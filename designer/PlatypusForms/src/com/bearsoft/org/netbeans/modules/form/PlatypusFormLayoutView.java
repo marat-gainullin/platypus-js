@@ -136,7 +136,6 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
     private boolean initialized = false;
     MultiViewElementCallback multiViewObserver;
     private ExplorerManager explorerManager;
-    private ProxyLookup lookup;
     private AssistantView assistantView;
     private PreferenceChangeListener settingsListener;
     private PropertyChangeListener paletteListener;
@@ -1766,12 +1765,9 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                 if (!modifying) {
                     return;
                 }
-
                 assert EventQueue.isDispatchThread();
             }
-
             events = aEvents;
-
             if (lafBlock) { // Look&Feel UI defaults remapping needed
                 FormLAF.executeWithLookAndFeel(formModel, this);
             } else {

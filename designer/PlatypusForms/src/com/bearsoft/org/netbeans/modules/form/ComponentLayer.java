@@ -211,16 +211,14 @@ class ComponentLayer extends JPanel {
                     BORDER_THICKNESS));
         }
 
-        /*
         @Override
         public Dimension getPreferredSize() {
-            Dimension size = new Dimension(designerSize);
+            Dimension size = new Dimension(formModel.getTopDesignComponent().getBeanInstance().getSize());
             Insets insets = getInsets();
             size.width += insets.left + insets.right;
             size.height += insets.top + insets.bottom;
             return size;
         }
-        */
 
         @Override
         public void paint(Graphics g) {

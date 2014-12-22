@@ -66,22 +66,6 @@ public class RADLayout extends RADComponent<LayoutManager> {
     }
 
     @Override
-    protected void createPropertySets(java.util.List<Node.PropertySet> propSets) {
-        super.createPropertySets(propSets);
-        // RADComponent provides also Code Generation properties for which
-        // we have no use here (yet) - so we remove them now
-        for (int i = 0, n = propSets.size(); i < n; i++) {
-            Node.PropertySet propSet = propSets.get(i);
-            if (!"properties".equals(propSet.getName()) // NOI18N
-                    && !"properties2".equals(propSet.getName())) { // NOI18N
-                propSets.remove(i);
-                i--;
-                n--;
-            }
-        }
-    }
-
-    @Override
     protected RADProperty<?> createBeanProperty(PropertyDescriptor desc) {
         RADProperty<?> res = super.createBeanProperty(desc);
         // cannot reuse RADComponent.PropertyListener, because this is not

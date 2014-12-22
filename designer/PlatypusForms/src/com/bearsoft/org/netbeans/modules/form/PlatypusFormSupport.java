@@ -237,7 +237,7 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
      * exceptions. Runs in AWT event dispatch thread, returns after the form is
      * loaded (even if not called from AWT thread).
      *
-     * @return whether the form is loaded (true also if it already was)
+     * @throws com.bearsoft.org.netbeans.modules.form.PersistenceException
      */
     public void loadForm() throws PersistenceException {
         // Ensure initialization of the formEditor

@@ -34,6 +34,7 @@ public class CompletionContext {
      * @param aScriptClass a class to provide the completion items using reflection
      */
     public CompletionContext(Class<?> aScriptClass) {
+        super();
         scriptClass = aScriptClass;
     }
 

@@ -82,8 +82,8 @@ public class RADVisualContainer<C extends Container> extends RADVisualComponent<
 
         super.setBeanInstance(beanInstance);
 
-        if (layoutSupport == null) // need new layout support for new container bean
-        {
+        // need new layout support for new container bean
+        if (layoutSupport == null) {
             layoutSupport = new LayoutSupportManager(this);
         }
     }
@@ -142,7 +142,7 @@ public class RADVisualContainer<C extends Container> extends RADVisualComponent<
      */
     public JComponent getContainerDelegate(Component container) {
         if (container instanceof RootPaneContainer/*
-                && container.getClass().getName().startsWith("javax.swing.")*/) // NOI18N
+                 && container.getClass().getName().startsWith("javax.swing.")*/) // NOI18N
         {
             return (JComponent) ((RootPaneContainer) container).getContentPane();
         }
@@ -182,9 +182,9 @@ public class RADVisualContainer<C extends Container> extends RADVisualComponent<
             }
             if (delegateGetterName != null) {
                 try {
-                    containerDelegateGetter =
-                            getBeanClass().getMethod(
-                            delegateGetterName, new Class<?>[]{});
+                    containerDelegateGetter
+                            = getBeanClass().getMethod(
+                                    delegateGetterName, new Class<?>[]{});
                 } catch (NoSuchMethodException ex) {
                     org.openide.ErrorManager.getDefault().notify(org.openide.ErrorManager.INFORMATIONAL, ex);
                 }

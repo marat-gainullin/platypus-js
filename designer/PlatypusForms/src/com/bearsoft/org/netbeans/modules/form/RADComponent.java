@@ -50,6 +50,7 @@ import com.eas.design.Designable;
 import com.eas.design.Undesignable;
 import com.eas.script.ScriptFunction;
 import java.awt.Component;
+import java.awt.LayoutManager;
 import java.beans.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -464,9 +465,7 @@ public abstract class RADComponent<C> {
         if (nameToProperty == null) {
             createBeanProperties();
         }
-
         ResourceBundle bundle = FormUtils.getBundle();
-
         if (isValid()) {
             for (Map.Entry<String, RADProperty<?>[]> entry : propsByCategories.entrySet()) {
                 final String category = entry.getKey();
@@ -490,6 +489,7 @@ public abstract class RADComponent<C> {
         // and fill nameToProperty map.
         PropertyDescriptor[] descriptors = getBeanInfo().getPropertyDescriptors();
         //props = FormUtils.getBeanInfo(beanClass, Introspector.IGNORE_ALL_BEANINFO).getPropertyDescriptors();
+        Class<?> _beanClass = getBeanInfo().getBeanDescriptor().getBeanClass();
         for (int i = 0; i < descriptors.length; i++) {
             PropertyDescriptor descriptor = descriptors[i];
             if (descriptor.getReadMethod() != null && descriptor.getWriteMethod() != null) {
@@ -501,7 +501,7 @@ public abstract class RADComponent<C> {
                 if (scriptFunction == null) {
                     scriptFunction = descriptor.getWriteMethod().getAnnotation(ScriptFunction.class);
                 }
-                if (designable != null || scriptFunction != null) {
+                if (designable != null || scriptFunction != null || LayoutManager.class.isAssignableFrom(_beanClass)) {
                     String category = "general"; // NOI18N
                     if (designable != null && designable.category() != null && !designable.category().isEmpty()) {
                         category = designable.category();

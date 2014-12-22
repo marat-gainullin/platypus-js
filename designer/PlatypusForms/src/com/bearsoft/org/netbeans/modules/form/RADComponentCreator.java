@@ -53,6 +53,7 @@ import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.MarginLayo
 import com.eas.client.forms.components.Button;
 import com.eas.client.forms.components.CheckBox;
 import com.eas.client.forms.components.DesktopPane;
+import com.eas.client.forms.components.DropDownButton;
 import com.eas.client.forms.components.FormattedField;
 import com.eas.client.forms.components.HtmlArea;
 import com.eas.client.forms.components.Label;
@@ -939,6 +940,7 @@ public class RADComponentCreator {
         } else if (comp instanceof Label
                 || comp instanceof Button
                 || comp instanceof ToggleButton
+                || comp instanceof DropDownButton
                 || comp instanceof RadioButton
                 || comp instanceof CheckBox
                 || comp instanceof ModelCheckBox

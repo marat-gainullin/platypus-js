@@ -34,7 +34,7 @@ public class FormCompletionContext extends CompletionContext {
     @Override
     public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
         super.applyCompletionItems(point, offset, resultSet);
-        addItem(resultSet, point.getFilter(), new BeanCompletionItem(getPlaypusContainerClass(), Form.VIEW_SCRIPT_NAME, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset())); //NOI18N
+        addItem(resultSet, point.getFilter(), new BeanCompletionItem(getPlaypusContainerClass(getFormModel().getTopRADComponent()), Form.VIEW_SCRIPT_NAME, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset())); //NOI18N
         fillComponents(point, resultSet);
     }
 
@@ -45,7 +45,7 @@ public class FormCompletionContext extends CompletionContext {
             return completionContext;
         }
         if (Form.VIEW_SCRIPT_NAME.equals(token.name)) {
-            Class<?> conainerClass = getPlaypusContainerClass();
+            Class<?> conainerClass = getPlaypusContainerClass(getFormModel().getTopRADComponent());
             if (conainerClass != null) {
                 return new CompletionContext(conainerClass);
             } else {
@@ -56,6 +56,13 @@ public class FormCompletionContext extends CompletionContext {
         if (comp != null) {
             if (ModelGrid.class.isAssignableFrom(comp.getBeanClass())) {
                 return new ModelGridCompletionContext((ModelGrid) comp.getBeanInstance());
+            } else if (FormUtils.Panel.class.isAssignableFrom(comp.getBeanClass())) {
+                Class<?> conainerClass = getPlaypusContainerClass(comp);
+                if (conainerClass != null) {
+                    return new CompletionContext(conainerClass);
+                } else {
+                    return new CompletionContext(comp.getBeanClass());
+                }
             } else {
                 return new CompletionContext(comp.getBeanClass());
             }
@@ -63,9 +70,12 @@ public class FormCompletionContext extends CompletionContext {
         return null;
     }
 
-    protected Class<?> getPlaypusContainerClass() {
-        RADVisualContainer<?> container = getFormModel().getTopRADComponent();
-        return FormUtils.getPlatypusConainerClass(container.getLayoutSupport().getSupportedClass());
+    protected Class<?> getPlaypusContainerClass(RADComponent aRadComp) {
+        if (aRadComp instanceof RADVisualContainer<?>) {
+            return FormUtils.getPlatypusConainerClass(((RADVisualContainer<?>) aRadComp).getLayoutSupport().getSupportedClass());
+        } else {
+            return null;
+        }
     }
 
     protected void fillComponents(CompletionPoint point, CompletionResultSet resultSet) {
