@@ -97,13 +97,7 @@ public class RADComponentNode extends FormNode
 
     final void updateName() {
         String compClassName = component.getBeanClass().getSimpleName();
-        if (component == component.getFormModel().getTopRADComponent()) {
-            setDisplayName(nodeNoNameFormat.format(
-                    new Object[]{compClassName}));
-        } else {
-            setDisplayName(nodeNameFormat.format(
-                    new Object[]{getName(), compClassName}));
-        }
+        setDisplayName(nodeNameFormat.format(new Object[]{getName(), compClassName}));
     }
 
     public void fireComponentPropertiesChange() {
@@ -208,11 +202,7 @@ public class RADComponentNode extends FormNode
                     lactions.add(SystemAction.get(SelectGridColumnViewAction.class));
                     addSeparator(lactions);
                 }
-                if (component != topComp) {
-                    lactions.add(SystemAction.get(ChangeComponentNameAction.class));
-                } else {
-                    lactions.add(SystemAction.get(TestAction.class));
-                }
+                lactions.add(SystemAction.get(ChangeComponentNameAction.class));
                 lactions.add(null);
 
                 addSeparator(lactions);
@@ -249,8 +239,13 @@ public class RADComponentNode extends FormNode
             lactions.add(null);
 
             javax.swing.Action[] superActions = super.getActions(context);
-            lactions.addAll(Arrays.asList(superActions));
-
+            if (superActions != null && superActions.length > 0) {
+                lactions.addAll(Arrays.asList(superActions));
+                lactions.add(null);
+            }
+            if (component == topComp) {
+                lactions.add(SystemAction.get(TestAction.class));
+            }
             this.actions = new Action[lactions.size()];
             lactions.toArray(this.actions);
         }
@@ -310,11 +305,13 @@ public class RADComponentNode extends FormNode
      * Set the system name. Fires a property change event. Also may change the
      * display name according to {@link #displayFormat}.
      *
-     * @param s the new name
+     * @param aValue the new name
      */
     @Override
-    public void setName(String s) {
-        component.setName(s);
+    public void setName(String aValue) {
+        if (aValue != null && !aValue.isEmpty()) {
+            component.setName(aValue);
+        }
     }
 
     /**
@@ -324,8 +321,7 @@ public class RADComponentNode extends FormNode
      */
     @Override
     public boolean canRename() {
-        return !component.isReadOnly()
-                && component != component.getFormModel().getTopRADComponent();
+        return !component.isReadOnly();
     }
 
     /**

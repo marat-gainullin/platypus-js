@@ -85,7 +85,7 @@ public class FormCompletionContext extends CompletionContext {
                 // <comp>
                 if (point.getFilter() == null || point.getFilter().isEmpty() || comp.getName().toLowerCase().startsWith(point.getFilter().toLowerCase())) {
                     String compName = comp.getName();
-                    if (RADVisualFormContainer.FORM_NAME.equals(compName)) {
+                    if (Form.VIEW_SCRIPT_NAME.equals(compName)) {
                         continue;
                     }
                     addItem(resultSet, point.getFilter(), new BeanCompletionItem(comp.getBeanClass(), compName, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));

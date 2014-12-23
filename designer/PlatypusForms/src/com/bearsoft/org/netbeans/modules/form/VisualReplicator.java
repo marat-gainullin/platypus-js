@@ -76,18 +76,17 @@ import org.openide.ErrorManager;
  */
 public class VisualReplicator {
 
-    private RADComponent<?> topRADComponent;
-    private Map<String, Object> nameToClone = new HashMap<>();
-    private Map<Object, String> cloneToName = new HashMap<>();
-    private boolean designRestrictions;
-    private ViewConverter[] converters;
+    //private RADComponent<?> topRADComponent;
+    private final FormEditor formEditor;
+    private final Map<String, Object> nameToClone = new HashMap<>();
+    private final Map<Object, String> cloneToName = new HashMap<>();
+    private final boolean designRestrictions;
 
     // ---------
-    public VisualReplicator(boolean aDesignRestrictions,
-            ViewConverter[] aConverters) {
+    public VisualReplicator(FormEditor aFormEditor, boolean aDesignRestrictions) {
         super();
+        formEditor = aFormEditor;
         designRestrictions = aDesignRestrictions;
-        converters = aConverters;
     }
 
     // ---------
@@ -108,11 +107,12 @@ public class VisualReplicator {
         return Collections.unmodifiableMap(nameToClone);
     }
 
+/*
     // ---------
     private FormModel getFormModel() {
         return getTopRADComponent().getFormModel();
     }
-
+    
     // getters & setters
     public RADComponent<?> getTopRADComponent() {
         return topRADComponent;
@@ -123,7 +123,7 @@ public class VisualReplicator {
         nameToClone.clear();
         cloneToName.clear();
     }
-
+*/
     public boolean getDesignRestrictions() {
         return designRestrictions;
     }
@@ -131,7 +131,7 @@ public class VisualReplicator {
     // --------
     // executive public methods
     public Object createClone() {
-        return createClone(getTopRADComponent());
+        return createClone(formEditor.getFormModel().getTopRADComponent());
     }
 
     public Object createClone(RADComponent<?> radComp) {
@@ -149,7 +149,7 @@ public class VisualReplicator {
                 }
 
                 Map<String, Object> mapToClones = new HashMap<>(getMapToClones());
-                FormModel formModel = getFormModel();
+                FormModel formModel = formEditor.getFormModel();
                 Set<Entry<String, Object>> entries = mapToClones.entrySet();
                 for (Map.Entry<String, Object> entry : entries) {
                     String id = entry.getKey();
@@ -249,6 +249,18 @@ public class VisualReplicator {
         }
     }
 
+    public void renameComponent(String aOldName, String aNewName){
+        Object renamed = nameToClone.remove(aOldName);
+        if(renamed != null){
+            nameToClone.put(aNewName, renamed);
+            String oldName = cloneToName.remove(renamed);
+            cloneToName.put(renamed, aNewName);
+            if(renamed instanceof Component){
+                ((Component)renamed).setName(aNewName);
+            }
+        }
+    }
+    
     // for adding just one component, for adding more components use
     // updateAddedComponents
     public void addComponent(RADComponent<?> radComp) throws Exception {
@@ -420,40 +432,10 @@ public class VisualReplicator {
     private Object cloneComponent(RADComponent<?> radComp,
             java.util.List<RADProperty<?>> relativeProperties)
             throws Exception {
-        Object oClone = null; // cloned instance to return
         Object compClone = null; // clone of the component itself, might be "inside"
         // the returned clone - e.g. JPanel enclosed in JFrame by a converter
 
-        for (ViewConverter converter : converters) {
-            ViewConverter.Convert convert = converter.convert(
-                    radComp.getBeanInstance(),
-                    radComp == getTopRADComponent(),
-                    getDesignRestrictions());
-            if (convert != null) {
-                oClone = convert.getConverted();
-                compClone = convert.getEnclosed();
-
-                java.util.List<RADProperty<?>> applyProperties;
-                if (oClone instanceof Window) { // some properties should not be set to Window, e.g. visible
-                    applyProperties = new ArrayList<>();
-                    for (RADProperty<?> prop : radComp.getBeanProperties()) {
-                        if (!"visible".equals(prop.getName())) {
-                            applyProperties.add(prop);
-                        }
-                    }
-                } else {
-                    applyProperties = Arrays.asList(radComp.getBeanProperties());
-                }
-                FormUtils.copyPropertiesToBean(applyProperties,
-                        compClone != null ? compClone : oClone,
-                        relativeProperties);
-                break;
-            }
-        }
-        if (oClone == null) { // no converter applied, clone the standard way
-            oClone = radComp.cloneBeanInstance(relativeProperties);
-        }
-
+        Object oClone = radComp.cloneBeanInstance(relativeProperties);
         if (oClone == null) {
             return null;
         }
@@ -531,12 +513,9 @@ public class VisualReplicator {
             if (clonedComp instanceof JInternalFrame) {
                 ((JInternalFrame) oClone).getGlassPane().setVisible(false);
             }
-            clonedComp.addHierarchyListener(new HierarchyListener() {
-                @Override
-                public void hierarchyChanged(HierarchyEvent e) {
-                    originalComp.setLocation(clonedComp.getLocation());
-                    originalComp.setSize(clonedComp.getSize());
-                }
+            clonedComp.addHierarchyListener((HierarchyEvent e) -> {
+                originalComp.setLocation(clonedComp.getLocation());
+                originalComp.setSize(clonedComp.getSize());
             });
             clonedComp.addComponentListener(new ComponentAdapter() {
                 @Override
@@ -652,91 +631,6 @@ public class VisualReplicator {
             for (int i = 0; i < subcomps.length; i++) {
                 removeMapping(subcomps[i]);
             }
-        }
-    }
-
-    // -----
-    @org.openide.util.lookup.ServiceProvider(service = com.bearsoft.org.netbeans.modules.form.ViewConverter.class)
-    public static class DefaultConverter implements ViewConverter {
-
-        @Override
-        public Convert convert(Object component, boolean root, boolean designRestrictions) {
-            Class<?> compClass = component.getClass();
-            Class<?> convClass = null;
-            if (designRestrictions) { // convert windows and AWT menus for design view
-                if ((RootPaneContainer.class.isAssignableFrom(compClass)
-                        && Window.class.isAssignableFrom(compClass))
-                        || Frame.class.isAssignableFrom(compClass)) {
-                    convClass = JRootPane.class;
-                } else if (Window.class.isAssignableFrom(compClass)
-                        || java.applet.Applet.class.isAssignableFrom(compClass)) {
-                    convClass = Panel.class;
-                }
-            } else if (root) { // need to enclose in JFrame/Frame for preview
-                if (RootPaneContainer.class.isAssignableFrom(compClass)
-                        || JComponent.class.isAssignableFrom(compClass)) { // Swing
-                    if (!JFrame.class.isAssignableFrom(compClass)) {
-                        convClass = JFrame.class;
-                    }
-                } else if (Component.class.isAssignableFrom(compClass)) { // AWT
-                    if (!Frame.class.isAssignableFrom(compClass)) {
-                        convClass = Frame.class;
-                    }
-                }
-            }
-            if (convClass == null) {
-                return null; // no conversion needed
-            }
-
-            try {
-                Component converted = (Component) CreationFactory.createDefaultInstance(convClass);
-                Component enclosed = null;
-
-                if (converted instanceof JFrame) {
-                    if (JComponent.class.isAssignableFrom(compClass)
-                            && !RootPaneContainer.class.isAssignableFrom(compClass)) {
-                        // JComponent but not JInternalFrame
-                        enclosed = (Component) CreationFactory.createDefaultInstance(compClass);
-                        ((JFrame) converted).getContentPane().add(enclosed);
-                    }
-                } else if (converted instanceof JRootPane) { // RootPaneContainer or Frame converted to JRootPane
-                    Container contentCont = (Container) CreationFactory.createDefaultInstance(
-                            RootPaneContainer.class.isAssignableFrom(compClass) ? JPanel.class : Panel.class);
-                    ((JRootPane) converted).setContentPane(contentCont);
-                }
-
-                return new ConvertResult(converted, enclosed);
-            } catch (Exception ex) { // some instance creation failed, very unlikely to happen
-                Logger.getLogger(VisualReplicator.class.getName()).log(Level.INFO, null, ex);
-                return null;
-            }
-        }
-
-        @Override
-        public boolean canVisualize(Class<?> componentClass) {
-            return false; // not able to visualize non-visual components
-        }
-    }
-
-    private static class ConvertResult implements ViewConverter.Convert {
-
-        private Component converted;
-        private Component enclosed;
-
-        ConvertResult(Component aConverted, Component aEnclosed) {
-            super();
-            converted = aConverted;
-            enclosed = aEnclosed;
-        }
-
-        @Override
-        public Component getConverted() {
-            return converted;
-        }
-
-        @Override
-        public Component getEnclosed() {
-            return enclosed;
         }
     }
 }

@@ -45,11 +45,6 @@ package com.bearsoft.org.netbeans.modules.form;
 
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.beans.PropertyDescriptor;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -63,7 +58,6 @@ import java.util.Set;
  */
 public class RADVisualFormContainer extends RADVisualContainer<Container> {
 
-    public static final String FORM_NAME = "Form";
     protected static Set<String> hiddenProps = new HashSet<>(Arrays.asList(new String[]{
         "visible",
         "left",
@@ -71,30 +65,6 @@ public class RADVisualFormContainer extends RADVisualContainer<Container> {
 
     public RADVisualFormContainer() {
         super();
-    }
-
-    // ------------------------------------------------------------------------------
-    // Form synthetic properties
-    /**
-     * Getter for the Name property of the component - overriden to provide
-     * non-null value, as the top-level component does not have a variable
-     *
-     * @return current value of the Name property
-     */
-    @Override
-    public String getName() {
-        return FORM_NAME;// special name for top-level container. It's no i18n because of references in the form.
-    }
-
-    /**
-     * Setter for the Name property of the component - usually maps to variable
-     * declaration for holding the instance of the component
-     *
-     * @param value new value of the Name property
-     */
-    @Override
-    public void setName(String value) {
-        // noop in forms
     }
 
     @Override

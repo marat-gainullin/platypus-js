@@ -789,23 +789,7 @@ public class FormUtils {
         if (java.awt.Component.class.isAssignableFrom(cls) && !ButtonGroup.class.isAssignableFrom(cls)) {
             return true;
         }
-        for (ViewConverter c : getViewConverters()) {
-            if (c.canVisualize(cls)) {
-                return true;
-            }
-        }
         return false;
-    }
-
-    static ViewConverter[] getViewConverters() {
-        Lookup.Result<ViewConverter> result = Lookup.getDefault().lookupResult(ViewConverter.class);
-        Collection<? extends ViewConverter> all = result.allInstances();
-        ViewConverter[] converters = new ViewConverter[all.size()];
-        int i = all.size();
-        for (ViewConverter c : all) {
-            converters[--i] = c;
-        }
-        return converters;
     }
 
     static ComponentConverter[] getClassConverters() {

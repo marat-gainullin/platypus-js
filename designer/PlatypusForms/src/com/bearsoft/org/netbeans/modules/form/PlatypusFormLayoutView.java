@@ -218,7 +218,7 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
             }
             formModel.addFormModelListener(formModelListener);
 
-            replicator = new VisualReplicator(true, FormUtils.getViewConverters());
+            replicator = new VisualReplicator(formEditor, true);
 
             resetTopDesignComponent(false);
             handleLayer.setViewOnly(formModel.isReadOnly());
@@ -492,11 +492,12 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
      * Данный метод предназначен для использования вне дизайнера форм.
      *
      * @param radComp
+     * @param aFormEditor
      * @param previewInfo
      * @return
      * @throws Exception
      */
-    public static Container createFormView(final RADComponent<?> radComp, final FormLAF.PreviewInfo previewInfo)
+    public static Container createFormView(final RADComponent<?> radComp, final FormEditor aFormEditor, final FormLAF.PreviewInfo previewInfo)
             throws Exception {
         Container result = null;
         FormModel formModel = radComp.getFormModel();
@@ -507,8 +508,7 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                     new Mutex.ExceptionAction<Container>() {
                         @Override
                         public Container run() throws Exception {
-                            VisualReplicator r = new VisualReplicator(false, FormUtils.getViewConverters());
-                            r.setTopRADComponent(radComp);
+                            VisualReplicator r = new VisualReplicator(aFormEditor, false);
                             Container container = (Container) r.createClone();
                             if (container instanceof RootPaneContainer) {
                                 JRootPane rootPane = ((RootPaneContainer) container).getRootPane();
@@ -556,13 +556,13 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
     Point pointFromComponentToHandleLayer(Point p, Component sourceComp) {
         Component commonParent = layeredPane;
         Component comp = sourceComp;
-        while (comp != commonParent) {
+        while (comp != null && comp != commonParent) {
             p.x += comp.getX();
             p.y += comp.getY();
             comp = comp.getParent();
         }
         comp = handleLayer;
-        while (comp != commonParent) {
+        while (comp != null && comp != commonParent) {
             p.x -= comp.getX();
             p.y -= comp.getY();
             comp = comp.getParent();
@@ -1778,7 +1778,6 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
         @Override
         public void run() {
             if (events == null) {
-                replicator.setTopRADComponent(topDesignComponent);
                 JComponent formClone = (JComponent) replicator.createClone();
                 if (formClone != null) {
                     formClone.setVisible(true);
@@ -1912,11 +1911,14 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                                 try {
                                     String oldName = (String) ev.getOldPropertyValue();
                                     String newName = (String) ev.getNewPropertyValue();
+                                    replicator.renameComponent(oldName, newName);
+                                    /*
                                     RADComponent<?> comp = ev.getComponent();
                                     comp.setStoredName(oldName);
                                     replicator.removeComponent(comp, null);
                                     comp.setStoredName(newName);
                                     replicator.addComponent(comp);
+                                    */
                                     updateDone = true;
                                 } catch (Exception ex) {
                                     Exceptions.printStackTrace(ex);

@@ -205,6 +205,7 @@ public class PersistenceManager {
             RADVisualFormContainer formComp = new RADVisualFormContainer();
             formComp.initialize(formModel);
             formModel.initFormComponent(formComp);
+            formComp.setStoredName(form.getViewWidget().getName());
             formComp.setBeanInstance(form.getViewWidget());
             for (RADProperty<?> radProp : formComp.getBeanProperties()) {
                 radProp.setChanged(!radProp.isDefaultValue());

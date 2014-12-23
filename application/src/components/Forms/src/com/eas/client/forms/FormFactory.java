@@ -115,23 +115,6 @@ public class FormFactory {
     }
 
     public void parse() throws Exception {
-        Element layoutTag = XmlDomUtils.getElementByTagName(element, "layout");
-        assert layoutTag != null : "tag layout is required for panel containers.";
-
-        JComponent viewWidget = readLayoutedContainer(layoutTag);
-        readGeneralProps(element, viewWidget);
-        form = new Form(viewWidget);
-        form.setDefaultCloseOperation(XmlDomUtils.readIntegerAttribute(element, "defaultCloseOperation", JFrame.DISPOSE_ON_CLOSE));
-        form.setIcon(resolveIcon(element.getAttribute("icon")));
-        form.setTitle(element.getAttribute("title"));
-        form.setResizable(XmlDomUtils.readBooleanAttribute(element, "resizable", Boolean.TRUE));
-        form.setUndecorated(XmlDomUtils.readBooleanAttribute(element, "undecorated", Boolean.FALSE));
-        form.setOpacity(XmlDomUtils.readFloatAttribute(element, "opacity", 1.0f));
-        form.setAlwaysOnTop(XmlDomUtils.readBooleanAttribute(element, "alwaysOnTop", Boolean.FALSE));
-        form.setLocationByPlatform(XmlDomUtils.readBooleanAttribute(element, "locationByPlatform", Boolean.TRUE));
-        
-        Dimension prefSize = readPrefSize(element);
-        form.setDesignedViewSize(prefSize);
         List<Element> widgetsElements = XmlDomUtils.elementsByTagName(element, "widget");
         List<Element> legacyNonVisualElements = XmlDomUtils.elementsByTagName(element, "nonvisual");
         widgetsElements.addAll(legacyNonVisualElements);
@@ -145,6 +128,20 @@ public class FormFactory {
                 Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
+        String viewCompName = element.getAttribute(Form.VIEW_SCRIPT_NAME);
+        JComponent viewWidget = widgets.get(viewCompName);
+        if (viewWidget == null) {
+            Logger.getLogger(FormFactory.class.getName()).log(Level.WARNING, "view widget missing. Falling back to AnchrosPane.");
+        }
+        form = new Form(viewWidget);
+        form.setDefaultCloseOperation(XmlDomUtils.readIntegerAttribute(element, "defaultCloseOperation", JFrame.DISPOSE_ON_CLOSE));
+        form.setIcon(resolveIcon(element.getAttribute("icon")));
+        form.setTitle(element.getAttribute("title"));
+        form.setResizable(XmlDomUtils.readBooleanAttribute(element, "resizable", Boolean.TRUE));
+        form.setUndecorated(XmlDomUtils.readBooleanAttribute(element, "undecorated", Boolean.FALSE));
+        form.setOpacity(XmlDomUtils.readFloatAttribute(element, "opacity", 1.0f));
+        form.setAlwaysOnTop(XmlDomUtils.readBooleanAttribute(element, "alwaysOnTop", Boolean.FALSE));
+        form.setLocationByPlatform(XmlDomUtils.readBooleanAttribute(element, "locationByPlatform", Boolean.TRUE));
         resolvers.stream().forEach((Consumer<Map<String, JComponent>> aResolver) -> {
             aResolver.accept(widgets);
         });

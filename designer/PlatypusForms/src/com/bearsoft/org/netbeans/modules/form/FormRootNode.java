@@ -232,7 +232,7 @@ public class FormRootNode extends FormNode {
     static class RootChildren extends FormNodeChildren {
 
         static final RADVisualContainer<?> OTHERS_ROOT = new RADVisualContainer<>();
-        private FormModel formModel;
+        private final FormModel formModel;
         private FormOthersNode othersNode;
 
         protected RootChildren(FormModel aFormModel) {
@@ -268,12 +268,7 @@ public class FormRootNode extends FormNode {
                 node = othersNode = new FormOthersNode(formModel);
             } else {
                 assert key instanceof RADVisualComponent<?>;
-                node = new RADComponentNode((RADVisualComponent<?>) key) {
-                    @Override
-                    public String getDisplayName() {
-                        return NbBundle.getMessage(FormRootNode.class, "CTL_VisualComponents");
-                    }
-                };
+                node = new RADComponentNode((RADVisualComponent<?>) key);
                 key.setNodeReference((RADComponentNode) node);
             }
             node.getChildren().getNodes(); // enforce subnodes creation

@@ -172,7 +172,7 @@ public class TestAction extends CallableSystemAction implements Runnable {
             // create a copy of form
             final ClassLoader classLoader = Lookup.getDefault().lookup(ClassLoader.class);
             final FormLAF.PreviewInfo previewInfo = FormLAF.initPreviewLaf(selectedLaf, classLoader);
-            final Frame frame = (Frame) PlatypusFormLayoutView.createFormView(topComp, previewInfo);
+            final Frame frame = (Frame) PlatypusFormLayoutView.createFormView(topComp, formDesigner.getFormEditor(), previewInfo);
             frame.setEnabled(true); // Issue 178457
             frame.addWindowListener(new WindowAdapter() {
 
