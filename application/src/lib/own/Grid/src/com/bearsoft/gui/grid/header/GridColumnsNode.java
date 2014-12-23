@@ -384,20 +384,6 @@ public class GridColumnsNode {
         } else {
             return 0;
         }
-        /*
-         if (children.isEmpty()) {
-         if (tableColumn != null) {
-         return tableColumn.getPreferredWidth();
-         }else
-         return 0;
-         } else {
-         int pWidth = 0;
-         for (int i = 0; i < children.size(); i++) {
-         pWidth += children.get(i).getPreferredWidth();
-         }
-         return pWidth;
-         }
-         */
     }
 
     public void setPreferredWidth(int aValue) {

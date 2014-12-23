@@ -27,5 +27,6 @@ public class ServiceColumn extends ModelColumn {
         setMinWidth(SERVICE_COLUMN_DEFAULT_WIDTH);
         setMaxWidth(SERVICE_COLUMN_DEFAULT_WIDTH);
         setWidth(SERVICE_COLUMN_DEFAULT_WIDTH);
+        setResizeable(false);
     }
 }

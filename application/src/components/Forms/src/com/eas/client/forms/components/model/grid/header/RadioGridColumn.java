@@ -7,7 +7,6 @@ package com.eas.client.forms.components.model.grid.header;
 
 import com.bearsoft.gui.grid.header.GridColumnsNode;
 import com.eas.client.forms.components.model.grid.columns.RadioServiceColumn;
-import com.eas.design.Designable;
 import com.eas.script.ScriptFunction;
 import java.awt.Color;
 import java.awt.Font;
@@ -23,6 +22,7 @@ public class RadioGridColumn extends GridColumnsNode {
     public RadioGridColumn() {
         super();
         setTableColumn(new RadioServiceColumn());
+        setResizable(false);
     }
 
     public RadioGridColumn(GridColumnsNode aParent) {

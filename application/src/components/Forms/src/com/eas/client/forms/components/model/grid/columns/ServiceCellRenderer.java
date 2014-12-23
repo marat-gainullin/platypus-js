@@ -13,7 +13,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Icon;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 import jdk.nashorn.api.scripting.JSObject;
@@ -33,6 +32,9 @@ public class ServiceCellRenderer extends RowHeaderCellRenderer implements TableC
 
     public ServiceCellRenderer() {
         super();
+        indicator.setHorizontalTextPosition(JLabel.LEFT);
+        indicator.setIconTextGap(0);
+        indicator.setText(" ");
         indicator.setOpaque(false);
         rowDescriptor.setOpaque(false);
         add(indicator, BorderLayout.WEST);

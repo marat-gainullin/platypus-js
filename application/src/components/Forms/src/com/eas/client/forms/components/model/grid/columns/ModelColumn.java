@@ -230,16 +230,12 @@ public class ModelColumn extends TableColumn implements HasPublished {
     @ScriptFunction
     @Override
     public void setWidth(int aValue) {
-        if (isResizeable()) {
-            super.setWidth(aValue);
-        }
+        super.setWidth(aValue);
     }
 
     @Override
     public void setPreferredWidth(int preferredWidth) {
-        if (isResizeable()) {
-            super.setPreferredWidth(preferredWidth);
-        }
+        super.setPreferredWidth(preferredWidth);
     }
 
     @ScriptFunction(jsDoc = "The title of the column.")
