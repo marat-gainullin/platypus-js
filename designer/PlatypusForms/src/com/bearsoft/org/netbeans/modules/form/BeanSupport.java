@@ -43,9 +43,6 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
-import java.awt.*;
-import java.lang.ref.Reference;
-import java.lang.ref.SoftReference;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -61,7 +58,7 @@ public class BeanSupport {
     public static final Object NO_VALUE = null;
     // -----------------------------------------------------------------------------
     // Private variables
-    private static Map<Class<?>, Object> instancesCache = new HashMap<>(30);
+    private static final Map<Class<?>, Object> instancesCache = new HashMap<>(30);
 
     // -----------------------------------------------------------------------------
     // Public methods

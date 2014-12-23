@@ -41,9 +41,13 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package com.bearsoft.org.netbeans.modules.form.menu;
+package com.bearsoft.org.netbeans.modules.form.bound;
 
+import com.bearsoft.gui.grid.header.GridColumnsNode;
+import com.bearsoft.org.netbeans.modules.form.ComponentContainer;
+import com.bearsoft.org.netbeans.modules.form.menu.*;
 import com.bearsoft.org.netbeans.modules.form.FormInspector;
+import com.bearsoft.org.netbeans.modules.form.FormModel;
 import com.bearsoft.org.netbeans.modules.form.FormUtils;
 import com.bearsoft.org.netbeans.modules.form.RADComponent;
 import com.bearsoft.org.netbeans.modules.form.RADComponentNode;
@@ -73,7 +77,7 @@ import org.openide.util.actions.NodeAction;
  *
  * @author Joshua Marinacci, Jan Stola
  */
-public class AddSubItemAction extends NodeAction {
+public class AddGridColumnAction extends NodeAction {
 
     //fix this
     @Override
@@ -83,7 +87,7 @@ public class AddSubItemAction extends NodeAction {
 
     @Override
     public String getName() {
-        return NbBundle.getMessage(AddSubItemAction.class, "ACT_AddFromPalette"); // NOI18N
+        return NbBundle.getMessage(AddGridColumnAction.class, "ACT_AddFromPalette"); // NOI18N
     }
 
     @Override
@@ -107,7 +111,7 @@ public class AddSubItemAction extends NodeAction {
      */
     @Override
     public JMenuItem getPopupPresenter() {
-        JMenu popupMenu = new JMenu(NbBundle.getMessage(AddSubItemAction.class, "ACT_AddFromPalette")); //NOI18N
+        JMenu popupMenu = new JMenu(NbBundle.getMessage(AddGridColumnAction.class, "ACT_AddFromPalette")); //NOI18N
 
         popupMenu.setEnabled(isEnabled());
         HelpCtx.setHelpIDString(popupMenu, AlignAction.class.getName());
@@ -116,7 +120,7 @@ public class AddSubItemAction extends NodeAction {
             @Override
             public void menuSelected(MenuEvent e) {
                 JMenu menu = (JMenu) e.getSource();
-                createInsertSubmenu(menu);
+                createInsertGridColumns(menu);
             }
 
             @Override
@@ -134,8 +138,9 @@ public class AddSubItemAction extends NodeAction {
 
         private final PaletteItem pItem;
 
-        public AddListener(PaletteItem pItem) {
-            this.pItem = pItem;
+        public AddListener(PaletteItem aItem) {
+            super();
+            pItem = aItem;
         }
 
         @Override
@@ -146,7 +151,8 @@ public class AddSubItemAction extends NodeAction {
                     if (nd instanceof RADComponentNode) {
                         RADComponentNode rnode = (RADComponentNode) nd;
                         RADComponent<?> comp = rnode.getRADComponent();
-                        FormUtils.addComponentToEndOfContainer(comp, pItem);
+                        FormModel formModel = comp.getFormModel();
+                        formModel.getComponentCreator().createComponent(pItem.getComponentClassSource(), comp, null);
                     }
                 }
             } catch (Exception ex) {
@@ -155,9 +161,9 @@ public class AddSubItemAction extends NodeAction {
         }
     };
 
-    private void createInsertSubmenu(JMenu menu) {
+    private void createInsertGridColumns(JMenu menu) {
         //only create this menu the first time it is called
-        if (!(menu.getMenuComponentCount() > 0)) {
+        if (menu.getMenuComponentCount() <= 0) {
             Set<Class<?>> classes = new HashSet<>();
             SortedSet<PaletteItem> items = new TreeSet<>((PaletteItem item1, PaletteItem item2) -> {
                 String name1 = item1.getNode().getDisplayName();
@@ -166,8 +172,8 @@ public class AddSubItemAction extends NodeAction {
             });
             for (PaletteItem item : PaletteUtils.getAllItems()) {
                 Class<?> clazz = item.getComponentClass();
-                if ((clazz != null) && !classes.contains(clazz)
-                        && (JMenuItem.class.isAssignableFrom(clazz) || JSeparator.class.isAssignableFrom(clazz))) {
+                if (clazz != null && !classes.contains(clazz)
+                        && GridColumnsNode.class.isAssignableFrom(clazz)) {
                     classes.add(clazz);
                     items.add(item);
                 }

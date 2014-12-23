@@ -989,7 +989,9 @@ public class RADComponentCreator {
             RADVisualContainer<?> menuCont = (RADVisualContainer<?>) newRadComp;
             Container menuBar = (Container) menuCont.getBeanInstance();
             RADVisualComponent<?> menuComp = createVisualComponent(Menu.class);
-            menuComp.setStoredName(formModel.findFreeComponentName("mnuFile"));
+            String menuFileName = formModel.findFreeComponentName("mnuFile");
+            menuComp.setStoredName(menuFileName);
+            menuComp.getBeanInstance().setName(menuFileName);
             try {
                 (menuComp.<RADProperty<String>>getProperty("text")) // NOI18N
                         .setValue(FormUtils.getBundleString("CTL_DefaultFileMenu")); // NOI18N
@@ -1002,7 +1004,9 @@ public class RADComponentCreator {
                     menuBar, menuBar, new Component[]{menu}, 0);
 
             menuComp = createVisualComponent(Menu.class);
-            menuComp.setStoredName(formModel.findFreeComponentName("mnuEdit"));
+            String mnuEditName = formModel.findFreeComponentName("mnuEdit");
+            menuComp.setStoredName(mnuEditName);
+            menuComp.getBeanInstance().setName(mnuEditName);
             try {
                 (menuComp.<RADProperty<String>>getProperty("text")) // NOI18N
                         .setValue(FormUtils.getBundleString("CTL_DefaultEditMenu")); // NOI18N

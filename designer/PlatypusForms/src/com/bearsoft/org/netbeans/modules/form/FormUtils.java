@@ -44,6 +44,7 @@
 package com.bearsoft.org.netbeans.modules.form;
 
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.MarginLayoutSupport;
+import com.bearsoft.org.netbeans.modules.form.palette.PaletteItem;
 import com.eas.client.forms.Forms;
 import com.eas.client.forms.HasChildren;
 import com.eas.client.forms.Widget;
@@ -408,6 +409,13 @@ public class FormUtils {
 
     public static String getDefaultEventPropertyName(Class<?> componentClass) {
         return componentClasses2DefaultEventHandlers.get(componentClass);
+    }
+
+    public static boolean addComponentToEndOfContainer(RADComponent<?> targetContainer, PaletteItem paletteItem) throws Exception {
+        FormModel model = targetContainer.getFormModel();
+        RADComponentCreator creator = model.getComponentCreator();
+        creator.precreateVisualComponent(paletteItem.getComponentClassSource());
+        return creator.addPrecreatedComponent(targetContainer, -1, null);
     }
 
     /**

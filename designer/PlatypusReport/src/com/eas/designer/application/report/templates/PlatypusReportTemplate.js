@@ -9,12 +9,14 @@ function ${appElementName}(){
     
     // TODO : place constructor code here
     
-    self.execute = function(){
+    self.execute = function(onSuccess, onFailure){
         
-        model.requery();
-        // TODO : place data processing code here
+        model.requery(function(){
+            // TODO : place data processing code here
+            var report = template.generateReport();
+            // report.show(); | report.print(); | var savedTo = report.save(saveTo ?);
+            onSuccess(report);
+        }, onFailure);
         
-        var report = template.generateReport();
-        // report.show(); | report.print(); | var savedTo = report.save(saveTo ?);
     };
 }

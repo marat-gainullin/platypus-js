@@ -30,12 +30,13 @@
  */
 package com.bearsoft.org.netbeans.modules.form.menu;
 
+import com.bearsoft.org.netbeans.modules.form.FormUtils;
 import com.bearsoft.org.netbeans.modules.form.RADComponent;
 import com.bearsoft.org.netbeans.modules.form.RADComponentCookie;
 import com.bearsoft.org.netbeans.modules.form.palette.PaletteItem;
 import com.bearsoft.org.netbeans.modules.form.palette.PaletteUtils;
+import java.awt.EventQueue;
 import javax.swing.JMenu;
-import javax.swing.SwingUtilities;
 import org.openide.ErrorManager;
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
@@ -72,14 +73,11 @@ public class InsertMenuAction extends NodeAction {
                 Class<?> clazz = item.getComponentClass();
                 if (clazz != null && JMenu.class.isAssignableFrom(clazz)) {
                     final PaletteItem it = item;
-                    java.awt.EventQueue.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                MenuEditLayer.addComponentToEndOfMenu(radComp, it);
-                            } catch (Exception ex) {
-                                ErrorManager.getDefault().notify(ex);
-                            }
+                    EventQueue.invokeLater(() -> {
+                        try {
+                            FormUtils.addComponentToEndOfContainer(radComp, it);
+                        } catch (Exception ex) {
+                            ErrorManager.getDefault().notify(ex);
                         }
                     });
                     return;

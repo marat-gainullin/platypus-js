@@ -59,8 +59,8 @@ public class PaletteMenuView extends JMenu {
 
     private Node menuNode;
     private NodeAcceptor menuAction;
-    private boolean hacked = false;
-    private boolean filled = false;
+    private boolean hacked;
+    private boolean filled;
     private int level;
     private static int maxHeight = Utilities.getUsableScreenBounds().height - 25;
 
@@ -72,10 +72,11 @@ public class PaletteMenuView extends JMenu {
         this(node, acceptor, 0);
     }
 
-    private PaletteMenuView(Node node, NodeAcceptor acceptor, int level) {
+    private PaletteMenuView(Node node, NodeAcceptor acceptor, int aLevel) {
+        super();
         menuNode = node;
         menuAction = acceptor;
-        this.level = level;
+        level = aLevel;
         setText(node.getDisplayName());
         getSubNodes(); // force subnodes creation
     }

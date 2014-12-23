@@ -48,6 +48,7 @@ import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelScalarComponent;
 import com.bearsoft.org.netbeans.modules.form.editors.IconEditor;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutSupportDelegate;
+import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutSupportRegistry;
 import com.eas.client.forms.Form;
 import com.eas.client.forms.FormFactory;
@@ -62,9 +63,11 @@ import com.eas.client.forms.layouts.BoxLayout;
 import com.eas.client.forms.layouts.CardLayout;
 import com.eas.client.forms.layouts.MarginConstraints;
 import com.eas.client.forms.layouts.MarginLayout;
+import com.eas.client.settings.SettingsConstants;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.gui.ScriptColor;
 import com.eas.xml.dom.Source2XmlDom;
+import com.eas.xml.dom.XmlDom2String;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
@@ -72,6 +75,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.logging.Level;
@@ -273,24 +277,37 @@ public class PersistenceManager {
         }
     }
 
-    public void saveForm(PlatypusFormDataObject formObject, FormModel formModel, List<Throwable> nonfatalErrors) throws PersistenceException {
+    public void saveForm(PlatypusFormDataObject formObject, FormEditor formEditor, List<Throwable> nonfatalErrors) throws PersistenceException {
         try {
             DocumentBuilder builder = docsBuidlersFactory.newDocumentBuilder();
             Document doc = builder.newDocument();
             doc.setXmlStandalone(true);
             Element root = doc.createElement(XML_FORM);
             doc.appendChild(root);
-            writeProperties(formModel.getTopRADComponent().getBeanProperties(), doc, root);
-            formModel.getAllComponents().forEach((RADComponent<?> aComp) -> {
+            writeProperties(formEditor.getFormRootNode().getFormProperties(), doc, root);
+            root.setAttribute(Form.VIEW_SCRIPT_NAME, formEditor.getFormModel().getTopRADComponent().getName());
+            formEditor.getFormModel().getAllComponents().forEach((RADComponent<?> aComp) -> {
+                if (aComp instanceof RADModelGridColumn) {
+                    return;// grid columns willbe written by grid.
+                }
                 Element widgetElement = doc.createElement("widget");
                 root.appendChild(widgetElement);
                 widgetElement.setAttribute("type", aComp.getBeanClass().getSimpleName());
                 widgetElement.setAttribute("name", aComp.getName());
                 writeProperties(aComp.getBeanProperties(), doc, widgetElement);
                 if (aComp instanceof RADVisualContainer<?>) {
+                    RADVisualContainer<?> radCont = (RADVisualContainer<?>) aComp;
+                    if (aComp.getBeanInstance() instanceof FormUtils.Panel) {
+                        LayoutSupportManager layoutSupportManager = radCont.getLayoutSupport();
+                        if (layoutSupportManager != null && layoutSupportManager.getLayoutDelegate() != null) {
+                            Class<?> layoutedContainerClass = FormUtils.getPlatypusConainerClass(layoutSupportManager.getLayoutDelegate().getSupportedClass());
+                            if (layoutedContainerClass != null) {
+                                widgetElement.setAttribute("type", layoutedContainerClass.getSimpleName());
+                            }
+                        }
+                    }
                     Element layoutElement = doc.createElement("layout");
                     widgetElement.appendChild(layoutElement);
-                    RADVisualContainer<?> radCont = (RADVisualContainer<?>) aComp;
                     writeProperties(radCont.getLayoutSupport().getAllProperties(), doc, layoutElement);
                 }
                 if (aComp instanceof RADVisualComponent<?>) {
@@ -308,7 +325,11 @@ public class PersistenceManager {
                     widgetElement.setAttribute("parent", visParent.getName());
                 }
             });
-        } catch (ParserConfigurationException ex) {
+            String content = XmlDom2String.transform(doc);
+            try (OutputStream out = formObject.getFormEntry().getFile().getOutputStream()) {
+                out.write(content.getBytes(SettingsConstants.COMMON_ENCODING));
+            }
+        } catch (Exception ex) {
             throw new PersistenceException(ex);
         }
     }
@@ -317,6 +338,8 @@ public class PersistenceManager {
         for (RADComponent<?> subBean : aColumnsContainer.getSubBeans()) {
             Element columnElement = doc.createElement("column");
             targetElement.appendChild(columnElement);
+            columnElement.setAttribute("type", subBean.getBeanClass().getSimpleName());
+            columnElement.setAttribute("name", subBean.getName());
             writeProperties(subBean.getBeanProperties(), doc, columnElement);
             if (subBean instanceof RADModelGridColumn) {
                 RADModelGridColumn radColumn = (RADModelGridColumn) subBean;
@@ -356,7 +379,20 @@ public class PersistenceManager {
                                 fontElement.setAttribute("size", String.valueOf(fontValue.getSize()));
                                 fontElement.setAttribute("style", String.valueOf(fontValue.getStyle()));
                             } else {
-                                targetElement.setAttribute(radProp.getName(), String.valueOf(propValue));
+                                String propName = radProp.getName();
+                                switch (propName) {
+                                    case "width":
+                                        propName = "prefWidth";
+                                        break;
+                                    case "height":
+                                        propName = "prefHeight";
+                                        break;
+                                    case "left":
+                                        continue;
+                                    case "top":
+                                        continue;
+                                }
+                                targetElement.setAttribute(propName, String.valueOf(propValue));
                             }
                         }
                     } catch (IllegalAccessException | InvocationTargetException ex) {

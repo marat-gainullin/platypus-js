@@ -103,7 +103,7 @@ public class FormEditor {
     /**
      * @return root node representing the form (in pair with the class node)
      */
-    public final FormNode getFormRootNode() {
+    public final FormRootNode getFormRootNode() {
         return formRootNode;
     }
 
@@ -197,7 +197,7 @@ public class FormEditor {
         if (formLoaded && !formDataObject.formFileReadOnly() && !formModel.isReadOnly() && formModel.isModified()) {
             formModel.fireFormToBeSaved();
             resetPersistenceErrorLog();
-            persistenceManager.saveForm(formDataObject, formModel, persistenceErrors);
+            persistenceManager.saveForm(formDataObject, this, persistenceErrors);
             formModel.setModified(false);
         }
     }

@@ -77,7 +77,6 @@ import org.openide.util.datatransfer.PasteType;
  */
 public class FormRootNode extends FormNode {
 
-
     private Map<String, FormProperty<?>> propsByName;
     private List<PropertySet> propSets;
     private final PropertyChangeListener propsListener = (PropertyChangeEvent evt) -> {
@@ -97,6 +96,11 @@ public class FormRootNode extends FormNode {
         return propsByName.get(propertyName);
     }
 
+    public FormProperty[] getFormProperties(){
+        checkPropertiesSets();
+        return propsByName.values().toArray(new FormProperty[]{});
+    }
+    
     @Override
     public PropertySet[] getPropertySets() {
         checkPropertiesSets();

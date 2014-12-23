@@ -1126,13 +1126,6 @@ public class MenuEditLayer extends JPanel {
         }
     }
 
-    public static boolean addComponentToEndOfMenu(RADComponent<?> targetContainer, PaletteItem paletteItem) throws Exception {
-        FormModel model = targetContainer.getFormModel();
-        RADComponentCreator creator = model.getComponentCreator();
-        creator.precreateVisualComponent(paletteItem.getComponentClassSource());
-        return creator.addPrecreatedComponent(targetContainer, -1, null);
-    }
-
     // change the look of the component to reflect the newly added state.
     // this mainly means making the foreground color light gray.
     void configureNewComponent(RADComponent<?> item) {

@@ -46,7 +46,9 @@ package com.bearsoft.org.netbeans.modules.form;
 import com.bearsoft.org.netbeans.modules.form.actions.*;
 import com.bearsoft.org.netbeans.modules.form.actions.menu.DesignParentAction;
 import com.bearsoft.org.netbeans.modules.form.actions.menu.EditContainerAction;
+import com.bearsoft.org.netbeans.modules.form.bound.AddGridColumnAction;
 import com.bearsoft.org.netbeans.modules.form.bound.RADColumnView;
+import com.bearsoft.org.netbeans.modules.form.bound.RADModelGrid;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.*;
 import com.bearsoft.org.netbeans.modules.form.menu.AddSubItemAction;
@@ -273,6 +275,8 @@ public class RADComponentNode extends FormNode
             actions.add(SystemAction.get(InsertMenuAction.class));
         } else if (MenuEditLayer.isMenuRelatedContainer(component)) {
             actions.add(SystemAction.get(AddSubItemAction.class));
+        } else if (component instanceof RADModelGrid || component instanceof RADModelGridColumn) {
+            actions.add(SystemAction.get(AddGridColumnAction.class));
         } else { // only use the AddAction for non-menu containers
             actions.add(SystemAction.get(AddAction.class));
         }

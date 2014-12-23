@@ -48,6 +48,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 import org.openide.ErrorManager;
 import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
 
 /**
  * This class provides basic implementation of properties used in form module
@@ -213,7 +214,12 @@ public abstract class FormProperty<T> extends Node.Property<T> {
 
     @Override
     public boolean isDefaultValue() {
-        return supportsDefaultValue() ? !isChanged() : true;
+        try {
+            return supportsDefaultValue() ? Objects.equals(getValue(), getDefaultValue()) : false;
+        } catch (IllegalAccessException | InvocationTargetException ex) {
+            Exceptions.printStackTrace(ex);
+            return false;
+        }
     }
 
     /**
