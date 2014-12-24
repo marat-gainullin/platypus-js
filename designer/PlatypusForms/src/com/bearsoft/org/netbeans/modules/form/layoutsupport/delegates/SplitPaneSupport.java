@@ -448,7 +448,7 @@ public class SplitPaneSupport extends AbstractLayoutSupport {
             if (properties == null) {
                 properties = new FormProperty<?>[]{
                     new FormProperty<String>(
-                    "SplitConstraints splitPosition", // NOI18N
+                    "splitPosition", // NOI18N
                     String.class,
                     getBundle().getString("PROP_splitPos"), // NOI18N
                     getBundle().getString("HINT_splitPos")) // NOI18N

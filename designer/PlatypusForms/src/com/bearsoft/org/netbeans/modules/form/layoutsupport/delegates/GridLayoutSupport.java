@@ -142,7 +142,7 @@ public class GridLayoutSupport extends AbstractLayoutSupport {
 
     @Override
     public Object[] getAssistantParams() {
-        return new Object[]{Integer.valueOf(assistantParams + 1)};
+        return new Object[]{assistantParams + 1};
     }
 
     /**

@@ -463,7 +463,7 @@ public class BorderLayoutSupport extends AbstractLayoutSupport {
             if (properties == null) {
                 properties = new FormProperty<?>[]{
                     new FormProperty<String>(
-                    "BorderConstraints direction", // NOI18N
+                    "direction", // NOI18N
                     String.class,
                     getBundle().getString("PROP_direction"), // NOI18N
                     getBundle().getString("HINT_direction")) // NOI18N

@@ -372,7 +372,7 @@ public class TabbedPaneSupport extends AbstractLayoutSupport {
         public FormProperty<?>[] getProperties() {
             if (properties == null) {
                 properties = new FormProperty<?>[]{
-                    new FormProperty<String>("TabConstraints.tabTitle", // NOI18N
+                    new FormProperty<String>("tabTitle", // NOI18N
                     String.class,
                     getBundle().getString("PROP_tabTitle"), // NOI18N
                     getBundle().getString("HINT_tabTitle")) { // NOI18N
@@ -388,7 +388,7 @@ public class TabbedPaneSupport extends AbstractLayoutSupport {
                             propertyValueChanged(oldValue, value);
                         }
                     },
-                    new FormProperty<IconEditor.NbImageIcon>("TabConstraints.tabIcon", // NOI18N
+                    new FormProperty<IconEditor.NbImageIcon>("tabIcon", // NOI18N
                     IconEditor.NbImageIcon.class,
                     getBundle().getString("PROP_tabIcon"), // NOI18N
                     getBundle().getString("HINT_tabIcon")) { // NOI18N
@@ -417,7 +417,7 @@ public class TabbedPaneSupport extends AbstractLayoutSupport {
                             return null;
                         }
                     },
-                    new FormProperty<String>("TabConstraints.tabToolTip", // NOI18N
+                    new FormProperty<String>("tabToolTip", // NOI18N
                     String.class,
                     getBundle().getString("PROP_tabToolTip"), // NOI18N
                     getBundle().getString("HINT_tabToolTip")) { // NOI18N
