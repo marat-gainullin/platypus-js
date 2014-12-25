@@ -50,6 +50,7 @@ import java.awt.*;
 import java.beans.*;
 import java.lang.reflect.InvocationTargetException;
 import javax.swing.JPanel;
+import org.openide.util.ImageUtilities;
 
 /**
  * Support class for BoxLayout. This is an example of support for layout manager
@@ -61,6 +62,17 @@ import javax.swing.JPanel;
 // Expects ltr orientation of the designer
 public class BoxLayoutSupport extends AbstractLayoutSupport {
 
+    /**
+     * The icon for BoxLayout.
+     */
+    private static final String iconURL =
+            "com/bearsoft/org/netbeans/modules/form/beaninfo/swing/boxLayout.gif"; // NOI18N
+    /**
+     * The icon for BoxLayout.
+     */
+    private static final String icon32URL =
+            "com/bearsoft/org/netbeans/modules/form/beaninfo/swing/boxLayout32.gif"; // NOI18N
+    
     private int axis = BoxLayout.X_AXIS;
     private int hgap;
     private int vgap;
@@ -74,6 +86,25 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
     @Override
     public Class<?> getSupportedClass() {
         return BoxLayout.class;
+    }
+
+    /**
+     * Provides an icon to be used for the layout node in Component Inspector.
+     * Only 16x16 color icon is required.
+     *
+     * @param type is one of BeanInfo constants: ICON_COLOR_16x16,
+     * ICON_COLOR_32x32, ICON_MONO_16x16, ICON_MONO_32x32
+     * @return icon to be displayed for node in Component Inspector
+     */
+    @Override
+    public Image getIcon(int type) {
+        switch (type) {
+            case BeanInfo.ICON_COLOR_16x16:
+            case BeanInfo.ICON_MONO_16x16:
+                return ImageUtilities.loadImage(iconURL);
+            default:
+                return ImageUtilities.loadImage(icon32URL);
+        }
     }
 
     /**
@@ -339,7 +370,7 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
             // bean property - we must create a special FormProperty
             properties = new FormProperty<?>[]{
                 new FormProperty<Integer>(
-                "axis", // NOI18N
+                "orientation", // NOI18N
                 Integer.TYPE,
                 getBundle().getString("PROP_axis"), // NOI18N
                 getBundle().getString("HINT_axis")) // NOI18N

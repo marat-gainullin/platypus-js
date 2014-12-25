@@ -45,9 +45,18 @@ package com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates;
 
 import com.bearsoft.org.netbeans.modules.form.FormProperty;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.*;
-import java.awt.*;
+import com.bearsoft.org.netbeans.modules.form.resources.Resources;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.Point;
 import java.beans.*;
 import java.util.*;
+import org.openide.util.ImageUtilities;
 
 /**
  * Support class for BorderLayout. This is an example of support for layout
@@ -59,6 +68,87 @@ import java.util.*;
 public class BorderLayoutSupport extends AbstractLayoutSupport {
 
     /**
+     * The icon for BorderLayout.
+     */
+    private static final String iconURL =
+            "com/bearsoft/org/netbeans/modules/form/beaninfo/swing/borderLayout.gif"; // NOI18N
+    /**
+     * The icon for BorderLayout.
+     */
+    private static final String icon32URL =
+            "com/bearsoft/org/netbeans/modules/form/beaninfo/swing/borderLayout32.gif"; // NOI18N
+    
+    private FormProperty[] properties;
+    
+    @Override
+    protected FormProperty<?>[] getProperties() {
+        if(properties == null)
+            properties = new FormProperty[]{
+                new FormProperty<Integer>(
+                "hgap", // NOI18N
+                Integer.TYPE,
+                getBundle().getString("PROP_hgap"), // NOI18N
+                getBundle().getString("HINT_hgap")) {
+
+                    @Override
+                    public Integer getValue() throws IllegalAccessException {
+                        return ((BorderLayout)getRadLayout().getBeanInstance()).getHgap();
+                    }
+
+                    @Override
+                    public void setValue(Integer aValue) throws IllegalAccessException, IllegalArgumentException {
+                        int oldValue = getValue();
+                        int hgap = aValue != null ? aValue : 0;
+                        ((BorderLayout)getRadLayout().getBeanInstance()).setHgap(hgap);
+                        setChanged(hgap != 0);
+                        propertyValueChanged(oldValue, hgap);
+                    }
+
+                    @Override
+                    public boolean supportsDefaultValue() {
+                        return true;
+                    }
+
+                    @Override
+                    public Integer getDefaultValue() {
+                        return 0;
+                    }
+                }, // NOI18N
+                new FormProperty<Integer>(
+                "vgap", // NOI18N
+                Integer.TYPE,
+                getBundle().getString("PROP_vgap"), // NOI18N
+                getBundle().getString("HINT_vgap")) {
+
+                    @Override
+                    public Integer getValue() {
+                        return ((BorderLayout)getRadLayout().getBeanInstance()).getVgap();
+                    }
+
+                    @Override
+                    public void setValue(Integer aValue) {
+                        int oldValue = getValue();
+                        int vgap = aValue != null ? aValue : 0;
+                        ((BorderLayout)getRadLayout().getBeanInstance()).setVgap(vgap);
+                        setChanged(vgap != 0);
+                        propertyValueChanged(oldValue, vgap);
+                    }
+
+                    @Override
+                    public boolean supportsDefaultValue() {
+                        return true;
+                    }
+
+                    @Override
+                    public Integer getDefaultValue() {
+                        return 0;
+                    }
+                } // NOI18N
+            };
+        return properties;
+    }
+
+    /**
      * Gets the supported layout manager class - BorderLayout.
      *
      * @return the class supported by this delegate
@@ -66,6 +156,36 @@ public class BorderLayoutSupport extends AbstractLayoutSupport {
     @Override
     public Class<?> getSupportedClass() {
         return BorderLayout.class;
+    }
+
+    /**
+     * Provides a display name for the layout node - derived from the name of
+     * supported class here.
+     *
+     * @return display name of supported layout
+     */
+    @Override
+    public String getDisplayName() {
+        return Resources.getBundle().getString("NAME_java-awt-"+getSupportedClass().getSimpleName());
+    }
+    
+    /**
+     * Provides an icon to be used for the layout node in Component Inspector.
+     * Only 16x16 color icon is required.
+     *
+     * @param type is one of BeanInfo constants: ICON_COLOR_16x16,
+     * ICON_COLOR_32x32, ICON_MONO_16x16, ICON_MONO_32x32
+     * @return icon to be displayed for node in Component Inspector
+     */
+    @Override
+    public Image getIcon(int type) {
+        switch (type) {
+            case BeanInfo.ICON_COLOR_16x16:
+            case BeanInfo.ICON_MONO_16x16:
+                return ImageUtilities.loadImage(iconURL);
+            default:
+                return ImageUtilities.loadImage(icon32URL);
+        }
     }
 
     /**
@@ -315,51 +435,10 @@ public class BorderLayoutSupport extends AbstractLayoutSupport {
                 return true; // container is too small
             }
         }
-
         g.drawRect(x1, y1, x2 - x1 - 1, y2 - y1 - 1);
-
         return true;
     }
 
-    // ----------
-    /**
-     * This method is called from readComponentCode method to read layout
-     * constraints of a component from code. It is just a simple String for
-     * BorderLayout.
-     *
-     * @param constrExp CodeExpression object of the constraints (taken from add
-     * method in the code)
-     * @param constrCode CodeGroup to be filled with the relevant constraints
-     * initialization code; not needed here because String is just a single code
-     * expression
-     * @param compExp CodeExpression of the component for which the constraints
-     * are read (not needed here)
-     * @return LayoutConstraints based on information read form code
-     * @Override protected LayoutConstraints readConstraintsCode(CodeExpression
-     * constrExp, CodeGroup constrCode, CodeExpression compExp) {
-     * BorderConstraints constr = new BorderConstraints(BorderLayout.CENTER);
-     * FormCodeSupport.readPropertyExpression(constrExp,
-     * constr.getProperties()[0], false); return constr; }
-     */
-    /**
-     * Called from createComponentCode method, creates code for a component
-     * layout constraints (opposite to readConstraintsCode).
-     *
-     * @param constrCode CodeGroup to be filled with constraints code; not
-     * needed here String (used as the constraints object) is just a single code
-     * expression
-     * @param constr layout constraints metaobject representing the constraints
-     * @param compExp CodeExpression object representing the component; not
-     * needed here
-     * @return created CodeExpression representing the layout constraints
-     * @Override protected CodeExpression createConstraintsCode(CodeGroup
-     * constrCode, LayoutConstraints constr, CodeExpression compExp, int index)
-     * { if (!(constr instanceof BorderConstraints)) return null; // should not
-     * happen
-     *
-     * return getCodeStructure().createExpression(
-     * FormCodeSupport.createOrigin(constr.getProperties()[0])); }
-     */
     /**
      * This method is called to get a default component layout constraints
      * metaobject in case it is not provided (e.g. in addComponents method).
@@ -397,7 +476,6 @@ public class BorderLayoutSupport extends AbstractLayoutSupport {
         if (positions.isEmpty()) {
             positions.add(BorderLayout.CENTER);
         }
-
         String[] free = new String[positions.size()];
         positions.toArray(free);
         return free;
@@ -408,7 +486,6 @@ public class BorderLayoutSupport extends AbstractLayoutSupport {
         if (constraints == null) {
             return -1;
         }
-
         position = (String) toAbsolute(position);
         for (int i = 0, n = constraints.size(); i < n; i++) {
             LayoutConstraints<?> constr = constraints.get(i);
@@ -416,7 +493,6 @@ public class BorderLayoutSupport extends AbstractLayoutSupport {
                 return i;
             }
         }
-
         return -1;
     }
 
@@ -446,16 +522,16 @@ public class BorderLayoutSupport extends AbstractLayoutSupport {
 
     // ----------------
     /**
-     * LayoutConstraints implementation class for component constraints of
-     * BorderLayout.
+     * LayoutConstraints implementation class for component constraints of BorderLayout.
      */
     public static class BorderLayoutConstraints implements LayoutConstraints<String> {
 
         private String direction;
         private FormProperty<?>[] properties;
 
-        public BorderLayoutConstraints(String direction) {
-            this.direction = direction;
+        public BorderLayoutConstraints(String aDirection) {
+            super();
+            direction = aDirection;
         }
 
         @Override
@@ -463,7 +539,7 @@ public class BorderLayoutSupport extends AbstractLayoutSupport {
             if (properties == null) {
                 properties = new FormProperty<?>[]{
                     new FormProperty<String>(
-                    "direction", // NOI18N
+                    "place", // NOI18N
                     String.class,
                     getBundle().getString("PROP_direction"), // NOI18N
                     getBundle().getString("HINT_direction")) // NOI18N

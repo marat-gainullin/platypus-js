@@ -19,7 +19,7 @@ import org.openide.util.NbBundle;
 public class NameAndLocationWizardPanelVisual extends JPanel implements DocumentListener {
 
     public static final String PROP_PROJECT_NAME = "projectName";
-    private NameAndLocationWizardPanel panel;
+    private final NameAndLocationWizardPanel panel;
 
     public NameAndLocationWizardPanelVisual(NameAndLocationWizardPanel aPanel) {
         initComponents();

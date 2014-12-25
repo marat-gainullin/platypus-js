@@ -62,7 +62,6 @@ import java.beans.PropertyVetoException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import org.openide.util.ImageUtilities;
-import org.openide.util.NbBundle;
 
 /**
  * Support class for AbsoluteLayout - for absolute positioning and sizing of
@@ -77,12 +76,12 @@ import org.openide.util.NbBundle;
 public class MarginLayoutSupport extends AbstractLayoutSupport {
 
     /**
-     * The icon for AbsoluteLayout.
+     * The icon for MarginLayout.
      */
     private static final String iconURL =
             "com/bearsoft/org/netbeans/modules/form/layoutsupport/resources/AbsoluteLayout.gif"; // NOI18N
     /**
-     * The icon for AbsoluteLayout.
+     * The icon for MarginLayout.
      */
     private static final String icon32URL =
             "com/bearsoft/org/netbeans/modules/form/layoutsupport/resources/AbsoluteLayout32.gif"; // NOI18N
@@ -97,11 +96,6 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
     @Override
     public Class<?> getSupportedClass() {
         return MarginLayout.class;
-    }
-
-    @Override
-    public String getDisplayName() {
-        return NbBundle.getMessage(MarginLayoutSupport.class, "NAME_MARGIN_LAYOUNT");
     }
 
     /**
@@ -850,10 +844,14 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
         private FormProperty<?>[] properties;
 
         public MarginLayoutConstraints(Margin left, Margin top, Margin right, Margin bottom, Margin width, Margin height) {
-            super();
-            constraints = new MarginConstraints(left, top, right, bottom, width, height);
+            this(new MarginConstraints(left, top, right, bottom, width, height));
         }
 
+        public MarginLayoutConstraints(MarginConstraints aConstraints) {
+            super();
+            constraints = aConstraints;
+        }
+        
         public FormProperty<Margin> getMLeft() {
             checkProperties();
             return mleft;
@@ -1055,7 +1053,7 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
         }
 
         protected FormProperty<?>[] createProperties() {
-            mleft = new FormProperty<Margin>("mleft", // NOI18N
+            mleft = new FormProperty<Margin>("left", // NOI18N
                     Margin.class,
                     getBundle().getString("PROPM_posl"), // NOI18N
                     getBundle().getString("HINTM_posl")) {
@@ -1093,7 +1091,7 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
                     return null;
                 }
             };
-            mtop = new FormProperty<Margin>("mtop", // NOI18N
+            mtop = new FormProperty<Margin>("top", // NOI18N
                     Margin.class,
                     getBundle().getString("PROPM_post"), // NOI18N
                     getBundle().getString("HINTM_post")) {
@@ -1131,7 +1129,7 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
                     return null;
                 }
             };
-            mright = new FormProperty<Margin>("mright", // NOI18N
+            mright = new FormProperty<Margin>("right", // NOI18N
                     Margin.class,
                     getBundle().getString("PROPM_posr"), // NOI18N
                     getBundle().getString("HINTM_posr")) {
@@ -1169,7 +1167,7 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
                     return null;
                 }
             };
-            mbottom = new FormProperty<Margin>("mbottom", // NOI18N
+            mbottom = new FormProperty<Margin>("bottom", // NOI18N
                     Margin.class,
                     getBundle().getString("PROPM_posb"), // NOI18N
                     getBundle().getString("HINTM_posb")) { // NOI18N
@@ -1207,7 +1205,7 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
                     return null;
                 }
             };
-            mwidth = new FormProperty<Margin>("mwidth", // NOI18N
+            mwidth = new FormProperty<Margin>("width", // NOI18N
                     Margin.class,
                     getBundle().getString("PROPM_width"), // NOI18N
                     getBundle().getString("HINTM_width")) { // NOI18N
@@ -1245,7 +1243,7 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
                     return null;
                 }
             };
-            mheight = new FormProperty<Margin>("mheight", // NOI18N
+            mheight = new FormProperty<Margin>("height", // NOI18N
                     Margin.class,
                     getBundle().getString("PROPM_height"), // NOI18N
                     getBundle().getString("HINTM_height")) { // NOI18N

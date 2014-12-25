@@ -7,7 +7,6 @@ package com.eas.client.forms.layouts;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 public class MarginLayout implements LayoutManager2 {
 

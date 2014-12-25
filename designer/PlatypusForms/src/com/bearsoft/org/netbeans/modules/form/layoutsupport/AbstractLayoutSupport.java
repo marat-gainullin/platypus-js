@@ -44,6 +44,7 @@
 package com.bearsoft.org.netbeans.modules.form.layoutsupport;
 
 import com.bearsoft.org.netbeans.modules.form.*;
+import com.bearsoft.org.netbeans.modules.form.resources.Resources;
 import java.awt.*;
 import java.beans.*;
 import java.util.*;
@@ -110,8 +111,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate {
      * @param aLayoutContext provides a necessary context information for the
      * layout delegate
      * @param lmInstance LayoutManager instance for initialization (may be null)
-     * @param fromCode indicates whether to initialize from code structure
-     * @exception any Exception occurred during initialization
+     * @throws java.lang.Exception
      */
     @Override
     public void initialize(LayoutSupportContext aLayoutContext,
@@ -188,19 +188,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate {
      */
     @Override
     public String getDisplayName() {
-        Class<?> cls = getSupportedClass();
-        String name;
-
-        if (cls != null) {
-            name = cls.getName();
-            int lastdot = name.lastIndexOf('.');
-            if (lastdot > 0) {
-                name = name.substring(lastdot + 1);
-            }
-        } else {
-            name = "null"; // NOI18N
-        }
-        return name;
+        return Resources.getBundle().getString("NAME_"+getSupportedClass().getSimpleName());
     }
 
     /**
@@ -371,10 +359,8 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate {
      * level, no real components but their CodeExpression representations are
      * added. The code structures describing the layout is updated immediately.
      *
-     * @param compExpressions array of CodeExpression objects representing the
-     * components to be accepted
-     * @param constraints array of layout constraints of the components, may
-     * contain nulls
+     * @param newComps
+     * @param newConstraints
      * @param index position at which the components should be added (inserted);
      * if -1, the components should be added at the end
      */
@@ -607,7 +593,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate {
      * does nothing.
      *
      * @param p Point of click in the container
-     * @param real instance of the container when the click occurred
+     * @param container
      * @param containerDelegate effective container delegate of the container
      * (e.g. like content pane of JFrame)
      */
@@ -901,155 +887,6 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate {
     }
 
     /**
-     * This method is used for "reading layout from code", called from
-     * initialize method. It recognizes relevant code which sets the layout
-     * manager on the container and reads the layout information from the code.
-     * This includes the code for setting up the layout manager itself and the
-     * code for setting the layout manger to container. For setting up just the
-     * layout manager bean, the method readInitLayoutCode is used. Reading
-     * components code is not done here.
-     *
-     * @param layoutCode CodeGroup to be filled with relevant layout code
-     * @see readInitLayoutCode method protected void readLayoutCode(CodeGroup
-     * layoutCode) { if (isDedicated()) return;
-     *
-     * CodeGroup initLayoutCode = getCodeStructure().createCodeGroup();
-     * CodeStatement setLayoutStatement = null;
-     *
-     * Iterator it = CodeStructure.getDefinedStatementsIterator(
-     * getActiveContainerCodeExpression()); CodeStatement[] statements =
-     * CodeStructure.filterStatements( it, getSetLayoutMethod()); if
-     * (statements.length > 0) { // read from code setLayoutStatement =
-     * statements[0];
-     * readInitLayoutCode(setLayoutStatement.getStatementParameters()[0],
-     * initLayoutCode); } else { // create new CodeExpression layoutExp =
-     * createInitLayoutCode(initLayoutCode); if (layoutExp != null)
-     * setLayoutStatement = CodeStructure.createStatement(
-     * getActiveContainerCodeExpression(), getSetLayoutMethod(), new
-     * CodeExpression[] { layoutExp }); }
-     *
-     * if (setLayoutStatement != null) { layoutCode.addGroup(initLayoutCode);
-     * layoutCode.addStatement(setLayoutStatement); } }
-     */
-    /**
-     * This method is called from readLayoutCode to read the layout manager bean
-     * code (i.e. code for constructor and properties).
-     *
-     * @param layoutExp CodeExpressin of the layout manager
-     * @param initLayoutCode CodeGroup to be filled with relevant initialization
-     * code protected void readInitLayoutCode(CodeExpression layoutExp,
-     * CodeGroup initLayoutCode) { if (metaLayout == null) return;
-     *
-     * layoutBeanCode = new BeanCodeManager( getSupportedClass(),
-     * getAllProperties(), CreationDescriptor.PLACE_ALL |
-     * CreationDescriptor.CHANGED_ONLY, false, // don't force empty constructor
-     * false, // disable changes firing when properties are restored layoutExp,
-     * initLayoutCode); }
-     */
-    /**
-     * Creates code structures for a new layout manager (opposite to
-     * readInitLayoutCode).
-     *
-     * @param initLayoutCode CodeGroup to be filled with relevant initialization
-     * code
-     * @return created CodeExpression representing the layout manager protected
-     * CodeExpression createInitLayoutCode(CodeGroup initLayoutCode) { if
-     * (metaLayout == null) return null;
-     *
-     * layoutBeanCode = new BeanCodeManager( getSupportedClass(),
-     * getAllProperties(), CreationDescriptor.PLACE_ALL |
-     * CreationDescriptor.CHANGED_ONLY, false, layoutContext.getCodeStructure(),
-     * CodeVariable.LOCAL, initLayoutCode);
-     *
-     * return layoutBeanCode.getCodeExpression(); }
-     */
-    /**
-     * This method is used for scanning code structures and recognizing
-     * components added to containers and their constraints. It's called from
-     * initialize method. When a relevant code statement is found, then the
-     * CodeExpression of component is get and added to component, and also the
-     * layout constraints information is read (using separate
-     * readConstraintsCode method).
-     *
-     * @param statement CodeStatement to be tested if it contains relevant code
-     * @param componentCode CodeGroup to be filled with all component code
-     * @return CodeExpression representing found component; null if the
-     * statement is not relevant protected CodeExpression
-     * readComponentCode(CodeStatement statement, CodeGroup componentCode) {
-     * CodeExpression compExp; CodeGroup constrCode; LayoutConstraints constr;
-     *
-     * // look for Container.add(Component) or Container.add(Component, Object)
-     * if (getSimpleAddMethod().equals(statement.getMetaObject())) { compExp =
-     * statement.getStatementParameters()[0]; constrCode = null; constr = null;
-     * } else if (getAddWithConstraintsMethod().equals(
-     * statement.getMetaObject())) { CodeExpression[] params =
-     * statement.getStatementParameters();
-     *
-     * compExp = params[0]; constrCode = getCodeStructure().createCodeGroup();
-     * constr = readConstraintsCode(params[1], constrCode, compExp); } else
-     * return null;
-     *
-     * componentConstraints.add(constr); if (constrCode != null)
-     * componentCode.addGroup(constrCode);
-     * componentCode.addStatement(statement);
-     *
-     * return compExp; }
-     */
-    /**
-     * This method is called from readComponentCode method to read layout
-     * constraints of a component from code.
-     *
-     * @param constrExp CodeExpression object of the constraints (taken from add
-     * method in the code)
-     * @param constrCode CodeGroup to be filled with the relevant constraints
-     * initialization code
-     * @param compExp CodeExpression of the component for which the constraints
-     * are read
-     * @return LayoutConstraints based on information read form code protected
-     * LayoutConstraints readConstraintsCode(CodeExpression constrExp, CodeGroup
-     * constrCode, CodeExpression compExp) { return null; // no default
-     * implementation possible }
-     */
-    /**
-     * Creates code for a component added to the layout (opposite to
-     * readComponentCode method).
-     *
-     * @param componentCode CodeGroup to be filled with complete component code
-     * (code for initializing the layout constraints and adding the component to
-     * the layout)
-     * @param compExp CodeExpression object representing component
-     * @param index position of the component in the layout protected void
-     * createComponentCode(CodeGroup componentCode, CodeExpression compExp, int
-     * index) { CodeGroup constrCode = getCodeStructure().createCodeGroup();
-     * LayoutConstraints constr = getConstraints(index);
-     *
-     * // first create init code for the constraints object CodeExpression
-     * constrExp = createConstraintsCode( constrCode, constr, compExp, index);
-     *
-     * // create "add" code for the component CodeStatement compAddStatement;
-     * if (constrExp != null) { // add with constraints compAddStatement =
-     * CodeStructure.createStatement( getActiveContainerCodeExpression(),
-     * getAddWithConstraintsMethod(), new CodeExpression[] { compExp, constrExp
-     * }); } else { // add without constraints compAddStatement =
-     * CodeStructure.createStatement( getActiveContainerCodeExpression(),
-     * getSimpleAddMethod(), new CodeExpression[] { compExp }); }
-     *
-     * componentCode.addGroup(constrCode);
-     * componentCode.addStatement(compAddStatement); }
-     */
-    /**
-     * Called from createComponentCode method, creates code for a component
-     * layout constraints (opposite to readConstraintsCode).
-     *
-     * @param constrCode CodeGroup to be filled with constraints code
-     * @param constr layout constraints metaobject representing the constraints
-     * @param compExp CodeExpression object representing the component
-     * @return created CodeExpression representing the layout constraints
-     * protected CodeExpression createConstraintsCode(CodeGroup constrCode,
-     * LayoutConstraints constr, CodeExpression compExp, int index) { return
-     * null; // no default implementation possible }
-     */
-    /**
      * This method is called to get a default component layout constraints
      * metaobject in case it is not provided (e.g. in addComponents method).
      *
@@ -1063,6 +900,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate {
     /**
      * Method to obtain just one propetry of given name.
      *
+     * @param propName
      * @return layout property of given name
      */
     protected FormProperty<?> getProperty(String propName) {
@@ -1081,7 +919,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate {
      * @return array of alternative properties of the layout
      */
     protected FormProperty<?>[] getProperties() {
-        return null; // use default "bean" properties
+        return radLayout.getBeanProperties(); // use default "bean" properties
     }
 
     // ---------------

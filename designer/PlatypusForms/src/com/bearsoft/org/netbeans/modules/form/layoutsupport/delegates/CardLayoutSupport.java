@@ -51,9 +51,12 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.Insets;
 import java.awt.LayoutManager;
 import java.awt.Point;
+import java.beans.BeanInfo;
+import org.openide.util.ImageUtilities;
 
 /**
  * Support class for CardLayout. This support uses fictive layout constraints
@@ -64,7 +67,19 @@ import java.awt.Point;
  */
 public class CardLayoutSupport extends AbstractLayoutSupport {
 
+    /**
+     * The icon for CardLayout.
+     */
+    private static final String iconURL =
+            "com/bearsoft/org/netbeans/modules/form/beaninfo/swing/cardLayout.gif"; // NOI18N
+    /**
+     * The icon for CardLayout.
+     */
+    private static final String icon32URL =
+            "com/bearsoft/org/netbeans/modules/form/beaninfo/swing/cardLayout32.gif"; // NOI18N
+    
     private CardLayoutConstraints currentCard;
+    private FormProperty<?>[] properties;
 
     /**
      * Gets the supported layout manager class - CardLayout.
@@ -74,6 +89,25 @@ public class CardLayoutSupport extends AbstractLayoutSupport {
     @Override
     public Class<?> getSupportedClass() {
         return CardLayout.class;
+    }
+
+    /**
+     * Provides an icon to be used for the layout node in Component Inspector.
+     * Only 16x16 color icon is required.
+     *
+     * @param type is one of BeanInfo constants: ICON_COLOR_16x16,
+     * ICON_COLOR_32x32, ICON_MONO_16x16, ICON_MONO_32x32
+     * @return icon to be displayed for node in Component Inspector
+     */
+    @Override
+    public Image getIcon(int type) {
+        switch (type) {
+            case BeanInfo.ICON_COLOR_16x16:
+            case BeanInfo.ICON_MONO_16x16:
+                return ImageUtilities.loadImage(iconURL);
+            default:
+                return ImageUtilities.loadImage(icon32URL);
+        }
     }
 
     /**
@@ -178,6 +212,74 @@ public class CardLayoutSupport extends AbstractLayoutSupport {
         return "cardLayout"; // NOI18N
     }
 
+    @Override
+    protected FormProperty<?>[] getProperties() {
+        if(properties == null)
+            properties = new FormProperty[]{
+                new FormProperty<Integer>(
+                "hgap", // NOI18N
+                Integer.TYPE,
+                getBundle().getString("PROP_hgap"), // NOI18N
+                getBundle().getString("HINT_hgap")) {
+
+                    @Override
+                    public Integer getValue() {
+                        return ((CardLayout)getRadLayout().getBeanInstance()).getHgap();
+                    }
+
+                    @Override
+                    public void setValue(Integer aValue) {
+                        int oldValue = getValue();
+                        int hgap = aValue != null ? aValue : 0;
+                        ((CardLayout)getRadLayout().getBeanInstance()).setHgap(hgap);
+                        setChanged(hgap != 0);
+                        propertyValueChanged(oldValue, hgap);
+                    }
+
+                    @Override
+                    public boolean supportsDefaultValue() {
+                        return true;
+                    }
+
+                    @Override
+                    public Integer getDefaultValue() {
+                        return 0;
+                    }
+                }, // NOI18N
+                new FormProperty<Integer>(
+                "vgap", // NOI18N
+                Integer.TYPE,
+                getBundle().getString("PROP_vgap"), // NOI18N
+                getBundle().getString("HINT_vgap")) {
+
+                    @Override
+                    public Integer getValue() {
+                        return ((CardLayout)getRadLayout().getBeanInstance()).getVgap();
+                    }
+
+                    @Override
+                    public void setValue(Integer aValue) {
+                        int oldValue = getValue();
+                        int vgap = aValue != null ? aValue : 0;
+                        ((CardLayout)getRadLayout().getBeanInstance()).setVgap(vgap);
+                        setChanged(vgap != 0);
+                        propertyValueChanged(oldValue, vgap);
+                    }
+
+                    @Override
+                    public boolean supportsDefaultValue() {
+                        return true;
+                    }
+
+                    @Override
+                    public Integer getDefaultValue() {
+                        return 0;
+                    }
+                } // NOI18N
+            };
+        return properties;
+    }
+
     /**
      * This method paints a dragging feedback for a component dragged over a
      * container (or just for mouse cursor being moved over container, without
@@ -274,8 +376,8 @@ public class CardLayoutSupport extends AbstractLayoutSupport {
         private String card;
         private FormProperty<?>[] properties;
 
-        public CardLayoutConstraints(String card) {
-            this.card = card;
+        public CardLayoutConstraints(String aCard) {
+            card = aCard;
         }
 
         @Override

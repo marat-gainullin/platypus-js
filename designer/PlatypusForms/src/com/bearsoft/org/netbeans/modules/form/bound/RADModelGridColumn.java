@@ -50,6 +50,7 @@ public class RADModelGridColumn extends RADComponent<GridColumnsNode> implements
             return super.createCheckedBeanProperty(desc);
         }
     }
+
     public RADColumnView<? super ModelComponentDecorator> getViewControl() {
         return viewControl;
     }
@@ -99,6 +100,11 @@ public class RADModelGridColumn extends RADComponent<GridColumnsNode> implements
     @Override
     public RADComponent<?>[] getSubBeans() {
         return columns.toArray(new RADComponent<?>[]{});
+    }
+
+    @Override
+    public int getSubBeansCount() {
+        return columns.size();
     }
 
     @Override

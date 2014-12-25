@@ -509,7 +509,9 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                         @Override
                         public Container run() throws Exception {
                             VisualReplicator r = new VisualReplicator(aFormEditor, false);
-                            Container container = (Container) r.createClone();
+                            Container rootView = (Container) r.createClone();
+                            Container container = new JFrame();
+                            container.add(rootView);
                             if (container instanceof RootPaneContainer) {
                                 JRootPane rootPane = ((RootPaneContainer) container).getRootPane();
                                 JLayeredPane newPane = new JLayeredPane() {
@@ -1913,12 +1915,12 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                                     String newName = (String) ev.getNewPropertyValue();
                                     replicator.renameComponent(oldName, newName);
                                     /*
-                                    RADComponent<?> comp = ev.getComponent();
-                                    comp.setStoredName(oldName);
-                                    replicator.removeComponent(comp, null);
-                                    comp.setStoredName(newName);
-                                    replicator.addComponent(comp);
-                                    */
+                                     RADComponent<?> comp = ev.getComponent();
+                                     comp.setStoredName(oldName);
+                                     replicator.removeComponent(comp, null);
+                                     comp.setStoredName(newName);
+                                     replicator.addComponent(comp);
+                                     */
                                     updateDone = true;
                                 } catch (Exception ex) {
                                     Exceptions.printStackTrace(ex);

@@ -23,6 +23,7 @@ public class CardLayout extends java.awt.CardLayout {
 
     protected Set<ItemListener> changeListeners = new HashSet<>();
     protected Map<String, Component> comps = new HashMap<>();
+    protected Map<Component, String> cards = new HashMap<>();
 
     public CardLayout() {
         this(0, 0);
@@ -37,20 +38,23 @@ public class CardLayout extends java.awt.CardLayout {
         super.addLayoutComponent(comp, constraints);
         if (constraints instanceof String) {
             comps.put((String) constraints, comp);
+            cards.put(comp, (String) constraints);
         }
     }
 
     @Override
     public void removeLayoutComponent(Component comp) {
         super.removeLayoutComponent(comp);
-        for (Entry<String, Component> entry : comps.entrySet()) {
-            if (entry.getValue() == comp) {
-                comps.remove(entry.getKey());
-                break;
-            }
+        String wasCard = cards.remove(comp);
+        if(wasCard != null){
+            comps.remove(wasCard);
         }
     }
 
+    public String getCard(Component aComp){
+        return cards.get(aComp);
+    }
+    
     public Component getComponent(String aCardName) {
         return comps.get(aCardName);
     }

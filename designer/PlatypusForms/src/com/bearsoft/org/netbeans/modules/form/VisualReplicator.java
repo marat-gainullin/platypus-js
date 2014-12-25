@@ -54,7 +54,6 @@ import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.HierarchyEvent;
-import java.awt.event.HierarchyListener;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.Map.Entry;

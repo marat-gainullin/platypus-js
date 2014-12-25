@@ -108,10 +108,11 @@ public final class LayoutSupportManager implements LayoutSupportContext {
             }
         } else {
             Container contDel = getPrimaryContainerDelegate();
-            if (contDel.getComponentCount() == 0) {
+            //if (contDel.getComponentCount() == 0) {
                 // we can still handle only empty containers ...
                 lmInstance = contDel.getLayout();
                 delegate = LayoutSupportRegistry.createSupportForLayout(lmInstance.getClass());
+                /*
             } else {
                 RuntimeException ex = new IllegalArgumentException();
                 org.openide.ErrorManager.getDefault().annotate(
@@ -119,6 +120,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
                                 "MSG_ERR_NonEmptyContainer")); // NOI18N
                 throw ex;
             }
+                */
         }
 
         if (delegate != null) {
@@ -165,10 +167,8 @@ public final class LayoutSupportManager implements LayoutSupportContext {
 
         if (layoutDelegate != null) {
             try {
-                layoutDelegate.initialize(this, null);//, fromCode);
-                //if (!fromCode) {
+                layoutDelegate.initialize(this, null);
                 fillLayout(oldConstraints);
-                //}
                 getPropertySets(); // force properties and listeners creation
             } catch (Exception ex) {
                 removeLayoutDelegate(false);
@@ -408,25 +408,27 @@ public final class LayoutSupportManager implements LayoutSupportContext {
     }
 
     // components adding/removing
-    public void addComponents(RADVisualComponent<?>[] components,
+    public void injectComponents(RADVisualComponent<?>[] components,
             LayoutConstraints<?>[] aConstraints,
             int index) {
-        Component[] comps = new Component[components.length];
-
-        for (int i = 0; i < components.length; i++) {
-            comps[i] = components[i].getBeanInstance();
-        }
-
         if (index <= -1) {
             index = layoutDelegate.getComponentCount();
         }
-
         layoutDelegate.addComponents(components, aConstraints, index);
-
         for (RADVisualComponent<?> component : components) {
             component.resetConstraintsProperties();
         }
+    }
 
+    public void addComponents(RADVisualComponent<?>[] components,
+            LayoutConstraints<?>[] aConstraints,
+            int index) {
+        injectComponents(components, aConstraints, index);
+        
+        Component[] comps = new Component[components.length];
+        for (int i = 0; i < components.length; i++) {
+            comps[i] = components[i].getBeanInstance();
+        }
         layoutDelegate.addComponentsToContainer(getPrimaryContainer(),
                 getPrimaryContainerDelegate(),
                 comps, index);

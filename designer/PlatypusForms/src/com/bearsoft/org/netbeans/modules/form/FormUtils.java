@@ -60,6 +60,7 @@ import com.eas.client.forms.events.MouseEvent;
 import com.eas.client.forms.layouts.BoxLayout;
 import com.eas.client.forms.layouts.MarginLayout;
 import com.eas.client.forms.layouts.CardLayout;
+import com.eas.script.HasPublished;
 import com.eas.script.ScriptFunction;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -102,7 +103,7 @@ import org.openide.util.Utilities;
  */
 public class FormUtils {
 
-    public static class Panel extends JPanel implements Widget {
+    public static class Panel extends JPanel implements Widget, HasPublished {
 
         public Panel() {
             super(new MarginLayout());
@@ -337,6 +338,16 @@ public class FormUtils {
         @Override
         public JComponent getComponent() {
             return this;
+        }
+
+        @Override
+        public JSObject getPublished() {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void setPublished(JSObject jso) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
 
     }
@@ -726,7 +737,7 @@ public class FormUtils {
             Object targetBean,
             Collection<RADProperty<?>> relativeProperties) {
         for (RADProperty<?> prop : props) {
-            if (!prop.isChanged()) {
+            if (prop.isDefaultValue()) {
                 continue;
             }
             try {

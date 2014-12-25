@@ -1097,25 +1097,19 @@ public class FormModel {
 
         @Override
         public RADComponent<?>[] getSubBeans() {
-            int n = otherComponents.size();
-            if (topRADComponent != null) {
-                n++;
-            }
-            RADComponent<?>[] comps = new RADComponent<?>[n];
-            otherComponents.toArray(comps);
-            if (topRADComponent != null) {
-                comps[n - 1] = topRADComponent;
-            }
-            return comps;
+            return otherComponents.toArray(new RADComponent<?>[]{});
+        }
+
+        @Override
+        public int getSubBeansCount() {
+            return otherComponents.size();
         }
 
         @Override
         public void initSubComponents(RADComponent<?>[] initComponents) {
             otherComponents.clear();
             for (RADComponent<?> initComponent : initComponents) {
-                if (initComponent != topRADComponent) {
                     add(initComponent);
-                }
             }
         }
 
@@ -1144,11 +1138,7 @@ public class FormModel {
 
         @Override
         public int getIndexOf(RADComponent<?> comp) {
-            int index = otherComponents.indexOf(comp);
-            if (index < 0 && comp == topRADComponent) {
-                index = otherComponents.size();
-            }
-            return index;
+            return otherComponents.indexOf(comp);
         }
     }
     // ---------------

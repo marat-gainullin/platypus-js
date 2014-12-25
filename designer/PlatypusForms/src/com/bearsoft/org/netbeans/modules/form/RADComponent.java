@@ -275,7 +275,7 @@ public abstract class RADComponent<C> {
             org.openide.ErrorManager.getDefault().notify(org.openide.ErrorManager.INFORMATIONAL, ex);
             return null;
         }
-        FormUtils.copyPropertiesToBean(nameToProperty.values().toArray(new RADProperty<?>[]{}),
+        FormUtils.copyPropertiesToBean(getBeanProperties(),
                 clone,
                 relativeProperties);
         return clone;

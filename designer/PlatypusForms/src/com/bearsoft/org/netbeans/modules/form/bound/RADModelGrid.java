@@ -83,6 +83,11 @@ public class RADModelGrid extends RADVisualComponent<ModelGrid> implements Compo
     }
 
     @Override
+    public int getSubBeansCount() {
+        return columns.size();
+    }
+
+    @Override
     public void initSubComponents(RADComponent<?>[] initComponents) {
         try {
             columns.clear();

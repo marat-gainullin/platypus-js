@@ -5,6 +5,7 @@
 package com.eas.client.forms;
 
 import com.bearsoft.gui.grid.header.GridColumnsNode;
+import com.bearsoft.gui.grid.header.MultiLevelHeader;
 import com.eas.client.forms.components.Button;
 import com.eas.client.forms.components.CheckBox;
 import com.eas.client.forms.components.DesktopPane;
@@ -27,6 +28,11 @@ import com.eas.client.forms.components.model.ModelSpin;
 import com.eas.client.forms.components.model.ModelTextArea;
 import com.eas.client.forms.components.model.ModelWidget;
 import com.eas.client.forms.components.model.grid.ModelGrid;
+import com.eas.client.forms.components.model.grid.columns.ModelColumn;
+import com.eas.client.forms.components.model.grid.header.CheckGridColumn;
+import com.eas.client.forms.components.model.grid.header.ModelGridColumn;
+import com.eas.client.forms.components.model.grid.header.RadioGridColumn;
+import com.eas.client.forms.components.model.grid.header.ServiceGridColumn;
 import com.eas.client.forms.components.rt.ButtonGroupWrapper;
 import com.eas.client.forms.components.rt.FormatsUtils;
 import com.eas.client.forms.components.rt.HasEditable;
@@ -76,6 +82,8 @@ import javax.swing.JFrame;
 import javax.swing.JPopupMenu;
 import jdk.nashorn.api.scripting.JSObject;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  *
@@ -83,12 +91,14 @@ import org.w3c.dom.Element;
  */
 public class FormFactory {
 
-    public static final String FORM_ROOT_CONTAINER_NAME = "Form";
+    public static final String OLD_FORM_ROOT_CONTAINER_NAME = "Form";
     protected Element element;
     protected JSObject model;
     protected Form form;
     protected Map<String, JComponent> widgets = new HashMap<>();
-    protected boolean forceColumns;
+    //protected boolean forceColumns;
+    protected boolean oldFormat;
+    protected String rootContainerName;
     //
     protected List<Consumer<Map<String, JComponent>>> resolvers = new ArrayList<>();
 
@@ -101,38 +111,65 @@ public class FormFactory {
     public Map<String, JComponent> getWidgets() {
         return widgets;
     }
+    /*
+     public boolean isForceColumns() {
+     return forceColumns;
+     }
 
-    public boolean isForceColumns() {
-        return forceColumns;
-    }
-
-    public void setForceColumns(boolean aValue) {
-        forceColumns = aValue;
-    }
+     public void setForceColumns(boolean aValue) {
+     forceColumns = aValue;
+     }
+     */
 
     public Form getForm() {
         return form;
     }
 
     public void parse() throws Exception {
-        List<Element> widgetsElements = XmlDomUtils.elementsByTagName(element, "widget");
-        List<Element> legacyNonVisualElements = XmlDomUtils.elementsByTagName(element, "nonvisual");
-        widgetsElements.addAll(legacyNonVisualElements);
-        widgetsElements.stream().forEach((Element aElement) -> {
-            try {
-                JComponent widget = readWidget(aElement);
-                String wName = widget.getName();
-                assert wName != null && !wName.isEmpty() : "A widget is expected to be a named item.";
-                widgets.put(wName, widget);
-            } catch (Exception ex) {
-                Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
+        oldFormat = !element.hasAttribute(Form.VIEW_SCRIPT_NAME);
+        if (oldFormat) {
+            List<Element> widgetsElements = XmlDomUtils.elementsByTagName(element, "widget");
+            List<Element> legacyNonVisualElements = XmlDomUtils.elementsByTagName(element, "nonvisual");
+            widgetsElements.addAll(legacyNonVisualElements);
+            widgetsElements.stream().forEach((Element aElement) -> {
+                try {
+                    JComponent widget = readWidget(aElement);
+                    String wName = widget.getName();
+                    assert wName != null && !wName.isEmpty() : "A widget is expected to be a named item.";
+                    widgets.put(wName, widget);
+                } catch (Exception ex) {
+                    Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            });
+        } else {
+            rootContainerName = element.getAttribute(Form.VIEW_SCRIPT_NAME);
+            NodeList childrenElements = element.getChildNodes();
+            for (int i = 0; i < childrenElements.getLength(); i++) {
+                Node childNode = childrenElements.item(i);
+                if (childNode instanceof Element) {
+                    JComponent widget = readWidget((Element) childNode);
+                    String wName = widget.getName();
+                    assert wName != null && !wName.isEmpty() : "A widget is expected to be a named item.";
+                    widgets.put(wName, widget);
+                }
             }
-        });
-        String viewCompName = element.getAttribute(Form.VIEW_SCRIPT_NAME);
-        JComponent viewWidget = widgets.get(viewCompName);
+        }
+        JComponent viewWidget;
+        if (oldFormat) {
+            element.setAttribute("type", "PanelDesignInfo");
+            viewWidget = readWidget(element);
+            Dimension rootPrefSize = readPrefSize(element);
+            viewWidget.setName(Form.VIEW_SCRIPT_NAME);
+            viewWidget.setPreferredSize(rootPrefSize);
+        } else {
+            viewWidget = widgets.get(rootContainerName);
+        }
         if (viewWidget == null) {
+            viewWidget = new AnchorsPane();
+            viewWidget.setPreferredSize(new Dimension(400, 300));
             Logger.getLogger(FormFactory.class.getName()).log(Level.WARNING, "view widget missing. Falling back to AnchrosPane.");
         }
+        viewWidget.setSize(viewWidget.getPreferredSize());
         form = new Form(viewWidget);
         form.setDefaultCloseOperation(XmlDomUtils.readIntegerAttribute(element, "defaultCloseOperation", JFrame.DISPOSE_ON_CLOSE));
         form.setIcon(resolveIcon(element.getAttribute("icon")));
@@ -142,6 +179,8 @@ public class FormFactory {
         form.setOpacity(XmlDomUtils.readFloatAttribute(element, "opacity", 1.0f));
         form.setAlwaysOnTop(XmlDomUtils.readBooleanAttribute(element, "alwaysOnTop", Boolean.FALSE));
         form.setLocationByPlatform(XmlDomUtils.readBooleanAttribute(element, "locationByPlatform", Boolean.TRUE));
+        form.setDesignedViewSize(viewWidget.getPreferredSize());
+        //
         resolvers.stream().forEach((Consumer<Map<String, JComponent>> aResolver) -> {
             aResolver.accept(widgets);
         });
@@ -174,10 +213,16 @@ public class FormFactory {
     }
 
     private JComponent readWidget(Element anElement) throws Exception {
-        String type = anElement.getAttribute("type");
-        assert type != null && !type.isEmpty() : "type attribute is required for widgets to be read from a file";
+        String type;
+        if (oldFormat) {
+            type = anElement.getAttribute("type");
+            assert type != null && !type.isEmpty() : "type attribute is required for widgets to be read from a file";
+        } else {
+            type = anElement.getTagName();
+        }
         switch (type) {
             // widgets
+            case "Label":
             case "LabelDesignInfo":
                 Label label = new Label();
                 readGeneralProps(anElement, label);
@@ -201,11 +246,13 @@ public class FormFactory {
                     });
                 }
                 return label;
+            case "Button":
             case "ButtonDesignInfo":
                 Button button = new Button();
                 readGeneralProps(anElement, button);
                 readButton(anElement, button);
                 return button;
+            case "DropDownButton":
             case "DropDownButtonDesignInfo":
                 DropDownButton dropDownButton = new DropDownButton();
                 readGeneralProps(anElement, dropDownButton);
@@ -222,9 +269,11 @@ public class FormFactory {
                     });
                 }
                 return dropDownButton;
+            case "ButtonGroup":
             case "ButtonGroupDesignInfo":
                 ButtonGroup buttonGroup = new ButtonGroup();
                 return buttonGroup;
+            case "CheckBox":
             case "CheckDesignInfo":
                 CheckBox checkBox = new CheckBox();
                 readGeneralProps(anElement, checkBox);
@@ -237,6 +286,7 @@ public class FormFactory {
                     checkBox.setText(anElement.getAttribute("text"));
                 }
                 return checkBox;
+            case "TextArea":
             case "TextPaneDesignInfo":
                 TextArea textArea = new TextArea();
                 readGeneralProps(anElement, textArea);
@@ -244,6 +294,7 @@ public class FormFactory {
                     textArea.setText(anElement.getAttribute("text"));
                 }
                 return textArea;
+            case "HtmlArea":
             case "EditorPaneDesignInfo":
                 HtmlArea htmlArea = new HtmlArea();
                 readGeneralProps(anElement, htmlArea);
@@ -251,6 +302,7 @@ public class FormFactory {
                     htmlArea.setText(anElement.getAttribute("text"));
                 }
                 return htmlArea;
+            case "FormattedField":
             case "FormattedFieldDesignInfo": {
                 FormattedField formattedField = new FormattedField();
                 readGeneralProps(anElement, formattedField);
@@ -263,6 +315,7 @@ public class FormFactory {
                 }
                 return formattedField;
             }
+            case "PasswordField":
             case "PasswordFieldDesignInfo":
                 PasswordField passwordField = new PasswordField();
                 readGeneralProps(anElement, passwordField);
@@ -270,6 +323,7 @@ public class FormFactory {
                     passwordField.setText(anElement.getAttribute("text"));
                 }
                 return passwordField;
+            case "ProgressBar":
             case "ProgressBarDesignInfo": {
                 ProgressBar progressBar = new ProgressBar();
                 readGeneralProps(anElement, progressBar);
@@ -284,6 +338,7 @@ public class FormFactory {
                 }
                 return progressBar;
             }
+            case "RadioButton":
             case "RadioDesignInfo":
                 RadioButton radio = new RadioButton();
                 readGeneralProps(anElement, radio);
@@ -296,6 +351,7 @@ public class FormFactory {
                     radio.setText(anElement.getAttribute("text"));
                 }
                 return radio;
+            case "Slider":
             case "SliderDesignInfo":
                 Slider slider = new Slider();
                 readGeneralProps(anElement, slider);
@@ -306,6 +362,7 @@ public class FormFactory {
                 slider.setMaximum(maximum);
                 slider.setValue(value);
                 return slider;
+            case "TextField":
             case "TextFieldDesignInfo":
                 TextField textField = new TextField();
                 readGeneralProps(anElement, textField);
@@ -313,16 +370,19 @@ public class FormFactory {
                     textField.setText(anElement.getAttribute("text"));
                 }
                 return textField;
+            case "ToggleButton":
             case "ToggleButtonDesignInfo":
                 ToggleButton toggle = new ToggleButton();
                 readGeneralProps(anElement, toggle);
                 readButton(anElement, toggle);
                 return toggle;
+            case "DesktopPane":
             case "DesktopDesignInfo":
                 DesktopPane desktop = new DesktopPane();
                 readGeneralProps(anElement, desktop);
                 return desktop;
             // model widgets
+            case "ModelCheckBox":
             case "DbCheckDesignInfo":
                 ModelCheckBox modelCheckBox = new ModelCheckBox();
                 readGeneralProps(anElement, modelCheckBox);
@@ -330,6 +390,7 @@ public class FormFactory {
                     modelCheckBox.setText(anElement.getAttribute("text"));
                 }
                 return modelCheckBox;
+            case "ModelCombo":
             case "DbComboDesignInfo":
                 ModelCombo modelCombo = new ModelCombo();
                 readGeneralProps(anElement, modelCombo);
@@ -341,6 +402,7 @@ public class FormFactory {
                     String displayField = anElement.getAttribute("displayField");
                 }
                 return modelCombo;
+            case "ModelDate":
             case "DbDateDesignInfo":
                 ModelDate modelDate = new ModelDate();
                 readGeneralProps(anElement, modelDate);
@@ -353,6 +415,7 @@ public class FormFactory {
                     }
                 }
                 return modelDate;
+            case "ModelFormattedField":
             case "DbLabelDesignInfo":
                 ModelFormattedField modelFormattedField = new ModelFormattedField();
                 readGeneralProps(anElement, modelFormattedField);
@@ -368,6 +431,7 @@ public class FormFactory {
                     Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 return modelFormattedField;
+            case "ModelSpin":
             case "DbSpinDesignInfo":
                 ModelSpin modelSpin = new ModelSpin();
                 readGeneralProps(anElement, modelSpin);
@@ -382,6 +446,7 @@ public class FormFactory {
                     Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 return modelSpin;
+            case "ModelTextArea":
             case "DbTextDesignInfo":
                 ModelTextArea textarea = new ModelTextArea();
                 readGeneralProps(anElement, textarea);
@@ -393,7 +458,8 @@ public class FormFactory {
                     }
                 }
                 return textarea;
-            case "DbGridDesignInfo":
+            case "ModelGrid":
+            case "DbGridDesignInfo": {
                 ModelGrid grid = new ModelGrid();
                 readGeneralProps(anElement, grid);
                 int fixedColumns = XmlDomUtils.readIntegerAttribute(anElement, "fixedColumns", 0);
@@ -430,18 +496,69 @@ public class FormFactory {
                     String childrenFieldPath = anElement.getAttribute("childrenField");
                     grid.setChildrenField(childrenFieldPath);
                 }
-                List<GridColumnsNode> columnsRoots = readColumns(grid, XmlDomUtils.elementsByTagName(anElement, "column"));
-                grid.setHeader(columnsRoots);
+                List<GridColumnsNode> roots = readColumns(anElement);
+                List<ModelColumn> columns = new ArrayList<>();
+                List<GridColumnsNode> leaves = new ArrayList<>();
+                MultiLevelHeader.achieveLeaves(roots, leaves);
+                for (GridColumnsNode leaf : leaves) {
+                    columns.add((ModelColumn) leaf.getTableColumn());
+                }
+                grid.setColumns(columns.toArray(new ModelColumn[]{}));
+                grid.setHeader(roots);
                 return grid;
+            }
             // containers   
-            // layouted containers
-            case "PanelDesignInfo":
+            // layouted containers                
+            case "PanelDesignInfo":// oldFormat
                 Element layoutTag = XmlDomUtils.getElementByTagName(anElement, "layout");
                 assert layoutTag != null : "tag layout is required for panel containers.";
-                JComponent container = readLayoutedContainer(layoutTag);
+                JComponent container = readOldStyleLayoutedContainer(layoutTag);
                 readGeneralProps(anElement, container);
                 return container;
+            case "AnchorsPane":
+                JComponent anchorsPane = createAnchorsPane();
+                readGeneralProps(anElement, anchorsPane);
+                return anchorsPane;
+            case "BorderPane": {
+                int hgap = XmlDomUtils.readIntegerAttribute(anElement, "hgap", 0);
+                int vgap = XmlDomUtils.readIntegerAttribute(anElement, "vgap", 0);
+                JComponent borderPane = createBorderPane(hgap, vgap);
+                readGeneralProps(anElement, borderPane);
+                return borderPane;
+            }
+            case "BoxPane": {
+                int hgap = XmlDomUtils.readIntegerAttribute(anElement, "hgap", 0);
+                int vgap = XmlDomUtils.readIntegerAttribute(anElement, "vgap", 0);
+                int orientation = XmlDomUtils.readIntegerAttribute(anElement, "orientation", BoxLayout.LINE_AXIS);
+                JComponent boxPane = createBoxPane(orientation, hgap, vgap);
+                readGeneralProps(anElement, boxPane);
+                return boxPane;
+            }
+            case "CardPane": {
+                int hgap = XmlDomUtils.readIntegerAttribute(anElement, "hgap", 0);
+                int vgap = XmlDomUtils.readIntegerAttribute(anElement, "vgap", 0);
+                JComponent cardPane = createCardPane(hgap, vgap);
+                readGeneralProps(anElement, cardPane);
+                return cardPane;
+            }
+            case "FlowPane": {
+                int hgap = XmlDomUtils.readIntegerAttribute(anElement, "hgap", 0);
+                int vgap = XmlDomUtils.readIntegerAttribute(anElement, "vgap", 0);
+                JComponent flowPane = createFlowPane(hgap, vgap);
+                readGeneralProps(anElement, flowPane);
+                return flowPane;
+            }
+            case "GridPane": {
+                int hgap = XmlDomUtils.readIntegerAttribute(anElement, "hgap", 0);
+                int vgap = XmlDomUtils.readIntegerAttribute(anElement, "vgap", 0);
+                int rows = XmlDomUtils.readIntegerAttribute(anElement, "rows", 0);
+                int columns = XmlDomUtils.readIntegerAttribute(anElement, "columns", 0);
+                JComponent gridPane = createGridPane(rows, columns, hgap, vgap);
+                readGeneralProps(anElement, gridPane);
+                return gridPane;
+            }
             // predefined layout containers
+            case "ScrollPane":
             case "ScrollDesignInfo":
                 ScrollPane scroll = new ScrollPane();
                 readGeneralProps(anElement, scroll);
@@ -451,6 +568,7 @@ public class FormFactory {
                 scroll.setHorizontalScrollBarPolicy(horizontalScrollBarPolicy);
                 scroll.setVerticalScrollBarPolicy(verticalScrollBarPolicy);
                 return scroll;
+            case "SplitPane":
             case "SplitDesignInfo":
                 SplitPane split = new SplitPane();
                 readGeneralProps(anElement, split);
@@ -477,17 +595,20 @@ public class FormFactory {
                     });
                 }
                 return split;
+            case "TabbedPane":
             case "TabsDesignInfo":
                 TabbedPane tabs = new TabbedPane();
                 readGeneralProps(anElement, tabs);
                 int tabPlacement = XmlDomUtils.readIntegerAttribute(anElement, "tabPlacement", TabbedPane.TOP);
                 tabs.setTabPlacement(tabPlacement);
                 return tabs;
+            case "ToolBar":
             case "ToolbarDesignInfo":
                 ToolBar toolbar = new ToolBar();
                 readGeneralProps(anElement, toolbar);
                 return toolbar;
             // menus
+            case "CheckMenuItem":
             case "MenuCheckItemDesignInfo":
                 CheckMenuItem checkMenuItem = new CheckMenuItem();
                 readGeneralProps(anElement, checkMenuItem);
@@ -500,10 +621,12 @@ public class FormFactory {
                     checkMenuItem.setText(anElement.getAttribute("text"));
                 }
                 return checkMenuItem;
+            case "Menu":
             case "MenuDesignInfo":
                 Menu menu = new Menu();
                 readGeneralProps(anElement, menu);
                 return menu;
+            case "MenuItem":
             case "MenuItemDesignInfo":
                 MenuItem menuitem = new MenuItem();
                 readGeneralProps(anElement, menuitem);
@@ -512,6 +635,7 @@ public class FormFactory {
                     menuitem.setText(anElement.getAttribute("text"));
                 }
                 return menuitem;
+            case "RadioMenuItem":
             case "MenuRadioItemDesignInfo":
                 RadioMenuItem radioMenuItem = new RadioMenuItem();
                 readGeneralProps(anElement, radioMenuItem);
@@ -524,14 +648,17 @@ public class FormFactory {
                     radioMenuItem.setText(anElement.getAttribute("text"));
                 }
                 return radioMenuItem;
+            case "MenuSeparator":
             case "MenuSeparatorDesignInfo":
                 MenuSeparator menuSeparator = new MenuSeparator();
                 readGeneralProps(anElement, menuSeparator);
                 return menuSeparator;
+            case "MenuBar":
             case "MenubarDesignInfo":
                 MenuBar menuBar = new MenuBar();
                 readGeneralProps(anElement, menuBar);
                 return menuBar;
+            case "PopupMenu":
             case "PopupDesignInfo":
                 PopupMenu popupMenu = new PopupMenu();
                 readGeneralProps(anElement, popupMenu);
@@ -555,7 +682,7 @@ public class FormFactory {
         button.setVerticalTextPosition(XmlDomUtils.readIntegerAttribute(anElement, "verticalTextPosition", Button.CENTER));
     }
 
-    protected JComponent readLayoutedContainer(Element aLayoutElement) {
+    protected JComponent readOldStyleLayoutedContainer(Element aLayoutElement) {
         String type = aLayoutElement.getAttribute("type");
         assert type != null && !type.isEmpty() : "type attribute is required for layouts to be read from a file";
         int hgap = XmlDomUtils.readIntegerAttribute(aLayoutElement, "hgap", 0);
@@ -697,10 +824,13 @@ public class FormFactory {
             String parentName = anElement.getAttribute("parent");
             if (!parentName.isEmpty()) {
                 resolvers.add((Map<String, JComponent> aWidgets) -> {
-                    JComponent parent = FORM_ROOT_CONTAINER_NAME.equalsIgnoreCase(parentName) ? form.getViewWidget() : aWidgets.get(parentName);
+                    JComponent parent = oldFormat && OLD_FORM_ROOT_CONTAINER_NAME.equalsIgnoreCase(parentName) ? form.getViewWidget() : aWidgets.get(parentName);
                     addToParent(anElement, aTarget, parent);
                 });
             }
+        }
+        if (!oldFormat && rootContainerName.equals(aTarget.getName())) {
+            aTarget.setPreferredSize(readPrefSize(anElement));
         }
     }
 
@@ -730,9 +860,12 @@ public class FormFactory {
         } else if (parent instanceof ToolBar) {
             ((ToolBar) parent).add(aTarget);
         } else if (parent instanceof TabbedPane) {
+            if (constraintsElement == null) {// new format
+                constraintsElement = XmlDomUtils.getElementByTagName(anElement, TabbedPane.class.getSimpleName() + "Constraints");
+            }
             String tabTitle = constraintsElement.getAttribute("tabTitle");
             String tabIconName = constraintsElement.getAttribute("tabIcon");
-            String tabTooltipText = constraintsElement.getAttribute("tabTooltipText");
+            String tabTooltipText = oldFormat ? constraintsElement.getAttribute("tabToolTip") : constraintsElement.getAttribute("tabTooltipText");
             ((TabbedPane) parent).add(aTarget, tabTitle, resolveIcon(tabIconName));
         } else if (parent instanceof SplitPane) {
             // Split pane children are:
@@ -745,6 +878,9 @@ public class FormFactory {
             aTarget.setPreferredSize(prefSize);
             scroll.setView(aTarget);
         } else if (parent != null && parent.getLayout() instanceof BorderLayout) {
+            if (constraintsElement == null) {// new format
+                constraintsElement = XmlDomUtils.getElementByTagName(anElement, "BorderPaneConstraints");
+            }
             Dimension prefSize = readPrefSize(anElement);
             Integer place = HorizontalPosition.CENTER;
             Integer size = null;
@@ -779,15 +915,20 @@ public class FormFactory {
             Dimension prefSize = readPrefSize(anElement);
             addToBoxPane(parent, aTarget, prefSize);
         } else if (parent != null && parent.getLayout() instanceof CardLayout) {
+            if (constraintsElement == null) {// new format
+                constraintsElement = XmlDomUtils.getElementByTagName(anElement, "CardPaneConstraints");
+            }
             String cardName = constraintsElement.getAttribute("cardName");
             addToCardPane(parent, aTarget, cardName);
         } else if (parent != null && parent.getLayout() instanceof FlowLayout) {
             Dimension prefSize = readPrefSize(anElement);
-            aTarget.setPreferredSize(prefSize);
-            addToFlowPane(parent, aTarget);
+            addToFlowPane(parent, aTarget, prefSize);
         } else if (parent != null && parent.getLayout() instanceof GridLayout) {
             addToGridPane(parent, aTarget);
         } else if (parent != null && parent.getLayout() instanceof MarginLayout) {
+            if (constraintsElement == null) {// new format
+                constraintsElement = XmlDomUtils.getElementByTagName(anElement, "AnchorsPaneConstraints");
+            }
             MarginConstraints constraints = readMarginConstraints(constraintsElement);
             addToAnchorsPane(parent, aTarget, constraints);
         }
@@ -802,8 +943,9 @@ public class FormFactory {
         ((GridPane) parent).add(aTarget);
     }
 
-    protected void addToFlowPane(JComponent parent, JComponent aTarget) {
+    protected void addToFlowPane(JComponent parent, JComponent aTarget, Dimension prefSize) {
         ((FlowPane) parent).add(aTarget);
+        aTarget.setPreferredSize(prefSize);
     }
 
     protected void addToCardPane(JComponent parent, JComponent aTarget, String cardName) {
@@ -820,7 +962,8 @@ public class FormFactory {
     }
 
     protected void addToBorderPane(JComponent parent, JComponent aTarget, Integer place, Integer size) {
-        ((BorderPane) parent).add(aTarget, place, size);
+        BorderPane borderPane = (BorderPane) parent;
+        borderPane.add(aTarget, place, size);
     }
 
     private static MarginConstraints readMarginConstraints(Element anElement) {
@@ -846,19 +989,55 @@ public class FormFactory {
         return result;
     }
 
-    private List<GridColumnsNode> readColumns(ModelGrid grid, List<Element> columnsElements) {
+    private List<GridColumnsNode> readColumns(Element aColumnsElement) {
         List<GridColumnsNode> nodes = new ArrayList<>();
-        columnsElements.stream().sequential().forEach((columnElement) -> {
-            GridColumnsNode node = new GridColumnsNode();
-            nodes.add(node);
-            List<Element> subColumnsElements = XmlDomUtils.elementsByTagName(columnElement, "column");
-            if (!subColumnsElements.isEmpty()) {
-                List<GridColumnsNode> subGroups = readColumns(grid, subColumnsElements);
-                subGroups.stream().sequential().forEach((GridColumnsNode aGroup) -> {
-                    node.addChild(aGroup);
-                });
+        NodeList childNodes = aColumnsElement.getChildNodes();
+        for (int i = 0; i < childNodes.getLength(); i++) {
+            Node childNode = childNodes.item(i);
+            if (childNode instanceof Element) {
+                Element childTag = (Element) childNode;
+                String columnType;
+                if (oldFormat) {
+                    if ("column".equals(childTag.getTagName())) {
+                        columnType = "ModelGridColumn";
+                    } else {
+                        continue;
+                    }
+                } else {
+                    columnType = childTag.getTagName();
+                }
+                switch (columnType) {
+                    case "CheckGridColumn": {
+                        CheckGridColumn columnn = new CheckGridColumn();
+                        nodes.add(columnn);
+                        List<GridColumnsNode> children = readColumns(childTag);
+                        columnn.getChildren().addAll(children);
+                        break;
+                    }
+                    case "RadioGridColumn": {
+                        RadioGridColumn columnn = new RadioGridColumn();
+                        nodes.add(columnn);
+                        List<GridColumnsNode> children = readColumns(childTag);
+                        columnn.getChildren().addAll(children);
+                        break;
+                    }
+                    case "ServiceGridColumn": {
+                        ServiceGridColumn columnn = new ServiceGridColumn();
+                        nodes.add(columnn);
+                        List<GridColumnsNode> children = readColumns(childTag);
+                        columnn.getChildren().addAll(children);
+                        break;
+                    }
+                    case "ModelGridColumn": {
+                        ModelGridColumn columnn = new ModelGridColumn();
+                        nodes.add(columnn);
+                        List<GridColumnsNode> children = readColumns(childTag);
+                        columnn.getChildren().addAll(children);
+                        break;
+                    }
+                }
             }
-        });
+        }
         return nodes;
     }
 }

@@ -272,9 +272,7 @@ public class MultiLevelHeader extends JPanel {
             roots = aValue;
             if (roots != null) {
                 List<GridColumnsNode> leaves = new ArrayList<>();
-                for (GridColumnsNode root : roots) {
-                    MultiLevelHeader.achieveLeaves(root, leaves);
-                }
+                MultiLevelHeader.achieveLeaves(roots, leaves);
                 for (int i = 0; i < leaves.size(); i++) {
                     leaves.get(i).setTableColumn(columnModel.getColumn(i));
                 }
@@ -328,12 +326,20 @@ public class MultiLevelHeader extends JPanel {
             achieveLeaves(aGroup.getChildren().get(i), aLeaves);
         }
     }
+    
+    public static void achieveLeaves(List<GridColumnsNode> aRoots, List<GridColumnsNode> aLeaves) {
+        for (GridColumnsNode node : aRoots) {
+            if (node.isLeaf()) {
+                aLeaves.add(node);
+            } else {
+                achieveLeaves(node.getChildren(), aLeaves);
+            }
+        }
+    }
 
     public void checkStructure() {
         List<GridColumnsNode> leaves = new ArrayList<>();
-        for (GridColumnsNode root : roots) {
-            MultiLevelHeader.achieveLeaves(root, leaves);
-        }
+        MultiLevelHeader.achieveLeaves(roots, leaves);
         assert leaves.size() == columnModel.getColumnCount();
         for (int i = 0; i < leaves.size(); i++) {
             assert leaves.get(i).getTableColumn() == columnModel.getColumn(i);

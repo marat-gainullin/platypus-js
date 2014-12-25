@@ -47,10 +47,16 @@ import com.bearsoft.org.netbeans.modules.form.bound.RADModelGrid;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelScalarComponent;
 import com.bearsoft.org.netbeans.modules.form.editors.IconEditor;
+import com.bearsoft.org.netbeans.modules.form.editors.IconEditor.NbImageIcon;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutConstraints;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutSupportDelegate;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutSupportRegistry;
+import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.BorderLayoutSupport;
+import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.CardLayoutSupport;
+import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.MarginLayoutSupport;
+import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.SplitPaneSupport;
+import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.TabbedPaneSupport;
 import com.eas.client.forms.Form;
 import com.eas.client.forms.FormFactory;
 import com.eas.client.forms.HasChildren;
@@ -59,18 +65,24 @@ import com.eas.client.forms.Orientation;
 import com.eas.client.forms.Widget;
 import com.eas.client.forms.components.model.ModelWidget;
 import com.eas.client.forms.components.model.grid.ModelGrid;
+import com.eas.client.forms.components.model.grid.columns.ServiceColumn;
 import com.eas.client.forms.containers.ButtonGroup;
+import com.eas.client.forms.containers.SplitPane;
+import com.eas.client.forms.containers.TabbedPane;
 import com.eas.client.forms.layouts.BoxLayout;
 import com.eas.client.forms.layouts.CardLayout;
 import com.eas.client.forms.layouts.MarginConstraints;
 import com.eas.client.forms.layouts.MarginLayout;
+import com.eas.client.forms.menu.PopupMenu;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.designer.application.PlatypusUtils;
+import com.eas.designer.application.module.ModelJSObject;
 import com.eas.gui.ScriptColor;
 import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -80,6 +92,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.xml.parsers.DocumentBuilder;
@@ -190,7 +203,8 @@ public class PersistenceManager {
                 }
 
                 @Override
-                protected void addToFlowPane(JComponent parent, JComponent aTarget) {
+                protected void addToFlowPane(JComponent parent, JComponent aTarget, Dimension prefSize) {
+                    aTarget.setPreferredSize(prefSize);
                     parent.add(aTarget);
                 }
 
@@ -214,13 +228,17 @@ public class PersistenceManager {
             for (RADProperty<?> radProp : formComp.getBeanProperties()) {
                 radProp.setChanged(!radProp.isDefaultValue());
             }
+
             formComp.checkLayoutSupport();
-            LayoutSupportDelegate layoutSupportDelegate = LayoutSupportRegistry.createSupportForLayout(((Container) formComp.getBeanInstance()).getLayout().getClass());
-            formComp.getLayoutSupport().setLayoutDelegate(layoutSupportDelegate);
+            LayoutSupportManager laysup = formComp.getLayoutSupport();
+            laysup.prepareLayoutDelegate(false);
             formComp.setInModel(true);
 
             Map<String, RADComponent<?>> radComps = new HashMap<>();
-            formFactory.getWidgets().entrySet().stream().forEach((Map.Entry<String, JComponent> aEntry) -> {
+            radComps.put(formComp.getName(), formComp);
+            formFactory.getWidgets().entrySet().stream().filter((Map.Entry<String, JComponent> aEntry) -> {
+                return aEntry.getValue() != form.getViewWidget();
+            }).forEach((Map.Entry<String, JComponent> aEntry) -> {
                 try {
                     RADComponent<?> radComp = radComponentByWidget(formModel, aEntry.getValue());
                     radComps.put(radComp.getName(), radComp);
@@ -252,24 +270,56 @@ public class PersistenceManager {
                     Widget w = (Widget) oWidget;
                     Widget p = w.getParentWidget();
                     if (p != null) {
-                        if (p == form.getViewWidget()) {
-                            radComp.setParent(formComp);
-                            formComp.add(radComp);
-                        } else {
-                            String parentName = p.getComponent().getName();
-                            RADComponent<?> radParent = radComps.get(parentName);
-                            if (radParent instanceof ComponentContainer) {
-                                ComponentContainer cont = (ComponentContainer) radParent;
-                                radComp.setParent(cont);
-                                cont.add(radComp);
-                            } else {
-                                formModel.getModelContainer().add(radComp);
+                        String parentName = p.getComponent().getName();
+                        RADComponent<?> radParent = radComps.get(parentName);
+                        if (radParent instanceof ComponentContainer) {
+                            ComponentContainer cont = (ComponentContainer) radParent;
+                            radComp.setParent(cont);
+                            cont.add(radComp);
+                            RADVisualContainer<?> visCont = radComp.getParentComponent();
+                            if (visCont != null && visCont.getLayoutSupport() != null) {
+                                LayoutSupportManager layoutSupportManager = visCont.getLayoutSupport();
+                                LayoutSupportDelegate layoutDelegate = layoutSupportManager.getLayoutDelegate();
+                                if (layoutDelegate instanceof BorderLayoutSupport) {
+                                    layoutDelegate.getRadLayout().setBeanInstance(visCont.getBeanInstance().getLayout());
+                                    BorderLayout borderLayout = (BorderLayout) visCont.getBeanInstance().getLayout();
+                                    LayoutConstraints constriants = new BorderLayoutSupport.BorderLayoutConstraints((String) borderLayout.getConstraints((Component) radComp.getBeanInstance()));
+                                    layoutSupportManager.injectComponents(new RADVisualComponent<?>[]{(RADVisualComponent<?>) radComp}, new LayoutConstraints[]{constriants}, layoutSupportManager.getComponentCount());
+                                } else if (layoutDelegate instanceof CardLayoutSupport) {
+                                    layoutDelegate.getRadLayout().setBeanInstance(visCont.getBeanInstance().getLayout());
+                                    CardLayout cardLayout = (CardLayout) visCont.getBeanInstance().getLayout();
+                                    LayoutConstraints constriants = new CardLayoutSupport.CardLayoutConstraints(cardLayout.getCard((Component) radComp.getBeanInstance()));
+                                    layoutSupportManager.injectComponents(new RADVisualComponent<?>[]{(RADVisualComponent<?>) radComp}, new LayoutConstraints[]{constriants}, layoutSupportManager.getComponentCount());
+                                } else if (layoutDelegate instanceof MarginLayoutSupport) {
+                                    layoutDelegate.getRadLayout().setBeanInstance(visCont.getBeanInstance().getLayout());
+                                    MarginLayout marginLayout = (MarginLayout) visCont.getBeanInstance().getLayout();
+                                    LayoutConstraints constriants = new MarginLayoutSupport.MarginLayoutConstraints(marginLayout.getLayoutConstraints((Component) radComp.getBeanInstance()));
+                                    layoutSupportManager.injectComponents(new RADVisualComponent<?>[]{(RADVisualComponent<?>) radComp}, new LayoutConstraints[]{constriants}, layoutSupportManager.getComponentCount());
+                                } else if (layoutDelegate instanceof TabbedPaneSupport) {
+                                    TabbedPane tabbedPane = (TabbedPane) visCont.getBeanInstance();
+                                    int index = layoutSupportManager.getComponentCount();
+                                    String tooltip = tabbedPane.getToolTipTextAt(index);
+                                    NbImageIcon icon = (NbImageIcon) tabbedPane.getIconAt(index);
+                                    String title = tabbedPane.getTitleAt(index);
+                                    LayoutConstraints constriants = new TabbedPaneSupport.TabLayoutConstraints(title, icon, tooltip);
+                                    layoutSupportManager.injectComponents(new RADVisualComponent<?>[]{(RADVisualComponent<?>) radComp}, new LayoutConstraints[]{constriants}, index);
+                                } else if (layoutDelegate instanceof SplitPaneSupport) {
+                                    SplitPane splitPane = (SplitPane) visCont.getBeanInstance();
+                                    String placement = splitPane.getOrientation() == Orientation.HORIZONTAL
+                                            ? (splitPane.getLeftComponent() == radComp.getBeanInstance() ? SplitPane.LEFT : SplitPane.RIGHT)
+                                            : (splitPane.getTopComponent() == radComp.getBeanInstance() ? SplitPane.TOP : SplitPane.BOTTOM);
+                                    LayoutConstraints constriants = new SplitPaneSupport.SplitLayoutConstraints(placement);
+                                    layoutSupportManager.injectComponents(new RADVisualComponent<?>[]{(RADVisualComponent<?>) radComp}, new LayoutConstraints[]{constriants}, layoutSupportManager.getComponentCount());
+                                }
                             }
+                        } else {
+                            formModel.getModelContainer().add(radComp);
                         }
-                    } else {
+                    } else if (w != form.getViewWidget()) {
                         formModel.getModelContainer().add(radComp);
                     }
                 }
+                radComp.getProperties();// force properties creation
             }
             return formModel;
         } catch (Exception ex) {
@@ -284,7 +334,7 @@ public class PersistenceManager {
             doc.setXmlStandalone(true);
             Element root = doc.createElement(XML_FORM);
             doc.appendChild(root);
-            writeProperties(formEditor.getFormRootNode().getFormProperties(), doc, root);
+            writeProperties(formEditor.getFormRootNode().getFormProperties(), doc, root, true);
             root.setAttribute(Form.VIEW_SCRIPT_NAME, formEditor.getFormModel().getTopRADComponent().getName());
             formEditor.getFormModel().getAllComponents().stream().filter((RADComponent<?> aComp) -> {
                 return !(aComp instanceof RADModelGridColumn);// grid columns will be written by grid.
@@ -296,31 +346,40 @@ public class PersistenceManager {
                     LayoutSupportManager layoutSupportManager = radCont.getLayoutSupport();
                     if (layoutSupportManager != null && layoutSupportManager.getLayoutDelegate() != null) {
                         Class<?> layoutedContainerClass = FormUtils.getPlatypusConainerClass(layoutSupportManager.getLayoutDelegate().getSupportedClass());
-                        if (layoutedContainerClass != null) {
-                            widgetTagName = layoutedContainerClass.getSimpleName();
-                        }
+                        widgetTagName = layoutedContainerClass.getSimpleName();
                     }
                 }
                 Element widgetElement = doc.createElement(widgetTagName);
                 root.appendChild(widgetElement);
                 widgetElement.setAttribute("name", aComp.getName());
-                writeProperties(aComp.getBeanProperties(), doc, widgetElement);
+                writeProperties(aComp.getBeanProperties(), doc, widgetElement, true);
+                if (aComp.getBeanInstance() instanceof JComponent
+                        && !(aComp.getBeanInstance() instanceof ButtonGroup)
+                        && !(aComp.getBeanInstance() instanceof PopupMenu)) {
+                    JComponent jComp = (JComponent) aComp.getBeanInstance();
+                    widgetElement.setAttribute("prefWidth", jComp.getSize().width + "px");
+                    widgetElement.setAttribute("prefHeight", jComp.getSize().height + "px");
+                }
                 if (aComp instanceof RADVisualContainer<?> && aComp.getBeanInstance() instanceof FormUtils.Panel) {
                     RADVisualContainer<?> radCont = (RADVisualContainer<?>) aComp;
-                    writeProperties(radCont.getLayoutSupport().getAllProperties(), doc, widgetElement);
+                    writeProperties(radCont.getLayoutSupport().getAllProperties(), doc, widgetElement, false);
                 }
                 if (aComp instanceof RADVisualComponent<?>) {
                     RADVisualComponent<?> visComp = (RADVisualComponent<?>) aComp;
-                    if (visComp.getParentLayoutSupport() != null && visComp.getParentComponent() != null
-                            && visComp.getParentComponent().getBeanInstance() instanceof FormUtils.Panel) {
-                        LayoutConstraints contraints = visComp.getParentLayoutSupport().getConstraints(visComp);
-                        if (contraints != null) {
-                            Object oConstraints = contraints.getConstraintsObject();
-                            if (oConstraints != null) {
-                                Element constraintsElement = doc.createElement(contraints.getClass().getSimpleName());
-                                widgetElement.appendChild(constraintsElement);
-                                writeProperties(contraints.getProperties(), doc, constraintsElement);
-                            }
+                    if (visComp.getParentComponent() != null) {
+                        if (visComp.getParentComponent().getBeanInstance() instanceof FormUtils.Panel) {
+                            LayoutSupportManager parentLayoutSupport = visComp.getParentLayoutSupport();
+                            LayoutConstraints contraints = parentLayoutSupport.getConstraints(visComp);
+                            Class<?> layoutedContainerClass = FormUtils.getPlatypusConainerClass(parentLayoutSupport.getSupportedClass());
+                            Element constraintsElement = doc.createElement(layoutedContainerClass.getSimpleName() + "Constraints");
+                            widgetElement.appendChild(constraintsElement);
+                            writeProperties(contraints.getProperties(), doc, constraintsElement, false);
+                        } else if (visComp.getParentComponent().getBeanInstance() instanceof TabbedPane) {
+                            LayoutSupportManager parentLayoutSupport = visComp.getParentLayoutSupport();
+                            LayoutConstraints contraints = parentLayoutSupport.getConstraints(visComp);
+                            Element constraintsElement = doc.createElement(TabbedPane.class.getSimpleName() + "Constraints");
+                            widgetElement.appendChild(constraintsElement);
+                            writeProperties(contraints.getProperties(), doc, constraintsElement, false);
                         }
                     }
                     if (aComp instanceof RADModelGrid) {
@@ -347,13 +406,13 @@ public class PersistenceManager {
             Element columnElement = doc.createElement(subBean.getBeanClass().getSimpleName());
             targetElement.appendChild(columnElement);
             columnElement.setAttribute("name", subBean.getName());
-            writeProperties(subBean.getBeanProperties(), doc, columnElement);
+            writeProperties(subBean.getBeanProperties(), doc, columnElement, false);
             if (subBean instanceof RADModelGridColumn) {
                 RADModelGridColumn radColumn = (RADModelGridColumn) subBean;
-                if (radColumn.getViewControl() != null) {
+                if (!(radColumn.getBeanInstance().getTableColumn() instanceof ServiceColumn)) {
                     Element viewElement = doc.createElement(radColumn.getViewControl().getBeanClass().getSimpleName());
                     columnElement.appendChild(viewElement);
-                    writeProperties(radColumn.getViewControl().getBeanProperties(), doc, viewElement);
+                    writeProperties(radColumn.getViewControl().getBeanProperties(), doc, viewElement, true);
                 }
             }
             if (subBean instanceof ComponentContainer) {
@@ -362,7 +421,7 @@ public class PersistenceManager {
         }
     }
 
-    private void writeProperties(FormProperty<?>[] aProperties, Document doc, Element targetElement) throws DOMException {
+    private void writeProperties(FormProperty<?>[] aProperties, Document doc, Element targetElement, boolean skipPosition) throws DOMException {
         for (FormProperty<?> radProp : aProperties) {
             if (!radProp.isDefaultValue()) {
                 try {
@@ -373,6 +432,8 @@ public class PersistenceManager {
                             if (compRef.getComponent() != null) {
                                 targetElement.setAttribute(radProp.getName(), compRef.getComponent().getName());
                             }
+                        } else if (propValue instanceof ModelJSObject) {
+                            targetElement.setAttribute(radProp.getName(), ((ModelJSObject) propValue).getEntity().getName());
                         } else if (propValue instanceof IconEditor.NbImageIcon) {
                             targetElement.setAttribute(radProp.getName(), ((IconEditor.NbImageIcon) propValue).getName());
                         } else if (propValue instanceof java.awt.Cursor) {
@@ -388,17 +449,11 @@ public class PersistenceManager {
                             fontElement.setAttribute("style", String.valueOf(fontValue.getStyle()));
                         } else {
                             String propName = radProp.getName();
-                            switch (propName) {
-                                case "width":
-                                    propName = "prefWidth";
-                                    break;
-                                case "height":
-                                    propName = "prefHeight";
-                                    break;
-                                case "left":
-                                    continue;
-                                case "top":
-                                    continue;
+                            if (skipPosition && ("left".equalsIgnoreCase(propName)
+                                    || "top".equalsIgnoreCase(propName)
+                                    || "width".equalsIgnoreCase(propName)
+                                    || "height".equalsIgnoreCase(propName))) {
+                                continue;
                             }
                             targetElement.setAttribute(propName, String.valueOf(propValue));
                         }
@@ -438,8 +493,8 @@ public class PersistenceManager {
         if (radComp instanceof RADVisualContainer<?>) {
             RADVisualContainer<?> radCont = (RADVisualContainer<?>) radComp;
             radCont.checkLayoutSupport();
-            LayoutSupportDelegate layoutSupportDelegate = LayoutSupportRegistry.createSupportForLayout(radCont.getBeanInstance().getLayout().getClass());
-            radCont.getLayoutSupport().setLayoutDelegate(layoutSupportDelegate);
+            LayoutSupportManager laysup = radCont.getLayoutSupport();
+            laysup.prepareLayoutDelegate(false);
         }
         radComp.setInModel(true);
         return radComp;

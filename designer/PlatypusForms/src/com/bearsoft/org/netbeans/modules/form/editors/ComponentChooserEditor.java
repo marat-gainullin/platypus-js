@@ -74,9 +74,7 @@ public class ComponentChooserEditor implements PropertyEditor, ExPropertyEditor,
     public static final int NONVISUAL_COMPONENTS = 3;
     private static final String NULL_REF_NAME = "null"; // NOI18N
     private static final String INVALID_REF_NAME = "default"; // NOI18N
-    private static String noneText = null;
-    private static String invalidText = null;
-    private static String defaultText = null;
+    private static String invalidText;
     private FormModel formModel;
     private FormProperty<?> prop;
     private List<RADComponent<?>> components = new ArrayList<>();
@@ -111,60 +109,29 @@ public class ComponentChooserEditor implements PropertyEditor, ExPropertyEditor,
     @Override
     public String[] getTags() {
         List<RADComponent<?>> compList = getComponents();
-        int extraValues = 0;
-        int count = 0;
-        String[] names;
-
-        if (isDefaultValue()) {
-            extraValues = 2;
-            count = compList.size() + extraValues;
-            names = new String[count];
-            names[0] = defaultString();
-        } else {
-            extraValues = 1;
-            count = compList.size() + extraValues;
-            names = new String[count];
+        String[] names = new String[compList.size()];
+        for (int i = 0; i < compList.size(); i++) {
+            names[i] = compList.get(i).getName();
         }
-        names[extraValues - 1] = noneString();
-
-        if (count > extraValues) {
-            for (int i = extraValues; i < count; i++) {
-                names[i] = compList.get(i - extraValues).getName();
-            }
-            Arrays.sort(names, 1, count);
-        }
-
+        Arrays.sort(names);
         return names;
-    }
-
-    private boolean isDefaultValue() {
-        return getValue() == null;
     }
 
     @Override
     public String getAsText() {
-        if (isDefaultValue()) {
-            return defaultString();
-        }
-        if (value == null) {
-            return noneString();
-        }
-        if (value.getComponent() == null) {
-            return invalidString();
-        }
-        return value.getComponent().getName();
+        return value != null && value.getComponent() != null ? value.getComponent().getName() : "";
     }
 
     @Override
-    public void setAsText(String str) {
-        if (str == null || str.equals("") || str.equals(noneString())) // NOI18N
-        {
+    public void setAsText(String aValue) {
+        if (aValue == null || aValue.equals("")) {
             setValue(null);
         } else {
-            if (defaultString().equals(str)) {
-                setValue(null);
+            RADComponent<?> comp = formModel.getRADComponent(aValue);
+            if (comp != null) {
+                setValue(new ComponentRef<>(aValue, formModel));
             } else {
-                setValue(new ComponentRef<>(str, formModel));
+                setValue(null);
             }
         }
     }
@@ -258,20 +225,6 @@ public class ComponentChooserEditor implements PropertyEditor, ExPropertyEditor,
         return prop.getValueType().isAssignableFrom((Class<?>) comp.getBeanClass());
     }
 
-    protected String noneString() {
-        if (noneText == null) {
-            noneText = FormUtils.getBundleString("CTL_NoComponent"); // NOI18N
-        }
-        return noneText;
-    }
-
-    protected String defaultString() {
-        if (defaultText == null) {
-            defaultText = FormUtils.getBundleString("CTL_DefaultComponent"); // NOI18N
-        }
-        return defaultText;
-    }
-
     protected String invalidString() {
         if (invalidText == null) {
             invalidText = FormUtils.getBundleString("CTL_InvalidReference"); // NOI18N
@@ -363,7 +316,7 @@ public class ComponentChooserEditor implements PropertyEditor, ExPropertyEditor,
             if (component == null
                     && !NULL_REF_NAME.equals(componentName)
                     && !INVALID_REF_NAME.equals(componentName)) {
-                component = (RADComponent<C>)formModel.getRADComponent(componentName);
+                component = (RADComponent<C>) formModel.getRADComponent(componentName);
             } else if (component != null) {
                 if (!component.isInModel()) {
                     component = null;

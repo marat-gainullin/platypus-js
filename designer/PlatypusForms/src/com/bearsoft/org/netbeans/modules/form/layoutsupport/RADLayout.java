@@ -46,7 +46,6 @@ package com.bearsoft.org.netbeans.modules.form.layoutsupport;
 import com.bearsoft.org.netbeans.modules.form.*;
 import java.awt.*;
 import java.beans.*;
-import org.openide.nodes.Node;
 
 /**
  * Meta component representing a LayoutManager instance as a JavaBean.

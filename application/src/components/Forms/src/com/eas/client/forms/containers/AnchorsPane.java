@@ -733,6 +733,7 @@ public class AnchorsPane extends JPanel implements HasPublished, HasContainerEve
     
     @ScriptFunction(jsDoc = ON_COMPONENT_ADDED_JSDOC)
     @EventMethod(eventClass = ContainerEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnComponentAdded() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.componentAdded);
@@ -746,6 +747,7 @@ public class AnchorsPane extends JPanel implements HasPublished, HasContainerEve
 
     @ScriptFunction(jsDoc = ON_COMPONENT_REMOVED_JSDOC)
     @EventMethod(eventClass = ContainerEvent.class)
+    @Undesignable
     @Override
     public JSObject getOnComponentRemoved() {
         return eventsProxy.getHandlers().get(ControlEventsIProxy.componentRemoved);

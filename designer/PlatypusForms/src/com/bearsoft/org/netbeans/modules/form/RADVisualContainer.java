@@ -297,6 +297,11 @@ public class RADVisualContainer<C extends Container> extends RADVisualComponent<
     }
 
     @Override
+    public int getSubBeansCount() {
+        return subComponents.size();
+    }
+        
+    @Override
     public void initSubComponents(RADComponent<?>[] initComponents) {
         if (subComponents == null) {
             subComponents = new ArrayList<>(initComponents.length);

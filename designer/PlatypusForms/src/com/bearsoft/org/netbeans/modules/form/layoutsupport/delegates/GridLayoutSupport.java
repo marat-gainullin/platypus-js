@@ -43,8 +43,20 @@
  */
 package com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates;
 
+import com.bearsoft.org.netbeans.modules.form.FormProperty;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.*;
-import java.awt.*;
+import com.bearsoft.org.netbeans.modules.form.resources.Resources;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.beans.BeanInfo;
+import org.openide.util.ImageUtilities;
 
 /**
  * Support class for GridLayout. This is an example of very simple layout with
@@ -55,6 +67,147 @@ import java.awt.*;
 public class GridLayoutSupport extends AbstractLayoutSupport {
 
     /**
+     * The icon for GridLayout.
+     */
+    private static final String iconURL =
+            "com/bearsoft/org/netbeans/modules/form/beaninfo/swing/gridLayout.gif"; // NOI18N
+    /**
+     * The icon for GridLayout.
+     */
+    private static final String icon32URL =
+            "com/bearsoft/org/netbeans/modules/form/beaninfo/swing/gridLayout32.gif"; // NOI18N
+    
+    private FormProperty<?>[] properties;
+    
+    @Override
+    protected FormProperty<?>[] getProperties() {
+        if(properties == null)
+            properties = new FormProperty[]{
+                new FormProperty<Integer>(
+                "rows", // NOI18N
+                Integer.TYPE,
+                getBundle().getString("PROP_rows"), // NOI18N
+                getBundle().getString("HINT_rows")) {
+
+                    @Override
+                    public Integer getValue() {
+                        return ((GridLayout)getRadLayout().getBeanInstance()).getRows();
+                    }
+
+                    @Override
+                    public void setValue(Integer aValue) {
+                        int oldValue = getValue();
+                        int rows = aValue != null ? aValue : 0;
+                        ((GridLayout)getRadLayout().getBeanInstance()).setRows(rows);
+                        setChanged(rows != 0);
+                        propertyValueChanged(oldValue, rows);
+                    }
+
+                    @Override
+                    public boolean supportsDefaultValue() {
+                        return true;
+                    }
+
+                    @Override
+                    public Integer getDefaultValue() {
+                        return 0;
+                    }
+                }, // NOI18N
+                new FormProperty<Integer>(
+                "cols", // NOI18N
+                Integer.TYPE,
+                getBundle().getString("PROP_cols"), // NOI18N
+                getBundle().getString("HINT_cols")) {
+
+                    @Override
+                    public Integer getValue() {
+                        return ((GridLayout)getRadLayout().getBeanInstance()).getColumns();
+                    }
+
+                    @Override
+                    public void setValue(Integer aValue) {
+                        int oldValue = getValue();
+                        int cols = aValue != null ? aValue : 0;
+                        ((GridLayout)getRadLayout().getBeanInstance()).setColumns(cols);
+                        setChanged(cols != 0);
+                        propertyValueChanged(oldValue, cols);
+                    }
+
+                    @Override
+                    public boolean supportsDefaultValue() {
+                        return true;
+                    }
+
+                    @Override
+                    public Integer getDefaultValue() {
+                        return 0;
+                    }
+                }, // NOI18N
+                new FormProperty<Integer>(
+                "hgap", // NOI18N
+                Integer.TYPE,
+                getBundle().getString("PROP_hgap"), // NOI18N
+                getBundle().getString("HINT_hgap")) {
+
+                    @Override
+                    public Integer getValue() {
+                        return ((GridLayout)getRadLayout().getBeanInstance()).getHgap();
+                    }
+
+                    @Override
+                    public void setValue(Integer aValue) {
+                        int oldValue = getValue();
+                        int hgap = aValue != null ? aValue : 0;
+                        ((GridLayout)getRadLayout().getBeanInstance()).setHgap(hgap);
+                        setChanged(hgap != 0);
+                        propertyValueChanged(oldValue, hgap);
+                    }
+
+                    @Override
+                    public boolean supportsDefaultValue() {
+                        return true;
+                    }
+
+                    @Override
+                    public Integer getDefaultValue() {
+                        return 0;
+                    }
+                }, // NOI18N
+                new FormProperty<Integer>(
+                "vgap", // NOI18N
+                Integer.TYPE,
+                getBundle().getString("PROP_vgap"), // NOI18N
+                getBundle().getString("HINT_vgap")) {
+
+                    @Override
+                    public Integer getValue() {
+                        return ((GridLayout)getRadLayout().getBeanInstance()).getVgap();
+                    }
+
+                    @Override
+                    public void setValue(Integer aValue) {
+                        int oldValue = getValue();
+                        int vgap = aValue != null ? aValue : 0;
+                        ((GridLayout)getRadLayout().getBeanInstance()).setVgap(vgap);
+                        setChanged(vgap != 0);
+                        propertyValueChanged(oldValue, vgap);
+                    }
+
+                    @Override
+                    public boolean supportsDefaultValue() {
+                        return true;
+                    }
+
+                    @Override
+                    public Integer getDefaultValue() {
+                        return 0;
+                    }
+                } // NOI18N
+            };
+        return properties;
+    }
+
+    /**
      * Gets the supported layout manager class - GridLayout.
      *
      * @return the class supported by this delegate
@@ -62,6 +215,36 @@ public class GridLayoutSupport extends AbstractLayoutSupport {
     @Override
     public Class<?> getSupportedClass() {
         return GridLayout.class;
+    }
+    
+    /**
+     * Provides an icon to be used for the layout node in Component Inspector.
+     * Only 16x16 color icon is required.
+     *
+     * @param type is one of BeanInfo constants: ICON_COLOR_16x16,
+     * ICON_COLOR_32x32, ICON_MONO_16x16, ICON_MONO_32x32
+     * @return icon to be displayed for node in Component Inspector
+     */
+    @Override
+    public Image getIcon(int type) {
+        switch (type) {
+            case BeanInfo.ICON_COLOR_16x16:
+            case BeanInfo.ICON_MONO_16x16:
+                return ImageUtilities.loadImage(iconURL);
+            default:
+                return ImageUtilities.loadImage(icon32URL);
+        }
+    }
+
+    /**
+     * Provides a display name for the layout node - derived from the name of
+     * supported class here.
+     *
+     * @return display name of supported layout
+     */
+    @Override
+    public String getDisplayName() {
+        return Resources.getBundle().getString("NAME_java-awt-"+getSupportedClass().getSimpleName());
     }
 
     /**
@@ -218,26 +401,5 @@ public class GridLayoutSupport extends AbstractLayoutSupport {
         } else {
             return false;
         }
-    }
-    // ------------
-    /**
-     * This method is called from readLayoutCode to read the layout manager bean
-     * code (i.e. code for constructor and properties). This method is
-     * overridden here because "rows" and "columns" properties are mutually
-     * dependent (so not true JavaBean properties).
-     *
-     * @param layoutExp CodeExpressin of the layout manager
-     * @param initLayoutCode CodeGroup to be filled with relevant initialization
-     * code
-     * @Override protected void readInitLayoutCode(CodeExpression layoutExp,
-     * CodeGroup initLayoutCode) { CodeExpression[] params =
-     * layoutExp.getOrigin().getCreationParameters(); if (params.length > 0) {
-     * Object rowsValue = params[0].getOrigin().getValue(); if (rowsValue
-     * instanceof Integer && ((Integer)rowsValue).intValue() == 0) { // number
-     * of rows is to be set to 0, we must preset // columns property to
-     * something else than 0 try { getProperty("columns").setValue(new
-     * Integer(1)); } catch (Exception ex) {} // ignore } }
-     *
-     * super.readInitLayoutCode(layoutExp, initLayoutCode); }
-     */
+    }    
 }
