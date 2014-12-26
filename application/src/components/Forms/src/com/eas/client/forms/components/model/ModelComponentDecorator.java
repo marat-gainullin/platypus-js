@@ -630,11 +630,13 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
             + " * Object, bound to the widget.\n"
             + " */")
     @Designable(category = "model")
+    @Override
     public JSObject getData() {
         return data;
     }
 
     @ScriptFunction
+    @Override
     public void setData(JSObject aValue) {
         data = aValue;
     }

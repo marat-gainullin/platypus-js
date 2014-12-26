@@ -13,6 +13,7 @@ import com.bearsoft.org.netbeans.modules.form.palette.PaletteItem;
 import com.bearsoft.org.netbeans.modules.form.palette.PaletteUtils;
 import com.eas.client.forms.components.model.ModelComponentDecorator;
 import com.eas.client.forms.components.model.ModelWidget;
+import com.eas.client.forms.components.model.grid.header.ModelGridColumn;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.BeanInfo;
@@ -31,7 +32,7 @@ import org.openide.util.actions.CookieAction;
 public final class SelectGridColumnViewAction extends CookieAction {
 
     public static boolean isEditableComponent(RADComponent<?> aComponent) {
-        return aComponent instanceof RADModelGridColumn;
+        return aComponent instanceof RADModelGridColumn && ((RADModelGridColumn) aComponent).getBeanInstance() instanceof ModelGridColumn;
     }
 
     public SelectGridColumnViewAction() {

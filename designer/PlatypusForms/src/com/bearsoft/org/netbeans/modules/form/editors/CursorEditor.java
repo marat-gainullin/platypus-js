@@ -43,6 +43,7 @@
  */
 package com.bearsoft.org.netbeans.modules.form.editors;
 
+import com.bearsoft.org.netbeans.modules.form.NamedPropertyEditor;
 import java.awt.*;
 import java.beans.*;
 import java.util.HashMap;
@@ -60,9 +61,7 @@ import org.openide.util.NbBundle;
  * @author Pavel Buzek
  */
 @PropertyEditorRegistration(targetType = Cursor.class)
-public class CursorEditor extends PropertyEditorSupport implements
-        ExPropertyEditor,
-        com.bearsoft.org.netbeans.modules.form.NamedPropertyEditor {
+public class CursorEditor extends PropertyEditorSupport implements ExPropertyEditor, NamedPropertyEditor {
 
     private static final Map<String, Integer> CURSOR_TYPES = new HashMap<>();
     private static final Map<Integer, String> CURSOR_CONSTANTS = new HashMap<>();
@@ -109,9 +108,9 @@ public class CursorEditor extends PropertyEditorSupport implements
     }
 
     @Override
-    public void attachEnv(PropertyEnv env) {
-        this.env = env;
-        env.getFeatureDescriptor().setValue("canEditAsText", Boolean.TRUE); // NOI18N
+    public void attachEnv(PropertyEnv aEnv) {
+        env = aEnv;
+        aEnv.getFeatureDescriptor().setValue("canEditAsText", Boolean.TRUE); // NOI18N
     }
 
     @Override

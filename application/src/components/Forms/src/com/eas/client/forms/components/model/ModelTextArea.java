@@ -34,6 +34,7 @@ public class ModelTextArea extends ModelComponentDecorator<VTextArea, String> im
     public ModelTextArea() {
         super();
         setDecorated(new VTextArea());
+        setBackground(getDecorated().getBackground());
     }
 
     @ScriptFunction(jsDoc = EDITABLE_JSDOC)

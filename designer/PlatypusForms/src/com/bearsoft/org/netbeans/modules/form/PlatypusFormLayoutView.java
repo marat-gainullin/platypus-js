@@ -1633,6 +1633,7 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
         if (!formEditor.isFormLoaded()) {
             long ms = System.currentTimeMillis();
             formEditor.loadForm();
+            formEditor.reportErrors(FormEditor.FormOperation.LOADING);
             Logger.getLogger(FormEditor.class.getName()).log(Level.FINER, "Opening form time 3: {0}ms", (System.currentTimeMillis() - ms)); // NOI18N
         }
         if (formEditor.isFormLoaded()) {

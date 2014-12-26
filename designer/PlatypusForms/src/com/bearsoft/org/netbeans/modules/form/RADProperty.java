@@ -49,7 +49,6 @@ import java.beans.*;
 import java.lang.reflect.*;
 import java.util.Objects;
 import javax.swing.plaf.UIResource;
-import org.openide.ErrorManager;
 
 /**
  * Implementation of properties for (meta)components (class RADComponent).

@@ -18,20 +18,6 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public interface ModelWidget<V> extends TableCellRenderer, TableCellEditor, HasValue<V> {
 
-    public String getField();
-    
-    public void setField(String aFieldPath) throws Exception;
-    
-    /**
-     * Returns whether editing value is modified. Unfortunately, not all the
-     * controls have straight criterion of editing completed, like an action.
-     * For example, multiline text editors have no such criterion. So we have to
-     * consider, that value is not modified until data might be saved or
-     * transmitted in a some way. In this case we explicitly check whether data
-     * is changed.
-     *
-     * @return
-     */
     public boolean isFieldContentModified();
 
     public void injectPublished(JSObject aPublished);
@@ -47,4 +33,13 @@ public interface ModelWidget<V> extends TableCellRenderer, TableCellEditor, HasV
     public boolean isSelectOnly();
 
     public void setSelectOnly(boolean aValue);
+    
+    public JSObject getData();
+    
+    public void setData(JSObject aData);
+    
+    public String getField();
+    
+    public void setField(String aFieldPath) throws Exception;
+    
 }

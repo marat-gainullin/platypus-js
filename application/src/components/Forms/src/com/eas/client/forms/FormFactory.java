@@ -33,7 +33,6 @@ import com.eas.client.forms.components.model.grid.header.CheckGridColumn;
 import com.eas.client.forms.components.model.grid.header.ModelGridColumn;
 import com.eas.client.forms.components.model.grid.header.RadioGridColumn;
 import com.eas.client.forms.components.model.grid.header.ServiceGridColumn;
-import com.eas.client.forms.components.rt.ButtonGroupWrapper;
 import com.eas.client.forms.components.rt.FormatsUtils;
 import com.eas.client.forms.components.rt.HasEditable;
 import com.eas.client.forms.components.rt.HasEmptyText;
@@ -79,7 +78,6 @@ import javax.swing.AbstractButton;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JPopupMenu;
 import jdk.nashorn.api.scripting.JSObject;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -143,6 +141,17 @@ public class FormFactory {
             });
         } else {
             rootContainerName = element.getAttribute(Form.VIEW_SCRIPT_NAME);
+            Node childNode = element.getFirstChild();
+            while(childNode != null){
+                if (childNode instanceof Element) {
+                    JComponent widget = readWidget((Element) childNode);
+                    String wName = widget.getName();
+                    assert wName != null && !wName.isEmpty() : "A widget is expected to be a named item.";
+                    widgets.put(wName, widget);
+                }
+                childNode = childNode.getNextSibling();
+            }
+            /*
             NodeList childrenElements = element.getChildNodes();
             for (int i = 0; i < childrenElements.getLength(); i++) {
                 Node childNode = childrenElements.item(i);
@@ -153,6 +162,7 @@ public class FormFactory {
                     widgets.put(wName, widget);
                 }
             }
+            */
         }
         JComponent viewWidget;
         if (oldFormat) {
@@ -212,6 +222,16 @@ public class FormFactory {
         }
     }
 
+    protected JSObject resolveEntity(String aEntityName) throws Exception {
+        if (model.hasMember(aEntityName)) {
+            Object oEntity = model.getMember(aEntityName);
+            if (oEntity instanceof JSObject) {
+                return (JSObject) oEntity;
+            }
+        }
+        return null;
+    }
+
     private JComponent readWidget(Element anElement) throws Exception {
         String type;
         if (oldFormat) {
@@ -262,8 +282,8 @@ public class FormFactory {
                     resolvers.add((Map<String, JComponent> aWidgets) -> {
                         if (aWidgets.containsKey(dropDownMenuName)) {
                             JComponent compMenu = aWidgets.get(dropDownMenuName);
-                            if (compMenu instanceof JPopupMenu) {
-                                dropDownButton.setDropDownMenu((JPopupMenu) compMenu);
+                            if (compMenu instanceof PopupMenu) {
+                                dropDownButton.setDropDownMenu((PopupMenu) compMenu);
                             }
                         }
                     });
@@ -272,6 +292,9 @@ public class FormFactory {
             case "ButtonGroup":
             case "ButtonGroupDesignInfo":
                 ButtonGroup buttonGroup = new ButtonGroup();
+                if (anElement.hasAttribute("name")) {
+                    buttonGroup.setName(anElement.getAttribute("name"));
+                }
                 return buttonGroup;
             case "CheckBox":
             case "CheckDesignInfo":
@@ -395,6 +418,7 @@ public class FormFactory {
                 ModelCombo modelCombo = new ModelCombo();
                 readGeneralProps(anElement, modelCombo);
                 boolean list = XmlDomUtils.readBooleanAttribute(anElement, "list", Boolean.TRUE);
+                modelCombo.setList(list);
                 if (anElement.hasAttribute("valueField")) {
                     String valueField = anElement.getAttribute("valueField");
                 }
@@ -500,11 +524,19 @@ public class FormFactory {
                 List<ModelColumn> columns = new ArrayList<>();
                 List<GridColumnsNode> leaves = new ArrayList<>();
                 MultiLevelHeader.achieveLeaves(roots, leaves);
-                for (GridColumnsNode leaf : leaves) {
+                leaves.stream().sequential().forEach((leaf) -> {
                     columns.add((ModelColumn) leaf.getTableColumn());
-                }
+                });
                 grid.setColumns(columns.toArray(new ModelColumn[]{}));
                 grid.setHeader(roots);
+                if (anElement.hasAttribute("data")) {
+                    String entityName = anElement.getAttribute("data");
+                    try {
+                        grid.setData(resolveEntity(entityName));
+                    } catch (Exception ex) {
+                        Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, "While setting data to named model's property ({0}) to widget {1} exception occured: {2}", new Object[]{entityName, grid.getName(), ex.getMessage()});
+                    }
+                }
                 return grid;
             }
             // containers   
@@ -608,6 +640,23 @@ public class FormFactory {
                 readGeneralProps(anElement, toolbar);
                 return toolbar;
             // menus
+            case "Menu":
+            case "MenuDesignInfo":
+                Menu menu = new Menu();
+                readGeneralProps(anElement, menu);
+                if (anElement.hasAttribute("text")) {
+                    menu.setText(anElement.getAttribute("text"));
+                }
+                return menu;
+            case "MenuItem":
+            case "MenuItemDesignInfo":
+                MenuItem menuitem = new MenuItem();
+                readGeneralProps(anElement, menuitem);
+                readButton(anElement, menuitem);
+                if (anElement.hasAttribute("text")) {
+                    menuitem.setText(anElement.getAttribute("text"));
+                }
+                return menuitem;
             case "CheckMenuItem":
             case "MenuCheckItemDesignInfo":
                 CheckMenuItem checkMenuItem = new CheckMenuItem();
@@ -621,20 +670,6 @@ public class FormFactory {
                     checkMenuItem.setText(anElement.getAttribute("text"));
                 }
                 return checkMenuItem;
-            case "Menu":
-            case "MenuDesignInfo":
-                Menu menu = new Menu();
-                readGeneralProps(anElement, menu);
-                return menu;
-            case "MenuItem":
-            case "MenuItemDesignInfo":
-                MenuItem menuitem = new MenuItem();
-                readGeneralProps(anElement, menuitem);
-                readButton(anElement, menuitem);
-                if (anElement.hasAttribute("text")) {
-                    menuitem.setText(anElement.getAttribute("text"));
-                }
-                return menuitem;
             case "RadioMenuItem":
             case "MenuRadioItemDesignInfo":
                 RadioMenuItem radioMenuItem = new RadioMenuItem();
@@ -757,7 +792,14 @@ public class FormFactory {
                 Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, "While setting field ({0}) to widget {1} exception occured: {2}", new Object[]{fieldPath, aTarget.getName(), ex.getMessage()});
             }
         }
-
+        if (anElement.hasAttribute("data") && aTarget instanceof ModelWidget) {
+            String entityName = anElement.getAttribute("data");
+            try {
+                ((ModelWidget) aTarget).setData(resolveEntity(entityName));
+            } catch (Exception ex) {
+                Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, "While setting data to named model's property ({0}) to widget {1} exception occured: {2}", new Object[]{entityName, aTarget.getName(), ex.getMessage()});
+            }
+        }
         if (anElement.hasAttribute("background")) {
             ScriptColor background = new ScriptColor(anElement.getAttribute("background"));
             aTarget.setBackground(background);
@@ -768,15 +810,7 @@ public class FormFactory {
         }
         aTarget.setEnabled(XmlDomUtils.readBooleanAttribute(anElement, "enabled", Boolean.TRUE));
         aTarget.setFocusable(XmlDomUtils.readBooleanAttribute(anElement, "focusable", Boolean.TRUE));
-        com.eas.gui.Font font = readFontTag(anElement, "font");
-        if (font != null) {
-            aTarget.setFont(font);
-        } else {
-            com.eas.gui.Font easfont = readFontTag(anElement, "easFont");
-            if (easfont != null) {
-                aTarget.setFont(easfont);
-            }
-        }
+        aTarget.setFont(readFont(anElement));
         if (anElement.hasAttribute("opaque")) {
             aTarget.setOpaque(XmlDomUtils.readBooleanAttribute(anElement, "opaque", Boolean.TRUE));
         }
@@ -802,8 +836,8 @@ public class FormFactory {
             if (!popupName.isEmpty()) {
                 resolvers.add((Map<String, JComponent> aWidgets) -> {
                     JComponent popup = aWidgets.get(popupName);
-                    if (popup instanceof JPopupMenu) {
-                        aTarget.setComponentPopupMenu((JPopupMenu) popup);
+                    if (popup instanceof PopupMenu) {
+                        aTarget.setComponentPopupMenu((PopupMenu) popup);
                     }
                 });
             }
@@ -813,9 +847,9 @@ public class FormFactory {
             if (!buttonGroupName.isEmpty()) {
                 resolvers.add((Map<String, JComponent> aWidgets) -> {
                     JComponent buttonGroup = aWidgets.get(buttonGroupName);
-                    if (buttonGroup instanceof ButtonGroupWrapper) {
-                        ButtonGroupWrapper bgw = (ButtonGroupWrapper) buttonGroup;
-                        bgw.add(aTarget);
+                    if (buttonGroup instanceof ButtonGroup) {
+                        ButtonGroup bg = (ButtonGroup) buttonGroup;
+                        ((HasGroup) aTarget).setButtonGroup(bg);
                     }
                 });
             }
@@ -831,6 +865,17 @@ public class FormFactory {
         }
         if (!oldFormat && rootContainerName.equals(aTarget.getName())) {
             aTarget.setPreferredSize(readPrefSize(anElement));
+        }
+    }
+
+    protected com.eas.gui.Font readFont(Element anElement) {
+        com.eas.gui.Font font = readFontTag(anElement, "font");
+        if (font != null) {
+            return font;
+        } else if (oldFormat) {
+            return readFontTag(anElement, "easFont");
+        } else {
+            return null;
         }
     }
 
@@ -876,39 +921,28 @@ public class FormFactory {
             ScrollPane scroll = (ScrollPane) parent;
             Dimension prefSize = readPrefSize(anElement);
             aTarget.setPreferredSize(prefSize);
+            aTarget.setSize(prefSize);
             scroll.setView(aTarget);
         } else if (parent != null && parent.getLayout() instanceof BorderLayout) {
             if (constraintsElement == null) {// new format
                 constraintsElement = XmlDomUtils.getElementByTagName(anElement, "BorderPaneConstraints");
             }
             Dimension prefSize = readPrefSize(anElement);
-            Integer place = HorizontalPosition.CENTER;
-            Integer size = null;
-            if (constraintsElement.hasAttribute("place")) {
-                String placeName = constraintsElement.getAttribute("place");
-                switch (placeName) {
-                    case BorderLayout.WEST:
-                        place = HorizontalPosition.LEFT;
-                        size = prefSize.width;
-                        break;
-                    case BorderLayout.EAST:
-                        place = HorizontalPosition.RIGHT;
-                        size = prefSize.width;
-                        break;
-                    case BorderLayout.NORTH:
-                        place = VerticalPosition.TOP;
-                        size = prefSize.height;
-                        break;
-                    case BorderLayout.SOUTH:
-                        place = VerticalPosition.BOTTOM;
-                        size = prefSize.height;
-                        break;
-                    case BorderLayout.CENTER:
-                        place = HorizontalPosition.CENTER;
-                        break;
-                    default:
-                        place = HorizontalPosition.CENTER;
-                }
+            Integer place = XmlDomUtils.readIntegerAttribute(constraintsElement, "place", HorizontalPosition.CENTER);
+            Integer size = 0;
+            switch (place) {
+                case HorizontalPosition.LEFT:
+                    size = prefSize.width;
+                    break;
+                case HorizontalPosition.RIGHT:
+                    size = prefSize.width;
+                    break;
+                case VerticalPosition.TOP:
+                    size = prefSize.height;
+                    break;
+                case VerticalPosition.BOTTOM:
+                    size = prefSize.height;
+                    break;
             }
             addToBorderPane(parent, aTarget, place, size);
         } else if (parent != null && parent.getLayout() instanceof BoxLayout) {
@@ -989,11 +1023,15 @@ public class FormFactory {
         return result;
     }
 
-    private List<GridColumnsNode> readColumns(Element aColumnsElement) {
+    private List<GridColumnsNode> readColumns(Element aColumnsElement) throws Exception {
         List<GridColumnsNode> nodes = new ArrayList<>();
+        /*
         NodeList childNodes = aColumnsElement.getChildNodes();
         for (int i = 0; i < childNodes.getLength(); i++) {
             Node childNode = childNodes.item(i);
+            */
+        Node childNode = aColumnsElement.getFirstChild();
+        while(childNode != null){
             if (childNode instanceof Element) {
                 Element childTag = (Element) childNode;
                 String columnType;
@@ -1009,6 +1047,7 @@ public class FormFactory {
                 switch (columnType) {
                     case "CheckGridColumn": {
                         CheckGridColumn columnn = new CheckGridColumn();
+                        readColumnNode(columnn, childTag);
                         nodes.add(columnn);
                         List<GridColumnsNode> children = readColumns(childTag);
                         columnn.getChildren().addAll(children);
@@ -1016,6 +1055,7 @@ public class FormFactory {
                     }
                     case "RadioGridColumn": {
                         RadioGridColumn columnn = new RadioGridColumn();
+                        readColumnNode(columnn, childTag);
                         nodes.add(columnn);
                         List<GridColumnsNode> children = readColumns(childTag);
                         columnn.getChildren().addAll(children);
@@ -1023,6 +1063,7 @@ public class FormFactory {
                     }
                     case "ServiceGridColumn": {
                         ServiceGridColumn columnn = new ServiceGridColumn();
+                        readColumnNode(columnn, childTag);
                         nodes.add(columnn);
                         List<GridColumnsNode> children = readColumns(childTag);
                         columnn.getChildren().addAll(children);
@@ -1030,6 +1071,26 @@ public class FormFactory {
                     }
                     case "ModelGridColumn": {
                         ModelGridColumn columnn = new ModelGridColumn();
+                        readColumnNode(columnn, childTag);
+                        /*
+                        NodeList _childNodes = childTag.getChildNodes();
+                        for (int _i = 0; _i < _childNodes.getLength(); _i++) {
+                            Node _childNode = _childNodes.item(_i);
+                        */
+                        Node _childNode = childTag.getFirstChild();
+                        while(_childNode != null){
+                            if (_childNode instanceof Element) {
+                                JComponent editorComp = readWidget((Element) _childNode);
+                                if (editorComp instanceof ModelWidget) {
+                                    ModelColumn col = (ModelColumn)columnn.getTableColumn();
+                                    col.setEditor((ModelWidget) editorComp);
+                                    ModelWidget viewComp = (ModelWidget) readWidget((Element) _childNode);
+                                    col.setView(viewComp);
+                                    break;
+                                }
+                            }
+                            _childNode = _childNode.getNextSibling();
+                        }
                         nodes.add(columnn);
                         List<GridColumnsNode> children = readColumns(childTag);
                         columnn.getChildren().addAll(children);
@@ -1037,7 +1098,53 @@ public class FormFactory {
                     }
                 }
             }
+            childNode = childNode.getNextSibling();
         }
         return nodes;
+    }
+
+    private void readColumnNode(GridColumnsNode aNode, Element anElement) throws Exception {
+        ((ModelColumn) aNode.getTableColumn()).setName(anElement.getAttribute("name"));
+        if (anElement.hasAttribute("background")) {
+            ScriptColor background = new ScriptColor(anElement.getAttribute("background"));
+            aNode.setBackground(background);
+        }
+        if (anElement.hasAttribute("foreground")) {
+            ScriptColor foreground = new ScriptColor(anElement.getAttribute("foreground"));
+            aNode.setForeground(foreground);
+        }
+        aNode.setEditable(XmlDomUtils.readBooleanAttribute(anElement, "editable", Boolean.TRUE));
+        aNode.setEnabled(XmlDomUtils.readBooleanAttribute(anElement, "enabled", Boolean.TRUE));
+        aNode.setFont(readFont(anElement));
+
+        if (anElement.hasAttribute("width")) {
+            String width = anElement.getAttribute("width");
+            if (width.length() > 2 && width.endsWith("px")) {
+                aNode.setWidth(Integer.parseInt(width.substring(0, width.length() - 2)));
+            }
+        }
+        if (anElement.hasAttribute("minWidth")) {
+            String minWidth = anElement.getAttribute("minWidth");
+            if (minWidth.length() > 2 && minWidth.endsWith("px")) {
+                aNode.setMinWidth(Integer.parseInt(minWidth.substring(0, minWidth.length() - 2)));
+            }
+        }
+        if (anElement.hasAttribute("maxWidth")) {
+            String maxWidth = anElement.getAttribute("maxWidth");
+            if (maxWidth.length() > 2 && maxWidth.endsWith("px")) {
+                aNode.setMaxWidth(Integer.parseInt(maxWidth.substring(0, maxWidth.length() - 2)));
+            }
+        }
+        if (anElement.hasAttribute("preferredWidth")) {
+            String preferredWidth = anElement.getAttribute("preferredWidth");
+            if (preferredWidth.length() > 2 && preferredWidth.endsWith("px")) {
+                aNode.setPreferredWidth(Integer.parseInt(preferredWidth.substring(0, preferredWidth.length() - 2)));
+            }
+        }
+        aNode.setMovable(XmlDomUtils.readBooleanAttribute(anElement, "movable", Boolean.TRUE));
+        aNode.setResizable(XmlDomUtils.readBooleanAttribute(anElement, "resizable", Boolean.TRUE));
+        aNode.setSelectOnly(XmlDomUtils.readBooleanAttribute(anElement, "selectOnly", Boolean.FALSE));
+        aNode.setSortable(XmlDomUtils.readBooleanAttribute(anElement, "sortable", Boolean.TRUE));
+        aNode.setVisible(XmlDomUtils.readBooleanAttribute(anElement, "visible", Boolean.TRUE));
     }
 }

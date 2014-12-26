@@ -342,7 +342,7 @@ public class BorderPane extends JPanel implements HasPublished, HasContainerEven
                 aComp.setPreferredSize(new Dimension(prefSize.width, aSize));
             }
         }
-        add(aComp, aPlace);
+        add(aComp, aPlace.intValue());
     }
 
     public void add(JComponent aComp) {

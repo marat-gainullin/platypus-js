@@ -43,6 +43,8 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
+import com.bearsoft.gui.grid.header.GridColumnsNode;
+import com.bearsoft.org.netbeans.modules.form.bound.RADColumnView;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGrid;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelScalarComponent;
@@ -51,7 +53,6 @@ import com.bearsoft.org.netbeans.modules.form.editors.IconEditor.NbImageIcon;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutConstraints;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutSupportDelegate;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
-import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutSupportRegistry;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.BorderLayoutSupport;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.CardLayoutSupport;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.MarginLayoutSupport;
@@ -62,9 +63,12 @@ import com.eas.client.forms.FormFactory;
 import com.eas.client.forms.HasChildren;
 import com.eas.client.forms.HorizontalPosition;
 import com.eas.client.forms.Orientation;
+import com.eas.client.forms.VerticalPosition;
 import com.eas.client.forms.Widget;
+import com.eas.client.forms.components.model.ModelComponentDecorator;
 import com.eas.client.forms.components.model.ModelWidget;
 import com.eas.client.forms.components.model.grid.ModelGrid;
+import com.eas.client.forms.components.model.grid.columns.ModelColumn;
 import com.eas.client.forms.components.model.grid.columns.ServiceColumn;
 import com.eas.client.forms.containers.ButtonGroup;
 import com.eas.client.forms.containers.SplitPane;
@@ -74,6 +78,7 @@ import com.eas.client.forms.layouts.CardLayout;
 import com.eas.client.forms.layouts.MarginConstraints;
 import com.eas.client.forms.layouts.MarginLayout;
 import com.eas.client.forms.menu.PopupMenu;
+import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.application.module.ModelJSObject;
@@ -83,21 +88,18 @@ import com.eas.xml.dom.XmlDom2String;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import jdk.nashorn.api.scripting.JSObject;
 import org.openide.util.Exceptions;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
@@ -135,6 +137,12 @@ public class PersistenceManager {
                         nonfatalErrors.add(ex);
                         return null;
                     }
+                }
+
+                @Override
+                protected JSObject resolveEntity(String aEntityName) throws Exception {
+                    ApplicationDbEntity entity = formDataObject.getModel().getEntityByName(aEntityName);
+                    return entity != null ? entity.getPublished() : null;
                 }
 
                 @Override
@@ -185,16 +193,35 @@ public class PersistenceManager {
                             aComp.setPreferredSize(new Dimension(prefSize.width, aSize));
                         }
                     }
-                    parent.add(aComp, aPlace);
+                    String place;
+                    switch (aPlace) {
+                        case HorizontalPosition.LEFT:
+                            place = BorderLayout.WEST;
+                            break;
+                        case HorizontalPosition.CENTER:
+                            place = BorderLayout.CENTER;
+                            break;
+                        case HorizontalPosition.RIGHT:
+                            place = BorderLayout.EAST;
+                            break;
+                        case VerticalPosition.TOP:
+                            place = BorderLayout.NORTH;
+                            break;
+                        case VerticalPosition.BOTTOM:
+                            place = BorderLayout.SOUTH;
+                            break;
+                        default:
+                            place = BorderLayout.CENTER;
+                            break;
+                    }
+                    parent.add(aComp, place);
                 }
 
                 @Override
                 protected void addToBoxPane(JComponent parent, JComponent aTarget, Dimension prefSize) {
-                    if (((BoxLayout) parent.getLayout()).getAxis() == Orientation.HORIZONTAL) {
-                        parent.add(aTarget, prefSize.width);
-                    } else {
-                        parent.add(aTarget, prefSize.height);
-                    }
+                    aTarget.setPreferredSize(prefSize);
+                    aTarget.setSize(prefSize);
+                    parent.add(aTarget);
                 }
 
                 @Override
@@ -281,17 +308,14 @@ public class PersistenceManager {
                                 LayoutSupportManager layoutSupportManager = visCont.getLayoutSupport();
                                 LayoutSupportDelegate layoutDelegate = layoutSupportManager.getLayoutDelegate();
                                 if (layoutDelegate instanceof BorderLayoutSupport) {
-                                    layoutDelegate.getRadLayout().setBeanInstance(visCont.getBeanInstance().getLayout());
                                     BorderLayout borderLayout = (BorderLayout) visCont.getBeanInstance().getLayout();
                                     LayoutConstraints constriants = new BorderLayoutSupport.BorderLayoutConstraints((String) borderLayout.getConstraints((Component) radComp.getBeanInstance()));
                                     layoutSupportManager.injectComponents(new RADVisualComponent<?>[]{(RADVisualComponent<?>) radComp}, new LayoutConstraints[]{constriants}, layoutSupportManager.getComponentCount());
                                 } else if (layoutDelegate instanceof CardLayoutSupport) {
-                                    layoutDelegate.getRadLayout().setBeanInstance(visCont.getBeanInstance().getLayout());
                                     CardLayout cardLayout = (CardLayout) visCont.getBeanInstance().getLayout();
                                     LayoutConstraints constriants = new CardLayoutSupport.CardLayoutConstraints(cardLayout.getCard((Component) radComp.getBeanInstance()));
                                     layoutSupportManager.injectComponents(new RADVisualComponent<?>[]{(RADVisualComponent<?>) radComp}, new LayoutConstraints[]{constriants}, layoutSupportManager.getComponentCount());
                                 } else if (layoutDelegate instanceof MarginLayoutSupport) {
-                                    layoutDelegate.getRadLayout().setBeanInstance(visCont.getBeanInstance().getLayout());
                                     MarginLayout marginLayout = (MarginLayout) visCont.getBeanInstance().getLayout();
                                     LayoutConstraints constriants = new MarginLayoutSupport.MarginLayoutConstraints(marginLayout.getLayoutConstraints((Component) radComp.getBeanInstance()));
                                     layoutSupportManager.injectComponents(new RADVisualComponent<?>[]{(RADVisualComponent<?>) radComp}, new LayoutConstraints[]{constriants}, layoutSupportManager.getComponentCount());
@@ -360,6 +384,15 @@ public class PersistenceManager {
                     widgetElement.setAttribute("prefWidth", jComp.getSize().width + "px");
                     widgetElement.setAttribute("prefHeight", jComp.getSize().height + "px");
                 }
+                if (aComp.getBeanInstance() instanceof SplitPane) {
+                    SplitPane split = (SplitPane) aComp.getBeanInstance();
+                    if (split.getLeftComponent() != null) {
+                        widgetElement.setAttribute("leftComponent", split.getLeftComponent().getName());
+                    }
+                    if (split.getRightComponent() != null) {
+                        widgetElement.setAttribute("rightComponent", split.getRightComponent().getName());
+                    }
+                }
                 if (aComp instanceof RADVisualContainer<?> && aComp.getBeanInstance() instanceof FormUtils.Panel) {
                     RADVisualContainer<?> radCont = (RADVisualContainer<?>) aComp;
                     writeProperties(radCont.getLayoutSupport().getAllProperties(), doc, widgetElement, false);
@@ -369,11 +402,19 @@ public class PersistenceManager {
                     if (visComp.getParentComponent() != null) {
                         if (visComp.getParentComponent().getBeanInstance() instanceof FormUtils.Panel) {
                             LayoutSupportManager parentLayoutSupport = visComp.getParentLayoutSupport();
-                            LayoutConstraints contraints = parentLayoutSupport.getConstraints(visComp);
-                            Class<?> layoutedContainerClass = FormUtils.getPlatypusConainerClass(parentLayoutSupport.getSupportedClass());
-                            Element constraintsElement = doc.createElement(layoutedContainerClass.getSimpleName() + "Constraints");
-                            widgetElement.appendChild(constraintsElement);
-                            writeProperties(contraints.getProperties(), doc, constraintsElement, false);
+                            LayoutConstraints constraints = parentLayoutSupport.getConstraints(visComp);
+                            if (constraints != null) {
+                                Class<?> layoutedContainerClass = FormUtils.getPlatypusConainerClass(parentLayoutSupport.getSupportedClass());
+                                Element constraintsElement = doc.createElement(layoutedContainerClass.getSimpleName() + "Constraints");
+                                widgetElement.appendChild(constraintsElement);
+                                if (constraints instanceof BorderLayoutSupport.BorderLayoutConstraints) {
+                                    BorderLayoutSupport.BorderLayoutConstraints borderConstraints = (BorderLayoutSupport.BorderLayoutConstraints) constraints;
+                                    String place = (String) borderConstraints.getConstraintsObject();
+                                    constraintsElement.setAttribute("place", awtBorderConstraintsToPlPositions(place) + "");
+                                } else {
+                                    writeProperties(constraints.getProperties(), doc, constraintsElement, false);
+                                }
+                            }
                         } else if (visComp.getParentComponent().getBeanInstance() instanceof TabbedPane) {
                             LayoutSupportManager parentLayoutSupport = visComp.getParentLayoutSupport();
                             LayoutConstraints contraints = parentLayoutSupport.getConstraints(visComp);
@@ -383,8 +424,12 @@ public class PersistenceManager {
                         }
                     }
                     if (aComp instanceof RADModelGrid) {
-                        RADModelGrid grid = (RADModelGrid) aComp;
-                        writeSubBeans(grid, doc, widgetElement);
+                        try {
+                            RADModelGrid grid = (RADModelGrid) aComp;
+                            writeSubBeans(grid, doc, widgetElement);
+                        } catch (Exception ex) {
+                            Exceptions.printStackTrace(ex);
+                        }
                     }
                 }
                 if (aComp.getParent() instanceof RADVisualComponent<?>) {
@@ -396,12 +441,45 @@ public class PersistenceManager {
             try (OutputStream out = formObject.getFormEntry().getFile().getOutputStream()) {
                 out.write(content.getBytes(SettingsConstants.COMMON_ENCODING));
             }
-        } catch (ParserConfigurationException | DOMException | IOException ex) {
+        } catch (Exception ex) {
             throw new PersistenceException(ex);
         }
     }
 
-    private void writeSubBeans(ComponentContainer aColumnsContainer, Document doc, Element targetElement) throws DOMException {
+    private int awtBorderConstraintsToPlPositions(String aPlace) {
+        int place;
+        if (aPlace != null) {
+            switch (aPlace) {
+                case BorderLayout.LINE_START:
+                case BorderLayout.WEST:
+                    place = HorizontalPosition.LEFT;
+                    break;
+                case BorderLayout.CENTER:
+                    place = HorizontalPosition.CENTER;
+                    break;
+                case BorderLayout.LINE_END:
+                case BorderLayout.EAST:
+                    place = HorizontalPosition.RIGHT;
+                    break;
+                case BorderLayout.PAGE_START:
+                case BorderLayout.NORTH:
+                    place = VerticalPosition.TOP;
+                    break;
+                case BorderLayout.PAGE_END:
+                case BorderLayout.SOUTH:
+                    place = VerticalPosition.BOTTOM;
+                    break;
+                default:
+                    place = HorizontalPosition.CENTER;
+                    break;
+            }
+            return place;
+        } else {
+            return HorizontalPosition.CENTER;
+        }
+    }
+
+    private void writeSubBeans(ComponentContainer aColumnsContainer, Document doc, Element targetElement) throws Exception {
         for (RADComponent<?> subBean : aColumnsContainer.getSubBeans()) {
             Element columnElement = doc.createElement(subBean.getBeanClass().getSimpleName());
             targetElement.appendChild(columnElement);
@@ -409,6 +487,22 @@ public class PersistenceManager {
             writeProperties(subBean.getBeanProperties(), doc, columnElement, false);
             if (subBean instanceof RADModelGridColumn) {
                 RADModelGridColumn radColumn = (RADModelGridColumn) subBean;
+                RADProperty<Integer> radWidth = radColumn.getProperty("width");
+                if (!radWidth.isDefaultValue()) {
+                    columnElement.setAttribute(radWidth.getName(), radWidth.getValue() + "px");
+                }
+                RADProperty<Integer> radMinWidth = radColumn.getProperty("minWidth");
+                if (!radMinWidth.isDefaultValue()) {
+                    columnElement.setAttribute(radMinWidth.getName(), radMinWidth.getValue() + "px");
+                }
+                RADProperty<Integer> radMaxWidth = radColumn.getProperty("maxWidth");
+                if (!radMaxWidth.isDefaultValue()) {
+                    columnElement.setAttribute(radMaxWidth.getName(), radMaxWidth.getValue() + "px");
+                }
+                RADProperty<Integer> radPreferredWidth = radColumn.getProperty("preferredWidth");
+                if (!radPreferredWidth.isDefaultValue()) {
+                    columnElement.setAttribute(radPreferredWidth.getName(), radPreferredWidth.getValue() + "px");
+                }
                 if (!(radColumn.getBeanInstance().getTableColumn() instanceof ServiceColumn)) {
                     Element viewElement = doc.createElement(radColumn.getViewControl().getBeanClass().getSimpleName());
                     columnElement.appendChild(viewElement);
@@ -467,22 +561,20 @@ public class PersistenceManager {
 
     private RADComponent<?> radComponentByWidget(FormModel aFormModel, JComponent aWidget) throws Exception {
         RADComponent<?> radComp;
-        if (aWidget instanceof ModelWidget) {
-            if (aWidget instanceof ModelGrid) {
-                radComp = new RADModelGrid();
-            } else {
-                radComp = new RADModelScalarComponent<>();
-            }
+        if (aWidget instanceof ModelGrid) {
+            radComp = new RADModelGrid();
+            ModelGrid modelGrid = (ModelGrid) aWidget;
+            ((RADModelGrid) radComp).setFireRawColumnsChanges(false);
+            adoptHeaderNodes(aFormModel, modelGrid.getHeader(), (RADModelGrid) radComp);
+            ((RADModelGrid) radComp).setFireRawColumnsChanges(true);
+        } else if (aWidget instanceof ModelWidget) {
+            radComp = new RADModelScalarComponent<>();
+        } else if (aWidget instanceof ButtonGroup) {
+            radComp = new RADButtonGroup();
+        } else if (aWidget instanceof HasChildren) {
+            radComp = new RADVisualContainer<>();
         } else {
-            if (aWidget instanceof ButtonGroup) {
-                radComp = new RADButtonGroup();
-            } else {
-                if (aWidget instanceof HasChildren) {
-                    radComp = new RADVisualContainer<>();
-                } else {
-                    radComp = new RADVisualComponent<>();
-                }
-            }
+            radComp = new RADVisualComponent<>();
         }
         radComp.initialize(aFormModel);
         radComp.setStoredName(aWidget.getName());
@@ -498,5 +590,34 @@ public class PersistenceManager {
         }
         radComp.setInModel(true);
         return radComp;
+    }
+
+    private void adoptHeaderNodes(FormModel aFormModel, List<GridColumnsNode> aNodes, ComponentContainer aColumnsContainer) {
+        aNodes.stream().sequential().forEach((GridColumnsNode aNode) -> {
+            RADModelGridColumn radCol = new RADModelGridColumn();
+            radCol.initialize(aFormModel);
+            radCol.setStoredName(((ModelColumn) aNode.getTableColumn()).getName());
+            radCol.setBeanInstance(aNode);
+            radCol.setParent(aColumnsContainer);
+            aColumnsContainer.add(radCol);
+            radCol.setInModel(true);
+            if (aNode.getTableColumn() instanceof ModelColumn) {
+                ModelWidget editor = ((ModelColumn) aNode.getTableColumn()).getEditor();
+                if (editor != null) {
+                    try {
+                        RADColumnView<ModelComponentDecorator> radEditor = new RADColumnView<>();
+                        radEditor.initialize(aFormModel);
+                        radEditor.setBeanInstance((ModelComponentDecorator)editor);
+                        for (RADProperty<?> radProp : radEditor.getBeanProperties()) {
+                            radProp.setChanged(!radProp.isDefaultValue());
+                        }
+                        radCol.setViewControl(radEditor);
+                    } catch (Exception ex) {
+                        Exceptions.printStackTrace(ex);
+                    }
+                }
+            }
+            adoptHeaderNodes(aFormModel, aNode.getChildren(), radCol);
+        });
     }
 }

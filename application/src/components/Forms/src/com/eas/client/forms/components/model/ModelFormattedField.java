@@ -28,6 +28,7 @@ public class ModelFormattedField extends ModelComponentDecorator<VFormattedField
     public ModelFormattedField() {
         super();
         setDecorated(new VFormattedField());
+        setBackground(getDecorated().getBackground());
     }
 
     @ScriptFunction(jsDoc = EDITABLE_JSDOC)

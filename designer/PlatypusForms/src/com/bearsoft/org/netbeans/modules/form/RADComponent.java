@@ -45,6 +45,7 @@ package com.bearsoft.org.netbeans.modules.form;
 
 import com.bearsoft.org.netbeans.modules.form.RADProperty.FakePropertyDescriptor;
 import com.bearsoft.org.netbeans.modules.form.editors.IconEditor;
+import com.eas.client.forms.components.rt.HasGroup;
 import com.eas.client.forms.containers.ButtonGroup;
 import com.eas.design.Designable;
 import com.eas.design.Undesignable;
@@ -562,7 +563,7 @@ public abstract class RADComponent<C> {
             return new FakeRADProperty<>(this, (FakePropertyDescriptor) desc);
         } else {
             if (java.awt.Component.class.isAssignableFrom(desc.getPropertyType())
-                    && !(ButtonGroup.class.isAssignableFrom(desc.getPropertyType()))) {
+                    && !ButtonGroup.class.isAssignableFrom(desc.getPropertyType())) {
                 return new ComponentProperty(this, desc);
             } else if (javax.swing.Icon.class.isAssignableFrom(desc.getPropertyType()) || java.awt.Image.class.isAssignableFrom(desc.getPropertyType())) {
                 return new IconProperty(this, desc);
@@ -701,12 +702,92 @@ public abstract class RADComponent<C> {
         }
     }
 
+    public static class ComponentRef<C> implements ComponentReference<C> {
+
+        private FormModel formModel;
+        private String componentName;
+        private RADComponent<C> component;
+
+        public ComponentRef(String name, FormModel aFormModel) {
+            super();
+            componentName = name;
+            formModel = aFormModel;
+        }
+
+        public ComponentRef(RADComponent<C> radComp, FormModel aFormModel) {
+            super();
+            componentName = radComp.getName();
+            component = radComp;
+            formModel = aFormModel;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            boolean equal;
+
+            if (obj instanceof ComponentRef<?>) {
+                ComponentRef<C> ref = (ComponentRef<C>) obj;
+
+                equal = (ref.component == component);
+                if (componentName == null) {
+                    equal = equal && (ref.componentName == null);
+                } else {
+                    equal = equal && componentName.equals(ref.componentName);
+                }
+            } else {
+                equal = (obj instanceof RADComponent<?> && obj == component);
+            }
+
+            return equal;
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 5;
+            hash = 89 * hash + (this.componentName != null ? this.componentName.hashCode() : 0);
+            hash = 89 * hash + (this.component != null ? this.component.hashCode() : 0);
+            return hash;
+        }
+
+        public String getJavaInitString() {
+            checkComponent();
+            if (component != null) {
+                if (component == component.getFormModel().getTopRADComponent()) {
+                    return "this"; // NOI18N
+                }
+            }
+            return componentName;
+        }
+
+        @Override
+        public RADComponent<C> getComponent() {
+            checkComponent();
+            return component;
+        }
+
+        private void checkComponent() {
+            if (component == null) {
+                component = (RADComponent<C>) formModel.getRADComponent(componentName);
+            } else {
+                if (!component.isInModel()) {
+                    component = null;
+                } else {
+                    componentName = component.getName();
+                }
+            }
+        }
+    }
+    
     static class ComponentProperty extends RADProperty<ComponentReference<Component>> {
 
         protected ComponentReference<Component> value;
 
-        ComponentProperty(RADComponent<?> comp, PropertyDescriptor aDesc) throws IllegalAccessException, InvocationTargetException {
-            super(comp, aDesc);
+        ComponentProperty(RADComponent<?> aRadComp, PropertyDescriptor aDesc) throws IllegalAccessException, InvocationTargetException {
+            super(aRadComp, aDesc);
+            Object nativeValue = aDesc.getReadMethod().invoke(aRadComp.getBeanInstance());
+            if (nativeValue instanceof Component) {
+                value = new ComponentRef(((Component) nativeValue).getName(), aRadComp.getFormModel());
+            }
         }
 
         @Override
@@ -749,12 +830,14 @@ public abstract class RADComponent<C> {
 
         protected ComponentReference<ButtonGroup> value;
 
-        ButtonGroupProperty(RADComponent<?> comp) throws IllegalAccessException, InvocationTargetException, IntrospectionException {
-            super(comp,
+        ButtonGroupProperty(RADComponent<?> aRadComp) throws IllegalAccessException, InvocationTargetException, IntrospectionException {
+            super(aRadComp,
                     new FakePropertyDescriptor("buttonGroup", // NOI18N
                             ButtonGroup.class));
             setAccessType(DETACHED_READ | DETACHED_WRITE);
             setShortDescription(FormUtils.getBundleString("HINT_ButtonGroup")); // NOI18N
+            ButtonGroup nativeValue = ((HasGroup)aRadComp.getBeanInstance()).getButtonGroup();
+            value = nativeValue != null ? new ComponentRef(((Component) nativeValue).getName(), aRadComp.getFormModel()) : null;
         }
 
         @Override

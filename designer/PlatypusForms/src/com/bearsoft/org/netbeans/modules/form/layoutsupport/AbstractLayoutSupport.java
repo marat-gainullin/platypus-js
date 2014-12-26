@@ -919,7 +919,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate {
      * @return array of alternative properties of the layout
      */
     protected FormProperty<?>[] getProperties() {
-        return radLayout.getBeanProperties(); // use default "bean" properties
+        return radLayout != null ? radLayout.getBeanProperties() : null; // use default "bean" properties
     }
 
     // ---------------

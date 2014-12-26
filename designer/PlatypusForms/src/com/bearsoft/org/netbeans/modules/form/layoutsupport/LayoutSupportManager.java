@@ -99,6 +99,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
 
         if (layoutDelegateClass != null) {
             delegate = (LayoutSupportDelegate) layoutDelegateClass.newInstance();
+            /*
             if (!delegate.checkEmptyContainer(getPrimaryContainer())) {
                 RuntimeException ex = new IllegalArgumentException();
                 org.openide.ErrorManager.getDefault().annotate(
@@ -106,6 +107,7 @@ public final class LayoutSupportManager implements LayoutSupportContext {
                                 "MSG_ERR_NonEmptyContainer")); // NOI18N
                 throw ex;
             }
+            */
         } else {
             Container contDel = getPrimaryContainerDelegate();
             //if (contDel.getComponentCount() == 0) {
@@ -423,6 +425,9 @@ public final class LayoutSupportManager implements LayoutSupportContext {
     public void addComponents(RADVisualComponent<?>[] components,
             LayoutConstraints<?>[] aConstraints,
             int index) {
+        if (index <= -1) {
+            index = layoutDelegate.getComponentCount();
+        }
         injectComponents(components, aConstraints, index);
         
         Component[] comps = new Component[components.length];

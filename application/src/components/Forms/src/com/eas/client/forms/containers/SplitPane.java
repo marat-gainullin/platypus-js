@@ -57,6 +57,7 @@ public class SplitPane extends JSplitPane implements HasPublished, HasContainerE
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"orientation"})
     public SplitPane(int aOrientation) {
         super(aOrientation == Orientation.VERTICAL ? JSplitPane.VERTICAL_SPLIT : JSplitPane.HORIZONTAL_SPLIT);
+        super.setOneTouchExpandable(true);
         super.addContainerListener(invalidatorListener);
     }
 
@@ -340,7 +341,8 @@ public class SplitPane extends JSplitPane implements HasPublished, HasContainerE
 
     @ScriptFunction(jsDoc = ONE_TOUCH_EXPANDABLE_JSDOC)
     @Designable(category = "split")
-    public boolean getOneTouchExpandable() {
+    @Override
+    public boolean isOneTouchExpandable() {
         return super.isOneTouchExpandable();
     }
 

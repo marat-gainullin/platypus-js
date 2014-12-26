@@ -48,7 +48,6 @@ import com.bearsoft.org.netbeans.modules.form.layoutsupport.*;
 import java.awt.*;
 import java.beans.*;
 import java.lang.reflect.Method;
-import javax.swing.JButton;
 import javax.swing.JSplitPane;
 import org.openide.ErrorManager;
 
@@ -58,14 +57,12 @@ import org.openide.ErrorManager;
  * @author Tomas Pavek
  */
 public class SplitPaneSupport extends AbstractLayoutSupport {
-
+/*
     private static Method setLeftComponentMethod;
     private static Method setRightComponentMethod;
     private static Method setTopComponentMethod;
     private static Method setBottomComponentMethod;
-    private static final String LEFT_TOP_BUTTON = "cp_left_top_button"; // NOI18N
-    private static final String RIGHT_BOTTOM_BUTTON = "cp_right_bottom_button"; // NOI18N
-
+*/
     /**
      * Gets the supported layout manager class - JSplitPane.
      *
@@ -101,33 +98,6 @@ public class SplitPaneSupport extends AbstractLayoutSupport {
             Point posInComp) {
         if (!(container instanceof JSplitPane)) {
             return null;
-        }
-
-        JSplitPane splitPane = (JSplitPane) container;
-        Dimension sz = splitPane.getSize();
-        int orientation = splitPane.getOrientation();
-
-        JButton left = (JButton) splitPane.getClientProperty(LEFT_TOP_BUTTON);
-        JButton right = (JButton) splitPane.getClientProperty(RIGHT_BOTTOM_BUTTON);
-
-        if ((left == null && right == null)
-                || (left != null && right != null)) {
-            String freePosition;
-            if (orientation == JSplitPane.HORIZONTAL_SPLIT) {
-                if (posInCont.x <= sz.width / 2) {
-                    freePosition = JSplitPane.LEFT;
-                } else {
-                    freePosition = JSplitPane.RIGHT;
-                }
-            } else {
-                if (posInCont.y <= sz.height / 2) {
-                    freePosition = JSplitPane.TOP;
-                } else {
-                    freePosition = JSplitPane.BOTTOM;
-                }
-            }
-            assistantParams = freePosition;
-            return new SplitLayoutConstraints(freePosition);
         }
 
         assistantParams = findFreePosition();
@@ -251,18 +221,8 @@ public class SplitPaneSupport extends AbstractLayoutSupport {
 
             int descPos = convertPosition(getConstraints(i + index));
             if (descPos == 0) {
-                if (splitPane.getClientProperty(LEFT_TOP_BUTTON) == null) {
-                    // store the defaul swing button, so we can fall back to it
-                    // if component[i] will be removed later...
-                    splitPane.putClientProperty(LEFT_TOP_BUTTON, splitPane.getLeftComponent());
-                }
                 splitPane.setLeftComponent(components[i]);
             } else if (descPos == 1) {
-                if (splitPane.getClientProperty(RIGHT_BOTTOM_BUTTON) == null) {
-                    // store the defaul swing button, so we can fall back to it
-                    // if component[i] will be removed later...
-                    splitPane.putClientProperty(RIGHT_BOTTOM_BUTTON, splitPane.getRightComponent());
-                }
                 splitPane.setRightComponent(components[i]);
             }
 
@@ -285,31 +245,6 @@ public class SplitPaneSupport extends AbstractLayoutSupport {
         if (!(containerDelegate instanceof JSplitPane)) {
             return false; // should not happen
         }
-
-        JSplitPane splitPane = (JSplitPane) containerDelegate;
-
-        if (component == splitPane.getLeftComponent()) {
-            if (super.removeComponentFromContainer(container, containerDelegate, component)) {
-                JButton left = (JButton) splitPane.getClientProperty(LEFT_TOP_BUTTON);
-                if (left != null) {
-                    // fall back to the default swing setting
-                    splitPane.setLeftComponent(left);
-                    splitPane.putClientProperty(LEFT_TOP_BUTTON, null);
-                }
-                return true;
-            }
-        } else if (component == splitPane.getRightComponent()) {
-            if (super.removeComponentFromContainer(container, containerDelegate, component)) {
-                JButton right = (JButton) splitPane.getClientProperty(RIGHT_BOTTOM_BUTTON);
-                if (right != null) {
-                    // fall back to the default swing setting
-                    splitPane.setRightComponent(right);
-                    splitPane.putClientProperty(RIGHT_BOTTOM_BUTTON, null);
-                }
-                return true;
-            }
-        }
-
         return super.removeComponentFromContainer(container, containerDelegate, component);
     }
 
@@ -322,27 +257,19 @@ public class SplitPaneSupport extends AbstractLayoutSupport {
      * @return whether it was possible to clear the container (some containers
      * may not support this)
      */
+    /*
     @Override
     public boolean clearContainer(Container container,
             Container containerDelegate) {
-
         // don't remove components which are a default part of JSplitPane
-
         JSplitPane splitPane = (JSplitPane) container;
-        JButton left = (JButton) splitPane.getClientProperty(LEFT_TOP_BUTTON);
-        JButton right = (JButton) splitPane.getClientProperty(RIGHT_BOTTOM_BUTTON);
-
-        if (left != null) {
-            // left/top component has already been set -> remove it
-            removeComponentFromContainer(container, containerDelegate, splitPane.getLeftComponent());
-        }
-        if (right != null) {
-            // right/bottom component has already been set -> remove it
-            removeComponentFromContainer(container, containerDelegate, splitPane.getRightComponent());
-        }
-
+        // left/top component has already been set -> remove it
+        removeComponentFromContainer(container, containerDelegate, splitPane.getLeftComponent());
+        // right/bottom component has already been set -> remove it
+        removeComponentFromContainer(container, containerDelegate, splitPane.getRightComponent());
         return true;
     }
+    */
 
     @Override
     protected LayoutConstraints<?> createDefaultConstraints() {
@@ -389,7 +316,7 @@ public class SplitPaneSupport extends AbstractLayoutSupport {
                     ? JSplitPane.RIGHT : JSplitPane.BOTTOM;
         }
     }
-
+/*
     // --------
     private static Method getSetLeftComponentMethod() {
         if (setLeftComponentMethod == null) {
@@ -418,7 +345,7 @@ public class SplitPaneSupport extends AbstractLayoutSupport {
         }
         return setBottomComponentMethod;
     }
-
+*/
     private static Method getAddMethod(String name) {
         try {
             return JSplitPane.class.getMethod(name,

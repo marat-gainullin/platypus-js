@@ -47,9 +47,9 @@ import com.bearsoft.org.netbeans.modules.form.ComponentReference;
 import com.bearsoft.org.netbeans.modules.form.FormCookie;
 import com.bearsoft.org.netbeans.modules.form.FormModel;
 import com.bearsoft.org.netbeans.modules.form.FormProperty;
-import com.bearsoft.org.netbeans.modules.form.FormUtils;
 import com.bearsoft.org.netbeans.modules.form.NamedPropertyEditor;
 import com.bearsoft.org.netbeans.modules.form.RADComponent;
+import com.bearsoft.org.netbeans.modules.form.RADComponent.ComponentRef;
 import com.eas.client.forms.containers.ButtonGroup;
 import java.beans.*;
 import java.util.*;
@@ -67,43 +67,27 @@ import org.openide.util.NbBundle;
  * @author Tomas Pavek
  */
 @PropertyEditorRegistration(targetType = {javax.swing.JComponent.class, JPopupMenu.class, ButtonGroup.class})
-public class ComponentChooserEditor implements PropertyEditor, ExPropertyEditor,
-        NamedPropertyEditor {
+public class ComponentChooserEditor extends PropertyEditorSupport implements ExPropertyEditor, NamedPropertyEditor {
 
-    public static final int ALL_COMPONENTS = 0;
-    public static final int NONVISUAL_COMPONENTS = 3;
-    private static final String NULL_REF_NAME = "null"; // NOI18N
-    private static final String INVALID_REF_NAME = "default"; // NOI18N
-    private static String invalidText;
     private FormModel formModel;
     private FormProperty<?> prop;
-    private List<RADComponent<?>> components = new ArrayList<>();
-    private int componentCategory;
-    private ComponentRef<?> value;
-    private PropertyChangeSupport changeSupport;
-
+    private final List<RADComponent<?>> components = new ArrayList<>();
+    
     public ComponentChooserEditor() {
         super();
     }
 
-    // PropertyEditor implementation
     @Override
     public void setValue(Object aValue) {
         if (aValue == null || aValue instanceof ComponentRef) {
-            value = (ComponentRef<?>) aValue;
+            super.setValue((ComponentRef<?>) aValue);
         } else if (aValue instanceof RADComponent<?>) {
-            value = new ComponentRef<>((RADComponent<?>) aValue, formModel);
+            super.setValue(new ComponentRef<>((RADComponent<?>) aValue, formModel));
         } else if (aValue instanceof String) {
-            value = new ComponentRef<>((String) aValue, formModel);
+            super.setValue(new ComponentRef<>((String) aValue, formModel));
         } else {
-            value = null;
+            super.setValue(null);
         }
-        firePropertyChange();
-    }
-
-    @Override
-    public Object getValue() {
-        return value;
     }
 
     @Override
@@ -119,7 +103,8 @@ public class ComponentChooserEditor implements PropertyEditor, ExPropertyEditor,
 
     @Override
     public String getAsText() {
-        return value != null && value.getComponent() != null ? value.getComponent().getName() : "";
+        ComponentRef<?> val = (ComponentRef<?>)super.getValue();
+        return val != null && val.getComponent() != null ? val.getComponent().getName() : "";
     }
 
     @Override
@@ -138,41 +123,8 @@ public class ComponentChooserEditor implements PropertyEditor, ExPropertyEditor,
 
     @Override
     public String getJavaInitializationString() {
-        return value != null ? value.getJavaInitString() : null;
-    }
-
-    @Override
-    public synchronized void addPropertyChangeListener(PropertyChangeListener l) {
-        if (changeSupport == null) {
-            changeSupport = new PropertyChangeSupport(this);
-        }
-        changeSupport.addPropertyChangeListener(l);
-    }
-
-    @Override
-    public void removePropertyChangeListener(PropertyChangeListener l) {
-        if (changeSupport != null) {
-            changeSupport.removePropertyChangeListener(l);
-        }
-    }
-
-    @Override
-    public boolean isPaintable() {
-        return false;
-    }
-
-    @Override
-    public void paintValue(java.awt.Graphics gfx, java.awt.Rectangle box) {
-    }
-
-    @Override
-    public java.awt.Component getCustomEditor() {
-        return null;
-    }
-
-    @Override
-    public boolean supportsCustomEditor() {
-        return false;
+        ComponentRef<?> val = (ComponentRef<?>)super.getValue();
+        return val != null ? val.getJavaInitString() : null;
     }
 
     @Override
@@ -193,30 +145,12 @@ public class ComponentChooserEditor implements PropertyEditor, ExPropertyEditor,
         return formModel;
     }
 
-    public void setComponentCategory(int cat) {
-        componentCategory = cat;
-    }
-
-    public int getComponentCategory() {
-        return componentCategory;
-    }
-    // ---------
-
     protected List<RADComponent<?>> getComponents() {
         components.clear();
         if (formModel != null) {
-            Collection<RADComponent<?>> comps;
-            if (componentCategory == NONVISUAL_COMPONENTS) {
-                comps = formModel.getNonVisualComponents();
-            } else {
-                comps = formModel.getAllComponents();
-            }
-
-            for (RADComponent<?> radComp : comps) {
-                if (acceptBean(radComp)) {
-                    components.add(radComp);
-                }
-            }
+            formModel.getAllComponents().stream().filter((radComp) -> (acceptBean(radComp))).forEach((radComp) -> {
+                components.add(radComp);
+            });
         }
         return components;
     }
@@ -225,105 +159,9 @@ public class ComponentChooserEditor implements PropertyEditor, ExPropertyEditor,
         return prop.getValueType().isAssignableFrom((Class<?>) comp.getBeanClass());
     }
 
-    protected String invalidString() {
-        if (invalidText == null) {
-            invalidText = FormUtils.getBundleString("CTL_InvalidReference"); // NOI18N
-        }
-        return invalidText;
-    }
-
-    // ------
-    protected final void firePropertyChange() {
-        if (changeSupport != null) {
-            changeSupport.firePropertyChange(null, null, null);
-        }
-    }
-
     // NamedPropertyEditor implementation
     @Override
     public String getDisplayName() {
         return NbBundle.getMessage(getClass(), "CTL_ComponentChooserEditor_DisplayName"); // NOI18N
-    }
-
-    // ------------
-    public static class ComponentRef<C> implements ComponentReference<C> {
-
-        private FormModel formModel;
-        private String componentName;
-        private RADComponent<C> component;
-
-        public ComponentRef(String name, FormModel aFormModel) {
-            super();
-            componentName = name;
-            formModel = aFormModel;
-        }
-
-        ComponentRef(RADComponent<C> radComp, FormModel aFormModel) {
-            super();
-            componentName = radComp.getName();
-            component = radComp;
-            formModel = aFormModel;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            boolean equal;
-
-            if (obj instanceof ComponentRef<?>) {
-                ComponentRef<C> ref = (ComponentRef<C>) obj;
-
-                equal = (ref.component == component);
-                if (componentName == null) {
-                    equal = equal && (ref.componentName == null);
-                } else {
-                    equal = equal && componentName.equals(ref.componentName);
-                }
-            } else {
-                equal = (obj instanceof RADComponent<?> && obj == component);
-            }
-
-            return equal;
-        }
-
-        @Override
-        public int hashCode() {
-            int hash = 5;
-            hash = 89 * hash + (this.componentName != null ? this.componentName.hashCode() : 0);
-            hash = 89 * hash + (this.component != null ? this.component.hashCode() : 0);
-            return hash;
-        }
-
-        String getJavaInitString() {
-            checkComponent();
-
-            if (component != null) {
-                if (component == component.getFormModel().getTopRADComponent()) {
-                    return "this"; // NOI18N
-                }
-            } else if (!NULL_REF_NAME.equals(componentName)) {
-                return null; // invalid reference
-            }
-            return componentName;
-        }
-
-        @Override
-        public RADComponent<C> getComponent() {
-            checkComponent();
-            return component;
-        }
-
-        private void checkComponent() {
-            if (component == null
-                    && !NULL_REF_NAME.equals(componentName)
-                    && !INVALID_REF_NAME.equals(componentName)) {
-                component = (RADComponent<C>) formModel.getRADComponent(componentName);
-            } else if (component != null) {
-                if (!component.isInModel()) {
-                    component = null;
-                } else {
-                    componentName = component.getName();
-                }
-            }
-        }
     }
 }

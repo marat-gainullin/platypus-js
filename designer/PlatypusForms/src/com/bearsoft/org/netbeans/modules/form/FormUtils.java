@@ -97,13 +97,13 @@ import org.openide.util.RequestProcessor;
 import org.openide.util.Utilities;
 
 /**
- * A class that contains utility methods for the formeditor.
+ * A class that contains utility methods for the form editor.
  *
  * @author Ian Formanek
  */
 public class FormUtils {
 
-    public static class Panel extends JPanel implements Widget, HasPublished {
+    public static class Panel extends JPanel implements Widget, HasPublished, HasChildren {
 
         public Panel() {
             super(new MarginLayout());
@@ -347,6 +347,31 @@ public class FormUtils {
 
         @Override
         public void setPublished(JSObject jso) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public JComponent child(int i) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public JComponent[] getChildren() {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void remove(JComponent jc) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void clear() {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public int getCount() {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
 

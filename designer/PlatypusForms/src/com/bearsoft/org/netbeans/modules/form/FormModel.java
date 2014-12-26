@@ -250,7 +250,7 @@ public class FormModel {
     public Collection<RADComponent<?>> getAllComponents() {
         return Collections.unmodifiableCollection(namesToComponents.values());
     }
-
+/*
     public List<RADComponent<?>> getNonVisualComponents() {
         List<RADComponent<?>> list = new ArrayList<>(otherComponents.size());
         for (RADComponent<?> radComp : otherComponents) {
@@ -260,7 +260,7 @@ public class FormModel {
         }
         return list;
     }
-
+*/
     public List<RADComponent<?>> getVisualComponents() {
         List<RADComponent<?>> list = new ArrayList<>(namesToComponents.size());
         for (Map.Entry<String, RADComponent<?>> e : namesToComponents.entrySet()) {

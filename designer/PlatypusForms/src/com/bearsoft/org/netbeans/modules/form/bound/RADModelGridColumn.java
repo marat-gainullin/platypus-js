@@ -89,7 +89,7 @@ public class RADModelGridColumn extends RADComponent<GridColumnsNode> implements
     }
 
     @Override
-    protected void setBeanInstance(GridColumnsNode aBeanInstance) {
+    public void setBeanInstance(GridColumnsNode aBeanInstance) {
         super.setBeanInstance(aBeanInstance);
         if (getBeanInstance() != null) {
             ((ModelColumn) getBeanInstance().getTableColumn()).setName(getName());
