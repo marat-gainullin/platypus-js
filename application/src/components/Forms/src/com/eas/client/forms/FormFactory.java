@@ -81,7 +81,6 @@ import javax.swing.JFrame;
 import jdk.nashorn.api.scripting.JSObject;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  *
@@ -142,7 +141,7 @@ public class FormFactory {
         } else {
             rootContainerName = element.getAttribute(Form.VIEW_SCRIPT_NAME);
             Node childNode = element.getFirstChild();
-            while(childNode != null){
+            while (childNode != null) {
                 if (childNode instanceof Element) {
                     JComponent widget = readWidget((Element) childNode);
                     String wName = widget.getName();
@@ -151,18 +150,6 @@ public class FormFactory {
                 }
                 childNode = childNode.getNextSibling();
             }
-            /*
-            NodeList childrenElements = element.getChildNodes();
-            for (int i = 0; i < childrenElements.getLength(); i++) {
-                Node childNode = childrenElements.item(i);
-                if (childNode instanceof Element) {
-                    JComponent widget = readWidget((Element) childNode);
-                    String wName = widget.getName();
-                    assert wName != null && !wName.isEmpty() : "A widget is expected to be a named item.";
-                    widgets.put(wName, widget);
-                }
-            }
-            */
         }
         JComponent viewWidget;
         if (oldFormat) {
@@ -419,11 +406,16 @@ public class FormFactory {
                 readGeneralProps(anElement, modelCombo);
                 boolean list = XmlDomUtils.readBooleanAttribute(anElement, "list", Boolean.TRUE);
                 modelCombo.setList(list);
-                if (anElement.hasAttribute("valueField")) {
-                    String valueField = anElement.getAttribute("valueField");
+                if (anElement.hasAttribute("displayList")) {
+                    String displayList = anElement.getAttribute("displayList");
+                    modelCombo.setDisplayList(resolveEntity(displayList));
                 }
                 if (anElement.hasAttribute("displayField")) {
                     String displayField = anElement.getAttribute("displayField");
+                    modelCombo.setDisplayField(displayField);
+                }
+                if (anElement.hasAttribute("valueField")) {
+                    String valueField = anElement.getAttribute("valueField");
                 }
                 return modelCombo;
             case "ModelDate":
@@ -810,7 +802,10 @@ public class FormFactory {
         }
         aTarget.setEnabled(XmlDomUtils.readBooleanAttribute(anElement, "enabled", Boolean.TRUE));
         aTarget.setFocusable(XmlDomUtils.readBooleanAttribute(anElement, "focusable", Boolean.TRUE));
-        aTarget.setFont(readFont(anElement));
+        Font font = readFont(anElement);
+        if (font != null) {
+            aTarget.setFont(font);
+        }
         if (anElement.hasAttribute("opaque")) {
             aTarget.setOpaque(XmlDomUtils.readBooleanAttribute(anElement, "opaque", Boolean.TRUE));
         }
@@ -1025,13 +1020,8 @@ public class FormFactory {
 
     private List<GridColumnsNode> readColumns(Element aColumnsElement) throws Exception {
         List<GridColumnsNode> nodes = new ArrayList<>();
-        /*
-        NodeList childNodes = aColumnsElement.getChildNodes();
-        for (int i = 0; i < childNodes.getLength(); i++) {
-            Node childNode = childNodes.item(i);
-            */
         Node childNode = aColumnsElement.getFirstChild();
-        while(childNode != null){
+        while (childNode != null) {
             if (childNode instanceof Element) {
                 Element childTag = (Element) childNode;
                 String columnType;
@@ -1072,17 +1062,15 @@ public class FormFactory {
                     case "ModelGridColumn": {
                         ModelGridColumn columnn = new ModelGridColumn();
                         readColumnNode(columnn, childTag);
-                        /*
-                        NodeList _childNodes = childTag.getChildNodes();
-                        for (int _i = 0; _i < _childNodes.getLength(); _i++) {
-                            Node _childNode = _childNodes.item(_i);
-                        */
+                        if (childTag.hasAttribute("field")) {
+                            columnn.setField(childTag.getAttribute("field"));
+                        }
                         Node _childNode = childTag.getFirstChild();
-                        while(_childNode != null){
+                        while (_childNode != null) {
                             if (_childNode instanceof Element) {
                                 JComponent editorComp = readWidget((Element) _childNode);
                                 if (editorComp instanceof ModelWidget) {
-                                    ModelColumn col = (ModelColumn)columnn.getTableColumn();
+                                    ModelColumn col = (ModelColumn) columnn.getTableColumn();
                                     col.setEditor((ModelWidget) editorComp);
                                     ModelWidget viewComp = (ModelWidget) readWidget((Element) _childNode);
                                     col.setView(viewComp);
@@ -1115,8 +1103,10 @@ public class FormFactory {
         }
         aNode.setEditable(XmlDomUtils.readBooleanAttribute(anElement, "editable", Boolean.TRUE));
         aNode.setEnabled(XmlDomUtils.readBooleanAttribute(anElement, "enabled", Boolean.TRUE));
-        aNode.setFont(readFont(anElement));
-
+        Font font = readFont(anElement);
+        if (font != null) {
+            aNode.setFont(font);
+        }
         if (anElement.hasAttribute("width")) {
             String width = anElement.getAttribute("width");
             if (width.length() > 2 && width.endsWith("px")) {

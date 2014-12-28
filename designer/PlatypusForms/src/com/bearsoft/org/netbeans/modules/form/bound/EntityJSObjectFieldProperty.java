@@ -7,7 +7,7 @@ package com.bearsoft.org.netbeans.modules.form.bound;
 
 import com.bearsoft.org.netbeans.modules.form.RADComponent;
 import com.bearsoft.org.netbeans.modules.form.RADProperty;
-import com.bearsoft.org.netbeans.modules.form.editors.ModelObjectPropertyPropertyEditor;
+import com.bearsoft.org.netbeans.modules.form.editors.EntityJSObjectFieldEditor;
 import java.beans.PropertyDescriptor;
 import java.beans.PropertyEditor;
 import java.lang.reflect.InvocationTargetException;
@@ -16,13 +16,13 @@ import java.lang.reflect.InvocationTargetException;
  *
  * @author mg
  */
-public class ModelObjectPropertyProperty extends RADProperty<String> {
+public class EntityJSObjectFieldProperty extends RADProperty<String> {
 
-    protected ModelObjectPropertyPropertyEditor editor;
+    protected EntityJSObjectFieldEditor editor;
 
-    public ModelObjectPropertyProperty(RADComponent<?> aRadComp, PropertyDescriptor propdesc, String aPrefix) throws IllegalAccessException, InvocationTargetException {
+    public EntityJSObjectFieldProperty(RADComponent<?> aRadComp, PropertyDescriptor propdesc, String aPrefix) throws IllegalAccessException, InvocationTargetException {
         super(aRadComp, propdesc);
-        editor = new ModelObjectPropertyPropertyEditor(aPrefix);
+        editor = new EntityJSObjectFieldEditor(aPrefix);
         editor.setFormModel(aRadComp.getFormModel());
         editor.setProperty(this);
         editor.setComp(aRadComp);

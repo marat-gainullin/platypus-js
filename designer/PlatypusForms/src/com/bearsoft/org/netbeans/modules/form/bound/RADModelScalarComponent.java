@@ -27,9 +27,9 @@ public class RADModelScalarComponent<M extends ModelComponentDecorator> extends 
     protected RADProperty<?> createCheckedBeanProperty(PropertyDescriptor desc) throws InvocationTargetException, IllegalAccessException {
         switch (desc.getName()) {
             case "field":
-                return new ModelObjectPropertyProperty(this, desc, "cursor.");
+                return new EntityJSObjectFieldProperty(this, desc, "cursor.");
             case "displayField":// only ModelCombo case
-                return new ModelObjectPropertyProperty(this, desc, "");
+                return new EntityJSObjectFieldProperty(this, desc, "");
             default:
                 return super.createCheckedBeanProperty(desc);
         }

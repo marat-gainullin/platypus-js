@@ -44,7 +44,6 @@
 package com.bearsoft.org.netbeans.modules.form;
 
 import com.bearsoft.org.netbeans.modules.form.completion.FormModuleCompletionContext;
-import com.bearsoft.org.netbeans.modules.form.node.FormEntityNode;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.forms.Form;
 import com.eas.client.model.application.ApplicationDbEntity;
@@ -53,7 +52,6 @@ import com.eas.designer.application.module.PlatypusModuleSupport;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
 import com.eas.designer.application.module.nodes.ApplicationEntityNode;
 import com.eas.designer.application.module.nodes.ApplicationModelNodeChildren;
-import com.eas.designer.datamodel.nodes.FieldsOrderSupport;
 import com.eas.designer.datamodel.nodes.ModelNode;
 import java.io.IOException;
 import org.openide.filesystems.FileObject;
@@ -135,20 +133,6 @@ public class PlatypusFormDataObject extends PlatypusModuleDataObject {
     protected Node createNodeDelegate() {
         FormDataNode node = new FormDataNode(this);
         return node;
-    }
-
-    @Override
-    protected ModelNode createModelNode() {
-        return new ModelNode<>(new ApplicationModelNodeChildren(model,
-                getLookup().lookup(PlatypusModuleSupport.class).getModelUndo(),
-                getLookup()) {
-                    @Override
-                    protected ApplicationEntityNode newNodeInstance(ApplicationDbEntity key) throws Exception {
-                        Lookup lkp = Lookups.fixed(key);
-                        FormEntityNode node = new FormEntityNode(key, undoReciever, new ProxyLookup(lookup, lkp));
-                        return node;
-                    }
-                }, this);
     }
 
     //--------------------------------------------------------------------

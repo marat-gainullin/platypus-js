@@ -43,7 +43,7 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
-import com.bearsoft.org.netbeans.modules.form.editors.ModelObjectEditor;
+import com.bearsoft.org.netbeans.modules.form.editors.EntityJSObjectEditor;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import com.eas.designer.application.module.PlatypusModuleDatamodelDescription;
 import com.eas.designer.application.module.PlatypusModuleSourceDescription;
@@ -105,8 +105,8 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
     public static final String iconURL
             = "com/bearsoft/org/netbeans/modules/form/resources/form.gif"; // NOI18N
 
-    static {// because of crazy net beans class loaders
-        PropertyEditorManager.registerEditor(JSObject.class, ModelObjectEditor.class);
+    static {// because of crazy netbeans class loaders
+        PropertyEditorManager.registerEditor(JSObject.class, EntityJSObjectEditor.class);
     }
     private UndoRedo.Manager editorUndoManager;
     private FormEditor formEditor;

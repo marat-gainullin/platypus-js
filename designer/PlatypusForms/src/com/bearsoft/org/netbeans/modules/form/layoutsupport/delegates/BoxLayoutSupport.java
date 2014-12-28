@@ -398,7 +398,6 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
                                 || ax == BoxLayout.LINE_AXIS || ax == BoxLayout.PAGE_AXIS) {
                             if (axis != ax) {
                                 axis = ax;
-                                setChanged(axis != BoxLayout.X_AXIS);
                                 propertyValueChanged(oldValue, value);
                             }
                         }
@@ -429,7 +428,6 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
                     public void setValue(Integer aValue) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
                         int oldValue = hgap;
                         hgap = aValue != null ? aValue : 0;
-                        setChanged(hgap != 0);
                         propertyValueChanged(oldValue, hgap);
                     }
 
@@ -458,7 +456,6 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
                     public void setValue(Integer aValue) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
                         int oldValue = vgap;
                         vgap = aValue != null ? aValue : 0;
-                        setChanged(vgap != 0);
                         propertyValueChanged(oldValue, vgap);
                     }
 

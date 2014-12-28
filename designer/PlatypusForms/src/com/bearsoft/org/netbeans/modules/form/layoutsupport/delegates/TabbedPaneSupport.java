@@ -137,26 +137,24 @@ public class TabbedPaneSupport extends AbstractLayoutSupport {
     @Override
     public void arrangeContainer(Container container,
             Container containerDelegate) {
-        if (!(container instanceof JTabbedPane)) {
-            return;
-        }
+        if (container instanceof JTabbedPane) {
+            JTabbedPane tabbedPane = (JTabbedPane) container;
+            if (selectedTab >= 0) {
+                if (tabbedPane.getTabCount() > selectedTab) {
+                    // select the tab
+                    tabbedPane.setSelectedIndex(selectedTab);
 
-        JTabbedPane tabbedPane = (JTabbedPane) container;
-        if (selectedTab >= 0) {
-            if (tabbedPane.getTabCount() > selectedTab) {
-                // select the tab
-                tabbedPane.setSelectedIndex(selectedTab);
-
-                // workaround for JTabbedPane bug 4190719
-                Component comp = tabbedPane.getSelectedComponent();
-                if (comp != null) {
-                    comp.setVisible(true);
+                    // workaround for JTabbedPane bug 4190719
+                    Component comp = tabbedPane.getSelectedComponent();
+                    if (comp != null) {
+                        comp.setVisible(true);
+                    }
+                    tabbedPane.repaint();
                 }
-                tabbedPane.repaint();
+            } else if (tabbedPane.getTabCount() > 0) {
+                // workaround for JTabbedPane bug 4190719
+                tabbedPane.getComponentAt(0).setVisible(true);
             }
-        } else if (tabbedPane.getTabCount() > 0) {
-            // workaround for JTabbedPane bug 4190719
-            tabbedPane.getComponentAt(0).setVisible(true);
         }
     }
 
@@ -319,19 +317,19 @@ public class TabbedPaneSupport extends AbstractLayoutSupport {
 
     // tab, component
     /*
-    private static Method getAddTabMethod3() {
-        if (addTabMethod3 == null) {
-            try {
-                addTabMethod3 = JTabbedPane.class.getMethod(
-                        "addTab", // NOI18N
-                        new Class<?>[]{String.class, Component.class});
-            } catch (NoSuchMethodException ex) { // should not happen
-                ErrorManager.getDefault().notify(ex);
-            }
-        }
-        return addTabMethod3;
-    }
-*/
+     private static Method getAddTabMethod3() {
+     if (addTabMethod3 == null) {
+     try {
+     addTabMethod3 = JTabbedPane.class.getMethod(
+     "addTab", // NOI18N
+     new Class<?>[]{String.class, Component.class});
+     } catch (NoSuchMethodException ex) { // should not happen
+     ErrorManager.getDefault().notify(ex);
+     }
+     }
+     return addTabMethod3;
+     }
+     */
     // ----------
     /**
      * LayoutConstraints implementation for managing JTabbedPane tab parameters.
@@ -444,8 +442,6 @@ public class TabbedPaneSupport extends AbstractLayoutSupport {
                         }
                     }
                 };
-
-                properties[0].setChanged(true);
             }
 
             return properties;

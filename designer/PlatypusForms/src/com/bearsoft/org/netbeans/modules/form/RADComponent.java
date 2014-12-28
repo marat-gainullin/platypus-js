@@ -696,7 +696,6 @@ public abstract class RADComponent<C> {
                 InvocationTargetException {
             IconEditor.NbImageIcon oldValue = getValue();
             value = aValue;
-            setChanged(!isDefaultValue());
             getPropertyDescriptor().getWriteMethod().invoke(getComponent().getBeanInstance(), new Object[]{value});
             propertyValueChanged(oldValue, value);
         }
@@ -704,7 +703,7 @@ public abstract class RADComponent<C> {
 
     public static class ComponentRef<C> implements ComponentReference<C> {
 
-        private FormModel formModel;
+        private final FormModel formModel;
         private String componentName;
         private RADComponent<C> component;
 
@@ -812,7 +811,6 @@ public abstract class RADComponent<C> {
             ComponentReference<Component> oldValue = getValue();
             value = aValue;
             if (oldValue != value) {
-                setChanged(value != getDefaultValue());
                 Object innerValue = null;
                 if (value != null && value.getComponent() != null && canWrite()) {
                     innerValue = value.getComponent().getBeanInstance();
@@ -885,7 +883,6 @@ public abstract class RADComponent<C> {
             ComponentReference<ButtonGroup> oldValue = getValue();
             value = aValue;
             if (oldValue != value) {
-                setChanged(value != getDefaultValue());
                 ButtonGroup oldGroup = null;
                 if (oldValue != null && oldValue.getComponent() != null) {
                     oldGroup = oldValue.getComponent().getBeanInstance();

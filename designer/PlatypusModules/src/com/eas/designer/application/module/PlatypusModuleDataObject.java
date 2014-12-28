@@ -58,7 +58,7 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
 
         @Override
         public void entityAdded(ApplicationDbEntity e) {
-            e.setPublished(new ModelJSObject(e));
+            e.setPublished(new EntityJSObject(e));
             markModelModified();
             e.getChangeSupport().addPropertyChangeListener(this);
         }
@@ -293,9 +293,9 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
         ApplicationDbModel modelRead = new ApplicationDbModel(getProject().getQueries());
         modelRead.accept(new XmlDom2ApplicationModel<>(doc));
         modelRead.getEntities().values().stream().forEach((ApplicationDbEntity aEntity) -> {
-            aEntity.setPublished(new ModelJSObject(aEntity));
+            aEntity.setPublished(new EntityJSObject(aEntity));
         });
-        modelRead.setPublished(new ModelContentJSObject(modelRead));
+        modelRead.setPublished(new ModelJSObject(modelRead));
         return modelRead;
     }
 

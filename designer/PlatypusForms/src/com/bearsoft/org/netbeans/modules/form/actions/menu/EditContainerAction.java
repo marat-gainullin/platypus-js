@@ -55,7 +55,7 @@ import org.openide.util.actions.*;
  * PlatypusFormLayoutView.
  */
 @ActionID(id = "com.bearsoft.org.netbeans.modules.form.actions.EditContainerAction", category = "Form")
-@ActionRegistration(displayName = "#ACT_EditContainer", lazy=true)
+@ActionRegistration(displayName = "#ACT_EditContainer", lazy = true)
 public class EditContainerAction extends NodeAction {
 
     private static String name;
@@ -66,13 +66,13 @@ public class EditContainerAction extends NodeAction {
             RADComponentCookie radCookie = activatedNodes[0].getLookup().lookup(RADComponentCookie.class);
             RADComponent<?> radComp = (radCookie != null) ? radCookie.getRADComponent() : null;
             if (isEditableComponent(radComp)) {
-                    //designer.setTopDesignComponent((RADVisualContainer<?>) radComp, true);
-                    assert radComp != null && radComp.getFormModel() != null;
-                    radComp.getFormModel().setTopDesignComponent((RADVisualContainer<?>)radComp);
-                    // same node keeps selected, but the state changed
-                    reenable0(activatedNodes);
-                    DesignParentAction.reenable(activatedNodes);
-                    EditFormAction.reenable(activatedNodes);
+                //designer.setTopDesignComponent((RADVisualContainer<?>) radComp, true);
+                assert radComp != null && radComp.getFormModel() != null;
+                radComp.getFormModel().setTopDesignComponent((RADVisualContainer<?>) radComp);
+                // same node keeps selected, but the state changed
+                reenable0(activatedNodes);
+                DesignParentAction.reenable(activatedNodes);
+                EditFormAction.reenable(activatedNodes);
             }
         }
     }

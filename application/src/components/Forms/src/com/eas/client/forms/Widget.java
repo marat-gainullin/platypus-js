@@ -5,13 +5,18 @@
  */
 package com.eas.client.forms;
 
+import com.eas.client.forms.containers.AnchorsPane;
+import com.eas.client.forms.containers.BorderPane;
 import com.eas.client.forms.containers.BoxPane;
 import com.eas.client.forms.containers.FlowPane;
+import com.eas.client.forms.layouts.BoxLayout;
 import com.eas.client.forms.layouts.MarginLayout;
 import com.eas.script.ScriptFunction;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
@@ -25,47 +30,46 @@ import javax.swing.JViewport;
 public interface Widget {
 
     public static void setWidth(JComponent aTarget, int aValue) {
-        if (aTarget.getParent() != null && aTarget.getParent().getLayout() instanceof MarginLayout) {
-            MarginLayout.ajustWidth(aTarget, aValue);
-        } else if (aTarget.getParent() instanceof JViewport && aTarget.getParent().getParent() instanceof JScrollPane) {
-            /*
-             if (!super.isPreferredSizeSet()) {
-             clearPrefSize = true;
-             }
-             */
-            aTarget.setPreferredSize(new Dimension(aValue, aTarget.getHeight()));
-        } else if (aTarget.getParent() instanceof BoxPane) {
-            aTarget.setPreferredSize(new Dimension(aValue, aTarget.getHeight()));
-        } else if (aTarget.getParent() instanceof FlowPane) {
-            aTarget.setPreferredSize(new Dimension(aValue, aTarget.getHeight()));
+        if (aTarget.getParent() != null) {
+            if (aTarget.getParent() instanceof AnchorsPane || aTarget.getParent().getLayout() instanceof MarginLayout) {
+                MarginLayout.ajustWidth(aTarget, aValue);
+            } else if (aTarget.getParent() instanceof JViewport && aTarget.getParent().getParent() instanceof JScrollPane) {
+                aTarget.setPreferredSize(new Dimension(aValue, aTarget.getHeight()));
+            } else if (aTarget.getParent() instanceof BoxPane || aTarget.getParent().getLayout() instanceof BoxLayout) {
+                aTarget.setPreferredSize(new Dimension(aValue, aTarget.getHeight()));
+            } else if (aTarget.getParent() instanceof BorderPane || aTarget.getParent().getLayout() instanceof BorderLayout) {
+                aTarget.setPreferredSize(new Dimension(aValue, aTarget.getHeight()));
+            } else if (aTarget.getParent() instanceof FlowPane || aTarget.getParent().getLayout() instanceof FlowLayout) {
+                aTarget.setPreferredSize(new Dimension(aValue, aTarget.getHeight()));
+            }
         }
         aTarget.setSize(aValue, aTarget.getHeight());
     }
 
     public static void setHeight(JComponent aTarget, int aValue) {
-        if (aTarget.getParent() != null && aTarget.getParent().getLayout() instanceof MarginLayout) {
-            MarginLayout.ajustHeight(aTarget, aValue);
-        } else if (aTarget.getParent() instanceof JViewport && aTarget.getParent().getParent() instanceof JScrollPane) {
-            /*
-             if (!super.isPreferredSizeSet()) {
-             clearPrefSize = true;
-             }
-             */
-            aTarget.setPreferredSize(new Dimension(aTarget.getWidth(), aValue));
-        } else if (aTarget.getParent() instanceof BoxPane) {
-            aTarget.setPreferredSize(new Dimension(aTarget.getWidth(), aValue));
-        } else if (aTarget.getParent() instanceof FlowPane) {
-            aTarget.setPreferredSize(new Dimension(aTarget.getWidth(), aValue));
+        if (aTarget.getParent() != null) {
+            if (aTarget.getParent() instanceof AnchorsPane || aTarget.getParent().getLayout() instanceof MarginLayout) {
+                MarginLayout.ajustHeight(aTarget, aValue);
+            } else if (aTarget.getParent() instanceof JViewport && aTarget.getParent().getParent() instanceof JScrollPane) {
+                aTarget.setPreferredSize(new Dimension(aTarget.getWidth(), aValue));
+            } else if (aTarget.getParent() instanceof BoxPane || aTarget.getParent().getLayout() instanceof BoxLayout) {
+                aTarget.setPreferredSize(new Dimension(aTarget.getWidth(), aValue));
+            } else if (aTarget.getParent() instanceof BorderPane || aTarget.getParent().getLayout() instanceof BorderLayout) {
+                aTarget.setPreferredSize(new Dimension(aTarget.getWidth(), aValue));
+            } else if (aTarget.getParent() instanceof FlowPane || aTarget.getParent().getLayout() instanceof FlowLayout) {
+                aTarget.setPreferredSize(new Dimension(aTarget.getWidth(), aValue));
+            }
         }
         aTarget.setSize(aTarget.getWidth(), aValue);
     }
-    
+
     public static final String PARENT_JSDOC = ""
             + "/**\n"
             + "* Parent container of this widget.\n"
             + "*/";
+
     public Widget getParentWidget();
-    
+
     public static final String LEFT_JSDOC = ""
             + "/**\n"
             + "* Horizontal coordinate of the component.\n"

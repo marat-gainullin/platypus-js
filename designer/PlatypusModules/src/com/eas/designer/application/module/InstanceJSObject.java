@@ -11,11 +11,11 @@ import jdk.nashorn.api.scripting.AbstractJSObject;
  *
  * @author mg
  */
-public class FakeJSObject extends AbstractJSObject {
+public class InstanceJSObject extends AbstractJSObject {
 
     public static final Object fakeMember = new Object();
 
-    public FakeJSObject() {
+    public InstanceJSObject() {
         super();
     }
 

@@ -440,7 +440,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate {
 
         FormProperty<?>[] props = getAllProperties();
         for (int i = 0; i < props.length; i++) {
-            if (props[i].isChanged()) {
+            if (!props[i].isDefaultValue()) {
                 return true;
             }
         }

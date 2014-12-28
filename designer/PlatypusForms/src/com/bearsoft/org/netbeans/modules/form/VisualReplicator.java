@@ -75,10 +75,11 @@ import org.openide.ErrorManager;
  */
 public class VisualReplicator {
 
-    //private RADComponent<?> topRADComponent;
+    //private RADComponent<?> topDesignComponent;
     private final FormEditor formEditor;
     private final Map<String, Object> nameToClone = new HashMap<>();
     private final Map<Object, String> cloneToName = new HashMap<>();
+    protected RADComponent<?> topDesignComponent;
     private final boolean designRestrictions;
 
     // ---------
@@ -106,23 +107,17 @@ public class VisualReplicator {
         return Collections.unmodifiableMap(nameToClone);
     }
 
-/*
-    // ---------
-    private FormModel getFormModel() {
-        return getTopRADComponent().getFormModel();
-    }
-    
     // getters & setters
-    public RADComponent<?> getTopRADComponent() {
-        return topRADComponent;
+    public RADComponent<?> getTopDesignComponent() {
+        return topDesignComponent;
     }
 
-    public void setTopRADComponent(RADComponent<?> aRadComponent) {
-        topRADComponent = aRadComponent;
+    public void setTopDesignComponent(RADComponent<?> aRadComponent) {
+        topDesignComponent = aRadComponent;
         nameToClone.clear();
         cloneToName.clear();
     }
-*/
+
     public boolean getDesignRestrictions() {
         return designRestrictions;
     }
@@ -130,7 +125,7 @@ public class VisualReplicator {
     // --------
     // executive public methods
     public Object createClone() {
-        return createClone(formEditor.getFormModel().getTopRADComponent());
+        return createClone(topDesignComponent);
     }
 
     public Object createClone(RADComponent<?> radComp) {

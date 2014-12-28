@@ -10,7 +10,7 @@ import com.bearsoft.org.netbeans.modules.form.FormProperty;
 import com.bearsoft.org.netbeans.modules.form.RADComponent;
 import com.bearsoft.org.netbeans.modules.form.RADComponentNode;
 import com.bearsoft.org.netbeans.modules.form.RADProperty;
-import com.bearsoft.org.netbeans.modules.form.bound.ModelObjectPropertyProperty;
+import com.bearsoft.org.netbeans.modules.form.bound.EntityJSObjectFieldProperty;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
@@ -19,7 +19,7 @@ import com.eas.client.model.ModelElementRef;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.model.gui.selectors.ModelElementSelector;
-import com.eas.designer.application.module.ModelJSObject;
+import com.eas.designer.application.module.EntityJSObject;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyEditorSupport;
@@ -38,20 +38,20 @@ import org.openide.util.NbBundle;
  *
  * @author mg
  */
-public class ModelObjectPropertyPropertyEditor extends PropertyEditorSupport implements ExPropertyEditor {
+public class EntityJSObjectFieldEditor extends PropertyEditorSupport implements ExPropertyEditor {
 
     protected int selectionSubject = ModelElementSelector.FIELD_SELECTION_SUBJECT;
-    protected String dialogTitle = NbBundle.getMessage(ModelObjectPropertyPropertyEditor.class, "CTL_SelectField");
+    protected String dialogTitle = NbBundle.getMessage(EntityJSObjectFieldEditor.class, "CTL_SelectField");
     protected FormModel formModel;
-    protected ModelObjectPropertyProperty property;
+    protected EntityJSObjectFieldProperty property;
     protected RADComponent<?> comp;
     protected String prefix = "";
 
-    public ModelObjectPropertyPropertyEditor() {
+    public EntityJSObjectFieldEditor() {
         super();
     }
 
-    public ModelObjectPropertyPropertyEditor(String aPrefix) {
+    public EntityJSObjectFieldEditor(String aPrefix) {
         this();
         prefix = aPrefix;
     }
@@ -89,8 +89,8 @@ public class ModelObjectPropertyPropertyEditor extends PropertyEditorSupport imp
                 RADModelGridColumn radCol = (RADModelGridColumn) comp;
                 comp = radCol.lookupGrid();
             }
-            RADProperty<ModelJSObject> prop = comp.getProperty(ModelCombo.class.isAssignableFrom(comp.getBeanClass()) && "displayField".equals(property.getName()) ? "displayList" : "data");
-            ModelJSObject modelJsObject = prop != null ? prop.getValue() : null;
+            RADProperty<EntityJSObject> prop = comp.getProperty(ModelCombo.class.isAssignableFrom(comp.getBeanClass()) && "displayField".equals(property.getName()) ? "displayList" : "data");
+            EntityJSObject modelJsObject = prop != null ? prop.getValue() : null;
             ApplicationDbEntity dataEntity = modelJsObject != null ? modelJsObject.getEntity() : null;
             return dataEntity;
         } catch (IllegalAccessException | InvocationTargetException ex) {
@@ -189,12 +189,12 @@ public class ModelObjectPropertyPropertyEditor extends PropertyEditorSupport imp
      renderer.setText("<>");
      }
      } else {
-     renderer.setText(NbBundle.getMessage(ModelObjectPropertyPropertyEditor.class, "CTL_ModelUnavailable"));
+     renderer.setText(NbBundle.getMessage(EntityJSObjectFieldEditor.class, "CTL_ModelUnavailable"));
      }
      renderer.setSize(box.getSize());
      renderer.paint(gfx);
      } catch (Exception ex) {
-     Logger.getLogger(ModelObjectPropertyPropertyEditor.class.getName()).log(Level.SEVERE, null, ex);
+     Logger.getLogger(EntityJSObjectFieldEditor.class.getName()).log(Level.SEVERE, null, ex);
      }
      }
 
@@ -250,7 +250,7 @@ public class ModelObjectPropertyPropertyEditor extends PropertyEditorSupport imp
                 return super.getCustomEditor();
             }
         } catch (Exception ex) {
-            Logger.getLogger(ModelObjectPropertyPropertyEditor.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(EntityJSObjectFieldEditor.class.getName()).log(Level.SEVERE, null, ex);
             return super.getCustomEditor();
         }
     }
@@ -264,7 +264,7 @@ public class ModelObjectPropertyPropertyEditor extends PropertyEditorSupport imp
             FormCookie formCookie = node.getLookup().lookup(FormCookie.class);
             if (formCookie != null && aEnv.getFeatureDescriptor() instanceof FormProperty<?>) {
                 formModel = formCookie.getFormModel();
-                property = (ModelObjectPropertyProperty) aEnv.getFeatureDescriptor();
+                property = (EntityJSObjectFieldProperty) aEnv.getFeatureDescriptor();
             }
             if (node instanceof RADComponentNode) {
                 comp = ((RADComponentNode) node).getRADComponent();
@@ -276,7 +276,7 @@ public class ModelObjectPropertyPropertyEditor extends PropertyEditorSupport imp
         formModel = aFormModel;
     }
 
-    public void setProperty(ModelObjectPropertyProperty aProperty) {
+    public void setProperty(EntityJSObjectFieldProperty aProperty) {
         property = aProperty;
     }
 

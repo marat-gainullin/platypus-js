@@ -45,7 +45,7 @@ public class RADModelGridColumn extends RADComponent<GridColumnsNode> implements
     @Override
     protected RADProperty<?> createCheckedBeanProperty(PropertyDescriptor desc) throws InvocationTargetException, IllegalAccessException {
         if ("field".equals(desc.getName())) {
-            return new ModelObjectPropertyProperty(this, desc, "");
+            return new EntityJSObjectFieldProperty(this, desc, "");
         } else {
             return super.createCheckedBeanProperty(desc);
         }

@@ -714,7 +714,7 @@ public class FormUtils {
 
             if (sfProp != null
                     && (mode & CHANGED_ONLY) != 0
-                    && !sfProp.isChanged()) {
+                    && sfProp.isDefaultValue()) {
                 continue; // copy only changed properties
             }
             // find target property
@@ -834,17 +834,6 @@ public class FormUtils {
             return true;
         }
         return false;
-    }
-
-    static ComponentConverter[] getClassConverters() {
-        Lookup.Result<ComponentConverter> result = Lookup.getDefault().lookupResult(ComponentConverter.class);
-        Collection<? extends ComponentConverter> all = result.allInstances();
-        ComponentConverter[] converters = new ComponentConverter[all.size()];
-        int i = all.size();
-        for (ComponentConverter c : all) {
-            converters[--i] = c;
-        }
-        return converters;
     }
 
     public static RADVisualContainer<?> getSameParent(List<RADVisualComponent<?>> aComps) {

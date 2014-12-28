@@ -69,19 +69,20 @@ import org.openide.util.actions.SystemAction;
 import org.openide.util.datatransfer.NewType;
 import org.openide.util.datatransfer.PasteType;
 
-public class RADComponentNode extends FormNode
-        implements RADComponentCookie, FormPropertyCookie {
+public class RADComponentNode extends FormNode implements RADComponentCookie, FormPropertyCookie {
 
     private static final DefaultRADAction DEFAULT_ACTION = new DefaultRADAction();
     private final static MessageFormat nodeNameFormat
             = new MessageFormat(
                     FormUtils.getBundleString("FMT_ComponentNodeName")); // NOI18N
+    /*
     private final static MessageFormat nodeNoNameFormat
             = new MessageFormat(
                     FormUtils.getBundleString("FMT_UnnamedComponentNodeName")); // NOI18N
+    */
     private RADComponent<?> component;
     private boolean highlightDisplayName;
-    private Map<Integer, Image> img = new HashMap<>();
+    private final Map<Integer, Image> img = new HashMap<>();
 
     public RADComponentNode(RADComponent<?> aComponent) {
         this(aComponent instanceof ComponentContainer ? new RADChildren((ComponentContainer) aComponent) : Children.LEAF,

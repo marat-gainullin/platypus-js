@@ -1625,7 +1625,7 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
             super.componentShowing();
             finishComponentShowing();
         } catch (PersistenceException ex) {
-            Exceptions.printStackTrace(ex);
+            ErrorManager.getDefault().notify(ErrorManager.EXCEPTION, ex);
         }
     }
 
@@ -1781,6 +1781,7 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
         @Override
         public void run() {
             if (events == null) {
+                replicator.setTopDesignComponent(topDesignComponent);
                 JComponent formClone = (JComponent) replicator.createClone();
                 if (formClone != null) {
                     formClone.setVisible(true);

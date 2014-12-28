@@ -117,7 +117,6 @@ public class RADProperty<T> extends FormProperty<T> {
         // invoke the setter method
         T oldValue = getValue();
         writeMethod.invoke(beanInstance, new Object[]{value});
-        setChanged(!isDefaultValue());
         propertyValueChanged(oldValue, value);
     }
 

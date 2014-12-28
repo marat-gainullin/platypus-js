@@ -6,8 +6,8 @@
 package com.eas.designer.application.module;
 
 import com.eas.client.model.application.ApplicationDbEntity;
+import com.eas.client.model.application.ApplicationDbModel;
 import jdk.nashorn.api.scripting.AbstractJSObject;
-import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -15,52 +15,27 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class ModelJSObject extends AbstractJSObject {
 
-    protected ApplicationDbEntity entity;
-    protected JSObject cursor;
-    protected JSObject[] elements = new JSObject[20];
+    protected ApplicationDbModel model;
 
-    public ModelJSObject(ApplicationDbEntity aEntity) {
+    public ModelJSObject(ApplicationDbModel aModel) {
         super();
-        entity = aEntity;
-        for (int i = 0; i < elements.length; i++) {
-            elements[i] = new FakeJSObject();
-        }
-        cursor = elements[0];
+        model = aModel;
     }
 
-    public ApplicationDbEntity getEntity() {
-        return entity;
-    }
-
-    @Override
-    public boolean isArray() {
-        return true;
+    public ApplicationDbModel getModel() {
+        return model;
     }
 
     @Override
     public boolean hasMember(String name) {
-        if ("length".equals(name) || "cursor".equals(name)) {
-            return true;
-        } else {
-            return super.hasMember(name);
-        }
+        ApplicationDbEntity entity = model.getEntityByName(name);
+        return entity != null;
     }
 
     @Override
     public Object getMember(String name) {
-        switch (name) {
-            case "length":
-                return elements.length;
-            case "cursor":
-                return cursor;
-            default:
-                return super.getMember(name);
-        }
-    }
-
-    @Override
-    public Object getSlot(int index) {
-        return elements[index];
+        ApplicationDbEntity entity = model.getEntityByName(name);
+        return entity != null ? entity.getPublished() : null;
     }
 
 }

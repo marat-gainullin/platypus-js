@@ -148,30 +148,20 @@ public class FormEditor {
             Logger.getLogger("TIMER").log(Level.FINE, "FormModel", new Object[]{formDataObject.getPrimaryFile(), formModel}); // NOI18N
             // load the form data (FormModel) and report errors
             try {
-                formModel = persistenceManager.loadForm(formDataObject,
-                        persistenceErrors);
+                formModel = persistenceManager.loadForm(formDataObject, persistenceErrors);
                 formModel.setModified(false);
-            } catch (PersistenceException ex) { // some fatal error occurred
-                persistenceManager = null;
-                formModel = null;
-                throw ex;
-            } catch (Exception ex) { // should not happen, but for sure...
-                ErrorManager.getDefault().notify(ex);
-                persistenceManager = null;
-                formModel = null;
-                return;
+                // form is successfully loaded...
+                formLoaded = true;
+                formModel.fireFormLoaded();
+                // create form nodes hierarchy and add it to SourceChildren
+                formRootNode = new FormRootNode(formModel);
+                formRootNode.getChildren().getNodes();
+                formDataObject.getNodeDelegate().getChildren().add(new Node[]{formRootNode});
+
+                attachDataObjectListener();
+            } catch (Exception ex) {
+                throw new PersistenceException(ex);
             }
-
-            // form is successfully loaded...
-            formLoaded = true;
-
-            formModel.fireFormLoaded();
-            // create form nodes hierarchy and add it to SourceChildren
-            formRootNode = new FormRootNode(formModel);
-            formRootNode.getChildren().getNodes();
-            formDataObject.getNodeDelegate().getChildren().add(new Node[]{formRootNode});
-
-            attachDataObjectListener();
         }
     }
 

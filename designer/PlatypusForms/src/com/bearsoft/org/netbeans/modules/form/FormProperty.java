@@ -76,6 +76,7 @@ import org.openide.util.Exceptions;
  * sheet about changing current property editor of a property.
  *
  * @author Tomas Pavek
+ * @param <T>
  */
 public abstract class FormProperty<T> extends Node.Property<T> {
 
@@ -101,7 +102,6 @@ public abstract class FormProperty<T> extends Node.Property<T> {
     // ------------------------
     // variables
     protected int accessType = NORMAL_RW;
-    boolean valueChanged = false; // non-default value that came in through setValue
     private PropertyChangeSupport changeSupport;
     private VetoableChangeSupport vetoableChangeSupport;
     private boolean fireChanges = true;
@@ -137,8 +137,7 @@ public abstract class FormProperty<T> extends Node.Property<T> {
     // getter, setter & related methods
     @Override
     public String getHtmlDisplayName() {
-        //!isDefaultValue() is substituted with isChanged() for performance reasons
-        if (isChanged()) {
+        if (!isDefaultValue()) {
             return "<b>" + getDisplayName(); // NOI18N
         } else {
             return null;
@@ -177,27 +176,6 @@ public abstract class FormProperty<T> extends Node.Property<T> {
 
     public void setAccessType(int aValue) {
         accessType = aValue;
-    }
-
-    /**
-     * Tests whether this property is marked as "changed". This method returns
-     * true if the value of the property is different from the default value and
-     * if it is accessible and replicable (readable and writeable property).
-     *
-     * @return <code>true</code> if the property was changed, * * * * returns
-     * <code>false</code> otherwise.
-     */
-    public boolean isChanged() {
-        return valueChanged;
-    }
-
-    /**
-     * Sets explicitly the flag indicating changed property.
-     *
-     * @param changed determines whether this property was changed.
-     */
-    public void setChanged(boolean changed) {
-        valueChanged = changed;
     }
 
     /**
@@ -241,8 +219,7 @@ public abstract class FormProperty<T> extends Node.Property<T> {
      * invocation problem.
      */
     @Override
-    public void restoreDefaultValue() throws IllegalAccessException,
-            InvocationTargetException {
+    public void restoreDefaultValue() throws IllegalAccessException, InvocationTargetException {
         T oldValue = null;
         T defValue = getDefaultValue();
 
@@ -255,7 +232,6 @@ public abstract class FormProperty<T> extends Node.Property<T> {
         }
         if (!Objects.deepEquals(defValue, oldValue)) {
             setValue(defValue);
-            setChanged(false);
         }
     }
 
@@ -297,7 +273,7 @@ public abstract class FormProperty<T> extends Node.Property<T> {
         fireChanges = fire;
     }
 
-    protected void propertyValueChanged(T old, T current) {
+    protected final void propertyValueChanged(T old, T current) {
         if (fireChanges) {
             try {
                 firePropertyChange(PROP_VALUE, old, current);

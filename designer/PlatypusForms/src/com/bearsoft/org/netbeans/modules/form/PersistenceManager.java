@@ -81,7 +81,7 @@ import com.eas.client.forms.menu.PopupMenu;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.designer.application.PlatypusUtils;
-import com.eas.designer.application.module.ModelJSObject;
+import com.eas.designer.application.module.EntityJSObject;
 import com.eas.gui.ScriptColor;
 import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
@@ -252,9 +252,6 @@ public class PersistenceManager {
             formModel.initFormComponent(formComp);
             formComp.setStoredName(form.getViewWidget().getName());
             formComp.setBeanInstance(form.getViewWidget());
-            for (RADProperty<?> radProp : formComp.getBeanProperties()) {
-                radProp.setChanged(!radProp.isDefaultValue());
-            }
 
             formComp.checkLayoutSupport();
             LayoutSupportManager laysup = formComp.getLayoutSupport();
@@ -526,8 +523,8 @@ public class PersistenceManager {
                             if (compRef.getComponent() != null) {
                                 targetElement.setAttribute(radProp.getName(), compRef.getComponent().getName());
                             }
-                        } else if (propValue instanceof ModelJSObject) {
-                            targetElement.setAttribute(radProp.getName(), ((ModelJSObject) propValue).getEntity().getName());
+                        } else if (propValue instanceof EntityJSObject) {
+                            targetElement.setAttribute(radProp.getName(), ((EntityJSObject) propValue).getEntity().getName());
                         } else if (propValue instanceof IconEditor.NbImageIcon) {
                             targetElement.setAttribute(radProp.getName(), ((IconEditor.NbImageIcon) propValue).getName());
                         } else if (propValue instanceof java.awt.Cursor) {
@@ -579,9 +576,6 @@ public class PersistenceManager {
         radComp.initialize(aFormModel);
         radComp.setStoredName(aWidget.getName());
         ((RADComponent<JComponent>) radComp).setBeanInstance(aWidget);
-        for (RADProperty<?> radProp : radComp.getBeanProperties()) {
-            radProp.setChanged(!radProp.isDefaultValue());
-        }
         if (radComp instanceof RADVisualContainer<?>) {
             RADVisualContainer<?> radCont = (RADVisualContainer<?>) radComp;
             radCont.checkLayoutSupport();
@@ -608,9 +602,6 @@ public class PersistenceManager {
                         RADColumnView<ModelComponentDecorator> radEditor = new RADColumnView<>();
                         radEditor.initialize(aFormModel);
                         radEditor.setBeanInstance((ModelComponentDecorator)editor);
-                        for (RADProperty<?> radProp : radEditor.getBeanProperties()) {
-                            radProp.setChanged(!radProp.isDefaultValue());
-                        }
                         radCol.setViewControl(radEditor);
                     } catch (Exception ex) {
                         Exceptions.printStackTrace(ex);

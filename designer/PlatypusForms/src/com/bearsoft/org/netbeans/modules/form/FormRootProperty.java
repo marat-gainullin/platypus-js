@@ -52,7 +52,6 @@ class FormRootProperty<T> extends FormProperty<T> {
         // invoke the setter method
         T oldValue = getValue();
         writeMethod.invoke(form, new Object[]{value});
-        setChanged(!isDefaultValue());
         propertyValueChanged(oldValue, value);
     }
 

@@ -98,7 +98,6 @@ public class FlowLayoutSupport extends AbstractLayoutSupport {
                         int oldValue = getValue();
                         int hgap = aValue != null ? aValue : 0;
                         ((FlowLayout)getRadLayout().getBeanInstance()).setHgap(hgap);
-                        setChanged(hgap != 0);
                         propertyValueChanged(oldValue, hgap);
                     }
 
@@ -128,7 +127,6 @@ public class FlowLayoutSupport extends AbstractLayoutSupport {
                         int oldValue = getValue();
                         int vgap = aValue != null ? aValue : 0;
                         ((FlowLayout)getRadLayout().getBeanInstance()).setVgap(vgap);
-                        setChanged(vgap != 0);
                         propertyValueChanged(oldValue, vgap);
                     }
 

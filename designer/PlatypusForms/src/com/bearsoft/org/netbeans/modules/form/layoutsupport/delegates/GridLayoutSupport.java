@@ -99,7 +99,6 @@ public class GridLayoutSupport extends AbstractLayoutSupport {
                         int oldValue = getValue();
                         int rows = aValue != null ? aValue : 0;
                         ((GridLayout)getRadLayout().getBeanInstance()).setRows(rows);
-                        setChanged(rows != 0);
                         propertyValueChanged(oldValue, rows);
                     }
 
@@ -129,7 +128,6 @@ public class GridLayoutSupport extends AbstractLayoutSupport {
                         int oldValue = getValue();
                         int cols = aValue != null ? aValue : 0;
                         ((GridLayout)getRadLayout().getBeanInstance()).setColumns(cols);
-                        setChanged(cols != 0);
                         propertyValueChanged(oldValue, cols);
                     }
 
@@ -159,7 +157,6 @@ public class GridLayoutSupport extends AbstractLayoutSupport {
                         int oldValue = getValue();
                         int hgap = aValue != null ? aValue : 0;
                         ((GridLayout)getRadLayout().getBeanInstance()).setHgap(hgap);
-                        setChanged(hgap != 0);
                         propertyValueChanged(oldValue, hgap);
                     }
 
@@ -189,7 +186,6 @@ public class GridLayoutSupport extends AbstractLayoutSupport {
                         int oldValue = getValue();
                         int vgap = aValue != null ? aValue : 0;
                         ((GridLayout)getRadLayout().getBeanInstance()).setVgap(vgap);
-                        setChanged(vgap != 0);
                         propertyValueChanged(oldValue, vgap);
                     }
 

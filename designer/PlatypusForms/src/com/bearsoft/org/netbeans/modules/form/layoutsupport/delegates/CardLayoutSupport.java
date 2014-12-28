@@ -232,7 +232,6 @@ public class CardLayoutSupport extends AbstractLayoutSupport {
                         int oldValue = getValue();
                         int hgap = aValue != null ? aValue : 0;
                         ((CardLayout)getRadLayout().getBeanInstance()).setHgap(hgap);
-                        setChanged(hgap != 0);
                         propertyValueChanged(oldValue, hgap);
                     }
 
@@ -262,7 +261,6 @@ public class CardLayoutSupport extends AbstractLayoutSupport {
                         int oldValue = getValue();
                         int vgap = aValue != null ? aValue : 0;
                         ((CardLayout)getRadLayout().getBeanInstance()).setVgap(vgap);
-                        setChanged(vgap != 0);
                         propertyValueChanged(oldValue, vgap);
                     }
 

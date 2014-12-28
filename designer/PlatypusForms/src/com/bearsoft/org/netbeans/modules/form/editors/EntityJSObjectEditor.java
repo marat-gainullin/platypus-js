@@ -7,7 +7,7 @@ package com.bearsoft.org.netbeans.modules.form.editors;
 import com.bearsoft.org.netbeans.modules.form.FormCookie;
 import com.bearsoft.org.netbeans.modules.form.FormModel;
 import com.bearsoft.org.netbeans.modules.form.FormProperty;
-import com.eas.designer.application.module.ModelJSObject;
+import com.eas.designer.application.module.EntityJSObject;
 import com.eas.client.model.ModelElementRef;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
@@ -30,17 +30,17 @@ import org.openide.util.NbBundle;
  *
  * @author mg
  */
-public class ModelObjectEditor extends PropertyEditorSupport implements ExPropertyEditor {
+public class EntityJSObjectEditor extends PropertyEditorSupport implements ExPropertyEditor {
 
     protected int selectionSubject = ModelElementSelector.DATASOURCE_SELECTION_SUBJECT;
-    protected String dialogTitle = NbBundle.getMessage(ModelObjectPropertyPropertyEditor.class, "CTL_SelectField");
+    protected String dialogTitle = NbBundle.getMessage(EntityJSObjectFieldEditor.class, "CTL_SelectField");
     protected FormModel formModel;
     protected FormProperty<Object> property;
     protected IconsListCellRenderer renderer;
 
-    public ModelObjectEditor() {
+    public EntityJSObjectEditor() {
         super();
-        dialogTitle = NbBundle.getMessage(ModelObjectEditor.class, "CTL_SelectEntity");
+        dialogTitle = NbBundle.getMessage(EntityJSObjectEditor.class, "CTL_SelectEntity");
     }
 
     // Elipsis button section
@@ -55,7 +55,7 @@ public class ModelObjectEditor extends PropertyEditorSupport implements ExProper
             ApplicationDbModel model = formModel.getDataObject().getModel();
             if (model != null) {
                 ModelElementRef oldRef = new ModelElementRef();
-                ModelJSObject oldModelObject = (ModelJSObject) getValue();
+                EntityJSObject oldModelObject = (EntityJSObject) getValue();
                 oldRef.setEntityId(oldModelObject.getEntity().getEntityId());
                 final ModelElementRef selected = new ModelElementRef();
                 return ModelElementSelector.prepareDialog(model,
@@ -71,7 +71,7 @@ public class ModelObjectEditor extends PropertyEditorSupport implements ExProper
                 return super.getCustomEditor();
             }
         } catch (Exception ex) {
-            Logger.getLogger(ModelObjectPropertyPropertyEditor.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(EntityJSObjectFieldEditor.class.getName()).log(Level.SEVERE, null, ex);
             return super.getCustomEditor();
         }
     }
@@ -93,8 +93,8 @@ public class ModelObjectEditor extends PropertyEditorSupport implements ExProper
     @Override
     public String getAsText() {
         Object oObject = getValue();
-        if (oObject instanceof ModelJSObject) {
-            ModelJSObject obj = (ModelJSObject) oObject;
+        if (oObject instanceof EntityJSObject) {
+            EntityJSObject obj = (EntityJSObject) oObject;
             return obj.getEntity().getName();
         } else {
             return super.getAsText();
