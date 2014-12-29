@@ -22,7 +22,7 @@ public class ServiceGridColumn extends GridColumnsNode {
     public ServiceGridColumn() {
         super();
         setTableColumn(new ServiceColumn());
-        setResizable(false);
+        resizable = false;
     }
 
     public ServiceGridColumn(GridColumnsNode aParent) {
@@ -30,7 +30,8 @@ public class ServiceGridColumn extends GridColumnsNode {
     }
 
     public ServiceGridColumn(String aTitle) {
-        super(aTitle);
+        this();
+        title = aTitle;
     }
 
     protected ServiceGridColumn(TableColumn aCol) {

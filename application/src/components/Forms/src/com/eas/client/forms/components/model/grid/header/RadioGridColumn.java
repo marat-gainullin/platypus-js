@@ -22,7 +22,7 @@ public class RadioGridColumn extends GridColumnsNode {
     public RadioGridColumn() {
         super();
         setTableColumn(new RadioServiceColumn());
-        setResizable(false);
+        resizable = false;
     }
 
     public RadioGridColumn(GridColumnsNode aParent) {
@@ -30,7 +30,8 @@ public class RadioGridColumn extends GridColumnsNode {
     }
 
     public RadioGridColumn(String aTitle) {
-        super(aTitle);
+        this();
+        title = aTitle;
     }
 
     protected RadioGridColumn(TableColumn aCol) {

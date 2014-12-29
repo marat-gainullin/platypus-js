@@ -55,6 +55,7 @@ import com.bearsoft.org.netbeans.modules.form.menu.AddSubItemAction;
 import com.bearsoft.org.netbeans.modules.form.menu.InsertMenuAction;
 import com.bearsoft.org.netbeans.modules.form.menu.MenuEditLayer;
 import com.bearsoft.org.netbeans.modules.form.palette.PaletteUtils;
+import com.eas.client.forms.components.model.grid.header.ModelGridColumn;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Image;
@@ -85,8 +86,7 @@ public class RADComponentNode extends FormNode implements RADComponentCookie, Fo
     private final Map<Integer, Image> img = new HashMap<>();
 
     public RADComponentNode(RADComponent<?> aComponent) {
-        this(aComponent instanceof ComponentContainer ? new RADChildren((ComponentContainer) aComponent) : Children.LEAF,
-                aComponent);
+        this(aComponent instanceof ComponentContainer ? new RADChildren((ComponentContainer) aComponent) : Children.LEAF, aComponent);
     }
 
     protected RADComponentNode(Children children, RADComponent<?> aComponent) {
@@ -195,12 +195,6 @@ public class RADComponentNode extends FormNode implements RADComponentCookie, Fo
                 }
                 lactions.add(SystemAction.get(CopyAction.class));
             } else if (!(component instanceof RADColumnView)) {
-                /* If you whant ot uncomment folowing code, you have to refactor
-                 * action to avoid breaking of model-view pattern
-                 if (InPlaceEditLayer.supportsEditingFor(component.getBeanClass(), false)) {
-                 lactions.add(SystemAction.get(InPlaceEditAction.class));
-                 }
-                 */
                 if (SelectGridColumnViewAction.isEditableComponent(component)) {
                     lactions.add(SystemAction.get(SelectGridColumnViewAction.class));
                     addSeparator(lactions);
@@ -476,7 +470,7 @@ public class RADComponentNode extends FormNode implements RADComponentCookie, Fo
     // Innerclasses
     public static class RADChildren extends FormNodeChildren {
 
-        private ComponentContainer container;
+        private final ComponentContainer container;
         private RADLayout keyLayout;
 
         public RADChildren(ComponentContainer aContainer) {
@@ -493,7 +487,7 @@ public class RADComponentNode extends FormNode implements RADComponentCookie, Fo
                 keyLayout = ((RADVisualContainer<?>) container).getLayoutSupport().getLayoutDelegate().getRadLayout();
                 keys.add(keyLayout);
             }
-            if (container instanceof RADModelGridColumn) {
+            if (container instanceof RADModelGridColumn && ((RADModelGridColumn)container).getBeanInstance() instanceof ModelGridColumn) {
                 RADModelGridColumn col = (RADModelGridColumn) container;
                 keys.add(col.getViewControl());
             }

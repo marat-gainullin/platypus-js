@@ -590,10 +590,6 @@ public class BorderLayoutSupport extends AbstractLayoutSupport {
 
         private final String[] values = {
             BorderLayout.CENTER,
-            BorderLayout.LINE_START,
-            BorderLayout.LINE_END,
-            BorderLayout.PAGE_START,
-            BorderLayout.PAGE_END,
             BorderLayout.WEST,
             BorderLayout.EAST,
             BorderLayout.NORTH,
@@ -601,10 +597,6 @@ public class BorderLayoutSupport extends AbstractLayoutSupport {
         };
         private final String[] javaInitStrings = {
             "java.awt.BorderLayout.CENTER", // NOI18N
-            "java.awt.BorderLayout.LINE_START", // NOI18N
-            "java.awt.BorderLayout.LINE_END", // NOI18N
-            "java.awt.BorderLayout.PAGE_START", // NOI18N
-            "java.awt.BorderLayout.PAGE_END", // NOI18N
             "java.awt.BorderLayout.WEST", // NOI18N
             "java.awt.BorderLayout.EAST", // NOI18N
             "java.awt.BorderLayout.NORTH", // NOI18N

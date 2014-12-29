@@ -9,7 +9,6 @@ import com.eas.client.forms.Form;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Objects;
 
 /**
  *
@@ -53,16 +52,6 @@ class FormRootProperty<T> extends FormProperty<T> {
         T oldValue = getValue();
         writeMethod.invoke(form, new Object[]{value});
         propertyValueChanged(oldValue, value);
-    }
-
-    @Override
-    public boolean isDefaultValue() {
-        try {
-            Object currentValue = getValue();
-            return Objects.deepEquals(currentValue, defaultValue);
-        } catch (IllegalAccessException | InvocationTargetException ex) {
-            return false;
-        }
     }
 
     @Override

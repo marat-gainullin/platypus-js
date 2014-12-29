@@ -648,7 +648,7 @@ public abstract class RADComponent<C> {
                 String eventName = evt.getPropertyName();
                 switch (eventName) {
                     case FormProperty.PROP_VALUE:
-                        // property value has changed (or value and editor together)
+                        // property value has settedToDefault (or value and editor together)
                         Object oldValue = evt.getOldValue();
                         Object newValue = evt.getNewValue();
                         formModel.fireComponentPropertyChanged(

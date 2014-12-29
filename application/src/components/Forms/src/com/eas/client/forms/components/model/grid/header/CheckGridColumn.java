@@ -22,7 +22,7 @@ public class CheckGridColumn extends GridColumnsNode {
     public CheckGridColumn() {
         super();
         setTableColumn(new CheckServiceColumn());
-        setResizable(false);
+        resizable = false;
     }
 
     public CheckGridColumn(GridColumnsNode aParent) {
@@ -30,7 +30,8 @@ public class CheckGridColumn extends GridColumnsNode {
     }
 
     public CheckGridColumn(String aTitle) {
-        super(aTitle);
+        this();
+        title = aTitle;
     }
 
     protected CheckGridColumn(TableColumn aCol) {

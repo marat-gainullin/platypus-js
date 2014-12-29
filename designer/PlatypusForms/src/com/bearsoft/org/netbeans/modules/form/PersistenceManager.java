@@ -146,6 +146,12 @@ public class PersistenceManager {
                 }
 
                 @Override
+                protected JSObject resolveEntity(long aEntityId) throws Exception {
+                    ApplicationDbEntity entity = formDataObject.getModel().getEntityById(aEntityId);
+                    return entity != null ? entity.getPublished() : null;
+                }
+
+                @Override
                 protected JComponent createAnchorsPane() {
                     return new FormUtils.Panel(new MarginLayout());
                 }
@@ -260,38 +266,20 @@ public class PersistenceManager {
 
             Map<String, RADComponent<?>> radComps = new HashMap<>();
             radComps.put(formComp.getName(), formComp);
-            formFactory.getWidgets().entrySet().stream().filter((Map.Entry<String, JComponent> aEntry) -> {
-                return aEntry.getValue() != form.getViewWidget();
-            }).forEach((Map.Entry<String, JComponent> aEntry) -> {
+            formFactory.getWidgetsList().stream().sequential().filter((JComponent aWidget) -> {
+                return aWidget != form.getViewWidget();
+            }).forEach((JComponent aWidget) -> {
                 try {
-                    RADComponent<?> radComp = radComponentByWidget(formModel, aEntry.getValue());
+                    RADComponent<?> radComp = radComponentByWidget(formModel, aWidget);
                     radComps.put(radComp.getName(), radComp);
-                    /*
-                     if(radComp instanceof RADModelGrid){
-                     RADModelGrid radGrid = (RADModelGrid)radComp;
-                     ModelGrid grid = radGrid.getBeanInstance();
-                     for(GridColumnsNode colNode : grid.getHeader()){
-                     RADModelGridColumn radCol = new RADModelGridColumn();
-                     radCol.initialize(formModel);
-                     radCol.setStoredName(colNode.getName());
-                     radCol.setBeanInstance(colNode);
-                     radCol.setInModel(true);
-                     for(RADProperty<?> radProp : radCol.getBeanProperties()){
-                     radProp.setChanged(!radProp.isDefaultValue());
-                     }
-                     }
-                     }
-                     */
                 } catch (Exception ex) {
                     nonfatalErrors.add(ex);
                 }
             });
-
-            RADComponent<?>[] toResolve = radComps.values().toArray(new RADComponent<?>[]{});
-            for (RADComponent<?> radComp : toResolve) {
-                Object oWidget = radComp.getBeanInstance();
-                if (oWidget instanceof Widget) {
-                    Widget w = (Widget) oWidget;
+            formFactory.getWidgetsList().stream().sequential().forEach((JComponent aWidget) -> {
+                RADComponent<?> radComp = radComps.get(aWidget.getName());
+                if (aWidget instanceof Widget) {
+                    Widget w = (Widget) aWidget;
                     Widget p = w.getParentWidget();
                     if (p != null) {
                         String parentName = p.getComponent().getName();
@@ -341,9 +329,9 @@ public class PersistenceManager {
                     }
                 }
                 radComp.getProperties();// force properties creation
-            }
+            });
             return formModel;
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             throw new PersistenceException(ex);
         }
     }
@@ -357,7 +345,7 @@ public class PersistenceManager {
             doc.appendChild(root);
             writeProperties(formEditor.getFormRootNode().getFormProperties(), doc, root, true);
             root.setAttribute(Form.VIEW_SCRIPT_NAME, formEditor.getFormModel().getTopRADComponent().getName());
-            formEditor.getFormModel().getAllComponents().stream().filter((RADComponent<?> aComp) -> {
+            formEditor.getFormModel().getAllComponents().stream().sequential().filter((RADComponent<?> aComp) -> {
                 return !(aComp instanceof RADModelGridColumn);// grid columns will be written by grid.
             }).forEach((RADComponent<?> aComp) -> {
                 String widgetTagName = aComp.getBeanClass().getSimpleName();
@@ -601,7 +589,7 @@ public class PersistenceManager {
                     try {
                         RADColumnView<ModelComponentDecorator> radEditor = new RADColumnView<>();
                         radEditor.initialize(aFormModel);
-                        radEditor.setBeanInstance((ModelComponentDecorator)editor);
+                        radEditor.setBeanInstance((ModelComponentDecorator) editor);
                         radCol.setViewControl(radEditor);
                     } catch (Exception ex) {
                         Exceptions.printStackTrace(ex);

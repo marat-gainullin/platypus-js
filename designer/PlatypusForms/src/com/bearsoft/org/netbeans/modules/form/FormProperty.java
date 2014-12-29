@@ -105,6 +105,7 @@ public abstract class FormProperty<T> extends Node.Property<T> {
     private PropertyChangeSupport changeSupport;
     private VetoableChangeSupport vetoableChangeSupport;
     private boolean fireChanges = true;
+    protected Boolean settedToDefault;
 
     // ---------------------------
     // constructors
@@ -144,11 +145,6 @@ public abstract class FormProperty<T> extends Node.Property<T> {
         }
     }
 
-    // ------------------------------
-    // boolean flags
-    /**
-     * Tests whether the property is readable.
-     */
     @Override
     public boolean canRead() {
         return (accessType & NO_READ_PROP) == 0;
@@ -162,9 +158,6 @@ public abstract class FormProperty<T> extends Node.Property<T> {
         return (accessType & DETACHED_WRITE) == 0;
     }
 
-    /**
-     * Tests whether the property is writable.
-     */
     @Override
     public boolean canWrite() {
         return (accessType & NO_WRITE_PROP) == 0;
@@ -191,9 +184,12 @@ public abstract class FormProperty<T> extends Node.Property<T> {
     }
 
     @Override
-    public boolean isDefaultValue() {
+    public final boolean isDefaultValue() {
         try {
-            return supportsDefaultValue() ? Objects.equals(getValue(), getDefaultValue()) : false;
+            if (settedToDefault == null) {
+                settedToDefault = supportsDefaultValue() ? Objects.equals(getValue(), getDefaultValue()) : false;
+            }
+            return settedToDefault;
         } catch (IllegalAccessException | InvocationTargetException ex) {
             Exceptions.printStackTrace(ex);
             return false;
@@ -274,6 +270,7 @@ public abstract class FormProperty<T> extends Node.Property<T> {
     }
 
     protected final void propertyValueChanged(T old, T current) {
+        settedToDefault = null;// invalidate default state
         if (fireChanges) {
             try {
                 firePropertyChange(PROP_VALUE, old, current);

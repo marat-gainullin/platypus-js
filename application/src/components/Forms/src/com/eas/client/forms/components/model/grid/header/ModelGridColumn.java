@@ -32,7 +32,8 @@ public class ModelGridColumn extends GridColumnsNode {
     }
 
     public ModelGridColumn(String aTitle) {
-        super(aTitle);
+        this();
+        title = aTitle;
     }
 
     protected ModelGridColumn(TableColumn aCol) {

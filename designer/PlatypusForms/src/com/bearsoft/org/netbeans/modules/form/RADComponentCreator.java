@@ -80,6 +80,7 @@ import com.eas.client.forms.menu.MenuItem;
 import com.eas.client.forms.menu.MenuSeparator;
 import com.eas.client.forms.menu.PopupMenu;
 import com.eas.client.forms.menu.RadioMenuItem;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -953,6 +954,8 @@ public class RADComponentCreator {
                 || comp instanceof ModelTextArea
                 || comp instanceof ModelFormattedField) {
             changes.put("text", varName); // NOI18N
+        }else if(comp instanceof FormUtils.Panel){
+            changes.put("background", Color.white); // NOI18N
         }
 
         for (Map.Entry<String, Object> change : changes.entrySet()) {

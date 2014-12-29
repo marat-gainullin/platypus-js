@@ -133,7 +133,7 @@ public class FormModel {
     private final List<RADComponent<?>> otherComponents = new ArrayList<>(10);
     // holds both topRADComponent and otherComponents
     private ModelContainer modelContainer;
-    private final Map<String, RADComponent<?>> namesToComponents = new HashMap<>();
+    private final Map<String, RADComponent<?>> namesToComponents = new LinkedHashMap<>();
     private boolean formLoaded;
     private UndoRedo.Manager undoRedoManager;
     private boolean undoRedoRecording;

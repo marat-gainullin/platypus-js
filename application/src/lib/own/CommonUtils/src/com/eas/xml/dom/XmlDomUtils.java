@@ -211,35 +211,28 @@ public class XmlDomUtils {
 
     public static List<Element> elementsByTagName(Node element, String aName) {
         if (element != null && aName != null && !aName.isEmpty()) {
-            NodeList nl = element.getChildNodes();
-            if (nl != null && nl.getLength() > 0) {
-                List<Element> res = new ArrayList<>();
-                for (int i = 0; i < nl.getLength(); i++) {
-                    if (nl.item(i) != null && nl.item(i) instanceof Element) {
-                        Element el = (Element) nl.item(i);
-                        if (el != null) {
-                            String tagName = el.getTagName();
-                            if (tagName != null && !tagName.isEmpty()
-                                    && tagName.equals(aName)) {
-                                res.add(el);
-                            }
-                        }
-                    }
+            List<Element> res = new ArrayList<>();
+            Node child = element.getFirstChild();
+            while (child != null) {
+                if (child instanceof Element && ((Element) child).getTagName().equals(aName)) {
+                    res.add((Element) child);
                 }
-                return res;
+                child = child.getNextSibling();
             }
+            return res;
         }
         return null;
     }
- 
-    public static Element getElementByTagName(Element aParent, String aName) {
-        NodeList nl = aParent.getElementsByTagName(aName);
-        if (nl != null && nl.getLength() == 1 && nl.item(0) instanceof Element) {
-            return (Element) nl.item(0);
-        } else {
-            return null;
-        }
-    }
 
+    public static Element getElementByTagName(Element aParent, String aName) {
+        Node child = aParent.getFirstChild();
+        while (child != null) {
+            if (child instanceof Element && ((Element) child).getTagName().equals(aName)) {
+                return (Element) child;
+            }
+            child = child.getNextSibling();
+        }
+        return null;
+    }
 
 }

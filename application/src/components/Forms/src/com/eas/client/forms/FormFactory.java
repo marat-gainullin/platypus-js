@@ -93,7 +93,7 @@ public class FormFactory {
     protected JSObject model;
     protected Form form;
     protected Map<String, JComponent> widgets = new HashMap<>();
-    //protected boolean forceColumns;
+    protected List<JComponent> widgetsList = new ArrayList<>();
     protected boolean oldFormat;
     protected String rootContainerName;
     //
@@ -108,15 +108,10 @@ public class FormFactory {
     public Map<String, JComponent> getWidgets() {
         return widgets;
     }
-    /*
-     public boolean isForceColumns() {
-     return forceColumns;
-     }
 
-     public void setForceColumns(boolean aValue) {
-     forceColumns = aValue;
-     }
-     */
+    public List<JComponent> getWidgetsList() {
+        return widgetsList;
+    }
 
     public Form getForm() {
         return form;
@@ -128,12 +123,13 @@ public class FormFactory {
             List<Element> widgetsElements = XmlDomUtils.elementsByTagName(element, "widget");
             List<Element> legacyNonVisualElements = XmlDomUtils.elementsByTagName(element, "nonvisual");
             widgetsElements.addAll(legacyNonVisualElements);
-            widgetsElements.stream().forEach((Element aElement) -> {
+            widgetsElements.stream().sequential().forEach((Element aElement) -> {
                 try {
                     JComponent widget = readWidget(aElement);
                     String wName = widget.getName();
                     assert wName != null && !wName.isEmpty() : "A widget is expected to be a named item.";
                     widgets.put(wName, widget);
+                    widgetsList.add(widget);
                 } catch (Exception ex) {
                     Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -147,6 +143,7 @@ public class FormFactory {
                     String wName = widget.getName();
                     assert wName != null && !wName.isEmpty() : "A widget is expected to be a named item.";
                     widgets.put(wName, widget);
+                    widgetsList.add(widget);
                 }
                 childNode = childNode.getNextSibling();
             }
@@ -171,6 +168,8 @@ public class FormFactory {
         form.setDefaultCloseOperation(XmlDomUtils.readIntegerAttribute(element, "defaultCloseOperation", JFrame.DISPOSE_ON_CLOSE));
         form.setIcon(resolveIcon(element.getAttribute("icon")));
         form.setTitle(element.getAttribute("title"));
+        form.setMaximizable(XmlDomUtils.readBooleanAttribute(element, "maximizable", Boolean.TRUE));
+        form.setMinimizable(XmlDomUtils.readBooleanAttribute(element, "minimizable", Boolean.TRUE));
         form.setResizable(XmlDomUtils.readBooleanAttribute(element, "resizable", Boolean.TRUE));
         form.setUndecorated(XmlDomUtils.readBooleanAttribute(element, "undecorated", Boolean.FALSE));
         form.setOpacity(XmlDomUtils.readFloatAttribute(element, "opacity", 1.0f));
@@ -178,7 +177,7 @@ public class FormFactory {
         form.setLocationByPlatform(XmlDomUtils.readBooleanAttribute(element, "locationByPlatform", Boolean.TRUE));
         form.setDesignedViewSize(viewWidget.getPreferredSize());
         //
-        resolvers.stream().forEach((Consumer<Map<String, JComponent>> aResolver) -> {
+        resolvers.stream().sequential().forEach((Consumer<Map<String, JComponent>> aResolver) -> {
             aResolver.accept(widgets);
         });
     }
@@ -219,11 +218,21 @@ public class FormFactory {
         return null;
     }
 
+    protected JSObject resolveEntity(long aEntityId) throws Exception {
+        return null;
+    }
+
     private JComponent readWidget(Element anElement) throws Exception {
         String type;
         if (oldFormat) {
-            type = anElement.getAttribute("type");
-            assert type != null && !type.isEmpty() : "type attribute is required for widgets to be read from a file";
+            if (anElement.getTagName().equals("controlInfo")) {
+                type = anElement.getAttribute("classHint");
+            } else {
+                type = anElement.getAttribute("type");
+            }
+            if (type == null || type.isEmpty()) {
+                return null;
+            }
         } else {
             type = anElement.getTagName();
         }
@@ -406,16 +415,25 @@ public class FormFactory {
                 readGeneralProps(anElement, modelCombo);
                 boolean list = XmlDomUtils.readBooleanAttribute(anElement, "list", Boolean.TRUE);
                 modelCombo.setList(list);
-                if (anElement.hasAttribute("displayList")) {
-                    String displayList = anElement.getAttribute("displayList");
-                    modelCombo.setDisplayList(resolveEntity(displayList));
-                }
-                if (anElement.hasAttribute("displayField")) {
-                    String displayField = anElement.getAttribute("displayField");
-                    modelCombo.setDisplayField(displayField);
-                }
-                if (anElement.hasAttribute("valueField")) {
-                    String valueField = anElement.getAttribute("valueField");
+                if (oldFormat) {
+                    Element displayField = XmlDomUtils.getElementByTagName(anElement, "displayField");
+                    if (displayField != null && displayField.hasAttribute("fieldName")) {
+                        modelCombo.setDisplayField(displayField.getAttribute("fieldName"));
+                    }
+                    Element valueField = XmlDomUtils.getElementByTagName(anElement, "valueField");
+                    if (valueField != null && valueField.hasAttribute("entityId")) {
+                        String entityId = valueField.getAttribute("entityId");
+                        modelCombo.setDisplayList(resolveEntity(Long.valueOf(entityId)));
+                    }
+                } else {
+                    if (anElement.hasAttribute("displayList")) {
+                        String displayList = anElement.getAttribute("displayList");
+                        modelCombo.setDisplayList(resolveEntity(displayList));
+                    }
+                    if (anElement.hasAttribute("displayField")) {
+                        String displayField = anElement.getAttribute("displayField");
+                        modelCombo.setDisplayField(displayField);
+                    }
                 }
                 return modelCombo;
             case "ModelDate":
@@ -478,6 +496,37 @@ public class FormFactory {
             case "DbGridDesignInfo": {
                 ModelGrid grid = new ModelGrid();
                 readGeneralProps(anElement, grid);
+                GridColumnsNode oldFormatRowsHeader = null;
+                if (oldFormat) {
+                    Element rowsColumns = XmlDomUtils.getElementByTagName(anElement, "rowsColumnsDesignInfo");
+                    if (rowsColumns != null) {
+                        Element rowsDatasource = XmlDomUtils.getElementByTagName(rowsColumns, "rowsDatasource");
+                        if (rowsDatasource != null) {
+                            String entityId = rowsDatasource.getAttribute("entityId");
+                            try {
+                                grid.setData(resolveEntity(Long.valueOf(entityId)));
+                            } catch (Exception ex) {
+                                Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, "While setting data to named model's property ({0}) in old format to grid {1} exception occured: {2}", new Object[]{entityId, grid.getName(), ex.getMessage()});
+                            }
+                        }
+                        int rowsHeaderType = 1;// Usual
+                        if (rowsColumns.hasAttribute("rowsHeaderType")) {
+                            rowsHeaderType = Integer.valueOf(rowsColumns.getAttribute("rowsHeaderType"));
+                        }
+                        switch (rowsHeaderType) {
+                            case 1:// Usual
+                                oldFormatRowsHeader = new ServiceGridColumn("\\");
+                                break;
+                            case 2:// Check
+                                oldFormatRowsHeader = new CheckGridColumn("\\");
+                                break;
+                            case 3:// Radio
+                                oldFormatRowsHeader = new RadioGridColumn("\\");
+                                break;
+                        }
+                    }
+                    Element tree = XmlDomUtils.getElementByTagName(anElement, "treeDesignInfo");
+                }
                 int fixedColumns = XmlDomUtils.readIntegerAttribute(anElement, "fixedColumns", 0);
                 int fixedRows = XmlDomUtils.readIntegerAttribute(anElement, "fixedRows", 0);
                 boolean insertable = XmlDomUtils.readBooleanAttribute(anElement, "insertable", Boolean.TRUE);
@@ -519,6 +568,10 @@ public class FormFactory {
                 leaves.stream().sequential().forEach((leaf) -> {
                     columns.add((ModelColumn) leaf.getTableColumn());
                 });
+                if (oldFormatRowsHeader != null) {
+                    roots.add(0, oldFormatRowsHeader);
+                    columns.add(0, (ModelColumn) oldFormatRowsHeader.getTableColumn());
+                }
                 grid.setColumns(columns.toArray(new ModelColumn[]{}));
                 grid.setHeader(roots);
                 if (anElement.hasAttribute("data")) {
@@ -784,21 +837,49 @@ public class FormFactory {
                 Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, "While setting field ({0}) to widget {1} exception occured: {2}", new Object[]{fieldPath, aTarget.getName(), ex.getMessage()});
             }
         }
-        if (anElement.hasAttribute("data") && aTarget instanceof ModelWidget) {
-            String entityName = anElement.getAttribute("data");
-            try {
-                ((ModelWidget) aTarget).setData(resolveEntity(entityName));
-            } catch (Exception ex) {
-                Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, "While setting data to named model's property ({0}) to widget {1} exception occured: {2}", new Object[]{entityName, aTarget.getName(), ex.getMessage()});
+        if (oldFormat) {
+            if (aTarget instanceof ModelWidget) {
+                Element datamodelElement = XmlDomUtils.getElementByTagName(anElement, "datamodelElement");
+                if (datamodelElement != null) {
+                    String entityId = datamodelElement.getAttribute("entityId");
+                    try {
+                        ((ModelWidget) aTarget).setData(resolveEntity(Long.valueOf(entityId)));
+                    } catch (Exception ex) {
+                        Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, "While setting data to named model's property ({0}) in old format to widget {1} exception occured: {2}", new Object[]{entityId, aTarget.getName(), ex.getMessage()});
+                    }
+                    String fieldName = datamodelElement.getAttribute("fieldName");
+                    try {
+                        ((ModelWidget) aTarget).setField("cursor." + fieldName);
+                    } catch (Exception ex) {
+                        Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, "While setting data to named model's property ({0}) in old format to widget {1} exception occured: {2}", new Object[]{entityId, aTarget.getName(), ex.getMessage()});
+                    }
+                }
             }
-        }
-        if (anElement.hasAttribute("background")) {
-            ScriptColor background = new ScriptColor(anElement.getAttribute("background"));
-            aTarget.setBackground(background);
-        }
-        if (anElement.hasAttribute("foreground")) {
-            ScriptColor foreground = new ScriptColor(anElement.getAttribute("foreground"));
-            aTarget.setForeground(foreground);
+            if (anElement.hasAttribute("backgroundColor")) {
+                ScriptColor background = new ScriptColor(anElement.getAttribute("backgroundColor"));
+                aTarget.setBackground(background);
+            }
+            if (anElement.hasAttribute("foregroundColor")) {
+                ScriptColor foreground = new ScriptColor(anElement.getAttribute("foregroundColor"));
+                aTarget.setForeground(foreground);
+            }
+        } else {
+            if (anElement.hasAttribute("background")) {
+                ScriptColor background = new ScriptColor(anElement.getAttribute("background"));
+                aTarget.setBackground(background);
+            }
+            if (anElement.hasAttribute("foreground")) {
+                ScriptColor foreground = new ScriptColor(anElement.getAttribute("foreground"));
+                aTarget.setForeground(foreground);
+            }
+            if (anElement.hasAttribute("data") && aTarget instanceof ModelWidget) {
+                String entityName = anElement.getAttribute("data");
+                try {
+                    ((ModelWidget) aTarget).setData(resolveEntity(entityName));
+                } catch (Exception ex) {
+                    Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, "While setting data to named model's property ({0}) to widget {1} exception occured: {2}", new Object[]{entityName, aTarget.getName(), ex.getMessage()});
+                }
+            }
         }
         aTarget.setEnabled(XmlDomUtils.readBooleanAttribute(anElement, "enabled", Boolean.TRUE));
         aTarget.setFocusable(XmlDomUtils.readBooleanAttribute(anElement, "focusable", Boolean.TRUE));
@@ -923,7 +1004,34 @@ public class FormFactory {
                 constraintsElement = XmlDomUtils.getElementByTagName(anElement, "BorderPaneConstraints");
             }
             Dimension prefSize = readPrefSize(anElement);
-            Integer place = XmlDomUtils.readIntegerAttribute(constraintsElement, "place", HorizontalPosition.CENTER);
+            Integer place = HorizontalPosition.CENTER;
+            if (oldFormat) {
+                String sPlace = constraintsElement.getAttribute("place");
+                if (sPlace != null && !sPlace.isEmpty()) {
+                    switch (sPlace) {
+                        case BorderLayout.LINE_START:
+                        case BorderLayout.WEST:
+                            place = HorizontalPosition.LEFT;
+                            break;
+                        case BorderLayout.LINE_END:
+                        case BorderLayout.EAST:
+                            place = HorizontalPosition.RIGHT;
+                            break;
+                        case BorderLayout.PAGE_START:
+                        case BorderLayout.NORTH:
+                            place = VerticalPosition.TOP;
+                            break;
+                        case BorderLayout.PAGE_END:
+                        case BorderLayout.SOUTH:
+                            place = VerticalPosition.BOTTOM;
+                            break;
+                        default:
+                            place = HorizontalPosition.CENTER;
+                    }
+                }
+            } else {
+                place = XmlDomUtils.readIntegerAttribute(constraintsElement, "place", HorizontalPosition.CENTER);
+            }
             Integer size = 0;
             switch (place) {
                 case HorizontalPosition.LEFT:
@@ -1029,6 +1137,7 @@ public class FormFactory {
                     if ("column".equals(childTag.getTagName())) {
                         columnType = "ModelGridColumn";
                     } else {
+                        childNode = childNode.getNextSibling();
                         continue;
                     }
                 } else {
@@ -1068,13 +1177,23 @@ public class FormFactory {
                         Node _childNode = childTag.getFirstChild();
                         while (_childNode != null) {
                             if (_childNode instanceof Element) {
-                                JComponent editorComp = readWidget((Element) _childNode);
+                                Element _childTag = (Element) _childNode;
+                                if (oldFormat) {
+                                    if (_childTag.getTagName().equals("datamodelElement")) {
+                                        if (_childTag.hasAttribute("fieldName")) {
+                                            columnn.setField(_childTag.getAttribute("fieldName"));
+                                        }
+                                    }
+                                }
+                                JComponent editorComp = readWidget(_childTag);
                                 if (editorComp instanceof ModelWidget) {
                                     ModelColumn col = (ModelColumn) columnn.getTableColumn();
                                     col.setEditor((ModelWidget) editorComp);
                                     ModelWidget viewComp = (ModelWidget) readWidget((Element) _childNode);
                                     col.setView(viewComp);
-                                    break;
+                                    if (!oldFormat) {
+                                        break;
+                                    }
                                 }
                             }
                             _childNode = _childNode.getNextSibling();
@@ -1093,6 +1212,9 @@ public class FormFactory {
 
     private void readColumnNode(GridColumnsNode aNode, Element anElement) throws Exception {
         ((ModelColumn) aNode.getTableColumn()).setName(anElement.getAttribute("name"));
+        if (anElement.hasAttribute("title")) {
+            aNode.setTitle(anElement.getAttribute("title"));
+        }
         if (anElement.hasAttribute("background")) {
             ScriptColor background = new ScriptColor(anElement.getAttribute("background"));
             aNode.setBackground(background);

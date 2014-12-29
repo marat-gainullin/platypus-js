@@ -480,7 +480,7 @@ public class FormUtils {
             return o; // no need to change reference
         }
 
-        if (o.getClass() == Font.class) {
+        if (o instanceof Font) {
             return o;
         }
         if (o instanceof Dimension) {

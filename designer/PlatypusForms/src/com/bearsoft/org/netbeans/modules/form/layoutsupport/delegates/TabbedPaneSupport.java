@@ -386,21 +386,21 @@ public class TabbedPaneSupport extends AbstractLayoutSupport {
                             propertyValueChanged(oldValue, value);
                         }
                     },
-                    new FormProperty<IconEditor.NbImageIcon>("tabIcon", // NOI18N
-                    IconEditor.NbImageIcon.class,
+                    new FormProperty<ImageIcon>("tabIcon", // NOI18N
+                    ImageIcon.class,
                     getBundle().getString("PROP_tabIcon"), // NOI18N
                     getBundle().getString("HINT_tabIcon")) { // NOI18N
 
                         @Override
-                        public IconEditor.NbImageIcon getValue() {
+                        public ImageIcon getValue() {
                             return icon;
                         }
 
                         @Override
-                        public void setValue(IconEditor.NbImageIcon aValue) {
-                            IconEditor.NbImageIcon oldValue = getValue();
+                        public void setValue(ImageIcon aValue) {
+                            IconEditor.NbImageIcon oldValue = (IconEditor.NbImageIcon)getValue();
                             if (icon != aValue) {
-                                icon = aValue;
+                                icon = (IconEditor.NbImageIcon)aValue;
                                 propertyValueChanged(oldValue, aValue);
                             }
                         }
@@ -411,7 +411,7 @@ public class TabbedPaneSupport extends AbstractLayoutSupport {
                         }
 
                         @Override
-                        public IconEditor.NbImageIcon getDefaultValue() {
+                        public ImageIcon getDefaultValue() {
                             return null;
                         }
                     },

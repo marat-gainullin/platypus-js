@@ -126,29 +126,6 @@ public class RADProperty<T> extends FormProperty<T> {
     }
 
     @Override
-    public boolean isDefaultValue() {
-        try {
-            Object currentValue = getValue();
-            if (currentValue instanceof Color || currentValue instanceof java.awt.Font || currentValue instanceof java.awt.Cursor) {
-                if (getComponent().getBeanInstance() instanceof Component) {
-                    RADVisualContainer<?> radContainer = getComponent().getParentComponent();
-                    if (radContainer != null) {
-                        RADProperty<?> parentProp = radContainer.getProperty(getName());
-                        if (parentProp != null) {
-                            if (currentValue instanceof UIResource || currentValue == parentProp.getValue()) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-            return Objects.deepEquals(currentValue, defaultValue);
-        } catch (IllegalAccessException | InvocationTargetException ex) {
-            return false;
-        }
-    }
-
-    @Override
     public T getDefaultValue() {
         return defaultValue;
     }
