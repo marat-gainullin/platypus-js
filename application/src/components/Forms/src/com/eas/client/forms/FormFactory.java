@@ -126,10 +126,12 @@ public class FormFactory {
             widgetsElements.stream().sequential().forEach((Element aElement) -> {
                 try {
                     JComponent widget = readWidget(aElement);
-                    String wName = widget.getName();
-                    assert wName != null && !wName.isEmpty() : "A widget is expected to be a named item.";
-                    widgets.put(wName, widget);
-                    widgetsList.add(widget);
+                    if (widget != null) {
+                        String wName = widget.getName();
+                        assert wName != null && !wName.isEmpty() : "A widget is expected to be a named item.";
+                        widgets.put(wName, widget);
+                        widgetsList.add(widget);
+                    }
                 } catch (Exception ex) {
                     Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
                 }

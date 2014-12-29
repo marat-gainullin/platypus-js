@@ -44,9 +44,14 @@
 package com.bearsoft.org.netbeans.modules.form;
 
 import com.bearsoft.org.netbeans.modules.form.RADProperty.FakePropertyDescriptor;
+import com.bearsoft.org.netbeans.modules.form.editors.EnumEditor;
 import com.bearsoft.org.netbeans.modules.form.editors.IconEditor;
+import com.eas.client.forms.Orientation;
+import com.eas.client.forms.components.FormattedField;
+import com.eas.client.forms.components.rt.FormatsUtils;
 import com.eas.client.forms.components.rt.HasGroup;
 import com.eas.client.forms.containers.ButtonGroup;
+import com.eas.client.forms.containers.SplitPane;
 import com.eas.design.Designable;
 import com.eas.design.Undesignable;
 import com.eas.script.ScriptFunction;
@@ -490,7 +495,7 @@ public abstract class RADComponent<C> {
         // and fill nameToProperty map.
         PropertyDescriptor[] descriptors = getBeanInfo().getPropertyDescriptors();
         //props = FormUtils.getBeanInfo(beanClass, Introspector.IGNORE_ALL_BEANINFO).getPropertyDescriptors();
-        Class<?> _beanClass = getBeanInfo().getBeanDescriptor().getBeanClass();
+        //Class<?> _beanClass = getBeanInfo().getBeanDescriptor().getBeanClass();
         for (int i = 0; i < descriptors.length; i++) {
             PropertyDescriptor descriptor = descriptors[i];
             if (descriptor.getReadMethod() != null && descriptor.getWriteMethod() != null) {
@@ -502,7 +507,7 @@ public abstract class RADComponent<C> {
                 if (scriptFunction == null) {
                     scriptFunction = descriptor.getWriteMethod().getAnnotation(ScriptFunction.class);
                 }
-                if (designable != null || scriptFunction != null || LayoutManager.class.isAssignableFrom(_beanClass)) {
+                if (designable != null || scriptFunction != null || LayoutManager.class.isAssignableFrom(beanClass)) {
                     String category = "general"; // NOI18N
                     if (designable != null && designable.category() != null && !designable.category().isEmpty()) {
                         category = designable.category();
@@ -567,6 +572,10 @@ public abstract class RADComponent<C> {
                 return new ComponentProperty(this, desc);
             } else if (javax.swing.Icon.class.isAssignableFrom(desc.getPropertyType()) || java.awt.Image.class.isAssignableFrom(desc.getPropertyType())) {
                 return new IconProperty(this, desc);
+            } else if ("valueType".equals(desc.getName()) && FormattedField.class.isAssignableFrom(beanClass)) {
+                return new ValueTypeProperty(this, desc);
+            } else if ("orientation".equals(desc.getName()) && SplitPane.class.isAssignableFrom(beanClass)) {
+                return new OrientationProperty(this, desc);
             } else {
                 return new RADProperty<>(this, desc);
             }
@@ -665,6 +674,45 @@ public abstract class RADComponent<C> {
     @Override
     public String toString() {
         return super.toString() + ", name: " + getName() + ", class: " + getBeanClass() + ", beaninfo: " + getBeanInfo() + ", instance: " + getBeanInstance(); // NOI18N
+    }
+
+    static class ValueTypeProperty extends RADProperty<Integer> {
+
+        private EnumEditor editor = new EnumEditor(new Object[]{
+            FormUtils.getBundleString("CTL_Mask"), FormatsUtils.MASK, "MASK"
+           ,FormUtils.getBundleString("CTL_Number"), FormatsUtils.NUMBER, "NUMBER"
+           ,FormUtils.getBundleString("CTL_Percent"), FormatsUtils.PERCENT, "PERCENT"
+           ,FormUtils.getBundleString("CTL_DateTime"), FormatsUtils.DATE, "DATE"
+           ,FormUtils.getBundleString("CTL_Currency"), FormatsUtils.CURRENCY, "CURRENCY"
+        });
+
+        ValueTypeProperty(RADComponent<?> comp, PropertyDescriptor aDesc) throws IllegalAccessException, InvocationTargetException {
+            super(comp, aDesc);
+        }
+
+        @Override
+        public PropertyEditor getPropertyEditor() {
+            return editor;
+        }
+
+    }
+
+    static class OrientationProperty extends RADProperty<Integer> {
+
+        private EnumEditor editor = new EnumEditor(new Object[]{
+            FormUtils.getBundleString("CTL_Horizontal"), Orientation.HORIZONTAL, "HORIZONTAL"
+           ,FormUtils.getBundleString("CTL_Vertical"), Orientation.VERTICAL, "VERTICAL"
+        });
+
+        OrientationProperty(RADComponent<?> comp, PropertyDescriptor aDesc) throws IllegalAccessException, InvocationTargetException {
+            super(comp, aDesc);
+        }
+
+        @Override
+        public PropertyEditor getPropertyEditor() {
+            return editor;
+        }
+
     }
 
     static class IconProperty extends RADProperty<IconEditor.NbImageIcon> {
@@ -776,7 +824,7 @@ public abstract class RADComponent<C> {
             }
         }
     }
-    
+
     static class ComponentProperty extends RADProperty<ComponentReference<Component>> {
 
         protected ComponentReference<Component> value;
@@ -834,7 +882,7 @@ public abstract class RADComponent<C> {
                             ButtonGroup.class));
             setAccessType(DETACHED_READ | DETACHED_WRITE);
             setShortDescription(FormUtils.getBundleString("HINT_ButtonGroup")); // NOI18N
-            ButtonGroup nativeValue = ((HasGroup)aRadComp.getBeanInstance()).getButtonGroup();
+            ButtonGroup nativeValue = ((HasGroup) aRadComp.getBeanInstance()).getButtonGroup();
             value = nativeValue != null ? new ComponentRef(((Component) nativeValue).getName(), aRadComp.getFormModel()) : null;
         }
 

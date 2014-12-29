@@ -22,6 +22,7 @@ public class VFormattedField extends JFormattedTextField implements HasValue<Obj
 
     public VFormattedField(Object aValue) {
         super();
+        setFocusLostBehavior(COMMIT);
         setValue(aValue);
     }
 
@@ -36,7 +37,7 @@ public class VFormattedField extends JFormattedTextField implements HasValue<Obj
     public void setValueType(int aValue) {
         if (valueType != aValue) {
             valueType = aValue;
-            setFormatterFactory(FormatsUtils.formatterFactoryByFormat(format, valueType));
+            setFormatterFactory(format != null ? FormatsUtils.formatterFactoryByFormat(format, valueType) : null);
         }
     }
 
@@ -47,7 +48,7 @@ public class VFormattedField extends JFormattedTextField implements HasValue<Obj
     public void setFormat(String aValue) {
         if (format == null ? aValue != null : !format.equals(aValue)) {
             format = aValue;
-            setFormatterFactory(FormatsUtils.formatterFactoryByFormat(format, valueType));
+            setFormatterFactory(format != null ? FormatsUtils.formatterFactoryByFormat(format, valueType) : null);
         }
     }
 
@@ -62,7 +63,7 @@ public class VFormattedField extends JFormattedTextField implements HasValue<Obj
             super.setText(aValue != null ? aValue : "");
             super.commitEdit();
         } catch (ParseException ex) {
-            Logger.getLogger(VFormattedField.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(VFormattedField.class.getName()).log(Level.WARNING, ex.getMessage());
         }
     }
 

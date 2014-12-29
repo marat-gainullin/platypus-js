@@ -45,7 +45,7 @@ import jdk.nashorn.api.scripting.JSObject;
 public class SplitPane extends JSplitPane implements HasPublished, HasContainerEvents, HasChildren, HasPublishedInvalidatableCollection, HasJsName, Widget {
 
     public SplitPane() {
-        this(Orientation.HORIZONTAL);
+        this(Orientation.VERTICAL);
     }
 
     private static final String CONSTRUCTOR_JSDOC = ""

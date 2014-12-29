@@ -487,19 +487,6 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
         return "axis".equals(propName) ? getProperties()[0] : null; // NOI18N
     }
 
-    /*
-     private static Constructor getBoxLayoutConstructor() {
-     if (boxLayoutConstructor == null) {
-     try {
-     boxLayoutConstructor = BoxLayout.class.getConstructor(
-     new Class<?>[]{Container.class, Integer.TYPE});
-     } catch (NoSuchMethodException ex) { // should not happen
-     ErrorManager.getDefault().notify(ex);
-     }
-     }
-     return boxLayoutConstructor;
-     }
-     */
     // --------------
     /**
      * PropertyEditor for axis property of BoxLayoutSupport.
