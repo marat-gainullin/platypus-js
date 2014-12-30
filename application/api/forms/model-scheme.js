@@ -23,23 +23,6 @@
         if(P.ModelScheme.superclass)
             P.ModelScheme.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        Object.defineProperty(this, "onMouseDragged", {
-            get: function() {
-                var value = delegate.onMouseDragged;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMouseDragged = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelScheme){
-            /**
-             * Mouse dragged event handler function.
-             * @property onMouseDragged
-             * @memberOf ModelScheme
-             */
-            P.ModelScheme.prototype.onMouseDragged = {};
-        }
         Object.defineProperty(this, "cursor", {
             get: function() {
                 var value = delegate.cursor;
@@ -56,6 +39,23 @@
              * @memberOf ModelScheme
              */
             P.ModelScheme.prototype.cursor = {};
+        }
+        Object.defineProperty(this, "onMouseDragged", {
+            get: function() {
+                var value = delegate.onMouseDragged;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseDragged = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelScheme){
+            /**
+             * Mouse dragged event handler function.
+             * @property onMouseDragged
+             * @memberOf ModelScheme
+             */
+            P.ModelScheme.prototype.onMouseDragged = {};
         }
         Object.defineProperty(this, "parent", {
             get: function() {
@@ -287,23 +287,6 @@
              */
             P.ModelScheme.prototype.element = {};
         }
-        Object.defineProperty(this, "onComponentShown", {
-            get: function() {
-                var value = delegate.onComponentShown;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onComponentShown = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelScheme){
-            /**
-             * Component shown event handler function.
-             * @property onComponentShown
-             * @memberOf ModelScheme
-             */
-            P.ModelScheme.prototype.onComponentShown = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -320,6 +303,23 @@
              * @memberOf ModelScheme
              */
             P.ModelScheme.prototype.height = 0;
+        }
+        Object.defineProperty(this, "onComponentShown", {
+            get: function() {
+                var value = delegate.onComponentShown;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onComponentShown = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelScheme){
+            /**
+             * Component shown event handler function.
+             * @property onComponentShown
+             * @memberOf ModelScheme
+             */
+            P.ModelScheme.prototype.onComponentShown = {};
         }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
@@ -338,23 +338,6 @@
              */
             P.ModelScheme.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "visible", {
-            get: function() {
-                var value = delegate.visible;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.visible = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelScheme){
-            /**
-             * Determines whether this component should be visible when its parent is visible.
-             * @property visible
-             * @memberOf ModelScheme
-             */
-            P.ModelScheme.prototype.visible = true;
-        }
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
@@ -371,6 +354,23 @@
              * @memberOf ModelScheme
              */
             P.ModelScheme.prototype.opaque = true;
+        }
+        Object.defineProperty(this, "visible", {
+            get: function() {
+                var value = delegate.visible;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.visible = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelScheme){
+            /**
+             * Determines whether this component should be visible when its parent is visible.
+             * @property visible
+             * @memberOf ModelScheme
+             */
+            P.ModelScheme.prototype.visible = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
@@ -406,23 +406,6 @@
              */
             P.ModelScheme.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelScheme){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf ModelScheme
-             */
-            P.ModelScheme.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -439,6 +422,23 @@
              * @memberOf ModelScheme
              */
             P.ModelScheme.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelScheme){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf ModelScheme
+             */
+            P.ModelScheme.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -539,23 +539,6 @@
              */
             P.ModelScheme.prototype.left = 0;
         }
-        Object.defineProperty(this, "onMouseClicked", {
-            get: function() {
-                var value = delegate.onMouseClicked;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMouseClicked = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelScheme){
-            /**
-             * Mouse clicked event handler function.
-             * @property onMouseClicked
-             * @memberOf ModelScheme
-             */
-            P.ModelScheme.prototype.onMouseClicked = {};
-        }
         Object.defineProperty(this, "background", {
             get: function() {
                 var value = delegate.background;
@@ -572,6 +555,23 @@
              * @memberOf ModelScheme
              */
             P.ModelScheme.prototype.background = {};
+        }
+        Object.defineProperty(this, "onMouseClicked", {
+            get: function() {
+                var value = delegate.onMouseClicked;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseClicked = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelScheme){
+            /**
+             * Mouse clicked event handler function.
+             * @property onMouseClicked
+             * @memberOf ModelScheme
+             */
+            P.ModelScheme.prototype.onMouseClicked = {};
         }
         Object.defineProperty(this, "onMouseExited", {
             get: function() {
@@ -621,23 +621,6 @@
              */
             P.ModelScheme.prototype.width = 0;
         }
-        Object.defineProperty(this, "onKeyPressed", {
-            get: function() {
-                var value = delegate.onKeyPressed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyPressed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelScheme){
-            /**
-             * Key pressed event handler function.
-             * @property onKeyPressed
-             * @memberOf ModelScheme
-             */
-            P.ModelScheme.prototype.onKeyPressed = {};
-        }
         Object.defineProperty(this, "font", {
             get: function() {
                 var value = delegate.font;
@@ -654,6 +637,23 @@
              * @memberOf ModelScheme
              */
             P.ModelScheme.prototype.font = {};
+        }
+        Object.defineProperty(this, "onKeyPressed", {
+            get: function() {
+                var value = delegate.onKeyPressed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyPressed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelScheme){
+            /**
+             * Key pressed event handler function.
+             * @property onKeyPressed
+             * @memberOf ModelScheme
+             */
+            P.ModelScheme.prototype.onKeyPressed = {};
         }
     };
         /**

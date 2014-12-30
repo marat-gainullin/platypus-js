@@ -24,23 +24,6 @@
         if(P.ScrollPane.superclass)
             P.ScrollPane.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        Object.defineProperty(this, "onMouseDragged", {
-            get: function() {
-                var value = delegate.onMouseDragged;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMouseDragged = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ScrollPane){
-            /**
-             * Mouse dragged event handler function.
-             * @property onMouseDragged
-             * @memberOf ScrollPane
-             */
-            P.ScrollPane.prototype.onMouseDragged = {};
-        }
         Object.defineProperty(this, "cursor", {
             get: function() {
                 var value = delegate.cursor;
@@ -57,6 +40,23 @@
              * @memberOf ScrollPane
              */
             P.ScrollPane.prototype.cursor = {};
+        }
+        Object.defineProperty(this, "onMouseDragged", {
+            get: function() {
+                var value = delegate.onMouseDragged;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseDragged = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ScrollPane){
+            /**
+             * Mouse dragged event handler function.
+             * @property onMouseDragged
+             * @memberOf ScrollPane
+             */
+            P.ScrollPane.prototype.onMouseDragged = {};
         }
         Object.defineProperty(this, "parent", {
             get: function() {
@@ -336,23 +336,6 @@
              */
             P.ScrollPane.prototype.element = {};
         }
-        Object.defineProperty(this, "onComponentShown", {
-            get: function() {
-                var value = delegate.onComponentShown;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onComponentShown = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ScrollPane){
-            /**
-             * Component shown event handler function.
-             * @property onComponentShown
-             * @memberOf ScrollPane
-             */
-            P.ScrollPane.prototype.onComponentShown = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -369,6 +352,23 @@
              * @memberOf ScrollPane
              */
             P.ScrollPane.prototype.height = 0;
+        }
+        Object.defineProperty(this, "onComponentShown", {
+            get: function() {
+                var value = delegate.onComponentShown;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onComponentShown = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ScrollPane){
+            /**
+             * Component shown event handler function.
+             * @property onComponentShown
+             * @memberOf ScrollPane
+             */
+            P.ScrollPane.prototype.onComponentShown = {};
         }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
@@ -387,23 +387,6 @@
              */
             P.ScrollPane.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "visible", {
-            get: function() {
-                var value = delegate.visible;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.visible = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ScrollPane){
-            /**
-             * Determines whether this component should be visible when its parent is visible.
-             * @property visible
-             * @memberOf ScrollPane
-             */
-            P.ScrollPane.prototype.visible = true;
-        }
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
@@ -420,6 +403,23 @@
              * @memberOf ScrollPane
              */
             P.ScrollPane.prototype.opaque = true;
+        }
+        Object.defineProperty(this, "visible", {
+            get: function() {
+                var value = delegate.visible;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.visible = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ScrollPane){
+            /**
+             * Determines whether this component should be visible when its parent is visible.
+             * @property visible
+             * @memberOf ScrollPane
+             */
+            P.ScrollPane.prototype.visible = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
@@ -469,23 +469,6 @@
              */
             P.ScrollPane.prototype.count = 0;
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ScrollPane){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf ScrollPane
-             */
-            P.ScrollPane.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -502,6 +485,23 @@
              * @memberOf ScrollPane
              */
             P.ScrollPane.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ScrollPane){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf ScrollPane
+             */
+            P.ScrollPane.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -619,23 +619,6 @@
              */
             P.ScrollPane.prototype.left = 0;
         }
-        Object.defineProperty(this, "onMouseClicked", {
-            get: function() {
-                var value = delegate.onMouseClicked;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMouseClicked = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ScrollPane){
-            /**
-             * Mouse clicked event handler function.
-             * @property onMouseClicked
-             * @memberOf ScrollPane
-             */
-            P.ScrollPane.prototype.onMouseClicked = {};
-        }
         Object.defineProperty(this, "background", {
             get: function() {
                 var value = delegate.background;
@@ -652,6 +635,23 @@
              * @memberOf ScrollPane
              */
             P.ScrollPane.prototype.background = {};
+        }
+        Object.defineProperty(this, "onMouseClicked", {
+            get: function() {
+                var value = delegate.onMouseClicked;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseClicked = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ScrollPane){
+            /**
+             * Mouse clicked event handler function.
+             * @property onMouseClicked
+             * @memberOf ScrollPane
+             */
+            P.ScrollPane.prototype.onMouseClicked = {};
         }
         Object.defineProperty(this, "onMouseExited", {
             get: function() {
@@ -701,23 +701,6 @@
              */
             P.ScrollPane.prototype.width = 0;
         }
-        Object.defineProperty(this, "onKeyPressed", {
-            get: function() {
-                var value = delegate.onKeyPressed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyPressed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ScrollPane){
-            /**
-             * Key pressed event handler function.
-             * @property onKeyPressed
-             * @memberOf ScrollPane
-             */
-            P.ScrollPane.prototype.onKeyPressed = {};
-        }
         Object.defineProperty(this, "font", {
             get: function() {
                 var value = delegate.font;
@@ -734,6 +717,23 @@
              * @memberOf ScrollPane
              */
             P.ScrollPane.prototype.font = {};
+        }
+        Object.defineProperty(this, "onKeyPressed", {
+            get: function() {
+                var value = delegate.onKeyPressed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyPressed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ScrollPane){
+            /**
+             * Key pressed event handler function.
+             * @property onKeyPressed
+             * @memberOf ScrollPane
+             */
+            P.ScrollPane.prototype.onKeyPressed = {};
         }
         var invalidatable = null;
         delegate.setPublishedCollectionInvalidator(function() {

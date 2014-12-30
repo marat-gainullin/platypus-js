@@ -24,23 +24,6 @@
         if(P.PasswordField.superclass)
             P.PasswordField.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        Object.defineProperty(this, "onMouseDragged", {
-            get: function() {
-                var value = delegate.onMouseDragged;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMouseDragged = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.PasswordField){
-            /**
-             * Mouse dragged event handler function.
-             * @property onMouseDragged
-             * @memberOf PasswordField
-             */
-            P.PasswordField.prototype.onMouseDragged = {};
-        }
         Object.defineProperty(this, "cursor", {
             get: function() {
                 var value = delegate.cursor;
@@ -57,6 +40,23 @@
              * @memberOf PasswordField
              */
             P.PasswordField.prototype.cursor = {};
+        }
+        Object.defineProperty(this, "onMouseDragged", {
+            get: function() {
+                var value = delegate.onMouseDragged;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseDragged = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.PasswordField){
+            /**
+             * Mouse dragged event handler function.
+             * @property onMouseDragged
+             * @memberOf PasswordField
+             */
+            P.PasswordField.prototype.onMouseDragged = {};
         }
         Object.defineProperty(this, "parent", {
             get: function() {
@@ -339,23 +339,6 @@
              */
             P.PasswordField.prototype.element = {};
         }
-        Object.defineProperty(this, "onComponentShown", {
-            get: function() {
-                var value = delegate.onComponentShown;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onComponentShown = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.PasswordField){
-            /**
-             * Component shown event handler function.
-             * @property onComponentShown
-             * @memberOf PasswordField
-             */
-            P.PasswordField.prototype.onComponentShown = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -372,6 +355,23 @@
              * @memberOf PasswordField
              */
             P.PasswordField.prototype.height = 0;
+        }
+        Object.defineProperty(this, "onComponentShown", {
+            get: function() {
+                var value = delegate.onComponentShown;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onComponentShown = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.PasswordField){
+            /**
+             * Component shown event handler function.
+             * @property onComponentShown
+             * @memberOf PasswordField
+             */
+            P.PasswordField.prototype.onComponentShown = {};
         }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
@@ -390,23 +390,6 @@
              */
             P.PasswordField.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "visible", {
-            get: function() {
-                var value = delegate.visible;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.visible = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.PasswordField){
-            /**
-             * Determines whether this component should be visible when its parent is visible.
-             * @property visible
-             * @memberOf PasswordField
-             */
-            P.PasswordField.prototype.visible = true;
-        }
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
@@ -423,6 +406,23 @@
              * @memberOf PasswordField
              */
             P.PasswordField.prototype.opaque = true;
+        }
+        Object.defineProperty(this, "visible", {
+            get: function() {
+                var value = delegate.visible;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.visible = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.PasswordField){
+            /**
+             * Determines whether this component should be visible when its parent is visible.
+             * @property visible
+             * @memberOf PasswordField
+             */
+            P.PasswordField.prototype.visible = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
@@ -458,23 +458,6 @@
              */
             P.PasswordField.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.PasswordField){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf PasswordField
-             */
-            P.PasswordField.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -491,6 +474,23 @@
              * @memberOf PasswordField
              */
             P.PasswordField.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.PasswordField){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf PasswordField
+             */
+            P.PasswordField.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -591,23 +591,6 @@
              */
             P.PasswordField.prototype.left = 0;
         }
-        Object.defineProperty(this, "onMouseClicked", {
-            get: function() {
-                var value = delegate.onMouseClicked;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMouseClicked = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.PasswordField){
-            /**
-             * Mouse clicked event handler function.
-             * @property onMouseClicked
-             * @memberOf PasswordField
-             */
-            P.PasswordField.prototype.onMouseClicked = {};
-        }
         Object.defineProperty(this, "background", {
             get: function() {
                 var value = delegate.background;
@@ -624,6 +607,23 @@
              * @memberOf PasswordField
              */
             P.PasswordField.prototype.background = {};
+        }
+        Object.defineProperty(this, "onMouseClicked", {
+            get: function() {
+                var value = delegate.onMouseClicked;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseClicked = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.PasswordField){
+            /**
+             * Mouse clicked event handler function.
+             * @property onMouseClicked
+             * @memberOf PasswordField
+             */
+            P.PasswordField.prototype.onMouseClicked = {};
         }
         Object.defineProperty(this, "onMouseExited", {
             get: function() {
@@ -673,23 +673,6 @@
              */
             P.PasswordField.prototype.width = 0;
         }
-        Object.defineProperty(this, "onKeyPressed", {
-            get: function() {
-                var value = delegate.onKeyPressed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyPressed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.PasswordField){
-            /**
-             * Key pressed event handler function.
-             * @property onKeyPressed
-             * @memberOf PasswordField
-             */
-            P.PasswordField.prototype.onKeyPressed = {};
-        }
         Object.defineProperty(this, "font", {
             get: function() {
                 var value = delegate.font;
@@ -706,6 +689,23 @@
              * @memberOf PasswordField
              */
             P.PasswordField.prototype.font = {};
+        }
+        Object.defineProperty(this, "onKeyPressed", {
+            get: function() {
+                var value = delegate.onKeyPressed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyPressed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.PasswordField){
+            /**
+             * Key pressed event handler function.
+             * @property onKeyPressed
+             * @memberOf PasswordField
+             */
+            P.PasswordField.prototype.onKeyPressed = {};
         }
     };
         /**

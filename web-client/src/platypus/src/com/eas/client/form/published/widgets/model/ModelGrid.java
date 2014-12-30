@@ -9,7 +9,6 @@ import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.gwt.ui.widgets.grid.Grid;
 import com.bearsoft.gwt.ui.widgets.grid.GridSection;
 import com.bearsoft.gwt.ui.widgets.grid.GridSelectionEventManager;
-import com.bearsoft.gwt.ui.widgets.grid.builders.ThemedCellTableBuilder;
 import com.bearsoft.gwt.ui.widgets.grid.builders.ThemedHeaderOrFooterBuilder;
 import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
 import com.bearsoft.gwt.ui.widgets.grid.header.HeaderNode;

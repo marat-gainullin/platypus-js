@@ -23,23 +23,6 @@
         if(P.TabbedPane.superclass)
             P.TabbedPane.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        Object.defineProperty(this, "onMouseDragged", {
-            get: function() {
-                var value = delegate.onMouseDragged;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMouseDragged = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.TabbedPane){
-            /**
-             * Mouse dragged event handler function.
-             * @property onMouseDragged
-             * @memberOf TabbedPane
-             */
-            P.TabbedPane.prototype.onMouseDragged = {};
-        }
         Object.defineProperty(this, "cursor", {
             get: function() {
                 var value = delegate.cursor;
@@ -56,6 +39,23 @@
              * @memberOf TabbedPane
              */
             P.TabbedPane.prototype.cursor = {};
+        }
+        Object.defineProperty(this, "onMouseDragged", {
+            get: function() {
+                var value = delegate.onMouseDragged;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseDragged = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.TabbedPane){
+            /**
+             * Mouse dragged event handler function.
+             * @property onMouseDragged
+             * @memberOf TabbedPane
+             */
+            P.TabbedPane.prototype.onMouseDragged = {};
         }
         Object.defineProperty(this, "parent", {
             get: function() {
@@ -321,23 +321,6 @@
              */
             P.TabbedPane.prototype.element = {};
         }
-        Object.defineProperty(this, "onComponentShown", {
-            get: function() {
-                var value = delegate.onComponentShown;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onComponentShown = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.TabbedPane){
-            /**
-             * Component shown event handler function.
-             * @property onComponentShown
-             * @memberOf TabbedPane
-             */
-            P.TabbedPane.prototype.onComponentShown = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -354,6 +337,23 @@
              * @memberOf TabbedPane
              */
             P.TabbedPane.prototype.height = 0;
+        }
+        Object.defineProperty(this, "onComponentShown", {
+            get: function() {
+                var value = delegate.onComponentShown;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onComponentShown = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.TabbedPane){
+            /**
+             * Component shown event handler function.
+             * @property onComponentShown
+             * @memberOf TabbedPane
+             */
+            P.TabbedPane.prototype.onComponentShown = {};
         }
         Object.defineProperty(this, "selectedComponent", {
             get: function() {
@@ -389,23 +389,6 @@
              */
             P.TabbedPane.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "visible", {
-            get: function() {
-                var value = delegate.visible;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.visible = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.TabbedPane){
-            /**
-             * Determines whether this component should be visible when its parent is visible.
-             * @property visible
-             * @memberOf TabbedPane
-             */
-            P.TabbedPane.prototype.visible = true;
-        }
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
@@ -422,6 +405,23 @@
              * @memberOf TabbedPane
              */
             P.TabbedPane.prototype.opaque = true;
+        }
+        Object.defineProperty(this, "visible", {
+            get: function() {
+                var value = delegate.visible;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.visible = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.TabbedPane){
+            /**
+             * Determines whether this component should be visible when its parent is visible.
+             * @property visible
+             * @memberOf TabbedPane
+             */
+            P.TabbedPane.prototype.visible = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
@@ -471,23 +471,6 @@
              */
             P.TabbedPane.prototype.count = 0;
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.TabbedPane){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf TabbedPane
-             */
-            P.TabbedPane.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -504,6 +487,23 @@
              * @memberOf TabbedPane
              */
             P.TabbedPane.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.TabbedPane){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf TabbedPane
+             */
+            P.TabbedPane.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -655,23 +655,6 @@
              */
             P.TabbedPane.prototype.left = 0;
         }
-        Object.defineProperty(this, "onMouseClicked", {
-            get: function() {
-                var value = delegate.onMouseClicked;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMouseClicked = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.TabbedPane){
-            /**
-             * Mouse clicked event handler function.
-             * @property onMouseClicked
-             * @memberOf TabbedPane
-             */
-            P.TabbedPane.prototype.onMouseClicked = {};
-        }
         Object.defineProperty(this, "background", {
             get: function() {
                 var value = delegate.background;
@@ -688,6 +671,23 @@
              * @memberOf TabbedPane
              */
             P.TabbedPane.prototype.background = {};
+        }
+        Object.defineProperty(this, "onMouseClicked", {
+            get: function() {
+                var value = delegate.onMouseClicked;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseClicked = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.TabbedPane){
+            /**
+             * Mouse clicked event handler function.
+             * @property onMouseClicked
+             * @memberOf TabbedPane
+             */
+            P.TabbedPane.prototype.onMouseClicked = {};
         }
         Object.defineProperty(this, "onMouseExited", {
             get: function() {
@@ -737,23 +737,6 @@
              */
             P.TabbedPane.prototype.width = 0;
         }
-        Object.defineProperty(this, "onKeyPressed", {
-            get: function() {
-                var value = delegate.onKeyPressed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyPressed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.TabbedPane){
-            /**
-             * Key pressed event handler function.
-             * @property onKeyPressed
-             * @memberOf TabbedPane
-             */
-            P.TabbedPane.prototype.onKeyPressed = {};
-        }
         Object.defineProperty(this, "font", {
             get: function() {
                 var value = delegate.font;
@@ -770,6 +753,23 @@
              * @memberOf TabbedPane
              */
             P.TabbedPane.prototype.font = {};
+        }
+        Object.defineProperty(this, "onKeyPressed", {
+            get: function() {
+                var value = delegate.onKeyPressed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyPressed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.TabbedPane){
+            /**
+             * Key pressed event handler function.
+             * @property onKeyPressed
+             * @memberOf TabbedPane
+             */
+            P.TabbedPane.prototype.onKeyPressed = {};
         }
         var invalidatable = null;
         delegate.setPublishedCollectionInvalidator(function() {

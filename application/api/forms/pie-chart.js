@@ -22,23 +22,6 @@
         if(P.PieChart.superclass)
             P.PieChart.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        Object.defineProperty(this, "onMouseDragged", {
-            get: function() {
-                var value = delegate.onMouseDragged;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMouseDragged = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.PieChart){
-            /**
-             * Mouse dragged event handler function.
-             * @property onMouseDragged
-             * @memberOf PieChart
-             */
-            P.PieChart.prototype.onMouseDragged = {};
-        }
         Object.defineProperty(this, "cursor", {
             get: function() {
                 var value = delegate.cursor;
@@ -55,6 +38,23 @@
              * @memberOf PieChart
              */
             P.PieChart.prototype.cursor = {};
+        }
+        Object.defineProperty(this, "onMouseDragged", {
+            get: function() {
+                var value = delegate.onMouseDragged;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseDragged = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.PieChart){
+            /**
+             * Mouse dragged event handler function.
+             * @property onMouseDragged
+             * @memberOf PieChart
+             */
+            P.PieChart.prototype.onMouseDragged = {};
         }
         Object.defineProperty(this, "parent", {
             get: function() {
@@ -286,23 +286,6 @@
              */
             P.PieChart.prototype.element = {};
         }
-        Object.defineProperty(this, "onComponentShown", {
-            get: function() {
-                var value = delegate.onComponentShown;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onComponentShown = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.PieChart){
-            /**
-             * Component shown event handler function.
-             * @property onComponentShown
-             * @memberOf PieChart
-             */
-            P.PieChart.prototype.onComponentShown = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -319,6 +302,23 @@
              * @memberOf PieChart
              */
             P.PieChart.prototype.height = 0;
+        }
+        Object.defineProperty(this, "onComponentShown", {
+            get: function() {
+                var value = delegate.onComponentShown;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onComponentShown = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.PieChart){
+            /**
+             * Component shown event handler function.
+             * @property onComponentShown
+             * @memberOf PieChart
+             */
+            P.PieChart.prototype.onComponentShown = {};
         }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
@@ -337,23 +337,6 @@
              */
             P.PieChart.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "visible", {
-            get: function() {
-                var value = delegate.visible;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.visible = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.PieChart){
-            /**
-             * Determines whether this component should be visible when its parent is visible.
-             * @property visible
-             * @memberOf PieChart
-             */
-            P.PieChart.prototype.visible = true;
-        }
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
@@ -370,6 +353,23 @@
              * @memberOf PieChart
              */
             P.PieChart.prototype.opaque = true;
+        }
+        Object.defineProperty(this, "visible", {
+            get: function() {
+                var value = delegate.visible;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.visible = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.PieChart){
+            /**
+             * Determines whether this component should be visible when its parent is visible.
+             * @property visible
+             * @memberOf PieChart
+             */
+            P.PieChart.prototype.visible = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
@@ -405,23 +405,6 @@
              */
             P.PieChart.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.PieChart){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf PieChart
-             */
-            P.PieChart.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -438,6 +421,23 @@
              * @memberOf PieChart
              */
             P.PieChart.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.PieChart){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf PieChart
+             */
+            P.PieChart.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -538,23 +538,6 @@
              */
             P.PieChart.prototype.left = 0;
         }
-        Object.defineProperty(this, "onMouseClicked", {
-            get: function() {
-                var value = delegate.onMouseClicked;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMouseClicked = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.PieChart){
-            /**
-             * Mouse clicked event handler function.
-             * @property onMouseClicked
-             * @memberOf PieChart
-             */
-            P.PieChart.prototype.onMouseClicked = {};
-        }
         Object.defineProperty(this, "background", {
             get: function() {
                 var value = delegate.background;
@@ -571,6 +554,23 @@
              * @memberOf PieChart
              */
             P.PieChart.prototype.background = {};
+        }
+        Object.defineProperty(this, "onMouseClicked", {
+            get: function() {
+                var value = delegate.onMouseClicked;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseClicked = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.PieChart){
+            /**
+             * Mouse clicked event handler function.
+             * @property onMouseClicked
+             * @memberOf PieChart
+             */
+            P.PieChart.prototype.onMouseClicked = {};
         }
         Object.defineProperty(this, "onMouseExited", {
             get: function() {
@@ -620,23 +620,6 @@
              */
             P.PieChart.prototype.width = 0;
         }
-        Object.defineProperty(this, "onKeyPressed", {
-            get: function() {
-                var value = delegate.onKeyPressed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyPressed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.PieChart){
-            /**
-             * Key pressed event handler function.
-             * @property onKeyPressed
-             * @memberOf PieChart
-             */
-            P.PieChart.prototype.onKeyPressed = {};
-        }
         Object.defineProperty(this, "font", {
             get: function() {
                 var value = delegate.font;
@@ -653,6 +636,23 @@
              * @memberOf PieChart
              */
             P.PieChart.prototype.font = {};
+        }
+        Object.defineProperty(this, "onKeyPressed", {
+            get: function() {
+                var value = delegate.onKeyPressed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyPressed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.PieChart){
+            /**
+             * Key pressed event handler function.
+             * @property onKeyPressed
+             * @memberOf PieChart
+             */
+            P.PieChart.prototype.onKeyPressed = {};
         }
     };
         /**

@@ -75,23 +75,6 @@
              */
             P.Style.prototype.folderIcon = {};
         }
-        Object.defineProperty(this, "openFolderIcon", {
-            get: function() {
-                var value = delegate.openFolderIcon;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.openFolderIcon = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Style){
-            /**
-             * An open forlder icon associated with this style.
-             * @property openFolderIcon
-             * @memberOf Style
-             */
-            P.Style.prototype.openFolderIcon = {};
-        }
         Object.defineProperty(this, "foreground", {
             get: function() {
                 var value = delegate.foreground;
@@ -108,6 +91,23 @@
              * @memberOf Style
              */
             P.Style.prototype.foreground = {};
+        }
+        Object.defineProperty(this, "openFolderIcon", {
+            get: function() {
+                var value = delegate.openFolderIcon;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.openFolderIcon = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Style){
+            /**
+             * An open forlder icon associated with this style.
+             * @property openFolderIcon
+             * @memberOf Style
+             */
+            P.Style.prototype.openFolderIcon = {};
         }
         Object.defineProperty(this, "align", {
             get: function() {

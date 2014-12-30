@@ -121,23 +121,6 @@
              */
             P.Parameter.prototype.scale = 0;
         }
-        Object.defineProperty(this, "signed", {
-            get: function() {
-                var value = delegate.signed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.signed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Parameter){
-            /**
-             * Determines if the field is signed.
-             * @property signed
-             * @memberOf Parameter
-             */
-            P.Parameter.prototype.signed = true;
-        }
         Object.defineProperty(this, "description", {
             get: function() {
                 var value = delegate.description;
@@ -154,6 +137,23 @@
              * @memberOf Parameter
              */
             P.Parameter.prototype.description = '';
+        }
+        Object.defineProperty(this, "signed", {
+            get: function() {
+                var value = delegate.signed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.signed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Parameter){
+            /**
+             * Determines if the field is signed.
+             * @property signed
+             * @memberOf Parameter
+             */
+            P.Parameter.prototype.signed = true;
         }
         Object.defineProperty(this, "schemaName", {
             get: function() {

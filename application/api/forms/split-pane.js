@@ -24,23 +24,6 @@
         if(P.SplitPane.superclass)
             P.SplitPane.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        Object.defineProperty(this, "onMouseDragged", {
-            get: function() {
-                var value = delegate.onMouseDragged;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMouseDragged = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.SplitPane){
-            /**
-             * Mouse dragged event handler function.
-             * @property onMouseDragged
-             * @memberOf SplitPane
-             */
-            P.SplitPane.prototype.onMouseDragged = {};
-        }
         Object.defineProperty(this, "cursor", {
             get: function() {
                 var value = delegate.cursor;
@@ -57,6 +40,23 @@
              * @memberOf SplitPane
              */
             P.SplitPane.prototype.cursor = {};
+        }
+        Object.defineProperty(this, "onMouseDragged", {
+            get: function() {
+                var value = delegate.onMouseDragged;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseDragged = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.SplitPane){
+            /**
+             * Mouse dragged event handler function.
+             * @property onMouseDragged
+             * @memberOf SplitPane
+             */
+            P.SplitPane.prototype.onMouseDragged = {};
         }
         Object.defineProperty(this, "parent", {
             get: function() {
@@ -373,23 +373,6 @@
              */
             P.SplitPane.prototype.element = {};
         }
-        Object.defineProperty(this, "onComponentShown", {
-            get: function() {
-                var value = delegate.onComponentShown;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onComponentShown = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.SplitPane){
-            /**
-             * Component shown event handler function.
-             * @property onComponentShown
-             * @memberOf SplitPane
-             */
-            P.SplitPane.prototype.onComponentShown = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -406,6 +389,23 @@
              * @memberOf SplitPane
              */
             P.SplitPane.prototype.height = 0;
+        }
+        Object.defineProperty(this, "onComponentShown", {
+            get: function() {
+                var value = delegate.onComponentShown;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onComponentShown = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.SplitPane){
+            /**
+             * Component shown event handler function.
+             * @property onComponentShown
+             * @memberOf SplitPane
+             */
+            P.SplitPane.prototype.onComponentShown = {};
         }
         Object.defineProperty(this, "orientation", {
             get: function() {
@@ -441,23 +441,6 @@
              */
             P.SplitPane.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "visible", {
-            get: function() {
-                var value = delegate.visible;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.visible = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.SplitPane){
-            /**
-             * Determines whether this component should be visible when its parent is visible.
-             * @property visible
-             * @memberOf SplitPane
-             */
-            P.SplitPane.prototype.visible = true;
-        }
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
@@ -474,6 +457,23 @@
              * @memberOf SplitPane
              */
             P.SplitPane.prototype.opaque = true;
+        }
+        Object.defineProperty(this, "visible", {
+            get: function() {
+                var value = delegate.visible;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.visible = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.SplitPane){
+            /**
+             * Determines whether this component should be visible when its parent is visible.
+             * @property visible
+             * @memberOf SplitPane
+             */
+            P.SplitPane.prototype.visible = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
@@ -523,23 +523,6 @@
              */
             P.SplitPane.prototype.count = 0;
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.SplitPane){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf SplitPane
-             */
-            P.SplitPane.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -556,6 +539,23 @@
              * @memberOf SplitPane
              */
             P.SplitPane.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.SplitPane){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf SplitPane
+             */
+            P.SplitPane.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -673,23 +673,6 @@
              */
             P.SplitPane.prototype.left = 0;
         }
-        Object.defineProperty(this, "onMouseClicked", {
-            get: function() {
-                var value = delegate.onMouseClicked;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMouseClicked = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.SplitPane){
-            /**
-             * Mouse clicked event handler function.
-             * @property onMouseClicked
-             * @memberOf SplitPane
-             */
-            P.SplitPane.prototype.onMouseClicked = {};
-        }
         Object.defineProperty(this, "background", {
             get: function() {
                 var value = delegate.background;
@@ -706,6 +689,23 @@
              * @memberOf SplitPane
              */
             P.SplitPane.prototype.background = {};
+        }
+        Object.defineProperty(this, "onMouseClicked", {
+            get: function() {
+                var value = delegate.onMouseClicked;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseClicked = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.SplitPane){
+            /**
+             * Mouse clicked event handler function.
+             * @property onMouseClicked
+             * @memberOf SplitPane
+             */
+            P.SplitPane.prototype.onMouseClicked = {};
         }
         Object.defineProperty(this, "onMouseExited", {
             get: function() {
@@ -772,23 +772,6 @@
              */
             P.SplitPane.prototype.width = 0;
         }
-        Object.defineProperty(this, "onKeyPressed", {
-            get: function() {
-                var value = delegate.onKeyPressed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyPressed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.SplitPane){
-            /**
-             * Key pressed event handler function.
-             * @property onKeyPressed
-             * @memberOf SplitPane
-             */
-            P.SplitPane.prototype.onKeyPressed = {};
-        }
         Object.defineProperty(this, "font", {
             get: function() {
                 var value = delegate.font;
@@ -805,6 +788,23 @@
              * @memberOf SplitPane
              */
             P.SplitPane.prototype.font = {};
+        }
+        Object.defineProperty(this, "onKeyPressed", {
+            get: function() {
+                var value = delegate.onKeyPressed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyPressed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.SplitPane){
+            /**
+             * Key pressed event handler function.
+             * @property onKeyPressed
+             * @memberOf SplitPane
+             */
+            P.SplitPane.prototype.onKeyPressed = {};
         }
         var invalidatable = null;
         delegate.setPublishedCollectionInvalidator(function() {
