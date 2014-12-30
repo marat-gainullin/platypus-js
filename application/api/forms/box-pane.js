@@ -28,23 +28,6 @@
         if(P.BoxPane.superclass)
             P.BoxPane.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        Object.defineProperty(this, "cursor", {
-            get: function() {
-                var value = delegate.cursor;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.cursor = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.BoxPane){
-            /**
-             * The mouse <code>Cursor</code> over this component.
-             * @property cursor
-             * @memberOf BoxPane
-             */
-            P.BoxPane.prototype.cursor = {};
-        }
         Object.defineProperty(this, "onMouseDragged", {
             get: function() {
                 var value = delegate.onMouseDragged;
@@ -61,6 +44,23 @@
              * @memberOf BoxPane
              */
             P.BoxPane.prototype.onMouseDragged = {};
+        }
+        Object.defineProperty(this, "cursor", {
+            get: function() {
+                var value = delegate.cursor;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.cursor = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.BoxPane){
+            /**
+             * The mouse <code>Cursor</code> over this component.
+             * @property cursor
+             * @memberOf BoxPane
+             */
+            P.BoxPane.prototype.cursor = {};
         }
         Object.defineProperty(this, "parent", {
             get: function() {
@@ -360,23 +360,6 @@
              */
             P.BoxPane.prototype.element = {};
         }
-        Object.defineProperty(this, "height", {
-            get: function() {
-                var value = delegate.height;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.height = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.BoxPane){
-            /**
-             * Height of the component.
-             * @property height
-             * @memberOf BoxPane
-             */
-            P.BoxPane.prototype.height = 0;
-        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -393,6 +376,23 @@
              * @memberOf BoxPane
              */
             P.BoxPane.prototype.onComponentShown = {};
+        }
+        Object.defineProperty(this, "height", {
+            get: function() {
+                var value = delegate.height;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.height = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.BoxPane){
+            /**
+             * Height of the component.
+             * @property height
+             * @memberOf BoxPane
+             */
+            P.BoxPane.prototype.height = 0;
         }
         Object.defineProperty(this, "orientation", {
             get: function() {
@@ -425,23 +425,6 @@
              */
             P.BoxPane.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "opaque", {
-            get: function() {
-                var value = delegate.opaque;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.opaque = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.BoxPane){
-            /**
-             * True if this component is completely opaque.
-             * @property opaque
-             * @memberOf BoxPane
-             */
-            P.BoxPane.prototype.opaque = true;
-        }
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
@@ -458,6 +441,23 @@
              * @memberOf BoxPane
              */
             P.BoxPane.prototype.visible = true;
+        }
+        Object.defineProperty(this, "opaque", {
+            get: function() {
+                var value = delegate.opaque;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.opaque = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.BoxPane){
+            /**
+             * True if this component is completely opaque.
+             * @property opaque
+             * @memberOf BoxPane
+             */
+            P.BoxPane.prototype.opaque = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
@@ -507,23 +507,6 @@
              */
             P.BoxPane.prototype.count = 0;
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.BoxPane){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf BoxPane
-             */
-            P.BoxPane.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -540,6 +523,23 @@
              * @memberOf BoxPane
              */
             P.BoxPane.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.BoxPane){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf BoxPane
+             */
+            P.BoxPane.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -657,23 +657,6 @@
              */
             P.BoxPane.prototype.left = 0;
         }
-        Object.defineProperty(this, "background", {
-            get: function() {
-                var value = delegate.background;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.background = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.BoxPane){
-            /**
-             * The background color of this component.
-             * @property background
-             * @memberOf BoxPane
-             */
-            P.BoxPane.prototype.background = {};
-        }
         Object.defineProperty(this, "onMouseClicked", {
             get: function() {
                 var value = delegate.onMouseClicked;
@@ -690,6 +673,23 @@
              * @memberOf BoxPane
              */
             P.BoxPane.prototype.onMouseClicked = {};
+        }
+        Object.defineProperty(this, "background", {
+            get: function() {
+                var value = delegate.background;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.background = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.BoxPane){
+            /**
+             * The background color of this component.
+             * @property background
+             * @memberOf BoxPane
+             */
+            P.BoxPane.prototype.background = {};
         }
         Object.defineProperty(this, "onMouseExited", {
             get: function() {
@@ -739,23 +739,6 @@
              */
             P.BoxPane.prototype.width = 0;
         }
-        Object.defineProperty(this, "font", {
-            get: function() {
-                var value = delegate.font;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.font = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.BoxPane){
-            /**
-             * The font of this component.
-             * @property font
-             * @memberOf BoxPane
-             */
-            P.BoxPane.prototype.font = {};
-        }
         Object.defineProperty(this, "onKeyPressed", {
             get: function() {
                 var value = delegate.onKeyPressed;
@@ -772,6 +755,23 @@
              * @memberOf BoxPane
              */
             P.BoxPane.prototype.onKeyPressed = {};
+        }
+        Object.defineProperty(this, "font", {
+            get: function() {
+                var value = delegate.font;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.font = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.BoxPane){
+            /**
+             * The font of this component.
+             * @property font
+             * @memberOf BoxPane
+             */
+            P.BoxPane.prototype.font = {};
         }
         var invalidatable = null;
         delegate.setPublishedCollectionInvalidator(function() {

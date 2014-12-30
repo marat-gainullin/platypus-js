@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
@@ -34,6 +35,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * The utility application to convert JavaScript API classes with
@@ -289,10 +291,11 @@ public class Classes2Scripts {
                     if (pb == null) {
                         pb = new MethodedPropBox();
                         pb.name = propName;
-                        if(propAnn.name() != null && !propAnn.name().isEmpty())
+                        if (propAnn.name() != null && !propAnn.name().isEmpty()) {
                             pb.apiName = propAnn.name();
-                        else
+                        } else {
                             pb.apiName = propName;
+                        }
                         pb.method = method;
                         pb.invalidatable = invalidatable;
                         props.put(pb.name, pb);
@@ -438,18 +441,19 @@ public class Classes2Scripts {
         return fi;
     }
 
-    private FunctionInfo getConstructorInfo(String javaType, String defaultName, AnnotatedElement ae) {
+    private FunctionInfo getConstructorInfo(String javaType, String defaultName, Executable ae) {
         FunctionInfo fi = getFunctionInfo(defaultName, ae);
         fi.javaClassName = javaType;
         return fi;
     }
 
-    private FunctionInfo getFunctionInfo(String defaultName, AnnotatedElement ae) {
+    private FunctionInfo getFunctionInfo(String defaultName, Executable ae) {
         FunctionInfo ci = new FunctionInfo();
         ScriptFunction sf = (ScriptFunction) ae.getAnnotation(ScriptFunction.class);
         ci.name = sf.name().isEmpty() ? defaultName : sf.name();
         ci.jsDoc = formJsDoc(sf.jsDoc());
         ci.params = new String[sf.params().length];
+        ci.nativeParams = ae.getParameters();
         System.arraycopy(sf.params(), 0, ci.params, 0, sf.params().length);
         return ci;
     }
@@ -639,12 +643,14 @@ public class Classes2Scripts {
 
         public FunctionInfo() {
             jsDoc = "";//NOI18N
-            params = new String[0];
+            params = new String[]{};
+            nativeParams = new Parameter[]{};
         }
 
         public String name;
         public String javaClassName;
         public String[] params;
+        public Parameter[] nativeParams;
         public String jsDoc;
 
         public String getNullParamsStr() {
@@ -671,6 +677,9 @@ public class Classes2Scripts {
 
         public String getUnwrappedParamsStr(int indent) {
             StringBuilder argsSb = new StringBuilder();
+            if (params.length != nativeParams.length) {
+                throw new IllegalStateException("@ScriptFunction annotation 'params' parameter is invalid. Constructor of " + javaClassName);
+            }
             for (int argsCount = params.length; argsCount >= 0; argsCount--) {
                 if (argsCount > 0) {
                     argsSb.append("arguments.length === ").append(argsCount).append(" ? ");

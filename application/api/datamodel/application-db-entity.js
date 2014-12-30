@@ -22,21 +22,6 @@
         if(P.ApplicationDbEntity.superclass)
             P.ApplicationDbEntity.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        Object.defineProperty(this, "cursor", {
-            get: function() {
-                var value = delegate.cursor;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ApplicationDbEntity){
-            /**
-             * Gets the row at cursor position.
-             * @return the row object or <code>null</code> if cursor is before first or after last position.
-             * @property cursor
-             * @memberOf ApplicationDbEntity
-             */
-            P.ApplicationDbEntity.prototype.cursor = {};
-        }
         Object.defineProperty(this, "willScroll", {
             get: function() {
                 var value = delegate.willScroll;
@@ -53,6 +38,21 @@
              * @memberOf ApplicationDbEntity
              */
             P.ApplicationDbEntity.prototype.willScroll = {};
+        }
+        Object.defineProperty(this, "cursor", {
+            get: function() {
+                var value = delegate.cursor;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ApplicationDbEntity){
+            /**
+             * Gets the row at cursor position.
+             * @return the row object or <code>null</code> if cursor is before first or after last position.
+             * @property cursor
+             * @memberOf ApplicationDbEntity
+             */
+            P.ApplicationDbEntity.prototype.cursor = {};
         }
         Object.defineProperty(this, "willInsert", {
             get: function() {
@@ -257,6 +257,17 @@
         }
     };
         /**
+         * Adds the updates into the change log as a command.
+         * @method enqueueUpdate
+         * @memberOf ApplicationDbEntity
+         */
+        P.ApplicationDbEntity.prototype.enqueueUpdate = function() {
+            var delegate = this.unwrap();
+            var value = delegate.enqueueUpdate();
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Applies the updates into the database and commits the transaction.
          * @param onSuccess Success callback. It has an argument, - updates rows count.
          * @param onFailure Failure callback. It has an argument, - exception occured while applying updates into the database.
@@ -266,17 +277,6 @@
         P.ApplicationDbEntity.prototype.executeUpdate = function(arg0, arg1) {
             var delegate = this.unwrap();
             var value = delegate.executeUpdate(P.boxAsJava(arg0), P.boxAsJava(arg1));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Adds the updates into the change log as a command.
-         * @method enqueueUpdate
-         * @memberOf ApplicationDbEntity
-         */
-        P.ApplicationDbEntity.prototype.enqueueUpdate = function() {
-            var delegate = this.unwrap();
-            var value = delegate.enqueueUpdate();
             return P.boxAsJs(value);
         };
 
@@ -342,45 +342,6 @@
         };
 
         /**
-         * Sets the array cursor to the specified object.
-         * @param object the object to position the entity cursor on.
-         * @return <code>true</code> if the cursor changed successfully and <code>false</code> otherwise.
-         * @method scrollTo
-         * @memberOf ApplicationDbEntity
-         */
-        P.ApplicationDbEntity.prototype.scrollTo = function(row) {
-            var delegate = this.unwrap();
-            var value = delegate.scrollTo(P.boxAsJava(row));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Finds row by its key. Key must a single property.
-         * @param key the unique identifier of the row.
-         * @return a row object or <code>null</code> if nothing is found.
-         * @method findById
-         * @memberOf ApplicationDbEntity
-         */
-        P.ApplicationDbEntity.prototype.findById = function(key) {
-            var delegate = this.unwrap();
-            var value = delegate.findById(P.boxAsJava(key));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Creates an instace of filter object to filter rowset data in-place using specified constraints objects.
-         * @param fields The filter conditions fields in following form: entity.schema.propName or just a propName in a string form.
-         * @return a comparator object.
-         * @method createFilter
-         * @memberOf ApplicationDbEntity
-         */
-        P.ApplicationDbEntity.prototype.createFilter = function(fields) {
-            var delegate = this.unwrap();
-            var value = delegate.createFilter(P.boxAsJava(fields));
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Creates an instance of comparator object using specified constraints objects.
          * @param pairs the sort criteria pairs, in a form of property object (e.g. entity.schema.propName or just a propName in a string form) and the order of sort (ascending - true; descending - false).
          * @return a comparator object to be passed as a parameter to entity's <code>sort</code> method.
@@ -403,6 +364,45 @@
         P.ApplicationDbEntity.prototype.requery = function(onSuccess, onFailure) {
             var delegate = this.unwrap();
             var value = delegate.requery(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Creates an instace of filter object to filter rowset data in-place using specified constraints objects.
+         * @param fields The filter conditions fields in following form: entity.schema.propName or just a propName in a string form.
+         * @return a comparator object.
+         * @method createFilter
+         * @memberOf ApplicationDbEntity
+         */
+        P.ApplicationDbEntity.prototype.createFilter = function(fields) {
+            var delegate = this.unwrap();
+            var value = delegate.createFilter(P.boxAsJava(fields));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Finds row by its key. Key must a single property.
+         * @param key the unique identifier of the row.
+         * @return a row object or <code>null</code> if nothing is found.
+         * @method findById
+         * @memberOf ApplicationDbEntity
+         */
+        P.ApplicationDbEntity.prototype.findById = function(key) {
+            var delegate = this.unwrap();
+            var value = delegate.findById(P.boxAsJava(key));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Sets the array cursor to the specified object.
+         * @param object the object to position the entity cursor on.
+         * @return <code>true</code> if the cursor changed successfully and <code>false</code> otherwise.
+         * @method scrollTo
+         * @memberOf ApplicationDbEntity
+         */
+        P.ApplicationDbEntity.prototype.scrollTo = function(row) {
+            var delegate = this.unwrap();
+            var value = delegate.scrollTo(P.boxAsJava(row));
             return P.boxAsJs(value);
         };
 

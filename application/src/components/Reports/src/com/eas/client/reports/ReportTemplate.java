@@ -10,10 +10,12 @@ package com.eas.client.reports;
 import com.eas.client.report.Report;
 import com.bearsoft.rowset.compacts.CompactBlob;
 import com.eas.client.cache.ReportConfig;
+import com.eas.client.model.application.ApplicationModel;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import com.eas.script.ScriptUtils;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -22,13 +24,13 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-
 public class ReportTemplate implements HasPublished {
 
     protected ReportConfig config;
-    //
+    protected int timezoneOffset = 0;
     protected String name;
     protected JSObject scriptData;
+    protected JSObject fixed = ScriptUtils.makeArray();
     private static JSObject publisher;
     protected JSObject published;
 
@@ -43,6 +45,13 @@ public class ReportTemplate implements HasPublished {
         super();
         config = aConfig;
         scriptData = aData;
+        name = config.getNameTemplate();
+    }
+
+    public ReportTemplate(ReportConfig aConfig, ApplicationModel<?, ?> aData) {
+        super();
+        config = aConfig;
+        scriptData = aData.getPublished();
         name = config.getNameTemplate();
     }
 
@@ -62,25 +71,24 @@ public class ReportTemplate implements HasPublished {
     @ScriptFunction(jsDoc = GENERATEREPORT_JSDOC)
     public Report generateReport() throws Exception {
         if (config != null) {
-            ExelTemplate reportTemplate = new ExelTemplate(scriptData, config.getFormat());
-            reportTemplate.setTemplate(new CompactBlob(config.getTemplateContent()));
+            ExelTemplate reportTemplate = new ExelTemplate(scriptData, config.getFormat(), this);
             byte[] generated = reportTemplate.create();
             return new Report(generated, config.getFormat(), name);
         }
         return null;
     }
 
-    public void injectPublished(JSObject aValue){
+    public void injectPublished(JSObject aValue) {
         published = aValue;
     }
-    
+
     @Override
     public JSObject getPublished() {
         if (published == null) {
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = (JSObject)publisher.call(null, new Object[]{this});
+            published = (JSObject) publisher.call(null, new Object[]{this});
         }
         return published;
     }
@@ -107,9 +115,42 @@ public class ReportTemplate implements HasPublished {
         return name;
     }
 
-    @ScriptFunction()
+    @ScriptFunction
     public void setName(String aName) {
         name = aName;
     }
 
+    private static final String FIXED_JSDOC = ""
+            + "/**\n"
+            + " * Array of name collections, that will fixed.\n"
+            + " */";
+
+    @ScriptFunction(jsDoc = FIXED_JSDOC)
+    public JSObject getFixed() {
+        return fixed;
+    }
+    
+    @ScriptFunction
+    public void setFixed(JSObject aValue) {
+        fixed = aValue;
+    }
+
+    public ReportConfig getConfig() {
+        return config;
+    }
+
+    private static final String TIMEZONE_OFFSET_JSDOC = ""
+            + "/**\n"
+            + " * Array of name collections, that will fixed.\n"
+            + " */";
+
+    @ScriptFunction(jsDoc = TIMEZONE_OFFSET_JSDOC)
+    public int getTimezoneOffset() {
+        return timezoneOffset;
+    }
+
+    @ScriptFunction
+    public void setTimezoneOffset(int aValue) {
+        timezoneOffset = aValue;
+    }
 }

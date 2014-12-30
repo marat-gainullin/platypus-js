@@ -128,21 +128,21 @@
     }
 
     Object.defineProperty(P, "invokeDelayed", {get: function () {
-        return invokeDelayed;
-    }});
-    
+            return invokeDelayed;
+        }});
+
     var serverCoreClass;
     try {
         serverCoreClass = Java.type('com.eas.server.PlatypusServerCore');
         // in server (EE or standalone)
-        
+
         function invokeLater(aTarget) {
             invokeDelayed(1, aTarget);
         }
 
         Object.defineProperty(P, "invokeLater", {get: function () {
-            return invokeLater;
-        }});
+                return invokeLater;
+            }});
         load("classpath:server-deps.js");
     } catch (e) {
         serverCoreClass = null;
@@ -168,8 +168,8 @@
         }
 
         Object.defineProperty(P, "invokeLater", {get: function () {
-            return invokeLater;
-        }});
+                return invokeLater;
+            }});
         //
         Object.defineProperty(P.Color, "black", {value: new P.Color(0, 0, 0)});
         Object.defineProperty(P.Color, "BLACK", {value: new P.Color(0, 0, 0)});
@@ -255,10 +255,10 @@
                     curDir = ".";
                 }
                 var dialog = new FileChooserClass(new FileClass(curDir));
-                if (aFileFilter){
+                if (aFileFilter) {
                     var name = aFileFilter;
-                    aFileFilter = aFileFilter.replace(/ /g,"");
-                    aFileFilter = aFileFilter.replace(/\./g,"");
+                    aFileFilter = aFileFilter.replace(/ /g, "");
+                    aFileFilter = aFileFilter.replace(/\./g, "");
                     var array = [];
                     array = aFileFilter.split(",");
                     dialog.setFileFilter(new FileFilter(name, array));
@@ -285,20 +285,20 @@
          * @param curDir current directory [optional]
          * @return selected file or else null
          */
-        function selectFile(aCallback,aFileFilter, curDir) {
+        function selectFile(aCallback, aFileFilter, curDir) {
 //            if (aCallback) {
-                invokeLater(function () {
-                    var file = fileDialog(curDir, false, aFileFilter);
-                    if (file){
-                        aCallback(file);
-                    }
-                });
+            invokeLater(function () {
+                var file = fileDialog(curDir, false, aFileFilter);
+                if (file) {
+                    aCallback(file);
+                }
+            });
 //            } else {
 //                return fileDialog(curDir, false, aFileFilter);
 //            }
         }
-        
-        
+
+
         Object.defineProperty(P, "selectFile", {
             value: selectFile
         });
@@ -590,31 +590,35 @@
          */
         function loadForm(aName, aModel, aTarget) {
             var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
-            var formDocument = ScriptedResourceClass.getApp().getForms().get(aName, files);
-            var designInfo = FormLoaderClass.load(formDocument, ScriptedResourceClass.getApp());
-            var form = new FormClass(aName, designInfo, aModel ? aModel.unwrap() : null, null);
-            if (aTarget) {
-                P.Form.call(aTarget, null, aName, form);
+            if (files) {
+                var formDocument = ScriptedResourceClass.getApp().getForms().get(aName, files);
+                var designInfo = FormLoaderClass.load(formDocument, ScriptedResourceClass.getApp());
+                var form = new FormClass(aName, designInfo, aModel ? aModel.unwrap() : null, null);
+                if (aTarget) {
+                    P.Form.call(aTarget, null, aName, form);
+                } else {
+                    aTarget = new P.Form(null, aName, form);
+                }
+                form.injectPublished(aTarget);
+                if (!form.title)
+                    form.title = aName;
+                var comps = form.publishedComponents;
+                for (var c = 0; c < comps.length; c++) {
+                    (function () {
+                        var comp = comps[c];
+                        if (comp.name) {
+                            Object.defineProperty(aTarget, comp.name, {
+                                get: function () {
+                                    return comp;
+                                }
+                            });
+                        }
+                    })();
+                }
+                return aTarget;
             } else {
-                aTarget = new P.Form(null, aName, form);
+                throw "Form layout '" + aName + "' missing.";
             }
-            form.injectPublished(aTarget);
-            if (!form.title)
-                form.title = aName;
-            var comps = form.publishedComponents;
-            for (var c = 0; c < comps.length; c++) {
-                (function () {
-                    var comp = comps[c];
-                    if (comp.name) {
-                        Object.defineProperty(aTarget, comp.name, {
-                            get: function () {
-                                return comp;
-                            }
-                        });
-                    }
-                })();
-            }
-            return aTarget;
         }
         Object.defineProperty(P, "loadForm", {value: loadForm});
     }
@@ -1052,88 +1056,92 @@
      */
     function loadModel(aName, aTarget) {
         var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
-        var modelDocument = ScriptedResourceClass.getApp().getModels().get(aName, files);
-        var model = ModelLoaderClass.load(modelDocument, ScriptedResourceClass.getApp());
-        var modelCTor;
-        if (model instanceof TwoTierModelClass) {
-            modelCTor = P.ApplicationDbModel;
-        } else if (model instanceof ThreeTierModelClass) {
-            modelCTor = P.ApplicationPlatypusModel;
+        if (files) {
+            var modelDocument = ScriptedResourceClass.getApp().getModels().get(aName, files);
+            var model = ModelLoaderClass.load(modelDocument, ScriptedResourceClass.getApp());
+            var modelCTor;
+            if (model instanceof TwoTierModelClass) {
+                modelCTor = P.ApplicationDbModel;
+            } else if (model instanceof ThreeTierModelClass) {
+                modelCTor = P.ApplicationPlatypusModel;
+            } else {
+                throw "Can't determine model's type.";
+            }
+            if (aTarget) {
+                modelCTor.call(aTarget, model);
+            } else {
+                aTarget = new modelCTor(model);
+            }
+            function publishEntity(nEntity) {
+                var published = EngineUtilsClass.unwrap(nEntity.getPublished());
+                var pSchema = {};
+                Object.defineProperty(published, "schema", {
+                    value: pSchema
+                });
+                var nFields = nEntity.getFields().toCollection();
+                for (var n = 0; n < nFields.size(); n++) {
+                    (function () {
+                        var nField = nFields[n];
+                        // schema
+                        var schemaDesc = {
+                            value: nField.getPublished()
+                        };
+                        Object.defineProperty(pSchema, nField.name, schemaDesc);
+                        Object.defineProperty(pSchema, n, schemaDesc);
+                    })();
+                }
+                // entity.params.p1 syntax
+                var nParameters = nEntity.getQuery().getParameters();
+                var ncParameters = nParameters.toCollection();
+                var pParams = {};
+                for (var p = 0; p < ncParameters.size(); p++) {
+                    (function () {
+                        var nParameter = ncParameters[p];
+                        var pDesc = {
+                            get: function () {
+                                return boxAsJs(nParameter.jsValue/*because of UNDEFINED_SQL_VALUE*/);
+                            },
+                            set: function (aValue) {
+                                nParameter.jsValue/*because of UNDEFINED_SQL_VALUE*/ = boxAsJava(aValue);
+                            }
+                        };
+                        Object.defineProperty(pParams, nParameter.name, pDesc);
+                        Object.defineProperty(pParams, p, pDesc);
+                    })();
+                }
+                Object.defineProperty(published, "params", {value: pParams});
+                // entity.params.schema.p1 syntax
+                var pParamsSchema = EngineUtilsClass.unwrap(nParameters.getPublished());
+                if (!pParams.schema)
+                    Object.defineProperty(pParams, "schema", {value: pParamsSchema});
+                return published;
+            }
+            var entities = model.entities();
+            for each (var enEntity in entities) {
+                enEntity.validateQuery();
+                if (enEntity.name) {
+                    (function () {
+                        var ppEntity = publishEntity(enEntity);
+                        Object.defineProperty(aTarget, enEntity.name, {
+                            value: ppEntity,
+                            enumerable: true
+                        });
+                    })();
+                }
+            }
+            model.createORMDefinitions();
+            aTarget.loadEntity = function (queryName) {
+                var lnEntity = model.loadEntity(P.boxAsJava(queryName));
+                return publishEntity(lnEntity);
+            };
+            aTarget.createEntity = function (sqlText, datasourceName) {
+                var lnEntity = model.createEntity(P.boxAsJava(sqlText), P.boxAsJava(datasourceName));
+                return publishEntity(lnEntity);
+            };
+            return aTarget;
         } else {
-            throw "Can't determine model's type.";
+            throw "Model definition '" + aName + "' missing.";
         }
-        if (aTarget) {
-            modelCTor.call(aTarget, model);
-        } else {
-            aTarget = new modelCTor(model);
-        }
-        function publishEntity(nEntity) {
-            var published = EngineUtilsClass.unwrap(nEntity.getPublished());
-            var pSchema = {};
-            Object.defineProperty(published, "schema", {
-                value: pSchema
-            });
-            var nFields = nEntity.getFields().toCollection();
-            for (var n = 0; n < nFields.size(); n++) {
-                (function () {
-                    var nField = nFields[n];
-                    // schema
-                    var schemaDesc = {
-                        value: nField.getPublished()
-                    };
-                    Object.defineProperty(pSchema, nField.name, schemaDesc);
-                    Object.defineProperty(pSchema, n, schemaDesc);
-                })();
-            }
-            // entity.params.p1 syntax
-            var nParameters = nEntity.getQuery().getParameters();
-            var ncParameters = nParameters.toCollection();
-            var pParams = {};
-            for (var p = 0; p < ncParameters.size(); p++) {
-                (function () {
-                    var nParameter = ncParameters[p];
-                    var pDesc = {
-                        get: function () {
-                            return boxAsJs(nParameter.jsValue/*because of UNDEFINED_SQL_VALUE*/);
-                        },
-                        set: function (aValue) {
-                            nParameter.jsValue/*because of UNDEFINED_SQL_VALUE*/ = boxAsJava(aValue);
-                        }
-                    };
-                    Object.defineProperty(pParams, nParameter.name, pDesc);
-                    Object.defineProperty(pParams, p, pDesc);
-                })();
-            }
-            Object.defineProperty(published, "params", {value: pParams});
-            // entity.params.schema.p1 syntax
-            var pParamsSchema = EngineUtilsClass.unwrap(nParameters.getPublished());
-            if(!pParams.schema)
-                Object.defineProperty(pParams, "schema", {value: pParamsSchema});
-            return published;
-        }
-        var entities = model.entities();
-        for each (var enEntity in entities) {
-            enEntity.validateQuery();
-            if (enEntity.name) {
-                (function () {
-                    var ppEntity = publishEntity(enEntity);
-                    Object.defineProperty(aTarget, enEntity.name, {
-                        value: ppEntity,
-                        enumerable: true
-                    });
-                })();
-            }
-        }
-        model.createORMDefinitions();
-        aTarget.loadEntity = function (queryName) {
-            var lnEntity = model.loadEntity(P.boxAsJava(queryName));
-            return publishEntity(lnEntity);
-        };
-        aTarget.createEntity = function (sqlText, datasourceName) {
-            var lnEntity = model.createEntity(P.boxAsJava(sqlText), P.boxAsJava(datasourceName));
-            return publishEntity(lnEntity);
-        };
-        return aTarget;
     }
     Object.defineProperty(P, "loadModel", {value: loadModel});
     /**
@@ -1145,13 +1153,17 @@
      */
     function loadTemplate(aName, aData, aTarget) {
         var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
-        var reportConfig = ScriptedResourceClass.getApp().getReports().get(aName, files);
-        if (aTarget) {
-            P.ReportTemplate.call(aTarget, reportConfig, aData);
+        if (files) {
+            var reportConfig = ScriptedResourceClass.getApp().getReports().get(aName, files);
+            if (aTarget) {
+                P.ReportTemplate.call(aTarget, reportConfig, aData);
+            } else {
+                aTarget = new P.ReportTemplate(reportConfig, aData);
+            }
+            return aTarget;
         } else {
-            aTarget = new P.ReportTemplate(reportConfig, aData);
+            throw "Report template '" + aName + "' missing.";
         }
-        return aTarget;
     }
     Object.defineProperty(P, "loadTemplate", {value: loadTemplate});
     /**
@@ -1417,12 +1429,14 @@ if (!P) {
      * @param aFormKey form key value.
      * @returns {P.Form} instance
      */
-    P.Form.getShownForm = function(aFormKey){};
+    P.Form.getShownForm = function (aFormKey) {
+    };
     /**
      * P.Form.shown change handler.
      * @returns {Function}
      */
-    P.Form.onChange = function(){};
+    P.Form.onChange = function () {
+    };
     /**
      * Constructs server module network proxy.
      * @constructor

@@ -1,23 +1,25 @@
 (function() {
     var javaClass = Java.type("com.eas.client.forms.api.components.Slider");
     javaClass.setPublisher(function(aDelegate) {
-        return new P.Slider(null, null, null, aDelegate);
+        return new P.Slider(null, null, null, null, aDelegate);
     });
     
     /**
      * Slider component.
+     * @param orientation the minimum value (optional)
      * @param min the minimum value (optional)
      * @param max the maximum value (optional)
      * @param value the initial value (optional)
      * @constructor Slider Slider
      */
-    P.Slider = function (min, max, value) {
-        var maxArgs = 3;
+    P.Slider = function (orientation, min, max, value) {
+        var maxArgs = 4;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
-            : arguments.length === 3 ? new javaClass(P.boxAsJava(min), P.boxAsJava(max), P.boxAsJava(value))
-            : arguments.length === 2 ? new javaClass(P.boxAsJava(min), P.boxAsJava(max))
-            : arguments.length === 1 ? new javaClass(P.boxAsJava(min))
+            : arguments.length === 4 ? new javaClass(P.boxAsJava(orientation), P.boxAsJava(min), P.boxAsJava(max), P.boxAsJava(value))
+            : arguments.length === 3 ? new javaClass(P.boxAsJava(orientation), P.boxAsJava(min), P.boxAsJava(max))
+            : arguments.length === 2 ? new javaClass(P.boxAsJava(orientation), P.boxAsJava(min))
+            : arguments.length === 1 ? new javaClass(P.boxAsJava(orientation))
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
@@ -28,23 +30,6 @@
         if(P.Slider.superclass)
             P.Slider.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        Object.defineProperty(this, "cursor", {
-            get: function() {
-                var value = delegate.cursor;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.cursor = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Slider){
-            /**
-             * The mouse <code>Cursor</code> over this component.
-             * @property cursor
-             * @memberOf Slider
-             */
-            P.Slider.prototype.cursor = {};
-        }
         Object.defineProperty(this, "onMouseDragged", {
             get: function() {
                 var value = delegate.onMouseDragged;
@@ -61,6 +46,23 @@
              * @memberOf Slider
              */
             P.Slider.prototype.onMouseDragged = {};
+        }
+        Object.defineProperty(this, "cursor", {
+            get: function() {
+                var value = delegate.cursor;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.cursor = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Slider){
+            /**
+             * The mouse <code>Cursor</code> over this component.
+             * @property cursor
+             * @memberOf Slider
+             */
+            P.Slider.prototype.cursor = {};
         }
         Object.defineProperty(this, "parent", {
             get: function() {
@@ -326,23 +328,6 @@
              */
             P.Slider.prototype.element = {};
         }
-        Object.defineProperty(this, "height", {
-            get: function() {
-                var value = delegate.height;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.height = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Slider){
-            /**
-             * Height of the component.
-             * @property height
-             * @memberOf Slider
-             */
-            P.Slider.prototype.height = 0;
-        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -359,6 +344,23 @@
              * @memberOf Slider
              */
             P.Slider.prototype.onComponentShown = {};
+        }
+        Object.defineProperty(this, "height", {
+            get: function() {
+                var value = delegate.height;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.height = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Slider){
+            /**
+             * Height of the component.
+             * @property height
+             * @memberOf Slider
+             */
+            P.Slider.prototype.height = 0;
         }
         Object.defineProperty(this, "orientation", {
             get: function() {
@@ -394,23 +396,6 @@
              */
             P.Slider.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "opaque", {
-            get: function() {
-                var value = delegate.opaque;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.opaque = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Slider){
-            /**
-             * True if this component is completely opaque.
-             * @property opaque
-             * @memberOf Slider
-             */
-            P.Slider.prototype.opaque = true;
-        }
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
@@ -427,6 +412,23 @@
              * @memberOf Slider
              */
             P.Slider.prototype.visible = true;
+        }
+        Object.defineProperty(this, "opaque", {
+            get: function() {
+                var value = delegate.opaque;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.opaque = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Slider){
+            /**
+             * True if this component is completely opaque.
+             * @property opaque
+             * @memberOf Slider
+             */
+            P.Slider.prototype.opaque = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
@@ -462,23 +464,6 @@
              */
             P.Slider.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Slider){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf Slider
-             */
-            P.Slider.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -495,6 +480,23 @@
              * @memberOf Slider
              */
             P.Slider.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Slider){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf Slider
+             */
+            P.Slider.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -595,23 +597,6 @@
              */
             P.Slider.prototype.left = 0;
         }
-        Object.defineProperty(this, "background", {
-            get: function() {
-                var value = delegate.background;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.background = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Slider){
-            /**
-             * The background color of this component.
-             * @property background
-             * @memberOf Slider
-             */
-            P.Slider.prototype.background = {};
-        }
         Object.defineProperty(this, "onMouseClicked", {
             get: function() {
                 var value = delegate.onMouseClicked;
@@ -628,6 +613,23 @@
              * @memberOf Slider
              */
             P.Slider.prototype.onMouseClicked = {};
+        }
+        Object.defineProperty(this, "background", {
+            get: function() {
+                var value = delegate.background;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.background = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Slider){
+            /**
+             * The background color of this component.
+             * @property background
+             * @memberOf Slider
+             */
+            P.Slider.prototype.background = {};
         }
         Object.defineProperty(this, "onMouseExited", {
             get: function() {
@@ -711,23 +713,6 @@
              */
             P.Slider.prototype.minimum = 0;
         }
-        Object.defineProperty(this, "font", {
-            get: function() {
-                var value = delegate.font;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.font = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Slider){
-            /**
-             * The font of this component.
-             * @property font
-             * @memberOf Slider
-             */
-            P.Slider.prototype.font = {};
-        }
         Object.defineProperty(this, "onKeyPressed", {
             get: function() {
                 var value = delegate.onKeyPressed;
@@ -744,6 +729,23 @@
              * @memberOf Slider
              */
             P.Slider.prototype.onKeyPressed = {};
+        }
+        Object.defineProperty(this, "font", {
+            get: function() {
+                var value = delegate.font;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.font = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Slider){
+            /**
+             * The font of this component.
+             * @property font
+             * @memberOf Slider
+             */
+            P.Slider.prototype.font = {};
         }
     };
         /**

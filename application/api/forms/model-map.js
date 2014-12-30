@@ -23,23 +23,6 @@
         if(P.ModelMap.superclass)
             P.ModelMap.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        Object.defineProperty(this, "cursor", {
-            get: function() {
-                var value = delegate.cursor;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.cursor = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelMap){
-            /**
-             * The mouse <code>Cursor</code> over this component.
-             * @property cursor
-             * @memberOf ModelMap
-             */
-            P.ModelMap.prototype.cursor = {};
-        }
         Object.defineProperty(this, "onMouseDragged", {
             get: function() {
                 var value = delegate.onMouseDragged;
@@ -56,6 +39,23 @@
              * @memberOf ModelMap
              */
             P.ModelMap.prototype.onMouseDragged = {};
+        }
+        Object.defineProperty(this, "cursor", {
+            get: function() {
+                var value = delegate.cursor;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.cursor = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * The mouse <code>Cursor</code> over this component.
+             * @property cursor
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.cursor = {};
         }
         Object.defineProperty(this, "parent", {
             get: function() {
@@ -346,23 +346,6 @@
              */
             P.ModelMap.prototype.element = {};
         }
-        Object.defineProperty(this, "height", {
-            get: function() {
-                var value = delegate.height;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.height = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelMap){
-            /**
-             * Height of the component.
-             * @property height
-             * @memberOf ModelMap
-             */
-            P.ModelMap.prototype.height = 0;
-        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -379,6 +362,23 @@
              * @memberOf ModelMap
              */
             P.ModelMap.prototype.onComponentShown = {};
+        }
+        Object.defineProperty(this, "height", {
+            get: function() {
+                var value = delegate.height;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.height = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Height of the component.
+             * @property height
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.height = 0;
         }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
@@ -397,23 +397,6 @@
              */
             P.ModelMap.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "opaque", {
-            get: function() {
-                var value = delegate.opaque;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.opaque = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelMap){
-            /**
-             * True if this component is completely opaque.
-             * @property opaque
-             * @memberOf ModelMap
-             */
-            P.ModelMap.prototype.opaque = true;
-        }
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
@@ -430,6 +413,23 @@
              * @memberOf ModelMap
              */
             P.ModelMap.prototype.visible = true;
+        }
+        Object.defineProperty(this, "opaque", {
+            get: function() {
+                var value = delegate.opaque;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.opaque = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * True if this component is completely opaque.
+             * @property opaque
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.opaque = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
@@ -465,23 +465,6 @@
              */
             P.ModelMap.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelMap){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf ModelMap
-             */
-            P.ModelMap.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -498,6 +481,23 @@
              * @memberOf ModelMap
              */
             P.ModelMap.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -598,23 +598,6 @@
              */
             P.ModelMap.prototype.left = 0;
         }
-        Object.defineProperty(this, "background", {
-            get: function() {
-                var value = delegate.background;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.background = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelMap){
-            /**
-             * The background color of this component.
-             * @property background
-             * @memberOf ModelMap
-             */
-            P.ModelMap.prototype.background = {};
-        }
         Object.defineProperty(this, "onMouseClicked", {
             get: function() {
                 var value = delegate.onMouseClicked;
@@ -631,6 +614,23 @@
              * @memberOf ModelMap
              */
             P.ModelMap.prototype.onMouseClicked = {};
+        }
+        Object.defineProperty(this, "background", {
+            get: function() {
+                var value = delegate.background;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.background = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * The background color of this component.
+             * @property background
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.background = {};
         }
         Object.defineProperty(this, "onEvent", {
             get: function() {
@@ -697,23 +697,6 @@
              */
             P.ModelMap.prototype.width = 0;
         }
-        Object.defineProperty(this, "font", {
-            get: function() {
-                var value = delegate.font;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.font = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelMap){
-            /**
-             * The font of this component.
-             * @property font
-             * @memberOf ModelMap
-             */
-            P.ModelMap.prototype.font = {};
-        }
         Object.defineProperty(this, "onKeyPressed", {
             get: function() {
                 var value = delegate.onKeyPressed;
@@ -731,7 +714,52 @@
              */
             P.ModelMap.prototype.onKeyPressed = {};
         }
+        Object.defineProperty(this, "font", {
+            get: function() {
+                var value = delegate.font;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.font = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelMap){
+            /**
+             * The font of this component.
+             * @property font
+             * @memberOf ModelMap
+             */
+            P.ModelMap.prototype.font = {};
+        }
     };
+        /**
+         * Fits the map to the specified area. If area parameter is not provided fits the map to the maximum extent.
+         * @param area the <code>Geometry</code> of the specified area (optional)
+         * @method fit
+         * @memberOf ModelMap
+         */
+        P.ModelMap.prototype.fit = function(area) {
+            var delegate = this.unwrap();
+            var value = delegate.fit(P.boxAsJava(area));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Adds new layer to the map.
+         * @param layerTitle the layer's title.
+         * @param rowset the layer's data.
+         * @param geometryClass the geometry class.
+         * @param styleAttributes the layer's style attributes.
+         * @return <code>MapLayer</code> instance.
+         * @method addLayer
+         * @memberOf ModelMap
+         */
+        P.ModelMap.prototype.addLayer = function(layerTitle, rowset, geometryClass, styleAttributes) {
+            var delegate = this.unwrap();
+            var value = delegate.addLayer(P.boxAsJava(layerTitle), P.boxAsJava(rowset), P.boxAsJava(geometryClass), P.boxAsJava(styleAttributes));
+            return P.boxAsJs(value);
+        };
+
         /**
          * Hits to the specified point.
          * @param hitObject the object to hit, can be either a Point or a Polygon instance.
@@ -742,31 +770,6 @@
         P.ModelMap.prototype.hit = function(hitObject) {
             var delegate = this.unwrap();
             var value = delegate.hit(P.boxAsJava(hitObject));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Gets map's layer by the title.
-         * @param layerTitle the layer's title.
-         * @return an <code>MapLayer</code> instance.
-         * @method getLayer
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.getLayer = function(layerTitle) {
-            var delegate = this.unwrap();
-            var value = delegate.getLayer(P.boxAsJava(layerTitle));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Selects specified entries.
-         * @param selectionEntries the array of <code>SelectionEntry</code> elements to select.
-         * @method select
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.select = function(selectionEntries) {
-            var delegate = this.unwrap();
-            var value = delegate.select(P.boxAsJava(selectionEntries));
             return P.boxAsJs(value);
         };
 
@@ -873,30 +876,27 @@
         };
 
         /**
-         * Fits the map to the specified area. If area parameter is not provided fits the map to the maximum extent.
-         * @param area the <code>Geometry</code> of the specified area (optional)
-         * @method fit
+         * Selects specified entries.
+         * @param selectionEntries the array of <code>SelectionEntry</code> elements to select.
+         * @method select
          * @memberOf ModelMap
          */
-        P.ModelMap.prototype.fit = function(area) {
+        P.ModelMap.prototype.select = function(selectionEntries) {
             var delegate = this.unwrap();
-            var value = delegate.fit(P.boxAsJava(area));
+            var value = delegate.select(P.boxAsJava(selectionEntries));
             return P.boxAsJs(value);
         };
 
         /**
-         * Adds new layer to the map.
+         * Gets map's layer by the title.
          * @param layerTitle the layer's title.
-         * @param rowset the layer's data.
-         * @param geometryClass the geometry class.
-         * @param styleAttributes the layer's style attributes.
-         * @return <code>MapLayer</code> instance.
-         * @method addLayer
+         * @return an <code>MapLayer</code> instance.
+         * @method getLayer
          * @memberOf ModelMap
          */
-        P.ModelMap.prototype.addLayer = function(layerTitle, rowset, geometryClass, styleAttributes) {
+        P.ModelMap.prototype.getLayer = function(layerTitle) {
             var delegate = this.unwrap();
-            var value = delegate.addLayer(P.boxAsJava(layerTitle), P.boxAsJava(rowset), P.boxAsJava(geometryClass), P.boxAsJava(styleAttributes));
+            var value = delegate.getLayer(P.boxAsJava(layerTitle));
             return P.boxAsJs(value);
         };
 

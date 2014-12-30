@@ -30,23 +30,6 @@
         if(P.GridPane.superclass)
             P.GridPane.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        Object.defineProperty(this, "cursor", {
-            get: function() {
-                var value = delegate.cursor;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.cursor = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.GridPane){
-            /**
-             * The mouse <code>Cursor</code> over this component.
-             * @property cursor
-             * @memberOf GridPane
-             */
-            P.GridPane.prototype.cursor = {};
-        }
         Object.defineProperty(this, "onMouseDragged", {
             get: function() {
                 var value = delegate.onMouseDragged;
@@ -63,6 +46,23 @@
              * @memberOf GridPane
              */
             P.GridPane.prototype.onMouseDragged = {};
+        }
+        Object.defineProperty(this, "cursor", {
+            get: function() {
+                var value = delegate.cursor;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.cursor = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.GridPane){
+            /**
+             * The mouse <code>Cursor</code> over this component.
+             * @property cursor
+             * @memberOf GridPane
+             */
+            P.GridPane.prototype.cursor = {};
         }
         Object.defineProperty(this, "parent", {
             get: function() {
@@ -342,23 +342,6 @@
              */
             P.GridPane.prototype.element = {};
         }
-        Object.defineProperty(this, "height", {
-            get: function() {
-                var value = delegate.height;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.height = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.GridPane){
-            /**
-             * Height of the component.
-             * @property height
-             * @memberOf GridPane
-             */
-            P.GridPane.prototype.height = 0;
-        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -375,6 +358,23 @@
              * @memberOf GridPane
              */
             P.GridPane.prototype.onComponentShown = {};
+        }
+        Object.defineProperty(this, "height", {
+            get: function() {
+                var value = delegate.height;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.height = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.GridPane){
+            /**
+             * Height of the component.
+             * @property height
+             * @memberOf GridPane
+             */
+            P.GridPane.prototype.height = 0;
         }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
@@ -393,23 +393,6 @@
              */
             P.GridPane.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "opaque", {
-            get: function() {
-                var value = delegate.opaque;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.opaque = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.GridPane){
-            /**
-             * True if this component is completely opaque.
-             * @property opaque
-             * @memberOf GridPane
-             */
-            P.GridPane.prototype.opaque = true;
-        }
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
@@ -426,6 +409,23 @@
              * @memberOf GridPane
              */
             P.GridPane.prototype.visible = true;
+        }
+        Object.defineProperty(this, "opaque", {
+            get: function() {
+                var value = delegate.opaque;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.opaque = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.GridPane){
+            /**
+             * True if this component is completely opaque.
+             * @property opaque
+             * @memberOf GridPane
+             */
+            P.GridPane.prototype.opaque = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
@@ -475,23 +475,6 @@
              */
             P.GridPane.prototype.count = 0;
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.GridPane){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf GridPane
-             */
-            P.GridPane.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -508,6 +491,23 @@
              * @memberOf GridPane
              */
             P.GridPane.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.GridPane){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf GridPane
+             */
+            P.GridPane.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -639,23 +639,6 @@
              */
             P.GridPane.prototype.left = 0;
         }
-        Object.defineProperty(this, "background", {
-            get: function() {
-                var value = delegate.background;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.background = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.GridPane){
-            /**
-             * The background color of this component.
-             * @property background
-             * @memberOf GridPane
-             */
-            P.GridPane.prototype.background = {};
-        }
         Object.defineProperty(this, "onMouseClicked", {
             get: function() {
                 var value = delegate.onMouseClicked;
@@ -672,6 +655,23 @@
              * @memberOf GridPane
              */
             P.GridPane.prototype.onMouseClicked = {};
+        }
+        Object.defineProperty(this, "background", {
+            get: function() {
+                var value = delegate.background;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.background = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.GridPane){
+            /**
+             * The background color of this component.
+             * @property background
+             * @memberOf GridPane
+             */
+            P.GridPane.prototype.background = {};
         }
         Object.defineProperty(this, "onMouseExited", {
             get: function() {
@@ -721,23 +721,6 @@
              */
             P.GridPane.prototype.width = 0;
         }
-        Object.defineProperty(this, "font", {
-            get: function() {
-                var value = delegate.font;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.font = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.GridPane){
-            /**
-             * The font of this component.
-             * @property font
-             * @memberOf GridPane
-             */
-            P.GridPane.prototype.font = {};
-        }
         Object.defineProperty(this, "onKeyPressed", {
             get: function() {
                 var value = delegate.onKeyPressed;
@@ -754,6 +737,23 @@
              * @memberOf GridPane
              */
             P.GridPane.prototype.onKeyPressed = {};
+        }
+        Object.defineProperty(this, "font", {
+            get: function() {
+                var value = delegate.font;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.font = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.GridPane){
+            /**
+             * The font of this component.
+             * @property font
+             * @memberOf GridPane
+             */
+            P.GridPane.prototype.font = {};
         }
         var invalidatable = null;
         delegate.setPublishedCollectionInvalidator(function() {
