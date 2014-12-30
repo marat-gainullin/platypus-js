@@ -26,6 +26,23 @@
         if(P.ReportTemplate.superclass)
             P.ReportTemplate.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
+        Object.defineProperty(this, "timezoneOffset", {
+            get: function() {
+                var value = delegate.timezoneOffset;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.timezoneOffset = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ReportTemplate){
+            /**
+             * Array of name collections, that will fixed.
+             * @property timezoneOffset
+             * @memberOf ReportTemplate
+             */
+            P.ReportTemplate.prototype.timezoneOffset = 0;
+        }
         Object.defineProperty(this, "name", {
             get: function() {
                 var value = delegate.name;
@@ -42,6 +59,23 @@
              * @memberOf ReportTemplate
              */
             P.ReportTemplate.prototype.name = '';
+        }
+        Object.defineProperty(this, "fixed", {
+            get: function() {
+                var value = delegate.fixed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.fixed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ReportTemplate){
+            /**
+             * Array of name collections, that will fixed.
+             * @property fixed
+             * @memberOf ReportTemplate
+             */
+            P.ReportTemplate.prototype.fixed = {};
         }
     };
         /**

@@ -20,12 +20,13 @@ public class Slider extends Component<JSlider> {
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
             + "* Slider component.\n"
+            + "* @param orientation the minimum value (optional)\n"
             + "* @param min the minimum value (optional)\n"
             + "* @param max the maximum value (optional)\n"
             + "* @param value the initial value (optional)\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"min", "max", "value"})
+    @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"orientation", "min", "max", "value"})
     public Slider(int aOrientation, int min, int max, int value) {
         super();
         int orientation = JSlider.HORIZONTAL;

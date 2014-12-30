@@ -919,18 +919,6 @@
         };
 
         /**
-         * Unselects the specified instance.
-         * @param instance Entity's instance to be unselected
-         * @method unselect
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.unselect = function(instance) {
-            var delegate = this.unwrap();
-            var value = delegate.unselect(P.boxAsJava(instance));
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Shows find dialog.
          * @deprecated Use find() instead.
          * @method findSomething
@@ -952,6 +940,18 @@
         P.ModelGrid.prototype.makeVisible = function(instance, need2select) {
             var delegate = this.unwrap();
             var value = delegate.makeVisible(P.boxAsJava(instance), P.boxAsJava(need2select));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Unselects the specified instance.
+         * @param instance Entity's instance to be unselected
+         * @method unselect
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.unselect = function(instance) {
+            var delegate = this.unwrap();
+            var value = delegate.unselect(P.boxAsJava(instance));
             return P.boxAsJs(value);
         };
 

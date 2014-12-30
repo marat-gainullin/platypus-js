@@ -1,23 +1,25 @@
 (function() {
     var javaClass = Java.type("com.eas.client.forms.api.components.Slider");
     javaClass.setPublisher(function(aDelegate) {
-        return new P.Slider(null, null, null, aDelegate);
+        return new P.Slider(null, null, null, null, aDelegate);
     });
     
     /**
      * Slider component.
+     * @param orientation the minimum value (optional)
      * @param min the minimum value (optional)
      * @param max the maximum value (optional)
      * @param value the initial value (optional)
      * @constructor Slider Slider
      */
-    P.Slider = function (min, max, value) {
-        var maxArgs = 3;
+    P.Slider = function (orientation, min, max, value) {
+        var maxArgs = 4;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
-            : arguments.length === 3 ? new javaClass(P.boxAsJava(min), P.boxAsJava(max), P.boxAsJava(value))
-            : arguments.length === 2 ? new javaClass(P.boxAsJava(min), P.boxAsJava(max))
-            : arguments.length === 1 ? new javaClass(P.boxAsJava(min))
+            : arguments.length === 4 ? new javaClass(P.boxAsJava(orientation), P.boxAsJava(min), P.boxAsJava(max), P.boxAsJava(value))
+            : arguments.length === 3 ? new javaClass(P.boxAsJava(orientation), P.boxAsJava(min), P.boxAsJava(max))
+            : arguments.length === 2 ? new javaClass(P.boxAsJava(orientation), P.boxAsJava(min))
+            : arguments.length === 1 ? new javaClass(P.boxAsJava(orientation))
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {

@@ -329,15 +329,15 @@
         };
 
         /**
-         * Creates an instace of filter object to filter rowset data in-place using specified constraints objects.
-         * @param fields The filter conditions fields in following form: entity.schema.propName or just a propName in a string form.
-         * @return a comparator object.
-         * @method createFilter
+         * Sets the array cursor to the specified object.
+         * @param object the object to position the entity cursor on.
+         * @return <code>true</code> if the cursor changed successfully and <code>false</code> otherwise.
+         * @method scrollTo
          * @memberOf ApplicationPlatypusEntity
          */
-        P.ApplicationPlatypusEntity.prototype.createFilter = function(fields) {
+        P.ApplicationPlatypusEntity.prototype.scrollTo = function(row) {
             var delegate = this.unwrap();
-            var value = delegate.createFilter(P.boxAsJava(fields));
+            var value = delegate.scrollTo(P.boxAsJava(row));
             return P.boxAsJs(value);
         };
 
@@ -355,15 +355,15 @@
         };
 
         /**
-         * Sets the array cursor to the specified object.
-         * @param object the object to position the entity cursor on.
-         * @return <code>true</code> if the cursor changed successfully and <code>false</code> otherwise.
-         * @method scrollTo
+         * Creates an instace of filter object to filter rowset data in-place using specified constraints objects.
+         * @param fields The filter conditions fields in following form: entity.schema.propName or just a propName in a string form.
+         * @return a comparator object.
+         * @method createFilter
          * @memberOf ApplicationPlatypusEntity
          */
-        P.ApplicationPlatypusEntity.prototype.scrollTo = function(row) {
+        P.ApplicationPlatypusEntity.prototype.createFilter = function(fields) {
             var delegate = this.unwrap();
-            var value = delegate.scrollTo(P.boxAsJava(row));
+            var value = delegate.createFilter(P.boxAsJava(fields));
             return P.boxAsJs(value);
         };
 

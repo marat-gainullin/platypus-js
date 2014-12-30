@@ -733,72 +733,6 @@
         }
     };
         /**
-         * Hits to the specified point.
-         * @param hitObject the object to hit, can be either a Point or a Polygon instance.
-         * @return an array of <code>SelectionEntry</code> elements
-         * @method hit
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.hit = function(hitObject) {
-            var delegate = this.unwrap();
-            var value = delegate.hit(P.boxAsJava(hitObject));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Selects specified entries.
-         * @param selectionEntries the array of <code>SelectionEntry</code> elements to select.
-         * @method select
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.select = function(selectionEntries) {
-            var delegate = this.unwrap();
-            var value = delegate.select(P.boxAsJava(selectionEntries));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Gets map's layer by the title.
-         * @param layerTitle the layer's title.
-         * @return an <code>MapLayer</code> instance.
-         * @method getLayer
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.getLayer = function(layerTitle) {
-            var delegate = this.unwrap();
-            var value = delegate.getLayer(P.boxAsJava(layerTitle));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Fits the map to the specified area. If area parameter is not provided fits the map to the maximum extent.
-         * @param area the <code>Geometry</code> of the specified area (optional)
-         * @method fit
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.fit = function(area) {
-            var delegate = this.unwrap();
-            var value = delegate.fit(P.boxAsJava(area));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Adds new layer to the map.
-         * @param layerTitle the layer's title.
-         * @param rowset the layer's data.
-         * @param geometryClass the geometry class.
-         * @param styleAttributes the layer's style attributes.
-         * @return <code>MapLayer</code> instance.
-         * @method addLayer
-         * @memberOf ModelMap
-         */
-        P.ModelMap.prototype.addLayer = function(layerTitle, rowset, geometryClass, styleAttributes) {
-            var delegate = this.unwrap();
-            var value = delegate.addLayer(P.boxAsJava(layerTitle), P.boxAsJava(rowset), P.boxAsJava(geometryClass), P.boxAsJava(styleAttributes));
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Removes layer by the specified title.
          * @param layerTitle the layer's title.
          * @return <code>MapLayer</code> instance.
@@ -897,6 +831,72 @@
         P.ModelMap.prototype.hitSelection = function(hitPoint) {
             var delegate = this.unwrap();
             var value = delegate.hitSelection(P.boxAsJava(hitPoint));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Hits to the specified point.
+         * @param hitObject the object to hit, can be either a Point or a Polygon instance.
+         * @return an array of <code>SelectionEntry</code> elements
+         * @method hit
+         * @memberOf ModelMap
+         */
+        P.ModelMap.prototype.hit = function(hitObject) {
+            var delegate = this.unwrap();
+            var value = delegate.hit(P.boxAsJava(hitObject));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Selects specified entries.
+         * @param selectionEntries the array of <code>SelectionEntry</code> elements to select.
+         * @method select
+         * @memberOf ModelMap
+         */
+        P.ModelMap.prototype.select = function(selectionEntries) {
+            var delegate = this.unwrap();
+            var value = delegate.select(P.boxAsJava(selectionEntries));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Gets map's layer by the title.
+         * @param layerTitle the layer's title.
+         * @return an <code>MapLayer</code> instance.
+         * @method getLayer
+         * @memberOf ModelMap
+         */
+        P.ModelMap.prototype.getLayer = function(layerTitle) {
+            var delegate = this.unwrap();
+            var value = delegate.getLayer(P.boxAsJava(layerTitle));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Fits the map to the specified area. If area parameter is not provided fits the map to the maximum extent.
+         * @param area the <code>Geometry</code> of the specified area (optional)
+         * @method fit
+         * @memberOf ModelMap
+         */
+        P.ModelMap.prototype.fit = function(area) {
+            var delegate = this.unwrap();
+            var value = delegate.fit(P.boxAsJava(area));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Adds new layer to the map.
+         * @param layerTitle the layer's title.
+         * @param rowset the layer's data.
+         * @param geometryClass the geometry class.
+         * @param styleAttributes the layer's style attributes.
+         * @return <code>MapLayer</code> instance.
+         * @method addLayer
+         * @memberOf ModelMap
+         */
+        P.ModelMap.prototype.addLayer = function(layerTitle, rowset, geometryClass, styleAttributes) {
+            var delegate = this.unwrap();
+            var value = delegate.addLayer(P.boxAsJava(layerTitle), P.boxAsJava(rowset), P.boxAsJava(geometryClass), P.boxAsJava(styleAttributes));
             return P.boxAsJs(value);
         };
 
