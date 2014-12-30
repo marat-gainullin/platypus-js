@@ -34,6 +34,7 @@ import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.HasJsName;
 import com.eas.client.form.published.containers.AnchorsPane;
+import com.eas.client.form.published.menu.PlatypusMenuBar;
 import com.eas.client.form.published.widgets.DesktopPane;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -47,6 +48,7 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.touch.client.Point;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.HasWidgets;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xhr.client.XMLHttpRequest;
 
@@ -455,6 +457,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 		aCallback($wnd.P.boxAsJs(aSelectedValue));
 	}-*/;
 
+	// TODO: remove this code when ui branch will come
 	private void publishComponentsFacades(JavaScriptObject aTarget, HasWidgets aView) {
 		java.util.Iterator<Widget> wIt = aView.iterator();
 		while (wIt.hasNext()) {
@@ -462,11 +465,28 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 			if (w instanceof HasJsName && w instanceof HasPublished) {
 				aTarget.<Utils.JsObject> cast().inject(((HasJsName) w).getJsName(), ((HasPublished) w).getPublished());
 			}
-			if (w instanceof HasWidgets)
+			if (w instanceof HasWidgets){
 				publishComponentsFacades(aTarget, (HasWidgets) w);
+			}else if(w instanceof PlatypusMenuBar){
+				PlatypusMenuBar bar = (PlatypusMenuBar)w;
+				publishPlatypusMenuBarFacades(aTarget, bar);
+			} 
 		}
 	}
 
+	// TODO: remove this code when ui branch will come
+	private void publishPlatypusMenuBarFacades(JavaScriptObject aTarget, PlatypusMenuBar aView) {
+		for (int i = 0; i < aView.getCount(); i++) {
+			UIObject w = aView.getItem(i);
+			if (w instanceof HasJsName && w instanceof HasPublished) {
+				aTarget.<Utils.JsObject> cast().inject(((HasJsName) w).getJsName(), ((HasPublished) w).getPublished());
+			}
+			if (w instanceof PlatypusMenuBar){
+				publishPlatypusMenuBarFacades(aTarget, (PlatypusMenuBar) w);
+			} 
+		}
+	}
+	
 	protected native static void publishFormFacade(JavaScriptObject aPublished, Widget aView, PlatypusWindow aForm)/*-{
         Object.defineProperty(aPublished, "view", {
 	        get : function() {

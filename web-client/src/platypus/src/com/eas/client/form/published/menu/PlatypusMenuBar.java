@@ -181,7 +181,7 @@ public class PlatypusMenuBar extends MenuBar implements HasJsFacade, HasEnabled,
 		return added;
 	}
 
-	public void remove(UIObject aChild) {
+	public boolean remove(UIObject aChild) {
 		boolean removed = false;
 		if (aChild instanceof MenuItem) {
 			removeItem((MenuItem) aChild);
@@ -199,6 +199,7 @@ public class PlatypusMenuBar extends MenuBar implements HasJsFacade, HasEnabled,
 		if (removed) {
 			RemoveEvent.fire(this, aChild);
 		}
+		return removed; 
 	}
 
 	@Override
