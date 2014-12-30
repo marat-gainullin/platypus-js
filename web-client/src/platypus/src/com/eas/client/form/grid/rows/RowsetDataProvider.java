@@ -208,11 +208,12 @@ public class RowsetDataProvider extends ListDataProvider<Row> implements IndexOf
 		public void rowInserted(RowsetInsertEvent event) {
 			List<Row> targetList = getList();
 			if (targetListCursor != null) {
-				if(targetListCursor >= 0 && targetListCursor <= targetList.size()){
-					targetList.add(targetListCursor + 1, event.getRow());
+				if(targetListCursor >= 0 && targetListCursor < targetList.size()){
 					targetListCursor++;
+					targetList.add(targetListCursor, event.getRow());
 				} else {
 					targetList.add(event.getRow());
+					targetListCursor = targetList.size() - 1;
 				}
 			} else {
 				targetList.add(event.getRow());

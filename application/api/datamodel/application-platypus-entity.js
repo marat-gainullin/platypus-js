@@ -329,15 +329,15 @@
         };
 
         /**
-         * Sets the array cursor to the specified object.
-         * @param object the object to position the entity cursor on.
-         * @return <code>true</code> if the cursor changed successfully and <code>false</code> otherwise.
-         * @method scrollTo
+         * Creates an instace of filter object to filter rowset data in-place using specified constraints objects.
+         * @param fields The filter conditions fields in following form: entity.schema.propName or just a propName in a string form.
+         * @return a comparator object.
+         * @method createFilter
          * @memberOf ApplicationPlatypusEntity
          */
-        P.ApplicationPlatypusEntity.prototype.scrollTo = function(row) {
+        P.ApplicationPlatypusEntity.prototype.createFilter = function(fields) {
             var delegate = this.unwrap();
-            var value = delegate.scrollTo(P.boxAsJava(row));
+            var value = delegate.createFilter(P.boxAsJava(fields));
             return P.boxAsJs(value);
         };
 
@@ -355,28 +355,15 @@
         };
 
         /**
-         * Creates an instace of filter object to filter rowset data in-place using specified constraints objects.
-         * @param fields The filter conditions fields in following form: entity.schema.propName or just a propName in a string form.
-         * @return a comparator object.
-         * @method createFilter
+         * Sets the array cursor to the specified object.
+         * @param object the object to position the entity cursor on.
+         * @return <code>true</code> if the cursor changed successfully and <code>false</code> otherwise.
+         * @method scrollTo
          * @memberOf ApplicationPlatypusEntity
          */
-        P.ApplicationPlatypusEntity.prototype.createFilter = function(fields) {
+        P.ApplicationPlatypusEntity.prototype.scrollTo = function(row) {
             var delegate = this.unwrap();
-            var value = delegate.createFilter(P.boxAsJava(fields));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Creates an instance of comparator object using specified constraints objects.
-         * @param pairs the sort criteria pairs, in a form of property object (e.g. entity.schema.propName or just a propName in a string form) and the order of sort (ascending - true; descending - false).
-         * @return a comparator object to be passed as a parameter to entity's <code>sort</code> method.
-         * @method createSorting
-         * @memberOf ApplicationPlatypusEntity
-         */
-        P.ApplicationPlatypusEntity.prototype.createSorting = function(pairs) {
-            var delegate = this.unwrap();
-            var value = delegate.createSorting(P.boxAsJava(pairs));
+            var value = delegate.scrollTo(P.boxAsJava(row));
             return P.boxAsJs(value);
         };
 
@@ -390,6 +377,19 @@
         P.ApplicationPlatypusEntity.prototype.requery = function(onSuccess, onFailure) {
             var delegate = this.unwrap();
             var value = delegate.requery(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Creates an instance of comparator object using specified constraints objects.
+         * @param pairs the sort criteria pairs, in a form of property object (e.g. entity.schema.propName or just a propName in a string form) and the order of sort (ascending - true; descending - false).
+         * @return a comparator object to be passed as a parameter to entity's <code>sort</code> method.
+         * @method createSorting
+         * @memberOf ApplicationPlatypusEntity
+         */
+        P.ApplicationPlatypusEntity.prototype.createSorting = function(pairs) {
+            var delegate = this.unwrap();
+            var value = delegate.createSorting(P.boxAsJava(pairs));
             return P.boxAsJs(value);
         };
 

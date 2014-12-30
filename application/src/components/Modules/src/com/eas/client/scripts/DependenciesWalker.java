@@ -107,11 +107,13 @@ public class DependenciesWalker {
                                     break;
                                 case GET:
                                 case CREATE:
-                                    AccessNode baseAccess = (AccessNode) lastAccess.getBase();
-                                    if (baseAccess.getProperty() instanceof IdentNode) {
-                                        String baseName = ((IdentNode) baseAccess.getProperty()).getName();
-                                        if (MODULES.equals(baseName) && (GET.equals(funcName) || CREATE.equals(funcName))) {
-                                            putDependence(value);
+                                    if (lastAccess.getBase() instanceof AccessNode) {
+                                        AccessNode baseAccess = (AccessNode) lastAccess.getBase();
+                                        if (baseAccess.getProperty() instanceof IdentNode) {
+                                            String baseName = ((IdentNode) baseAccess.getProperty()).getName();
+                                            if (MODULES.equals(baseName) && (GET.equals(funcName) || CREATE.equals(funcName))) {
+                                                putDependence(value);
+                                            }
                                         }
                                     }
                                     break;

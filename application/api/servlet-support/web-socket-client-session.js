@@ -1,14 +1,14 @@
 (function() {
     var javaClass = Java.type("com.eas.server.websocket.WebSocketClientSession");
     javaClass.setPublisher(function(aDelegate) {
-        return new P.WebSocket(null, aDelegate);
+        return new P.WebSocketClientSession(null, aDelegate);
     });
     
     /**
      *
      * @constructor WebSocketClientSession WebSocketClientSession
      */
-    P.WebSocket = function (uri) {
+    P.WebSocketClientSession = function (uri) {
         var maxArgs = 1;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -20,8 +20,8 @@
                 return delegate;
             }
         });
-        if(P.WebSocket.superclass)
-            P.WebSocket.superclass.constructor.apply(this, arguments);
+        if(P.WebSocketClientSession.superclass)
+            P.WebSocketClientSession.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
         Object.defineProperty(this, "onmessage", {
             get: function() {
@@ -32,13 +32,13 @@
                 delegate.onmessage = P.boxAsJava(aValue);
             }
         });
-        if(!P.WebSocket){
+        if(!P.WebSocketClientSession){
             /**
              * Generated property jsDoc.
              * @property onmessage
-             * @memberOf WebSocket
+             * @memberOf WebSocketClientSession
              */
-            P.WebSocket.prototype.onmessage = {};
+            P.WebSocketClientSession.prototype.onmessage = {};
         }
         Object.defineProperty(this, "onerror", {
             get: function() {
@@ -49,13 +49,13 @@
                 delegate.onerror = P.boxAsJava(aValue);
             }
         });
-        if(!P.WebSocket){
+        if(!P.WebSocketClientSession){
             /**
              * Generated property jsDoc.
              * @property onerror
-             * @memberOf WebSocket
+             * @memberOf WebSocketClientSession
              */
-            P.WebSocket.prototype.onerror = {};
+            P.WebSocketClientSession.prototype.onerror = {};
         }
         Object.defineProperty(this, "onopen", {
             get: function() {
@@ -66,13 +66,13 @@
                 delegate.onopen = P.boxAsJava(aValue);
             }
         });
-        if(!P.WebSocket){
+        if(!P.WebSocketClientSession){
             /**
              * Generated property jsDoc.
              * @property onopen
-             * @memberOf WebSocket
+             * @memberOf WebSocketClientSession
              */
-            P.WebSocket.prototype.onopen = {};
+            P.WebSocketClientSession.prototype.onopen = {};
         }
         Object.defineProperty(this, "query", {
             get: function() {
@@ -80,13 +80,13 @@
                 return P.boxAsJs(value);
             }
         });
-        if(!P.WebSocket){
+        if(!P.WebSocketClientSession){
             /**
              * Generated property jsDoc.
              * @property query
-             * @memberOf WebSocket
+             * @memberOf WebSocketClientSession
              */
-            P.WebSocket.prototype.query = '';
+            P.WebSocketClientSession.prototype.query = '';
         }
         Object.defineProperty(this, "onclose", {
             get: function() {
@@ -97,13 +97,13 @@
                 delegate.onclose = P.boxAsJava(aValue);
             }
         });
-        if(!P.WebSocket){
+        if(!P.WebSocketClientSession){
             /**
              * Generated property jsDoc.
              * @property onclose
-             * @memberOf WebSocket
+             * @memberOf WebSocketClientSession
              */
-            P.WebSocket.prototype.onclose = {};
+            P.WebSocketClientSession.prototype.onclose = {};
         }
         Object.defineProperty(this, "protocolVersion", {
             get: function() {
@@ -111,13 +111,13 @@
                 return P.boxAsJs(value);
             }
         });
-        if(!P.WebSocket){
+        if(!P.WebSocketClientSession){
             /**
              * Generated property jsDoc.
              * @property protocolVersion
-             * @memberOf WebSocket
+             * @memberOf WebSocketClientSession
              */
-            P.WebSocket.prototype.protocolVersion = '';
+            P.WebSocketClientSession.prototype.protocolVersion = '';
         }
         Object.defineProperty(this, "id", {
             get: function() {
@@ -125,13 +125,13 @@
                 return P.boxAsJs(value);
             }
         });
-        if(!P.WebSocket){
+        if(!P.WebSocketClientSession){
             /**
              * Generated property jsDoc.
              * @property id
-             * @memberOf WebSocket
+             * @memberOf WebSocketClientSession
              */
-            P.WebSocket.prototype.id = '';
+            P.WebSocketClientSession.prototype.id = '';
         }
         Object.defineProperty(this, "uri", {
             get: function() {
@@ -139,21 +139,21 @@
                 return P.boxAsJs(value);
             }
         });
-        if(!P.WebSocket){
+        if(!P.WebSocketClientSession){
             /**
              * Generated property jsDoc.
              * @property uri
-             * @memberOf WebSocket
+             * @memberOf WebSocketClientSession
              */
-            P.WebSocket.prototype.uri = '';
+            P.WebSocketClientSession.prototype.uri = '';
         }
     };
         /**
          *
          * @method close
-         * @memberOf WebSocket
+         * @memberOf WebSocketClientSession
          */
-        P.WebSocket.prototype.close = function(arg0, arg1) {
+        P.WebSocketClientSession.prototype.close = function(arg0, arg1) {
             var delegate = this.unwrap();
             var value = delegate.close(P.boxAsJava(arg0), P.boxAsJava(arg1));
             return P.boxAsJs(value);
@@ -162,9 +162,9 @@
         /**
          *
          * @method send
-         * @memberOf WebSocket
+         * @memberOf WebSocketClientSession
          */
-        P.WebSocket.prototype.send = function(data) {
+        P.WebSocketClientSession.prototype.send = function(data) {
             var delegate = this.unwrap();
             var value = delegate.send(P.boxAsJava(data));
             return P.boxAsJs(value);
