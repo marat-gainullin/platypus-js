@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.components.RadioButton");
+    var javaClass = Java.type("com.eas.client.forms.components.RadioButton");
     javaClass.setPublisher(function(aDelegate) {
         return new P.RadioButton(null, null, null, aDelegate);
     });
@@ -61,20 +61,6 @@
              * @memberOf RadioButton
              */
             P.RadioButton.prototype.onMouseDragged = {};
-        }
-        Object.defineProperty(this, "parent", {
-            get: function() {
-                var value = delegate.parent;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.RadioButton){
-            /**
-             * Gets the parent of this component.
-             * @property parent
-             * @memberOf RadioButton
-             */
-            P.RadioButton.prototype.parent = {};
         }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
@@ -165,6 +151,9 @@
             get: function() {
                 var value = delegate.error;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.error = P.boxAsJava(aValue);
             }
         });
         if(!P.RadioButton){
@@ -295,22 +284,19 @@
              */
             P.RadioButton.prototype.onMouseEntered = {};
         }
-        Object.defineProperty(this, "selected", {
+        Object.defineProperty(this, "value", {
             get: function() {
-                var value = delegate.selected;
+                var value = delegate.value;
                 return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.selected = P.boxAsJava(aValue);
             }
         });
         if(!P.RadioButton){
             /**
-             * The state of the button.
-             * @property selected
+             * Widget's value.
+             * @property value
              * @memberOf RadioButton
              */
-            P.RadioButton.prototype.selected = true;
+            P.RadioButton.prototype.value = true;
         }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
@@ -328,6 +314,23 @@
              * @memberOf RadioButton
              */
             P.RadioButton.prototype.toolTipText = '';
+        }
+        Object.defineProperty(this, "selected", {
+            get: function() {
+                var value = delegate.selected;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.selected = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.RadioButton){
+            /**
+             * The state of the button.
+             * @property selected
+             * @memberOf RadioButton
+             */
+            P.RadioButton.prototype.selected = true;
         }
         Object.defineProperty(this, "element", {
             get: function() {
@@ -394,23 +397,6 @@
              */
             P.RadioButton.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "buttonGroup", {
-            get: function() {
-                var value = delegate.buttonGroup;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.buttonGroup = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.RadioButton){
-            /**
-             * The ButtonGroup this component belongs to.
-             * @property buttonGroup
-             * @memberOf RadioButton
-             */
-            P.RadioButton.prototype.buttonGroup = {};
-        }
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
@@ -444,6 +430,23 @@
              * @memberOf RadioButton
              */
             P.RadioButton.prototype.visible = true;
+        }
+        Object.defineProperty(this, "buttonGroup", {
+            get: function() {
+                var value = delegate.buttonGroup;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.buttonGroup = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.RadioButton){
+            /**
+             * The ButtonGroup this component belongs to.
+             * @property buttonGroup
+             * @memberOf RadioButton
+             */
+            P.RadioButton.prototype.buttonGroup = {};
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
@@ -479,23 +482,6 @@
              */
             P.RadioButton.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.RadioButton){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf RadioButton
-             */
-            P.RadioButton.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -512,6 +498,23 @@
              * @memberOf RadioButton
              */
             P.RadioButton.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.RadioButton){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf RadioButton
+             */
+            P.RadioButton.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

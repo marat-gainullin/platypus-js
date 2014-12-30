@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.menu.MenuItem");
+    var javaClass = Java.type("com.eas.client.forms.menu.MenuItem");
     javaClass.setPublisher(function(aDelegate) {
         return new P.MenuItem(null, null, null, aDelegate);
     });
@@ -61,20 +61,6 @@
              * @memberOf MenuItem
              */
             P.MenuItem.prototype.onMouseDragged = {};
-        }
-        Object.defineProperty(this, "parent", {
-            get: function() {
-                var value = delegate.parent;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.MenuItem){
-            /**
-             * The parent container.
-             * @property parent
-             * @memberOf MenuItem
-             */
-            P.MenuItem.prototype.parent = {};
         }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
@@ -165,6 +151,9 @@
             get: function() {
                 var value = delegate.error;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.error = P.boxAsJava(aValue);
             }
         });
         if(!P.MenuItem){
@@ -260,6 +249,20 @@
              * @memberOf MenuItem
              */
             P.MenuItem.prototype.onComponentResized = {};
+        }
+        Object.defineProperty(this, "parentWidget", {
+            get: function() {
+                var value = delegate.parentWidget;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.MenuItem){
+            /**
+             * Parent container of this widget.
+             * @property parentWidget
+             * @memberOf MenuItem
+             */
+            P.MenuItem.prototype.parentWidget = {};
         }
         Object.defineProperty(this, "text", {
             get: function() {
@@ -445,23 +448,6 @@
              */
             P.MenuItem.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.MenuItem){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf MenuItem
-             */
-            P.MenuItem.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -478,6 +464,23 @@
              * @memberOf MenuItem
              */
             P.MenuItem.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuItem){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf MenuItem
+             */
+            P.MenuItem.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

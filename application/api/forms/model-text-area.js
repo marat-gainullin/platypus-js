@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.components.model.ModelTextArea");
+    var javaClass = Java.type("com.eas.client.forms.components.model.ModelTextArea");
     javaClass.setPublisher(function(aDelegate) {
         return new P.ModelTextArea(aDelegate);
     });
@@ -33,7 +33,7 @@
         });
         if(!P.ModelTextArea){
             /**
-             * The mouse <code>Cursor</code> over this component.
+             * Generated property jsDoc.
              * @property cursor
              * @memberOf ModelTextArea
              */
@@ -56,19 +56,22 @@
              */
             P.ModelTextArea.prototype.onMouseDragged = {};
         }
-        Object.defineProperty(this, "parent", {
+        Object.defineProperty(this, "selectOnly", {
             get: function() {
-                var value = delegate.parent;
+                var value = delegate.selectOnly;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.selectOnly = P.boxAsJava(aValue);
             }
         });
         if(!P.ModelTextArea){
             /**
-             * Gets the parent of this component.
-             * @property parent
+             * Generated property jsDoc.
+             * @property selectOnly
              * @memberOf ModelTextArea
              */
-            P.ModelTextArea.prototype.parent = {};
+            P.ModelTextArea.prototype.selectOnly = true;
         }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
@@ -86,6 +89,40 @@
              * @memberOf ModelTextArea
              */
             P.ModelTextArea.prototype.onMouseReleased = {};
+        }
+        Object.defineProperty(this, "data", {
+            get: function() {
+                var value = delegate.data;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.data = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelTextArea){
+            /**
+             * Object, bound to the widget.
+             * @property data
+             * @memberOf ModelTextArea
+             */
+            P.ModelTextArea.prototype.data = {};
+        }
+        Object.defineProperty(this, "nullable", {
+            get: function() {
+                var value = delegate.nullable;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.nullable = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelTextArea){
+            /**
+             * Generated property jsDoc.
+             * @property nullable
+             * @memberOf ModelTextArea
+             */
+            P.ModelTextArea.prototype.nullable = true;
         }
         Object.defineProperty(this, "onFocusLost", {
             get: function() {
@@ -120,6 +157,23 @@
              * @memberOf ModelTextArea
              */
             P.ModelTextArea.prototype.emptyText = '';
+        }
+        Object.defineProperty(this, "icon", {
+            get: function() {
+                var value = delegate.icon;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.icon = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelTextArea){
+            /**
+             * Generated property jsDoc.
+             * @property icon
+             * @memberOf ModelTextArea
+             */
+            P.ModelTextArea.prototype.icon = {};
         }
         Object.defineProperty(this, "onMousePressed", {
             get: function() {
@@ -159,6 +213,9 @@
             get: function() {
                 var value = delegate.error;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.error = P.boxAsJava(aValue);
             }
         });
         if(!P.ModelTextArea){
@@ -221,23 +278,6 @@
              */
             P.ModelTextArea.prototype.onSelect = {};
         }
-        Object.defineProperty(this, "componentPopupMenu", {
-            get: function() {
-                var value = delegate.componentPopupMenu;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.componentPopupMenu = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelTextArea){
-            /**
-             * <code>PopupMenu</code> that assigned for this component.
-             * @property componentPopupMenu
-             * @memberOf ModelTextArea
-             */
-            P.ModelTextArea.prototype.componentPopupMenu = {};
-        }
         Object.defineProperty(this, "top", {
             get: function() {
                 var value = delegate.top;
@@ -289,20 +329,6 @@
              */
             P.ModelTextArea.prototype.onComponentResized = {};
         }
-        Object.defineProperty(this, "model", {
-            get: function() {
-                var value = delegate.model;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ModelTextArea){
-            /**
-             * Model of the component. It will be used for data binding.
-             * @property model
-             * @memberOf ModelTextArea
-             */
-            P.ModelTextArea.prototype.model = {};
-        }
         Object.defineProperty(this, "text", {
             get: function() {
                 var value = delegate.text;
@@ -341,14 +367,11 @@
             get: function() {
                 var value = delegate.value;
                 return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.value = P.boxAsJava(aValue);
             }
         });
         if(!P.ModelTextArea){
             /**
-             * Generated property jsDoc.
+             * Widget's value.
              * @property value
              * @memberOf ModelTextArea
              */
@@ -498,7 +521,7 @@
         });
         if(!P.ModelTextArea){
             /**
-             * Determines if component is editable.
+             * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
              * @property editable
              * @memberOf ModelTextArea
              */
@@ -515,28 +538,11 @@
         });
         if(!P.ModelTextArea){
             /**
-             * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
+             * Generated property jsDoc.
              * @property nextFocusableComponent
              * @memberOf ModelTextArea
              */
             P.ModelTextArea.prototype.nextFocusableComponent = {};
-        }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelTextArea){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf ModelTextArea
-             */
-            P.ModelTextArea.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
@@ -554,6 +560,23 @@
              * @memberOf ModelTextArea
              */
             P.ModelTextArea.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelTextArea){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf ModelTextArea
+             */
+            P.ModelTextArea.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -631,11 +654,11 @@
         });
         if(!P.ModelTextArea){
             /**
-             * Model entity's field.
+             * Model binding field.
              * @property field
              * @memberOf ModelTextArea
              */
-            P.ModelTextArea.prototype.field = {};
+            P.ModelTextArea.prototype.field = '';
         }
         Object.defineProperty(this, "onFocusGained", {
             get: function() {
@@ -730,7 +753,7 @@
         });
         if(!P.ModelTextArea){
             /**
-             * Gets name of this component.
+             * Generated property jsDoc.
              * @property name
              * @memberOf ModelTextArea
              */
@@ -764,7 +787,7 @@
         });
         if(!P.ModelTextArea){
             /**
-             * The font of this component.
+             * Generated property jsDoc.
              * @property font
              * @memberOf ModelTextArea
              */
@@ -789,17 +812,6 @@
         }
     };
         /**
-         * Redraw the component.
-         * @method redraw
-         * @memberOf ModelTextArea
-         */
-        P.ModelTextArea.prototype.redraw = function() {
-            var delegate = this.unwrap();
-            var value = delegate.redraw();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf ModelTextArea
@@ -807,6 +819,17 @@
         P.ModelTextArea.prototype.focus = function() {
             var delegate = this.unwrap();
             var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Redraw the component.
+         * @method redraw
+         * @memberOf ModelTextArea
+         */
+        P.ModelTextArea.prototype.redraw = function() {
+            var delegate = this.unwrap();
+            var value = delegate.redraw();
             return P.boxAsJs(value);
         };
 

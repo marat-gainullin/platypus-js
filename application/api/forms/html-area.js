@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.components.HtmlArea");
+    var javaClass = Java.type("com.eas.client.forms.components.HtmlArea");
     javaClass.setPublisher(function(aDelegate) {
         return new P.HtmlArea(null, aDelegate);
     });
@@ -58,20 +58,6 @@
              */
             P.HtmlArea.prototype.onMouseDragged = {};
         }
-        Object.defineProperty(this, "parent", {
-            get: function() {
-                var value = delegate.parent;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.HtmlArea){
-            /**
-             * Gets the parent of this component.
-             * @property parent
-             * @memberOf HtmlArea
-             */
-            P.HtmlArea.prototype.parent = {};
-        }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
                 var value = delegate.onMouseReleased;
@@ -117,7 +103,7 @@
         });
         if(!P.HtmlArea){
             /**
-             * The text to be shown when component's value is absent.
+             * Generated property jsDoc.
              * @property emptyText
              * @memberOf HtmlArea
              */
@@ -161,6 +147,9 @@
             get: function() {
                 var value = delegate.error;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.error = P.boxAsJava(aValue);
             }
         });
         if(!P.HtmlArea){
@@ -302,7 +291,7 @@
         });
         if(!P.HtmlArea){
             /**
-             * Value of the component.
+             * Widget's value.
              * @property value
              * @memberOf HtmlArea
              */
@@ -458,23 +447,6 @@
              */
             P.HtmlArea.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.HtmlArea){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf HtmlArea
-             */
-            P.HtmlArea.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -491,6 +463,23 @@
              * @memberOf HtmlArea
              */
             P.HtmlArea.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.HtmlArea){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf HtmlArea
+             */
+            P.HtmlArea.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

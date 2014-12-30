@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.containers.GridPane");
+    var javaClass = Java.type("com.eas.client.forms.containers.GridPane");
     javaClass.setPublisher(function(aDelegate) {
         return new P.GridPane(null, null, null, null, aDelegate);
     });
@@ -63,20 +63,6 @@
              * @memberOf GridPane
              */
             P.GridPane.prototype.onMouseDragged = {};
-        }
-        Object.defineProperty(this, "parent", {
-            get: function() {
-                var value = delegate.parent;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.GridPane){
-            /**
-             * Gets the parent of this component.
-             * @property parent
-             * @memberOf GridPane
-             */
-            P.GridPane.prototype.parent = {};
         }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
@@ -164,6 +150,9 @@
             get: function() {
                 var value = delegate.error;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.error = P.boxAsJava(aValue);
             }
         });
         if(!P.GridPane){
@@ -461,6 +450,23 @@
              */
             P.GridPane.prototype.nextFocusableComponent = {};
         }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.GridPane){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf GridPane
+             */
+            P.GridPane.prototype.onKeyReleased = {};
+        }
         Object.defineProperty(this, "count", {
             get: function() {
                 var value = delegate.count;
@@ -491,23 +497,6 @@
              * @memberOf GridPane
              */
             P.GridPane.prototype.onActionPerformed = {};
-        }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.GridPane){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf GridPane
-             */
-            P.GridPane.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -787,19 +776,6 @@
         };
 
         /**
-         * Gets the component with the specified row and column.
-         * @param row the row of the component
-         * @param column the column of the component
-         * @method child
-         * @memberOf GridPane
-         */
-        P.GridPane.prototype.child = function(row, column) {
-            var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(row), P.boxAsJava(column));
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Removes all the components from this container.
          * @method clear
          * @memberOf GridPane
@@ -818,6 +794,19 @@
         P.GridPane.prototype.focus = function() {
             var delegate = this.unwrap();
             var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Gets the component with the specified row and column.
+         * @param row the row of the component
+         * @param column the column of the component
+         * @method child
+         * @memberOf GridPane
+         */
+        P.GridPane.prototype.child = function(row, column) {
+            var delegate = this.unwrap();
+            var value = delegate.child(P.boxAsJava(row), P.boxAsJava(column));
             return P.boxAsJs(value);
         };
 

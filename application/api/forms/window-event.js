@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.events.WindowEvent");
+    var javaClass = Java.type("com.eas.client.forms.events.WindowEvent");
     javaClass.setPublisher(function(aDelegate) {
         return new P.WindowEvent(aDelegate);
     });
@@ -30,7 +30,7 @@
         });
         if(!P.WindowEvent){
             /**
-             * The source component object of the event.
+             * The source object of the event.
              * @property source
              * @memberOf WindowEvent
              */

@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.components.ToggleButton");
+    var javaClass = Java.type("com.eas.client.forms.components.ToggleButton");
     javaClass.setPublisher(function(aDelegate) {
         return new P.ToggleButton(null, null, null, null, null, aDelegate);
     });
@@ -65,20 +65,6 @@
              * @memberOf ToggleButton
              */
             P.ToggleButton.prototype.onMouseDragged = {};
-        }
-        Object.defineProperty(this, "parent", {
-            get: function() {
-                var value = delegate.parent;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ToggleButton){
-            /**
-             * Gets the parent of this component.
-             * @property parent
-             * @memberOf ToggleButton
-             */
-            P.ToggleButton.prototype.parent = {};
         }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
@@ -169,6 +155,9 @@
             get: function() {
                 var value = delegate.error;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.error = P.boxAsJava(aValue);
             }
         });
         if(!P.ToggleButton){
@@ -299,22 +288,19 @@
              */
             P.ToggleButton.prototype.onMouseEntered = {};
         }
-        Object.defineProperty(this, "selected", {
+        Object.defineProperty(this, "value", {
             get: function() {
-                var value = delegate.selected;
+                var value = delegate.value;
                 return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.selected = P.boxAsJava(aValue);
             }
         });
         if(!P.ToggleButton){
             /**
-             * The state of the button.
-             * @property selected
+             * Widget's value.
+             * @property value
              * @memberOf ToggleButton
              */
-            P.ToggleButton.prototype.selected = true;
+            P.ToggleButton.prototype.value = true;
         }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
@@ -332,6 +318,23 @@
              * @memberOf ToggleButton
              */
             P.ToggleButton.prototype.toolTipText = '';
+        }
+        Object.defineProperty(this, "selected", {
+            get: function() {
+                var value = delegate.selected;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.selected = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ToggleButton){
+            /**
+             * The state of the button.
+             * @property selected
+             * @memberOf ToggleButton
+             */
+            P.ToggleButton.prototype.selected = true;
         }
         Object.defineProperty(this, "element", {
             get: function() {
@@ -398,23 +401,6 @@
              */
             P.ToggleButton.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "buttonGroup", {
-            get: function() {
-                var value = delegate.buttonGroup;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.buttonGroup = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ToggleButton){
-            /**
-             * The ButtonGroup this component belongs to.
-             * @property buttonGroup
-             * @memberOf ToggleButton
-             */
-            P.ToggleButton.prototype.buttonGroup = {};
-        }
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
@@ -449,6 +435,23 @@
              */
             P.ToggleButton.prototype.visible = true;
         }
+        Object.defineProperty(this, "buttonGroup", {
+            get: function() {
+                var value = delegate.buttonGroup;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.buttonGroup = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ToggleButton){
+            /**
+             * The ButtonGroup this component belongs to.
+             * @property buttonGroup
+             * @memberOf ToggleButton
+             */
+            P.ToggleButton.prototype.buttonGroup = {};
+        }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
                 var value = delegate.onComponentHidden;
@@ -465,23 +468,6 @@
              * @memberOf ToggleButton
              */
             P.ToggleButton.prototype.onComponentHidden = {};
-        }
-        Object.defineProperty(this, "iconTextGap", {
-            get: function() {
-                var value = delegate.iconTextGap;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.iconTextGap = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ToggleButton){
-            /**
-             * The amount of space between the text and the icon displayed in this button.
-             * @property iconTextGap
-             * @memberOf ToggleButton
-             */
-            P.ToggleButton.prototype.iconTextGap = 0;
         }
         Object.defineProperty(this, "nextFocusableComponent", {
             get: function() {
@@ -500,22 +486,22 @@
              */
             P.ToggleButton.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
+        Object.defineProperty(this, "iconTextGap", {
             get: function() {
-                var value = delegate.onActionPerformed;
+                var value = delegate.iconTextGap;
                 return P.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
+                delegate.iconTextGap = P.boxAsJava(aValue);
             }
         });
         if(!P.ToggleButton){
             /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
+             * The amount of space between the text and the icon displayed in this button.
+             * @property iconTextGap
              * @memberOf ToggleButton
              */
-            P.ToggleButton.prototype.onActionPerformed = {};
+            P.ToggleButton.prototype.iconTextGap = 0;
         }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
@@ -533,6 +519,23 @@
              * @memberOf ToggleButton
              */
             P.ToggleButton.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ToggleButton){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf ToggleButton
+             */
+            P.ToggleButton.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.events.ContainerEvent");
+    var javaClass = Java.type("com.eas.client.forms.events.ContainerEvent");
     javaClass.setPublisher(function(aDelegate) {
         return new P.ContainerEvent(aDelegate);
     });
@@ -30,7 +30,7 @@
         });
         if(!P.ContainerEvent){
             /**
-             * The source component object of the event.
+             * The source object of the event.
              * @property source
              * @memberOf ContainerEvent
              */

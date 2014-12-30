@@ -125,9 +125,9 @@
         var FormClass = Java.type("com.eas.client.forms.Form");
         var FormLoaderClass = Java.type('com.eas.client.scripts.ModelFormLoader');
         var IconResourcesClass = Java.type("com.eas.client.forms.IconResources");
-        var HorizontalPositionClass = Java.type("com.eas.client.forms.api.HorizontalPosition");
-        var VerticalPositionClass = Java.type("com.eas.client.forms.api.VerticalPosition");
-        var OrientationClass = Java.type("com.eas.client.forms.api.Orientation");
+        var HorizontalPositionClass = Java.type("com.eas.client.forms.HorizontalPosition");
+        var VerticalPositionClass = Java.type("com.eas.client.forms.VerticalPosition");
+        var OrientationClass = Java.type("com.eas.client.forms.Orientation");
         /** 
          * invokeLater - invokes given function in AWT event thread
          */
@@ -577,8 +577,8 @@
         function loadForm(aName, aModel, aTarget) {
             var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
             var formDocument = ScriptedResourceClass.getApp().getForms().get(aName, files);
-            var designInfo = FormLoaderClass.load(formDocument, ScriptedResourceClass.getApp());
-            var form = new FormClass(aName, designInfo, aModel ? aModel.unwrap() : null, null);
+            var formFactory = FormLoaderClass.load(formDocument, ScriptedResourceClass.getApp(), aModel);
+            var form = formFactory.form;
             if (aTarget) {
                 P.Form.call(aTarget, null, aName, form);
             } else {
@@ -587,10 +587,10 @@
             form.injectPublished(aTarget);
             if (!form.title)
                 form.title = aName;
-            var comps = form.publishedComponents;
+            var comps = formFactory.getWidgetsList();
             for (var c = 0; c < comps.length; c++) {
                 (function () {
-                    var comp = comps[c];
+                    var comp = EngineUtilsClass.unwrap(boxAsJs(comps[c]));
                     if (comp.name) {
                         Object.defineProperty(aTarget, comp.name, {
                             get: function () {

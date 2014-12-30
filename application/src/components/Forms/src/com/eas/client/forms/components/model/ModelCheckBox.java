@@ -5,14 +5,17 @@
 package com.eas.client.forms.components.model;
 
 import com.eas.client.forms.components.rt.VCheckBox;
+import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import javax.swing.JTable;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
  * @author mg
  */
-public class ModelCheckBox extends ModelComponentDecorator<VCheckBox, Boolean> {
+public class ModelCheckBox extends ModelComponentDecorator<VCheckBox, Boolean> implements HasPublished{
 
     public ModelCheckBox() {
         super();
@@ -31,6 +34,23 @@ public class ModelCheckBox extends ModelComponentDecorator<VCheckBox, Boolean> {
     public ModelCheckBox(String aText) throws Exception {
         this();
         decorated.setText(aText);
+    }
+
+    @Override
+    public JSObject getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = (JSObject) publisher.call(null, new Object[]{this});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
     }
 
     @Override

@@ -48,8 +48,8 @@ import com.bearsoft.org.netbeans.modules.form.editors.EnumEditor;
 import com.bearsoft.org.netbeans.modules.form.editors.IconEditor;
 import com.eas.client.forms.Orientation;
 import com.eas.client.forms.components.FormattedField;
-import com.eas.client.forms.components.rt.FormatsUtils;
 import com.eas.client.forms.components.rt.HasGroup;
+import com.eas.client.forms.components.rt.VFormattedField;
 import com.eas.client.forms.containers.ButtonGroup;
 import com.eas.client.forms.containers.SplitPane;
 import com.eas.design.Designable;
@@ -679,11 +679,12 @@ public abstract class RADComponent<C> {
     static class ValueTypeProperty extends RADProperty<Integer> {
 
         private EnumEditor editor = new EnumEditor(new Object[]{
-            FormUtils.getBundleString("CTL_Mask"), FormatsUtils.MASK, "MASK"
-           ,FormUtils.getBundleString("CTL_Number"), FormatsUtils.NUMBER, "NUMBER"
-           ,FormUtils.getBundleString("CTL_Percent"), FormatsUtils.PERCENT, "PERCENT"
-           ,FormUtils.getBundleString("CTL_DateTime"), FormatsUtils.DATE, "DATE"
-           ,FormUtils.getBundleString("CTL_Currency"), FormatsUtils.CURRENCY, "CURRENCY"
+            FormUtils.getBundleString("CTL_RegExp"), VFormattedField.REGEXP, "REGEXP"
+           ,FormUtils.getBundleString("CTL_Mask"), VFormattedField.MASK, "MASK"
+           ,FormUtils.getBundleString("CTL_Number"), VFormattedField.NUMBER, "NUMBER"
+           ,FormUtils.getBundleString("CTL_Percent"), VFormattedField.PERCENT, "PERCENT"
+           ,FormUtils.getBundleString("CTL_DateTime"), VFormattedField.DATE, "DATE"
+           ,FormUtils.getBundleString("CTL_Currency"), VFormattedField.CURRENCY, "CURRENCY"
         });
 
         ValueTypeProperty(RADComponent<?> comp, PropertyDescriptor aDesc) throws IllegalAccessException, InvocationTargetException {

@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.containers.BorderPane");
+    var javaClass = Java.type("com.eas.client.forms.containers.BorderPane");
     javaClass.setPublisher(function(aDelegate) {
         return new P.BorderPane(null, null, aDelegate);
     });
@@ -59,20 +59,6 @@
              * @memberOf BorderPane
              */
             P.BorderPane.prototype.onMouseDragged = {};
-        }
-        Object.defineProperty(this, "parent", {
-            get: function() {
-                var value = delegate.parent;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.BorderPane){
-            /**
-             * Gets the parent of this component.
-             * @property parent
-             * @memberOf BorderPane
-             */
-            P.BorderPane.prototype.parent = {};
         }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
@@ -146,6 +132,9 @@
             get: function() {
                 var value = delegate.error;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.error = P.boxAsJava(aValue);
             }
         });
         if(!P.BorderPane){
@@ -375,21 +364,6 @@
              */
             P.BorderPane.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "topComponent", {
-            get: function() {
-                var value = delegate.topComponent;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.BorderPane){
-            /**
-             * The component added using HorizontalPosition.TOP constraint.
-             * If no component at the container on this constraint then set to <code>null</code>.
-             * @property topComponent
-             * @memberOf BorderPane
-             */
-            P.BorderPane.prototype.topComponent = {};
-        }
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
@@ -423,6 +397,21 @@
              * @memberOf BorderPane
              */
             P.BorderPane.prototype.visible = true;
+        }
+        Object.defineProperty(this, "topComponent", {
+            get: function() {
+                var value = delegate.topComponent;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.BorderPane){
+            /**
+             * The component added using HorizontalPosition.TOP constraint.
+             * If no component at the container on this constraint then set to <code>null</code>.
+             * @property topComponent
+             * @memberOf BorderPane
+             */
+            P.BorderPane.prototype.topComponent = {};
         }
         Object.defineProperty(this, "bottomComponent", {
             get: function() {
@@ -476,6 +465,23 @@
              */
             P.BorderPane.prototype.nextFocusableComponent = {};
         }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.BorderPane){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf BorderPane
+             */
+            P.BorderPane.prototype.onKeyReleased = {};
+        }
         Object.defineProperty(this, "count", {
             get: function() {
                 var value = delegate.count;
@@ -506,23 +512,6 @@
              * @memberOf BorderPane
              */
             P.BorderPane.prototype.onActionPerformed = {};
-        }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.BorderPane){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf BorderPane
-             */
-            P.BorderPane.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -558,6 +547,23 @@
              */
             P.BorderPane.prototype.onKeyTyped = {};
         }
+        Object.defineProperty(this, "onMouseWheelMoved", {
+            get: function() {
+                var value = delegate.onMouseWheelMoved;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseWheelMoved = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.BorderPane){
+            /**
+             * Mouse wheel moved event handler function.
+             * @property onMouseWheelMoved
+             * @memberOf BorderPane
+             */
+            P.BorderPane.prototype.onMouseWheelMoved = {};
+        }
         Object.defineProperty(this, "rightComponent", {
             get: function() {
                 var value = delegate.rightComponent;
@@ -576,23 +582,6 @@
              */
             P.BorderPane.prototype.rightComponent = {};
         }
-        Object.defineProperty(this, "onMouseWheelMoved", {
-            get: function() {
-                var value = delegate.onMouseWheelMoved;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMouseWheelMoved = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.BorderPane){
-            /**
-             * Mouse wheel moved event handler function.
-             * @property onMouseWheelMoved
-             * @memberOf BorderPane
-             */
-            P.BorderPane.prototype.onMouseWheelMoved = {};
-        }
         Object.defineProperty(this, "onComponentRemoved", {
             get: function() {
                 var value = delegate.onComponentRemoved;
@@ -609,6 +598,20 @@
              * @memberOf BorderPane
              */
             P.BorderPane.prototype.onComponentRemoved = {};
+        }
+        Object.defineProperty(this, "component", {
+            get: function() {
+                var value = delegate.component;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.BorderPane){
+            /**
+             * Native API. Returns low level swing component. Applicable only in J2SE swing client.
+             * @property component
+             * @memberOf BorderPane
+             */
+            P.BorderPane.prototype.component = {};
         }
         Object.defineProperty(this, "leftComponent", {
             get: function() {
@@ -627,20 +630,6 @@
              * @memberOf BorderPane
              */
             P.BorderPane.prototype.leftComponent = {};
-        }
-        Object.defineProperty(this, "component", {
-            get: function() {
-                var value = delegate.component;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.BorderPane){
-            /**
-             * Native API. Returns low level swing component. Applicable only in J2SE swing client.
-             * @property component
-             * @memberOf BorderPane
-             */
-            P.BorderPane.prototype.component = {};
         }
         Object.defineProperty(this, "onFocusGained", {
             get: function() {
@@ -826,19 +815,6 @@
         P.BorderPane.prototype.add = function(component, place, size) {
             var delegate = this.unwrap();
             var value = delegate.add(P.boxAsJava(component), P.boxAsJava(place), P.boxAsJava(size));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Gets the container's n-th component.
-         * @param index the component's index in the container
-         * @return the child component
-         * @method child
-         * @memberOf BorderPane
-         */
-        P.BorderPane.prototype.child = function(index) {
-            var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(index));
             return P.boxAsJs(value);
         };
 

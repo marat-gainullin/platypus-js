@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.containers.ButtonGroup");
+    var javaClass = Java.type("com.eas.client.forms.containers.ButtonGroup");
     javaClass.setPublisher(function(aDelegate) {
         return new P.ButtonGroup(aDelegate);
     });
@@ -56,20 +56,6 @@
              * @memberOf ButtonGroup
              */
             P.ButtonGroup.prototype.onMouseDragged = {};
-        }
-        Object.defineProperty(this, "parent", {
-            get: function() {
-                var value = delegate.parent;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ButtonGroup){
-            /**
-             * Gets the parent of this component.
-             * @property parent
-             * @memberOf ButtonGroup
-             */
-            P.ButtonGroup.prototype.parent = {};
         }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
@@ -143,6 +129,9 @@
             get: function() {
                 var value = delegate.error;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.error = P.boxAsJava(aValue);
             }
         });
         if(!P.ButtonGroup){
@@ -440,6 +429,23 @@
              */
             P.ButtonGroup.prototype.nextFocusableComponent = {};
         }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ButtonGroup){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf ButtonGroup
+             */
+            P.ButtonGroup.prototype.onKeyReleased = {};
+        }
         Object.defineProperty(this, "count", {
             get: function() {
                 var value = delegate.count;
@@ -470,23 +476,6 @@
              * @memberOf ButtonGroup
              */
             P.ButtonGroup.prototype.onActionPerformed = {};
-        }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ButtonGroup){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf ButtonGroup
-             */
-            P.ButtonGroup.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -539,23 +528,6 @@
              */
             P.ButtonGroup.prototype.onMouseWheelMoved = {};
         }
-        Object.defineProperty(this, "onItemSelected", {
-            get: function() {
-                var value = delegate.onItemSelected;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onItemSelected = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ButtonGroup){
-            /**
-             * Event that is fired when one of the components is selected in this group.
-             * @property onItemSelected
-             * @memberOf ButtonGroup
-             */
-            P.ButtonGroup.prototype.onItemSelected = {};
-        }
         Object.defineProperty(this, "onComponentRemoved", {
             get: function() {
                 var value = delegate.onComponentRemoved;
@@ -572,6 +544,23 @@
              * @memberOf ButtonGroup
              */
             P.ButtonGroup.prototype.onComponentRemoved = {};
+        }
+        Object.defineProperty(this, "onItemSelected", {
+            get: function() {
+                var value = delegate.onItemSelected;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onItemSelected = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ButtonGroup){
+            /**
+             * Event that is fired when one of the components is selected in this group.
+             * @property onItemSelected
+             * @memberOf ButtonGroup
+             */
+            P.ButtonGroup.prototype.onItemSelected = {};
         }
         Object.defineProperty(this, "component", {
             get: function() {
@@ -767,19 +756,6 @@
         };
 
         /**
-         * Gets the container's n-th component.
-         * @param index the component's index in the container
-         * @return the child component
-         * @method child
-         * @memberOf ButtonGroup
-         */
-        P.ButtonGroup.prototype.child = function(index) {
-            var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(index));
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Removes all the components from this container.
          * @method clear
          * @memberOf ButtonGroup
@@ -798,6 +774,19 @@
         P.ButtonGroup.prototype.focus = function() {
             var delegate = this.unwrap();
             var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Gets the container's n-th component.
+         * @param index the component's index in the container
+         * @return the child component
+         * @method child
+         * @memberOf ButtonGroup
+         */
+        P.ButtonGroup.prototype.child = function(index) {
+            var delegate = this.unwrap();
+            var value = delegate.child(P.boxAsJava(index));
             return P.boxAsJs(value);
         };
 

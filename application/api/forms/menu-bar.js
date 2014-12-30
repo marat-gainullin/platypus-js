@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.menu.MenuBar");
+    var javaClass = Java.type("com.eas.client.forms.menu.MenuBar");
     javaClass.setPublisher(function(aDelegate) {
         return new P.MenuBar(aDelegate);
     });
@@ -55,20 +55,6 @@
              * @memberOf MenuBar
              */
             P.MenuBar.prototype.onMouseDragged = {};
-        }
-        Object.defineProperty(this, "parent", {
-            get: function() {
-                var value = delegate.parent;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.MenuBar){
-            /**
-             * Gets the parent of this component.
-             * @property parent
-             * @memberOf MenuBar
-             */
-            P.MenuBar.prototype.parent = {};
         }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
@@ -142,6 +128,9 @@
             get: function() {
                 var value = delegate.error;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.error = P.boxAsJava(aValue);
             }
         });
         if(!P.MenuBar){
@@ -439,6 +428,23 @@
              */
             P.MenuBar.prototype.nextFocusableComponent = {};
         }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuBar){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf MenuBar
+             */
+            P.MenuBar.prototype.onKeyReleased = {};
+        }
         Object.defineProperty(this, "count", {
             get: function() {
                 var value = delegate.count;
@@ -469,23 +475,6 @@
              * @memberOf MenuBar
              */
             P.MenuBar.prototype.onActionPerformed = {};
-        }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.MenuBar){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf MenuBar
-             */
-            P.MenuBar.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -737,19 +726,6 @@
         };
 
         /**
-         * Gets the container's n-th component.
-         * @param index the component's index in the container
-         * @return the child component
-         * @method child
-         * @memberOf MenuBar
-         */
-        P.MenuBar.prototype.child = function(index) {
-            var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(index));
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Removes the specified component from this container.
          * @param component the component to remove
          * @method remove
@@ -780,6 +756,19 @@
         P.MenuBar.prototype.focus = function() {
             var delegate = this.unwrap();
             var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Gets the container's n-th component.
+         * @param index the component's index in the container
+         * @return the child component
+         * @method child
+         * @memberOf MenuBar
+         */
+        P.MenuBar.prototype.child = function(index) {
+            var delegate = this.unwrap();
+            var value = delegate.child(P.boxAsJava(index));
             return P.boxAsJs(value);
         };
 

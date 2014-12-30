@@ -17,6 +17,7 @@ import com.eas.client.forms.events.rt.ControlEventsIProxy;
 import com.eas.client.forms.layouts.MarginLayout;
 import com.eas.design.Designable;
 import com.eas.design.Undesignable;
+import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
 import com.eas.script.ScriptFunction;
 import java.awt.BorderLayout;
@@ -374,6 +375,13 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
                 }
             });
         }
+    }
+
+    @ScriptFunction
+    @Undesignable
+    @Override
+    public String getName() {
+        return super.getName();
     }
 
     public int getAlign() {
@@ -1051,9 +1059,9 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (selector != null && published != null) {
+            if (selector != null && getPublished() != null) {
                 try {
-                    selector.call(published, new Object[]{published});
+                    selector.call(getPublished(), new Object[]{getPublished()});
                 } catch (Exception ex) {
                     Logger.getLogger(ModelComponentDecorator.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -1086,6 +1094,15 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         if (!silent) {
             super.repaint(tm, x, y, width, height);
         }
+    }
+
+    public abstract JSObject getPublished();
+
+    public void setPublished(JSObject aValue) {
+        if (published != null) {
+            throw new AlreadyPublishedException();
+        }
+        published = aValue;
     }
 
     protected ControlEventsIProxy eventsProxy = new ControlEventsIProxy(this);

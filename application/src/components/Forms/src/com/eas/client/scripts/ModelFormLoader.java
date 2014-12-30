@@ -6,7 +6,6 @@
 package com.eas.client.scripts;
 
 import com.eas.client.Application;
-import com.eas.client.forms.Form;
 import com.eas.client.forms.FormFactory;
 import jdk.nashorn.api.scripting.JSObject;
 import org.w3c.dom.Document;
@@ -17,9 +16,9 @@ import org.w3c.dom.Document;
  */
 public class ModelFormLoader {
     
-    public static Form load(Document aDoc, Application<?> aApp, JSObject aModel) throws Exception {
+    public static FormFactory load(Document aDoc, Application<?> aApp, JSObject aModel) throws Exception {
         FormFactory factory = new FormFactory(aDoc.getDocumentElement(), aModel);
         factory.parse();
-        return factory.getForm();
+        return factory;
     }
 }

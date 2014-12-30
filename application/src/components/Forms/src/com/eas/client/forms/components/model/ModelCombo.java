@@ -8,6 +8,8 @@ import com.eas.client.forms.components.rt.HasEditable;
 import com.eas.client.forms.components.rt.HasEmptyText;
 import com.eas.client.forms.components.rt.VComboBox;
 import com.eas.design.Designable;
+import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.awt.BorderLayout;
 import javax.swing.JLabel;
@@ -18,7 +20,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class ModelCombo extends ModelComponentDecorator<VComboBox, Object> implements HasEmptyText, HasEditable {
+public class ModelCombo extends ModelComponentDecorator<VComboBox, Object> implements HasPublished, HasEmptyText, HasEditable {
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
@@ -33,6 +35,23 @@ public class ModelCombo extends ModelComponentDecorator<VComboBox, Object> imple
     public ModelCombo() {
         super();
         setDecorated(new VComboBox());
+    }
+
+    @Override
+    public JSObject getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = (JSObject) publisher.call(null, new Object[]{this});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
     }
 
     private static final String DISPLAY_LIST_JSDOC = ""

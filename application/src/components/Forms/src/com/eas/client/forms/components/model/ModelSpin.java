@@ -6,16 +6,19 @@ package com.eas.client.forms.components.model;
 
 import com.eas.client.forms.components.rt.HasEmptyText;
 import com.eas.client.forms.components.rt.VSpinner;
+import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.awt.BorderLayout;
 import javax.swing.JLabel;
 import javax.swing.JTable;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
  * @author mg
  */
-public class ModelSpin extends ModelComponentDecorator<VSpinner, Double> implements HasEmptyText{
+public class ModelSpin extends ModelComponentDecorator<VSpinner, Double> implements HasPublished, HasEmptyText{
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
@@ -28,6 +31,23 @@ public class ModelSpin extends ModelComponentDecorator<VSpinner, Double> impleme
         setDecorated(new VSpinner());
     }
     
+    @Override
+    public JSObject getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = (JSObject) publisher.call(null, new Object[]{this});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
     private static final String EDITABLE_JSDOC = ""
             + "/**\n"
             + " * Determines if component is editable.\n"

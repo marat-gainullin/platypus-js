@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.components.Button");
+    var javaClass = Java.type("com.eas.client.forms.components.Button");
     javaClass.setPublisher(function(aDelegate) {
         return new P.Button(null, null, null, null, aDelegate);
     });
@@ -63,20 +63,6 @@
              * @memberOf Button
              */
             P.Button.prototype.onMouseDragged = {};
-        }
-        Object.defineProperty(this, "parent", {
-            get: function() {
-                var value = delegate.parent;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.Button){
-            /**
-             * Gets the parent of this component.
-             * @property parent
-             * @memberOf Button
-             */
-            P.Button.prototype.parent = {};
         }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
@@ -167,6 +153,9 @@
             get: function() {
                 var value = delegate.error;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.error = P.boxAsJava(aValue);
             }
         });
         if(!P.Button){
@@ -430,23 +419,6 @@
              */
             P.Button.prototype.onComponentHidden = {};
         }
-        Object.defineProperty(this, "iconTextGap", {
-            get: function() {
-                var value = delegate.iconTextGap;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.iconTextGap = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Button){
-            /**
-             * The amount of space between the text and the icon displayed in this button.
-             * @property iconTextGap
-             * @memberOf Button
-             */
-            P.Button.prototype.iconTextGap = 0;
-        }
         Object.defineProperty(this, "nextFocusableComponent", {
             get: function() {
                 var value = delegate.nextFocusableComponent;
@@ -464,22 +436,22 @@
              */
             P.Button.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
+        Object.defineProperty(this, "iconTextGap", {
             get: function() {
-                var value = delegate.onActionPerformed;
+                var value = delegate.iconTextGap;
                 return P.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
+                delegate.iconTextGap = P.boxAsJava(aValue);
             }
         });
         if(!P.Button){
             /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
+             * The amount of space between the text and the icon displayed in this button.
+             * @property iconTextGap
              * @memberOf Button
              */
-            P.Button.prototype.onActionPerformed = {};
+            P.Button.prototype.iconTextGap = 0;
         }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
@@ -497,6 +469,23 @@
              * @memberOf Button
              */
             P.Button.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Button){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf Button
+             */
+            P.Button.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

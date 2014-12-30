@@ -67,7 +67,11 @@ public class OptimisticMaskFormatter extends MaskFormatter {
         if (getMask() == null || getMask().isEmpty()) {
             return nullMaskFormatter.stringToValue(value);//value;
         } else {
-            return super.stringToValue(value);
+            try {
+                return super.stringToValue(value);
+            } catch (ParseException ex) {
+                throw new ParseException(String.format("%s - is invalid text for %s mask.", value, getMask()), ex.getErrorOffset());
+            }
         }
     }
 }

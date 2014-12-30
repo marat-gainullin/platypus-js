@@ -304,7 +304,7 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
      * data don't affect the java source file (generated code).
      */
     void markFormModified() {
-        if (formEditor != null && formEditor.isFormLoaded() && !dataObject.isModified()) {
+        if (formEditor != null && formEditor.isFormLoaded()) {
             notifyModified();
         }
     }

@@ -274,11 +274,8 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
         if (java.awt.EventQueue.isDispatchThread()) {
             updateMVTCDisplayNameInAWT();
         } else {
-            java.awt.EventQueue.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    updateMVTCDisplayNameInAWT();
-                }
+            java.awt.EventQueue.invokeLater(() -> {
+                updateMVTCDisplayNameInAWT();
             });
         }
     }

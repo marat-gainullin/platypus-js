@@ -59,8 +59,8 @@ public class Slider extends VSlider implements HasPublished, HasComponentEvents,
     }
 */
     @ScriptFunction(jsDoc = ""
-            + "/**"
-            + " * Slider's value. Can't be null."
+            + "/**\n"
+            + " * Slider's value. Can't be null.\n"
             + " */")
     @Undesignable
     @Override

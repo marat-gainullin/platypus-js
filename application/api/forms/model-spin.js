@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.components.model.ModelSpin");
+    var javaClass = Java.type("com.eas.client.forms.components.model.ModelSpin");
     javaClass.setPublisher(function(aDelegate) {
         return new P.ModelSpin(aDelegate);
     });
@@ -22,19 +22,22 @@
         if(P.ModelSpin.superclass)
             P.ModelSpin.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        Object.defineProperty(this, "parent", {
+        Object.defineProperty(this, "selectOnly", {
             get: function() {
-                var value = delegate.parent;
+                var value = delegate.selectOnly;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.selectOnly = P.boxAsJava(aValue);
             }
         });
         if(!P.ModelSpin){
             /**
-             * Gets the parent of this component.
-             * @property parent
+             * Generated property jsDoc.
+             * @property selectOnly
              * @memberOf ModelSpin
              */
-            P.ModelSpin.prototype.parent = {};
+            P.ModelSpin.prototype.selectOnly = true;
         }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
@@ -52,6 +55,40 @@
              * @memberOf ModelSpin
              */
             P.ModelSpin.prototype.onMouseReleased = {};
+        }
+        Object.defineProperty(this, "data", {
+            get: function() {
+                var value = delegate.data;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.data = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelSpin){
+            /**
+             * Object, bound to the widget.
+             * @property data
+             * @memberOf ModelSpin
+             */
+            P.ModelSpin.prototype.data = {};
+        }
+        Object.defineProperty(this, "nullable", {
+            get: function() {
+                var value = delegate.nullable;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.nullable = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelSpin){
+            /**
+             * Generated property jsDoc.
+             * @property nullable
+             * @memberOf ModelSpin
+             */
+            P.ModelSpin.prototype.nullable = true;
         }
         Object.defineProperty(this, "foreground", {
             get: function() {
@@ -103,20 +140,6 @@
              * @memberOf ModelSpin
              */
             P.ModelSpin.prototype.onRender = {};
-        }
-        Object.defineProperty(this, "model", {
-            get: function() {
-                var value = delegate.model;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ModelSpin){
-            /**
-             * Model of the component. It will be used for data binding.
-             * @property model
-             * @memberOf ModelSpin
-             */
-            P.ModelSpin.prototype.model = {};
         }
         Object.defineProperty(this, "text", {
             get: function() {
@@ -251,23 +274,6 @@
              */
             P.ModelSpin.prototype.onComponentHidden = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelSpin){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf ModelSpin
-             */
-            P.ModelSpin.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -284,6 +290,23 @@
              * @memberOf ModelSpin
              */
             P.ModelSpin.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelSpin){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf ModelSpin
+             */
+            P.ModelSpin.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -347,11 +370,11 @@
         });
         if(!P.ModelSpin){
             /**
-             * Model entity's field.
+             * Model binding field.
              * @property field
              * @memberOf ModelSpin
              */
-            P.ModelSpin.prototype.field = {};
+            P.ModelSpin.prototype.field = '';
         }
         Object.defineProperty(this, "left", {
             get: function() {
@@ -395,7 +418,7 @@
         });
         if(!P.ModelSpin){
             /**
-             * Gets name of this component.
+             * Generated property jsDoc.
              * @property name
              * @memberOf ModelSpin
              */
@@ -412,7 +435,7 @@
         });
         if(!P.ModelSpin){
             /**
-             * The mouse <code>Cursor</code> over this component.
+             * Generated property jsDoc.
              * @property cursor
              * @memberOf ModelSpin
              */
@@ -469,6 +492,23 @@
              */
             P.ModelSpin.prototype.emptyText = '';
         }
+        Object.defineProperty(this, "icon", {
+            get: function() {
+                var value = delegate.icon;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.icon = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelSpin){
+            /**
+             * Generated property jsDoc.
+             * @property icon
+             * @memberOf ModelSpin
+             */
+            P.ModelSpin.prototype.icon = {};
+        }
         Object.defineProperty(this, "onMousePressed", {
             get: function() {
                 var value = delegate.onMousePressed;
@@ -490,6 +530,9 @@
             get: function() {
                 var value = delegate.error;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.error = P.boxAsJava(aValue);
             }
         });
         if(!P.ModelSpin){
@@ -552,23 +595,6 @@
              */
             P.ModelSpin.prototype.min = 0;
         }
-        Object.defineProperty(this, "componentPopupMenu", {
-            get: function() {
-                var value = delegate.componentPopupMenu;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.componentPopupMenu = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelSpin){
-            /**
-             * <code>PopupMenu</code> that assigned for this component.
-             * @property componentPopupMenu
-             * @memberOf ModelSpin
-             */
-            P.ModelSpin.prototype.componentPopupMenu = {};
-        }
         Object.defineProperty(this, "top", {
             get: function() {
                 var value = delegate.top;
@@ -607,14 +633,11 @@
             get: function() {
                 var value = delegate.value;
                 return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.value = P.boxAsJava(aValue);
             }
         });
         if(!P.ModelSpin){
             /**
-             * Component's value.
+             * Widget's value.
              * @property value
              * @memberOf ModelSpin
              */
@@ -699,7 +722,7 @@
         });
         if(!P.ModelSpin){
             /**
-             * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
+             * Generated property jsDoc.
              * @property nextFocusableComponent
              * @memberOf ModelSpin
              */
@@ -815,7 +838,7 @@
         });
         if(!P.ModelSpin){
             /**
-             * The font of this component.
+             * Generated property jsDoc.
              * @property font
              * @memberOf ModelSpin
              */
@@ -840,17 +863,6 @@
         }
     };
         /**
-         * Redraw the component.
-         * @method redraw
-         * @memberOf ModelSpin
-         */
-        P.ModelSpin.prototype.redraw = function() {
-            var delegate = this.unwrap();
-            var value = delegate.redraw();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf ModelSpin
@@ -858,6 +870,17 @@
         P.ModelSpin.prototype.focus = function() {
             var delegate = this.unwrap();
             var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Redraw the component.
+         * @method redraw
+         * @memberOf ModelSpin
+         */
+        P.ModelSpin.prototype.redraw = function() {
+            var delegate = this.unwrap();
+            var value = delegate.redraw();
             return P.boxAsJs(value);
         };
 

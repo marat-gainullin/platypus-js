@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.dbcontrols.CellRenderEvent");
+    var javaClass = Java.type("com.eas.client.forms.components.model.CellRenderEvent");
     javaClass.setPublisher(function(aDelegate) {
         return new P.CellRenderEvent(aDelegate);
     });
@@ -22,33 +22,19 @@
         if(P.CellRenderEvent.superclass)
             P.CellRenderEvent.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        Object.defineProperty(this, "columnId", {
+        Object.defineProperty(this, "column", {
             get: function() {
-                var value = delegate.columnId;
+                var value = delegate.column;
                 return P.boxAsJs(value);
             }
         });
         if(!P.CellRenderEvent){
             /**
-             * The cell's column ID.
-             * @property columnId
+             * The cell's column.
+             * @property column
              * @memberOf CellRenderEvent
              */
-            P.CellRenderEvent.prototype.columnId = {};
-        }
-        Object.defineProperty(this, "id", {
-            get: function() {
-                var value = delegate.id;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.CellRenderEvent){
-            /**
-             * The primary key of the data object.
-             * @property id
-             * @memberOf CellRenderEvent
-             */
-            P.CellRenderEvent.prototype.id = {};
+            P.CellRenderEvent.prototype.column = {};
         }
         Object.defineProperty(this, "source", {
             get: function() {
@@ -86,7 +72,7 @@
         });
         if(!P.CellRenderEvent){
             /**
-             * The cell's row object.
+             * The cell's object.
              * @property object
              * @memberOf CellRenderEvent
              */

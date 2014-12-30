@@ -53,22 +53,5 @@
              */
             P.CellData.prototype.display = {};
         }
-        Object.defineProperty(this, "style", {
-            get: function() {
-                var value = delegate.style;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.style = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.CellData){
-            /**
-             * The cell's style.
-             * @property style
-             * @memberOf CellData
-             */
-            P.CellData.prototype.style = {};
-        }
     };
 })();

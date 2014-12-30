@@ -123,13 +123,9 @@ public class ControlEventsIProxy implements MouseListener,
                 if (mHandlee != null) {
                     unregisterEvents();
                 }
-                eventThis = null;
                 mHandlee = aHandlee;
                 if (mHandlee != null) {
                     registerEvents();
-                    if (ScriptUtils.isInitialized()) {
-                        eventThis = ((HasPublished) mHandlee).getPublished();
-                    }
                 }
             }
         } catch (Exception ex) {

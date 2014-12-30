@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.components.Label");
+    var javaClass = Java.type("com.eas.client.forms.components.Label");
     javaClass.setPublisher(function(aDelegate) {
         return new P.Label(null, null, null, aDelegate);
     });
@@ -61,20 +61,6 @@
              * @memberOf Label
              */
             P.Label.prototype.onMouseDragged = {};
-        }
-        Object.defineProperty(this, "parent", {
-            get: function() {
-                var value = delegate.parent;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.Label){
-            /**
-             * Gets the parent of this component.
-             * @property parent
-             * @memberOf Label
-             */
-            P.Label.prototype.parent = {};
         }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
@@ -165,6 +151,9 @@
             get: function() {
                 var value = delegate.error;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.error = P.boxAsJava(aValue);
             }
         });
         if(!P.Label){
@@ -428,23 +417,6 @@
              */
             P.Label.prototype.onComponentHidden = {};
         }
-        Object.defineProperty(this, "iconTextGap", {
-            get: function() {
-                var value = delegate.iconTextGap;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.iconTextGap = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Label){
-            /**
-             * The amount of space between the text and the icon displayed in this label.
-             * @property iconTextGap
-             * @memberOf Label
-             */
-            P.Label.prototype.iconTextGap = 0;
-        }
         Object.defineProperty(this, "nextFocusableComponent", {
             get: function() {
                 var value = delegate.nextFocusableComponent;
@@ -462,22 +434,22 @@
              */
             P.Label.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
+        Object.defineProperty(this, "iconTextGap", {
             get: function() {
-                var value = delegate.onActionPerformed;
+                var value = delegate.iconTextGap;
                 return P.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
+                delegate.iconTextGap = P.boxAsJava(aValue);
             }
         });
         if(!P.Label){
             /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
+             * The amount of space between the text and the icon displayed in this label.
+             * @property iconTextGap
              * @memberOf Label
              */
-            P.Label.prototype.onActionPerformed = {};
+            P.Label.prototype.iconTextGap = 0;
         }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
@@ -495,6 +467,23 @@
              * @memberOf Label
              */
             P.Label.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Label){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf Label
+             */
+            P.Label.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

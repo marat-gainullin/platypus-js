@@ -5,30 +5,164 @@
  */
 package com.eas.client.forms.components.rt;
 
+import com.eas.script.ScriptUtils;
 import java.beans.PropertyChangeListener;
+import java.text.DecimalFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import javax.swing.JFormattedTextField;
+import javax.swing.text.DefaultFormatterFactory;
+import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.internal.runtime.JSType;
 
 /**
  *
  * @author mg
  */
-public class VFormattedField extends JFormattedTextField implements HasValue<Object>, HasEmptyText, HasEditable {
+public abstract class VFormattedField extends JFormattedTextField implements HasValue<Object>, HasEmptyText, HasEditable {
 
-    protected String format;
-    protected int valueType;
+    public static final int NUMBER = 0;
+    public static final int DATE = 1;
+    public static final int TIME = 2;
+    public static final int PERCENT = 3;
+    public static final int CURRENCY = 4;
+    public static final int MASK = 5;
+    public static final int REGEXP = 6;
+
+    public class PolymorphFormatter extends AbstractFormatter {
+
+        private String pattern;
+        private final OptimisticMaskFormatter maskFormatter = new OptimisticMaskFormatter();
+        private final SimpleDateFormat dateFormat = new SimpleDateFormat();
+        private final DecimalFormat numberFormat = new DecimalFormat();
+        private Pattern regexp;
+
+        public PolymorphFormatter() {
+            super();
+            maskFormatter.setValueContainsLiteralCharacters(true);
+        }
+
+        public String getPattern() {
+            return pattern;
+        }
+
+        public void setPattern(String aValue) {
+            if (pattern == null ? aValue != null : !pattern.equals(aValue)) {
+                pattern = aValue;
+                try {
+                    maskFormatter.setMask(pattern);
+                } catch (ParseException ex) {
+                    Logger.getLogger(VFormattedField.class.getName()).log(Level.WARNING, ex.getMessage());
+                }
+                try {
+                    dateFormat.applyPattern(pattern);
+                } catch (Exception ex) {
+                    Logger.getLogger(VFormattedField.class.getName()).log(Level.WARNING, ex.getMessage());
+                }
+                try {
+                    numberFormat.applyPattern(pattern);
+                } catch (Exception ex) {
+                    Logger.getLogger(VFormattedField.class.getName()).log(Level.WARNING, ex.getMessage());
+                }
+                try {
+                    regexp = aValue != null && !aValue.isEmpty() ? Pattern.compile(aValue) : null;
+                } catch (Exception ex) {
+                    Logger.getLogger(VFormattedField.class.getName()).log(Level.WARNING, ex.getMessage());
+                }
+            }
+        }
+
+        @Override
+        public Object stringToValue(String text) throws ParseException {
+            if (onParse != null) {
+                JSObject jsEvent = ScriptUtils.makeObj();
+                jsEvent.setMember("source", getPublished());
+                jsEvent.setMember("text", text);
+                try {
+                    return ScriptUtils.toJava(onParse.call(getPublished(), new Object[]{jsEvent}));
+                } catch (Throwable t) {
+                    throw new ParseException(text, 0);
+                }
+            } else {
+                switch (valueType) {
+                    case DATE:
+                        return dateFormat.parse(text);
+                    case TIME:
+                        return dateFormat.parse(text);
+                    case NUMBER:
+                        return numberFormat.parse(text);
+                    case PERCENT:
+                        return numberFormat.parse(text);
+                    case CURRENCY:
+                        return numberFormat.parse(text);
+                    case MASK:
+                        return maskFormatter.stringToValue(text);
+                    case REGEXP:
+                        boolean matches = regexp != null ? regexp.matcher(text).matches() : true;
+                        if (matches) {
+                            return text;
+                        } else {
+                            throw new ParseException(text, 0);
+                        }
+                    default:
+                        return text;
+                }
+            }
+        }
+
+        @Override
+        public String valueToString(Object value) throws ParseException {
+            if (onFormat != null) {
+                JSObject jsEvent = ScriptUtils.makeObj();
+                jsEvent.setMember("source", getPublished());
+                jsEvent.setMember("value", ScriptUtils.toJs(value));
+                try {
+                    return JSType.toString(onFormat.call(getPublished(), new Object[]{jsEvent}));
+                } catch (Throwable t) {
+                    throw new ParseException(t.getMessage(), 0);
+                }
+            } else {
+                switch (valueType) {
+                    case DATE:
+                        return dateFormat.format(value);
+                    case TIME:
+                        return dateFormat.format(value);
+                    case NUMBER:
+                        return numberFormat.format(value);
+                    case PERCENT:
+                        return numberFormat.format(value);
+                    case CURRENCY:
+                        return numberFormat.format(value);
+                    case MASK:
+                        return maskFormatter.valueToString(value);
+                    case REGEXP:
+                        return value != null ? value.toString() : "";
+                    default:
+                        return value != null ? value.toString() : "";
+                }
+            }
+        }
+    }
+
+    protected PolymorphFormatter formatter = new PolymorphFormatter();
+    protected int valueType = REGEXP;
+    protected JSObject onFormat;
+    protected JSObject onParse;
 
     public VFormattedField(Object aValue) {
         super();
-        setFocusLostBehavior(COMMIT);
+        setFormatterFactory(new DefaultFormatterFactory(formatter));
         setValue(aValue);
     }
 
     public VFormattedField() {
         this(null);
     }
+
+    protected abstract JSObject getPublished();
 
     public int getValueType() {
         return valueType;
@@ -37,19 +171,31 @@ public class VFormattedField extends JFormattedTextField implements HasValue<Obj
     public void setValueType(int aValue) {
         if (valueType != aValue) {
             valueType = aValue;
-            setFormatterFactory(format != null ? FormatsUtils.formatterFactoryByFormat(format, valueType) : null);
         }
     }
 
     public String getFormat() {
-        return format;
+        return formatter.getPattern();
     }
 
     public void setFormat(String aValue) {
-        if (format == null ? aValue != null : !format.equals(aValue)) {
-            format = aValue;
-            setFormatterFactory(format != null ? FormatsUtils.formatterFactoryByFormat(format, valueType) : null);
-        }
+        formatter.setPattern(aValue);
+    }
+
+    public JSObject getOnFormat() {
+        return onFormat;
+    }
+
+    public void setOnFormat(JSObject aValue) {
+        onFormat = aValue;
+    }
+
+    public JSObject getOnParse() {
+        return onParse;
+    }
+
+    public void setOnParse(JSObject aValue) {
+        onParse = aValue;
     }
 
     @Override
@@ -76,9 +222,6 @@ public class VFormattedField extends JFormattedTextField implements HasValue<Obj
     public void setValue(Object aValue) {
         if (aValue instanceof Number) {
             aValue = ((Number) aValue).doubleValue();
-        }
-        if (super.getFormatterFactory() == null && aValue instanceof String) {
-            super.setFormatterFactory(FormatsUtils.formatterFactoryByFormat(getFormat(), FormatsUtils.MASK));
         }
         super.setValue(aValue);
     }

@@ -33,10 +33,10 @@ import com.eas.client.forms.components.model.grid.header.CheckGridColumn;
 import com.eas.client.forms.components.model.grid.header.ModelGridColumn;
 import com.eas.client.forms.components.model.grid.header.RadioGridColumn;
 import com.eas.client.forms.components.model.grid.header.ServiceGridColumn;
-import com.eas.client.forms.components.rt.FormatsUtils;
 import com.eas.client.forms.components.rt.HasEditable;
 import com.eas.client.forms.components.rt.HasEmptyText;
 import com.eas.client.forms.components.rt.HasGroup;
+import com.eas.client.forms.components.rt.VFormattedField;
 import com.eas.client.forms.containers.AnchorsPane;
 import com.eas.client.forms.containers.BorderPane;
 import com.eas.client.forms.containers.BoxPane;
@@ -328,7 +328,7 @@ public class FormFactory {
                 FormattedField formattedField = new FormattedField();
                 readGeneralProps(anElement, formattedField);
                 String format = anElement.getAttribute("format");
-                int valueType = XmlDomUtils.readIntegerAttribute(anElement, "valueType", FormatsUtils.MASK);
+                int valueType = XmlDomUtils.readIntegerAttribute(anElement, "valueType", VFormattedField.REGEXP);
                 formattedField.setValueType(valueType);
                 formattedField.setFormat(format);
                 if (anElement.hasAttribute("text")) {
@@ -457,7 +457,7 @@ public class FormFactory {
                 readGeneralProps(anElement, modelFormattedField);
                 try {
                     String format = anElement.getAttribute("format");
-                    int valueType = XmlDomUtils.readIntegerAttribute(anElement, "valueType", FormatsUtils.MASK);
+                    int valueType = XmlDomUtils.readIntegerAttribute(anElement, "valueType", VFormattedField.REGEXP);
                     modelFormattedField.setValueType(valueType);
                     modelFormattedField.setFormat(format);
                     if (anElement.hasAttribute("text")) {

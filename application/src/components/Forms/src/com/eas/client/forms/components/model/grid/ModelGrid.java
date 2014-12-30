@@ -1354,12 +1354,10 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         }
     }
 
-    @ScriptFunction
     public void addColumn(ModelColumn aColumn) throws Exception {
         addColumn(columnModel.getColumnCount(), aColumn);
     }
 
-    @ScriptFunction
     public void removeColumn(int aIndex) throws Exception {
         removeColumn((ModelColumn) columnModel.getColumn(aIndex));
     }

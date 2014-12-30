@@ -5,7 +5,6 @@ try {
     load('classpath:common-utils/color.js');
     load('classpath:common-utils/cursor.js');
     load('classpath:common-utils/font.js');
-    load('classpath:common-utils/style.js');
     printf('common-utils API loaded.');
 } catch (e) {
     printf('common-utils API skipped.');
@@ -36,15 +35,6 @@ try {
 }
 
 try {
-    load('classpath:db-controls/cell-render-event.js');
-    load('classpath:db-controls/scriptable-column.js');
-    printf('db-controls API loaded.');
-} catch (e) {
-    printf('db-controls API skipped.');
-}
-
-try {
-    load('classpath:forms/absolute-pane.js');
     load('classpath:forms/action-event.js');
     load('classpath:forms/anchors-pane.js');
     load('classpath:forms/anchors.js');
@@ -53,6 +43,7 @@ try {
     load('classpath:forms/button-group.js');
     load('classpath:forms/button.js');
     load('classpath:forms/card-pane.js');
+    load('classpath:forms/cell-render-event.js');
     load('classpath:forms/change-event.js');
     load('classpath:forms/check-box.js');
     load('classpath:forms/check-menu-item.js');
@@ -68,24 +59,20 @@ try {
     load('classpath:forms/html-area.js');
     load('classpath:forms/key-event.js');
     load('classpath:forms/label.js');
-    load('classpath:forms/line-chart.js');
     load('classpath:forms/menu-bar.js');
     load('classpath:forms/menu-item.js');
     load('classpath:forms/menu-separator.js');
     load('classpath:forms/menu.js');
     load('classpath:forms/model-check-box.js');
+    load('classpath:forms/model-column.js');
     load('classpath:forms/model-combo.js');
     load('classpath:forms/model-date.js');
     load('classpath:forms/model-formatted-field.js');
     load('classpath:forms/model-grid.js');
-    load('classpath:forms/model-image.js');
-    load('classpath:forms/model-map.js');
-    load('classpath:forms/model-scheme.js');
     load('classpath:forms/model-spin.js');
     load('classpath:forms/model-text-area.js');
     load('classpath:forms/mouse-event.js');
     load('classpath:forms/password-field.js');
-    load('classpath:forms/pie-chart.js');
     load('classpath:forms/popup-menu.js');
     load('classpath:forms/progress-bar.js');
     load('classpath:forms/radio-button.js');
@@ -96,7 +83,6 @@ try {
     load('classpath:forms/tabbed-pane.js');
     load('classpath:forms/text-area.js');
     load('classpath:forms/text-field.js');
-    load('classpath:forms/time-series-chart.js');
     load('classpath:forms/toggle-button.js');
     load('classpath:forms/tool-bar.js');
     load('classpath:forms/window-event.js');

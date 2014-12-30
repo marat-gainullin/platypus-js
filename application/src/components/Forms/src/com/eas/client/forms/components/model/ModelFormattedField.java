@@ -7,17 +7,21 @@ package com.eas.client.forms.components.model;
 import com.eas.client.forms.components.rt.HasEditable;
 import com.eas.client.forms.components.rt.HasEmptyText;
 import com.eas.client.forms.components.rt.VFormattedField;
+import com.eas.design.Undesignable;
+import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.awt.BorderLayout;
 import java.text.ParseException;
 import javax.swing.JLabel;
 import javax.swing.JTable;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
  * @author mg
  */
-public class ModelFormattedField extends ModelComponentDecorator<VFormattedField, Object> implements HasEmptyText, HasEditable {
+public class ModelFormattedField extends ModelComponentDecorator<VFormattedField, Object> implements HasPublished, HasEmptyText, HasEditable {
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
@@ -27,8 +31,53 @@ public class ModelFormattedField extends ModelComponentDecorator<VFormattedField
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC)
     public ModelFormattedField() {
         super();
-        setDecorated(new VFormattedField());
+        setDecorated(new VFormattedField() {
+
+            @Override
+            protected JSObject getPublished() {
+                return ModelFormattedField.this.getPublished();
+            }
+        });
         setBackground(getDecorated().getBackground());
+    }
+
+    @Override
+    public JSObject getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = (JSObject) publisher.call(null, new Object[]{this});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
+    }
+
+    @ScriptFunction
+    @Undesignable
+    public JSObject getOnFormat() {
+        return decorated.getOnFormat();
+    }
+
+    @ScriptFunction
+    public void setOnFormat(JSObject aValue) {
+        decorated.setOnFormat(aValue);
+    }
+
+    @ScriptFunction
+    @Undesignable
+    public JSObject getOnParse() {
+        return decorated.getOnParse();
+    }
+
+    @ScriptFunction
+    public void setOnParse(JSObject aValue) {
+        decorated.setOnParse(aValue);
     }
 
     @ScriptFunction(jsDoc = EDITABLE_JSDOC)
@@ -59,8 +108,8 @@ public class ModelFormattedField extends ModelComponentDecorator<VFormattedField
     }
 
     @ScriptFunction(jsDoc = ""
-            + "/**"
-            + " * ValueType hint for the field. It is used to determine, how to interpret format pattern."
+            + "/**\n"
+            + " * ValueType hint for the field. It is used to determine, how to interpret format pattern.\n"
             + " */")
     public int getValueType(){
         return decorated.getValueType();

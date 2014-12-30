@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.events.KeyEvent");
+    var javaClass = Java.type("com.eas.client.forms.events.KeyEvent");
     javaClass.setPublisher(function(aDelegate) {
         return new P.KeyEvent(aDelegate);
     });
@@ -100,7 +100,7 @@
         });
         if(!P.KeyEvent){
             /**
-             * The source component object of the event.
+             * The source object of the event.
              * @property source
              * @memberOf KeyEvent
              */

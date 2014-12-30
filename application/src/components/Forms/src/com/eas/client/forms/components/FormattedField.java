@@ -27,7 +27,6 @@ import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
-import java.text.ParseException;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import jdk.nashorn.api.scripting.JSObject;
@@ -51,6 +50,32 @@ public class FormattedField extends VFormattedField implements HasPublished, Has
 
     public FormattedField() {
         this((Object) null);
+    }
+
+    @ScriptFunction
+    @Undesignable
+    @Override
+    public JSObject getOnFormat() {
+        return super.getOnFormat();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnFormat(JSObject aValue) {
+        super.setOnFormat(aValue);
+    }
+
+    @ScriptFunction
+    @Undesignable
+    @Override
+    public JSObject getOnParse() {
+        return super.getOnParse();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnParse(JSObject aValue) {
+        super.setOnParse(aValue);
     }
 
     @ScriptFunction(jsDoc = JS_NAME_DOC)
@@ -333,8 +358,8 @@ public class FormattedField extends VFormattedField implements HasPublished, Has
     }
 
     @ScriptFunction(jsDoc = ""
-            + "/**"
-            + " * ValueType hint for the field. It is used to determine, how to interpret format pattern."
+            + "/**\n"
+            + " * ValueType hint for the field. It is used to determine, how to interpret format pattern.\n"
             + " */")
     @Override
     public int getValueType() {

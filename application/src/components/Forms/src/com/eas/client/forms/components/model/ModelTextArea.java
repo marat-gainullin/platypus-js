@@ -7,10 +7,13 @@ package com.eas.client.forms.components.model;
 import com.eas.client.forms.components.rt.HasEditable;
 import com.eas.client.forms.components.rt.HasEmptyText;
 import com.eas.client.forms.components.rt.VTextArea;
+import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.awt.BorderLayout;
 import javax.swing.JLabel;
 import javax.swing.JTable;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -23,7 +26,7 @@ import javax.swing.JTable;
         }
 
  */
-public class ModelTextArea extends ModelComponentDecorator<VTextArea, String> implements HasEmptyText, HasEditable{
+public class ModelTextArea extends ModelComponentDecorator<VTextArea, String> implements HasPublished, HasEmptyText, HasEditable{
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
@@ -35,6 +38,23 @@ public class ModelTextArea extends ModelComponentDecorator<VTextArea, String> im
         super();
         setDecorated(new VTextArea());
         setBackground(getDecorated().getBackground());
+    }
+
+    @Override
+    public JSObject getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = (JSObject) publisher.call(null, new Object[]{this});
+        }
+        return published;
+    }
+
+    private static JSObject publisher;
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
     }
 
     @ScriptFunction(jsDoc = EDITABLE_JSDOC)

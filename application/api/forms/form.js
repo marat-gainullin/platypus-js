@@ -6,7 +6,7 @@
     
     /**
      * Creates a form.
-     * @param aView Container instance to be used as view of created form.
+     * @param aView Container instance to be used as view of created form. Optional. If it is omitted P.AnchorsPane will be created and used as view.
      * @param aFormKey Form instance key for open windows accounting. Optional.
      * @constructor Form Form
      */
@@ -124,20 +124,6 @@
              * @memberOf Form
              */
             P.Form.prototype.onWindowMinimized = {};
-        }
-        Object.defineProperty(this, "view", {
-            get: function() {
-                var value = delegate.view;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.Form){
-            /**
-             * Top level widget of a form.
-             * @property view
-             * @memberOf Form
-             */
-            P.Form.prototype.view = {};
         }
         Object.defineProperty(this, "top", {
             get: function() {
@@ -290,23 +276,6 @@
              */
             P.Form.prototype.resizable = true;
         }
-        Object.defineProperty(this, "formKey", {
-            get: function() {
-                var value = delegate.formKey;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.formKey = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Form){
-            /**
-             * The form key. Used to identify a form instance. Initialy set to the form's application element name.
-             * @property formKey
-             * @memberOf Form
-             */
-            P.Form.prototype.formKey = '';
-        }
         Object.defineProperty(this, "onWindowRestored", {
             get: function() {
                 var value = delegate.onWindowRestored;
@@ -323,6 +292,23 @@
              * @memberOf Form
              */
             P.Form.prototype.onWindowRestored = {};
+        }
+        Object.defineProperty(this, "formKey", {
+            get: function() {
+                var value = delegate.formKey;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.formKey = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Form){
+            /**
+             * The form key. Used to identify a form instance. Initialy set to the form's application element name.
+             * @property formKey
+             * @memberOf Form
+             */
+            P.Form.prototype.formKey = '';
         }
         Object.defineProperty(this, "maximized", {
             get: function() {
@@ -505,6 +491,18 @@
         };
 
         /**
+         * Shows the form as an internal window in a desktop.
+         * @param desktop the parent desktop object
+         * @method showInternalFrame
+         * @memberOf Form
+         */
+        P.Form.prototype.showInternalFrame = function(desktop) {
+            var delegate = this.unwrap();
+            var value = delegate.showInternalFrame(P.boxAsJava(desktop));
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Minimizes this form.
          * @method minimize
          * @memberOf Form
@@ -534,18 +532,6 @@
         P.Form.prototype.restore = function() {
             var delegate = this.unwrap();
             var value = delegate.restore();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Shows the form as an internal window in a desktop.
-         * @param desktop the parent desktop object
-         * @method showInternalFrame
-         * @memberOf Form
-         */
-        P.Form.prototype.showInternalFrame = function(desktop) {
-            var delegate = this.unwrap();
-            var value = delegate.showInternalFrame(P.boxAsJava(desktop));
             return P.boxAsJs(value);
         };
 
