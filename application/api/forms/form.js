@@ -491,18 +491,6 @@
         };
 
         /**
-         * Shows the form as an internal window in a desktop.
-         * @param desktop the parent desktop object
-         * @method showInternalFrame
-         * @memberOf Form
-         */
-        P.Form.prototype.showInternalFrame = function(desktop) {
-            var delegate = this.unwrap();
-            var value = delegate.showInternalFrame(P.boxAsJava(desktop));
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Minimizes this form.
          * @method minimize
          * @memberOf Form
@@ -532,6 +520,18 @@
         P.Form.prototype.restore = function() {
             var delegate = this.unwrap();
             var value = delegate.restore();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Shows the form as an internal window in a desktop.
+         * @param desktop the parent desktop object
+         * @method showInternalFrame
+         * @memberOf Form
+         */
+        P.Form.prototype.showInternalFrame = function(desktop) {
+            var delegate = this.unwrap();
+            var value = delegate.showInternalFrame(P.boxAsJava(desktop));
             return P.boxAsJs(value);
         };
 

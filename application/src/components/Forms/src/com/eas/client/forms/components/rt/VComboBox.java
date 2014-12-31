@@ -54,8 +54,6 @@ public class VComboBox extends JComboBox<Object> implements HasValue<Object>, Ha
         super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
     }
 
-    private static final String VALUE_PROP_NAME = "value";
-
     protected String emptyText;
 
     @Override

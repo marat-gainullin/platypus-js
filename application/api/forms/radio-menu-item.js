@@ -290,7 +290,7 @@
              * @property value
              * @memberOf RadioMenuItem
              */
-            P.RadioMenuItem.prototype.value = {};
+            P.RadioMenuItem.prototype.value = true;
         }
         Object.defineProperty(this, "toolTipText", {
             get: function() {

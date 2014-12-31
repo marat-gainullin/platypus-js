@@ -25,7 +25,7 @@ public class VSpinner extends JSpinner implements HasEmptyText, HasEditable {
     }
 
     protected PropertyChangeListener valueChangedAlerter = (PropertyChangeEvent evt) -> {
-        firePropertyChange(VALUE_PROP_NAME, evt.getOldValue(), evt.getNewValue());
+        firePropertyChange(HasValue.VALUE_PROP_NAME, evt.getOldValue(), evt.getNewValue());
     };
 
     public final void setModel(SpinnerDoubleModel aModel) {
@@ -49,10 +49,8 @@ public class VSpinner extends JSpinner implements HasEmptyText, HasEditable {
     }
 
     public void addValueChangeListener(PropertyChangeListener listener) {
-        super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
+        super.addPropertyChangeListener(HasValue.VALUE_PROP_NAME, listener);
     }
-
-    private static final String VALUE_PROP_NAME = "value";
 
     @Override
     public void commitEdit() throws ParseException {

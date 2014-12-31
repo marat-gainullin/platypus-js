@@ -66,6 +66,4 @@ public class VCheckBox extends JCheckBox implements HasValue<Boolean> {
         super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
     }
 
-    private static final String VALUE_PROP_NAME = "value";
-
 }

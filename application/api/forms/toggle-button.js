@@ -100,6 +100,23 @@
              */
             P.ToggleButton.prototype.onFocusLost = {};
         }
+        Object.defineProperty(this, "onValueChange", {
+            get: function() {
+                var value = delegate.onValueChange;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onValueChange = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ToggleButton){
+            /**
+             * Value change handler.
+             * @property onValueChange
+             * @memberOf ToggleButton
+             */
+            P.ToggleButton.prototype.onValueChange = {};
+        }
         Object.defineProperty(this, "icon", {
             get: function() {
                 var value = delegate.icon;

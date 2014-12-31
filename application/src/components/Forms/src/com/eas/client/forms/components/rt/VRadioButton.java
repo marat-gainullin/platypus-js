@@ -48,7 +48,4 @@ public class VRadioButton extends JRadioButton implements HasValue<Boolean> {
     public void addValueChangeListener(PropertyChangeListener listener) {
         super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
     }
-
-    private static final String VALUE_PROP_NAME = "value";
-
 }

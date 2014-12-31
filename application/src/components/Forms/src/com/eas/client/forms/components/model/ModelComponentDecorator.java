@@ -8,11 +8,13 @@ import com.bearsoft.rowset.RowsetConverter;
 import com.eas.client.forms.ModelCellEditingListener;
 import com.eas.client.forms.Forms;
 import com.eas.client.forms.HasComponentEvents;
+import com.eas.client.forms.HasOnValueChange;
 import com.eas.client.forms.IconCache;
 import com.eas.client.forms.Widget;
 import com.eas.client.forms.components.rt.HasValue;
 import com.eas.client.forms.components.rt.VSpinner;
 import com.eas.client.forms.events.ComponentEvent;
+import com.eas.client.forms.events.ValueChangeEvent;
 import com.eas.client.forms.events.rt.ControlEventsIProxy;
 import com.eas.client.forms.layouts.MarginLayout;
 import com.eas.design.Designable;
@@ -87,7 +89,7 @@ import jdk.nashorn.api.scripting.JSObject;
  * @param <D>
  * @param <V>
  */
-public abstract class ModelComponentDecorator<D extends JComponent, V> extends JPanel implements Widget, ModelWidget<V>, HasComponentEvents {
+public abstract class ModelComponentDecorator<D extends JComponent, V> extends JPanel implements HasOnValueChange, Widget, ModelWidget<V>, HasComponentEvents {
 
     public static final int EXTRA_BUTTON_WIDTH = 18;
 
@@ -727,8 +729,6 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
     }
 
-    private static final String VALUE_PROP_NAME = "value";
-
     protected String error;
     protected JPanel errorPanel = new JPanel();
 
@@ -1357,6 +1357,20 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     @Override
     public void setOnKeyTyped(JSObject aValue) {
         eventsProxy.getHandlers().put(ControlEventsIProxy.keyTyped, aValue);
+    }
+
+    @ScriptFunction(jsDoc = ON_VALUE_CHANED_JSDOC)
+    @EventMethod(eventClass = ValueChangeEvent.class)
+    @Undesignable
+    @Override
+    public JSObject getOnValueChange() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.valueChanged);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnValueChange(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.valueChanged, aValue);
     }
 
     // published parent

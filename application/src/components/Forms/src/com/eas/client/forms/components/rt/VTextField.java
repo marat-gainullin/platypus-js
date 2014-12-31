@@ -66,8 +66,6 @@ public class VTextField extends JTextField implements HasValue<String>, HasEmpty
         super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
     }
 
-    private static final String VALUE_PROP_NAME = "value";
-
     protected String emptyText;
 
     @Override

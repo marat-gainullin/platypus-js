@@ -94,6 +94,23 @@
              */
             P.ProgressBar.prototype.onFocusLost = {};
         }
+        Object.defineProperty(this, "onValueChange", {
+            get: function() {
+                var value = delegate.onValueChange;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onValueChange = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ProgressBar){
+            /**
+             * Value change handler.
+             * @property onValueChange
+             * @memberOf ProgressBar
+             */
+            P.ProgressBar.prototype.onValueChange = {};
+        }
         Object.defineProperty(this, "onMousePressed", {
             get: function() {
                 var value = delegate.onMousePressed;

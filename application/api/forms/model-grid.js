@@ -940,28 +940,6 @@
 
         /**
          *
-         * @method try2StopAnyEditing
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.try2StopAnyEditing = function() {
-            var delegate = this.unwrap();
-            var value = delegate.try2StopAnyEditing();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         *
-         * @method try2CancelAnyEditing
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.try2CancelAnyEditing = function() {
-            var delegate = this.unwrap();
-            var value = delegate.try2CancelAnyEditing();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         *
          * @method row2Index
          * @memberOf ModelGrid
          */
@@ -1003,6 +981,28 @@
         P.ModelGrid.prototype.makeVisible = function(instance, need2select) {
             var delegate = this.unwrap();
             var value = delegate.makeVisible(P.boxAsJava(instance), P.boxAsJava(need2select));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
+         * @method try2StopAnyEditing
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.try2StopAnyEditing = function() {
+            var delegate = this.unwrap();
+            var value = delegate.try2StopAnyEditing();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
+         * @method try2CancelAnyEditing
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.try2CancelAnyEditing = function() {
+            var delegate = this.unwrap();
+            var value = delegate.try2CancelAnyEditing();
             return P.boxAsJs(value);
         };
 

@@ -19,6 +19,10 @@ public class EventsWrapper {
         return new KeyEvent(aEvent);
     }
 
+    public static ValueChangeEvent wrap(java.beans.PropertyChangeEvent aEvent) {
+        return new ValueChangeEvent(aEvent);
+    }
+
     public static ActionEvent wrap(java.awt.event.ActionEvent aEvent) {
         return new ActionEvent(aEvent);
     }

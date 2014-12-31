@@ -85,6 +85,7 @@ try {
     load('classpath:forms/text-field.js');
     load('classpath:forms/toggle-button.js');
     load('classpath:forms/tool-bar.js');
+    load('classpath:forms/value-change-event.js');
     load('classpath:forms/window-event.js');
     printf('forms API loaded.');
 } catch (e) {

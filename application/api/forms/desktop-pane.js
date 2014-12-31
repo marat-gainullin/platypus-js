@@ -671,6 +671,17 @@
         };
 
         /**
+         * Tries to acquire focus for this component.
+         * @method focus
+         * @memberOf DesktopPane
+         */
+        P.DesktopPane.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Minimizes all frames on the pane.
          * @method minimizeAll
          * @memberOf DesktopPane
@@ -700,17 +711,6 @@
         P.DesktopPane.prototype.maximizeAll = function() {
             var delegate = this.unwrap();
             var value = delegate.maximizeAll();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf DesktopPane
-         */
-        P.DesktopPane.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
             return P.boxAsJs(value);
         };
 

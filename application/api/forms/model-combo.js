@@ -90,6 +90,23 @@
              */
             P.ModelCombo.prototype.nullable = true;
         }
+        Object.defineProperty(this, "onValueChange", {
+            get: function() {
+                var value = delegate.onValueChange;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onValueChange = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelCombo){
+            /**
+             * Value change handler.
+             * @property onValueChange
+             * @memberOf ModelCombo
+             */
+            P.ModelCombo.prototype.onValueChange = {};
+        }
         Object.defineProperty(this, "foreground", {
             get: function() {
                 var value = delegate.foreground;

@@ -478,6 +478,20 @@
              */
             P.ScrollPane.prototype.nextFocusableComponent = {};
         }
+        Object.defineProperty(this, "count", {
+            get: function() {
+                var value = delegate.count;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ScrollPane){
+            /**
+             * Gets the number of components in this panel.
+             * @property count
+             * @memberOf ScrollPane
+             */
+            P.ScrollPane.prototype.count = 0;
+        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -494,20 +508,6 @@
              * @memberOf ScrollPane
              */
             P.ScrollPane.prototype.onKeyReleased = {};
-        }
-        Object.defineProperty(this, "count", {
-            get: function() {
-                var value = delegate.count;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ScrollPane){
-            /**
-             * Gets the number of components in this panel.
-             * @property count
-             * @memberOf ScrollPane
-             */
-            P.ScrollPane.prototype.count = 0;
         }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {

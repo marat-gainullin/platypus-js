@@ -92,6 +92,23 @@
              */
             P.FormattedField.prototype.onFocusLost = {};
         }
+        Object.defineProperty(this, "onValueChange", {
+            get: function() {
+                var value = delegate.onValueChange;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onValueChange = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.FormattedField){
+            /**
+             * Value change handler.
+             * @property onValueChange
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.onValueChange = {};
+        }
         Object.defineProperty(this, "emptyText", {
             get: function() {
                 var value = delegate.emptyText;

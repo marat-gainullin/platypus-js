@@ -30,7 +30,7 @@ public class VSlider extends JSlider {
         if (oldValue != newValue) {
             int wasOldValue = oldValue;
             oldValue = newValue;
-            firePropertyChange(VALUE_PROP_NAME, wasOldValue, newValue);
+            firePropertyChange(HasValue.VALUE_PROP_NAME, wasOldValue, newValue);
         }
     }
 
@@ -46,8 +46,6 @@ public class VSlider extends JSlider {
     }
 
     public void addValueChangeListener(PropertyChangeListener listener) {
-        super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
+        super.addPropertyChangeListener(HasValue.VALUE_PROP_NAME, listener);
     }
-
-    private static final String VALUE_PROP_NAME = "value";
 }

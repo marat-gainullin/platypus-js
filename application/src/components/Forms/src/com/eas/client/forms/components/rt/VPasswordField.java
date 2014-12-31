@@ -93,6 +93,4 @@ public class VPasswordField extends JPasswordField implements HasValue<String>, 
     public void addValueChangeListener(PropertyChangeListener listener) {
         super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
     }
-
-    private static final String VALUE_PROP_NAME = "value";   
 }

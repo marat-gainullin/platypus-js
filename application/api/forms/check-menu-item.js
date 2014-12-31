@@ -290,7 +290,7 @@
              * @property value
              * @memberOf CheckMenuItem
              */
-            P.CheckMenuItem.prototype.value = {};
+            P.CheckMenuItem.prototype.value = true;
         }
         Object.defineProperty(this, "toolTipText", {
             get: function() {

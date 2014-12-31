@@ -90,6 +90,23 @@
              */
             P.ModelFormattedField.prototype.nullable = true;
         }
+        Object.defineProperty(this, "onValueChange", {
+            get: function() {
+                var value = delegate.onValueChange;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onValueChange = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelFormattedField){
+            /**
+             * Value change handler.
+             * @property onValueChange
+             * @memberOf ModelFormattedField
+             */
+            P.ModelFormattedField.prototype.onValueChange = {};
+        }
         Object.defineProperty(this, "onParse", {
             get: function() {
                 var value = delegate.onParse;

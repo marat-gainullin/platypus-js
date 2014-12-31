@@ -88,6 +88,4 @@ public class VHtmlArea extends JEditorPane implements HasValue<String>, HasEmpty
         checkValueChanged();
     }
 
-    private static final String VALUE_PROP_NAME = "value";
-
 }

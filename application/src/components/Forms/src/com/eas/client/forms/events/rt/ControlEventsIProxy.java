@@ -4,8 +4,8 @@
  */
 package com.eas.client.forms.events.rt;
 
+import com.eas.client.forms.components.rt.HasValue;
 import com.eas.client.forms.events.EventsWrapper;
-import com.eas.script.HasPublished;
 import com.eas.script.ScriptUtils;
 import java.awt.Component;
 import java.awt.Container;
@@ -57,7 +57,8 @@ public class ControlEventsIProxy implements MouseListener,
     public static final int keyReleased = 21;
     public static final int componentAdded = 22;
     public static final int componentRemoved = 23;
-    protected static final int CONTROL_EVENT_LAST = componentRemoved;
+    public static final int valueChanged = 24;
+    protected static final int CONTROL_EVENT_LAST = valueChanged;
     protected Component mHandlee;
     protected JSObject eventThis;
     protected Map<Integer, JSObject> handlers = new HashMap<>();
@@ -96,6 +97,8 @@ public class ControlEventsIProxy implements MouseListener,
             anEvent = EventsWrapper.wrap((java.awt.event.ComponentEvent) anEvent);
         } else if (anEvent instanceof java.awt.event.ActionEvent) {
             anEvent = EventsWrapper.wrap((java.awt.event.ActionEvent) anEvent);
+        } else if (anEvent instanceof java.beans.PropertyChangeEvent) {
+            anEvent = EventsWrapper.wrap((java.beans.PropertyChangeEvent) anEvent);
         } else if (anEvent instanceof javax.swing.event.ChangeEvent) {
             anEvent = EventsWrapper.wrap((javax.swing.event.ChangeEvent) anEvent);
         }
@@ -291,7 +294,11 @@ public class ControlEventsIProxy implements MouseListener,
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        executeEvent(propertyChange, evt);
+        if (HasValue.VALUE_PROP_NAME.equals(evt.getPropertyName())) {
+            executeEvent(valueChanged, evt);
+        } else {
+            executeEvent(propertyChange, evt);
+        }
     }
 
     @Override

@@ -8,11 +8,14 @@ import com.eas.client.forms.Forms;
 import com.eas.client.forms.HasComponentEvents;
 import com.eas.client.forms.components.rt.HasEmptyText;
 import com.eas.client.forms.HasJsName;
+import com.eas.client.forms.HasOnValueChange;
+import static com.eas.client.forms.HasOnValueChange.ON_VALUE_CHANED_JSDOC;
 import com.eas.client.forms.Widget;
 import com.eas.client.forms.events.ActionEvent;
 import com.eas.client.forms.events.ComponentEvent;
 import com.eas.client.forms.events.MouseEvent;
 import com.eas.client.forms.components.rt.VPasswordField;
+import com.eas.client.forms.events.ValueChangeEvent;
 import com.eas.client.forms.events.rt.ControlEventsIProxy;
 import com.eas.client.forms.layouts.MarginLayout;
 import com.eas.design.Undesignable;
@@ -34,7 +37,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class PasswordField extends VPasswordField implements HasPublished, HasComponentEvents, HasEmptyText, HasJsName, Widget {
+public class PasswordField extends VPasswordField implements HasOnValueChange, HasPublished, HasComponentEvents, HasEmptyText, HasJsName, Widget {
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
@@ -607,6 +610,20 @@ public class PasswordField extends VPasswordField implements HasPublished, HasCo
         eventsProxy.getHandlers().put(ControlEventsIProxy.keyTyped, aValue);
     }
     
+    @ScriptFunction(jsDoc = ON_VALUE_CHANED_JSDOC)
+    @EventMethod(eventClass = ValueChangeEvent.class)
+    @Undesignable
+    @Override
+    public JSObject getOnValueChange() {
+        return eventsProxy.getHandlers().get(ControlEventsIProxy.valueChanged);
+    }
+
+    @ScriptFunction
+    @Override
+    public void setOnValueChange(JSObject aValue) {
+        eventsProxy.getHandlers().put(ControlEventsIProxy.valueChanged, aValue);
+    }
+
     // published parent
     @Override
     public Widget getParentWidget() {
