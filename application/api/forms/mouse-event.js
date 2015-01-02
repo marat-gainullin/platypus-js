@@ -51,6 +51,20 @@
              */
             P.MouseEvent.prototype.altDown = true;
         }
+        Object.defineProperty(this, "clickCount", {
+            get: function() {
+                var value = delegate.clickCount;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.MouseEvent){
+            /**
+             * The number of mouse clicks associated with this event.
+             * @property clickCount
+             * @memberOf MouseEvent
+             */
+            P.MouseEvent.prototype.clickCount = 0;
+        }
         Object.defineProperty(this, "controlDown", {
             get: function() {
                 var value = delegate.controlDown;
@@ -78,20 +92,6 @@
              * @memberOf MouseEvent
              */
             P.MouseEvent.prototype.shiftDown = true;
-        }
-        Object.defineProperty(this, "clickCount", {
-            get: function() {
-                var value = delegate.clickCount;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.MouseEvent){
-            /**
-             * The number of mouse clicks associated with this event.
-             * @property clickCount
-             * @memberOf MouseEvent
-             */
-            P.MouseEvent.prototype.clickCount = 0;
         }
         Object.defineProperty(this, "X", {
             get: function() {

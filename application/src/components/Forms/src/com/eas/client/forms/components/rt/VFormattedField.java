@@ -231,6 +231,11 @@ public abstract class VFormattedField extends JFormattedTextField implements Has
         super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
     }
 
+    @Override
+    public void removeValueChangeListener(PropertyChangeListener listener) {
+        super.removePropertyChangeListener(VALUE_PROP_NAME, listener);
+    }
+
     protected String emptyText;
 
     @Override

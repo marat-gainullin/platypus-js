@@ -65,6 +65,11 @@ public class VHtmlArea extends JEditorPane implements HasValue<String>, HasEmpty
     }
 
     @Override
+    public void removeValueChangeListener(PropertyChangeListener listener) {
+        super.removePropertyChangeListener(VALUE_PROP_NAME, listener);
+    }
+
+    @Override
     public boolean getEditable() {
         return super.isEditable();
     }

@@ -10,14 +10,11 @@ import com.bearsoft.rowset.resourcepool.BearCallableStatement;
 import com.bearsoft.rowset.resourcepool.BearDatabaseConnection;
 import com.bearsoft.rowset.resourcepool.BearPreparedStatement;
 import com.bearsoft.rowset.resourcepool.BearResourcePool;
-import com.eas.util.ListenerRegistration;
 import java.io.PrintWriter;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
 import static org.junit.Assert.assertEquals;
@@ -59,10 +56,9 @@ public class FlowBaseTest {
     public class JdbcFlowProviderAdapter<JKT> extends JdbcFlowProvider<JKT> {
 
         protected List<Change> changeLog = new ArrayList<>();
-        protected Set<TransactionListener> listeners = new HashSet<>();
-        
+
         public JdbcFlowProviderAdapter(JKT aJdbcSourceTag, DataSource aDataSource, Converter aConverter, String aClause) {
-            super(aJdbcSourceTag, aDataSource, aConverter, aClause, null);
+            super(aJdbcSourceTag, aDataSource, null, aConverter, aClause, null);
         }
 
         @Override
@@ -83,13 +79,7 @@ public class FlowBaseTest {
             return changeLog;
         }
 
-        public void commit(Connection aConnection) throws Exception
-        {
-        }
-
-        @Override
-        public ListenerRegistration addTransactionListener(TransactionListener aListener) {
-            throw new UnsupportedOperationException("Not supported yet.");
+        public void commit(Connection aConnection) throws Exception {
         }
     }
 

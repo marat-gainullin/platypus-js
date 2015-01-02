@@ -6,8 +6,8 @@ package com.eas.client.forms.components.model.grid.models;
 
 import com.bearsoft.gui.grid.data.CellData;
 import com.eas.client.forms.components.model.CellRenderEvent;
+import com.eas.client.forms.components.model.ModelWidget;
 import com.eas.client.forms.components.model.grid.columns.ModelColumn;
-import com.eas.script.ScriptUtils;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.table.TableColumnModel;
@@ -62,9 +62,9 @@ public abstract class ArrayModel {
         if (columnIndex >= 0 && columnIndex < columns.getColumnCount()) {
             try {
                 ModelColumn column = (ModelColumn) columns.getColumn(columnIndex);
-                return getObjectsData(column.getField(), anElement);
+                return ModelWidget.getPathData(anElement, column.getField());
             } catch (Exception ex) {
-                severe(ex.getMessage());
+                Logger.getLogger(ArrayTableModel.class.getName()).log(Level.SEVERE, ex.getMessage());
                 return null;
             }
         }
@@ -75,71 +75,11 @@ public abstract class ArrayModel {
         if (columnIndex >= 0 && columnIndex < columns.getColumnCount()) {
             try {
                 ModelColumn column = (ModelColumn) columns.getColumn(columnIndex);
-                setObjectsData(aValue, column.getField(), anElement);
+                ModelWidget.setPathData(anElement, column.getField(), aValue);
             } catch (Exception ex) {
-                severe(ex.getMessage());
+                Logger.getLogger(ArrayTableModel.class.getName()).log(Level.SEVERE, ex.getMessage());
             }
         }
-    }
-
-    protected Object getObjectsData(String aField, JSObject anElement) throws Exception {
-        if (aField != null && !aField.isEmpty()) {
-            JSObject target = anElement;
-            String[] path = aField.split(".");
-            String propName = path[0];
-            for (int i = 1; i < path.length; i++) {
-                Object oTarget = anElement.getMember(propName);
-                propName = path[i];
-                if (!(oTarget instanceof JSObject)) {
-                    propName = null;
-                    break;
-                } else {
-                    target = (JSObject) oTarget;
-                }
-            }
-            Object value = null;
-            if (propName != null) {
-                value = ScriptUtils.toJava(target.getMember(propName));
-            } else {
-                severe("Field path: " + aField + " doesn't exist.");
-            }
-            return value;
-        } else {
-            return null;
-        }
-    }
-
-    protected void setObjectsData(Object aValue, String aField, JSObject anElement) throws Exception {
-        if (aField != null && !aField.isEmpty()) {
-            if (aValue instanceof CellData) {
-                aValue = ((CellData) aValue).getData();
-            }
-            // All validating/change events posting code is inside of script object class.
-            JSObject target = anElement;
-            String[] path = aField.split(".");
-            String propName = path[0];
-            for (int i = 1; i < path.length; i++) {
-                Object oTarget = anElement.getMember(propName);
-                propName = path[i];
-                if (!(oTarget instanceof JSObject)) {
-                    propName = null;
-                    break;
-                } else {
-                    target = (JSObject) oTarget;
-                }
-            }
-            if (propName != null) {
-                target.setMember(propName, ScriptUtils.toJs(aValue));
-            } else {
-                severe("Field path: " + aField + " doesn't exist.");
-            }
-        } else {
-            severe(COLUMN_BINDING_MISSING_MSG);
-        }
-    }
-
-    protected void severe(String aMsg) {
-        Logger.getLogger(ArrayTableModel.class.getName()).log(Level.SEVERE, aMsg);
     }
 
     /**

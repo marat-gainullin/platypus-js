@@ -418,23 +418,6 @@
              */
             P.ToggleButton.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "opaque", {
-            get: function() {
-                var value = delegate.opaque;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.opaque = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ToggleButton){
-            /**
-             * True if this component is completely opaque.
-             * @property opaque
-             * @memberOf ToggleButton
-             */
-            P.ToggleButton.prototype.opaque = true;
-        }
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
@@ -451,6 +434,23 @@
              * @memberOf ToggleButton
              */
             P.ToggleButton.prototype.visible = true;
+        }
+        Object.defineProperty(this, "opaque", {
+            get: function() {
+                var value = delegate.opaque;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.opaque = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ToggleButton){
+            /**
+             * True if this component is completely opaque.
+             * @property opaque
+             * @memberOf ToggleButton
+             */
+            P.ToggleButton.prototype.opaque = true;
         }
         Object.defineProperty(this, "buttonGroup", {
             get: function() {

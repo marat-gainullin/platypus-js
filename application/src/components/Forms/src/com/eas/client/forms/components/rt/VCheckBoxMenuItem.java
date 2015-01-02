@@ -59,4 +59,10 @@ public class VCheckBoxMenuItem extends JCheckBoxMenuItem implements HasValue<Boo
     public void addValueChangeListener(PropertyChangeListener listener) {
         super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
     }
+
+    @Override
+    public void removeValueChangeListener(PropertyChangeListener listener) {
+        super.removePropertyChangeListener(VALUE_PROP_NAME, listener);
+    }
+
 }

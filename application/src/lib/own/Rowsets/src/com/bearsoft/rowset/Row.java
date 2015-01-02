@@ -134,10 +134,18 @@ public class Row implements HasPublished {
         propertyChangeSupport.addPropertyChangeListener(l);
     }
 
+    public void addPropertyChangeListener(String aPropertyName, PropertyChangeListener l) {
+        propertyChangeSupport.addPropertyChangeListener(aPropertyName, l);
+    }
+
     public void removePropertyChangeListener(PropertyChangeListener l) {
         propertyChangeSupport.removePropertyChangeListener(l);
     }
 
+    public void removePropertyChangeListener(String aPropertyName, PropertyChangeListener l) {
+        propertyChangeSupport.removePropertyChangeListener(aPropertyName, l);
+    }
+    
     public void addVetoableChangeListener(VetoableChangeListener l) {
         vetoableChangeSupport.addVetoableChangeListener(l);
     }

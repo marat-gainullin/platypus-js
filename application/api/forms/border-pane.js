@@ -364,23 +364,6 @@
              */
             P.BorderPane.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "opaque", {
-            get: function() {
-                var value = delegate.opaque;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.opaque = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.BorderPane){
-            /**
-             * True if this component is completely opaque.
-             * @property opaque
-             * @memberOf BorderPane
-             */
-            P.BorderPane.prototype.opaque = true;
-        }
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
@@ -412,6 +395,23 @@
              * @memberOf BorderPane
              */
             P.BorderPane.prototype.topComponent = {};
+        }
+        Object.defineProperty(this, "opaque", {
+            get: function() {
+                var value = delegate.opaque;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.opaque = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.BorderPane){
+            /**
+             * True if this component is completely opaque.
+             * @property opaque
+             * @memberOf BorderPane
+             */
+            P.BorderPane.prototype.opaque = true;
         }
         Object.defineProperty(this, "bottomComponent", {
             get: function() {

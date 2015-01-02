@@ -27,4 +27,5 @@ public interface HasValue<V> {
 
     public void addValueChangeListener(PropertyChangeListener listener);
 
+    public void removeValueChangeListener(PropertyChangeListener listener);
 }

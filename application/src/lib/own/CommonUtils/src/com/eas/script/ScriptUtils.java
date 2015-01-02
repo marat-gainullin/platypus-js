@@ -58,6 +58,7 @@ public class ScriptUtils {
     protected static JSObject collectionDefFunc;
     protected static JSObject isArrayFunc;
     protected static JSObject makeObjFunc;
+    protected static JSObject listenFunc;
     protected static ScriptEngine engine;
     // Thread locals
     protected static ThreadLocal<Object> lock = new ThreadLocal<>();
@@ -347,6 +348,11 @@ public class ScriptUtils {
         makeObjFunc = aValue;
     }
 
+    public static void setListenFunc(JSObject aValue) {
+        assert listenFunc == null;
+        listenFunc = aValue;
+    }
+
     public static Object toJava(Object aValue) {
         if (aValue instanceof ScriptObject) {
             aValue = jdk.nashorn.api.scripting.ScriptUtils.wrap(aValue);
@@ -540,6 +546,12 @@ public class ScriptUtils {
         return (JSObject) oResult;
     }
 
+    public static JSObject listen(JSObject aTarget, String aPath, JSObject aCallback) {
+        assert listenFunc != null : SCRIPT_NOT_INITIALIZED;
+        Object oResult = listenFunc.call(null, new Object[]{aCallback});
+        return (JSObject) oResult;
+    }
+    
     public static JSObject createModule(String aModuleName) {
         assert lookupInGlobalFunc != null : SCRIPT_NOT_INITIALIZED;
         Object oConstructor = lookupInGlobalFunc.call(null, new Object[]{aModuleName});

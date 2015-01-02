@@ -14,8 +14,8 @@ import javax.swing.JPasswordField;
  *
  * @author Марат
  */
-public class VPasswordField extends JPasswordField implements HasValue<String>, HasEditable, HasEmptyText{
-    
+public class VPasswordField extends JPasswordField implements HasValue<String>, HasEditable, HasEmptyText {
+
     private String oldValue;
 
     public VPasswordField(String aText) {
@@ -36,7 +36,7 @@ public class VPasswordField extends JPasswordField implements HasValue<String>, 
             checkValueChanged();
         });
     }
-    
+
     private void checkValueChanged() {
         String newValue = getValue();
         if (oldValue == null ? newValue != null : !oldValue.equals(newValue)) {
@@ -93,4 +93,10 @@ public class VPasswordField extends JPasswordField implements HasValue<String>, 
     public void addValueChangeListener(PropertyChangeListener listener) {
         super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
     }
+
+    @Override
+    public void removeValueChangeListener(PropertyChangeListener listener) {
+        super.removePropertyChangeListener(VALUE_PROP_NAME, listener);
+    }
+
 }

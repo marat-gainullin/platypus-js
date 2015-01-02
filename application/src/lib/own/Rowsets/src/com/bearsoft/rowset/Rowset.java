@@ -48,7 +48,6 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
     protected FlowProvider flow;
     // rowset's metadata
     protected Fields fields;
-    protected Class<? extends Row> rowsClass = Row.class;
     // rowset's data
     protected List<Row> original = new ArrayList<>();
     protected List<Row> current = new ArrayList<>();
@@ -186,6 +185,10 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
         propertyChangeSupport.addPropertyChangeListener(aListener);
     }
 
+    public void addPropertyChangeListener(String aPropertyName, PropertyChangeListener l) {
+        propertyChangeSupport.addPropertyChangeListener(aPropertyName, l);
+    }
+
     /**
      * Removes <code>PropertyChangeListener</code> from this rowset.
      *
@@ -195,6 +198,10 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
         propertyChangeSupport.removePropertyChangeListener(aListener);
     }
 
+    public void removePropertyChangeListener(String aPropertyName, PropertyChangeListener l) {
+        propertyChangeSupport.removePropertyChangeListener(aPropertyName, l);
+    }
+    
     /**
      * Registers <code>RowsetListener</code> on this rowset.
      *
@@ -273,24 +280,6 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
         Fields oldValue = fields;
         fields = aFields;
         propertyChangeSupport.firePropertyChange("fields", oldValue, fields);
-    }
-
-    /**
-     * Returns class of rows, contained and managed by this rowset.
-     *
-     * @return Rowset's rows class.
-     */
-    public Class<? extends Row> getRowsClass() {
-        return rowsClass;
-    }
-
-    /**
-     * Sets class of rows, contained and managed by this rowset.
-     *
-     * @param aClass Class to be setted.
-     */
-    public void setRowsClass(Class<? extends Row> aClass) {
-        rowsClass = aClass;
     }
 
     /**
@@ -1133,14 +1122,10 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
      */
     public void insert(Object... initingValues) throws RowsetException {
         if (!showOriginal) {
-            try {
-                assert fields != null;
-                Row row = rowsClass.newInstance();
-                row.setFields(fields);
-                insert(row, false, initingValues);
-            } catch (InstantiationException | IllegalAccessException ex) {
-                throw new RowsetException(ex);
-            }
+            assert fields != null;
+            Row row = new Row();
+            row.setFields(fields);
+            insert(row, false, initingValues);
         }
     }
 
@@ -1164,15 +1149,11 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
      */
     public Row insertAt(int insertAt, boolean aAjusting, Object... initingValues) throws RowsetException {
         if (!showOriginal) {
-            try {
-                assert fields != null;
-                Row row = rowsClass.newInstance();
-                row.setFields(fields);
-                insertAt(row, aAjusting, insertAt, initingValues);
-                return row;
-            } catch (InstantiationException | IllegalAccessException ex) {
-                throw new RowsetException(ex);
-            }
+            assert fields != null;
+            Row row = new Row();
+            row.setFields(fields);
+            insertAt(row, aAjusting, insertAt, initingValues);
+            return row;
         }
         return null;
     }
@@ -1239,10 +1220,6 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
             if (toInsert.getColumnCount() != fields.getFieldsCount()) {
                 throw new RowsetException("Bad column count. While inserting, columns count in a row must same with fields count in rowset fields.");
             }
-            if (!rowsClass.isAssignableFrom(toInsert.getClass())) {
-                throw new RowsetException(String.format("Bad row class. While inserting a row, row's class must be descendant from \"%s\" or \"%s\" itself.", rowsClass.getName(), rowsClass.getName()));
-            }
-
             insertingRow = toInsert;
             try {
                 if (rowsetChangeSupport.fireWillInsertEvent(insertingRow, aAjusting)) {

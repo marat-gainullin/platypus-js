@@ -9,6 +9,7 @@ import com.bearsoft.gui.grid.events.data.ElementsAddedEvent;
 import com.bearsoft.gui.grid.events.data.ElementsDataChangedEvent;
 import com.bearsoft.gui.grid.events.data.ElementsRemovedEvent;
 import com.bearsoft.gui.grid.events.data.TreedModelListener;
+import com.eas.client.forms.components.model.ModelWidget;
 import com.eas.client.forms.components.model.grid.columns.ModelColumn;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,7 +47,7 @@ public class ArrayTreedModel extends ArrayModel implements TreedModel<JSObject> 
     @Override
     public JSObject getParentOf(JSObject anElement) {
         try {
-            Object oChildren = super.getObjectsData(parentField, anElement);
+            Object oChildren = ModelWidget.getPathData(anElement, parentField);
             if (oChildren instanceof JSObject) {
                 return (JSObject) oChildren;
             } else {
@@ -63,7 +64,7 @@ public class ArrayTreedModel extends ArrayModel implements TreedModel<JSObject> 
         List<JSObject> children = new ArrayList<>();
         if (anElement != null) {
             try {
-                Object oChildren = super.getObjectsData(childrenField, anElement);
+                Object oChildren = ModelWidget.getPathData(anElement, childrenField);
                 if (oChildren instanceof JSObject) {
                     JSObject jsChildren = (JSObject) oChildren;
                     int length = JSType.toInteger(jsChildren.getMember("length"));

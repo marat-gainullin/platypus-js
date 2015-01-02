@@ -361,23 +361,6 @@
              */
             P.ButtonGroup.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "opaque", {
-            get: function() {
-                var value = delegate.opaque;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.opaque = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ButtonGroup){
-            /**
-             * True if this component is completely opaque.
-             * @property opaque
-             * @memberOf ButtonGroup
-             */
-            P.ButtonGroup.prototype.opaque = true;
-        }
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
@@ -394,6 +377,23 @@
              * @memberOf ButtonGroup
              */
             P.ButtonGroup.prototype.visible = true;
+        }
+        Object.defineProperty(this, "opaque", {
+            get: function() {
+                var value = delegate.opaque;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.opaque = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ButtonGroup){
+            /**
+             * True if this component is completely opaque.
+             * @property opaque
+             * @memberOf ButtonGroup
+             */
+            P.ButtonGroup.prototype.opaque = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
@@ -767,17 +767,6 @@
         };
 
         /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf ButtonGroup
-         */
-        P.ButtonGroup.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Gets the container's n-th component.
          * @param index the component's index in the container
          * @return the child component
@@ -787,6 +776,17 @@
         P.ButtonGroup.prototype.child = function(index) {
             var delegate = this.unwrap();
             var value = delegate.child(P.boxAsJava(index));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Tries to acquire focus for this component.
+         * @method focus
+         * @memberOf ButtonGroup
+         */
+        P.ButtonGroup.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
             return P.boxAsJs(value);
         };
 

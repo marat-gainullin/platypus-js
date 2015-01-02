@@ -16,8 +16,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.JFormattedTextField;
 import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import sun.awt.SunToolkit;
 
 /**
  *
@@ -134,6 +132,11 @@ public class VDateTimeField extends JCalendarComboBox implements HasValue<Date>,
     @Override
     public void addValueChangeListener(PropertyChangeListener listener) {
         super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
+    }
+
+    @Override
+    public void removeValueChangeListener(PropertyChangeListener listener) {
+        super.removePropertyChangeListener(VALUE_PROP_NAME, listener);
     }
 
 }

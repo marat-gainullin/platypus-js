@@ -67,7 +67,9 @@ import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
+import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.api.scripting.ScriptUtils;
 
 /*
  === from setValueToRowset ===
@@ -613,6 +615,9 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     // binding
     protected JSObject data;
     protected String field;
+    protected JSObject boundToData;
+    protected PropertyChangeListener boundToValue;
+
     private static final String FIELD_JSDOC = ""
             + "/**\n"
             + " * Model binding field.\n"
@@ -635,7 +640,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         }
     }
 
-    @ScriptFunction(jsDoc=""
+    @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * Object, bound to the widget.\n"
             + " */")
@@ -648,7 +653,63 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     @ScriptFunction
     @Override
     public void setData(JSObject aValue) {
-        data = aValue;
+        if (ScriptUtils.unwrap(data) != ScriptUtils.unwrap(aValue)) {
+            unbind();
+            data = aValue;
+            bind();
+        }
+    }
+
+    protected boolean settingValueFromJs;
+    protected boolean settingValueToJs;
+
+    protected void bind() {
+        if (data != null && field != null && !field.isEmpty()) {
+            boundToData = com.eas.script.ScriptUtils.listen(data, field, new AbstractJSObject() {
+
+                @Override
+                public Object call(Object thiz, Object... args) {
+                    if (!settingValueToJs) {
+                        if (args.length >= 1 && args[0] instanceof JSObject) {
+                            JSObject jsEvt = (JSObject) args[0];
+                            if (jsEvt.hasMember("newValue")) {
+                                settingValueFromJs = true;
+                                try {
+                                    setJsValue(jsEvt.getMember("newValue"));
+                                } finally {
+                                    settingValueFromJs = false;
+                                }
+                            }
+                        }
+                    }
+                    return null;
+                }
+
+            });
+            boundToValue = (PropertyChangeEvent evt) -> {
+                if (!settingValueFromJs) {
+                    settingValueToJs = true;
+                    try {
+                        ModelWidget.setPathData(data, field, com.eas.script.ScriptUtils.toJs(evt.getNewValue()));
+                    } finally {
+                        settingValueToJs = false;
+                    }
+                }
+            };
+            addValueChangeListener(boundToValue);
+        }
+    }
+
+    protected void unbind() {
+        if (boundToData != null) {
+            JSObject unlisten = (JSObject) boundToData.getMember("unlisten");
+            unlisten.call(null, new Object[]{});
+            boundToData = null;
+        }
+        if (boundToValue != null) {
+            removeValueChangeListener(boundToValue);
+            boundToValue = null;
+        }
     }
 
     private static final String ON_SELECT_JSDOC = ""
@@ -719,14 +780,17 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         }
     }
 
-    public void removeValueChangeListener(PropertyChangeListener listener) {
-        super.removePropertyChangeListener(VALUE_PROP_NAME, listener);
-    }
+    protected abstract void setJsValue(Object aValue);
 
     @Override
     public void addValueChangeListener(PropertyChangeListener listener) {
         super.removePropertyChangeListener(VALUE_PROP_NAME, listener);
         super.addPropertyChangeListener(VALUE_PROP_NAME, listener);
+    }
+
+    @Override
+    public void removeValueChangeListener(PropertyChangeListener listener) {
+        super.removePropertyChangeListener(VALUE_PROP_NAME, listener);
     }
 
     protected String error;

@@ -105,23 +105,6 @@
              */
             P.ApplicationDbEntity.prototype.onChanged = {};
         }
-        Object.defineProperty(this, "onDeleted", {
-            get: function() {
-                var value = delegate.onDeleted;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onDeleted = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ApplicationDbEntity){
-            /**
-             * The handler function for the event occured after an entity row has been deleted.
-             * @property onDeleted
-             * @memberOf ApplicationDbEntity
-             */
-            P.ApplicationDbEntity.prototype.onDeleted = {};
-        }
         Object.defineProperty(this, "onScrolled", {
             get: function() {
                 var value = delegate.onScrolled;
@@ -138,6 +121,23 @@
              * @memberOf ApplicationDbEntity
              */
             P.ApplicationDbEntity.prototype.onScrolled = {};
+        }
+        Object.defineProperty(this, "onDeleted", {
+            get: function() {
+                var value = delegate.onDeleted;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onDeleted = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ApplicationDbEntity){
+            /**
+             * The handler function for the event occured after an entity row has been deleted.
+             * @property onDeleted
+             * @memberOf ApplicationDbEntity
+             */
+            P.ApplicationDbEntity.prototype.onDeleted = {};
         }
         Object.defineProperty(this, "cursorPos", {
             get: function() {
@@ -381,19 +381,6 @@
         };
 
         /**
-         * Requeries the entity's data. Forses the entity to refresh its data, no matter if its parameters has changed or not.
-         * @param onSuccess The callback function for refresh data on success event (optional).
-         * @param onFailure The callback function for refresh data on failure event (optional).
-         * @method requery
-         * @memberOf ApplicationDbEntity
-         */
-        P.ApplicationDbEntity.prototype.requery = function(onSuccess, onFailure) {
-            var delegate = this.unwrap();
-            var value = delegate.requery(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Creates an instance of comparator object using specified constraints objects.
          * @param pairs the sort criteria pairs, in a form of property object (e.g. entity.schema.propName or just a propName in a string form) and the order of sort (ascending - true; descending - false).
          * @return a comparator object to be passed as a parameter to entity's <code>sort</code> method.
@@ -403,6 +390,19 @@
         P.ApplicationDbEntity.prototype.createSorting = function(pairs) {
             var delegate = this.unwrap();
             var value = delegate.createSorting(P.boxAsJava(pairs));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Requeries the entity's data. Forses the entity to refresh its data, no matter if its parameters has changed or not.
+         * @param onSuccess The callback function for refresh data on success event (optional).
+         * @param onFailure The callback function for refresh data on failure event (optional).
+         * @method requery
+         * @memberOf ApplicationDbEntity
+         */
+        P.ApplicationDbEntity.prototype.requery = function(onSuccess, onFailure) {
+            var delegate = this.unwrap();
+            var value = delegate.requery(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
             return P.boxAsJs(value);
         };
 

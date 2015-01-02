@@ -362,23 +362,6 @@
              */
             P.ToolBar.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "opaque", {
-            get: function() {
-                var value = delegate.opaque;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.opaque = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ToolBar){
-            /**
-             * True if this component is completely opaque.
-             * @property opaque
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.opaque = true;
-        }
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
@@ -395,6 +378,23 @@
              * @memberOf ToolBar
              */
             P.ToolBar.prototype.visible = true;
+        }
+        Object.defineProperty(this, "opaque", {
+            get: function() {
+                var value = delegate.opaque;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.opaque = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ToolBar){
+            /**
+             * True if this component is completely opaque.
+             * @property opaque
+             * @memberOf ToolBar
+             */
+            P.ToolBar.prototype.opaque = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
@@ -751,17 +751,6 @@
         };
 
         /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf ToolBar
-         */
-        P.ToolBar.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Gets the container's n-th component.
          * @param index the component's index in the container
          * @return the child component
@@ -771,6 +760,17 @@
         P.ToolBar.prototype.child = function(index) {
             var delegate = this.unwrap();
             var value = delegate.child(P.boxAsJava(index));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Tries to acquire focus for this component.
+         * @method focus
+         * @memberOf ToolBar
+         */
+        P.ToolBar.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
             return P.boxAsJs(value);
         };
 

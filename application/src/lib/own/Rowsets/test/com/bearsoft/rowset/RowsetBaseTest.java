@@ -9,6 +9,7 @@ import com.bearsoft.rowset.events.RowsetDeleteEvent;
 import com.bearsoft.rowset.events.RowsetFilterEvent;
 import com.bearsoft.rowset.events.RowsetInsertEvent;
 import com.bearsoft.rowset.events.RowsetListener;
+import com.bearsoft.rowset.events.RowsetNetErrorEvent;
 import com.bearsoft.rowset.events.RowsetNextPageEvent;
 import com.bearsoft.rowset.events.RowsetRequeryEvent;
 import com.bearsoft.rowset.events.RowsetRollbackEvent;
@@ -289,6 +290,16 @@ public class RowsetBaseTest {
         @Override
         public void rowsetSorted(RowsetSortEvent event) {
             ++sorted;
+        }
+
+        @Override
+        public void beforeRequery(RowsetRequeryEvent event) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void rowsetNetError(RowsetNetErrorEvent event) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
     }
 }

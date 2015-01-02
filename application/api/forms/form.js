@@ -276,23 +276,6 @@
              */
             P.Form.prototype.resizable = true;
         }
-        Object.defineProperty(this, "onWindowRestored", {
-            get: function() {
-                var value = delegate.onWindowRestored;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onWindowRestored = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Form){
-            /**
-             * The handler function for the form's <i>after restore</i> event.
-             * @property onWindowRestored
-             * @memberOf Form
-             */
-            P.Form.prototype.onWindowRestored = {};
-        }
         Object.defineProperty(this, "formKey", {
             get: function() {
                 var value = delegate.formKey;
@@ -309,6 +292,23 @@
              * @memberOf Form
              */
             P.Form.prototype.formKey = '';
+        }
+        Object.defineProperty(this, "onWindowRestored", {
+            get: function() {
+                var value = delegate.onWindowRestored;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onWindowRestored = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Form){
+            /**
+             * The handler function for the form's <i>after restore</i> event.
+             * @property onWindowRestored
+             * @memberOf Form
+             */
+            P.Form.prototype.onWindowRestored = {};
         }
         Object.defineProperty(this, "maximized", {
             get: function() {
@@ -457,6 +457,18 @@
         };
 
         /**
+         * Shows the form as a dialog (modal window).
+         * @param callback a callback handler function
+         * @method showModal
+         * @memberOf Form
+         */
+        P.Form.prototype.showModal = function(callback) {
+            var delegate = this.unwrap();
+            var value = delegate.showModal(P.boxAsJava(callback));
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Shows the form as an ordinary window.
          * @method show
          * @memberOf Form
@@ -475,18 +487,6 @@
         P.Form.prototype.toFront = function() {
             var delegate = this.unwrap();
             var value = delegate.toFront();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Shows the form as a dialog (modal window).
-         * @param callback a callback handler function
-         * @method showModal
-         * @memberOf Form
-         */
-        P.Form.prototype.showModal = function(callback) {
-            var delegate = this.unwrap();
-            var value = delegate.showModal(P.boxAsJava(callback));
             return P.boxAsJs(value);
         };
 
