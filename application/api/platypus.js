@@ -31,6 +31,7 @@
     var RowClass = Java.type("com.bearsoft.rowset.Row");
     var FieldsClass = Java.type("com.bearsoft.rowset.metadata.Fields");
     var IDGeneratorClass = Java.type("com.bearsoft.rowset.utils.IDGenerator");
+    var PropertyChangeSupportClass = Java.type("java.beans.PropertyChangeSupport");
     var RowsetJSAdapterClass = Java.type("com.bearsoft.rowset.events.RowsetJSAdapter");
     var RowsComparatorClass = Java.type("com.bearsoft.rowset.sorting.RowsComparator");
     var ScriptTimerTaskClass = Java.type("com.eas.client.scripts.ScriptTimerTask");
@@ -765,7 +766,7 @@
         rowset.addRowsetListener(adapter);
         adapter.rowsetFiltered = function () {
             Array.prototype.splice.call(target, 0, target.length);
-            var rows = rowset.current;
+            var rows = rowset.getCurrent();
             for each (var aRow in rows) {
                 Array.prototype.push.call(target, EngineUtilsClass.unwrap(aRow.getPublished()));
             }
@@ -793,7 +794,7 @@
                 adapter.rowsetFiltered(null);
         };
         adapter.rowChanged = function (event) {
-            if (event.oldRowCount != event.newRowCount) {
+            if (event.oldRowCount !== event.newRowCount) {
                 adapter.rowsetFiltered(null);
             }
         };
@@ -977,8 +978,12 @@
                 if (!found.tag) {
                     var res = [];
                     for (var f = 0; f < found.size(); f++) {
-                        res.push(EngineUtilsClass.unwrap(found[f].getPublished()));
+                        res.push(EngineUtilsClass.unwrap(found[f].getRow().getPublished()));
                     }
+                    var changeSupport = new PropertyChangeSupportClass();
+                    res.unwrap = function () {
+                        return changeSupport;
+                    };
                     found.tag = res;
                 }
                 return found.tag;

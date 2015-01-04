@@ -4,8 +4,10 @@
  */
 package com.eas.client.forms.components.model;
 
+import static com.eas.client.forms.HasJsValue.JS_VALUE_JSDOC;
 import com.eas.client.forms.components.rt.HasEmptyText;
 import com.eas.client.forms.components.rt.VSpinner;
+import com.eas.design.Undesignable;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
@@ -13,12 +15,13 @@ import java.awt.BorderLayout;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.internal.runtime.JSType;
 
 /**
  *
  * @author mg
  */
-public class ModelSpin extends ModelComponentDecorator<VSpinner, Double> implements HasPublished, HasEmptyText{
+public class ModelSpin extends ModelComponentDecorator<VSpinner, Double> implements HasPublished, HasEmptyText {
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
@@ -30,7 +33,20 @@ public class ModelSpin extends ModelComponentDecorator<VSpinner, Double> impleme
         super();
         setDecorated(new VSpinner());
     }
-    
+
+    @ScriptFunction(name = "value", jsDoc = JS_VALUE_JSDOC)
+    @Undesignable
+    @Override
+    public Object getJsValue() {
+        return super.getJsValue();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setJsValue(Object aValue) {
+        setValue(aValue != null ? JSType.toNumber(aValue) : null);
+    }
+
     @Override
     public JSObject getPublished() {
         if (published == null) {
@@ -121,7 +137,7 @@ public class ModelSpin extends ModelComponentDecorator<VSpinner, Double> impleme
     public String getText() {
         return decorated.getText();
     }
-    
+
     @ScriptFunction
     public void setText(String aValue) throws Exception {
         decorated.setText(aValue);

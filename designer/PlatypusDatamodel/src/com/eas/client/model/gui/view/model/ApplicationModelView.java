@@ -43,6 +43,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.Icon;
 import javax.swing.JFrame;
 import javax.swing.KeyStroke;
@@ -102,7 +104,11 @@ public class ApplicationModelView extends ModelView<ApplicationDbEntity, Applica
     @Override
     protected EntityView<ApplicationDbEntity> createGenericEntityView(ApplicationDbEntity aEntity) throws Exception {
         if (aEntity.getQueryName() != null && !aEntity.getQueryName().isEmpty()) {
-            model.getQueries().getQuery(aEntity.getQueryName(), null, null);
+            try {
+                model.getQueries().getQuery(aEntity.getQueryName(), null, null);
+            } catch (Exception ex) {
+                Logger.getLogger(ApplicationModelView.class.getName()).log(Level.WARNING, ex.getMessage());
+            }
         }
         aEntity.validateQuery();
         return new ApplicationEntityView(aEntity, entitiesViewsMover);

@@ -8,6 +8,8 @@ import com.eas.client.forms.HasChildren;
 import com.eas.client.forms.HasComponentEvents;
 import com.eas.client.forms.components.rt.HasGroup;
 import com.eas.client.forms.HasJsName;
+import com.eas.client.forms.HasJsValue;
+import static com.eas.client.forms.HasJsValue.JS_VALUE_JSDOC;
 import com.eas.client.forms.Widget;
 import com.eas.client.forms.containers.ButtonGroup;
 import com.eas.client.forms.events.ActionEvent;
@@ -31,12 +33,13 @@ import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.internal.runtime.JSType;
 
 /**
  *
  * @author mg
  */
-public class RadioMenuItem extends VRadioButtonMenuItem implements HasPublished, HasComponentEvents, HasGroup, HasJsName, Widget {
+public class RadioMenuItem extends VRadioButtonMenuItem implements HasJsValue, HasPublished, HasComponentEvents, HasGroup, HasJsName, Widget {
 
     protected ButtonGroup group;
 
@@ -66,7 +69,19 @@ public class RadioMenuItem extends VRadioButtonMenuItem implements HasPublished,
         this(null, false);
     }
 
-    @ScriptFunction(jsDoc = VALUE_JSDOC)
+    @ScriptFunction(name = "value", jsDoc = JS_VALUE_JSDOC)
+    @Undesignable
+    @Override
+    public Object getJsValue() {
+        return super.getValue();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setJsValue(Object aValue) {
+        setValue(aValue != null ? JSType.toBoolean(aValue) : null);
+    }
+
     @Override
     public Boolean getValue() {
         return super.getValue();

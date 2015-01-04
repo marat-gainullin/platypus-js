@@ -11,6 +11,7 @@ import com.eas.design.Undesignable;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import com.eas.script.ScriptUtils;
 import java.awt.BorderLayout;
 import java.text.ParseException;
 import javax.swing.JLabel;
@@ -39,6 +40,19 @@ public class ModelFormattedField extends ModelComponentDecorator<VFormattedField
             }
         });
         setBackground(getDecorated().getBackground());
+    }
+
+    @ScriptFunction(name = "value", jsDoc = JS_VALUE_JSDOC)
+    @Undesignable
+    @Override
+    public Object getJsValue() {
+        return super.getJsValue();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setJsValue(Object aValue) {
+        setValue(ScriptUtils.toJava(aValue));
     }
 
     @Override
@@ -111,15 +125,15 @@ public class ModelFormattedField extends ModelComponentDecorator<VFormattedField
             + "/**\n"
             + " * ValueType hint for the field. It is used to determine, how to interpret format pattern.\n"
             + " */")
-    public int getValueType(){
+    public int getValueType() {
         return decorated.getValueType();
     }
-    
+
     @ScriptFunction
-    public void setValueType(int aValue){
+    public void setValueType(int aValue) {
         decorated.setValueType(aValue);
     }
-    
+
     @ScriptFunction
     public String getText() throws Exception {
         return decorated.getText();
@@ -141,7 +155,7 @@ public class ModelFormattedField extends ModelComponentDecorator<VFormattedField
     public void setEmptyText(String aValue) {
         decorated.setEmptyText(aValue);
     }
-    
+
     @Override
     protected void setupCellRenderer(JTable table, int row, int column, boolean isSelected) {
         remove(decorated);

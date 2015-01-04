@@ -190,15 +190,13 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     // Find and positioning interface
     private static final String FIND_JSDOC = ""
             + "/**\n"
-            + "* Finds rows using field - value pairs.\n"
-            + "* @param pairs the search conditions pairs, if a form of key-values pairs, where the key is the property object (e.g. entity.schema.propName or just a prop name in a string form) and the value for this property.\n"
-            + "* @return the rows object's array accordind to the search condition or empty array if nothing is found.\n"
-            + "*/";
-
-    protected List<Row> emptyFoundResults = new TaggedList<>();
+            + " * Finds rows using field - value pairs.\n"
+            + " * @param pairs the search conditions pairs, if a form of key-values pairs, where the key is the property object (e.g. entity.schema.propName or just a prop name in a string form) and the value for this property.\n"
+            + " * @return the rows object's array accordind to the search condition or empty array if nothing is found.\n"
+            + " */";
 
     @ScriptFunction(jsDoc = FIND_JSDOC, params = {"pairs"})
-    public List<Row> find(Object... values) throws Exception {
+    public List<RowWrap> find(Object... values) throws Exception {
         if (values != null) {
             values = ScriptUtils.jsObjectToCriteria(values);
             if (values.length > 0 && values.length % 2 == 0) {
@@ -232,17 +230,9 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
                 if (!constraints.isEmpty() && constraints.size() == keyValues.size()) {
                     Locator loc = checkUserLocator(constraints);
                     if (loc.find(keyValues.toArray())) {
-                        TaggedList<RowWrap> subSet = loc.getSubSet();
-                        if (subSet.tag == null) {
-                            List<Row> found = new TaggedList<>();
-                            subSet.stream().forEach((rw) -> {
-                                found.add(rw.getRow());
-                            });
-                            subSet.tag = found;
-                        }
-                        return (TaggedList<Row>) subSet.tag;
+                        return loc.getSubSet();
                     } else {
-                        return emptyFoundResults;
+                        return new TaggedList<>();
                     }
                 }
             } else {
@@ -267,9 +257,9 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         Fields fields = rs.getFields();
         List<Field> pks = fields.getPrimaryKeys();
         if (pks.size() == 1) {
-            List<Row> res = find(pks.get(0), aValue);
+            List<RowWrap> res = find(pks.get(0), aValue);
             if (res != null && !res.isEmpty()) {
-                return res.get(0);
+                return res.get(0).getRow();
             } else {
                 return null;
             }

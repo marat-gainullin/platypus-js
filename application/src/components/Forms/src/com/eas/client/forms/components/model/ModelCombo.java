@@ -4,10 +4,12 @@
  */
 package com.eas.client.forms.components.model;
 
+import static com.eas.client.forms.HasJsValue.JS_VALUE_JSDOC;
 import com.eas.client.forms.components.rt.HasEditable;
 import com.eas.client.forms.components.rt.HasEmptyText;
 import com.eas.client.forms.components.rt.VComboBox;
 import com.eas.design.Designable;
+import com.eas.design.Undesignable;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
@@ -35,6 +37,19 @@ public class ModelCombo extends ModelComponentDecorator<VComboBox, Object> imple
     public ModelCombo() {
         super();
         setDecorated(new VComboBox());
+    }
+
+    @ScriptFunction(name = "value", jsDoc = JS_VALUE_JSDOC)
+    @Undesignable
+    @Override
+    public Object getJsValue() {
+        return super.getJsValue();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setJsValue(Object aValue) {
+        setValue(aValue);
     }
 
     @Override

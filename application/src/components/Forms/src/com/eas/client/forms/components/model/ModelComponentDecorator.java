@@ -70,6 +70,7 @@ import javax.swing.event.ChangeEvent;
 import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.ScriptUtils;
+import jdk.nashorn.internal.runtime.Undefined;
 
 /*
  === from setValueToRowset ===
@@ -675,7 +676,8 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
                             if (jsEvt.hasMember("newValue")) {
                                 settingValueFromJs = true;
                                 try {
-                                    setJsValue(jsEvt.getMember("newValue"));
+                                    Object newValue = jsEvt.getMember("newValue");
+                                    setJsValue(newValue instanceof Undefined ? null : newValue);
                                 } finally {
                                     settingValueFromJs = false;
                                 }
@@ -759,7 +761,6 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         return getValue();
     }
 
-    @ScriptFunction(jsDoc = VALUE_JSDOC)
     @Undesignable
     @Override
     public V getValue() {
@@ -780,7 +781,13 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         }
     }
 
-    protected abstract void setJsValue(Object aValue);
+    @Override
+    public Object getJsValue() {
+        return com.eas.script.ScriptUtils.toJs(getValue());
+    }
+
+    @Override
+    public abstract void setJsValue(Object aValue);
 
     @Override
     public void addValueChangeListener(PropertyChangeListener listener) {

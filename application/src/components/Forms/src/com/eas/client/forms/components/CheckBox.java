@@ -7,6 +7,7 @@ package com.eas.client.forms.components;
 import com.eas.client.forms.Forms;
 import com.eas.client.forms.HasComponentEvents;
 import com.eas.client.forms.HasJsName;
+import com.eas.client.forms.HasJsValue;
 import com.eas.client.forms.HasOnValueChange;
 import static com.eas.client.forms.HasOnValueChange.ON_VALUE_CHANED_JSDOC;
 import com.eas.client.forms.Widget;
@@ -31,12 +32,13 @@ import java.awt.event.KeyEvent;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.internal.runtime.JSType;
 
 /**
  *
  * @author mg
  */
-public class CheckBox extends VCheckBox implements HasOnValueChange, HasPublished, HasComponentEvents, HasJsName, Widget {
+public class CheckBox extends VCheckBox implements HasOnValueChange, HasJsValue, HasPublished, HasComponentEvents, HasJsName, Widget {
 
     public CheckBox(String aText, boolean aSelected) {
         this(aText, aSelected, null);
@@ -65,7 +67,19 @@ public class CheckBox extends VCheckBox implements HasOnValueChange, HasPublishe
         this(null, false);
     }
 
-    @ScriptFunction(jsDoc = VALUE_JSDOC)
+    @ScriptFunction(name = "value", jsDoc = JS_VALUE_JSDOC)
+    @Undesignable
+    @Override
+    public Object getJsValue() {
+        return super.getValue();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setJsValue(Object aValue) {
+        setValue(aValue != null ? JSType.toBoolean(aValue) : null);
+    }
+
     @Undesignable
     @Override
     public Boolean getValue() {

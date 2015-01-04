@@ -8,8 +8,9 @@ import com.eas.client.forms.Forms;
 import com.eas.client.forms.HasComponentEvents;
 import com.eas.client.forms.components.rt.HasGroup;
 import com.eas.client.forms.HasJsName;
+import com.eas.client.forms.HasJsValue;
+import static com.eas.client.forms.HasJsValue.JS_VALUE_JSDOC;
 import com.eas.client.forms.HasOnValueChange;
-import static com.eas.client.forms.HasOnValueChange.ON_VALUE_CHANED_JSDOC;
 import com.eas.client.forms.Widget;
 import com.eas.client.forms.containers.ButtonGroup;
 import com.eas.client.forms.events.ActionEvent;
@@ -34,12 +35,13 @@ import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.internal.runtime.JSType;
 
 /**
  *
  * @author mg
  */
-public class ToggleButton extends VToggleButton implements HasOnValueChange, HasPublished, HasComponentEvents, HasGroup, HasJsName, Widget {
+public class ToggleButton extends VToggleButton implements HasOnValueChange, HasJsValue, HasPublished, HasComponentEvents, HasGroup, HasJsName, Widget {
 
     protected ButtonGroup group;
 
@@ -83,7 +85,19 @@ public class ToggleButton extends VToggleButton implements HasOnValueChange, Has
         this(null, null, false, 4);
     }
 
-    @ScriptFunction(jsDoc = VALUE_JSDOC)
+    @ScriptFunction(name = "value", jsDoc = JS_VALUE_JSDOC)
+    @Undesignable
+    @Override
+    public Object getJsValue() {
+        return super.getValue();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setJsValue(Object aValue) {
+        setValue(aValue != null ? JSType.toBoolean(aValue) : null);
+    }
+
     @Undesignable
     @Override
     public Boolean getValue() {

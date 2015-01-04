@@ -4,12 +4,15 @@
  */
 package com.eas.client.forms.components.model;
 
+import static com.eas.client.forms.HasJsValue.JS_VALUE_JSDOC;
 import com.eas.client.forms.components.rt.VCheckBox;
+import com.eas.design.Undesignable;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import javax.swing.JTable;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.internal.runtime.JSType;
 
 /**
  *
@@ -51,6 +54,19 @@ public class ModelCheckBox extends ModelComponentDecorator<VCheckBox, Boolean> i
 
     public static void setPublisher(JSObject aPublisher) {
         publisher = aPublisher;
+    }
+
+    @ScriptFunction(name = "value", jsDoc = JS_VALUE_JSDOC)
+    @Undesignable
+    @Override
+    public Object getJsValue() {
+        return super.getJsValue();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setJsValue(Object aValue) {
+        setValue(aValue != null ? JSType.toBoolean(aValue) : null);
     }
 
     @Override

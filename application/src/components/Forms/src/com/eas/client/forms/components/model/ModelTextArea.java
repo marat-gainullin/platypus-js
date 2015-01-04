@@ -4,9 +4,11 @@
  */
 package com.eas.client.forms.components.model;
 
+import static com.eas.client.forms.HasJsValue.JS_VALUE_JSDOC;
 import com.eas.client.forms.components.rt.HasEditable;
 import com.eas.client.forms.components.rt.HasEmptyText;
 import com.eas.client.forms.components.rt.VTextArea;
+import com.eas.design.Undesignable;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
@@ -14,19 +16,17 @@ import java.awt.BorderLayout;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.internal.runtime.JSType;
 
 /**
  *
  * @author mg
- *       
- *      if(aValue instanceof Number){
-            Number n = (Number)aValue;
-            DecimalFormat df = new DecimalFormat("#.#");
-            aValue = df.format(n.doubleValue());
-        }
-
+ *
+ * if(aValue instanceof Number){ Number n = (Number)aValue; DecimalFormat df =
+ * new DecimalFormat("#.#"); aValue = df.format(n.doubleValue()); }
+ *
  */
-public class ModelTextArea extends ModelComponentDecorator<VTextArea, String> implements HasPublished, HasEmptyText, HasEditable{
+public class ModelTextArea extends ModelComponentDecorator<VTextArea, String> implements HasPublished, HasEmptyText, HasEditable {
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
@@ -38,6 +38,19 @@ public class ModelTextArea extends ModelComponentDecorator<VTextArea, String> im
         super();
         setDecorated(new VTextArea());
         setBackground(getDecorated().getBackground());
+    }
+
+    @ScriptFunction(name = "value", jsDoc = JS_VALUE_JSDOC)
+    @Undesignable
+    @Override
+    public Object getJsValue() {
+        return super.getJsValue();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setJsValue(Object aValue) {
+        setValue(aValue != null ? JSType.toString(aValue) : null);
     }
 
     @Override

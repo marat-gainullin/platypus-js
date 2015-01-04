@@ -8,6 +8,8 @@ import com.eas.client.forms.Forms;
 import com.eas.client.forms.HasComponentEvents;
 import com.eas.client.forms.components.rt.HasEmptyText;
 import com.eas.client.forms.HasJsName;
+import com.eas.client.forms.HasJsValue;
+import static com.eas.client.forms.HasJsValue.JS_VALUE_JSDOC;
 import com.eas.client.forms.HasOnValueChange;
 import com.eas.client.forms.Widget;
 import com.eas.client.forms.events.ActionEvent;
@@ -37,7 +39,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class FormattedField extends VFormattedField implements HasOnValueChange, HasPublished, HasComponentEvents, HasEmptyText, HasJsName, Widget {
+public class FormattedField extends VFormattedField implements HasOnValueChange, HasJsValue, HasPublished, HasComponentEvents, HasEmptyText, HasJsName, Widget {
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
@@ -329,14 +331,25 @@ public class FormattedField extends VFormattedField implements HasOnValueChange,
         super.setText(aValue);
     }
 
-    @ScriptFunction(jsDoc = VALUE_JSDOC)
+    @ScriptFunction(name = "value", jsDoc = JS_VALUE_JSDOC)
+    @Undesignable
+    @Override
+    public Object getJsValue() {
+        return ScriptUtils.toJs(super.getValue());
+    }
+
+    @ScriptFunction
+    @Override
+    public void setJsValue(Object aValue) {
+        setValue(ScriptUtils.toJava(aValue));
+    }
+
     @Undesignable
     @Override
     public Object getValue() {
         return super.getValue();
     }
 
-    @ScriptFunction
     @Override
     public void setValue(Object aValue) {
         super.setValue(ScriptUtils.toJava(aValue));

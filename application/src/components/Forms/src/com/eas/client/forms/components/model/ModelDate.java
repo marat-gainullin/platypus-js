@@ -4,9 +4,11 @@
  */
 package com.eas.client.forms.components.model;
 
+import static com.eas.client.forms.HasJsValue.JS_VALUE_JSDOC;
 import com.eas.client.forms.components.rt.HasEditable;
 import com.eas.client.forms.components.rt.HasEmptyText;
 import com.eas.client.forms.components.rt.VDateTimeField;
+import com.eas.design.Undesignable;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
@@ -15,6 +17,7 @@ import java.util.Date;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.internal.runtime.JSType;
 
 /**
  *
@@ -31,6 +34,19 @@ public class ModelDate extends ModelComponentDecorator<VDateTimeField, Date> imp
     public ModelDate() {
         super();
         setDecorated(new VDateTimeField());
+    }
+
+    @ScriptFunction(name = "value", jsDoc = JS_VALUE_JSDOC)
+    @Undesignable
+    @Override
+    public Object getJsValue() {
+        return super.getJsValue();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setJsValue(Object aValue) {
+        setValue(aValue != null ? new Date(JSType.toLong(aValue)) : null);
     }
 
     @Override

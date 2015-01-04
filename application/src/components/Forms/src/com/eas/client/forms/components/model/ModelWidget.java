@@ -4,6 +4,7 @@
  */
 package com.eas.client.forms.components.model;
 
+import com.eas.client.forms.HasJsValue;
 import com.eas.client.forms.components.rt.HasValue;
 import com.eas.script.ScriptUtils;
 import java.util.logging.Level;
@@ -19,7 +20,7 @@ import jdk.nashorn.api.scripting.JSObject;
  * @param <V>
  * @author mg
  */
-public interface ModelWidget<V> extends TableCellRenderer, TableCellEditor, HasValue<V> {
+public interface ModelWidget<V> extends TableCellRenderer, TableCellEditor, HasValue<V>, HasJsValue {
 
     public static Object getPathData(JSObject anElement, String aPath) {
         if (aPath != null && !aPath.isEmpty()) {
