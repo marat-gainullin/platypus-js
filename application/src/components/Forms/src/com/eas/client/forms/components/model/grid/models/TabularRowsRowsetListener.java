@@ -44,7 +44,7 @@ public class TabularRowsRowsetListener extends RowsetAdapter {
             model.fireElementDeleted(rowset.getCursorPos() - 1);
         }
     }
-
+/*
     @Override
     public void rowChanged(RowChangeEvent event) {
         if (event.getNewRowCount() != event.getOldRowCount()) {
@@ -54,7 +54,7 @@ public class TabularRowsRowsetListener extends RowsetAdapter {
             model.fireElementsFieldChanged(field.getName());
         }
     }
-
+*/
     @Override
     public void rowsetFiltered(RowsetFilterEvent event) {
         model.fireElementsChanged();

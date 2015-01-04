@@ -92,9 +92,9 @@ public class RowsetAdapter implements RowsetListener {
     public void rowInserted(RowsetInsertEvent event) {
     }
 
-    @Override
-    public void rowChanged(RowChangeEvent event) {
-    }
+//    @Override
+//    public void rowChanged(RowChangeEvent event) {
+//    }
 
     @Override
     public void rowDeleted(RowsetDeleteEvent event) {

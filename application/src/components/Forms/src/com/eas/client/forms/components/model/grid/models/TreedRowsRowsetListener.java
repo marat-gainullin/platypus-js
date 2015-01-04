@@ -38,13 +38,13 @@ public class TreedRowsRowsetListener extends RowsetAdapter {
     public Rowset getRowset() {
         return rowset;
     }
-
+/*
     @Override
     public void rowChanged(RowChangeEvent event) {
         Field field = event.getChangedRow().getFields().get(event.getFieldIndex());
         model.fireElementsChanged(event.getChangedRow().getPublished(), field.getName(), false);
     }
-
+*/
     @Override
     public void rowDeleted(RowsetDeleteEvent event) {
         if (!event.isAjusting()) {

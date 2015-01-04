@@ -1557,7 +1557,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         }
         return res;
     }
-
+/*
     @Override
     public void rowChanged(final RowChangeEvent aEvent) {
         try {
@@ -1573,7 +1573,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
             Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+*/
     @Override
     public boolean willInsertRow(final RowsetInsertEvent event) {
         boolean res = true;

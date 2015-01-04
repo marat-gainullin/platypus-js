@@ -18,12 +18,12 @@ public class RowsetJSAdapter extends RowsetAdapter implements RowsetEventsEarlyA
     public JSObject rowInserted;
     public JSObject rowChanged;
     public JSObject rowDeleted;
-
+/*
     @Override
     public void rowChanged(RowChangeEvent event) {
         executeEvent(rowChanged, event);
     }
-
+*/
     @Override
     public void rowInserted(RowsetInsertEvent event) {
         executeEvent(rowInserted, event);

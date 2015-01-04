@@ -460,10 +460,11 @@ public class RowsetChangeSupport {
      * @throws InvalidColIndexException
      * @throws InvalidCursorPositionException
      */
+    /*
     public void fireRowChangedEvent(Row aChangedRow, int aFieldIndex, Object aOldValue) throws InvalidColIndexException, InvalidCursorPositionException {
         fireRowChangedEvent(aChangedRow, aFieldIndex, aOldValue, aChangedRow.getColumnObject(aFieldIndex));
     }
-
+*/
     /**
      * Fires rowChangedEvent event to all registered listeners.
      *
@@ -474,6 +475,7 @@ public class RowsetChangeSupport {
      * @throws InvalidColIndexException
      * @throws InvalidCursorPositionException
      */
+    /*
     public void fireRowChangedEvent(Row aChangedRow, int aFieldIndex, Object aOldValue, Object aNewValue) throws InvalidColIndexException, InvalidCursorPositionException {
         if (rowsetListeners != null) {
             RowChangeEvent event = new RowChangeEvent(source, aChangedRow, aFieldIndex, aOldValue, aNewValue, RowsetEventMoment.AFTER);
@@ -482,7 +484,7 @@ public class RowsetChangeSupport {
             });
         }
     }
-
+*/
     public void fireNetErrorEvent(Exception anErrorCause) {
         if (rowsetListeners != null) {
             RowsetNetErrorEvent event = new RowsetNetErrorEvent(source, anErrorCause);

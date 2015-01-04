@@ -189,8 +189,8 @@ public interface RowsetListener {
      * @param event a <code>RowsetEvent</code> object that contains        the <code>Rowset</code> object that is the source of the
      * event
      */
-    @Designable(displayName="onChanged", description="After each object change event")
-    public void rowChanged(RowChangeEvent event);
+    //@Designable(displayName="onChanged", description="After each object change event")
+    //public void rowChanged(RowChangeEvent event);
 
     /**
      * Notifies registered listeners that a row has beeen deleted from the

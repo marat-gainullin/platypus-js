@@ -113,21 +113,14 @@
             if (target.addPropertyChangeListener) {
                 var adapter = new PAdapterClass(aListener);
                 target.addPropertyChangeListener(aPropName, adapter);
-                return adapter;
+                return function () {
+                    target.removePropertyChangeListener(aPropName, adapter);
+                };
             }
         }
         return null;
     }
-
-    function unsubscribe(aData, aListener, aPropName) {
-        if (aData.unwrap) {
-            var target = aData.unwrap();
-            if (target.removePropertyChangeListener) {
-                target.removePropertyChangeListener(aPropName, aListener);
-            }
-        }
-    }
-
+    
     function listen(aTarget, aPath, aListener) {
         var subscribed = [];
         function listenPath() {
@@ -138,14 +131,14 @@
                 var propName = path[i];
                 var listener = i === path.length - 1 ? aListener : function (evt) {
                     subscribed.forEach(function (aEntry) {
-                        unsubscribe(aEntry.target, aEntry.subscribed, aEntry.propName);
+                        aEntry();
                     });
                     listenPath();
                     aListener(evt);
                 };
                 var cookie = subscribe(data, listener, propName);
                 if (cookie) {
-                    subscribed.push({'target': data, 'subscribed': cookie, 'propName': propName});
+                    subscribed.push(cookie);
                     if (data[propName])
                         data = data[propName];
                     else
@@ -161,7 +154,7 @@
         return {
             unlisten: function () {
                 subscribed.forEach(function (aEntry) {
-                    unsubscribe(aEntry.target, aEntry.subscribed);
+                    aEntry();
                 });
             }
         };

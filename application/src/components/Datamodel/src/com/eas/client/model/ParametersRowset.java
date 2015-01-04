@@ -35,11 +35,11 @@ public class ParametersRowset extends Rowset {
         public boolean setColumnObject(int aColIndex, Object aColValue) throws RowsetException {
             if (!smartEquals(getColumnObject(aColIndex), aColValue)) {
                 Object oldColValue = getColumnObject(aColIndex);
-                if (ParametersRowset.this.rowsetChangeSupport.fireWillChangeEvent(ParametersRowWrapper.this, aColIndex, oldColValue, aColValue)) {
+                //if (ParametersRowset.this.rowsetChangeSupport.fireWillChangeEvent(ParametersRowWrapper.this, aColIndex, oldColValue, aColValue)) {
                     params.get(aColIndex).setValue(aColValue);
-                    ParametersRowset.this.rowsetChangeSupport.fireRowChangedEvent(ParametersRowWrapper.this, aColIndex, oldColValue);
+                    //ParametersRowset.this.rowsetChangeSupport.fireRowChangedEvent(ParametersRowWrapper.this, aColIndex, oldColValue);
                     return true;
-                }
+                //}
             }
             return false;
         }
@@ -108,11 +108,11 @@ public class ParametersRowset extends Rowset {
             }
             Object oldValue = param.getValue();
             if (!Row.smartEquals(oldValue, aValue)) {
-                if (rowsetChangeSupport.fireWillChangeEvent(paramRow, aColIndex, oldValue, aValue)) {
+//                if (rowsetChangeSupport.fireWillChangeEvent(paramRow, aColIndex, oldValue, aValue)) {
                     params.get(aColIndex).setValue(aValue);
-                    rowsetChangeSupport.fireRowChangedEvent(paramRow, aColIndex, oldValue);
+//                    rowsetChangeSupport.fireRowChangedEvent(paramRow, aColIndex, oldValue);
                     return true;
-                }
+//                }
             }
         }
         return false;
