@@ -9,7 +9,6 @@ import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.RowsetContainer;
 import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.dataflow.DelegatingFlowProvider;
 import com.bearsoft.rowset.events.*;
 import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
@@ -198,7 +197,8 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     @ScriptFunction(jsDoc = FIND_JSDOC, params = {"pairs"})
     public List<RowWrap> find(Object... values) throws Exception {
         if (values != null) {
-            values = ScriptUtils.jsObjectToCriteria(values);
+            Object[] jsCriteria = values.length == 1 ? ScriptUtils.jsObjectToCriteria(values[0]) : null;
+            values = jsCriteria != null ? jsCriteria : values;
             if (values.length > 0 && values.length % 2 == 0) {
                 Fields fields = rowset.getFields();
                 Converter converter = rowset.getConverter();
@@ -1149,27 +1149,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
             assert pending != null || (aOnSuccess == null && model.process == null);
             // filtering will be done while processing onRequeried event in ApplicationEntity code
         }
-    }
-
-    protected void unforwardChangeLog() {
-        if (rowset != null && rowset.getFlowProvider() instanceof DelegatingFlowProvider) {
-            DelegatingFlowProvider dfp = (DelegatingFlowProvider) rowset.getFlowProvider();
-            rowset.setFlowProvider(dfp.getDelegate());
-        }
-    }
-
-    protected void forwardChangeLog() {
-        rowset.setFlowProvider(new DelegatingFlowProvider(rowset.getFlowProvider()) {
-            @Override
-            public List<Change> getChangeLog() {
-                try {
-                    return ApplicationEntity.this.getChangeLog();
-                } catch (Exception ex) {
-                    Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
-                    return null;
-                }
-            }
-        });
     }
 
     protected void uninstallUserFiltering() throws RowsetException {

@@ -174,7 +174,7 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
         Rowset oldRowset = rowset;
         if (rowset != null) {
             rowset.removeRowsetListener(this);
-            unforwardChangeLog();
+            rowset.setLog(null);
             rowset = null;
         }
         if (query != null) {
@@ -188,7 +188,7 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
                     resolver.resolve2Application(field);
                 });
             }
-            forwardChangeLog();
+            rowset.setLog(getChangeLog());
             rowset.addRowsetListener(this);
             changeSupport.firePropertyChange("rowset", oldRowset, rowset);
         }

@@ -712,7 +712,7 @@ public class ResultSetImplTest extends RowsetBaseTest {
         rs.getFields().get(8).setTypeInfo(DataTypeInfo.BLOB);
         rs.beforeFirst();
         while (rs.next()) {
-            rs.updateObject(8, blob);
+            rs.getCurrentRow().setColumnObject(8, blob);
         }
         ResultSet jdbcRs = new ResultSetImpl(rs, new RowsetConverter());
         ResultSetMetaData jdbcMd = jdbcRs.getMetaData();
@@ -744,9 +744,8 @@ public class ResultSetImplTest extends RowsetBaseTest {
         rs.getFields().get(8).setTypeInfo(DataTypeInfo.BLOB);
         rs.beforeFirst();
         while (rs.next()) {
-            rs.updateObject(8, blob);
+            rs.getCurrentRow().setColumnObject(8, blob);
         }
-
         ResultSet jdbcRs = new ResultSetImpl(rs, new RowsetConverter());
         ResultSetMetaData jdbcMd = jdbcRs.getMetaData();
         assertTrue(jdbcRs.isWrapperFor(Rowset.class));

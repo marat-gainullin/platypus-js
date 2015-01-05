@@ -1,8 +1,10 @@
 package com.bearsoft.rowset;
 
+import com.bearsoft.rowset.dataflow.FlowBaseTest;
 import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
 import com.bearsoft.rowset.exceptions.RowsetException;
+import javax.sql.DataSource;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -37,7 +39,7 @@ public class RowsetTest extends RowsetBaseTest{
     @Test
     public void testInsert() throws InvalidColIndexException, InvalidCursorPositionException, RowsetException {
         System.out.println("testInsert");
-        Rowset rowset = new Rowset(fields);
+        Rowset rowset = initRowset();
         // initial filling tests
         assertTrue(rowset.isEmpty());
         fillInRowset(rowset);
@@ -63,7 +65,7 @@ public class RowsetTest extends RowsetBaseTest{
     @Test
     public void testScroll1forward() throws InvalidCursorPositionException, InvalidColIndexException, RowsetException {
         System.out.println("testScroll1forward");
-        Rowset rowset = new Rowset(fields);
+        Rowset rowset = initRowset();
         // initial filling tests
         assertTrue(rowset.isEmpty());
         fillInRowset(rowset);
@@ -91,7 +93,7 @@ public class RowsetTest extends RowsetBaseTest{
     @Test
     public void testScroll2forward() throws InvalidCursorPositionException, InvalidColIndexException, RowsetException {
         System.out.println("testScroll2forward");
-        Rowset rowset = new Rowset(fields);
+        Rowset rowset = initRowset();
         // initial filling tests
         assertTrue(rowset.isEmpty());
         fillInRowset(rowset);
@@ -118,7 +120,7 @@ public class RowsetTest extends RowsetBaseTest{
     @Test
     public void testScroll3forward() throws InvalidCursorPositionException, InvalidColIndexException, RowsetException {
         System.out.println("testScroll3forward");
-        Rowset rowset = new Rowset(fields);
+        Rowset rowset = initRowset();
         // initial filling tests
         assertTrue(rowset.isEmpty());
         fillInRowset(rowset);
@@ -145,7 +147,7 @@ public class RowsetTest extends RowsetBaseTest{
     @Test
     public void testScroll1backward() throws InvalidCursorPositionException, InvalidColIndexException, RowsetException {
         System.out.println("testScroll1backward");
-        Rowset rowset = new Rowset(fields);
+        Rowset rowset = initRowset();
         // initial filling tests
         assertTrue(rowset.isEmpty());
         fillInRowset(rowset);
@@ -173,7 +175,7 @@ public class RowsetTest extends RowsetBaseTest{
     @Test
     public void testScroll2backward() throws InvalidCursorPositionException, InvalidColIndexException, RowsetException {
         System.out.println("testScroll2backward");
-        Rowset rowset = new Rowset(fields);
+        Rowset rowset = initRowset();
         // initial filling tests
         assertTrue(rowset.isEmpty());
         fillInRowset(rowset);
@@ -200,7 +202,7 @@ public class RowsetTest extends RowsetBaseTest{
     @Test
     public void testScroll3backward() throws InvalidCursorPositionException, InvalidColIndexException, RowsetException {
         System.out.println("testScroll3backward");
-        Rowset rowset = new Rowset(fields);
+        Rowset rowset = initRowset();
         // initial filling tests
         assertTrue(rowset.isEmpty());
         fillInRowset(rowset);
@@ -227,7 +229,7 @@ public class RowsetTest extends RowsetBaseTest{
     @Test
     public void testDeleteAllRows() throws InvalidCursorPositionException, InvalidColIndexException, RowsetException {
         System.out.println("testDeleteAllRows");
-        Rowset rowset = new Rowset(fields);
+        Rowset rowset = initRowset();
         // initial filling tests
         assertTrue(rowset.isEmpty());
         fillInRowset(rowset);
@@ -254,7 +256,7 @@ public class RowsetTest extends RowsetBaseTest{
     @Test
     public void testDeletePartial() throws InvalidCursorPositionException, InvalidColIndexException, RowsetException {
         System.out.println("testDeletePartial");
-        Rowset rowset = new Rowset(fields);
+        Rowset rowset = initRowset();
         // initial filling tests
         assertTrue(rowset.isEmpty());
         fillInRowset(rowset);
@@ -304,7 +306,7 @@ public class RowsetTest extends RowsetBaseTest{
     @Test
     public void testUpdate() throws InvalidCursorPositionException, InvalidColIndexException, RowsetException {
         System.out.println("testUpdate");
-        Rowset rowset = new Rowset(fields);
+        Rowset rowset = initRowset();
         // initial filling tests
         assertTrue(rowset.isEmpty());
         fillInRowset(rowset);
@@ -317,7 +319,7 @@ public class RowsetTest extends RowsetBaseTest{
         rowset.beforeFirst();
         int recIndex = 0;
         while (rowset.next()) {
-            rowset.updateObject(field2Update, testData[recIndex][fieldFromUpdate - 1]);
+            rowset.getCurrentRow().setColumnObject(field2Update, testData[recIndex][fieldFromUpdate - 1]);
             recIndex++;
         }
         // check if data is updated
@@ -334,7 +336,7 @@ public class RowsetTest extends RowsetBaseTest{
         rowset.beforeFirst();
         recIndex = 0;
         while (rowset.next()) {
-            rowset.updateObject(field2Update, testData[recIndex][fieldFromUpdate - 1]);
+            rowset.getCurrentRow().setColumnObject(field2Update, testData[recIndex][fieldFromUpdate - 1]);
             recIndex++;
         }
         // check if data is updated
@@ -373,7 +375,7 @@ public class RowsetTest extends RowsetBaseTest{
     @Test
     public void unconvertableUpdateTest() throws InvalidCursorPositionException, InvalidColIndexException, RowsetException {
         System.out.println("unconvertableUpdateTest");
-        Rowset rowset = new Rowset(fields);
+        Rowset rowset = initRowset();
         // initial filling tests
         assertTrue(rowset.isEmpty());
         fillInRowset(rowset);
@@ -386,7 +388,7 @@ public class RowsetTest extends RowsetBaseTest{
         rowset.beforeFirst();
         int recIndex = 0;
         while (rowset.next()) {
-            rowset.updateObject(field2Update, testData[recIndex][fieldFromUpdate - 1]);
+            rowset.getCurrentRow().setColumnObject(field2Update, testData[recIndex][fieldFromUpdate - 1]);
             recIndex++;
         }
         // check if data is not updated, because of incompatible values types

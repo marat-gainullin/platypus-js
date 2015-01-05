@@ -4,6 +4,8 @@
  */
 package com.bearsoft.rowset;
 
+import com.bearsoft.rowset.dataflow.FlowBaseTest.JdbcFlowProviderAdapter;
+import com.bearsoft.rowset.dataflow.FlowBaseTest.ObservingResourcesProvider;
 import com.bearsoft.rowset.events.RowChangeEvent;
 import com.bearsoft.rowset.events.RowsetDeleteEvent;
 import com.bearsoft.rowset.events.RowsetFilterEvent;
@@ -24,6 +26,7 @@ import com.bearsoft.rowset.metadata.Fields;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
+import javax.sql.DataSource;
 import javax.sql.rowset.serial.SerialBlob;
 import static org.junit.Assert.*;
 import org.junit.BeforeClass;
@@ -94,7 +97,7 @@ public class RowsetBaseTest {
                 assertTrue(rowset.getRow(rowset.getCursorPos()) == rowset.getCurrentRow());
                 assertTrue(rowset.getCurrentRow().isInserted());
                 for (int colIndex = 0; colIndex < fields.getFieldsCount(); colIndex++) {
-                    rowset.updateObject(colIndex + 1, testData[i][colIndex]);
+                    rowset.getCurrentRow().setColumnObject(colIndex + 1, testData[i][colIndex]);
                 }
             }
         }
@@ -145,6 +148,8 @@ public class RowsetBaseTest {
 
     protected Rowset initRowset() throws InvalidCursorPositionException, InvalidColIndexException, RowsetException {
         Rowset rowset = new Rowset(fields);
+        DataSource ds = new ObservingResourcesProvider("", null, 0, 0, 0);
+        rowset.setFlowProvider(new JdbcFlowProviderAdapter("test-source", ds, new RowsetConverter(), "test-clause"));
         // initial filling tests
         assertTrue(rowset.isEmpty());
         fillInRowset(rowset);
@@ -277,10 +282,12 @@ public class RowsetBaseTest {
             ++inserted;
         }
 
+        /*
         @Override
         public void rowChanged(RowChangeEvent event) {
             ++changed;
         }
+        */
 
         @Override
         public void rowDeleted(RowsetDeleteEvent event) {

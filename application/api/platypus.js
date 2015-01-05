@@ -793,11 +793,13 @@
             if (!event.ajusting)
                 adapter.rowsetFiltered(null);
         };
+        /*
         adapter.rowChanged = function (event) {
             if (event.oldRowCount !== event.newRowCount) {
                 adapter.rowsetFiltered(null);
             }
         };
+        */
         adapter.rowDeleted = function (event) {
             if (!event.ajusting)
                 adapter.rowsetFiltered(null);

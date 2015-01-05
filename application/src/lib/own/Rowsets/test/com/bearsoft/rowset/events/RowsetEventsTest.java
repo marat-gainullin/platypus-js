@@ -312,7 +312,7 @@ public class RowsetEventsTest extends RowsetBaseTest {
         }
         rowset.absolute(10);
         Object oldPkValue = rowset.getObject(1);
-        rowset.updateObject(1, 444444);
+        rowset.getCurrentRow().setColumnObject(1, 444444);
         assertEquals(oldPkValue, rowset.getObject(1));
         eventsRecivers[14].allowChange = true;
         rowset.deleteAll();
@@ -320,7 +320,7 @@ public class RowsetEventsTest extends RowsetBaseTest {
         checkRowsetCorrespondToTestData(rowset);
         rowset.absolute(10);
         oldPkValue = rowset.getObject(1);
-        rowset.updateObject(1, 444444);
+        rowset.getCurrentRow().setColumnObject(1, 444444);
         assertEquals(new BigDecimal(444444), rowset.getObject(1));
     }
 

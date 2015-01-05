@@ -5,10 +5,8 @@
 package com.bearsoft.rowset.dataflow;
 
 import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.exceptions.FlowProviderNotPagedException;
 import com.bearsoft.rowset.metadata.Parameters;
-import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -81,12 +79,4 @@ public interface FlowProvider {
     public boolean isProcedure();
 
     public void setProcedure(boolean aProcedure);
-
-    /**
-     * Retruns a change log, fronted with this flow provider.
-     *
-     * @return Changes' log to collect changes in.
-     */
-    public List<Change> getChangeLog();
-
 }

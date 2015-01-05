@@ -10,7 +10,7 @@ import com.bearsoft.rowset.utils.KeySet;
 import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
 import com.bearsoft.rowset.exceptions.RowsetException;
-import com.bearsoft.rowset.locators.Locator;
+import com.bearsoft.rowset.ordering.Locator;
 import com.bearsoft.rowset.sorting.RowsComparator;
 import com.bearsoft.rowset.sorting.SortingCriterion;
 import java.util.ArrayList;
@@ -181,7 +181,7 @@ public class LocatorsTest extends RowsetBaseTest {
 
         rowset.absolute(10);
         rowset.insert();
-        rowset.updateObject(2, false);
+        rowset.getCurrentRow().setColumnObject(2, false);
         assertFalse(loc.isValid());
         assertTrue(loc.find(locatorMultiKey));
         assertTrue(loc.isValid());
@@ -198,7 +198,7 @@ public class LocatorsTest extends RowsetBaseTest {
         assertEquals(loc.getRowset().getCursorPos(), mkRowsetPosition);
         assertEquals(loc.getRowsetPos(1), mkRowsetPosition);
 
-        rowset.updateObject(6, null);
+        rowset.getCurrentRow().setColumnObject(6, null);
         assertFalse(loc.isValid());
         assertFalse(loc.find(locatorMultiKey));
         assertTrue(loc.isValid());
@@ -206,7 +206,7 @@ public class LocatorsTest extends RowsetBaseTest {
         assertEquals(loc.getSize(), 0);
 
         assertEquals(loc.getRowset().getCursorPos(), mkRowsetPosition);
-        rowset.updateObject(6, 345677.9898f);
+        rowset.getCurrentRow().setColumnObject(6, 345677.9898f);
         assertEquals(loc.getRowset().getCursorPos(), mkRowsetPosition);
 
         assertFalse(loc.isValid());
@@ -218,7 +218,7 @@ public class LocatorsTest extends RowsetBaseTest {
 
         // updating of non-locator field doesn't lead to invalidating of locator.
         assertTrue(loc.isValid());
-        rowset.updateObject(1, 45);
+        rowset.getCurrentRow().setColumnObject(1, 45);
         assertTrue(loc.isValid());
     }
 

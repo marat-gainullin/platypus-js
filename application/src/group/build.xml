@@ -99,13 +99,6 @@
         </antcall>
         <antcall target="-maybe-call-dep">
             <param name="call.built.properties" value="${built-jar.properties}"/>
-            <param location="${project.GeoPane}" name="call.subproject"/>
-            <param location="${project.GeoPane}/build.xml" name="call.script"/>
-            <param name="call.target" value="jar"/>
-            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
-        </antcall>
-        <antcall target="-maybe-call-dep">
-            <param name="call.built.properties" value="${built-jar.properties}"/>
             <param location="${project.Grid}" name="call.subproject"/>
             <param location="${project.Grid}/build.xml" name="call.script"/>
             <param name="call.target" value="jar"/>
@@ -183,13 +176,6 @@
         </antcall>
         <antcall target="-maybe-call-dep">
             <param name="call.built.properties" value="${built-jar.properties}"/>
-            <param location="${project.GeoAddon}" name="call.subproject"/>
-            <param location="${project.GeoAddon}/build.xml" name="call.script"/>
-            <param name="call.target" value="jar"/>
-            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
-        </antcall>
-        <antcall target="-maybe-call-dep">
-            <param name="call.built.properties" value="${built-jar.properties}"/>
             <param location="${project.Reports}" name="call.subproject"/>
             <param location="${project.Reports}/build.xml" name="call.script"/>
             <param name="call.target" value="jar"/>
@@ -252,7 +238,6 @@
     <target depends="init,compile-test,-pre-test-run,-do-test-run,test-report,-post-test-run,-test-browse" description="Run unit tests." name="test">
         <subant buildpath="${project.JSqlParser}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.CommonUtils}" antfile="build.xml" target="test"/>
-        <subant buildpath="${project.GeoPane}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.Grid}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.ScalablePane}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.Updater}" antfile="build.xml" target="test"/>
@@ -318,12 +303,10 @@
 				<include name="bin/Core.jar"/>
 				<include name="bin/Datamodel.jar"/>
 				<include name="bin/Forms.jar"/>
-				<include name="bin/GeoAddon.jar"/>
 				<include name="bin/Modules.jar"/>
 				<include name="bin/Reports.jar"/>
 				<include name="lib/own/BinaryTags.jar"/>
 				<include name="lib/own/CommonUtils.jar"/>
-				<include name="lib/own/GeoPane.jar"/>
 				<include name="lib/own/Grid.jar"/>
 				<include name="lib/own/IconLib.jar"/>
 				<include name="lib/own/Rowsets.jar"/>

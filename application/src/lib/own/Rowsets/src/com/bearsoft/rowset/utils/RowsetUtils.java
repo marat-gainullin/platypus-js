@@ -10,7 +10,7 @@
 package com.bearsoft.rowset.utils;
 
 import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.locators.Locator;
+import com.bearsoft.rowset.ordering.Locator;
 import com.bearsoft.rowset.metadata.Field;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

@@ -2,43 +2,100 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.bearsoft.rowset.locators;
+package com.bearsoft.rowset.ordering;
 
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
+import com.bearsoft.rowset.events.RowsetAdapter;
+import com.bearsoft.rowset.events.RowsetDeleteEvent;
+import com.bearsoft.rowset.events.RowsetEventsEarlyAccess;
+import com.bearsoft.rowset.events.RowsetFilterEvent;
+import com.bearsoft.rowset.events.RowsetInsertEvent;
+import com.bearsoft.rowset.events.RowsetListener;
+import com.bearsoft.rowset.events.RowsetNextPageEvent;
+import com.bearsoft.rowset.events.RowsetRequeryEvent;
+import com.bearsoft.rowset.events.RowsetRollbackEvent;
+import com.bearsoft.rowset.events.RowsetSortEvent;
 import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.ordering.HashOrderer;
 import com.bearsoft.rowset.utils.KeySet;
+import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 /**
- * Locator is filter subclass, intended to locate particular rows. It doesn't filter rowset, but rows partition is also used.
+ * Locator is filter subclass, intended to locate particular rows. It doesn't
+ * filter rowset, but rows partition is also used.
+ *
  * @author mg
  */
 public class Locator extends HashOrderer {
+
+    protected class Invalidator extends RowsetAdapter implements RowsetEventsEarlyAccess {
+
+        @Override
+        public void rowsetSorted(RowsetSortEvent event) {
+            invalidate();
+        }
+
+        @Override
+        public void rowDeleted(RowsetDeleteEvent event) {
+            invalidate();
+        }
+
+        @Override
+        public void rowInserted(RowsetInsertEvent event) {
+            invalidate();
+        }
+
+        @Override
+        public void rowsetFiltered(RowsetFilterEvent event) {
+            invalidate();
+        }
+
+        @Override
+        public void rowsetRequeried(RowsetRequeryEvent event) {
+            invalidate();
+        }
+
+        @Override
+        public void rowsetNextPageFetched(RowsetNextPageEvent event) {
+            invalidate();
+        }
+
+        @Override
+        public void rowsetRolledback(RowsetRollbackEvent event) {
+            invalidate();
+        }
+    }
 
     public static final String LOCATOR_IS_INVALID = "locator is invalid! Rowset was edited but locator havn\'t been rebuild.";
     public static final String INDEX_IS_INVALID = "index is out of bounds";
     public static final String WRONG_POSITION_MARKER = "invalid position in locator's subset";
     protected TaggedList<RowWrap> subSet;
     protected int subSetPos = -1;
+    protected RowsetListener invalidator = new Invalidator();
+    protected List<Runnable> keyInvalidators = new ArrayList<>();
 
     /**
      * Locator's constructor.
+     *
      * @param aRowset Rowset this locator is build for.
      */
     public Locator(Rowset aRowset) {
         super(aRowset);
+        aRowset.addRowsetListener(invalidator);
     }
 
     /**
-     * Returns <code>Row</code> object from rowset on witch this locator was created
+     * Returns <code>Row</code> object from rowset on witch this locator was
+     * created
+     *
      * @param aIndex Index of row in the rows subset vector. Index is 0-based
-     * @return A <code>Row</cdoe> object.
+     * @return A <code>Row</code> object.
      */
     public Row getRow(int aIndex) throws IllegalStateException {
         if (subSet != null && !subSet.isEmpty()) {
@@ -60,9 +117,12 @@ public class Locator extends HashOrderer {
     }
 
     /**
-     * Returns index of row in the row's subset, defined by <code>HashOrderer</code>.
+     * Returns index of row in the row's subset, defined by
+     * <code>HashOrderer</code>.
+     *
      * @param aRow Row which index is returned.
-     * @return Index of row in the row's subset, defined by <code>HashOrderer</code>.
+     * @return Index of row in the row's subset, defined by
+     * <code>HashOrderer</code>.
      * @throws IllegalStateException
      */
     public int indexOf(Row aRow) throws IllegalStateException {
@@ -87,9 +147,10 @@ public class Locator extends HashOrderer {
 
     /**
      * This function changes row position within same locator's subset of rows
+     *
      * @param aRow A Row, that position is to be changed.
      * @param aIndex Index, the row would be at.
-     * @return A <code>Row</cdoe> object.
+     * @return A <code>Row</code> object.
      * @throws ArrayIndexOutOfBoundsException
      */
     public Row changeRowPosition(Row aRow, int aIndex) throws ArrayIndexOutOfBoundsException {
@@ -105,7 +166,7 @@ public class Locator extends HashOrderer {
                             break;
                         }
                     }
-                    if (lIndex != -1) {
+                    if (rw != null) {
                         if (aIndex != lIndex) {
                             subSet.remove(lIndex);
                             subSet.add(aIndex, rw);
@@ -124,7 +185,9 @@ public class Locator extends HashOrderer {
 
     /**
      * Finds subset of rows, corresponding to values, passed to the method.
-     * Performs converting of passed values from thier's types to rowset's corresponding fields types.
+     * Performs converting of passed values from thier's types to rowset's
+     * corresponding fields types.
+     *
      * @param values Keys vector to find
      * @return Whether subset of rows is found.
      * @throws RowsetException
@@ -143,8 +206,11 @@ public class Locator extends HashOrderer {
     }
 
     /**
-     * Find subset of rows, corresponding to <code>KeySet</code>, passed to the method.
-     * Any converting is not performed. Types of values passed in <code>values</code> parameter must be equal with types of corresponding fields.
+     * Find subset of rows, corresponding to <code>KeySet</code>, passed to the
+     * method. Any converting is not performed. Types of values passed in
+     * <code>values</code> parameter must be equal with types of corresponding
+     * fields.
+     *
      * @param values Keys vector to find.
      * @return Whether subset of rows is found.
      * @throws RowsetException
@@ -167,8 +233,11 @@ public class Locator extends HashOrderer {
     }
 
     /**
-     * Returns size of current subset. Current subset is defined when <code>find()</code> method is called.
-     * @return Size of current subset, corresponding to <code>KeySet</code>, has been passed to <code>find()</code> method
+     * Returns size of current subset. Current subset is defined when
+     * <code>find()</code> method is called.
+     *
+     * @return Size of current subset, corresponding to <code>KeySet</code>, has
+     * been passed to <code>find()</code> method
      * @throws IllegalStateException
      */
     public int getSize() throws IllegalStateException {
@@ -188,7 +257,9 @@ public class Locator extends HashOrderer {
     }
 
     /**
-     * Returns row position in rowset. Row is the subset's element at <code>aSubsetPos</code>.
+     * Returns row position in rowset. Row is the subset's element at
+     * <code>aSubsetPos</code>.
+     *
      * @param aSubsetPos Subset's element position. It's 1-based.
      * @return Row position in rowset.
      * @throws IllegalStateException
@@ -216,16 +287,16 @@ public class Locator extends HashOrderer {
     }
 
     /**
-     * Prepares the locator for iterating through underlying rowset.
-     * It acts like rowset's method <code>beforeFirst()</code>
+     * Prepares the locator for iterating through underlying rowset. It acts
+     * like rowset's method <code>beforeFirst()</code>
      */
     public void beforeFirst() {
         subSetPos = -1;
     }
 
     /**
-     * Prepares the locator for iterating through underlying rowset.
-     * It acts like rowset's method <code>afterLast()</code>
+     * Prepares the locator for iterating through underlying rowset. It acts
+     * like rowset's method <code>afterLast()</code>
      */
     public void afterLast() {
         if (subSet != null) {
@@ -234,9 +305,12 @@ public class Locator extends HashOrderer {
     }
 
     /**
-     * Positions the rowset on the row, corresponding to the first subset's position.
+     * Positions the rowset on the row, corresponding to the first subset's
+     * position.
+     *
      * @return Whether rowset have been repositioned.
      * @throws IllegalStateException
+     * @throws com.bearsoft.rowset.exceptions.InvalidCursorPositionException
      */
     public boolean first() throws IllegalStateException, InvalidCursorPositionException {
         if (subSet != null && !subSet.isEmpty()) {
@@ -260,9 +334,12 @@ public class Locator extends HashOrderer {
     }
 
     /**
-     * Positions the rowset on the row, corresponding to the next subset's position.
+     * Positions the rowset on the row, corresponding to the next subset's
+     * position.
+     *
      * @return Whether rowset have been repositioned.
      * @throws IllegalStateException
+     * @throws com.bearsoft.rowset.exceptions.InvalidCursorPositionException
      */
     public boolean next() throws IllegalStateException, InvalidCursorPositionException {
         if (subSet != null && !subSet.isEmpty() && !isAfterLast()) {
@@ -288,10 +365,13 @@ public class Locator extends HashOrderer {
     }
 
     /**
-     * Positions the rowset on the row, corresponding to the first subset's position.
+     * Positions the rowset on the row, corresponding to the first subset's
+     * position.
+     *
      * @param index Subset's position. index is 0-based.
      * @return Whether rowset have been repositioned.
      * @throws IllegalStateException
+     * @throws com.bearsoft.rowset.exceptions.InvalidCursorPositionException
      */
     public boolean absolute(int index) throws IllegalStateException, InvalidCursorPositionException {
         if (subSet != null && !subSet.isEmpty() && !isAfterLast()) {
@@ -317,9 +397,12 @@ public class Locator extends HashOrderer {
     }
 
     /**
-     * Positions the rowset on the row, corresponding to the previous subset's position.
+     * Positions the rowset on the row, corresponding to the previous subset's
+     * position.
+     *
      * @return Whether rowset have been repositioned.
      * @throws IllegalStateException
+     * @throws com.bearsoft.rowset.exceptions.InvalidCursorPositionException
      */
     public boolean previous() throws IllegalStateException, InvalidCursorPositionException {
         if (subSet != null && !subSet.isEmpty() && !isBeforeFirst()) {
@@ -345,9 +428,12 @@ public class Locator extends HashOrderer {
     }
 
     /**
-     * Positions the rowset on the row, corresponding to the last subset's position.
+     * Positions the rowset on the row, corresponding to the last subset's
+     * position.
+     *
      * @return Whether rowset have been repositioned.
      * @throws IllegalStateException
+     * @throws com.bearsoft.rowset.exceptions.InvalidCursorPositionException
      */
     public boolean last() throws IllegalStateException, InvalidCursorPositionException {
         if (subSet != null && !subSet.isEmpty()) {
@@ -372,6 +458,7 @@ public class Locator extends HashOrderer {
 
     /**
      * Returns whether subset's position is before first.
+     *
      * @return Whether subset's position is before first.
      */
     public boolean isBeforeFirst() {
@@ -380,6 +467,7 @@ public class Locator extends HashOrderer {
 
     /**
      * Returns whether subset's position is after last.
+     *
      * @return Whether subset's position is after last.
      */
     public boolean isAfterLast() {
@@ -388,6 +476,7 @@ public class Locator extends HashOrderer {
 
     /**
      * Changes row index in the ordered structure.
+     *
      * @param aRow Row to change index of.
      * @param newIndex Value row index to be changed to.
      * @throws RowsetException
@@ -411,8 +500,10 @@ public class Locator extends HashOrderer {
 
     /**
      * Adds row to the ordered structure.
+     *
      * @param aRow Row to add.
-     * @param aIndex Index to be assigned to <code>aRow</code> in ordered structure.
+     * @param aIndex Index to be assigned to <code>aRow</code> in ordered
+     * structure.
      * @throws RowsetException
      */
     public void add(Row aRow, int aIndex) throws RowsetException {
@@ -425,11 +516,15 @@ public class Locator extends HashOrderer {
                 ordered.put(ks, subset);
             }
             subset.add(new RowWrap(aRow, aIndex));
+            keyInvalidators.addAll(signOn(aRow, fieldsIndicies, (PropertyChangeEvent evt) -> {
+                invalidate();
+            }));
         }
     }
 
     /**
      * Builds ordered structure of this locator.
+     *
      * @throws RowsetException
      */
     @Override
@@ -453,6 +548,7 @@ public class Locator extends HashOrderer {
 
     /**
      * Sorts rows into partitioned subsets.
+     *
      * @param aRowWrapsComparator Comparator used while sorting.
      */
     public void sort(Comparator<RowWrap> aRowWrapsComparator) {
@@ -467,6 +563,7 @@ public class Locator extends HashOrderer {
 
     /**
      * Returns vector of rows gathered from all subsets in ordered structure.
+     *
      * @return Vector of rows gathered from all subsets in ordered structure.
      */
     public List<Row> getAllRowsVector() {
@@ -490,6 +587,10 @@ public class Locator extends HashOrderer {
      */
     @Override
     public void invalidate() {
+        keyInvalidators.stream().forEach((Runnable unsign) -> {
+            unsign.run();
+        });
+        keyInvalidators.clear();
         super.invalidate();
         ordered.clear();
         subSet = null;
@@ -500,6 +601,11 @@ public class Locator extends HashOrderer {
      */
     @Override
     public void die() {
+        keyInvalidators.stream().forEach((Runnable unsign) -> {
+            unsign.run();
+        });
+        keyInvalidators.clear();
+        rowset.removeRowsetListener(invalidator);
         super.die();
         subSet = null;
         valid = false;

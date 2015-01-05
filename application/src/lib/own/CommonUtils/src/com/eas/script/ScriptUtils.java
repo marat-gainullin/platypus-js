@@ -88,10 +88,10 @@ public class ScriptUtils {
         }
     }
 
-    public static boolean isInitialized(){
+    public static boolean isInitialized() {
         return engine != null;
     }
-    
+
     public static void initServices(int aMaxThreads) {
         services.setCorePoolSize(aMaxThreads);
         services.setMaximumPoolSize(aMaxThreads);
@@ -443,25 +443,24 @@ public class ScriptUtils {
         return sb.toString();
     }
 
-    public static Object[] jsObjectToCriteria(Object[] values) {
-        if (values.length == 1) {
-            JSObject criteria = null;
-            if (values[0] instanceof ScriptObject) {
-                criteria = (JSObject) jdk.nashorn.api.scripting.ScriptUtils.wrap(values[0]);
-            } else if (values[0] instanceof JSObject) {
-                criteria = (JSObject) values[0];
-            }
-            if (criteria != null) {
-                Set<String> jsKeys = criteria.keySet();
-                values = new Object[jsKeys.size() * 2];
-                int i = -1;
-                for (String jsKey : jsKeys) {
-                    values[++i] = jsKey;
-                    values[++i] = ScriptUtils.toJava(criteria.getMember(jsKey));
-                }
-            }
+    public static Object[] jsObjectToCriteria(Object aValue) {
+        JSObject criteria = null;
+        if (aValue instanceof ScriptObject) {
+            criteria = (JSObject) jdk.nashorn.api.scripting.ScriptUtils.wrap(aValue);
+        } else if (aValue instanceof JSObject) {
+            criteria = (JSObject) aValue;
         }
-        return values;
+        if (criteria != null) {
+            Set<String> jsKeys = criteria.keySet();
+            Object[] values = new Object[jsKeys.size() * 2];
+            int i = -1;
+            for (String jsKey : jsKeys) {
+                values[++i] = jsKey;
+                values[++i] = ScriptUtils.toJava(criteria.getMember(jsKey));
+            }
+            return values;
+        }
+        return null;
     }
 
     /**
@@ -551,7 +550,7 @@ public class ScriptUtils {
         Object oResult = listenFunc.call(null, new Object[]{aCallback});
         return (JSObject) oResult;
     }
-    
+
     public static JSObject createModule(String aModuleName) {
         assert lookupInGlobalFunc != null : SCRIPT_NOT_INITIALIZED;
         Object oConstructor = lookupInGlobalFunc.call(null, new Object[]{aModuleName});

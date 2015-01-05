@@ -668,7 +668,7 @@ public class DatabasesClient {
                 DatabaseMetaData dbmd = lconn.getMetaData();
                 if (dbmd != null) {
                     try (ResultSet rs = dbmd.getTypeInfo()) {
-                        lrowSet = rsReader.readRowset(rs, -1);
+                        lrowSet = rsReader.readRowset(rs, null, -1);
                     }
                 }
             }

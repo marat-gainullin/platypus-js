@@ -23,7 +23,7 @@ public class ParametersRowset extends Rowset {
     protected class ParametersRowWrapper extends Row {
 
         ParametersRowWrapper() {
-            super(params);
+            super("params", params);
         }
 
         @Override
@@ -205,7 +205,4 @@ public class ParametersRowset extends Rowset {
     protected void generateInsert(Row aRow) {
     }
 
-    @Override
-    protected void generateUpdate(int colIndex, Row aRow, Object oldValue, Object newValue) {
-    }
 }

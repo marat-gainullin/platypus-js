@@ -93,7 +93,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
             JdbcReader reader = new JdbcReader(converter, expectedFields);
             Callable<Rowset> doWork = () -> {
                 try {
-                    return reader.readRowset(lowLevelResults, pageSize);
+                    return reader.readRowset(lowLevelResults, this, pageSize);
                 } catch (SQLException ex) {
                     throw new FlowProviderFailedException(ex);
                 } finally {
@@ -247,7 +247,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                                     if (rs != null) {
                                         try {
                                             JdbcReader reader = new JdbcReader(converter, expectedFields);
-                                            return reader.readRowset(rs, pageSize);
+                                            return reader.readRowset(rs, this, pageSize);
                                         } finally {
                                             if (isPaged()) {
                                                 lowLevelResults = rs;

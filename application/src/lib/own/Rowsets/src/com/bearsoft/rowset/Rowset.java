@@ -8,21 +8,17 @@ import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.changes.ChangeValue;
 import com.bearsoft.rowset.changes.Delete;
 import com.bearsoft.rowset.changes.Insert;
-import com.bearsoft.rowset.changes.Update;
 import com.bearsoft.rowset.dataflow.DatabaseFlowProvider;
 import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.dataflow.JdbcFlowProvider;
 import com.bearsoft.rowset.events.RowsetChangeSupport;
 import com.bearsoft.rowset.events.RowsetListener;
 import com.bearsoft.rowset.exceptions.*;
-import com.bearsoft.rowset.filters.Filter;
-import com.bearsoft.rowset.locators.Locator;
-import com.bearsoft.rowset.locators.ParentLocator;
+import com.bearsoft.rowset.ordering.Filter;
+import com.bearsoft.rowset.ordering.Locator;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.bearsoft.rowset.ordering.DefaultOrderersFactory;
-import com.bearsoft.rowset.ordering.OrderersFactory;
 import com.bearsoft.rowset.utils.KeySet;
 import com.bearsoft.rowset.utils.RowsetUtils;
 import java.beans.*;
@@ -41,10 +37,13 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class Rowset implements PropertyChangeListener, VetoableChangeListener {
+public class Rowset {
 
     public static final String BAD_FLOW_PROVIDER_RESULT_MSG = "Flow Provider must return at least an empty rowset";
-    // support for data flows.
+
+    // rowset's data changes log.
+    protected List<Change> log;
+    // rowset's data flow.
     protected FlowProvider flow;
     // rowset's metadata
     protected Fields fields;
@@ -62,7 +61,6 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
     // client code interaction
     protected PropertyChangeSupport propertyChangeSupport;
     protected RowsetChangeSupport rowsetChangeSupport;
-    protected OrderersFactory orderersFactory;
     protected Converter converter = new RowsetConverter();
     protected boolean immediateFilter = true;
     protected boolean modified;
@@ -74,7 +72,6 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
         super();
         propertyChangeSupport = new PropertyChangeSupport(this);
         rowsetChangeSupport = new RowsetChangeSupport(this);
-        orderersFactory = new DefaultOrderersFactory(this);
     }
 
     /**
@@ -102,6 +99,14 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
         }
     }
 
+    public List<Change> getLog() {
+        return log;
+    }
+
+    public void setLog(List<Change> aValue) {
+        log = aValue;
+    }
+
     /**
      * Returns the flow provider instance, used by this rowset to support data
      * flow process.
@@ -112,15 +117,21 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
         return flow;
     }
 
+    public void setFlowProvider(FlowProvider aValue) {
+        if (flow != aValue) {
+            flow = aValue;
+            if (flow instanceof JdbcFlowProvider) {
+                converter = ((JdbcFlowProvider) flow).getConverter();
+            }
+        }
+    }
+
     /**
      * Sets the provider to be used in data flow process.
      *
-     * @param aFlow Flow provider to set.
+     * @param aFlow Flow provider to set. public void
+     * setFlowProvider(FlowProvider aFlow) { flow = aFlow; }
      */
-    public void setFlowProvider(FlowProvider aFlow) {
-        flow = aFlow;
-    }
-
     /**
      * Returns converter, used to convert data from application-specific to
      * source specific and vice versa.
@@ -201,7 +212,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
     public void removePropertyChangeListener(String aPropertyName, PropertyChangeListener l) {
         propertyChangeSupport.removePropertyChangeListener(aPropertyName, l);
     }
-    
+
     /**
      * Registers <code>RowsetListener</code> on this rowset.
      *
@@ -230,26 +241,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
     }
 
     /**
-     * Returns current <code>OrderersFactory</code> object, installed on this
-     * rowset.
-     *
-     * @return Currently installed <code>OrderersFactory</code> object
-     */
-    public OrderersFactory getOrderersFactory() {
-        return orderersFactory;
-    }
-
-    /**
-     * Installed <code>OrderersFactory</code> object on this rowset.
-     *
-     * @param orderersFactory Factory object to install.
-     */
-    public void setOrderersFactory(OrderersFactory orderersFactory) {
-        this.orderersFactory = orderersFactory;
-    }
-
-    /**
-     * Columns definition getter.
+     * Field getter.
      *
      * @return Columns definition of this rowset.
      */
@@ -258,9 +250,9 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
     }
 
     /**
-     * Columns definition setter.
+     * Field setter.
      *
-     * @param aFields Columns definition.
+     * @param aFields Fields instance.
      * @throws com.bearsoft.rowset.exceptions.InvalidFieldsExceptionException
      */
     public void setFields(Fields aFields) throws InvalidFieldsExceptionException {
@@ -301,50 +293,6 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
         activeFilter = aValue;
     }
 
-    /**
-     * Returns session id for this rowset.
-     *
-     * @return Session id for this rowset. May be null. Null means
-     * default(system) session.
-     *
-     * public String getSessionId() { return sessionId; }
-     *
-     * /**
-     * Sets session id for this rowset.
-     *
-     * @param aSessionId Session id for this rowset. May be null. Null means
-     * default(system) session.
-     *
-     * public void setSessionId(String aSessionId) { String oldValue =
-     * sessionId; sessionId = aSessionId;
-     * propertyChangeSupport.firePropertyChange("sessionId", oldValue,
-     * sessionId); }
-     *
-     * /**
-     * Returns whether this rowset is transacted. If it's transacted, the rowset
-     * will not fire the saved event and will not call currentToOriginal method
-     * after appling changes. It will be done by somebody at the commit. If this
-     * rowset is not transacted, than it will act as standalone rowset and will
-     * call currentToOriginal method and fire the saved event.
-     *
-     * @return Whether this rowset is transacted.
-     * @see #setTransacted(boolean)
-     *
-     * public boolean isTransacted() { return transacted; }
-     *
-     * /**
-     * Sets the transacted flag. The flag is described in isTransacted() method
-     * doc.
-     *
-     * @param transacted
-     * @see #isTransacted()
-     *
-     * public void setTransacted(boolean aTransacted) { boolean oldValue =
-     * transacted; if (transacted != aTransacted) { transacted = aTransacted;
-     * propertyChangeSupport.firePropertyChange("transacted", oldValue,
-     * transacted); } }
-     *
-     */
     /**
      * Retruns this rowset's modified status.
      *
@@ -395,7 +343,6 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
     public void reverse() throws InvalidCursorPositionException {
         if (rowsetChangeSupport.fireWillSortEvent()) {
             Collections.reverse(current);
-            invalidateLocators();
             rowsetChangeSupport.fireSortedEvent();
         }
     }
@@ -436,8 +383,10 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
                                 aRowset.setCurrent(new ArrayList<>());
                                 aRowset.currentToOriginal();
                                 setCurrent(rows);
+                                rows.stream().forEach((Row aRow) -> {
+                                    aRow.setLog(log);
+                                });
                                 currentToOriginal();
-                                invalidateFilters();
                                 // silent first
                                 if (!current.isEmpty()) {
                                     currentRowPos = 1;
@@ -477,9 +426,12 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
                         }
                         List<Row> rows = rowset.getCurrent();
                         rowset.setCurrent(new ArrayList<>());
+                        rowset.currentToOriginal();
                         setCurrent(rows);
+                        rows.stream().forEach((Row aRow) -> {
+                            aRow.setLog(log);
+                        });
                         currentToOriginal();
-                        invalidateFilters();
                         // silent first
                         if (!current.isEmpty()) {
                             currentRowPos = 1;
@@ -519,10 +471,14 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
                                 assert fields != null : "Fields is missing. Method nextPage must not be called as the first method while retrieving data, and so, fields must already present.";
                                 int fetched = aRowset.getCurrent().size();
                                 if (fetched > 0) {
-                                    setCurrent(aRowset.getCurrent());
+                                    List<Row> rows = aRowset.getCurrent();
                                     aRowset.setCurrent(new ArrayList<>());
+                                    aRowset.currentToOriginal();
+                                    setCurrent(rows);
+                                    rows.stream().forEach((Row aRow) -> {
+                                        aRow.setLog(log);
+                                    });
                                     currentToOriginal();
-                                    invalidateFilters();
                                     rowsetChangeSupport.fireNextPageFetchedEvent();
                                     onSuccess.accept(true);
                                 } else {
@@ -541,10 +497,14 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
                             assert fields != null : "Fields is missing. Method nextPage must not be called as the first method while retrieving data, and so, fields must already present.";
                             int fetched = rowset.getCurrent().size();
                             if (fetched > 0) {
-                                setCurrent(rowset.getCurrent());
+                                List<Row> rows = rowset.getCurrent();
                                 rowset.setCurrent(new ArrayList<>());
+                                rowset.currentToOriginal();
+                                setCurrent(rows);
+                                rows.stream().forEach((Row aRow) -> {
+                                    aRow.setLog(log);
+                                });
                                 currentToOriginal();
-                                invalidateFilters();
                                 rowsetChangeSupport.fireNextPageFetchedEvent();
                                 return true;
                             } else {
@@ -595,56 +555,8 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
      */
     public void setCurrent(List<Row> aCurrent) {
         assert fields != null;
-        unsubscribeFromRows(current);
-        current = aCurrent;
-        subscribeOnRows(current);
-        currentRowPos = 0;
-        invalidateLocators();
-        // WARNING: Invalidating of filters MUST NOT go here, because filtering calls this setCurrent(List<Row> aCurrent) method.
-        // Current set of rowset's rows is changed and so, we need to invalidate locators, but NOT FILTERS!
-    }
-
-    /**
-     * Method similar to setCurrent, except it doesn't unsubscribe from old rows
-     * events and doesn't subscribe on new rows events. Used with filtering
-     * classes. The idea is that new rows list is a subset of this rowset's
-     * native rows and so, we don't need to riddle theese rows's events
-     * subscribers.
-     *
-     * @param aCurrent Rows list to be setted as current rowset's content.
-     * @see HashOrderer
-     * @see Filter
-     * @see Locator
-     */
-    public void setSubsetAsCurrent(List<Row> aCurrent) {
-        assert fields != null;
         current = aCurrent;
         currentRowPos = 0;
-        invalidateLocators();
-        // WARNING: Invalidating of filters MUST NOT go here, because filtering calls this setCurrent(List<Row> aCurrent) method.
-        // Current set of rowset's rows is changed and so, we need to invalidate locators, but NOT FILTERS!
-    }
-
-    private void unsubscribeFromRows(List<Row> aRows) {
-        aRows.forEach((Row row) -> {
-            row.removePropertyChangeListener(this);
-            row.removeVetoableChangeListener(this);
-        });
-    }
-
-    /**
-     * Subscribes this rowset on rows events and sets this rowset's fields to
-     * the rows.
-     *
-     * @param aRows
-     */
-    private void subscribeOnRows(List<Row> aRows) {
-        aRows.forEach((Row row) -> {
-            row.addPropertyChangeListener(this);
-            row.addVetoableChangeListener(this);
-            // hack. We extremely need a way to set row's fields without related processing
-            row.fields = fields;
-        });
     }
 
     /**
@@ -1123,17 +1035,11 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
     public void insert(Object... initingValues) throws RowsetException {
         if (!showOriginal) {
             assert fields != null;
-            Row row = new Row();
-            row.setFields(fields);
+            Row row = new Row(flow.getEntityId(), fields);
             insert(row, false, initingValues);
         }
     }
 
-    /*
-     public Row insertAt(int insertAt, Object... initingValues) throws RowsetException {
-     return insertAt(insertAt, false, initingValues);
-     }
-     */
     /**
      * Simple insert method. Inserts a new <code>Row</code> in this rowset in
      * both original and current rows arrays. First, filter's values are used
@@ -1150,8 +1056,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
     public Row insertAt(int insertAt, boolean aAjusting, Object... initingValues) throws RowsetException {
         if (!showOriginal) {
             assert fields != null;
-            Row row = new Row();
-            row.setFields(fields);
+            Row row = new Row(flow.getEntityId(), fields);
             insertAt(row, aAjusting, insertAt, initingValues);
             return row;
         }
@@ -1220,40 +1125,18 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
             if (toInsert.getColumnCount() != fields.getFieldsCount()) {
                 throw new RowsetException("Bad column count. While inserting, columns count in a row must same with fields count in rowset fields.");
             }
+            toInsert.setLog(log);
             insertingRow = toInsert;
             try {
                 if (rowsetChangeSupport.fireWillInsertEvent(insertingRow, aAjusting)) {
                     initColumns(insertingRow, initingValues);
                     insertingRow.setInserted();
                     // work on current rows vector, probably filtered
-                    List<Row> lcurrent = current;
-                    lcurrent.add(insertAt - 1, insertingRow);
+                    current.add(insertAt - 1, insertingRow);
                     currentRowPos = insertAt;
-                    if (activeFilter != null) {
-                        // work on rowset's native rows vector, hided by active filter
-                        lcurrent = activeFilter.getOriginalRows();
-                        int lcurrentRowPos = activeFilter.getOriginalPos();
-                        if (lcurrentRowPos == 0) { // before first
-                            lcurrent.add(0, insertingRow);
-                            lcurrentRowPos = 1;
-                        } else if (lcurrentRowPos > lcurrent.size()) {
-                            lcurrent.add(insertingRow);
-                            // lcurrent.size() has been incremented by add() method.
-                            lcurrentRowPos = lcurrent.size();
-                        } else {
-                            lcurrent.add(lcurrentRowPos, insertingRow);
-                            lcurrentRowPos++;
-                        }
-                        activeFilter.setOriginalPos(lcurrentRowPos);
-                    }
                     original.add(insertingRow);
-
-                    addRow2Filters(insertingRow, -1);
-                    invalidateLocators();
                     Row insertedRow = insertingRow;
                     modified = true;
-                    insertedRow.addVetoableChangeListener(this);
-                    insertedRow.addPropertyChangeListener(this);
                     generateInsert(insertedRow);
                     rowsetChangeSupport.fireRowInsertedEvent(insertedRow, aAjusting);
                 }
@@ -1354,59 +1237,6 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
     }
 
     /**
-     * Removes a row from all filters as aFieldIndex == -1, and from some
-     * filters if aFieldIndex != -1.
-     *
-     * @param aRow - A row to operate with
-     * @param aFieldIndex - A field index to detemine if it is filtering
-     * criteria. It may be -1 to force removing a row from filters
-     * @return True if aRow was removed from one of the filters, False
-     * otherwise.
-     * @throws RowsetException
-     */
-    public boolean removeRowFromFilters(Row aRow, int aFieldIndex) throws RowsetException {
-        boolean removed = false;
-        if (filters != null) {
-            for (Filter hf : filters) {
-                assert hf != null;
-                if (aFieldIndex == -1 || hf.isFilteringCriteria(aFieldIndex)) {
-                    boolean lRemoved = hf.remove(aRow);
-                    if (lRemoved) {
-                        removed = true;
-                    }
-                }
-            }
-        }
-        return removed;
-    }
-
-    /**
-     * Adds a row to all filters as aFieldIndex == -1, and to some filters if
-     * aFieldIndex != -1.
-     *
-     * @param aRow - A row to operate with
-     * @param aFieldIndex - A field index to detemine if it is filtering
-     * criteria. It may be -1 to force adding a row to filters
-     * @return True if aRow was added to one of the filters, False otherwise.
-     * @throws RowsetException
-     */
-    public boolean addRow2Filters(Row aRow, int aFieldIndex) throws RowsetException {
-        boolean added = false;
-        if (filters != null) {
-            for (Filter hf : filters) {
-                assert hf != null;
-                if (aFieldIndex == -1 || hf.isFilteringCriteria(aFieldIndex)) {
-                    boolean lAdded = hf.add(aRow);
-                    if (lAdded) {
-                        added = true;
-                    }
-                }
-            }
-        }
-        return added;
-    }
-
-    /**
      * Returns if <code>showOriginal</code> flag is set.
      *
      * @return True if showOriginal flag is set.
@@ -1450,8 +1280,6 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
             assert row != null;
             if (rowsetChangeSupport.fireWillDeleteEvent(row)) {
                 row.setDeleted();
-                row.removePropertyChangeListener(this);
-                row.removeVetoableChangeListener(this);
                 generateDelete(row);
                 current.remove(currentRowPos - 1);
                 if (!isEmpty()) {
@@ -1464,8 +1292,6 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
                 } else {
                     currentRowPos = 0;
                 }
-                invalidateLocators();
-                removeRowFromFilters(row, -1);
                 modified = true;
                 rowsetChangeSupport.fireRowDeletedEvent(row);
             }
@@ -1499,13 +1325,9 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
                 Row row = current.get(i);
                 assert row != null;
                 if (rowsetChangeSupport.fireWillDeleteEvent(row, i != 0)) { // last iteration will fire non-ajusting event
-                    invalidateLocators();
                     row.setDeleted();
-                    row.removePropertyChangeListener(this);
-                    row.removeVetoableChangeListener(this);
                     generateDelete(row);
                     current.remove(i);
-                    removeRowFromFilters(row, -1);
                     modified = true;
                     currentRowPos = i + 1;
                     rowsetChangeSupport.fireRowDeletedEvent(row, i != 0); // last iteration will fire non-ajusting event
@@ -1553,13 +1375,9 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
                 if (rows2Delete.contains(row)) {
                     rows2Delete.remove(row);
                     if (rowsetChangeSupport.fireWillDeleteEvent(row, !rows2Delete.isEmpty())) { // last iteration will fire non-ajusting event
-                        invalidateLocators();
                         row.setDeleted();
-                        row.removePropertyChangeListener(this);
-                        row.removeVetoableChangeListener(this);
                         generateDelete(row);
                         current.remove(i);
-                        removeRowFromFilters(row, -1);
                         modified = true;
                         currentRowPos = i + 1;
                         rowsetChangeSupport.fireRowDeletedEvent(row, !rows2Delete.isEmpty()); // last iteration will fire non-ajusting event
@@ -1608,13 +1426,9 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
             Row row = current.get(aRowIndex - 1);
             assert row != null;
             if (rowsetChangeSupport.fireWillDeleteEvent(row, aIsAjusting)) { // the deletion will fire non-ajusting event
-                invalidateLocators();
                 row.setDeleted();
-                row.removePropertyChangeListener(this);
-                row.removeVetoableChangeListener(this);
                 generateDelete(row);
                 current.remove(aRowIndex - 1);
-                removeRowFromFilters(row, -1);
                 modified = true;
                 currentRowPos = aRowIndex;
                 rowsetChangeSupport.fireRowDeletedEvent(row, aIsAjusting); // the deletion will fire non-ajusting event
@@ -1822,69 +1636,6 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
     }
 
     /**
-     * Updates particular field of the current record.
-     *
-     * @param colIndex Index of particular field. 1-Based.
-     * @param aValue Value you whant to be setted to field.
-     * @return
-     * @throws RowsetException
-     */
-    public boolean updateObject(int colIndex, Object aValue) throws RowsetException {
-        checkCursor();
-        checkColIndex(colIndex);
-        Row row = getCurrentRow();
-        assert row != null;
-        return row.setColumnObject(colIndex, aValue);
-    }
-
-    private int extractColIndex(PropertyChangeEvent evt) {
-        int colIndex;
-        if (evt.getPropagationId() != null && evt.getPropagationId() instanceof Integer) {
-            colIndex = (Integer) evt.getPropagationId();
-        } else {
-            colIndex = fields.find(evt.getPropertyName());
-        }
-        return colIndex;
-    }
-
-    @Override
-    public void vetoableChange(PropertyChangeEvent evt) throws PropertyVetoException {
-        try {
-            int colIndex = extractColIndex(evt);
-            assert colIndex != 0;
-            assert evt.getSource() instanceof Row;
-            if (!rowsetChangeSupport.fireWillChangeEvent((Row) evt.getSource(), colIndex, evt.getOldValue(), evt.getNewValue())) {
-                throw new PropertyVetoException("One of rowset's change listeners have prohibited a column change", evt);
-            }
-        } catch (InvalidCursorPositionException ex) {
-            throw new PropertyVetoException(ex.getMessage(), evt);
-        }
-    }
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        try {
-            int colIndex = extractColIndex(evt);
-            assert colIndex != 0;
-            assert evt.getSource() instanceof Row;
-            Row row = (Row) evt.getSource();
-            invalidateLocatorsByColIndex(colIndex);
-            row.getInternalCurrentValues().set(colIndex - 1, evt.getOldValue());
-            removeRowFromFilters(row, colIndex);
-            row.getInternalCurrentValues().set(colIndex - 1, evt.getNewValue());
-            addRow2Filters(row, colIndex);
-            modified = true;
-            generateUpdate(colIndex, row, evt.getOldValue(), evt.getNewValue());
-//            rowsetChangeSupport.fireRowChangedEvent(row, colIndex, evt.getOldValue());
-            if (activeFilter != null && immediateFilter && activeFilter.isFilteringCriteria(colIndex)) {
-                activeFilter.refilterRowset();
-            }
-        } catch (RowsetException ex) {
-            Logger.getLogger(Rowset.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    /**
      * Returns <code>Row</code> at current cursor position. Doesn't perform
      * current position check, so it has to be called internally.
      *
@@ -1951,16 +1702,12 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
                 assert row != null;
                 row.originalToCurrent();
                 if (row.isInserted()) {
-                    row.removePropertyChangeListener(this);
-                    row.removeVetoableChangeListener(this);
                     current.remove(i);
                     original.remove(i);
                 }
                 row.clearDeleted();
             }
             modified = false;
-            invalidateLocators();
-            invalidateFilters();
         } finally {
             if (wasFilter != null && wasApplied) {
                 wasFilter.refilterRowset();// implicit setCurrent() call.
@@ -1969,8 +1716,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
     }
 
     protected void generateInsert(Row aRow) {
-        if (flow != null && flow.getChangeLog() != null) {
-            List<Change> changesLog = flow.getChangeLog();
+        if (flow != null && log != null) {
             Insert insert = new Insert(flow.getEntityId());
             List<ChangeValue> data = new ArrayList<>();
             for (int i = 0; i < aRow.getCurrentValues().length; i++) {
@@ -1981,51 +1727,16 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
                 }
             }
             insert.data = data.toArray(new ChangeValue[]{});
-            changesLog.add(insert);
+            log.add(insert);
             aRow.setInserted(insert);
         }
     }
 
-    private ChangeValue[] generateChangeLogKeys(int colIndex, Row aRow, Object oldValue) {
-        if (fields != null) {
-            List<ChangeValue> keys = new ArrayList<>();
-            for (int i = 1; i <= fields.getFieldsCount(); i++) {
-                Field field = fields.get(i);
-                // Some tricky processing of primary key modification case ...
-                if (field.isPk()) {
-                    Object value = aRow.getInternalCurrentValues().get(i - 1);
-                    if (i == colIndex) {
-                        value = oldValue;
-                    }
-                    keys.add(new ChangeValue(field.getName(), value, field.getTypeInfo()));
-                }
-            }
-            return keys.toArray(new ChangeValue[]{});
-        } else {
-            return null;
-        }
-    }
-
-    protected void generateUpdate(int colIndex, Row aRow, Object oldValue, Object newValue) {
-        if (fields != null && flow != null && flow.getChangeLog() != null) {
-            List<Change> changesLog = flow.getChangeLog();
-            Field field = fields.get(colIndex);
-            boolean insertComplemented = tryToComplementInsert(aRow, field, newValue);
-            if (!insertComplemented) {
-                Update update = new Update(flow.getEntityId());
-                update.data = new ChangeValue[]{new ChangeValue(field.getName(), newValue, field.getTypeInfo())};
-                update.keys = generateChangeLogKeys(colIndex, aRow, oldValue);
-                changesLog.add(update);
-            }
-        }
-    }
-
     protected void generateDelete(Row aRow) {
-        if (flow != null && flow.getChangeLog() != null) {
-            List<Change> changesLog = flow.getChangeLog();
+        if (flow != null && log != null) {
             Delete delete = new Delete(flow.getEntityId());
-            delete.keys = generateChangeLogKeys(-1, aRow, null);
-            changesLog.add(delete);
+            delete.keys = Row.generateChangeLogKeys(-1, aRow, null);
+            log.add(delete);
         }
     }
 
@@ -2035,7 +1746,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
      * @return New filter based on this rowset.
      */
     public Filter createFilter() {
-        Filter hf = orderersFactory.createFilter();
+        Filter hf = new Filter(this);
         filters.add(hf);
         return hf;
     }
@@ -2046,24 +1757,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
      * @return New locator based on this rowset.
      */
     public Locator createLocator() {
-        Locator hl = orderersFactory.createLocator();
-        locators.add(hl);
-        return hl;
-    }
-
-    /**
-     * Creates locator, that doesn't distinguish the null key and key that is
-     * not found in the rowset by <code>aParentColIndex</code> with
-     * <code>aByPkLocator</code>
-     *
-     * @param aParentColIndex Index of column that is used to achive key values
-     * to locate "parent" rows.
-     * @param aByPkLocator A <code>Locator</code> that is used to locate
-     * "parent" rows.
-     * @return New locator.
-     */
-    public Locator createParentLocator(int aParentColIndex, Locator aByPkLocator) {
-        Locator hl = new ParentLocator(this, aParentColIndex, aByPkLocator);
+        Locator hl = new Locator(this);
         locators.add(hl);
         return hl;
     }
@@ -2078,8 +1772,8 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
         if (aFilter == activeFilter) {
             activeFilter.cancelFilter();
         }
-        filters.remove(aFilter);
         aFilter.die();
+        filters.remove(aFilter);
     }
 
     /**
@@ -2088,6 +1782,7 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
      * @param aLocator Locator object to be removed.
      */
     public void removeLocator(Locator aLocator) {
+        aLocator.die();
         locators.remove(aLocator);
     }
 
@@ -2101,53 +1796,8 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
         if (aComparator != null) {
             if (rowsetChangeSupport.fireWillSortEvent()) {
                 Collections.sort(current, aComparator);
-                invalidateLocators();
                 rowsetChangeSupport.fireSortedEvent();
             }
-        }
-    }
-
-    /*
-     * Invlidates all installed locators
-     */
-    public void invalidateLocators() {
-        if (locators != null) {
-            locators.forEach((Locator loc) -> {
-                assert loc != null;
-                loc.invalidate();
-            });
-        }
-    }
-
-    /*
-     * Invlidates all installed filters and deactivates them. Also it cancels
-     * any active filter.
-     */
-    protected void invalidateFilters() {
-        activeFilter = null;
-        if (filters != null) {
-            filters.forEach((Filter filter) -> {
-                assert filter != null;
-                filter.deactivate();
-                filter.invalidate();
-            });
-        }
-    }
-
-    /**
-     * Invlidates all installed locators with constrainting set including
-     * <code>aColIndex</code>.
-     *
-     * @param aColIndex Column index to examine constraints with.
-     */
-    public void invalidateLocatorsByColIndex(int aColIndex) {
-        if (locators != null) {
-            locators.forEach((Locator loc) -> {
-                assert loc != null;
-                if (loc.getFields().contains(aColIndex)) {
-                    loc.invalidate();
-                }
-            });
         }
     }
 
@@ -2169,28 +1819,6 @@ public class Rowset implements PropertyChangeListener, VetoableChangeListener {
     public Filter[] getFilters() {
         Filter[] res = new Filter[filters.size()];
         return filters.toArray(res);
-    }
-
-    private boolean tryToComplementInsert(Row aRow, Field field, Object newValue) {
-        boolean insertComplemented = false;
-        Insert insertChange = aRow.getInsertChange();
-        if (insertChange != null && !insertChange.consumed && !field.isNullable()) {
-            boolean met = false;
-            for (ChangeValue value : insertChange.data) {
-                if (value.name.equalsIgnoreCase(field.getName())) {
-                    met = true;
-                    break;
-                }
-            }
-            if (!met) {
-                ChangeValue[] newdata = new ChangeValue[insertChange.data.length + 1];
-                newdata[newdata.length - 1] = new ChangeValue(field.getName(), newValue, field.getTypeInfo());
-                System.arraycopy(insertChange.data, 0, newdata, 0, insertChange.data.length);
-                insertChange.data = newdata;
-                insertComplemented = true;
-            }
-        }
-        return insertComplemented;
     }
 
     public static List<JSObject> toJs(List<Row> aRows) {

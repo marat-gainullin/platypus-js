@@ -2,13 +2,20 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.bearsoft.rowset.filters;
+package com.bearsoft.rowset.ordering;
 
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
+import com.bearsoft.rowset.events.RowsetAdapter;
+import com.bearsoft.rowset.events.RowsetDeleteEvent;
+import com.bearsoft.rowset.events.RowsetEventsEarlyAccess;
+import com.bearsoft.rowset.events.RowsetInsertEvent;
 import com.bearsoft.rowset.events.RowsetListener;
+import com.bearsoft.rowset.events.RowsetNextPageEvent;
+import com.bearsoft.rowset.events.RowsetRequeryEvent;
+import com.bearsoft.rowset.events.RowsetRollbackEvent;
 import com.bearsoft.rowset.exceptions.RowsetException;
-import com.bearsoft.rowset.locators.RowWrap;
+import com.bearsoft.rowset.ordering.RowWrap;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.ordering.HashOrderer;
 import com.bearsoft.rowset.utils.KeySet;
@@ -16,11 +23,13 @@ import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
-import com.eas.script.ScriptUtils;
+import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -30,11 +39,66 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class Filter extends HashOrderer implements HasPublished {
 
+    protected class Invalidator extends RowsetAdapter implements RowsetEventsEarlyAccess {
+
+        @Override
+        public void rowDeleted(RowsetDeleteEvent event) {
+            try {
+                remove(event.getRow());
+            } catch (RowsetException ex) {
+                Logger.getLogger(Filter.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        @Override
+        public void rowInserted(RowsetInsertEvent event) {
+            try {
+                Row insertingRow = event.getRow();
+                add(insertingRow);
+                if (filterApplied) {
+                    // work on rowset's native rows, hided by the filter
+                    if (originalPos == 0) { // before first
+                        originalRows.add(0, insertingRow);
+                        originalPos = 1;
+                    } else if (originalPos > originalRows.size()) {
+                        originalRows.add(insertingRow);
+                        originalPos = originalRows.size();
+                    } else {
+                        originalRows.add(originalPos, insertingRow);
+                        originalPos++;
+                    }
+                }
+            } catch (RowsetException ex) {
+                Logger.getLogger(Filter.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        @Override
+        public void rowsetRequeried(RowsetRequeryEvent event) {
+            deactivate();
+            invalidate();
+        }
+
+        @Override
+        public void rowsetNextPageFetched(RowsetNextPageEvent event) {
+            deactivate();
+            invalidate();
+        }
+
+        @Override
+        public void rowsetRolledback(RowsetRollbackEvent event) {
+            deactivate();
+            invalidate();
+        }
+    }
+
     protected List<Row> originalRows;
     protected int originalPos;
     protected boolean filterApplied;
     protected KeySet keysetApplied;
     protected JSObject published;
+    protected RowsetListener invalidator = new Invalidator();
+    protected List<Runnable> keyInvalidators = new ArrayList<>();
 
     /**
      * The filter's class constructor
@@ -117,6 +181,17 @@ public class Filter extends HashOrderer implements HasPublished {
                 subset = new TaggedList<>();
                 ordered.put(ks, subset);
             }
+            keyInvalidators.addAll(signOn(aRow, fieldsIndicies, (PropertyChangeEvent evt) -> {
+                try {
+                    remove(aRow);
+                    add(aRow);
+                    if (filterApplied && rowset.isImmediateFilter()) {
+                        refilterRowset();
+                    }
+                } catch (RowsetException ex) {
+                    Logger.getLogger(Filter.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }));
             return subset.add(new RowWrap(aRow, -1));
         }
         return false;
@@ -216,7 +291,7 @@ public class Filter extends HashOrderer implements HasPublished {
                                     originalRows = rowset.getCurrent();
                                     originalPos = rowset.getCursorPos();
                                 }
-                                rowset.setSubsetAsCurrent(subSetRows);
+                                rowset.setCurrent(subSetRows);
                                 rowset.setActiveFilter(this);
                                 Set<RowsetListener> l = rowset.getRowsetChangeSupport().getRowsetListeners();
                                 rowset.getRowsetChangeSupport().setRowsetListeners(null);
@@ -284,7 +359,7 @@ public class Filter extends HashOrderer implements HasPublished {
                                         originalRows.remove(i);
                                     }
                                 }
-                                rowset.setSubsetAsCurrent(originalRows);
+                                rowset.setCurrent(originalRows);
                                 originalRows = null;
                                 boolean positioned = rowset.absolute(originalPos);
                                 if (!rowset.isEmpty() && !positioned) {
@@ -339,11 +414,24 @@ public class Filter extends HashOrderer implements HasPublished {
         }
     }
 
+    @Override
+    public void invalidate() {
+        keyInvalidators.stream().forEach((Runnable unsign) -> {
+            unsign.run();
+        });
+        keyInvalidators.clear();
+        super.invalidate();
+    }
+
     /**
      * @inheritDoc
      */
     @Override
     public void die() {
+        keyInvalidators.stream().forEach((Runnable unsign) -> {
+            unsign.run();
+        });
+        keyInvalidators.clear();
         super.die();
         originalRows = null;
     }
@@ -354,7 +442,7 @@ public class Filter extends HashOrderer implements HasPublished {
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = (JSObject)publisher.call(null, new Object[]{this});
+            published = (JSObject) publisher.call(null, new Object[]{this});
         }
         return published;
     }

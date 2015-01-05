@@ -103,16 +103,16 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
     }
 
     @Override
-    protected void prepareRowsetByQuery() throws InvalidFieldsExceptionException {
+    protected void prepareRowsetByQuery() throws Exception {
         Rowset oldRowset = rowset;
         if (rowset != null) {
             rowset.removeRowsetListener(this);
-            unforwardChangeLog();
+            rowset.setLog(null);
             rowset = null;
         }
         if (query != null) {
             rowset = query.prepareRowset();
-            forwardChangeLog();
+            rowset.setLog(getChangeLog());
             rowset.addRowsetListener(this);
             changeSupport.firePropertyChange("rowset", oldRowset, rowset);
         }

@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package com.bearsoft.rowset.locators;
+package com.bearsoft.rowset.ordering;
 
 import com.bearsoft.rowset.Row;
 

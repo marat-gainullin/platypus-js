@@ -9,8 +9,8 @@ import com.bearsoft.rowset.events.RowsetInsertEvent;
 import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
 import com.bearsoft.rowset.exceptions.RowsetException;
-import com.bearsoft.rowset.filters.Filter;
-import com.bearsoft.rowset.locators.Locator;
+import com.bearsoft.rowset.ordering.Filter;
+import com.bearsoft.rowset.ordering.Locator;
 import com.bearsoft.rowset.sorting.RowsComparator;
 import com.bearsoft.rowset.sorting.SortingCriterion;
 import com.bearsoft.rowset.utils.KeySet;
@@ -177,7 +177,7 @@ public class FilteringTest extends RowsetBaseTest {
         System.out.println("filteredUpdateAndModifiedFieldsTest");
         Rowset rowset = initRowset();
         rowset.first();
-        rowset.updateObject(7, new BigInteger("34267"));
+        rowset.getCurrentRow().setColumnObject(7, new BigInteger("34267"));
         EventsReciver lreciver = new EventsReciver();
         rowset.addRowsetListener(lreciver);
         Filter filter = rowset.createFilter();
@@ -209,14 +209,14 @@ public class FilteringTest extends RowsetBaseTest {
         @Override
         public boolean willInsertRow(RowsetInsertEvent event) {
             try {
-                event.getRowset().updateObject(1, 765234);
-                event.getRowset().updateObject(2, "ncvhdu");
-                event.getRowset().updateObject(3, new Date(millis + 87));
-                event.getRowset().updateObject(4, true);
-                event.getRowset().updateObject(5, "ncncncncn");
-                event.getRowset().updateObject(6, null);
-                event.getRowset().updateObject(7, new BigInteger("38746583645"));
-                event.getRowset().updateObject(8, 10101010);
+                event.getRowset().getCurrentRow().setColumnObject(1, 765234);
+                event.getRowset().getCurrentRow().setColumnObject(2, "ncvhdu");
+                event.getRowset().getCurrentRow().setColumnObject(3, new Date(millis + 87));
+                event.getRowset().getCurrentRow().setColumnObject(4, true);
+                event.getRowset().getCurrentRow().setColumnObject(5, "ncncncncn");
+                event.getRowset().getCurrentRow().setColumnObject(6, null);
+                event.getRowset().getCurrentRow().setColumnObject(7, new BigInteger("38746583645"));
+                event.getRowset().getCurrentRow().setColumnObject(8, 10101010);
             } catch (RowsetException ex) {
                 Logger.getLogger(FilteringTest.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -311,41 +311,41 @@ public class FilteringTest extends RowsetBaseTest {
         Date _4Data = new Date(millis + 3453);
         String _8Data = "nonfiltering field data";
         Long _9Data = 86869595975L;
-        rowset.updateObject(4, _4Data);
-        rowset.updateObject(8, _8Data);
-        rowset.updateObject(7, _9Data);
+        rowset.getCurrentRow().setColumnObject(4, _4Data);
+        rowset.getCurrentRow().setColumnObject(8, _8Data);
+        rowset.getCurrentRow().setColumnObject(7, _9Data);
         assertEquals(rowset.size(), 10);
         // let's update criteria field and try to see what we get
         Boolean _2Data = true;
         String _5Data = "llllLLLLL__lll";
         BigDecimal _6Data = new BigDecimal(52367f);
-        rowset.updateObject(2, _2Data);
+        rowset.getCurrentRow().setColumnObject(2, _2Data);
         assertEquals(rowset.size(), 10 - 1); // 2 field is filtering criteria, and so, row goes into another subset of rows in corresponding filter
-        rowset.updateObject(5, _5Data);
+        rowset.getCurrentRow().setColumnObject(5, _5Data);
         assertEquals(rowset.size(), 10 - 2); // 5 field is filtering criteria, and so, !one more! row goes into another subset of rows in corresponding filter
-        rowset.updateObject(6, _6Data);
+        rowset.getCurrentRow().setColumnObject(6, _6Data);
         assertEquals(rowset.size(), 10 - 3); // 6 field is filtering criteria, and so, !one more! row goes into another subset of rows in corresponding filter
         //rowset.getActiveFilter().refilterRowset(); refilterRowset occurs immediatly after updateObject
         //assertEquals(rowset.size(), 10-3);
 
         rowset.setImmediateFilter(false);
-        rowset.updateObject(2, _2Data);
-        rowset.updateObject(5, _5Data);
-        rowset.updateObject(6, _6Data);
+        rowset.getCurrentRow().setColumnObject(2, _2Data);
+        rowset.getCurrentRow().setColumnObject(5, _5Data);
+        rowset.getCurrentRow().setColumnObject(6, _6Data);
         assertEquals(rowset.size(), 7);
         rowset.getActiveFilter().refilterRowset();
         assertEquals(rowset.size(), 6);
 
-        rowset.updateObject(2, _2Data);
-        rowset.updateObject(5, _5Data);
-        rowset.updateObject(6, _6Data);
+        rowset.getCurrentRow().setColumnObject(2, _2Data);
+        rowset.getCurrentRow().setColumnObject(5, _5Data);
+        rowset.getCurrentRow().setColumnObject(6, _6Data);
         assertEquals(rowset.size(), 6);
         rowset.getActiveFilter().refilterRowset();
         assertEquals(rowset.size(), 5);
 
-        rowset.updateObject(2, _2Data);
-        rowset.updateObject(5, _5Data);
-        rowset.updateObject(6, _6Data);
+        rowset.getCurrentRow().setColumnObject(2, _2Data);
+        rowset.getCurrentRow().setColumnObject(5, _5Data);
+        rowset.getCurrentRow().setColumnObject(6, _6Data);
         assertEquals(rowset.size(), 5);
         rowset.getActiveFilter().refilterRowset();
         assertEquals(rowset.size(), 4);

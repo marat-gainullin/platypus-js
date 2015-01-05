@@ -8,7 +8,7 @@ package com.bearsoft.rowset.wrappers.collections;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.exceptions.RowsetException;
-import com.bearsoft.rowset.locators.Locator;
+import com.bearsoft.rowset.ordering.Locator;
 import com.bearsoft.rowset.metadata.Field;
 import java.util.List;
 import java.util.logging.Level;

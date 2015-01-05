@@ -9,7 +9,8 @@ import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.exceptions.RowsetException;
-import com.bearsoft.rowset.locators.RowWrap;
+import com.bearsoft.rowset.metadata.Field;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,13 +38,13 @@ public abstract class HashOrderer extends Object {
 
         public Object tag;
     }
-    protected Rowset rowset = null;
-    protected Fields fields = null;
+    protected Rowset rowset;
+    protected Fields fields;
     protected List<Integer> fieldsIndicies = new ArrayList<>();
-    protected boolean constrainting = false;
+    protected boolean constrainting;
     protected Map<KeySet, TaggedList<RowWrap>> ordered = new HashMap<>();
     protected boolean caseSensitive = true;
-    protected boolean valid = false;
+    protected boolean valid;
 
     /**
      * Filter constructor.
@@ -192,8 +193,8 @@ public abstract class HashOrderer extends Object {
     }
 
     /**
-     * Returns whether a
-     * <code>aFieldIndex</code> is in filtering conditions vector.
+     * Returns whether a <code>aFieldIndex</code> is in filtering conditions
+     * vector.
      *
      * @param aFieldIndex Fields index to check.
      * @return Whether a <code>aFieldIndex</code> is in filtering conditions
@@ -305,6 +306,24 @@ public abstract class HashOrderer extends Object {
             }
         }
         return ks;
+    }
+
+    protected List<Runnable> signOn(Row aRow, List<Integer> fieldsIndicies, PropertyChangeListener aListener) {
+        List<Runnable> signed = new ArrayList<>();
+        if (fields != null) {
+            for (int i = 0; i < fieldsIndicies.size(); i++) {
+                int fIndex = fieldsIndicies.get(i);
+                if (fIndex >= 1 && fIndex <= fields.getFieldsCount()) {
+                    Field field = fields.get(fIndex);
+                    String fname = field.getName();
+                    aRow.addPropertyChangeListener(fname, aListener);
+                    signed.add(() -> {
+                        aRow.removePropertyChangeListener(fname, aListener);
+                    });
+                }
+            }
+        }
+        return signed;
     }
 
     /**

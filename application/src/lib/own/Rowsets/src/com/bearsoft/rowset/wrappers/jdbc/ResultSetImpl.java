@@ -765,7 +765,7 @@ public class ResultSetImpl implements ResultSet {
      */
     public void updateNull(int columnIndex) throws SQLException {
         try {
-            delegate.updateObject(columnIndex, null);
+            delegate.getCurrentRow().setColumnObject(columnIndex, null);
         } catch (Exception ex) {
             throw new SQLException(ex);
         }
@@ -869,7 +869,7 @@ public class ResultSetImpl implements ResultSet {
         try {
             byte[] data = RowsetUtils.readStream(x, length);
             CompactClob clob = new CompactClob(data, "us-ascii");
-            delegate.updateObject(columnIndex, clob);
+            delegate.getCurrentRow().setColumnObject(columnIndex, clob);
         } catch (Exception ex) {
             throw new SQLException(ex);
         }
@@ -882,7 +882,7 @@ public class ResultSetImpl implements ResultSet {
         try {
             byte[] data = RowsetUtils.readStream(x, length);
             CompactBlob blob = new CompactBlob(data);
-            delegate.updateObject(columnIndex, blob);
+            delegate.getCurrentRow().setColumnObject(columnIndex, blob);
         } catch (Exception ex) {
             throw new SQLException(ex);
         }
@@ -895,7 +895,7 @@ public class ResultSetImpl implements ResultSet {
         try {
             String data = RowsetUtils.readReader(x, length);
             CompactClob clob = new CompactClob(data);
-            delegate.updateObject(columnIndex, clob);
+            delegate.getCurrentRow().setColumnObject(columnIndex, clob);
         } catch (Exception ex) {
             throw new SQLException(ex);
         }
@@ -955,7 +955,7 @@ public class ResultSetImpl implements ResultSet {
      */
     public void updateObject(int columnIndex, Object x) throws SQLException {
         try {
-            delegate.updateObject(columnIndex, x);
+            delegate.getCurrentRow().setColumnObject(columnIndex, x);
         } catch (Exception ex) {
             throw new SQLException(ex);
         }
@@ -1415,6 +1415,7 @@ public class ResultSetImpl implements ResultSet {
     public void cancelRowUpdates() throws SQLException {
         try {
             delegate.originalToCurrent();
+            delegate.getRowsetChangeSupport().fireRolledbackEvent();
         } catch (Exception ex) {
             throw new SQLException(ex);
         }
