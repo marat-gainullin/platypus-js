@@ -19,7 +19,7 @@ import com.bearsoft.rowset.ordering.Locator;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.bearsoft.rowset.utils.KeySet;
+import com.bearsoft.rowset.ordering.Orderer;
 import com.bearsoft.rowset.utils.RowsetUtils;
 import java.beans.*;
 import java.util.*;
@@ -54,6 +54,7 @@ public class Rowset {
     protected int currentRowPos; // before first position
     protected boolean showOriginal;
     // data processing
+    protected Set<Orderer> orderers = new HashSet<>(); // filters
     protected Set<Filter> filters = new HashSet<>(); // filters
     protected Set<Locator> locators = new HashSet<>(); // locators
     protected Filter activeFilter;
@@ -372,10 +373,6 @@ public class Rowset {
                     flow.refresh(aParams, (Rowset aRowset) -> {
                         if (aRowset != null) {
                             try {
-                                if (activeFilter != null && activeFilter.isApplied()) {
-                                    activeFilter.deactivate(); // No implicit calls to setCurrent and etc.
-                                    activeFilter = null;
-                                }
                                 if (fields == null) {
                                     setFields(aRowset.getFields());
                                 }
@@ -417,10 +414,6 @@ public class Rowset {
                 } else {
                     Rowset rowset = flow.refresh(aParams, null, null);
                     if (rowset != null) {
-                        if (activeFilter != null && activeFilter.isApplied()) {
-                            activeFilter.deactivate(); // No implicit calls to setCurrent and etc.
-                            activeFilter = null;
-                        }
                         if (fields == null) {
                             setFields(rowset.getFields());
                         }
@@ -529,7 +522,7 @@ public class Rowset {
      * Returns current rows vector. Used with filtering classes.
      *
      * @return Current rows vector.
-     * @see HashOrderer
+     * @see Orderer
      */
     public List<Row> getCurrent() {
         return current;
@@ -549,7 +542,7 @@ public class Rowset {
      * subscribes on new rows events.
      *
      * @param aCurrent Current rows list.
-     * @see HashOrderer
+     * @see Orderer
      * @see Filter
      * @see Locator
      */
@@ -1203,16 +1196,16 @@ public class Rowset {
             // filtered values to correponding fields, excluding key fields
             if (activeFilter != null) {
                 List<Integer> filterCriteriaFields = activeFilter.getFields();
-                KeySet ks = activeFilter.getKeysetApplied();
+                List<Object> filteringKeys = activeFilter.getAppliedKeys();
                 assert filterCriteriaFields != null;
-                assert ks != null;
-                assert filterCriteriaFields.size() == ks.size();
+                assert filteringKeys != null;
+                assert filterCriteriaFields.size() == filteringKeys.size();
                 for (int i = 0; i < filterCriteriaFields.size(); i++) {
                     int colIndex = filterCriteriaFields.get(i);
                     Field field = fields.get(colIndex);
                     // do not touch key fields!
                     if (!field.isPk()) {
-                        Object fieldValue = ks.get(i);
+                        Object fieldValue = filteringKeys.get(i);
                         if (fieldValue == RowsetUtils.UNDEFINED_SQL_VALUE) {
                             fieldValue = null;
                         }
@@ -1689,10 +1682,8 @@ public class Rowset {
      */
     public void originalToCurrent() throws RowsetException {
         Filter wasFilter = activeFilter;
-        boolean wasApplied = false;
         if (wasFilter != null) {
-            wasApplied = wasFilter.isApplied();
-            wasFilter.cancelFilter();
+            wasFilter.cancel();// implicit setCurrent() and setActiveFilter() calls.
         }
         try {
             current.clear();
@@ -1709,8 +1700,8 @@ public class Rowset {
             }
             modified = false;
         } finally {
-            if (wasFilter != null && wasApplied) {
-                wasFilter.refilterRowset();// implicit setCurrent() call.
+            if (wasFilter != null) {
+                wasFilter.refilterRowset();// implicit setCurrent() and setActiveFilter() calls.
             }
         }
     }
@@ -1741,13 +1732,28 @@ public class Rowset {
     }
 
     /**
-     * Creates and returns new filter based on this rowset.
+     * Creates and returns new orderer based on this rowset.
      *
+     * @param aFieldIndicies
      * @return New filter based on this rowset.
      */
-    public Filter createFilter() {
-        Filter hf = new Filter(this);
+    public Orderer createOrderer(List<Integer> aFieldIndicies) {
+        Orderer hf = new Orderer(aFieldIndicies, true);
+        orderers.add(hf);
+        hf.setRowset(this);
+        return hf;
+    }
+
+    /**
+     * Creates and returns new filter based on this rowset.
+     *
+     * @param aFieldIndicies
+     * @return New filter based on this rowset.
+     */
+    public Filter createFilter(List<Integer> aFieldIndicies) {
+        Filter hf = new Filter(aFieldIndicies);
         filters.add(hf);
+        hf.setRowset(this);
         return hf;
     }
 
@@ -1757,9 +1763,22 @@ public class Rowset {
      * @return New locator based on this rowset.
      */
     public Locator createLocator() {
-        Locator hl = new Locator(this);
+        Locator hl = new Locator();
         locators.add(hl);
+        hl.setRowset(this);
         return hl;
+    }
+
+    /**
+     * Removes specified filter from this rowset.
+     *
+     * @param aOrderer Locator object to be removed.
+     * @throws RowsetException
+     */
+    public void removeOrderer(Orderer aOrderer) throws RowsetException {
+        if (orderers.remove(aOrderer)) {
+            aOrderer.setRowset(null);
+        }
     }
 
     /**
@@ -1770,10 +1789,11 @@ public class Rowset {
      */
     public void removeFilter(Filter aFilter) throws RowsetException {
         if (aFilter == activeFilter) {
-            activeFilter.cancelFilter();
+            activeFilter.cancel();
         }
-        aFilter.die();
-        filters.remove(aFilter);
+        if (filters.remove(aFilter)) {
+            aFilter.setRowset(null);
+        }
     }
 
     /**
@@ -1782,8 +1802,9 @@ public class Rowset {
      * @param aLocator Locator object to be removed.
      */
     public void removeLocator(Locator aLocator) {
-        aLocator.die();
-        locators.remove(aLocator);
+        if (locators.remove(aLocator)) {
+            aLocator.setRowset(null);
+        }
     }
 
     /**
@@ -1807,8 +1828,7 @@ public class Rowset {
      * @return Array of locators installed on this rowset.
      */
     public Locator[] getLocators() {
-        Locator[] res = new Locator[locators.size()];
-        return locators.toArray(res);
+        return locators.toArray(new Locator[]{});
     }
 
     /**
@@ -1817,8 +1837,16 @@ public class Rowset {
      * @return Array of filters installed on this rowset.
      */
     public Filter[] getFilters() {
-        Filter[] res = new Filter[filters.size()];
-        return filters.toArray(res);
+        return filters.toArray(new Filter[]{});
+    }
+
+    /**
+     * Returns array of orderers installed on this rowset.
+     *
+     * @return Array of orderers installed on this rowset.
+     */
+    public Orderer[] getOrderers() {
+        return orderers.toArray(new Orderer[]{});
     }
 
     public static List<JSObject> toJs(List<Row> aRows) {

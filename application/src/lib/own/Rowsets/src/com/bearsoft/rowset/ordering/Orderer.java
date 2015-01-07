@@ -4,10 +4,10 @@
  */
 package com.bearsoft.rowset.ordering;
 
-import com.bearsoft.rowset.utils.KeySet;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
+import com.bearsoft.rowset.RowsetContainer;
 import com.bearsoft.rowset.events.RowsetAdapter;
 import com.bearsoft.rowset.events.RowsetDeleteEvent;
 import com.bearsoft.rowset.events.RowsetEventsEarlyAccess;
@@ -31,11 +31,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * The base class for rowset's filters, locators and sorters.
+ * The base class for rowset's filters, locators and orderers.
  *
  * @author mg
  */
-public abstract class HashOrderer extends RowsetAdapter implements RowsetEventsEarlyAccess {
+public class Orderer extends RowsetAdapter implements RowsetEventsEarlyAccess, RowsetContainer {
 
     public static final String CANT_ADD_CONSTRAINT_WHILE_NOT_CONSTRAINTING = "can\'t add constraint while constrainting is not begun";
     public static final String CANT_APPLY_NULL_KEY_SET = "can\'t apply null key set";
@@ -54,13 +54,14 @@ public abstract class HashOrderer extends RowsetAdapter implements RowsetEventsE
     }
     protected Rowset rowset;
     protected List<Integer> fieldsIndicies = new ArrayList<>();
-    protected Map<KeySet, TaggedList<Row>> ordered;
+    protected Map<List<Object>, TaggedList<Row>> ordered;
     protected PropertyChangeListener keysInvalidator = (PropertyChangeEvent evt) -> {
         try {
             Row row = (Row) evt.getSource();
-            keysChanged(row);
+            int colIndex = (Integer) evt.getPropagationId();
+            keysChanged(row, colIndex, evt.getOldValue(), evt.getNewValue());
         } catch (RowsetException ex) {
-            Logger.getLogger(HashOrderer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Orderer.class.getName()).log(Level.SEVERE, null, ex);
         }
     };
     protected final boolean stable;
@@ -72,13 +73,13 @@ public abstract class HashOrderer extends RowsetAdapter implements RowsetEventsE
      * @param aFieldsIndicies
      * @param aStable
      */
-    public HashOrderer(List<Integer> aFieldsIndicies, boolean aStable) {
+    public Orderer(List<Integer> aFieldsIndicies, boolean aStable) {
         super();
         fieldsIndicies = aFieldsIndicies;
         stable = aStable;
     }
 
-    public HashOrderer(List<Integer> aFieldsIndicies) {
+    public Orderer(List<Integer> aFieldsIndicies) {
         this(aFieldsIndicies, false);
     }
 
@@ -91,24 +92,32 @@ public abstract class HashOrderer extends RowsetAdapter implements RowsetEventsE
      *
      * @return Underlying rowset object.
      */
+    @Override
     public Rowset getRowset() {
         return rowset;
     }
 
     public void setRowset(Rowset aValue) {
-        if (rowset != null) {
-            ordered = null;
-            rowset.removeRowsetListener(this);
-        }
-        rowset = aValue;
-        if (rowset != null) {
-            ordered = new HashMap<>();
-            addRows();
-            rowset.addRowsetListener(this);
+        if (rowset != aValue) {
+            if (rowset != null) {
+                ordered = null;
+                rowset.removeRowsetListener(this);
+            }
+            rowset = aValue;
+            if (rowset != null) {
+                ordered = new HashMap<>();
+                addRows();
+                rowset.addRowsetListener(this);
+            }
         }
     }
 
     protected void clear() {
+        ordered.values().stream().forEach((TaggedList<Row> aContent) -> {
+            aContent.stream().forEach((Row aRow) -> {
+                unsignFrom(aRow);
+            });
+        });
         if (stable) {
             ordered.values().stream().forEach((TaggedList<Row> aContent) -> {
                 aContent.clear();
@@ -123,7 +132,7 @@ public abstract class HashOrderer extends RowsetAdapter implements RowsetEventsE
             try {
                 add(aRow);
             } catch (InvalidColIndexException ex) {
-                Logger.getLogger(HashOrderer.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(Orderer.class.getName()).log(Level.SEVERE, null, ex);
             }
         };
         if (rowset.getActiveFilter() != null) {
@@ -177,7 +186,11 @@ public abstract class HashOrderer extends RowsetAdapter implements RowsetEventsE
      * @throws com.bearsoft.rowset.exceptions.InvalidColIndexException
      */
     public boolean add(Row aRow) throws InvalidColIndexException {
-        KeySet ks = makeKeySet(aRow, fieldsIndicies);
+        return add(aRow, true);
+    }
+
+    public boolean add(Row aRow, boolean addToSubset) throws InvalidColIndexException {
+        List<Object> ks = makeKeys(aRow, fieldsIndicies);
         if (ks != null) {
             TaggedList<Row> subset = ordered.get(ks);
             // add to structure
@@ -186,7 +199,10 @@ public abstract class HashOrderer extends RowsetAdapter implements RowsetEventsE
                 ordered.put(ks, subset);
             }
             signOn(aRow);
-            return subset.add(aRow);
+            if (addToSubset) {
+                subset.add(aRow);
+            }
+            return true;
         }
         return false;
     }
@@ -199,17 +215,26 @@ public abstract class HashOrderer extends RowsetAdapter implements RowsetEventsE
      * @throws RowsetException
      */
     public boolean remove(Row aRow) throws RowsetException {
-        KeySet ks = makeKeySet(aRow, fieldsIndicies);
+        return remove(aRow, true);
+    }
+
+    public boolean remove(Row aRow, boolean removeFromSubset) throws RowsetException {
+        List<Object> ks = makeKeys(aRow, fieldsIndicies);
         if (ks != null) {
             // delete from structure
             List<Row> subset = ordered.get(ks);
             if (subset != null) {
-                boolean removed = subset.remove(aRow);
+                if (removeFromSubset) {
+                    subset.remove(aRow);
+                }
                 unsignFrom(aRow);
                 if (!stable && subset.isEmpty()) {
                     ordered.remove(ks);
                 }
-                return removed;
+                // Subset may be used by applied filter and so
+                // row may be already removed from it.
+                // So, we have to perform our work regardless of subset.remove() result.
+                return true;
             }
         }
         return false;
@@ -226,7 +251,7 @@ public abstract class HashOrderer extends RowsetAdapter implements RowsetEventsE
      */
     public boolean containsKeys(Object... values) throws RowsetException {
         if (values != null && values.length > 0) {
-            KeySet ks = valuesToKeySet(values);
+            List<Object> ks = valuesToKeySet(values);
             return ordered.containsKey(ks);
         }
         return false;
@@ -243,7 +268,7 @@ public abstract class HashOrderer extends RowsetAdapter implements RowsetEventsE
      */
     public Collection<Row> get(Object... values) throws RowsetException {
         if (values != null && values.length > 0) {
-            KeySet ks = valuesToKeySet(values);
+            List<Object> ks = valuesToKeySet(values);
             return ordered.get(ks);
         }
         return null;
@@ -251,7 +276,7 @@ public abstract class HashOrderer extends RowsetAdapter implements RowsetEventsE
 
     public boolean putKeys(Object... values) throws RowsetException {
         if (values != null && values.length > 0) {
-            KeySet ks = valuesToKeySet(values);
+            List<Object> ks = valuesToKeySet(values);
             if (!ordered.containsKey(ks)) {
                 ordered.put(ks, new TaggedList<>());
             }
@@ -259,8 +284,8 @@ public abstract class HashOrderer extends RowsetAdapter implements RowsetEventsE
         return false;
     }
 
-    protected KeySet valuesToKeySet(Object[] values) throws RowsetException {
-        KeySet ks = new KeySet();
+    protected List<Object> valuesToKeySet(Object[] values) throws RowsetException {
+        List<Object> ks = new ArrayList<>();
         assert fieldsIndicies.size() == values.length;
         for (int i = 0; i < fieldsIndicies.size(); i++) {
             Object value = rowset.getConverter().convert2RowsetCompatible(values[i], rowset.getFields().get(fieldsIndicies.get(i)).getTypeInfo());
@@ -277,8 +302,8 @@ public abstract class HashOrderer extends RowsetAdapter implements RowsetEventsE
      * @return Key set been maded.
      * @throws com.bearsoft.rowset.exceptions.InvalidColIndexException
      */
-    protected KeySet makeKeySet(Row aRow, List<Integer> fieldsIndicies) throws InvalidColIndexException {
-        KeySet ks = new KeySet();
+    protected List<Object> makeKeys(Row aRow, List<Integer> fieldsIndicies) throws InvalidColIndexException {
+        List<Object> ks = new ArrayList<>();
         Fields _fields = aRow.getFields();
         for (int i = 0; i < fieldsIndicies.size(); i++) {
             int fIndex = fieldsIndicies.get(i);
@@ -322,7 +347,7 @@ public abstract class HashOrderer extends RowsetAdapter implements RowsetEventsE
         try {
             remove(event.getRow());
         } catch (RowsetException ex) {
-            Logger.getLogger(HashOrderer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Orderer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -331,7 +356,7 @@ public abstract class HashOrderer extends RowsetAdapter implements RowsetEventsE
         try {
             add(event.getRow());
         } catch (RowsetException ex) {
-            Logger.getLogger(HashOrderer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Orderer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -353,8 +378,31 @@ public abstract class HashOrderer extends RowsetAdapter implements RowsetEventsE
         addRows();
     }
 
-    protected void keysChanged(Row Row) throws RowsetException {
-        remove(Row);
-        add(Row);
+    protected void keysChanged(Row aRow, int aColIndex, Object aOldValue, Object aNewValue) throws RowsetException {
+        List<Object> keysToRemove = new ArrayList<>();
+        Fields _fields = aRow.getFields();
+        for (int i = 0; i < fieldsIndicies.size(); i++) {
+            int fIndex = fieldsIndicies.get(i);
+            if (fIndex >= 1 && fIndex <= _fields.getFieldsCount()) {
+                Object oKey = aRow.getColumnObject(fIndex);
+                if (aColIndex == fIndex) {
+                    oKey = aOldValue;
+                }
+                if (oKey != null && oKey instanceof String && !caseSensitive) {
+                    oKey = ((String) oKey).toLowerCase();
+                }
+                keysToRemove.add(oKey);
+            }
+        }
+        // delete from structure
+        List<Row> subset = ordered.get(keysToRemove);
+        if (subset != null) {
+            subset.remove(aRow);
+            unsignFrom(aRow);
+            if (!stable && subset.isEmpty()) {
+                ordered.remove(keysToRemove);
+            }
+        }
+        add(aRow);
     }
 }

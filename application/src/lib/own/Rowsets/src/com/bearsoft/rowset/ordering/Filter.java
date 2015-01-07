@@ -5,11 +5,12 @@
 package com.bearsoft.rowset.ordering;
 
 import com.bearsoft.rowset.Row;
+import com.bearsoft.rowset.events.RowsetDeleteEvent;
 import com.bearsoft.rowset.events.RowsetInsertEvent;
 import com.bearsoft.rowset.events.RowsetListener;
+import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.utils.KeySet;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
@@ -18,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -25,13 +28,13 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class Filter extends HashOrderer implements HasPublished {
+public class Filter extends Orderer implements HasPublished {
 
     protected List<Row> originalRows;
     protected int originalPos;
     //
     protected boolean filterApplied;
-    protected KeySet keysetApplied;
+    protected List<Object> appliedKeys;
     protected JSObject published;
 
     /**
@@ -44,15 +47,15 @@ public class Filter extends HashOrderer implements HasPublished {
     }
 
     /**
-     * Returns applied values vector (KeySet) according to feilds indicies
-     * vector, setted previously.
+     * Returns applied keys List according to feilds indicies vector, setted
+     * previously.
      *
      * @return Applied values KeySet.
      * @see #getFields()
      * @see #setFields(java.util.Vector)
      */
-    public KeySet getKeysetApplied() {
-        return keysetApplied;
+    public List<Object> getAppliedKeys() {
+        return appliedKeys;
     }
 
     /**
@@ -93,17 +96,17 @@ public class Filter extends HashOrderer implements HasPublished {
      * Sets rowset's cursor position was in the rowset before this filter has
      * been applied.
      *
-     * @param aPos Position is to be setted.
+     * @param Row
+     * @param aColIndex
+     * @param aOldValue
+     * @param aNewValue
+     * @throws com.bearsoft.rowset.exceptions.RowsetException
      */
-    public void setOriginalPos(int aPos) {
-        originalPos = aPos;
-    }
-
     @Override
-    protected void keysChanged(Row Row) throws RowsetException {
-        super.keysChanged(Row);
+    protected void keysChanged(Row Row, int aColIndex, Object aOldValue, Object aNewValue) throws RowsetException {
+        super.keysChanged(Row, aColIndex, aOldValue, aNewValue);
         if (filterApplied && rowset.isImmediateFilter()) {
-            refilterRowset();
+            rowset.getRowsetChangeSupport().fireFilteredEvent();
         }
     }
 
@@ -113,31 +116,9 @@ public class Filter extends HashOrderer implements HasPublished {
      * @throws RowsetException
      */
     public void refilterRowset() throws RowsetException {
-        filterRowset(keysetApplied);
+        apply(appliedKeys);
     }
 
-    /**
-     * Applies this filter to the rowset with keys values according to fields
-     * (columns) conditions collection already prepared with
-     * <code>setFields()</code> or <code>...Constrainting()</code> methods.
-     *
-     * @param values Values vector.
-     * @throws RowsetException
-     * @see #beginConstrainting()
-     * @see #isConstrainting()
-     * @see #addConstraint(int aFieldIndex)
-     * @see #removeConstraint(int aFieldIndex)
-     * @see #endConstrainting()
-     */
-    public void filterRowset(Object... values) throws RowsetException {
-        if (values != null && values.length > 0) {
-            KeySet ks = new KeySet();
-            ks.addAll(Arrays.asList(values));
-            filterRowset(ks);
-        } else {
-            throw new RowsetException("bad filtering conditions. Absent or empty");
-        }
-    }
     private boolean filtering = false;
 
     /**
@@ -153,7 +134,7 @@ public class Filter extends HashOrderer implements HasPublished {
      * @see #removeConstraint(int aFieldIndex)
      * @see #endConstrainting()
      */
-    public void filterRowset(KeySet values) throws RowsetException {
+    public void apply(List<Object> values) throws RowsetException {
         if (rowset != null) {
             if (!filtering) {
                 filtering = true;
@@ -174,43 +155,35 @@ public class Filter extends HashOrderer implements HasPublished {
                                     throw new RowsetException("Filtering keys array is greater then rowset's fields array");
                                 }
                             }
-                            if (filterApplied) {
-                                filterApplied = false;
+                            boolean wasBeforeFirst = rowset.isBeforeFirst();
+                            boolean wasAfterLast = rowset.isAfterLast();
+                            TaggedList<Row> subSet = ordered.get(values);
+                            if (subSet == null) {
+                                subSet = new TaggedList<>();
+                                ordered.put(values, subSet);
                             }
-                            Filter activeFilter = rowset.getActiveFilter();
-                            boolean foreignFilter = activeFilter == null || activeFilter != this;
-                            if (foreignFilter && activeFilter != null) {
-                                activeFilter.cancelFilter();
+                            if (rowset.getActiveFilter() != null) {
+                                rowset.getActiveFilter().cancel();
                             }
-                            if (!filterApplied) {
-                                boolean wasBeforeFirst = rowset.isBeforeFirst();
-                                boolean wasAfterLast = rowset.isAfterLast();
-                                List<Row> subSet = ordered.get(values);
-                                if (subSet == null) {
-                                    subSet = new ArrayList<>();
+                            originalRows = rowset.getCurrent();
+                            originalPos = rowset.getCursorPos();
+                            rowset.setCurrent(subSet);
+                            rowset.setActiveFilter(this);
+                            Set<RowsetListener> listeners = rowset.getRowsetChangeSupport().getRowsetListeners();
+                            rowset.getRowsetChangeSupport().setRowsetListeners(null);
+                            try {
+                                if (wasBeforeFirst) {
+                                    rowset.beforeFirst();
+                                } else if (wasAfterLast) {
+                                    rowset.afterLast();
+                                } else if (!rowset.isEmpty()) {
+                                    rowset.first();
                                 }
-                                if (foreignFilter) {
-                                    originalRows = rowset.getCurrent();
-                                    originalPos = rowset.getCursorPos();
-                                }
-                                rowset.setCurrent(subSet);
-                                rowset.setActiveFilter(this);
-                                Set<RowsetListener> l = rowset.getRowsetChangeSupport().getRowsetListeners();
-                                rowset.getRowsetChangeSupport().setRowsetListeners(null);
-                                try {
-                                    if (wasBeforeFirst) {
-                                        rowset.beforeFirst();
-                                    } else if (wasAfterLast) {
-                                        rowset.afterLast();
-                                    } else if (!rowset.isEmpty()) {
-                                        rowset.first();
-                                    }
-                                } finally {
-                                    rowset.getRowsetChangeSupport().setRowsetListeners(l);
-                                }
-                                filterApplied = true;
-                                keysetApplied = values;
+                            } finally {
+                                rowset.getRowsetChangeSupport().setRowsetListeners(listeners);
                             }
+                            filterApplied = true;
+                            appliedKeys = values;
                             rowset.getRowsetChangeSupport().fireFilteredEvent();
                         }
                     } else {
@@ -231,32 +204,19 @@ public class Filter extends HashOrderer implements HasPublished {
             + " * @param values Values for keys in createFilter() call.\n"
             + " */", params = "values")
     public void apply(Object... values) throws RowsetException {
-        filterRowset(values);
+        if (values != null && values.length > 0) {
+            List<Object> ks = new ArrayList<>();
+            ks.addAll(Arrays.asList(values));
+            apply(ks);
+        } else {
+            throw new RowsetException("bad filtering conditions. Absent or empty");
+        }
     }
 
     @ScriptFunction(jsDoc = "/**\n"
             + " * Cancels applied filter.\n"
             + " */")
     public void cancel() throws RowsetException {
-        cancelFilter();
-    }
-
-    /**
-     * Returns whether any filter is applied on the underlying rowset.
-     *
-     * @return Whether any filter is applied on the underlying rowset.
-     */
-    protected boolean isAnyFilterInstalled() {
-        return rowset != null && rowset.getActiveFilter() != null;
-    }
-
-    /**
-     * Cancels this filter from rowset.
-     *
-     * @throws IllegalStateException
-     * @throws RowsetException
-     */
-    public void cancelFilter() throws RowsetException {
         if (rowset != null) {
             if (!filtering) {
                 filtering = true;
@@ -283,7 +243,7 @@ public class Filter extends HashOrderer implements HasPublished {
                             throw new RowsetException(ORIGINAL_ROWS_IS_MISSING);
                         }
                         filterApplied = false;
-                        assert !isAnyFilterInstalled();
+                        assert rowset.getActiveFilter() == null;
                     }
                 } finally {
                     filtering = false;
@@ -296,20 +256,40 @@ public class Filter extends HashOrderer implements HasPublished {
 
     @Override
     public void rowInserted(RowsetInsertEvent event) {
-        super.rowInserted(event);
         if (filterApplied) {
-            Row insertingRow = event.getRow();
-            // work on rowset's native rows, hided by the filter
-            if (originalPos == 0) { // before first
-                originalRows.add(0, insertingRow);
-                originalPos = 1;
-            } else if (originalPos > originalRows.size()) {
-                originalRows.add(insertingRow);
-                originalPos = originalRows.size();
-            } else {
-                originalRows.add(originalPos, insertingRow);
-                originalPos++;
+            try {
+                Row insertingRow = event.getRow();
+                add(insertingRow, false);
+                // work on rowset's native rows, hided by the filter
+                if (originalPos == 0) { // before first
+                    originalRows.add(0, insertingRow);
+                    originalPos = 1;
+                } else if (originalPos > originalRows.size()) {
+                    originalRows.add(insertingRow);
+                    originalPos = originalRows.size();
+                } else {
+                    originalRows.add(originalPos, insertingRow);
+                    originalPos++;
+                }
+            } catch (InvalidColIndexException ex) {
+                Logger.getLogger(Filter.class.getName()).log(Level.SEVERE, null, ex);
             }
+        } else {
+            super.rowInserted(event);
+        }
+    }
+
+    @Override
+    public void rowDeleted(RowsetDeleteEvent event) {
+        if (filterApplied) {
+            try {
+                remove(event.getRow(), false);
+                // cancel() will take care of originalRows.
+            } catch (RowsetException ex) {
+                Logger.getLogger(Filter.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else {
+            super.rowDeleted(event);
         }
     }
 
