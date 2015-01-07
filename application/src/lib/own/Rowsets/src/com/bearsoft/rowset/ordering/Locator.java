@@ -24,7 +24,9 @@ import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Locator is filter subclass, intended to locate particular rows. It doesn't
@@ -32,7 +34,7 @@ import java.util.List;
  *
  * @author mg
  */
-public class Locator extends HashOrderer {
+public class Locator {
 
     protected class Invalidator extends RowsetAdapter implements RowsetEventsEarlyAccess {
 
@@ -75,10 +77,10 @@ public class Locator extends HashOrderer {
     public static final String LOCATOR_IS_INVALID = "locator is invalid! Rowset was edited but locator havn\'t been rebuild.";
     public static final String INDEX_IS_INVALID = "index is out of bounds";
     public static final String WRONG_POSITION_MARKER = "invalid position in locator's subset";
-    protected TaggedList<RowWrap> subSet;
     protected int subSetPos = -1;
+    protected Rowset rowset;
     protected RowsetListener invalidator = new Invalidator();
-    protected List<Runnable> keyInvalidators = new ArrayList<>();
+    protected Map<Row, Integer> indices = new HashMap<>();
 
     /**
      * Locator's constructor.
@@ -86,34 +88,9 @@ public class Locator extends HashOrderer {
      * @param aRowset Rowset this locator is build for.
      */
     public Locator(Rowset aRowset) {
-        super(aRowset);
-        aRowset.addRowsetListener(invalidator);
-    }
-
-    /**
-     * Returns <code>Row</code> object from rowset on witch this locator was
-     * created
-     *
-     * @param aIndex Index of row in the rows subset vector. Index is 0-based
-     * @return A <code>Row</code> object.
-     */
-    public Row getRow(int aIndex) throws IllegalStateException {
-        if (subSet != null && !subSet.isEmpty()) {
-            if (rowset != null) {
-                if (valid) {
-                    if (aIndex >= 0 && aIndex < subSet.size()) {
-                        return subSet.get(aIndex).getRow();
-                    } else {
-                        throw new IllegalStateException(INDEX_IS_INVALID);
-                    }
-                } else {
-                    throw new IllegalStateException(LOCATOR_IS_INVALID);
-                }
-            } else {
-                throw new IllegalStateException(ROWSET_MISSING);
-            }
-        }
-        return null;
+        super();
+        rowset = aRowset;
+        rowset.addRowsetListener(invalidator);
     }
 
     /**
@@ -126,23 +103,9 @@ public class Locator extends HashOrderer {
      * @throws IllegalStateException
      */
     public int indexOf(Row aRow) throws IllegalStateException {
-        if (subSet != null && !subSet.isEmpty()) {
-            if (rowset != null) {
-                if (valid) {
-                    for (int i = 0; i < subSet.size(); i++) {
-                        RowWrap rw = subSet.get(i);
-                        if (rw != null && rw.getRow() == aRow) {
-                            return i;
-                        }
-                    }
-                } else {
-                    throw new IllegalStateException(LOCATOR_IS_INVALID);
-                }
-            } else {
-                throw new IllegalStateException(ROWSET_MISSING);
-            }
-        }
-        return -1;
+        validate();
+        Integer idx = indices.get(aRow);
+        return idx != null ? idx : -1;
     }
 
     /**
@@ -152,7 +115,6 @@ public class Locator extends HashOrderer {
      * @param aIndex Index, the row would be at.
      * @return A <code>Row</code> object.
      * @throws ArrayIndexOutOfBoundsException
-     */
     public Row changeRowPosition(Row aRow, int aIndex) throws ArrayIndexOutOfBoundsException {
         if (subSet != null && !subSet.isEmpty()) {
             if (rowset != null) {
@@ -182,55 +144,7 @@ public class Locator extends HashOrderer {
         }
         return null;
     }
-
-    /**
-     * Finds subset of rows, corresponding to values, passed to the method.
-     * Performs converting of passed values from thier's types to rowset's
-     * corresponding fields types.
-     *
-     * @param values Keys vector to find
-     * @return Whether subset of rows is found.
-     * @throws RowsetException
-     */
-    public boolean find(Object... values) throws RowsetException {
-        if (values != null && values.length > 0) {
-            KeySet ks = new KeySet();
-            assert fieldsIndicies.size() == values.length;
-            for (int i = 0; i < fieldsIndicies.size(); i++) {
-                Object value = rowset.getConverter().convert2RowsetCompatible(values[i], rowset.getFields().get(fieldsIndicies.get(i)).getTypeInfo());
-                ks.add(value);
-            }
-            return find(ks);
-        }
-        return false;
-    }
-
-    /**
-     * Find subset of rows, corresponding to <code>KeySet</code>, passed to the
-     * method. Any converting is not performed. Types of values passed in
-     * <code>values</code> parameter must be equal with types of corresponding
-     * fields.
-     *
-     * @param values Keys vector to find.
-     * @return Whether subset of rows is found.
-     * @throws RowsetException
-     */
-    public boolean find(KeySet values) throws RowsetException {
-        if (rowset != null) {
-            if (!valid) {
-                validate();
-            }
-            if (valid) {
-                subSet = ordered.get(values);
-                subSetPos = -1;
-                return (subSet != null && !subSet.isEmpty());
-            } else {
-                throw new IllegalStateException(LOCATOR_IS_INVALID);
-            }
-        } else {
-            throw new IllegalStateException(ROWSET_MISSING);
-        }
-    }
+    */
 
     /**
      * Returns size of current subset. Current subset is defined when

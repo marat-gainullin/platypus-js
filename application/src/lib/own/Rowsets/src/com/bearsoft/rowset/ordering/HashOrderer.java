@@ -8,20 +8,34 @@ import com.bearsoft.rowset.utils.KeySet;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
+import com.bearsoft.rowset.events.RowsetAdapter;
+import com.bearsoft.rowset.events.RowsetDeleteEvent;
+import com.bearsoft.rowset.events.RowsetEventsEarlyAccess;
+import com.bearsoft.rowset.events.RowsetInsertEvent;
+import com.bearsoft.rowset.events.RowsetNextPageEvent;
+import com.bearsoft.rowset.events.RowsetRequeryEvent;
+import com.bearsoft.rowset.events.RowsetRollbackEvent;
+import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Field;
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The base class for rowset's filters, locators and sorters.
  *
  * @author mg
  */
-public abstract class HashOrderer extends Object {
+public abstract class HashOrderer extends RowsetAdapter implements RowsetEventsEarlyAccess {
 
     public static final String CANT_ADD_CONSTRAINT_WHILE_NOT_CONSTRAINTING = "can\'t add constraint while constrainting is not begun";
     public static final String CANT_APPLY_NULL_KEY_SET = "can\'t apply null key set";
@@ -39,22 +53,37 @@ public abstract class HashOrderer extends Object {
         public Object tag;
     }
     protected Rowset rowset;
-    protected Fields fields;
     protected List<Integer> fieldsIndicies = new ArrayList<>();
-    protected boolean constrainting;
-    protected Map<KeySet, TaggedList<RowWrap>> ordered = new HashMap<>();
+    protected Map<KeySet, TaggedList<Row>> ordered;
+    protected PropertyChangeListener keysInvalidator = (PropertyChangeEvent evt) -> {
+        try {
+            Row row = (Row) evt.getSource();
+            keysChanged(row);
+        } catch (RowsetException ex) {
+            Logger.getLogger(HashOrderer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    };
+    protected final boolean stable;
     protected boolean caseSensitive = true;
-    protected boolean valid;
 
     /**
      * Filter constructor.
      *
-     * @param aRowset The rowset this filter to be applied on.
+     * @param aFieldsIndicies
+     * @param aStable
      */
-    public HashOrderer(Rowset aRowset) {
+    public HashOrderer(List<Integer> aFieldsIndicies, boolean aStable) {
         super();
-        rowset = aRowset;
-        fields = aRowset.getFields();
+        fieldsIndicies = aFieldsIndicies;
+        stable = aStable;
+    }
+
+    public HashOrderer(List<Integer> aFieldsIndicies) {
+        this(aFieldsIndicies, false);
+    }
+
+    public boolean isStable() {
+        return stable;
     }
 
     /**
@@ -64,6 +93,44 @@ public abstract class HashOrderer extends Object {
      */
     public Rowset getRowset() {
         return rowset;
+    }
+
+    public void setRowset(Rowset aValue) {
+        if (rowset != null) {
+            ordered = null;
+            rowset.removeRowsetListener(this);
+        }
+        rowset = aValue;
+        if (rowset != null) {
+            ordered = new HashMap<>();
+            addRows();
+            rowset.addRowsetListener(this);
+        }
+    }
+
+    protected void clear() {
+        if (stable) {
+            ordered.values().stream().forEach((TaggedList<Row> aContent) -> {
+                aContent.clear();
+            });
+        } else {
+            ordered.clear();
+        }
+    }
+
+    protected void addRows() {
+        Consumer<Row> adder = (Row aRow) -> {
+            try {
+                add(aRow);
+            } catch (InvalidColIndexException ex) {
+                Logger.getLogger(HashOrderer.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        };
+        if (rowset.getActiveFilter() != null) {
+            rowset.getActiveFilter().getOriginalRows().stream().forEach(adder);
+        } else {
+            rowset.getCurrent().stream().forEach(adder);
+        }
     }
 
     /**
@@ -78,10 +145,10 @@ public abstract class HashOrderer extends Object {
     /**
      * Sets case sensivity of this rowset's filter.
      *
-     * @param caseSensitive The case sensivity flag to be setted tothe filter.
+     * @param aValue The case sensivity flag to be setted tothe filter.
      */
-    public void setCaseSensitive(boolean caseSensitive) {
-        this.caseSensitive = caseSensitive;
+    public void setCaseSensitive(boolean aValue) {
+        caseSensitive = aValue;
     }
 
     /**
@@ -91,177 +158,41 @@ public abstract class HashOrderer extends Object {
      * @return Fields (columns) ordinal numbers vector.
      */
     public List<Integer> getFields() {
-        return fieldsIndicies;
+        return Collections.unmodifiableList(fieldsIndicies);
     }
 
-    /**
-     * Sets fields (columns) ordinal numbers vector. Theese fields (columns) are
-     * used to perform the filtering. The indices are 1-based.
-     *
-     * @param fields Fields (columns) ordinal numbers vector.
-     */
-    public void setFields(List<Integer> fields) {
-        this.fieldsIndicies = fields;
+    public boolean isCriterion(int aFieldIndex) {
+        return fieldsIndicies != null && fieldsIndicies.contains(aFieldIndex);
     }
 
-    /**
-     * Begins filtering fields (columns) vector building.
-     *
-     * @throws IllegalStateException
-     * @see #isConstrainting()
-     * @see #addConstraint(int aFieldIndex)
-     * @see #removeConstraint(int aFieldIndex)
-     * @see #endConstrainting()
-     * @see #isEmpty()
-     */
-    public void beginConstrainting() throws IllegalStateException {
-        if (!constrainting) {
-            constrainting = true;
-        } else {
-            throw new IllegalStateException(CONSTRAINTING_ALREADY_BEGUN);
-        }
-    }
-
-    /**
-     * Adds field (column) index to filtering fields (columns) vector
-     *
-     * @param aFieldIndex A field (column) index to be added.
-     * @throws IllegalStateException
-     * @see #beginConstrainting()
-     * @see #isConstrainting()
-     * @see #removeConstraint(int aFieldIndex)
-     * @see #endConstrainting()
-     * @see #isEmpty()
-     */
-    public void addConstraint(int aFieldIndex) throws IllegalStateException {
-        if (constrainting) {
-            fieldsIndicies.add(aFieldIndex);
-        } else {
-            throw new IllegalStateException(CANT_ADD_CONSTRAINT_WHILE_NOT_CONSTRAINTING);
-        }
-    }
-
-    /**
-     * Removes field (column) index from filtering fields (columns) vector
-     *
-     * @param aFieldIndex A field (column) index to be deleted.
-     * @throws IllegalStateException
-     * @see #beginConstrainting()
-     * @see #isConstrainting()
-     * @see #addConstraint(int aFieldIndex)
-     * @see #endConstrainting()
-     * @see #isEmpty()
-     */
-    public void removeConstraint(int aFieldIndex) throws IllegalStateException {
-        if (constrainting) {
-            fieldsIndicies.remove(aFieldIndex);
-        } else {
-            throw new IllegalStateException(CANT_REMOVE_CONSTRAINT_WHILE_NOT_CONSTRAINTING);
-        }
-    }
-
-    /**
-     * Ends the process of filtering fields vector constructing.
-     *
-     * @throws IllegalStateException
-     * @see #beginConstrainting()
-     * @see #isConstrainting()
-     * @see #addConstraint(int aFieldIndex)
-     * @see #removeConstraint(int aFieldIndex)
-     * @see #isEmpty()
-     */
-    public void endConstrainting() throws IllegalStateException {
-        if (constrainting) {
-            constrainting = false;
-        } else {
-            throw new IllegalStateException(CONSTRAINTING_NOT_BEGUN_YET);
-        }
-    }
-
-    /**
-     * Returns whether filtering fields (columns) vector building is in process.
-     *
-     * @return Whether filtering fields (columns) vector building is in process.
-     * @see #beginConstrainting()
-     * @see #addConstraint(int aFieldIndex)
-     * @see #removeConstraint(int aFieldIndex)
-     * @see #endConstrainting()
-     * @see #isEmpty()
-     */
-    public boolean isConstrainting() {
-        return constrainting;
-    }
-
-    /**
-     * Returns whether a <code>aFieldIndex</code> is in filtering conditions
-     * vector.
-     *
-     * @param aFieldIndex Fields index to check.
-     * @return Whether a <code>aFieldIndex</code> is in filtering conditions
-     * vector.
-     * @see beginConstrainting()
-     * @see isConstrainting()
-     * @see addConstraint(int aFieldIndex)
-     * @see removeConstraint(int aFieldIndex)
-     * @see endConstrainting()
-     * @see isEmpty()
-     */
-    public boolean isFilteringCriteria(int aFieldIndex) {
-        return fieldsIndicies != null && fieldsIndicies.indexOf(aFieldIndex) != -1;
-    }
-
-    /**
-     * Returns whether filtering fields vector is empty.
-     *
-     * @return Whether filtering fields vector is empty.
-     * @see #beginConstrainting()
-     * @see #isConstrainting()
-     * @see #addConstraint(int aFieldIndex)
-     * @see #removeConstraint(int aFieldIndex)
-     * @see #endConstrainting()
-     */
     public boolean isEmpty() {
         return fieldsIndicies == null || fieldsIndicies.isEmpty();
     }
 
     /**
-     * Helps the GC to do it's work by setting all properties to null.
-     */
-    public void die() {
-        rowset = null;
-        fields = null;
-        fieldsIndicies = null;
-        ordered = null;
-    }
-
-    /**
-     * Builds a hash-ordered structure of the rowset's rows by multi fielded key
-     * set.
+     * Adds a row to hash-ordered structure of rows
      *
-     * @throws RowsetException
+     * @param aRow Row is to be added.
+     * @return True if aRow wass added to the structure, False otherwise.
+     * @throws com.bearsoft.rowset.exceptions.InvalidColIndexException
      */
-    public abstract void build() throws RowsetException;
-
-    /**
-     * Returns index of rows-related wrap in the hash-ordered structure.
-     *
-     * @param aSubSet Subset of rows wraps in the hash-ordered structure.
-     * @param aRow Row index of wich is to be returned.
-     * @return
-     */
-    int indexOfRowWrap(List<RowWrap> aSubSet, Row aRow) {
-        if (aSubSet != null && aRow != null) {
-            for (int i = 0; i < aSubSet.size(); i++) {
-                if (aSubSet.get(i) != null && aSubSet.get(i).getRow() == aRow) {
-                    return i;
-                }
+    public boolean add(Row aRow) throws InvalidColIndexException {
+        KeySet ks = makeKeySet(aRow, fieldsIndicies);
+        if (ks != null) {
+            TaggedList<Row> subset = ordered.get(ks);
+            // add to structure
+            if (subset == null) {
+                subset = new TaggedList<>();
+                ordered.put(ks, subset);
             }
+            signOn(aRow);
+            return subset.add(aRow);
         }
-        return -1;
+        return false;
     }
 
     /**
-     * Removes a row from hash-ordered structure of row wraps.
+     * Removes a row from hash-ordered structure of rows.
      *
      * @param aRow Row is to be removed.
      * @return True if deletion actually happend, False otherwise.
@@ -271,16 +202,71 @@ public abstract class HashOrderer extends Object {
         KeySet ks = makeKeySet(aRow, fieldsIndicies);
         if (ks != null) {
             // delete from structure
-            List<RowWrap> subset = ordered.get(ks);
+            List<Row> subset = ordered.get(ks);
             if (subset != null) {
-                int rIndex = indexOfRowWrap(subset, aRow);
-                if (rIndex >= 0 && rIndex < subset.size()) {
-                    subset.remove(rIndex);
-                    return true;
+                boolean removed = subset.remove(aRow);
+                unsignFrom(aRow);
+                if (!stable && subset.isEmpty()) {
+                    ordered.remove(ks);
                 }
+                return removed;
             }
         }
         return false;
+    }
+
+    /**
+     * Checks wheither the orderer contains rows, corresponding to values,
+     * passed in. Performs converting of passed values from thier's types to
+     * rowset's corresponding fields types.
+     *
+     * @param values Keys to check
+     * @return Whether subset of rows is found.
+     * @throws RowsetException
+     */
+    public boolean containsKeys(Object... values) throws RowsetException {
+        if (values != null && values.length > 0) {
+            KeySet ks = valuesToKeySet(values);
+            return ordered.containsKey(ks);
+        }
+        return false;
+    }
+
+    /**
+     * Finds subset of rows, corresponding to values, passed to the method.
+     * Performs converting of passed values from thier's types to rowset's
+     * corresponding fields types.
+     *
+     * @param values Keys vector to find
+     * @return Whether subset of rows is found.
+     * @throws RowsetException
+     */
+    public Collection<Row> get(Object... values) throws RowsetException {
+        if (values != null && values.length > 0) {
+            KeySet ks = valuesToKeySet(values);
+            return ordered.get(ks);
+        }
+        return null;
+    }
+
+    public boolean putKeys(Object... values) throws RowsetException {
+        if (values != null && values.length > 0) {
+            KeySet ks = valuesToKeySet(values);
+            if (!ordered.containsKey(ks)) {
+                ordered.put(ks, new TaggedList<>());
+            }
+        }
+        return false;
+    }
+
+    protected KeySet valuesToKeySet(Object[] values) throws RowsetException {
+        KeySet ks = new KeySet();
+        assert fieldsIndicies.size() == values.length;
+        for (int i = 0; i < fieldsIndicies.size(); i++) {
+            Object value = rowset.getConverter().convert2RowsetCompatible(values[i], rowset.getFields().get(fieldsIndicies.get(i)).getTypeInfo());
+            ks.add(value);
+        }
+        return ks;
     }
 
     /**
@@ -289,85 +275,86 @@ public abstract class HashOrderer extends Object {
      * @param aRow The source row of the key set values.
      * @param fieldsIndicies Fields indicies to build key set by.
      * @return Key set been maded.
-     * @throws RowsetException
+     * @throws com.bearsoft.rowset.exceptions.InvalidColIndexException
      */
-    protected KeySet makeKeySet(Row aRow, List<Integer> fieldsIndicies) throws RowsetException {
+    protected KeySet makeKeySet(Row aRow, List<Integer> fieldsIndicies) throws InvalidColIndexException {
         KeySet ks = new KeySet();
-        if (fields != null) {
-            for (int i = 0; i < fieldsIndicies.size(); i++) {
-                int fIndex = fieldsIndicies.get(i);
-                if (fIndex >= 1 && fIndex <= fields.getFieldsCount()) {
-                    Object oKey = aRow.getColumnObject(fIndex);
-                    if (oKey != null && oKey instanceof String && !caseSensitive) {
-                        oKey = ((String) oKey).toLowerCase();
-                    }
-                    ks.add(oKey);
+        Fields _fields = aRow.getFields();
+        for (int i = 0; i < fieldsIndicies.size(); i++) {
+            int fIndex = fieldsIndicies.get(i);
+            if (fIndex >= 1 && fIndex <= _fields.getFieldsCount()) {
+                Object oKey = aRow.getColumnObject(fIndex);
+                if (oKey != null && oKey instanceof String && !caseSensitive) {
+                    oKey = ((String) oKey).toLowerCase();
                 }
+                ks.add(oKey);
             }
         }
         return ks;
     }
 
-    protected List<Runnable> signOn(Row aRow, List<Integer> fieldsIndicies, PropertyChangeListener aListener) {
-        List<Runnable> signed = new ArrayList<>();
-        if (fields != null) {
-            for (int i = 0; i < fieldsIndicies.size(); i++) {
-                int fIndex = fieldsIndicies.get(i);
-                if (fIndex >= 1 && fIndex <= fields.getFieldsCount()) {
-                    Field field = fields.get(fIndex);
-                    String fname = field.getName();
-                    aRow.addPropertyChangeListener(fname, aListener);
-                    signed.add(() -> {
-                        aRow.removePropertyChangeListener(fname, aListener);
-                    });
-                }
+    protected void signOn(Row aRow) {
+        Fields _fields = aRow.getFields();
+        for (int i = 0; i < fieldsIndicies.size(); i++) {
+            int fIndex = fieldsIndicies.get(i);
+            if (fIndex >= 1 && fIndex <= _fields.getFieldsCount()) {
+                Field field = _fields.get(fIndex);
+                String fname = field.getName();
+                aRow.addPropertyChangeListener(fname, keysInvalidator);
             }
         }
-        return signed;
     }
 
-    /**
-     * Returns the rowset's current, probably filtered rows vector.
-     *
-     * @return The rowset's current, probably filtered rows vector.
-     */
-    protected List<Row> getRowsetRows() {
-        return rowset.getCurrent();
+    protected void unsignFrom(Row aRow) {
+        Fields _fields = aRow.getFields();
+        for (int i = 0; i < fieldsIndicies.size(); i++) {
+            int fIndex = fieldsIndicies.get(i);
+            if (fIndex >= 1 && fIndex <= _fields.getFieldsCount()) {
+                Field field = _fields.get(fIndex);
+                String fname = field.getName();
+                aRow.removePropertyChangeListener(fname, keysInvalidator);
+            }
+        }
     }
 
-    /**
-     * Returns whether any filter is applied on the underlying rowset.
-     *
-     * @return Whether any filter is applied on the underlying rowset.
-     */
-    protected boolean isAnyFilterInstalled() {
-        return rowset != null && rowset.getActiveFilter() != null;
+    @Override
+    public void rowDeleted(RowsetDeleteEvent event) {
+        try {
+            remove(event.getRow());
+        } catch (RowsetException ex) {
+            Logger.getLogger(HashOrderer.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
-    /**
-     * Marks this orderer as invalid.
-     */
-    public void invalidate() {
-        valid = false;
+    @Override
+    public void rowInserted(RowsetInsertEvent event) {
+        try {
+            add(event.getRow());
+        } catch (RowsetException ex) {
+            Logger.getLogger(HashOrderer.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
-    /**
-     * Returns whether orderer is valid.
-     *
-     * @return Whether orderer is valid.
-     */
-    public boolean isValid() {
-        return valid;
+    @Override
+    public void rowsetRequeried(RowsetRequeryEvent event) {
+        clear();
+        addRows();
     }
 
-    /**
-     * Validates the orderer, building ordered structure of rows.
-     *
-     * @throws RowsetException
-     */
-    public void validate() throws RowsetException {
-        assert !valid;
-        build();
-        valid = true;
+    @Override
+    public void rowsetNextPageFetched(RowsetNextPageEvent event) {
+        clear();
+        addRows();
+    }
+
+    @Override
+    public void rowsetRolledback(RowsetRollbackEvent event) {
+        clear();
+        addRows();
+    }
+
+    protected void keysChanged(Row Row) throws RowsetException {
+        remove(Row);
+        add(Row);
     }
 }
