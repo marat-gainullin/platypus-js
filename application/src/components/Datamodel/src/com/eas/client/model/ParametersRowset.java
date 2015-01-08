@@ -99,6 +99,7 @@ public class ParametersRowset extends Rowset {
         return null;
     }
 
+    /*
     @Override
     public boolean updateObject(int aColIndex, Object aValue) throws RowsetException {
         if (aColIndex >= 1 && aColIndex <= params.getParametersCount()) {
@@ -117,7 +118,7 @@ public class ParametersRowset extends Rowset {
         }
         return false;
     }
-
+*/
     @Override
     public Row getCurrentRow() {
         return paramRow;

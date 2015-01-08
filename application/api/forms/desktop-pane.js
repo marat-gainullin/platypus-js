@@ -228,6 +228,20 @@
              */
             P.DesktopPane.prototype.onComponentResized = {};
         }
+        Object.defineProperty(this, "parent", {
+            get: function() {
+                var value = delegate.parentWidget;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.DesktopPane){
+            /**
+             * Parent container of this widget.
+             * @property parentWidget
+             * @memberOf DesktopPane
+             */
+            P.DesktopPane.prototype.parent = {};
+        }
         Object.defineProperty(this, "onMouseEntered", {
             get: function() {
                 var value = delegate.onMouseEntered;
@@ -327,23 +341,6 @@
              */
             P.DesktopPane.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "visible", {
-            get: function() {
-                var value = delegate.visible;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.visible = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.DesktopPane){
-            /**
-             * Determines whether this component should be visible when its parent is visible.
-             * @property visible
-             * @memberOf DesktopPane
-             */
-            P.DesktopPane.prototype.visible = true;
-        }
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
@@ -360,6 +357,23 @@
              * @memberOf DesktopPane
              */
             P.DesktopPane.prototype.opaque = true;
+        }
+        Object.defineProperty(this, "visible", {
+            get: function() {
+                var value = delegate.visible;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.visible = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.DesktopPane){
+            /**
+             * Determines whether this component should be visible when its parent is visible.
+             * @property visible
+             * @memberOf DesktopPane
+             */
+            P.DesktopPane.prototype.visible = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
@@ -671,13 +685,13 @@
         };
 
         /**
-         * Tries to acquire focus for this component.
-         * @method focus
+         * Minimizes all frames on the pane.
+         * @method minimizeAll
          * @memberOf DesktopPane
          */
-        P.DesktopPane.prototype.focus = function() {
+        P.DesktopPane.prototype.minimizeAll = function() {
             var delegate = this.unwrap();
-            var value = delegate.focus();
+            var value = delegate.minimizeAll();
             return P.boxAsJs(value);
         };
 
@@ -693,17 +707,6 @@
         };
 
         /**
-         * Minimizes all frames on the pane.
-         * @method minimizeAll
-         * @memberOf DesktopPane
-         */
-        P.DesktopPane.prototype.minimizeAll = function() {
-            var delegate = this.unwrap();
-            var value = delegate.minimizeAll();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Maximizes all frames on the pane.
          * @method maximizeAll
          * @memberOf DesktopPane
@@ -711,6 +714,17 @@
         P.DesktopPane.prototype.maximizeAll = function() {
             var delegate = this.unwrap();
             var value = delegate.maximizeAll();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Tries to acquire focus for this component.
+         * @method focus
+         * @memberOf DesktopPane
+         */
+        P.DesktopPane.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
             return P.boxAsJs(value);
         };
 

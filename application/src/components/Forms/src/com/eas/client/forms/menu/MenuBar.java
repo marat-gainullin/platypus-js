@@ -675,6 +675,7 @@ public class MenuBar extends JMenuBar implements HasPublished, HasContainerEvent
     }
     
     // published parent
+    @ScriptFunction(name = "parent", jsDoc = PARENT_JSDOC)
     @Override
     public Widget getParentWidget() {
         return Forms.lookupPublishedParent(this);

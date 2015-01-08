@@ -53,6 +53,7 @@ public class PopupMenu extends JPopupMenu implements HasPublished, HasContainerE
     }
 
     @Override
+    @ScriptFunction(name = "parent", jsDoc = PARENT_JSDOC)
     public Widget getParentWidget() {
         return null;
     }

@@ -20,6 +20,7 @@ import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Field;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -48,13 +50,116 @@ public class Orderer extends RowsetAdapter implements RowsetEventsEarlyAccess, R
     public static final String ORIGINAL_ROWS_IS_MISSING = "original rows is missing!";
     public static final String ROWSET_MISSING = "rowset missing";
 
-    public static class TaggedList<T> extends ArrayList<T> {
+    public static class ObservableList<T> extends ArrayList<T> {
 
         public Object tag;
+        protected PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+
+        public void addPropertyChangeListener(PropertyChangeListener aListener) {
+            propertyChangeSupport.addPropertyChangeListener(aListener);
+        }
+
+        public void addPropertyChangeListener(String aPropertyName, PropertyChangeListener aListener) {
+            propertyChangeSupport.addPropertyChangeListener(aPropertyName, aListener);
+        }
+
+        public void removePropertyChangeListener(PropertyChangeListener aListener) {
+            propertyChangeSupport.removePropertyChangeListener(aListener);
+        }
+
+        public void removePropertyChangeListener(String aPropertyName, PropertyChangeListener aListener) {
+            propertyChangeSupport.removePropertyChangeListener(aPropertyName, aListener);
+        }
+
+        @Override
+        public boolean remove(Object o) {
+            int oldLength = super.size();
+            if (super.remove(o)) {
+                propertyChangeSupport.firePropertyChange("length", oldLength, super.size());
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public T remove(int index) {
+            int oldLength = super.size();
+            T res = super.remove(index);
+            propertyChangeSupport.firePropertyChange("length", oldLength, super.size());
+            return res;
+        }
+
+        @Override
+        public boolean removeAll(Collection<?> c) {
+            int oldLength = super.size();
+            boolean res = super.removeAll(c);
+            propertyChangeSupport.firePropertyChange("length", oldLength, super.size());
+            return res;
+        }
+
+        @Override
+        protected void removeRange(int fromIndex, int toIndex) {
+            int oldLength = super.size();
+            super.removeRange(fromIndex, toIndex);
+            propertyChangeSupport.firePropertyChange("length", oldLength, super.size());
+        }
+
+        @Override
+        public boolean removeIf(Predicate<? super T> filter) {
+            int oldLength = super.size();
+            if (super.removeIf(filter)) {
+                propertyChangeSupport.firePropertyChange("length", oldLength, super.size());
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public boolean add(T e) {
+            int oldLength = super.size();
+            if (super.add(e)) {
+                propertyChangeSupport.firePropertyChange("length", oldLength, super.size());
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public void add(int index, T element) {
+            int oldLength = super.size();
+            super.add(index, element);
+            propertyChangeSupport.firePropertyChange("length", oldLength, super.size());
+        }
+
+        @Override
+        public boolean addAll(Collection<? extends T> c) {
+            int oldLength = super.size();
+            if (super.addAll(c)) {
+                propertyChangeSupport.firePropertyChange("length", oldLength, super.size());
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public boolean addAll(int index, Collection<? extends T> c) {
+            int oldLength = super.size();
+            if (super.addAll(index, c)) {
+                propertyChangeSupport.firePropertyChange("length", oldLength, super.size());
+                return true;
+            } else {
+                return false;
+            }
+        }
+
     }
     protected Rowset rowset;
     protected List<Integer> fieldsIndicies = new ArrayList<>();
-    protected Map<List<Object>, TaggedList<Row>> ordered;
+    protected Map<List<Object>, ObservableList<Row>> ordered;
     protected PropertyChangeListener keysInvalidator = (PropertyChangeEvent evt) -> {
         try {
             Row row = (Row) evt.getSource();
@@ -113,13 +218,13 @@ public class Orderer extends RowsetAdapter implements RowsetEventsEarlyAccess, R
     }
 
     protected void clear() {
-        ordered.values().stream().forEach((TaggedList<Row> aContent) -> {
+        ordered.values().stream().forEach((ObservableList<Row> aContent) -> {
             aContent.stream().forEach((Row aRow) -> {
                 unsignFrom(aRow);
             });
         });
         if (stable) {
-            ordered.values().stream().forEach((TaggedList<Row> aContent) -> {
+            ordered.values().stream().forEach((ObservableList<Row> aContent) -> {
                 aContent.clear();
             });
         } else {
@@ -190,19 +295,21 @@ public class Orderer extends RowsetAdapter implements RowsetEventsEarlyAccess, R
     }
 
     public boolean add(Row aRow, boolean addToSubset) throws InvalidColIndexException {
-        List<Object> ks = makeKeys(aRow, fieldsIndicies);
-        if (ks != null) {
-            TaggedList<Row> subset = ordered.get(ks);
-            // add to structure
-            if (subset == null) {
-                subset = new TaggedList<>();
-                ordered.put(ks, subset);
+        if (!aRow.isDeleted()) {
+            List<Object> ks = makeKeys(aRow, fieldsIndicies);
+            if (ks != null) {
+                ObservableList<Row> subset = ordered.get(ks);
+                // add to structure
+                if (subset == null) {
+                    subset = new ObservableList<>();
+                    ordered.put(ks, subset);
+                }
+                signOn(aRow);
+                if (addToSubset) {
+                    subset.add(aRow);
+                }
+                return true;
             }
-            signOn(aRow);
-            if (addToSubset) {
-                subset.add(aRow);
-            }
-            return true;
         }
         return false;
     }
@@ -251,7 +358,7 @@ public class Orderer extends RowsetAdapter implements RowsetEventsEarlyAccess, R
      */
     public boolean containsKeys(Object... values) throws RowsetException {
         if (values != null && values.length > 0) {
-            List<Object> ks = valuesToKeySet(values);
+            List<Object> ks = valuesToKeys(values);
             return ordered.containsKey(ks);
         }
         return false;
@@ -268,23 +375,33 @@ public class Orderer extends RowsetAdapter implements RowsetEventsEarlyAccess, R
      */
     public Collection<Row> get(Object... values) throws RowsetException {
         if (values != null && values.length > 0) {
-            List<Object> ks = valuesToKeySet(values);
+            List<Object> ks = valuesToKeys(values);
             return ordered.get(ks);
+        } else {
+            return null;
         }
-        return null;
+    }
+
+    public Collection<Row> get(List<Object> values) throws RowsetException {
+        if (values != null && !values.isEmpty()) {
+            List<Object> ks = valuesToKeys(values.toArray());
+            return ordered.get(ks);
+        } else {
+            return null;
+        }
     }
 
     public boolean putKeys(Object... values) throws RowsetException {
         if (values != null && values.length > 0) {
-            List<Object> ks = valuesToKeySet(values);
+            List<Object> ks = valuesToKeys(values);
             if (!ordered.containsKey(ks)) {
-                ordered.put(ks, new TaggedList<>());
+                ordered.put(ks, new ObservableList<>());
             }
         }
         return false;
     }
 
-    protected List<Object> valuesToKeySet(Object[] values) throws RowsetException {
+    protected List<Object> valuesToKeys(Object[] values) throws RowsetException {
         List<Object> ks = new ArrayList<>();
         assert fieldsIndicies.size() == values.length;
         for (int i = 0; i < fieldsIndicies.size(); i++) {

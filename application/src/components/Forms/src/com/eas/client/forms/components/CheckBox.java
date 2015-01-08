@@ -652,6 +652,7 @@ public class CheckBox extends VCheckBox implements HasOnValueChange, HasJsValue,
     }
 
     // published parent
+    @ScriptFunction(name = "parent", jsDoc = PARENT_JSDOC)
     @Override
     public Widget getParentWidget() {
         return Forms.lookupPublishedParent(this);

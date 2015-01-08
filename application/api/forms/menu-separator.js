@@ -229,7 +229,7 @@
              */
             P.MenuSeparator.prototype.onComponentResized = {};
         }
-        Object.defineProperty(this, "parentWidget", {
+        Object.defineProperty(this, "parent", {
             get: function() {
                 var value = delegate.parentWidget;
                 return P.boxAsJs(value);
@@ -241,7 +241,7 @@
              * @property parentWidget
              * @memberOf MenuSeparator
              */
-            P.MenuSeparator.prototype.parentWidget = {};
+            P.MenuSeparator.prototype.parent = {};
         }
         Object.defineProperty(this, "onMouseEntered", {
             get: function() {
@@ -342,23 +342,6 @@
              */
             P.MenuSeparator.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "visible", {
-            get: function() {
-                var value = delegate.visible;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.visible = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.MenuSeparator){
-            /**
-             * Determines whether this component should be visible when its parent is visible.
-             * @property visible
-             * @memberOf MenuSeparator
-             */
-            P.MenuSeparator.prototype.visible = true;
-        }
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
@@ -375,6 +358,23 @@
              * @memberOf MenuSeparator
              */
             P.MenuSeparator.prototype.opaque = true;
+        }
+        Object.defineProperty(this, "visible", {
+            get: function() {
+                var value = delegate.visible;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.visible = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Determines whether this component should be visible when its parent is visible.
+             * @property visible
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.visible = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {

@@ -635,6 +635,7 @@ public class TextField extends VTextField implements HasOnValueChange, HasJsValu
     }
 
     // published parent
+    @ScriptFunction(name = "parent", jsDoc = PARENT_JSDOC)
     @Override
     public Widget getParentWidget() {
         return Forms.lookupPublishedParent(this);

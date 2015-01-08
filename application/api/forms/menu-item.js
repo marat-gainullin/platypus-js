@@ -250,7 +250,7 @@
              */
             P.MenuItem.prototype.onComponentResized = {};
         }
-        Object.defineProperty(this, "parentWidget", {
+        Object.defineProperty(this, "parent", {
             get: function() {
                 var value = delegate.parentWidget;
                 return P.boxAsJs(value);
@@ -262,7 +262,7 @@
              * @property parentWidget
              * @memberOf MenuItem
              */
-            P.MenuItem.prototype.parentWidget = {};
+            P.MenuItem.prototype.parent = {};
         }
         Object.defineProperty(this, "text", {
             get: function() {
@@ -380,23 +380,6 @@
              */
             P.MenuItem.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "visible", {
-            get: function() {
-                var value = delegate.visible;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.visible = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.MenuItem){
-            /**
-             * Determines whether this component should be visible when its parent is visible.
-             * @property visible
-             * @memberOf MenuItem
-             */
-            P.MenuItem.prototype.visible = true;
-        }
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
@@ -413,6 +396,23 @@
              * @memberOf MenuItem
              */
             P.MenuItem.prototype.opaque = true;
+        }
+        Object.defineProperty(this, "visible", {
+            get: function() {
+                var value = delegate.visible;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.visible = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuItem){
+            /**
+             * Determines whether this component should be visible when its parent is visible.
+             * @property visible
+             * @memberOf MenuItem
+             */
+            P.MenuItem.prototype.visible = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {

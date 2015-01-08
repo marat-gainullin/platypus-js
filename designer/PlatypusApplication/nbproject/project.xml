@@ -230,7 +230,6 @@
                 <package>com.eas.client.forms.events.rt</package>
                 <package>com.eas.client.forms.layouts</package>
                 <package>com.eas.client.forms.menu</package>
-                <package>com.eas.client.geo</package>
                 <package>com.eas.client.login</package>
                 <package>com.eas.client.metadata</package>
                 <package>com.eas.client.model</package>
@@ -520,14 +519,6 @@
             <class-path-extension>
                 <runtime-relative-path>ext/Routing.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/Routing.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/GeoAddon.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/GeoAddon.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/GeoPane.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/GeoPane.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/jcifs-1.2.19.jar</runtime-relative-path>

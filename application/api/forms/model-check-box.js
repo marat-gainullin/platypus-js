@@ -280,6 +280,23 @@
              */
             P.ModelCheckBox.prototype.onSelect = {};
         }
+        Object.defineProperty(this, "value", {
+            get: function() {
+                var value = delegate.jsValue;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.jsValue = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelCheckBox){
+            /**
+             * Widget's value.
+             * @property jsValue
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.value = {};
+        }
         Object.defineProperty(this, "top", {
             get: function() {
                 var value = delegate.top;
@@ -331,6 +348,20 @@
              */
             P.ModelCheckBox.prototype.onComponentResized = {};
         }
+        Object.defineProperty(this, "parent", {
+            get: function() {
+                var value = delegate.parentWidget;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelCheckBox){
+            /**
+             * Parent container of this widget.
+             * @property parentWidget
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.parent = {};
+        }
         Object.defineProperty(this, "text", {
             get: function() {
                 var value = delegate.text;
@@ -363,20 +394,6 @@
              * @memberOf ModelCheckBox
              */
             P.ModelCheckBox.prototype.onMouseEntered = {};
-        }
-        Object.defineProperty(this, "value", {
-            get: function() {
-                var value = delegate.value;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ModelCheckBox){
-            /**
-             * Widget's value.
-             * @property value
-             * @memberOf ModelCheckBox
-             */
-            P.ModelCheckBox.prototype.value = {};
         }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
@@ -460,23 +477,6 @@
              */
             P.ModelCheckBox.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "visible", {
-            get: function() {
-                var value = delegate.visible;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.visible = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelCheckBox){
-            /**
-             * Determines whether this component should be visible when its parent is visible.
-             * @property visible
-             * @memberOf ModelCheckBox
-             */
-            P.ModelCheckBox.prototype.visible = true;
-        }
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
@@ -493,6 +493,23 @@
              * @memberOf ModelCheckBox
              */
             P.ModelCheckBox.prototype.opaque = true;
+        }
+        Object.defineProperty(this, "visible", {
+            get: function() {
+                var value = delegate.visible;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.visible = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelCheckBox){
+            /**
+             * Determines whether this component should be visible when its parent is visible.
+             * @property visible
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.visible = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {

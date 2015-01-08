@@ -182,6 +182,23 @@
              */
             P.CheckMenuItem.prototype.onComponentMoved = {};
         }
+        Object.defineProperty(this, "value", {
+            get: function() {
+                var value = delegate.jsValue;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.jsValue = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.CheckMenuItem){
+            /**
+             * Widget's value.
+             * @property jsValue
+             * @memberOf CheckMenuItem
+             */
+            P.CheckMenuItem.prototype.value = {};
+        }
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {
                 var value = delegate.componentPopupMenu;
@@ -233,7 +250,7 @@
              */
             P.CheckMenuItem.prototype.onComponentResized = {};
         }
-        Object.defineProperty(this, "parentWidget", {
+        Object.defineProperty(this, "parent", {
             get: function() {
                 var value = delegate.parentWidget;
                 return P.boxAsJs(value);
@@ -245,7 +262,7 @@
              * @property parentWidget
              * @memberOf CheckMenuItem
              */
-            P.CheckMenuItem.prototype.parentWidget = {};
+            P.CheckMenuItem.prototype.parent = {};
         }
         Object.defineProperty(this, "text", {
             get: function() {
@@ -277,20 +294,6 @@
              * @memberOf CheckMenuItem
              */
             P.CheckMenuItem.prototype.onMouseEntered = {};
-        }
-        Object.defineProperty(this, "value", {
-            get: function() {
-                var value = delegate.value;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.CheckMenuItem){
-            /**
-             * Widget's value.
-             * @property value
-             * @memberOf CheckMenuItem
-             */
-            P.CheckMenuItem.prototype.value = true;
         }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
@@ -388,23 +391,6 @@
              */
             P.CheckMenuItem.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "visible", {
-            get: function() {
-                var value = delegate.visible;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.visible = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.CheckMenuItem){
-            /**
-             * Determines whether this component should be visible when its parent is visible.
-             * @property visible
-             * @memberOf CheckMenuItem
-             */
-            P.CheckMenuItem.prototype.visible = true;
-        }
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
@@ -421,6 +407,23 @@
              * @memberOf CheckMenuItem
              */
             P.CheckMenuItem.prototype.opaque = true;
+        }
+        Object.defineProperty(this, "visible", {
+            get: function() {
+                var value = delegate.visible;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.visible = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.CheckMenuItem){
+            /**
+             * Determines whether this component should be visible when its parent is visible.
+             * @property visible
+             * @memberOf CheckMenuItem
+             */
+            P.CheckMenuItem.prototype.visible = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {

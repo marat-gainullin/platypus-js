@@ -6,7 +6,6 @@ package com.bearsoft.rowset;
 
 import com.bearsoft.rowset.dataflow.FlowBaseTest.JdbcFlowProviderAdapter;
 import com.bearsoft.rowset.dataflow.FlowBaseTest.ObservingResourcesProvider;
-import com.bearsoft.rowset.events.RowChangeEvent;
 import com.bearsoft.rowset.events.RowsetDeleteEvent;
 import com.bearsoft.rowset.events.RowsetFilterEvent;
 import com.bearsoft.rowset.events.RowsetInsertEvent;
@@ -160,6 +159,7 @@ public class RowsetBaseTest {
         assertFalse(rowset.isEmpty());
         rowset.currentToOriginal();
         assertFalse(rowset.isEmpty());
+        checkRowsetCorrespondToTestData(rowset);
         return rowset;
     }
 
@@ -173,7 +173,6 @@ public class RowsetBaseTest {
         public boolean allowSort = true;
         public boolean allowDelete = true;
         public boolean allowInsert = true;
-        public boolean allowChange = true;
         public boolean allowFilter = true;
         public boolean allowRequery = true;
         public boolean allowPaging = true;
@@ -231,12 +230,6 @@ public class RowsetBaseTest {
         public boolean willInsertRow(RowsetInsertEvent event) {
             ++willInsert;
             return allowInsert;
-        }
-
-        @Override
-        public boolean willChangeRow(RowChangeEvent event) {
-            ++willChange;
-            return allowChange;
         }
 
         @Override

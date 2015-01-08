@@ -49,11 +49,9 @@ public class OrderersTest extends RowsetBaseTest {
         for (int i = 2; i <= fields.getFieldsCount(); i++) {
             Orderer orderer = rowset.createOrderer(Arrays.asList(new Integer[]{i}));
             assertEquals(rowset.getOrderers().length, i - 1);
-            List<Object> ks = new ArrayList<>();
-            ks.add(orderersKeys[i - 2]);
-            Collection<Row> found = orderer.get(ks);
+            Collection<Row> found = orderer.get(orderersKeys[i - 2]);
             assertEquals(rowsetPositions[i - 2].length, found.size());
-            assertEquals(testData.length, orderer.getRowset().size());
+            assertEquals(testData.length, rowset.size());
 
             SortingCriterion sc1 = new SortingCriterion(i, false);
             List<SortingCriterion> criteria = new ArrayList<>();
@@ -149,37 +147,35 @@ public class OrderersTest extends RowsetBaseTest {
         Orderer orderer = rowset.createOrderer(fieldsIndicies);
 
         assertEquals(rowset.getOrderers().length, 1);
-        Collection<Row> found = orderer.get(ordererMultiKey);
-        assertFalse(found.isEmpty());
-
-        rowset.absolute(10);
+        //
+        Collection<Row> found1 = orderer.get(ordererMultiKey);
+        assertFalse(found1.isEmpty());
+        //
         rowset.insert();
-        rowset.getCurrentRow().setColumnObject(2, false);
-        found = orderer.get(ordererMultiKey);
-        assertFalse(found.isEmpty());
-
-        rowset.absolute(9);
+        Row inserted = rowset.getCurrentRow();
+        Collection<Row> foundInserted1 = orderer.get(new Object[]{null, null, null, null, null, null, null});
+        assertEquals(1, foundInserted1.size());
+        assertSame(inserted, foundInserted1.stream().findAny().get());
+        inserted.setColumnObject(2, false);
+        Collection<Row> foundInserted2 = orderer.get(new Object[]{null, null, null, null, null, null, null});
+        assertSame(foundInserted1, foundInserted2);
+        assertTrue(foundInserted2.isEmpty());
+        Collection<Row> foundUpdated1 = orderer.get(new Object[]{false, null, null, null, null, null, null});
+        assertEquals(1, foundUpdated1.size());
+        assertSame(inserted, foundUpdated1.stream().findAny().get());
+        //
+        found1 = orderer.get(ordererMultiKey);
+        assertFalse(found1.isEmpty());
+        //
+        Row deleted = rowset.getCurrentRow();
+        assertSame(deleted, inserted);
         rowset.delete();
-        found = orderer.get(ordererMultiKey);
-        assertFalse(found.isEmpty());
-
-        rowset.getCurrentRow().setColumnObject(6, null);
-        found = orderer.get(ordererMultiKey);
-        assertNotNull(found);
-        assertTrue(found.isEmpty());
-
-        assertEquals(orderer.getRowset().getCursorPos(), mkRowsetPosition);
-        rowset.getCurrentRow().setColumnObject(6, 345677.9898f);
-        assertEquals(orderer.getRowset().getCursorPos(), mkRowsetPosition);
-
-        found = orderer.get(ordererMultiKey);
-        assertFalse(found.isEmpty());
-
-        /*
-        // updating of non-locator field doesn't lead to invalidating of locator.
-        assertTrue(loc.isValid());
-        rowset.getCurrentRow().setColumnObject(1, 45);
-        assertTrue(loc.isValid());
-        */
-    }    
+        Collection<Row> foundUpdated2 = orderer.get(new Object[]{false, null, null, null, null, null, null});
+        assertTrue(foundUpdated2.isEmpty());
+        assertSame(foundUpdated1, foundUpdated2);
+        //
+        found1 = orderer.get(ordererMultiKey);
+        assertFalse(found1.isEmpty());
+        //
+    }
 }

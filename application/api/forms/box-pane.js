@@ -284,6 +284,20 @@
              */
             P.BoxPane.prototype.vgap = 0;
         }
+        Object.defineProperty(this, "parent", {
+            get: function() {
+                var value = delegate.parentWidget;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.BoxPane){
+            /**
+             * Parent container of this widget.
+             * @property parentWidget
+             * @memberOf BoxPane
+             */
+            P.BoxPane.prototype.parent = {};
+        }
         Object.defineProperty(this, "onMouseEntered", {
             get: function() {
                 var value = delegate.onMouseEntered;
@@ -414,23 +428,6 @@
              */
             P.BoxPane.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "visible", {
-            get: function() {
-                var value = delegate.visible;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.visible = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.BoxPane){
-            /**
-             * Determines whether this component should be visible when its parent is visible.
-             * @property visible
-             * @memberOf BoxPane
-             */
-            P.BoxPane.prototype.visible = true;
-        }
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
@@ -447,6 +444,23 @@
              * @memberOf BoxPane
              */
             P.BoxPane.prototype.opaque = true;
+        }
+        Object.defineProperty(this, "visible", {
+            get: function() {
+                var value = delegate.visible;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.visible = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.BoxPane){
+            /**
+             * Determines whether this component should be visible when its parent is visible.
+             * @property visible
+             * @memberOf BoxPane
+             */
+            P.BoxPane.prototype.visible = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
@@ -482,20 +496,6 @@
              */
             P.BoxPane.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "count", {
-            get: function() {
-                var value = delegate.count;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.BoxPane){
-            /**
-             * Gets the number of components in this panel.
-             * @property count
-             * @memberOf BoxPane
-             */
-            P.BoxPane.prototype.count = 0;
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -512,6 +512,20 @@
              * @memberOf BoxPane
              */
             P.BoxPane.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "count", {
+            get: function() {
+                var value = delegate.count;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.BoxPane){
+            /**
+             * Gets the number of components in this panel.
+             * @property count
+             * @memberOf BoxPane
+             */
+            P.BoxPane.prototype.count = 0;
         }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {

@@ -7,6 +7,7 @@ package com.eas.client.model.application;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.exceptions.InvalidFieldsExceptionException;
+import com.bearsoft.rowset.ordering.Locator;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.script.NoPublisherException;
@@ -114,6 +115,8 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
             rowset = query.prepareRowset();
             rowset.setLog(getChangeLog());
             rowset.addRowsetListener(this);
+            locator = new Locator();
+            locator.setRowset(rowset);
             changeSupport.firePropertyChange("rowset", oldRowset, rowset);
         }
     }

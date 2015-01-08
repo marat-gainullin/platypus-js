@@ -671,6 +671,7 @@ public class Button extends JButton implements HasPublished, HasComponentEvents,
     }
     
     // published parent
+    @ScriptFunction(name = "parent", jsDoc = PARENT_JSDOC)
     @Override
     public Widget getParentWidget() {
         return Forms.lookupPublishedParent(this);

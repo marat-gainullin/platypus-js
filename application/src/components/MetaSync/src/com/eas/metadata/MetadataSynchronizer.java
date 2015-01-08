@@ -282,7 +282,7 @@ public class MetadataSynchronizer {
 
         DBStructure srcDBStructure = null;
         if (!emptyFrom) {
-            try (DatabasesClientWithResource dbResorce = new DatabasesClientWithResource(new DbConnectionSettings(urlFrom, userFrom, passwordFrom), null)) {
+            try (DatabasesClientWithResource dbResorce = new DatabasesClientWithResource(new DbConnectionSettings(urlFrom, userFrom, passwordFrom))) {
                 srcDBStructure = readDBStructure(dbResorce.getClient(), schemaFrom);
                 if (!emptyXml) {
                     serializeMetadata(srcDBStructure, fileXml);
@@ -294,7 +294,7 @@ public class MetadataSynchronizer {
         }
 
         if (!emptyTo && srcDBStructure != null) {
-            try (DatabasesClientWithResource dbResorce = new DatabasesClientWithResource(new DbConnectionSettings(urlTo, userTo, passwordTo), null)) {
+            try (DatabasesClientWithResource dbResorce = new DatabasesClientWithResource(new DbConnectionSettings(urlTo, userTo, passwordTo))) {
                 DatabasesClient client = dbResorce.getClient();
                 MetadataMerger metadataMerger = new MetadataMerger(client, schemaTo, srcDBStructure, readDBStructure(client, schemaTo), isNoExecute(), isNoDropTables(), tablesList, systemLogger, sqlLogger, errorLogger, needSqlsList);
                 metadataMerger.run();
@@ -303,7 +303,7 @@ public class MetadataSynchronizer {
 
             // re-read structure destination for compare with source
             if (infoLogger != null) {
-                try (DatabasesClientWithResource dbResorce = new DatabasesClientWithResource(new DbConnectionSettings(urlTo, userTo, passwordTo), null)) {
+                try (DatabasesClientWithResource dbResorce = new DatabasesClientWithResource(new DbConnectionSettings(urlTo, userTo, passwordTo))) {
                     MetadataUtils.printCompareMetadata(srcDBStructure, readDBStructure(dbResorce.getClient(), schemaTo), infoLogger);
                 }
             }
@@ -463,7 +463,7 @@ public class MetadataSynchronizer {
      * @throws Exception
      */
     public DBStructure readDBStructure(String aUrl, String aSchema, String aUser, String aPassword) throws Exception {
-        try (DatabasesClientWithResource dbResource = new DatabasesClientWithResource(new DbConnectionSettings(aUrl, aUser, aPassword), null)) {
+        try (DatabasesClientWithResource dbResource = new DatabasesClientWithResource(new DbConnectionSettings(aUrl, aUser, aPassword))) {
             return readDBStructure(dbResource.getClient(), aSchema);
         }
     }

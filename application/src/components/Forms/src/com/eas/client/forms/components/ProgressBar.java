@@ -647,6 +647,7 @@ public class ProgressBar extends VProgressBar implements HasOnValueChange, HasPu
     }
 
     // published parent
+    @ScriptFunction(name = "parent", jsDoc = PARENT_JSDOC)
     @Override
     public Widget getParentWidget() {
         return Forms.lookupPublishedParent(this);

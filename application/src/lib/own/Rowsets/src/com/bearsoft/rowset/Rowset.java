@@ -382,6 +382,7 @@ public class Rowset {
                                 setCurrent(rows);
                                 rows.stream().forEach((Row aRow) -> {
                                     aRow.setLog(log);
+                                    aRow.setEntityName(flow.getEntityId());
                                 });
                                 currentToOriginal();
                                 // silent first
@@ -423,6 +424,7 @@ public class Rowset {
                         setCurrent(rows);
                         rows.stream().forEach((Row aRow) -> {
                             aRow.setLog(log);
+                            aRow.setEntityName(flow.getEntityId());
                         });
                         currentToOriginal();
                         // silent first
@@ -470,6 +472,7 @@ public class Rowset {
                                     setCurrent(rows);
                                     rows.stream().forEach((Row aRow) -> {
                                         aRow.setLog(log);
+                                        aRow.setEntityName(flow.getEntityId());
                                     });
                                     currentToOriginal();
                                     rowsetChangeSupport.fireNextPageFetchedEvent();
@@ -496,6 +499,7 @@ public class Rowset {
                                 setCurrent(rows);
                                 rows.stream().forEach((Row aRow) -> {
                                     aRow.setLog(log);
+                                    aRow.setEntityName(flow.getEntityId());
                                 });
                                 currentToOriginal();
                                 rowsetChangeSupport.fireNextPageFetchedEvent();
@@ -1119,6 +1123,7 @@ public class Rowset {
                 throw new RowsetException("Bad column count. While inserting, columns count in a row must same with fields count in rowset fields.");
             }
             toInsert.setLog(log);
+            toInsert.setEntityName(flow != null ? flow.getEntityId() : "");
             insertingRow = toInsert;
             try {
                 if (rowsetChangeSupport.fireWillInsertEvent(insertingRow, aAjusting)) {

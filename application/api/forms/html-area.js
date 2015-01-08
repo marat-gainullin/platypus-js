@@ -212,6 +212,23 @@
              */
             P.HtmlArea.prototype.onComponentMoved = {};
         }
+        Object.defineProperty(this, "value", {
+            get: function() {
+                var value = delegate.jsValue;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.jsValue = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.HtmlArea){
+            /**
+             * Widget's value.
+             * @property jsValue
+             * @memberOf HtmlArea
+             */
+            P.HtmlArea.prototype.value = {};
+        }
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {
                 var value = delegate.componentPopupMenu;
@@ -263,6 +280,20 @@
              */
             P.HtmlArea.prototype.onComponentResized = {};
         }
+        Object.defineProperty(this, "parent", {
+            get: function() {
+                var value = delegate.parentWidget;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.HtmlArea){
+            /**
+             * Parent container of this widget.
+             * @property parentWidget
+             * @memberOf HtmlArea
+             */
+            P.HtmlArea.prototype.parent = {};
+        }
         Object.defineProperty(this, "text", {
             get: function() {
                 var value = delegate.text;
@@ -308,7 +339,7 @@
         });
         if(!P.HtmlArea){
             /**
-             * Widget's value.
+             * Generated property jsDoc.
              * @property value
              * @memberOf HtmlArea
              */
@@ -396,23 +427,6 @@
              */
             P.HtmlArea.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "visible", {
-            get: function() {
-                var value = delegate.visible;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.visible = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.HtmlArea){
-            /**
-             * Determines whether this component should be visible when its parent is visible.
-             * @property visible
-             * @memberOf HtmlArea
-             */
-            P.HtmlArea.prototype.visible = true;
-        }
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
@@ -429,6 +443,23 @@
              * @memberOf HtmlArea
              */
             P.HtmlArea.prototype.opaque = true;
+        }
+        Object.defineProperty(this, "visible", {
+            get: function() {
+                var value = delegate.visible;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.visible = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.HtmlArea){
+            /**
+             * Determines whether this component should be visible when its parent is visible.
+             * @property visible
+             * @memberOf HtmlArea
+             */
+            P.HtmlArea.prototype.visible = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {

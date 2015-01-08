@@ -688,6 +688,7 @@ public class DropDownButton extends JDropDownButton implements HasPublished, Has
     }
     
     // published parent
+    @ScriptFunction(name = "parent", jsDoc = PARENT_JSDOC)
     @Override
     public Widget getParentWidget() {
         return Forms.lookupPublishedParent(this);

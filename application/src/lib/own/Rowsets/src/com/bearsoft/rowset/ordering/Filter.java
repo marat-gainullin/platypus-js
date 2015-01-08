@@ -103,10 +103,12 @@ public class Filter extends Orderer implements HasPublished {
      * @throws com.bearsoft.rowset.exceptions.RowsetException
      */
     @Override
-    protected void keysChanged(Row Row, int aColIndex, Object aOldValue, Object aNewValue) throws RowsetException {
-        super.keysChanged(Row, aColIndex, aOldValue, aNewValue);
-        if (filterApplied && rowset.isImmediateFilter()) {
-            rowset.getRowsetChangeSupport().fireFilteredEvent();
+    protected void keysChanged(final Row Row, final int aColIndex, final Object aOldValue, final Object aNewValue) throws RowsetException {
+        if (rowset.isImmediateFilter()) {
+            super.keysChanged(Row, aColIndex, aOldValue, aNewValue);
+            if (filterApplied) {
+                rowset.getRowsetChangeSupport().fireFilteredEvent();
+            }
         }
     }
 
@@ -116,7 +118,11 @@ public class Filter extends Orderer implements HasPublished {
      * @throws RowsetException
      */
     public void refilterRowset() throws RowsetException {
-        apply(appliedKeys);
+        if (!filterApplied || !rowset.isImmediateFilter()) {
+            clear();
+            addRows();
+            apply(appliedKeys);
+        }
     }
 
     private boolean filtering = false;
@@ -157,16 +163,23 @@ public class Filter extends Orderer implements HasPublished {
                             }
                             boolean wasBeforeFirst = rowset.isBeforeFirst();
                             boolean wasAfterLast = rowset.isAfterLast();
-                            TaggedList<Row> subSet = ordered.get(values);
+                            ObservableList<Row> subSet = ordered.get(values);
                             if (subSet == null) {
-                                subSet = new TaggedList<>();
+                                subSet = new ObservableList<>();
                                 ordered.put(values, subSet);
                             }
-                            if (rowset.getActiveFilter() != null) {
-                                rowset.getActiveFilter().cancel();
+                            if (!filterApplied) {
+                                if (rowset.getActiveFilter() != null) {
+                                    originalRows = rowset.getActiveFilter().getOriginalRows();
+                                    originalPos = rowset.getActiveFilter().getOriginalPos();
+                                    rowset.getActiveFilter().deactivate();
+                                } else {
+                                    originalRows = rowset.getCurrent();
+                                    originalPos = rowset.getCursorPos();
+                                }
+                            }else{
+                                assert rowset.getActiveFilter() == this : "filter applied flag has unactual value";
                             }
-                            originalRows = rowset.getCurrent();
-                            originalPos = rowset.getCursorPos();
                             rowset.setCurrent(subSet);
                             rowset.setActiveFilter(this);
                             Set<RowsetListener> listeners = rowset.getRowsetChangeSupport().getRowsetListeners();
@@ -211,6 +224,12 @@ public class Filter extends Orderer implements HasPublished {
         } else {
             throw new RowsetException("bad filtering conditions. Absent or empty");
         }
+    }
+
+    void deactivate() {
+        filterApplied = false;
+        originalRows = null;
+        originalPos = 0;
     }
 
     @ScriptFunction(jsDoc = "/**\n"

@@ -1445,6 +1445,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     }
 
     // published parent
+    @ScriptFunction(name = "parent", jsDoc = PARENT_JSDOC)
     @Override
     public Widget getParentWidget() {
         return Forms.lookupPublishedParent(this);

@@ -15,17 +15,10 @@ import com.bearsoft.gui.grid.rows.ConstrainedRowSorter;
 import com.bearsoft.gui.grid.rows.TabularRowsSorter;
 import com.bearsoft.gui.grid.rows.TreedRowsSorter;
 import com.bearsoft.gui.grid.selection.ConstrainedListSelectionModel;
-import com.bearsoft.rowset.Row;
-import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.exceptions.RowsetException;
-import com.bearsoft.rowset.locators.Locator;
 import com.eas.client.forms.Forms;
 import com.eas.client.forms.HasComponentEvents;
 import com.eas.client.forms.Widget;
-import static com.eas.client.forms.Widget.HEIGHT_JSDOC;
-import static com.eas.client.forms.Widget.LEFT_JSDOC;
-import static com.eas.client.forms.Widget.TOP_JSDOC;
-import static com.eas.client.forms.Widget.WIDTH_JSDOC;
 import com.eas.client.forms.components.model.ArrayModelWidget;
 import com.eas.client.forms.components.model.CellRenderEvent;
 import com.eas.client.forms.components.model.ModelComponentDecorator;
@@ -162,6 +155,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         }
     }
 
+    /*
     protected Locator createPksLocator(Rowset colsRs) throws IllegalStateException {
         Locator colsLoc = colsRs.createLocator();
         colsLoc.beginConstrainting();
@@ -175,6 +169,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         }
         return colsLoc;
     }
+    */
 
     /**
      * Returns index of a row in the model. Index is in model coordinates. Index
@@ -1110,7 +1105,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         if (isTreeConfigured()) {
             rowsModel = new ArrayTreedModel(columnModel, data, parentField, childrenField, generalOnRender);
             deepModel = new TableFront2TreedModel<>((ArrayTreedModel) rowsModel);
-            rowSorter = new TreedRowsSorter<>((TableFront2TreedModel<Row>) deepModel, rowsSelectionModel);
+            rowSorter = new TreedRowsSorter<>((TableFront2TreedModel<JSObject>) deepModel, rowsSelectionModel);
         } else {
             rowsModel = new ArrayTableModel(columnModel, data, generalOnRender);
             deepModel = (TableModel) rowsModel;
@@ -2652,6 +2647,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
     }
 
     // published parent
+    @ScriptFunction(name = "parent", jsDoc = PARENT_JSDOC)
     @Override
     public Widget getParentWidget() {
         return Forms.lookupPublishedParent(this);

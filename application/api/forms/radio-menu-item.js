@@ -182,6 +182,23 @@
              */
             P.RadioMenuItem.prototype.onComponentMoved = {};
         }
+        Object.defineProperty(this, "value", {
+            get: function() {
+                var value = delegate.jsValue;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.jsValue = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.RadioMenuItem){
+            /**
+             * Widget's value.
+             * @property jsValue
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.value = {};
+        }
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {
                 var value = delegate.componentPopupMenu;
@@ -233,7 +250,7 @@
              */
             P.RadioMenuItem.prototype.onComponentResized = {};
         }
-        Object.defineProperty(this, "parentWidget", {
+        Object.defineProperty(this, "parent", {
             get: function() {
                 var value = delegate.parentWidget;
                 return P.boxAsJs(value);
@@ -245,7 +262,7 @@
              * @property parentWidget
              * @memberOf RadioMenuItem
              */
-            P.RadioMenuItem.prototype.parentWidget = {};
+            P.RadioMenuItem.prototype.parent = {};
         }
         Object.defineProperty(this, "text", {
             get: function() {
@@ -278,19 +295,22 @@
              */
             P.RadioMenuItem.prototype.onMouseEntered = {};
         }
-        Object.defineProperty(this, "value", {
+        Object.defineProperty(this, "selected", {
             get: function() {
-                var value = delegate.value;
+                var value = delegate.selected;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.selected = P.boxAsJava(aValue);
             }
         });
         if(!P.RadioMenuItem){
             /**
-             * Widget's value.
-             * @property value
+             * <code>true</code> if the menu item is selected.
+             * @property selected
              * @memberOf RadioMenuItem
              */
-            P.RadioMenuItem.prototype.value = true;
+            P.RadioMenuItem.prototype.selected = true;
         }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
@@ -308,23 +328,6 @@
              * @memberOf RadioMenuItem
              */
             P.RadioMenuItem.prototype.toolTipText = '';
-        }
-        Object.defineProperty(this, "selected", {
-            get: function() {
-                var value = delegate.selected;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.selected = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.RadioMenuItem){
-            /**
-             * <code>true</code> if the menu item is selected.
-             * @property selected
-             * @memberOf RadioMenuItem
-             */
-            P.RadioMenuItem.prototype.selected = true;
         }
         Object.defineProperty(this, "element", {
             get: function() {
@@ -391,23 +394,6 @@
              */
             P.RadioMenuItem.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "visible", {
-            get: function() {
-                var value = delegate.visible;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.visible = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.RadioMenuItem){
-            /**
-             * Determines whether this component should be visible when its parent is visible.
-             * @property visible
-             * @memberOf RadioMenuItem
-             */
-            P.RadioMenuItem.prototype.visible = true;
-        }
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
@@ -424,6 +410,23 @@
              * @memberOf RadioMenuItem
              */
             P.RadioMenuItem.prototype.opaque = true;
+        }
+        Object.defineProperty(this, "visible", {
+            get: function() {
+                var value = delegate.visible;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.visible = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.RadioMenuItem){
+            /**
+             * Determines whether this component should be visible when its parent is visible.
+             * @property visible
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.visible = true;
         }
         Object.defineProperty(this, "buttonGroup", {
             get: function() {

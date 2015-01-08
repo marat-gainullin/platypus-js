@@ -9,7 +9,6 @@ import com.bearsoft.rowset.RowsetBaseTest;
 import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
 import com.bearsoft.rowset.exceptions.RowsetException;
-import java.math.BigDecimal;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -56,16 +55,8 @@ public class RowsetEventsTest extends RowsetBaseTest {
 
     @Test
     public void eventsTestScroll1forward() throws InvalidCursorPositionException, InvalidColIndexException, RowsetException {
-        Rowset rowset = new Rowset(fields);
+        Rowset rowset = initRowset();
         System.out.println("eventsTestScroll1forward");
-        // initial filling tests
-        assertTrue(rowset.isEmpty());
-        fillInRowset(rowset);
-        assertFalse(rowset.isEmpty());
-        rowset.originalToCurrent();
-        assertTrue(rowset.isEmpty());
-        fillInRowset(rowset);
-        assertFalse(rowset.isEmpty());
         reRegisterRecivers(rowset);
         int scrolled = 0;
         rowset.first();
@@ -89,15 +80,7 @@ public class RowsetEventsTest extends RowsetBaseTest {
     @Test
     public void eventsTestScroll2forward() throws InvalidCursorPositionException, InvalidColIndexException, RowsetException {
         System.out.println("eventsTestScroll2forward");
-        Rowset rowset = new Rowset(fields);
-        // initial filling tests
-        assertTrue(rowset.isEmpty());
-        fillInRowset(rowset);
-        assertFalse(rowset.isEmpty());
-        rowset.originalToCurrent();
-        assertTrue(rowset.isEmpty());
-        fillInRowset(rowset);
-        assertFalse(rowset.isEmpty());
+        Rowset rowset = initRowset();
         reRegisterRecivers(rowset);
         int scrolled = 0;
         rowset.beforeFirst();
@@ -120,15 +103,7 @@ public class RowsetEventsTest extends RowsetBaseTest {
     @Test
     public void eventsTestScroll3forward() throws InvalidCursorPositionException, InvalidColIndexException, RowsetException {
         System.out.println("eventsTestScroll3forward");
-        Rowset rowset = new Rowset(fields);
-        // initial filling tests
-        assertTrue(rowset.isEmpty());
-        fillInRowset(rowset);
-        assertFalse(rowset.isEmpty());
-        rowset.originalToCurrent();
-        assertTrue(rowset.isEmpty());
-        fillInRowset(rowset);
-        assertFalse(rowset.isEmpty());
+        Rowset rowset = initRowset();
         reRegisterRecivers(rowset);
         int scrolled = 0;
         for (int i = 1; i <= rowset.size(); i++) {
@@ -152,15 +127,7 @@ public class RowsetEventsTest extends RowsetBaseTest {
     @Test
     public void eventsTestScroll1backward() throws InvalidCursorPositionException, InvalidColIndexException, RowsetException {
         System.out.println("eventsTestScroll1backward");
-        Rowset rowset = new Rowset(fields);
-        // initial filling tests
-        assertTrue(rowset.isEmpty());
-        fillInRowset(rowset);
-        assertFalse(rowset.isEmpty());
-        rowset.originalToCurrent();
-        assertTrue(rowset.isEmpty());
-        fillInRowset(rowset);
-        assertFalse(rowset.isEmpty());
+        Rowset rowset = initRowset();
         rowset.first();
         reRegisterRecivers(rowset);
         int scrolled = 0;
@@ -185,15 +152,7 @@ public class RowsetEventsTest extends RowsetBaseTest {
     @Test
     public void eventsTestScroll2backward() throws InvalidCursorPositionException, InvalidColIndexException, RowsetException {
         System.out.println("eventsTestScroll2backward");
-        Rowset rowset = new Rowset(fields);
-        // initial filling tests
-        assertTrue(rowset.isEmpty());
-        fillInRowset(rowset);
-        assertFalse(rowset.isEmpty());
-        rowset.originalToCurrent();
-        assertTrue(rowset.isEmpty());
-        fillInRowset(rowset);
-        assertFalse(rowset.isEmpty());
+        Rowset rowset = initRowset();
         reRegisterRecivers(rowset);
         int scrolled = 0;
         rowset.afterLast();
@@ -216,15 +175,7 @@ public class RowsetEventsTest extends RowsetBaseTest {
     @Test
     public void eventsTestScroll3backward() throws InvalidCursorPositionException, InvalidColIndexException, RowsetException {
         System.out.println("eventsTestScroll3backward");
-        Rowset rowset = new Rowset(fields);
-        // initial filling tests
-        assertTrue(rowset.isEmpty());
-        fillInRowset(rowset);
-        assertFalse(rowset.isEmpty());
-        rowset.originalToCurrent();
-        assertTrue(rowset.isEmpty());
-        fillInRowset(rowset);
-        assertFalse(rowset.isEmpty());
+        Rowset rowset = initRowset();
         rowset.beforeFirst();
         reRegisterRecivers(rowset);
         int scrolled = 0;
@@ -249,15 +200,7 @@ public class RowsetEventsTest extends RowsetBaseTest {
     @Test
     public void eventsTestDeniedReciverStabilityforward() throws InvalidCursorPositionException, InvalidColIndexException, RowsetException {
         System.out.println("eventsTestDeniedReciverStabilityforward");
-        Rowset rowset = new Rowset(fields);
-        // initial filling tests
-        assertTrue(rowset.isEmpty());
-        fillInRowset(rowset);
-        assertFalse(rowset.isEmpty());
-        rowset.originalToCurrent();
-        assertTrue(rowset.isEmpty());
-        fillInRowset(rowset);
-        assertFalse(rowset.isEmpty());
+        Rowset rowset = initRowset();
         rowset.beforeFirst();
         reRegisterRecivers(rowset);
         eventsRecivers[45].allowScroll = false;
@@ -285,43 +228,13 @@ public class RowsetEventsTest extends RowsetBaseTest {
     @Test
     public void eventsTestDeniedInsert() throws InvalidCursorPositionException, InvalidColIndexException, RowsetException {
         System.out.println("eventsTestDeniedInsert");
-        Rowset rowset = new Rowset(fields);
+        Rowset rowset = initRowset();
         reRegisterRecivers(rowset);
         eventsRecivers[63].allowInsert = false;
-        // initial filling tests
-        assertTrue(rowset.isEmpty());
-        fillInRowset(rowset);
-        assertTrue(rowset.isEmpty());
-    }
-
-    @Test
-    public void eventsTestDeniedUpdate() throws InvalidCursorPositionException, InvalidColIndexException, RowsetException {
-        System.out.println("eventsTestDeniedUpdate");
-        Rowset rowset = new Rowset(fields);
-        reRegisterRecivers(rowset);
-        eventsRecivers[14].allowChange = false;
-        // initial filling tests
-        assertTrue(rowset.isEmpty());
-        fillInRowset(rowset);
-        assertFalse(rowset.isEmpty());
-        for (int i = 1; i <= rowset.size(); i++) {
-            rowset.absolute(i);
-            for (int j = 2; j <= fields.getFieldsCount(); j++) {
-                assertEquals(rowset.getObject(j), null);
-            }
-        }
-        rowset.absolute(10);
-        Object oldPkValue = rowset.getObject(1);
-        rowset.getCurrentRow().setColumnObject(1, 444444);
-        assertEquals(oldPkValue, rowset.getObject(1));
-        eventsRecivers[14].allowChange = true;
         rowset.deleteAll();
+        assertTrue(rowset.isEmpty());
         fillInRowset(rowset);
-        checkRowsetCorrespondToTestData(rowset);
-        rowset.absolute(10);
-        oldPkValue = rowset.getObject(1);
-        rowset.getCurrentRow().setColumnObject(1, 444444);
-        assertEquals(new BigDecimal(444444), rowset.getObject(1));
+        assertTrue(rowset.isEmpty());
     }
 
     @Test
@@ -329,14 +242,9 @@ public class RowsetEventsTest extends RowsetBaseTest {
         System.out.println("eventsTestDeniedDelete");
 
         int reciver2Test = 84;
-        Rowset rowset = new Rowset(fields);
+        Rowset rowset = initRowset();
         reRegisterRecivers(rowset);
         eventsRecivers[reciver2Test].allowDelete = false;
-        // initial filling tests
-        assertTrue(rowset.isEmpty());
-        fillInRowset(rowset);
-        assertFalse(rowset.isEmpty());
-        checkRowsetCorrespondToTestData(rowset);
         rowset.deleteAll();
         checkRowsetCorrespondToTestData(rowset);
 

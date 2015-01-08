@@ -742,6 +742,7 @@ public class CardPane extends JPanel implements HasPublished, HasContainerEvents
     }
     
     // published parent
+    @ScriptFunction(name = "parent", jsDoc = PARENT_JSDOC)
     @Override
     public Widget getParentWidget() {
         return Forms.lookupPublishedParent(this);

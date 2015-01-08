@@ -8,19 +8,26 @@ package com.eas.client.forms.components.model.grid.header;
 import com.bearsoft.gui.grid.header.GridColumnsNode;
 import com.eas.client.forms.components.model.grid.columns.ModelColumn;
 import com.eas.design.Designable;
+import com.eas.script.AlreadyPublishedException;
+import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.awt.Color;
 import java.awt.Font;
 import javax.swing.table.TableColumn;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
  * @author Марат
  */
-public class ModelGridColumn extends GridColumnsNode {
+public class ModelGridColumn extends GridColumnsNode implements HasPublished {
+
+    private static JSObject publisher;
+    protected JSObject published;
 
     protected String field;
-    
+
     @ScriptFunction
     public ModelGridColumn() {
         super();
@@ -100,7 +107,7 @@ public class ModelGridColumn extends GridColumnsNode {
     public void setMaxWidth(int aValue) {
         super.setMaxWidth(aValue);
     }
-    
+
     @ScriptFunction
     @Override
     public boolean isEditable() {
@@ -122,19 +129,19 @@ public class ModelGridColumn extends GridColumnsNode {
     @ScriptFunction
     @Override
     public void setVisible(boolean aValue) {
-        super.setVisible(aValue); 
+        super.setVisible(aValue);
     }
 
     @ScriptFunction
     @Override
     public boolean isMovable() {
-        return super.isMovable(); 
+        return super.isMovable();
     }
 
     @ScriptFunction
     @Override
     public void setMovable(boolean aValue) {
-        super.setMovable(aValue); 
+        super.setMovable(aValue);
     }
 
     @ScriptFunction
@@ -152,13 +159,13 @@ public class ModelGridColumn extends GridColumnsNode {
     @ScriptFunction
     @Override
     public boolean isSortable() {
-        return super.isSortable(); 
+        return super.isSortable();
     }
 
     @ScriptFunction
     @Override
     public void setSortable(boolean aValue) {
-        super.setSortable(aValue); 
+        super.setSortable(aValue);
     }
 
     @ScriptFunction
@@ -170,7 +177,7 @@ public class ModelGridColumn extends GridColumnsNode {
     @ScriptFunction
     @Override
     public void setTitle(String aTitle) {
-        super.setTitle(aTitle); 
+        super.setTitle(aTitle);
     }
 
     @ScriptFunction
@@ -194,18 +201,47 @@ public class ModelGridColumn extends GridColumnsNode {
     @ScriptFunction
     @Override
     public void setForeground(Color aValue) {
-        super.setForeground(aValue); 
+        super.setForeground(aValue);
     }
 
     @ScriptFunction
     @Override
     public Font getFont() {
-        return super.getFont(); 
+        return super.getFont();
     }
 
     @ScriptFunction
     @Override
     public void setFont(Font aValue) {
-        super.setFont(aValue); 
+        super.setFont(aValue);
+    }
+
+    @Override
+    public JSObject getPublished() {
+        if (published == null) {
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = (JSObject) publisher.call(null, new Object[]{this});
+        }
+        return published;
+    }
+
+    @Override
+    public void setPublished(JSObject jsColumn) {
+        if (published != null) {
+            throw new AlreadyPublishedException();
+        }
+        published = jsColumn;
+        /*
+         if(view != null)
+         view.injectPublished(published);
+         if(editor != null)
+         editor.injectPublished(published);
+         */
+    }
+
+    public static void setPublisher(JSObject aPublisher) {
+        publisher = aPublisher;
     }
 }

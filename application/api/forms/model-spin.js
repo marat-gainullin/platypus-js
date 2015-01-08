@@ -158,6 +158,20 @@
              */
             P.ModelSpin.prototype.onRender = {};
         }
+        Object.defineProperty(this, "parent", {
+            get: function() {
+                var value = delegate.parentWidget;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelSpin){
+            /**
+             * Parent container of this widget.
+             * @property parentWidget
+             * @memberOf ModelSpin
+             */
+            P.ModelSpin.prototype.parent = {};
+        }
         Object.defineProperty(this, "text", {
             get: function() {
                 var value = delegate.text;
@@ -612,6 +626,23 @@
              */
             P.ModelSpin.prototype.min = 0;
         }
+        Object.defineProperty(this, "value", {
+            get: function() {
+                var value = delegate.jsValue;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.jsValue = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelSpin){
+            /**
+             * Widget's value.
+             * @property jsValue
+             * @memberOf ModelSpin
+             */
+            P.ModelSpin.prototype.value = {};
+        }
         Object.defineProperty(this, "top", {
             get: function() {
                 var value = delegate.top;
@@ -645,20 +676,6 @@
              * @memberOf ModelSpin
              */
             P.ModelSpin.prototype.onComponentResized = {};
-        }
-        Object.defineProperty(this, "value", {
-            get: function() {
-                var value = delegate.value;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ModelSpin){
-            /**
-             * Widget's value.
-             * @property value
-             * @memberOf ModelSpin
-             */
-            P.ModelSpin.prototype.value = {};
         }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {

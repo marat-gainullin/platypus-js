@@ -159,6 +159,20 @@
              */
             P.ModelGrid.prototype.onRender = {};
         }
+        Object.defineProperty(this, "parent", {
+            get: function() {
+                var value = delegate.parentWidget;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * Parent container of this widget.
+             * @property parentWidget
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.parent = {};
+        }
         Object.defineProperty(this, "onMouseEntered", {
             get: function() {
                 var value = delegate.onMouseEntered;
@@ -882,6 +896,17 @@
         };
 
         /**
+         * Clears current selection.
+         * @method clearSelection
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.clearSelection = function() {
+            var delegate = this.unwrap();
+            var value = delegate.clearSelection();
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Selects the specified element.
          * @param instance Entity's instance to be selected.
          * @method select
@@ -905,17 +930,6 @@
         };
 
         /**
-         * Clears current selection.
-         * @method clearSelection
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.clearSelection = function() {
-            var delegate = this.unwrap();
-            var value = delegate.clearSelection();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf ModelGrid
@@ -923,6 +937,18 @@
         P.ModelGrid.prototype.focus = function() {
             var delegate = this.unwrap();
             var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Unselects the specified element.
+         * @param instance Entity's instance to be unselected
+         * @method unselect
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.unselect = function(instance) {
+            var delegate = this.unwrap();
+            var value = delegate.unselect(P.boxAsJava(instance));
             return P.boxAsJs(value);
         };
 
@@ -950,35 +976,12 @@
 
         /**
          *
-         * @method removeColumn
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.removeColumn = function(arg0) {
-            var delegate = this.unwrap();
-            var value = delegate.removeColumn(P.boxAsJava(arg0));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         *
          * @method row2Index
          * @memberOf ModelGrid
          */
         P.ModelGrid.prototype.row2Index = function(arg0) {
             var delegate = this.unwrap();
             var value = delegate.row2Index(P.boxAsJava(arg0));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Unselects the specified element.
-         * @param instance Entity's instance to be unselected
-         * @method unselect
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.unselect = function(instance) {
-            var delegate = this.unwrap();
-            var value = delegate.unselect(P.boxAsJava(instance));
             return P.boxAsJs(value);
         };
 
@@ -990,6 +993,17 @@
         P.ModelGrid.prototype.index2Row = function(arg0) {
             var delegate = this.unwrap();
             var value = delegate.index2Row(P.boxAsJava(arg0));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
+         * @method removeColumn
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.removeColumn = function(arg0) {
+            var delegate = this.unwrap();
+            var value = delegate.removeColumn(P.boxAsJava(arg0));
             return P.boxAsJs(value);
         };
 

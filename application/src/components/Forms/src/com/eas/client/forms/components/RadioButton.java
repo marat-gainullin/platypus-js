@@ -694,6 +694,7 @@ public class RadioButton extends VRadioButton implements HasOnValueChange, HasJs
     }
 
     // published parent
+    @ScriptFunction(name = "parent", jsDoc = PARENT_JSDOC)
     @Override
     public Widget getParentWidget() {
         return Forms.lookupPublishedParent(this);

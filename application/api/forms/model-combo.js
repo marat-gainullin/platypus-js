@@ -158,6 +158,20 @@
              */
             P.ModelCombo.prototype.onRender = {};
         }
+        Object.defineProperty(this, "parent", {
+            get: function() {
+                var value = delegate.parentWidget;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelCombo){
+            /**
+             * Parent container of this widget.
+             * @property parentWidget
+             * @memberOf ModelCombo
+             */
+            P.ModelCombo.prototype.parent = {};
+        }
         Object.defineProperty(this, "text", {
             get: function() {
                 var value = delegate.text;
@@ -646,6 +660,23 @@
              */
             P.ModelCombo.prototype.onSelect = {};
         }
+        Object.defineProperty(this, "value", {
+            get: function() {
+                var value = delegate.jsValue;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.jsValue = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelCombo){
+            /**
+             * Widget's value.
+             * @property jsValue
+             * @memberOf ModelCombo
+             */
+            P.ModelCombo.prototype.value = {};
+        }
         Object.defineProperty(this, "top", {
             get: function() {
                 var value = delegate.top;
@@ -679,20 +710,6 @@
              * @memberOf ModelCombo
              */
             P.ModelCombo.prototype.onComponentResized = {};
-        }
-        Object.defineProperty(this, "value", {
-            get: function() {
-                var value = delegate.value;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ModelCombo){
-            /**
-             * Widget's value.
-             * @property value
-             * @memberOf ModelCombo
-             */
-            P.ModelCombo.prototype.value = {};
         }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {

@@ -6,7 +6,6 @@ package com.bearsoft.rowset.events;
 
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
 import java.util.HashSet;
 import java.util.Set;
@@ -200,40 +199,6 @@ public class RowsetChangeSupport {
                     int oldRowPos = source.getCursorPos();
                     try {
                         if (!l.willFilter(event)) {
-                            res = false;
-                        }
-                    } finally {
-                        restoreRowsetPosition(oldRowPos);
-                        source.wideCheckCursor();
-                    }
-                }
-            }
-        }
-        return res;
-    }
-
-    /**
-     * Fires <code>willChange</code> event to all registered listeners. The
-     * changing might be vetoed by one of the registered listeners. Nevertheless
-     * the event will be propagated to all the registered listeners.
-     *
-     * @param aChangedRow
-     * @param aFieldIndex Rowset's column(field) index the changing will be
-     * performed at.
-     * @param aOldValue The old value of the updating column.
-     * @param aNewValue The value that is to be setted to the updating column.
-     * @return Whether event source may perform the changing.
-     * @throws InvalidCursorPositionException
-     */
-    public boolean fireWillChangeEvent(Row aChangedRow, int aFieldIndex, Object aOldValue, Object aNewValue) throws InvalidCursorPositionException {
-        boolean res = true;
-        if (rowsetListeners != null && !rowsetListeners.isEmpty()) {
-            RowChangeEvent event = new RowChangeEvent(source, aChangedRow, aFieldIndex, aOldValue, aNewValue, RowsetEventMoment.BEFORE);
-            for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
-                if (l != null) {
-                    int oldRowPos = source.getCursorPos();
-                    try {
-                        if (!l.willChangeRow(event)) {
                             res = false;
                         }
                     } finally {
@@ -452,39 +417,6 @@ public class RowsetChangeSupport {
         }
     }
 
-    /**
-     * @param aChangedRow Fires rowChangedEvent event to all registered
-     * listeners.
-     * @param aOldValue Old value of row's column at <code>aFieldIndex</code>.
-     * @param aFieldIndex Field (column) index of the upadated column.
-     * @throws InvalidColIndexException
-     * @throws InvalidCursorPositionException
-     */
-    /*
-    public void fireRowChangedEvent(Row aChangedRow, int aFieldIndex, Object aOldValue) throws InvalidColIndexException, InvalidCursorPositionException {
-        fireRowChangedEvent(aChangedRow, aFieldIndex, aOldValue, aChangedRow.getColumnObject(aFieldIndex));
-    }
-*/
-    /**
-     * Fires rowChangedEvent event to all registered listeners.
-     *
-     * @param aChangedRow
-     * @param aOldValue Old value of row's column at <code>aFieldIndex</code>.
-     * @param aNewValue New value of row's column at <code>aFieldIndex</code>.
-     * @param aFieldIndex Field (column) index of the upadated column.
-     * @throws InvalidColIndexException
-     * @throws InvalidCursorPositionException
-     */
-    /*
-    public void fireRowChangedEvent(Row aChangedRow, int aFieldIndex, Object aOldValue, Object aNewValue) throws InvalidColIndexException, InvalidCursorPositionException {
-        if (rowsetListeners != null) {
-            RowChangeEvent event = new RowChangeEvent(source, aChangedRow, aFieldIndex, aOldValue, aNewValue, RowsetEventMoment.AFTER);
-            notifyListeners((RowsetListener l) -> {
-                l.rowChanged(event);
-            });
-        }
-    }
-*/
     public void fireNetErrorEvent(Exception anErrorCause) {
         if (rowsetListeners != null) {
             RowsetNetErrorEvent event = new RowsetNetErrorEvent(source, anErrorCause);

@@ -759,7 +759,8 @@
     }
 
     function BoundArray() {
-        BoundArray.superclass.constructor.apply(this, arguments);
+        if (BoundArray.superclass)
+            BoundArray.superclass.constructor.apply(this, arguments);
         var target = this;
         var rowset = this.unwrap().getRowset();
         var adapter = new RowsetJSAdapterClass();
@@ -781,7 +782,7 @@
             // ignore
         };
         adapter.rowsetRolledback = function (event) {
-            // ignore
+            adapter.rowsetFiltered(null);
         };
         adapter.rowsetScrolled = function (event) {
             // ignore
@@ -789,22 +790,6 @@
         adapter.rowsetSorted = function (event) {
             adapter.rowsetFiltered(null);
         };
-        adapter.rowInserted = function (event) {
-            if (!event.ajusting)
-                adapter.rowsetFiltered(null);
-        };
-        /*
-        adapter.rowChanged = function (event) {
-            if (event.oldRowCount !== event.newRowCount) {
-                adapter.rowsetFiltered(null);
-            }
-        };
-        */
-        adapter.rowDeleted = function (event) {
-            if (!event.ajusting)
-                adapter.rowsetFiltered(null);
-        };
-
         Object.defineProperty(target, "fill", {
             value: function () {
                 throw '\'fill\' is unsupported in BoundArray because of it\'s distinct values requirement';
@@ -823,14 +808,9 @@
         Object.defineProperty(target, "push", {
             value: function () {
                 var justInserted;
-                if (arguments.length > 1) {
-                    for (var a = 0; a < arguments.length; a++) {
-                        justInserted = rowset.insertAt(rowset.size() + 1, a < arguments.length - 1, objectToInsertIniting(arguments[a]));
-                        justInserted.setPublished(publishRow(justInserted, arguments[a]));
-                    }
-                } else if (arguments.length === 1) {
-                    justInserted = rowset.insertAt(rowset.size() + 1, true, objectToInsertIniting(arguments[0]));
-                    justInserted.setPublished(publishRow(justInserted, arguments[0]));
+                for (var a = 0; a < arguments.length; a++) {
+                    justInserted = rowset.insertAt(rowset.size() + 1, a < arguments.length - 1, objectToInsertIniting(arguments[a]));
+                    justInserted.setPublished(publishRow(justInserted, arguments[a]));
                     Array.prototype.push.call(target, justInserted.getPublished());
                 }
                 return target.length;
@@ -879,10 +859,8 @@
                         howManyToDelete = arguments[1];
                     }
                     var needToAdd = arguments.length > 2;
-                    var deleted = [];
-                    while (!rowset.empty && deleted.length < howManyToDelete) {
-                        var rowToDelete = rowset.getRow(beginToDeleteAt + 1);
-                        deleted.push(rowToDelete);
+                    var deleted = 0;
+                    while (!rowset.empty && deleted++ < howManyToDelete) {
                         rowset.deleteAt(beginToDeleteAt + 1, needToAdd);
                     }
                     var insertAt = beginToDeleteAt;
@@ -891,52 +869,22 @@
                         justInserted.setPublished(publishRow(justInserted, arguments[a]));
                         insertAt++;
                     }
-                    return deleted;
-                } else {
-                    return [];
                 }
+                return Array.prototype.splice.apply(target, arguments);
             }
         });
 
         Object.defineProperty(target, "unshift", {
             value: function () {
                 var justInserted;
-                if (arguments.length > 1) {
-                    for (var a = 0; a < arguments.length; a++) {
-                        justInserted = rowset.insertAt(a + 1, a < arguments.length - 1, objectToInsertIniting(arguments[a]));
-                        justInserted.setPublished(publishRow(justInserted, arguments[a]));
-                    }
-                } else if (arguments.length === 1) {
-                    justInserted = rowset.insertAt(1, true, objectToInsertIniting(arguments[0]));
-                    justInserted.setPublished(publishRow(justInserted, arguments[0]));
+                for (var a = 0; a < arguments.length; a++) {
+                    justInserted = rowset.insertAt(a + 1, a < arguments.length - 1, objectToInsertIniting(arguments[a]));
+                    justInserted.setPublished(publishRow(justInserted, arguments[a]));
                     Array.prototype.unshift.call(target, justInserted.getPublished());
                 }
                 return target.length;
             }
         });
-
-        /*
-         Object.defineProperty(target, "insert", {
-         value: function () {
-         var initing = new JavaArrayClass(arguments.length);
-         for (var v = 0; v < arguments.length; v++)
-         initing[v] = boxAsJava(arguments[v]);
-         rowset.insert(initing);
-         }
-         });
-         
-         Object.defineProperty(target, "insertAt", {
-         value: function () {
-         if (arguments.length > 0) {
-         var index = arguments[0];
-         var initing = new JavaArrayClass(arguments.length - 1);
-         for (var v = 1; v < arguments.length; v++)
-         initing[v - 1] = boxAsJava(arguments[v]);
-         rowset.insertAt(index, false, initing);
-         }
-         }
-         });
-         */
 
         Object.defineProperty(target, "createFilter", {
             value: function () {
@@ -980,15 +928,16 @@
                 if (!found.tag) {
                     var res = [];
                     for (var f = 0; f < found.size(); f++) {
-                        res.push(EngineUtilsClass.unwrap(found[f].getRow().getPublished()));
+                        res.push(EngineUtilsClass.unwrap(found[f].getPublished()));
                     }
-                    var changeSupport = new PropertyChangeSupportClass();
-                    res.unwrap = function () {
-                        return changeSupport;
-                    };
                     found.tag = res;
+                    Object.defineProperty(res, "unwrap", {
+                        value: function () {
+                            return found;
+                        }
+                    });
                 }
-                return found.tag;
+                return EngineUtilsClass.unwrap(found.tag);
             }
         });
     }

@@ -242,19 +242,8 @@ public class BinaryRowsetReader extends RowsetReader {
             for (int i = 0; i < rowsNodes.size(); i++) {
                 ProtoNode rowNode = rowsNodes.get(i);
                 if (rowNode != null) {
-                    aRowset.insert();
                     // row flags
-                    boolean deletedRow = rowNode.containsChild(BinaryTags.DELETED);
-                    boolean insertedRow = rowNode.containsChild(BinaryTags.INSERTED);
-                    Row row = aRowset.getCurrentRow();
-                    row.clearDeleted();
-                    row.clearInserted();
-                    if (deletedRow) {
-                        row.setDeleted();
-                    }
-                    if (insertedRow) {
-                        row.setInserted();
-                    }
+                    Row row = new Row("", fields);
                     // row values
                     List<ProtoNode> valuesNodes = rowNode.getChildren(BinaryTags.ORIGINAL_VALUE);
                     readRowValues(fields, customSerializers, row, valuesNodes);
@@ -263,20 +252,8 @@ public class BinaryRowsetReader extends RowsetReader {
                     readRowValues(fields, customSerializers, row, valuesNodes);
                     // updated flags
                     row.clearUpdated();
-                    ProtoNode updatedNode = rowNode.getChild(BinaryTags.UPDATED);
-                    if (updatedNode != null) {
-                        List<ProtoNode> indicies = updatedNode.getChildren(BinaryTags.UPDATED_INDEX);
-                        for (ProtoNode idxNode : indicies) {
-                            int updIdx = idxNode.getInt();
-                            row.setColumnUpdated(updIdx);
-                        }
-                    }
-                }
-            }
-            aRowset.afterLast();
-            while (aRowset.previous()) {
-                if (aRowset.getCurrentRow().isDeleted()) {
-                    aRowset.delete();
+                    aRowset.insert(row, true);
+                    row.clearInserted();
                 }
             }
         }

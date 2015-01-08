@@ -261,6 +261,20 @@
              */
             P.AnchorsPane.prototype.onComponentResized = {};
         }
+        Object.defineProperty(this, "parent", {
+            get: function() {
+                var value = delegate.parentWidget;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.AnchorsPane){
+            /**
+             * Parent container of this widget.
+             * @property parentWidget
+             * @memberOf AnchorsPane
+             */
+            P.AnchorsPane.prototype.parent = {};
+        }
         Object.defineProperty(this, "onMouseEntered", {
             get: function() {
                 var value = delegate.onMouseEntered;
@@ -360,23 +374,6 @@
              */
             P.AnchorsPane.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "visible", {
-            get: function() {
-                var value = delegate.visible;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.visible = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.AnchorsPane){
-            /**
-             * Determines whether this component should be visible when its parent is visible.
-             * @property visible
-             * @memberOf AnchorsPane
-             */
-            P.AnchorsPane.prototype.visible = true;
-        }
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
@@ -393,6 +390,23 @@
              * @memberOf AnchorsPane
              */
             P.AnchorsPane.prototype.opaque = true;
+        }
+        Object.defineProperty(this, "visible", {
+            get: function() {
+                var value = delegate.visible;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.visible = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.AnchorsPane){
+            /**
+             * Determines whether this component should be visible when its parent is visible.
+             * @property visible
+             * @memberOf AnchorsPane
+             */
+            P.AnchorsPane.prototype.visible = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
@@ -428,20 +442,6 @@
              */
             P.AnchorsPane.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "count", {
-            get: function() {
-                var value = delegate.count;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.AnchorsPane){
-            /**
-             * Gets the number of components in this panel.
-             * @property count
-             * @memberOf AnchorsPane
-             */
-            P.AnchorsPane.prototype.count = 0;
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -458,6 +458,20 @@
              * @memberOf AnchorsPane
              */
             P.AnchorsPane.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "count", {
+            get: function() {
+                var value = delegate.count;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.AnchorsPane){
+            /**
+             * Gets the number of components in this panel.
+             * @property count
+             * @memberOf AnchorsPane
+             */
+            P.AnchorsPane.prototype.count = 0;
         }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {

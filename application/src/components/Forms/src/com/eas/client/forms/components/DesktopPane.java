@@ -643,6 +643,7 @@ public class DesktopPane extends JDesktopPane implements HasPublished, HasCompon
     }
     
     // published parent
+    @ScriptFunction(name = "parent", jsDoc = PARENT_JSDOC)
     @Override
     public Widget getParentWidget() {
         return Forms.lookupPublishedParent(this);

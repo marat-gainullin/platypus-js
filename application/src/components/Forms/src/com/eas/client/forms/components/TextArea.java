@@ -635,6 +635,7 @@ public class TextArea extends VTextArea implements HasOnValueChange, HasJsValue,
     }
 
     // published parent
+    @ScriptFunction(name = "parent", jsDoc = PARENT_JSDOC)
     @Override
     public Widget getParentWidget() {
         return Forms.lookupPublishedParent(this);

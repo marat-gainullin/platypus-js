@@ -199,6 +199,23 @@
              */
             P.CheckBox.prototype.onComponentMoved = {};
         }
+        Object.defineProperty(this, "value", {
+            get: function() {
+                var value = delegate.jsValue;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.jsValue = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.CheckBox){
+            /**
+             * Widget's value.
+             * @property jsValue
+             * @memberOf CheckBox
+             */
+            P.CheckBox.prototype.value = {};
+        }
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {
                 var value = delegate.componentPopupMenu;
@@ -250,6 +267,20 @@
              */
             P.CheckBox.prototype.onComponentResized = {};
         }
+        Object.defineProperty(this, "parent", {
+            get: function() {
+                var value = delegate.parentWidget;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.CheckBox){
+            /**
+             * Parent container of this widget.
+             * @property parentWidget
+             * @memberOf CheckBox
+             */
+            P.CheckBox.prototype.parent = {};
+        }
         Object.defineProperty(this, "text", {
             get: function() {
                 var value = delegate.text;
@@ -283,19 +314,21 @@
              */
             P.CheckBox.prototype.onMouseEntered = {};
         }
-        Object.defineProperty(this, "value", {
+        Object.defineProperty(this, "selected", {
             get: function() {
-                var value = delegate.value;
+                var value = delegate.selected;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.selected = P.boxAsJava(aValue);
             }
         });
         if(!P.CheckBox){
             /**
-             * Widget's value.
-             * @property value
+             * @property selected
              * @memberOf CheckBox
-             */
-            P.CheckBox.prototype.value = {};
+             * Determines whether this component is selected.*/
+            P.CheckBox.prototype.selected = true;
         }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
@@ -313,22 +346,6 @@
              * @memberOf CheckBox
              */
             P.CheckBox.prototype.toolTipText = '';
-        }
-        Object.defineProperty(this, "selected", {
-            get: function() {
-                var value = delegate.selected;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.selected = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.CheckBox){
-            /**
-             * @property selected
-             * @memberOf CheckBox
-             * Determines whether this component is selected.*/
-            P.CheckBox.prototype.selected = true;
         }
         Object.defineProperty(this, "element", {
             get: function() {
@@ -395,23 +412,6 @@
              */
             P.CheckBox.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "visible", {
-            get: function() {
-                var value = delegate.visible;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.visible = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.CheckBox){
-            /**
-             * Determines whether this component should be visible when its parent is visible.
-             * @property visible
-             * @memberOf CheckBox
-             */
-            P.CheckBox.prototype.visible = true;
-        }
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
@@ -428,6 +428,23 @@
              * @memberOf CheckBox
              */
             P.CheckBox.prototype.opaque = true;
+        }
+        Object.defineProperty(this, "visible", {
+            get: function() {
+                var value = delegate.visible;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.visible = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.CheckBox){
+            /**
+             * Determines whether this component should be visible when its parent is visible.
+             * @property visible
+             * @memberOf CheckBox
+             */
+            P.CheckBox.prototype.visible = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {

@@ -175,6 +175,20 @@
              */
             P.ModelDate.prototype.onRender = {};
         }
+        Object.defineProperty(this, "parent", {
+            get: function() {
+                var value = delegate.parentWidget;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelDate){
+            /**
+             * Parent container of this widget.
+             * @property parentWidget
+             * @memberOf ModelDate
+             */
+            P.ModelDate.prototype.parent = {};
+        }
         Object.defineProperty(this, "text", {
             get: function() {
                 var value = delegate.text;
@@ -612,6 +626,23 @@
              */
             P.ModelDate.prototype.onSelect = {};
         }
+        Object.defineProperty(this, "value", {
+            get: function() {
+                var value = delegate.jsValue;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.jsValue = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelDate){
+            /**
+             * Widget's value.
+             * @property jsValue
+             * @memberOf ModelDate
+             */
+            P.ModelDate.prototype.value = {};
+        }
         Object.defineProperty(this, "top", {
             get: function() {
                 var value = delegate.top;
@@ -645,20 +676,6 @@
              * @memberOf ModelDate
              */
             P.ModelDate.prototype.onComponentResized = {};
-        }
-        Object.defineProperty(this, "value", {
-            get: function() {
-                var value = delegate.value;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * Widget's value.
-             * @property value
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.value = {};
         }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {

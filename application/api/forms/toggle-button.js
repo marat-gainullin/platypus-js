@@ -220,6 +220,23 @@
              */
             P.ToggleButton.prototype.onComponentMoved = {};
         }
+        Object.defineProperty(this, "value", {
+            get: function() {
+                var value = delegate.jsValue;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.jsValue = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ToggleButton){
+            /**
+             * Widget's value.
+             * @property jsValue
+             * @memberOf ToggleButton
+             */
+            P.ToggleButton.prototype.value = {};
+        }
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {
                 var value = delegate.componentPopupMenu;
@@ -271,6 +288,20 @@
              */
             P.ToggleButton.prototype.onComponentResized = {};
         }
+        Object.defineProperty(this, "parent", {
+            get: function() {
+                var value = delegate.parentWidget;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ToggleButton){
+            /**
+             * Parent container of this widget.
+             * @property parentWidget
+             * @memberOf ToggleButton
+             */
+            P.ToggleButton.prototype.parent = {};
+        }
         Object.defineProperty(this, "text", {
             get: function() {
                 var value = delegate.text;
@@ -305,19 +336,22 @@
              */
             P.ToggleButton.prototype.onMouseEntered = {};
         }
-        Object.defineProperty(this, "value", {
+        Object.defineProperty(this, "selected", {
             get: function() {
-                var value = delegate.value;
+                var value = delegate.selected;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.selected = P.boxAsJava(aValue);
             }
         });
         if(!P.ToggleButton){
             /**
-             * Widget's value.
-             * @property value
+             * The state of the button.
+             * @property selected
              * @memberOf ToggleButton
              */
-            P.ToggleButton.prototype.value = true;
+            P.ToggleButton.prototype.selected = true;
         }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
@@ -335,23 +369,6 @@
              * @memberOf ToggleButton
              */
             P.ToggleButton.prototype.toolTipText = '';
-        }
-        Object.defineProperty(this, "selected", {
-            get: function() {
-                var value = delegate.selected;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.selected = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ToggleButton){
-            /**
-             * The state of the button.
-             * @property selected
-             * @memberOf ToggleButton
-             */
-            P.ToggleButton.prototype.selected = true;
         }
         Object.defineProperty(this, "element", {
             get: function() {
@@ -418,23 +435,6 @@
              */
             P.ToggleButton.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "visible", {
-            get: function() {
-                var value = delegate.visible;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.visible = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ToggleButton){
-            /**
-             * Determines whether this component should be visible when its parent is visible.
-             * @property visible
-             * @memberOf ToggleButton
-             */
-            P.ToggleButton.prototype.visible = true;
-        }
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
@@ -451,6 +451,23 @@
              * @memberOf ToggleButton
              */
             P.ToggleButton.prototype.opaque = true;
+        }
+        Object.defineProperty(this, "visible", {
+            get: function() {
+                var value = delegate.visible;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.visible = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ToggleButton){
+            /**
+             * Determines whether this component should be visible when its parent is visible.
+             * @property visible
+             * @memberOf ToggleButton
+             */
+            P.ToggleButton.prototype.visible = true;
         }
         Object.defineProperty(this, "buttonGroup", {
             get: function() {

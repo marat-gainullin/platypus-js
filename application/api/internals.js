@@ -120,7 +120,7 @@
         }
         return null;
     }
-    
+
     function listen(aTarget, aPath, aListener) {
         var subscribed = [];
         function listenPath() {

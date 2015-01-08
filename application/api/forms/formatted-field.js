@@ -229,6 +229,23 @@
              */
             P.FormattedField.prototype.onComponentMoved = {};
         }
+        Object.defineProperty(this, "value", {
+            get: function() {
+                var value = delegate.jsValue;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.jsValue = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.FormattedField){
+            /**
+             * Widget's value.
+             * @property jsValue
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.value = {};
+        }
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {
                 var value = delegate.componentPopupMenu;
@@ -297,6 +314,20 @@
              */
             P.FormattedField.prototype.valueType = 0;
         }
+        Object.defineProperty(this, "parent", {
+            get: function() {
+                var value = delegate.parentWidget;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.FormattedField){
+            /**
+             * Parent container of this widget.
+             * @property parentWidget
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.parent = {};
+        }
         Object.defineProperty(this, "text", {
             get: function() {
                 var value = delegate.text;
@@ -330,23 +361,6 @@
              * @memberOf FormattedField
              */
             P.FormattedField.prototype.onMouseEntered = {};
-        }
-        Object.defineProperty(this, "value", {
-            get: function() {
-                var value = delegate.value;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.value = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.FormattedField){
-            /**
-             * Widget's value.
-             * @property value
-             * @memberOf FormattedField
-             */
-            P.FormattedField.prototype.value = {};
         }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
@@ -447,23 +461,6 @@
              */
             P.FormattedField.prototype.onFormat = {};
         }
-        Object.defineProperty(this, "visible", {
-            get: function() {
-                var value = delegate.visible;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.visible = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.FormattedField){
-            /**
-             * Determines whether this component should be visible when its parent is visible.
-             * @property visible
-             * @memberOf FormattedField
-             */
-            P.FormattedField.prototype.visible = true;
-        }
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
@@ -480,6 +477,23 @@
              * @memberOf FormattedField
              */
             P.FormattedField.prototype.opaque = true;
+        }
+        Object.defineProperty(this, "visible", {
+            get: function() {
+                var value = delegate.visible;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.visible = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.FormattedField){
+            /**
+             * Determines whether this component should be visible when its parent is visible.
+             * @property visible
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.visible = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {

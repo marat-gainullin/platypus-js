@@ -250,6 +250,20 @@
              */
             P.Label.prototype.onComponentResized = {};
         }
+        Object.defineProperty(this, "parent", {
+            get: function() {
+                var value = delegate.parentWidget;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Label){
+            /**
+             * Parent container of this widget.
+             * @property parentWidget
+             * @memberOf Label
+             */
+            P.Label.prototype.parent = {};
+        }
         Object.defineProperty(this, "text", {
             get: function() {
                 var value = delegate.text;
@@ -366,23 +380,6 @@
              */
             P.Label.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "visible", {
-            get: function() {
-                var value = delegate.visible;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.visible = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Label){
-            /**
-             * Determines whether this component should be visible when its parent is visible.
-             * @property visible
-             * @memberOf Label
-             */
-            P.Label.prototype.visible = true;
-        }
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
@@ -399,6 +396,23 @@
              * @memberOf Label
              */
             P.Label.prototype.opaque = true;
+        }
+        Object.defineProperty(this, "visible", {
+            get: function() {
+                var value = delegate.visible;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.visible = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Label){
+            /**
+             * Determines whether this component should be visible when its parent is visible.
+             * @property visible
+             * @memberOf Label
+             */
+            P.Label.prototype.visible = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
@@ -570,6 +584,20 @@
              */
             P.Label.prototype.onMouseWheelMoved = {};
         }
+        Object.defineProperty(this, "component", {
+            get: function() {
+                var value = delegate.component;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Label){
+            /**
+             * Native API. Returns low level swing component. Applicable only in J2SE swing client.
+             * @property component
+             * @memberOf Label
+             */
+            P.Label.prototype.component = {};
+        }
         Object.defineProperty(this, "horizontalAlignment", {
             get: function() {
                 var value = delegate.horizontalAlignment;
@@ -586,20 +614,6 @@
              * @memberOf Label
              */
             P.Label.prototype.horizontalAlignment = 0;
-        }
-        Object.defineProperty(this, "component", {
-            get: function() {
-                var value = delegate.component;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.Label){
-            /**
-             * Native API. Returns low level swing component. Applicable only in J2SE swing client.
-             * @property component
-             * @memberOf Label
-             */
-            P.Label.prototype.component = {};
         }
         Object.defineProperty(this, "onFocusGained", {
             get: function() {

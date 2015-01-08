@@ -5,7 +5,6 @@
 package com.eas.client.forms.components.model.grid.models;
 
 import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.events.RowChangeEvent;
 import com.bearsoft.rowset.events.RowsetAdapter;
 import com.bearsoft.rowset.events.RowsetDeleteEvent;
 import com.bearsoft.rowset.events.RowsetFilterEvent;
@@ -14,7 +13,6 @@ import com.bearsoft.rowset.events.RowsetNextPageEvent;
 import com.bearsoft.rowset.events.RowsetRequeryEvent;
 import com.bearsoft.rowset.events.RowsetRollbackEvent;
 import com.bearsoft.rowset.events.RowsetSortEvent;
-import com.bearsoft.rowset.metadata.Field;
 
 /**
  *

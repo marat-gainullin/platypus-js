@@ -62,6 +62,10 @@ public class Row implements HasPublished {
         log = aValue;
     }
 
+    public void setEntityName(String aValue) {
+        entityName = aValue;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (getClass() != obj.getClass()) {

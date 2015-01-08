@@ -892,6 +892,7 @@ public class BorderPane extends JPanel implements HasPublished, HasContainerEven
     }
     
     // published parent
+    @ScriptFunction(name = "parent", jsDoc = PARENT_JSDOC)
     @Override
     public Widget getParentWidget() {
         return Forms.lookupPublishedParent(this);

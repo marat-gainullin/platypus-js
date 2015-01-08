@@ -104,6 +104,7 @@ public class Classes2Scripts {
 
         public Method method;
         public boolean invalidatable;
+        public String apiName;
 
         public MethodedPropBox() {
             super();
@@ -216,7 +217,7 @@ public class Classes2Scripts {
     private void processJar(File jarFile) throws IOException, ClassNotFoundException {
         try (JarFile jar = new JarFile(jarFile)) {
             Logger.getLogger(Classes2Scripts.class.getName())
-                    .log(Level.INFO, "Processing jar: {0}", new String[]{jarFile.getAbsolutePath()});
+                    .log(Level.FINE, "Processing jar: {0}", new String[]{jarFile.getAbsolutePath()});
             URLClassLoader cl = new URLClassLoader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
             Enumeration<JarEntry> e = jar.entries();
             while (e.hasMoreElements()) {
@@ -234,7 +235,7 @@ public class Classes2Scripts {
                                     subDir.mkdir();
                                 }
                                 Logger.getLogger(Classes2Scripts.class.getName())
-                                        .log(Level.INFO, "\tClass name: {0}", new String[]{className});
+                                        .log(Level.FINE, "\tClass name: {0}", new String[]{className});
                                 File resultFile = new File(subDir, FileNameSupport.getFileName(jsConstructor.name) + ".js"); //NOI18N
                                 FileUtils.writeString(resultFile, js, SettingsConstants.COMMON_ENCODING);
                                 depsPaths.add(getRelativePath(destDirectory, resultFile));
@@ -272,12 +273,16 @@ public class Classes2Scripts {
         Map<String, MethodedPropBox> props = new HashMap<>();
         for (Method method : clazz.getMethods()) {
             if (method.isAnnotationPresent(ScriptFunction.class)) {
+                ScriptFunction sfAnnotation = method.getAnnotation(ScriptFunction.class);
                 if (PropertiesUtils.isBeanPatternMethod(method)) {
                     String propName = PropertiesUtils.getPropertyName(method.getName());
                     MethodedPropBox pb = props.get(propName);
                     if (pb == null) {
                         pb = new MethodedPropBox();
                         pb.name = propName;
+                        if (sfAnnotation.name() != null && !sfAnnotation.name().isEmpty()) {
+                            pb.apiName = sfAnnotation.name();
+                        }
                         pb.method = method;
                         pb.invalidatable = invalidatable;
                         props.put(pb.name, pb);
@@ -285,7 +290,7 @@ public class Classes2Scripts {
                     PropertiesUtils.setPropertyAccessStatus(pb, method.getName());
                     PropertiesUtils.setPropertyReturnType(pb, method);
                     if (pb.jsDoc == null || pb.jsDoc.isEmpty()) {
-                        pb.jsDoc = method.getAnnotation(ScriptFunction.class).jsDoc();
+                        pb.jsDoc = sfAnnotation.jsDoc();
                     }
                 } else {
                     methods.add(method);
@@ -443,7 +448,11 @@ public class Classes2Scripts {
         StringBuilder sb = new StringBuilder();
         int i = ident;
         sb.append(getIndentStr(i));
-        sb.append("Object.defineProperty(").append("this, \"").append(property.name).append("\", {\n");
+        String apiPropName = property.name;
+        if (property.apiName != null && !property.apiName.isEmpty()) {
+            apiPropName = property.apiName;
+        }
+        sb.append("Object.defineProperty(").append("this, \"").append(apiPropName).append("\", {\n");
         sb.append(getIndentStr(++i));
         assert property.readable;
         sb.append("get: function() {\n");
@@ -476,7 +485,7 @@ public class Classes2Scripts {
         sb.append("});\n");
         sb.append(getIndentStr(i)).append("if(!P.").append(namespace).append("){\n");
         sb.append(getPropertyJsDoc(namespace, property, ++i)).append("\n");
-        sb.append(getIndentStr(i)).append("P.").append(namespace).append(".prototype.").append(property.name).append(" = ").append(getDefaultLiteralOfType(property.typeName)).append(";\n");
+        sb.append(getIndentStr(i)).append("P.").append(namespace).append(".prototype.").append(apiPropName).append(" = ").append(getDefaultLiteralOfType(property.typeName)).append(";\n");
         sb.append(getIndentStr(--i)).append("}");
         return sb.toString();
     }

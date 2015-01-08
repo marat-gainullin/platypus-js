@@ -42,11 +42,6 @@ public class RowsetAdapter implements RowsetListener {
     }
 
     @Override
-    public boolean willChangeRow(RowChangeEvent event) {
-        return true;
-    }
-
-    @Override
     public boolean willDeleteRow(RowsetDeleteEvent event) {
         return true;
     }

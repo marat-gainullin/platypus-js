@@ -192,6 +192,20 @@
              */
             P.ModelFormattedField.prototype.valueType = 0;
         }
+        Object.defineProperty(this, "parent", {
+            get: function() {
+                var value = delegate.parentWidget;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelFormattedField){
+            /**
+             * Parent container of this widget.
+             * @property parentWidget
+             * @memberOf ModelFormattedField
+             */
+            P.ModelFormattedField.prototype.parent = {};
+        }
         Object.defineProperty(this, "text", {
             get: function() {
                 var value = delegate.text;
@@ -646,6 +660,23 @@
              */
             P.ModelFormattedField.prototype.onSelect = {};
         }
+        Object.defineProperty(this, "value", {
+            get: function() {
+                var value = delegate.jsValue;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.jsValue = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelFormattedField){
+            /**
+             * Widget's value.
+             * @property jsValue
+             * @memberOf ModelFormattedField
+             */
+            P.ModelFormattedField.prototype.value = {};
+        }
         Object.defineProperty(this, "top", {
             get: function() {
                 var value = delegate.top;
@@ -679,20 +710,6 @@
              * @memberOf ModelFormattedField
              */
             P.ModelFormattedField.prototype.onComponentResized = {};
-        }
-        Object.defineProperty(this, "value", {
-            get: function() {
-                var value = delegate.value;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ModelFormattedField){
-            /**
-             * Widget's value.
-             * @property value
-             * @memberOf ModelFormattedField
-             */
-            P.ModelFormattedField.prototype.value = {};
         }
         Object.defineProperty(this, "onFormat", {
             get: function() {

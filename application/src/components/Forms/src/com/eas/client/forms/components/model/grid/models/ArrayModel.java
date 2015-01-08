@@ -4,8 +4,6 @@
  */
 package com.eas.client.forms.components.model.grid.models;
 
-import com.bearsoft.gui.grid.data.CellData;
-import com.eas.client.forms.components.model.CellRenderEvent;
 import com.eas.client.forms.components.model.ModelWidget;
 import com.eas.client.forms.components.model.grid.columns.ModelColumn;
 import java.util.logging.Level;
@@ -97,7 +95,7 @@ public abstract class ArrayModel {
      * been changed, but elements structure havn't been changed.
      */
     public abstract void fireElementsDataChanged();
-
+/*
     private CellData complementCellData(final CellData aCellData, final JSObject anElement, final ModelColumn aColumn) throws Exception {
         JSObject lOnRender = aColumn.getOnRender();
         if (lOnRender == null) {
@@ -109,7 +107,7 @@ public abstract class ArrayModel {
         }
         return aCellData;
     }
-
+*/
     public JSObject getGeneralOnRender() {
         return generalOnRender;
     }

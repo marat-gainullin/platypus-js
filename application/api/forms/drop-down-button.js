@@ -252,6 +252,20 @@
              */
             P.DropDownButton.prototype.onComponentResized = {};
         }
+        Object.defineProperty(this, "parent", {
+            get: function() {
+                var value = delegate.parentWidget;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.DropDownButton){
+            /**
+             * Parent container of this widget.
+             * @property parentWidget
+             * @memberOf DropDownButton
+             */
+            P.DropDownButton.prototype.parent = {};
+        }
         Object.defineProperty(this, "text", {
             get: function() {
                 var value = delegate.text;
@@ -385,23 +399,6 @@
              */
             P.DropDownButton.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "visible", {
-            get: function() {
-                var value = delegate.visible;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.visible = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.DropDownButton){
-            /**
-             * Determines whether this component should be visible when its parent is visible.
-             * @property visible
-             * @memberOf DropDownButton
-             */
-            P.DropDownButton.prototype.visible = true;
-        }
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
@@ -418,6 +415,23 @@
              * @memberOf DropDownButton
              */
             P.DropDownButton.prototype.opaque = true;
+        }
+        Object.defineProperty(this, "visible", {
+            get: function() {
+                var value = delegate.visible;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.visible = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.DropDownButton){
+            /**
+             * Determines whether this component should be visible when its parent is visible.
+             * @property visible
+             * @memberOf DropDownButton
+             */
+            P.DropDownButton.prototype.visible = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {

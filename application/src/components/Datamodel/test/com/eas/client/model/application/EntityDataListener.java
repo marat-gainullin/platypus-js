@@ -61,12 +61,6 @@ public class EntityDataListener extends RowsetAdapter {
     }
 
     @Override
-    public boolean willChangeRow(RowChangeEvent event) {
-        incEvents();
-        return true;
-    }
-
-    @Override
     public boolean willInsertRow(RowsetInsertEvent event) {
         incEvents();
         return true;
@@ -89,11 +83,6 @@ public class EntityDataListener extends RowsetAdapter {
 
     @Override
     public void rowInserted(RowsetInsertEvent event) {
-        incEvents();
-    }
-
-    @Override
-    public void rowChanged(RowChangeEvent event) {
         incEvents();
     }
 

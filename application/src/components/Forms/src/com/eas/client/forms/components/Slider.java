@@ -668,6 +668,7 @@ public class Slider extends VSlider implements HasOnValueChange, HasPublished, H
     }
 
     // published parent
+    @ScriptFunction(name = "parent", jsDoc = PARENT_JSDOC)
     @Override
     public Widget getParentWidget() {
         return Forms.lookupPublishedParent(this);

@@ -46,6 +46,7 @@ try {
     load('classpath:forms/cell-render-event.js');
     load('classpath:forms/change-event.js');
     load('classpath:forms/check-box.js');
+    load('classpath:forms/check-grid-column.js');
     load('classpath:forms/check-menu-item.js');
     load('classpath:forms/component-event.js');
     load('classpath:forms/container-event.js');
@@ -64,10 +65,10 @@ try {
     load('classpath:forms/menu-separator.js');
     load('classpath:forms/menu.js');
     load('classpath:forms/model-check-box.js');
-    load('classpath:forms/model-column.js');
     load('classpath:forms/model-combo.js');
     load('classpath:forms/model-date.js');
     load('classpath:forms/model-formatted-field.js');
+    load('classpath:forms/model-grid-column.js');
     load('classpath:forms/model-grid.js');
     load('classpath:forms/model-spin.js');
     load('classpath:forms/model-text-area.js');
@@ -76,8 +77,10 @@ try {
     load('classpath:forms/popup-menu.js');
     load('classpath:forms/progress-bar.js');
     load('classpath:forms/radio-button.js');
+    load('classpath:forms/radio-grid-column.js');
     load('classpath:forms/radio-menu-item.js');
     load('classpath:forms/scroll-pane.js');
+    load('classpath:forms/service-grid-column.js');
     load('classpath:forms/slider.js');
     load('classpath:forms/split-pane.js');
     load('classpath:forms/tabbed-pane.js');

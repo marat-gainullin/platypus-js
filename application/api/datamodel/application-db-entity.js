@@ -71,6 +71,23 @@
              */
             P.ApplicationDbEntity.prototype.willInsert = {};
         }
+        Object.defineProperty(this, "onInserted", {
+            get: function() {
+                var value = delegate.onInserted;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onInserted = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ApplicationDbEntity){
+            /**
+             * The handler function for the event occured after an entity row has been inserted.
+             * @property onInserted
+             * @memberOf ApplicationDbEntity
+             */
+            P.ApplicationDbEntity.prototype.onInserted = {};
+        }
         Object.defineProperty(this, "onRequeried", {
             get: function() {
                 var value = delegate.onRequeried;
@@ -88,39 +105,19 @@
              */
             P.ApplicationDbEntity.prototype.onRequeried = {};
         }
-        Object.defineProperty(this, "onChanged", {
+        Object.defineProperty(this, "activeFilter", {
             get: function() {
-                var value = delegate.onChanged;
+                var value = delegate.activeFilter;
                 return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onChanged = P.boxAsJava(aValue);
             }
         });
         if(!P.ApplicationDbEntity){
             /**
-             * The handler function for the event occured after the entity data change.
-             * @property onChanged
+             * Entity's active <code>Filter</code> object.
+             * @property activeFilter
              * @memberOf ApplicationDbEntity
              */
-            P.ApplicationDbEntity.prototype.onChanged = {};
-        }
-        Object.defineProperty(this, "onScrolled", {
-            get: function() {
-                var value = delegate.onScrolled;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onScrolled = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ApplicationDbEntity){
-            /**
-             * The handler function for the event occured after the cursor position changed.
-             * @property onScrolled
-             * @memberOf ApplicationDbEntity
-             */
-            P.ApplicationDbEntity.prototype.onScrolled = {};
+            P.ApplicationDbEntity.prototype.activeFilter = {};
         }
         Object.defineProperty(this, "onDeleted", {
             get: function() {
@@ -139,6 +136,23 @@
              */
             P.ApplicationDbEntity.prototype.onDeleted = {};
         }
+        Object.defineProperty(this, "onScrolled", {
+            get: function() {
+                var value = delegate.onScrolled;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onScrolled = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ApplicationDbEntity){
+            /**
+             * The handler function for the event occured after the cursor position changed.
+             * @property onScrolled
+             * @memberOf ApplicationDbEntity
+             */
+            P.ApplicationDbEntity.prototype.onScrolled = {};
+        }
         Object.defineProperty(this, "cursorPos", {
             get: function() {
                 var value = delegate.cursorPos;
@@ -156,71 +170,6 @@
              */
             P.ApplicationDbEntity.prototype.cursorPos = 0;
         }
-        Object.defineProperty(this, "onFiltered", {
-            get: function() {
-                var value = delegate.onFiltered;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onFiltered = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ApplicationDbEntity){
-            /**
-             * The handler function for the event occured after the entity's data have been filtered.
-             * @property onFiltered
-             * @memberOf ApplicationDbEntity
-             */
-            P.ApplicationDbEntity.prototype.onFiltered = {};
-        }
-        Object.defineProperty(this, "onInserted", {
-            get: function() {
-                var value = delegate.onInserted;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onInserted = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ApplicationDbEntity){
-            /**
-             * The handler function for the event occured after an entity row has been inserted.
-             * @property onInserted
-             * @memberOf ApplicationDbEntity
-             */
-            P.ApplicationDbEntity.prototype.onInserted = {};
-        }
-        Object.defineProperty(this, "willChange", {
-            get: function() {
-                var value = delegate.willChange;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.willChange = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ApplicationDbEntity){
-            /**
-             * The handler function for the event occured before the entity data change.
-             * @property willChange
-             * @memberOf ApplicationDbEntity
-             */
-            P.ApplicationDbEntity.prototype.willChange = {};
-        }
-        Object.defineProperty(this, "activeFilter", {
-            get: function() {
-                var value = delegate.activeFilter;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ApplicationDbEntity){
-            /**
-             * Entity's active <code>Filter</code> object.
-             * @property activeFilter
-             * @memberOf ApplicationDbEntity
-             */
-            P.ApplicationDbEntity.prototype.activeFilter = {};
-        }
         Object.defineProperty(this, "elementClass", {
             get: function() {
                 var value = delegate.elementClass;
@@ -237,6 +186,23 @@
              * @memberOf ApplicationDbEntity
              */
             P.ApplicationDbEntity.prototype.elementClass = {};
+        }
+        Object.defineProperty(this, "onFiltered", {
+            get: function() {
+                var value = delegate.onFiltered;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onFiltered = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ApplicationDbEntity){
+            /**
+             * The handler function for the event occured after the entity's data have been filtered.
+             * @property onFiltered
+             * @memberOf ApplicationDbEntity
+             */
+            P.ApplicationDbEntity.prototype.onFiltered = {};
         }
         Object.defineProperty(this, "willDelete", {
             get: function() {
@@ -381,19 +347,6 @@
         };
 
         /**
-         * Creates an instance of comparator object using specified constraints objects.
-         * @param pairs the sort criteria pairs, in a form of property object (e.g. entity.schema.propName or just a propName in a string form) and the order of sort (ascending - true; descending - false).
-         * @return a comparator object to be passed as a parameter to entity's <code>sort</code> method.
-         * @method createSorting
-         * @memberOf ApplicationDbEntity
-         */
-        P.ApplicationDbEntity.prototype.createSorting = function(pairs) {
-            var delegate = this.unwrap();
-            var value = delegate.createSorting(P.boxAsJava(pairs));
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Requeries the entity's data. Forses the entity to refresh its data, no matter if its parameters has changed or not.
          * @param onSuccess The callback function for refresh data on success event (optional).
          * @param onFailure The callback function for refresh data on failure event (optional).
@@ -403,6 +356,19 @@
         P.ApplicationDbEntity.prototype.requery = function(onSuccess, onFailure) {
             var delegate = this.unwrap();
             var value = delegate.requery(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Creates an instance of comparator object using specified constraints objects.
+         * @param pairs the sort criteria pairs, in a form of property object (e.g. entity.schema.propName or just a propName in a string form) and the order of sort (ascending - true; descending - false).
+         * @return a comparator object to be passed as a parameter to entity's <code>sort</code> method.
+         * @method createSorting
+         * @memberOf ApplicationDbEntity
+         */
+        P.ApplicationDbEntity.prototype.createSorting = function(pairs) {
+            var delegate = this.unwrap();
+            var value = delegate.createSorting(P.boxAsJava(pairs));
             return P.boxAsJs(value);
         };
 

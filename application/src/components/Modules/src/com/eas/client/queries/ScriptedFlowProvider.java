@@ -6,7 +6,6 @@ package com.eas.client.queries;
 
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Field;
@@ -38,7 +37,6 @@ public class ScriptedFlowProvider implements FlowProvider {
     protected DatabasesClient client;
     protected JSObject source;
     protected Fields expectedFields;
-    protected List<Change> changeLog = new ArrayList<>();
 
     public ScriptedFlowProvider(DatabasesClient aClient, Fields aExpectedFields, JSObject aSource) {
         super();
@@ -63,7 +61,7 @@ public class ScriptedFlowProvider implements FlowProvider {
                     Object oRow = sRowset.getSlot(i);
                     if (oRow instanceof JSObject) {
                         JSObject sRow = (JSObject) oRow;
-                        Row row = new Row(expectedFields);
+                        Row row = new Row(getEntityId(), expectedFields);
                         for (Field field : expectedFields.toCollection()) {
                             if (sRow.hasMember(field.getName())) {
                                 Object javaValue = ScriptUtils.toJava(sRow.getMember(field.getName()));
@@ -249,10 +247,5 @@ public class ScriptedFlowProvider implements FlowProvider {
 
     @Override
     public void setProcedure(boolean bln) {
-    }
-
-    @Override
-    public List<Change> getChangeLog() {
-        return changeLog;
     }
 }

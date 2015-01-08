@@ -7,7 +7,6 @@ package com.eas.client;
 
 import com.bearsoft.rowset.resourcepool.BearResourcePool;
 import com.bearsoft.rowset.utils.IDGenerator;
-import com.eas.client.queries.QueriesProxy;
 import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.settings.DbConnectionSettings;
 
@@ -20,7 +19,7 @@ public class DatabasesClientWithResource implements AutoCloseable {
     protected String resourceName;
     protected DatabasesClient client;
 
-    public DatabasesClientWithResource(DbConnectionSettings aSettings, QueriesProxy<SqlQuery> aQueries) throws Exception {
+    public DatabasesClientWithResource(DbConnectionSettings aSettings) throws Exception {
         super();
         resourceName = "TestDb-" + String.valueOf(IDGenerator.genID());
         GeneralResourceProvider.getInstance().registerDatasource(resourceName, aSettings);

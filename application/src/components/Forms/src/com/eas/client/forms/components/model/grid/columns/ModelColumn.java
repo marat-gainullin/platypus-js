@@ -6,10 +6,6 @@ package com.eas.client.forms.components.model.grid.columns;
 
 import com.bearsoft.gui.grid.header.MultiLevelHeader;
 import com.eas.client.forms.components.model.ModelWidget;
-import com.eas.script.AlreadyPublishedException;
-import com.eas.script.HasPublished;
-import com.eas.script.NoPublisherException;
-import com.eas.script.ScriptFunction;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -24,9 +20,8 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class ModelColumn extends TableColumn implements HasPublished {
+public class ModelColumn extends TableColumn {
 
-    private static JSObject publisher;
     //
     protected String name;
     protected MultiLevelHeader header;
@@ -143,12 +138,10 @@ public class ModelColumn extends TableColumn implements HasPublished {
      *
      * @return
      */
-    @ScriptFunction(jsDoc = "On render column event.")
     public JSObject getOnRender() {
         return onRender;
     }
 
-    @ScriptFunction
     public void setOnRender(JSObject aValue) {
         onRender = aValue;
     }
@@ -158,12 +151,10 @@ public class ModelColumn extends TableColumn implements HasPublished {
      *
      * @return
      */
-    @ScriptFunction(jsDoc = "On select column event.")
     public JSObject getOnSelect() {
         return onSelect;
     }
 
-    @ScriptFunction
     public void setOnSelect(JSObject aValue) throws Exception {
         if (onSelect != aValue) {
             onSelect = aValue;
@@ -181,12 +172,10 @@ public class ModelColumn extends TableColumn implements HasPublished {
         readOnly = aValue;
     }
 
-    @ScriptFunction(jsDoc = "Determines if column is visible.")
     public boolean isVisible() {
         return visible;
     }
 
-    @ScriptFunction
     public void setVisible(boolean aValue) {
         if (visible != aValue) {
             visible = aValue;
@@ -221,13 +210,11 @@ public class ModelColumn extends TableColumn implements HasPublished {
         setWidth(tempWidth);
     }
 
-    @ScriptFunction(jsDoc = "Width of the column.")
     @Override
     public int getWidth() {
         return super.getWidth();
     }
 
-    @ScriptFunction
     @Override
     public void setWidth(int aValue) {
         super.setWidth(aValue);
@@ -238,12 +225,10 @@ public class ModelColumn extends TableColumn implements HasPublished {
         super.setPreferredWidth(preferredWidth);
     }
 
-    @ScriptFunction(jsDoc = "The title of the column.")
     public String getTitle() {
         return getHeaderValue() != null && getHeaderValue() instanceof String ? (String) getHeaderValue() : null;
     }
 
-    @ScriptFunction
     public void setTitle(String aTitle) {
         setHeaderValue(aTitle);
     }
@@ -260,12 +245,10 @@ public class ModelColumn extends TableColumn implements HasPublished {
         }
     }
 
-    @ScriptFunction(jsDoc = "Determines if column is resizeable.")
     public boolean isResizeable() {
         return super.isResizable;
     }
 
-    @ScriptFunction
     public void setResizeable(boolean aValue) {
         if (super.getResizable() != aValue) {
             boolean oldValue = super.getResizable();
@@ -274,12 +257,10 @@ public class ModelColumn extends TableColumn implements HasPublished {
         }
     }
 
-    @ScriptFunction(jsDoc = "Determines if column is readonly.")
     public boolean isReadonly() {
         return readonly;
     }
 
-    @ScriptFunction
     public void setReadonly(boolean aValue) {
         if (readonly != aValue) {
             boolean oldValue = readonly;
@@ -288,12 +269,10 @@ public class ModelColumn extends TableColumn implements HasPublished {
         }
     }
 
-    @ScriptFunction(jsDoc = "Determines if column is sortable.")
     public boolean isSortable() {
         return sortable;
     }
 
-    @ScriptFunction
     public void setSortable(boolean aValue) {
         if (sortable != aValue) {
             boolean oldValue = sortable;
@@ -302,41 +281,11 @@ public class ModelColumn extends TableColumn implements HasPublished {
         }
     }
 
-    @ScriptFunction(jsDoc = "The name of the column.")
     public String getName() {
         return name;
     }
 
     public void setName(String aValue) {
         name = aValue;
-    }
-
-    @Override
-    public JSObject getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = (JSObject) publisher.call(null, new Object[]{this});
-        }
-        return published;
-    }
-
-    @Override
-    public void setPublished(JSObject jsColumn) {
-        if (published != null) {
-            throw new AlreadyPublishedException();
-        }
-        published = jsColumn;
-        /*
-         if(view != null)
-         view.injectPublished(published);
-         if(editor != null)
-         editor.injectPublished(published);
-         */
-    }
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
     }
 }
