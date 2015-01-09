@@ -104,12 +104,19 @@ public class Filter extends Orderer implements HasPublished {
      */
     @Override
     protected void keysChanged(final Row Row, final int aColIndex, final Object aOldValue, final Object aNewValue) throws RowsetException {
+        super.keysChanged(Row, aColIndex, aOldValue, aNewValue);
         if (rowset.isImmediateFilter()) {
-            super.keysChanged(Row, aColIndex, aOldValue, aNewValue);
-            if (filterApplied) {
-                rowset.getRowsetChangeSupport().fireFilteredEvent();
-            }
+            refilterRowset();
         }
+
+        /*
+         if (rowset.isImmediateFilter()) {
+         super.keysChanged(Row, aColIndex, aOldValue, aNewValue);
+         if (filterApplied) {
+         rowset.getRowsetChangeSupport().fireFilteredEvent();
+         }
+         }
+         */
     }
 
     /**
@@ -118,11 +125,14 @@ public class Filter extends Orderer implements HasPublished {
      * @throws RowsetException
      */
     public void refilterRowset() throws RowsetException {
+        apply(appliedKeys);
+        /*
         if (!filterApplied || !rowset.isImmediateFilter()) {
             clear();
             addRows();
             apply(appliedKeys);
         }
+        */
     }
 
     private boolean filtering = false;
@@ -163,9 +173,9 @@ public class Filter extends Orderer implements HasPublished {
                             }
                             boolean wasBeforeFirst = rowset.isBeforeFirst();
                             boolean wasAfterLast = rowset.isAfterLast();
-                            ObservableList<Row> subSet = ordered.get(values);
+                            ObservableLinkedHashSet<Row> subSet = ordered.get(values);
                             if (subSet == null) {
-                                subSet = new ObservableList<>();
+                                subSet = new ObservableLinkedHashSet<>();
                                 ordered.put(values, subSet);
                             }
                             if (!filterApplied) {
@@ -177,10 +187,10 @@ public class Filter extends Orderer implements HasPublished {
                                     originalRows = rowset.getCurrent();
                                     originalPos = rowset.getCursorPos();
                                 }
-                            }else{
+                            } else {
                                 assert rowset.getActiveFilter() == this : "filter applied flag has unactual value";
                             }
-                            rowset.setCurrent(subSet);
+                            rowset.setCurrent(new ArrayList<>(Arrays.asList(subSet.toArray(new Row[]{}))));
                             rowset.setActiveFilter(this);
                             Set<RowsetListener> listeners = rowset.getRowsetChangeSupport().getRowsetListeners();
                             rowset.getRowsetChangeSupport().setRowsetListeners(null);
@@ -275,42 +285,57 @@ public class Filter extends Orderer implements HasPublished {
 
     @Override
     public void rowInserted(RowsetInsertEvent event) {
-        if (filterApplied) {
-            try {
-                Row insertingRow = event.getRow();
-                add(insertingRow, false);
-                // work on rowset's native rows, hided by the filter
-                if (originalPos == 0) { // before first
-                    originalRows.add(0, insertingRow);
-                    originalPos = 1;
-                } else if (originalPos > originalRows.size()) {
-                    originalRows.add(insertingRow);
-                    originalPos = originalRows.size();
-                } else {
-                    originalRows.add(originalPos, insertingRow);
-                    originalPos++;
-                }
-            } catch (InvalidColIndexException ex) {
-                Logger.getLogger(Filter.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        /*
+         if (filterApplied) {
+         try {
+         Row insertingRow = event.getRow();
+         add(insertingRow, false);
+         // work on rowset's native rows, hided by the filter
+         if (originalPos == 0) { // before first
+         originalRows.add(0, insertingRow);
+         originalPos = 1;
+         } else if (originalPos > originalRows.size()) {
+         originalRows.add(insertingRow);
+         originalPos = originalRows.size();
+         } else {
+         originalRows.add(originalPos, insertingRow);
+         originalPos++;
+         }
+         } catch (InvalidColIndexException ex) {
+         Logger.getLogger(Filter.class.getName()).log(Level.SEVERE, null, ex);
+         }
+         } else {
+         super.rowInserted(event);
+         }
+         */
+        Row insertingRow = event.getRow();
+        // work on rowset's native rows, hided by the filter
+        if (originalPos == 0) { // before first
+            originalRows.add(0, insertingRow);
+            originalPos = 1;
+        } else if (originalPos > originalRows.size()) {
+            originalRows.add(insertingRow);
+            originalPos = originalRows.size();
         } else {
-            super.rowInserted(event);
+            originalRows.add(originalPos, insertingRow);
+            originalPos++;
         }
+        super.rowInserted(event);
     }
-
-    @Override
-    public void rowDeleted(RowsetDeleteEvent event) {
-        if (filterApplied) {
-            try {
-                remove(event.getRow(), false);
-                // cancel() will take care of originalRows.
-            } catch (RowsetException ex) {
-                Logger.getLogger(Filter.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        } else {
-            super.rowDeleted(event);
-        }
-    }
+    /*
+     @Override
+     public void rowDeleted(RowsetDeleteEvent event) {
+     if (filterApplied) {
+     try {
+     remove(event.getRow(), false);
+     } catch (RowsetException ex) {
+     Logger.getLogger(Filter.class.getName()).log(Level.SEVERE, null, ex);
+     }
+     } else {
+     super.rowDeleted(event);
+     }
+     }
+     */
 
     @Override
     public JSObject getPublished() {
