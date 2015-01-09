@@ -746,9 +746,9 @@
             Object.defineProperty(target, "schema", {value: nnFields.getPublished()});
         // ORM mutable scalar and readonly collection properties
         var ormDefs = nnFields.getOrmDefinitions();
-        for each (var o in ormDefs.keySet()) {
-            var def = EngineUtilsClass.unwrap(ormDefs.get(o));
-            Object.defineProperty(target, o, def);
+        for each (var defsEntry in ormDefs.entrySet()) {
+            var def = EngineUtilsClass.unwrap(defsEntry.getValue());
+            Object.defineProperty(target, defsEntry.getKey(), def);
         }
         Object.defineProperty(target, "unwrap", {
             value: function () {

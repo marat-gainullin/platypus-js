@@ -5,18 +5,24 @@
  */
 package com.bearsoft.rowset.ordering;
 
+import com.eas.script.HasPublished;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.function.Predicate;
+import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.api.scripting.ScriptUtils;
+import jdk.nashorn.internal.runtime.JSType;
 
 /**
  *
  * @author mg
  * @param <T>
  */
-public class ObservableLinkedHashSet<T> extends LinkedHashSet<T> {
+public class ObservableLinkedHashSet<T extends HasPublished> extends LinkedHashSet<T> {
 
     public Object tag;
 
@@ -42,7 +48,7 @@ public class ObservableLinkedHashSet<T> extends LinkedHashSet<T> {
     public boolean remove(Object o) {
         int oldLength = super.size();
         if (super.remove(o)) {
-            propertyChangeSupport.firePropertyChange("length", oldLength, super.size());
+            lengthChanged(oldLength);
             return true;
         } else {
             return false;
@@ -53,7 +59,7 @@ public class ObservableLinkedHashSet<T> extends LinkedHashSet<T> {
     public boolean removeAll(Collection<?> c) {
         int oldLength = super.size();
         boolean res = super.removeAll(c);
-        propertyChangeSupport.firePropertyChange("length", oldLength, super.size());
+        lengthChanged(oldLength);
         return res;
     }
 
@@ -61,18 +67,34 @@ public class ObservableLinkedHashSet<T> extends LinkedHashSet<T> {
     public boolean removeIf(Predicate<? super T> filter) {
         int oldLength = super.size();
         if (super.removeIf(filter)) {
-            propertyChangeSupport.firePropertyChange("length", oldLength, super.size());
+            lengthChanged(oldLength);
             return true;
         } else {
             return false;
         }
     }
 
+    protected void lengthChanged(int oldLength) {
+        if (tag != null) {
+            JSObject jsArray = (JSObject) ScriptUtils.wrap(tag);
+            JSObject splice = (JSObject) jsArray.getMember("splice");
+            List<Object> args = new ArrayList<>();
+            args.add(0);
+            args.add(JSType.toNumber(jsArray.getMember("length")));
+            stream().forEach((T r) -> {
+                JSObject jsRow = r.getPublished();
+                args.add(ScriptUtils.unwrap(jsRow));
+            });
+            splice.call(tag, args.toArray());
+        }
+        propertyChangeSupport.firePropertyChange("length", oldLength, super.size());
+    }
+
     @Override
     public boolean add(T e) {
         int oldLength = super.size();
         if (super.add(e)) {
-            propertyChangeSupport.firePropertyChange("length", oldLength, super.size());
+            lengthChanged(oldLength);
             return true;
         } else {
             return false;
@@ -83,7 +105,7 @@ public class ObservableLinkedHashSet<T> extends LinkedHashSet<T> {
     public boolean addAll(Collection<? extends T> c) {
         int oldLength = super.size();
         if (super.addAll(c)) {
-            propertyChangeSupport.firePropertyChange("length", oldLength, super.size());
+            lengthChanged(oldLength);
             return true;
         } else {
             return false;

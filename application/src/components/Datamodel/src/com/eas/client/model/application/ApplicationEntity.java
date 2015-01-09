@@ -732,6 +732,10 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         changeSupport.firePropertyChange("willScroll", oldValue, aValue);
     }
 
+    public void addOrmScalarExpanding(String aBaseName, String aName) {
+        rowset.getFields().addOrmScalarExpanding(aBaseName, aName);
+    }
+
     public void putOrmDefinition(String aName, JSObject aDefinition) {
         if (aName != null && !aName.isEmpty() && aDefinition != null) {
             Map<String, Object> defs = rowset.getFields().getOrmDefinitions();

@@ -197,6 +197,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
                                 (JSObject) aRelation.getRightEntity().getPublished(),
                                 aRelation.getRightField().getName(),
                                 aRelation.getLeftField().getName()));
+                aRelation.getLeftEntity().addOrmScalarExpanding(aRelation.getLeftField().getName(), scalarPropertyName);
             }
             String collectionPropertyName = aRelation.getCollectionPropertyName();
             if (collectionPropertyName == null || collectionPropertyName.isEmpty()) {
