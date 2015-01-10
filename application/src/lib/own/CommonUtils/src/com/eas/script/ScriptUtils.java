@@ -547,7 +547,7 @@ public class ScriptUtils {
 
     public static JSObject listen(JSObject aTarget, String aPath, JSObject aCallback) {
         assert listenFunc != null : SCRIPT_NOT_INITIALIZED;
-        Object oResult = listenFunc.call(null, new Object[]{aCallback});
+        Object oResult = listenFunc.call(null, new Object[]{aTarget, aPath, aCallback});
         return (JSObject) oResult;
     }
 

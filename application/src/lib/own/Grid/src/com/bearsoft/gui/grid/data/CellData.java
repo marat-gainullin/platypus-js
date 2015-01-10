@@ -16,7 +16,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class CellData implements Comparable<Object>, HasPublished  {
+public class CellData implements HasPublished  {
 
     public Object data;
     public String display;
@@ -64,25 +64,6 @@ public class CellData implements Comparable<Object>, HasPublished  {
     @ScriptFunction
     public void setDisplay(String aValue) {
         display = aValue;
-    }
-
-    @Override
-    public int compareTo(Object o) {
-        if (o instanceof CellData) {
-            CellData cd = (CellData) o;
-            Object o1 = display != null ? display : data;
-            Object o2 = cd.display != null ? cd.display : cd.data;
-            if (o1 instanceof Comparable<?> && o2 instanceof Comparable<?>) {
-                Comparable<Object> c1 = (Comparable<Object>) o1;
-                Comparable<Object> c2 = (Comparable<Object>) o2;
-                return c1.compareTo(c2);
-            } else if (o1 == null && o2 != null) {
-                return -1;
-            } else if (o2 == null && o1 != null) {
-                return 1;
-            }
-        }
-        return 0;
     }
 
     @Override

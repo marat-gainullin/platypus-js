@@ -163,6 +163,10 @@ public class ConstrainedColumnModel implements TableColumnModel, ListSelectionLi
         return delegate;
     }
 
+    public LinearConstraint getConstraint() {
+        return constraint;
+    }
+
     /**
      * @inheritDoc
      */
@@ -382,36 +386,36 @@ public class ConstrainedColumnModel implements TableColumnModel, ListSelectionLi
     }
 
     protected void fireColumnSelectionChanged(ListSelectionEvent e) {
-        for (TableColumnModelListener l : listeners) {
+        listeners.stream().forEach((l) -> {
             l.columnSelectionChanged(e);
-        }
+        });
     }
 
     public void fireColumnMarginChanged(int aMargin) {
         ChangeEvent event = new ChangeEvent(this);
-        for (TableColumnModelListener l : listeners) {
+        listeners.stream().forEach((l) -> {
             l.columnMarginChanged(event);
-        }
+        });
     }
 
     protected void fireColumnRemoved(int aPosition) {
         TableColumnModelEvent event = new TableColumnModelEvent(this, aPosition, 0);
-        for (TableColumnModelListener l : listeners) {
+        listeners.stream().forEach((l) -> {
             l.columnRemoved(event);
-        }
+        });
     }
 
     protected void fireColumnAdded(int aPosition) {
         TableColumnModelEvent event = new TableColumnModelEvent(this, 0, aPosition);
-        for (TableColumnModelListener l : listeners) {
+        listeners.stream().forEach((l) -> {
             l.columnAdded(event);
-        }
+        });
     }
 
     protected void fireColumnMoved(int sourceIndex, int destIndex) {
         TableColumnModelEvent event = new TableColumnModelEvent(this, sourceIndex, destIndex);
-        for (TableColumnModelListener l : listeners) {
-            l.columnAdded(event);
-        }
+        listeners.stream().forEach((l) -> {
+            l.columnMoved(event);
+        });
     }
 }

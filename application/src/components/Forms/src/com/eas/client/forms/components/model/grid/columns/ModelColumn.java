@@ -31,6 +31,7 @@ public class ModelColumn extends TableColumn {
     protected boolean sortable = true;
     protected String field;
     //
+    protected JSObject eventsSource;
     protected JSObject onRender;
     protected JSObject onSelect;
     protected boolean readOnly;
@@ -126,10 +127,23 @@ public class ModelColumn extends TableColumn {
 
     public void setEditor(ModelWidget aEditor) {
         if (editor != aEditor) {
+            if (editor != null) {
+                editor.setOnSelect(null);
+            }
             editor = aEditor;
-            editor.setOnSelect(onSelect);
+            if (editor != null) {
+                editor.setOnSelect(onSelect);
+            }
             super.setCellEditor(editor);
         }
+    }
+
+    public JSObject getEventsSource() {
+        return eventsSource;
+    }
+
+    public void setEventsSource(JSObject aValue) {
+        eventsSource = aValue;
     }
 
     /**
@@ -156,7 +170,7 @@ public class ModelColumn extends TableColumn {
     }
 
     public void setOnSelect(JSObject aValue) throws Exception {
-        if (onSelect != aValue) {
+        if (onSelect != null ? !onSelect.equals(aValue) : aValue != null) {
             onSelect = aValue;
             if (editor != null) {
                 editor.setOnSelect(aValue);

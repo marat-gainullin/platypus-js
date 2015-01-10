@@ -4,24 +4,31 @@
  */
 package com.eas.client.forms.components.model.grid;
 
+import com.bearsoft.gui.grid.columns.ConstrainedColumnModel;
+import com.bearsoft.gui.grid.data.CellData;
 import com.bearsoft.gui.grid.editing.InsettedTreeEditor;
 import com.bearsoft.gui.grid.rendering.InsettedTreeRenderer;
 import com.eas.client.forms.ModelCellEditingListener;
+import com.eas.client.forms.components.model.CellRenderEvent;
 import com.eas.client.forms.components.model.grid.columns.ModelColumn;
 import com.eas.client.forms.components.model.grid.columns.RadioServiceColumn;
 import com.eas.gui.ScriptColor;
+import com.eas.script.HasPublished;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.KeyEvent;
+import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.RowSorterEvent;
+import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -58,6 +65,24 @@ public class GridTable extends JTable implements ModelCellEditingListener {
         showOddRowsInOtherColor = aValue;
     }
 
+    @Override
+    public int convertColumnIndexToModel(int viewColumnIndex) {
+        if (columnModel instanceof ConstrainedColumnModel) {
+            return ((ConstrainedColumnModel) columnModel).getConstraint().unconstraint(viewColumnIndex);
+        } else {
+            return viewColumnIndex;
+        }
+    }
+
+    @Override
+    public int convertColumnIndexToView(int modelColumnIndex) {
+        if (columnModel instanceof ConstrainedColumnModel) {
+            return ((ConstrainedColumnModel) columnModel).getConstraint().constraint(modelColumnIndex);
+        } else {
+            return modelColumnIndex;
+        }
+    }
+
     protected boolean allowCellEdit(int row, int column) {
         TableColumn tCol = getColumnModel().getColumn(column);
         return (editable && !isColumnReadOnly(tCol))
@@ -92,20 +117,21 @@ public class GridTable extends JTable implements ModelCellEditingListener {
         } finally {
             cellEditingCompletion = false;
         }
+        if (gridContainer != null && gridContainer.isAutoRedraw()) {
+            gridContainer.enqueueRedraw();
+        }
     }
 
     @Override
     public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
         Component res = super.prepareRenderer(renderer, row, column);
-        if (isShowOddRowsInOtherColor()) {
             int lrow = row;
             if (aboveNeightbour != null) {
                 lrow += aboveNeightbour.getRowCount();
             }
-            lrow++;// 0-base to 1-based.
-            int half = lrow / 2;
-            if (half * 2 != lrow) {
-                if (showOddRowsInOtherColor && getBackground().equals(res.getBackground())) {
+        if (showOddRowsInOtherColor) {
+            if ((lrow + 1) % 2 != 0) {
+                if (getBackground().equals(res.getBackground())) {
                     if (oddRowsColor != null) {
                         res.setBackground(oddRowsColor);
                     } else {
@@ -115,11 +141,37 @@ public class GridTable extends JTable implements ModelCellEditingListener {
                         res.setBackground(aColor);
                     }
                 }
-                return res;
+            }
+        }
+        Object value = getValueAt(row, column);
+        TableColumn tColumn = getColumnModel().getColumn(column);
+        if (tColumn instanceof ModelColumn) {
+            ModelColumn col = (ModelColumn) tColumn;
+            JSObject lOnRender = gridContainer != null ? gridContainer.getOnRender() : null;
+            if (col.getOnRender() != null) {
+                lOnRender = col.getOnRender();
+            }
+            if (lOnRender != null) {
+                JSObject element = gridContainer != null ? gridContainer.veiwIndex2Row(lrow) : null;
+                String display = res instanceof JLabel ? ((JLabel) res).getText() : (value != null ? value.toString() : "");
+                CellRenderEvent event = new CellRenderEvent(new HasPublished() {
+
+                    @Override
+                    public JSObject getPublished() {
+                        return col.getEventsSource();
+                    }
+
+                    @Override
+                    public void setPublished(JSObject aPublished) {
+                    }
+
+                }, col, new CellData(value, display), element);
+                lOnRender.call(col.getEventsSource(), new Object[]{event.getPublished()});
             }
         }
         return res;
     }
+
     //
     protected boolean processingKeyBinding = false;
     protected boolean editingEndedWhileKeyBinding = false;
@@ -161,12 +213,39 @@ public class GridTable extends JTable implements ModelCellEditingListener {
     }
 
     @Override
+    public void columnAdded(TableColumnModelEvent e) {
+        if (gridContainer != null) {
+            gridContainer.reindexColumns();
+        }
+        super.columnAdded(e);
+    }
+
+    @Override
+    public void columnRemoved(TableColumnModelEvent e) {
+        if (gridContainer != null) {
+            gridContainer.reindexColumns();
+        }
+        super.columnRemoved(e);
+    }
+
+    @Override
+    public void columnMoved(TableColumnModelEvent e) {
+        if (gridContainer != null) {
+            gridContainer.reindexColumns();
+        }
+        super.columnMoved(e);
+    }
+
+    @Override
     public void editingStopped(ChangeEvent e) {
         editingEndedWhileKeyBinding = false;
         if (processingKeyBinding) {
             editingEndedWhileKeyBinding = true;
         }
         super.editingStopped(e);
+        if (gridContainer != null && gridContainer.isAutoRedraw()) {
+            gridContainer.enqueueRedraw();
+        }
     }
 
     @Override
@@ -183,32 +262,30 @@ public class GridTable extends JTable implements ModelCellEditingListener {
         boolean bad = processingKeyBinding && editingEndedWhileKeyBinding && getSelectionModel().getLeadSelectionIndex() == getRowCount() - 1 && rowIndex == 0;
         if (!bad) {
             TableColumn tc = getColumnModel().getColumn(columnIndex);
-            if (!(tc instanceof RadioServiceColumn)) {
-                if (skipableColumn(tc)) {
-                    int leadColumnIndex = getColumnModel().getSelectionModel().getLeadSelectionIndex();
-                    if (columnIndex - 1 == leadColumnIndex) {
-                        while (skipableColumn(tc)) {
-                            columnIndex++;
-                            if (columnIndex >= 0 && columnIndex < getColumnModel().getColumnCount()) {
-                                tc = getColumnModel().getColumn(columnIndex);
-                            } else {
-                                break;
-                            }
+            if (skipableColumn(tc)) {
+                int leadColumnIndex = getColumnModel().getSelectionModel().getLeadSelectionIndex();
+                if (columnIndex - 1 == leadColumnIndex) {
+                    while (skipableColumn(tc)) {
+                        columnIndex++;
+                        if (columnIndex >= 0 && columnIndex < getColumnModel().getColumnCount()) {
+                            tc = getColumnModel().getColumn(columnIndex);
+                        } else {
+                            break;
                         }
-                    } else if (columnIndex + 1 == leadColumnIndex) {
-                        while (skipableColumn(tc)) {
-                            columnIndex--;
-                            if (columnIndex >= 0 && columnIndex < getColumnModel().getColumnCount()) {
-                                tc = getColumnModel().getColumn(columnIndex);
-                            } else {
-                                break;
-                            }
+                    }
+                } else if (columnIndex + 1 == leadColumnIndex) {
+                    while (skipableColumn(tc)) {
+                        columnIndex--;
+                        if (columnIndex >= 0 && columnIndex < getColumnModel().getColumnCount()) {
+                            tc = getColumnModel().getColumn(columnIndex);
+                        } else {
+                            break;
                         }
                     }
                 }
-                if (columnIndex >= 0 && columnIndex < getColumnModel().getColumnCount()) {
-                    super.changeSelection(rowIndex, columnIndex, toggle, extend);
-                }
+            }
+            if (columnIndex >= 0 && columnIndex < getColumnModel().getColumnCount()) {
+                super.changeSelection(rowIndex, columnIndex, toggle, extend);
             }
         } else {
             editingEndedWhileKeyBinding = false;

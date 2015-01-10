@@ -14,7 +14,6 @@ import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.awt.Color;
 import java.awt.Font;
-import javax.swing.table.TableColumn;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -33,7 +32,7 @@ public class ModelGridColumn extends GridColumnsNode implements HasPublished {
         super();
         setTableColumn(new ModelColumn());
     }
-
+/*
     public ModelGridColumn(GridColumnsNode aParent) {
         super(aParent);
     }
@@ -46,7 +45,7 @@ public class ModelGridColumn extends GridColumnsNode implements HasPublished {
     protected ModelGridColumn(TableColumn aCol) {
         super(aCol);
     }
-
+*/
     @ScriptFunction
     @Designable(category = "model")
     public String getField() {
@@ -233,6 +232,7 @@ public class ModelGridColumn extends GridColumnsNode implements HasPublished {
             throw new AlreadyPublishedException();
         }
         published = jsColumn;
+        ((ModelColumn)getTableColumn()).setEventsSource(jsColumn);
         /*
          if(view != null)
          view.injectPublished(published);

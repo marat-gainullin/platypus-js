@@ -22,6 +22,7 @@ public class BoundaredTableModel implements TableModelWrapper {
 
     protected class DelegateListener implements TableModelListener {
 
+        @Override
         public void tableChanged(TableModelEvent e) {
             fireTableChanged(e);
         }
@@ -48,14 +49,17 @@ public class BoundaredTableModel implements TableModelWrapper {
         return aIndex >= 0 && aIndex < maxBias;
     }
 
+    @Override
     public int getRowCount() {
         return delegate.getRowCount();
     }
 
+    @Override
     public int getColumnCount() {
         return delegate.getColumnCount();
     }
 
+    @Override
     public String getColumnName(int aColIndex) {
         if (isLegal(aColIndex)) {
             return delegate.getColumnName(aColIndex);
@@ -72,6 +76,7 @@ public class BoundaredTableModel implements TableModelWrapper {
         }
     }
 
+    @Override
     public boolean isCellEditable(int aRowIndex, int aColIndex) {
         if (isLegal(aRowIndex) && isLegal(aColIndex)) {
             return delegate.isCellEditable(aRowIndex, aColIndex);
@@ -80,6 +85,7 @@ public class BoundaredTableModel implements TableModelWrapper {
         }
     }
 
+    @Override
     public Object getValueAt(int aRowIndex, int aColIndex) {
         if (isLegal(aRowIndex) && isLegal(aColIndex)) {
             return delegate.getValueAt(aRowIndex, aColIndex);
@@ -88,12 +94,14 @@ public class BoundaredTableModel implements TableModelWrapper {
         }
     }
 
+    @Override
     public void setValueAt(Object aValue, int aRowIndex, int aColIndex) {
         if (isLegal(aRowIndex) && isLegal(aColIndex)) {
             delegate.setValueAt(aValue, aRowIndex, aColIndex);
         }
     }
 
+    @Override
     public void addTableModelListener(TableModelListener l) {
         listeners.add(l);
     }

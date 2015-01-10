@@ -30,8 +30,9 @@ public class ServiceGridColumn extends GridColumnsNode implements HasPublished {
         super();
         setTableColumn(new ServiceColumn());
         resizable = false;
+        setTitle("\\");
     }
-
+/*
     public ServiceGridColumn(GridColumnsNode aParent) {
         super(aParent);
     }
@@ -44,7 +45,7 @@ public class ServiceGridColumn extends GridColumnsNode implements HasPublished {
     protected ServiceGridColumn(TableColumn aCol) {
         super(aCol);
     }
-
+*/
     @ScriptFunction
     @Override
     public int getWidth() {

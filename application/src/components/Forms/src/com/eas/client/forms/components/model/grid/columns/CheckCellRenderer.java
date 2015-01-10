@@ -26,9 +26,8 @@ public class CheckCellRenderer extends RowHeaderCellRenderer {
 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int rowIndex, int column) {
-        if (check != null) {
-            check.setSelected(table.isRowSelected(rowIndex));
-        }
+        check.setSelected(table.isRowSelected(rowIndex));
+        setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
         return this;
     }
 }

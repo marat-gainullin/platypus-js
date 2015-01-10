@@ -18,6 +18,7 @@ import com.bearsoft.gui.grid.selection.ConstrainedListSelectionModel;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.eas.client.forms.Forms;
 import com.eas.client.forms.HasComponentEvents;
+import com.eas.client.forms.HasJsName;
 import com.eas.client.forms.Widget;
 import com.eas.client.forms.components.model.ArrayModelWidget;
 import com.eas.client.forms.components.model.CellRenderEvent;
@@ -55,7 +56,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridContainer, HasComponentEvents, Widget, HasPublished {
+public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridContainer, HasComponentEvents, Widget, HasPublished, HasJsName {
 
     protected JSObject published;
 
@@ -156,21 +157,20 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
     }
 
     /*
-    protected Locator createPksLocator(Rowset colsRs) throws IllegalStateException {
-        Locator colsLoc = colsRs.createLocator();
-        colsLoc.beginConstrainting();
-        try {
-            List<Integer> pkIndicies = colsRs.getFields().getPrimaryKeysIndicies();
-            for (Integer pkIdx : pkIndicies) {
-                colsLoc.addConstraint(pkIdx);
-            }
-        } finally {
-            colsLoc.endConstrainting();
-        }
-        return colsLoc;
-    }
-    */
-
+     protected Locator createPksLocator(Rowset colsRs) throws IllegalStateException {
+     Locator colsLoc = colsRs.createLocator();
+     colsLoc.beginConstrainting();
+     try {
+     List<Integer> pkIndicies = colsRs.getFields().getPrimaryKeysIndicies();
+     for (Integer pkIdx : pkIndicies) {
+     colsLoc.addConstraint(pkIdx);
+     }
+     } finally {
+     colsLoc.endConstrainting();
+     }
+     return colsLoc;
+     }
+     */
     /**
      * Returns index of a row in the model. Index is in model coordinates. Index
      * is 0-based.
@@ -192,6 +192,10 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         return idx;
     }
 
+    public JSObject veiwIndex2Row(int aViewIndex) {
+        return index2Row(rowSorter.convertRowIndexToModel(aViewIndex));
+    }
+    
     /**
      * Returns row for particular Index. Index is in model's coordinates. Index
      * is 0-based.
@@ -201,7 +205,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
      * @throws RowsetException
      */
     @ScriptFunction
-    public JSObject index2Row(int aIdx) throws RowsetException {
+    public JSObject index2Row(int aIdx) {
         JSObject element = null;
         if (deepModel instanceof TableFront2TreedModel<?>) {
             TableFront2TreedModel<JSObject> front = (TableFront2TreedModel<JSObject>) deepModel;
@@ -371,6 +375,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
     // data
     protected ArrayModel rowsModel;
     protected TableModel deepModel;
+    protected CachingTableModel cachingModel;
     protected TabularRowsSorter<? extends TableModel> rowSorter;
     protected Set<JSObject> processedRows = new HashSet<>();
     protected JSObject data;
@@ -431,8 +436,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
 
     public ModelGrid() {
         super();
-        // TODO: remove ROWS_HEADER_TYPE and substitute it with ServiceColumn component
-        // Columns configuration
+        // columns configuration
         columnsSelectionModel = new DefaultListSelectionModel();
         columnModel = new DefaultTableColumnModel();
         columnModel.setSelectionModel(columnsSelectionModel);
@@ -440,10 +444,9 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         // rows configuration
         rowsSelectionModel = new DefaultListSelectionModel();
         rowsSelectionModel.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-
+        //    selection
         generalSelectionChangesReflector = new GeneralSelectionChangesReflector();
         rowsSelectionModel.addListSelectionListener(generalSelectionChangesReflector);
-
         // constrained layer models setup
         tlTable = new GridTable(null, this);
         trTable = new GridTable(null, this);
@@ -487,18 +490,18 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         // grid columns setup.
         // left header setup
         lheader = new MultiLevelHeader();
+        lheader.setBackground(new JButton().getBackground());
         lheader.setTable(tlTable);
         lheader.setColumnModel(tlTable.getColumnModel());
         tlTable.getTableHeader().setResizingAllowed(true);
         lheader.setSlaveHeaders(tlTable.getTableHeader(), blTable.getTableHeader());
-        lheader.setRowSorter(rowSorter);
         // right header setup
         rheader = new MultiLevelHeader();
+        rheader.setBackground(new JButton().getBackground());
         rheader.setTable(trTable);
         rheader.setColumnModel(trTable.getColumnModel());
         trTable.getTableHeader().setResizingAllowed(true);
         rheader.setSlaveHeaders(trTable.getTableHeader(), brTable.getTableHeader());
-        rheader.setRowSorter(rowSorter);
 
         // Tables are enclosed in panels to avoid table's stupid efforts
         // to configure it's parent scroll pane.
@@ -593,6 +596,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
     @ScriptFunction(jsDoc = ON_RENDER_JSDOC)
     @EventMethod(eventClass = CellRenderEvent.class)
     @Undesignable
+    @Override
     public JSObject getOnRender() {
         return generalOnRender;
     }
@@ -832,6 +836,12 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         if (brTable != null) {
             brTable.setBackground(getBackground());
         }
+    }
+
+    @ScriptFunction(jsDoc = JS_NAME_DOC)
+    @Override
+    public String getName() {
+        return super.getName();
     }
 
     @ScriptFunction(jsDoc = GET_NEXT_FOCUSABLE_COMPONENT_JSDOC)
@@ -1090,12 +1100,24 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
 
     @ScriptFunction
     public void setData(JSObject aValue) {
-        if (data != aValue) {
+        if (data != null ? !data.equals(aValue) : aValue != null) {
             data = aValue;
             if (rowsModel != null) {
                 rowsModel.setElements(data);
             }
         }
+    }
+
+    private static final String REDRAW_JSDOC = ""
+            + "/**\n"
+            + "* Redraw the component.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = REDRAW_JSDOC)
+    public void redraw() {
+        rowsModel.fireElementsDataChanged();
+        invalidate();
+        repaint();
     }
 
     protected void applyRows() {
@@ -1111,8 +1133,10 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
             deepModel = (TableModel) rowsModel;
             rowSorter = new TabularRowsSorter<>((ArrayTableModel) deepModel, rowsSelectionModel);
         }
-        TableModel generalModel = new CachingTableModel(deepModel, CELLS_CACHE_SIZE);
+        cachingModel = new CachingTableModel(deepModel, CELLS_CACHE_SIZE);
 
+        lheader.setRowSorter(rowSorter);
+        rheader.setRowSorter(rowSorter);
         // rows constraints setup
         topRowsConstraint = new LinearConstraint(0, frozenRows - 1);
         bottomRowsConstraint = new LinearConstraint(frozenRows, Integer.MAX_VALUE);
@@ -1134,10 +1158,10 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         blTable.setRowSorter(new ConstrainedRowSorter<>(rowSorter, bottomRowsConstraint));
         brTable.setRowSorter(new ConstrainedRowSorter<>(rowSorter, bottomRowsConstraint));
         //
-        tlTable.setModel(generalModel);
-        trTable.setModel(generalModel);
-        blTable.setModel(generalModel);
-        brTable.setModel(generalModel);
+        tlTable.setModel(cachingModel);
+        trTable.setModel(cachingModel);
+        blTable.setModel(cachingModel);
+        brTable.setModel(cachingModel);
 
         tlTable.setSelectionModel(new ConstrainedListSelectionModel(rowsSelectionModel, topRowsConstraint));
         trTable.setSelectionModel(new ConstrainedListSelectionModel(rowsSelectionModel, topRowsConstraint));
@@ -1180,6 +1204,18 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         // headers setup
         lheader.setColumnModel(tlTable.getColumnModel());
         rheader.setColumnModel(trTable.getColumnModel());
+        reindexColumns();
+    }
+
+    @Override
+    public void reindexColumns() {
+        for (int i = 0; i < columnModel.getColumnCount(); i++) {
+            TableColumn col = columnModel.getColumn(i);
+            col.setModelIndex(i);
+        }
+        if (cachingModel != null) {
+            cachingModel.clearCache();
+        }
     }
 
     protected void applyHeader() throws Exception {
@@ -1288,6 +1324,16 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
                 try {
                     if (!try2StopAnyEditing()) {
                         try2CancelAnyEditing();
+                    }
+                    if (data != null) {
+                        JSObject jsNewCursor = index2Row(rowSorter.convertRowIndexToModel(rowsSelectionModel.getLeadSelectionIndex()));
+                        Object oScrollTo = data.getMember("scrollTo");
+                        if (oScrollTo instanceof JSObject && ((JSObject) oScrollTo).isFunction()) {
+                            JSObject jsScrollTo = (JSObject) oScrollTo;
+                            jsScrollTo.call(data, new Object[]{jsNewCursor});
+                        } else {
+                            data.setMember("cursor", jsNewCursor);
+                        }
                     }
                     repaint();
                 } catch (Exception ex) {
@@ -1449,6 +1495,24 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         }
         return tlTable.getCellEditor() == null && trTable.getCellEditor() == null
                 && blTable.getCellEditor() == null && brTable.getCellEditor() == null;
+    }
+
+    @Override
+    public boolean isAutoRedraw() {
+        return data != null && !data.hasMember("unwrap");
+    }
+
+    protected boolean redrawEnqueued;
+
+    @Override
+    public void enqueueRedraw() {
+        redrawEnqueued = true;
+        EventQueue.invokeLater(() -> {
+            if (redrawEnqueued) {
+                redrawEnqueued = false;
+                redraw();
+            }
+        });
     }
 
     public TableColumnModel getColumnModel() {
@@ -1694,7 +1758,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
 
     public boolean isCurrentRow(JSObject anElement) {
         JSObject jsCursor = getCurrentRow();
-        return jdk.nashorn.api.scripting.ScriptUtils.unwrap(jsCursor) == jdk.nashorn.api.scripting.ScriptUtils.unwrap(anElement);
+        return jsCursor != null ? jsCursor.equals(anElement) : false;
     }
 
     protected JSObject getCurrentRow() {

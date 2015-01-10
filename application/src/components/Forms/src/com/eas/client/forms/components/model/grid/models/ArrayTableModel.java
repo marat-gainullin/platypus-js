@@ -108,6 +108,7 @@ public class ArrayTableModel extends ArrayModel implements TableModel {
      * Fires an event, that tells all listeners that elements structure has been
      * changed.
      */
+    @Override
     public void fireElementsChanged() {
         TableModelEvent e = new TableModelEvent(this, TableModelEvent.HEADER_ROW);
         postEvent(e);

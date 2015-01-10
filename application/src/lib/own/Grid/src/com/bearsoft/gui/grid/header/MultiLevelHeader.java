@@ -365,7 +365,7 @@ public class MultiLevelHeader extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        if (g instanceof Graphics2D) {
+        if (isOpaque() && g instanceof Graphics2D) {
             Graphics2D g2d = (Graphics2D) g;
             Color backColor = getBackground();
             Color ltBackColor = ScriptColor.brighter(backColor, 0.95);

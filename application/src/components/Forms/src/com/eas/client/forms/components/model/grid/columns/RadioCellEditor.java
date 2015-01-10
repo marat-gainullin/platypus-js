@@ -4,10 +4,13 @@
  */
 package com.eas.client.forms.components.model.grid.columns;
 
+import com.bearsoft.gui.grid.columns.ConstrainedColumnModel;
+import com.bearsoft.gui.grid.selection.ConstrainedListSelectionModel;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import javax.swing.JRadioButton;
 import javax.swing.JTable;
+import javax.swing.table.TableColumnModel;
 
 /**
  *
@@ -33,7 +36,13 @@ public class RadioCellEditor extends RowHeaderCellEditor {
 
     @Override
     protected void invokeRowHeaderAction() {
-        if (radio.isSelected()) {
+        TableColumnModel tcm = editingTable.getColumnModel();
+        if (tcm instanceof ConstrainedColumnModel
+                && tcm.getSelectionModel() instanceof ConstrainedListSelectionModel) {
+            int colCount = ((ConstrainedColumnModel) tcm).getDelegate().getColumnCount();
+            ((ConstrainedListSelectionModel) tcm.getSelectionModel()).getDelegate().setSelectionInterval(0, colCount - 1);
+        }
+        if (!radio.isSelected()) {
             editingTable.setRowSelectionInterval(editingRow, editingRow);
         } else {
             editingTable.removeRowSelectionInterval(editingRow, editingRow);

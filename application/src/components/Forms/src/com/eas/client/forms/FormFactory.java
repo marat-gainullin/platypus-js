@@ -517,20 +517,20 @@ public class FormFactory {
                         }
                         switch (rowsHeaderType) {
                             case 1:// Usual
-                                oldFormatRowsHeader = new ServiceGridColumn("\\");
+                                oldFormatRowsHeader = new ServiceGridColumn();
                                 break;
                             case 2:// Check
-                                oldFormatRowsHeader = new CheckGridColumn("\\");
+                                oldFormatRowsHeader = new CheckGridColumn();
                                 break;
                             case 3:// Radio
-                                oldFormatRowsHeader = new RadioGridColumn("\\");
+                                oldFormatRowsHeader = new RadioGridColumn();
                                 break;
                         }
                     }
                     Element tree = XmlDomUtils.getElementByTagName(anElement, "treeDesignInfo");
                 }
-                int fixedColumns = XmlDomUtils.readIntegerAttribute(anElement, "fixedColumns", 0);
-                int fixedRows = XmlDomUtils.readIntegerAttribute(anElement, "fixedRows", 0);
+                int frozenColumns = XmlDomUtils.readIntegerAttribute(anElement, "frozenColumns", 0);
+                int frozenRows = XmlDomUtils.readIntegerAttribute(anElement, "frozenRows", 0);
                 boolean insertable = XmlDomUtils.readBooleanAttribute(anElement, "insertable", Boolean.TRUE);
                 boolean deletable = XmlDomUtils.readBooleanAttribute(anElement, "deletable", Boolean.TRUE);
                 boolean editable = XmlDomUtils.readBooleanAttribute(anElement, "editable", Boolean.TRUE);
@@ -545,8 +545,8 @@ public class FormFactory {
                 grid.setEditable(editable);
                 grid.setDeletable(deletable);
                 grid.setInsertable(insertable);
-                grid.setFrozenColumns(fixedColumns);
-                grid.setFrozenRows(fixedRows);
+                grid.setFrozenColumns(frozenColumns);
+                grid.setFrozenRows(frozenRows);
                 if (anElement.hasAttribute("oddRowsColor")) {
                     String oddRowsColorDesc = anElement.getAttribute("oddRowsColor");
                     grid.setOddRowsColor(new ScriptColor(oddRowsColorDesc));

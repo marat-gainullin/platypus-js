@@ -592,6 +592,7 @@
             for (var c = 0; c < comps.length; c++) {
                 (function () {
                     var comp = EngineUtilsClass.unwrap(boxAsJs(comps[c]));
+                    //P.Logger.info("comp: " + comp + "; comp.name: " + comp.name);
                     if (comp.name) {
                         Object.defineProperty(aTarget, comp.name, {
                             get: function () {

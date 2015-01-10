@@ -88,7 +88,7 @@ public class CellResizer extends MouseAdapter {
         TableColumn resizingColumn = header.getTable().getTableHeader().getResizingColumn();
         if (resizingColumn != null) {
             EventQueue.invokeLater(() -> {
-                resizingColumn.setMaxWidth(resizingColumnMaxWidth);
+                //resizingColumn.setMaxWidth(resizingColumnMaxWidth);
                 header.getTable().getTableHeader().setResizingColumn(null);
             });
         }

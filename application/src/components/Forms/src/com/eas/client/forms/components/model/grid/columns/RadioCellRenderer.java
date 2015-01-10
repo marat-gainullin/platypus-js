@@ -27,6 +27,7 @@ public class RadioCellRenderer extends RowHeaderCellRenderer {
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int rowIndex, int column) {
         radio.setSelected(table.isRowSelected(rowIndex));
+        setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
         return this;
     }
 

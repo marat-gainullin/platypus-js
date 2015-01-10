@@ -145,7 +145,7 @@ public class ModelSpin extends ModelComponentDecorator<VSpinner, Double> impleme
 
     @Override
     protected void setupCellRenderer(JTable table, int row, int column, boolean isSelected) {
-        remove(decorated);
+        removeAll();
         JLabel rendererLine = new JLabel(decorated.getText());
         rendererLine.setOpaque(false);
         add(rendererLine, BorderLayout.CENTER);

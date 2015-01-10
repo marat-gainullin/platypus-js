@@ -69,7 +69,6 @@ import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.api.scripting.ScriptUtils;
 import jdk.nashorn.internal.runtime.Undefined;
 
 /*
@@ -213,6 +212,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         extraTools.setOpaque(false);
         extraTools.setFocusable(false);
         extraTools.setInheritsPopupMenu(true);
+        recreateExtraEditingControls();
         checkEvents(extraTools);
         add(extraTools, BorderLayout.EAST);
         //
@@ -635,9 +635,9 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     @Override
     public void setField(String aField) throws Exception {
         if (field == null ? aField != null : !field.equals(aField)) {
+            unbind();
             field = aField;
-            revalidate();
-            repaint();
+            bind();
         }
     }
 
@@ -654,7 +654,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     @ScriptFunction
     @Override
     public void setData(JSObject aValue) {
-        if (ScriptUtils.unwrap(data) != ScriptUtils.unwrap(aValue)) {
+        if (data != null ? !data.equals(aValue) : aValue != null) {
             unbind();
             data = aValue;
             bind();
@@ -688,6 +688,8 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
                 }
 
             });
+            Object oData = ModelWidget.getPathData(data, field);
+            setJsValue(oData);
             boundToValue = (PropertyChangeEvent evt) -> {
                 if (!settingValueFromJs) {
                     settingValueToJs = true;
@@ -729,7 +731,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     @ScriptFunction
     @Override
     public void setOnSelect(JSObject aValue) {
-        if (onSelect != aValue) {
+        if (onSelect != null ? !onSelect.equals(aValue) : aValue != null) {
             onSelect = aValue;
             recreateExtraEditingControls();
             revalidate();
@@ -878,6 +880,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         try {
+            setOpaque(true);
             silent = true;
             extraTools.setVisible(false);
             setValue((V) value);
@@ -887,13 +890,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
             } else {
                 setBorder(null);
             }
-            if (isSelected) {
-                setBackground(table.getSelectionBackground());
-                setOpaque(true);
-            } else {
-                setBackground(table.getBackground());
-                setOpaque(false);
-            }
+            setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
             return this;
         } catch (Exception ex) {
             Logger.getLogger(ModelComponentDecorator.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
@@ -935,23 +932,28 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
 
     @Override
     public boolean stopCellEditing() {
-        if (isFieldContentModified()) {
-            fireEditingStopped();
-        } else {
-            fireEditingCancelled();
-        }
-        EventQueue.invokeLater(() -> {
-            extraTools.setVisible(false);
-        });
+        fireEditingStopped();
+        /*
+         if (isFieldContentModified()) {
+         fireEditingStopped();
+         } else {
+         fireEditingCancelled();
+         }
+         EventQueue.invokeLater(() -> {
+         extraTools.setVisible(false);
+         });
+         */
         return true;
     }
 
     @Override
     public void cancelCellEditing() {
         fireEditingCancelled();
-        EventQueue.invokeLater(() -> {
-            extraTools.setVisible(false);
-        });
+        /*
+         EventQueue.invokeLater(() -> {
+         extraTools.setVisible(false);
+         });
+         */
     }
 
     protected void fireEditingStopped() {

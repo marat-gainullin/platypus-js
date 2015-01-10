@@ -30,8 +30,9 @@ public class CheckGridColumn extends GridColumnsNode implements HasPublished {
         super();
         setTableColumn(new CheckServiceColumn());
         resizable = false;
+        setTitle("\\");
     }
-
+/*
     public CheckGridColumn(GridColumnsNode aParent) {
         super(aParent);
     }
@@ -44,7 +45,7 @@ public class CheckGridColumn extends GridColumnsNode implements HasPublished {
     protected CheckGridColumn(TableColumn aCol) {
         super(aCol);
     }
-
+*/
     @ScriptFunction
     @Override
     public int getWidth() {

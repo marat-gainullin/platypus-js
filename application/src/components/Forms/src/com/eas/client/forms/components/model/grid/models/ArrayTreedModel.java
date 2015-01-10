@@ -123,6 +123,14 @@ public class ArrayTreedModel extends ArrayModel implements TreedModel<JSObject> 
     }
 
     @Override
+    public void fireElementsChanged() {
+        ElementsDataChangedEvent<JSObject> ev = new ElementsDataChangedEvent<>();
+        listeners.stream().forEach((l) -> {
+            l.elementsDataChanged(ev);
+        });
+    }
+    
+    @Override
     public void fireElementsDataChanged() {
         ElementsDataChangedEvent<JSObject> ev = new ElementsDataChangedEvent<>();
         listeners.stream().forEach((l) -> {

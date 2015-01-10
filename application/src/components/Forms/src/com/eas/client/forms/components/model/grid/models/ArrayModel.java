@@ -10,6 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.table.TableColumnModel;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.api.scripting.ScriptUtils;
 
 /**
  *
@@ -36,11 +37,11 @@ public abstract class ArrayModel {
     }
 
     public void setElements(JSObject aValue) {
-        if (elements != aValue) {
+        if (elements != null ? !elements.equals(aValue) : aValue != null) {
             // TODO: remove luisteners from old object
             elements = aValue;
             // TODO: add listeners to new object
-            fireElementsDataChanged();
+            fireElementsChanged();
         }
     }
 
@@ -90,6 +91,11 @@ public abstract class ArrayModel {
      */
     public abstract void fireColumnFieldChanged(ModelColumn aColumn);
 
+    /**
+     * Fires an event, that tells all listeners that elements structure has been changed.
+     */
+    public abstract void fireElementsChanged();
+    
     /**
      * Fires an event, that tells all listeners that data in all elements have
      * been changed, but elements structure havn't been changed.

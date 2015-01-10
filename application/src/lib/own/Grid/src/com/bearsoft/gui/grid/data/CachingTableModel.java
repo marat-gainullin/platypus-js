@@ -74,9 +74,9 @@ public class CachingTableModel implements TableModelWrapper {
         public void tableChanged(TableModelEvent e) {
             clearCache();
             TableModelEvent event = new TableModelEvent(CachingTableModel.this, e.getFirstRow(), e.getLastRow(), e.getColumn(), e.getType());
-            for (TableModelListener l : listeners) {
+            listeners.stream().forEach((l) -> {
                 l.tableChanged(event);
-            }
+            });
         }
     }
     protected TableModel delegate;
@@ -141,7 +141,7 @@ public class CachingTableModel implements TableModelWrapper {
         return cache.remove(new TabledKey(aRow, aColumn));
     }
 
-    protected void clearCache() {
+    public void clearCache() {
         cache.clear();
     }
 

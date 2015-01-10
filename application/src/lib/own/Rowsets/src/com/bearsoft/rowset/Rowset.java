@@ -170,6 +170,7 @@ public class Rowset {
     }
 
     public void rolledback() throws Exception {
+        rowsetChangeSupport.fireBeforeRollback();
         final Set<RowsetListener> lrowsetListeners = rowsetChangeSupport.getRowsetListeners();
         rowsetChangeSupport.setRowsetListeners(null);
         try {
@@ -212,6 +213,10 @@ public class Rowset {
 
     public void removePropertyChangeListener(String aPropertyName, PropertyChangeListener l) {
         propertyChangeSupport.removePropertyChangeListener(aPropertyName, l);
+    }
+
+    public void firePropertyChange(String aPropertyName, Object aOldValue, Object aNewValue) {
+        propertyChangeSupport.firePropertyChange(aPropertyName, aOldValue, aNewValue);
     }
 
     /**

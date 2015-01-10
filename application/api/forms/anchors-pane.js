@@ -442,23 +442,6 @@
              */
             P.AnchorsPane.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.AnchorsPane){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf AnchorsPane
-             */
-            P.AnchorsPane.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "count", {
             get: function() {
                 var value = delegate.count;
@@ -489,6 +472,23 @@
              * @memberOf AnchorsPane
              */
             P.AnchorsPane.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.AnchorsPane){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf AnchorsPane
+             */
+            P.AnchorsPane.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

@@ -42,7 +42,7 @@ public class CheckCellEditor extends RowHeaderCellEditor {
             int colCount = ((ConstrainedColumnModel) tcm).getDelegate().getColumnCount();
             ((ConstrainedListSelectionModel) tcm.getSelectionModel()).getDelegate().setSelectionInterval(0, colCount - 1);
         }
-        if (check.isSelected()) {
+        if (!check.isSelected()) {
             editingTable.addRowSelectionInterval(editingRow, editingRow);
         } else {
             editingTable.removeRowSelectionInterval(editingRow, editingRow);

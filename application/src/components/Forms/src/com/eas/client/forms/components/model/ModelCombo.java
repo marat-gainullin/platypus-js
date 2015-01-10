@@ -170,7 +170,7 @@ public class ModelCombo extends ModelComponentDecorator<VComboBox, Object> imple
 
     @Override
     protected void setupCellRenderer(JTable table, int row, int column, boolean isSelected) {
-        remove(decorated);
+        removeAll();
         String rendered = renderValue(getValue());
         JLabel rendererLine = new JLabel(rendered);
         rendererLine.setOpaque(false);

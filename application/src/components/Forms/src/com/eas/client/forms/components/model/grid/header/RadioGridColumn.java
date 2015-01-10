@@ -30,8 +30,9 @@ public class RadioGridColumn extends GridColumnsNode implements HasPublished {
         super();
         setTableColumn(new RadioServiceColumn());
         resizable = false;
+        setTitle("\\");
     }
-
+/*
     public RadioGridColumn(GridColumnsNode aParent) {
         super(aParent);
     }
@@ -44,7 +45,7 @@ public class RadioGridColumn extends GridColumnsNode implements HasPublished {
     protected RadioGridColumn(TableColumn aCol) {
         super(aCol);
     }
-
+*/
     @ScriptFunction
     @Override
     public int getWidth() {

@@ -41,7 +41,6 @@ import javax.swing.text.View;
  */
 public class HeaderCell extends JEditorPane {
 
-    public static final Color defaultBackgroundColor = (new JButton()).getBackground();
     public static final Color defaultEdgeColor = new Color(118, 187, 246);
     public static final Color defaultBottomColor = new Color(248, 169, 0);
     public static final Color defaultBottomLightColor = new Color(252, 194, 71);
@@ -66,22 +65,19 @@ public class HeaderCell extends JEditorPane {
     protected Color uiEdgeColor;
     protected Color rolledOverOutlineColor = new Color(168, 216, 235);
     protected Color rolledOverFillColor = new Color(231, 239, 243);
-    protected PropertyChangeListener groupListener = new PropertyChangeListener() {
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-            if ("background".equals(evt.getPropertyName())) {
-                setBackground((Color) evt.getNewValue());
-            } else if ("foreground".equals(evt.getPropertyName())) {
-                setForeground((Color) evt.getNewValue());
-            } else if ("font".equals(evt.getPropertyName())) {
-                setFont((Font) evt.getNewValue());
-            } else if ("title".equals(evt.getPropertyName())
-                    && (evt.getNewValue() == null || evt.getNewValue() instanceof String)) {
-                applyTitle();
-            } else if ("width".equals(evt.getPropertyName()) || "preferredWidth".equals(evt.getPropertyName())
-                    || "maxWidth".equals(evt.getPropertyName()) || "minWidth".equals(evt.getPropertyName())) {
-                invalidate();
-            }
+    protected PropertyChangeListener groupListener = (PropertyChangeEvent evt) -> {
+        if ("background".equals(evt.getPropertyName())) {
+            setBackground((Color) evt.getNewValue());
+        } else if ("foreground".equals(evt.getPropertyName())) {
+            setForeground((Color) evt.getNewValue());
+        } else if ("font".equals(evt.getPropertyName())) {
+            setFont((Font) evt.getNewValue());
+        } else if ("title".equals(evt.getPropertyName())
+                && (evt.getNewValue() == null || evt.getNewValue() instanceof String)) {
+            applyTitle();
+        } else if ("width".equals(evt.getPropertyName()) || "preferredWidth".equals(evt.getPropertyName())
+                || "maxWidth".equals(evt.getPropertyName()) || "minWidth".equals(evt.getPropertyName())) {
+            invalidate();
         }
     };
 
@@ -295,9 +291,6 @@ public class HeaderCell extends JEditorPane {
             Dimension d = getSize();
             if (leftRolledover || rightRolledover) {
                 g2d.setColor(rolledOverFillColor);
-                g2d.fillRect(0, 0, d.width, d.height);
-            } else if (!defaultBackgroundColor.equals(getBackground())) {// isOpaque() is replaced with non-default background color
-                g2d.setColor(getBackground());
                 g2d.fillRect(0, 0, d.width, d.height);
             }
             if (getColGroup().isLeaf() && !rolledover && !leftRolledover && !rightRolledover) {

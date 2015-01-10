@@ -492,23 +492,6 @@
              */
             P.ScrollPane.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ScrollPane){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf ScrollPane
-             */
-            P.ScrollPane.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "count", {
             get: function() {
                 var value = delegate.count;
@@ -539,6 +522,23 @@
              * @memberOf ScrollPane
              */
             P.ScrollPane.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ScrollPane){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf ScrollPane
+             */
+            P.ScrollPane.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

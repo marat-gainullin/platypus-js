@@ -68,6 +68,7 @@ public class ServiceCellRenderer extends RowHeaderCellRenderer implements TableC
                 indicator.setIcon(null);
                 rowDescriptor.setIcon(null);
             }
+            setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
             return this;
         } catch (RowsetException ex) {
             Logger.getLogger(ServiceCellRenderer.class.getName()).log(Level.SEVERE, null, ex);

@@ -13,6 +13,8 @@ import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.EventQueue;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import jdk.nashorn.api.scripting.JSObject;
@@ -106,10 +108,18 @@ public class ModelTextArea extends ModelComponentDecorator<VTextArea, String> im
 
     @Override
     protected void setupCellRenderer(JTable table, int row, int column, boolean isSelected) {
-        remove(decorated);
+        removeAll();
         JLabel rendererLine = new JLabel(decorated.getText());
         rendererLine.setOpaque(false);
         add(rendererLine, BorderLayout.CENTER);
+    }
+
+    @Override
+    public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+        EventQueue.invokeLater(() -> {
+            decorated.requestFocus();
+        });
+        return super.getTableCellEditorComponent(table, value, isSelected, row, column);
     }
 
     @Override

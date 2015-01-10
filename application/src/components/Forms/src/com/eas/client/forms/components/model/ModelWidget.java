@@ -25,7 +25,7 @@ public interface ModelWidget<V> extends TableCellRenderer, TableCellEditor, HasV
     public static Object getPathData(JSObject anElement, String aPath) {
         if (aPath != null && !aPath.isEmpty()) {
             JSObject target = anElement;
-            String[] path = aPath.split(".");
+            String[] path = aPath.split("\\.");
             String propName = path[0];
             for (int i = 1; i < path.length; i++) {
                 Object oTarget = anElement.getMember(propName);
@@ -41,7 +41,7 @@ public interface ModelWidget<V> extends TableCellRenderer, TableCellEditor, HasV
             if (propName != null) {
                 value = ScriptUtils.toJava(target.getMember(propName));
             } else {
-                Logger.getLogger(ModelWidget.class.getName()).log(Level.SEVERE, PROPERTY_PATH_MISSING_MSG, aPath);
+                Logger.getLogger(ModelWidget.class.getName()).log(Level.FINE, PROPERTY_PATH_MISSING_MSG, aPath);
             }
             return value;
         } else {
@@ -52,7 +52,7 @@ public interface ModelWidget<V> extends TableCellRenderer, TableCellEditor, HasV
     public static void setPathData(JSObject anElement, String aPath, Object aValue) {
         if (aPath != null && !aPath.isEmpty()) {
             JSObject target = anElement;
-            String[] path = aPath.split(".");
+            String[] path = aPath.split("\\.");
             String propName = path[0];
             for (int i = 1; i < path.length; i++) {
                 Object oTarget = anElement.getMember(propName);
@@ -67,10 +67,10 @@ public interface ModelWidget<V> extends TableCellRenderer, TableCellEditor, HasV
             if (propName != null) {
                 target.setMember(propName, ScriptUtils.toJs(aValue));
             } else {
-                Logger.getLogger(ModelWidget.class.getName()).log(Level.SEVERE, PROPERTY_PATH_MISSING_MSG, aPath);
+                Logger.getLogger(ModelWidget.class.getName()).log(Level.FINE, PROPERTY_PATH_MISSING_MSG, aPath);
             }
         } else {
-            Logger.getLogger(ModelWidget.class.getName()).log(Level.SEVERE, "Property path missing");
+            Logger.getLogger(ModelWidget.class.getName()).log(Level.FINE, "Property path missing");
         }
     }
     static final String PROPERTY_PATH_MISSING_MSG = "Property path: {0} doesn't exist.";

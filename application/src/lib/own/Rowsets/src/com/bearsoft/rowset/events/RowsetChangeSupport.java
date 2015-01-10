@@ -20,6 +20,8 @@ public class RowsetChangeSupport {
 
     protected Set<RowsetListener> rowsetListeners = new HashSet<>();
     protected Rowset source;
+    protected Row oldCurrentRow;
+    protected int oldLength;
 
     /**
      * The constructor.
@@ -92,6 +94,9 @@ public class RowsetChangeSupport {
                 }
             }
         }
+        if (res) {
+            oldCurrentRow = source.getCurrentRow();
+        }
         return res;
     }
 
@@ -120,6 +125,9 @@ public class RowsetChangeSupport {
                     }
                 }
             }
+        }
+        if (res) {
+            oldCurrentRow = source.getCurrentRow();
         }
         return res;
     }
@@ -150,6 +158,10 @@ public class RowsetChangeSupport {
                 }
             }
         }
+        if (res) {
+            oldCurrentRow = source.getCurrentRow();
+            oldLength = source.size();
+        }
         return res;
     }
 
@@ -179,6 +191,10 @@ public class RowsetChangeSupport {
                 }
             }
         }
+        if (res) {
+            oldCurrentRow = source.getCurrentRow();
+            oldLength = source.size();
+        }
         return res;
     }
 
@@ -207,6 +223,10 @@ public class RowsetChangeSupport {
                     }
                 }
             }
+        }
+        if (res) {
+            oldCurrentRow = source.getCurrentRow();
+            oldLength = source.size();
         }
         return res;
     }
@@ -252,6 +272,10 @@ public class RowsetChangeSupport {
                     }
                 }
             }
+        }
+        if (res) {
+            oldCurrentRow = source.getCurrentRow();
+            oldLength = source.size();
         }
         return res;
     }
@@ -313,7 +337,16 @@ public class RowsetChangeSupport {
                 }
             }
         }
+        if (res) {
+            oldCurrentRow = source.getCurrentRow();
+            oldLength = source.size();
+        }
         return res;
+    }
+
+    public void fireBeforeRollback() {
+        oldCurrentRow = source.getCurrentRow();
+        oldLength = source.size();
     }
 
     protected void notifyListeners(Consumer<RowsetListener> aOperation) {
@@ -334,6 +367,8 @@ public class RowsetChangeSupport {
      * Fires requeriedEvent event to all registered listeners.
      */
     public void fireRequeriedEvent() {
+        notifyCursor();
+        notifyLength();
         if (rowsetListeners != null) {
             RowsetRequeryEvent event = new RowsetRequeryEvent(source, RowsetEventMoment.AFTER);
             notifyListeners((RowsetListener l) -> {
@@ -342,10 +377,28 @@ public class RowsetChangeSupport {
         }
     }
 
+    protected void notifyCursor() {
+        if (oldCurrentRow != source.getCurrentRow()) {
+            source.firePropertyChange("cursor", oldCurrentRow, source.getCurrentRow());
+            oldCurrentRow = null;
+        }
+    }
+
+    protected void notifyLength() {
+        if (oldLength == source.size()) {
+            source.firePropertyChange("length", oldLength, 0);
+            source.firePropertyChange("length", 0, source.size());
+        } else {
+            source.firePropertyChange("length", oldLength, source.size());
+        }
+    }
+
     /**
      * Fires rowsetNextPageFetched event to all registered listeners.
      */
     public void fireNextPageFetchedEvent() {
+        notifyCursor();
+        notifyLength();
         if (rowsetListeners != null) {
             RowsetNextPageEvent event = new RowsetNextPageEvent(source, RowsetEventMoment.AFTER);
             notifyListeners((RowsetListener l) -> {
@@ -358,6 +411,8 @@ public class RowsetChangeSupport {
      * Fires filteredEvent event to all registered listeners.
      */
     public void fireFilteredEvent() {
+        notifyCursor();
+        notifyLength();
         if (rowsetListeners != null) {
             RowsetFilterEvent event = new RowsetFilterEvent(source, source.getActiveFilter(), RowsetEventMoment.AFTER);
             notifyListeners((RowsetListener l) -> {
@@ -382,6 +437,8 @@ public class RowsetChangeSupport {
      * Fires savedEvent event to all registered listeners.
      */
     public void fireRolledbackEvent() {
+        notifyCursor();
+        notifyLength();
         if (rowsetListeners != null) {
             RowsetRollbackEvent event = new RowsetRollbackEvent(source);
             notifyListeners((RowsetListener l) -> {
@@ -403,6 +460,7 @@ public class RowsetChangeSupport {
                 l.rowsetScrolled(event);
             });
         }
+        notifyCursor();
     }
 
     /**
@@ -415,6 +473,7 @@ public class RowsetChangeSupport {
                 l.rowsetSorted(event);
             });
         }
+        notifyCursor();
     }
 
     public void fireNetErrorEvent(Exception anErrorCause) {
@@ -433,15 +492,10 @@ public class RowsetChangeSupport {
                 l.beforeRequery(event);
             });
         }
+        oldCurrentRow = source.getCurrentRow();
+        oldLength = source.size();
     }
-    /**
-     * Fires rowInsertedEvent event to all registered listeners.
-     *
-     * @param aRow Row was inserted to the rowset.
-     *
-     * public void fireRowInsertedEvent(Row aRow) { fireRowInsertedEvent(aRow,
-     * false); }
-     */
+
     /**
      * Fires rowInsertedEvent event to all registered listeners.
      *
@@ -450,6 +504,8 @@ public class RowsetChangeSupport {
      * events element.
      */
     public void fireRowInsertedEvent(Row aRow, boolean aAjusting) {
+        notifyCursor();
+        notifyLength();
         if (rowsetListeners != null) {
             RowsetInsertEvent event = new RowsetInsertEvent(source, aRow, RowsetEventMoment.AFTER, aAjusting);
             notifyListeners((RowsetListener l) -> {
@@ -475,6 +531,8 @@ public class RowsetChangeSupport {
      * element.
      */
     public void fireRowDeletedEvent(Row aRow, boolean aAjusting) {
+        notifyCursor();
+        notifyLength();
         if (rowsetListeners != null) {
             RowsetDeleteEvent event = new RowsetDeleteEvent(source, aRow, RowsetEventMoment.AFTER, aAjusting);
             notifyListeners((RowsetListener l) -> {
