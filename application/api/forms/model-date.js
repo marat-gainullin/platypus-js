@@ -626,7 +626,7 @@
              */
             P.ModelDate.prototype.onSelect = {};
         }
-        Object.defineProperty(this, "value", {
+        Object.defineProperty(this, "jsValue", {
             get: function() {
                 var value = delegate.jsValue;
                 return P.boxAsJs(value);
@@ -641,7 +641,7 @@
              * @property jsValue
              * @memberOf ModelDate
              */
-            P.ModelDate.prototype.value = {};
+            P.ModelDate.prototype.jsValue = {};
         }
         Object.defineProperty(this, "top", {
             get: function() {

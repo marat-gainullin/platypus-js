@@ -11,13 +11,15 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.table.TableColumn;
 
 /**
  *
  * @author mg
  */
-public class GridColumnsNode {
+public class GridColumnsNode implements ColumnNodesContainer {
 
     protected Color background;
     protected Color foreground;
@@ -58,6 +60,17 @@ public class GridColumnsNode {
                 case "title":
                     title = styleSource.getTitle();
                     changeSupport.firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
+                    break;
+            }
+        }
+    };
+    protected PropertyChangeListener childrenListener = new PropertyChangeListener() {
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            switch (evt.getPropertyName()) {
+                case "children":
+                    changeSupport.firePropertyChange(evt.getPropertyName(), null, children);
                     break;
             }
         }
@@ -348,10 +361,15 @@ public class GridColumnsNode {
         }
     }
 
-    public GridColumnsNode lightCopy() throws Exception {
-        GridColumnsNode copied = getClass().newInstance();
-        copied.lightAssign(this);
-        return copied;
+    public GridColumnsNode lightCopy() {
+        try {
+            GridColumnsNode copied = getClass().newInstance();
+            copied.lightAssign(this);
+            return copied;
+        } catch (InstantiationException | IllegalAccessException ex) {
+            Logger.getLogger(GridColumnsNode.class.getName()).log(Level.SEVERE, null, ex);
+            throw new IllegalStateException(ex);
+        }
     }
 
     public GridColumnsNode copy() throws Exception {
@@ -543,30 +561,39 @@ public class GridColumnsNode {
         changeSupport.firePropertyChange("background", oldValue, aValue);
     }
 
-    public void removeChild(GridColumnsNode aCol) {
+    @Override
+    public void removeColumnNode(GridColumnsNode aNode) {
         if (children != null) {
-            children.remove(aCol);
+            children.remove(aNode);
+            aNode.getChangeSupport().removePropertyChangeListener("children", childrenListener);
+            changeSupport.firePropertyChange("children", null, children);
         }
     }
 
-    public void addChild(GridColumnsNode aGroup) {
+    @Override
+    public void addColumnNode(GridColumnsNode aNode) {
         if (children == null) {
             children = new ArrayList<>();
         }
-        if (!children.contains(aGroup)) {
-            children.add(aGroup);
-            aGroup.setParent(this);
+        if (!children.contains(aNode)) {
+            children.add(aNode);
+            aNode.setParent(this);
+            aNode.getChangeSupport().addPropertyChangeListener("children", childrenListener);
+            changeSupport.firePropertyChange("children", null, children);
         }
     }
 
-    public void addChild(int atIndex, GridColumnsNode aGroup) {
+    @Override
+    public void insertColumnNode(int atIndex, GridColumnsNode aNode) {
         if (children == null) {
             children = new ArrayList<>();
         }
-        if (!children.contains(aGroup)
+        if (!children.contains(aNode)
                 && atIndex >= 0 && atIndex <= children.size()) {
-            children.add(atIndex, aGroup);
-            aGroup.setParent(this);
+            children.add(atIndex, aNode);
+            aNode.setParent(this);
+            aNode.getChangeSupport().addPropertyChangeListener("children", childrenListener);
+            changeSupport.firePropertyChange("children", null, children);
         }
     }
 

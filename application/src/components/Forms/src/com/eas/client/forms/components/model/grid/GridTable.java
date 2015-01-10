@@ -152,7 +152,7 @@ public class GridTable extends JTable implements ModelCellEditingListener {
                 lOnRender = col.getOnRender();
             }
             if (lOnRender != null) {
-                JSObject element = gridContainer != null ? gridContainer.veiwIndex2Row(lrow) : null;
+                JSObject element = gridContainer != null ? gridContainer.elementByViewIndex(lrow) : null;
                 String display = res instanceof JLabel ? ((JLabel) res).getText() : (value != null ? value.toString() : "");
                 CellRenderEvent event = new CellRenderEvent(new HasPublished() {
 

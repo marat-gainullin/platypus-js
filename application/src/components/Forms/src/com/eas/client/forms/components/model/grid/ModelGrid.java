@@ -6,6 +6,7 @@ import com.bearsoft.gui.grid.constraints.LinearConstraint;
 import com.bearsoft.gui.grid.data.CachingTableModel;
 import com.bearsoft.gui.grid.data.TableFront2TreedModel;
 import com.bearsoft.gui.grid.editing.InsettedTreeEditor;
+import com.bearsoft.gui.grid.header.ColumnNodesContainer;
 import com.bearsoft.gui.grid.header.GridColumnsNode;
 import com.bearsoft.gui.grid.header.HeaderSplitter;
 import com.bearsoft.gui.grid.header.MultiLevelHeader;
@@ -56,7 +57,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridContainer, HasComponentEvents, Widget, HasPublished, HasJsName {
+public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayModelWidget, TablesGridContainer, HasComponentEvents, Widget, HasPublished, HasJsName {
 
     protected JSObject published;
 
@@ -192,20 +193,21 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         return idx;
     }
 
-    public JSObject veiwIndex2Row(int aViewIndex) {
-        return index2Row(rowSorter.convertRowIndexToModel(aViewIndex));
+    @Override
+    public JSObject elementByViewIndex(int aViewIndex) {
+        return elementByModelIndex(rowSorter.convertRowIndexToModel(aViewIndex));
     }
-    
+
     /**
      * Returns row for particular Index. Index is in model's coordinates. Index
      * is 0-based.
      *
      * @param aIdx Index the row is to be calculated for.
      * @return Row's index;
-     * @throws RowsetException
      */
     @ScriptFunction
-    public JSObject index2Row(int aIdx) {
+    @Override
+    public JSObject elementByModelIndex(int aIdx) {
         JSObject element = null;
         if (deepModel instanceof TableFront2TreedModel<?>) {
             TableFront2TreedModel<JSObject> front = (TableFront2TreedModel<JSObject>) deepModel;
@@ -795,7 +797,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         if (deepModel != null) {// design time is only the case
             for (int i = 0; i < deepModel.getRowCount(); i++) {
                 if (rowsSelectionModel.isSelectedIndex(i)) {
-                    JSObject element = index2Row(rowSorter.convertRowIndexToModel(i));
+                    JSObject element = elementByViewIndex(i);
                     selectedRows.add(element);
                 }
             }
@@ -1218,7 +1220,7 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         }
     }
 
-    protected void applyHeader() throws Exception {
+    protected void applyHeader() {
         // set header
         List<GridColumnsNode> lgroups = HeaderSplitter.split(header, 0, frozenColumns - 1);
         List<GridColumnsNode> rgroups = HeaderSplitter.split(header, frozenColumns, Integer.MAX_VALUE);
@@ -1326,12 +1328,12 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
                         try2CancelAnyEditing();
                     }
                     if (data != null) {
-                        JSObject jsNewCursor = index2Row(rowSorter.convertRowIndexToModel(rowsSelectionModel.getLeadSelectionIndex()));
+                        JSObject jsNewCursor = elementByViewIndex(rowsSelectionModel.getLeadSelectionIndex());
                         Object oScrollTo = data.getMember("scrollTo");
                         if (oScrollTo instanceof JSObject && ((JSObject) oScrollTo).isFunction()) {
                             JSObject jsScrollTo = (JSObject) oScrollTo;
                             jsScrollTo.call(data, new Object[]{jsNewCursor});
-                        } else {
+                        } else if (data.hasMember("cursor")) {
                             data.setMember("cursor", jsNewCursor);
                         }
                     }
@@ -1395,25 +1397,44 @@ public class ModelGrid extends JPanel implements ArrayModelWidget, TablesGridCon
         }
     }
 
-    public void addColumn(ModelColumn aColumn) throws Exception {
-        addColumn(columnModel.getColumnCount(), aColumn);
-    }
-
-    public void removeColumn(int aIndex) throws Exception {
-        removeColumn((ModelColumn) columnModel.getColumn(aIndex));
+    @ScriptFunction
+    @Override
+    public void addColumnNode(GridColumnsNode aColumn) {
+        insertColumnNode(columnModel.getColumnCount(), aColumn);
     }
 
     @ScriptFunction
-    public void addColumn(int aIndex, ModelColumn aColumn) throws Exception {
-        columnModel.addColumn(aColumn);
-        columnModel.moveColumn(columnModel.getColumnCount() - 1, aIndex);
-        // edit header...
-        // apply changes        
+    @Override
+    public void removeColumnNode(GridColumnsNode aNode) {
+        if (aNode != null) {
+            if (aNode.getParent() != null) {
+                aNode.getParent().removeColumnNode(aNode);
+            } else {
+                header.remove(aNode);
+            }
+            refreshColumnModel();
+            applyColumns();
+            applyHeader();
+        }
+    }
+
+    public void refreshColumnModel() {
+        List<GridColumnsNode> leaves = new ArrayList<>();
+        MultiLevelHeader.achieveLeaves(header, leaves);
+        for (int i = columnModel.getColumnCount() - 1; i >= 0; i--) {
+            columnModel.removeColumn(columnModel.getColumn(i));
+        }
+    }
+
+    @ScriptFunction
+    @Override
+    public void insertColumnNode(int aIndex, GridColumnsNode aColumn) {
+        header.add(aIndex, aColumn);
+        refreshColumnModel();
         applyColumns();
         applyHeader();
     }
 
-    @ScriptFunction
     public void removeColumn(ModelColumn aColumn) throws Exception {
         columnModel.removeColumn(aColumn);
         // edit header...

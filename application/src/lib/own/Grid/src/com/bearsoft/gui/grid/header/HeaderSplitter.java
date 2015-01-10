@@ -20,7 +20,7 @@ public class HeaderSplitter {
         maxLeave = aMaxLeave;
     }
 
-    public static List<GridColumnsNode> split(List<GridColumnsNode> toBeSplitted, int aMinLeave, int aMaxLeave) throws Exception {
+    public static List<GridColumnsNode> split(List<GridColumnsNode> toBeSplitted, int aMinLeave, int aMaxLeave) {
         HeaderSplitter splitter = new HeaderSplitter(aMinLeave, aMaxLeave);
         splitter.process(toBeSplitted, null);
         return splitter.toRoots();
@@ -43,7 +43,7 @@ public class HeaderSplitter {
         return res;
     }
 
-    protected boolean process(List<GridColumnsNode> toBeSplitted, GridColumnsNode aClonedParent) throws Exception {
+    protected boolean process(List<GridColumnsNode> toBeSplitted, GridColumnsNode aClonedParent) {
         boolean res = false;
         for (int i = 0; i < toBeSplitted.size(); i++) {
             GridColumnsNode n = toBeSplitted.get(i);
@@ -56,7 +56,7 @@ public class HeaderSplitter {
                     res = true;
                     splittedLeaves.add(nc);
                     if (aClonedParent != null) {
-                        aClonedParent.addChild(nc);
+                        aClonedParent.addColumnNode(nc);
                     }
                 }
             } else {
@@ -64,7 +64,7 @@ public class HeaderSplitter {
                 if (isGoodLeaveIndex) {
                     res = true;
                     if (aClonedParent != null) {
-                        aClonedParent.addChild(nc);
+                        aClonedParent.addColumnNode(nc);
                     }
                 }
             }

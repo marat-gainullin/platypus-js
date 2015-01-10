@@ -460,20 +460,6 @@
              */
             P.TabbedPane.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "count", {
-            get: function() {
-                var value = delegate.count;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.TabbedPane){
-            /**
-             * Gets the number of components in this panel.
-             * @property count
-             * @memberOf TabbedPane
-             */
-            P.TabbedPane.prototype.count = 0;
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -507,6 +493,20 @@
              * @memberOf TabbedPane
              */
             P.TabbedPane.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "count", {
+            get: function() {
+                var value = delegate.count;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.TabbedPane){
+            /**
+             * Gets the number of components in this panel.
+             * @property count
+             * @memberOf TabbedPane
+             */
+            P.TabbedPane.prototype.count = 0;
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -576,23 +576,6 @@
              */
             P.TabbedPane.prototype.selectedIndex = 0;
         }
-        Object.defineProperty(this, "onComponentRemoved", {
-            get: function() {
-                var value = delegate.onComponentRemoved;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onComponentRemoved = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.TabbedPane){
-            /**
-             * Component removed event handler function.
-             * @property onComponentRemoved
-             * @memberOf TabbedPane
-             */
-            P.TabbedPane.prototype.onComponentRemoved = {};
-        }
         Object.defineProperty(this, "onItemSelected", {
             get: function() {
                 var value = delegate.onItemSelected;
@@ -609,6 +592,23 @@
              * @memberOf TabbedPane
              */
             P.TabbedPane.prototype.onItemSelected = {};
+        }
+        Object.defineProperty(this, "onComponentRemoved", {
+            get: function() {
+                var value = delegate.onComponentRemoved;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onComponentRemoved = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.TabbedPane){
+            /**
+             * Component removed event handler function.
+             * @property onComponentRemoved
+             * @memberOf TabbedPane
+             */
+            P.TabbedPane.prototype.onComponentRemoved = {};
         }
         Object.defineProperty(this, "component", {
             get: function() {

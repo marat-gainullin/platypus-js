@@ -64,21 +64,21 @@ public class MultiLevelHeaderTest {
         {
             g21 = new GridColumnsNode(columns.getColumn(0)); // col 0
             g22 = new GridColumnsNode(columns.getColumn(1)); // col 1
-            g11.addChild(g21);
-            g11.addChild(g22);
+            g11.addColumnNode(g21);
+            g11.addColumnNode(g22);
         }
 
         g12 = new GridColumnsNode("g12 hhhhhhhhhh test test");
         {
             g23 = new GridColumnsNode("g23 hhhhhhhhhh test test");
             g24 = new GridColumnsNode(columns.getColumn(4)); // col 4
-            g12.addChild(g23);
-            g12.addChild(g24);
+            g12.addColumnNode(g23);
+            g12.addColumnNode(g24);
             {
                 g33 = new GridColumnsNode(columns.getColumn(2)); // col 2
                 g34 = new GridColumnsNode(columns.getColumn(3)); // col 3
-                g23.addChild(g33);
-                g23.addChild(g34);
+                g23.addColumnNode(g33);
+                g23.addColumnNode(g34);
             }
         }
         roots.add(g11);

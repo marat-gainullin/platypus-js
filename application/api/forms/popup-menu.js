@@ -442,20 +442,6 @@
              */
             P.PopupMenu.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "count", {
-            get: function() {
-                var value = delegate.count;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.PopupMenu){
-            /**
-             * Gets the number of components in this panel.
-             * @property count
-             * @memberOf PopupMenu
-             */
-            P.PopupMenu.prototype.count = 0;
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -489,6 +475,20 @@
              * @memberOf PopupMenu
              */
             P.PopupMenu.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "count", {
+            get: function() {
+                var value = delegate.count;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.PopupMenu){
+            /**
+             * Gets the number of components in this panel.
+             * @property count
+             * @memberOf PopupMenu
+             */
+            P.PopupMenu.prototype.count = 0;
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

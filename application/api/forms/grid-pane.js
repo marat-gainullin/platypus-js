@@ -464,20 +464,6 @@
              */
             P.GridPane.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "count", {
-            get: function() {
-                var value = delegate.count;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.GridPane){
-            /**
-             * Generated property jsDoc.
-             * @property count
-             * @memberOf GridPane
-             */
-            P.GridPane.prototype.count = 0;
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -511,6 +497,20 @@
              * @memberOf GridPane
              */
             P.GridPane.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "count", {
+            get: function() {
+                var value = delegate.count;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.GridPane){
+            /**
+             * Generated property jsDoc.
+             * @property count
+             * @memberOf GridPane
+             */
+            P.GridPane.prototype.count = 0;
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

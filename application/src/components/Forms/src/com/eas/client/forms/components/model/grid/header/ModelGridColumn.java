@@ -46,6 +46,25 @@ public class ModelGridColumn extends GridColumnsNode implements HasPublished {
         super(aCol);
     }
 */
+    
+    @ScriptFunction(params = {"node"})
+    @Override
+    public void removeColumnNode(GridColumnsNode aNode) {
+        super.removeColumnNode(aNode);
+    }
+
+    @ScriptFunction(params = {"node"})
+    @Override
+    public void addColumnNode(GridColumnsNode aNode) {
+        super.addColumnNode(aNode);
+    }
+
+    @ScriptFunction(params = {"position", "node"})
+    @Override
+    public void insertColumnNode(int atIndex, GridColumnsNode aNode) {
+        super.insertColumnNode(atIndex, aNode);
+    }
+    
     @ScriptFunction
     @Designable(category = "model")
     public String getField() {

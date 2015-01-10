@@ -457,6 +457,18 @@
         };
 
         /**
+         * Shows the form as a dialog (modal window).
+         * @param callback a callback handler function
+         * @method showModal
+         * @memberOf Form
+         */
+        P.Form.prototype.showModal = function(callback) {
+            var delegate = this.unwrap();
+            var value = delegate.showModal(P.boxAsJava(callback));
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Shows the form as an ordinary window.
          * @method show
          * @memberOf Form
@@ -479,14 +491,14 @@
         };
 
         /**
-         * Shows the form as a dialog (modal window).
-         * @param callback a callback handler function
-         * @method showModal
+         * Shows the form as an internal window in a desktop.
+         * @param desktop the parent desktop object
+         * @method showInternalFrame
          * @memberOf Form
          */
-        P.Form.prototype.showModal = function(callback) {
+        P.Form.prototype.showInternalFrame = function(desktop) {
             var delegate = this.unwrap();
-            var value = delegate.showModal(P.boxAsJava(callback));
+            var value = delegate.showInternalFrame(P.boxAsJava(desktop));
             return P.boxAsJs(value);
         };
 
@@ -520,18 +532,6 @@
         P.Form.prototype.restore = function() {
             var delegate = this.unwrap();
             var value = delegate.restore();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Shows the form as an internal window in a desktop.
-         * @param desktop the parent desktop object
-         * @method showInternalFrame
-         * @memberOf Form
-         */
-        P.Form.prototype.showInternalFrame = function(desktop) {
-            var delegate = this.unwrap();
-            var value = delegate.showInternalFrame(P.boxAsJava(desktop));
             return P.boxAsJs(value);
         };
 

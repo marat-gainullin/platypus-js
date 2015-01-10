@@ -4,13 +4,10 @@
  */
 package com.eas.client.forms.components.model.grid.columns;
 
-import com.bearsoft.rowset.exceptions.RowsetException;
 import com.eas.client.forms.IconCache;
 import com.eas.client.forms.components.model.grid.ModelGrid;
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
@@ -43,36 +40,30 @@ public class ServiceCellRenderer extends RowHeaderCellRenderer implements TableC
 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int rowIndex, int column) {
-        try {
-            int modelRow = table.convertRowIndexToModel(rowIndex);
-            ModelGrid grid = ModelGrid.getFirstDbGrid(table);
-            JSObject row = grid.index2Row(modelRow);
-            if (row != null) {
-                if (grid.isElementProcessed(row)) {
-                    indicator.setIcon(processingIcon);
-                } else if (grid.isCurrentRow(row)) {
-                    indicator.setIcon(currentIcon);
-                } else {
-                    indicator.setIcon(null);
-                }
-                /*
-                if (row.isInserted()) {
-                    rowDescriptor.setIcon(insertingIcon);
-                } else if (row.isUpdated()) {
-                    rowDescriptor.setIcon(editingIcon);
-                } else {
-                    rowDescriptor.setIcon(null);
-                }
-                */
+        ModelGrid grid = ModelGrid.getFirstDbGrid(table);
+        JSObject row = grid.elementByViewIndex(rowIndex);
+        if (row != null) {
+            if (grid.isElementProcessed(row)) {
+                indicator.setIcon(processingIcon);
+            } else if (grid.isCurrentRow(row)) {
+                indicator.setIcon(currentIcon);
             } else {
                 indicator.setIcon(null);
-                rowDescriptor.setIcon(null);
             }
-            setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
-            return this;
-        } catch (RowsetException ex) {
-            Logger.getLogger(ServiceCellRenderer.class.getName()).log(Level.SEVERE, null, ex);
-            return this;
+            /*
+             if (row.isInserted()) {
+             rowDescriptor.setIcon(insertingIcon);
+             } else if (row.isUpdated()) {
+             rowDescriptor.setIcon(editingIcon);
+             } else {
+             rowDescriptor.setIcon(null);
+             }
+             */
+        } else {
+            indicator.setIcon(null);
+            rowDescriptor.setIcon(null);
         }
+        setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
+        return this;
     }
 }

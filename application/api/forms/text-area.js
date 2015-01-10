@@ -212,7 +212,7 @@
              */
             P.TextArea.prototype.onComponentMoved = {};
         }
-        Object.defineProperty(this, "value", {
+        Object.defineProperty(this, "jsValue", {
             get: function() {
                 var value = delegate.jsValue;
                 return P.boxAsJs(value);
@@ -227,7 +227,7 @@
              * @property jsValue
              * @memberOf TextArea
              */
-            P.TextArea.prototype.value = {};
+            P.TextArea.prototype.jsValue = {};
         }
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {

@@ -24,7 +24,7 @@ public interface TablesGridContainer {
 
     public JSObject getOnRender();
 
-    public JSObject veiwIndex2Row(int aViewIndex);
+    public JSObject elementByViewIndex(int aViewIndex);
 
-    public JSObject index2Row(int aIdx);
+    public JSObject elementByModelIndex(int aIdx);
 }

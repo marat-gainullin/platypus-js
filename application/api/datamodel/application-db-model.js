@@ -24,18 +24,6 @@
         delegate.setPublished(this);
     };
         /**
-         * Reverts model data changes.
-         * After this method call, no data changes are avaliable for <code>model.save()</code> method.
-         * @method revert
-         * @memberOf ApplicationDbModel
-         */
-        P.ApplicationDbModel.prototype.revert = function() {
-            var delegate = this.unwrap();
-            var value = delegate.revert();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Requeries the model data. Forces the model data refresh, no matter if its parameters has changed or not.
          * @param onSuccess The handler function for refresh data on success event (optional).
          * @param onFailure The handler function for refresh data on failure event (optional).
@@ -49,16 +37,14 @@
         };
 
         /**
-         * Creates new entity of model, based on passed sql query. This method works only in two tier components of a system.
-         * @param sqlText SQL text for the new entity.
-         * @param dbId the concrete database ID (optional).
-         * @return an entity instance.
-         * @method createEntity
+         * Reverts model data changes.
+         * After this method call, no data changes are avaliable for <code>model.save()</code> method.
+         * @method revert
          * @memberOf ApplicationDbModel
          */
-        P.ApplicationDbModel.prototype.createEntity = function(sqlText, datasourceName) {
+        P.ApplicationDbModel.prototype.revert = function() {
             var delegate = this.unwrap();
-            var value = delegate.createEntity(P.boxAsJava(sqlText), P.boxAsJava(datasourceName));
+            var value = delegate.revert();
             return P.boxAsJs(value);
         };
 
@@ -75,6 +61,20 @@
         P.ApplicationDbModel.prototype.executeSql = function(sqlText, datasourceName, arg2, arg3) {
             var delegate = this.unwrap();
             var value = delegate.executeSql(P.boxAsJava(sqlText), P.boxAsJava(datasourceName), P.boxAsJava(arg2), P.boxAsJava(arg3));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Creates new entity of model, based on passed sql query. This method works only in two tier components of a system.
+         * @param sqlText SQL text for the new entity.
+         * @param dbId the concrete database ID (optional).
+         * @return an entity instance.
+         * @method createEntity
+         * @memberOf ApplicationDbModel
+         */
+        P.ApplicationDbModel.prototype.createEntity = function(sqlText, datasourceName) {
+            var delegate = this.unwrap();
+            var value = delegate.createEntity(P.boxAsJava(sqlText), P.boxAsJava(datasourceName));
             return P.boxAsJs(value);
         };
 

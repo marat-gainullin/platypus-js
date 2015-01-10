@@ -182,7 +182,7 @@
              */
             P.RadioMenuItem.prototype.onComponentMoved = {};
         }
-        Object.defineProperty(this, "value", {
+        Object.defineProperty(this, "jsValue", {
             get: function() {
                 var value = delegate.jsValue;
                 return P.boxAsJs(value);
@@ -197,7 +197,7 @@
              * @property jsValue
              * @memberOf RadioMenuItem
              */
-            P.RadioMenuItem.prototype.value = {};
+            P.RadioMenuItem.prototype.jsValue = {};
         }
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {
