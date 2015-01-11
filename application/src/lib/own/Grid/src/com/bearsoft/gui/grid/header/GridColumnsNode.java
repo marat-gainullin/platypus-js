@@ -39,44 +39,31 @@ public class GridColumnsNode implements ColumnNodesContainer {
     // events sources
     protected TableColumn tableColumn;
     protected GridColumnsNode styleSource;
-    // because of nodes cloning
-    protected PropertyChangeListener styleListener = new PropertyChangeListener() {
-
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-            switch (evt.getPropertyName()) {
-                case "font":
-                    font = styleSource.getFont();
-                    changeSupport.firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
-                    break;
-                case "background":
-                    background = styleSource.getBackground();
-                    changeSupport.firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
-                    break;
-                case "foreground":
-                    foreground = styleSource.getForeground();
-                    changeSupport.firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
-                    break;
-                case "title":
-                    title = styleSource.getTitle();
-                    changeSupport.firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
-                    break;
-            }
-        }
-    };
-    protected PropertyChangeListener childrenListener = new PropertyChangeListener() {
-
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-            switch (evt.getPropertyName()) {
-                case "children":
-                    changeSupport.firePropertyChange(evt.getPropertyName(), null, children);
-                    break;
-            }
-        }
-    };
-    //
     protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
+    // because of nodes cloning
+    protected PropertyChangeListener styleListener = (PropertyChangeEvent evt) -> {
+        switch (evt.getPropertyName()) {
+            case "font":
+                font = styleSource.getFont();
+                changeSupport.firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
+                break;
+            case "background":
+                background = styleSource.getBackground();
+                changeSupport.firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
+                break;
+            case "foreground":
+                foreground = styleSource.getForeground();
+                changeSupport.firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
+                break;
+            case "title":
+                title = styleSource.getTitle();
+                changeSupport.firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
+                break;
+        }
+    };
+    protected PropertyChangeListener childrenListener = (PropertyChangeEvent evt) -> {
+        changeSupport.firePropertyChange(evt.getPropertyName(), null, children);
+    };
 
     public GridColumnsNode() {
         super();
@@ -449,11 +436,9 @@ public class GridColumnsNode implements ColumnNodesContainer {
     public void setChildren(List<GridColumnsNode> aChildren) {
         children = aChildren;
         if (children != null) {
-            for (GridColumnsNode lcol : children) {
-                if (lcol != null) {
-                    lcol.setParent(this);
-                }
-            }
+            children.stream().forEach((lcol) -> {
+                lcol.setParent(this);
+            });
         } else {
             children = new ArrayList<>();
         }
