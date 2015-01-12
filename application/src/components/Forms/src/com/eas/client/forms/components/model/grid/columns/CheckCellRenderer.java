@@ -8,6 +8,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import javax.swing.JCheckBox;
 import javax.swing.JTable;
+import javax.swing.UIManager;
 
 /**
  *
@@ -28,6 +29,11 @@ public class CheckCellRenderer extends RowHeaderCellRenderer {
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int rowIndex, int column) {
         check.setSelected(table.isRowSelected(rowIndex));
         setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
+        if (hasFocus) {
+            setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
+        } else {
+            setBorder(null);
+        }
         return this;
     }
 }

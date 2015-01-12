@@ -13,7 +13,10 @@ import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.EventQueue;
 import java.util.Date;
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import jdk.nashorn.api.scripting.JSObject;
@@ -46,7 +49,15 @@ public class ModelDate extends ModelComponentDecorator<VDateTimeField, Date> imp
     @ScriptFunction
     @Override
     public void setJsValue(Object aValue) {
-        setValue(aValue != null ? new Date(JSType.toLong(aValue)) : null);
+        if (aValue != null) {
+            if (aValue instanceof Date) {
+                setValue((Date) aValue);
+            } else {
+                setValue(new Date(JSType.toLong(aValue)));
+            }
+        } else {
+            setValue(null);
+        }
     }
 
     @Override
@@ -77,7 +88,7 @@ public class ModelDate extends ModelComponentDecorator<VDateTimeField, Date> imp
     public void setEditable(boolean aValue) {
         decorated.setEditable(aValue);
     }
-    
+
     @ScriptFunction
     public String getDateFormat() {
         return decorated.getDateFormat();
@@ -116,6 +127,17 @@ public class ModelDate extends ModelComponentDecorator<VDateTimeField, Date> imp
         JLabel rendererLine = new JLabel(decorated.getText());
         rendererLine.setOpaque(false);
         add(rendererLine, BorderLayout.CENTER);
+    }
+
+    @Override
+    public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+        JFormattedTextField ftf = decorated.getEditorComponent();
+        ftf.getActionMap().remove(TextFieldsCommitAction.COMMIT_ACTION_NAME);
+        ftf.getActionMap().put(TextFieldsCommitAction.COMMIT_ACTION_NAME, new TextFieldsCommitAction(ftf));
+        EventQueue.invokeLater(() -> {
+            decorated.requestFocus();
+        });
+        return super.getTableCellEditorComponent(table, value, isSelected, row, column);
     }
 
     @Override

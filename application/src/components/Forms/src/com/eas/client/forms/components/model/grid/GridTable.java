@@ -117,9 +117,6 @@ public class GridTable extends JTable implements ModelCellEditingListener {
         } finally {
             cellEditingCompletion = false;
         }
-        if (gridContainer != null && gridContainer.isAutoRedraw()) {
-            gridContainer.enqueueRedraw();
-        }
     }
 
     @Override
@@ -173,8 +170,8 @@ public class GridTable extends JTable implements ModelCellEditingListener {
     }
 
     //
-    protected boolean processingKeyBinding = false;
-    protected boolean editingEndedWhileKeyBinding = false;
+    protected boolean processingKeyBinding;
+    protected boolean editingEndedWhileKeyBinding;
 
     @Override
     protected boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed) {
@@ -244,7 +241,7 @@ public class GridTable extends JTable implements ModelCellEditingListener {
         }
         super.editingStopped(e);
         if (gridContainer != null && gridContainer.isAutoRedraw()) {
-            gridContainer.enqueueRedraw();
+            gridContainer.redraw();
         }
     }
 
@@ -259,7 +256,7 @@ public class GridTable extends JTable implements ModelCellEditingListener {
 
     @Override
     public void changeSelection(int rowIndex, int columnIndex, boolean toggle, boolean extend) {
-        boolean bad = processingKeyBinding && editingEndedWhileKeyBinding && getSelectionModel().getLeadSelectionIndex() == getRowCount() - 1 && rowIndex == 0;
+        boolean bad = processingKeyBinding && editingEndedWhileKeyBinding;
         if (!bad) {
             TableColumn tc = getColumnModel().getColumn(columnIndex);
             if (skipableColumn(tc)) {
@@ -287,9 +284,8 @@ public class GridTable extends JTable implements ModelCellEditingListener {
             if (columnIndex >= 0 && columnIndex < getColumnModel().getColumnCount()) {
                 super.changeSelection(rowIndex, columnIndex, toggle, extend);
             }
-        } else {
-            editingEndedWhileKeyBinding = false;
         }
+        editingEndedWhileKeyBinding = false;
     }
 
     public static boolean skipableColumn(TableColumn tc) {

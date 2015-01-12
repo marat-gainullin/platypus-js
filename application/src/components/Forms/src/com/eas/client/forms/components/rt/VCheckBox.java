@@ -6,7 +6,9 @@
 package com.eas.client.forms.components.rt;
 
 import com.eas.client.forms.IconCache;
+import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeListener;
+import javax.swing.DefaultButtonModel;
 import javax.swing.Icon;
 import javax.swing.JCheckBox;
 import javax.swing.event.ChangeEvent;
@@ -26,7 +28,8 @@ public class VCheckBox extends JCheckBox implements HasValue<Boolean> {
         super(aText, aSelected);
         ordinaryIcon = getIcon();
         oldValue = aSelected;
-        super.getModel().addChangeListener((ChangeEvent e) -> {
+        super.getModel().addActionListener((ActionEvent e) -> {
+            setIcon(ordinaryIcon);
             checkValueChanged();
         });
     }

@@ -12,7 +12,11 @@ import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.EventQueue;
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
+import javax.swing.JSpinner.NumberEditor;
 import javax.swing.JTable;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.internal.runtime.JSType;
@@ -149,6 +153,19 @@ public class ModelSpin extends ModelComponentDecorator<VSpinner, Double> impleme
         JLabel rendererLine = new JLabel(decorated.getText());
         rendererLine.setOpaque(false);
         add(rendererLine, BorderLayout.CENTER);
+    }
+
+    @Override
+    public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+        if (decorated.getEditor() instanceof NumberEditor) {
+            JFormattedTextField ftf = ((NumberEditor) decorated.getEditor()).getTextField();
+            ftf.getActionMap().remove(TextFieldsCommitAction.COMMIT_ACTION_NAME);
+            ftf.getActionMap().put(TextFieldsCommitAction.COMMIT_ACTION_NAME, new TextFieldsCommitAction(ftf));
+        }
+        EventQueue.invokeLater(() -> {
+            decorated.requestFocus();
+        });
+        return super.getTableCellEditorComponent(table, value, isSelected, row, column); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override

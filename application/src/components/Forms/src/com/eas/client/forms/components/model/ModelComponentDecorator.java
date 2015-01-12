@@ -129,10 +129,11 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
      */
     protected class TextFieldsCommitAction extends AbstractAction {
 
+        public static final String COMMIT_ACTION_NAME = "notify-field-accept";
         protected JFormattedTextField field;
 
-        public TextFieldsCommitAction(JFormattedTextField aField, Object aName) {
-            super(aName instanceof String ? (String) aName : "notify-field-accept");
+        public TextFieldsCommitAction(JFormattedTextField aField) {
+            super(COMMIT_ACTION_NAME);
             field = aField;
         }
 
@@ -156,20 +157,22 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     };
 
     public void setDecorated(D aComponent) {
-        if (decorated != null) {
-            decorated.removePropertyChangeListener(VALUE_PROP_NAME, decoratedValueListener);
-            remove(decorated);
-        }
-        decorated = aComponent;
-        if (decorated != null) {
-            decorated.setForeground(getForeground());
-            decorated.setFont(getFont());
-            decorated.setOpaque(false);
-            decorated.setBorder(null);
-            decorated.setInheritsPopupMenu(true);
-            add(decorated, BorderLayout.CENTER);
-            checkEvents(decorated);
-            decorated.addPropertyChangeListener(VALUE_PROP_NAME, decoratedValueListener);
+        if (decorated != aComponent) {
+            if (decorated != null) {
+                decorated.removePropertyChangeListener(VALUE_PROP_NAME, decoratedValueListener);
+                remove(decorated);
+            }
+            decorated = aComponent;
+            if (decorated != null) {
+                decorated.setForeground(getForeground());
+                decorated.setFont(getFont());
+                decorated.setOpaque(false);
+                decorated.setBorder(null);
+                decorated.setInheritsPopupMenu(true);
+                add(decorated, BorderLayout.CENTER);
+                checkEvents(decorated);
+                decorated.addPropertyChangeListener(VALUE_PROP_NAME, decoratedValueListener);
+            }
         }
     }
 
@@ -883,7 +886,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
             setOpaque(true);
             silent = true;
             extraTools.setVisible(false);
-            setValue((V) value);
+            setJsValue((V) value);
             setupCellRenderer(table, row, column, isSelected);
             if (hasFocus) {
                 setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
@@ -906,7 +909,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
         try {
             removeValueChangeListener(cellEditingCompletedAlerter);
-            setValue((V) value);
+            setJsValue((V) value);
             addValueChangeListener(cellEditingCompletedAlerter);
             EventQueue.invokeLater(() -> {
                 extraTools.setVisible(true);
@@ -939,9 +942,6 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
          } else {
          fireEditingCancelled();
          }
-         EventQueue.invokeLater(() -> {
-         extraTools.setVisible(false);
-         });
          */
         return true;
     }
@@ -1042,11 +1042,13 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     protected boolean nullable = true;
 
     @ScriptFunction
+    @Override
     public boolean getNullable() {
         return nullable;
     }
 
     @ScriptFunction
+    @Override
     public void setNullable(boolean aValue) {
         if (nullable != aValue) {
             nullable = aValue;

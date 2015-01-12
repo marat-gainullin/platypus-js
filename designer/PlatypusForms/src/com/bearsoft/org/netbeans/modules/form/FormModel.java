@@ -147,36 +147,6 @@ public class FormModel {
     private RADComponentCreator metaCreator;
     private final FormSettings settings = new FormSettings();
 
-    /**
-     * This methods sets the form base class (which is in fact the superclass of
-     * the form class in source java file). It is used for initializing the top
-     * meta component, and is also presented as the top component in designer
-     * and inspector.
-     *
-     * @param formClass form base class.
-     * @throws java.lang.Exception if anything goes wrong.
-     */
-    /*
-     public void setFormBaseClass(Class<? extends Container> formClass) throws Exception {
-     if (formBaseClass != null) {
-     throw new IllegalStateException("Form type already initialized."); // NOI18N
-     }
-     if (FormUtils.isVisualizableClass(formClass)) {
-     RADVisualContainer<?> topComp = new RADVisualFormContainer();
-     topRADComponent = topComp;
-     topDesignComponent = topRADComponent;
-     topComp.initialize(this);
-     topComp.initInstance(formClass);
-     ((RADVisualFormContainer) topComp).setLayoutSupportDelegate(new MarginLayoutSupport());
-     topComp.setInModel(true);
-     formBaseClass = formClass;
-     }
-     }
-
-     public Class<?> getFormBaseClass() {
-     return formBaseClass;
-     }
-     */
     final void setName(String name) {
         formName = name;
     }

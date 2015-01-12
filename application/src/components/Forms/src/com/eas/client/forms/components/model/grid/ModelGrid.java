@@ -1108,8 +1108,15 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
             + "*/";
 
     @ScriptFunction(jsDoc = REDRAW_JSDOC)
+    @Override
     public void redraw() {
-        enqueueRedraw();
+        ListSelectionModel rowsSelection = saveRowsSelection();
+        ListSelectionModel columnsSelection = saveColumnsSelection();
+        rowsModel.fireElementsChanged();
+        invalidate();
+        repaint();
+        restoreRowsSelection(rowsSelection);
+        restoreColumnsSelection(columnsSelection);
     }
 
     protected void applyRows() {
@@ -1234,19 +1241,21 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
                     if (rowsModel instanceof ArrayTreedModel) {
                         Object parentValue = jsCursor != null ? ModelWidget.getPathData(jsCursor, parentField) : null;
                         int length = JSType.toInteger(data.getMember("length"));
-                        int insertAt = JSType.toInteger(jsIndexOf.call(data, new Object[]{jsCursor}));
-                        if (insertAt < 0 || insertAt > length) {
-                            insertAt = length;
-                        }
+                        int cursorAt = JSType.toInteger(jsIndexOf.call(data, new Object[]{jsCursor}));
+                        int insertAt = cursorAt >= 0 && cursorAt < length ? cursorAt + 1 : length;
                         jsSplice.call(data, new Object[]{insertAt, 0, jsCreated});
                         ModelWidget.setPathData(jsCreated, parentField, parentValue);
                     } else {
-                        int lead = rowsSelectionModel.getLeadSelectionIndex();
-                        int insertAt = lead >= 0 && lead < deepModel.getRowCount() ? lead + 1 : deepModel.getRowCount();
+                        int length = deepModel.getRowCount();
+                        int cursorAt = rowsSelectionModel.getLeadSelectionIndex();
+                        int insertAt = cursorAt >= 0 && cursorAt < length ? cursorAt + 1 : length;
                         jsSplice.call(data, new Object[]{insertAt, 0, jsCreated});
                     }
                 } finally {
                     rowsSelectionModel.addListSelectionListener(generalSelectionChangesReflector);
+                }
+                if (isAutoRedraw()) {
+                    redraw();
                 }
                 makeVisible(jsCreated);
             }
@@ -1255,23 +1264,43 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         }
     }
 
-    public void deleteRow() {
+    protected ListSelectionModel saveRowsSelection() {
+        ListSelectionModel savedSelection = new DefaultListSelectionModel();
+        for (int viewRowIndex = rowsSelectionModel.getMinSelectionIndex(); viewRowIndex <= rowsSelectionModel.getMaxSelectionIndex(); viewRowIndex++) {
+            if (rowsSelectionModel.isSelectedIndex(viewRowIndex)) {
+                // We have to act upon view coordinates here!
+                savedSelection.addSelectionInterval(viewRowIndex, viewRowIndex);
+            }
+        }
+        return savedSelection;
+    }
+
+    protected ListSelectionModel saveColumnsSelection() {
+        ListSelectionModel savedSelection = new DefaultListSelectionModel();
+        for (int viewColumnIndex = columnsSelectionModel.getMinSelectionIndex(); viewColumnIndex <= columnsSelectionModel.getMaxSelectionIndex(); viewColumnIndex++) {
+            if (columnsSelectionModel.isSelectedIndex(viewColumnIndex)) {
+                // We have to act upon view coordinates here!
+                savedSelection.addSelectionInterval(viewColumnIndex, viewColumnIndex);
+            }
+        }
+        return savedSelection;
+    }
+
+    public void deleteElementAtCursor() {
         if (deletable && data != null && data.hasMember("splice")) {
             JSObject jsSplice = (JSObject) data.getMember("splice");
-            ListSelectionModel savedSelection = new DefaultListSelectionModel();
-            Set<Object> elements = new HashSet<>();
-            for (int viewRowIndex = rowsSelectionModel.getMinSelectionIndex(); viewRowIndex <= rowsSelectionModel.getMaxSelectionIndex(); viewRowIndex++) {
-                if (rowsSelectionModel.isSelectedIndex(viewRowIndex)) {
-                    // We have to act upon model coordinates here!
-                    JSObject element = elementByViewIndex(viewRowIndex);
-                    if (element != null) {
-                        elements.add(element);
-                    }
-                    // We have to act upon view coordinates here!
-                    savedSelection.addSelectionInterval(viewRowIndex, viewRowIndex);
-                }
-            }
+            ListSelectionModel wasSeleted = saveRowsSelection();
             try {
+                Set<Object> elements = new HashSet<>();
+                for (int viewRowIndex = rowsSelectionModel.getMinSelectionIndex(); viewRowIndex <= rowsSelectionModel.getMaxSelectionIndex(); viewRowIndex++) {
+                    if (rowsSelectionModel.isSelectedIndex(viewRowIndex)) {
+                        // We have to act upon model coordinates here!
+                        JSObject element = elementByViewIndex(viewRowIndex);
+                        if (element != null) {
+                            elements.add(element);
+                        }
+                    }
+                }
                 int length = JSType.toInteger(data.getMember("length"));
                 for (int i = length - 1; i >= 0; i--) {
                     Object oElement = data.getSlot(i);
@@ -1279,16 +1308,33 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
                         jsSplice.call(data, new Object[]{i, 1});
                     }
                 }
-            } finally {
-                // We have to act upon view coordinates here!
-                rowsSelectionModel.clearSelection();
-                for (int viewRowIndex = savedSelection.getMinSelectionIndex(); viewRowIndex <= savedSelection.getMaxSelectionIndex(); viewRowIndex++) {
-                    if (viewRowIndex >= 0 && viewRowIndex < rowSorter.getViewRowCount()) {
-                        rowsSelectionModel.addSelectionInterval(viewRowIndex, viewRowIndex);
-                    } else if (viewRowIndex == rowSorter.getViewRowCount()) {
-                        rowsSelectionModel.addSelectionInterval(viewRowIndex - 1, viewRowIndex - 1);
-                    }
+                if (isAutoRedraw()) {
+                    redraw();
                 }
+            } finally {
+                restoreRowsSelection(wasSeleted);
+            }
+        }
+    }
+
+    protected void restoreRowsSelection(ListSelectionModel wasSeleted) {
+        // We have to act upon view coordinates here!
+        rowsSelectionModel.clearSelection();
+        for (int viewRowIndex = wasSeleted.getMinSelectionIndex(); viewRowIndex <= wasSeleted.getMaxSelectionIndex(); viewRowIndex++) {
+            if (viewRowIndex >= 0 && viewRowIndex < rowSorter.getViewRowCount()) {
+                rowsSelectionModel.addSelectionInterval(viewRowIndex, viewRowIndex);
+            } else if (viewRowIndex == rowSorter.getViewRowCount()) {
+                rowsSelectionModel.addSelectionInterval(viewRowIndex - 1, viewRowIndex - 1);
+            }
+        }
+    }
+
+    protected void restoreColumnsSelection(ListSelectionModel aSeleted) {
+        // We have to act upon view coordinates here!
+        columnsSelectionModel.clearSelection();
+        for (int viewColumnIndex = aSeleted.getMinSelectionIndex(); viewColumnIndex <= aSeleted.getMaxSelectionIndex(); viewColumnIndex++) {
+            if (viewColumnIndex >= 0 && viewColumnIndex < columnModel.getColumnCount()) {
+                columnsSelectionModel.addSelectionInterval(viewColumnIndex, viewColumnIndex);
             }
         }
     }
@@ -1378,6 +1424,9 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         for (int i = columnModel.getColumnCount() - 1; i >= 0; i--) {
             columnModel.removeColumn(columnModel.getColumn(i));
         }
+        leaves.stream().sequential().forEach((GridColumnsNode aNode) -> {
+            columnModel.addColumn(aNode.getTableColumn());
+        });
     }
 
     protected boolean autoRefreshHeader = true;
@@ -1400,7 +1449,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     @ScriptFunction
     @Override
     public void addColumnNode(GridColumnsNode aColumn) {
-        insertColumnNode(columnModel.getColumnCount(), aColumn);
+        insertColumnNode(header.size(), aColumn);
     }
 
     @ScriptFunction
@@ -1409,9 +1458,11 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         if (aNode != null) {
             aNode.getChangeSupport().removePropertyChangeListener("children", columnNodesListener);
             header.remove(aNode);
-            refreshColumnModel();
-            applyColumns();
-            applyHeader();
+            if (autoRefreshHeader) {
+                refreshColumnModel();
+                applyColumns();
+                applyHeader();
+            }
         }
     }
 
@@ -1420,9 +1471,11 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     public void insertColumnNode(int aIndex, GridColumnsNode aNode) {
         header.add(aIndex, aNode);
         aNode.getChangeSupport().removePropertyChangeListener("children", columnNodesListener);
-        refreshColumnModel();
-        applyColumns();
-        applyHeader();
+        if (autoRefreshHeader) {
+            refreshColumnModel();
+            applyColumns();
+            applyHeader();
+        }
     }
 
     public void removeColumn(ModelColumn aColumn) throws Exception {
@@ -1521,9 +1574,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         EventQueue.invokeLater(() -> {
             if (redrawEnqueued) {
                 redrawEnqueued = false;
-                rowsModel.fireElementsDataChanged();
-                invalidate();
-                repaint();
+                redraw();
             }
         });
     }
@@ -1660,48 +1711,6 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     public void find() {
         findSomethingAction.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "startFinding", 0));
     }
-    /*
-     public boolean ensureFetched(ApplicationEntity<?, ?, ?> aEntity, Field aParentField, Object aTargetId) throws Exception {
-     if (deepModel instanceof TableFront2TreedModel) {
-     TableFront2TreedModel<Row> front = (TableFront2TreedModel<Row>) deepModel;
-     if (front.unwrap() instanceof ArrayTreedModel) {
-     ArrayTreedModel rModel = (ArrayTreedModel) front.unwrap();
-     Rowset r = aEntity.getRowset();
-     if (!rowsModel.getPkLocator().getFields().isEmpty()) {
-     int pkColIndex = rowsModel.getPkLocator().getFields().get(0);
-     int parentColIndex = r.getFields().find(aParentField.getName());
-     List<Row> toFetch = new ArrayList<>();
-     toFetch.addAll(r.getCurrent());
-     int fetched = toFetch.size();
-     while (!toFetch.isEmpty() && fetched != 0) {
-     fetched = 0;
-     for (int i = toFetch.size() - 1; i >= 0; i--) {
-     Row rowToFetch = toFetch.get(i);
-     if (!rModel.getPkLocator().find(new Object[]{rowToFetch.getColumnObject(pkColIndex)})) {
-     if (rModel.getPkLocator().find(new Object[]{rowToFetch.getColumnObject(parentColIndex)})) {
-     Row innerParentRow = rModel.getPkLocator().getRow(0);
-     front.expand(innerParentRow, false);
-     toFetch.remove(rowToFetch);
-     ++fetched;
-     }
-     } else {
-     toFetch.remove(rowToFetch);
-     ++fetched;
-     }
-     }
-     }
-     return rModel.getPkLocator().find(new Object[]{aTargetId});
-     } else {
-     return false;
-     }
-     } else {
-     return false;
-     }
-     } else {
-     return false;
-     }
-     }
-     */
 
     public boolean makeVisible(JSObject anElement) throws Exception {
         return makeVisible(anElement, true);
@@ -1754,20 +1763,6 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         }
         return false;
     }
-    /*
-     public boolean makeVisible(Object aId) throws Exception {
-     return makeVisible(aId, true);
-     }
-
-     public boolean makeVisible(Object aId, boolean need2Select) throws Exception {
-     aId = ScriptUtils.toJava(aId);
-     aId = rowsModel.getRowsRowset().getConverter().convert2RowsetCompatible(aId, rowsModel.getRowsRowset().getFields().get(rowsModel.getPkLocator().getFields().get(0)).getTypeInfo());
-     if (rowsModel.getPkLocator().find(aId)) {
-     return makeVisible(rowsModel.getPkLocator().getRow(0), need2Select);
-     }
-     return false;
-     }
-     */
 
     public boolean isCurrentRow(JSObject anElement) {
         JSObject jsCursor = getCurrentRow();
@@ -2145,44 +2140,44 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         public void keyReleased(KeyEvent e) {
         }
     }
+
+    protected class DeleteAtCursorAction extends AbstractAction {
+
+        DeleteAtCursorAction() {
+            super();
+            putValue(Action.NAME, Forms.getLocalizedString(DeleteAtCursorAction.class.getSimpleName()));
+            putValue(Action.SHORT_DESCRIPTION, Forms.getLocalizedString(DeleteAtCursorAction.class.getSimpleName()));
+            putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
+            setEnabled(false);
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return !rowsSelectionModel.isSelectionEmpty();
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            deleteElementAtCursor();
+        }
+    }
+
+    protected class InsertAtCursorAction extends AbstractAction {
+
+        InsertAtCursorAction() {
+            super();
+            putValue(Action.NAME, Forms.getLocalizedString(InsertAtCursorAction.class.getSimpleName()));
+            putValue(Action.SHORT_DESCRIPTION, Forms.getLocalizedString(InsertAtCursorAction.class.getSimpleName()));
+            putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0));
+            setEnabled(true);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            insertElementAtCursor();
+        }
+    }
     /*
-     protected class DbGridDeleteSelectedAction extends AbstractAction {
-
-     DbGridDeleteSelectedAction() {
-     super();
-     putValue(Action.NAME, Form.getLocalizedString(DbGridDeleteSelectedAction.class.getSimpleName()));
-     putValue(Action.SHORT_DESCRIPTION, Form.getLocalizedString(DbGridDeleteSelectedAction.class.getSimpleName()));
-     putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, KeyEvent.CTRL_DOWN_MASK));
-     setEnabled(false);
-     }
-
-     @Override
-     public boolean isEnabled() {
-     return !rowsSelectionModel.isSelectionEmpty();
-     }
-
-     @Override
-     public void actionPerformed(ActionEvent e) {
-     deleteRow();
-     }
-     }
-
-     protected class DbGridInsertAction extends AbstractAction {
-
-     DbGridInsertAction() {
-     super();
-     putValue(Action.NAME, Form.getLocalizedString(DbGridInsertAction.class.getSimpleName()));
-     putValue(Action.SHORT_DESCRIPTION, Form.getLocalizedString(DbGridInsertAction.class.getSimpleName()));
-     putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0));
-     setEnabled(true);
-     }
-
-     @Override
-     public void actionPerformed(ActionEvent e) {
-     insertRow();
-     }
-     }
-
      protected class DbGridInsertChildAction extends AbstractAction {
 
      DbGridInsertChildAction() {
@@ -2381,11 +2376,11 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         Action insertChildAction = null;
         findSomethingAction = new ModelGridFindSomethingAction();
         putAction(findSomethingAction);
+        deleteAction = new DeleteAtCursorAction();
+        putAction(deleteAction);
+        insertAction = new InsertAtCursorAction();
+        putAction(insertAction);
         /*
-         deleteAction = new DbGridDeleteSelectedAction();
-         putAction(deleteAction);
-         insertAction = new DbGridInsertAction();
-         putAction(insertAction);
          insertChildAction = new DbGridInsertChildAction();
          putAction(insertChildAction);
          Action rowInfoAction = new DbGridRowInfoAction();

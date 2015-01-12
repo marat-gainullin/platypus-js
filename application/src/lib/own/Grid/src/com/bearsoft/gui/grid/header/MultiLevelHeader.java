@@ -12,7 +12,6 @@ import java.awt.event.MouseListener;
 import java.awt.geom.Point2D;
 import java.util.*;
 import java.util.List;
-import java.util.Map.Entry;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.RowSorter;
@@ -273,9 +272,11 @@ public class MultiLevelHeader extends JPanel {
             if (roots != null) {
                 List<GridColumnsNode> leaves = new ArrayList<>();
                 MultiLevelHeader.achieveLeaves(roots, leaves);
+                /*
                 for (int i = 0; i < leaves.size(); i++) {
                     leaves.get(i).setTableColumn(columnModel.getColumn(i));
                 }
+                        */
             }
         }
     }
@@ -300,7 +301,7 @@ public class MultiLevelHeader extends JPanel {
         setLayout(new GridBagLayout());
         int maxRow = -1;
         int maxColumn = -1;
-        for (Entry<GridColumnsNode, GridBagConstraints> entry : group2Constraints.entrySet()) {
+        for (Map.Entry<GridColumnsNode, GridBagConstraints> entry : group2Constraints.entrySet()) {
             GridBagConstraints gbc = entry.getValue();
             if (maxRow < gbc.gridy) {
                 maxRow = gbc.gridy;

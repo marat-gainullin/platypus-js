@@ -20,6 +20,8 @@ public interface TablesGridContainer {
 
     public void enqueueRedraw();
 
+    public void redraw();
+
     public void reindexColumns();
 
     public JSObject getOnRender();

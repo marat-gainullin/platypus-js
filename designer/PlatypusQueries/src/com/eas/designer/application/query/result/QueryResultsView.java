@@ -20,7 +20,14 @@ import com.eas.client.DatabasesClient;
 import com.eas.client.SQLUtils;
 import com.eas.client.SqlQuery;
 import com.eas.client.StoredQueryFactory;
+import com.eas.client.forms.components.model.ModelCheckBox;
+import com.eas.client.forms.components.model.ModelDate;
+import com.eas.client.forms.components.model.ModelFormattedField;
+import com.eas.client.forms.components.model.ModelSpin;
 import com.eas.client.forms.components.model.grid.ModelGrid;
+import com.eas.client.forms.components.model.grid.columns.ModelColumn;
+import com.eas.client.forms.components.model.grid.header.ModelGridColumn;
+import com.eas.client.forms.components.model.grid.header.ServiceGridColumn;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.queries.LocalQueriesProxy;
@@ -28,6 +35,7 @@ import com.eas.client.queries.ScriptedQueryFactory;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.query.PlatypusQueryDataObject;
 import com.eas.designer.application.query.editing.SqlTextEditsComplementor;
+import com.eas.designer.application.query.result.jsobjects.StandalonePublishedRowset;
 import java.awt.Color;
 import java.awt.Dialog;
 import java.awt.EventQueue;
@@ -35,7 +43,6 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.StringReader;
@@ -141,8 +148,8 @@ public class QueryResultsView extends javax.swing.JPanel {
         nextPageButton.setEnabled(false);
     }
 
-    public void setPageSize(int pageSize) {
-        this.pageSize = pageSize;
+    public void setPageSize(int aValue) {
+        pageSize = aValue;
     }
 
     public PageSizeItem[] getPageSizeItems() {
@@ -406,6 +413,7 @@ public class QueryResultsView extends javax.swing.JPanel {
                         showInfo(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.affectedRowsMessage", rowsAffected));
                     } else {
                         model.requery();
+                        grid.redraw();
                         showQueryResultsMessage();
                     }
                 } catch (Exception ex) {
@@ -420,7 +428,7 @@ public class QueryResultsView extends javax.swing.JPanel {
 
     private void commitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_commitButtonActionPerformed
         try {
-            if (model != null && model.isModified()) {
+            if (model != null && !model.getChangeLog(dataEntity.getQuery().getDatasourceName()).isEmpty()) {
                 commitButton.setEnabled(false);
                 final String entityName = IDGenerator.genID().toString();
                 dataEntity.getQuery().setEntityId(entityName);
@@ -428,7 +436,7 @@ public class QueryResultsView extends javax.swing.JPanel {
                 model.forEachChange((Change aChange) -> {
                     aChange.entityName = entityName;
                 });
-                ((LocalQueriesProxy) basesProxy.getQueries()).putCachedQuery(entityName, (SqlQuery) dataEntity.getQuery());
+                ((LocalQueriesProxy) basesProxy.getQueries()).putCachedQuery(entityName, dataEntity.getQuery());
                 RequestProcessor.getDefault().execute(() -> {
                     final ProgressHandle ph = ProgressHandleFactory.createHandle(getName());
                     ph.start();
@@ -461,6 +469,7 @@ public class QueryResultsView extends javax.swing.JPanel {
         if (model != null && dataEntity != null) {
             try {
                 dataEntity.getRowset().nextPage(null, null);
+                grid.redraw();
             } catch (Exception ex) {
                 Exceptions.printStackTrace(ex);
             }
@@ -468,11 +477,11 @@ public class QueryResultsView extends javax.swing.JPanel {
     }//GEN-LAST:event_nextPageButtonActionPerformed
 
     private void addButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addButtonActionPerformed
-        grid.insertRow();
+        grid.insertElementAtCursor();
     }//GEN-LAST:event_addButtonActionPerformed
 
     private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteButtonActionPerformed
-        grid.deleteRow();
+        grid.deleteElementAtCursor();
     }//GEN-LAST:event_deleteButtonActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addButton;
@@ -603,22 +612,87 @@ public class QueryResultsView extends javax.swing.JPanel {
      */
     private boolean refresh() throws Exception {
         if (initModel()) {
-            initDbGrid();
+            initModelGrid();
             return true;
         } else {
             return false;
         }
     }
 
-    private void initDbGrid() throws Exception {
+    private void initModelGrid() throws Exception {
         gridPanel.removeAll();
         grid = new ModelGrid();
+        grid.setAutoRefreshHeader(false);
         gridPanel.add(grid);
-        // TODO: revive following code after widgets refactoring
-        //DbGrid.fillByEntity(dataEntity, grid, 120);
+        Fields fields = dataEntity.getFields();
+        for (int i = 1; i <= fields.getFieldsCount(); i++) {
+            Field columnField = fields.get(i);
+            ModelGridColumn columnNode = new ModelGridColumn();
+            grid.addColumnNode(columnNode);
+            ModelColumn column = (ModelColumn) columnNode.getTableColumn();
+            int lwidth = 80;
+            if (lwidth >= columnNode.getWidth()) {
+                columnNode.setWidth(lwidth);
+            }
+            String description = columnField.getDescription();
+            if (description != null && !description.isEmpty()) {
+                columnNode.setTitle(description);
+            } else {
+                columnNode.setTitle(columnField.getName());
+            }
+            columnNode.setField(columnField.getName());
+            switch (columnField.getTypeInfo().getSqlType()) {
+                // Numbers
+                case java.sql.Types.NUMERIC:
+                case java.sql.Types.BIGINT:
+                case java.sql.Types.DECIMAL:
+                case java.sql.Types.DOUBLE:
+                case java.sql.Types.FLOAT:
+                case java.sql.Types.INTEGER:
+                case java.sql.Types.REAL:
+                case java.sql.Types.TINYINT:
+                case java.sql.Types.SMALLINT: {
+                    ModelSpin editor = new ModelSpin();
+                    editor.setMin(-Double.MAX_VALUE);
+                    editor.setMax(Double.MAX_VALUE);
+                    ModelSpin view = new ModelSpin();
+                    view.setMin(-Double.MAX_VALUE);
+                    view.setMax(Double.MAX_VALUE);
+                    column.setEditor(editor);
+                    column.setView(view);
+                    break;
+                }
+                // Logical
+                case java.sql.Types.BOOLEAN:
+                case java.sql.Types.BIT:
+                    column.setEditor(new ModelCheckBox());
+                    column.setView(new ModelCheckBox());
+                    break;
+                // Date and time
+                case java.sql.Types.DATE:
+                case java.sql.Types.TIME:
+                case java.sql.Types.TIMESTAMP: {
+                    ModelDate editor = new ModelDate();
+                    editor.setDateFormat("dd.MM.yyyy HH:mm:ss.SSS");
+                    ModelDate view = new ModelDate();
+                    view.setDateFormat("dd.MM.yyyy HH:mm:ss.SSS");
+                    column.setEditor(editor);
+                    column.setView(view);
+                    break;
+                }
+                default:
+                    column.setEditor(new ModelFormattedField());
+                    column.setView(new ModelFormattedField());
+                    break;
+            }
+            column.getEditor().setNullable(columnField.isNullable());
+        }
+        grid.setAutoRefreshHeader(true);
+        grid.insertColumnNode(0, new ServiceGridColumn());
         List<Field> pks = dataEntity.getRowset().getFields().getPrimaryKeys();
         grid.setEditable(pks != null && !pks.isEmpty());
         grid.setDeletable(pks != null && !pks.isEmpty());
+        grid.setData(new StandalonePublishedRowset(dataEntity.getRowset()));
         deleteButton.setEnabled(pks != null && !pks.isEmpty());
         showInfo(String.format(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.noKeysMessage"), dataEntity.getEntityId()));
         dataEntity.getRowset().addRowsetListener(new RowsetAdapter() {

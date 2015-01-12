@@ -32,7 +32,7 @@ public class VDateTimeField extends JCalendarComboBox implements HasValue<Date>,
     protected String emptyText;
 
     public VDateTimeField() {
-        super();
+        super(true);
         oldValue = NULL_DATE_VALUE.equals(getModel().getValue()) ? null : (Date) getModel().getValue();
         getModel().addChangeListener((ChangeEvent e) -> {
             Date newValue = NULL_DATE_VALUE.equals(getModel().getValue()) ? null : (Date) getModel().getValue();
@@ -116,6 +116,16 @@ public class VDateTimeField extends JCalendarComboBox implements HasValue<Date>,
         JFormattedTextField tf = getEditorComponent();
         tf.setText(aValue != null ? aValue : "");
         tf.commitEdit();
+    }
+
+    @Override
+    public void requestFocus() {
+        getEditorComponent().requestFocus();
+    }
+
+    @Override
+    public boolean requestFocus(boolean temporary) {
+        return getEditorComponent().requestFocus(temporary);
     }
 
     @Override

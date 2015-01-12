@@ -11,6 +11,7 @@ import java.awt.Component;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
+import javax.swing.UIManager;
 import javax.swing.table.TableCellRenderer;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -64,6 +65,11 @@ public class ServiceCellRenderer extends RowHeaderCellRenderer implements TableC
             rowDescriptor.setIcon(null);
         }
         setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
+        if (hasFocus) {
+            setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
+        } else {
+            setBorder(null);
+        }
         return this;
     }
 }

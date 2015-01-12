@@ -93,6 +93,7 @@ public class JCalendarComboBox extends JPanel implements AncestorListener, Chang
 
     public void setDateFormat(SimpleDateFormat aFormat) {
         _calendarPanel = null;
+        panelDateFormat = aFormat;
         createGUI();
     }
 
@@ -273,6 +274,21 @@ public class JCalendarComboBox extends JPanel implements AncestorListener, Chang
     }
 
     /**
+     * Creates a Calendar using the current Date and current Local settings.
+     *
+     * @param calendarPanelDialogStyle
+     */
+    public JCalendarComboBox(boolean calendarPanelDialogStyle) {
+        panelCal = (Calendar) Calendar.getInstance().clone();
+        panelLocale = Locale.getDefault();
+        panelDateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.getDefault());
+        panelFlat = true;
+        panelCalendarPanelDialogStyle = calendarPanelDialogStyle;
+        //_calendarPanel = new JCalendarPanel();
+        createGUI();
+    }
+
+    /**
      * Creates a Calendar using the cal-Date and current Locale Settings. It
      * doesn't use the Locale in the Calendar-Object !
      *
@@ -391,6 +407,7 @@ public class JCalendarComboBox extends JPanel implements AncestorListener, Chang
      * @param dateFormat DateFormat for the ComboBox
      * @param location Location of the Popup (LEFT, CENTER or RIGHT)
      * @param flat Flat Buttons for next/last Month/Year
+     * @param calendarPanelDialogStyle
      */
     public JCalendarComboBox(Calendar cal, Locale locale,
             DateFormat dateFormat, int location, boolean flat, boolean calendarPanelDialogStyle) {
@@ -403,6 +420,7 @@ public class JCalendarComboBox extends JPanel implements AncestorListener, Chang
         _popupLocation = location;
         createGUI();
     }
+
     private Calendar panelCal;
     private Locale panelLocale;
     private DateFormat panelDateFormat;
@@ -434,6 +452,7 @@ public class JCalendarComboBox extends JPanel implements AncestorListener, Chang
     private void createGUI() {
         _selected = (Calendar) panelCal.clone();
         setLayout(new BorderLayout());
+        _spinner = new JSpinner();
         _spinner.setModel(new NullableSpinnerDateModel());
         _spinner.setFont(getFont());
         SimpleDateFormat lFormat = (SimpleDateFormat) panelDateFormat;
@@ -499,6 +518,7 @@ public class JCalendarComboBox extends JPanel implements AncestorListener, Chang
         btns.setBorder(null);
         URL url = JCalendarComboBox.class.getClassLoader().getResource("de/wannawork/jcalendar/calendar.png");
         ImageIcon icon = new ImageIcon(url);
+        _dropDownButton = new JCalendarInvokerButton();
         _dropDownButton.setIcon(icon);
         _dropDownButton.setBorderPainted(false);
         _dropDownButton.setBorder(new EmptyBorder(0, 1, 0, 1));
@@ -508,7 +528,7 @@ public class JCalendarComboBox extends JPanel implements AncestorListener, Chang
         _dropDownButton.setFocusable(false);
         _dropDownButton.addMouseListener(new MouseAdapter() {
             @Override
-            public void mousePressed(MouseEvent e) {
+            public void mouseClicked(MouseEvent e) {
                 if (_dropDownButton.isEnabled()) {
                     if (!isCalendarShown()) {
                         showCalendar();
@@ -1024,8 +1044,8 @@ public class JCalendarComboBox extends JPanel implements AncestorListener, Chang
     /**
      * The text field that holds the date
      */
-    private JSpinner _spinner = new JSpinner();
-    private JCalendarInvokerButton _dropDownButton = new JCalendarInvokerButton();
+    private JSpinner _spinner;
+    private JCalendarInvokerButton _dropDownButton;
     /**
      * The JWindow for the Popup
      */

@@ -16,6 +16,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.text.ParseException;
+import javax.swing.Action;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import jdk.nashorn.api.scripting.JSObject;
@@ -168,9 +169,13 @@ public class ModelFormattedField extends ModelComponentDecorator<VFormattedField
 
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-            EventQueue.invokeLater(() -> {
-                decorated.requestFocus();
-            });
+        if (decorated != null) {
+            decorated.getActionMap().remove(TextFieldsCommitAction.COMMIT_ACTION_NAME);
+            decorated.getActionMap().put(TextFieldsCommitAction.COMMIT_ACTION_NAME, new TextFieldsCommitAction(decorated));
+        }
+        EventQueue.invokeLater(() -> {
+            decorated.requestFocus();
+        });
         return super.getTableCellEditorComponent(table, value, isSelected, row, column);
     }
 

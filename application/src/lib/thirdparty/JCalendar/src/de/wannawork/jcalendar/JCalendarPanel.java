@@ -46,32 +46,30 @@ import javax.swing.event.ChangeListener;
 
 /**
  * This JCalendarPanel shows a Calendar.
- * 
+ *
  * It is coded with 2 rules:
  * <ul>
  * <li>No hard coded Fonts or Colors, use the current Look and Feel</li>
- * <li>No hard coded locale behaviour, use the given Locale (Start of Week, Name of Days/Months)</li>
+ * <li>No hard coded locale behaviour, use the given Locale (Start of Week, Name
+ * of Days/Months)</li>
  * </ul>
  *
- * You can add a ChangeListener to this JCalendarPanel to receive 
- * change events.
- *  
+ * You can add a ChangeListener to this JCalendarPanel to receive change events.
+ *
  * @author Bodo Tasche, Scott Sirovy
  */
 public class JCalendarPanel extends JPanel implements ItemListener, ChangeListener {
 
     /**
-     * Creates a Calendar using the current Date and
-     * current Local settings.
+     * Creates a Calendar using the current Date and current Local settings.
      */
     public JCalendarPanel() {
         createGUI((Calendar) Calendar.getInstance().clone(), Locale.getDefault(), DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.getDefault()), true, false);
     }
 
     /**
-     * Creates a Calendar using the cal-Date and
-     * current Locale Settings. It doesn't use
-     * the Locale in the Calendar-Object !
+     * Creates a Calendar using the cal-Date and current Locale Settings. It
+     * doesn't use the Locale in the Calendar-Object !
      *
      * @param cal Calendar to use
      */
@@ -80,8 +78,7 @@ public class JCalendarPanel extends JPanel implements ItemListener, ChangeListen
     }
 
     /**
-     * Creates a Calendar using the current Date
-     * and the given Locale Settings.
+     * Creates a Calendar using the current Date and the given Locale Settings.
      *
      * @param locale Locale to use
      */
@@ -90,8 +87,7 @@ public class JCalendarPanel extends JPanel implements ItemListener, ChangeListen
     }
 
     /**
-     * Creates a Calender using the given Date and
-     * Locale
+     * Creates a Calender using the given Date and Locale
      *
      * @param cal Calendar to use
      * @param locale Locale to use
@@ -101,8 +97,7 @@ public class JCalendarPanel extends JPanel implements ItemListener, ChangeListen
     }
 
     /**
-     * Creates a Calender using the given Calendar,
-     * Locale and DateFormat.
+     * Creates a Calender using the given Calendar, Locale and DateFormat.
      *
      * @param cal Calendar to use
      * @param locale Locale to use
@@ -113,8 +108,7 @@ public class JCalendarPanel extends JPanel implements ItemListener, ChangeListen
     }
 
     /**
-     * Creates a Calender using the given Calendar,
-     * Locale and DateFormat.
+     * Creates a Calender using the given Calendar, Locale and DateFormat.
      *
      * @param cal Calendar to use
      * @param locale Locale to use
@@ -126,8 +120,7 @@ public class JCalendarPanel extends JPanel implements ItemListener, ChangeListen
     }
 
     /**
-     * Creates a Calender using the given Calendar,
-     * Locale and DateFormat.
+     * Creates a Calender using the given Calendar, Locale and DateFormat.
      *
      * @param cal Calendar to use
      * @param locale Locale to use
@@ -205,6 +198,7 @@ public class JCalendarPanel extends JPanel implements ItemListener, ChangeListen
 
     /**
      * Creates the ButtonPanel on the bottom
+     *
      * @param flat Flat Buttons for Navigation at the Bottom ?
      * @return JPanel with Buttons
      */
@@ -236,7 +230,6 @@ public class JCalendarPanel extends JPanel implements ItemListener, ChangeListen
             yearRight.setMargin(new Insets(1, 1, 1, 1));
         }
 
-
         buttonpanel.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.NONE;
@@ -246,6 +239,7 @@ public class JCalendarPanel extends JPanel implements ItemListener, ChangeListen
         yearLeft.setToolTipText(LocaleStrings.getString("JCalendarPanel.Last_Year")); //$NON-NLS-1$
         yearLeft.addActionListener(new ActionListener() {
 
+            @Override
             public void actionPerformed(ActionEvent e) {
                 if (_year.getSelectedIndex() > 0) {
                     if (_cal == null) {
@@ -267,6 +261,7 @@ public class JCalendarPanel extends JPanel implements ItemListener, ChangeListen
 
         dayLeft.addActionListener(new ActionListener() {
 
+            @Override
             public void actionPerformed(ActionEvent e) {
                 if (_cal == null) {
                     _cal = (Calendar) Calendar.getInstance().clone();
@@ -288,7 +283,6 @@ public class JCalendarPanel extends JPanel implements ItemListener, ChangeListen
 
         buttonpanel.add(dayLeft, c);
 
-
         GridBagConstraints c2 = new GridBagConstraints();
         c2.fill = GridBagConstraints.HORIZONTAL;
         c2.weightx = 1.0;
@@ -296,6 +290,7 @@ public class JCalendarPanel extends JPanel implements ItemListener, ChangeListen
         today.setMargin(new Insets(2, 2, 2, 2));
         today.addActionListener(new ActionListener() {
 
+            @Override
             public void actionPerformed(ActionEvent e) {
                 setCalendar((Calendar) Calendar.getInstance().clone());
                 if (!dialogStyle) {
@@ -311,6 +306,7 @@ public class JCalendarPanel extends JPanel implements ItemListener, ChangeListen
         dayRight.setToolTipText(LocaleStrings.getString("JCalendarPanel.Next_Month")); //$NON-NLS-1$
         dayRight.addActionListener(new ActionListener() {
 
+            @Override
             public void actionPerformed(ActionEvent e) {
                 if (_cal == null) {
                     _cal = (Calendar) Calendar.getInstance().clone();
@@ -332,6 +328,7 @@ public class JCalendarPanel extends JPanel implements ItemListener, ChangeListen
         yearRight.setToolTipText(LocaleStrings.getString("JCalendarPanel.Next_Year")); //$NON-NLS-1$
         yearRight.addActionListener(new ActionListener() {
 
+            @Override
             public void actionPerformed(ActionEvent e) {
                 if (_year.getSelectedIndex() < _year.getItemCount() - 1) {
                     if (_cal == null) {
@@ -356,6 +353,7 @@ public class JCalendarPanel extends JPanel implements ItemListener, ChangeListen
 
     /**
      * Creates the ButtonPanel on the post bottom
+     *
      * @param flat Flat Buttons for Navigation at the Bottom ?
      * @return JPanel with Buttons
      */
@@ -375,7 +373,6 @@ public class JCalendarPanel extends JPanel implements ItemListener, ChangeListen
             btnCancel.setMargin(new Insets(1, 1, 1, 1));
         }
 
-
         buttonpanel.setLayout(new GridBagLayout());
 
         GridBagConstraints okConstraints = new GridBagConstraints();
@@ -385,7 +382,6 @@ public class JCalendarPanel extends JPanel implements ItemListener, ChangeListen
         GridBagConstraints cancelContsraints = new GridBagConstraints();
         cancelContsraints.fill = GridBagConstraints.HORIZONTAL;
         cancelContsraints.weightx = 1.0;
-
 
         btnOk.setMargin(new Insets(2, 2, 2, 2));
         btnOk.addActionListener(new ActionListener() {
@@ -410,6 +406,7 @@ public class JCalendarPanel extends JPanel implements ItemListener, ChangeListen
 
     /**
      * Creates a JComboBox filled with year values (1900-2100)
+     *
      * @return JComboBox with Years
      */
     private JComboBox createYear() {
@@ -434,9 +431,8 @@ public class JCalendarPanel extends JPanel implements ItemListener, ChangeListen
     }
 
     /**
-     * Creates a JComboBox filled with Months.
-     * The name for the Month is created using the locale given
-     * in the constructor.
+     * Creates a JComboBox filled with Months. The name for the Month is created
+     * using the locale given in the constructor.
      *
      * @return JComboBox filled with Months
      */
@@ -533,8 +529,8 @@ public class JCalendarPanel extends JPanel implements ItemListener, ChangeListen
     }
 
     /**
-     * Returns a String-Representation of this Calendar using
-     * the DateFormat given in the Constructor
+     * Returns a String-Representation of this Calendar using the DateFormat
+     * given in the Constructor
      *
      * @return String-Representation of this Calendar
      */
@@ -545,8 +541,8 @@ public class JCalendarPanel extends JPanel implements ItemListener, ChangeListen
     }
 
     /**
-     * Returns a String-Representation of this Calendar
-     * using the given DateFormat
+     * Returns a String-Representation of this Calendar using the given
+     * DateFormat
      *
      * @param format DateFormat to use
      * @return String-Representation of this Calendar
@@ -557,12 +553,14 @@ public class JCalendarPanel extends JPanel implements ItemListener, ChangeListen
     }
 
     /**
-     * Recieves StateChanges from the ComboBoxes for Month/Year
-     * and updates the Calendar
+     * Recieves StateChanges from the ComboBoxes for Month/Year and updates the
+     * Calendar
      *
      * @param e ItemEvent
-     * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
+     * @see
+     * java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
      */
+    @Override
     public void itemStateChanged(ItemEvent e) {
         updateCalendar();
         if (_listenermode == FIRE_EVERYTIME) {
@@ -571,13 +569,14 @@ public class JCalendarPanel extends JPanel implements ItemListener, ChangeListen
     }
 
     /**
-     * Recieves StateChanges from the MonthPanel and
-     * updates the Calendar
+     * Recieves StateChanges from the MonthPanel and updates the Calendar
      *
      * @param e ChangeEvent
      *
-     * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
+     * @see
+     * javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
      */
+    @Override
     public void stateChanged(ChangeEvent e) {
         updateCalendar();
         if (!dialogStyle) {
@@ -600,8 +599,7 @@ public class JCalendarPanel extends JPanel implements ItemListener, ChangeListen
     /**
      * Adds a Changelistener to this JCalendarPanel.
      *
-     * It will be called every time the selected Date
-     * changes.
+     * It will be called every time the selected Date changes.
      *
      * @param listener ChangeListener
      */
@@ -620,6 +618,7 @@ public class JCalendarPanel extends JPanel implements ItemListener, ChangeListen
 
     /**
      * Gets all ChangeListeners
+     *
      * @return all ChangeListeners
      */
     public ChangeListener[] getChangeListener() {
@@ -647,8 +646,8 @@ public class JCalendarPanel extends JPanel implements ItemListener, ChangeListen
     }
 
     /**
-     * Sets the Mode when the FireChangeEvent is called.
-     * Use FIRE_EVERYTIME or FIRE_DAYCHANGES as parameter.
+     * Sets the Mode when the FireChangeEvent is called. Use FIRE_EVERYTIME or
+     * FIRE_DAYCHANGES as parameter.
      *
      * @param mode The Mode of the Listener
      */
@@ -658,6 +657,7 @@ public class JCalendarPanel extends JPanel implements ItemListener, ChangeListen
 
     /**
      * Enables/Disables the Panel
+     *
      * @param enabled Enabled ?
      */
     @Override
@@ -669,6 +669,7 @@ public class JCalendarPanel extends JPanel implements ItemListener, ChangeListen
 
     /**
      * Is the Panel enabled ?
+     *
      * @return enabled ?
      */
     @Override
@@ -682,6 +683,7 @@ public class JCalendarPanel extends JPanel implements ItemListener, ChangeListen
 
     /**
      * Returns the Dateformat the Panel is using
+     *
      * @return DateFormat
      */
     public DateFormat getDateFormat() {
@@ -696,15 +698,15 @@ public class JCalendarPanel extends JPanel implements ItemListener, ChangeListen
      */
     public static final int FIRE_DAYCHANGES = 2;
     /**
-     * When does FireEvent() fire events?
-     * Every time there is an update or only
+     * When does FireEvent() fire events? Every time there is an update or only
      * if the Day was changed?
      */
     private int _listenermode = FIRE_EVERYTIME;
     /**
-     * Current chang in progress?
+     * Current change in progress?
      */
     private boolean _updating = false;
+
     protected boolean dialogStyle = false;
     /**
      * The current Date

@@ -65,7 +65,8 @@ public interface ModelWidget<V> extends TableCellRenderer, TableCellEditor, HasV
                 }
             }
             if (propName != null) {
-                target.setMember(propName, ScriptUtils.toJs(aValue));
+                Object jsData = ScriptUtils.isInitialized() ? ScriptUtils.toJs(aValue) : aValue;
+                target.setMember(propName, jsData);
             } else {
                 Logger.getLogger(ModelWidget.class.getName()).log(Level.FINE, PROPERTY_PATH_MISSING_MSG, aPath);
             }
@@ -99,4 +100,7 @@ public interface ModelWidget<V> extends TableCellRenderer, TableCellEditor, HasV
 
     public void setField(String aFieldPath) throws Exception;
 
+    public boolean getNullable();
+
+    public void setNullable(boolean aValue);
 }

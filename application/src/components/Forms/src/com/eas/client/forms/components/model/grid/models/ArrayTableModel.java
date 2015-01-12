@@ -156,15 +156,16 @@ public class ArrayTableModel extends ArrayModel implements TableModel {
 
     public int elementToIndex(JSObject anElement) {
         if (locator == null) {
+            locator = new HashMap<>();
             int length = JSType.toInteger(elements.getMember("length"));
             if (length != Integer.MAX_VALUE) {
                 for (int i = 0; i < length; i++) {
                     Object oElement = elements.getSlot(i);
-                    locator.put(jdk.nashorn.api.scripting.ScriptUtils.unwrap(oElement), i);
+                    locator.put(oElement, i);
                 }
             }
         }
-        Integer idx = locator.get(jdk.nashorn.api.scripting.ScriptUtils.unwrap(anElement));
+        Integer idx = locator.get(anElement);
         return idx != null ? idx : -1;
     }
     

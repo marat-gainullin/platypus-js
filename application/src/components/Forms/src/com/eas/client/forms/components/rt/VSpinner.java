@@ -8,6 +8,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.ParseException;
 import javax.swing.JComponent;
+import javax.swing.JFormattedTextField;
 import javax.swing.JSpinner;
 
 /**
@@ -20,7 +21,7 @@ public class VSpinner extends JSpinner implements HasEmptyText, HasEditable {
 
     public VSpinner() {
         super(new SpinnerDoubleModel(0.0d, 0.0d, 100.0d, 1.0d));
-        model = (SpinnerDoubleModel)super.getModel();
+        model = (SpinnerDoubleModel) super.getModel();
         model.addValueChangeListener(valueChangedAlerter);
     }
 
@@ -50,6 +51,23 @@ public class VSpinner extends JSpinner implements HasEmptyText, HasEditable {
 
     public void addValueChangeListener(PropertyChangeListener listener) {
         super.addPropertyChangeListener(HasValue.VALUE_PROP_NAME, listener);
+    }
+
+    @Override
+    public void requestFocus() {
+        if (getEditor() instanceof NumberEditor) {
+            JFormattedTextField ftf = ((NumberEditor) getEditor()).getTextField();
+            ftf.requestFocus();
+        }
+    }
+
+    @Override
+    public boolean requestFocus(boolean temporary) {
+        if (getEditor() instanceof NumberEditor) {
+            JFormattedTextField ftf = ((NumberEditor) getEditor()).getTextField();
+            return ftf.requestFocus(temporary);
+        }
+        return super.requestFocus(temporary);
     }
 
     @Override
@@ -121,7 +139,7 @@ public class VSpinner extends JSpinner implements HasEmptyText, HasEditable {
         JComponent editor = getEditor();
         return ((NumberEditor) editor).getTextField().getText();
     }
-    
+
     public void setText(String aValue) throws Exception {
         JComponent editor = getEditor();
         ((NumberEditor) editor).getTextField().setText(aValue != null ? aValue : "");

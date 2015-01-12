@@ -10,7 +10,13 @@ import com.eas.design.Undesignable;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.util.EventObject;
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.internal.runtime.JSType;
 
@@ -18,7 +24,7 @@ import jdk.nashorn.internal.runtime.JSType;
  *
  * @author mg
  */
-public class ModelCheckBox extends ModelComponentDecorator<VCheckBox, Boolean> implements HasPublished{
+public class ModelCheckBox extends ModelComponentDecorator<VCheckBox, Boolean> implements HasPublished {
 
     public ModelCheckBox() {
         super();
@@ -93,7 +99,23 @@ public class ModelCheckBox extends ModelComponentDecorator<VCheckBox, Boolean> i
     }
 
     @Override
+    public boolean isCellEditable(EventObject event) {
+        return event instanceof MouseEvent
+                || (event instanceof KeyEvent && ((KeyEvent) event).getKeyCode() == KeyEvent.VK_F2)
+                || (event instanceof ActionEvent);
+    }
+
+    @Override
     protected void setupCellRenderer(JTable table, int row, int column, boolean isSelected) {
+        decorated.setHorizontalAlignment(SwingConstants.CENTER);
+        decorated.setHorizontalTextPosition(SwingConstants.CENTER);
+    }
+
+    @Override
+    public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+        decorated.setHorizontalAlignment(SwingConstants.CENTER);
+        decorated.setHorizontalTextPosition(SwingConstants.CENTER);
+        return super.getTableCellEditorComponent(table, value, isSelected, row, column);
     }
 
     @Override
