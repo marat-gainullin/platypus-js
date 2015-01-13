@@ -6,7 +6,7 @@ package com.eas.client.model.store;
 
 import com.eas.client.model.Model;
 import com.eas.client.model.application.ApplicationEntity;
-import com.eas.client.model.application.ApplicationModel;
+import com.eas.client.model.application.ApplicationModel; 
 import com.eas.client.model.application.ReferenceRelation;
 import com.eas.client.model.visitors.ApplicationModelVisitor;
 import org.w3c.dom.Document;

@@ -888,57 +888,26 @@
         });
 
         Object.defineProperty(target, "createFilter", {
-            value: function () {
+            value: function (aConstraints) {
                 var nEntity = this.unwrap();
-                var varargs = new JavaArrayClass(arguments.length);
-                var args = arguments.length === 1 && Array.isArray(arguments[0]) ? arguments[0] : arguments;
-                for (var v = 0; v < args.length; v++)
-                    varargs[v] = boxAsJava(args[v]);
-                return boxAsJs(nEntity.createFilter(varargs));
+                return boxAsJs(nEntity.createFilter(aConstraints));
             }
         });
 
         Object.defineProperty(target, "createSorting", {
-            value: function () {
+            value: function (aCriteria) {
                 var nEntity = this.unwrap();
-                var args = arguments.length === 1 ? arguments[0] : arguments;
-                if (Array.isArray(args) || args === arguments) {
-                    var varargs = new JavaArrayClass(args.length);
-                    for (var v = 0; v < args.length; v++)
-                        varargs[v] = boxAsJava(args[v]);
-                    return boxAsJs(nEntity.createSorting(varargs));
-                } else {
-                    return boxAsJs(nEntity.createSorting(args));
-                }
+                return boxAsJs(nEntity.createSorting(aCriteria));
             }
         });
 
         Object.defineProperty(target, "find", {
-            value: function () {
-                var found;
+            value: function (aCriteria, aResolve) {                
                 var nEntity = this.unwrap();
-                var args = arguments.length === 1 ? arguments[0] : arguments;
-                if (Array.isArray(args) || args === arguments) {
-                    var varargs = new JavaArrayClass(args.length);
-                    for (var v = 0; v < args.length; v++)
-                        varargs[v] = boxAsJava(args[v]);
-                    found = nEntity.find(varargs);
-                } else {
-                    found = nEntity.find(args);
-                }
-                if (!found.tag) {
-                    var res = [];
-                    for (var f = 0; f < found.size(); f++) {
-                        res.push(EngineUtilsClass.unwrap(found[f].getPublished()));
-                    }
-                    found.tag = res;
-                    Object.defineProperty(res, "unwrap", {
-                        value: function () {
-                            return found;
-                        }
-                    });
-                }
-                return EngineUtilsClass.unwrap(found.tag);
+                if(arguments.length > 1)
+                    return EngineUtilsClass.unwrap(nEntity.find(aCriteria, aResolve));
+                else
+                    return EngineUtilsClass.unwrap(nEntity.find(aCriteria));
             }
         });
     }

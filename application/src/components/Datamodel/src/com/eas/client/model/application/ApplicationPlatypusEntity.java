@@ -6,7 +6,6 @@ package com.eas.client.model.application;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.exceptions.InvalidFieldsExceptionException;
 import com.bearsoft.rowset.ordering.Locator;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.PlatypusQuery;

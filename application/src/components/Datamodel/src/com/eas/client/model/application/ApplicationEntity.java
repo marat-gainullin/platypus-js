@@ -19,6 +19,7 @@ import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.ordering.Filter;
 import com.bearsoft.rowset.ordering.Locator;
+import com.bearsoft.rowset.ordering.ObservableLinkedHashSet;
 import com.bearsoft.rowset.ordering.Orderer;
 import com.bearsoft.rowset.sorting.RowsComparator;
 import com.bearsoft.rowset.sorting.SortingCriterion;
@@ -42,6 +43,7 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.internal.runtime.JSType;
 
 /**
  *
@@ -73,15 +75,11 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     protected boolean valid;
     protected Future<Void> pending;
     //
-    protected transient List<Integer> filterConstraints = new ArrayList<>();
-    protected transient Filter rowsetFilter;
-    protected transient boolean userFiltering;
-    //
-    protected Map<List<Integer>, Orderer> userLocators = new HashMap<>();
+    protected transient Filter filter;
     // to preserve relations order
     protected transient List<Relation<E>> rtInFilterRelations;
-    protected transient int updatingCounter;
-    protected E substitute;
+    //
+    protected Map<List<Integer>, Orderer> userOrderers = new HashMap<>();
 
     public ApplicationEntity() {
         super();
@@ -169,10 +167,10 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     }
 
     private Orderer checkUserOrderer(List<Integer> aConstraints) throws IllegalStateException {
-        Orderer orderer = userLocators.get(aConstraints);
+        Orderer orderer = userOrderers.get(aConstraints);
         if (orderer == null) {
             orderer = rowset.createOrderer(aConstraints);
-            userLocators.put(aConstraints, orderer);
+            userOrderers.put(aConstraints, orderer);
         }
         return orderer;
     }
@@ -185,43 +183,44 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
             + " * @return the rows object's array accordind to the search condition or empty array if nothing is found.\n"
             + " */";
 
-    @ScriptFunction(jsDoc = FIND_JSDOC, params = {"pairs"})
-    public Collection<Row> find(Object... values) throws Exception {
-        if (values != null) {
-            Object[] jsCriteria = values.length == 1 ? ScriptUtils.jsObjectToCriteria(values[0]) : null;
-            values = jsCriteria != null ? jsCriteria : values;
-            if (values.length > 0 && values.length % 2 == 0) {
-                Fields fields = rowset.getFields();
-                Converter converter = rowset.getConverter();
-                List<Integer> constraints = new ArrayList<>();
-                List<Object> keyValues = new ArrayList<>();
-                for (int i = 0; i < values.length - 1; i += 2) {
-                    if (values[i] != null && (values[i] instanceof Number || values[i] instanceof Field || values[i] instanceof String)) {
-                        Field field = values[i] instanceof Number ? fields.get(((Number) values[i]).intValue()) : (values[i] instanceof Field ? (Field) values[i] : fields.get((String) values[i]));
-                        int colIndex = fields.find(field.getName());
-                        if (colIndex > 0) {
-                            constraints.add(colIndex);
-                        } else {
-                            Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, String.format(BAD_FIELD_NAME_MSG, field.getName()));
-                        }
-                        Object keyValue = ScriptUtils.toJava(values[i + 1]);
-                        if (converter != null) {
-                            try {
-                                keyValue = converter.convert2RowsetCompatible(keyValue, field.getTypeInfo());
-                            } catch (Exception ex) {
-                                Logger.getLogger(ApplicationEntity.class.getName()).warning(String.format(CANT_CONVERT_TO_MSG, field.getTypeInfo().getSqlTypeName()));
-                                keyValue = null;
-                            }
-                        }
-                        keyValues.add(keyValue);
-                    } else {
-                        Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, String.format(BAD_FIND_ARGUMENT_MSG, i));
+    @ScriptFunction(jsDoc = FIND_JSDOC, params = {"criteria"})
+    public JSObject find(JSObject aCriteria) throws Exception {
+        return find(aCriteria, false);
+    }
+    
+    public JSObject find(JSObject aCriteria, boolean aResolve) throws Exception {
+        if (aCriteria != null) {
+            Fields fields = rowset.getFields();
+            Converter converter = rowset.getConverter();
+            List<Integer> constraints = new ArrayList<>();
+            List<Object> keyValues = new ArrayList<>();
+            Set<String> jsKeys = aCriteria.keySet();
+            for (String key : jsKeys) {
+                int fieldIndex = fields.find(key);
+                if (fieldIndex != -1) {
+                    Field field = fields.get(key);
+                    constraints.add(fieldIndex);
+                    Object jsValue = aCriteria.getMember(key);
+                    Object javaValue = ScriptUtils.toJava(jsValue);
+                    Object convertedValue = converter.convert2RowsetCompatible(javaValue, field.getTypeInfo());
+                    keyValues.add(convertedValue);
+                }
+            }
+            if (!constraints.isEmpty() && constraints.size() == keyValues.size()) {
+                Orderer loc = checkUserOrderer(constraints);
+                ObservableLinkedHashSet<Row> res = loc.get(keyValues);
+                if(res == null && aResolve){
+                    res = new ObservableLinkedHashSet<>();
+                    loc.put(keyValues, res);
+                }
+                if(res != null){
+                    if(res.getPublished() == null){
+                        res.setPublished(ScriptUtils.makeObj());
+                        res.refresh();
                     }
+                    return res.getPublished();
                 }
-                if (!constraints.isEmpty() && constraints.size() == keyValues.size()) {
-                    Orderer loc = checkUserOrderer(constraints);
-                    return loc.get(keyValues);
-                }
+                return null;
             } else {
                 Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, BAD_FIND_AGRUMENTS_MSG);
             }
@@ -240,11 +239,13 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
 
     @ScriptFunction(jsDoc = FIND_BY_ID_JSDOC, params = {"key"})
     public Row findById(Object aValue) throws Exception {
-        Rowset rs = getRowset();
-        Fields fields = rs.getFields();
-        List<Field> pks = fields.getPrimaryKeys();
+        Fields fields = rowset.getFields();
+        List<Integer> pks = fields.getPrimaryKeysIndicies();
         if (pks.size() == 1) {
-            Collection<Row> res = find(pks.get(0), aValue);
+            List<Object> keyValues = new ArrayList<>();
+            keyValues.add(ScriptUtils.toJava(aValue));
+            Orderer loc = checkUserOrderer(pks);
+            Collection<Row> res = loc.get(keyValues);
             if (res != null && !res.isEmpty()) {
                 return res.iterator().next();
             } else {
@@ -299,57 +300,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         rowset.absolute(aValue);
     }
 
-    // Table-pattern API
-    /*
-     public Locator createLocator(Object... constraints) throws Exception {
-     if (constraints != null && constraints.length > 0) {
-     Locator loc = rowset.createLocator();
-     loc.beginConstrainting();
-     try {
-     for (int i = 0; i < constraints.length; i++) {
-     if (constraints[i] instanceof Double) {
-     Double d = (Double) constraints[i];
-     if (Math.abs(Math.round(d) - d) < 1e-10) {
-     Long lFieldIndex = Math.round(d);
-     if (Math.abs(lFieldIndex.intValue() - lFieldIndex) == 0) {
-     loc.addConstraint(lFieldIndex.intValue());
-     } else {
-     throw new RowsetException(String.valueOf(i + 1) + " fieldIndex is out of integer value range.");
-     }
-     } else {
-     throw new RowsetException(String.valueOf(i + 1) + " fieldIndex must be an integer value, but it is not.");
-     }
-     } else if (constraints[i] instanceof Field) {
-     Field field = (Field) constraints[i];
-     int colIndex = rowset.getFields().find(field.getName());
-     if (colIndex > 0) {
-     loc.addConstraint(colIndex);
-     } else {
-     throw new RowsetException(String.format(" field name %s not found.", field.getName()));
-     }
-     } else if (constraints[i] instanceof String) {
-     int colIndex = rowset.getFields().find((String) constraints[i]);
-     if (colIndex > 0) {
-     loc.addConstraint(colIndex);
-     } else {
-     throw new RowsetException(String.format(" field name %s not found.", (String) constraints[i]));
-     }
-     } else {
-     throw new RowsetException(String.valueOf(i + 1) + " field must be an integer col index or a field name or field instance.");
-     }
-     }
-     } finally {
-     loc.endConstrainting();
-     }
-     if (!loc.isEmpty()) {
-     return loc;
-     } else {
-     return null;
-     }
-     }
-     return null;
-     }
-     */
     private static final String CREATE_FILTER_JSDOC = ""
             + "/**\n"
             + "* Creates an instace of filter object to filter rowset data in-place using specified constraints objects.\n"
@@ -405,50 +355,15 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
             + "*/";
 
     @ScriptFunction(jsDoc = CREATE_SORTER_JSDOC, params = {"pairs"})
-    public RowsComparator createSorting(Object... constraints) throws Exception {
-        if (constraints != null && constraints.length > 0) {
-            constraints = ScriptUtils.jsObjectToCriteria(constraints);
+    public RowsComparator createSorting(JSObject jsConstraints) throws Exception {
+        if (jsConstraints != null) {
+            Fields fields = rowset.getFields();
             List<SortingCriterion> criteria = new ArrayList<>();
-            for (int i = 0; i < constraints.length; i += 2) {
-                int colIndex = 0;
-                if (constraints[i] instanceof Double) {
-                    Double d = (Double) constraints[i];
-                    if (Math.abs(Math.round(d) - d) < 1e-10) {
-                        Long lFieldIndex = Math.round(d);
-                        if (Math.abs(lFieldIndex.intValue() - lFieldIndex) == 0) {
-                            colIndex = lFieldIndex.intValue();
-                        } else {
-                            throw new RowsetException(String.valueOf(i + 1) + " fieldIndex is out of integer value range.");
-                        }
-                    } else {
-                        throw new RowsetException(String.valueOf(i + 1) + " fieldIndex must be an integer value, but it is not.");
-                    }
-                } else if (constraints[i] instanceof Field) {
-                    Field field = (Field) constraints[i];
-                    colIndex = rowset.getFields().find(field.getName());
-                    if (colIndex <= 0) {
-                        throw new RowsetException(field.getName() + " field name not found.");
-                    }
-                } else if (constraints[i] instanceof String) {
-                    colIndex = rowset.getFields().find((String) constraints[i]);
-                    if (colIndex <= 0) {
-                        throw new RowsetException((String) constraints[i] + " field name not found.");
-                    }
-                } else {
-                    throw new RowsetException(String.valueOf(i + 1) + " field must be an integer col index or a field name or field metadata descriptor.");
-                }
-                if (colIndex > 0) {
-                    boolean ascending = true;
-                    if (constraints.length > i + 1) {
-                        if (constraints[i + 1] instanceof Boolean) {
-                            ascending = (Boolean) constraints[i + 1];
-                        } else {
-                            throw new RowsetException(String.valueOf(i + 2) + " ascending/descending order argument is invalid. It must be a boolean value");
-                        }
-                    }
+            for (String key : jsConstraints.keySet()) {
+                int colIndex = fields.find(key);
+                if (colIndex > -1) {
+                    boolean ascending = JSType.toBoolean(jsConstraints.getMember(key));
                     criteria.add(new SortingCriterion(colIndex, ascending));
-                } else {
-                    throw new RowsetException(String.valueOf(i + 1) + " invalid arguments.");
                 }
             }
             return new RowsComparator(criteria);
@@ -842,7 +757,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         } else {
             // Requery if query parameters values have been changed while bindQueryParameters() call
             // or we are forced to refresh the data via requery() call.
-            uninstallUserFiltering();
             silentUnpend();
             refreshRowset(aOnSuccess, aOnFailure);
             assert rowset != null;
@@ -851,47 +765,36 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         }
     }
 
-    protected void uninstallUserFiltering() throws RowsetException {
-        if (userFiltering && rowset != null && rowset.getActiveFilter() != null) {
-            rowset.getActiveFilter().cancel();
-        }
-        userFiltering = false;
-    }
-
     protected void internalExecuteChildren(boolean refresh) throws Exception {
-        if (updatingCounter == 0) {
-            Set<Relation<E>> rels = getOutRelations();
-            if (rels != null) {
-                Set<E> toExecute = new HashSet<>();
-                rels.forEach((Relation<E> outRel) -> {
-                    if (outRel != null) {
-                        E rEntity = outRel.getRightEntity();
-                        if (rEntity != null) {
-                            toExecute.add(rEntity);
-                        }
+        Set<Relation<E>> rels = getOutRelations();
+        if (rels != null) {
+            Set<E> toExecute = new HashSet<>();
+            rels.forEach((Relation<E> outRel) -> {
+                if (outRel != null) {
+                    E rEntity = outRel.getRightEntity();
+                    if (rEntity != null) {
+                        toExecute.add(rEntity);
                     }
-                });
-                model.executeEntities(refresh, toExecute);
-            }
+                }
+            });
+            model.executeEntities(refresh, toExecute);
         }
     }
 
     protected void internalExecuteChildren(boolean refresh, int aOnlyFieldIndex) throws Exception {
-        if (updatingCounter == 0) {
-            Set<Relation<E>> rels = getOutRelations();
-            if (rels != null) {
-                Field onlyField = getFields().get(aOnlyFieldIndex);
-                Set<E> toExecute = new HashSet<>();
-                rels.forEach((Relation<E> outRel) -> {
-                    if (outRel != null) {
-                        E rEntity = outRel.getRightEntity();
-                        if (rEntity != null && outRel.getLeftField() == onlyField) {
-                            toExecute.add(rEntity);
-                        }
+        Set<Relation<E>> rels = getOutRelations();
+        if (rels != null) {
+            Field onlyField = getFields().get(aOnlyFieldIndex);
+            Set<E> toExecute = new HashSet<>();
+            rels.forEach((Relation<E> outRel) -> {
+                if (outRel != null) {
+                    E rEntity = outRel.getRightEntity();
+                    if (rEntity != null && outRel.getLeftField() == onlyField) {
+                        toExecute.add(rEntity);
                     }
-                });
-                model.executeEntities(refresh, toExecute);
-            }
+                }
+            });
+            model.executeEntities(refresh, toExecute);
         }
     }
 
@@ -944,23 +847,8 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         return fields;
     }
 
-    public boolean isUserFiltering() {
-        return userFiltering;
-    }
-
-    public void setUserFiltering(boolean aUserFiltering) throws Exception {
-        boolean oldUserFiltering = userFiltering;
-        userFiltering = aUserFiltering;
-        if (oldUserFiltering != userFiltering) {
-            if (rowset.getActiveFilter() != null) {
-                rowset.getActiveFilter().cancel();
-            }
-            execute();
-        }
-    }
-
     protected boolean isFilterable() throws Exception {
-        return rowset != null && !userFiltering && rtInFilterRelations != null && !rtInFilterRelations.isEmpty();
+        return rowset != null && rtInFilterRelations != null && !rtInFilterRelations.isEmpty();
     }
 
     protected boolean isQueriable() throws Exception {
@@ -1064,22 +952,15 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     protected void validateFilter() throws RowsetException {
         assert rtInFilterRelations != null;
         assert rowset != null;
-        if (rowsetFilter == null && !rtInFilterRelations.isEmpty()) {
-            List<Field> constraints = new ArrayList<>();
+        if (filter == null && !rtInFilterRelations.isEmpty()) {
+            List<Integer> fConstraints = new ArrayList<>();
+            Fields rFields = rowset.getFields();
             // enumerate filtering relations ...
             rtInFilterRelations.forEach((Relation<E> rel) -> {
                 assert rel != null && rel.isRightField();
-                constraints.add(rel.getRightField());
+                fConstraints.add(rFields.find(rel.getRightField().getName()));
             });
-            if (!constraints.isEmpty()) {
-                List<Integer> indicies = new ArrayList<>();
-                Fields rFields = rowset.getFields();
-                constraints.stream().sequential().forEach((field) -> {
-                    // entity's and rowset's fields may differ.
-                    indicies.add(rFields.find(field.getName()));
-                });
-                rowsetFilter = rowset.createFilter(indicies);
-            }
+            filter = rowset.createFilter(fConstraints);
         }
     }
 
@@ -1095,7 +976,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
 
     public boolean applyFilter() throws Exception {
         try {
-            assert !userFiltering : "Can't apply own filter while user filtering";
             assert rowset != null : "Bad requery -> filter chain";
             List<Object> filterKeys = new ArrayList<>();
             if (!rtInFilterRelations.isEmpty()) {
@@ -1129,12 +1009,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
                             Logger.getLogger(Entity.class.getName()).log(Level.FINE, "Failed to achieve value for filtering field:{0} in entity: {1} [{2}]. The source rowset is absent.", new Object[]{rel.getRightField(), getTitle(), String.valueOf(getEntityId())});
                         }
                     } else {
-                        /*
-                         Q leftQuery = leftEntity.getQuery();
-                         assert leftQuery != null : "Left query must present (Relation points to query, but query is absent)";
-                         Parameters leftParams = leftQuery.getParameters();
-                         assert leftParams != null : "Parameters of left query must present (Relation points to query parameter, but query parameters are absent)";
-                         */
                         Parameter leftParameter = rel.getLeftParameter();
                         if (leftParameter != null) {
                             fValue = leftParameter.getValue();
@@ -1151,9 +1025,9 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
                 }
             }
             Filter activeFilter = rowset.getActiveFilter();
-            if (rowsetFilter != null && !rowsetFilter.isEmpty()
-                    && (rowsetFilter != activeFilter || !rowsetFilter.getAppliedKeys().equals(filterKeys))) {
-                rowsetFilter.apply(filterKeys);
+            if (filter != null && !filter.isEmpty()
+                    && (filter != activeFilter || !filter.getAppliedKeys().equals(filterKeys))) {
+                filter.apply(filterKeys);
                 return true;
             } else {
                 return false;
@@ -1211,24 +1085,20 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
 
     @Override
     public boolean willInsertRow(final RowsetInsertEvent event) {
-        boolean res = true;
         // call script method
         try {
             Object sRes = executeScriptEvent(willInsert, new EntityInstanceInsertEvent(this, event.getRow()));
             if (sRes != null && sRes instanceof Boolean) {
                 return (Boolean) sRes;
-            } else {
-                return true;
             }
         } catch (Exception ex) {
             Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return res;
+        return true;
     }
 
     @Override
     public boolean willDeleteRow(final RowsetDeleteEvent event) {
-        boolean res = true;
         // call script method
         try {
             Object sRes = executeScriptEvent(willDelete, new EntityInstanceDeleteEvent(this, event.getRow()));
@@ -1240,7 +1110,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         } catch (Exception ex) {
             Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return res;
+        return true;
     }
 
     @Override

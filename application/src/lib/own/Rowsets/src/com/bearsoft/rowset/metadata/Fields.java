@@ -68,11 +68,6 @@ public class Fields implements HasPublished {
         }
     }
 
-    /**
-     * Rowset's rows' wrapper class-closure function
-     *
-     * @return
-     */
     public JSObject getInstanceConstructor() {
         return instanceConstructor;
     }

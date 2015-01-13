@@ -6,6 +6,7 @@ package com.bearsoft.rowset.wrappers.jdbc;
 
 import com.bearsoft.rowset.utils.RowsetUtils;
 import com.bearsoft.rowset.Converter;
+import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.compacts.CompactBlob;
 import com.bearsoft.rowset.compacts.CompactClob;
@@ -1380,7 +1381,7 @@ public class ResultSetImpl implements ResultSet {
      */
     public void insertRow() throws SQLException {
         try {
-            delegate.insert();
+            delegate.insert(new Row(delegate.getFlowProvider().getEntityId(), delegate.getFields()), false);
         } catch (RowsetException ex) {
             throw new SQLException(ex);
         }

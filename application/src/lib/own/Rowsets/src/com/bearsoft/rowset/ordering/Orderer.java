@@ -273,7 +273,7 @@ public class Orderer extends RowsetAdapter implements RowsetEventsEarlyAccess, R
         }
     }
 
-    public Collection<Row> get(List<Object> values) throws RowsetException {
+    public ObservableLinkedHashSet<Row> get(List<Object> values) throws RowsetException {
         if (values != null && !values.isEmpty()) {
             List<Object> ks = valuesToKeys(values.toArray());
             return ordered.get(ks);
@@ -282,14 +282,11 @@ public class Orderer extends RowsetAdapter implements RowsetEventsEarlyAccess, R
         }
     }
 
-    public boolean putKeys(Object... values) throws RowsetException {
-        if (values != null && values.length > 0) {
-            List<Object> ks = valuesToKeys(values);
-            if (!ordered.containsKey(ks)) {
-                ordered.put(ks, new ObservableLinkedHashSet<>());
-            }
+    public void put(List<Object> values, ObservableLinkedHashSet<Row> aValue) throws RowsetException {
+        if (values != null && !values.isEmpty()) {
+            List<Object> ks = valuesToKeys(values.toArray());
+            ordered.put(ks, aValue);
         }
-        return false;
     }
 
     protected List<Object> valuesToKeys(Object[] values) throws RowsetException {

@@ -151,7 +151,7 @@ public class OrderersTest extends RowsetBaseTest {
         Collection<Row> found1 = orderer.get(ordererMultiKey);
         assertFalse(found1.isEmpty());
         //
-        rowset.insert();
+        rowset.insert(new Row(rowset.getFlowProvider().getEntityId(), rowset.getFields()), false);
         Row inserted = rowset.getCurrentRow();
         Collection<Row> foundInserted1 = orderer.get(new Object[]{null, null, null, null, null, null, null});
         assertEquals(1, foundInserted1.size());

@@ -378,17 +378,22 @@ public class Rowset {
                     flow.refresh(aParams, (Rowset aRowset) -> {
                         if (aRowset != null) {
                             try {
+                                if (activeFilter != null) {
+                                    // No implicit calls to setCurrent and etc.
+                                    activeFilter.deactivate();
+                                    activeFilter = null;
+                                }
                                 if (fields == null) {
                                     setFields(aRowset.getFields());
                                 }
                                 List<Row> rows = aRowset.getCurrent();
                                 aRowset.setCurrent(new ArrayList<>());
                                 aRowset.currentToOriginal();
-                                setCurrent(rows);
                                 rows.stream().forEach((Row aRow) -> {
                                     aRow.setLog(log);
                                     aRow.setEntityName(flow.getEntityId());
                                 });
+                                setCurrent(rows);
                                 currentToOriginal();
                                 // silent first
                                 if (!current.isEmpty()) {
@@ -420,17 +425,22 @@ public class Rowset {
                 } else {
                     Rowset rowset = flow.refresh(aParams, null, null);
                     if (rowset != null) {
+                        if (activeFilter != null) {
+                            // No implicit calls to setCurrent and etc.
+                            activeFilter.deactivate();
+                            activeFilter = null;
+                        }
                         if (fields == null) {
                             setFields(rowset.getFields());
                         }
                         List<Row> rows = rowset.getCurrent();
                         rowset.setCurrent(new ArrayList<>());
                         rowset.currentToOriginal();
-                        setCurrent(rows);
                         rows.stream().forEach((Row aRow) -> {
                             aRow.setLog(log);
                             aRow.setEntityName(flow.getEntityId());
                         });
+                        setCurrent(rows);
                         currentToOriginal();
                         // silent first
                         if (!current.isEmpty()) {
@@ -468,17 +478,22 @@ public class Rowset {
                     if (onSuccess != null) {
                         flow.nextPage((Rowset aRowset) -> {
                             if (aRowset != null) {
+                                if (activeFilter != null) {
+                                    // No implicit calls to setCurrent and etc.
+                                    activeFilter.deactivate();
+                                    activeFilter = null;
+                                }
                                 assert fields != null : "Fields is missing. Method nextPage must not be called as the first method while retrieving data, and so, fields must already present.";
                                 int fetched = aRowset.getCurrent().size();
                                 if (fetched > 0) {
                                     List<Row> rows = aRowset.getCurrent();
                                     aRowset.setCurrent(new ArrayList<>());
                                     aRowset.currentToOriginal();
-                                    setCurrent(rows);
                                     rows.stream().forEach((Row aRow) -> {
                                         aRow.setLog(log);
                                         aRow.setEntityName(flow.getEntityId());
                                     });
+                                    setCurrent(rows);
                                     currentToOriginal();
                                     rowsetChangeSupport.fireNextPageFetchedEvent();
                                     onSuccess.accept(true);
@@ -495,17 +510,22 @@ public class Rowset {
                     } else {
                         Rowset rowset = flow.nextPage(null, null);
                         if (rowset != null) {
+                            if (activeFilter != null) {
+                                // No implicit calls to setCurrent and etc.
+                                activeFilter.deactivate();
+                                activeFilter = null;
+                            }
                             assert fields != null : "Fields is missing. Method nextPage must not be called as the first method while retrieving data, and so, fields must already present.";
                             int fetched = rowset.getCurrent().size();
                             if (fetched > 0) {
                                 List<Row> rows = rowset.getCurrent();
                                 rowset.setCurrent(new ArrayList<>());
                                 rowset.currentToOriginal();
-                                setCurrent(rows);
                                 rows.stream().forEach((Row aRow) -> {
                                     aRow.setLog(log);
                                     aRow.setEntityName(flow.getEntityId());
                                 });
+                                setCurrent(rows);
                                 currentToOriginal();
                                 rowsetChangeSupport.fireNextPageFetchedEvent();
                                 return true;
@@ -1019,10 +1039,10 @@ public class Rowset {
      * filter values is performed.
      *
      * @throws com.bearsoft.rowset.exceptions.RowsetException
-     */
     public void insert() throws RowsetException {
         insert(new Object[]{});
     }
+     */
 
     /**
      * Simple insert method. Inserts a new <code>Row</code> in this rowset in
@@ -1033,7 +1053,6 @@ public class Rowset {
      *
      * @param initingValues Values inserting row to be initialized with.
      * @throws RowsetException
-     */
     public void insert(Object... initingValues) throws RowsetException {
         if (!showOriginal) {
             assert fields != null;
@@ -1041,6 +1060,7 @@ public class Rowset {
             insert(row, false, initingValues);
         }
     }
+     */
 
     /**
      * Simple insert method. Inserts a new <code>Row</code> in this rowset in
@@ -1054,7 +1074,6 @@ public class Rowset {
      * @param initingValues Values inserting row to be initialized with.
      * @return
      * @throws RowsetException
-     */
     public Row insertAt(int insertAt, boolean aAjusting, Object... initingValues) throws RowsetException {
         if (!showOriginal) {
             assert fields != null;
@@ -1064,6 +1083,7 @@ public class Rowset {
         }
         return null;
     }
+     */
 
     /**
      * Collections - like insert method. Inserts a passed <code>Row</code> in
@@ -1370,8 +1390,6 @@ public class Rowset {
         if (!showOriginal) {
             Set<Row> rows2Delete = new HashSet<>();
             rows2Delete.addAll(aRows2Delete);
-            boolean wasBeforeFirst = isBeforeFirst();
-            boolean wasAfterLast = isAfterLast();
             for (int i = current.size() - 1; i >= 0; i--) {
                 Row row = current.get(i);
                 assert row != null;
@@ -1382,23 +1400,9 @@ public class Rowset {
                         generateDelete(row);
                         current.remove(i);
                         modified = true;
-                        currentRowPos = i + 1;
+                        currentRowPos = Math.min(i + 1, current.size());
                         rowsetChangeSupport.fireRowDeletedEvent(row, !rows2Delete.isEmpty()); // last iteration will fire non-ajusting event
-                        currentRowPos = Math.min(currentRowPos, current.size());
                     }
-                }
-            }
-            if (current.isEmpty()) {
-                currentRowPos = 0;
-            } else {
-                if (wasBeforeFirst) {
-                    currentRowPos = 0;
-                }
-                if (wasAfterLast) {
-                    currentRowPos = size() + 1;
-                }
-                if (!wasBeforeFirst && !wasAfterLast && currentRowPos > size()) {
-                    currentRowPos = size();
                 }
             }
             wideCheckCursor();
@@ -1424,8 +1428,6 @@ public class Rowset {
 
     public void deleteAt(int aRowIndex, boolean aIsAjusting) throws RowsetException {
         if (!showOriginal) {
-            boolean wasBeforeFirst = isBeforeFirst();
-            boolean wasAfterLast = isAfterLast();
             Row row = current.get(aRowIndex - 1);
             assert row != null;
             if (rowsetChangeSupport.fireWillDeleteEvent(row, aIsAjusting)) { // the deletion will fire non-ajusting event
@@ -1433,22 +1435,8 @@ public class Rowset {
                 generateDelete(row);
                 current.remove(aRowIndex - 1);
                 modified = true;
-                currentRowPos = aRowIndex;
+                currentRowPos = Math.min(aRowIndex, current.size());
                 rowsetChangeSupport.fireRowDeletedEvent(row, aIsAjusting); // the deletion will fire non-ajusting event
-                currentRowPos = Math.min(currentRowPos, current.size());
-            }
-            if (current.isEmpty()) {
-                currentRowPos = 0;
-            } else {
-                if (wasBeforeFirst) {
-                    currentRowPos = 0;
-                }
-                if (wasAfterLast) {
-                    currentRowPos = size() + 1;
-                }
-                if (!wasBeforeFirst && !wasAfterLast && currentRowPos > size()) {
-                    currentRowPos = size();
-                }
             }
             wideCheckCursor();
         }

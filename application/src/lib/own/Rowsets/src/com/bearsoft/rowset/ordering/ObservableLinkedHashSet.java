@@ -24,7 +24,7 @@ import jdk.nashorn.internal.runtime.JSType;
  */
 public class ObservableLinkedHashSet<T extends HasPublished> extends LinkedHashSet<T> {
 
-    public Object tag;
+    public JSObject published;
 
     protected PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
@@ -75,19 +75,30 @@ public class ObservableLinkedHashSet<T extends HasPublished> extends LinkedHashS
     }
 
     protected void lengthChanged(int oldLength) {
-        if (tag != null) {
-            JSObject jsArray = (JSObject) ScriptUtils.wrap(tag);
-            JSObject splice = (JSObject) jsArray.getMember("splice");
+        refresh();
+        propertyChangeSupport.firePropertyChange("length", oldLength, super.size());
+    }
+
+    public void refresh(){
+        if (published != null) {
+            JSObject splice = (JSObject) published.getMember("splice");
             List<Object> args = new ArrayList<>();
             args.add(0);
-            args.add(JSType.toNumber(jsArray.getMember("length")));
+            args.add(JSType.toNumber(published.getMember("length")));
             stream().forEach((T r) -> {
                 JSObject jsRow = r.getPublished();
                 args.add(ScriptUtils.unwrap(jsRow));
             });
-            splice.call(tag, args.toArray());
+            splice.call(published, args.toArray());
         }
-        propertyChangeSupport.firePropertyChange("length", oldLength, super.size());
+    }
+    
+    public JSObject getPublished() {
+        return published;
+    }
+
+    public void setPublished(JSObject aValue) {
+        published = aValue;
     }
 
     @Override

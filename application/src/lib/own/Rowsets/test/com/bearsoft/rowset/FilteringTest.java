@@ -119,7 +119,7 @@ public class FilteringTest extends RowsetBaseTest {
         checkRowsetPks(rowset, crudPks);
         assertTrue(rowset.first());
 
-        rowset.insert();
+        rowset.insert(new Row(rowset.getFlowProvider().getEntityId(), rowset.getFields()), false);
         // lt's test pks generating capability
         assertNotNull(rowset.getObject(1));
         // let's test filter's initing capability
@@ -201,7 +201,7 @@ public class FilteringTest extends RowsetBaseTest {
         assertEquals(rowset.size(), 3);
 
         rowset.addRowsetListener(new NewRowsIniter());
-        rowset.insert(new Object[]{1, 34L, rowset.getFields().get(4), null, rowset.getFields().get(5), "user supplied data for inserting", rowset.getFields().get(6), null, rowset.getFields().get(7), 76549076});
+        rowset.insert(new Row(rowset.getFlowProvider().getEntityId(), rowset.getFields()), false, new Object[]{1, 34L, rowset.getFields().get(4), null, rowset.getFields().get(5), "user supplied data for inserting", rowset.getFields().get(6), null, rowset.getFields().get(7), 76549076});
         // let's test pks generating capability
         assertEquals(rowset.getObject(1), new BigDecimal(34L));
         // let's test filter's initing capability, overriding user supplied values, where needed
@@ -242,7 +242,7 @@ public class FilteringTest extends RowsetBaseTest {
         // let's test update for filtered rowset
         // let's start with inserting some data
         for (int i = 0; i < 10; i++) {
-            rowset.insert(new Object[]{1, 34L, rowset.getFields().get(4), null, rowset.getFields().get(5), "user supplied data for inserting", rowset.getFields().get(6), null, rowset.getFields().get(7), 76549076});
+            rowset.insert(new Row(rowset.getFlowProvider().getEntityId(), rowset.getFields()), false, new Object[]{1, 34L, rowset.getFields().get(4), null, rowset.getFields().get(5), "user supplied data for inserting", rowset.getFields().get(6), null, rowset.getFields().get(7), 76549076});
             // let's test pks generating capability
             assertEquals(rowset.getObject(1), new BigDecimal(34L));
             // let's test filter's initing capability, overriding user supplied values, where needed

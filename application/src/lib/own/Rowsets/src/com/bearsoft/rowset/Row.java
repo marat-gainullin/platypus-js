@@ -344,11 +344,11 @@ public class Row implements HasPublished {
                 PropertyChangeEvent event = new PropertyChangeEvent(this, field.getName(), oldValue, aValue);
                 event.setPropagationId(aColIndex);
                 if (checkChange(event)) {
-                    Map<String, Object> expandedValues = new HashMap<>();
+                    Map<String, Object> expandedOldValues = new HashMap<>();
                     Collection<String> expandings = fields.getOrmExpandings().get(field.getName());
                     if (expandings != null) {
                         expandings.stream().forEach((String aOrmScalarProperty) -> {
-                            expandedValues.put(aOrmScalarProperty, ScriptUtils.toJava(getPublished().getMember(aOrmScalarProperty)));
+                            expandedOldValues.put(aOrmScalarProperty, ScriptUtils.toJava(getPublished().getMember(aOrmScalarProperty)));
                         });
                     }
                     currentValues.set(aColIndex - 1, aValue);
@@ -357,7 +357,7 @@ public class Row implements HasPublished {
                     propertyChangeSupport.firePropertyChange(event);
                     if (expandings != null) {
                         expandings.stream().forEach((String aOrmScalarProperty) -> {
-                            propertyChangeSupport.firePropertyChange(aOrmScalarProperty, expandedValues.get(aOrmScalarProperty), ScriptUtils.toJava(getPublished().getMember(aOrmScalarProperty)));
+                            propertyChangeSupport.firePropertyChange(aOrmScalarProperty, expandedOldValues.get(aOrmScalarProperty), ScriptUtils.toJava(getPublished().getMember(aOrmScalarProperty)));
                         });
                     }
                     return true;

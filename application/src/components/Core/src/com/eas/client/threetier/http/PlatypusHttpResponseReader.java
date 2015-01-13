@@ -135,8 +135,8 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
             int length = ((Number) jsData.getMember(LENGTH_PROP_NAME)).intValue();
             for (int i = 0; i < length; i++) {
                 JSObject oRow = (JSObject) jsData.getSlot(i);
-                rowset.insert();
-                Row row = rowset.getCurrentRow();
+                Row row = new Row("", fields);
+                rowset.insert(row, false);
                 for (String pName : oRow.keySet()) {
                     Field field = fields.get(pName);
                     if (field != null) {

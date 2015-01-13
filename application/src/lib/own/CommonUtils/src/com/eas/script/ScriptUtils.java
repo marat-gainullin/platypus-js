@@ -443,26 +443,6 @@ public class ScriptUtils {
         return sb.toString();
     }
 
-    public static Object[] jsObjectToCriteria(Object aValue) {
-        JSObject criteria = null;
-        if (aValue instanceof ScriptObject) {
-            criteria = (JSObject) jdk.nashorn.api.scripting.ScriptUtils.wrap(aValue);
-        } else if (aValue instanceof JSObject) {
-            criteria = (JSObject) aValue;
-        }
-        if (criteria != null) {
-            Set<String> jsKeys = criteria.keySet();
-            Object[] values = new Object[jsKeys.size() * 2];
-            int i = -1;
-            for (String jsKey : jsKeys) {
-                values[++i] = jsKey;
-                values[++i] = ScriptUtils.toJava(criteria.getMember(jsKey));
-            }
-            return values;
-        }
-        return null;
-    }
-
     /**
      * Searches for all <code>this</code> aliases in a constructor.
      *

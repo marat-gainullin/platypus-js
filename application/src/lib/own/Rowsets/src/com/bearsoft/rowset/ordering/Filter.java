@@ -5,10 +5,8 @@
 package com.bearsoft.rowset.ordering;
 
 import com.bearsoft.rowset.Row;
-import com.bearsoft.rowset.events.RowsetDeleteEvent;
 import com.bearsoft.rowset.events.RowsetInsertEvent;
 import com.bearsoft.rowset.events.RowsetListener;
-import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Field;
 import com.eas.script.AlreadyPublishedException;
@@ -19,8 +17,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -108,15 +104,6 @@ public class Filter extends Orderer implements HasPublished {
         if (rowset.isImmediateFilter()) {
             refilterRowset();
         }
-
-        /*
-         if (rowset.isImmediateFilter()) {
-         super.keysChanged(Row, aColIndex, aOldValue, aNewValue);
-         if (filterApplied) {
-         rowset.getRowsetChangeSupport().fireFilteredEvent();
-         }
-         }
-         */
     }
 
     /**
@@ -126,13 +113,6 @@ public class Filter extends Orderer implements HasPublished {
      */
     public void refilterRowset() throws RowsetException {
         apply(appliedKeys);
-        /*
-        if (!filterApplied || !rowset.isImmediateFilter()) {
-            clear();
-            addRows();
-            apply(appliedKeys);
-        }
-        */
     }
 
     private boolean filtering = false;
@@ -236,7 +216,7 @@ public class Filter extends Orderer implements HasPublished {
         }
     }
 
-    void deactivate() {
+    public void deactivate() {
         filterApplied = false;
         originalRows = null;
         originalPos = 0;
@@ -285,29 +265,6 @@ public class Filter extends Orderer implements HasPublished {
 
     @Override
     public void rowInserted(RowsetInsertEvent event) {
-        /*
-         if (filterApplied) {
-         try {
-         Row insertingRow = event.getRow();
-         add(insertingRow, false);
-         // work on rowset's native rows, hided by the filter
-         if (originalPos == 0) { // before first
-         originalRows.add(0, insertingRow);
-         originalPos = 1;
-         } else if (originalPos > originalRows.size()) {
-         originalRows.add(insertingRow);
-         originalPos = originalRows.size();
-         } else {
-         originalRows.add(originalPos, insertingRow);
-         originalPos++;
-         }
-         } catch (InvalidColIndexException ex) {
-         Logger.getLogger(Filter.class.getName()).log(Level.SEVERE, null, ex);
-         }
-         } else {
-         super.rowInserted(event);
-         }
-         */
         Row insertingRow = event.getRow();
         // work on rowset's native rows, hided by the filter
         if (originalPos == 0) { // before first
@@ -322,21 +279,7 @@ public class Filter extends Orderer implements HasPublished {
         }
         super.rowInserted(event);
     }
-    /*
-     @Override
-     public void rowDeleted(RowsetDeleteEvent event) {
-     if (filterApplied) {
-     try {
-     remove(event.getRow(), false);
-     } catch (RowsetException ex) {
-     Logger.getLogger(Filter.class.getName()).log(Level.SEVERE, null, ex);
-     }
-     } else {
-     super.rowDeleted(event);
-     }
-     }
-     */
-
+    
     @Override
     public JSObject getPublished() {
         if (published == null) {

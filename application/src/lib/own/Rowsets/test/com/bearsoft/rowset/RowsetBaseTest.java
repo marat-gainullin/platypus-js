@@ -91,7 +91,7 @@ public class RowsetBaseTest {
     protected void fillInRowset(Rowset rowset) throws InvalidCursorPositionException, InvalidColIndexException, RowsetException {
         for (int i = 0; i < testData.length; i++) {
             int oldSize = rowset.size();
-            rowset.insert();
+            rowset.insert(new Row(rowset.getFlowProvider().getEntityId(), rowset.getFields()), false);
             if (oldSize < rowset.size()) {
                 assertTrue(rowset.getRow(rowset.getCursorPos()) == rowset.getCurrentRow());
                 assertTrue(rowset.getCurrentRow().isInserted());

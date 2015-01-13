@@ -8,7 +8,6 @@ import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.exceptions.RowsetException;
-import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import java.util.ArrayList;
 import java.util.List;
@@ -168,14 +167,6 @@ public class ParametersRowset extends Rowset {
     @Override
     public boolean absolute(int row) {
         return row == 1;
-    }
-
-    @Override
-    public void insert() {
-    }
-
-    @Override
-    public void insert(Object... initingValues) throws RowsetException {
     }
 
     @Override

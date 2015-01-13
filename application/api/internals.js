@@ -82,7 +82,9 @@
                 _self.enumerable = true;
                 _self.configurable = false;
                 _self.get = function () {
-                    var found = targetPublishedEntity.find(targetPublishedEntity.schema[targetFieldName], this[sourceFieldName]);
+                    var criteria = {};
+                    criteria[targetFieldName] = this[sourceFieldName];
+                    var found = targetPublishedEntity.find(criteria);
                     return found === null || found.length === 0 ? null : (found.length === 1 ? found[0] : found);
                 };
                 _self.set = function (aValue) {
@@ -95,7 +97,9 @@
                 _self.enumerable = true;
                 _self.configurable = false;
                 _self.get = function () {
-                    return sourcePublishedEntity.find(sourcePublishedEntity.schema[sourceFieldName], this[targetFieldName]);
+                    var criteria = {};
+                    criteria[sourceFieldName] = this[targetFieldName];
+                    return sourcePublishedEntity.find(criteria, true);
                 };
             });
     ScriptUtils.setIsArrayFunc(function (aInstance) {
