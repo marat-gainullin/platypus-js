@@ -1230,6 +1230,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     public void insertElementAtCursor() {
         try {
             if (insertable && data != null && data.hasMember("splice")) {
+                ListSelectionModel columnSelection = saveColumnsSelection();
                 JSObject jsSplice = (JSObject) data.getMember("splice");
                 JSObject jsIndexOf = (JSObject) data.getMember("indexOf");
                 Object oElementClass = data.getMember("elementClass");
@@ -1258,6 +1259,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
                     redraw();
                 }
                 makeVisible(jsCreated);
+                restoreColumnsSelection(columnSelection);
             }
         } catch (Exception ex) {
             Logger.getLogger(ModelGrid.class.getName()).log(Level.SEVERE, null, ex);
@@ -1286,7 +1288,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         return savedSelection;
     }
 
-    public void deleteElementAtCursor() {
+    public void deleteSelectedElements() {
         if (deletable && data != null && data.hasMember("splice")) {
             JSObject jsSplice = (JSObject) data.getMember("splice");
             ListSelectionModel wasSeleted = saveRowsSelection();
@@ -2158,7 +2160,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            deleteElementAtCursor();
+            deleteSelectedElements();
         }
     }
 

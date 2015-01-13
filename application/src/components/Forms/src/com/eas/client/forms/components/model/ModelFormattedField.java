@@ -16,7 +16,6 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.text.ParseException;
-import javax.swing.Action;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import jdk.nashorn.api.scripting.JSObject;

@@ -323,8 +323,7 @@ public class QueryResultsView extends javax.swing.JPanel {
         toolBar.add(nextPageButton);
 
         addButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/eas/designer/application/query/result/new.png"))); // NOI18N
-        addButton.setText(org.openide.util.NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.addButton.text")); // NOI18N
-        addButton.setToolTipText(org.openide.util.NbBundle.getMessage(QueryResultsView.class, "addButton.Tooltip")); // NOI18N
+        addButton.setToolTipText(org.openide.util.NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.addButton.toolTipText")); // NOI18N
         addButton.setFocusable(false);
         addButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         addButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -336,8 +335,7 @@ public class QueryResultsView extends javax.swing.JPanel {
         toolBar.add(addButton);
 
         deleteButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/eas/designer/application/query/result/delete.png"))); // NOI18N
-        deleteButton.setText(org.openide.util.NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.deleteButton.text")); // NOI18N
-        deleteButton.setToolTipText(org.openide.util.NbBundle.getMessage(QueryResultsView.class, "deleteButton.Tooltip")); // NOI18N
+        deleteButton.setToolTipText(org.openide.util.NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.deleteButton.toolTipText")); // NOI18N
         deleteButton.setFocusable(false);
         deleteButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         deleteButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -481,7 +479,7 @@ public class QueryResultsView extends javax.swing.JPanel {
     }//GEN-LAST:event_addButtonActionPerformed
 
     private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteButtonActionPerformed
-        grid.deleteElementAtCursor();
+        grid.deleteSelectedElements();
     }//GEN-LAST:event_deleteButtonActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addButton;

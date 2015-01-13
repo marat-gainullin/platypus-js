@@ -16,6 +16,7 @@ import com.eas.gui.ScriptColor;
 import com.eas.script.HasPublished;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import javax.swing.JLabel;
 import javax.swing.JTable;

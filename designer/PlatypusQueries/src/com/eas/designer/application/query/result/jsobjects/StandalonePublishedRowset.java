@@ -77,8 +77,11 @@ public class StandalonePublishedRowset extends AbstractJSObject {
                 for (int i = 0; i < howManyToDelete; i++) {
                     rowset.deleteAt(insertAt + 1);
                 }
-                if (args.length > 2) {
-                    rowset.insertAt(insertAt + 1, false);
+                for (int i = 2; i < args.length; i++) {
+                    StandalonePublishedRow rowWrapper = (StandalonePublishedRow) args[i];
+                    if (args.length > 2) {
+                        rowset.insertAt(rowWrapper.getRow(), false, (insertAt + 1) + (i - 2));
+                    }
                 }
             } catch (RowsetException ex) {
                 Exceptions.printStackTrace(ex);
