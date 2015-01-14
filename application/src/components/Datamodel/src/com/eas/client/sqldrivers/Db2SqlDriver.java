@@ -5,7 +5,7 @@
 package com.eas.client.sqldrivers;
 
 import com.bearsoft.rowset.Converter;
-import com.bearsoft.rowset.Rowset;
+import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
@@ -39,7 +39,8 @@ public class Db2SqlDriver extends SqlDriver {
     /**
      * Listing of SQLSTATE values
      *
-     * @see http://publib.boulder.ibm.com/infocenter/iseries/v5r3/index.jsp?topic=%2Frzala%2Frzalaco.htm
+     * @see
+     * http://publib.boulder.ibm.com/infocenter/iseries/v5r3/index.jsp?topic=%2Frzala%2Frzalaco.htm
      */
     protected static final int[] db2ErrorCodes = {};
     protected static final String[] platypusErrorMessages = {};
@@ -295,35 +296,23 @@ public class Db2SqlDriver extends SqlDriver {
     }
 
     @Override
-    public String getColumnNameFromCommentsDs(Rowset rs) throws RowsetException {
-        if (!rs.isAfterLast() && !rs.isBeforeFirst()) {
-            return (String) rs.getObject(rs.getFields().find(ClientConstants.F_COLUMNS_COMMENTS_FIELD_FIELD_NAME));
-        }
-        return null;
+    public String getColumnNameFromCommentsDs(Row aRow) throws RowsetException {
+        return (String) aRow.getColumnObject(aRow.getFields().find(ClientConstants.F_COLUMNS_COMMENTS_FIELD_FIELD_NAME));
     }
 
     @Override
-    public String getColumnCommentFromCommentsDs(Rowset rs) throws RowsetException {
-        if (!rs.isAfterLast() && !rs.isBeforeFirst()) {
-            return (String) rs.getObject(rs.getFields().find(ClientConstants.F_COLUMNS_COMMENTS_COMMENT_FIELD_NAME));
-        }
-        return null;
+    public String getColumnCommentFromCommentsDs(Row aRow) throws RowsetException {
+        return (String) aRow.getColumnObject(aRow.getFields().find(ClientConstants.F_COLUMNS_COMMENTS_COMMENT_FIELD_NAME));
     }
 
     @Override
-    public String getTableNameFromCommentsDs(Rowset rs) throws RowsetException {
-        if (!rs.isAfterLast() && !rs.isBeforeFirst()) {
-            return (String) rs.getObject(rs.getFields().find(ClientConstants.F_TABLE_COMMENTS_NAME_FIELD_NAME));
-        }
-        return null;
+    public String getTableNameFromCommentsDs(Row aRow) throws RowsetException {
+        return (String) aRow.getColumnObject(aRow.getFields().find(ClientConstants.F_TABLE_COMMENTS_NAME_FIELD_NAME));
     }
 
     @Override
-    public String getTableCommentFromCommentsDs(Rowset rs) throws RowsetException {
-        if (!rs.isAfterLast() && !rs.isBeforeFirst()) {
-            return (String) rs.getObject(rs.getFields().find(ClientConstants.F_TABLE_COMMENTS_COMMENT_FIELD_NAME));
-        }
-        return null;
+    public String getTableCommentFromCommentsDs(Row aRow) throws RowsetException {
+        return (String) aRow.getColumnObject(aRow.getFields().find(ClientConstants.F_TABLE_COMMENTS_COMMENT_FIELD_NAME));
     }
 
     @Override
@@ -524,12 +513,12 @@ public class Db2SqlDriver extends SqlDriver {
     public String getUsersSpaceInitResourceName() {
         return "/" + Db2SqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/Db2InitUsersSpace.sql";
     }
-    
+
     @Override
     public String getVersionInitResourceName() {
         return "/" + Db2SqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/Db2InitVersion.sql";
     }
-    
+
     @Override
     public Set<Integer> getSupportedJdbcDataTypes() {
         return resolver.getSupportedJdbcDataTypes();
@@ -575,7 +564,8 @@ public class Db2SqlDriver extends SqlDriver {
             }
 
             /**
-             * The DB2 system does not allow the "on update cascade" option for foreign key constraints.
+             * The DB2 system does not allow the "on update cascade" option for
+             * foreign key constraints.
              */
             String fkRule = " ON UPDATE NO ACTION";
             switch (fk.getFkDeleteRule()) {

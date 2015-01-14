@@ -4,6 +4,7 @@
  */
 package com.eas.client.forms.components.model.grid.models;
 
+import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.events.RowsetAdapter;
 import com.bearsoft.rowset.events.RowsetDeleteEvent;
@@ -36,18 +37,12 @@ public class TreedRowsRowsetListener extends RowsetAdapter {
     public Rowset getRowset() {
         return rowset;
     }
-/*
-    @Override
-    public void rowChanged(RowChangeEvent event) {
-        Field field = event.getChangedRow().getFields().get(event.getFieldIndex());
-        model.fireElementsChanged(event.getChangedRow().getPublished(), field.getName(), false);
-    }
-*/
+
     @Override
     public void rowDeleted(RowsetDeleteEvent event) {
         if (!event.isAjusting()) {
             model.fireElementsRemoved(Collections.singletonList(event.getRow().getPublished()));
-            oldRows = Rowset.toJs(rowset.getCurrent());
+            oldRows = toJs(rowset.getCurrent());
         }
     }
 
@@ -62,7 +57,7 @@ public class TreedRowsRowsetListener extends RowsetAdapter {
     @Override
     public void rowsetFiltered(RowsetFilterEvent event) {
         model.fireElementsRemoved(oldRows);
-        List<JSObject> newRows = Rowset.toJs(rowset.getCurrent());
+        List<JSObject> newRows = toJs(rowset.getCurrent());
         oldRows = newRows;
         model.fireElementsAdded(newRows);
     }
@@ -70,7 +65,7 @@ public class TreedRowsRowsetListener extends RowsetAdapter {
     @Override
     public void rowsetRequeried(RowsetRequeryEvent event) {
         model.fireElementsRemoved(oldRows);
-        List<JSObject> newRows = Rowset.toJs(rowset.getCurrent());
+        List<JSObject> newRows = toJs(rowset.getCurrent());
         oldRows = newRows;
         model.fireElementsAdded(newRows);
     }
@@ -78,7 +73,7 @@ public class TreedRowsRowsetListener extends RowsetAdapter {
     @Override
     public void rowsetRolledback(RowsetRollbackEvent event) {
         model.fireElementsRemoved(oldRows);
-        List<JSObject> newRows = Rowset.toJs(rowset.getCurrent());
+        List<JSObject> newRows = toJs(rowset.getCurrent());
         oldRows = newRows;
         model.fireElementsAdded(newRows);
     }
@@ -86,8 +81,12 @@ public class TreedRowsRowsetListener extends RowsetAdapter {
     @Override
     public void rowsetNextPageFetched(RowsetNextPageEvent event) {
         model.fireElementsRemoved(oldRows);
-        List<JSObject> newRows = Rowset.toJs(rowset.getCurrent());
+        List<JSObject> newRows = toJs(rowset.getCurrent());
         oldRows = newRows;
         model.fireElementsAdded(newRows);
+    }
+
+    private List<JSObject> toJs(List<Row> current) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

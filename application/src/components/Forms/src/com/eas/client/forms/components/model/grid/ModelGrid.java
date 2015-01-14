@@ -401,30 +401,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     protected JPanel trPanel = new JPanel(new BorderLayout());
     protected JPanel blPanel = new JPanel(new BorderLayout());
     protected JPanel brPanel;
-    /*
-     protected RowsetListener scrollReflector = new RowsetAdapter() {
-     protected void repaintRowHeader() {
-     if (gridScroll.getRowHeader() != null) {
-     gridScroll.getRowHeader().repaint();
-     }
-     }
-
-     @Override
-     public void rowsetScrolled(RowsetScrollEvent event) {
-     repaintRowHeader();
-     }
-
-     @Override
-     public void rowsetRolledback(RowsetRollbackEvent event) {
-     repaintRowHeader();
-     }
-
-     @Override
-     public void rowsetSaved(RowsetSaveEvent event) {
-     repaintRowHeader();
-     }
-     };
-     */
+    
     // actions
     protected Action findSomethingAction;
 

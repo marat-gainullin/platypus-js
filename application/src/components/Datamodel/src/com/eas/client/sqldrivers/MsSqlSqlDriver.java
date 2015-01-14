@@ -5,7 +5,7 @@
 package com.eas.client.sqldrivers;
 
 import com.bearsoft.rowset.Converter;
-import com.bearsoft.rowset.Rowset;
+import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.RowsetConverter;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Field;
@@ -255,35 +255,23 @@ public class MsSqlSqlDriver extends SqlDriver {
     }
 
     @Override
-    public String getColumnNameFromCommentsDs(Rowset rs) throws RowsetException {
-        if (!rs.isAfterLast() && !rs.isBeforeFirst()) {
-            return (String) rs.getObject(rs.getFields().find(ClientConstants.F_COLUMNS_COMMENTS_FIELD_FIELD_NAME));
-        }
-        return null;
+    public String getColumnNameFromCommentsDs(Row aRow) throws RowsetException {
+        return (String) aRow.getColumnObject(aRow.getFields().find(ClientConstants.F_COLUMNS_COMMENTS_FIELD_FIELD_NAME));
     }
 
     @Override
-    public String getColumnCommentFromCommentsDs(Rowset rs) throws RowsetException {
-        if (!rs.isAfterLast() && !rs.isBeforeFirst()) {
-            return (String) rs.getObject(rs.getFields().find(ClientConstants.F_COLUMNS_COMMENTS_COMMENT_FIELD_NAME));
-        }
-        return null;
+    public String getColumnCommentFromCommentsDs(Row aRow) throws RowsetException {
+        return (String) aRow.getColumnObject(aRow.getFields().find(ClientConstants.F_COLUMNS_COMMENTS_COMMENT_FIELD_NAME));
     }
 
     @Override
-    public String getTableNameFromCommentsDs(Rowset rs) throws RowsetException {
-        if (!rs.isAfterLast() && !rs.isBeforeFirst()) {
-            return (String) rs.getObject(rs.getFields().find(ClientConstants.F_TABLE_COMMENTS_NAME_FIELD_NAME));
-        }
-        return null;
+    public String getTableNameFromCommentsDs(Row aRow) throws RowsetException {
+        return (String) aRow.getColumnObject(aRow.getFields().find(ClientConstants.F_TABLE_COMMENTS_NAME_FIELD_NAME));
     }
 
     @Override
-    public String getTableCommentFromCommentsDs(Rowset rs) throws RowsetException {
-        if (!rs.isAfterLast() && !rs.isBeforeFirst()) {
-            return (String) rs.getObject(rs.getFields().find(ClientConstants.F_TABLE_COMMENTS_COMMENT_FIELD_NAME));
-        }
-        return null;
+    public String getTableCommentFromCommentsDs(Row aRow) throws RowsetException {
+        return (String) aRow.getColumnObject(aRow.getFields().find(ClientConstants.F_TABLE_COMMENTS_COMMENT_FIELD_NAME));
     }
 
     @Override
@@ -367,12 +355,12 @@ public class MsSqlSqlDriver extends SqlDriver {
     public String getUsersSpaceInitResourceName() {
         return "/" + MsSqlSqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/MsSqlInitUsersSpace.sql";
     }
-    
+
     @Override
     public String getVersionInitResourceName() {
         return "/" + MsSqlSqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/MsSqlInitVersion.sql";
     }
-    
+
     @Override
     public Set<Integer> getSupportedJdbcDataTypes() {
         return resolver.getSupportedJdbcDataTypes();

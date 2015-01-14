@@ -800,7 +800,7 @@
             value: function () {
                 if (!rowset.empty) {
                     var res = rowset.getRow(rowset.size());
-                    rowset.deleteAt(rowset.size(), true);
+                    rowset.deleteAt(rowset.size());
                     Array.prototype.pop.call(target);
                     return res.getPublished();
                 }
@@ -826,7 +826,7 @@
             value: function () {
                 if (!rowset.empty) {
                     var res = rowset.getRow(1);
-                    rowset.deleteAt(1, true);
+                    rowset.deleteAt(1);
                     Array.prototype.shift.call(target);
                     return res.getPublished();
                 }
@@ -902,12 +902,9 @@
         });
 
         Object.defineProperty(target, "find", {
-            value: function (aCriteria, aResolve) {                
+            value: function (aCriteria) {                
                 var nEntity = this.unwrap();
-                if(arguments.length > 1)
-                    return EngineUtilsClass.unwrap(nEntity.find(aCriteria, aResolve));
-                else
-                    return EngineUtilsClass.unwrap(nEntity.find(aCriteria));
+                return EngineUtilsClass.unwrap(nEntity.find(aCriteria));
             }
         });
     }

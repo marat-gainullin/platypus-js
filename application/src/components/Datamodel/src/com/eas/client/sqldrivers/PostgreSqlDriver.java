@@ -5,7 +5,7 @@
 package com.eas.client.sqldrivers;
 
 import com.bearsoft.rowset.Converter;
-import com.bearsoft.rowset.Rowset;
+import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
@@ -384,38 +384,38 @@ public class PostgreSqlDriver extends SqlDriver {
     protected static int colIdxColumnName = 0;
 
     @Override
-    public String getColumnNameFromCommentsDs(Rowset rs) throws RowsetException {
+    public String getColumnNameFromCommentsDs(Row aRow) throws RowsetException {
         if (colIdxColumnName == 0) {
-            colIdxColumnName = rs.getFields().find(ClientConstants.F_COLUMNS_COMMENTS_FIELD_FIELD_NAME);
+            colIdxColumnName = aRow.getFields().find(ClientConstants.F_COLUMNS_COMMENTS_FIELD_FIELD_NAME);
         }
-        return (String) rs.getObject(colIdxColumnName);
+        return (String) aRow.getColumnObject(colIdxColumnName);
     }
     protected static int colIdxColumnComment = 0;
 
     @Override
-    public String getColumnCommentFromCommentsDs(Rowset rs) throws RowsetException {
+    public String getColumnCommentFromCommentsDs(Row aRow) throws RowsetException {
         if (colIdxColumnComment == 0) {
-            colIdxColumnComment = rs.getFields().find(ClientConstants.JDBCCOLS_REMARKS);
+            colIdxColumnComment = aRow.getFields().find(ClientConstants.JDBCCOLS_REMARKS);
         }
-        return (String) rs.getObject(colIdxColumnComment);
+        return (String) aRow.getColumnObject(colIdxColumnComment);
     }
     protected static int colIdxTableName = 0;
 
     @Override
-    public String getTableNameFromCommentsDs(Rowset rs) throws RowsetException {
+    public String getTableNameFromCommentsDs(Row aRow) throws RowsetException {
         if (colIdxTableName == 0) {
-            colIdxTableName = rs.getFields().find(ClientConstants.F_TABLE_COMMENTS_NAME_FIELD_NAME);
+            colIdxTableName = aRow.getFields().find(ClientConstants.F_TABLE_COMMENTS_NAME_FIELD_NAME);
         }
-        return (String) rs.getObject(colIdxTableName);
+        return (String) aRow.getColumnObject(colIdxTableName);
     }
     protected static int colIdxTableComment = 0;
 
     @Override
-    public String getTableCommentFromCommentsDs(Rowset rs) throws RowsetException {
+    public String getTableCommentFromCommentsDs(Row aRow) throws RowsetException {
         if (colIdxTableComment == 0) {
-            colIdxTableComment = rs.getFields().find(ClientConstants.JDBCCOLS_TABLE_DESC);
+            colIdxTableComment = aRow.getFields().find(ClientConstants.JDBCCOLS_TABLE_DESC);
         }
-        return (String) rs.getObject(colIdxTableComment);
+        return (String) aRow.getColumnObject(colIdxTableComment);
     }
 
     @Override

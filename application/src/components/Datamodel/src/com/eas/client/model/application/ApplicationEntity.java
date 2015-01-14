@@ -19,8 +19,8 @@ import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.ordering.Filter;
 import com.bearsoft.rowset.ordering.Locator;
-import com.bearsoft.rowset.ordering.ObservableLinkedHashSet;
 import com.bearsoft.rowset.ordering.Orderer;
+import com.bearsoft.rowset.ordering.Subset;
 import com.bearsoft.rowset.sorting.RowsComparator;
 import com.bearsoft.rowset.sorting.SortingCriterion;
 import com.bearsoft.rowset.utils.RowsetUtils;
@@ -185,10 +185,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
 
     @ScriptFunction(jsDoc = FIND_JSDOC, params = {"criteria"})
     public JSObject find(JSObject aCriteria) throws Exception {
-        return find(aCriteria, false);
-    }
-    
-    public JSObject find(JSObject aCriteria, boolean aResolve) throws Exception {
         if (aCriteria != null) {
             Fields fields = rowset.getFields();
             Converter converter = rowset.getConverter();
@@ -208,19 +204,21 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
             }
             if (!constraints.isEmpty() && constraints.size() == keyValues.size()) {
                 Orderer loc = checkUserOrderer(constraints);
-                ObservableLinkedHashSet<Row> res = loc.get(keyValues);
-                if(res == null && aResolve){
-                    res = new ObservableLinkedHashSet<>();
-                    loc.put(keyValues, res);
-                }
-                if(res != null){
-                    if(res.getPublished() == null){
-                        res.setPublished(ScriptUtils.makeObj());
-                        res.refresh();
+                Subset res = loc.get(keyValues);
+                if (res != null) {
+                    if (res.getPublished() == null) {
+                        JSObject jsRes = ScriptUtils.makeArray();
+                        JSObject jsPush = (JSObject) jsRes.getMember("push");
+                        List<Object> pushArgs = new ArrayList<>();
+                        res.stream().forEach((Row r) -> {
+                            JSObject jsRow = r.getPublished();
+                            pushArgs.add(jdk.nashorn.api.scripting.ScriptUtils.unwrap(jsRow));
+                        });
+                        jsPush.call(jsRes, pushArgs.toArray());
+                        res.setPublished(jsRes);
                     }
                     return res.getPublished();
                 }
-                return null;
             } else {
                 Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, BAD_FIND_AGRUMENTS_MSG);
             }
@@ -268,7 +266,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         if (aRow != null) {
             int idx = locator.indexOf(aRow);
             if (idx != -1) {
-                return rowset.absolute(idx + 1);
+                return rowset.setCursorPos(idx + 1);
             }
         }
         return false;
@@ -295,9 +293,9 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         return rowset.getCursorPos();
     }
 
-    @ScriptFunction()
+    @ScriptFunction
     public void setCursorPos(int aValue) throws InvalidCursorPositionException {
-        rowset.absolute(aValue);
+        rowset.setCursorPos(aValue);
     }
 
     private static final String CREATE_FILTER_JSDOC = ""
@@ -437,48 +435,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     }
 
     // modify interface
-    private static final String INSERT_JSDOC = ""
-            + "/**\n"
-            + "* Inserts new row in the rowset and sets cursor on this row. @see push.\n"
-            + "* @param pairs the fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.schema.propName) and the value for this property (optional).\n"
-            + "*/";
-    /*
-     @ScriptFunction(jsDoc = INSERT_JSDOC, params = {"pairs"})
-     public void insert(Object... requiredFields) throws Exception {
-     if (requiredFields != null) {
-     for (int i = 0; i < requiredFields.length; i++) {
-     requiredFields[i] = ScriptUtils.toJava(requiredFields[i]);
-     }
-     }
-     rowset.insert(requiredFields);
-     }
-     */
-
-    private static final String INSERT_AT_JSDOC = ""
-            + "/**\n"
-            + "* Inserts new row in the rowset and sets cursor on this row. @see push.\n"
-            + "* @param index The new row will be inserted at. 1 - based.\n"
-            + "* @param pairs The fields value pairs, in a form of key-values pairs, where the key is the property object (e.g. entity.schema.propName) and the value for this property.\n"
-            + "*/";
-    /*
-     @ScriptFunction(jsDoc = INSERT_AT_JSDOC, params = {"index", "pairs"})
-     public void insertAt(int aIndex, Object... requiredFields) throws Exception {
-     if (requiredFields != null) {
-     for (int i = 0; i < requiredFields.length; i++) {
-     requiredFields[i] = ScriptUtils.toJava(requiredFields[i]);
-     }
-     }
-     rowset.insertAt(aIndex, false, requiredFields);
-     }
-     */
-
-    public boolean delete() throws Exception {
-        int oldCount = rowset.size();
-        if (oldCount > 0) {
-            rowset.delete();
-        }
-        return oldCount != rowset.size();
-    }
     private static final String REMOVE_ALL_JSDOC = ""
             + "/**\n"
             + "* Deletes all rows in the rowset.\n"
@@ -505,7 +461,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         } else if (aCursorPosOrInstance instanceof Number) {
             return deleteRow(((Number) aCursorPosOrInstance).intValue());
         } else {
-            return delete();
+            return false;
         }
     }
 
@@ -723,7 +679,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     private void silentFirst() throws InvalidCursorPositionException {
         rowset.removeRowsetListener(this);
         try {
-            rowset.first();
+            rowset.setCursorPos(1);
         } finally {
             rowset.addRowsetListener(this);
         }
@@ -878,10 +834,10 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
                             // data in theirs rowsets, so we can't bind query parameters to proper values. In the
                             // such case we initialize parameters values with RowsetUtils.UNDEFINED_SQL_VALUE
                             Rowset leftRowset = leftEntity.getRowset();
-                            if (leftRowset != null && !leftRowset.isEmpty() && !leftRowset.isBeforeFirst() && !leftRowset.isAfterLast()) {
+                            if (leftRowset != null && !leftRowset.isEmpty() && leftRowset.getCurrentRow() != null) {
                                 try {
-                                    pValue = leftRowset.getObject(leftRowset.getFields().find(relation.getLeftField().getName()));
-                                } catch (InvalidColIndexException | InvalidCursorPositionException ex) {
+                                    pValue = leftRowset.getCurrentRow().getColumnObject(leftRowset.getFields().find(relation.getLeftField().getName()));
+                                } catch (InvalidColIndexException ex) {
                                     pValue = RowsetUtils.UNDEFINED_SQL_VALUE;
                                     Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "while assigning parameter:" + relation.getRightParameter() + " in entity: " + getTitle() + " [" + String.valueOf(getEntityId()) + "]", ex);
                                 }
@@ -990,8 +946,8 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
                         if (leftRowset != null) {
                             try {
                                 if (!leftRowset.isEmpty()) {
-                                    if (!leftRowset.isBeforeFirst() && !leftRowset.isAfterLast()) {
-                                        fValue = leftRowset.getObject(leftRowset.getFields().find(rel.getLeftField().getName()));
+                                    if (leftRowset.getCurrentRow() != null) {
+                                        fValue = leftRowset.getCurrentRow().getColumnObject(leftRowset.getFields().find(rel.getLeftField().getName()));
                                     } else {
                                         fValue = RowsetUtils.UNDEFINED_SQL_VALUE;
                                         Logger.getLogger(Entity.class.getName()).log(Level.FINE, "Failed to achieve value for filtering field:{0} in entity: {1} [{2}]. The source rowset has bad position (before first or after last).", new Object[]{rel.getRightField(), getTitle(), String.valueOf(getEntityId())});
@@ -1000,7 +956,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
                                     fValue = RowsetUtils.UNDEFINED_SQL_VALUE;
                                     Logger.getLogger(Entity.class.getName()).log(Level.FINE, "Failed to achieve value for filtering field:{0} in entity: {1} [{2}]. The source rowset has no any rows.", new Object[]{rel.getRightField(), getTitle(), String.valueOf(getEntityId())});
                                 }
-                            } catch (InvalidColIndexException | InvalidCursorPositionException ex) {
+                            } catch (InvalidColIndexException ex) {
                                 Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "while achieving value for filtering field:" + rel.getRightField() + " in entity: " + getTitle() + " [" + String.valueOf(getEntityId()) + "]", ex);
                                 throw ex;
                             }

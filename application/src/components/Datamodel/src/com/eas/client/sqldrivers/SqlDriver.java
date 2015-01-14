@@ -10,6 +10,7 @@
 package com.eas.client.sqldrivers;
 
 import com.bearsoft.rowset.Converter;
+import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Field;
@@ -270,41 +271,41 @@ public abstract class SqlDriver {
      * *
      * Finds column name from comment's rowset on current cursor position.
      *
-     * @param rs Comments rowset
+     * @param aRow
      * @return Column name
      * @throws RowsetException Rowset exception
      */
-    public abstract String getColumnNameFromCommentsDs(Rowset rs) throws RowsetException;
+    public abstract String getColumnNameFromCommentsDs(Row aRow) throws RowsetException;
 
     /**
      * *
      * Finds column comment from comment's rowset on current cursor position.
      *
-     * @param rs Comments rowset
+     * @param aRow
      * @return Column name
      * @throws RowsetException Rowset exception
      */
-    public abstract String getColumnCommentFromCommentsDs(Rowset rs) throws RowsetException;
+    public abstract String getColumnCommentFromCommentsDs(Row aRow) throws RowsetException;
 
     /**
      * *
      * Finds table name from comment's rowset on current cursor position.
      *
-     * @param rs Comments rowset
+     * @param aRow
      * @return Column name
      * @throws RowsetException Rowset exception
      */
-    public abstract String getTableNameFromCommentsDs(Rowset rs) throws RowsetException;
+    public abstract String getTableNameFromCommentsDs(Row aRow) throws RowsetException;
 
     /**
      * *
      * Finds table comment from comment's rowset on current cursor position.
      *
-     * @param rs Comments rowset
+     * @param aRow
      * @return Column name
      * @throws RowsetException Rowset exception
      */
-    public abstract String getTableCommentFromCommentsDs(Rowset rs) throws RowsetException;
+    public abstract String getTableCommentFromCommentsDs(Row aRow) throws RowsetException;
 
     /**
      * *

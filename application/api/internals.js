@@ -99,7 +99,7 @@
                 _self.get = function () {
                     var criteria = {};
                     criteria[sourceFieldName] = this[targetFieldName];
-                    return sourcePublishedEntity.find(criteria, true);
+                    return sourcePublishedEntity.find(criteria);
                 };
             });
     ScriptUtils.setIsArrayFunc(function (aInstance) {
@@ -107,6 +107,9 @@
     });
     ScriptUtils.setMakeObjFunc(function () {
         return {};
+    });
+    ScriptUtils.setMakeArrayFunc(function () {
+        return [];
     });
 
     var PAdapterClass = Java.type("com.eas.client.scripts.PropertyChangeListenerJSAdapter");

@@ -15,6 +15,7 @@ import com.bearsoft.rowset.sorting.SortingCriterion;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -169,7 +170,7 @@ public class OrderersTest extends RowsetBaseTest {
         //
         Row deleted = rowset.getCurrentRow();
         assertSame(deleted, inserted);
-        rowset.delete();
+        rowset.delete(Collections.singleton(deleted));
         Collection<Row> foundUpdated2 = orderer.get(new Object[]{false, null, null, null, null, null, null});
         assertTrue(foundUpdated2.isEmpty());
         assertSame(foundUpdated1, foundUpdated2);

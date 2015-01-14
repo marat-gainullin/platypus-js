@@ -65,14 +65,6 @@ public class BinaryRowsetWriter extends RowsetWriter {
         try {
             ProtoWriter pw = new ProtoWriter(out);
             // properties
-            /*
-             if (aRowset.getSessionId() != null) {
-             pw.put(BinaryTags.SESSION, aRowset.getSessionId());
-             }
-             if (aRowset.isTransacted()) {
-             pw.put(BinaryTags.TRANSACTED);
-             }
-             */
             pw.put(BinaryTags.CURSOR_POSITION, aRowset.getCursorPos());
             // fields
             if (writeFields) {
@@ -81,27 +73,10 @@ public class BinaryRowsetWriter extends RowsetWriter {
                 pw.put(BinaryTags.METADATA);
                 pw.put(CoreTags.TAG_STREAM, metadataOut);
             }
-
-            boolean wasBeforeFirst = aRowset.isBeforeFirst();
-            boolean wasAfterFirst = aRowset.isAfterLast();
-            boolean wasShowOriginal = aRowset.isShowOriginal();
-            int oldCursorPos = aRowset.getCursorPos();
-            try {
                 // data
-                aRowset.setShowOriginal(true);
                 ByteArrayOutputStream originalOut = writeData(aRowset);
                 pw.put(BinaryTags.DATA);
                 pw.put(CoreTags.TAG_STREAM, originalOut);
-            } finally {
-                aRowset.setShowOriginal(wasShowOriginal);
-                if (wasBeforeFirst) {
-                    aRowset.beforeFirst();
-                } else if (wasAfterFirst) {
-                    aRowset.afterLast();
-                } else {
-                    aRowset.absolute(oldCursorPos);
-                }
-            }
             pw.flush();
         } finally {
             aRowset.getRowsetChangeSupport().setRowsetListeners(listeners);
@@ -209,9 +184,7 @@ public class BinaryRowsetWriter extends RowsetWriter {
         ProtoWriter dataPw = new ProtoWriter(dataOut);
         List<CustomSerializer> customSerializers = achieveCustomSerializers(aRowset.getFields());
         Fields fields = aRowset.getFields();
-        aRowset.beforeFirst();
-        while (aRowset.next()) {
-            Row row = aRowset.getCurrentRow();
+        for (Row row : aRowset.getOriginal()) {
             if (needToWriteRow(row)) {
                 ByteArrayOutputStream rowOut = new ByteArrayOutputStream();
                 ProtoWriter rowPw = new ProtoWriter(rowOut);
@@ -223,14 +196,14 @@ public class BinaryRowsetWriter extends RowsetWriter {
                     writeValue(fields, i, rowPw, customSerializers, toWrite, BinaryTags.ORIGINAL_VALUE);
                 }
                 // row flags
-                if (aRowset.getCurrentRow().isInserted()) {
+                if (row.isInserted()) {
                     rowPw.put(BinaryTags.INSERTED);
                 }
-                if (aRowset.getCurrentRow().isDeleted()) {
+                if (row.isDeleted()) {
                     rowPw.put(BinaryTags.DELETED);
                 }
                 // updated indicies set
-                Set<Integer> updatedFields = aRowset.getCurrentRow().getUpdatedColumns();
+                Set<Integer> updatedFields = row.getUpdatedColumns();
                 if (!updatedFields.isEmpty()) {
                     ByteArrayOutputStream updOut = new ByteArrayOutputStream();
                     ProtoWriter updPw = new ProtoWriter(updOut);

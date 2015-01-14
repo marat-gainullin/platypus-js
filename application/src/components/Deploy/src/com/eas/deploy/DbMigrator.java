@@ -86,7 +86,7 @@ public class DbMigrator {
     public boolean isBusy() {
         return busy;
     }
-    
+
     /**
      * Apply all required migrations to the database.
      *
@@ -225,8 +225,11 @@ public class DbMigrator {
             if (rs.size() != 1) {
                 throw new AppElementFilesException(ILLEGAL_VERSIONS_RECORDS_NUMBER_MSG);
             }
-            rs.first();
-            return rs.getInt(rs.getFields().find(ClientConstants.F_VERSION_VALUE));
+            rs.setCursorPos(1);
+            Object oVersionNumber = rs.getCurrentRow().getColumnObject(rs.getFields().find(ClientConstants.F_VERSION_VALUE));
+            if (oVersionNumber instanceof Number) {
+                return ((Number) oVersionNumber).intValue();
+            }
         } catch (Exception ex) {
             Logger.getLogger(DbMigrator.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -248,7 +251,7 @@ public class DbMigrator {
             r.setLog(log);
             r.setEntityName(ClientConstants.T_MTD_VERSION);
             r.setColumnObject(rs.getFields().find(ClientConstants.F_VERSION_VALUE), aVersion);
-            client.commit(Collections.singletonMap((String)null, log), null, null);
+            client.commit(Collections.singletonMap((String) null, log), null, null);
         } catch (Exception ex) {
             Logger.getLogger(DbMigrator.class.getName()).log(Level.SEVERE, null, ex);
         }

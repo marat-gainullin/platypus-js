@@ -58,6 +58,7 @@ public class ScriptUtils {
     protected static JSObject collectionDefFunc;
     protected static JSObject isArrayFunc;
     protected static JSObject makeObjFunc;
+    protected static JSObject makeArrayFunc;
     protected static JSObject listenFunc;
     protected static ScriptEngine engine;
     // Thread locals
@@ -348,6 +349,11 @@ public class ScriptUtils {
         makeObjFunc = aValue;
     }
 
+    public static void setMakeArrayFunc(JSObject aValue) {
+        assert makeArrayFunc == null;
+        makeArrayFunc = aValue;
+    }
+
     public static void setListenFunc(JSObject aValue) {
         assert listenFunc == null;
         listenFunc = aValue;
@@ -522,6 +528,12 @@ public class ScriptUtils {
     public static JSObject makeObj() {
         assert makeObjFunc != null : SCRIPT_NOT_INITIALIZED;
         Object oResult = makeObjFunc.call(null, new Object[]{});
+        return (JSObject) oResult;
+    }
+
+    public static JSObject makeArray() {
+        assert makeArrayFunc != null : SCRIPT_NOT_INITIALIZED;
+        Object oResult = makeArrayFunc.call(null, new Object[]{});
         return (JSObject) oResult;
     }
 

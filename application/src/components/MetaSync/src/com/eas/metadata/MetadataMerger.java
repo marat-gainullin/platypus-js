@@ -4,6 +4,7 @@
  */
 package com.eas.metadata;
 
+import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.metadata.Field;
@@ -788,7 +789,7 @@ public class MetadataMerger {
                     sqlsList.add(aSql);
                 }
                 if (!noExecuteSQL) {
-                    client.commit(Collections.singletonMap((String)null, Collections.singletonList((Change)q.prepareCommand())), null, null);
+                    client.commit(Collections.singletonMap((String) null, Collections.singletonList((Change) q.prepareCommand())), null, null);
                 }
                 if (sqlLogger != null) {
                     sqlLogger.log(Level.CONFIG, new StringBuilder().append(sqlCommentChars).append(numSql++).append(": ").toString());
@@ -836,42 +837,39 @@ public class MetadataMerger {
     private Map<String, Set<String>> readIndexNames(String aSchema, Set<String> aTables) {
         Map<String, Set<String>> mapIndexes = new HashMap();
         if (aTables != null && !aTables.isEmpty()) {
-            assert driver != null;
-            String sql4Indexes = driver.getSql4Indexes(aSchema, aTables);
-            SqlCompiledQuery queryIndexes;
             try {
+                assert driver != null;
+                String sql4Indexes = driver.getSql4Indexes(aSchema, aTables);
+                SqlCompiledQuery queryIndexes;
                 assert client != null;
                 queryIndexes = new SqlCompiledQuery(client, null, sql4Indexes);
                 Rowset rowset = queryIndexes.executeQuery(null, null);
-                if (rowset.first()) {
-                    Fields fields = rowset.getFields();
+                Fields fields = rowset.getFields();
+                for (Row r : rowset.getCurrent()) {
                     int nCol_Idx_TableName = fields.find(ClientConstants.JDBCIDX_TABLE_NAME);
                     int nCol_Idx_Name = fields.find(ClientConstants.JDBCIDX_INDEX_NAME);
                     int nCol_Idx_PKey = fields.find(ClientConstants.JDBCIDX_PRIMARY_KEY);
                     int nCol_Idx_FKey = fields.find(ClientConstants.JDBCIDX_FOREIGN_KEY);
-
-                    do {
-                        String tableName = rowset.getString(nCol_Idx_TableName);
-                        String tableNameUpper = tableName.toUpperCase();
-                        Set<String> indexes = mapIndexes.get(tableNameUpper);
-                        if (indexes == null) {
-                            indexes = new HashSet<>();
-                        }
-
-                        Object oIdxName = rowset.getObject(nCol_Idx_Name);
-                        Object oPKey = rowset.getObject(nCol_Idx_PKey);
-                        Object oFKeyName = rowset.getObject(nCol_Idx_FKey);
-
-                        // if not pkey and not fkey
-                        if ((oPKey == null || (oPKey instanceof Number && ((Number) oPKey).intValue() != 0))
-                                && (oFKeyName == null || (oFKeyName instanceof String && ((String) oFKeyName).isEmpty()))
-                                && oIdxName != null && (oIdxName instanceof String) && !((String) oIdxName).isEmpty()) {
-                            indexes.add(((String) oIdxName).toUpperCase());
-                        }
-                        if (!indexes.isEmpty()) {
-                            mapIndexes.put(tableNameUpper, indexes);
-                        }
-                    } while (rowset.next());
+                    String tableName = (String) r.getColumnObject(nCol_Idx_TableName);
+                    String tableNameUpper = tableName.toUpperCase();
+                    Set<String> indexes = mapIndexes.get(tableNameUpper);
+                    if (indexes == null) {
+                        indexes = new HashSet<>();
+                    }
+                    
+                    Object oIdxName = r.getColumnObject(nCol_Idx_Name);
+                    Object oPKey = r.getColumnObject(nCol_Idx_PKey);
+                    Object oFKeyName = r.getColumnObject(nCol_Idx_FKey);
+                    
+                    // if not pkey and not fkey
+                    if ((oPKey == null || (oPKey instanceof Number && ((Number) oPKey).intValue() != 0))
+                            && (oFKeyName == null || (oFKeyName instanceof String && ((String) oFKeyName).isEmpty()))
+                            && oIdxName != null && (oIdxName instanceof String) && !((String) oIdxName).isEmpty()) {
+                        indexes.add(((String) oIdxName).toUpperCase());
+                    }
+                    if (!indexes.isEmpty()) {
+                        mapIndexes.put(tableNameUpper, indexes);
+                    }
                 }
             } catch (Exception ex) {
                 log(Level.SEVERE, null, ex);

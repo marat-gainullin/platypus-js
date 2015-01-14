@@ -28,7 +28,7 @@ public interface ModelWidget<V> extends TableCellRenderer, TableCellEditor, HasV
             String[] path = aPath.split("\\.");
             String propName = path[0];
             for (int i = 1; i < path.length; i++) {
-                Object oTarget = anElement.getMember(propName);
+                Object oTarget = target.getMember(propName);
                 propName = path[i];
                 if (!(oTarget instanceof JSObject)) {
                     propName = null;
@@ -55,7 +55,7 @@ public interface ModelWidget<V> extends TableCellRenderer, TableCellEditor, HasV
             String[] path = aPath.split("\\.");
             String propName = path[0];
             for (int i = 1; i < path.length; i++) {
-                Object oTarget = anElement.getMember(propName);
+                Object oTarget = target.getMember(propName);
                 propName = path[i];
                 if (!(oTarget instanceof JSObject)) {
                     propName = null;

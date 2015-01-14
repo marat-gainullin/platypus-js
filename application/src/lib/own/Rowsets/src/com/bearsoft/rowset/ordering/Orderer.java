@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -50,7 +51,7 @@ public class Orderer extends RowsetAdapter implements RowsetEventsEarlyAccess, R
 
     protected Rowset rowset;
     protected List<Integer> fieldsIndicies = new ArrayList<>();
-    protected Map<List<Object>, ObservableLinkedHashSet<Row>> ordered;
+    protected Map<List<Object>, Subset> ordered;
     protected PropertyChangeListener keysInvalidator = (PropertyChangeEvent evt) -> {
         try {
             Row row = (Row) evt.getSource();
@@ -60,27 +61,16 @@ public class Orderer extends RowsetAdapter implements RowsetEventsEarlyAccess, R
             Logger.getLogger(Orderer.class.getName()).log(Level.SEVERE, null, ex);
         }
     };
-    protected final boolean stable;
     protected boolean caseSensitive = true;
 
     /**
      * Filter constructor.
      *
      * @param aFieldsIndicies
-     * @param aStable
      */
-    public Orderer(List<Integer> aFieldsIndicies, boolean aStable) {
+    public Orderer(List<Integer> aFieldsIndicies) {
         super();
         fieldsIndicies = aFieldsIndicies;
-        stable = aStable;
-    }
-
-    public Orderer(List<Integer> aFieldsIndicies) {
-        this(aFieldsIndicies, false);
-    }
-
-    public boolean isStable() {
-        return stable;
     }
 
     /**
@@ -109,18 +99,12 @@ public class Orderer extends RowsetAdapter implements RowsetEventsEarlyAccess, R
     }
 
     protected void clear() {
-        ordered.values().stream().forEach((ObservableLinkedHashSet<Row> aContent) -> {
+        ordered.values().stream().forEach((LinkedHashSet<Row> aContent) -> {
             aContent.stream().forEach((Row aRow) -> {
                 unsignFrom(aRow);
             });
         });
-        if (stable) {
-            ordered.values().stream().forEach((ObservableLinkedHashSet<Row> aContent) -> {
-                aContent.clear();
-            });
-        } else {
-            ordered.clear();
-        }
+        ordered.clear();
     }
 
     protected void addRows() {
@@ -189,10 +173,10 @@ public class Orderer extends RowsetAdapter implements RowsetEventsEarlyAccess, R
         if (!aRow.isDeleted()) {
             List<Object> ks = makeKeys(aRow, fieldsIndicies);
             if (ks != null) {
-                ObservableLinkedHashSet<Row> subset = ordered.get(ks);
+                Subset subset = ordered.get(ks);
                 // add to structure
                 if (subset == null) {
-                    subset = new ObservableLinkedHashSet<>();
+                    subset = new Subset();
                     ordered.put(ks, subset);
                 }
                 signOn(aRow);
@@ -226,7 +210,7 @@ public class Orderer extends RowsetAdapter implements RowsetEventsEarlyAccess, R
                     subset.remove(aRow);
                 }
                 unsignFrom(aRow);
-                if (!stable && subset.isEmpty()) {
+                if (subset.isEmpty()) {
                     ordered.remove(ks);
                 }
                 // Subset may be used by applied filter and so
@@ -273,7 +257,7 @@ public class Orderer extends RowsetAdapter implements RowsetEventsEarlyAccess, R
         }
     }
 
-    public ObservableLinkedHashSet<Row> get(List<Object> values) throws RowsetException {
+    public Subset get(List<Object> values) throws RowsetException {
         if (values != null && !values.isEmpty()) {
             List<Object> ks = valuesToKeys(values.toArray());
             return ordered.get(ks);
@@ -282,7 +266,7 @@ public class Orderer extends RowsetAdapter implements RowsetEventsEarlyAccess, R
         }
     }
 
-    public void put(List<Object> values, ObservableLinkedHashSet<Row> aValue) throws RowsetException {
+    public void put(List<Object> values, Subset aValue) throws RowsetException {
         if (values != null && !values.isEmpty()) {
             List<Object> ks = valuesToKeys(values.toArray());
             ordered.put(ks, aValue);
@@ -404,7 +388,7 @@ public class Orderer extends RowsetAdapter implements RowsetEventsEarlyAccess, R
         if (subset != null) {
             subset.remove(aRow);
             unsignFrom(aRow);
-            if (!stable && subset.isEmpty()) {
+            if (subset.isEmpty()) {
                 ordered.remove(keysToRemove);
             }
         }

@@ -289,7 +289,7 @@ public class RowsetChangeSupport {
         Set<RowsetListener> oldRowsetListeners = rowsetListeners;
         rowsetListeners = null;
         try {
-            source.absolute(oldRowPos);
+            source.setCursorPos(oldRowPos);
         } finally {
             rowsetListeners = oldRowsetListeners;
         }
@@ -454,26 +454,26 @@ public class RowsetChangeSupport {
      * scrolling has been performed.
      */
     public void fireScrolledEvent(int oldRowIndex) {
+        notifyCursor();
         if (rowsetListeners != null) {
             RowsetScrollEvent event = new RowsetScrollEvent(source, oldRowIndex, source.getCursorPos(), RowsetEventMoment.AFTER);
             notifyListeners((RowsetListener l) -> {
                 l.rowsetScrolled(event);
             });
         }
-        notifyCursor();
     }
 
     /**
      * Fires sortedEvent event to all registered listeners.
      */
     public void fireSortedEvent() {
+        notifyCursor();
         if (rowsetListeners != null) {
             RowsetSortEvent event = new RowsetSortEvent(source, RowsetEventMoment.AFTER);
             notifyListeners((RowsetListener l) -> {
                 l.rowsetSorted(event);
             });
         }
-        notifyCursor();
     }
 
     public void fireNetErrorEvent(Exception anErrorCause) {
@@ -486,14 +486,14 @@ public class RowsetChangeSupport {
     }
 
     public void fireBeforeRequeryEvent() {
+        oldCurrentRow = source.getCurrentRow();
+        oldLength = source.size();
         if (rowsetListeners != null) {
             RowsetRequeryEvent event = new RowsetRequeryEvent(source, RowsetEventMoment.BEFORE);
             notifyListeners((RowsetListener l) -> {
                 l.beforeRequery(event);
             });
         }
-        oldCurrentRow = source.getCurrentRow();
-        oldLength = source.size();
     }
 
     /**

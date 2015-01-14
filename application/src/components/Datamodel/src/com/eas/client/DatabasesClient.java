@@ -10,6 +10,7 @@
 package com.eas.client;
 
 import com.bearsoft.rowset.Converter;
+import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.dataflow.FlowProvider;
@@ -193,13 +194,14 @@ public class DatabasesClient {
         SqlCompiledQuery compiled = q.compile();
         CallableConsumer<Map<String, String>, Rowset> doWork = (Rowset rs) -> {
             Map<String, String> properties = new HashMap<>();
-            if (rs.first()) {
+            if (!rs.isEmpty()) {
+                Row r = rs.getRow(1);
                 properties.put(ClientConstants.F_USR_NAME, aUserName);
-                properties.put(ClientConstants.F_USR_CONTEXT, rs.getString(rs.getFields().find(ClientConstants.F_USR_CONTEXT)));
-                properties.put(ClientConstants.F_USR_EMAIL, rs.getString(rs.getFields().find(ClientConstants.F_USR_EMAIL)));
-                properties.put(ClientConstants.F_USR_PHONE, rs.getString(rs.getFields().find(ClientConstants.F_USR_PHONE)));
-                properties.put(ClientConstants.F_USR_FORM, rs.getString(rs.getFields().find(ClientConstants.F_USR_FORM)));
-                properties.put(ClientConstants.F_USR_PASSWD, rs.getString(rs.getFields().find(ClientConstants.F_USR_PASSWD)));
+                properties.put(ClientConstants.F_USR_CONTEXT, (String)r.getColumnObject(rs.getFields().find(ClientConstants.F_USR_CONTEXT)));
+                properties.put(ClientConstants.F_USR_EMAIL, (String)r.getColumnObject(rs.getFields().find(ClientConstants.F_USR_EMAIL)));
+                properties.put(ClientConstants.F_USR_PHONE, (String)r.getColumnObject(rs.getFields().find(ClientConstants.F_USR_PHONE)));
+                properties.put(ClientConstants.F_USR_FORM, (String)r.getColumnObject(rs.getFields().find(ClientConstants.F_USR_FORM)));
+                properties.put(ClientConstants.F_USR_PASSWD, (String)r.getColumnObject(rs.getFields().find(ClientConstants.F_USR_PASSWD)));
             }
             return properties;
         };

@@ -91,11 +91,15 @@ public class DbClientTest {
                         assertNotNull(rowset.getFlowProvider());
                         rowset.getFields().get(1).setPk(true);
                         assertTrue(rowset.size() > 0);
-                        rowset.beforeFirst();
+                        rowset.setCursorPos(0);
                         boolean rowMet = false;
                         int newValue = (new Random()).nextInt();
-                        while (rowset.next()) {
-                            Integer id = rowset.getInt(rowset.getFields().find("id"));
+                        while (rowset.setCursorPos(rowset.getCursorPos() + 1)) {
+                            Integer id = null;
+                            Object oId = rowset.getCurrentRow().getColumnObject(rowset.getFields().find("id"));
+                            if (oId instanceof Number) {
+                                id = ((Number) oId).intValue();
+                            }
                             assertNotNull(id);
                             if (id == 2) {
                                 rowMet = true;

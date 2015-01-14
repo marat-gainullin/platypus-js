@@ -31,11 +31,8 @@ public class RowsetTest extends RowsetBaseTest{
     public void tearDown() {
     }
 
-    /**
-     * Test of first method, of class Rowset.
-     */
     @Test
-    public void testInsert() throws InvalidColIndexException, InvalidCursorPositionException, RowsetException {
+    public void testInsert() throws Exception {
         System.out.println("testInsert");
         Rowset rowset = initRowset();
         assertFalse(rowset.isEmpty());
@@ -49,59 +46,16 @@ public class RowsetTest extends RowsetBaseTest{
         Rowset rowset = initRowset();
         assertFalse(rowset.isEmpty());
         int scrolled = 0;
-        rowset.first();
-        while (!rowset.isAfterLast()) {
+        rowset.setCursorPos(1);
+        while (rowset.getCursorPos() < rowset.size() + 1) {
             scrolled++;
-            rowset.next();
+            rowset.setCursorPos(rowset.getCursorPos()+1);
         }
         assertEquals(scrolled, testData.length);
-        assertFalse(rowset.next());
-        assertFalse(rowset.next());
-        assertTrue(rowset.isAfterLast());
-        assertTrue(rowset.isAfterLast());
-        assertTrue(rowset.afterLast());
-        assertTrue(rowset.afterLast());
-        assertTrue(rowset.afterLast());
-    }
-
-    @Test
-    public void testScroll2forward() throws InvalidCursorPositionException, InvalidColIndexException, RowsetException {
-        System.out.println("testScroll2forward");
-        Rowset rowset = initRowset();
-        assertFalse(rowset.isEmpty());
-        int scrolled = 0;
-        rowset.beforeFirst();
-        while (rowset.next()) {
-            scrolled++;
-        }
-        assertEquals(scrolled, testData.length);
-        assertFalse(rowset.next());
-        assertFalse(rowset.next());
-        assertTrue(rowset.isAfterLast());
-        assertTrue(rowset.isAfterLast());
-        assertTrue(rowset.afterLast());
-        assertTrue(rowset.afterLast());
-        assertTrue(rowset.afterLast());
-    }
-
-    @Test
-    public void testScroll3forward() throws InvalidCursorPositionException, InvalidColIndexException, RowsetException {
-        System.out.println("testScroll3forward");
-        Rowset rowset = initRowset();
-        assertFalse(rowset.isEmpty());
-        int scrolled = 0;
-        for (int i = 1; i <= rowset.size(); i++) {
-            rowset.absolute(i);
-            scrolled++;
-        }
-        assertEquals(scrolled, testData.length);
-        assertFalse(rowset.next());
-        assertFalse(rowset.next());
-        assertTrue(rowset.isAfterLast());
-        assertTrue(rowset.isAfterLast());
-        assertTrue(rowset.afterLast());
-        assertTrue(rowset.afterLast());
-        assertTrue(rowset.afterLast());
+        assertFalse(rowset.setCursorPos(rowset.getCursorPos()+1));
+        assertFalse(rowset.setCursorPos(rowset.getCursorPos()+1));
+        assertTrue(rowset.getCursorPos() == rowset.size() + 1);
+        assertTrue(rowset.setCursorPos(rowset.size() + 1));
     }
 
     @Test
@@ -110,61 +64,18 @@ public class RowsetTest extends RowsetBaseTest{
         Rowset rowset = initRowset();
         assertFalse(rowset.isEmpty());
         int scrolled = 0;
-        rowset.last();
-        while (!rowset.isBeforeFirst()) {
+        rowset.setCursorPos(rowset.size());
+        while (rowset.getCursorPos() > 0) {
             scrolled++;
-            rowset.previous();
+            rowset.setCursorPos(rowset.getCursorPos() - 1);
         }
         assertEquals(scrolled, testData.length);
-        assertFalse(rowset.previous());
-        assertFalse(rowset.previous());
-        assertTrue(rowset.isBeforeFirst());
-        assertTrue(rowset.isBeforeFirst());
-        assertTrue(rowset.beforeFirst());
-        assertTrue(rowset.beforeFirst());
-        assertTrue(rowset.beforeFirst());
+        assertFalse(rowset.setCursorPos(rowset.getCursorPos() - 1));
+        assertFalse(rowset.setCursorPos(rowset.getCursorPos() - 1));
+        assertTrue(rowset.getCursorPos() == 0);
+        assertTrue(rowset.setCursorPos(0));
     }
-
-    @Test
-    public void testScroll2backward() throws InvalidCursorPositionException, InvalidColIndexException, RowsetException {
-        System.out.println("testScroll2backward");
-        Rowset rowset = initRowset();
-        assertFalse(rowset.isEmpty());
-        int scrolled = 0;
-        rowset.afterLast();
-        while (rowset.previous()) {
-            scrolled++;
-        }
-        assertEquals(scrolled, testData.length);
-        assertFalse(rowset.previous());
-        assertFalse(rowset.previous());
-        assertTrue(rowset.isBeforeFirst());
-        assertTrue(rowset.isBeforeFirst());
-        assertTrue(rowset.beforeFirst());
-        assertTrue(rowset.beforeFirst());
-        assertTrue(rowset.beforeFirst());
-    }
-
-    @Test
-    public void testScroll3backward() throws InvalidCursorPositionException, InvalidColIndexException, RowsetException {
-        System.out.println("testScroll3backward");
-        Rowset rowset = initRowset();
-        assertFalse(rowset.isEmpty());
-        int scrolled = 0;
-        for (int i = rowset.size(); i >= 1; i--) {
-            rowset.absolute(i);
-            scrolled++;
-        }
-        assertEquals(scrolled, testData.length);
-        assertFalse(rowset.previous());
-        assertFalse(rowset.previous());
-        assertTrue(rowset.isBeforeFirst());
-        assertTrue(rowset.isBeforeFirst());
-        assertTrue(rowset.beforeFirst());
-        assertTrue(rowset.beforeFirst());
-        assertTrue(rowset.beforeFirst());
-    }
-
+    
     @Test
     public void testDeleteAllRows() throws InvalidCursorPositionException, InvalidColIndexException, RowsetException {
         System.out.println("testDeleteAllRows");
@@ -191,38 +102,37 @@ public class RowsetTest extends RowsetBaseTest{
         assertEquals(rowset.size(), testData.length);
         int startPos = 10;
         int toDelete = 4;
-        rowset.absolute(startPos);
+        rowset.setCursorPos(startPos);
         for (int i = 0; i < toDelete; i++) {
-            rowset.delete();
+            rowset.deleteAt(rowset.getCursorPos());
         }
         assertEquals(rowset.size(), testData.length - toDelete);
         assertEquals(rowset.getCursorPos(), startPos);
 
         toDelete = 10;
         for (int i = 0; i < toDelete; i++) {
-            rowset.delete();
+            rowset.deleteAt(rowset.getCursorPos());
         }
         assertEquals(rowset.getCursorPos(), startPos-2);
 
-        rowset.delete();
+        rowset.deleteAt(rowset.getCursorPos());
         assertEquals(rowset.getCursorPos(), startPos-3);
-        rowset.delete();
+        rowset.deleteAt(rowset.getCursorPos());
         assertEquals(rowset.getCursorPos(), startPos-4);
-        rowset.delete();
+        rowset.deleteAt(rowset.getCursorPos());
         assertEquals(rowset.getCursorPos(), startPos-5);
-        rowset.delete();
+        rowset.deleteAt(rowset.getCursorPos());
         assertEquals(rowset.getCursorPos(), startPos-6);
-        rowset.delete();
+        rowset.deleteAt(rowset.getCursorPos());
         assertEquals(rowset.getCursorPos(), startPos-7);
-        rowset.delete();
+        rowset.deleteAt(rowset.getCursorPos());
         assertEquals(rowset.getCursorPos(), startPos-8);
-        rowset.delete();
+        rowset.deleteAt(rowset.getCursorPos());
         assertEquals(rowset.getCursorPos(), startPos-9);
         assertEquals(rowset.size(), 1);
-        rowset.delete();
+        rowset.deleteAt(rowset.getCursorPos());
         assertTrue(rowset.isEmpty());
-        assertTrue(rowset.isBeforeFirst());
-        assertTrue(rowset.isAfterLast());
+        assertTrue(rowset.getCursorPos() == 0);
     }
 
     @Test
@@ -233,16 +143,16 @@ public class RowsetTest extends RowsetBaseTest{
         // update some data
         int fieldFromUpdate = 8;
         int field2Update = 3;
-        rowset.beforeFirst();
+        rowset.setCursorPos(0);
         int recIndex = 0;
-        while (rowset.next()) {
+        while (rowset.setCursorPos(rowset.getCursorPos() + 1)) {
             rowset.getCurrentRow().setColumnObject(field2Update, testData[recIndex][fieldFromUpdate - 1]);
             recIndex++;
         }
         // check if data is updated
         for (int i = 1; i <= testData.length; i++) {
-            rowset.absolute(i);
-            Object lValue = rowset.getObject(field2Update);
+            rowset.setCursorPos(i);
+            Object lValue = rowset.getCurrentRow().getColumnObject(field2Update);
             assertEquals(testData[i-1][fieldFromUpdate - 1], lValue);
         }
         // cancel updated data
@@ -250,42 +160,23 @@ public class RowsetTest extends RowsetBaseTest{
         checkRowsetCorrespondToTestData(rowset);
 
         // update some data again
-        rowset.beforeFirst();
+        rowset.setCursorPos(0);
         recIndex = 0;
-        while (rowset.next()) {
+        while (rowset.setCursorPos(rowset.getCursorPos() + 1)) {
             rowset.getCurrentRow().setColumnObject(field2Update, testData[recIndex][fieldFromUpdate - 1]);
             recIndex++;
         }
         // check if data is updated
         for (int i = 1; i <= testData.length; i++) {
-            rowset.absolute(i);
-            Object lValue = rowset.getObject(field2Update);
+            rowset.setCursorPos(i);
+            Object lValue = rowset.getCurrentRow().getColumnObject(field2Update);
             assertEquals(lValue, testData[i-1][fieldFromUpdate - 1]);
-        }
-        rowset.setShowOriginal(true);
-        try {
-            checkRowsetCorrespondToTestData(rowset);
-        } finally {
-            rowset.setShowOriginal(false);
         }
         // check if data is updated
         for (int i = 1; i <= testData.length; i++) {
-            rowset.absolute(i);
-            Object lValue = rowset.getObject(field2Update);
+            rowset.setCursorPos(i);
+            Object lValue = rowset.getCurrentRow().getColumnObject(field2Update);
             assertEquals(lValue, testData[i-1][fieldFromUpdate - 1]);
-        }
-        // apply updated data
-        rowset.currentToOriginal();
-        // check if data is updated
-        rowset.setShowOriginal(true);
-        try {
-            for (int i = 1; i <= testData.length; i++) {
-                rowset.absolute(i);
-                Object lValue = rowset.getObject(field2Update);
-                assertEquals(lValue, testData[i-1][fieldFromUpdate - 1]);
-            }
-        } finally {
-            rowset.setShowOriginal(false);
         }
     }
 
@@ -297,16 +188,16 @@ public class RowsetTest extends RowsetBaseTest{
         // update some data
         int fieldFromUpdate = 4;
         int field2Update = 2;
-        rowset.beforeFirst();
+        rowset.setCursorPos(0);
         int recIndex = 0;
-        while (rowset.next()) {
+        while (rowset.setCursorPos(rowset.getCursorPos() + 1)) {
             rowset.getCurrentRow().setColumnObject(field2Update, testData[recIndex][fieldFromUpdate - 1]);
             recIndex++;
         }
         // check if data is not updated, because of incompatible values types
         for (int i = 1; i <= testData.length; i++) {
-            rowset.absolute(i);
-            Object lValue = rowset.getObject(field2Update);
+            rowset.setCursorPos(i);
+            Object lValue = rowset.getCurrentRow().getColumnObject(field2Update);
             Object etalonData = testData[i-1][fieldFromUpdate - 1];
             if(etalonData != null || lValue != null)
                 assertNotSame(etalonData, lValue);

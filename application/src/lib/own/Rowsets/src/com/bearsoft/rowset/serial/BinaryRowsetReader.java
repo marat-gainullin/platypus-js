@@ -215,7 +215,7 @@ public class BinaryRowsetReader extends RowsetReader {
             ProtoNode currentDataNode = rowsetNode.getChild(BinaryTags.DATA);
             readData(rowset, currentDataNode);
             // position
-            rowset.absolute(cursorPos);
+            rowset.setCursorPos(cursorPos);
         } catch (Exception ex) {
             if (ex instanceof RowsetException) {
                 throw (RowsetException) ex;

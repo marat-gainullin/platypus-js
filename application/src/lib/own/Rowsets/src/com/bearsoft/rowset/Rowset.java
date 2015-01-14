@@ -26,7 +26,6 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * Rowset serves as original and updated rows vectors holder. There are three
@@ -52,7 +51,6 @@ public class Rowset {
     protected List<Row> current = new ArrayList<>();
     // data view capabilities
     protected int currentRowPos; // before first position
-    protected boolean showOriginal;
     // data processing
     protected Set<Orderer> orderers = new HashSet<>(); // filters
     protected Set<Filter> filters = new HashSet<>(); // filters
@@ -582,286 +580,11 @@ public class Rowset {
     }
 
     /**
-     * Moves cursor on pre first position. Cusor position becomes 0.
-     *
-     * @return
-     * @throws com.bearsoft.rowset.exceptions.InvalidCursorPositionException
-     * @see #absolute(int aCursorPos)
-     * @see #getCursorPos()
-     * @see #size()
-     * @see #first()
-     * @see #isBeforeFirst()
-     * @see #previous()
-     * @see #next()
-     * @see #last()
-     * @see #afterLast()
-     * @see #isAfterLast()
-     */
-    public boolean beforeFirst() throws InvalidCursorPositionException {
-        if (!isBeforeFirst()) {
-            if (rowsetChangeSupport.fireWillScrollEvent(0)) {
-                int oldCurrentRowPos = currentRowPos;
-                currentRowPos = 0;
-                rowsetChangeSupport.fireScrolledEvent(oldCurrentRowPos);
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return true;
-        }
-    }
-
-    /**
-     * Returns if cursor is before the first row. Takes into account
-     * <code>showOriginal</code> flag
-     *
-     * @return True if the cursor is on before first position.
-     * @see #absolute(int aCursorPos)
-     * @see #getCursorPos()
-     * @see #size()
-     * @see #beforeFirst()
-     * @see #first()
-     * @see #previous()
-     * @see #next()
-     * @see #last()
-     * @see #afterLast()
-     * @see #isAfterLast()
-     */
-    public boolean isBeforeFirst() {
-        assert currentRowPos >= 0;
-        return isEmpty() || currentRowPos == 0;
-    }
-
-    /**
-     * Moves cursor to the first position in the rowset. It won't to position
-     * the rowset if it is empty. After that, position becomes 1 if this method
-     * returns true. If this method returns false, than position remains
-     * unchnaged. Takes into account <code>showOriginal</code> flag
-     *
-     * @return True if rowset is on the first position, and false if it is not.
-     * @throws com.bearsoft.rowset.exceptions.InvalidCursorPositionException
-     * @see #absolute(int aCursorPos)
-     * @see #getCursorPos()
-     * @see #size()
-     * @see #beforeFirst()
-     * @see #isBeforeFirst()
-     * @see #previous()
-     * @see #next()
-     * @see #last()
-     * @see #afterLast()
-     * @see #isAfterLast()
-     */
-    public boolean first() throws InvalidCursorPositionException {
-        if (!isEmpty()) {
-            if (currentRowPos != 1) {
-                if (rowsetChangeSupport.fireWillScrollEvent(1)) {
-                    int oldCurrentRowPos = currentRowPos;
-                    currentRowPos = 1;
-                    rowsetChangeSupport.fireScrolledEvent(oldCurrentRowPos);
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Moves cursor to the last position in the rowset. It won't to position the
-     * rowset if it is empty. After that, position equals to rows count if this
-     * method returns true. If this method returns false, than position remains
-     * unchnaged. Takes into account <code>showOriginal</code> flag
-     *
-     * @return True if rowset is on the last position, and false if it is not.
-     * @throws com.bearsoft.rowset.exceptions.InvalidCursorPositionException
-     * @see #absolute(int aCursorPos)
-     * @see #getCursorPos()
-     * @see #size()
-     * @see #beforeFirst()
-     * @see #first()
-     * @see #isBeforeFirst()
-     * @see #previous()
-     * @see #next()
-     * @see #afterLast()
-     * @see #isAfterLast()
-     */
-    public boolean last() throws InvalidCursorPositionException {
-        if (!isEmpty()) {
-            if (currentRowPos != size()) {
-                if (rowsetChangeSupport.fireWillScrollEvent(size())) {
-                    int oldCurrentRowPos = currentRowPos;
-                    currentRowPos = size();
-                    rowsetChangeSupport.fireScrolledEvent(oldCurrentRowPos);
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Moves cursor to the after last position in the rowset. It won't to
-     * position the rowset if it is empty. After positioning, position equals to
-     * rows count+1 if this method returns true. If this method returns false,
-     * than position remains 0. Takes into account <code>showOriginal</code>
-     * flag
-     *
-     * @return True if has been positioned, and false if it hasn't.
-     * @throws com.bearsoft.rowset.exceptions.InvalidCursorPositionException
-     * @see #absolute(int aCursorPos)
-     * @see #getCursorPos()
-     * @see #size()
-     * @see #beforeFirst()
-     * @see #first()
-     * @see #isBeforeFirst()
-     * @see #previous()
-     * @see #next()
-     * @see #last()
-     * @see #isAfterLast()
-     */
-    public boolean afterLast() throws InvalidCursorPositionException {
-        if (!isAfterLast()) {
-            if (rowsetChangeSupport.fireWillScrollEvent(size() + 1)) {
-                int oldCurrentRowPos = currentRowPos;
-                currentRowPos = size() + 1;
-                rowsetChangeSupport.fireScrolledEvent(oldCurrentRowPos);
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return true;
-        }
-    }
-
-    /**
-     * Returns if cursor is after last row. Takes into account
-     * <code>showOriginal</code> flag
-     *
-     * @return True if the cursor is on after last position.
-     * @see #absolute(int aCursorPos)
-     * @see #getCursorPos()
-     * @see #size()
-     * @see #beforeFirst()
-     * @see #first()
-     * @see #isBeforeFirst()
-     * @see #previous()
-     * @see #next()
-     * @see #last()
-     * @see #afterLast()
-     */
-    public boolean isAfterLast() {
-        return isEmpty() || currentRowPos > size();
-    }
-
-    /**
-     * Moves the cursor one position forward. Takes into account
-     * <code>showOriginal</code> flag
-     *
-     * @return True if new position is on the next row. False if the rowset is
-     * empty or cursor becomes after last position. In this case cusor is moved,
-     * but method returns false.
-     * @throws com.bearsoft.rowset.exceptions.InvalidCursorPositionException
-     * @see #absolute(int aCursorPos)
-     * @see #getCursorPos()
-     * @see #size()
-     * @see #beforeFirst()
-     * @see #first()
-     * @see #isBeforeFirst()
-     * @see #previous()
-     * @see #last()
-     * @see #afterLast()
-     * @see #isAfterLast()
-     */
-    public boolean next() throws InvalidCursorPositionException {
-        if (!isEmpty()) {
-            if (currentRowPos < size() + 1) {
-                if (currentRowPos < size()) {
-                    if (rowsetChangeSupport.fireWillScrollEvent(currentRowPos + 1)) {
-                        int oldCurrentRowPos = currentRowPos;
-                        currentRowPos++;
-                        rowsetChangeSupport.fireScrolledEvent(oldCurrentRowPos);
-                        return true;
-                    } else {
-                        return false;
-                    }
-                } else {
-                    if (rowsetChangeSupport.fireWillScrollEvent(currentRowPos + 1)) {
-                        int oldCurrentRowPos = currentRowPos;
-                        currentRowPos++;
-                        rowsetChangeSupport.fireScrolledEvent(oldCurrentRowPos);
-                    }
-                    return false;
-                }
-            }
-        } else {
-            assert currentRowPos == 0;
-        }
-        return false;
-    }
-
-    /**
-     * Moves the cursor one position backward. Takes into account
-     * <code>showOriginal</code> flag
-     *
-     * @return True if new position is on the previous row. False if the rowset
-     * is empty or cursor becomes before first position. In this case cusor is
-     * moved, but method returns false.
-     * @throws com.bearsoft.rowset.exceptions.InvalidCursorPositionException
-     * @see #absolute(int aCursorPos)
-     * @see #getCursorPos()
-     * @see #size()
-     * @see #beforeFirst()
-     * @see #first()
-     * @see #isBeforeFirst()
-     * @see #next()
-     * @see #last()
-     * @see #afterLast()
-     * @see #isAfterLast()
-     */
-    public boolean previous() throws InvalidCursorPositionException {
-        if (!isEmpty()) {
-            if (currentRowPos > 0) {
-                if (currentRowPos > 1) {
-                    if (rowsetChangeSupport.fireWillScrollEvent(currentRowPos - 1)) {
-                        int oldCurrentRowPos = currentRowPos;
-                        currentRowPos--;
-                        rowsetChangeSupport.fireScrolledEvent(oldCurrentRowPos);
-                        return true;
-                    } else {
-                        return false;
-                    }
-                } else {
-                    if (rowsetChangeSupport.fireWillScrollEvent(currentRowPos - 1)) {
-                        int oldCurrentRowPos = currentRowPos;
-                        currentRowPos--;
-                        rowsetChangeSupport.fireScrolledEvent(oldCurrentRowPos);
-                    }
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        } else {
-            assert currentRowPos == 0;
-        }
-        return false;
-    }
-
-    /**
      * Returns rows count in this rowset. Takes into account
      * <code>showOriginal</code> flag
      *
      * @return Rows count in this rowset.
-     * @see #absolute(int aCursorPos)
+     * @see #setCursorPos(int)
      * @see #getCursorPos()
      * @see #beforeFirst()
      * @see #first()
@@ -873,11 +596,7 @@ public class Rowset {
      * @see #isAfterLast()
      */
     public int size() {
-        if (showOriginal) {
-            return original.size();
-        } else {
-            return current.size();
-        }
+        return current.size();
     }
 
     /**
@@ -932,7 +651,7 @@ public class Rowset {
      * Returns current cursor position in this rowset.
      *
      * @return Current cursor position in this rowset.
-     * @see #absolute(int aCursorPos)
+     * @see #setCursorPos(int)
      * @see #size()
      * @see #beforeFirst()
      * @see #first()
@@ -965,15 +684,16 @@ public class Rowset {
      * @see #afterLast()
      * @see #isAfterLast()
      */
-    public boolean absolute(int aCursorPos) throws InvalidCursorPositionException {
+    public boolean setCursorPos(int aCursorPos) throws InvalidCursorPositionException {
         if (!isEmpty()) {
-            if (aCursorPos >= 1 && aCursorPos <= size()) {
+            // from before first (0) to after last (size() + 1) inclusive
+            if (aCursorPos >= 0 && aCursorPos <= size() + 1) {
                 if (aCursorPos != currentRowPos) {
                     if (rowsetChangeSupport.fireWillScrollEvent(aCursorPos)) {
                         int oldCurrentRowPos = currentRowPos;
                         currentRowPos = aCursorPos;
                         rowsetChangeSupport.fireScrolledEvent(oldCurrentRowPos);
-                        return true;
+                        return currentRowPos > 0 && currentRowPos < size() + 1;// return if cursor points to any record
                     } else {
                         return false;
                     }
@@ -991,7 +711,7 @@ public class Rowset {
     /**
      * Returns a row by ordinal number. Row number is 1 - based.
      *
-     * @param aRowNumber Row number you whant to be used to locate the row.
+     * @param aIndex Row number you whant to be used to locate the row.
      * @return Row if speciified row number is valid, null otherwise.
      * @see #getCursorPos()
      * @see #size()
@@ -1004,14 +724,10 @@ public class Rowset {
      * @see #afterLast()
      * @see #isAfterLast()
      */
-    public Row getRow(int aRowNumber) {
+    public Row getRow(int aIndex) {
         if (!isEmpty()) {
-            if (aRowNumber >= 1 && aRowNumber <= size()) {
-                if (showOriginal) {
-                    return original.get(aRowNumber - 1);
-                } else {
-                    return current.get(aRowNumber - 1);
-                }
+            if (aIndex >= 1 && aIndex <= size()) {
+                return current.get(aIndex - 1);
             } else {
                 return null;
             }
@@ -1026,64 +742,8 @@ public class Rowset {
      * @return Whether this rowset is empty.
      */
     public boolean isEmpty() {
-        if (showOriginal) {
-            return original.isEmpty();
-        } else {
-            return current.isEmpty();
-        }
+        return current.isEmpty();
     }
-
-    /**
-     * Simple insert method. Inserts a new <code>Row</code> in this rowset in
-     * both original and current rows vectors. Initialization with current
-     * filter values is performed.
-     *
-     * @throws com.bearsoft.rowset.exceptions.RowsetException
-    public void insert() throws RowsetException {
-        insert(new Object[]{});
-    }
-     */
-
-    /**
-     * Simple insert method. Inserts a new <code>Row</code> in this rowset in
-     * both original and current rows arrays. First, filter's values are used
-     * for initialization, than <code>initingValues</code> specified is used.
-     * Takes into account <code>showOriginal</code> flag. If
-     * <code>showOriginal</code> flag is setted, than no action is performed.
-     *
-     * @param initingValues Values inserting row to be initialized with.
-     * @throws RowsetException
-    public void insert(Object... initingValues) throws RowsetException {
-        if (!showOriginal) {
-            assert fields != null;
-            Row row = new Row(flow.getEntityId(), fields);
-            insert(row, false, initingValues);
-        }
-    }
-     */
-
-    /**
-     * Simple insert method. Inserts a new <code>Row</code> in this rowset in
-     * both original and current rows arrays. First, filter's values are used
-     * for initialization, than <code>initingValues</code> specified is used.
-     * Takes into account <code>showOriginal</code> flag. If
-     * <code>showOriginal</code> flag is setted, than no action is performed.
-     *
-     * @param insertAt
-     * @param aAjusting
-     * @param initingValues Values inserting row to be initialized with.
-     * @return
-     * @throws RowsetException
-    public Row insertAt(int insertAt, boolean aAjusting, Object... initingValues) throws RowsetException {
-        if (!showOriginal) {
-            assert fields != null;
-            Row row = new Row(flow.getEntityId(), fields);
-            insertAt(row, aAjusting, insertAt, initingValues);
-            return row;
-        }
-        return null;
-    }
-     */
 
     /**
      * Collections - like insert method. Inserts a passed <code>Row</code> in
@@ -1114,16 +774,18 @@ public class Rowset {
     public void insert(Row toInsert, boolean aAjusting, Object... initingValues)
             throws RowsetException {
         int insertAtPosition;
-        if (isBeforeFirst()) {
+        if (currentRowPos < 0 || currentRowPos > size()) {
             insertAtPosition = 1;
-        } else if (isAfterLast()) {
-            insertAtPosition = currentRowPos;
         } else {
             insertAtPosition = currentRowPos + 1;
         }
         insertAt(toInsert, aAjusting, insertAtPosition, initingValues);
     }
 
+    public void insertAt(boolean aAjusting, int insertAt, Object[] initingValues) throws RowsetException {
+        insertAt(new Row(flow.getEntityId(), fields), aAjusting, insertAt, initingValues);
+    }
+    
     /**
      * Row insert method. Inserts a passed <code>Row</code> in this rowset in
      * both original and current rows arrays. First, filter's values are used
@@ -1138,34 +800,32 @@ public class Rowset {
      * @param initingValues Values inserting row to be initialized with.
      * @throws RowsetException
      */
-    public void insertAt(Row toInsert, boolean aAjusting, int insertAt, Object... initingValues) throws RowsetException {
-        if (!showOriginal) {
-            assert fields != null;
-            if (toInsert == null) {
-                throw new RowsetException("Bad inserting row. It must be non null value.");
+    public void insertAt(Row toInsert, boolean aAjusting, int insertAt, Object[] initingValues) throws RowsetException {
+        assert fields != null;
+        if (toInsert == null) {
+            throw new RowsetException("Bad inserting row. It must be non null value.");
+        }
+        if (toInsert.getColumnCount() != fields.getFieldsCount()) {
+            throw new RowsetException("Bad column count. While inserting, columns count in a row must same with fields count in rowset fields.");
+        }
+        toInsert.setLog(log);
+        toInsert.setEntityName(flow != null ? flow.getEntityId() : "");
+        insertingRow = toInsert;
+        try {
+            if (rowsetChangeSupport.fireWillInsertEvent(insertingRow, aAjusting)) {
+                initColumns(insertingRow, initingValues);
+                insertingRow.setInserted();
+                // work on current rows vector, probably filtered
+                current.add(insertAt - 1, insertingRow);
+                currentRowPos = insertAt;
+                original.add(insertingRow);
+                Row insertedRow = insertingRow;
+                modified = true;
+                generateInsert(insertedRow);
+                rowsetChangeSupport.fireRowInsertedEvent(insertedRow, aAjusting);
             }
-            if (toInsert.getColumnCount() != fields.getFieldsCount()) {
-                throw new RowsetException("Bad column count. While inserting, columns count in a row must same with fields count in rowset fields.");
-            }
-            toInsert.setLog(log);
-            toInsert.setEntityName(flow != null ? flow.getEntityId() : "");
-            insertingRow = toInsert;
-            try {
-                if (rowsetChangeSupport.fireWillInsertEvent(insertingRow, aAjusting)) {
-                    initColumns(insertingRow, initingValues);
-                    insertingRow.setInserted();
-                    // work on current rows vector, probably filtered
-                    current.add(insertAt - 1, insertingRow);
-                    currentRowPos = insertAt;
-                    original.add(insertingRow);
-                    Row insertedRow = insertingRow;
-                    modified = true;
-                    generateInsert(insertedRow);
-                    rowsetChangeSupport.fireRowInsertedEvent(insertedRow, aAjusting);
-                }
-            } finally {
-                insertingRow = null;
-            }
+        } finally {
+            insertingRow = null;
         }
     }
 
@@ -1186,7 +846,7 @@ public class Rowset {
      * @param values Values the specified <code>Row</code> to initialize with.
      * @throws com.bearsoft.rowset.exceptions.RowsetException
      */
-    protected void initColumns(Row aRow, Object... values) throws RowsetException {
+    protected void initColumns(Row aRow, Object[] values) throws RowsetException {
         if (aRow != null) {
             // key fields generation
             for (int i = 1; i <= fields.getFieldsCount(); i++) {
@@ -1260,68 +920,6 @@ public class Rowset {
     }
 
     /**
-     * Returns if <code>showOriginal</code> flag is set.
-     *
-     * @return True if showOriginal flag is set.
-     */
-    public boolean isShowOriginal() {
-        return showOriginal;
-    }
-
-    /**
-     * Sets <code>showOriginal</code> flag to this rowset.
-     *
-     * @param aShowOriginal Flag, indicating this rowset show original rows
-     * vector.
-     */
-    public void setShowOriginal(boolean aShowOriginal) {
-        showOriginal = aShowOriginal;
-        if (currentRowPos < 0) {
-            currentRowPos = 0;
-        }
-        if (currentRowPos > size() + 1) {
-            currentRowPos = size() + 1;
-        }
-    }
-
-    /**
-     * Deletes current row. It means current row is marked as deleted and
-     * removed from cuurent rows vector. If cursor is not on the valid position
-     * no action is performed. Takes into account <code>showOriginal</code>
-     * flag. If <code>showOriginal</code> flag is setted, than no action is
-     * performed. If <code>showOriginal</code> flag setted, than no action is
-     * performed.
-     *
-     * @see #delete(java.util.Set)
-     * @see #deleteAll()
-     * @throws RowsetException
-     */
-    public void delete() throws RowsetException {
-        if (!showOriginal) {
-            checkCursor();
-            Row row = getCurrentRow();
-            assert row != null;
-            if (rowsetChangeSupport.fireWillDeleteEvent(row)) {
-                row.setDeleted();
-                generateDelete(row);
-                current.remove(currentRowPos - 1);
-                if (!isEmpty()) {
-                    if (isBeforeFirst()) {
-                        currentRowPos = 1;
-                    }
-                    if (isAfterLast()) {
-                        currentRowPos = current.size();
-                    }
-                } else {
-                    currentRowPos = 0;
-                }
-                modified = true;
-                rowsetChangeSupport.fireRowDeletedEvent(row);
-            }
-        }
-    }
-
-    /**
      * Deletes all rows in the rowset. Rows are marked as deleted and removed
      * from cuurent rows vector. After deleting, cursor position becomes invalid
      * and both <code>isBeforeFirst()</code> and <code>isAfterLast()</code> must
@@ -1336,42 +934,24 @@ public class Rowset {
      * @throws RowsetException
      */
     public void deleteAll() throws RowsetException {
-        if (!showOriginal) {
-            /**
-             * The following approach is very harmful! If any events listener
-             * whould like to veto the deletion, than the cycle never ends.
-             * while(!isEmpty()) delete();
-             */
-            boolean wasBeforeFirst = isBeforeFirst();
-            boolean wasAfterLast = isAfterLast();
-            for (int i = current.size() - 1; i >= 0; i--) {
-                Row row = current.get(i);
-                assert row != null;
-                if (rowsetChangeSupport.fireWillDeleteEvent(row, i != 0)) { // last iteration will fire non-ajusting event
-                    row.setDeleted();
-                    generateDelete(row);
-                    current.remove(i);
-                    modified = true;
-                    currentRowPos = i + 1;
-                    rowsetChangeSupport.fireRowDeletedEvent(row, i != 0); // last iteration will fire non-ajusting event
-                    currentRowPos = Math.min(currentRowPos, current.size());
-                }
+        /**
+         * The following approach is very harmful! If any events listener whould
+         * like to veto the deletion, than the cycle never ends.
+         * while(!isEmpty()) delete();
+         */
+        for (int i = current.size() - 1; i >= 0; i--) {
+            Row row = current.get(i);
+            assert row != null;
+            if (rowsetChangeSupport.fireWillDeleteEvent(row, i != 0)) { // last iteration will fire non-ajusting event
+                row.setDeleted();
+                generateDelete(row);
+                current.remove(i);
+                modified = true;
+                currentRowPos = Math.min(i + 1, current.size());
+                rowsetChangeSupport.fireRowDeletedEvent(row, i != 0); // last iteration will fire non-ajusting event
             }
-            if (current.isEmpty()) {
-                currentRowPos = 0;
-            } else {
-                if (wasBeforeFirst) {
-                    currentRowPos = 0;
-                }
-                if (wasAfterLast) {
-                    currentRowPos = size() + 1;
-                }
-                if (!wasBeforeFirst && !wasAfterLast && currentRowPos > size()) {
-                    currentRowPos = size();
-                }
-            }
-            wideCheckCursor();
         }
+        wideCheckCursor();
     }
 
     /**
@@ -1387,26 +967,24 @@ public class Rowset {
      * @throws RowsetException
      */
     public void delete(Set<Row> aRows2Delete) throws RowsetException {
-        if (!showOriginal) {
-            Set<Row> rows2Delete = new HashSet<>();
-            rows2Delete.addAll(aRows2Delete);
-            for (int i = current.size() - 1; i >= 0; i--) {
-                Row row = current.get(i);
-                assert row != null;
-                if (rows2Delete.contains(row)) {
-                    rows2Delete.remove(row);
-                    if (rowsetChangeSupport.fireWillDeleteEvent(row, !rows2Delete.isEmpty())) { // last iteration will fire non-ajusting event
-                        row.setDeleted();
-                        generateDelete(row);
-                        current.remove(i);
-                        modified = true;
-                        currentRowPos = Math.min(i + 1, current.size());
-                        rowsetChangeSupport.fireRowDeletedEvent(row, !rows2Delete.isEmpty()); // last iteration will fire non-ajusting event
-                    }
+        Set<Row> rows2Delete = new HashSet<>();
+        rows2Delete.addAll(aRows2Delete);
+        for (int i = current.size() - 1; i >= 0; i--) {
+            Row row = current.get(i);
+            assert row != null;
+            if (rows2Delete.contains(row)) {
+                rows2Delete.remove(row);
+                if (rowsetChangeSupport.fireWillDeleteEvent(row, !rows2Delete.isEmpty())) { // last iteration will fire non-ajusting event
+                    row.setDeleted();
+                    generateDelete(row);
+                    current.remove(i);
+                    modified = true;
+                    currentRowPos = Math.min(i + 1, current.size());
+                    rowsetChangeSupport.fireRowDeletedEvent(row, !rows2Delete.isEmpty()); // last iteration will fire non-ajusting event
                 }
             }
-            wideCheckCursor();
         }
+        wideCheckCursor();
     }
 
     /**
@@ -1427,203 +1005,17 @@ public class Rowset {
     }
 
     public void deleteAt(int aRowIndex, boolean aIsAjusting) throws RowsetException {
-        if (!showOriginal) {
-            Row row = current.get(aRowIndex - 1);
-            assert row != null;
-            if (rowsetChangeSupport.fireWillDeleteEvent(row, aIsAjusting)) { // the deletion will fire non-ajusting event
-                row.setDeleted();
-                generateDelete(row);
-                current.remove(aRowIndex - 1);
-                modified = true;
-                currentRowPos = Math.min(aRowIndex, current.size());
-                rowsetChangeSupport.fireRowDeletedEvent(row, aIsAjusting); // the deletion will fire non-ajusting event
-            }
-            wideCheckCursor();
-        }
-    }
-
-    /**
-     * Returns value of particular field of current row by index of column.
-     *
-     * @param colIndex Index of particular field.
-     * @return Value of perticular field of current row by index of column.
-     * @throws InvalidColIndexException
-     * @throws InvalidCursorPositionException
-     * @see #updateObject(int colIndex, Object aValue)
-     */
-    public Object getObject(int colIndex) throws InvalidColIndexException, InvalidCursorPositionException {
-        checkCursor();
-        checkColIndex(colIndex);
-        Row row = getCurrentRow();
+        Row row = current.get(aRowIndex - 1);
         assert row != null;
-        if (showOriginal) {
-            return row.getOriginalColumnObject(colIndex);
-        } else {
-            return row.getColumnObject(colIndex);
+        if (rowsetChangeSupport.fireWillDeleteEvent(row, aIsAjusting)) { // the deletion will fire non-ajusting event
+            row.setDeleted();
+            generateDelete(row);
+            current.remove(aRowIndex - 1);
+            modified = true;
+            currentRowPos = Math.min(aRowIndex, current.size());
+            rowsetChangeSupport.fireRowDeletedEvent(row, aIsAjusting); // the deletion will fire non-ajusting event
         }
-    }
-
-    /**
-     * Returns value of particular field of current row by index of column as
-     * string.
-     *
-     * @param colIndex Index of particular field.
-     * @return Value of perticular field of current row by index of column as
-     * string.
-     * @throws InvalidColIndexException
-     * @throws InvalidCursorPositionException
-     * @see #updateObject(int colIndex, Object aValue)
-     * @see #getObject(int colIndex)
-     */
-    public String getString(int colIndex) throws InvalidColIndexException, InvalidCursorPositionException {
-        return (String) getObject(colIndex);
-    }
-
-    /**
-     * Returns value of particular field of current row by index of column as
-     * integer number.
-     *
-     * @param colIndex Index of particular field.
-     * @return Value of perticular field of current row by index of column as
-     * integer number.
-     * @throws InvalidColIndexException
-     * @throws InvalidCursorPositionException
-     * @see #updateObject(int colIndex, Object aValue)
-     * @see #getObject(int colIndex)
-     */
-    public Integer getInt(int colIndex) throws InvalidColIndexException, InvalidCursorPositionException {
-        Object value = getObject(colIndex);
-        if (value instanceof Integer) {
-            return (Integer) getObject(colIndex);
-        } else if (value instanceof Number) {
-            return ((Number) value).intValue();
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Returns value of particular field of current row by index of column as
-     * date.
-     *
-     * @param colIndex Index of particular field.
-     * @return Value of perticular field of current row by index of column as
-     * date.
-     * @throws InvalidColIndexException
-     * @throws InvalidCursorPositionException
-     * @see #updateObject(int colIndex, Object aValue)
-     * @see #getObject(int colIndex)
-     */
-    public Date getDate(int colIndex) throws InvalidColIndexException, InvalidCursorPositionException {
-        return (Date) getObject(colIndex);
-    }
-
-    /**
-     * Returns value of particular field of current row by index of column as
-     * double number.
-     *
-     * @param colIndex Index of particular field.
-     * @return Value of perticular field of current row by index of column as
-     * double number.
-     * @throws InvalidColIndexException
-     * @throws InvalidCursorPositionException
-     * @see #updateObject(int colIndex, Object aValue)
-     * @see #getObject(int colIndex)
-     */
-    public Double getDouble(int colIndex) throws InvalidColIndexException, InvalidCursorPositionException {
-        Object value = getObject(colIndex);
-        if (value instanceof Double) {
-            return (Double) getObject(colIndex);
-        } else if (value instanceof Number) {
-            return ((Number) value).doubleValue();
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Returns value of particular field of current row by index of column as
-     * float number.
-     *
-     * @param colIndex Index of particular field.
-     * @return Value of perticular field of current row by index of column as
-     * float number.
-     * @throws InvalidColIndexException
-     * @throws InvalidCursorPositionException
-     * @see #updateObject(int colIndex, Object aValue)
-     * @see #getObject(int colIndex)
-     */
-    public Float getFloat(int colIndex) throws InvalidColIndexException, InvalidCursorPositionException {
-        Object value = getObject(colIndex);
-        if (value instanceof Float) {
-            return (Float) getObject(colIndex);
-        } else if (value instanceof Number) {
-            return ((Number) value).floatValue();
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Returns value of particular field of current row by index of column as
-     * boolean value.
-     *
-     * @param colIndex Index of particular field.
-     * @return Value of perticular field of current row by index of column as
-     * boolean value.
-     * @throws InvalidColIndexException
-     * @throws InvalidCursorPositionException
-     * @see #updateObject(int colIndex, Object aValue)
-     * @see #getObject(int colIndex)
-     */
-    public Boolean getBoolean(int colIndex) throws InvalidColIndexException, InvalidCursorPositionException {
-        return (Boolean) getObject(colIndex);
-    }
-
-    /**
-     * Returns value of particular field of current row by index of column as
-     * short number.
-     *
-     * @param colIndex Index of particular field.
-     * @return Value of perticular field of current row by index of column as
-     * short number.
-     * @throws InvalidColIndexException
-     * @throws InvalidCursorPositionException
-     * @see #updateObject(int colIndex, Object aValue)
-     * @see #getObject(int colIndex)
-     */
-    public Short getShort(int colIndex) throws InvalidColIndexException, InvalidCursorPositionException {
-        Object value = getObject(colIndex);
-        if (value instanceof Short) {
-            return (Short) getObject(colIndex);
-        } else if (value instanceof Number) {
-            return ((Number) value).shortValue();
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Returns value of particular field of current row by index of column as
-     * long number.
-     *
-     * @param colIndex Index of particular field.
-     * @return Value of perticular field of current row by index of column as
-     * long number.
-     * @throws InvalidColIndexException
-     * @throws InvalidCursorPositionException
-     * @see #updateObject(int colIndex, Object aValue)
-     * @see #getObject(int colIndex)
-     */
-    public Long getLong(int colIndex) throws InvalidColIndexException, InvalidCursorPositionException {
-        Object value = getObject(colIndex);
-        if (value instanceof Long) {
-            return (Long) getObject(colIndex);
-        } else if (value instanceof Number) {
-            return ((Number) value).longValue();
-        } else {
-            return null;
-        }
+        wideCheckCursor();
     }
 
     /**
@@ -1635,11 +1027,11 @@ public class Rowset {
     public Row getCurrentRow() {
         if (insertingRow != null) {
             return insertingRow;
-        } else if (!isEmpty() && !isBeforeFirst() && !isAfterLast()) {
-            if (showOriginal) {
-                return original.get(currentRowPos - 1);
-            } else {
+        } else if (!isEmpty()) {
+            if (currentRowPos >= 1 && currentRowPos <= current.size()) {
                 return current.get(currentRowPos - 1);
+            } else {
+                return null;
             }
         } else {
             return null;
@@ -1736,7 +1128,7 @@ public class Rowset {
      * @return New filter based on this rowset.
      */
     public Orderer createOrderer(List<Integer> aFieldIndicies) {
-        Orderer hf = new Orderer(aFieldIndicies, true);
+        Orderer hf = new Orderer(aFieldIndicies);
         orderers.add(hf);
         hf.setRowset(this);
         return hf;
@@ -1846,12 +1238,13 @@ public class Rowset {
     public Orderer[] getOrderers() {
         return orderers.toArray(new Orderer[]{});
     }
-
-    public static List<JSObject> toJs(List<Row> aRows) {
-        List<JSObject> jses = new ArrayList<>();
-        aRows.forEach((Row aRow) -> {
-            jses.add(aRow.getPublished());
-        });
-        return jses;
-    }
+    /*
+     public static List<JSObject> toJs(List<Row> aRows) {
+     List<JSObject> jses = new ArrayList<>();
+     aRows.forEach((Row aRow) -> {
+     jses.add(aRow.getPublished());
+     });
+     return jses;
+     }
+     */
 }

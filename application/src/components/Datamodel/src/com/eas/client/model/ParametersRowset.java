@@ -81,44 +81,6 @@ public class ParametersRowset extends Rowset {
     }
 
     @Override
-    public boolean next() {
-        return currentRowPos++ < 1;
-    }
-
-    @Override
-    public boolean previous() {
-        return currentRowPos-- > 1;
-    }
-
-    @Override
-    public Object getObject(int aColIndex) {
-        if (aColIndex >= 1 && aColIndex <= params.getParametersCount()) {
-            return params.get(aColIndex).getValue();
-        }
-        return null;
-    }
-
-    /*
-    @Override
-    public boolean updateObject(int aColIndex, Object aValue) throws RowsetException {
-        if (aColIndex >= 1 && aColIndex <= params.getParametersCount()) {
-            Parameter param = params.get(aColIndex);
-            if (converter != null) {
-                aValue = converter.convert2RowsetCompatible(aValue, param.getTypeInfo());
-            }
-            Object oldValue = param.getValue();
-            if (!Row.smartEquals(oldValue, aValue)) {
-//                if (rowsetChangeSupport.fireWillChangeEvent(paramRow, aColIndex, oldValue, aValue)) {
-                    params.get(aColIndex).setValue(aValue);
-//                    rowsetChangeSupport.fireRowChangedEvent(paramRow, aColIndex, oldValue);
-                    return true;
-//                }
-            }
-        }
-        return false;
-    }
-*/
-    @Override
     public Row getCurrentRow() {
         return paramRow;
     }
@@ -140,45 +102,11 @@ public class ParametersRowset extends Rowset {
     }
 
     @Override
-    public boolean isBeforeFirst() {
-        return false;
-    }
-
-    @Override
-    public boolean isAfterLast() {
-        return false;
-    }
-
-    @Override
-    public boolean first() {
-        return true;
-    }
-
-    @Override
-    public boolean last() {
-        return true;
-    }
-
-    @Override
-    public int getCursorPos() {
-        return 1;
-    }
-
-    @Override
-    public boolean absolute(int row) {
-        return row == 1;
-    }
-
-    @Override
     public void insert(Row toInsert, boolean aAjusting) throws RowsetException {
     }
 
     @Override
     public void insert(Row toInsert, boolean aAjusting, Object... initingValues) throws RowsetException {
-    }
-
-    @Override
-    public void delete() {
     }
 
     @Override

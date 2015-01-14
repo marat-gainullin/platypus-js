@@ -15,6 +15,7 @@ import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import jdk.nashorn.api.scripting.JSObject;
@@ -151,13 +152,7 @@ public class Filter extends Orderer implements HasPublished {
                                     throw new RowsetException("Filtering keys array is greater then rowset's fields array");
                                 }
                             }
-                            boolean wasBeforeFirst = rowset.isBeforeFirst();
-                            boolean wasAfterLast = rowset.isAfterLast();
-                            ObservableLinkedHashSet<Row> subSet = ordered.get(values);
-                            if (subSet == null) {
-                                subSet = new ObservableLinkedHashSet<>();
-                                ordered.put(values, subSet);
-                            }
+                            LinkedHashSet<Row> subSet = ordered.get(values);
                             if (!filterApplied) {
                                 if (rowset.getActiveFilter() != null) {
                                     originalRows = rowset.getActiveFilter().getOriginalRows();
@@ -170,17 +165,15 @@ public class Filter extends Orderer implements HasPublished {
                             } else {
                                 assert rowset.getActiveFilter() == this : "filter applied flag has unactual value";
                             }
-                            rowset.setCurrent(new ArrayList<>(Arrays.asList(subSet.toArray(new Row[]{}))));
+                            rowset.setCurrent(subSet != null ? new ArrayList<>(Arrays.asList(subSet.toArray(new Row[]{}))) : new ArrayList<>());
                             rowset.setActiveFilter(this);
                             Set<RowsetListener> listeners = rowset.getRowsetChangeSupport().getRowsetListeners();
                             rowset.getRowsetChangeSupport().setRowsetListeners(null);
                             try {
-                                if (wasBeforeFirst) {
-                                    rowset.beforeFirst();
-                                } else if (wasAfterLast) {
-                                    rowset.afterLast();
-                                } else if (!rowset.isEmpty()) {
-                                    rowset.first();
+                                if (rowset.isEmpty()) {
+                                    rowset.setCursorPos(0);
+                                } else {
+                                    rowset.setCursorPos(1);
                                 }
                             } finally {
                                 rowset.getRowsetChangeSupport().setRowsetListeners(listeners);
@@ -241,9 +234,9 @@ public class Filter extends Orderer implements HasPublished {
                                 }
                                 rowset.setCurrent(originalRows);
                                 originalRows = null;
-                                boolean positioned = rowset.absolute(originalPos);
+                                boolean positioned = rowset.setCursorPos(originalPos);
                                 if (!rowset.isEmpty() && !positioned) {
-                                    rowset.first();
+                                    rowset.setCursorPos(1);
                                 }
                                 originalPos = 0;
                                 rowset.getRowsetChangeSupport().fireFilteredEvent();
@@ -279,7 +272,7 @@ public class Filter extends Orderer implements HasPublished {
         }
         super.rowInserted(event);
     }
-    
+
     @Override
     public JSObject getPublished() {
         if (published == null) {

@@ -69,7 +69,7 @@ public class RowsetBaseTest {
 
     protected void checkRowsetCorrespondToTestData(Rowset rowset) throws InvalidColIndexException, InvalidCursorPositionException {
         for (int i = 1; i <= rowset.size(); i++) {
-            rowset.absolute(i);
+            rowset.setCursorPos(i);
             for (int colIndex = 1; colIndex <= rowset.getFields().getFieldsCount(); colIndex++) {
                 Object tstData = testData[i - 1][colIndex - 1];
                 // check of converter work
@@ -83,7 +83,7 @@ public class RowsetBaseTest {
                     }
                 }
                 //
-                assertEquals(rowset.getObject(colIndex), tstData);
+                assertEquals(rowset.getCurrentRow().getColumnObject(colIndex), tstData);
             }
         }
     }
