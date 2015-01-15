@@ -53,6 +53,9 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 
 	protected boolean tabsOnTop = true;
 	protected FlowPanel chevron = new FlowPanel();
+	protected Button scrollLeft;
+	protected Button scrollRight;
+	protected Button tabsList;
 	protected TabLayoutPanel tabs;
 	protected double barHeight;
 	protected Style.Unit barUnit;
@@ -80,46 +83,45 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 			public void insert(Widget child, Widget tab, int beforeIndex) {
 				child.getElement().getStyle().clearWidth();
 				child.getElement().getStyle().clearHeight();
-				//if (child instanceof FocusWidget) {
-					child.getElement().getStyle().clearRight();
-					child.getElement().getStyle().setWidth(100, Style.Unit.PCT);
-					com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().ensureInjected();
-					child.getElement().addClassName(com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().borderSized());
-				//}
+				// if (child instanceof FocusWidget) {
+				child.getElement().getStyle().clearRight();
+				child.getElement().getStyle().setWidth(100, Style.Unit.PCT);
+				com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().ensureInjected();
+				child.getElement().addClassName(com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().borderSized());
+				// }
 				super.insert(child, tab, beforeIndex);
 			}
 
 			@Override
 			public void selectTab(final int index, boolean fireEvents) {
 				super.selectTab(index, fireEvents);
-				Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
-					@Override
-					public void execute() {
-						if (index >= 0 && index < getWidgetCount()) {
-							Widget w = getWidget(index);
-							if (w instanceof RequiresResize) {
-								((RequiresResize) w).onResize();
-							}
-						}
-					}
-
-				});
 			}
+
 		};
 		tabs.addSelectionHandler(new SelectionHandler<Integer>() {
 
 			@Override
 			public void onSelection(SelectionEvent<Integer> event) {
 				selected = event.getSelectedItem() != -1 ? tabs.getWidget(event.getSelectedItem()) : null;
+				Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+					@Override
+					public void execute() {
+						if (selected instanceof RequiresResize) {
+							((RequiresResize) selected).onResize();
+						}
+					}
+
+				});
 				SelectionEvent.fire(TabsDecoratedPanel.this, selected);
 			}
 
 		});
 		tabBar = tabBarContainer.getWidget(0);
 		tabsContent = tabBarContainer.getWidget(1);
-		tabs.setAnimationDuration(500);
-		final Button scrollLeft = new Button(template.classedDiv("tabs-chevron-left"), new ClickHandler() {
+		// GWT Layout animations are deprecated because of CSS3 transitions
+		tabs.setAnimationDuration(0);
+		scrollLeft = new Button(template.classedDiv("tabs-chevron-left"), new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
@@ -127,26 +129,19 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 				if (offsetLeft < 0) {
 					tabBar.getElement().getStyle().setLeft(Math.min(offsetLeft + 100, 0), Style.Unit.PX);
 				}
+				updateScrolls();
 			}
 		});
-		final Button scrollRight = new Button(template.classedDiv("tabs-chevron-right"), new ClickHandler() {
+		scrollRight = new Button(template.classedDiv("tabs-chevron-right"), new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
-				Widget lastTab = tabs.getTabWidget(tabs.getWidgetCount() - 1);
-				int rightMostX = lastTab.getParent().getElement().getOffsetLeft() + lastTab.getParent().getElement().getOffsetWidth();
-				int tabBarParentWidth = tabBar.getElement().getParentElement().getOffsetWidth() - chevron.getElement().getOffsetWidth();
-				int offsetLeft = tabBar.getElement().getOffsetLeft();
-				int newOffsetLeft = offsetLeft - 100;
-				int width = rightMostX + newOffsetLeft;
-				if (width > tabBarParentWidth) {
-					tabBar.getElement().getStyle().setLeft(Math.min(newOffsetLeft, 0), Style.Unit.PX);
-				} else {
-					tabBar.getElement().getStyle().setLeft(Math.min(tabBarParentWidth - rightMostX, 0), Style.Unit.PX);
-				}
+				int newTabBarLeft = calcNewScrollRightPosition();
+				tabBar.getElement().getStyle().setLeft(newTabBarLeft, Style.Unit.PX);
+				updateScrolls();
 			}
 		});
-		Button tabsList = new Button(template.classedDiv("tabs-chevron-list"), new ClickHandler() {
+		tabsList = new Button(template.classedDiv("tabs-chevron-list"), new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
@@ -169,15 +164,12 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 							tabs.selectTab(content);
 							pp.hide();
 							Widget targetTab = tabs.getTabWidget(content);
-							int tabCenterX = targetTab.getParent().getElement().getOffsetLeft()
-									+ targetTab.getParent().getElement().getOffsetWidth() / 2;
-							int tabBarParentWidth = tabBar.getElement().getParentElement().getOffsetWidth()
-									- chevron.getElement().getOffsetWidth();
+							int tabCenterX = targetTab.getParent().getElement().getOffsetLeft() + targetTab.getParent().getElement().getOffsetWidth() / 2;
+							int tabBarParentWidth = tabBar.getElement().getParentElement().getOffsetWidth() - chevron.getElement().getOffsetWidth();
 							int newOffsetLeft = tabBarParentWidth / 2 - tabCenterX;
 
 							Widget lastTab = tabs.getTabWidget(tabs.getWidgetCount() - 1);
-							int rightMostX = lastTab.getParent().getElement().getOffsetLeft()
-									+ lastTab.getParent().getElement().getOffsetWidth();
+							int rightMostX = lastTab.getParent().getElement().getOffsetLeft() + lastTab.getParent().getElement().getOffsetWidth();
 							int width = rightMostX + newOffsetLeft;
 							if (width > tabBarParentWidth) {
 								tabBar.getElement().getStyle().setLeft(Math.min(newOffsetLeft, 0), Style.Unit.PX);
@@ -230,7 +222,7 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 		chevron.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
 		assert tabBarContainer != null;
 		tabBarContainer.getWidgetContainerElement(tabBar).appendChild(chevron.getElement());
-		getElement().<XElement>cast().addResizingTransitionEnd(this);
+		getElement().<XElement> cast().addResizingTransitionEnd(this);
 	}
 
 	public boolean isTabsOnTop() {
@@ -287,6 +279,26 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 	@Override
 	public void onResize() {
 		tabs.onResize();
+		updateScrolls();
+	}
+
+	protected int calcNewScrollRightPosition() {
+		Widget lastTab = tabs.getTabWidget(tabs.getWidgetCount() - 1);
+		int rightMostX = lastTab.getParent().getElement().getOffsetLeft() + lastTab.getParent().getElement().getOffsetWidth();
+		int tabBarParentWidth = tabBar.getElement().getParentElement().getOffsetWidth() - chevron.getElement().getOffsetWidth();
+		int tabBarMostLeft = Math.min(tabBarParentWidth - rightMostX, 0);
+		int nextTabBarLeft = tabBar.getElement().getOffsetLeft() - 100;
+		if (nextTabBarLeft < tabBarMostLeft)
+			nextTabBarLeft = tabBarMostLeft;
+		return nextTabBarLeft;
+	}
+
+	protected void updateScrolls() {
+		int oldTabBarLeft = tabBar.getElement().getOffsetLeft();
+		scrollLeft.setEnabled(oldTabBarLeft < 0);
+		//
+		int newTabBarLeft = calcNewScrollRightPosition();
+		scrollRight.setEnabled(newTabBarLeft != oldTabBarLeft);
 	}
 
 	/**

@@ -13,14 +13,14 @@ import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.dom.client.HasDoubleClickHandlers;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.HasHTML;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.ScrollPanel;
 
 public class ImageParagraph extends FocusWidget implements HasText, HasHTML, RequiresResize, HasClickHandlers, HasDoubleClickHandlers, Focusable, HasEnabled, HasAllMouseHandlers, HasAllTouchHandlers,
         HasImageResource {
@@ -102,9 +102,9 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Req
 
 	private void organize() {
 		if (isAttached()) {
-			Style contentStyle = content.getStyle();
-			organizeImage();
+			final Style contentStyle = content.getStyle();
 			organizeText();
+			organizeImage();
 			if (isAttached() && (getParent() instanceof FlowPanel || getParent() instanceof RootPanel || getParent() instanceof ScrollPanel)) {
 				contentStyle.setPosition(Style.Position.RELATIVE);
 			} else {
@@ -164,9 +164,9 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Req
 
 	protected void organizeText() {
 		if (html) {
-			content.setInnerHTML(text != null ? text : "&#160;");
+			content.setInnerHTML(text != null ? text : "");
 		} else {
-			content.setInnerText(text);
+			content.setInnerText(text != null ? text : "");
 		}
 	}
 
@@ -183,16 +183,20 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Req
 				backgroundPosition = "left";
 				contentStyle.setPaddingLeft(iconTextGap + image.getWidth(), Style.Unit.PX);
 				contentStyle.setPaddingRight(0, Style.Unit.PX);
-			} else {
-				backgroundPosition = "center";
-				int imageOverflow = image.getWidth() - content.getOffsetWidth();
+			} else {	
+				int imageWidth = image.getWidth();
+				int contentWidth = content.getOffsetWidth();
+				int imageOverflow = imageWidth - (contentWidth - contentPaddingLeft - contentPaddingRight);
+				if(text == null || text.isEmpty())
+					imageOverflow = imageWidth;
 				if (imageOverflow < 0)
 					imageOverflow = 0;
+				backgroundPosition = "center";
 
-				contentPaddingLeft += imageOverflow / 2;
+				contentPaddingLeft = imageOverflow / 2;
 				contentStyle.setPaddingLeft(contentPaddingLeft, Style.Unit.PX);
 
-				contentPaddingRight += imageOverflow / 2;
+				contentPaddingRight = imageOverflow / 2;
 				contentStyle.setPaddingRight(contentPaddingRight, Style.Unit.PX);
 			}
 			backgroundPosition += " ";
@@ -205,15 +209,19 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Req
 				contentStyle.setPaddingTop(iconTextGap + image.getHeight(), Style.Unit.PX);
 				contentStyle.setPaddingBottom(0, Style.Unit.PX);
 			} else {
-				int imageOverflow = image.getHeight() - content.getOffsetHeight();
+				int imageHeight = image.getHeight();
+				int contentHeight = content.getOffsetHeight();
+				int imageOverflow = imageHeight - (contentHeight - contentPaddingTop - contentPaddingBottom);
+				if(text == null || text.isEmpty())
+					imageOverflow = imageHeight;
 				if (imageOverflow < 0)
 					imageOverflow = 0;
 				backgroundPosition += "center";
 
-				contentPaddingTop += imageOverflow / 2;
+				contentPaddingTop = imageOverflow / 2;
 				contentStyle.setPaddingTop(contentPaddingTop, Style.Unit.PX);
 
-				contentPaddingBottom += imageOverflow / 2;
+				contentPaddingBottom = imageOverflow / 2;
 				contentStyle.setPaddingBottom(contentPaddingBottom, Style.Unit.PX);
 			}
 			contentStyle.setProperty("background", "url(" + image.getSafeUri().asString() + ")" + " no-repeat " + backgroundPosition);

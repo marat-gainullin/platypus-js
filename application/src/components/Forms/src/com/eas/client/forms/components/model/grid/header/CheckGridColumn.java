@@ -13,7 +13,6 @@ import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.awt.Color;
 import java.awt.Font;
-import javax.swing.table.TableColumn;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -32,20 +31,21 @@ public class CheckGridColumn extends GridColumnsNode implements HasPublished {
         resizable = false;
         setTitle("\\");
     }
-/*
-    public CheckGridColumn(GridColumnsNode aParent) {
-        super(aParent);
+    
+    @Override
+    public GridColumnsNode lightCopy() {
+        GridColumnsNode copied = new CheckGridColumn();
+        copied.lightAssign(this);
+        return copied;
     }
 
-    public CheckGridColumn(String aTitle) {
-        this();
-        title = aTitle;
+    @Override
+    public GridColumnsNode copy() throws Exception {
+        GridColumnsNode copied = new CheckGridColumn();
+        copied.assign(this);
+        return copied;
     }
 
-    protected CheckGridColumn(TableColumn aCol) {
-        super(aCol);
-    }
-*/
     @ScriptFunction
     @Override
     public int getWidth() {

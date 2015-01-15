@@ -88,7 +88,7 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 		setCaptionWidget(new Caption(""));
 		setUndecorated(false);
 		getElement().addClassName("window-panel");
-		getElement().<XElement> cast().addResizingTransitionEnd(this);		
+		getElement().<XElement> cast().addResizingTransitionEnd(this);
 		getMovableTarget().getElement().<XElement> cast().addResizingTransitionEnd(this);
 	}
 
@@ -339,7 +339,7 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 	@Override
 	public void setSize(double aWidth, double aHeight) {
 		super.setSize(aWidth, aHeight);
-		ResizeEvent.<WindowPanel>fire(this, (int)aWidth, (int)aHeight);
+		ResizeEvent.<WindowPanel> fire(this, (int) aWidth, (int) aHeight);
 	}
 
 	private void snapshotMetrics() throws NumberFormatException {
@@ -443,7 +443,7 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 		}
 	}
 
-	protected void activate() {
+	public void activate() {
 		if (captionWidget != null) {
 			captionWidget.removeStyleName("window-caption");
 			captionWidget.addStyleName("window-caption-active");
@@ -462,7 +462,7 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 		ActivateEvent.<WindowUI> fire(this, this);
 	}
 
-	protected void deactivate() {
+	public void deactivate() {
 		if (captionWidget != null) {
 			captionWidget.removeStyleName("window-caption-active");
 			captionWidget.addStyleName("window-caption");
@@ -484,9 +484,11 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 	public void toFront() {
 		Element selfEl = getMovableTarget().getElement();
 		Element parentEl = selfEl.getParentElement();
-		Node lastChildNode = parentEl.getLastChild();
-		if (lastChildNode instanceof Element && lastChildNode != selfEl) {
-			parentEl.insertAfter(selfEl, lastChildNode);
+		if (parentEl != null) {
+			Node lastChildNode = parentEl.getLastChild();
+			if (lastChildNode instanceof Element && lastChildNode != selfEl) {
+				parentEl.insertAfter(selfEl, lastChildNode);
+			}
 		}
 	}
 

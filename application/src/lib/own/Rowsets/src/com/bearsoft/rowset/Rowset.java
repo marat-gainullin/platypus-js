@@ -994,17 +994,18 @@ public class Rowset {
      *
      * @param aRowIndex Index of row to be deleted from the rowset. aRowIndex is
      * 1-based.
+     * @return 
      * @see #isBeforeFirst()
      * @see #isAfterLast()
      * @see #delete()
      * @see #deleteAll()
      * @throws RowsetException
      */
-    public void deleteAt(int aRowIndex) throws RowsetException {
-        deleteAt(aRowIndex, false);
+    public Row deleteAt(int aRowIndex) throws RowsetException {
+        return deleteAt(aRowIndex, false);
     }
 
-    public void deleteAt(int aRowIndex, boolean aIsAjusting) throws RowsetException {
+    public Row deleteAt(int aRowIndex, boolean aIsAjusting) throws RowsetException {
         Row row = current.get(aRowIndex - 1);
         assert row != null;
         if (rowsetChangeSupport.fireWillDeleteEvent(row, aIsAjusting)) { // the deletion will fire non-ajusting event
@@ -1016,6 +1017,7 @@ public class Rowset {
             rowsetChangeSupport.fireRowDeletedEvent(row, aIsAjusting); // the deletion will fire non-ajusting event
         }
         wideCheckCursor();
+        return row;
     }
 
     /**

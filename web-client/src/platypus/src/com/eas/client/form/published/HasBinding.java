@@ -1,10 +1,14 @@
 package com.eas.client.form.published;
 
-import com.bearsoft.rowset.metadata.Field;
+import com.google.gwt.core.client.JavaScriptObject;
 
 public interface HasBinding {
 
-	public Field getBinding() throws Exception;
+	public JavaScriptObject getData();
 
-	public void setBinding(Field aField) throws Exception;
+	public void setData(JavaScriptObject aValue);
+
+	public String getField();
+
+	public void setField(String aField);
 }

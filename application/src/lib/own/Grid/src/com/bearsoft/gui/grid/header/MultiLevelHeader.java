@@ -272,11 +272,6 @@ public class MultiLevelHeader extends JPanel {
             if (roots != null) {
                 List<GridColumnsNode> leaves = new ArrayList<>();
                 MultiLevelHeader.achieveLeaves(roots, leaves);
-                /*
-                for (int i = 0; i < leaves.size(); i++) {
-                    leaves.get(i).setTableColumn(columnModel.getColumn(i));
-                }
-                        */
             }
         }
     }

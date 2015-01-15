@@ -13,7 +13,6 @@ import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.awt.Color;
 import java.awt.Font;
-import javax.swing.table.TableColumn;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -32,20 +31,21 @@ public class ServiceGridColumn extends GridColumnsNode implements HasPublished {
         resizable = false;
         setTitle("\\");
     }
-/*
-    public ServiceGridColumn(GridColumnsNode aParent) {
-        super(aParent);
+
+    @Override
+    public GridColumnsNode lightCopy() {
+        GridColumnsNode copied = new ServiceGridColumn();
+        copied.lightAssign(this);
+        return copied;
     }
 
-    public ServiceGridColumn(String aTitle) {
-        this();
-        title = aTitle;
+    @Override
+    public GridColumnsNode copy() throws Exception {
+        GridColumnsNode copied = new ServiceGridColumn();
+        copied.assign(this);
+        return copied;
     }
 
-    protected ServiceGridColumn(TableColumn aCol) {
-        super(aCol);
-    }
-*/
     @ScriptFunction
     @Override
     public int getWidth() {

@@ -9,17 +9,12 @@
  */
 package com.bearsoft.rowset.utils;
 
-import java.sql.Date;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.Utils;
-import com.bearsoft.rowset.locators.Locator;
 import com.bearsoft.rowset.metadata.Field;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.core.client.JsArrayMixed;
 
 /**
  * 
@@ -126,30 +121,8 @@ public class RowsetUtils {
 		return typesNames.get(type);
 	}
 
-	public static Locator generatePkLocator(Rowset aRowset) {
-		List<Field> pks = aRowset.getFields().getPrimaryKeys();
-		Locator res = aRowset.createLocator();
-		res.beginConstrainting();
-		try {
-			for (Field pk : pks) {
-				res.addConstraint(aRowset.getFields().find(pk.getName()));
-			}
-		} finally {
-			res.endConstrainting();
-		}
-		return res;
-	}
-
 	public static native Field unwrapField(JavaScriptObject aValue)
 			throws Exception/*-{
 		return aValue.unwrap();
 	}-*/;
-
-	protected static native Object boxArrayElementAsJava(JavaScriptObject aArray, int aIndex) throws Exception/*-{
-		return $wnd.P.boxAsJava(aArray[aIndex]);
-	}-*/;
-	
-	public static Object extractValueFromJsArray(JsArrayMixed aArray, int aIndex) throws Exception {
-		return Utils.toJava(boxArrayElementAsJava(aArray, aIndex));
-	}
 }

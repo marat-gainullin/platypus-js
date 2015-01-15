@@ -37,7 +37,8 @@ public class StyledListBox<T> extends ListBox implements HasValue<T> {
 	}
 
 	public StyledListBox(boolean isMultipleSelect) {
-		super(isMultipleSelect);
+		super();
+		setMultipleSelect(isMultipleSelect);
 		addChangeHandler(new ChangeHandler() {
 
 			@Override
@@ -54,20 +55,20 @@ public class StyledListBox<T> extends ListBox implements HasValue<T> {
 	}
 
 	public void addItem(String aLabel, String aKey, T aAssociatedValue, String aClassName) {
-		super.addItem(aLabel, aKey);
+		super.addItem(aLabel != null ? aLabel : "", aKey);
 		associatedValues.set(getItemCount() - 1, aAssociatedValue);
 		setItemStyleName(getItemCount() - 1, aClassName);
 	}
 
 	public void addItem(String aLabel, HasDirection.Direction dir, String aKey, T aAssociatedValue, String aClassName) {
-		super.addItem(aLabel, dir, aKey);
+		super.addItem(aLabel != null ? aLabel : "", dir, aKey);
 		associatedValues.set(getItemCount() - 1, aAssociatedValue);
 		setItemStyleName(getItemCount() - 1, aClassName);
 	}
 
 	@Override
-	public void insertItem(String item, Direction dir, String value, int index) {
-		super.insertItem(item, dir, value, index);
+	public void insertItem(String aLabel, Direction dir, String value, int index) {
+		super.insertItem(aLabel != null ? aLabel : "", dir, value, index);
 		if (index == -1) {
 			associatedValues.add(null);
 		} else {

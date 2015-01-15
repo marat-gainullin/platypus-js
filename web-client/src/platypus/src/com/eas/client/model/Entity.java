@@ -10,7 +10,7 @@
 package com.eas.client.model;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,9 +28,6 @@ import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.Utils.JsObject;
 import com.bearsoft.rowset.beans.PropertyChangeSupport;
-import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.dataflow.DelegatingFlowProvider;
-import com.bearsoft.rowset.events.RowChangeEvent;
 import com.bearsoft.rowset.events.RowsetDeleteEvent;
 import com.bearsoft.rowset.events.RowsetFilterEvent;
 import com.bearsoft.rowset.events.RowsetInsertEvent;
@@ -41,21 +38,20 @@ import com.bearsoft.rowset.events.RowsetRollbackEvent;
 import com.bearsoft.rowset.events.RowsetSaveEvent;
 import com.bearsoft.rowset.events.RowsetScrollEvent;
 import com.bearsoft.rowset.events.RowsetSortEvent;
+import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
 import com.bearsoft.rowset.exceptions.InvalidFieldsExceptionException;
 import com.bearsoft.rowset.exceptions.RowsetException;
-import com.bearsoft.rowset.filters.Filter;
-import com.bearsoft.rowset.locators.Locator;
-import com.bearsoft.rowset.locators.RowWrap;
-import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.bearsoft.rowset.ordering.HashOrderer;
+import com.bearsoft.rowset.ordering.Filter;
+import com.bearsoft.rowset.ordering.Locator;
+import com.bearsoft.rowset.ordering.Orderer;
+import com.bearsoft.rowset.ordering.Subset;
 import com.bearsoft.rowset.sorting.RowsComparator;
 import com.bearsoft.rowset.sorting.SortingCriterion;
 import com.bearsoft.rowset.utils.IDGenerator;
-import com.bearsoft.rowset.utils.KeySet;
 import com.bearsoft.rowset.utils.RowsetUtils;
 import com.eas.client.application.Application;
 import com.eas.client.form.js.JsEvents;
@@ -63,7 +59,6 @@ import com.eas.client.form.published.HasPublished;
 import com.eas.client.queries.Query;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.JsArrayMixed;
 import com.google.gwt.core.client.JsArrayString;
 
@@ -75,29 +70,26 @@ public class Entity implements RowsetListener, HasPublished{
 
     protected static final String PENDING_ASSUMPTION_FAILED_MSG = "pending assigned to null without pending.cancel() call.";
 	public static final String QUERY_REQUIRED = "All model entities must have a query";
-	protected JavaScriptObject onBeforeChange;
-	protected JavaScriptObject onAfterChange;
-	protected JavaScriptObject onBeforeScroll;
-	protected JavaScriptObject onAfterScroll;
-	protected JavaScriptObject onBeforeInsert;
-	protected JavaScriptObject onAfterInsert;
-	protected JavaScriptObject onBeforeDelete;
-	protected JavaScriptObject onAfterDelete;
+	protected JavaScriptObject willScroll;
+	protected JavaScriptObject onScrolled;
+	protected JavaScriptObject willInsert;
+	protected JavaScriptObject onInserted;
+	protected JavaScriptObject willDelete;
+	protected JavaScriptObject onDeleted;
 	protected JavaScriptObject onRequeried;
 	protected JavaScriptObject onFiltered;
 	protected JavaScriptObject jsPublished;
-	protected JavaScriptObject jsElementClass;
 	// runtime
-	protected List<Integer> filterConstraints = new ArrayList<Integer>();
-	protected Cancellable pending;
-	protected boolean valid;
 	protected Rowset rowset;
 	protected Filter filter;
-	protected boolean userFiltering;
-	protected Map<List<Integer>, Locator> userLocators = new HashMap<List<Integer>, Locator>();
+	protected List<Integer> filterConstraints = new ArrayList<Integer>();
 	// to preserve relation order
 	protected List<Relation> rtInFilterRelations;
-	protected int updatingCounter;
+    protected Locator locator;
+	//
+	protected Cancellable pending;
+	protected boolean valid;
+    protected Map<List<Integer>, Orderer> userOrderers = new HashMap<List<Integer>, Orderer>();
 	protected String title;
 	protected String name;
 	protected String entityId = String.valueOf((long) IDGenerator.genId());
@@ -106,9 +98,7 @@ public class Entity implements RowsetListener, HasPublished{
 	protected Query query;
 	protected Set<Relation> inRelations = new HashSet<Relation>();
 	protected Set<Relation> outRelations = new HashSet<Relation>();
-	protected Fields fields;
 	protected PropertyChangeSupport changeSupport;
-	protected Map<String, JavaScriptObject> ormDefinitions = new HashMap<String, JavaScriptObject>();
 
 	public Entity() {
 		super();
@@ -120,316 +110,142 @@ public class Entity implements RowsetListener, HasPublished{
 		model = aModel;
 	}
 
-	public Entity(String aQueryId) {
+	public Entity(String aQueryName) {
 		this();
-		queryName = aQueryId;
+		queryName = aQueryName;
 	}
 
     public void putOrmDefinition(String aName, JavaScriptObject aDefinition) {
         if (aName != null && !aName.isEmpty() && aDefinition != null) {
-            if (!ormDefinitions.containsKey(aName)) {
-                ormDefinitions.put(aName, aDefinition);
-            }else{
-                Logger.getLogger(Entity.class.getName()).log(Level.FINE, "ORM property "+aName+" redefinition attempt on entity "+(name != null && !name.isEmpty() ? name : "")+" "+(title != null && !title.isEmpty() ? "[" + title + "]" : "")+".");
+            Map<String, JavaScriptObject> defs = rowset.getFields().getOrmDefinitions();
+            if (!defs.containsKey(aName)) {
+                rowset.getFields().putOrmDefinition(aName, aDefinition);
+            } else {
+                Logger.getLogger(Entity.class.getName()).log(Level.FINE, String.format("ORM property %s redefinition attempt on entity %s %s.", aName, name != null && !name.isEmpty() ? name : "", title != null && !title.isEmpty() ? "[" + title + "]" : ""));
             }
         }
     }
 
     public Map<String, JavaScriptObject> getOrmDefinitions() {
-        return Collections.unmodifiableMap(ormDefinitions);
+        return rowset.getFields().getOrmDefinitions();
     }
 
-	private static native JavaScriptObject publishEntityFacade(Entity aEntity)/*-{
+	private static native JavaScriptObject publishFacade(Entity aEntity)/*-{
 
 		var rowset = aEntity.@com.eas.client.model.Entity::getRowset()();
+		var nFields = aEntity.@com.eas.client.model.Entity::getFields()();
 		
-		function propsToArray(aObj){
-			var linearProps = [];
-			for(var pName in aObj){
-				if(isNaN(pName) && pName != 'length'){
-					linearProps.push(pName);
-					linearProps.push(aObj[pName]);
-				}
-			}
-			return linearProps;
-		}
 		var published = aEntity.@com.eas.client.model.Entity::getPublished()();
-		// array mutator methods
-		Object.defineProperty(published, "pop", { 
-			value : function(){
-                if(rowset != null){
-                    var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-                    var deleted = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(size);
-                    rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(size);
-                    return @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;Lcom/google/gwt/core/client/JavaScriptObject;)(deleted, aEntity, null);
-                }
-			}
+		// array interface
+		rowset.@com.bearsoft.rowset.Rowset::addRowsetContentJsListener(Lcom/bearsoft/rowset/Rowset;Lcom/bearsoft/rowset/Utils$JsObject;)(rowset, function(){
+            Array.prototype.splice.call(target, 0, target.length);
+            var rLength = rowset.@com.bearsoft.rowset.Rowset::size()();
+            for (var aCursorPos = 1; aCursorPos <= rLength; aCursorPos++) {
+            	var nRow = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(aCursorPos);
+                Array.prototype.push.call(published, nRow.@com.bearsoft.rowset.Row::getPublished()());
+            }
+		});
+        Object.defineProperty(target, "fill", {
+            value: function () {
+                throw '\'fill\' is unsupported in BoundArray because of it\'s distinct values requirement';
+            }
         });
-        Object.defineProperty(published, "shift", {
-        	value : function(){
-                if(rowset != null){
-                    var deleted = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(1);
+        Object.defineProperty(target, "pop", {
+            value: function () {
+                if (published.length > 0) {
+            		var nRow = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(published.length);
+                    rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(published.length);
+                    Array.prototype.pop.call(published);
+                    return nRow.@com.bearsoft.rowset.Row::getPublished()();
+                }
+            }
+        });
+        Object.defineProperty(target, "push", {
+            value: function () {
+                for (var a = 0; a < arguments.length; a++) {
+                	var justInserted = aEntity.@com.eas.client.model.Entity::jsInsertAt(IZLcom/google/gwt/core/client/JavaScriptObject;)(published.length, a < arguments.length - 1, arguments[a]);
+                }
+                return Array.prototype.push.apply(published, arguments);
+            }
+        });
+        Object.defineProperty(target, "reverse", {
+            value: function () {
+                rowset.@com.bearsoft.rowset.Rowset::reverse()();
+            }
+        });
+        Object.defineProperty(target, "shift", {
+            value: function () {
+                if (published.length > 0) {
+            		var nRow = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(1);
                     rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(1);
-                    return @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;Lcom/google/gwt/core/client/JavaScriptObject;)(deleted, aEntity, null);
+                    Array.prototype.shift.call(published);
+                    return nRow.@com.bearsoft.rowset.Row::getPublished()();
                 }
-        	}
+            }
         });
-        Object.defineProperty(published, "push", {
-        	value : function(){
-                if(rowset != null){
-                    for(var i = 0; i < arguments.length; i++){
-                        var cSize = rowset.@com.bearsoft.rowset.Rowset::size()();
-                        var propsAsArray = propsToArray(arguments[i]);
-                        aEntity.@com.eas.client.model.Entity::insertAt(ILcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(cSize + 1, propsAsArray, arguments[i]);
+        var defaultCompareFunction = function (o1, o2) {
+            var s1 = (o1 + '');
+            var s2 = (o2 + '');
+            return s1 > s2 ? 1 : s1 < s2 ? -1 : 0;
+        };
+        Object.defineProperty(target, "sort", {
+            value: function () {
+                if (arguments.length <= 0 || !aEntity.@com.eas.client.model.Entity::jsSort(Ljava/lang/Object;)(arguments[0])) {
+                    var compareFunc = defaultCompareFunction;
+                    if (arguments.length > 0 && typeof arguments[0] === 'function') {
+                        compareFunc = arguments[0];
                     }
-                    return rowset.@com.bearsoft.rowset.Rowset::size()();
-                }else{
-                    return 0;
+                    Array.prototype.sort.call(published, compareFunc);
                 }
-        	}
+                return published;
+            }
         });
-        Object.defineProperty(published, "unshift", {
-        	value : function(){
-                if(rowset != null){
-                    for(var i = arguments.length - 1; i >= 0; i--){
-                        var propsAsArray = propsToArray(arguments[i]);
-                        aEntity.@com.eas.client.model.Entity::insertAt(ILcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(1, propsAsArray, arguments[i]);
+        Object.defineProperty(target, "splice", {
+            value: function () {
+                if (arguments.length > 0) {
+                    var beginToDeleteAt = arguments[0];
+                    var howManyToDelete = published.length;
+                    if (arguments.length > 1) {
+                        howManyToDelete = arguments[1];
                     }
-                    return rowset.@com.bearsoft.rowset.Rowset::size()();
-                }else
-                    return 0;
-        	}
-        });
-        Object.defineProperty(published, "reverse", {
-        	value : function(){
-                if(rowset != null){
-                    rowset.@com.bearsoft.rowset.Rowset::reverse()();
+                    var needToAdd = arguments.length > 2;
+                    var deleted = 0;
+                    while (!rowset.@com.bearsoft.rowset.Rowset::isEmpty()() && deleted++ < howManyToDelete) {
+                        rowset.@com.bearsoft.rowset.Rowset::deleteAt(IZ)(beginToDeleteAt + 1, needToAdd);
+                    }
+                    var insertAt = beginToDeleteAt;
+                    for (var a = 2; a < arguments.length; a++) {
+                        var justInserted = aEntity.@com.eas.client.model.Entity::jsInsertAt(IZLcom/google/gwt/core/client/JavaScriptObject;)(insertAt + 1, a < arguments.length - 1, arguments[a]);
+                        insertAt++;
+                    }
                 }
-        	}
+                return Array.prototype.splice.apply(target, arguments);
+            }
         });
-        Object.defineProperty(published, "splice", {
-        	value : function(){
-                if(arguments.length > 0){
-                    if(rowset != null){
-                        var size = rowset.@com.bearsoft.rowset.Rowset::size()();
-                        var startAt = arguments[0];
-                        if(startAt < 0)
-                            startAt = size + startAt;
-                        if(startAt < 0)
-                            throw "Bad first argument 'index'. It should be less than or equal array's length by absolute value"; 
-                        var howMany = arguments.length > 1 ? arguments[1] : size;
-                        if(howMany < 0)
-                            throw "Bad second argument 'howMany'. It should greater or equal to zero"; 
-                        var toAdd = arguments.length > 2 ? $wnd.Array.prototype.slice.call(arguments, 2) : [];
-                        var removed = [];
-                        while(startAt < size && removed.length < howMany){
-                            var deleted = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(startAt + 1);
-                            rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(startAt + 1);
-                            var deletedFacade = @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;Lcom/google/gwt/core/client/JavaScriptObject;)(deleted, aEntity, null);
-                            removed.push(deletedFacade);
-                            size = rowset.@com.bearsoft.rowset.Rowset::size()();
-                        }
-                        for(var l = arguments.length - 1; l >= 2; l--){						
-                            var propsAsArray = propsToArray(arguments[l]);
-                            aEntity.@com.eas.client.model.Entity::insertAt(ILcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(startAt + 1, propsAsArray, arguments[l]);
-                        }
-                        return removed;
-                    }else
-                        return [];
-                }else
-                    throw "Bad arguments. There are must at least one argument";
-        	}
-        });
-        Object.defineProperty(published, "sort", {
-        	value : function(aComparator) {
-                if(aComparator){
-                    aEntity.@com.eas.client.model.Entity::sort(Ljava/lang/Object;)(aComparator);
-                }else
-                    throw "A comparing function or comparator object must be specified."; 
-        	}
-        });
-		// properties
-//		Object.defineProperty(published, "getQueryId", {
-//			value : function() {
-//				return aEntity.@com.eas.client.model.Entity::getQueryName()();
-//			}
-//		});
-//		Object.defineProperty(published, "isModified", {
-//			value : function() {
-//				if(rowset != null)
-//					return rowset.@com.bearsoft.rowset.Rowset::isModified()();
-//				else
-//					return false;
-//			}
-//		});
-//		Object.defineProperty(published, "isEmpty", {
-//			value : function() {
-//				if(rowset != null)
-//					return rowset.@com.bearsoft.rowset.Rowset::isEmpty()();
-//				else
-//					return true;
-//			}
-//		});
-//		Object.defineProperty(published, "isInserting", {
-//			value : function() {
-//				if(rowset != null)
-//					return rowset.@com.bearsoft.rowset.Rowset::isInserting()();
-//				else
-//					return false;
-//			}
-//		});
-//		Object.defineProperty(published, "getSize", {
-//			value : function() {
-//				if(rowset != null)
-//					return rowset.@com.bearsoft.rowset.Rowset::size()();
-//				else
-//					return 0;
-//			}
-//		});
-//		Object.defineProperty(published, "getRowIndex", {
-//			value : function() {
-//				if(rowset != null)
-//					return rowset.@com.bearsoft.rowset.Rowset::getCursorPos()();
-//				else
-//					return -1;
-//			}
-//		});
-//		Object.defineProperty(published, "setRowIndex", {
-//			value : function(aRowIndex) {
-//				if(rowset != null)
-//					return rowset.@com.bearsoft.rowset.Rowset::absolute(I)(aRowIndex);
-//			}
-//			
-//		});
-//		Object.defineProperty(published, "getSubstitute", {
-//			value : function() {
-//				var sEntity = aEntity.@com.eas.client.model.Entity::getSubstitute()();
-//				if(sEntity != null)
-//					return sEntity.@com.eas.client.model.Entity::getPublished()();
-//				else
-//					return null;
-//			}
-//		});
-//		Object.defineProperty(published, "setSubstitute", {
-//			value : function(aSubstitute) {
-//				aEntity.@com.eas.client.model.Entity::setSubstitute(Lcom/eas/client/model/Entity;)(aSubstitute != null ? aSubstitute.unwrap() : null);
-//			}
-//		});
+
+        Object.defineProperty(target, "unshift", {
+            value: function () {
+                for (var a = 0; a < arguments.length; a++) {
+                    var justInserted = aEntity.@com.eas.client.model.Entity::jsInsertAt(IZLcom/google/gwt/core/client/JavaScriptObject;)(a + 1, a < arguments.length - 1, arguments[a]);
+                }
+                return Array.prototype.unshift.apply(target, arguments);
+            }
+        });		
 		// cursor interface 
 		Object.defineProperty(published, "scrollTo", {
-			value : function(aRow) {
-				return aEntity.@com.eas.client.model.Entity::scrollTo(Lcom/google/gwt/core/client/JavaScriptObject;)(aRow);
+			value : function(aRowWrapper) {
+				return aRowWrapper && aRowWrapper.unwrap ? aEntity.@com.eas.client.model.Entity::scrollTo(Lcom/bearsoft/rowset/Row;)(aRowWrapper.unwrap()) : false;
 			}
 		});
-//		Object.defineProperty(published, "beforeFirst", {
-//			value : function() {
-//				if(rowset != null)
-//					return rowset.@com.bearsoft.rowset.Rowset::beforeFirst()();
-//				else
-//					return false;
-//			}
-//		});
-//		Object.defineProperty(published, "afterLast", {
-//			value : function() {
-//				if(rowset != null)
-//					return rowset.@com.bearsoft.rowset.Rowset::afterLast()();
-//				else
-//					return false;
-//			}
-//		});
-//		Object.defineProperty(published, "bof", {
-//			value : function() {
-//				if(rowset != null)
-//					return rowset.@com.bearsoft.rowset.Rowset::isBeforeFirst()();
-//				else
-//					return false;
-//			}
-//		});
-//		Object.defineProperty(published, "eof", {
-//			value : function() {
-//				if(rowset != null)
-//					return rowset.@com.bearsoft.rowset.Rowset::isAfterLast()();
-//				else
-//					return false;
-//			}
-//		});
-//		Object.defineProperty(published, "first", {
-//			value : function() {
-//				if(rowset != null)
-//					return rowset.@com.bearsoft.rowset.Rowset::first()();
-//				else
-//					return false;
-//			}
-//		});
-//		Object.defineProperty(published, "next", {
-//			value : function() {
-//				if(rowset != null)
-//					return rowset.@com.bearsoft.rowset.Rowset::next()();
-//				else
-//					return false;
-//			}
-//		});
-//		Object.defineProperty(published, "prev", {
-//			 value : function() {
-//				if(rowset != null)
-//					return rowset.@com.bearsoft.rowset.Rowset::previous()();
-//				else
-//					return false;
-//			}
-//		});
-//		Object.defineProperty(published, "last", {
-//			value : function() {
-//				if(rowset != null)
-//					return rowset.@com.bearsoft.rowset.Rowset::last()();
-//				else
-//					return false;
-//			}
-//		});
-//		Object.defineProperty(published, "pos", {
-//			value : function(aIndex) {
-//				if(rowset != null)
-//					return rowset.@com.bearsoft.rowset.Rowset::absolute(I)(aIndex);
-//				else
-//					return false;
-//			}
-//		});
-//		Object.defineProperty(published, "getRow", {
-//			value : function(aIndex) {
-//				if(rowset != null)
-//					return @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;)(rowset.@com.bearsoft.rowset.Rowset::getRow(I)(aIndex), aEntity);
-//				else
-//					return null;
-//			}
-//		});
 		// find interface
 		Object.defineProperty(published, "find", {
-			value : function() {
-				var args;
-				if(arguments.length == 1){
-					args = arguments[0];
-				}else{
-					args = [];
-					for(var a=0;a<arguments.length;a++){
-						args[args.length] = arguments[a]; 
-					}
-				}
-				return aEntity.@com.eas.client.model.Entity::find(Lcom/google/gwt/core/client/JavaScriptObject;)(args);
+			value : function(aCriteria) {
+				return aEntity.@com.eas.client.model.Entity::jsFind(Lcom/google/gwt/core/client/JavaScriptObject;)(aCriteria);
 			}
 		});
 		Object.defineProperty(published, "findById", {
 			value : function(aValue) {
 				return aEntity.@com.eas.client.model.Entity::findById(Ljava/lang/Object;)($wnd.P.boxAsJava(aValue));
-			}
-		});
-		// relations interface
-		Object.defineProperty(published, "beginUpdate", {
-			value : function() {
-				aEntity.@com.eas.client.model.Entity::beginUpdate()();
-			}
-		});
-		Object.defineProperty(published, "endUpdate", {
-			value : function() {
-				aEntity.@com.eas.client.model.Entity::endUpdate()();
 			}
 		});
 		//
@@ -440,221 +256,117 @@ public class Entity implements RowsetListener, HasPublished{
 		});
 		Object.defineProperty(published, "execute", {
 			value : function(onSuccess, onFailure) {
-				var oldManual = published.manual;
-				try{
-					published.manual = false;
-					aEntity.@com.eas.client.model.Entity::execute(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
-				}finally{
-					published.manual = oldManual;
-				}
+				aEntity.@com.eas.client.model.Entity::execute(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
 			}
 		});
 		Object.defineProperty(published, "requery", {
 			value : function(onSuccess, onFailure) {
-				var oldManual = published.manual;
-				try{
-					published.manual = false;
-					aEntity.@com.eas.client.model.Entity::refresh(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
-				}finally{
-					published.manual = oldManual;
-				}
+				aEntity.@com.eas.client.model.Entity::refresh(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
 			}
 		});
-		// processing interface
-		//Object.defineProperty(published, "createLocator", {
-		//	value : function() {
-		//		return aEntity.@com.eas.client.model.Entity::createLocator(Lcom/google/gwt/core/client/JavaScriptObject;)(arguments.length == 1 && Array.isArray(arguments[0]) ? arguments[0] : arguments);
-		//	}
-		//});
 		Object.defineProperty(published, "createFilter", {
-			value : function() {
-				return aEntity.@com.eas.client.model.Entity::createFilter(Lcom/google/gwt/core/client/JavaScriptObject;)(arguments.length == 1 && Array.isArray(arguments[0]) ? arguments[0] : arguments);
+			value : function(aConstraints) {
+				return aEntity.@com.eas.client.model.Entity::jsCreateFilter(Lcom/google/gwt/core/client/JavaScriptObject;)(aConstraints);
 			}
 		});
 		Object.defineProperty(published, "activeFilter", {
 			get : function() {
 				var nFilter = rowset.@com.bearsoft.rowset.Rowset::getActiveFilter()();
-				return @com.eas.client.model.Entity::publishFilterFacade(Lcom/bearsoft/rowset/filters/Filter;Lcom/eas/client/model/Entity;)(nFilter, aEntity);
+				return nFilter != null ? @com.bearsoft.rowset.ordering.Filter::publishFacade(Lcom/bearsoft/rowset/ordering/Filter;)(nFilter) : null;
 			}
 		});
 		
 		Object.defineProperty(published, "createSorting", {
-			value : function() {
-				var args;
-				if(arguments.length == 1){
-					args = arguments[0];
-				}else{
-					args = [];
-					for(var a=0;a<arguments.length;a++){
-						args[args.length] = arguments[a]; 
-					}
-				}
-				return aEntity.@com.eas.client.model.Entity::createSorting(Lcom/google/gwt/core/client/JavaScriptObject;)(args);
+			value : function(aCriteria) {
+				return aEntity.@com.eas.client.model.Entity::jsCreateSorting(Lcom/google/gwt/core/client/JavaScriptObject;)(aCriteria);
 			}
 		});
-		// data at cursor interface
-//		Object.defineProperty(published, "getObject", {
-//			value : function(aColIndex) {
-//				var rValue = null;
-//				if(rowset != null){
-//					rValue = rowset.@com.bearsoft.rowset.Rowset::getJsObject(Ljava/lang/String;)(published.schema[aColIndex - 1].name);
-//				}
-//				if(rValue == null){
-//					rValue = aEntity.@com.eas.client.model.Entity::getSubstituteRowsetJsObject(I)(aColIndex);
-//				}
-//				return $wnd.P.boxAsJs(rValue);
-//			}
-//		});
-//		// modify interface
-//		Object.defineProperty(published, "updateObject", {
-//			value : function(aColIndex, aValue) {
-//				if(rowset != null)
-//					rowset.@com.bearsoft.rowset.Rowset::updateJsObject(Ljava/lang/String;Ljava/lang/Object;)(published.schema[aColIndex-1].name, $wnd.P.boxAsJava(aValue));
-//			}
-//		});
-//		Object.defineProperty(published, "insert", {
-//			value : function() {
-//				aEntity.@com.eas.client.model.Entity::insert(Lcom/google/gwt/core/client/JavaScriptObject;)(arguments);
-//			}
-//		});
-//		Object.defineProperty(published, "insertAt", {
-//			value : function() {
-//				aEntity.@com.eas.client.model.Entity::insertAt(ILcom/google/gwt/core/client/JavaScriptObject;)($wnd.P.boxAsJava(arguments[0]), $wnd.Array.prototype.slice.call(arguments, 1));
-//			}
-//		});
 		Object.defineProperty(published, "removeAll", {
 			value : function() {
-				if(rowset != null){
-					rowset.@com.bearsoft.rowset.Rowset::deleteAll()();
-				}
+				rowset.@com.bearsoft.rowset.Rowset::deleteAll()();
 			}
 		});
-//		Object.defineProperty(published, "deleteAll", {
-//			value : function() {
-//				if(rowset != null)
-//					rowset.@com.bearsoft.rowset.Rowset::deleteAll()();
-//			}
-//		});
 		Object.defineProperty(published, "remove", {
 			value : function(aRow) {
-				if(rowset != null){
-					if(aRow){
-						if(aRow.unwrap){
-							rowset.@com.bearsoft.rowset.Rowset::deleteRow(Lcom/bearsoft/rowset/Row;)(aRow.unwrap());
-						}else{
-							rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(aRow);
-						}
+				if(aRow){
+					if(aRow.unwrap){
+						rowset.@com.bearsoft.rowset.Rowset::delete(Lcom/bearsoft/rowset/Row;)(aRow.unwrap());
 					}else{
-						rowset.@com.bearsoft.rowset.Rowset::delete()();
+						rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(aRow);
 					}
 				}
 			}
 		});
-//		Object.defineProperty(published, "deleteRow", {
-//			value : function(aRow) {
-//				if(rowset != null){
-//					if(aRow){
-//						if(aRow.unwrap)
-//							rowset.@com.bearsoft.rowset.Rowset::deleteRow(Lcom/bearsoft/rowset/Row;)(aRow.unwrap());
-//						else
-//							rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(aRow);
-//					}else
-//						rowset.@com.bearsoft.rowset.Rowset::delete()();
-//				}
-//			}
-//		});
 		Object.defineProperty(published, "unwrap", {
 			value : function() {
 				return aEntity;
 			}
 		});
 		// properties
-//		Object.defineProperty(published, "queryId",      { get : function(){ return published.getQueryId()}});
-//		Object.defineProperty(published, "manual",       { get : function(){ return aEntity.@com.eas.client.model.Entity::isManual()()}, set : function(aValue){ aEntity.@com.eas.client.model.Entity::setManual(Z)(!!aValue)}});
-//		Object.defineProperty(published, "modified",     { get : function(){ return published.isModified()}});
-//		Object.defineProperty(published, "empty",        { get : function(){ return published.isEmpty()}});
-//		Object.defineProperty(published, "inserting",    { get : function(){ return published.isInserting()}});
-//		Object.defineProperty(published, "size",         { get : function(){ return published.getSize(); }});
-		Object.defineProperty(published, "cursorPos",    { get : function(){ return rowset.@com.bearsoft.rowset.Rowset::getCursorPos()();}, set : function(aValue){ rowset.@com.bearsoft.rowset.Rowset::absolute(I)(+aValue);}});
-//		Object.defineProperty(published, "substitute",   { get : function(){ return published.getSubstitute()}, set : function(aValue){ published.setSubstitute(aValue)}});
+		Object.defineProperty(published, "cursorPos",    { get : function(){ return rowset.@com.bearsoft.rowset.Rowset::getCursorPos()();}, set : function(aValue){ rowset.@com.bearsoft.rowset.Rowset::setCursorPos(I)(+aValue);}});
 		Object.defineProperty(published, "elementClass", { get : function(){ return aEntity.@com.eas.client.model.Entity::getElementClass()()}, set : function(aValue){ aEntity.@com.eas.client.model.Entity::setElementClass(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue)}});
 		Object.defineProperty(published, "cursor",       {
 			get : function(){
 				var nRow = rowset.@com.bearsoft.rowset.Rowset::getCurrentRow()();
-			    return @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;Lcom/google/gwt/core/client/JavaScriptObject;)(nRow, aEntity, null);
+			    return nRow != null ? @com.bearsoft.rowset.Row::publishFacade(Lcom/bearsoft/rowset/Row;Lcom/google/gwt/core/client/JavaScriptObject;)(nRow, null) : null;
 			}
-		});
-		    
-		Object.defineProperty(published, "schema",         { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(aEntity.@com.eas.client.model.Entity::getFields()(), aEntity) }});
+		});		    
+		Object.defineProperty(published, "schema",         { get : function(){ return @com.bearsoft.rowset.metadata.Fields::publishFacade(Lcom/bearsoft/rowset/metadata/Fields;)(nFields); }});
 		// entity.params
 		var nativeQuery = aEntity.@com.eas.client.model.Entity::getQuery()();
 		var nativeParams = nativeQuery.@com.eas.client.queries.Query::getParameters()();
+		var paramsCount = nativeParams.@com.bearsoft.rowset.metadata.Parameters::getParametersCount()();
 		var publishedParams = {};  
-		Object.defineProperty(publishedParams, "schema", { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(nativeParams, aEntity); }});
-		Object.defineProperty(publishedParams, "length", { get : function(){ return publishedParams.schema.length; }});
-		for(var i = 0; i < publishedParams.schema.length; i++){
+		var publishedParamsSchema = @com.bearsoft.rowset.metadata.Fields::publishFacade(Lcom/bearsoft/rowset/metadata/Fields;)(nativeParams);
+		for(var i = 0; i < paramsCount; i++){
 			(function(){
 				var _i = i;
 				var propDesc = {
-					 get : function(){ return publishedParams.schema[_i].value; },
-					 set : function(aValue){ publishedParams.schema[_i].value = aValue; }
+					 get : function(){ return publishedParamsSchema[_i].value; },
+					 set : function(aValue){ publishedParamsSchema[_i].value = aValue; }
 				};
-				Object.defineProperty(publishedParams, publishedParams.schema[_i].name, propDesc);
+				Object.defineProperty(publishedParams, publishedParamsSchema[_i].name, propDesc);
 				Object.defineProperty(publishedParams, _i, propDesc);
 			})();
 		}			
+		if(!publishedParams.schema)
+			Object.defineProperty(publishedParams, "schema", { get : function(){ return publishedParamsSchema; }});
 		Object.defineProperty(published, "params", {
 			get : function(){
 				return publishedParams;
 			}
 		});
 		// events
-		Object.defineProperty(published, "willChange", {
-			get : function(){
-				return aEntity.@com.eas.client.model.Entity::getOnBeforeChange()();
-			},
-			set : function(aValue){
-				aEntity.@com.eas.client.model.Entity::setOnBeforeChange(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
-			}
-		});
 		Object.defineProperty(published, "willDelete", {
 			get : function(){
-				return aEntity.@com.eas.client.model.Entity::getOnBeforeDelete()();
+				return aEntity.@com.eas.client.model.Entity::getWillDelete()();
 			},
 			set : function(aValue){
-				aEntity.@com.eas.client.model.Entity::setOnBeforeDelete(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				aEntity.@com.eas.client.model.Entity::setWillDelete(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 			}
 		});
 		Object.defineProperty(published, "willInsert", {
 			get : function(){
-				return aEntity.@com.eas.client.model.Entity::getOnBeforeInsert()();
+				return aEntity.@com.eas.client.model.Entity::getWillInsert()();
 			},
 			set : function(aValue){
-				aEntity.@com.eas.client.model.Entity::setOnBeforeInsert(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				aEntity.@com.eas.client.model.Entity::setWillInsert(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 			}
 		});
 		Object.defineProperty(published, "willScroll", {
 			get : function(){
-				return aEntity.@com.eas.client.model.Entity::getOnBeforeScroll()();
+				return aEntity.@com.eas.client.model.Entity::getWillScroll()();
 			},
 			set : function(aValue){
-				aEntity.@com.eas.client.model.Entity::setOnBeforeScroll(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
-			}
-		});
-		Object.defineProperty(published, "onChanged", {
-			get : function(){
-				return aEntity.@com.eas.client.model.Entity::getOnAfterChange()();
-			},
-			set : function(aValue){
-				aEntity.@com.eas.client.model.Entity::setOnAfterChange(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				aEntity.@com.eas.client.model.Entity::setWillScroll(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 			}
 		});
 		Object.defineProperty(published, "onDeleted", {
 			get : function(){
-				return aEntity.@com.eas.client.model.Entity::getOnAfterDelete()();
+				return aEntity.@com.eas.client.model.Entity::getOnDeleted()();
 			},
 			set : function(aValue){
-				aEntity.@com.eas.client.model.Entity::setOnAfterDelete(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				aEntity.@com.eas.client.model.Entity::setOnDeleted(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 			}
 		});
 		Object.defineProperty(published, "onFiltered", {
@@ -667,10 +379,10 @@ public class Entity implements RowsetListener, HasPublished{
 		});
 		Object.defineProperty(published, "onInserted", {
 			get : function(){
-				return aEntity.@com.eas.client.model.Entity::getOnAfterInsert()();
+				return aEntity.@com.eas.client.model.Entity::getOnInserted()();
 			},
 			set : function(aValue){
-				aEntity.@com.eas.client.model.Entity::setOnAfterInsert(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				aEntity.@com.eas.client.model.Entity::setOnInserted(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 			}
 		});
 		Object.defineProperty(published, "onRequeried", {
@@ -683,281 +395,12 @@ public class Entity implements RowsetListener, HasPublished{
 		});
 		Object.defineProperty(published, "onScrolled", {
 			get : function(){
-				return aEntity.@com.eas.client.model.Entity::getOnAfterScroll()();
+				return aEntity.@com.eas.client.model.Entity::getOnScrolled()();
 			},
 			set : function(aValue){
-				aEntity.@com.eas.client.model.Entity::setOnAfterScroll(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				aEntity.@com.eas.client.model.Entity::setOnScrolled(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 			}
 		});
-	}-*/;
-
-	public static native void publishRows(JavaScriptObject aPublished) throws Exception/*-{
-		var nEntity = aPublished.unwrap();
-		var rowset = nEntity.@com.eas.client.model.Entity::getRowset()();
-		var rowsCount = rowset.@com.bearsoft.rowset.Rowset::size()(); 
-        $wnd.Array.prototype.splice.call(aPublished, 0, aPublished.length);
-		for (var j = 1; j <= rowsCount; j++) {
-			var nRow = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(j);
-			$wnd.Array.prototype.push.call(aPublished, @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;Lcom/google/gwt/core/client/JavaScriptObject;)(nRow, nEntity, null));
-		}
-	}-*/;
-
-	public static native JavaScriptObject publishRowFacade(Row aRow, Entity aEntity, JavaScriptObject aTarget) throws Exception/*-{
-		if(aRow != null){
-			var published = aRow.@com.bearsoft.rowset.Row::getPublished()();
-			if(published == null){
-				if(aTarget){
-					published = aTarget;
-				}else{
-					var elClass = aEntity.@com.eas.client.model.Entity::getElementClass()();
-					if(elClass != null && typeof elClass == "function")
-						published = new elClass();
-					else
-						published = {};
-				} 
-				Object.defineProperty(published, "unwrap", { get : function(){
-					return function() {
-						return aRow;
-					}
-				}});
-				Object.defineProperty(published, "schema", { get : function(){ return @com.eas.client.model.Entity::publishFieldsFacade(Lcom/bearsoft/rowset/metadata/Fields;Lcom/eas/client/model/Entity;)(aRow.@com.bearsoft.rowset.Row::getFields()(), aEntity); }});
-				Object.defineProperty(published, "length", { get : function(){ return published.schema.length; }});
-				for(var i = 0; i < published.schema.length; i++){
-					(function(){
-						var _i = i;
-						var propDesc = {
-							 get : function(){ return $wnd.P.boxAsJs(aRow.@com.bearsoft.rowset.Row::getFieldObject(Ljava/lang/String;)(published.schema[_i].name)); },
-							 set : function(aValue){ aRow.@com.bearsoft.rowset.Row::setFieldObject(Ljava/lang/String;Ljava/lang/Object;)(published.schema[_i].name, $wnd.P.boxAsJava(aValue)); }
-						};
-						Object.defineProperty(published, published.schema[_i].name, propDesc);
-						Object.defineProperty(published, (_i+""),     propDesc);
-					})();
-				}
-				aRow.@com.bearsoft.rowset.Row::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
-				aEntity.@com.eas.client.model.Entity::publishOrmProps(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
-			}
-			return published;
-		}else
-			return null;
-	}-*/;
-
-	public void publishOrmProps(JavaScriptObject aTarget){
-		for(Map.Entry<String, JavaScriptObject> entry : ormDefinitions.entrySet()){
-			aTarget.<JsObject>cast().defineProperty(entry.getKey(), entry.getValue());
-		}
-	}
-	
-	public static native JavaScriptObject publishFieldsFacade(Fields aFields, Entity aEntity) throws Exception/*-{
-		if(aFields != null){
-			var published = aFields.@com.bearsoft.rowset.metadata.Fields::getPublished()();
-			if(published == null){
-				published = {
-					getFieldsCount : function() {
-						return aFields.@com.bearsoft.rowset.metadata.Fields::getFieldsCount()();
-					},
-					isEmpty : function() {
-						return aFields.@com.bearsoft.rowset.metadata.Fields::isEmpty()();
-					},
-					get : function(aFieldIndex) {
-						return @com.eas.client.model.Entity::publishFieldFacade(Lcom/bearsoft/rowset/metadata/Field;)(aFields.@com.bearsoft.rowset.metadata.Fields::get(I)(aFieldIndex));
-					},
-					getTableDescription : function() {
-						return aFields.@com.bearsoft.rowset.metadata.Fields::getTableDescription()();
-					},
-					unwrap : function()
-					{
-						return aFields;
-					}
-				};
-				
-				Object.defineProperty(published, "empty", { get : function(){ return published.isEmpty()}});
-				Object.defineProperty(published, "tableDescription", { get : function(){ return published.getTableDescription()}});
-				Object.defineProperty(published, "length", { get : function(){ return published.getFieldsCount()}});
-				
-				for(var i = 0; i < published.length; i++)
-				{
-					(function(){
-						var _i = i;
-						Object.defineProperty(published, (_i+""), { get : function(){ return published.get(_i+1) }});
-						Object.defineProperty(published, published.get(_i+1).name, { get : function(){ return published.get(_i+1) }});
-					})();
-				}
-				aFields.@com.bearsoft.rowset.metadata.Fields::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
-			}
-			return published;
-		}else
-			return null;
-	}-*/;
-
-	public static native JavaScriptObject publishFieldFacade(Field aField) throws Exception/*-{
-		if(aField != null)
-		{
-			var published = aField.@com.bearsoft.rowset.metadata.Field::getPublished()();
-			if (published == null) {
-				published = {
-					getName : function() {
-						return aField.@com.bearsoft.rowset.metadata.Field::getName()();
-					},
-					getDescription : function() {
-						return aField.@com.bearsoft.rowset.metadata.Field::getDescription()();
-					},
-					getSize : function() {
-						return aField.@com.bearsoft.rowset.metadata.Field::getSize()();
-					},
-					isPk : function() {
-						return aField.@com.bearsoft.rowset.metadata.Field::isPk()();
-					},
-					setPk : function(aValue) {
-						aField.@com.bearsoft.rowset.metadata.Field::setPk(Z)(aValue);
-					},
-					isStrong4Insert : function() {
-						return aField.@com.bearsoft.rowset.metadata.Field::isStrong4Insert()();
-					},
-					setStrong4Insert : function(aValue) {
-						aField.@com.bearsoft.rowset.metadata.Field::setStrong4Insert(Z)(aValue);
-					},
-					isNullable : function() {
-						return aField.@com.bearsoft.rowset.metadata.Field::isNullable()();
-					},
-					isReadonly : function() {
-						return aField.@com.bearsoft.rowset.metadata.Field::isReadonly()();
-					},
-					unwrap : function() {
-						return aField;
-					}
-				};
-				Object.defineProperty(published, "name", {
-					get : function() {
-						return published.getName();
-					}
-				});
-				Object.defineProperty(published, "description", {
-					get : function() {
-						return published.getDescription();
-					}
-				});
-				Object.defineProperty(published, "size", {
-					get : function() {
-						return published.getSize();
-					}
-				});
-				Object.defineProperty(published, "pk", {
-					get : function() {
-						return published.isPk();
-					},
-					set : function(aValue) {
-						published.setPk(aValue);
-					}
-				});
-				Object.defineProperty(published, "strong4Insert", {
-					get : function() {
-						return published.isStrong4Insert();
-					},
-					set : function(aValue) {
-						published.setStrong4Insert(aValue);
-					}
-				});
-				Object.defineProperty(published, "nullable", {
-					get : function() {
-						return published.isNullable();
-					}
-				});
-				Object.defineProperty(published, "readonly", {
-					get : function() {
-						return published.isReadonly();
-					}
-				});
-				if(@com.eas.client.model.Entity::isParameter(Lcom/bearsoft/rowset/metadata/Field;)(aField))
-				{
-					Object.defineProperty(published, "modified", {
-						get : function() {
-							return aField.@com.bearsoft.rowset.metadata.Parameter::isModified()();
-						}
-					});
-					Object.defineProperty(published, "value", {
-						get : function() {
-							return $wnd.P.boxAsJs(aField.@com.bearsoft.rowset.metadata.Parameter::getJsValue()());
-						},
-						set : function(aValue) {
-							aField.@com.bearsoft.rowset.metadata.Parameter::setJsValue(Ljava/lang/Object;)($wnd.P.boxAsJava(aValue));
-						}
-					});
-				}
-				aField.@com.bearsoft.rowset.metadata.Field::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
-			}
-			return published;
-		} else
-			return null;
-	}-*/;
-
-	public static native JavaScriptObject publishLocatorFacade(Locator loc, Entity aEntity) throws Exception/*-{
-		if(loc != null)
-		{
-			var published = loc.@com.bearsoft.rowset.locators.Locator::getPublished()();
-			if(published == null){
-				published = {
-					first : function() {
-						return loc.@com.bearsoft.rowset.locators.Locator::first()();
-					},
-					last : function() {
-						return loc.@com.bearsoft.rowset.locators.Locator::last()();
-					},
-					next : function() {
-						return loc.@com.bearsoft.rowset.locators.Locator::next()();
-					},
-					prev : function() {
-						return loc.@com.bearsoft.rowset.locators.Locator::previous()();
-					},
-					isBeforeFirst : function() {
-						return loc.@com.bearsoft.rowset.locators.Locator::isBeforeFirst()();
-					},
-					isAfterLast : function() {
-						return loc.@com.bearsoft.rowset.locators.Locator::isAfterLast()();
-					},
-					find : function() {
-						return loc.@com.bearsoft.rowset.locators.Locator::find(Lcom/google/gwt/core/client/JavaScriptObject;)(arguments);
-					},
-					getRow : function(aIndex) {
-						return @com.eas.client.model.Entity::publishRowFacade(Lcom/bearsoft/rowset/Row;Lcom/eas/client/model/Entity;Lcom/google/gwt/core/client/JavaScriptObject;)(loc.@com.bearsoft.rowset.locators.Locator::getRow(I)(aIndex), aEntity, null);
-					},
-					getSize : function() {
-						return loc.@com.bearsoft.rowset.locators.Locator::getSize()();
-					},
-					unwrap : function() {
-						return loc;
-					}
-				}
-				loc.@com.bearsoft.rowset.locators.Locator::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
-			}
-			return published;
-		} else
-			return null;
-	}-*/;
-
-	public static native JavaScriptObject publishFilterFacade(Filter aFilter, Entity aEntity) throws Exception/*-{
-		if (aFilter != null) {
-			var published = aFilter.@com.bearsoft.rowset.filters.Filter::getPublished()();
-			if (published == null) {
-				published = {
-					apply : function() {
-						aEntity.@com.eas.client.model.Entity::setUserFiltering(Z)(true);
-						aFilter.@com.bearsoft.rowset.filters.Filter::apply(Lcom/google/gwt/core/client/JavaScriptObject;)(arguments);
-					},
-					isApplied : function() {
-						return aFilter.@com.bearsoft.rowset.filters.Filter::isApplied()();
-					},
-					cancel : function() {
-						aFilter.@com.bearsoft.rowset.filters.Filter::cancelFilter()();
-					},
-					unwrap : function() {
-						return aFilter;
-					}
-				}
-				aFilter.@com.bearsoft.rowset.filters.Filter::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
-			}
-			return published;
-		} else
-			return null;
 	}-*/;
 
 	public PropertyChangeSupport getChangeSupport() {
@@ -965,41 +408,11 @@ public class Entity implements RowsetListener, HasPublished{
 	}
 
 	public Fields getFields() {
-		if (fields == null) {
-			try {
-				assert query != null : "Query must present (getFields)";
-				if (query != null) {
-					fields = query.getFields();
-					if (fields == null) {
-						if (rowset != null) {
-							fields = rowset.getFields();
-						}
-					}
-					assert fields != null;
-				}
-			} catch (Exception ex) {
-				fields = null;
-				Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
-			}
-		}
-		if (fields != null)
-			fields.setOwner(this);
-		return fields;
-	}
-
-	public void clearFields() {
-		if (fields != null)
-			fields.setOwner(null);
-		fields = null;
-		setQuery(null);
+		return rowset.getFields();
 	}
 
 	public Model getModel() {
 		return model;
-	}
-
-	public void regenerateId() {
-		entityId = String.valueOf(IDGenerator.genId());
 	}
 
 	public void setModel(Model aValue) {
@@ -1060,11 +473,7 @@ public class Entity implements RowsetListener, HasPublished{
 	}
 
 	public void setQuery(Query aValue) {
-		if (query != null)
-			query.getParameters().setOwner(null);
 		query = aValue;
-		if (query != null)
-			query.getParameters().setOwner(this);
 	}
 
 	public boolean removeOutRelation(Relation aRelation) {
@@ -1160,31 +569,18 @@ public class Entity implements RowsetListener, HasPublished{
 			Rowset oldRowset = rowset;
 			if(rowset != null){
 				rowset.removeRowsetListener(this);
-				unforwardChangeLog();
+				rowset.setLog(null);
 				rowset = null;
 			}
 			rowset = query.prepareRowset();
-			forwardChangeLog();
+			rowset.setLog(model.getChangeLog());
 			rowset.addRowsetListener(this);
+            locator = new Locator();
+            locator.setRowset(rowset);
 			changeSupport.firePropertyChange("rowset", oldRowset, rowset);
 		}
 	}
 
-	protected void unforwardChangeLog(){
-		if(rowset.getFlowProvider() instanceof DelegatingFlowProvider){
-			DelegatingFlowProvider dfp = (DelegatingFlowProvider)rowset.getFlowProvider();
-			rowset.setFlowProvider(dfp.getDelegate());
-		}
-	}
-	
-	protected void forwardChangeLog(){
-		rowset.setFlowProvider(new DelegatingFlowProvider(rowset.getFlowProvider()) {
-			public List<Change> getChangeLog() {
-				return model.getChangeLog();
-			};
-		});
-	}
-	
 	public Entity copy() throws Exception {
 		assert model != null : "Entities can't exist without a model";
 		Entity copied = new Entity(model);
@@ -1192,36 +588,28 @@ public class Entity implements RowsetListener, HasPublished{
 		return copied;
 	}
 
-	public JavaScriptObject getOnAfterChange() {
-		return onAfterChange;
+	public JavaScriptObject getOnDeleted() {
+		return onDeleted;
 	}
 
-	public JavaScriptObject getOnAfterDelete() {
-		return onAfterDelete;
+	public JavaScriptObject getOnInserted() {
+		return onInserted;
 	}
 
-	public JavaScriptObject getOnAfterInsert() {
-		return onAfterInsert;
+	public JavaScriptObject getOnScrolled() {
+		return onScrolled;
 	}
 
-	public JavaScriptObject getOnAfterScroll() {
-		return onAfterScroll;
+	public JavaScriptObject getWillDelete() {
+		return willDelete;
 	}
 
-	public JavaScriptObject getOnBeforeChange() {
-		return onBeforeChange;
+	public JavaScriptObject getWillInsert() {
+		return willInsert;
 	}
 
-	public JavaScriptObject getOnBeforeDelete() {
-		return onBeforeDelete;
-	}
-
-	public JavaScriptObject getOnBeforeInsert() {
-		return onBeforeInsert;
-	}
-
-	public JavaScriptObject getOnBeforeScroll() {
-		return onBeforeScroll;
+	public JavaScriptObject getWillScroll() {
+		return willScroll;
 	}
 
 	public JavaScriptObject getOnFiltered() {
@@ -1232,36 +620,28 @@ public class Entity implements RowsetListener, HasPublished{
 		return onRequeried;
 	}
 
-	public void setOnAfterChange(JavaScriptObject aValue) {
-		onAfterChange = aValue;
+	public void setOnDeleted(JavaScriptObject aValue) {
+		onDeleted = aValue;
 	}
 
-	public void setOnAfterDelete(JavaScriptObject aValue) {
-		onAfterDelete = aValue;
+	public void setOnInserted(JavaScriptObject aValue) {
+		onInserted = aValue;
 	}
 
-	public void setOnAfterInsert(JavaScriptObject aValue) {
-		onAfterInsert = aValue;
+	public void setOnScrolled(JavaScriptObject aValue) {
+		onScrolled = aValue;
 	}
 
-	public void setOnAfterScroll(JavaScriptObject aValue) {
-		onAfterScroll = aValue;
+	public void setWillDelete(JavaScriptObject aValue) {
+		willDelete = aValue;
 	}
 
-	public void setOnBeforeChange(JavaScriptObject aValue) {
-		onBeforeChange = aValue;
+	public void setWillInsert(JavaScriptObject aValue) {
+		willInsert = aValue;
 	}
 
-	public void setOnBeforeDelete(JavaScriptObject aValue) {
-		onBeforeDelete = aValue;
-	}
-
-	public void setOnBeforeInsert(JavaScriptObject aValue) {
-		onBeforeInsert = aValue;
-	}
-
-	public void setOnBeforeScroll(JavaScriptObject aValue) {
-		onBeforeScroll = aValue;
+	public void setWillScroll(JavaScriptObject aValue) {
+		willScroll = aValue;
 	}
 
 	public void setOnFiltered(JavaScriptObject aValue) {
@@ -1272,40 +652,8 @@ public class Entity implements RowsetListener, HasPublished{
 		onRequeried = aValue;
 	}
 
-	/*
-	 * private void silentFirst() throws InvalidCursorPositionException {
-	 * rowset.removeRowsetListener(this); try { rowset.first(); } finally {
-	 * rowset.addRowsetListener(this); } }
-	 */
-
-	public void beginUpdate() {
-		updatingCounter++;
-	}
-
-	public void endUpdate() throws Exception {
-		assert updatingCounter > 0;
-		updatingCounter--;
-		if (updatingCounter == 0) {
-			internalExecuteChildren(false);
-		}
-	}
-
-	public boolean isManual() {
-		assert query != null : "Query must present (isManual)";
-		return query.isManual();
-	}
-
-	public void setManual(boolean aValue) {
-		assert query != null : "Query must present (setManual)";
-		query.setManual(aValue);
-	}
-
 	public boolean isPending() {
 		return pending != null;
-	}
-
-	public boolean isRowsetPresent() {
-		return rowset != null;
 	}
 
 	public void refresh(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
@@ -1385,7 +733,6 @@ public class Entity implements RowsetListener, HasPublished{
 		} else {
             // Requery if query parameters values have been changed while bindQueryParameters() call
             // or we are forced to refresh the data via requery() call.
-			uninstallUserFiltering();
 			silentUnpend();
 			refreshRowset(aCallback);
             assert rowset != null;
@@ -1411,50 +758,39 @@ public class Entity implements RowsetListener, HasPublished{
 		}
 	}
 	
-	protected void uninstallUserFiltering() throws RowsetException {
-		if (userFiltering && rowset != null && rowset.getActiveFilter() != null) {
-			rowset.getActiveFilter().cancelFilter();
-		}
-		userFiltering = false;
-	}
-	
     protected void internalExecuteChildren(boolean refresh) throws Exception {
-        if (updatingCounter == 0) {
-            Set<Relation> rels = getOutRelations();
-            if (rels != null) {
-                Set<Entity> toExecute = new HashSet<>();
-                for(Relation outRel : rels){
-                    if (outRel != null) {
-                    	Entity rEntity = outRel.getRightEntity();
-                        if (rEntity != null) {
-                            toExecute.add(rEntity);
-                        }
+        Set<Relation> rels = getOutRelations();
+        if (rels != null) {
+            Set<Entity> toExecute = new HashSet<>();
+            for(Relation outRel : rels){
+                if (outRel != null) {
+                	Entity rEntity = outRel.getRightEntity();
+                    if (rEntity != null) {
+                        toExecute.add(rEntity);
                     }
                 }
-                model.executeEntities(refresh, toExecute);
             }
+            model.executeEntities(refresh, toExecute);
         }
     }
 
     protected void internalExecuteChildren(boolean refresh, int aOnlyFieldIndex) throws Exception {
-        if (updatingCounter == 0) {
-            Set<Relation> rels = getOutRelations();
-            if (rels != null) {
-                Field onlyField = getFields().get(aOnlyFieldIndex);
-                Set<Entity> toExecute = new HashSet<>();
-                for(Relation outRel : rels){
-                    if (outRel != null) {
-                        Entity rEntity = outRel.getRightEntity();
-                        if (rEntity != null && outRel.getLeftField() == onlyField) {
-                            toExecute.add(rEntity);
-                        }
+        Set<Relation> rels = getOutRelations();
+        if (rels != null) {
+            Field onlyField = getFields().get(aOnlyFieldIndex);
+            Set<Entity> toExecute = new HashSet<>();
+            for(Relation outRel : rels){
+                if (outRel != null) {
+                    Entity rEntity = outRel.getRightEntity();
+                    if (rEntity != null && outRel.getLeftField() == onlyField) {
+                        toExecute.add(rEntity);
                     }
                 }
-                model.executeEntities(refresh, toExecute);
             }
+            model.executeEntities(refresh, toExecute);
         }
     }
-
+/*
 	public void setRowset(Rowset aRowset) {
         Rowset oldRowset = rowset;
         if (rowset != null) {
@@ -1467,24 +803,9 @@ public class Entity implements RowsetListener, HasPublished{
             changeSupport.firePropertyChange("rowset", oldRowset, rowset);
         }
 	}
-
-	public boolean isUserFiltering() {
-		return userFiltering;
-	}
-
-	public void setUserFiltering(boolean aUserFiltering) throws Exception {
-		boolean oldUserFiltering = userFiltering;
-		userFiltering = aUserFiltering;
-		if (oldUserFiltering != userFiltering) {
-			if (rowset.getActiveFilter() != null) {
-				rowset.getActiveFilter().cancelFilter();
-			}
-			execute(null);
-		}
-	}
-
+*/
 	protected boolean isFilterable() throws Exception {
-		return rowset != null && !userFiltering && rtInFilterRelations != null && !rtInFilterRelations.isEmpty();
+		return rowset != null && rtInFilterRelations != null && !rtInFilterRelations.isEmpty();
 	}
 
 	public void bindQueryParameters() throws Exception {
@@ -1503,9 +824,9 @@ public class Entity implements RowsetListener, HasPublished{
 							// There might be entities - parameters values sources, with no
 							// data in theirs rowsets, so we can't bind query parameters to proper values. In the
 							// such case we initialize parameters values with RowsetUtils.UNDEFINED_SQL_VALUE
-							if (leftRowset != null && !leftRowset.isEmpty() && !leftRowset.isBeforeFirst() && !leftRowset.isAfterLast()) {
+							if (leftRowset != null && leftRowset.getCurrentRow() != null) {
 								try {
-									pValue = leftRowset.getObject(leftRowset.getFields().find(relation.getLeftField().getName()));
+									pValue = leftRowset.getCurrentRow().getColumnObject(leftRowset.getFields().find(relation.getLeftField().getName()));
 								} catch (Exception ex) {
 									pValue = RowsetUtils.UNDEFINED_SQL_VALUE;
 									Logger.getLogger(Entity.class.getName()).log(Level.SEVERE,
@@ -1515,29 +836,6 @@ public class Entity implements RowsetListener, HasPublished{
 								pValue = RowsetUtils.UNDEFINED_SQL_VALUE;
 							}
 						} else {
-							/*
-							 * Query leftQuery = leftEntity.getQuery();
-							 * assert leftQuery != null :
-							 * "Left query must present (Relation points to query, but query is absent)"
-							 * ; Parameters leftParams =
-							 * leftQuery.getParameters(); assert leftParams
-							 * != null :
-							 * "Parameters of left query must present (Relation points to query parameter, but query parameters are absent)"
-							 * ; Parameter leftParameter =
-							 * leftParams.get(relation.getLeftParameter());
-							 * if (leftParameter != null) { pValue =
-							 * leftParameter.getValue(); if (pValue == null)
-							 * { pValue = leftParameter.getDefaultValue(); }
-							 * } else {
-							 * Logger.getLogger(Entity.class.getName()).log(
-							 * Level.SEVERE,
-							 * "Parameter of left query must present (Relation points to query parameter "
-							 * + relation.getRightParameter() +
-							 * " in entity: " + getTitle() + " [" +
-							 * String.valueOf(getEntityId()) +
-							 * "], but query parameter with specified name is absent)"
-							 * ); }
-							 */
 							Parameter leftParameter = relation.getLeftParameter();
 							if (leftParameter != null) {
 								pValue = leftParameter.getValue();
@@ -1593,29 +891,18 @@ public class Entity implements RowsetListener, HasPublished{
 	}
 
 	protected void validateFilter() throws RowsetException {
-		assert rtInFilterRelations != null;
-		assert rowset != null;
-		if (filter == null && !rtInFilterRelations.isEmpty()) {
-			List<Field> constraints = new ArrayList<Field>();
-			// enumerate filtering relations ...
-			for (Relation rel : rtInFilterRelations) {
-				assert rel != null && rel.isRightField();
-				constraints.add(rel.getRightField());
-			}
-			if (!constraints.isEmpty()) {
-				filter = rowset.createFilter();
-				filter.beginConstrainting();
-				try {
-					Fields rFields = rowset.getFields();
-					for (Field field : constraints) {
-						filter.addConstraint(rFields.find(field.getName()));
-					}
-				} finally {
-					filter.endConstrainting();
-				}
-				filter.build();
-			}
-		}
+        assert rtInFilterRelations != null;
+        assert rowset != null;
+        if (filter == null && !rtInFilterRelations.isEmpty()) {
+            List<Integer> filterConstraints = new ArrayList<>();
+            Fields rFields = rowset.getFields();
+            // enumerate filtering relations ...
+            for(Relation rel : rtInFilterRelations){
+                assert rel != null && rel.isRightField();
+                filterConstraints.add(rFields.find(rel.getRightField().getName()));
+            };
+            filter = rowset.createFilter(filterConstraints);
+        }
 	}
 
 	public boolean filterRowset() throws Exception {
@@ -1629,98 +916,82 @@ public class Entity implements RowsetListener, HasPublished{
 	}
 
 	public boolean applyFilter() throws Exception {
-		assert !userFiltering : "Can't apply own filter while user filtering";
-		assert rowset != null : "Bad requery -> filter chain";
-		KeySet filterKeySet = new KeySet();
-		if (!rtInFilterRelations.isEmpty()) {
-			for (Relation rel : rtInFilterRelations) {
-				// relation must be filtering relation ...
-				assert rel != null && rel.isRightField();
-				Entity leftEntity = rel.getLeftEntity();
-				assert leftEntity != null;
-				Object fValue = null;
-				if (rel.isLeftField()) {
-					Rowset leftRowset = leftEntity.getRowset();
-					if (leftRowset != null) {
-						if (!leftRowset.isEmpty()) {
-							if (!leftRowset.isBeforeFirst() && !leftRowset.isAfterLast()) {
-								fValue = leftRowset.getObject(leftRowset.getFields().find(rel.getLeftField().getName()));
+		try{
+	        assert rowset != null : "Bad requery -> filter chain";
+	        List<Object> filterKeys = new ArrayList<>();
+			if (!rtInFilterRelations.isEmpty()) {
+				for (Relation rel : rtInFilterRelations) {
+					// relation must be filtering relation ...
+					assert rel != null && rel.isRightField();
+					Entity leftEntity = rel.getLeftEntity();
+					assert leftEntity != null;
+					Object fValue = null;
+					if (rel.isLeftField()) {
+						Rowset leftRowset = leftEntity.getRowset();
+						if (leftRowset != null) {
+							if (!leftRowset.isEmpty()) {
+								if (leftRowset.getCurrentRow() != null) {
+									fValue = leftRowset.getCurrentRow().getColumnObject(leftRowset.getFields().find(rel.getLeftField().getName()));
+								} else {
+									fValue = RowsetUtils.UNDEFINED_SQL_VALUE;
+									Logger.getLogger(Entity.class.getName()).log(
+									        Level.FINE,
+									        "Failed to achieve value for filtering field:" + rel.getRightField() + " in entity: " + getTitle() + " [" + String.valueOf(getEntityId())
+									                + "]. The source rowset has bad position (before first or after last).");
+								}
 							} else {
 								fValue = RowsetUtils.UNDEFINED_SQL_VALUE;
 								Logger.getLogger(Entity.class.getName()).log(
 								        Level.FINE,
 								        "Failed to achieve value for filtering field:" + rel.getRightField() + " in entity: " + getTitle() + " [" + String.valueOf(getEntityId())
-								                + "]. The source rowset has bad position (before first or after last).");
+								                + "]. The source rowset has no any rows.");
 							}
 						} else {
 							fValue = RowsetUtils.UNDEFINED_SQL_VALUE;
 							Logger.getLogger(Entity.class.getName()).log(
 							        Level.FINE,
 							        "Failed to achieve value for filtering field:" + rel.getRightField() + " in entity: " + getTitle() + " [" + String.valueOf(getEntityId())
-							                + "]. The source rowset has no any rows.");
+							                + "]. The source rowset is absent.");
 						}
 					} else {
-						fValue = RowsetUtils.UNDEFINED_SQL_VALUE;
-						Logger.getLogger(Entity.class.getName()).log(
-						        Level.FINE,
-						        "Failed to achieve value for filtering field:" + rel.getRightField() + " in entity: " + getTitle() + " [" + String.valueOf(getEntityId())
-						                + "]. The source rowset is absent.");
-					}
-				} else {
-					/*
-					 * Query leftQuery = leftEntity.getQuery(); assert leftQuery
-					 * != null :
-					 * "Left query must present (Relation points to query, but query is absent)"
-					 * ; Parameters leftParams = leftQuery.getParameters();
-					 * assert leftParams != null :
-					 * "Parameters of left query must present (Relation points to query parameter, but query parameters are absent)"
-					 * ; Parameter leftParameter =
-					 * leftParams.get(rel.getLeftParameter()); if (leftParameter
-					 * != null) { fValue = leftParameter.getValue(); if (fValue
-					 * == null) { fValue = leftParameter.getDefaultValue(); } }
-					 * else {
-					 * Logger.getLogger(Entity.class.getName()).log(Level.
-					 * SEVERE,
-					 * "Parameter of left query must present (Relation points to query parameter "
-					 * + rel.getLeftParameter() +
-					 * ", but query parameter with specified name is absent)");
-					 * }
-					 */
-					Parameter leftParameter = rel.getLeftParameter();
-					if (leftParameter != null) {
-						fValue = leftParameter.getValue();
-						if (fValue == null) {
-							fValue = leftParameter.getDefaultValue();
+						Parameter leftParameter = rel.getLeftParameter();
+						if (leftParameter != null) {
+							fValue = leftParameter.getValue();
+							if (fValue == null) {
+								fValue = leftParameter.getDefaultValue();
+							}
+						} else {
+							Logger.getLogger(Entity.class.getName()).log(Level.SEVERE,
+							        "Parameter of left query must present (Relation points to query parameter, but query parameter with specified name is absent)");
 						}
-					} else {
-						Logger.getLogger(Entity.class.getName()).log(Level.SEVERE,
-						        "Parameter of left query must present (Relation points to query parameter, but query parameter with specified name is absent)");
 					}
+					Field fieldOfValue = rowset.getFields().get(rel.getRightField().getName());
+					filterKeys.add(Converter.convert2RowsetCompatible(fValue, fieldOfValue.getTypeInfo()));
 				}
-				Field fieldOfValue = rowset.getFields().get(rel.getRightField().getName());
-				filterKeySet.add(Converter.convert2RowsetCompatible(fValue, fieldOfValue.getTypeInfo()));
 			}
-		}
-		if (filter != null && !filter.isEmpty() && (filter != rowset.getActiveFilter() || !filter.getKeysetApplied().equals(filterKeySet))) {
-			filter.filterRowset(filterKeySet);			
-			return true;
-		} else {
-			return false;
-		}
+			if (filter != null && !filter.isEmpty() && (filter != rowset.getActiveFilter() || !filter.getAppliedKeys().equals(filterKeys))) {
+				filter.apply(filterKeys);			
+				return true;
+			} else {
+				return false;
+			}
+        } catch (Exception ex) {
+            Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
+            throw ex;
+        }
 	}
 
 	@Override
 	public boolean willScroll(RowsetScrollEvent aEvent) {
 		assert aEvent.getRowset() == rowset;
 		// call script method
-		Boolean sRes = null;
 		try {
-			sRes = Utils.executeScriptEventBoolean(jsPublished, onBeforeScroll, JsEvents.publishCursorPositionWillChangeEvent(jsPublished, aEvent.getOldRowIndex(), aEvent.getNewRowIndex()));
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-		if (sRes != null) {
-			return sRes;
+			Boolean sRes = Utils.executeScriptEventBoolean(jsPublished, willScroll, JsEvents.publishCursorPositionWillChangeEvent(jsPublished, aEvent.getOldRowIndex(), aEvent.getNewRowIndex()));
+			if (sRes != null) {
+				return sRes;
+			}
+		} catch (Exception ex) {
+            Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		return true;
 	}
@@ -1733,7 +1004,7 @@ public class Entity implements RowsetListener, HasPublished{
 			try {
 				internalExecuteChildren(false);
 				// call script method
-				Utils.executeScriptEventVoid(jsPublished, onAfterScroll, JsEvents.publishCursorPositionChangedEvent(jsPublished, aEvent.getOldRowIndex(), aEvent.getNewRowIndex()));
+				Utils.executeScriptEventVoid(jsPublished, onScrolled, JsEvents.publishCursorPositionChangedEvent(jsPublished, aEvent.getOldRowIndex(), aEvent.getNewRowIndex()));
 			} catch (Exception ex) {
 				Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
 			}
@@ -1741,59 +1012,16 @@ public class Entity implements RowsetListener, HasPublished{
 	}
 
 	@Override
-	public boolean willChangeRow(RowChangeEvent aEvent) {
-		Fields fmdv = getFields();
-		if (fmdv != null) {
-			Field fmd = fmdv.get(aEvent.getFieldIndex());
-			if (fmd != null) {
-				// call script method
-				Boolean sRes = null;
-				try {
-					JavaScriptObject publishedRow = publishRowFacade(aEvent.getChangedRow(), this, null);
-					sRes = Utils.executeScriptEventBoolean(jsPublished, onBeforeChange,
-					        JsEvents.publishEntityInstanceChangeEvent(publishedRow, publishFieldFacade(fmd), Utils.toJs(aEvent.getOldValue()), Utils.toJs(aEvent.getNewValue())));
-				} catch (Exception e) {
-					throw new IllegalStateException(e);
-				}
-				if (sRes != null) {
-					return sRes;
-				}
-			}
-		}
-		return true;
-	}
-
-	@Override
-	public void rowChanged(RowChangeEvent aEvent) {
-		try {
-			internalExecuteChildren(false, aEvent.getFieldIndex());
-			Fields fmdv = getFields();
-			if (fmdv != null) {
-				Field fmd = fmdv.get(aEvent.getFieldIndex());
-				if (fmd != null) {
-					// call script method
-					JavaScriptObject publishedRow = publishRowFacade(aEvent.getChangedRow(), this, null);
-					Utils.executeScriptEventVoid(jsPublished, onAfterChange,
-					        JsEvents.publishEntityInstanceChangeEvent(publishedRow, publishFieldFacade(fmd), Utils.toJs(aEvent.getOldValue()), Utils.toJs(aEvent.getNewValue())));
-				}
-			}
-		} catch (Exception ex) {
-			Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
-		}
-	}
-
-	@Override
 	public boolean willInsertRow(RowsetInsertEvent aEvent) {
 		// call script method
-		Boolean sRes = null;
 		try {
-			JavaScriptObject publishedRow = publishRowFacade(aEvent.getRow(), this, null);
-			sRes = Utils.executeScriptEventBoolean(jsPublished, onBeforeInsert, JsEvents.publishEntityInstanceInsertEvent(jsPublished, publishedRow));
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-		if (sRes != null) {
-			return sRes;
+			JavaScriptObject publishedRow = Row.publishFacade(aEvent.getRow(), null);
+			Boolean sRes = Utils.executeScriptEventBoolean(jsPublished, willInsert, JsEvents.publishEntityInstanceInsertEvent(jsPublished, publishedRow));
+			if (sRes != null) {
+				return sRes;
+			}
+		} catch (Exception ex) {
+            Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		return true;
 	}
@@ -1801,15 +1029,14 @@ public class Entity implements RowsetListener, HasPublished{
 	@Override
 	public boolean willDeleteRow(RowsetDeleteEvent aEvent) {
 		// call script method
-		Boolean sRes = null;
 		try {
-			JavaScriptObject publishedRow = publishRowFacade(aEvent.getRow(), this, null);
-			sRes = Utils.executeScriptEventBoolean(jsPublished, onBeforeDelete, JsEvents.publishEntityInstanceDeleteEvent(jsPublished, publishedRow));
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-		if (sRes != null) {
-			return sRes;
+			JavaScriptObject publishedRow = Row.publishFacade(aEvent.getRow(), null);
+			Boolean sRes = Utils.executeScriptEventBoolean(jsPublished, willDelete, JsEvents.publishEntityInstanceDeleteEvent(jsPublished, publishedRow));
+			if (sRes != null) {
+				return sRes;
+			}
+		} catch (Exception ex) {
+            Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		return true;
 	}
@@ -1817,12 +1044,10 @@ public class Entity implements RowsetListener, HasPublished{
 	@Override
 	public void rowInserted(RowsetInsertEvent aEvent) {
 		try {
-			if (jsPublished != null)
-				publishRows(jsPublished);
 			internalExecuteChildren(false);
 			// call script method
-			JavaScriptObject publishedRow = publishRowFacade(aEvent.getRow(), this, null);
-			Utils.executeScriptEventVoid(jsPublished, onAfterInsert, JsEvents.publishEntityInstanceInsertEvent(jsPublished, publishedRow));
+			JavaScriptObject publishedRow = Row.publishFacade(aEvent.getRow(), null);
+			Utils.executeScriptEventVoid(jsPublished, onInserted, JsEvents.publishEntityInstanceInsertEvent(jsPublished, publishedRow));
 		} catch (Exception ex) {
 			Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
 		}
@@ -1831,12 +1056,10 @@ public class Entity implements RowsetListener, HasPublished{
 	@Override
 	public void rowDeleted(RowsetDeleteEvent aEvent) {
 		try {
-			if (jsPublished != null)
-				publishRows(jsPublished);
 			internalExecuteChildren(false);
 			// call script method
-			JavaScriptObject publishedRow = publishRowFacade(aEvent.getRow(), this, null);
-			Utils.executeScriptEventVoid(jsPublished, onAfterDelete, JsEvents.publishEntityInstanceDeleteEvent(jsPublished, publishedRow));
+			JavaScriptObject publishedRow = Row.publishFacade(aEvent.getRow(), null);
+			Utils.executeScriptEventVoid(jsPublished, onDeleted, JsEvents.publishEntityInstanceDeleteEvent(jsPublished, publishedRow));
 		} catch (Exception ex) {
 			Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
 		}
@@ -1845,8 +1068,6 @@ public class Entity implements RowsetListener, HasPublished{
 	@Override
 	public void rowsetSorted(RowsetSortEvent event) {
 		try {
-			if (jsPublished != null)
-				publishRows(jsPublished);
 			internalExecuteChildren(false);
 			// call script method
 			JavaScriptObject publishedEvent = JsEvents.publishSourcedEvent(jsPublished);
@@ -1861,8 +1082,6 @@ public class Entity implements RowsetListener, HasPublished{
 		try {
             assert rowset != null;
 			filterRowset();
-			if (jsPublished != null)
-				publishRows(jsPublished);
 			JavaScriptObject publishedEvent = JsEvents.publishSourcedEvent(jsPublished);
 			Utils.executeScriptEventVoid(jsPublished, onRequeried, publishedEvent);
 			internalExecuteChildren(false);
@@ -1878,17 +1097,10 @@ public class Entity implements RowsetListener, HasPublished{
 	@Override
 	public void rowsetFiltered(RowsetFilterEvent event) {
 		try {
-			if (jsPublished != null)
-				publishRows(jsPublished);
-			if ((!rowset.isBeforeFirst() && !rowset.isAfterLast()) || !rowset.first())
+			if (!rowset.isEmpty())
 				internalExecuteChildren(false);
 			// call script method
 			JavaScriptObject publishedEvent = JsEvents.publishSourcedEvent(jsPublished);
-			/*
-			 * if (model.isPending()) model.enqueueEvent(new
-			 * ScriptEvent(jsPublished, this, onFiltered, publishedEvent));
-			 * else
-			 */
 			Utils.executeScriptEventVoid(jsPublished, onFiltered, publishedEvent);
 		} catch (Exception ex) {
 			Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
@@ -1927,16 +1139,14 @@ public class Entity implements RowsetListener, HasPublished{
 		appTarget.setQueryName(queryName);
 		appTarget.setTitle(title);
 		appTarget.setName(name);
-		appTarget.setOnAfterChange(onAfterChange);
-		appTarget.setOnAfterDelete(onAfterDelete);
-		appTarget.setOnAfterInsert(onAfterInsert);
-		appTarget.setOnAfterScroll(onAfterScroll);
+		appTarget.setOnDeleted(onDeleted);
+		appTarget.setOnInserted(onInserted);
+		appTarget.setOnScrolled(onScrolled);
 		appTarget.setOnFiltered(onFiltered);
 		appTarget.setOnRequeried(onRequeried);
-		appTarget.setOnBeforeChange(onBeforeChange);
-		appTarget.setOnBeforeDelete(onBeforeDelete);
-		appTarget.setOnBeforeInsert(onBeforeInsert);
-		appTarget.setOnBeforeScroll(onBeforeScroll);
+		appTarget.setWillDelete(willDelete);
+		appTarget.setWillInsert(willInsert);
+		appTarget.setWillScroll(willScroll);
 	}
 
 	public void accept(ModelVisitor visitor) {
@@ -1955,94 +1165,23 @@ public class Entity implements RowsetListener, HasPublished{
 		return rowset;
 	}
 
-	private Locator checkUserLocator(List<Integer> constraints) throws IllegalStateException {
-		Locator loc = userLocators.get(constraints);
-		if (loc == null) {
-			Rowset lrowset = getRowset();
-			if (lrowset != null) {
-				loc = lrowset.createLocator();
-				loc.beginConstrainting();
-				try {
-					for (int colIdx : constraints) {
-						loc.addConstraint(colIdx);
-					}
-				} finally {
-					loc.endConstrainting();
-				}
-				userLocators.put(constraints, loc);
-			}
-		}
-		return loc;
-	}
-
-	// Scriptable rowset interface
-
-	protected Entity substitute;
-
-	public Entity getSubstitute() {
-		return substitute;
-	}
-
-	public void setSubstitute(Entity aSubstitute) {
-		if (aSubstitute != this) {
-			substitute = aSubstitute;
-		}
-	}
-
-	public Object getSubstituteRowsetObject(String aFieldName) throws Exception {
-		Entity lsubstitute = substitute;
-		while (lsubstitute != null) {
-			Rowset sRowset = lsubstitute.getRowset();
-			if (sRowset != null && !sRowset.isBeforeFirst() && !sRowset.isAfterLast()) {
-				Object value = sRowset.getObject(sRowset.getFields().find(aFieldName));
-				if (value != null) {
-					return value;
-				}
-			}
-			lsubstitute = lsubstitute.getSubstitute();
-		}
-		return null;
-	}
-
-	public Object getSubstituteRowsetJsObject(int aColIndex) throws Exception {
-		if (fields != null) {
-			Field field = fields.get(aColIndex);
-			if (field != null) {
-				Object value = getSubstituteRowsetObject(field.getName());
-				return Utils.toJs(value);
-			}
-		}
-		return null;
-	}
-
-	protected native Row unwrapRow(JavaScriptObject aRowFacade) throws Exception/*-{
-		return aRowFacade != null ? aRowFacade.unwrap() : null;
-	}-*/;
-
-	public boolean scrollTo(JavaScriptObject aRowFacade) throws Exception {
-		Row row = unwrapRow(aRowFacade);
-		return scrollTo(row);
-	}
+    private Orderer checkUserOrderer(List<Integer> aConstraints) throws IllegalStateException {
+        Orderer orderer = userOrderers.get(aConstraints);
+        if (orderer == null) {
+            orderer = rowset.createOrderer(aConstraints);
+            userOrderers.put(aConstraints, orderer);
+        }
+        return orderer;
+    }
 
 	public boolean scrollTo(Row aRow) throws Exception {
-		if (rowset != null && aRow != null) {
-			List<Integer> pkIndices = rowset.getFields().getPrimaryKeysIndicies();
-			if (!pkIndices.isEmpty()) {
-				Locator loc = checkUserLocator(pkIndices);
-				Object[] keyValues = new Object[pkIndices.size()];
-				for (int i = 0; i < keyValues.length; i++) {
-					assert pkIndices.get(i) != null : "Primary keys indices must non null integers";
-					int colIndex = pkIndices.get(i);
-					keyValues[i] = aRow.getColumnObject(colIndex);
-				}
-				if (loc.find(keyValues)) {
-					return loc.first();
-				} else
-					return false;
-			} else
-				throw new IllegalArgumentException("Scrolling possible only for rows with primary keys specified");
-		} else
-			return false;
+        if (aRow != null) {
+            int idx = locator.indexOf(aRow);
+            if (idx != -1) {
+                return rowset.setCursorPos(idx + 1);
+            }
+        }
+        return false;
 	}
 
 	/**
@@ -2052,186 +1191,104 @@ public class Entity implements RowsetListener, HasPublished{
 	 *            Search key value.
 	 * @return Wrapped row if it have been found and null otherwise.
 	 */
-	public JavaScriptObject findById(Object aValue) throws Exception {
-		Row result = findRowById(aValue);
-		return result != null ? publishRowFacade(result, this, null) : null;
+	public JavaScriptObject jsFindById(Object aValue) throws Exception {
+		Row result = findById(aValue);
+		return result != null ? Row.publishFacade(result, null) : null;
 	}
 	
-	public Row findRowById(Object aValue) throws Exception {
-		List<Integer> pkIndicies = getFields().getPrimaryKeysIndicies();
-		if (pkIndicies.size() == 1) {
-			Object keyValue = Utils.toJava(aValue);
-			keyValue = Converter.convert2RowsetCompatible(keyValue, getFields().get(pkIndicies.get(0)).getTypeInfo());
-			Locator loc = checkUserLocator(pkIndicies);
-			if (loc != null && loc.find(new Object[] { keyValue }))
-				return loc.getRow(0);
-			else
-				return null;
-		} else
-			throw new IllegalArgumentException("There are must be only one primary key field to be searched on.");
+    public static final String BAD_PRIMARY_KEYS_MSG = "Bad primary keys detected. Required one and only one primary key field, but %d found.";
+    
+	public Row findById(Object aValue) throws Exception {
+        Fields fields = rowset.getFields();
+        List<Integer> pks = fields.getPrimaryKeysIndicies();
+        if (pks.size() == 1) {
+            List<Object> keyValues = new ArrayList<>();
+            keyValues.add(Utils.toJava(aValue));
+            Orderer loc = checkUserOrderer(pks);
+            Collection<Row> res = loc.get(keyValues);
+            if (res != null && !res.isEmpty()) {
+                return res.iterator().next();
+            } else {
+                return null;
+            }
+        } else {
+            Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, String.format(BAD_PRIMARY_KEYS_MSG, pks.size()));
+        }
+        return null;
 	}
 
 	public static final String BAD_FIND_AGRUMENTS_MSG = "Bad find agruments";
 	public static final String BAD_FIND_ARGUMENT_MSG = "Argument at index %d must be a rowset's field.";
 
-	/**
-	 * Finds set of rows and wraps it in appropriate js objects.
-	 * 
-	 * @param aValues
-	 *            Search key fields and key values.
-	 * @return js array of wrapped rows.
-	 * @throws RowsetException
-	 * @throws IllegalStateException
-	 */
-	public JavaScriptObject find(JavaScriptObject aValues) throws Exception {
-		if (aValues != null) {
-			Fields fields = getFields();
-			List<Integer> constraints = new ArrayList<Integer>();
-			List<Object> keyValues = new ArrayList<Object>();
-			if (aValues.<JsObject>cast().isArray()) {
-				JsArrayMixed values = aValues.<JsArrayMixed> cast();
-				if(values.length() % 2 == 0){
-					for (int i = 0; i < values.length(); i += 2) {
-						int colIndex = 0;
-						DataTypeInfo typeInfo = null;
-						try {
-							JavaScriptObject jsField = values.getObject(i);
-							Field field = RowsetUtils.unwrapField(jsField);
-							colIndex = fields.find(field.getName());
-							typeInfo = field.getTypeInfo();
-						} catch (Exception ex) {
-							String possibleFiledName = values.getString(i);
-							Field field = fields.get(possibleFiledName);
-							if(field != null){
-								colIndex = fields.find(possibleFiledName);
-								typeInfo = field.getTypeInfo();
-							}else{
-								colIndex = Double.valueOf(values.getNumber(i)).intValue();
-								field = fields.get(colIndex);
-								typeInfo = field.getTypeInfo();
-							}
-						}
-						// field col index
-						constraints.add(colIndex);
-						// corresponding value
-						Object keyValue = RowsetUtils.extractValueFromJsArray(values, i + 1);
-						keyValues.add(Converter.convert2RowsetCompatible(keyValue, typeInfo));
-					}
-				} else {
-					Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, BAD_FIND_AGRUMENTS_MSG);
-				}
-			}else{
-				JsArrayString jsKeys = aValues.<JsObject>cast().keys();
-				for(int i = 0; i < jsKeys.length(); i++){
-					String jsKey = jsKeys.get(i);
-					int colIndex = fields.find(jsKey);
-					Field field = fields.get(colIndex);
-					DataTypeInfo typeInfo = field.getTypeInfo();
-					// field col index
-					constraints.add(colIndex);
-					// corresponding value
-					Object keyValue = Utils.toJava(aValues.<JsObject>cast().getJava(jsKey));
-					keyValues.add(Converter.convert2RowsetCompatible(keyValue, typeInfo));
-				}
-			}
-			Locator loc = checkUserLocator(constraints);
-			if (loc.find(keyValues.toArray())) {
-                HashOrderer.TaggedList<RowWrap> subset = loc.getSubSet();
-                if (subset.tag == null) {
-            		JsArray<JavaScriptObject> arFound = JavaScriptObject.createArray().<JsArray<JavaScriptObject>> cast();
-    				for (RowWrap rw : subset) {
-    					arFound.push(publishRowFacade(rw.getRow(), this, null));
-    				}
-                    subset.tag = arFound; 
+	public JavaScriptObject jsFind(JavaScriptObject aCriteria) throws Exception {
+		if (aCriteria != null) {
+            Fields fields = rowset.getFields();
+            List<Integer> constraints = new ArrayList<>();
+            List<Object> keyValues = new ArrayList<>();
+            JsArrayString jsKeys = aCriteria.<JsObject>cast().keys();
+            for (int i = 0; i < jsKeys.length();i++) {
+            	String key = jsKeys.get(i);
+                int fieldIndex = fields.find(key);
+                if (fieldIndex != -1) {
+                    Field field = fields.get(key);
+                    constraints.add(fieldIndex);
+                    Object javaValue = aCriteria.<JsObject>cast().getJava(key);
+                    Object convertedValue = Converter.convert2RowsetCompatible(javaValue, field.getTypeInfo());
+                    keyValues.add(convertedValue);
                 }
-                assert subset.tag instanceof JavaScriptObject;
-                return (JavaScriptObject) subset.tag;
-				
-			}
+            }
+            if (!constraints.isEmpty() && constraints.size() == keyValues.size()) {
+                Orderer loc = checkUserOrderer(constraints);
+                Subset res = loc.get(keyValues);
+                if (res != null) {
+                	if(res.getPublished() == null){
+	                    JsObject jsRes = JavaScriptObject.createArray(res.size()).cast();
+	                    int i = 0;
+	                    for(Row r : res){
+	                        JavaScriptObject jsRow = Row.publishFacade(r, null);
+	                        jsRes.setSlot(i++, jsRow);
+	                    }
+	                    res.setPublished(jsRes);
+                	}
+                    return res.getPublished();
+                }
+            } else {
+                Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, BAD_FIND_AGRUMENTS_MSG);
+            }
 		} else {
 			Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, BAD_FIND_AGRUMENTS_MSG);
 		}
-		return JavaScriptObject.createArray();
+        return null;
 	}
 
-	public Row find(int aColIndex, Object aValue) throws Exception {
-		List<Integer> constraints = new ArrayList<Integer>();
-		List<Object> keyValues = new ArrayList<Object>();
-		DataTypeInfo typeInfo = getFields().get(aColIndex).getTypeInfo();
-		// field col index
-		constraints.add(aColIndex);
-		// correponding value
-		keyValues.add(Converter.convert2RowsetCompatible(aValue, typeInfo));
-		Locator loc = checkUserLocator(constraints);
-		if (loc.find(keyValues.toArray()) && loc.getSize() > 0) {
-			return loc.getRow(0);
-		} else
-			return null;
-	}
-
-	public JavaScriptObject createLocator(JavaScriptObject aConstraints) throws Exception {
-		Fields fields = getFields();
-		Locator loc = getRowset().createLocator();
-		loc.beginConstrainting();
-		try {
-			JsArrayMixed constraints = aConstraints.<JsArrayMixed> cast();
-			for (int i = 0; i < constraints.length(); i++) {
-				JavaScriptObject jsConstraint = constraints.getObject(i);				
-				int colIndex = 0;
-				try{
-					Field field = RowsetUtils.unwrapField(jsConstraint);
-					colIndex = fields.find(field.getName());
-				}catch(Exception ex){
-					// field name
-					String possibleFieldName = constraints.getString(i);
-					Field field = fields.get(possibleFieldName);
-					if(field != null){
-						colIndex = fields.find(possibleFieldName);
-					}else{
-						// field col index
-						colIndex = Double.valueOf(constraints.getNumber(i)).intValue();
-					}
-				}
-				loc.addConstraint(colIndex);
-			}
-		} finally {
-			loc.endConstrainting();
-		}
-		return publishLocatorFacade(loc, this);
-	}
-
-	public JavaScriptObject createFilter(JavaScriptObject aConstraints) throws Exception {
+	public JavaScriptObject jsCreateFilter(JavaScriptObject aConstraints) throws Exception {
 		JsArrayMixed constraints = aConstraints.<JsArrayMixed> cast();
-		Fields fields = getFields();
-		Filter filter = getRowset().createFilter();
-		filter.beginConstrainting();
-		try {
-			for (int i = 0; i < constraints.length(); i++) {
-				JavaScriptObject jsConstraint = constraints.getObject(i);
-				int colIndex = 0;
-				try{
-					Field field = RowsetUtils.unwrapField(jsConstraint);
-					colIndex = fields.find(field.getName());
-				}catch(Exception ex){
-					// field name
-					String possibleFieldName = constraints.getString(i);
-					Field field = fields.get(possibleFieldName);
-					if(field != null){
-						colIndex = fields.find(possibleFieldName);
-					}else{
-						// field col index
-						colIndex = Double.valueOf(constraints.getNumber(i)).intValue();
-					}
+		Fields fields = rowset.getFields();
+		List<Integer> indices = new ArrayList<>();
+		for (int i = 0; i < constraints.length(); i++) {
+			JavaScriptObject jsConstraint = constraints.getObject(i);
+			int colIndex = 0;
+			try{
+				Field field = RowsetUtils.unwrapField(jsConstraint);
+				colIndex = fields.find(field.getName());
+			}catch(Exception ex){
+				// field name
+				String possibleFieldName = constraints.getString(i);
+				Field field = fields.get(possibleFieldName);
+				if(field != null){
+					colIndex = fields.find(possibleFieldName);
+				}else{
+					// field col index
+					colIndex = Double.valueOf(constraints.getNumber(i)).intValue();
 				}
-				filter.addConstraint(colIndex);
 			}
-		} finally {
-			filter.endConstrainting();
+			indices.add(colIndex);
 		}
-		return publishFilterFacade(filter, this);
+		Filter lfilter = rowset.createFilter(indices);
+		return Filter.publishFacade(lfilter);
 	}
 
-	public RowsComparator createSorting(JavaScriptObject aConstraints) {
+	public RowsComparator jsCreateSorting(JavaScriptObject aConstraints) {
 		JsArrayMixed constraints = aConstraints.<JsArrayMixed> cast();
 		Fields fields = getFields();
 		List<SortingCriterion> criteria = new ArrayList<SortingCriterion>();
@@ -2280,14 +1337,6 @@ public class Entity implements RowsetListener, HasPublished{
 		rowset.sort(comparator);
 	}
 
-	public static boolean isParameter(Field aField) {
-		return aField instanceof Parameter;
-	}
-
-	protected native static int invokeComparatorFunc(JavaScriptObject aComparatorFun, JavaScriptObject row1, JavaScriptObject row2) throws Exception/*-{
-		return aComparatorFun(row1, row2);
-	}-*/;
-
 	public void sort(Object aComparator) throws Exception {
 		if(aComparator instanceof RowsComparator){
 			sort((RowsComparator)aComparator);
@@ -2299,13 +1348,15 @@ public class Entity implements RowsetListener, HasPublished{
 	
 	public void sort(final JavaScriptObject aComparatorFunc) throws Exception {
 		Comparator<Row> comparator = new Comparator<Row>() {
-
+			
+			protected native int invokeComparatorFunc(JavaScriptObject aComparatorFun, JavaScriptObject row1, JavaScriptObject row2) throws Exception/*-{
+				return aComparatorFun(row1, row2);
+			}-*/;
+			
 			@Override
 			public int compare(Row row1, Row row2) {
-				// Row row1 = (Row)arg0;
-				// Row row2 = (Row)arg1;
 				try {
-					return invokeComparatorFunc(aComparatorFunc, publishRowFacade(row1, Entity.this, null), publishRowFacade(row2, Entity.this, null));
+					return invokeComparatorFunc(aComparatorFunc, Row.publishFacade(row1, null), Row.publishFacade(row2, null));
 				} catch (Exception e) {
 					throw new IllegalStateException(e);
 				}
@@ -2315,52 +1366,40 @@ public class Entity implements RowsetListener, HasPublished{
 		rowset.sort(comparator);
 	}
 
-	public void insert(JavaScriptObject aValues) throws Exception {
-		JsArrayMixed fieldsValues = aValues.<JsArrayMixed> cast();
-		Object[] initingValues = new Object[fieldsValues.length()];
-		for (int i = 0; i < initingValues.length; i += 2) {
-			// field
-			try {
-				initingValues[i] = RowsetUtils.unwrapField(fieldsValues.getObject(i));
-			} catch (Exception ex) {
-				initingValues[i] = RowsetUtils.extractValueFromJsArray(fieldsValues, i);
-			}
-			// value
-			initingValues[i + 1] = RowsetUtils.extractValueFromJsArray(fieldsValues, i + 1);
-		}
-		rowset.insert(initingValues);
+	public void jsInsertAt(int aIndex, boolean aAjusting, JavaScriptObject aTarget) throws Exception {
+        Fields fields = rowset.getFields();
+        List<Object> constraints = new ArrayList<>();
+        JsArrayString jsKeys = aTarget.<JsObject>cast().keys();
+        for (int i = 0; i < jsKeys.length();i++) {
+        	String key = jsKeys.get(i);
+            int fieldIndex = fields.find(key);
+            if (fieldIndex != -1) {
+                Field field = fields.get(key);
+                constraints.add(fieldIndex);
+                Object javaValue = aTarget.<JsObject>cast().getJava(key);
+                Object convertedValue = Converter.convert2RowsetCompatible(javaValue, field.getTypeInfo());
+                constraints.add(convertedValue);
+            }
+        }
+		Row inserted = new Row(rowset.getFlowProvider().getEntityId(), rowset.getFields());
+		Row.publishFacade(inserted, aTarget);
+		rowset.insertAt(inserted, aAjusting, aIndex, constraints.toArray());
 	}
 
-	/**
-	 * 
-	 * @param aValues
-	 *            JavaScript array containing duplets of field name and field value.
-	 * @param aIndex
-	 *            Index new row will be inserted at. 1 - based.
-	 */
-	public void insertAt(int aIndex, JavaScriptObject aValues, JavaScriptObject aTarget) throws Exception {
-		JsArrayMixed fieldsValues = aValues.<JsArrayMixed> cast();
-		Object[] initingValues = new Object[fieldsValues.length()];
-		for (int i = 0; i < initingValues.length; i += 2) {
-			// field
-			try {
-				initingValues[i] = RowsetUtils.unwrapField(fieldsValues.getObject(i));
-			} catch (Exception ex) {
-				initingValues[i] = RowsetUtils.extractValueFromJsArray(fieldsValues, i);
-			}
-			// value
-			initingValues[i + 1] = RowsetUtils.extractValueFromJsArray(fieldsValues, i + 1);
-		}
-		Row inserted = rowset.insertAt(aIndex, initingValues);
-		if(inserted != null){
-			publishRowFacade(inserted, this, aTarget);
+	public boolean jsSort(Object aSorting) throws InvalidCursorPositionException{
+		if(aSorting instanceof RowsComparator){
+			rowset.sort((RowsComparator)aSorting);
+			return true;
+		}else{
+			return false;
 		}
 	}
-
+	
 	public void setPublished(JavaScriptObject aPublished) {
 		if(jsPublished != aPublished){
 			jsPublished = aPublished;
-			publishEntityFacade(this);
+			if(jsPublished != null)
+				publishFacade(this);
 		}
 	}
 
@@ -2370,10 +1409,10 @@ public class Entity implements RowsetListener, HasPublished{
 	}
 	
 	public JavaScriptObject getElementClass() {
-	    return jsElementClass;
+	    return rowset.getFields().getInstanceConstructor();
     }
 	
 	public void setElementClass(JavaScriptObject aValue) {
-	    jsElementClass = aValue;
+		rowset.getFields().setInstanceConstructor(aValue);
     }
 }

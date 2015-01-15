@@ -29,9 +29,9 @@ public class Field {
 	protected String description;// Such data is read from db, and so may
 										// be null
 	protected DataTypeInfo typeInfo = DataTypeInfo.INOPERABLE_TYPE.copy();
-	protected int size = 0;
-	protected int scale = 0;
-	protected int precision = 0;
+	protected int size;
+	protected int scale;
+	protected int precision;
 	protected boolean signed = true;
 	protected boolean nullable = true;
 	protected boolean readonly;
@@ -549,4 +549,58 @@ public class Field {
 	public JavaScriptObject getPublished() {
 		return jsPublished;
 	}
+	
+	public static native JavaScriptObject publishFacade(Field aField) throws Exception/*-{
+		var published = aField.@com.bearsoft.rowset.metadata.Field::getPublished()();
+		if (published == null) {
+			published = {
+				unwrap : function() {
+					return aField;
+				}
+			};
+			Object.defineProperty(published, "name", {
+				get : function() {
+					return aField.@com.bearsoft.rowset.metadata.Field::getName()();
+				}
+			});
+			Object.defineProperty(published, "description", {
+				get : function() {
+					return aField.@com.bearsoft.rowset.metadata.Field::getDescription()();
+				}
+			});
+			Object.defineProperty(published, "size", {
+				get : function() {
+					return aField.@com.bearsoft.rowset.metadata.Field::getSize()();
+				}
+			});
+			Object.defineProperty(published, "pk", {
+				get : function() {
+					return aField.@com.bearsoft.rowset.metadata.Field::isPk()();
+				},
+				set : function(aValue) {
+					aField.@com.bearsoft.rowset.metadata.Field::setPk(Z)(!!aValue);
+				}
+			});
+			Object.defineProperty(published, "strong4Insert", {
+				get : function() {
+					return aField.@com.bearsoft.rowset.metadata.Field::isStrong4Insert()();
+				},
+				set : function(aValue) {
+					aField.@com.bearsoft.rowset.metadata.Field::setStrong4Insert(Z)(!!aValue);
+				}
+			});
+			Object.defineProperty(published, "nullable", {
+				get : function() {
+					return aField.@com.bearsoft.rowset.metadata.Field::isNullable()();
+				}
+			});
+			Object.defineProperty(published, "readonly", {
+				get : function() {
+					return aField.@com.bearsoft.rowset.metadata.Field::isReadonly()();
+				}
+			});
+			aField.@com.bearsoft.rowset.metadata.Field::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		}
+		return published;
+	}-*/;
 }

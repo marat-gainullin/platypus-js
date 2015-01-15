@@ -1,14 +1,14 @@
 package com.eas.client.form.grid.selection;
 
 import com.bearsoft.gwt.ui.widgets.grid.processing.IndexOfProvider;
-import com.bearsoft.rowset.Row;
 import com.eas.client.form.RowKeyProvider;
 import com.eas.client.form.published.widgets.model.ModelGrid;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.view.client.SingleSelectionModel;
 
-public class SingleRowSelectionModel extends SingleSelectionModel<Row> implements HasSelectionLead<Row> {
+public class SingleRowSelectionModel extends SingleSelectionModel<JavaScriptObject> implements HasSelectionLead<JavaScriptObject> {
 
-	protected Row lead;
+	protected JavaScriptObject lead;
 	protected ModelGrid grid;
 
 	public SingleRowSelectionModel(ModelGrid aGrid) {
@@ -17,7 +17,7 @@ public class SingleRowSelectionModel extends SingleSelectionModel<Row> implement
 	}
 
 	@Override
-	public void setSelected(Row item, boolean selected) {
+	public void setSelected(JavaScriptObject item, boolean selected) {
 		if (selected)
 			lead = item;
 		else if (item == lead)
@@ -26,9 +26,9 @@ public class SingleRowSelectionModel extends SingleSelectionModel<Row> implement
 		updateRow(item);
 	}
 
-	protected void updateRow(Row item) {
+	protected void updateRow(JavaScriptObject item) {
 		if (item != null && grid.getDataProvider() instanceof IndexOfProvider<?>) {
-			int rowIndex = ((IndexOfProvider<Row>) grid.getDataProvider()).indexOf(item);
+			int rowIndex = ((IndexOfProvider<JavaScriptObject>) grid.getDataProvider()).indexOf(item);
 			if (rowIndex != -1) {
 				grid.getDataProvider().getList().set(rowIndex, item);
 			}
@@ -36,7 +36,7 @@ public class SingleRowSelectionModel extends SingleSelectionModel<Row> implement
 	}
 
 	@Override
-	public Row getLead() {
+	public JavaScriptObject getLead() {
 		return lead;
 	}
 }

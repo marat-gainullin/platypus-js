@@ -30,17 +30,21 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.TextBox;
 
-public class PlatypusTextField extends TextBox implements HasActionHandlers, HasJsFacade, HasEmptyText, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize {
+public class PlatypusTextField extends TextBox implements HasActionHandlers, HasJsFacade, HasEmptyText, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers,
+        RequiresResize {
 
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
-	protected String name;	
+	protected String name;
 	protected String emptyText;
+	//
+	protected boolean settingValue;
+	//
 	protected JavaScriptObject published;
 
 	public PlatypusTextField() {
 		super();
-		getElement().<XElement>cast().addResizingTransitionEnd(this);
+		getElement().<XElement> cast().addResizingTransitionEnd(this);
 	}
 
 	@Override
@@ -50,7 +54,7 @@ public class PlatypusTextField extends TextBox implements HasActionHandlers, Has
 
 	@Override
 	public void onResize() {
-		if(isAttached()){
+		if (isAttached()) {
 			ResizeEvent.fire(this, getElement().getOffsetWidth(), getElement().getOffsetHeight());
 		}
 	}
@@ -79,18 +83,19 @@ public class PlatypusTextField extends TextBox implements HasActionHandlers, Has
 	}
 
 	protected int actionHandlers;
-	protected HandlerRegistration clickReg;
+	protected HandlerRegistration valueChangeReg;
 
 	@Override
 	public HandlerRegistration addActionHandler(ActionHandler handler) {
 		final HandlerRegistration superReg = super.addHandler(handler, ActionEvent.getType());
 		if (actionHandlers == 0) {
-			clickReg = addValueChangeHandler(new ValueChangeHandler<String>() {
+			valueChangeReg = addValueChangeHandler(new ValueChangeHandler<String>() {
 
 				@Override
-                public void onValueChange(ValueChangeEvent<String> event) {
-					ActionEvent.fire(PlatypusTextField.this, PlatypusTextField.this);
-                }
+				public void onValueChange(ValueChangeEvent<String> event) {
+					if (!settingValue)
+						ActionEvent.fire(PlatypusTextField.this, PlatypusTextField.this);
+				}
 
 			});
 		}
@@ -101,9 +106,9 @@ public class PlatypusTextField extends TextBox implements HasActionHandlers, Has
 				superReg.removeHandler();
 				actionHandlers--;
 				if (actionHandlers == 0) {
-					assert clickReg != null : "Erroneous use of addActionHandler/removeHandler detected in PlatypusTextField";
-					clickReg.removeHandler();
-					clickReg = null;
+					assert valueChangeReg != null : "Erroneous use of addActionHandler/removeHandler detected in PlatypusTextField";
+					valueChangeReg.removeHandler();
+					valueChangeReg = null;
 				}
 			}
 		};
@@ -120,9 +125,9 @@ public class PlatypusTextField extends TextBox implements HasActionHandlers, Has
 	}
 
 	@Override
-    public PlatypusPopupMenu getPlatypusPopupMenu() {
-		return menu; 
-    }
+	public PlatypusPopupMenu getPlatypusPopupMenu() {
+		return menu;
+	}
 
 	protected HandlerRegistration menuTriggerReg;
 
@@ -134,7 +139,7 @@ public class PlatypusTextField extends TextBox implements HasActionHandlers, Has
 			menu = aMenu;
 			if (menu != null) {
 				menuTriggerReg = super.addDomHandler(new ContextMenuHandler() {
-					
+
 					@Override
 					public void onContextMenu(ContextMenuEvent event) {
 						event.preventDefault();
@@ -158,16 +163,26 @@ public class PlatypusTextField extends TextBox implements HasActionHandlers, Has
 	}
 
 	@Override
+	public void setValue(String value, boolean fireEvents) {
+		settingValue = true;
+		try {
+			super.setValue(value, fireEvents);
+		} finally {
+			settingValue = false;
+		}
+	}
+
+	@Override
 	public String getEmptyText() {
 		return emptyText;
 	}
-	
+
 	@Override
 	public void setEmptyText(String aValue) {
 		emptyText = aValue;
 		ControlsUtils.applyEmptyText(getElement(), emptyText);
 	}
-	
+
 	public JavaScriptObject getPublished() {
 		return published;
 	}

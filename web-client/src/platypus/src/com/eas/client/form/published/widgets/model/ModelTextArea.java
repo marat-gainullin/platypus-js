@@ -1,13 +1,12 @@
 package com.eas.client.form.published.widgets.model;
 
 import com.bearsoft.gwt.ui.widgets.NullableTextArea;
-import com.bearsoft.rowset.metadata.Field;
-import com.eas.client.converters.StringRowValueConverter;
+import com.bearsoft.rowset.Utils;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.published.HasEmptyText;
 import com.google.gwt.core.client.JavaScriptObject;
 
-public class ModelTextArea extends PublishedDecoratorBox<String> implements HasEmptyText {
+public class ModelTextArea extends ModelDecoratorBox<String> implements HasEmptyText {
 
 	protected String emptyText;
 
@@ -82,9 +81,19 @@ public class ModelTextArea extends PublishedDecoratorBox<String> implements HasE
 	public void setValue(String value) {
 		super.setValue(value);
 	}
+	
+	@Override
+	public Object getJsValue(){
+		return Utils.toJs(getValue());
+	}
 
 	@Override
-	public void setBinding(Field aField) throws Exception {
-		super.setBinding(aField, new StringRowValueConverter());
+	public void setJsValue(Object aValue) throws Exception {
+		Object javaValue = Utils.toJava(aValue);
+		if (javaValue == null || javaValue instanceof String)
+			setValue((String) javaValue, true);
+		else
+			throw new IllegalArgumentException("A value of type 'String' expected");
 	}
+
 }

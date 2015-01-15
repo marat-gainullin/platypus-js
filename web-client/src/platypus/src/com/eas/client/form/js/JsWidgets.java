@@ -547,7 +547,9 @@ public class JsWidgets {
  	    });
 	    Object.defineProperty(aPublished, "focus", {
 		    get : function() {
-		    	return function(){aPublished.element.focus();}
+		    	return function(){
+		    		@com.eas.client.form.ControlsUtils::focus(Lcom/google/gwt/user/client/ui/Widget;)(comp);
+		    	}
 		    }
  	    });
  	    // Events

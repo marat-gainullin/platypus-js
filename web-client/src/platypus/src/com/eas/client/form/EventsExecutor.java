@@ -230,8 +230,10 @@ public class EventsExecutor {
 
 	public void setActionPerformed(JavaScriptObject aValue) {
 		if (actionPerformed != aValue) {
-			if (actionPerformedReg != null)
+			if (actionPerformedReg != null){
 				actionPerformedReg.removeHandler();
+				actionPerformedReg = null;
+			}
 			actionPerformed = aValue;
 			if (actionPerformed != null && component instanceof HasActionHandlers) {
 				actionPerformedReg = ((HasActionHandlers) component).addActionHandler(new ActionHandler() {
@@ -700,6 +702,7 @@ public class EventsExecutor {
 		if (itemSelected != aValue) {
 			if (selectedItemReg != null) {
 				selectedItemReg.removeHandler();
+				selectedItemReg = null;
 			}
 			itemSelected = aValue;
 			if (component instanceof HasSelectionHandlers<?>) {

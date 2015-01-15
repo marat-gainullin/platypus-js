@@ -6,7 +6,6 @@ package com.bearsoft.rowset.events;
 
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
 import java.util.HashSet;
 import java.util.Set;
@@ -20,6 +19,8 @@ public class RowsetChangeSupport {
 
 	protected Set<RowsetListener> rowsetListeners = new HashSet<>();
 	protected Rowset source;
+    protected Row oldCurrentRow;
+    protected int oldLength;
 
 	/**
 	 * The constructor.
@@ -96,6 +97,9 @@ public class RowsetChangeSupport {
 				}
 			}
 		}
+        if (res) {
+            oldCurrentRow = source.getCurrentRow();
+        }
 		return res;
 	}
 
@@ -125,6 +129,9 @@ public class RowsetChangeSupport {
 				}
 			}
 		}
+        if (res) {
+            oldCurrentRow = source.getCurrentRow();
+        }
 		return res;
 	}
 
@@ -154,10 +161,16 @@ public class RowsetChangeSupport {
 				}
 			}
 		}
+        if (res) {
+            oldCurrentRow = source.getCurrentRow();
+            oldLength = source.size();
+        }
 		return res;
 	}
 
 	public void fireBeforeRequery(){
+        oldCurrentRow = source.getCurrentRow();
+        oldLength = source.size();
 		RowsetRequeryEvent event = new RowsetRequeryEvent(source, RowsetEventMoment.BEFORE);
 		for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
 			if (l != null) {
@@ -192,45 +205,13 @@ public class RowsetChangeSupport {
 				}
 			}
 		}
+        if (res) {
+            oldCurrentRow = source.getCurrentRow();
+            oldLength = source.size();
+        }
 		return res;
 	}
-
-	/**
-	 * Fires <code>willChange</code> event to all registered listeners. The
-	 * changing might be vetoed by one of the registered listeners. Nevertheless
-	 * the event will be propagated to all the registered listeners.
-	 * 
-	 * @param aFieldIndex
-	 *            Rowset's column(field) index the changing will be performed
-	 *            at.
-	 * @param aOldValue
-	 *            The old value of the updating column.
-	 * @param aNewValue
-	 *            The value that is to be setted to the updating column.
-	 * @return Whether event source may perform the changing.
-	 * @throws InvalidCursorPositionException
-	 */
-	public boolean fireWillChangeEvent(Row aChangedRow, int aFieldIndex, Object aOldValue, Object aNewValue) throws InvalidCursorPositionException {
-		boolean res = true;
-		if (rowsetListeners != null && !rowsetListeners.isEmpty()) {
-			RowChangeEvent event = new RowChangeEvent(source, aChangedRow, aFieldIndex, aOldValue, aNewValue, RowsetEventMoment.BEFORE);
-			for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
-				if (l != null) {
-					int oldRowPos = source.getCursorPos();
-					try {
-						if (!l.willChangeRow(event)) {
-							res = false;
-						}
-					} finally {
-						restoreRowsetPosition(oldRowPos);
-						source.wideCheckCursor();
-					}
-				}
-			}
-		}
-		return res;
-	}
-
+	
 	/**
 	 * Fires <code>willInsert</code> event to all registered listeners. The
 	 * inserting might be vetoed by one of the registered listeners. Nevetheless
@@ -276,6 +257,10 @@ public class RowsetChangeSupport {
 				}
 			}
 		}
+        if (res) {
+            oldCurrentRow = source.getCurrentRow();
+            oldLength = source.size();
+        }
 		return res;
 	}
 
@@ -289,7 +274,7 @@ public class RowsetChangeSupport {
 		Set<RowsetListener> oldRowsetListeners = rowsetListeners;
 		rowsetListeners = null;
 		try {
-			source.absolute(oldRowPos);
+			source.setCursorPos(oldRowPos);
 		} finally {
 			rowsetListeners = oldRowsetListeners;
 		}
@@ -339,13 +324,40 @@ public class RowsetChangeSupport {
 				}
 			}
 		}
+        if (res) {
+            oldCurrentRow = source.getCurrentRow();
+            oldLength = source.size();
+        }
 		return res;
 	}
+
+    public void fireBeforeRollback() {
+        oldCurrentRow = source.getCurrentRow();
+        oldLength = source.size();
+    }
+
+    protected void notifyCursor() {
+        if (oldCurrentRow != source.getCurrentRow()) {
+            source.firePropertyChange("cursor", oldCurrentRow, source.getCurrentRow());
+            oldCurrentRow = null;
+        }
+    }
+
+    protected void notifyLength() {
+        if (oldLength == source.size()) {
+            source.firePropertyChange("length", oldLength, 0);
+            source.firePropertyChange("length", 0, source.size());
+        } else {
+            source.firePropertyChange("length", oldLength, source.size());
+        }
+    }
 
 	/**
 	 * Fires requeriedEvent event to all registered listeners.
 	 */
 	public void fireRequeriedEvent() {
+        notifyCursor();
+        notifyLength();
 		if (rowsetListeners != null) {
 			RowsetRequeryEvent event = new RowsetRequeryEvent(source, RowsetEventMoment.AFTER);
 			for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
@@ -375,6 +387,8 @@ public class RowsetChangeSupport {
 	 * Fires filteredEvent event to all registered listeners.
 	 */
 	public void fireFilteredEvent() {
+        notifyCursor();
+        notifyLength();
 		if (rowsetListeners != null) {
 			RowsetFilterEvent event = new RowsetFilterEvent(source, source.getActiveFilter(), RowsetEventMoment.AFTER);
 			for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
@@ -403,6 +417,8 @@ public class RowsetChangeSupport {
 	 * Fires savedEvent event to all registered listeners.
 	 */
 	public void fireRolledbackEvent() {
+        notifyCursor();
+        notifyLength();
 		if (rowsetListeners != null) {
 			RowsetRollbackEvent event = new RowsetRollbackEvent(source);
 			for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
@@ -421,6 +437,7 @@ public class RowsetChangeSupport {
 	 *            has been performed.
 	 */
 	public void fireScrolledEvent(int oldRowIndex) {
+        notifyCursor();
 		if (rowsetListeners != null) {
 			RowsetScrollEvent event = new RowsetScrollEvent(source, oldRowIndex, source.getCursorPos(), RowsetEventMoment.AFTER);
 			for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
@@ -435,6 +452,7 @@ public class RowsetChangeSupport {
 	 * Fires sortedEvent event to all registered listeners.
 	 */
 	public void fireSortedEvent() {
+        notifyCursor();
 		if (rowsetListeners != null) {
 			RowsetSortEvent event = new RowsetSortEvent(source, RowsetEventMoment.AFTER);
 			for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
@@ -446,52 +464,6 @@ public class RowsetChangeSupport {
 	}
 
 	/**
-	 * Fires rowChangedEvent event to all registered listeners.
-	 * 
-	 * @param aOldValue
-	 *            Old value of row's column at <code>aFieldIndex</code>.
-	 * @param aFieldIndex
-	 *            Field (column) index of the upadated column.
-	 * @throws InvalidColIndexException
-	 * @throws InvalidCursorPositionException
-	 */
-	public void fireRowChangedEvent(Row aChangedRow, int aFieldIndex, Object aOldValue) throws InvalidColIndexException, InvalidCursorPositionException {
-		fireRowChangedEvent(aChangedRow, aFieldIndex, aOldValue, aChangedRow.getColumnObject(aFieldIndex));
-	}
-
-	/**
-	 * Fires rowChangedEvent event to all registered listeners.
-	 * 
-	 * @param aOldValue
-	 *            Old value of row's column at <code>aFieldIndex</code>.
-	 * @param aNewValue
-	 *            New value of row's column at <code>aFieldIndex</code>.
-	 * @param aFieldIndex
-	 *            Field (column) index of the upadated column.
-	 * @throws InvalidColIndexException
-	 * @throws InvalidCursorPositionException
-	 */
-	public void fireRowChangedEvent(Row aChangedRow, int aFieldIndex, Object aOldValue, Object aNewValue) throws InvalidColIndexException, InvalidCursorPositionException {
-		if (rowsetListeners != null) {
-			RowChangeEvent event = new RowChangeEvent(source, aChangedRow, aFieldIndex, aOldValue, aNewValue, RowsetEventMoment.AFTER);
-			for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
-				if (l != null) {
-					l.rowChanged(event);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Fires rowInsertedEvent event to all registered listeners.
-	 * 
-	 * @param aRow
-	 *            Row was inserted to the rowset.
-	 * 
-	 *            public void fireRowInsertedEvent(Row aRow) {
-	 *            fireRowInsertedEvent(aRow, false); }
-	 */
-	/**
 	 * Fires rowInsertedEvent event to all registered listeners.
 	 * 
 	 * @param aRow
@@ -501,6 +473,8 @@ public class RowsetChangeSupport {
 	 *            element.
 	 */
 	public void fireRowInsertedEvent(Row aRow, boolean aAjusting) {
+        notifyCursor();
+        notifyLength();
 		if (rowsetListeners != null) {
 			RowsetInsertEvent event = new RowsetInsertEvent(source, aRow, RowsetEventMoment.AFTER, aAjusting);
 			for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {
@@ -531,6 +505,8 @@ public class RowsetChangeSupport {
 	 *            element.
 	 */
 	public void fireRowDeletedEvent(Row aRow, boolean aAjusting) {
+        notifyCursor();
+        notifyLength();
 		if (rowsetListeners != null) {
 			RowsetDeleteEvent event = new RowsetDeleteEvent(source, aRow, RowsetEventMoment.AFTER, aAjusting);
 			for (RowsetListener l : rowsetListeners.toArray(new RowsetListener[]{})) {

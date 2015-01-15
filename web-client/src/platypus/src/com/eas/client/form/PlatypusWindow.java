@@ -34,6 +34,7 @@ import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.HasJsName;
 import com.eas.client.form.published.containers.AnchorsPane;
+import com.eas.client.form.published.menu.PlatypusMenuBar;
 import com.eas.client.form.published.widgets.DesktopPane;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -47,6 +48,7 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.touch.client.Point;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.HasWidgets;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xhr.client.XMLHttpRequest;
 
@@ -104,6 +106,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	protected float opacity = 1.0f;
 	protected boolean alwaysOnTop;
 	protected boolean locationByPlatform;
+	protected boolean autoHide;
 	protected JavaScriptObject windowOpened;
 	protected JavaScriptObject windowClosing;
 	protected JavaScriptObject windowClosed;
@@ -266,7 +269,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	}
 
 	public void show(boolean aModal, final JavaScriptObject aCallback, DesktopPane aDesktop) {
-		popup = new WindowPopupPanel(this, false, aModal);
+		popup = new WindowPopupPanel(this, autoHide, aModal);
 		popup.setWidget(view);
 		boolean wasSize = viewSize != null;
 		double actualWidth = wasSize ? viewSize.getX() : viewPreferredWidth;
@@ -454,6 +457,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 		aCallback($wnd.P.boxAsJs(aSelectedValue));
 	}-*/;
 
+	// TODO: remove this code when ui branch will come
 	private void publishComponentsFacades(JavaScriptObject aTarget, HasWidgets aView) {
 		java.util.Iterator<Widget> wIt = aView.iterator();
 		while (wIt.hasNext()) {
@@ -461,11 +465,28 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 			if (w instanceof HasJsName && w instanceof HasPublished) {
 				aTarget.<Utils.JsObject> cast().inject(((HasJsName) w).getJsName(), ((HasPublished) w).getPublished());
 			}
-			if (w instanceof HasWidgets)
+			if (w instanceof HasWidgets){
 				publishComponentsFacades(aTarget, (HasWidgets) w);
+			}else if(w instanceof PlatypusMenuBar){
+				PlatypusMenuBar bar = (PlatypusMenuBar)w;
+				publishPlatypusMenuBarFacades(aTarget, bar);
+			} 
 		}
 	}
 
+	// TODO: remove this code when ui branch will come
+	private void publishPlatypusMenuBarFacades(JavaScriptObject aTarget, PlatypusMenuBar aView) {
+		for (int i = 0; i < aView.getCount(); i++) {
+			UIObject w = aView.getItem(i);
+			if (w instanceof HasJsName && w instanceof HasPublished) {
+				aTarget.<Utils.JsObject> cast().inject(((HasJsName) w).getJsName(), ((HasPublished) w).getPublished());
+			}
+			if (w instanceof PlatypusMenuBar){
+				publishPlatypusMenuBarFacades(aTarget, (PlatypusMenuBar) w);
+			} 
+		}
+	}
+	
 	protected native static void publishFormFacade(JavaScriptObject aPublished, Widget aView, PlatypusWindow aForm)/*-{
         Object.defineProperty(aPublished, "view", {
 	        get : function() {
@@ -615,6 +636,14 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        	aForm.@com.eas.client.form.PlatypusWindow::setHeight(D)(aValue * 1);
 	        } 
         });
+        Object.defineProperty(aPublished, "autoHide", {
+	        get:function() {
+	        	return aForm.@com.eas.client.form.PlatypusWindow::isAutoHide()();
+	        },
+	        set:function(aValue) {
+	        	aForm.@com.eas.client.form.PlatypusWindow::setAutoHide(Z)(!!aValue);
+	        } 
+        });
         Object.defineProperty(aPublished, "onWindowOpened", {
 	        get:function() {
 	        	return aForm.@com.eas.client.form.PlatypusWindow::getWindowOpened()();
@@ -686,16 +715,19 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        aPublished.show = function() {
 		        closeCallback = null;
 		        showedWnd = aForm.@com.eas.client.form.PlatypusWindow::show(ZLcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/client/form/published/widgets/DesktopPane;)(false, null, null);
+		        aForm.@com.eas.client.form.PlatypusWindow::activate()();
 	        };
 	        aPublished.showModal = function(aCallback) {
 		        closeCallback = aCallback;
 		        showedWnd = aForm.@com.eas.client.form.PlatypusWindow::show(ZLcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/client/form/published/widgets/DesktopPane;)(true, aCallback, null);
+		        aForm.@com.eas.client.form.PlatypusWindow::activate()();
 	        };
 	        aPublished.showOnPanel = function(aPanel) {
 	        	$wnd.P.Logger.info("showOnPanel is unsupported. Use widget.showOn(...) method instead.");
 	        };
 	        aPublished.showInternalFrame = function(aPanel) {
 	        	showedWnd = aForm.@com.eas.client.form.PlatypusWindow::show(ZLcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/client/form/published/widgets/DesktopPane;)(false, null, aPanel != null ? aPanel.unwrap() : null);
+		        aForm.@com.eas.client.form.PlatypusWindow::activate()();
 	        };
 	        aPublished.minimize = function(){
 	        	aForm.@com.eas.client.form.PlatypusWindow::minimize()();
@@ -705,6 +737,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        };
 	        aPublished.toFront = function(){
 	        	aForm.@com.eas.client.form.PlatypusWindow::toFront()();
+		        aForm.@com.eas.client.form.PlatypusWindow::activate()();
 	        };
 	        aPublished.restore = function(){
 	        	aForm.@com.eas.client.form.PlatypusWindow::restore()();
@@ -769,6 +802,14 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 		}
 	}
 
+	public boolean isAutoHide() {
+		return autoHide;
+	}
+
+	public void setAutoHide(boolean aValue) {
+		autoHide = aValue;
+	}
+
 	public float getOpacity() {
 		return opacity;
 	}
@@ -792,9 +833,10 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 
 	@Override
 	public void setPosition(double aLeft, double aTop) {
-		super.setPosition(aLeft, aTop);
-		if (popup != null)
+		if (popup != null) {
+			super.setPosition(aLeft, aTop);
 			popup.setPosition(aLeft, aTop);
+		}
 	}
 
 	public double getLeft() {

@@ -10,8 +10,24 @@ import com.bearsoft.gwt.ui.XElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.editor.client.IsEditor;
 import com.google.gwt.editor.client.LeafValueEditor;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
+import com.google.gwt.event.dom.client.HasAllKeyHandlers;
+import com.google.gwt.event.dom.client.HasBlurHandlers;
+import com.google.gwt.event.dom.client.HasFocusHandlers;
+import com.google.gwt.event.dom.client.HasKeyDownHandlers;
+import com.google.gwt.event.dom.client.HasKeyPressHandlers;
+import com.google.gwt.event.dom.client.HasKeyUpHandlers;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -29,7 +45,7 @@ import com.google.gwt.user.client.ui.ValueBox;
  * @author mg
  * @param <T>
  */
-public abstract class SpinnerBox<T> extends Composite implements RequiresResize, HasValue<T>, HasValueChangeHandlers<T>, IsEditor<LeafValueEditor<T>>, Focusable {
+public abstract class SpinnerBox<T> extends Composite implements RequiresResize, HasValue<T>, HasValueChangeHandlers<T>, IsEditor<LeafValueEditor<T>>, Focusable, HasAllKeyHandlers, HasFocusHandlers, HasBlurHandlers {
 
 	protected FlowPanel container = new FlowPanel();
 	protected SimplePanel left = new SimplePanel();
@@ -50,6 +66,53 @@ public abstract class SpinnerBox<T> extends Composite implements RequiresResize,
 				ValueChangeEvent.fire(SpinnerBox.this, getValue());
 			}
 		});
+		if (field instanceof HasKeyDownHandlers) {
+			((HasKeyDownHandlers) field).addKeyDownHandler(new KeyDownHandler() {
+
+				@Override
+				public void onKeyDown(KeyDownEvent event) {
+					KeyDownEvent.fireNativeEvent(event.getNativeEvent(), SpinnerBox.this);
+				}
+			});
+		}
+		if (field instanceof HasKeyUpHandlers) {
+			((HasKeyUpHandlers) field).addKeyUpHandler(new KeyUpHandler() {
+
+				@Override
+				public void onKeyUp(KeyUpEvent event) {
+					KeyUpEvent.fireNativeEvent(event.getNativeEvent(), SpinnerBox.this);
+				}
+			});
+		}
+		if (field instanceof HasKeyPressHandlers) {
+			((HasKeyPressHandlers) field).addKeyPressHandler(new KeyPressHandler() {
+
+				@Override
+				public void onKeyPress(KeyPressEvent event) {
+					KeyPressEvent.fireNativeEvent(event.getNativeEvent(), SpinnerBox.this);
+				}
+			});
+		}
+		if (field instanceof HasFocusHandlers) {
+			((HasFocusHandlers) field).addFocusHandler(new FocusHandler() {
+
+				@Override
+				public void onFocus(FocusEvent event) {
+					FocusEvent.fireNativeEvent(event.getNativeEvent(), SpinnerBox.this);
+				}
+
+			});
+		}
+		if (field instanceof HasBlurHandlers) {
+			((HasBlurHandlers) field).addBlurHandler(new BlurHandler() {
+
+				@Override
+				public void onBlur(BlurEvent event) {
+					BlurEvent.fireNativeEvent(event.getNativeEvent(), SpinnerBox.this);
+				}
+
+			});
+		}
 		left.getElement().addClassName("spin-left");
 		left.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 		left.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
@@ -108,6 +171,30 @@ public abstract class SpinnerBox<T> extends Composite implements RequiresResize,
 		}, ClickEvent.getType());
 		organaizeFieldWrapperLeftRight();
 		getElement().<XElement> cast().addResizingTransitionEnd(this);
+	}
+
+	@Override
+	public HandlerRegistration addKeyDownHandler(KeyDownHandler handler) {
+		return super.addHandler(handler, KeyDownEvent.getType());
+	}
+
+	@Override
+	public HandlerRegistration addKeyPressHandler(KeyPressHandler handler) {
+		return super.addHandler(handler, KeyPressEvent.getType());
+	}
+
+	public HandlerRegistration addKeyUpHandler(KeyUpHandler handler) {
+		return super.addHandler(handler, KeyUpEvent.getType());
+	}
+
+	@Override
+	public HandlerRegistration addFocusHandler(FocusHandler handler) {
+		return addHandler(handler, FocusEvent.getType());
+	}
+
+	@Override
+	public HandlerRegistration addBlurHandler(BlurHandler handler) {
+		return addHandler(handler, BlurEvent.getType());
 	}
 
 	protected void organaizeFieldWrapperLeftRight() {

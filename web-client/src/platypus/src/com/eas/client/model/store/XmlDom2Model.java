@@ -40,7 +40,10 @@ public class XmlDom2Model implements ModelVisitor {
 
 	protected final static String YES_STRING = "yes";
 	protected final static String NO_STRING = "no";
+
 	public static final String DATAMODEL_TAG_NAME = "datamodel";
+	public static final String DATASOURCE_NAME_TAG_NAME = "Name";
+	public static final String DATASOURCE_TITLE_TAG_NAME = "Title";
 	public static final String ENTITY_TAG_NAME = "entity";
 	public static final String FIELDS_ENTITY_TAG_NAME = "fieldsEntity";
 	public static final String PARAMETERS_ENTITY_TAG_NAME = "parametersEntity";
@@ -174,11 +177,11 @@ public class XmlDom2Model implements ModelVisitor {
 	@Override
 	public void visit(Entity entity) {
 		NamedNodeMap attrs = currentTag.getAttributes();
-		Node a = attrs.getNamedItem(Model.DATASOURCE_NAME_TAG_NAME);
+		Node a = attrs.getNamedItem(DATASOURCE_NAME_TAG_NAME);
 		if (a != null) {
 			entity.setName(a.getNodeValue());
 		}
-		a = attrs.getNamedItem(Model.DATASOURCE_TITLE_TAG_NAME);
+		a = attrs.getNamedItem(DATASOURCE_TITLE_TAG_NAME);
 		if (a != null) {
 			entity.setTitle(a.getNodeValue());
 		}

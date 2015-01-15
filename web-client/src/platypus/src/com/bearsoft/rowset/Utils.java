@@ -23,8 +23,37 @@ public class Utils {
 			return $wnd.P.boxAsJava(this[aName]);
 		}-*/;
 
+		public final native boolean getBoolean(String aName)/*-{
+			return !!this[aName];
+		}-*/;
+
+		public final native String getString(String aName)/*-{
+			var v = this[aName];
+			return v != null ? v + '' : null;
+		}-*/;
+
+		public final native int getInteger(String aName)/*-{
+			return +this[aName];
+		}-*/;
+
+		public final native double getDouble(String aName)/*-{
+			return +this[aName];
+		}-*/;
+		
 		public final native JavaScriptObject getJs(String aName)/*-{
 			return this[aName];
+		}-*/;
+
+		public final native void setJs(String aName, JavaScriptObject aValue)/*-{
+			return this[aName] = aValue;
+		}-*/;
+		
+		public final native void setJava(String aName, Object aValue)/*-{
+			return this[aName] = $wnd.P.boxAsJs(aValue);
+		}-*/;
+	
+		public final native boolean has(String aName)/*-{
+			return typeof this[aName] != 'undefined';
 		}-*/;
 
 		public final native JavaScriptObject deleteProperty(String aName)/*-{
@@ -49,14 +78,33 @@ public class Utils {
 			return Array.isArray(this);
 		}-*/;
 		
-		public final native boolean getBoolean(String aName)/*-{
-			return !!this[aName];
-		}-*/;
-		
 		public final native JsArrayString keys()/*-{
 			return Object.keys(this);
 		}-*/;
-	
+		
+		public final native JavaScriptObject getSlot(int i)/*-{
+			return this[i];
+		}-*/;
+		
+		public final native void setSlot(int i, JavaScriptObject aValue)/*-{
+			this[i] = aValue;
+		}-*/;
+		
+		public final native void setSlot(int i, int aValue)/*-{
+			this[i] = aValue;
+		}-*/;
+		
+		public final native void setSlot(int i, String aValue)/*-{
+			this[i] = aValue;
+		}-*/;
+		
+		public final native void setSlot(int i, boolean aValue)/*-{
+			this[i] = aValue;
+		}-*/;
+		
+		public final native Object apply(JavaScriptObject aThis, JavaScriptObject aArgs)/*-{
+			return this.apply(aThis, aArgs != null ? aArgs : []);
+		}-*/;
 	}
 
 	public static native JavaScriptObject publishCancellable(Cancellable aValue)/*-{

@@ -8,13 +8,13 @@ import com.bearsoft.gwt.ui.widgets.grid.header.HeaderNode;
 import com.bearsoft.rowset.Utils;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.grid.columns.BooleanModelGridColumn;
-import com.eas.client.form.grid.columns.DateModelGridColumn;
-import com.eas.client.form.grid.columns.DoubleModelGridColumn;
-import com.eas.client.form.grid.columns.FormattedObjectModelGridColumn;
+import com.eas.client.form.grid.columns.DateModelColumn;
+import com.eas.client.form.grid.columns.DoubleModelColumn;
+import com.eas.client.form.grid.columns.FormattedObjectModelColumn;
 import com.eas.client.form.grid.columns.LookupModelGridColumn;
-import com.eas.client.form.grid.columns.ModelGridColumn;
-import com.eas.client.form.grid.columns.TextAreaModelGridColumn;
-import com.eas.client.form.grid.columns.TextModelGridColumn;
+import com.eas.client.form.grid.columns.ModelColumn;
+import com.eas.client.form.grid.columns.TextAreaModelColumn;
+import com.eas.client.form.grid.columns.TextModelColumn;
 import com.eas.client.form.published.PublishedColor;
 import com.eas.client.form.published.PublishedStyle;
 import com.eas.client.form.published.widgets.model.ModelElementRef;
@@ -178,7 +178,7 @@ public class ModelGridFactory {
 	}
 
 	private HeaderNode configureColumn(String aName, String aTitle, final ModelElementRef aColModelElement, Element aColumnTag, Element aControlTag) throws Exception {
-		ModelGridColumn<?> column = null;
+		ModelColumn<?> column = null;
 
 		boolean visible = Utils.getBooleanAttribute(aColumnTag, "visible", true);
 		boolean enabled = Utils.getBooleanAttribute(aColumnTag, "enabled", true);
@@ -197,18 +197,18 @@ public class ModelGridFactory {
 			} else if ("DbLabelDesignInfo".equalsIgnoreCase(controlInfoName)) {
 				String formatPattern = aControlTag.getAttribute("format");
 				int formatType = Utils.getIntegerAttribute(aControlTag, "valueType", ObjectFormat.MASK);
-				FormattedObjectModelGridColumn _column = new FormattedObjectModelGridColumn(aName);
+				FormattedObjectModelColumn _column = new FormattedObjectModelColumn(aName);
 				if(aControlTag.hasAttribute("emptyText"))
 					_column.setEmptyText(aControlTag.getAttribute("emptyText"));
 				column = _column;
 				_column.setFormatType(formatType, formatPattern);
 			} else if ("DbTextDesignInfo".equalsIgnoreCase(controlInfoName)) {
-				TextAreaModelGridColumn _column = new TextAreaModelGridColumn(aName);
+				TextAreaModelColumn _column = new TextAreaModelColumn(aName);
 				column = _column;
 				if(aControlTag.hasAttribute("emptyText"))
 					_column.setEmptyText(aControlTag.getAttribute("emptyText"));
 			} else if ("DbDateDesignInfo".equalsIgnoreCase(controlInfoName)) {
-				DateModelGridColumn _column = new DateModelGridColumn(aName);
+				DateModelColumn _column = new DateModelColumn(aName);
 				column = _column;
 				if(aControlTag.hasAttribute("emptyText"))
 					_column.setEmptyText(aControlTag.getAttribute("emptyText"));
@@ -221,7 +221,7 @@ public class ModelGridFactory {
 			} else if ("DbCheckDesignInfo".equalsIgnoreCase(controlInfoName)) {
 				column = new BooleanModelGridColumn(aName);
 			} else if ("DbSpinDesignInfo".equalsIgnoreCase(controlInfoName)) {
-				DoubleModelGridColumn _column = new DoubleModelGridColumn(aName);
+				DoubleModelColumn _column = new DoubleModelColumn(aName);
 				column = _column;
 				if(aControlTag.hasAttribute("emptyText"))
 					_column.setEmptyText(aControlTag.getAttribute("emptyText"));
@@ -249,7 +249,7 @@ public class ModelGridFactory {
 			}
 		} else {
 			// Cell calculated only by cell function
-			column = new TextModelGridColumn(aName);
+			column = new TextModelColumn(aName);
 		}
 		if (column != null) {
 			column.setTitle(aTitle);

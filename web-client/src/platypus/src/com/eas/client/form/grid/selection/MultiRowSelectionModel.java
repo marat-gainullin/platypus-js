@@ -1,13 +1,13 @@
 package com.eas.client.form.grid.selection;
 
-import com.bearsoft.rowset.Row;
 import com.eas.client.form.RowKeyProvider;
 import com.eas.client.form.published.widgets.model.ModelGrid;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.view.client.MultiSelectionModel;
 
-public class MultiRowSelectionModel extends MultiSelectionModel<Row> implements HasSelectionLead<Row> {
+public class MultiRowSelectionModel extends MultiSelectionModel<JavaScriptObject> implements HasSelectionLead<JavaScriptObject> {
 
-	protected Row lead;
+	protected JavaScriptObject lead;
 	protected ModelGrid grid;
 
 	public MultiRowSelectionModel(ModelGrid aGrid) {
@@ -16,7 +16,7 @@ public class MultiRowSelectionModel extends MultiSelectionModel<Row> implements 
 	}
 
 	@Override
-	public void setSelected(Row item, boolean selected) {
+	public void setSelected(JavaScriptObject item, boolean selected) {
 		if (selected)
 			lead = item;
 		else if (item == lead)
@@ -31,7 +31,7 @@ public class MultiRowSelectionModel extends MultiSelectionModel<Row> implements 
 	}
 
 	@Override
-	public Row getLead() {
+	public JavaScriptObject getLead() {
 		return lead;
 	}
 }

@@ -41,6 +41,10 @@ public abstract class DivDecoratorCell<C> implements Cell<C> {
 		return cell;
 	}
 
+	public void setCell(Cell<C> aCell) {
+		cell = aCell;
+	}
+
 	@Override
 	public boolean dependsOnSelection() {
 		return cell.dependsOnSelection();

@@ -1,18 +1,12 @@
 package com.eas.client.form;
 
-import com.bearsoft.rowset.Row;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.view.client.ProvidesKey;
 
-public class RowKeyProvider implements ProvidesKey<Row> {
+public class RowKeyProvider implements ProvidesKey<JavaScriptObject> {
 
 	@Override
-	public String getKey(Row item) {
-		String res = "";
-		for (Object key : item.getPKValues()){
-			if (!res.isEmpty())
-				res += "; ";
-			res += String.valueOf(key);
-		}
-		return res;
+	public JavaScriptObject getKey(JavaScriptObject item) {
+		return item;
 	}
 }

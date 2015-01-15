@@ -801,20 +801,17 @@
                 if (!rowset.empty) {
                     var res = rowset.getRow(rowset.size());
                     rowset.deleteAt(rowset.size());
-                    Array.prototype.pop.call(target);
-                    return res.getPublished();
+                    return Array.prototype.pop.call(target);
                 }
             }
         });
         Object.defineProperty(target, "push", {
             value: function () {
-                var justInserted;
                 for (var a = 0; a < arguments.length; a++) {
-                    justInserted = rowset.insertAt(rowset.size() + 1, a < arguments.length - 1, objectToInsertIniting(arguments[a]));
+                    var justInserted = rowset.insertAt(rowset.size() + 1, a < arguments.length - 1, objectToInsertIniting(arguments[a]));
                     justInserted.setPublished(publishRow(justInserted, arguments[a]));
-                    Array.prototype.push.call(target, justInserted.getPublished());
                 }
-                return target.length;
+                return Array.prototype.push.apply(target, arguments);
             }
         });
         Object.defineProperty(target, "reverse", {
@@ -827,8 +824,7 @@
                 if (!rowset.empty) {
                     var res = rowset.getRow(1);
                     rowset.deleteAt(1);
-                    Array.prototype.shift.call(target);
-                    return res.getPublished();
+                    return Array.prototype.shift.call(target);
                 }
             }
         });
@@ -877,13 +873,11 @@
 
         Object.defineProperty(target, "unshift", {
             value: function () {
-                var justInserted;
                 for (var a = 0; a < arguments.length; a++) {
-                    justInserted = rowset.insertAt(a + 1, a < arguments.length - 1, objectToInsertIniting(arguments[a]));
+                    var justInserted = rowset.insertAt(a + 1, a < arguments.length - 1, objectToInsertIniting(arguments[a]));
                     justInserted.setPublished(publishRow(justInserted, arguments[a]));
-                    Array.prototype.unshift.call(target, justInserted.getPublished());
                 }
-                return target.length;
+                return Array.prototype.unshift.apply(target, arguments);
             }
         });
 

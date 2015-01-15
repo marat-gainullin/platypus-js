@@ -38,7 +38,7 @@ public class RowsetReader extends FieldsJSONReader {
 
     private static Row readRow(JSONValue aValue, Fields aFields) throws Exception {
         JSONObject ro = aValue.isObject();
-        Row row = new Row(aFields);
+        Row row = new Row("", aFields);
         List<Object> currentValues = row.getInternalCurrentValues();
         assert currentValues.size() == aFields.getFieldsCount();
         assert ro.size() == currentValues.size();

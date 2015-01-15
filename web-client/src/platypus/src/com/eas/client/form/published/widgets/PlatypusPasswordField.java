@@ -30,17 +30,21 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.RequiresResize;
 
-public class PlatypusPasswordField extends PasswordTextBox implements HasJsFacade, HasEmptyText, HasComponentPopupMenu, HasActionHandlers, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize {
+public class PlatypusPasswordField extends PasswordTextBox implements HasJsFacade, HasEmptyText, HasComponentPopupMenu, HasActionHandlers, HasEventsExecutor, HasShowHandlers, HasHideHandlers,
+        HasResizeHandlers, RequiresResize {
 
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
 	protected String emptyText;
-	protected String name;	
+	protected String name;
+	//
+	protected boolean settingValue;
+	//
 	protected JavaScriptObject published;
 
 	public PlatypusPasswordField() {
 		super();
-		getElement().<XElement>cast().addResizingTransitionEnd(this);
+		getElement().<XElement> cast().addResizingTransitionEnd(this);
 	}
 
 	@Override
@@ -50,7 +54,7 @@ public class PlatypusPasswordField extends PasswordTextBox implements HasJsFacad
 
 	@Override
 	public void onResize() {
-		if(isAttached()){
+		if (isAttached()) {
 			ResizeEvent.fire(this, getElement().getOffsetWidth(), getElement().getOffsetHeight());
 		}
 	}
@@ -89,23 +93,24 @@ public class PlatypusPasswordField extends PasswordTextBox implements HasJsFacad
 	}
 
 	@Override
-    public PlatypusPopupMenu getPlatypusPopupMenu() {
-		return menu; 
-    }
+	public PlatypusPopupMenu getPlatypusPopupMenu() {
+		return menu;
+	}
 
 	protected int actionHandlers;
-	protected HandlerRegistration clickReg;
+	protected HandlerRegistration valueChangeReg;
 
 	@Override
 	public HandlerRegistration addActionHandler(ActionHandler handler) {
 		final HandlerRegistration superReg = super.addHandler(handler, ActionEvent.getType());
 		if (actionHandlers == 0) {
-			clickReg = addValueChangeHandler(new ValueChangeHandler<String>() {
+			valueChangeReg = addValueChangeHandler(new ValueChangeHandler<String>() {
 
 				@Override
-                public void onValueChange(ValueChangeEvent<String> event) {
-					ActionEvent.fire(PlatypusPasswordField.this, PlatypusPasswordField.this);
-                }
+				public void onValueChange(ValueChangeEvent<String> event) {
+					if (!settingValue)
+						ActionEvent.fire(PlatypusPasswordField.this, PlatypusPasswordField.this);
+				}
 
 			});
 		}
@@ -116,9 +121,9 @@ public class PlatypusPasswordField extends PasswordTextBox implements HasJsFacad
 				superReg.removeHandler();
 				actionHandlers--;
 				if (actionHandlers == 0) {
-					assert clickReg != null : "Erroneous use of addActionHandler/removeHandler detected in PlatypusPasswordField";
-					clickReg.removeHandler();
-					clickReg = null;
+					assert valueChangeReg != null : "Erroneous use of addActionHandler/removeHandler detected in PlatypusPasswordField";
+					valueChangeReg.removeHandler();
+					valueChangeReg = null;
 				}
 			}
 		};
@@ -134,7 +139,7 @@ public class PlatypusPasswordField extends PasswordTextBox implements HasJsFacad
 			menu = aMenu;
 			if (menu != null) {
 				menuTriggerReg = super.addDomHandler(new ContextMenuHandler() {
-					
+
 					@Override
 					public void onContextMenu(ContextMenuEvent event) {
 						event.preventDefault();
@@ -158,16 +163,26 @@ public class PlatypusPasswordField extends PasswordTextBox implements HasJsFacad
 	}
 
 	@Override
+	public void setValue(String value, boolean fireEvents) {
+		settingValue = true;
+		try {
+			super.setValue(value, fireEvents);
+		} finally {
+			settingValue = false;
+		}
+	}
+
+	@Override
 	public String getEmptyText() {
 		return emptyText;
 	}
-	
+
 	@Override
 	public void setEmptyText(String aValue) {
 		emptyText = aValue;
 		ControlsUtils.applyEmptyText(getElement(), emptyText);
 	}
-	
+
 	public JavaScriptObject getPublished() {
 		return published;
 	}

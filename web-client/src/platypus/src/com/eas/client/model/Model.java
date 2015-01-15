@@ -40,11 +40,6 @@ import com.google.gwt.core.client.JavaScriptObject;
  */
 public class Model implements HasPublished {
 
-	public static final String SCRIPT_MODEL_NAME = "model";
-	public static final String DATASOURCE_METADATA_SCRIPT_NAME = "schema";
-	public static final String DATASOURCE_NAME_TAG_NAME = "Name";
-	public static final String DATASOURCE_TITLE_TAG_NAME = "Title";
-
 	protected AppClient client;
 	protected Set<Relation> relations = new HashSet<Relation>();
 	protected Set<ReferenceRelation> referenceRelations = new HashSet<ReferenceRelation>();
@@ -294,7 +289,6 @@ public class Model implements HasPublished {
 		validateQueries();
 		for (Entity entity : entities.values()) {
 			JavaScriptObject publishedEntity = JsModel.publish(entity);
-			Entity.publishRows(publishedEntity);
 			if (entity.getName() != null && !entity.getName().isEmpty()) {
 				jsPublished.<JsObject> cast().inject(entity.getName(), publishedEntity);
 			}
@@ -335,7 +329,9 @@ public class Model implements HasPublished {
 					_self.enumerable = true;
 					_self.configurable = false;
 					_self.get = function() {
-						var found = targetEntity.find(targetEntity.schema[targetFieldName], this[sourceFieldName]);
+						var criteria = {};
+						criteria[targetFieldName] = this[sourceFieldName];
+						var found = targetEntity.find(criteria);
 						return found.length == 0 ? null : (found.length == 1 ? found[0] : found);
 					};
 					_self.set = function(aValue) {
@@ -347,7 +343,9 @@ public class Model implements HasPublished {
 					_self.enumerable = true;
 					_self.configurable = false;
 					_self.get = function() {
-						var res = sourceEntity.find(sourceEntity.schema[sourceFieldName], this[targetFieldName]);
+						var criteria = {};
+						criteria[sourceFieldName] = this[targetFieldName];
+						var res = sourceEntity.find(criteria);
 						if (res && res.length > 0) {
 							return res;
 						} else {

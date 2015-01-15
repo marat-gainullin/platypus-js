@@ -19,31 +19,35 @@ public class PlatypusMenuItemRadioButton extends MenuItemRadioButton implements 
 
 	protected EventsExecutor eventsExecutor;
 	protected JavaScriptObject published;
-	protected String name;	
-	
+	protected String name;
+	//
+	protected boolean settingValue;
+	//
+
 	protected ButtonGroup group;
-	
+
 	public PlatypusMenuItemRadioButton() {
-	    super(false, "", false);
-    }
+		super(false, "", false);
+	}
 
 	public PlatypusMenuItemRadioButton(Boolean aValue, String aText, boolean asHtml) {
-	    super(aValue, aText, asHtml);
-    }
+		super(aValue, aText, asHtml);
+	}
 
 	protected int actionHandlers;
-	protected HandlerRegistration clickReg;
+	protected HandlerRegistration valueChangeReg;
 
 	@Override
 	public HandlerRegistration addActionHandler(ActionHandler handler) {
 		final HandlerRegistration superReg = super.addHandler(handler, ActionEvent.getType());
 		if (actionHandlers == 0) {
-			clickReg = addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+			valueChangeReg = addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 
 				@Override
-                public void onValueChange(ValueChangeEvent<Boolean> event) {
-					ActionEvent.fire(PlatypusMenuItemRadioButton.this, PlatypusMenuItemRadioButton.this);
-                }
+				public void onValueChange(ValueChangeEvent<Boolean> event) {
+					if (!settingValue)
+						ActionEvent.fire(PlatypusMenuItemRadioButton.this, PlatypusMenuItemRadioButton.this);
+				}
 
 			});
 		}
@@ -54,9 +58,9 @@ public class PlatypusMenuItemRadioButton extends MenuItemRadioButton implements 
 				superReg.removeHandler();
 				actionHandlers--;
 				if (actionHandlers == 0) {
-					assert clickReg != null : "Erroneous use of addActionHandler/removeHandler detected in PlatypusMenuItemRadioButton";
-					clickReg.removeHandler();
-					clickReg = null;
+					assert valueChangeReg != null : "Erroneous use of addActionHandler/removeHandler detected in PlatypusMenuItemRadioButton";
+					valueChangeReg.removeHandler();
+					valueChangeReg = null;
 				}
 			}
 		};
@@ -96,10 +100,10 @@ public class PlatypusMenuItemRadioButton extends MenuItemRadioButton implements 
 	public void mutateButtonGroup(ButtonGroup aGroup) {
 		if (group != aGroup) {
 			if (group != null)
-				group.remove((HasPublished)this);
+				group.remove((HasPublished) this);
 			group = aGroup;
 			if (group != null)
-				group.add((HasPublished)this);
+				group.add((HasPublished) this);
 		}
 	}
 
@@ -112,6 +116,16 @@ public class PlatypusMenuItemRadioButton extends MenuItemRadioButton implements 
 
 	public void setPlainValue(boolean value) {
 		super.setValue(value, true);
+	}
+
+	@Override
+	public void setValue(Boolean aValue, boolean fireEvents) {
+		settingValue = true;
+		try {
+			super.setValue(aValue, fireEvents);
+		} finally {
+			settingValue = false;
+		}
 	}
 
 	@Override

@@ -32,20 +32,20 @@ public class ModelGridColumn extends GridColumnsNode implements HasPublished {
         super();
         setTableColumn(new ModelColumn());
     }
-/*
-    public ModelGridColumn(GridColumnsNode aParent) {
-        super(aParent);
+
+    @Override
+    public GridColumnsNode lightCopy() {
+        GridColumnsNode copied = new ModelGridColumn();
+        copied.lightAssign(this);
+        return copied;
     }
 
-    public ModelGridColumn(String aTitle) {
-        this();
-        title = aTitle;
+    @Override
+    public GridColumnsNode copy() throws Exception {
+        GridColumnsNode copied = new ModelGridColumn();
+        copied.assign(this);
+        return copied;
     }
-
-    protected ModelGridColumn(TableColumn aCol) {
-        super(aCol);
-    }
-*/
     
     @ScriptFunction(params = {"node"})
     @Override

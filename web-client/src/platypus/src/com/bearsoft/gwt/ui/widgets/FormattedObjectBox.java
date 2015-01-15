@@ -41,7 +41,7 @@ public class FormattedObjectBox extends ExplicitValueBox<Object> {
 
 		@Override
 		public Object parse(CharSequence text) throws ParseException {
-			if (format == null || "".equals(text.toString())) {
+			if (format == null || text == null || "".equals(text.toString())) {
 				return null;
 			} else {
 				return format.parse(text.toString());

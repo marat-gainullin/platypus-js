@@ -11,8 +11,6 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.table.TableColumn;
 
 /**
@@ -349,18 +347,13 @@ public class GridColumnsNode implements ColumnNodesContainer {
     }
 
     public GridColumnsNode lightCopy() {
-        try {
-            GridColumnsNode copied = getClass().newInstance();
-            copied.lightAssign(this);
-            return copied;
-        } catch (InstantiationException | IllegalAccessException ex) {
-            Logger.getLogger(GridColumnsNode.class.getName()).log(Level.SEVERE, null, ex);
-            throw new IllegalStateException(ex);
-        }
+        GridColumnsNode copied = new GridColumnsNode();
+        copied.lightAssign(this);
+        return copied;
     }
 
     public GridColumnsNode copy() throws Exception {
-        GridColumnsNode copied = getClass().newInstance();
+        GridColumnsNode copied = new GridColumnsNode();
         copied.assign(this);
         return copied;
     }

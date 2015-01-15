@@ -1,8 +1,7 @@
 package com.eas.client.form.published.widgets.model;
 
 import com.bearsoft.gwt.ui.widgets.NullableCheckBox;
-import com.bearsoft.rowset.metadata.Field;
-import com.eas.client.converters.BooleanRowValueConverter;
+import com.bearsoft.rowset.Utils;
 import com.eas.client.form.events.ActionEvent;
 import com.eas.client.form.events.ActionHandler;
 import com.eas.client.form.events.HasActionHandlers;
@@ -12,7 +11,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.CheckBox;
 
-public class ModelCheck extends PublishedDecoratorBox<Boolean> implements HasActionHandlers {
+public class ModelCheck extends ModelDecoratorBox<Boolean> implements HasActionHandlers {
 
 	public ModelCheck() {
 		super(new NullableCheckBox());
@@ -26,12 +25,12 @@ public class ModelCheck extends PublishedDecoratorBox<Boolean> implements HasAct
 	public HandlerRegistration addActionHandler(ActionHandler handler) {
 		final HandlerRegistration superReg = super.addHandler(handler, ActionEvent.getType());
 		if (actionHandlers == 0) {
-			clickReg = ((CheckBox)decorated).addClickHandler(new ClickHandler() {
+			clickReg = ((CheckBox) decorated).addClickHandler(new ClickHandler() {
 
 				@Override
-                public void onClick(ClickEvent event) {
+				public void onClick(ClickEvent event) {
 					ActionEvent.fire(ModelCheck.this, ModelCheck.this);
-                }
+				}
 
 			});
 		}
@@ -108,7 +107,22 @@ public class ModelCheck extends PublishedDecoratorBox<Boolean> implements HasAct
 	}
 
 	@Override
-	public void setBinding(Field aField) throws Exception {
-		super.setBinding(aField, new BooleanRowValueConverter());
+	protected void clearValue() {
+	    super.clearValue();
+		ActionEvent.fire(this, this);
+	}
+
+	@Override
+	public Object getJsValue(){
+		return Utils.toJs(getValue());
+	}
+
+	@Override
+	public void setJsValue(Object aValue) throws Exception {
+		Object javaValue = Utils.toJava(aValue);
+		if (javaValue == null || javaValue instanceof Boolean)
+			setValue((Boolean) javaValue, true);
+		else
+			throw new IllegalArgumentException("A value of type 'Boolean' expected");
 	}
 }

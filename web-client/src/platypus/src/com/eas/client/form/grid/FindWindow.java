@@ -9,7 +9,9 @@ import com.bearsoft.gwt.ui.containers.window.ToolsCaption;
 import com.bearsoft.gwt.ui.containers.window.WindowPanel;
 import com.bearsoft.gwt.ui.containers.window.WindowPopupPanel;
 import com.bearsoft.gwt.ui.widgets.grid.Grid;
-import com.bearsoft.rowset.Row;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
@@ -40,12 +42,12 @@ public class FindWindow extends WindowPanel {
 	private Button btnFind;
 	private Button closeButton;
 
-	private Grid<Row> grid;
+	private Grid<JavaScriptObject> grid;
 
 	private int row;
 	private int col;
 
-	public FindWindow(Grid<Row> aGrid) {
+	public FindWindow(Grid<JavaScriptObject> aGrid) {
 		super();
 		popup.setResizable(false);
 		popup.setMinimizable(false);
@@ -59,7 +61,7 @@ public class FindWindow extends WindowPanel {
 
 	@Override
 	protected Widget getMovableTarget() {
-		return popup;
+		return popup != null ? popup : this;
 	}
 
 	private void initComponents() {
@@ -134,7 +136,7 @@ public class FindWindow extends WindowPanel {
 	}
 
 	public boolean findNext() {
-		List<Row> data = grid.getDataProvider().getList();
+		List<JavaScriptObject> data = grid.getDataProvider().getList();
 		boolean caseSensitive = checkCase.getValue();
 		boolean wholeString = checkWhole.getValue();
 		String findText = field.getText();
@@ -206,9 +208,9 @@ public class FindWindow extends WindowPanel {
 	}
 
 	private void selectCell(int aRow, int aCol) {
-		List<Row> data = grid.getDataProvider().getList();
+		List<JavaScriptObject> data = grid.getDataProvider().getList();
 		if (grid.getSelectionModel() instanceof SetSelectionModel) {
-			SetSelectionModel<Row> ssm = (SetSelectionModel<Row>) grid.getSelectionModel();
+			SetSelectionModel<JavaScriptObject> ssm = (SetSelectionModel<JavaScriptObject>) grid.getSelectionModel();
 			ssm.clear();
 			ssm.setSelected(data.get(aRow), true);
 		}
@@ -224,7 +226,13 @@ public class FindWindow extends WindowPanel {
 		col = 0;
 		popup.center();
 		activate();
-		field.setFocus(true);
+		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+			
+			@Override
+			public void execute() {
+				field.setFocus(true);
+			}
+		});
 	}
 
 }

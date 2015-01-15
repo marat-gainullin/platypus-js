@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,6 +42,7 @@ import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
+import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.http.client.RequestBuilder;
@@ -115,14 +115,26 @@ public class AppClient {
 		}
 	}
 
+	public static String remoteApiUri() {
+		NodeList<com.google.gwt.dom.client.Element> metas = com.google.gwt.dom.client.Document.get().getHead().getElementsByTagName("meta");
+		for(int i=0;i<metas.getLength();i++){
+			com.google.gwt.dom.client.Element meta = metas.getItem(i);
+			if("platypus-server".equalsIgnoreCase(meta.getAttribute("name"))){
+				return meta.getAttribute("content");				
+			}
+		}
+		return relativeUri();
+	}
+	
 	public static String relativeUri() {
-		String pageUrl = GWT.getHostPageBaseURL();
-		return pageUrl.substring(0, pageUrl.length() - 1);
+		String pageUrl = GWT.getHostPageBaseURL();		
+		pageUrl = pageUrl.substring(0, pageUrl.length() - 1);
+		return pageUrl;
 	}
 
 	public static void init() {
 		if (appClient == null) {
-			appClient = new AppClient(relativeUri() + APPLICATION_URI);
+			appClient = new AppClient(remoteApiUri() + APPLICATION_URI);
 		}
 	}
 
@@ -140,16 +152,16 @@ public class AppClient {
 		appClient = aClient;
 	}
 
-	public SafeUri getResourceUri(final String imageName) {
+	public SafeUri getResourceUri(final String aResourceName) {
 		return new SafeUri() {
 
 			@Override
 			public String asString() {
-				MatchResult htppMatch = httpPrefixPattern.exec(imageName);
+				MatchResult htppMatch = httpPrefixPattern.exec(aResourceName);
 				if (htppMatch != null) {
-					return imageName;
+					return aResourceName;
 				} else {
-					return relativeUri() + APP_RESOURCE_PREFIX + imageName;
+					return relativeUri() + APP_RESOURCE_PREFIX + aResourceName;
 				}
 			}
 		};
@@ -200,7 +212,7 @@ public class AppClient {
 	public static JavaScriptObject jsUpload(PublishedFile aFile, String aName, final JavaScriptObject aCompleteCallback, final JavaScriptObject aProgresssCallback,
 	        final JavaScriptObject aErrorCallback) {
 		if (aFile != null) {
-			Cancellable cancellable = requestUpload(aFile, aName, new Callback<ProgressEvent, String>() {
+			Cancellable cancellable = AppClient.getInstance().startUploadRequest(aFile, aName, new Callback<ProgressEvent, String>() {
 
 				protected boolean completed;
 
@@ -210,11 +222,12 @@ public class AppClient {
 							if (aProgresssCallback != null) {
 								Utils.executeScriptEventVoid(aProgresssCallback, aProgresssCallback, aResult);
 							}
-							if (aResult.isComplete()) {
-								completed = true;
-								if (aCompleteCallback != null) {
-									Utils.executeScriptEventVoid(aCompleteCallback, aCompleteCallback, Utils.toJs("uploaded"));
-								}
+							
+								if (aResult.isComplete() && aResult.getRequest() != null ) {
+									completed = true;
+									if (aCompleteCallback != null) {
+										Utils.executeScriptEventVoid(aCompleteCallback, aCompleteCallback, aResult.getRequest().getResponseText());
+									}
 							}
 						}
 					} catch (Exception ex) {
@@ -238,9 +251,9 @@ public class AppClient {
 			return null;
 	}
 
-	public static Cancellable requestUpload(final PublishedFile aFile, String aName, final Callback<ProgressEvent, String> aCallback) {
+	public Cancellable startUploadRequest(final PublishedFile aFile, String aName, final Callback<ProgressEvent, String> aCallback) {
 		final XMLHttpRequest2 req = XMLHttpRequest.create().<XMLHttpRequest2> cast();
-		req.open("post", AppClient.getInstance().getApiUrl());
+		req.open("post", apiUrl);
 		final ProgressHandler handler = new ProgressHandlerAdapter() {
 			@Override
 			public void onProgress(ProgressEvent aEvent) {
@@ -255,7 +268,7 @@ public class AppClient {
 			public void onLoadEnd(XMLHttpRequest xhr) {
 				try {
 					if (aCallback != null)
-						aCallback.onSuccess(ProgressEvent.create(aFile.getSize(), aFile.getSize()));
+						aCallback.onSuccess(ProgressEvent.create(aFile.getSize(), aFile.getSize(), null));
 				} catch (Exception ex) {
 					Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
 				}
@@ -313,7 +326,7 @@ public class AppClient {
 					if (xhr.getStatus() == Response.SC_OK) {
 						try {
 							if (aCallback != null)
-								aCallback.onSuccess(ProgressEvent.create(aFile.getSize(), aFile.getSize()));
+								aCallback.onSuccess(ProgressEvent.create(aFile.getSize(), aFile.getSize(), xhr));
 						} catch (Exception ex) {
 							Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
 						}
@@ -340,7 +353,7 @@ public class AppClient {
 		aAction = (aAction != null ? aAction : "");
 		if (!aAction.startsWith("/"))
 			aAction = "/" + aAction;
-		String url = relativeUri() + aAction;
+		String url = apiUrl + aAction;
 		List<String> parameters = new ArrayList<String>();
 		for (String paramName : aFormData.keySet()) {
 			parameters.add(param(paramName, aFormData.get(paramName)));
@@ -390,10 +403,6 @@ public class AppClient {
 	public AppClient(String aApiUrl) {
 		super();
 		apiUrl = aApiUrl;
-	}
-
-	public String getApiUrl() {
-		return apiUrl;
 	}
 
 	public String getPrincipal() {
@@ -572,7 +581,7 @@ public class AppClient {
 			}
 		});
 		String query = "";
-		for (Entry<String, String> ent : aParams.entrySet()) {
+		for (Map.Entry<String, String> ent : aParams.entrySet()) {
 			query += param(ent.getKey(), ent.getValue()) + "&";
 		}
 		query += param(PlatypusHttpRequestParams.TYPE, String.valueOf(aRequestType));
@@ -588,7 +597,7 @@ public class AppClient {
 			throw new Exception(req.getStatus() + " " + req.getStatusText());
 	}
 
-	public XMLHttpRequest2 syncRequest(String aUrlPrefix, final String aUrlQuery, ResponseType aResponseType) throws Exception {
+	public XMLHttpRequest2 syncApiRequest(String aUrlPrefix, final String aUrlQuery, ResponseType aResponseType) throws Exception {
 		String url = apiUrl + (aUrlPrefix != null ? aUrlPrefix : "") + "?" + aUrlQuery;
 		final XMLHttpRequest2 req = syncRequest(url, aResponseType, null, RequestBuilder.GET);
 		if (req.getStatus() == Response.SC_OK)
@@ -862,7 +871,7 @@ public class AppClient {
 			});
 			return null;
 		} else {
-			XMLHttpRequest2 executed = syncRequest(null, query, ResponseType.Default);
+			XMLHttpRequest2 executed = syncApiRequest(null, query, ResponseType.Default);
 			if (executed != null) {
 				if (executed.getStatus() == Response.SC_OK) {
 					String responseType = executed.getResponseHeader("content-type");

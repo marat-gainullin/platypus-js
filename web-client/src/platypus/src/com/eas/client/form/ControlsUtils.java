@@ -6,8 +6,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.bearsoft.gwt.ui.XElement;
-import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Utils;
+import com.bearsoft.rowset.Utils.JsObject;
+import com.bearsoft.rowset.beans.HasPropertyListeners;
+import com.bearsoft.rowset.beans.PropertyChangeEvent;
+import com.bearsoft.rowset.beans.PropertyChangeListener;
+import com.bearsoft.rowset.beans.PropertyChangeSupport;
 import com.eas.client.form.MarginConstraints.Margin;
 import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.published.HasPublished;
@@ -20,11 +24,10 @@ import com.eas.client.form.published.containers.BorderPane;
 import com.eas.client.form.published.containers.MarginsPane;
 import com.eas.client.form.published.containers.SplitPane;
 import com.eas.client.form.published.menu.PlatypusMenuBar;
-import com.eas.client.form.published.widgets.model.ModelElementRef;
-import com.eas.client.model.Entity;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
+import com.google.gwt.core.client.JsArrayMixed;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Element;
@@ -35,10 +38,12 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.FileUpload;
+import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.MenuItem;
@@ -104,7 +109,7 @@ public class ControlsUtils {
 		}-*/;
 	}
 
-	public static void jsSelectFile(final JavaScriptObject aCallback) {
+	public static void jsSelectFile(final JavaScriptObject aCallback, final String aFileTypes) {
 		if (aCallback != null) {
 			selectFile(new Callback<JavaScriptObject, String>() {
 
@@ -121,13 +126,16 @@ public class ControlsUtils {
 				public void onFailure(String reason) {
 				}
 
-			});
+			}, aFileTypes);
 		}
 	}
 
-	public static void selectFile(final Callback<JavaScriptObject, String> aCallback) {
+	public static void selectFile(final Callback<JavaScriptObject, String> aCallback, String aFileTypes) {
 		final XFileUploadField fu = new XFileUploadField();
 		fu.getElement().getStyle().setDisplay(Style.Display.NONE);
+		if (aFileTypes != null) {
+			fu.getElement().setAttribute("accept", aFileTypes);
+		}
 		RootPanel.get().add(fu);
 		fu.addChangeHandler(new ChangeHandler() {
 			@Override
@@ -280,27 +288,26 @@ public class ControlsUtils {
 	 * @return
 	 * @throws Exception
 	 */
-	public static PublishedCell calcStandalonePublishedCell(JavaScriptObject aEventThis, JavaScriptObject cellFunction, Row aRow, String aDisplay, ModelElementRef aModelElement,
+	public static PublishedCell calcStandalonePublishedCell(JavaScriptObject aEventThis, JavaScriptObject cellFunction, JavaScriptObject aRow, String aDisplay, String aField,
 	        PublishedCell aAlreadyCell) throws Exception {
-		if (aEventThis != null && aModelElement != null && cellFunction != null) {
+		if (aEventThis != null && aField != null && !aField.isEmpty() && cellFunction != null) {
 			if (aRow != null) {
-				PublishedCell cell = aAlreadyCell != null ? aAlreadyCell : Publisher.publishCell(Utils.toJs(aRow.getColumnObject(aModelElement.getColIndex())), aDisplay);
-				Object[] rowIds = aRow.getPKValues();
-				if (rowIds != null) {
-					for (int i = 0; i < rowIds.length; i++)
-						rowIds[i] = Utils.toJs(rowIds[i]);
-				}
-				Boolean res = Utils.executeScriptEventBoolean(
-				        aEventThis,
-				        cellFunction,
-				        JsEvents.publishOnRenderEvent(aEventThis, rowIds != null && rowIds.length > 0 ? (rowIds.length > 1 ? Utils.toJsArray(rowIds) : rowIds[0]) : null, null,
-				                Entity.publishRowFacade(aRow, aModelElement.entity, null), cell));
-				if (res != null && res) {
-					return cell;
-				}
+				PublishedCell cell = aAlreadyCell != null ? aAlreadyCell : Publisher.publishCell(getPathData(aRow, aField), aDisplay);
+				Utils.executeScriptEventVoid(aEventThis, cellFunction, JsEvents.publishOnRenderEvent(aEventThis, null, null, aRow, cell));
+				return cell;
 			}
 		}
 		return null;
+	}
+
+	public static PublishedCell calcValuedPublishedCell(JavaScriptObject aEventThis, JavaScriptObject cellFunction, Object aValue, String aDisplay, PublishedCell aAlreadyCell) throws Exception {
+		if (aEventThis != null && cellFunction != null) {
+			PublishedCell cell = aAlreadyCell != null ? aAlreadyCell : Publisher.publishCell(Utils.toJs(aValue), aDisplay);
+			Utils.executeScriptEventVoid(aEventThis, cellFunction, JsEvents.publishOnRenderEvent(aEventThis, null, null, null, cell));
+			return cell;
+		} else {
+			return null;
+		}
 	}
 
 	protected static void walkChildren(XElement aRoot, XElement.Observer aCallback) {
@@ -471,5 +478,154 @@ public class ControlsUtils {
 				walk(wIt.next(), aObserver);
 			}
 		}
+	}
+
+	public static void focus(Widget aWidget) {
+		if (aWidget instanceof Focusable) {
+			((Focusable) aWidget).setFocus(true);
+		}
+	}
+
+	public static native Object getPathData(JavaScriptObject anElement, String aPath)/*-{
+		if (anElement != null && aPath != null && aPath != '') {
+			var target = anElement;
+			var path = aPath.split('.');
+			var propName = path[0];
+			for ( var i = 1; i < path.length; i++) {
+				var target = target[propName];
+				if (!target) {
+					propName = null;
+				} else
+					propName = path[i];
+			}
+			if (propName != null) {
+				var javaValue = $wnd.boxAsJava(target[propName]);
+				return javaValue;
+			} else
+				return null;
+		} else
+			return null;
+	}-*/;
+
+	public static native void setPathData(JavaScriptObject anElement, String aPath, Object aValue)/*-{
+		if (aPath != null && aPath != '') {
+			var target = anElement;
+			var path = aPath.split('.');
+			var propName = path[0];
+			for ( var i = 1; i < path.length; i++) {
+				var target = target[propName];
+				if (!target) {
+					propName = null;
+				} else {
+					propName = path[i];
+				}
+			}
+			if (propName != null) {
+				var jsData = $wnd.boxAsJs(aValue);
+				target[propName] = jsData;
+			}
+		}
+	}-*/;
+
+	private static native JavaScriptObject observePath(JavaScriptObject aTarget, String aPath, JavaScriptObject aPropListener)/*-{
+	    function subscribe(aData, aListener, aPropName) {
+	        if (aData.unwrap) {
+	        	var nHandler = @com.eas.client.form.ControlsUtils::tryListenProperty(Ljava/lang/Object;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aData.unwrap(), aPropName, aListener);
+	        	if(nHandler != null)
+	        		return function(){
+	        			nHandler.@com.google.gwt.event.shared.HandlerRegistration::removeHandler()();
+	        		};
+	        }
+	        if($wnd.Object.observe){
+	        	var observer = function(changes){
+	        		var touched = false;
+	        		changes.forEach(function(change){
+	        			if(change.propertyName == aPropName)
+	        				touched = true;
+	        		});
+	        		if(touched){
+	        			aListener(typeof aData[aPropName] != 'undefined' ? aData[aPropName] : null);
+	        		}
+	        	};
+	        	Object.observe(aData, observer);
+	        	return function (){
+	        		Object.unobserve(aData, observer);
+	        	};
+	        }
+	        return null;
+	    }
+        var subscribed = [];
+        function listenPath() {
+            subscribed = [];
+            var data = aTarget;
+            var path = aPath.split('.');
+            for (var i = 0; i < path.length; i++) {
+                var propName = path[i];
+                var listener = i === path.length - 1 ? aPropListener : function (evt) {
+                    subscribed.forEach(function (aEntry) {
+                        aEntry();
+                    });
+                    listenPath();
+                    aPropListener(evt);
+                };
+                var cookie = subscribe(data, listener, propName);
+                if (cookie) {
+                    subscribed.push(cookie);
+                    if (data[propName])
+                        data = data[propName];
+                    else
+                        break;
+                } else {
+                    break;
+                }
+            }
+        }
+        if (aTarget) {
+            listenPath();
+        }
+        return {
+            unlisten: function () {
+                subscribed.forEach(function (aEntry) {
+                    aEntry();
+                });
+            }
+        };
+	}-*/;
+	
+	public static HandlerRegistration tryListenProperty(Object aTarget, final String aPropertyName, final JavaScriptObject aListener){
+		if(aTarget instanceof HasPropertyListeners){
+			final HasPropertyListeners listenersContainer = (HasPropertyListeners)aTarget;
+			final PropertyChangeListener plistener = new PropertyChangeListener(){
+
+				protected native void invokeListener(JavaScriptObject aTarget, JavaScriptObject aEvent)/*-{
+					aTarget(aEvent.newValue);
+				}-*/;
+				
+				@Override
+                public void propertyChange(PropertyChangeEvent evt) {
+					invokeListener(aListener, PropertyChangeSupport.publishEvent(evt));
+                }
+				
+			};
+			listenersContainer.addPropertyChangeListener(aPropertyName, plistener);
+			return new HandlerRegistration(){
+				@Override
+				public void removeHandler() {
+					listenersContainer.removePropertyChangeListener(aPropertyName, plistener);
+				}
+			};
+		}
+		return null;
+	}
+	
+	public static HandlerRegistration listen(JavaScriptObject anElement, String aPath, PropertyChangeListener aListener) {
+		final JsObject listener = observePath(anElement, aPath, PropertyChangeSupport.publishListener(aListener)).cast();
+		return new HandlerRegistration() {
+			@Override
+			public void removeHandler() {
+				JsObject unlisten = listener.getJs("unlisten").cast();
+				unlisten.apply(listener, null);
+			}
+		};
 	}
 }

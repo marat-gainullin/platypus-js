@@ -260,7 +260,7 @@ public class JsEvents {
 					return ne.keyCode || 0;																																																																																																																																																																																																																																																																																																																																																																																																																																																																													
 				}
             });
-			Object.defineProperty(aPublishedEvent, "char", {
+			Object.defineProperty(this, "char", {
 				get : function() {																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																
 					var ne = aEvent.@com.google.gwt.event.dom.client.KeyEvent::getNativeEvent()();
 					return String.fromCharCode(ne.charCode || 0); 
@@ -428,7 +428,7 @@ public class JsEvents {
 	}-*/;
 	
 	public native static JavaScriptObject publish(ActionEvent aEvent)/*-{
-		return new $wnd.P.ContainerEvent(aEvent, false);
+		return new $wnd.P.ActionEvent(aEvent);
 	}-*/;
 
 }

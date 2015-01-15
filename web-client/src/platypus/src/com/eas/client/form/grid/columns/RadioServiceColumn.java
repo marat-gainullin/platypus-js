@@ -1,22 +1,16 @@
 package com.eas.client.form.grid.columns;
 
-import com.bearsoft.rowset.Row;
-import com.eas.client.form.grid.cells.RadioButtonCell;
-import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.view.client.SelectionModel;
+import com.google.gwt.core.client.JavaScriptObject;
 
-public class RadioServiceColumn extends Column<Row, Boolean> {
+public class RadioServiceColumn extends ModelColumn {
 
-	protected SelectionModel<Row> selectionModel;
-
-	public RadioServiceColumn(String aGroupName, SelectionModel<Row> aSelectionModel) {
-		super(new RadioButtonCell(aGroupName));
-		selectionModel = aSelectionModel;
+	public RadioServiceColumn() {
+		super();
 	}
 
 	@Override
-	public Boolean getValue(Row object) {
-		return selectionModel.isSelected(object);
+	public Boolean getValue(JavaScriptObject object) {
+		return grid.getSelectionModel().isSelected(object);
 	}
 
 }

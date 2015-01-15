@@ -173,14 +173,19 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 		switch (d) {
 		case WEST:
 			setLeftComponent(aWidget, aSize.getX());
+			break;
 		case EAST:
 			setRightComponent(aWidget, aSize.getX());
+			break;
 		case NORTH:
 			setTopComponent(aWidget, aSize.getY());
+			break;
 		case SOUTH:
 			setBottomComponent(aWidget, aSize.getY());
+			break;
 		case CENTER:
 			setCenterComponent(aWidget);
+			break;
 		}
 	}
 
@@ -199,8 +204,12 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 		if (old != w) {
 			if (old != null)
 				remove(old);
+			Widget centerWidget = super.getCenter();
+			if(centerWidget != null)
+				super.remove(centerWidget);
 			addWest(w, size);
-			super.getCenter();
+			if(centerWidget != null)
+				super.add(centerWidget);
 			AddEvent.fire(this, w);
 		}
 	}
@@ -220,7 +229,12 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 		if (old != w) {
 			if (old != null)
 				remove(old);
+			Widget centerWidget = super.getCenter();
+			if(centerWidget != null)
+				super.remove(centerWidget);
 			addEast(w, size);
+			if(centerWidget != null)
+				super.add(centerWidget);
 			AddEvent.fire(this, w);
 		}
 	}
@@ -240,7 +254,12 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 		if (old != w) {
 			if (old != null)
 				remove(old);
+			Widget centerWidget = super.getCenter();
+			if(centerWidget != null)
+				super.remove(centerWidget);
 			addNorth(w, size);
+			if(centerWidget != null)
+				super.add(centerWidget);
 			AddEvent.fire(this, w);
 		}
 	}
@@ -260,7 +279,12 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 		if (old != w) {
 			if (old != null)
 				remove(old);
+			Widget centerWidget = super.getCenter();
+			if(centerWidget != null)
+				super.remove(centerWidget);
 			addSouth(w, size);
+			if(centerWidget != null)
+				super.add(centerWidget);
 			AddEvent.fire(this, w);
 		}
 	}
