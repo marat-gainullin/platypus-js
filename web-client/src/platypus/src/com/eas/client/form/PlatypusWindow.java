@@ -26,10 +26,8 @@ import com.bearsoft.gwt.ui.containers.window.events.MoveEvent;
 import com.bearsoft.gwt.ui.containers.window.events.MoveHandler;
 import com.bearsoft.gwt.ui.containers.window.events.RestoreEvent;
 import com.bearsoft.gwt.ui.containers.window.events.RestoreHandler;
-import com.bearsoft.rowset.CallbackAdapter;
 import com.bearsoft.rowset.Utils;
 import com.eas.client.application.AppClient;
-import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.HasJsName;
@@ -94,7 +92,6 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	protected JavaScriptObject published;
 
 	protected ToolsCaption caption;
-	protected String iconImage;
 	protected Point location;
 	protected Point viewSize;
 	protected Widget view;
@@ -155,18 +152,6 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 
 		caption.setHTML(title);
 		caption.setText(title);
-		if (iconImage != null && !iconImage.isEmpty())
-			PlatypusImageResource.load(iconImage, new CallbackAdapter<ImageResource, String>() {
-				@Override
-				protected void doWork(ImageResource aResult) throws Exception {
-					setIcon(aResult);
-				}
-
-				@Override
-				public void onFailure(String reason) {
-					Logger.getLogger(PlatypusWindow.class.getName()).log(Level.SEVERE, "Window failed to load title icon. " + reason);
-				}
-			});
 		registerWindowListeners();
 	}
 
@@ -756,14 +741,6 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        };
         })();
     }-*/;
-
-	public String getIconImage() {
-		return iconImage;
-	}
-
-	public void setIconImage(String aValue) {
-		iconImage = aValue;
-	}
 
 	public int getDefaultCloseOperation() {
 		return defaultCloseOperation;

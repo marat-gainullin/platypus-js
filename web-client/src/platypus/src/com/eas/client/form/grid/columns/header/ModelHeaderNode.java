@@ -5,19 +5,75 @@ import com.bearsoft.gwt.ui.widgets.grid.header.HeaderNode;
 import com.eas.client.form.grid.columns.ModelColumn;
 import com.eas.client.form.published.HasJsName;
 import com.eas.client.form.published.HasPublished;
+import com.eas.client.form.published.PublishedColor;
+import com.eas.client.form.published.PublishedFont;
 import com.google.gwt.core.client.JavaScriptObject;
 
-public class ModelHeaderNode extends HeaderNode<JavaScriptObject, Object> implements HasJsName, HasPublished {
+public class ModelHeaderNode extends HeaderNode<JavaScriptObject> implements HasJsName, HasPublished {
 
 	protected JavaScriptObject published;
 	protected String name;
-	protected boolean resizable = true;
-	protected boolean moveable = true;
 
 	public ModelHeaderNode() {
 		super();
 		column = new ModelColumn();
 		header = new DraggableHeader<JavaScriptObject>("", null, column);
+	}
+
+	@Override
+	public ModelHeaderNode lightCopy(){
+		ModelHeaderNode copied = new ModelHeaderNode();
+		copied.setColumn(column);
+		copied.setHeader(header);
+		return copied;
+	}
+	
+	public PublishedColor getBackground() {
+		return ((DraggableHeader<?>)header).getBackground();
+	}
+
+	public void setBackground(PublishedColor aValue) {
+		((DraggableHeader<?>)header).setBackground(aValue);
+	}
+
+	public PublishedColor getForeground() {
+		return ((DraggableHeader<?>)header).getForeground();
+	}
+
+	public void setForeground(PublishedColor aValue) {
+		((DraggableHeader<?>)header).setForeground(aValue);
+	}
+
+	public PublishedFont getFont() {
+		return ((DraggableHeader<?>)header).getFont();
+	}
+
+	public void setFont(PublishedFont aValue) {
+		((DraggableHeader<?>)header).setFont(aValue);
+	}
+
+	public double getMinWidth() {
+		return ((ModelColumn) column).getMinWidth();
+	}
+
+	public void setMinWidth(double aValue) {
+		((ModelColumn) column).setMinWidth(aValue);
+	}
+
+	public double getMaxWidth() {
+		return ((ModelColumn) column).getMaxWidth();
+	}
+
+	public void setMaxWidth(double aValue) {
+		((ModelColumn) column).setMaxWidth(aValue);
+	}
+
+	public double getPreferredWidth() {
+		return ((ModelColumn) column).getDesignedWidth();
+	}
+
+	public void setPreferredWidth(double aValue) {
+		((ModelColumn) column).setWidth(aValue);
 	}
 
 	public String getField() {
@@ -29,29 +85,27 @@ public class ModelHeaderNode extends HeaderNode<JavaScriptObject, Object> implem
 	}
 
 	public String getTitle() {
-		return header.getTitle();
+		return ((DraggableHeader<JavaScriptObject>) header).getTitle();
 	}
 
 	public void setTitle(String aValue) {
-		header.setTitle(aValue);
+		((DraggableHeader<JavaScriptObject>) header).setTitle(aValue);
 	}
 
 	public boolean isResizable() {
-		return resizable;
+		return ((DraggableHeader<JavaScriptObject>) header).isResizable();
 	}
 
 	public void setResizable(boolean aValue) {
-		resizable = aValue;
-		header.setResizable(resizable);
+		((DraggableHeader<JavaScriptObject>) header).setResizable(aValue);
 	}
 
 	public boolean isMoveable() {
-		return moveable;
+		return ((DraggableHeader<JavaScriptObject>) header).isMoveable();
 	}
 
 	public void setMoveable(boolean aValue) {
-		moveable = aValue;
-		header.setMoveable(moveable);
+		((DraggableHeader<JavaScriptObject>) header).setMoveable(aValue);
 	}
 
 	public boolean isVisible() {
@@ -59,9 +113,7 @@ public class ModelHeaderNode extends HeaderNode<JavaScriptObject, Object> implem
 	}
 
 	public void setVisible(boolean aValue) {
-		if (isVisible() != aValue) {
-			((ModelColumn) column).setVisible(aValue);
-		}
+		((ModelColumn) column).setVisible(aValue);
 	}
 
 	@Override
@@ -130,12 +182,44 @@ public class ModelHeaderNode extends HeaderNode<JavaScriptObject, Object> implem
 	}
 
 	private static native void publish(ModelHeaderNode aColumn, JavaScriptObject aPublished)/*-{
+		Object.defineProperty(aPublished, "field", {
+			get : function() {
+				return aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::getField()();
+			},
+			set : function(aValue) {
+				aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::setField(Ljava/lang/String;)(aValue != null ? ''+aValue : '');
+			}
+		});
 		Object.defineProperty(aPublished, "visible", {
 			get : function() {
 				return aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::isVisible()();
 			},
 			set : function(aValue) {
 				aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::setVisible(Z)((false != aValue));
+			}
+		});
+		Object.defineProperty(aPublished, "minWidth", {
+			get : function() {
+				return aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::getMinWidth()();
+			},
+			set : function(aValue) {
+				aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::setMinWidth(D)(aValue != null ? aValue : 0);
+			}
+		});
+		Object.defineProperty(aPublished, "maxWidth", {
+			get : function() {
+				return aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::getMaxWidth()();
+			},
+			set : function(aValue) {
+				aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::setMaxWidth(D)(aValue != null ? aValue : 0);
+			}
+		});
+		Object.defineProperty(aPublished, "preferredWidth", {
+			get : function() {
+				return aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::getPreferredWidth()();
+			},
+			set : function(aValue) {
+				aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::setPreferredWidth(D)(aValue != null ? aValue : 0);
 			}
 		});
 		Object.defineProperty(aPublished, "width", {
@@ -175,7 +259,7 @@ public class ModelHeaderNode extends HeaderNode<JavaScriptObject, Object> implem
 				return aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::isReadonly()();
 			},
 			set : function(aValue) {
-				aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::setReadonly(Z)((false != aValue));
+				aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::setReadonly(Z)(!!aValue);
 			}
 		});
 		Object.defineProperty(aPublished, "sortable", {
@@ -184,6 +268,30 @@ public class ModelHeaderNode extends HeaderNode<JavaScriptObject, Object> implem
 			},
 			set : function(aValue) {
 				aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::setSortable(Z)((false != aValue));
+			}
+		});
+		Object.defineProperty(aPublished, "foreground", {
+			get : function() {
+				return aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::getForeground()()();
+			},
+			set : function(aValue) {
+				aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::setForeground(Lcom/eas/client/form/published/PublishedColor;)(aValue);
+			}
+		});
+		Object.defineProperty(aPublished, "background", {
+			get : function() {
+				return aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::getBackground()()();
+			},
+			set : function(aValue) {
+				aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::setBackground(Lcom/eas/client/form/published/PublishedColor;)(aValue);
+			}
+		});
+		Object.defineProperty(aPublished, "font", {
+			get : function() {
+				return aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::getFont()()();
+			},
+			set : function(aValue) {
+				aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::setFont(Lcom/eas/client/form/published/PublishedFont;)(aValue);
 			}
 		});
 		Object.defineProperty(aPublished, "onRender", {

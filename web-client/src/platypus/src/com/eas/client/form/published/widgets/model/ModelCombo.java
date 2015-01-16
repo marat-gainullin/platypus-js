@@ -26,42 +26,29 @@ import com.google.gwt.user.client.ui.Widget;
 public class ModelCombo extends ModelDecoratorBox<Object> implements HasEmptyText, HasActionHandlers {
 
 	/*
-	protected CrossUpdater updater = new CrossUpdater(new Callback<RowsetEvent, RowsetEvent>() {
-
-		@Override
-		public void onFailure(RowsetEvent reason) {
-		}
-
-		@Override
-		public void onSuccess(RowsetEvent result) {
-			if (displayElement != null && displayElement.isCorrect() && valueElement != null && valueElement.isCorrect()) {
-				try {
-					Rowset displayRowset = displayElement.entity != null ? displayElement.entity.getRowset() : null;
-					Rowset valueRowset = valueElement.entity != null ? valueElement.entity.getRowset() : null;
-					RowsetEvent event = (RowsetEvent) result;
-					if (event != null && (event.getRowset() == displayRowset || event.getRowset() == valueRowset)) {
-						if (event instanceof RowChangeEvent) {
-							RowChangeEvent change = (RowChangeEvent) event;
-							if (change.getOldRowCount() == change.getNewRowCount()) {
-								if (change.getRowset() == displayRowset && change.getFieldIndex() == displayElement.getColIndex() || change.getRowset() == valueRowset
-								        && change.getFieldIndex() == valueElement.getColIndex()) {
-									redraw();
-								}
-							} else {
-								redraw();
-							}
-						} else {
-							redraw();
-						}
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-
-	});
-	*/
+	 * protected CrossUpdater updater = new CrossUpdater(new
+	 * Callback<RowsetEvent, RowsetEvent>() {
+	 * 
+	 * @Override public void onFailure(RowsetEvent reason) { }
+	 * 
+	 * @Override public void onSuccess(RowsetEvent result) { if (displayElement
+	 * != null && displayElement.isCorrect() && valueElement != null &&
+	 * valueElement.isCorrect()) { try { Rowset displayRowset =
+	 * displayElement.entity != null ? displayElement.entity.getRowset() : null;
+	 * Rowset valueRowset = valueElement.entity != null ?
+	 * valueElement.entity.getRowset() : null; RowsetEvent event = (RowsetEvent)
+	 * result; if (event != null && (event.getRowset() == displayRowset ||
+	 * event.getRowset() == valueRowset)) { if (event instanceof RowChangeEvent)
+	 * { RowChangeEvent change = (RowChangeEvent) event; if
+	 * (change.getOldRowCount() == change.getNewRowCount()) { if
+	 * (change.getRowset() == displayRowset && change.getFieldIndex() ==
+	 * displayElement.getColIndex() || change.getRowset() == valueRowset &&
+	 * change.getFieldIndex() == valueElement.getColIndex()) { redraw(); } }
+	 * else { redraw(); } } else { redraw(); } } } catch (Exception e) {
+	 * e.printStackTrace(); } } }
+	 * 
+	 * });
+	 */
 
 	protected static final String CUSTOM_DROPDOWN_CLASS = "combo-field-custom-dropdown";
 	protected RowKeyProvider rowKeyProvider = new RowKeyProvider();
@@ -69,6 +56,8 @@ public class ModelCombo extends ModelDecoratorBox<Object> implements HasEmptyTex
 	protected StringRowValueConverter converter = new StringRowValueConverter();
 	protected String emptyValueKey = String.valueOf(IDGenerator.genId());
 	protected boolean forceRedraw;
+	protected JavaScriptObject displayList;
+	protected String displayField;
 
 	protected boolean list = true;
 
@@ -161,26 +150,22 @@ public class ModelCombo extends ModelDecoratorBox<Object> implements HasEmptyTex
 						label = emptyText;
 					box.addItem(label != null ? label : "", emptyValueKey, null, "");
 					OptionElement emptyTextOption = box.getItem(box.getItemCount() - 1);
-					if(list){
+					if (list) {
 						emptyTextOption.getStyle().setDisplay(Style.Display.NONE);
 					}
 					box.setSelectedIndex(0);
 				}
 				/*
-				if (valuesRowset != null) {
-					if (ModelCombo.this.list) {
-						for (Row row : valuesRowset.getCurrent()) {
-							Row displayRow = row;
-							if (displayRow != valueRow) {// avoid duplication of
-								                         // list's items
-								String _label = converter.convert(displayRow.getColumnObject(displayElement.getColIndex()));
-								Object _listedValue = row.getColumnObject(valueElement.getColIndex());
-								box.addItem(_label, String.valueOf(_listedValue), _listedValue, "");
-							}
-						}
-					}
-				}
-				*/
+				 * if (valuesRowset != null) { if (ModelCombo.this.list) { for
+				 * (Row row : valuesRowset.getCurrent()) { Row displayRow = row;
+				 * if (displayRow != valueRow) {// avoid duplication of //
+				 * list's items String _label =
+				 * converter.convert(displayRow.getColumnObject
+				 * (displayElement.getColIndex())); Object _listedValue =
+				 * row.getColumnObject(valueElement.getColIndex());
+				 * box.addItem(_label, String.valueOf(_listedValue),
+				 * _listedValue, ""); } } } }
+				 */
 				super.setValue(_value, false);
 			}
 		} catch (Exception e) {
@@ -282,5 +267,35 @@ public class ModelCombo extends ModelDecoratorBox<Object> implements HasEmptyTex
 
 	public void clear() {
 		((StyledListBox<Object>) decorated).clear();
+	}
+
+	public JavaScriptObject getDisplayList() {
+		return displayList;
+	}
+
+	protected void bindList() {
+	}
+
+	protected void unbindList() {
+	}
+
+	public void setDisplayList(JavaScriptObject aValue) {
+		if (displayList != aValue) {
+			unbindList();
+			displayList = aValue;
+			bindList();
+		}
+	}
+
+	public String getDisplayField() {
+		return displayField;
+	}
+
+	public void setDisplayField(String aValue) {
+		if (displayField != null ? !displayField.equals(aValue) : aValue != null) {
+			unbindList();
+			displayField = aValue;
+			bindList();
+		}
 	}
 }

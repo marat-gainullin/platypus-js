@@ -63,6 +63,10 @@ public class PublishedComponent extends JavaScriptObject {
 		this.opaque = aValue;
 	}-*/;
 	
+	public final native void setToolTipText(String aValue)/*-{
+		this.toolTipText = aValue;
+	}-*/;
+
 	public final native String getError()/*-{
 		return this.error;
 	}-*/;

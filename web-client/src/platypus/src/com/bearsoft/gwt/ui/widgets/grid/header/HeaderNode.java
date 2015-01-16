@@ -3,18 +3,26 @@ package com.bearsoft.gwt.ui.widgets.grid.header;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.bearsoft.gwt.ui.widgets.grid.DraggableHeader;
 import com.bearsoft.gwt.ui.widgets.grid.GridColumn;
+import com.bearsoft.rowset.beans.PropertyChangeEvent;
+import com.bearsoft.rowset.beans.PropertyChangeListener;
+import com.bearsoft.rowset.beans.PropertyChangeSupport;
 import com.eas.client.form.published.PublishedStyle;
 import com.google.gwt.user.cellview.client.Header;
 
-public class HeaderNode<R, C> {
+public class HeaderNode<T> {
 
-	protected GridColumn<R, C> column;
-	protected HeaderNode<?, ?> parent;
-	protected List<HeaderNode<?, ?>> children = new ArrayList<>();
+	protected GridColumn<T, ?> column;
+	protected HeaderNode<T> parent;
+	protected List<HeaderNode<T>> children = new ArrayList<>();
+	protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
+	protected PropertyChangeListener childrenListener = new PropertyChangeListener() {
+		public void propertyChange(PropertyChangeEvent evt) {
+			changeSupport.firePropertyChange(evt.getPropertyName(), null, children);
+		}
+	};
 
-	protected DraggableHeader<?> header;
+	protected Header<String> header;
 	protected int leavesCount;
 	protected int depthRemainder;
 	protected PublishedStyle style;
@@ -23,37 +31,80 @@ public class HeaderNode<R, C> {
 		super();
 	}
 
-	public HeaderNode(DraggableHeader<?> aHeader) {
+	public HeaderNode(Header<String> aHeader) {
 		super();
 		header = aHeader;
 	}
 
-	public GridColumn<R, C> getColumn() {
+	public HeaderNode<T> lightCopy() {
+		HeaderNode<T> copied = new HeaderNode<T>();
+		copied.setColumn(column);
+		copied.setHeader(header);
+		return copied;
+	}
+
+	public GridColumn<T, ?> getColumn() {
 		return column;
 	}
 
-	public void setColumn(GridColumn<R, C> aValue) {
+	public void setColumn(GridColumn<T, ?> aValue) {
 		column = aValue;
 	}
 
-	public HeaderNode<?, ?> getParent() {
+	public HeaderNode<T> getParent() {
 		return parent;
 	}
 
-	public void setParent(HeaderNode<?, ?> aParent) {
+	public void setParent(HeaderNode<T> aParent) {
 		parent = aParent;
 	}
 
-	public List<HeaderNode<?, ?>> getChildren() {
+	public List<HeaderNode<T>> getChildren() {
 		return children;
 	}
 
-	public Header<?> getHeader() {
+	public Header<String> getHeader() {
 		return header;
 	}
 
-	public void setHeader(DraggableHeader<?> aHeader) {
+	public void setHeader(Header<String> aHeader) {
 		header = aHeader;
+	}
+
+	public PropertyChangeSupport getChangeSupport() {
+		return changeSupport;
+	}
+
+	public void removeColumnNode(HeaderNode<T> aNode) {
+		if (children != null) {
+			children.remove(aNode);
+			aNode.getChangeSupport().removePropertyChangeListener("children", childrenListener);
+			changeSupport.firePropertyChange("children", null, children);
+		}
+	}
+
+	public void addColumnNode(HeaderNode<T> aNode) {
+		if (children == null) {
+			children = new ArrayList<>();
+		}
+		if (!children.contains(aNode)) {
+			children.add(aNode);
+			aNode.setParent(this);
+			aNode.getChangeSupport().addPropertyChangeListener("children", childrenListener);
+			changeSupport.firePropertyChange("children", null, children);
+		}
+	}
+
+	public void insertColumnNode(int atIndex, HeaderNode<T> aNode) {
+		if (children == null) {
+			children = new ArrayList<>();
+		}
+		if (!children.contains(aNode) && atIndex >= 0 && atIndex <= children.size()) {
+			children.add(atIndex, aNode);
+			aNode.setParent(this);
+			aNode.getChangeSupport().addPropertyChangeListener("children", childrenListener);
+			changeSupport.firePropertyChange("children", null, children);
+		}
 	}
 
 	public int getDepthRemainder() {
@@ -71,12 +122,8 @@ public class HeaderNode<R, C> {
 	public void setStyle(PublishedStyle aValue) {
 		style = aValue;
 	}
-	
-	public String getTitle(){
-		return header.getTitle();
-	}
-	
-	public void setTitle(String aTitle){
-		header.setTitle(aTitle);
-	}
+
+	public boolean isLeaf() {
+	    return children.isEmpty();
+    }
 }

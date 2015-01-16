@@ -8,6 +8,7 @@ import com.bearsoft.gwt.ui.widgets.grid.Grid;
 import com.bearsoft.gwt.ui.widgets.grid.GridSection;
 import com.bearsoft.gwt.ui.widgets.grid.builders.ThemedHeaderOrFooterBuilder;
 import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
+import com.bearsoft.gwt.ui.widgets.grid.header.HeaderAnalyzer;
 import com.bearsoft.gwt.ui.widgets.grid.header.HeaderNode;
 import com.bearsoft.gwt.ui.widgets.grid.header.HeaderSplitter;
 import com.bearsoft.gwt.ui.widgets.grid.processing.TreeDataProvider;
@@ -28,6 +29,7 @@ import com.eas.client.form.grid.columns.ModelColumn;
 import com.eas.client.form.published.HasComponentPopupMenu;
 import com.eas.client.form.published.HasEventsExecutor;
 import com.eas.client.form.published.HasJsFacade;
+import com.eas.client.form.published.HasJsName;
 import com.eas.client.form.published.HasOnRender;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.PublishedComponent;
@@ -94,9 +96,8 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 	protected PublishedComponent published;
 	protected FindWindow finder;
 	protected String groupName = "group-name-" + Document.get().createUniqueId();
-	protected List<HeaderNode<JavaScriptObject, Object>> header = new ArrayList<>();
+	protected List<HeaderNode<JavaScriptObject>> header = new ArrayList<>();
 	// runtime
-	protected JavaScriptObject data;
 	protected ListHandler<JavaScriptObject> sortHandler;
 	protected HandlerRegistration sortHandlerReg;
 	protected HandlerRegistration positionSelectionHandler;
@@ -293,14 +294,16 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		name = aValue;
 	}
 
-	public List<HeaderNode> getHeader() {
+	public List<HeaderNode<JavaScriptObject>> getHeader() {
 		return header;
 	}
 
-	public void setHeader(List<HeaderNode> aHeader) {
+	public void setHeader(List<HeaderNode<JavaScriptObject>> aHeader) {
 		if (header != aHeader) {
 			header = aHeader;
-			applyHeader();
+			if (autoRefreshHeader){
+				applyColumns();
+			}
 		}
 	}
 
@@ -320,29 +323,10 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 
 	@Override
 	protected void refreshColumns() {
-		columnsAjusting = true;
-		try {
-			super.refreshColumns();
-		} finally {
-			columnsAjusting = false;
-		}
-		applyHeader();
+		// no op since hierarchical header processing
 	}
 
-	@Override
-	public void addColumn(boolean forceRefreshColumns, int aIndex, Column<JavaScriptObject, ?> aColumn, String aWidth, Header<?> aHeader, Header<?> aFooter, boolean hidden) {
-		super.addColumn(forceRefreshColumns, aIndex, aColumn, aWidth, aHeader, aFooter, hidden);
-	}
-
-	public void addColumn(ModelColumn<?> aColumn) {
-		addColumn(getDataColumnCount(), aColumn);
-	}
-
-	public void addColumn(int aIndex, ModelColumn<?> aColumn) {
-		addColumn(aIndex, aColumn, aColumn.getWidth() + "px", aColumn.getHeaderNode().getHeader(), null, !aColumn.isVisible());
-	}
-
-	protected ModelColumn<?> treeIndicatorColumn;
+	protected ModelColumn treeIndicatorColumn;
 
 	@Override
 	public void addColumn(int aIndex, Column<JavaScriptObject, ?> aColumn, String aWidth, Header<?> aHeader, Header<?> aFooter, boolean hidden) {
@@ -351,8 +335,8 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 			int treeIndicatorIndex = 0;
 			if (treeIndicatorIndex < getDataColumnCount()) {
 				Column<JavaScriptObject, ?> indicatorColumn = getDataColumn(treeIndicatorIndex);
-				if (indicatorColumn instanceof ModelColumn<?>) {
-					treeIndicatorColumn = (ModelColumn<?>) indicatorColumn;
+				if (indicatorColumn instanceof ModelColumn) {
+					treeIndicatorColumn = (ModelColumn) indicatorColumn;
 					if (dataProvider instanceof TreeDataProvider<?> && treeIndicatorColumn.getCell() instanceof TreeExpandableCell<?, ?>) {
 						TreeExpandableCell<JavaScriptObject, ?> treeCell = (TreeExpandableCell<JavaScriptObject, ?>) treeIndicatorColumn.getCell();
 						treeCell.setDataProvider((TreeDataProvider<JavaScriptObject>) dataProvider);
@@ -365,7 +349,7 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 	@Override
 	public void removeColumn(int aIndex) {
 		Column<JavaScriptObject, ?> toDel = getDataColumn(aIndex);
-		ModelColumn<?> mCol = (ModelColumn<?>) toDel;
+		ModelColumn mCol = (ModelColumn) toDel;
 		if (mCol == treeIndicatorColumn) {
 			TreeExpandableCell<JavaScriptObject, ?> treeCell = (TreeExpandableCell<JavaScriptObject, ?>) mCol.getCell();
 			if (treeCell.getDataProvider() != null) {
@@ -379,50 +363,67 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 	@Override
 	public void setColumnWidthFromHeaderDrag(Column<JavaScriptObject, ?> aColumn, double aWidth, Unit aUnit) {
 		super.setColumnWidth(aColumn, aWidth, aUnit);
-		ModelColumn<?> colFacade = (ModelColumn<?>) aColumn;
+		ModelColumn colFacade = (ModelColumn) aColumn;
 		colFacade.setWidth(aWidth);
 	}
 
 	@Override
 	public void setColumnWidth(Column<JavaScriptObject, ?> aColumn, double aWidth, Unit aUnit) {
 		super.setColumnWidth(aColumn, aWidth, aUnit);
-		ModelColumn<?> colFacade = (ModelColumn<?>) aColumn;
+		ModelColumn colFacade = (ModelColumn) aColumn;
 		colFacade.updateWidth(aWidth);
 	}
 
 	@Override
 	public void showColumn(Column<JavaScriptObject, ?> aColumn) {
 		super.showColumn(aColumn);
-		ModelColumn<?> colFacade = (ModelColumn<?>) aColumn;
+		ModelColumn colFacade = (ModelColumn) aColumn;
 		colFacade.updateVisible(true);
 	}
 
 	public void hideColumn(Column<JavaScriptObject, ?> aColumn) {
 		super.hideColumn(aColumn);
-		ModelColumn<?> colFacade = (ModelColumn<?>) aColumn;
+		ModelColumn colFacade = (ModelColumn) aColumn;
 		colFacade.updateVisible(false);
 	}
 
-	protected boolean headerAjusting;
-
-	public boolean isHeaderAjusting() {
-		return headerAjusting;
-	}
-
-	public void setHeaderAjusting(boolean aValue) {
-		headerAjusting = aValue;
-	}
-
-	public void applyHeader() {
-		if (!headerAjusting) {
-			ThemedHeaderOrFooterBuilder<JavaScriptObject> leftBuilder = (ThemedHeaderOrFooterBuilder<JavaScriptObject>) headerLeft.getHeaderBuilder();
-			ThemedHeaderOrFooterBuilder<JavaScriptObject> rightBuilder = (ThemedHeaderOrFooterBuilder<JavaScriptObject>) headerRight.getHeaderBuilder();
-			List<HeaderNode> leftHeader = HeaderSplitter.split(header, 0, frozenColumns);
-			leftBuilder.setHeaderNodes(leftHeader);
-			List<HeaderNode> rightHeader = HeaderSplitter.split(header, frozenColumns, getDataColumnCount());
-			rightBuilder.setHeaderNodes(rightHeader);
-			redrawHeaders();
+	@Override
+	public void setFrozenColumns(int aValue) {
+		if (aValue >= 0 && frozenColumns != aValue) {
+			if (aValue >= 0) {
+				frozenColumns = aValue;
+				if (autoRefreshHeader && getDataColumnCount() > 0 && aValue <= getDataColumnCount()) {
+					applyColumns();
+				}
+			}
 		}
+	}
+
+	protected boolean autoRefreshHeader = true;
+
+	public boolean isAutoRefreshHeader() {
+		return autoRefreshHeader;
+	}
+
+	public void setAutoRefreshHeader(boolean aValue) {
+		autoRefreshHeader = aValue;
+	}
+
+	public void applyColumns() {
+		List<HeaderNode<JavaScriptObject>> leaves = new ArrayList<>();
+		HeaderAnalyzer.achieveLeaves(header, leaves);
+		for (HeaderNode<JavaScriptObject> leaf : leaves) {
+			Header<String> header = leaf.getHeader();
+			ModelColumn column = (ModelColumn) leaf.getColumn();
+			addColumn(column, column.getWidth()+"px", header, null, column.isVisible());
+		}		
+		ThemedHeaderOrFooterBuilder<JavaScriptObject> leftBuilder = (ThemedHeaderOrFooterBuilder<JavaScriptObject>) headerLeft.getHeaderBuilder();
+		ThemedHeaderOrFooterBuilder<JavaScriptObject> rightBuilder = (ThemedHeaderOrFooterBuilder<JavaScriptObject>) headerRight.getHeaderBuilder();
+		List<HeaderNode<JavaScriptObject>> leftHeader = HeaderSplitter.split(header, 0, frozenColumns);
+		leftBuilder.setHeaderNodes(leftHeader);
+		List<HeaderNode<JavaScriptObject>> rightHeader = HeaderSplitter.split(header, frozenColumns, getDataColumnCount());
+		rightBuilder.setHeaderNodes(rightHeader);
+		redrawHeaders();
 	}
 
 	@Override
@@ -510,14 +511,18 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		published = aValue != null ? aValue.<PublishedComponent> cast() : null;
 		if (published != null) {
 			publish(this, published);
-			for (int i = 0; i < getDataColumnCount(); i++) {
-				Column<JavaScriptObject, ?> col = getDataColumn(i);
-				ModelGridColumnFacade fCol = (ModelGridColumnFacade) col;
-				if (fCol.getJsName() != null && !fCol.getJsName().isEmpty() && col instanceof HasPublished) {
-					HasPublished pCol = (HasPublished) col;
-					published.<JsObject> cast().inject(fCol.getJsName(), pCol.getPublished());
-				}
+			publishColumnNodes(header);
+		}
+	}
+
+	protected void publishColumnNodes(List<HeaderNode<JavaScriptObject>> aNodes) {
+		for (HeaderNode<JavaScriptObject> node : aNodes) {
+			String jsName = ((HasJsName) node).getJsName();
+			if (jsName != null && !jsName.isEmpty()) {
+				HasPublished pCol = (HasPublished) node;
+				published.<JsObject> cast().inject(jsName, pCol.getPublished());
 			}
+			publishColumnNodes(node.getChildren());
 		}
 	}
 
@@ -726,13 +731,11 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 			for (int i = 0; i < getDataColumnCount(); i++) {
 				Column<JavaScriptObject, ?> column = getDataColumn(i);
 				String factWidth = i < frozenColumns ? scrollableLeft.getColumnWidth(column, false) : scrollableRight.getColumnWidth(column, false);
-				ModelColumn<?> mCol = (ModelColumn<?>) column;
+				ModelColumn mCol = (ModelColumn) column;
 				if (mCol.isVisible()) {
 					double colWidth = mCol.getDesignedWidth();
 					commonWidth += colWidth;
-					if (!mCol.isFixed()) {
-						weightedWidth += colWidth;
-					}
+					weightedWidth += colWidth;
 				}
 			}
 			double delta = (scrollableLeftContainer.getElement().getClientWidth() + scrollableRightContainer.getElement().getClientWidth()) - commonWidth;
@@ -740,8 +743,8 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 				delta = 0;
 			for (int i = 0; i < getDataColumnCount(); i++) {
 				Column<JavaScriptObject, ?> column = getDataColumn(i);
-				ModelColumn<?> mCol = (ModelColumn<?>) column;
-				if (mCol.isVisible() && !mCol.isFixed()) {
+				ModelColumn mCol = (ModelColumn) column;
+				if (mCol.isVisible()) {
 					double colWidth = mCol.getDesignedWidth();
 					double newFloatWidth = colWidth + colWidth / weightedWidth * delta;
 					setColumnWidth(mCol, newFloatWidth, Style.Unit.PX);

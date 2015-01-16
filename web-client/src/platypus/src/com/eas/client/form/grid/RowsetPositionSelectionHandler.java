@@ -3,7 +3,6 @@ package com.eas.client.form.grid;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.eas.client.form.factories.ModelGridFactory;
 import com.eas.client.form.grid.selection.HasSelectionLead;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -28,7 +27,7 @@ public class RowsetPositionSelectionHandler implements SelectionChangeEvent.Hand
 				if (lead != null)
 					scrollTo(rowsSource, lead);
 			} catch (Exception e) {
-				Logger.getLogger(ModelGridFactory.class.getName()).log(Level.SEVERE, e.getMessage());
+				Logger.getLogger(RowsetPositionSelectionHandler.class.getName()).log(Level.SEVERE, e.getMessage());
 			}
 		}
 	}

@@ -34,6 +34,8 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 	protected String field;
 	protected ModelDecoratorBox<Object> editor;
 	protected ModelGrid grid;
+	protected double minWidth = 0;
+	protected double maxWidth = Integer.MAX_VALUE / 2;
 	protected double designedWidth;
 	protected double widthDelta;
 	protected boolean resizable = true;
@@ -119,6 +121,22 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 			// comparator = new RowsComparator(new
 			// SortingCriterion(columnModelRef.getColIndex(), true));
 		}
+	}
+
+	public double getMinWidth() {
+		return minWidth;
+	}
+
+	public void setMinWidth(double aValue) {
+		minWidth = aValue;
+	}
+
+	public double getMaxWidth() {
+		return maxWidth;
+	}
+
+	public void setMaxWidth(double aValue) {
+		maxWidth = aValue;
 	}
 
 	@Override
@@ -266,7 +284,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 				PublishedCell cell = Publisher.publishCell(data, aDisplay);
 				JsArrayMixed args = JavaScriptObject.createArray().cast();
 				args.push(JsEvents.publishOnRenderEvent(aThis, null, null, renderedRow, cell));
-				aOnRender.<JsObject>cast().apply(aThis, args);
+				aOnRender.<JsObject> cast().apply(aThis, args);
 				return cell;
 			}
 		}

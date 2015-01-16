@@ -14,6 +14,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.HasName;
 import com.google.gwt.user.client.ui.HasValue;
+import com.google.gwt.user.client.ui.UIObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,7 +25,7 @@ import java.util.Map;
  * 
  * @author mg
  */
-public class RadioGroup implements ValueChangeHandler<Boolean> {
+public class RadioGroup extends UIObject implements ValueChangeHandler<Boolean> {
 
 	protected Map<HasValue<Boolean>, HandlerRegistration> groupedHandlers = new HashMap<>();
 	protected List<HasValue<Boolean>> grouped = new ArrayList<>();

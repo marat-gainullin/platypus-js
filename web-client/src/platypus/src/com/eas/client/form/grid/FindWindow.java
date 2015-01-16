@@ -2,9 +2,9 @@ package com.eas.client.form.grid;
 
 import java.util.List;
 
+import com.bearsoft.gwt.ui.Orientation;
 import com.bearsoft.gwt.ui.containers.AnchorsPanel;
-import com.bearsoft.gwt.ui.containers.HorizontalBoxPanel;
-import com.bearsoft.gwt.ui.containers.VerticalBoxPanel;
+import com.bearsoft.gwt.ui.containers.BoxPanel;
 import com.bearsoft.gwt.ui.containers.window.ToolsCaption;
 import com.bearsoft.gwt.ui.containers.window.WindowPanel;
 import com.bearsoft.gwt.ui.containers.window.WindowPopupPanel;
@@ -103,10 +103,11 @@ public class FindWindow extends WindowPanel {
 			}
 		});
 
-		VerticalBoxPanel findBox = new VerticalBoxPanel();
+		BoxPanel findBox = new BoxPanel();
+		findBox.setOrientation(Orientation.VERTICAL);
 		findBox.setVgap(10);
 
-		HorizontalBoxPanel settingsBox = new HorizontalBoxPanel();
+		BoxPanel settingsBox = new BoxPanel();
 		settingsBox.setHgap(10);
 		settingsBox.add(checkCase);
 		settingsBox.add(checkWhole);

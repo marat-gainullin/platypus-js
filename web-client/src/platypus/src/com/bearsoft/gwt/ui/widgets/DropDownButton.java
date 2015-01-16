@@ -62,6 +62,10 @@ public class DropDownButton extends Composite implements HasText, HasHTML, Requi
 	protected SimplePanel chevron = new SimplePanel();
 	protected MenuBar menu;
 
+	public DropDownButton() {
+		this("", false, null);
+	}
+	
 	public DropDownButton(String aTitle, boolean asHtml, MenuBar aMenu) {
 		this(aTitle, asHtml, null, aMenu);
 	}

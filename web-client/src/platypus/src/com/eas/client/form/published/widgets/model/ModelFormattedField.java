@@ -55,15 +55,15 @@ public class ModelFormattedField extends ModelDecoratorBox<Object> implements Ha
 	}
 
 	public String getFormat() {
-		return ((FormattedObjectBox) decorated).getPattern();
+		return ((FormattedObjectBox) decorated).getFormat();
 	}
 
 	public void setFormat(String aValue) throws ParseException {
-		((FormattedObjectBox) decorated).setPattern(aValue);
+		((FormattedObjectBox) decorated).setFormat(aValue);
 	}
 
-	public void setFormatType(int aFormatType, String aPattern) throws ParseException {
-		((FormattedObjectBox) decorated).setFormatType(aFormatType, aPattern);
+	public void setValueType(int aValue) throws ParseException {
+		((FormattedObjectBox) decorated).setValueType(aValue);
 	}
 
 	public String getText() {
@@ -77,14 +77,6 @@ public class ModelFormattedField extends ModelDecoratorBox<Object> implements Ha
 		} finally {
 			settingValue = false;
 		}
-	}
-
-	public String getPattern() {
-		return ((FormattedObjectBox) decorated).getPattern();
-	}
-
-	public void setPattern(String aPattern) throws ParseException {
-		((FormattedObjectBox) decorated).setPattern(aPattern);
 	}
 
 	@Override
@@ -133,10 +125,10 @@ public class ModelFormattedField extends ModelDecoratorBox<Object> implements Ha
 		});
 		Object.defineProperty(aPublished, "format", {
 			get : function() {
-				return aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::getPattern()();
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::getFormat()();
 			},
 			set : function(aValue) {
-				aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::setPattern(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
+				aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::setFormat(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
 			}
 		});
 	}-*/;

@@ -1225,7 +1225,7 @@ public class FormFactory {
             ScriptColor foreground = new ScriptColor(anElement.getAttribute("foreground"));
             aNode.setForeground(foreground);
         }
-        aNode.setEditable(XmlDomUtils.readBooleanAttribute(anElement, "editable", Boolean.TRUE));
+        aNode.setReadonly(XmlDomUtils.readBooleanAttribute(anElement, "readonly", Boolean.FALSE));
         aNode.setEnabled(XmlDomUtils.readBooleanAttribute(anElement, "enabled", Boolean.TRUE));
         Font font = readFont(anElement);
         if (font != null) {

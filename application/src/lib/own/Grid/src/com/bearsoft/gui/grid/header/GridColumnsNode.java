@@ -457,14 +457,6 @@ public class GridColumnsNode implements ColumnNodesContainer {
         readonly = aValue;
     }
 
-    public boolean isEditable() {
-        return !readonly;
-    }
-
-    public void setEditable(boolean aValue) {
-        readonly = !aValue;
-    }
-
     public boolean isEnabled() {
         return enabled;
     }

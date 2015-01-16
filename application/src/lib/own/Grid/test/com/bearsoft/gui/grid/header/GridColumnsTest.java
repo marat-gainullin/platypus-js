@@ -34,7 +34,7 @@ public class GridColumnsTest {
         col.assign(col1);
         assertTrue(col.isEqual(col1));
 
-        col.setEditable(!col.isEditable());
+        col.setReadonly(col.isReadonly());
         assertFalse(col.isEqual(col1));
         col.assign(col1);
         assertTrue(col.isEqual(col1));

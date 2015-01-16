@@ -346,6 +346,13 @@ public class Utils {
 			return aDefValue;
 	}
 
+	public static double getDoubleAttribute(Element aTag, String aName, double aDefValue) throws Exception {
+		if (aTag.hasAttribute(aName))
+			return Double.valueOf(aTag.getAttribute(aName));
+		else
+			return aDefValue;
+	}
+
 	public static int javaArrayLength(Object[] aValue) {
 		return aValue.length;
 	}

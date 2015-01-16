@@ -5,13 +5,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class HeaderSplitter {
+public class HeaderSplitter<T> {
 
     // settings
     protected int minLeave;
     protected int maxLeave;
     // processing
-    protected List<HeaderNode> splittedLeaves = new ArrayList<>();
+    protected List<HeaderNode<T>> splittedLeaves = new ArrayList<>();
     protected int leaveIndex = -1;
 
     protected HeaderSplitter(int aMinLeave, int aMaxLeave) {
@@ -20,18 +20,18 @@ public class HeaderSplitter {
         maxLeave = aMaxLeave;
     }
 
-    public static List<HeaderNode> split(List<HeaderNode> toBeSplitted, int aMinLeave, int aMaxLeave) {
-        HeaderSplitter splitter = new HeaderSplitter(aMinLeave, aMaxLeave);
+    public static <T> List<HeaderNode<T>> split(List<HeaderNode<T>> toBeSplitted, int aMinLeave, int aMaxLeave) {
+        HeaderSplitter<T> splitter = new HeaderSplitter<T>(aMinLeave, aMaxLeave);
         splitter.process(toBeSplitted, null);
         return splitter.toRoots();
     }
 
-    protected List<HeaderNode> toRoots() {
-        List<HeaderNode> res = new ArrayList<>();
-        Set<HeaderNode> met = new HashSet<>();
+    protected List<HeaderNode<T>> toRoots() {
+        List<HeaderNode<T>> res = new ArrayList<>();
+        Set<HeaderNode<T>> met = new HashSet<>();
         for (int i = 0; i < splittedLeaves.size(); i++) {
-        	HeaderNode leaf = splittedLeaves.get(i);
-        	HeaderNode parent = leaf;
+        	HeaderNode<T> leaf = splittedLeaves.get(i);
+        	HeaderNode<T> parent = leaf;
             while (parent.getParent() != null) {
                 parent = parent.getParent();
             }
@@ -43,12 +43,11 @@ public class HeaderSplitter {
         return res;
     }
 
-    protected boolean process(List<HeaderNode> toBeSplitted, HeaderNode aClonedParent) {
+    protected boolean process(List<HeaderNode<T>> toBeSplitted, HeaderNode<T> aClonedParent) {
         boolean res = false;
         for (int i = 0; i < toBeSplitted.size(); i++) {
-        	HeaderNode n = toBeSplitted.get(i);
-        	HeaderNode nc = n.lightCopy();
-            nc.setTableColumn(n.getTableColumn());
+        	HeaderNode<T> n = toBeSplitted.get(i);
+        	HeaderNode<T> nc = n.lightCopy();
             nc.setStyle(n.getStyle());
             if (n.getChildren().isEmpty()) {
                 leaveIndex++;

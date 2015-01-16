@@ -10,12 +10,11 @@ import com.eas.client.form.published.containers.ButtonGroup;
 import com.eas.client.form.published.containers.CardPane;
 import com.eas.client.form.published.containers.FlowPane;
 import com.eas.client.form.published.containers.GridPane;
-import com.eas.client.form.published.containers.HBoxPane;
+import com.eas.client.form.published.containers.BoxPane;
 import com.eas.client.form.published.containers.ScrollPane;
 import com.eas.client.form.published.containers.SplitPane;
 import com.eas.client.form.published.containers.TabbedPane;
 import com.eas.client.form.published.containers.ToolBar;
-import com.eas.client.form.published.containers.VBoxPane;
 import com.eas.client.form.published.menu.PlatypusMenu;
 import com.eas.client.form.published.menu.PlatypusMenuBar;
 import com.eas.client.form.published.menu.PlatypusMenuItemCheckBox;
@@ -197,11 +196,7 @@ public class Publisher {
 		return new $wnd.P.SplitPane(null, aComponent);
 	}-*/;
 
-	public native static PublishedComponent publish(VBoxPane aComponent)/*-{
-		return new $wnd.P.BoxPane($wnd.P.Orientation.VERTICAL, null, null, aComponent);
-	}-*/;
-
-	public native static PublishedComponent publish(HBoxPane aComponent)/*-{
+	public native static PublishedComponent publish(BoxPane aComponent)/*-{
 		return new $wnd.P.BoxPane($wnd.P.Orientation.HORIZONTAL, null, null, aComponent);
 	}-*/;
 

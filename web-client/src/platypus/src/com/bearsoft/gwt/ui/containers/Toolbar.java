@@ -33,7 +33,7 @@ import java.util.Map;
  */
 public class Toolbar extends SimplePanel implements IndexedPanel, ProvidesResize, RequiresResize {
 
-    protected HorizontalBoxPanel content = new HorizontalBoxPanel();
+    protected BoxPanel content = new BoxPanel();
     protected VerticalPanel altContent = new VerticalPanel();
     protected SimplePanel chevron = new SimplePanel();
 

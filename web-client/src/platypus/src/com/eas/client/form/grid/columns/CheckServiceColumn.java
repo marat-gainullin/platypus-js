@@ -2,7 +2,7 @@ package com.eas.client.form.grid.columns;
 
 import com.google.gwt.core.client.JavaScriptObject;
 
-public class CheckServiceColumn extends ModelColumn{
+public class CheckServiceColumn extends ModelColumn {
 
 	public CheckServiceColumn() {
 	    super();
