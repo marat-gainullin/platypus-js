@@ -373,6 +373,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     protected TabularRowsSorter<? extends TableModel> rowSorter;
     protected Set<JSObject> processedRows = new HashSet<>();
     protected JSObject data;
+    protected String field;
     // tree info
     protected String parentField;
     protected String childrenField;
@@ -1074,7 +1075,22 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         if (data != null ? !data.equals(aValue) : aValue != null) {
             data = aValue;
             if (rowsModel != null) {
-                rowsModel.setElements(data);
+                rowsModel.setData(data);
+            }
+        }
+    }
+
+    @ScriptFunction
+    @Designable(category = "model")
+    public String getField() {
+        return field;
+    }
+
+    public void setField(String aValue) {
+        if(field == null ? aValue != null : !field.equals(aValue)){
+            field = aValue;
+            if (rowsModel != null) {
+                rowsModel.setField(field);
             }
         }
     }
@@ -1098,14 +1114,14 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     protected void applyRows() {
         if (rowsModel != null) {
-            rowsModel.setElements(null);
+            rowsModel.setData(null);
         }
         if (isTreeConfigured()) {
-            rowsModel = new ArrayTreedModel(columnModel, data, parentField, childrenField, generalOnRender);
+            rowsModel = new ArrayTreedModel(columnModel, data, field, parentField, childrenField, generalOnRender);
             deepModel = new TableFront2TreedModel<>((ArrayTreedModel) rowsModel);
             rowSorter = new TreedRowsSorter<>((TableFront2TreedModel<JSObject>) deepModel, rowsSelectionModel);
         } else {
-            rowsModel = new ArrayTableModel(columnModel, data, generalOnRender);
+            rowsModel = new ArrayTableModel(columnModel, data, field, generalOnRender);
             deepModel = (TableModel) rowsModel;
             rowSorter = new TabularRowsSorter<>((ArrayTableModel) deepModel, rowsSelectionModel);
         }
@@ -1749,7 +1765,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     }
 
     protected JSObject getCurrentRow() {
-        Object oCursor = rowsModel.getElements().getMember("cursor");
+        Object oCursor = rowsModel.getData().getMember("cursor");
         return oCursor instanceof JSObject ? (JSObject) oCursor : null;
     }
 

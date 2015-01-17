@@ -25,11 +25,7 @@ public class PropertyChangeListenerJSAdapter implements PropertyChangeListener {
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        JSObject jsEvent = ScriptUtils.makeObj();
-        jsEvent.setMember("oldValue", ScriptUtils.toJs(evt.getOldValue()));
-        jsEvent.setMember("newValue", ScriptUtils.toJs(evt.getNewValue()));
-        jsEvent.setMember("propertyName", ScriptUtils.toJs(evt.getPropertyName()));
-        handler.call(null, new Object[]{jsEvent});
+        handler.call(null, new Object[]{evt});
     }
 
 }

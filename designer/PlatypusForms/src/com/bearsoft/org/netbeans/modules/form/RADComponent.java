@@ -451,6 +451,9 @@ public abstract class RADComponent<C> {
      * if there is no property of given name
      */
     public RADProperty<?>[] getBeanProperties(String[] propNames) {
+        if (nameToProperty == null) {
+            createBeanProperties();
+        }
         final Set<String> names = new HashSet<>(Arrays.asList(propNames));
         return nameToProperty.values().stream().filter((RADProperty<?> aProp) -> {
             return names.contains(aProp.getName());

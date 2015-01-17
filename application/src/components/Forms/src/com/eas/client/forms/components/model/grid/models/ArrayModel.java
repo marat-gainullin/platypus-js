@@ -23,25 +23,37 @@ public abstract class ArrayModel {
     public static final String COLUMN_MISSING_MSG = "Model column missing";
     protected TableColumnModel columns;
     protected JSObject generalOnRender;
-    protected JSObject elements;
+    protected JSObject data;
+    protected String field;
 
-    public ArrayModel(TableColumnModel aColumns, JSObject aElements, JSObject aGeneralOnRender) {
+    public ArrayModel(TableColumnModel aColumns, JSObject aData, String aField, JSObject aGeneralOnRender) {
         super();
         columns = aColumns;
-        elements = aElements;
+        data = aData;
+        field = aField;
         generalOnRender = aGeneralOnRender;
     }
 
-    public JSObject getElements() {
-        return elements;
+    public JSObject getData() {
+        return data;
     }
 
-    public void setElements(JSObject aValue) {
-        if (elements != null ? !elements.equals(aValue) : aValue != null) {
-            // TODO: remove luisteners from old object
-            elements = aValue;
+    public void setData(JSObject aValue) {
+        if (data != null ? !data.equals(aValue) : aValue != null) {
+            // TODO: remove listeners from old object
+            data = aValue;
             // TODO: add listeners to new object
             fireElementsChanged();
+        }
+    }
+
+    public String getField() {
+        return field;
+    }
+
+    public void setField(String aValue) {
+        if (field == null ? aValue != null : !field.equals(aValue)) {
+            field = aValue;
         }
     }
 
@@ -92,28 +104,30 @@ public abstract class ArrayModel {
     public abstract void fireColumnFieldChanged(ModelColumn aColumn);
 
     /**
-     * Fires an event, that tells all listeners that elements structure has been changed.
+     * Fires an event, that tells all listeners that elements structure has been
+     * changed.
      */
     public abstract void fireElementsChanged();
-    
+
     /**
      * Fires an event, that tells all listeners that data in all elements have
      * been changed, but elements structure havn't been changed.
      */
     public abstract void fireElementsDataChanged();
-/*
-    private CellData complementCellData(final CellData aCellData, final JSObject anElement, final ModelColumn aColumn) throws Exception {
-        JSObject lOnRender = aColumn.getOnRender();
-        if (lOnRender == null) {
-            lOnRender = generalOnRender;
-        }
-        if (lOnRender != null) {
-            CellRenderEvent event = new CellRenderEvent(aColumn, aColumn, aCellData, anElement);
-            lOnRender.call(aColumn.getPublished(), new Object[]{event.getPublished()});
-        }
-        return aCellData;
-    }
-*/
+    /*
+     private CellData complementCellData(final CellData aCellData, final JSObject anElement, final ModelColumn aColumn) throws Exception {
+     JSObject lOnRender = aColumn.getOnRender();
+     if (lOnRender == null) {
+     lOnRender = generalOnRender;
+     }
+     if (lOnRender != null) {
+     CellRenderEvent event = new CellRenderEvent(aColumn, aColumn, aCellData, anElement);
+     lOnRender.call(aColumn.getPublished(), new Object[]{event.getPublished()});
+     }
+     return aCellData;
+     }
+     */
+
     public JSObject getGeneralOnRender() {
         return generalOnRender;
     }

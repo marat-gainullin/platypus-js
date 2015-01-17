@@ -446,22 +446,19 @@
              */
             P.FlowPane.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
+        Object.defineProperty(this, "count", {
             get: function() {
-                var value = delegate.onActionPerformed;
+                var value = delegate.count;
                 return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
             }
         });
         if(!P.FlowPane){
             /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
+             * Gets the number of components in this panel.
+             * @property count
              * @memberOf FlowPane
              */
-            P.FlowPane.prototype.onActionPerformed = {};
+            P.FlowPane.prototype.count = 0;
         }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
@@ -480,19 +477,22 @@
              */
             P.FlowPane.prototype.onKeyReleased = {};
         }
-        Object.defineProperty(this, "count", {
+        Object.defineProperty(this, "onActionPerformed", {
             get: function() {
-                var value = delegate.count;
+                var value = delegate.onActionPerformed;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
             }
         });
         if(!P.FlowPane){
             /**
-             * Gets the number of components in this panel.
-             * @property count
+             * Main action performed event handler function.
+             * @property onActionPerformed
              * @memberOf FlowPane
              */
-            P.FlowPane.prototype.count = 0;
+            P.FlowPane.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -767,17 +767,6 @@
         };
 
         /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf FlowPane
-         */
-        P.FlowPane.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Gets the container's n-th component.
          * @param index the component's index in the container
          * @return the child component
@@ -787,6 +776,17 @@
         P.FlowPane.prototype.child = function(index) {
             var delegate = this.unwrap();
             var value = delegate.child(P.boxAsJava(index));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Tries to acquire focus for this component.
+         * @method focus
+         * @memberOf FlowPane
+         */
+        P.FlowPane.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
             return P.boxAsJs(value);
         };
 

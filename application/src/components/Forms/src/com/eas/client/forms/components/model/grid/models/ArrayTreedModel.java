@@ -32,8 +32,8 @@ public class ArrayTreedModel extends ArrayModel implements TreedModel<JSObject> 
     protected String parentField;
     protected String childrenField;
 
-    public ArrayTreedModel(TableColumnModel aColumns, JSObject aElements, String aParentField, String aChildrenField, JSObject aOnRender) {
-        super(aColumns, aElements, aOnRender);
+    public ArrayTreedModel(TableColumnModel aColumns, JSObject aData, String aField, String aParentField, String aChildrenField, JSObject aOnRender) {
+        super(aColumns, aData, aField, aOnRender);
         parentField = aParentField;
         // TODO: move to ModelGrid.setData() when refactored events listening
         //TreedRowsRowsetListener rowsRowsetListener = new TreedRowsRowsetListener(this, rowsRowset);

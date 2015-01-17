@@ -13,7 +13,14 @@ import jdk.nashorn.api.scripting.AbstractJSObject;
  */
 public class InstanceJSObject extends AbstractJSObject {
 
-    public static final Object fakeMember = new Object();
+    public static final Object fakeMember = new Object(){
+
+        @Override
+        public String toString() {
+            return "";
+        }
+    
+    };
 
     public InstanceJSObject() {
         super();

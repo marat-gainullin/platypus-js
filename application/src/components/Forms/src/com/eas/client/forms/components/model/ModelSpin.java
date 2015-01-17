@@ -18,6 +18,7 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JSpinner.NumberEditor;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.internal.runtime.JSType;
 
@@ -36,6 +37,7 @@ public class ModelSpin extends ModelComponentDecorator<VSpinner, Double> impleme
     public ModelSpin() {
         super();
         setDecorated(new VSpinner());
+        setBackground((new JTextField()).getBackground());
     }
 
     @ScriptFunction(name = "value", jsDoc = JS_VALUE_JSDOC)

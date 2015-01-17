@@ -73,23 +73,6 @@
              */
             P.ModelGridColumn.prototype.resizable = true;
         }
-        Object.defineProperty(this, "editable", {
-            get: function() {
-                var value = delegate.editable;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.editable = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property editable
-             * @memberOf ModelGridColumn
-             */
-            P.ModelGridColumn.prototype.editable = true;
-        }
         Object.defineProperty(this, "minWidth", {
             get: function() {
                 var value = delegate.minWidth;
@@ -192,6 +175,23 @@
              */
             P.ModelGridColumn.prototype.field = '';
         }
+        Object.defineProperty(this, "readonly", {
+            get: function() {
+                var value = delegate.readonly;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.readonly = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelGridColumn){
+            /**
+             * Generated property jsDoc.
+             * @property readonly
+             * @memberOf ModelGridColumn
+             */
+            P.ModelGridColumn.prototype.readonly = true;
+        }
         Object.defineProperty(this, "background", {
             get: function() {
                 var value = delegate.background;
@@ -260,12 +260,12 @@
     };
         /**
          *
-         * @method addColumnNode
+         * @method insertColumnNode
          * @memberOf ModelGridColumn
          */
-        P.ModelGridColumn.prototype.addColumnNode = function(node) {
+        P.ModelGridColumn.prototype.insertColumnNode = function(position, node) {
             var delegate = this.unwrap();
-            var value = delegate.addColumnNode(P.boxAsJava(node));
+            var value = delegate.insertColumnNode(P.boxAsJava(position), P.boxAsJava(node));
             return P.boxAsJs(value);
         };
 
@@ -282,12 +282,12 @@
 
         /**
          *
-         * @method insertColumnNode
+         * @method addColumnNode
          * @memberOf ModelGridColumn
          */
-        P.ModelGridColumn.prototype.insertColumnNode = function(position, node) {
+        P.ModelGridColumn.prototype.addColumnNode = function(node) {
             var delegate = this.unwrap();
-            var value = delegate.insertColumnNode(P.boxAsJava(position), P.boxAsJava(node));
+            var value = delegate.addColumnNode(P.boxAsJava(node));
             return P.boxAsJs(value);
         };
 

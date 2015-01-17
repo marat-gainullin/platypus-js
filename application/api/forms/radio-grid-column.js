@@ -73,23 +73,6 @@
              */
             P.RadioGridColumn.prototype.resizable = true;
         }
-        Object.defineProperty(this, "editable", {
-            get: function() {
-                var value = delegate.editable;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.editable = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.RadioGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property editable
-             * @memberOf RadioGridColumn
-             */
-            P.RadioGridColumn.prototype.editable = true;
-        }
         Object.defineProperty(this, "minWidth", {
             get: function() {
                 var value = delegate.minWidth;
@@ -174,6 +157,23 @@
              * @memberOf RadioGridColumn
              */
             P.RadioGridColumn.prototype.movable = true;
+        }
+        Object.defineProperty(this, "readonly", {
+            get: function() {
+                var value = delegate.readonly;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.readonly = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.RadioGridColumn){
+            /**
+             * Generated property jsDoc.
+             * @property readonly
+             * @memberOf RadioGridColumn
+             */
+            P.RadioGridColumn.prototype.readonly = true;
         }
         Object.defineProperty(this, "background", {
             get: function() {

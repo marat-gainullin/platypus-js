@@ -446,22 +446,19 @@
              */
             P.CardPane.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
+        Object.defineProperty(this, "count", {
             get: function() {
-                var value = delegate.onActionPerformed;
+                var value = delegate.count;
                 return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
             }
         });
         if(!P.CardPane){
             /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
+             * Gets the number of components in this panel.
+             * @property count
              * @memberOf CardPane
              */
-            P.CardPane.prototype.onActionPerformed = {};
+            P.CardPane.prototype.count = 0;
         }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
@@ -480,19 +477,22 @@
              */
             P.CardPane.prototype.onKeyReleased = {};
         }
-        Object.defineProperty(this, "count", {
+        Object.defineProperty(this, "onActionPerformed", {
             get: function() {
-                var value = delegate.count;
+                var value = delegate.onActionPerformed;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
             }
         });
         if(!P.CardPane){
             /**
-             * Gets the number of components in this panel.
-             * @property count
+             * Main action performed event handler function.
+             * @property onActionPerformed
              * @memberOf CardPane
              */
-            P.CardPane.prototype.count = 0;
+            P.CardPane.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -545,23 +545,6 @@
              */
             P.CardPane.prototype.onMouseWheelMoved = {};
         }
-        Object.defineProperty(this, "onItemSelected", {
-            get: function() {
-                var value = delegate.onItemSelected;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onItemSelected = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.CardPane){
-            /**
-             * Event that is fired when one of the components is selected in this card pane.
-             * @property onItemSelected
-             * @memberOf CardPane
-             */
-            P.CardPane.prototype.onItemSelected = {};
-        }
         Object.defineProperty(this, "onComponentRemoved", {
             get: function() {
                 var value = delegate.onComponentRemoved;
@@ -578,6 +561,23 @@
              * @memberOf CardPane
              */
             P.CardPane.prototype.onComponentRemoved = {};
+        }
+        Object.defineProperty(this, "onItemSelected", {
+            get: function() {
+                var value = delegate.onItemSelected;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onItemSelected = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.CardPane){
+            /**
+             * Event that is fired when one of the components is selected in this card pane.
+             * @property onItemSelected
+             * @memberOf CardPane
+             */
+            P.CardPane.prototype.onItemSelected = {};
         }
         Object.defineProperty(this, "component", {
             get: function() {
@@ -797,17 +797,6 @@
         };
 
         /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf CardPane
-         */
-        P.CardPane.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Gets child component, associated with the specified card.
          * @param cardName Name of the card.
          * @return the child component.
@@ -817,6 +806,17 @@
         P.CardPane.prototype.child = function(cardName) {
             var delegate = this.unwrap();
             var value = delegate.child(P.boxAsJava(cardName));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Tries to acquire focus for this component.
+         * @method focus
+         * @memberOf CardPane
+         */
+        P.CardPane.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
             return P.boxAsJs(value);
         };
 

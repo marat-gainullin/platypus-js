@@ -4,9 +4,9 @@
  */
 package com.eas.client.model.gui.selectors;
 
+import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.exceptions.InvalidColIndexException;
-import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
 import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.ClientConstants;
 import com.eas.client.DatabaseMdCache;
@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 import javax.swing.ListModel;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -105,16 +106,19 @@ public class DbTablesListModel implements ListModel<String> {
 
     @Override
     public String getElementAt(int index) {
-        try {
-            if (tablesRowset.absolute(index + 1)) {
-                String schemaName = tablesRowset.getString(schemaColIndex);
-                String tableName = tablesRowset.getString(tableColIndex);
+        if (index >= 0 && index < getSize()) {
+            try {
+                Row r = tablesRowset.getRow(index + 1);
+                String schemaName = (String) r.getColumnObject(schemaColIndex);
+                String tableName = (String) r.getColumnObject(tableColIndex);
                 return schemaName + "." + tableName;
+            } catch (InvalidColIndexException ex) {
+                Exceptions.printStackTrace(ex);
+                return null;
             }
-        } catch (InvalidCursorPositionException | InvalidColIndexException ex) {
-            Logger.getLogger(DbTablesListModel.class.getName()).log(Level.SEVERE, null, ex);
+        } else {
+            return null;
         }
-        return null;
     }
 
     @Override
@@ -146,20 +150,18 @@ public class DbTablesListModel implements ListModel<String> {
         if (tablesRowset != null && pattern != null && !pattern.isEmpty()) {
             int i = -1;
             try {
-                if (tablesRowset.first()) {
-                    do {
-                        i++;
-                        String schemaName = tablesRowset.getString(schemaColIndex);
-                        String tableName = tablesRowset.getString(tableColIndex);
-                        if (schemaName != null && !schemaName.isEmpty()) {
-                            tableName = schemaName + "." + tableName;
-                        }
-                        if (pattern.toLowerCase().equalsIgnoreCase(tableName.toLowerCase())) {
-                            return i;
-                        }
-                    } while (tablesRowset.next());
+                for (Row r : tablesRowset.getCurrent()) {
+                    i++;
+                    String schemaName = (String) r.getColumnObject(schemaColIndex);
+                    String tableName = (String) r.getColumnObject(tableColIndex);
+                    if (schemaName != null && !schemaName.isEmpty()) {
+                        tableName = schemaName + "." + tableName;
+                    }
+                    if (pattern.toLowerCase().equalsIgnoreCase(tableName.toLowerCase())) {
+                        return i;
+                    }
                 }
-            } catch (InvalidCursorPositionException | InvalidColIndexException ex) {
+            } catch (InvalidColIndexException ex) {
                 Logger.getLogger(DbTablesListModel.class.getName()).log(Level.SEVERE, null, ex);
             }
         }

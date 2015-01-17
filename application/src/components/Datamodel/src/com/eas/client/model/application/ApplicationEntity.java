@@ -34,6 +34,9 @@ import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
+import com.eas.util.ListenerRegistration;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -71,6 +74,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     //
     protected JSObject published;
     protected Rowset rowset;
+    protected ListenerRegistration cursorListener;
     protected Locator locator;
     protected boolean valid;
     protected Future<Void> pending;
@@ -1027,8 +1031,8 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
 
     @Override
     public void rowsetScrolled(RowsetScrollEvent aEvent) {
-        Rowset easRs = aEvent.getRowset();
-        if (aEvent.getNewRowIndex() >= 0 && aEvent.getNewRowIndex() <= easRs.size() + 1) {
+        resignOnCursor();
+        if (aEvent.getNewRowIndex() >= 0 && aEvent.getNewRowIndex() <= rowset.size() + 1) {
             try {
                 // call script method
                 executeScriptEvent(onScrolled, new CursorPositionChangedEvent(this, aEvent.getOldRowIndex(), aEvent.getNewRowIndex()));
@@ -1072,6 +1076,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     @Override
     public void rowInserted(final RowsetInsertEvent event) {
         try {
+            resignOnCursor();
             // call script method
             executeScriptEvent(onInserted, new EntityInstanceInsertEvent(this, event.getRow()));
             internalExecuteChildren(false);
@@ -1083,6 +1088,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     @Override
     public void rowDeleted(final RowsetDeleteEvent event) {
         try {
+            resignOnCursor();
             // call script method
             executeScriptEvent(onDeleted, new EntityInstanceDeleteEvent(this, event.getRow()));
             internalExecuteChildren(false);
@@ -1094,6 +1100,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     @Override
     public void rowsetFiltered(RowsetFilterEvent event) {
         try {
+            resignOnCursor();
             // call script method
             executeScriptEvent(onFiltered, new PublishedSourcedEvent(this));
             internalExecuteChildren(false);
@@ -1105,6 +1112,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     @Override
     public void rowsetSorted(RowsetSortEvent event) {
         try {
+            resignOnCursor();
             // call script method
             executeScriptEvent(onFiltered, new PublishedSourcedEvent(this));
             internalExecuteChildren(false);
@@ -1121,6 +1129,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     public void rowsetRequeried(RowsetRequeryEvent event) {
         try {
             assert rowset != null;
+            resignOnCursor();
             filterRowset();
             // call script method
             executeScriptEvent(onRequeried, new PublishedSourcedEvent(this));
@@ -1134,6 +1143,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     public void rowsetNextPageFetched(RowsetNextPageEvent event) {
         try {
             assert rowset != null;
+            resignOnCursor();
             filterRowset();
             // call script method
             executeScriptEvent(onRequeried, new PublishedSourcedEvent(this));
@@ -1144,15 +1154,23 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     }
 
     @Override
-    public void rowsetNetError(RowsetNetErrorEvent rnee) {
-    }
-
-    @Override
-    public void rowsetSaved(RowsetSaveEvent event) {
-    }
-
-    @Override
     public void rowsetRolledback(RowsetRollbackEvent event) {
+        try {
+            assert rowset != null;
+            resignOnCursor();
+            filterRowset();
+            internalExecuteChildren(false);
+        } catch (Exception ex) {
+            Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    @Override
+    public void rowsetSaved(RowsetSaveEvent rse) {
+    }
+
+    @Override
+    public void rowsetNetError(RowsetNetErrorEvent rnee) {
     }
 
     @Override
@@ -1173,6 +1191,27 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     @Override
     public boolean willNextPageFetch(RowsetNextPageEvent event) {
         return true;
+    }
+
+    protected void resignOnCursor() {
+        if (cursorListener != null) {
+            cursorListener.remove();
+            cursorListener = null;
+        }
+        Row cursor = rowset.getCurrentRow();
+        if (cursor != null) {
+            final PropertyChangeListener cursorPropsListener = (PropertyChangeEvent evt) -> {
+                try {
+                    internalExecuteChildren(false);
+                } catch (Exception ex) {
+                    Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            };
+            cursor.addPropertyChangeListener(cursorPropsListener);
+            cursorListener = () -> {
+                cursor.removePropertyChangeListener(cursorPropsListener);
+            };
+        }
     }
 
     @Override

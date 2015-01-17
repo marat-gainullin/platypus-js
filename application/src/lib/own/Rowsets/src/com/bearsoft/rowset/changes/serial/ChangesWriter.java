@@ -23,13 +23,12 @@ public class ChangesWriter {
         public ByteArrayOutputStream out = new ByteArrayOutputStream();
         protected ProtoWriter writer = new ProtoWriter(out);
         protected RowsetSerializer serializer;
-        
-        public ChangeWriter(RowsetSerializer aSerializer)
-        {
+
+        public ChangeWriter(RowsetSerializer aSerializer) {
             super();
             serializer = aSerializer;
         }
-        
+
         protected ByteArrayOutputStream writeValue(ChangeValue aValue) throws Exception {
             ByteArrayOutputStream valueOut = new ByteArrayOutputStream();
             ProtoWriter valueWriter = new ProtoWriter(valueOut);
@@ -38,10 +37,9 @@ public class ChangesWriter {
             valueWriter.put(ChangesTags.TYPE_NAME_TAG, aValue.type.getSqlTypeName());
             valueWriter.put(ChangesTags.TYPE_CLASS_NAME_TAG, aValue.type.getJavaClassName());
             CustomSerializer customSerializer = serializer.getSerializer(aValue.type);
-            if(customSerializer != null) {
+            if (customSerializer != null) {
                 valueWriter.put(ChangesTags.CUSTOM_VALUE_TAG, customSerializer.serialize(aValue.value, aValue.type));
-            }
-            else {
+            } else {
                 valueWriter.putJDBCCompatible(ChangesTags.VALUE_TAG, aValue.type.getSqlType(), aValue.value);
             }
             valueWriter.flush();
@@ -61,7 +59,7 @@ public class ChangesWriter {
 
         @Override
         public void visit(Update aChange) throws Exception {
-            writer.put(ChangesTags.CHANGE_TYPE_TAG, ChangesTags.CHANGE_TYPE_UPDATE);            
+            writer.put(ChangesTags.CHANGE_TYPE_TAG, ChangesTags.CHANGE_TYPE_UPDATE);
             writer.put(ChangesTags.CHANGE_ENTITY_TAG, aChange.entityName);
             for (ChangeValue value : aChange.data) {
                 writer.put(ChangesTags.CHANGE_VALUE_TAG);

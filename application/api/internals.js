@@ -117,6 +117,8 @@
     function subscribe(aData, aListener, aPropName) {
         if (aData.unwrap) {
             var target = aData.unwrap();
+            if(target.getRowset)
+                target = target.getRowset();
             if (target.addPropertyChangeListener) {
                 var adapter = new PAdapterClass(aListener);
                 target.addPropertyChangeListener(aPropName, adapter);

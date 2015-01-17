@@ -442,22 +442,19 @@
              */
             P.AnchorsPane.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
+        Object.defineProperty(this, "count", {
             get: function() {
-                var value = delegate.onActionPerformed;
+                var value = delegate.count;
                 return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
             }
         });
         if(!P.AnchorsPane){
             /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
+             * Gets the number of components in this panel.
+             * @property count
              * @memberOf AnchorsPane
              */
-            P.AnchorsPane.prototype.onActionPerformed = {};
+            P.AnchorsPane.prototype.count = 0;
         }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
@@ -476,19 +473,22 @@
              */
             P.AnchorsPane.prototype.onKeyReleased = {};
         }
-        Object.defineProperty(this, "count", {
+        Object.defineProperty(this, "onActionPerformed", {
             get: function() {
-                var value = delegate.count;
+                var value = delegate.onActionPerformed;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
             }
         });
         if(!P.AnchorsPane){
             /**
-             * Gets the number of components in this panel.
-             * @property count
+             * Main action performed event handler function.
+             * @property onActionPerformed
              * @memberOf AnchorsPane
              */
-            P.AnchorsPane.prototype.count = 0;
+            P.AnchorsPane.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

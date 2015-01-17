@@ -73,23 +73,6 @@
              */
             P.ServiceGridColumn.prototype.resizable = true;
         }
-        Object.defineProperty(this, "editable", {
-            get: function() {
-                var value = delegate.editable;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.editable = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ServiceGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property editable
-             * @memberOf ServiceGridColumn
-             */
-            P.ServiceGridColumn.prototype.editable = true;
-        }
         Object.defineProperty(this, "minWidth", {
             get: function() {
                 var value = delegate.minWidth;
@@ -174,6 +157,23 @@
              * @memberOf ServiceGridColumn
              */
             P.ServiceGridColumn.prototype.movable = true;
+        }
+        Object.defineProperty(this, "readonly", {
+            get: function() {
+                var value = delegate.readonly;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.readonly = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ServiceGridColumn){
+            /**
+             * Generated property jsDoc.
+             * @property readonly
+             * @memberOf ServiceGridColumn
+             */
+            P.ServiceGridColumn.prototype.readonly = true;
         }
         Object.defineProperty(this, "background", {
             get: function() {

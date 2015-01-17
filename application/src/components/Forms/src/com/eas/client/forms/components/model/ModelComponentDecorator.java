@@ -668,23 +668,18 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     protected boolean settingValueToJs;
 
     protected void bind() {
-        if (data != null && field != null && !field.isEmpty()) {
+        if (data != null && field != null && !field.isEmpty() && com.eas.script.ScriptUtils.isInitialized()) {
             boundToData = com.eas.script.ScriptUtils.listen(data, field, new AbstractJSObject() {
 
                 @Override
                 public Object call(Object thiz, Object... args) {
                     if (!settingValueToJs) {
-                        if (args.length >= 1 && args[0] instanceof JSObject) {
-                            JSObject jsEvt = (JSObject) args[0];
-                            if (jsEvt.hasMember("newValue")) {
-                                settingValueFromJs = true;
-                                try {
-                                    Object newValue = jsEvt.getMember("newValue");
-                                    setJsValue(newValue instanceof Undefined ? null : newValue);
-                                } finally {
-                                    settingValueFromJs = false;
-                                }
-                            }
+                        settingValueFromJs = true;
+                        try {
+                            Object newValue = ModelWidget.getPathData(data, field);
+                            setJsValue(newValue instanceof Undefined ? null : newValue);
+                        } finally {
+                            settingValueFromJs = false;
                         }
                     }
                     return null;

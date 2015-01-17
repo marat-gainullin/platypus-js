@@ -785,7 +785,7 @@ public class Rowset {
     public void insertAt(boolean aAjusting, int insertAt, Object[] initingValues) throws RowsetException {
         insertAt(new Row(flow.getEntityId(), fields), aAjusting, insertAt, initingValues);
     }
-    
+
     /**
      * Row insert method. Inserts a passed <code>Row</code> in this rowset in
      * both original and current rows arrays. First, filter's values are used
@@ -810,9 +810,9 @@ public class Rowset {
         }
         toInsert.setLog(log);
         toInsert.setEntityName(flow != null ? flow.getEntityId() : "");
-        insertingRow = toInsert;
-        try {
-            if (rowsetChangeSupport.fireWillInsertEvent(insertingRow, aAjusting)) {
+        if (rowsetChangeSupport.fireWillInsertEvent(toInsert, aAjusting)) {
+            insertingRow = toInsert;
+            try {
                 initColumns(insertingRow, initingValues);
                 insertingRow.setInserted();
                 // work on current rows vector, probably filtered
@@ -823,9 +823,9 @@ public class Rowset {
                 modified = true;
                 generateInsert(insertedRow);
                 rowsetChangeSupport.fireRowInsertedEvent(insertedRow, aAjusting);
+            } finally {
+                insertingRow = null;
             }
-        } finally {
-            insertingRow = null;
         }
     }
 
@@ -994,7 +994,7 @@ public class Rowset {
      *
      * @param aRowIndex Index of row to be deleted from the rowset. aRowIndex is
      * 1-based.
-     * @return 
+     * @return
      * @see #isBeforeFirst()
      * @see #isAfterLast()
      * @see #delete()
