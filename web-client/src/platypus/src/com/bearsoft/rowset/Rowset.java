@@ -459,10 +459,10 @@ public class Rowset {
 		return current.size();
 	}
 
-	public Row getRow(int aCursorPos){
+	public Row getRow(int aCursorPos) {
 		return current.get(aCursorPos - 1);
 	}
-	
+
 	/**
 	 * Checks whether cusor is in the valid position. If not than the
 	 * <code>InvalidCursorPositionException</code> is thrown.
@@ -557,13 +557,8 @@ public class Rowset {
 						int oldCurrentRowPos = currentRowPos;
 						currentRowPos = aCursorPos;
 						rowsetChangeSupport.fireScrolledEvent(oldCurrentRowPos);
-						return currentRowPos > 0 && currentRowPos < size() + 1;// return
-																			   // if
-																			   // cursor
-																			   // points
-																			   // to
-																			   // any
-																			   // record
+						// return if cursor points to any record
+						return currentRowPos > 0 && currentRowPos < size() + 1;
 					} else {
 						return false;
 					}
@@ -620,10 +615,10 @@ public class Rowset {
 		insertAt(toInsert, aAjusting, insertAtPosition, initingValues);
 	}
 
-    public void insertAt(boolean aAjusting, int insertAt, Object[] initingValues) throws RowsetException {
-        insertAt(new Row(flow.getEntityId(), fields), aAjusting, insertAt, initingValues);
-    }
-    
+	public void insertAt(boolean aAjusting, int insertAt, Object[] initingValues) throws RowsetException {
+		insertAt(new Row(flow.getEntityId(), fields), aAjusting, insertAt, initingValues);
+	}
+
 	/**
 	 * Row insert method. Inserts a passed <code>Row</code> in this rowset in
 	 * both original and current rows arrays. First, filter's values are used
@@ -651,9 +646,9 @@ public class Rowset {
 		}
 		toInsert.setLog(log);
 		toInsert.setEntityName(flow != null ? flow.getEntityId() : "");
-		insertingRow = toInsert;
-		try {
-			if (rowsetChangeSupport.fireWillInsertEvent(insertingRow, aAjusting)) {
+		if (rowsetChangeSupport.fireWillInsertEvent(insertingRow, aAjusting)) {
+			insertingRow = toInsert;
+			try {
 				initColumns(insertingRow, initingValues);
 				insertingRow.setInserted();
 				// work on current rows list, probably filtered
@@ -664,9 +659,9 @@ public class Rowset {
 				modified = true;
 				generateInsert(insertedRow);
 				rowsetChangeSupport.fireRowInsertedEvent(insertedRow, aAjusting);
+			} finally {
+				insertingRow = null;
 			}
-		} finally {
-			insertingRow = null;
 		}
 	}
 
@@ -868,7 +863,7 @@ public class Rowset {
 	public Row deleteAt(int aRowIndex) throws RowsetException {
 		return deleteAt(aRowIndex, false);
 	}
-	
+
 	public Row deleteAt(int aRowIndex, boolean aAjusting) throws RowsetException {
 		if (aRowIndex >= 1 && aRowIndex <= size()) {
 			Row row = current.get(aRowIndex - 1);
@@ -941,7 +936,7 @@ public class Rowset {
 		Filter wasFilter = activeFilter;
 		if (wasFilter != null) {
 			wasFilter.cancel();// implicit setCurrent() and setActiveFilter()
-							   // calls.
+			                   // calls.
 		}
 		try {
 			current.clear();
@@ -960,7 +955,7 @@ public class Rowset {
 		} finally {
 			if (wasFilter != null) {
 				wasFilter.refilterRowset();// implicit setCurrent() and
-										   // setActiveFilter() calls.
+				                           // setActiveFilter() calls.
 			}
 		}
 	}
