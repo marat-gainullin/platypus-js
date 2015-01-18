@@ -1068,28 +1068,30 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     protected void bind() {
         if (data != null && com.eas.script.ScriptUtils.isInitialized()) {
-            Object modelData = field == null || field.isEmpty() ? data : ModelWidget.getPathData(data, field);
+            Object modelData = field != null && !field.isEmpty() ? ModelWidget.getPathData(data, field) : data;
             if (rowsModel != null) {
                 modelData = jdk.nashorn.api.scripting.ScriptUtils.wrap(modelData);
                 if (modelData instanceof JSObject) {
                     rowsModel.setData((JSObject) modelData);
                 }
             }
-            boundToData = com.eas.script.ScriptUtils.listen(data, field, new AbstractJSObject() {
+            if (field != null && !field.isEmpty()) {
+                boundToData = com.eas.script.ScriptUtils.listen(data, field, new AbstractJSObject() {
 
-                @Override
-                public Object call(Object thiz, Object... args) {
-                    Object newOData = ModelWidget.getPathData(data, field);
-                    if (rowsModel != null) {
-                        newOData = jdk.nashorn.api.scripting.ScriptUtils.wrap(newOData);
-                        if (newOData instanceof JSObject) {
-                            rowsModel.setData((JSObject) newOData);
+                    @Override
+                    public Object call(Object thiz, Object... args) {
+                        Object newModelData = ModelWidget.getPathData(data, field);
+                        if (rowsModel != null) {
+                            newModelData = jdk.nashorn.api.scripting.ScriptUtils.wrap(newModelData);
+                            if (newModelData instanceof JSObject) {
+                                rowsModel.setData((JSObject) newModelData);
+                            }
                         }
+                        return null;
                     }
-                    return null;
-                }
 
-            });
+                });
+            }
         }
     }
 
@@ -1151,12 +1153,14 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         if (rowsModel != null) {
             rowsModel.setData(null);
         }
+        Object oModelData = field != null && !field.isEmpty() ? ModelWidget.getPathData(data, field) : data;
+        JSObject modelData = oModelData instanceof JSObject ? (JSObject) oModelData : null;
         if (isTreeConfigured()) {
-            rowsModel = new ArrayTreedModel(columnModel, data, parentField, childrenField, generalOnRender);
+            rowsModel = new ArrayTreedModel(columnModel, modelData, parentField, childrenField, generalOnRender);
             deepModel = new TableFront2TreedModel<>((ArrayTreedModel) rowsModel);
             rowSorter = new TreedRowsSorter<>((TableFront2TreedModel<JSObject>) deepModel, rowsSelectionModel);
         } else {
-            rowsModel = new ArrayTableModel(columnModel, data, generalOnRender);
+            rowsModel = new ArrayTableModel(columnModel, modelData, generalOnRender);
             deepModel = (TableModel) rowsModel;
             rowSorter = new TabularRowsSorter<>((ArrayTableModel) deepModel, rowsSelectionModel);
         }
@@ -1257,11 +1261,12 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     public void insertElementAtCursor() {
         try {
-            if (insertable && data != null && data.hasMember("splice")) {
+            if (insertable && rowsModel.getData() != null && rowsModel.getData().hasMember("splice")) {
+                JSObject ldata = rowsModel.getData();
                 ListSelectionModel columnSelection = saveColumnsSelection();
-                JSObject jsSplice = (JSObject) data.getMember("splice");
-                JSObject jsIndexOf = (JSObject) data.getMember("indexOf");
-                Object oElementClass = data.getMember("elementClass");
+                JSObject jsSplice = (JSObject) ldata.getMember("splice");
+                JSObject jsIndexOf = (JSObject) ldata.getMember("indexOf");
+                Object oElementClass = ldata.getMember("elementClass");
                 JSObject jsElementClass = oElementClass instanceof JSObject && ((JSObject) oElementClass).isFunction() ? (JSObject) oElementClass : null;
                 JSObject jsCreated = jsElementClass != null ? (JSObject) jsElementClass.newObject(new Object[]{}) : ScriptUtils.makeObj();
                 JSObject jsCursor = getCurrentRow();
@@ -1269,16 +1274,16 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
                 try {
                     if (rowsModel instanceof ArrayTreedModel) {
                         Object parentValue = jsCursor != null ? ModelWidget.getPathData(jsCursor, parentField) : null;
-                        int length = JSType.toInteger(data.getMember("length"));
-                        int cursorAt = JSType.toInteger(jsIndexOf.call(data, new Object[]{jsCursor}));
+                        int length = JSType.toInteger(ldata.getMember("length"));
+                        int cursorAt = JSType.toInteger(jsIndexOf.call(ldata, new Object[]{jsCursor}));
                         int insertAt = cursorAt >= 0 && cursorAt < length ? cursorAt + 1 : length;
-                        jsSplice.call(data, new Object[]{insertAt, 0, jsCreated});
+                        jsSplice.call(ldata, new Object[]{insertAt, 0, jsCreated});
                         ModelWidget.setPathData(jsCreated, parentField, parentValue);
                     } else {
                         int length = deepModel.getRowCount();
                         int cursorAt = rowsSelectionModel.getLeadSelectionIndex();
                         int insertAt = cursorAt >= 0 && cursorAt < length ? cursorAt + 1 : length;
-                        jsSplice.call(data, new Object[]{insertAt, 0, jsCreated});
+                        jsSplice.call(ldata, new Object[]{insertAt, 0, jsCreated});
                     }
                 } finally {
                     rowsSelectionModel.addListSelectionListener(generalSelectionChangesReflector);
@@ -1317,8 +1322,9 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     }
 
     public void deleteSelectedElements() {
-        if (deletable && data != null && data.hasMember("splice")) {
-            JSObject jsSplice = (JSObject) data.getMember("splice");
+        if (deletable && rowsModel.getData() != null && rowsModel.getData().hasMember("splice")) {
+            JSObject ldata = rowsModel.getData();
+            JSObject jsSplice = (JSObject) ldata.getMember("splice");
             ListSelectionModel wasSeleted = saveRowsSelection();
             try {
                 Set<Object> elements = new HashSet<>();
@@ -1331,11 +1337,11 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
                         }
                     }
                 }
-                int length = JSType.toInteger(data.getMember("length"));
+                int length = JSType.toInteger(ldata.getMember("length"));
                 for (int i = length - 1; i >= 0; i--) {
-                    Object oElement = data.getSlot(i);
+                    Object oElement = ldata.getSlot(i);
                     if (elements.contains(oElement)) {
-                        jsSplice.call(data, new Object[]{i, 1});
+                        jsSplice.call(ldata, new Object[]{i, 1});
                     }
                 }
                 if (isAutoRedraw()) {
@@ -1378,14 +1384,16 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
                     if (!try2StopAnyEditing()) {
                         try2CancelAnyEditing();
                     }
-                    if (data != null) {
+                    Object oModelData = field != null && !field.isEmpty() ? ModelWidget.getPathData(data, field) : data;
+                    JSObject modelData = oModelData instanceof JSObject ? (JSObject) oModelData : null;
+                    if (modelData != null) {
                         JSObject jsNewCursor = elementByViewIndex(rowsSelectionModel.getLeadSelectionIndex());
-                        Object oScrollTo = data.getMember("scrollTo");
+                        Object oScrollTo = modelData.getMember("scrollTo");
                         if (oScrollTo instanceof JSObject && ((JSObject) oScrollTo).isFunction()) {
                             JSObject jsScrollTo = (JSObject) oScrollTo;
-                            jsScrollTo.call(data, new Object[]{jsNewCursor});
-                        } else if (data.hasMember("cursor")) {
-                            data.setMember("cursor", jsNewCursor);
+                            jsScrollTo.call(modelData, new Object[]{jsNewCursor});
+                        } else if (modelData.hasMember("cursor")) {
+                            modelData.setMember("cursor", jsNewCursor);
                         }
                     }
                     repaint();
@@ -1593,7 +1601,9 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     @Override
     public boolean isAutoRedraw() {
-        return data != null && !data.hasMember("unwrap");
+        Object oModelData = field != null && !field.isEmpty() ? ModelWidget.getPathData(data, field) : data;
+        JSObject modelData = oModelData instanceof JSObject ? (JSObject) oModelData : null;
+        return modelData != null && !modelData.hasMember("unwrap");
     }
 
     protected boolean redrawEnqueued;
