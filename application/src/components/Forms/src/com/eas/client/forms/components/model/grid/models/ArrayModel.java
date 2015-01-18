@@ -6,11 +6,12 @@ package com.eas.client.forms.components.model.grid.models;
 
 import com.eas.client.forms.components.model.ModelWidget;
 import com.eas.client.forms.components.model.grid.columns.ModelColumn;
+import java.awt.EventQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.table.TableColumnModel;
+import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.api.scripting.ScriptUtils;
 
 /**
  *
@@ -24,14 +25,46 @@ public abstract class ArrayModel {
     protected TableColumnModel columns;
     protected JSObject generalOnRender;
     protected JSObject data;
-    protected String field;
+    protected JSObject boundToData;
 
-    public ArrayModel(TableColumnModel aColumns, JSObject aData, String aField, JSObject aGeneralOnRender) {
+    public ArrayModel(TableColumnModel aColumns, JSObject aData, JSObject aGeneralOnRender) {
         super();
         columns = aColumns;
         data = aData;
-        field = aField;
         generalOnRender = aGeneralOnRender;
+    }
+
+    protected boolean elementsChangedEnqueued;
+    protected void enqueueElementsChanged(){
+        elementsChangedEnqueued = true;
+        EventQueue.invokeLater(()->{
+            if(elementsChangedEnqueued){
+                elementsChangedEnqueued = false;
+                fireElementsChanged();
+            }
+        });
+    }
+    
+    protected void bind() {
+        if (data != null && com.eas.script.ScriptUtils.isInitialized()) {
+            boundToData = com.eas.script.ScriptUtils.listen(data, "length", new AbstractJSObject() {
+
+                @Override
+                public Object call(Object thiz, Object... args) {
+                    enqueueElementsChanged();
+                    return null;
+                }
+
+            });
+        }
+    }
+
+    protected void unbind() {
+        if (boundToData != null) {
+            JSObject unlisten = (JSObject) boundToData.getMember("unlisten");
+            unlisten.call(null, new Object[]{});
+            boundToData = null;
+        }
     }
 
     public JSObject getData() {
@@ -40,20 +73,10 @@ public abstract class ArrayModel {
 
     public void setData(JSObject aValue) {
         if (data != null ? !data.equals(aValue) : aValue != null) {
-            // TODO: remove listeners from old object
+            unbind();
             data = aValue;
-            // TODO: add listeners to new object
-            fireElementsChanged();
-        }
-    }
-
-    public String getField() {
-        return field;
-    }
-
-    public void setField(String aValue) {
-        if (field == null ? aValue != null : !field.equals(aValue)) {
-            field = aValue;
+            bind();
+            enqueueElementsChanged();
         }
     }
 

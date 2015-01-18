@@ -33,11 +33,10 @@ public class ArrayTableModel extends ArrayModel implements TableModel {
      *
      * @param aColumns
      * @param aData
-     * @param aFiled
      * @param aOnRender
      */
-    public ArrayTableModel(TableColumnModel aColumns, JSObject aData, String aFiled, JSObject aOnRender) {
-        super(aColumns, aData, aFiled, aOnRender);
+    public ArrayTableModel(TableColumnModel aColumns, JSObject aData, JSObject aOnRender) {
+        super(aColumns, aData, aOnRender);
     }
 
     @Override

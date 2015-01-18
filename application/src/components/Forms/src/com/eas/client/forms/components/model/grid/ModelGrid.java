@@ -54,6 +54,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.*;
+import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.internal.runtime.JSType;
 
@@ -374,6 +375,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     protected Set<JSObject> processedRows = new HashSet<>();
     protected JSObject data;
     protected String field;
+    protected JSObject boundToData;
     // tree info
     protected String parentField;
     protected String childrenField;
@@ -402,7 +404,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     protected JPanel trPanel = new JPanel(new BorderLayout());
     protected JPanel blPanel = new JPanel(new BorderLayout());
     protected JPanel brPanel;
-    
+
     // actions
     protected Action findSomethingAction;
 
@@ -1064,6 +1066,41 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         }
     }
 
+    protected void bind() {
+        if (data != null && com.eas.script.ScriptUtils.isInitialized()) {
+            Object modelData = field == null || field.isEmpty() ? data : ModelWidget.getPathData(data, field);
+            if (rowsModel != null) {
+                modelData = jdk.nashorn.api.scripting.ScriptUtils.wrap(modelData);
+                if (modelData instanceof JSObject) {
+                    rowsModel.setData((JSObject) modelData);
+                }
+            }
+            boundToData = com.eas.script.ScriptUtils.listen(data, field, new AbstractJSObject() {
+
+                @Override
+                public Object call(Object thiz, Object... args) {
+                    Object newOData = ModelWidget.getPathData(data, field);
+                    if (rowsModel != null) {
+                        newOData = jdk.nashorn.api.scripting.ScriptUtils.wrap(newOData);
+                        if (newOData instanceof JSObject) {
+                            rowsModel.setData((JSObject) newOData);
+                        }
+                    }
+                    return null;
+                }
+
+            });
+        }
+    }
+
+    protected void unbind() {
+        if (boundToData != null) {
+            JSObject unlisten = (JSObject) boundToData.getMember("unlisten");
+            unlisten.call(null, new Object[]{});
+            boundToData = null;
+        }
+    }
+
     @ScriptFunction
     @Designable(category = "model")
     public JSObject getData() {
@@ -1073,10 +1110,9 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     @ScriptFunction
     public void setData(JSObject aValue) {
         if (data != null ? !data.equals(aValue) : aValue != null) {
+            unbind();
             data = aValue;
-            if (rowsModel != null) {
-                rowsModel.setData(data);
-            }
+            bind();
         }
     }
 
@@ -1087,11 +1123,10 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     }
 
     public void setField(String aValue) {
-        if(field == null ? aValue != null : !field.equals(aValue)){
+        if (field == null ? aValue != null : !field.equals(aValue)) {
+            unbind();
             field = aValue;
-            if (rowsModel != null) {
-                rowsModel.setField(field);
-            }
+            bind();
         }
     }
 
@@ -1117,11 +1152,11 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
             rowsModel.setData(null);
         }
         if (isTreeConfigured()) {
-            rowsModel = new ArrayTreedModel(columnModel, data, field, parentField, childrenField, generalOnRender);
+            rowsModel = new ArrayTreedModel(columnModel, data, parentField, childrenField, generalOnRender);
             deepModel = new TableFront2TreedModel<>((ArrayTreedModel) rowsModel);
             rowSorter = new TreedRowsSorter<>((TableFront2TreedModel<JSObject>) deepModel, rowsSelectionModel);
         } else {
-            rowsModel = new ArrayTableModel(columnModel, data, field, generalOnRender);
+            rowsModel = new ArrayTableModel(columnModel, data, generalOnRender);
             deepModel = (TableModel) rowsModel;
             rowSorter = new TabularRowsSorter<>((ArrayTableModel) deepModel, rowsSelectionModel);
         }
