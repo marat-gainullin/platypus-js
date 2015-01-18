@@ -581,7 +581,7 @@ public class FormFactory {
                     try {
                         grid.setData(resolveEntity(entityName));
                     } catch (Exception ex) {
-                        Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, "While setting data to named model's property ({0}) to widget {1} exception occured: {2}", new Object[]{entityName, grid.getName(), ex.getMessage()});
+                        Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, "While setting data to property ({0}) of widget {1} exception occured: {2}", new Object[]{entityName, grid.getName(), ex.getMessage()});
                     }
                 }
                 return grid;
