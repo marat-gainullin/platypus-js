@@ -811,8 +811,8 @@
                 var nFields = rowset.getFields();
                 for (var a = 0; a < arguments.length; a++) {
                     var justInserted = new RowClass(entityName, nFields);
-                    rowset.insertAt(justInserted, a < arguments.length - 1, rowset.size() + 1, objectToInsertIniting(arguments[a]));
                     publishRow(justInserted, arguments[a]);
+                    rowset.insertAt(justInserted, a < arguments.length - 1, rowset.size() + 1, objectToInsertIniting(arguments[a]));
                 }
                 return Array.prototype.push.apply(target, arguments);
             }
@@ -868,8 +868,8 @@
                     var nFields = rowset.getFields();
                     for (var a = 2; a < arguments.length; a++) {
                         var justInserted = new RowClass(entityName, nFields);
-                        rowset.insertAt(justInserted, a < arguments.length - 1, insertAt + 1, objectToInsertIniting(arguments[a]));
                         publishRow(justInserted, arguments[a]);
+                        rowset.insertAt(justInserted, a < arguments.length - 1, insertAt + 1, objectToInsertIniting(arguments[a]));
                         insertAt++;
                     }
                 }
@@ -883,8 +883,8 @@
                 var nFields = rowset.getFields();
                 for (var a = 0; a < arguments.length; a++) {
                     var justInserted = new RowClass(entityName, nFields);
-                    rowset.insertAt(justInserted, a < arguments.length - 1, a + 1, objectToInsertIniting(arguments[a]));
                     publishRow(justInserted, arguments[a]);
+                    rowset.insertAt(justInserted, a < arguments.length - 1, a + 1, objectToInsertIniting(arguments[a]));
                 }
                 return Array.prototype.unshift.apply(target, arguments);
             }
