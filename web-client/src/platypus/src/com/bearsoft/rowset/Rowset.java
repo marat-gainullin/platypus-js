@@ -1138,27 +1138,31 @@ public class Rowset {
 		return orderers.toArray(new Orderer[] {});
 	}
 
-	public static void addRowsetContentJsListener(Rowset aTarget, final JsObject onContentChanged) {
+	public static void addRowsetContentJsListener(Rowset aTarget, final JavaScriptObject onContentChanged) {
 		aTarget.addRowsetListener(new RowsetAdapter() {
+
+			protected void contentChanged() {
+				onContentChanged.<JsObject> cast().apply(null, JavaScriptObject.createArray());
+			}
 
 			@Override
 			public void rowsetFiltered(RowsetFilterEvent event) {
-				onContentChanged.apply(null, JavaScriptObject.createArray());
+				contentChanged();
 			}
 
 			@Override
 			public void rowsetRequeried(RowsetRequeryEvent event) {
-				onContentChanged.apply(null, JavaScriptObject.createArray());
+				contentChanged();
 			}
 
 			@Override
 			public void rowsetRolledback(RowsetRollbackEvent event) {
-				onContentChanged.apply(null, JavaScriptObject.createArray());
+				contentChanged();
 			}
 
 			@Override
 			public void rowsetSorted(RowsetSortEvent event) {
-				onContentChanged.apply(null, JavaScriptObject.createArray());
+				contentChanged();
 			}
 		});
 	}

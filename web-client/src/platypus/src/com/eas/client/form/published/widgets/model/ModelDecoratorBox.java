@@ -237,7 +237,7 @@ public abstract class ModelDecoratorBox<T> extends DecoratorBox<T> implements Ha
 
     protected void bind() {
         if (data != null && field != null && !field.isEmpty()) {
-            boundToData = ControlsUtils.listen(data, field, new PropertyChangeListener() {
+            boundToData = Utils.listen(data, field, new PropertyChangeListener() {
 				@Override
                 public void propertyChange(PropertyChangeEvent evt) {
                     if (!settingValueToJs) {
@@ -255,7 +255,7 @@ public abstract class ModelDecoratorBox<T> extends DecoratorBox<T> implements Ha
                 }
 
             });
-            Object oData = ControlsUtils.getPathData(data, field);
+            Object oData = Utils.getPathData(data, field);
             try {
 	            setJsValue(oData);
             } catch (Exception e) {
@@ -268,7 +268,7 @@ public abstract class ModelDecoratorBox<T> extends DecoratorBox<T> implements Ha
 	                if (!settingValueFromJs) {
 	                    settingValueToJs = true;
 	                    try {
-	                        ControlsUtils.setPathData(data, field, Utils.toJs(event.getValue()));
+	                        Utils.setPathData(data, field, Utils.toJs(event.getValue()));
 	                    } finally {
 	                        settingValueToJs = false;
 	                    }

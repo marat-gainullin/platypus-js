@@ -64,9 +64,11 @@ import com.eas.script.HasPublished;
 import com.eas.script.ScriptFunction;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.LayoutManager;
 import java.awt.Paint;
@@ -112,7 +114,29 @@ public class FormUtils {
         public Panel(LayoutManager aLayout) {
             super(aLayout);
         }
-        
+
+        private boolean paintingChildren;
+
+        @Override
+        public Component getComponent(int n) {
+            if (paintingChildren) {
+                int count = super.getComponentCount() - 1;
+                return super.getComponent(count - n);
+            } else {
+                return super.getComponent(n);
+            }
+        }
+
+        @Override
+        protected void paintChildren(Graphics g) {
+            paintingChildren = true;
+            try {
+                super.paintChildren(g);
+            } finally {
+                paintingChildren = false;
+            }
+        }
+
         @Override
         public Widget getParentWidget() {
             return Forms.lookupPublishedParent(this);
@@ -501,8 +525,9 @@ public class FormUtils {
         if (o instanceof Paint) {
             return o;
         }
-        if(o instanceof JSObject)
+        if (o instanceof JSObject) {
             return o;
+        }
         throw new CloneNotSupportedException();
     }
 
@@ -1304,31 +1329,31 @@ public class FormUtils {
     public static BeanInfo getBeanInfo(Class<?> clazz) throws IntrospectionException {
         return Introspector.getBeanInfo(clazz, java.beans.Introspector.IGNORE_ALL_BEANINFO);
         /*
-        try {
-            return Introspector.getBeanInfo(clazz, java.beans.Introspector.IGNORE_ALL_BEANINFO);
-        } catch (Exception | Error ex) {
-            org.openide.ErrorManager.getDefault().notify(org.openide.ErrorManager.INFORMATIONAL, ex);
-            return getBeanInfo(clazz, Introspector.IGNORE_IMMEDIATE_BEANINFO);
-        }
-        */
+         try {
+         return Introspector.getBeanInfo(clazz, java.beans.Introspector.IGNORE_ALL_BEANINFO);
+         } catch (Exception | Error ex) {
+         org.openide.ErrorManager.getDefault().notify(org.openide.ErrorManager.INFORMATIONAL, ex);
+         return getBeanInfo(clazz, Introspector.IGNORE_IMMEDIATE_BEANINFO);
+         }
+         */
     }
 
     // helper method for getBeanInfo(Class)
     /*
-    static BeanInfo getBeanInfo(Class<?> clazz, int mode) throws IntrospectionException {
-        if (mode == Introspector.IGNORE_IMMEDIATE_BEANINFO) {
-            try {
-                return Introspector.getBeanInfo(clazz, Introspector.IGNORE_IMMEDIATE_BEANINFO);
-            } catch (Exception | Error ex) {
-                org.openide.ErrorManager.getDefault().notify(org.openide.ErrorManager.INFORMATIONAL, ex);
-                return getBeanInfo(clazz, Introspector.IGNORE_ALL_BEANINFO);
-            }
-        } else {
-            assert mode == Introspector.IGNORE_ALL_BEANINFO;
-            return Introspector.getBeanInfo(clazz, Introspector.IGNORE_ALL_BEANINFO);
-        }
-    }
-*/
+     static BeanInfo getBeanInfo(Class<?> clazz, int mode) throws IntrospectionException {
+     if (mode == Introspector.IGNORE_IMMEDIATE_BEANINFO) {
+     try {
+     return Introspector.getBeanInfo(clazz, Introspector.IGNORE_IMMEDIATE_BEANINFO);
+     } catch (Exception | Error ex) {
+     org.openide.ErrorManager.getDefault().notify(org.openide.ErrorManager.INFORMATIONAL, ex);
+     return getBeanInfo(clazz, Introspector.IGNORE_ALL_BEANINFO);
+     }
+     } else {
+     assert mode == Introspector.IGNORE_ALL_BEANINFO;
+     return Introspector.getBeanInfo(clazz, Introspector.IGNORE_ALL_BEANINFO);
+     }
+     }
+     */
     public static Class<?> getScriptEventClassByName(String anEventName) {
         return eventsNames2scriptEventsClasses.get(anEventName);
     }

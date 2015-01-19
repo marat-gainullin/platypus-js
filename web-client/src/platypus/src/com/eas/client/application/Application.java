@@ -597,6 +597,8 @@ public class Application {
 				$wnd.P.Form.call(aTarget, null, appElementName, nativeForm);
 			else
 				aTarget = new $wnd.P.Form(null, appElementName, nativeForm);
+			if(!aTarget.title)
+				aTarget.title = appElementName;
 			return aTarget;
 		};
 		$wnd.P.HTML5 = "Html5 client";

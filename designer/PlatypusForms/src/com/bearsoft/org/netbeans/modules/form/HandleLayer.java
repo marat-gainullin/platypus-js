@@ -2453,10 +2453,10 @@ public class HandleLayer extends JPanel {
                 }
                 if (isTopComponent()) {
                     Dimension newSize = new Dimension(movingBounds[0].width, movingBounds[0].height);
-                        formDesigner.getFormModel().fireComponentPropertyChanged(
-                                formDesigner.getTopDesignComponent(), "width", originalSize.width, newSize.width);
-                        formDesigner.getFormModel().fireComponentPropertyChanged(
-                                formDesigner.getTopDesignComponent(), "height", originalSize.height, newSize.height);
+                    formDesigner.getFormModel().fireComponentPropertyChanged(
+                            formDesigner.getTopDesignComponent(), "width", originalSize.width, newSize.width);
+                    formDesigner.getFormModel().fireComponentPropertyChanged(
+                            formDesigner.getTopDesignComponent(), "height", originalSize.height, newSize.height);
                 }
             } else { // resizing canceled
                 if (isTopComponent()) {
@@ -2472,8 +2472,14 @@ public class HandleLayer extends JPanel {
             try {
                 formDesigner.getFormModel().setUndoRedoRecording(false);
                 try {
-                    formDesigner.getTopDesignComponent().<RADProperty<Integer>>getProperty("width").setValue(newSize.width);
-                    formDesigner.getTopDesignComponent().<RADProperty<Integer>>getProperty("height").setValue(newSize.height);
+                    RADProperty<Integer> widthProp = formDesigner.getTopDesignComponent().<RADProperty<Integer>>getProperty("width");
+                    if (widthProp != null) {
+                        widthProp.setValue(newSize.width);
+                    }
+                    RADProperty<Integer> heightProp = formDesigner.getTopDesignComponent().<RADProperty<Integer>>getProperty("height");
+                    if (heightProp != null) {
+                        heightProp.setValue(newSize.height);
+                    }
                 } finally {
                     formDesigner.getFormModel().setUndoRedoRecording(true);
                 }

@@ -26,9 +26,11 @@ import com.eas.script.HasPublishedInvalidatableCollection;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.ContainerAdapter;
 import java.awt.event.ContainerEvent;
@@ -312,6 +314,28 @@ public class AnchorsPane extends JPanel implements HasPublished, HasContainerEve
             super.add(aComp, c);
             super.revalidate();
             super.repaint();
+        }
+    }
+
+    private boolean paintingChildren;
+
+    @Override
+    public Component getComponent(int n) {
+        if (paintingChildren) {
+            int count = super.getComponentCount() - 1;
+            return super.getComponent(count - n);
+        } else {
+            return super.getComponent(n);
+        }
+    }
+
+    @Override
+    protected void paintChildren(Graphics g) {
+        paintingChildren = true;
+        try {
+            super.paintChildren(g);
+        } finally {
+            paintingChildren = false;
         }
     }
 
@@ -730,7 +754,7 @@ public class AnchorsPane extends JPanel implements HasPublished, HasContainerEve
     public void setOnKeyTyped(JSObject aValue) {
         eventsProxy.getHandlers().put(ControlEventsIProxy.keyTyped, aValue);
     }
-    
+
     @ScriptFunction(jsDoc = ON_COMPONENT_ADDED_JSDOC)
     @EventMethod(eventClass = ContainerEvent.class)
     @Undesignable
@@ -758,7 +782,7 @@ public class AnchorsPane extends JPanel implements HasPublished, HasContainerEve
     public void setOnComponentRemoved(JSObject aValue) {
         eventsProxy.getHandlers().put(ControlEventsIProxy.componentRemoved, aValue);
     }
-    
+
     // published parent
     @ScriptFunction(name = "parent", jsDoc = PARENT_JSDOC)
     @Override

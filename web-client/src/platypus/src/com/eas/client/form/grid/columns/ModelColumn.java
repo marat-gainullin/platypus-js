@@ -8,8 +8,8 @@ import com.bearsoft.gwt.ui.widgets.grid.cells.CellHasReadonly;
 import com.bearsoft.gwt.ui.widgets.grid.cells.RenderedEditorCell;
 import com.bearsoft.gwt.ui.widgets.grid.cells.StringEditorCell;
 import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
+import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.Utils.JsObject;
-import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.Publisher;
 import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.published.HasPublished;
@@ -38,8 +38,6 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 	protected double maxWidth = Integer.MAX_VALUE / 2;
 	protected double designedWidth;
 	protected double widthDelta;
-	protected boolean resizable = true;
-	protected boolean moveable = true;
 	protected boolean readonly;
 	protected boolean visible = true;
 	protected boolean selectOnly;
@@ -147,7 +145,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 	@Override
 	public Object getValue(JavaScriptObject anElement) {
 		if (anElement != null && field != null && !field.isEmpty()) {
-			return ControlsUtils.getPathData(anElement, field);
+			return Utils.getPathData(anElement, field);
 		} else
 			return null;
 	}
@@ -155,7 +153,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 	@Override
 	public void update(int aIndex, JavaScriptObject anElement, Object value) {
 		if (anElement != null && field != null && !field.isEmpty()) {
-			ControlsUtils.setPathData(anElement, field, value);
+			Utils.setPathData(anElement, field, value);
 		}
 	}
 
@@ -280,7 +278,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 		if (aOnRender != null) {
 			JavaScriptObject renderedRow = renderedRow(context);
 			if (renderedRow != null) {
-				Object data = aField != null && !aField.isEmpty() ? ControlsUtils.getPathData(renderedRow, aField) : null;
+				Object data = aField != null && !aField.isEmpty() ? Utils.getPathData(renderedRow, aField) : null;
 				PublishedCell cell = Publisher.publishCell(data, aDisplay);
 				JsArrayMixed args = JavaScriptObject.createArray().cast();
 				args.push(JsEvents.publishOnRenderEvent(aThis, null, null, renderedRow, cell));

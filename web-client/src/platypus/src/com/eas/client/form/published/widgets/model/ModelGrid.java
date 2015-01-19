@@ -24,7 +24,7 @@ import com.eas.client.form.events.ShowEvent;
 import com.eas.client.form.events.ShowHandler;
 import com.eas.client.form.grid.FindWindow;
 import com.eas.client.form.grid.RenderedTableCellBuilder;
-import com.eas.client.form.grid.RowsetPositionSelectionHandler;
+import com.eas.client.form.grid.CursorPropertySelectionReflector;
 import com.eas.client.form.grid.columns.ModelColumn;
 import com.eas.client.form.published.HasComponentPopupMenu;
 import com.eas.client.form.published.HasEventsExecutor;
@@ -301,7 +301,7 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 	public void setHeader(List<HeaderNode<JavaScriptObject>> aHeader) {
 		if (header != aHeader) {
 			header = aHeader;
-			if (autoRefreshHeader){
+			if (autoRefreshHeader) {
 				applyColumns();
 			}
 		}
@@ -362,9 +362,11 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 
 	@Override
 	public void setColumnWidthFromHeaderDrag(Column<JavaScriptObject, ?> aColumn, double aWidth, Unit aUnit) {
-		super.setColumnWidth(aColumn, aWidth, aUnit);
-		ModelColumn colFacade = (ModelColumn) aColumn;
-		colFacade.setWidth(aWidth);
+		ModelColumn modelCol = (ModelColumn) aColumn;
+		if (aWidth >= modelCol.getMinWidth() && aWidth <= modelCol.getMaxWidth()) {
+			super.setColumnWidth(aColumn, aWidth, aUnit);
+			modelCol.setWidth(aWidth);
+		}
 	}
 
 	@Override
@@ -415,8 +417,8 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		for (HeaderNode<JavaScriptObject> leaf : leaves) {
 			Header<String> header = leaf.getHeader();
 			ModelColumn column = (ModelColumn) leaf.getColumn();
-			addColumn(column, column.getWidth()+"px", header, null, column.isVisible());
-		}		
+			addColumn(column, column.getWidth() + "px", header, null, !column.isVisible());
+		}
 		ThemedHeaderOrFooterBuilder<JavaScriptObject> leftBuilder = (ThemedHeaderOrFooterBuilder<JavaScriptObject>) headerLeft.getHeaderBuilder();
 		ThemedHeaderOrFooterBuilder<JavaScriptObject> rightBuilder = (ThemedHeaderOrFooterBuilder<JavaScriptObject>) headerRight.getHeaderBuilder();
 		List<HeaderNode<JavaScriptObject>> leftHeader = HeaderSplitter.split(header, 0, frozenColumns);
@@ -434,7 +436,7 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 			if (positionSelectionHandler != null)
 				positionSelectionHandler.removeHandler();
 			super.setSelectionModel(aValue);
-			positionSelectionHandler = aValue.addSelectionChangeHandler(new RowsetPositionSelectionHandler(data, aValue));
+			positionSelectionHandler = aValue.addSelectionChangeHandler(new CursorPropertySelectionReflector(data, aValue));
 		}
 	}
 

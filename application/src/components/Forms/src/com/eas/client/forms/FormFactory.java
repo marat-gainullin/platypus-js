@@ -472,7 +472,7 @@ public class FormFactory {
                 ModelSpin modelSpin = new ModelSpin();
                 readGeneralProps(anElement, modelSpin);
                 double min = XmlDomUtils.readDoubleAttribute(anElement, "min", 0.0d);
-                double step = XmlDomUtils.readDoubleAttribute(anElement, "step", 0.0d);
+                double step = XmlDomUtils.readDoubleAttribute(anElement, "step", 1.0d);
                 double max = XmlDomUtils.readDoubleAttribute(anElement, "max", 100.0d);
                 try {
                     modelSpin.setMin(min);

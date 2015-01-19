@@ -57,6 +57,7 @@ import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
@@ -418,6 +419,18 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
                 aTf.setHorizontalAlignment(JTextField.CENTER);
                 break;
         }
+    }
+
+    @ScriptFunction(jsDoc = COMPONENT_POPUP_MENU_JSDOC)
+    @Override
+    public JPopupMenu getComponentPopupMenu() {
+        return super.getComponentPopupMenu();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setComponentPopupMenu(JPopupMenu aMenu) {
+        super.setComponentPopupMenu(aMenu);
     }
 
     @ScriptFunction

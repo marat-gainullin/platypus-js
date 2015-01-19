@@ -7,11 +7,6 @@ import java.util.logging.Logger;
 
 import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.rowset.Utils;
-import com.bearsoft.rowset.Utils.JsObject;
-import com.bearsoft.rowset.beans.HasPropertyListeners;
-import com.bearsoft.rowset.beans.PropertyChangeEvent;
-import com.bearsoft.rowset.beans.PropertyChangeListener;
-import com.bearsoft.rowset.beans.PropertyChangeSupport;
 import com.eas.client.form.MarginConstraints.Margin;
 import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.published.HasPublished;
@@ -27,7 +22,6 @@ import com.eas.client.form.published.menu.PlatypusMenuBar;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
-import com.google.gwt.core.client.JsArrayMixed;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Element;
@@ -38,7 +32,6 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -292,7 +285,7 @@ public class ControlsUtils {
 	        PublishedCell aAlreadyCell) throws Exception {
 		if (aEventThis != null && aField != null && !aField.isEmpty() && cellFunction != null) {
 			if (aRow != null) {
-				PublishedCell cell = aAlreadyCell != null ? aAlreadyCell : Publisher.publishCell(getPathData(aRow, aField), aDisplay);
+				PublishedCell cell = aAlreadyCell != null ? aAlreadyCell : Publisher.publishCell(Utils.getPathData(aRow, aField), aDisplay);
 				Utils.executeScriptEventVoid(aEventThis, cellFunction, JsEvents.publishOnRenderEvent(aEventThis, null, null, aRow, cell));
 				return cell;
 			}
@@ -484,148 +477,5 @@ public class ControlsUtils {
 		if (aWidget instanceof Focusable) {
 			((Focusable) aWidget).setFocus(true);
 		}
-	}
-
-	public static native Object getPathData(JavaScriptObject anElement, String aPath)/*-{
-		if (anElement != null && aPath != null && aPath != '') {
-			var target = anElement;
-			var path = aPath.split('.');
-			var propName = path[0];
-			for ( var i = 1; i < path.length; i++) {
-				var target = target[propName];
-				if (!target) {
-					propName = null;
-				} else
-					propName = path[i];
-			}
-			if (propName != null) {
-				var javaValue = $wnd.boxAsJava(target[propName]);
-				return javaValue;
-			} else
-				return null;
-		} else
-			return null;
-	}-*/;
-
-	public static native void setPathData(JavaScriptObject anElement, String aPath, Object aValue)/*-{
-		if (aPath != null && aPath != '') {
-			var target = anElement;
-			var path = aPath.split('.');
-			var propName = path[0];
-			for ( var i = 1; i < path.length; i++) {
-				var target = target[propName];
-				if (!target) {
-					propName = null;
-				} else {
-					propName = path[i];
-				}
-			}
-			if (propName != null) {
-				var jsData = $wnd.boxAsJs(aValue);
-				target[propName] = jsData;
-			}
-		}
-	}-*/;
-
-	private static native JavaScriptObject observePath(JavaScriptObject aTarget, String aPath, JavaScriptObject aPropListener)/*-{
-	    function subscribe(aData, aListener, aPropName) {
-	        if (aData.unwrap) {
-	        	var nHandler = @com.eas.client.form.ControlsUtils::tryListenProperty(Ljava/lang/Object;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aData.unwrap(), aPropName, aListener);
-	        	if(nHandler != null)
-	        		return function(){
-	        			nHandler.@com.google.gwt.event.shared.HandlerRegistration::removeHandler()();
-	        		};
-	        }
-	        if($wnd.Object.observe){
-	        	var observer = function(changes){
-	        		var touched = false;
-	        		changes.forEach(function(change){
-	        			if(change.propertyName == aPropName)
-	        				touched = true;
-	        		});
-	        		if(touched){
-	        			aListener(typeof aData[aPropName] != 'undefined' ? aData[aPropName] : null);
-	        		}
-	        	};
-	        	Object.observe(aData, observer);
-	        	return function (){
-	        		Object.unobserve(aData, observer);
-	        	};
-	        }
-	        return null;
-	    }
-        var subscribed = [];
-        function listenPath() {
-            subscribed = [];
-            var data = aTarget;
-            var path = aPath.split('.');
-            for (var i = 0; i < path.length; i++) {
-                var propName = path[i];
-                var listener = i === path.length - 1 ? aPropListener : function (evt) {
-                    subscribed.forEach(function (aEntry) {
-                        aEntry();
-                    });
-                    listenPath();
-                    aPropListener(evt);
-                };
-                var cookie = subscribe(data, listener, propName);
-                if (cookie) {
-                    subscribed.push(cookie);
-                    if (data[propName])
-                        data = data[propName];
-                    else
-                        break;
-                } else {
-                    break;
-                }
-            }
-        }
-        if (aTarget) {
-            listenPath();
-        }
-        return {
-            unlisten: function () {
-                subscribed.forEach(function (aEntry) {
-                    aEntry();
-                });
-            }
-        };
-	}-*/;
-	
-	public static HandlerRegistration tryListenProperty(Object aTarget, final String aPropertyName, final JavaScriptObject aListener){
-		if(aTarget instanceof HasPropertyListeners){
-			final HasPropertyListeners listenersContainer = (HasPropertyListeners)aTarget;
-			final PropertyChangeListener plistener = new PropertyChangeListener(){
-
-				protected native void invokeListener(JavaScriptObject aTarget, JavaScriptObject aEvent)/*-{
-					aTarget(aEvent.newValue);
-				}-*/;
-				
-				@Override
-                public void propertyChange(PropertyChangeEvent evt) {
-					invokeListener(aListener, PropertyChangeSupport.publishEvent(evt));
-                }
-				
-			};
-			listenersContainer.addPropertyChangeListener(aPropertyName, plistener);
-			return new HandlerRegistration(){
-				@Override
-				public void removeHandler() {
-					listenersContainer.removePropertyChangeListener(aPropertyName, plistener);
-				}
-			};
-		}
-		return null;
-	}
-	
-	public static HandlerRegistration listen(JavaScriptObject anElement, String aPath, PropertyChangeListener aListener) {
-		final JsObject listener = observePath(anElement, aPath, PropertyChangeSupport.publishListener(aListener)).cast();
-		return new HandlerRegistration() {
-			@Override
-			public void removeHandler() {
-				JsObject unlisten = listener.getJs("unlisten").cast();
-				unlisten.apply(listener, null);
-			}
-		};
 	}
 }

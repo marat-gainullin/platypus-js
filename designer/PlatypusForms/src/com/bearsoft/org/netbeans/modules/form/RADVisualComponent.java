@@ -134,6 +134,14 @@ public class RADVisualComponent<C extends Component> extends RADComponent<C> {
         return null;
     }
 
+    @Override
+    public void setStoredName(String name) {
+        super.setStoredName(name);
+        C comp = getBeanInstance();
+        if(comp != null)
+            comp.setName(getName());
+    }
+
     // -----------------------------------------------------------------------------
     // Layout constraints management
     /**

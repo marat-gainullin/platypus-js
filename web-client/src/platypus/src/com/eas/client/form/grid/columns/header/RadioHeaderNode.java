@@ -9,7 +9,7 @@ public class RadioHeaderNode extends ModelHeaderNode {
 	public RadioHeaderNode() {
 		super();
 		column = new RadioServiceColumn();
-		header = new DraggableHeader<JavaScriptObject>("", null, column);
+		header = new DraggableHeader<JavaScriptObject>("\\", null, column);
 		setResizable(false);
 	}
 	

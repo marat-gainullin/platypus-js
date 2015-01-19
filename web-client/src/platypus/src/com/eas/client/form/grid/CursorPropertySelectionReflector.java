@@ -8,12 +8,12 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionModel;
 
-public class RowsetPositionSelectionHandler implements SelectionChangeEvent.Handler {
+public class CursorPropertySelectionReflector implements SelectionChangeEvent.Handler {
 
 	protected SelectionModel<JavaScriptObject> selectionModel;
 	protected JavaScriptObject rowsSource;
 
-	public RowsetPositionSelectionHandler(JavaScriptObject aRowsSource, SelectionModel<JavaScriptObject> aSelectionModel) {
+	public CursorPropertySelectionReflector(JavaScriptObject aRowsSource, SelectionModel<JavaScriptObject> aSelectionModel) {
 		super();
 		selectionModel = aSelectionModel;
 		rowsSource = aRowsSource;
@@ -27,7 +27,7 @@ public class RowsetPositionSelectionHandler implements SelectionChangeEvent.Hand
 				if (lead != null)
 					scrollTo(rowsSource, lead);
 			} catch (Exception e) {
-				Logger.getLogger(RowsetPositionSelectionHandler.class.getName()).log(Level.SEVERE, e.getMessage());
+				Logger.getLogger(CursorPropertySelectionReflector.class.getName()).log(Level.SEVERE, e.getMessage());
 			}
 		}
 	}

@@ -345,7 +345,8 @@ public class PersistenceManager {
             doc.appendChild(root);
             writeProperties(formEditor.getFormRootNode().getFormProperties(), doc, root, true);
             root.setAttribute(Form.VIEW_SCRIPT_NAME, formEditor.getFormModel().getTopRADComponent().getName());
-            formEditor.getFormModel().getAllComponents().stream().sequential().filter((RADComponent<?> aComp) -> {
+            //formEditor.getFormModel().getAllComponents().stream().sequential().filter((RADComponent<?> aComp) -> {
+            formEditor.getFormModel().getOrderedComponentList().stream().sequential().filter((RADComponent<?> aComp) -> {
                 return !(aComp instanceof RADModelGridColumn);// grid columns will be written by grid.
             }).forEach((RADComponent<?> aComp) -> {
                 String widgetTagName = aComp.getBeanClass().getSimpleName();
@@ -360,8 +361,8 @@ public class PersistenceManager {
                 }
                 Element widgetElement = doc.createElement(widgetTagName);
                 root.appendChild(widgetElement);
-                widgetElement.setAttribute("name", aComp.getName());
                 writeProperties(aComp.getBeanProperties(), doc, widgetElement, true);
+                widgetElement.setAttribute("name", aComp.getName());
                 if (aComp.getBeanInstance() instanceof JComponent
                         && !(aComp.getBeanInstance() instanceof ButtonGroup)
                         && !(aComp.getBeanInstance() instanceof PopupMenu)) {

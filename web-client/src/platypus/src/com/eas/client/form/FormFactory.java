@@ -2,9 +2,8 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.form.factories;
+package com.eas.client.form;
 
-import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,12 +20,6 @@ import com.bearsoft.rowset.CallbackAdapter;
 import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.Utils.JsObject;
 import com.eas.client.application.PlatypusImageResource;
-import com.eas.client.form.ControlsUtils;
-import com.eas.client.form.HorizontalPosition;
-import com.eas.client.form.MarginConstraints;
-import com.eas.client.form.PlatypusWindow;
-import com.eas.client.form.Publisher;
-import com.eas.client.form.VerticalPosition;
 import com.eas.client.form.grid.columns.ModelColumn;
 import com.eas.client.form.grid.columns.header.CheckHeaderNode;
 import com.eas.client.form.grid.columns.header.ModelHeaderNode;
@@ -85,6 +78,7 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.HasText;
+import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xml.client.Element;
@@ -95,6 +89,11 @@ import com.google.gwt.xml.client.Node;
  * @author mg
  */
 public class FormFactory {
+
+	protected static class Dimension {
+		public int width;
+		public int height;
+	}
 
 	protected Element element;
 	protected JsObject model;
@@ -171,22 +170,26 @@ public class FormFactory {
 		form.setAlwaysOnTop(Utils.getBooleanAttribute(element, "alwaysOnTop", Boolean.FALSE));
 		form.setLocationByPlatform(Utils.getBooleanAttribute(element, "locationByPlatform", Boolean.TRUE));
 		// form.setDesignedViewSize(viewWidget.getPreferredSize());
-		for (Runnable r : resolvers) {
+		for (int i = 0; i < resolvers.size(); i++) {
+			Runnable r = resolvers.get(i);
 			r.run();
 		}
 	}
 
 	protected Dimension readPrefSize(Element anElement) throws NumberFormatException {
-		Dimension prefSize = new Dimension();
-		String prefWidth = anElement.getAttribute("prefWidth");
-		String prefHeight = anElement.getAttribute("prefHeight");
-		if (prefWidth.length() > 2 && prefWidth.endsWith("px")) {
-			prefSize.width = Integer.parseInt(prefWidth.substring(0, prefWidth.length() - 2));
-		}
-		if (prefHeight.length() > 2 && prefHeight.endsWith("px")) {
-			prefSize.height = Integer.parseInt(prefHeight.substring(0, prefHeight.length() - 2));
-		}
-		return prefSize;
+		if (anElement.hasAttribute("prefWidth") && anElement.hasAttribute("prefHeight")) {
+			Dimension prefSize = new Dimension();
+			String prefWidth = anElement.getAttribute("prefWidth");
+			String prefHeight = anElement.getAttribute("prefHeight");
+			if (prefWidth.length() > 2 && prefWidth.endsWith("px")) {
+				prefSize.width = Integer.parseInt(prefWidth.substring(0, prefWidth.length() - 2));
+			}
+			if (prefHeight.length() > 2 && prefHeight.endsWith("px")) {
+				prefSize.height = Integer.parseInt(prefHeight.substring(0, prefHeight.length() - 2));
+			}
+			return prefSize;
+		} else
+			return null;
 	}
 
 	protected JsObject resolveEntity(String aEntityName) throws Exception {
@@ -440,7 +443,7 @@ public class FormFactory {
 			Publisher.publish(modelSpin);
 			readGeneralProps(anElement, modelSpin);
 			double min = Utils.getDoubleAttribute(anElement, "min", 0.0d);
-			double step = Utils.getDoubleAttribute(anElement, "step", 0.0d);
+			double step = Utils.getDoubleAttribute(anElement, "step", 1.0d);
 			double max = Utils.getDoubleAttribute(anElement, "max", 100.0d);
 			try {
 				modelSpin.setMin(min);
@@ -503,8 +506,8 @@ public class FormFactory {
 				try {
 					grid.setData(resolveEntity(entityName));
 				} catch (Exception ex) {
-					Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, "While setting data to named model's property ({0}) to widget {1} exception occured: {2}",
-					        new Object[] { entityName, grid.getJsName(), ex.getMessage() });
+					Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE,
+					        "While setting data to named model's property " + entityName + " to widget " + grid.getJsName() + " exception occured: " + ex.getMessage());
 				}
 			}
 			return grid;
@@ -729,8 +732,7 @@ public class FormFactory {
 			try {
 				((HasBinding) aTarget).setField(fieldPath);
 			} catch (Exception ex) {
-				Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, "While setting field ({0}) to widget {1} exception occured: {2}",
-				        new Object[] { fieldPath, widgetName, ex.getMessage() });
+				Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, "While setting field (" + fieldPath + ") to widget " + widgetName + " exception occured: " + ex.getMessage());
 			}
 		}
 		if (anElement.hasAttribute("data") && aTarget instanceof HasBinding) {
@@ -738,8 +740,8 @@ public class FormFactory {
 			try {
 				((HasBinding) aTarget).setData(resolveEntity(entityName));
 			} catch (Exception ex) {
-				Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, "While setting data to named model's property ({0}) to widget {1} exception occured: {2}",
-				        new Object[] { entityName, widgetName, ex.getMessage() });
+				Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE,
+				        "While setting data to named model's property (" + entityName + ") to widget " + widgetName + " exception occured: " + ex.getMessage());
 			}
 		}
 		if (aTarget instanceof HasEnabled)
@@ -763,9 +765,9 @@ public class FormFactory {
 				PublishedColor foreground = ControlsUtils.parseColor(anElement.getAttribute("foreground"));
 				pComp.setForeground(foreground);
 			}
-		}
-		if (anElement.hasAttribute("toolTipText")) {
-			aTarget.setTitle(anElement.getAttribute("toolTipText"));
+			if (anElement.hasAttribute("toolTipText")) {
+				pComp.setToolTipText(anElement.getAttribute("toolTipText"));
+			}
 		}
 		/*
 		 * int cursorId = Utils.getIntegerAttribute(anElement, "cursor",
@@ -805,7 +807,7 @@ public class FormFactory {
 						UIObject buttonGroup = widgets.get(buttonGroupName);
 						if (buttonGroup instanceof ButtonGroup) {
 							ButtonGroup bg = (ButtonGroup) buttonGroup;
-							((HasPlatypusButtonGroup) aTarget).setButtonGroup(bg);
+							bg.add((HasValue<Boolean>) aTarget);
 						}
 					}
 				});
@@ -826,9 +828,13 @@ public class FormFactory {
 				});
 			}
 		}
-		if (aTarget instanceof HasJsName && rootContainerName.equals(((HasJsName) aTarget).getJsName())) {
+		if (aTarget instanceof Widget && aTarget instanceof HasPublished) {
 			Dimension prefSize = readPrefSize(anElement);
-			aTarget.setSize(prefSize.width + "px", prefSize.height + "px");
+			if (prefSize != null) {
+				PublishedComponent pComp = ((HasPublished) aTarget).getPublished().<PublishedComponent> cast();
+				pComp.setWidth(prefSize.width);
+				pComp.setHeight(prefSize.height);
+			}
 		}
 	}
 
@@ -881,8 +887,8 @@ public class FormFactory {
 			// of a split pane.
 		} else if (parent instanceof ScrollPane) {
 			ScrollPane scroll = (ScrollPane) parent;
-			Dimension prefSize = readPrefSize(anElement);
-			aTarget.setSize(prefSize.width + "px", prefSize.height + "px");
+			// Dimension prefSize = readPrefSize(anElement);
+			// aTarget.setSize(prefSize.width + "px", prefSize.height + "px");
 			scroll.setWidget((Widget) aTarget);
 		} else if (parent instanceof BorderPane) {
 			Element constraintsElement = Utils.getElementByTagName(anElement, "BorderPaneConstraints");
@@ -903,56 +909,31 @@ public class FormFactory {
 				size = prefSize.height;
 				break;
 			}
-			addToBorderPane(parent, aTarget, place, size);
+			BorderPane borderPane = (BorderPane) parent;
+			borderPane.add((Widget) aTarget, place, size);
 		} else if (parent instanceof BoxPane) {
 			Dimension prefSize = readPrefSize(anElement);
-			addToBoxPane(parent, aTarget, prefSize);
+			BoxPane box = (BoxPane) parent;
+			if (box.getOrientation() == Orientation.HORIZONTAL) {
+				box.add((Widget) aTarget, prefSize.width);
+			} else {
+				box.add((Widget) aTarget, prefSize.height);
+			}
 		} else if (parent instanceof CardPane) {
 			Element constraintsElement = Utils.getElementByTagName(anElement, "CardPaneConstraints");
 			String cardName = constraintsElement.getAttribute("cardName");
-			addToCardPane(parent, aTarget, cardName);
+			((CardPane) parent).add((Widget) aTarget, cardName);
 		} else if (parent instanceof FlowPane) {
-			Dimension prefSize = readPrefSize(anElement);
-			addToFlowPane(parent, aTarget, prefSize);
+			// Dimension prefSize = readPrefSize(anElement);
+			// aTarget.setSize(prefSize.width + "px", prefSize.height + "px");
+			((FlowPane) parent).add((Widget) aTarget);
 		} else if (parent instanceof GridPane) {
-			addToGridPane(parent, aTarget);
+			((GridPane) parent).add((Widget) aTarget);
 		} else if (parent instanceof AnchorsPane) {
 			Element constraintsElement = Utils.getElementByTagName(anElement, "AnchorsPaneConstraints");
 			MarginConstraints constraints = readMarginConstraints(constraintsElement);
-			addToAnchorsPane(parent, aTarget, constraints);
+			((AnchorsPane) parent).add((Widget) aTarget, constraints);
 		}
-	}
-
-	protected void addToAnchorsPane(UIObject parent, UIObject aTarget, MarginConstraints constraints) {
-		AnchorsPane anchors = (AnchorsPane) parent;
-		anchors.add((Widget) aTarget, constraints);
-	}
-
-	protected void addToGridPane(UIObject parent, UIObject aTarget) {
-		((GridPane) parent).add((Widget) aTarget);
-	}
-
-	protected void addToFlowPane(UIObject parent, UIObject aTarget, Dimension prefSize) {
-		((FlowPane) parent).add((Widget) aTarget);
-		aTarget.setSize(prefSize.width + "px", prefSize.height + "px");
-	}
-
-	protected void addToCardPane(UIObject parent, UIObject aTarget, String cardName) {
-		((CardPane) parent).add((Widget) aTarget, cardName);
-	}
-
-	protected void addToBoxPane(UIObject parent, UIObject aTarget, Dimension prefSize) {
-		BoxPane box = (BoxPane) parent;
-		if (box.getOrientation() == Orientation.HORIZONTAL) {
-			box.add((Widget) aTarget, prefSize.width);
-		} else {
-			box.add((Widget) aTarget, prefSize.height);
-		}
-	}
-
-	protected void addToBorderPane(UIObject parent, UIObject aTarget, Integer place, Integer size) {
-		BorderPane borderPane = (BorderPane) parent;
-		borderPane.add((Widget) aTarget, place, size);
 	}
 
 	private static MarginConstraints readMarginConstraints(Element anElement) {
@@ -1089,7 +1070,7 @@ public class FormFactory {
 			}
 		}
 		aNode.setMoveable(Utils.getBooleanAttribute(anElement, "movable", Boolean.TRUE));
-		aNode.setResizable(Utils.getBooleanAttribute(anElement, "resizable", Boolean.TRUE));
+		aNode.setResizable(Utils.getBooleanAttribute(anElement, "resizable", aNode instanceof CheckHeaderNode || aNode instanceof RadioHeaderNode || aNode instanceof ServiceHeaderNode ? Boolean.FALSE : Boolean.TRUE));
 		// aNode.setSelectOnly(Utils.getBooleanAttribute(anElement,
 		// "selectOnly", Boolean.FALSE));
 		aNode.setSortable(Utils.getBooleanAttribute(anElement, "sortable", Boolean.TRUE));

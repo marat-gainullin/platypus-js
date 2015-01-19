@@ -1,7 +1,7 @@
 package com.eas.client.form.store;
 
+import com.eas.client.form.FormFactory;
 import com.eas.client.form.PlatypusWindow;
-import com.eas.client.form.factories.FormFactory;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.xml.client.Document;
 

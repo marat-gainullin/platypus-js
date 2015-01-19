@@ -1,5 +1,6 @@
 package com.eas.client.form.grid.columns;
 
+import com.bearsoft.gwt.ui.widgets.grid.Grid;
 import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
 import com.eas.client.form.grid.cells.rowmarker.RowMarkerCell;
 import com.eas.client.form.published.widgets.model.ModelGrid;
@@ -9,6 +10,9 @@ public class UsualServiceColumn extends ModelColumn {
 
 	public UsualServiceColumn() {
 		super();
+		designedWidth = Grid.MINIMUM_COLUMN_WIDTH;
+		minWidth = designedWidth;
+		maxWidth = designedWidth;
 		((TreeExpandableCell<JavaScriptObject, Object>)getCell()).setCell(new RowMarkerCell(){
 
 			@Override

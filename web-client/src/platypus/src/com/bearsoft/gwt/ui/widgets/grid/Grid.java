@@ -94,7 +94,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 	public static final String RULER_STYLE = "grid-ruler";
 	public static final String COLUMN_PHANTOM_STYLE = "grid-column-phantom";
 	public static final String COLUMNS_CHEVRON_STYLE = "grid-columns-chevron";
-	private static final int MINIMUM_COLUMN_WIDTH = 22;
+	public static final int MINIMUM_COLUMN_WIDTH = 22;
 	//
 	protected FlexTable hive;
 	protected SimplePanel headerLeftContainer;
@@ -483,25 +483,27 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 							targetSection = isTargetLeft ? headerLeft : headerRight;
 							int generalSourceIndex = isSourceLeft ? sourceIndex : sourceIndex + frozenColumns;
 							int generalTargetIndex = isTargetLeft ? targetIndex : targetIndex + frozenColumns;
+							Header<?> header = sourceSection.getHeader(sourceIndex);
+							if (header instanceof DraggableHeader) {
+								((DraggableHeader) header).setTable(targetSection);
+							}
 							if (/* isForeignColumn || */generalSourceIndex != generalTargetIndex) {
 								Column<T, ?> column = (Column<T, ?>) source.getColumn();
-								Header<?> header = sourceSection.getHeader(sourceIndex);
-								if (header instanceof DraggableHeader) {
-									((DraggableHeader) header).setTable(targetSection);
+								if (!(header instanceof DraggableHeader) || ((DraggableHeader) header).isMoveable()) {
+									moveColumn(generalSourceIndex, generalTargetIndex);
 								}
-								Header<?> footer = sourceSection.getFooter(sourceIndex);
-								String width = sourceSection.getColumnWidth(column);
-								sourceSection.clearColumnWidth(column);
-								removeColumn(generalSourceIndex);
-								addColumn(generalTargetIndex, column, width, header, footer, false);
-								headerLeft.getWidthPropagator().changed();
 							}
 						}
 					} else {
-						int newWidth = Math.max(event.getNativeEvent().getClientX() - source.getCellElement().getAbsoluteLeft(), MINIMUM_COLUMN_WIDTH);
-						// Source and target tables are the same, so we can
-						// cast to DraggedColumn<T> with no care
-						setColumnWidthFromHeaderDrag(((DraggedColumn<T>) source).getColumn(), newWidth, Style.Unit.PX);
+						int sourceIndex = source.getColumnIndex();
+						AbstractCellTable<T> sourceSection = (AbstractCellTable<T>) source.getTable();
+						Header<?> header = sourceSection.getHeader(sourceIndex);
+						if (!(header instanceof DraggableHeader) || ((DraggableHeader) header).isResizable()) {
+							int newWidth = Math.max(event.getNativeEvent().getClientX() - source.getCellElement().getAbsoluteLeft(), MINIMUM_COLUMN_WIDTH);
+							// Source and target tables are the same, so we can
+							// cast to DraggedColumn<T> with no care
+							setColumnWidthFromHeaderDrag(((DraggedColumn<T>) source).getColumn(), newWidth, Style.Unit.PX);
+						}
 					}
 				}
 			}
@@ -1017,6 +1019,17 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 		}
 	}
 
+	public void moveColumn(int aFromIndex, int aToIndex) {
+		Header<?> footer = getColumnFooter(aFromIndex);
+		Header<?> header = getColumnHeader(aFromIndex);
+		String width = getColumnWidth(aFromIndex);
+		Column<T, ?> column = getColumn(aFromIndex);
+		clearColumnWidth(aFromIndex);
+		removeColumn(aFromIndex);
+		addColumn(aToIndex, column, width, header, footer, false);
+		headerLeft.getWidthPropagator().changed();
+	}
+
 	public void hideColumn(Column<T, ?> aColumn) {
 		for (GridSection<?> section : new GridSection<?>[] { headerLeft, frozenLeft, scrollableLeft, footerLeft, headerRight, frozenRight, scrollableRight, footerRight }) {
 			GridSection<T> gSection = (GridSection<T>) section;
@@ -1173,6 +1186,41 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 			return aIndex >= 0 && aIndex < headerLeft.getColumnCount() ? headerLeft.getHeader(aIndex) : headerRight.getHeader(aIndex - headerLeft.getColumnCount());
 		} else
 			return null;
+	}
+
+	public Column<T, ?> getColumn(int aIndex) {
+		if (aIndex >= 0 && aIndex < getDataColumnCount()) {
+			return aIndex >= 0 && aIndex < headerLeft.getColumnCount() ? headerLeft.getColumn(aIndex) : headerRight.getColumn(aIndex - headerLeft.getColumnCount());
+		} else
+			return null;
+	}
+
+	public String getColumnWidth(int aIndex) {
+		if (aIndex >= 0 && aIndex < getDataColumnCount()) {
+			Column<T, ?> col = getColumn(aIndex);
+			return aIndex >= 0 && aIndex < headerLeft.getColumnCount() ? headerLeft.getColumnWidth(col) : headerRight.getColumnWidth(col);
+		} else
+			return null;
+	}
+
+	public Header<?> getColumnFooter(int aIndex) {
+		if (aIndex >= 0 && aIndex < getDataColumnCount()) {
+			return aIndex >= 0 && aIndex < headerLeft.getColumnCount() ? headerLeft.getFooter(aIndex) : headerRight.getFooter(aIndex - headerLeft.getColumnCount());
+		} else
+			return null;
+	}
+
+	public void clearColumnWidth(int aIndex) {
+		if (aIndex >= 0 && aIndex < getDataColumnCount()) {
+			Column<T, ?> col = getColumn(aIndex);
+			if(aIndex >= 0 && aIndex < headerLeft.getColumnCount()){
+				headerLeft.clearColumnWidth(aIndex);
+				headerLeft.clearColumnWidth(col);
+			}else{
+				headerRight.clearColumnWidth(aIndex - headerLeft.getColumnCount());
+				headerRight.clearColumnWidth(col);
+			}
+		}
 	}
 
 	public TableCellElement getViewCell(int aRow, int aCol) {
