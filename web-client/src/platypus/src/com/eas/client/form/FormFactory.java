@@ -1045,12 +1045,6 @@ public class FormFactory {
 		if (font != null) {
 			aNode.setFont(font);
 		}
-		if (anElement.hasAttribute("width")) {
-			String width = anElement.getAttribute("width");
-			if (width.length() > 2 && width.endsWith("px")) {
-				aNode.setWidth(Integer.parseInt(width.substring(0, width.length() - 2)));
-			}
-		}
 		if (anElement.hasAttribute("minWidth")) {
 			String minWidth = anElement.getAttribute("minWidth");
 			if (minWidth.length() > 2 && minWidth.endsWith("px")) {

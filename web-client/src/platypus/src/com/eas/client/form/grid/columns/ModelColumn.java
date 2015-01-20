@@ -34,9 +34,9 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 	protected String field;
 	protected ModelDecoratorBox<Object> editor;
 	protected ModelGrid grid;
-	protected double minWidth = 0;
-	protected double maxWidth = Integer.MAX_VALUE / 2;
-	protected double designedWidth;
+	protected double minWidth = 15;
+	protected double maxWidth = Integer.MAX_VALUE;
+	protected double designedWidth = 75;
 	protected double widthDelta;
 	protected boolean readonly;
 	protected boolean visible = true;
@@ -46,6 +46,10 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 	protected JavaScriptObject onRender;
 	protected JavaScriptObject onSelect;
 
+	public ModelColumn(Cell<Object> aCell) {
+		super(aCell);
+	}
+	
 	public ModelColumn() {
 		super(new TreeExpandableCell<JavaScriptObject, Object>(new StringEditorCell()));
 		if (getTargetCell() instanceof RenderedEditorCell<?>) {

@@ -8,7 +8,7 @@ import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.converters.StringRowValueConverter;
 import com.eas.client.form.ControlsUtils;
-import com.eas.client.form.RowKeyProvider;
+import com.eas.client.form.JavaScriptObjectKeyProvider;
 import com.eas.client.form.events.ActionEvent;
 import com.eas.client.form.events.ActionHandler;
 import com.eas.client.form.events.HasActionHandlers;
@@ -51,7 +51,7 @@ public class ModelCombo extends ModelDecoratorBox<Object> implements HasEmptyTex
 	 */
 
 	protected static final String CUSTOM_DROPDOWN_CLASS = "combo-field-custom-dropdown";
-	protected RowKeyProvider rowKeyProvider = new RowKeyProvider();
+	protected JavaScriptObjectKeyProvider rowKeyProvider = new JavaScriptObjectKeyProvider();
 	protected String emptyText;
 	protected StringRowValueConverter converter = new StringRowValueConverter();
 	protected String emptyValueKey = String.valueOf(IDGenerator.genId());

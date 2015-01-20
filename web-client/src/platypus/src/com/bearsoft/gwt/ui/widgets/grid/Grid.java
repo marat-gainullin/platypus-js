@@ -94,7 +94,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 	public static final String RULER_STYLE = "grid-ruler";
 	public static final String COLUMN_PHANTOM_STYLE = "grid-column-phantom";
 	public static final String COLUMNS_CHEVRON_STYLE = "grid-columns-chevron";
-	public static final int MINIMUM_COLUMN_WIDTH = 22;
+	public static final int MINIMUM_COLUMN_WIDTH = 15;
 	//
 	protected FlexTable hive;
 	protected SimplePanel headerLeftContainer;
@@ -948,26 +948,27 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 	}
 
 	public void setupVisibleRanges() {
-		int generalLength = dataProvider.getList().size();
-		int lfrozenRows = generalLength >= frozenRows ? frozenRows : generalLength;
-		int scrollableRowCount = generalLength - lfrozenRows;
-		//
-		headerLeft.setVisibleRange(new Range(0, 0));
-		headerRight.setVisibleRange(new Range(0, 0));
-		frozenLeft.setVisibleRange(new Range(0, lfrozenRows));
-		frozenRight.setVisibleRange(new Range(0, lfrozenRows));
-		scrollableLeft.setVisibleRange(new Range(lfrozenRows, scrollableRowCount >= 0 ? scrollableRowCount : 0));
-		scrollableRight.setVisibleRange(new Range(lfrozenRows, scrollableRowCount >= 0 ? scrollableRowCount : 0));
-		footerLeft.setVisibleRange(new Range(0, 0));
-		footerRight.setVisibleRange(new Range(0, 0));
-		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+			List<T> list = dataProvider != null ? dataProvider.getList() : null;
+			int generalLength = list != null ? list.size() : 0;
+			int lfrozenRows = generalLength >= frozenRows ? frozenRows : generalLength;
+			int scrollableRowCount = generalLength - lfrozenRows;
+			//
+			headerLeft.setVisibleRange(new Range(0, 0));
+			headerRight.setVisibleRange(new Range(0, 0));
+			frozenLeft.setVisibleRange(new Range(0, lfrozenRows));
+			frozenRight.setVisibleRange(new Range(0, lfrozenRows));
+			scrollableLeft.setVisibleRange(new Range(lfrozenRows, scrollableRowCount >= 0 ? scrollableRowCount : 0));
+			scrollableRight.setVisibleRange(new Range(lfrozenRows, scrollableRowCount >= 0 ? scrollableRowCount : 0));
+			footerLeft.setVisibleRange(new Range(0, 0));
+			footerRight.setVisibleRange(new Range(0, 0));
+			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
-			@Override
-			public void execute() {
-				onResize();
-			}
+				@Override
+				public void execute() {
+					onResize();
+				}
 
-		});
+			});
 	}
 
 	public void addColumn(Column<T, ?> aColumn, String aWidth, Header<?> aHeader, Header<?> aFooter, boolean hidden) {
@@ -1213,10 +1214,10 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 	public void clearColumnWidth(int aIndex) {
 		if (aIndex >= 0 && aIndex < getDataColumnCount()) {
 			Column<T, ?> col = getColumn(aIndex);
-			if(aIndex >= 0 && aIndex < headerLeft.getColumnCount()){
+			if (aIndex >= 0 && aIndex < headerLeft.getColumnCount()) {
 				headerLeft.clearColumnWidth(aIndex);
 				headerLeft.clearColumnWidth(col);
-			}else{
+			} else {
 				headerRight.clearColumnWidth(aIndex - headerLeft.getColumnCount());
 				headerRight.clearColumnWidth(col);
 			}

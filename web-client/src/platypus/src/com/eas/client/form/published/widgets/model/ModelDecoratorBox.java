@@ -244,7 +244,7 @@ public abstract class ModelDecoratorBox<T> extends DecoratorBox<T> implements Ha
                         settingValueFromJs = true;
                         try {
                             try {
-	                            setJsValue(evt.getNewValue());
+	                            setJsValue(Utils.getPathData(data, field));
                             } catch (Exception e) {
 	                            e.printStackTrace();
                             }
