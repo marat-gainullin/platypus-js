@@ -85,13 +85,13 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate {
     /**
      * Default icon URL.
      */
-    private static String iconURL =
-            "com/bearsoft/org/netbeans/modules/form/layoutsupport/resources/AbstractLayout.gif"; // NOI18N
+    private static String iconURL
+            = "com/bearsoft/org/netbeans/modules/form/layoutsupport/resources/AbstractLayout.gif"; // NOI18N
     /**
      * Default icon URL.
      */
-    private static String icon32URL =
-            "com/bearsoft/org/netbeans/modules/form/layoutsupport/resources/AbstractLayout32.gif"; // NOI18N
+    private static String icon32URL
+            = "com/bearsoft/org/netbeans/modules/form/layoutsupport/resources/AbstractLayout32.gif"; // NOI18N
     // ------
     private LayoutSupportContext layoutContext;
     private java.util.List<LayoutConstraints<?>> componentConstraints;
@@ -188,7 +188,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate {
      */
     @Override
     public String getDisplayName() {
-        return Resources.getBundle().getString("NAME_"+getSupportedClass().getSimpleName());
+        return Resources.getBundle().getString("NAME_" + getSupportedClass().getSimpleName());
     }
 
     /**
@@ -240,12 +240,12 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate {
                     "properties", // NOI18N
                     FormUtils.getBundleString("CTL_PropertiesTab"), // NOI18N
                     FormUtils.getBundleString("CTL_PropertiesTabHint")) // NOI18N
-            {
-                @Override
-                public FormProperty<?>[] getProperties() {
-                    return AbstractLayoutSupport.this.getProperties();
-                }
-            };
+                    {
+                        @Override
+                        public FormProperty<?>[] getProperties() {
+                            return AbstractLayoutSupport.this.getProperties();
+                        }
+                    };
         }
 
         if (propertySets != null) {
@@ -502,26 +502,23 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate {
     @Override
     public void setLayoutToContainer(Container container,
             Container containerDelegate) {
-        if (isDedicated()) {
-            return;
-        }
-
-        LayoutManager lm = null;
-        try {
-            if (containerDelegate == layoutContext.getPrimaryContainerDelegate()) {
-                if (radLayout != null) // use the instance of MetaLayout
-                {
-                    lm = radLayout.getBeanInstance();
+        if (!isDedicated()) {
+            LayoutManager lm = null;
+            try {
+                if (containerDelegate == layoutContext.getPrimaryContainerDelegate()) {
+                    if (radLayout != null) // use the instance of MetaLayout
+                    {
+                        lm = radLayout.getBeanInstance();
+                    }
+                } else { // use cloned layout instance
+                    lm = cloneLayoutInstance(container, containerDelegate);
                 }
-            } else { // use cloned layout instance
-                lm = cloneLayoutInstance(container, containerDelegate);
+            } catch (Exception ex) { // should not happen
+                ErrorManager.getDefault().notify(ex);
             }
-        } catch (Exception ex) { // should not happen
-            ErrorManager.getDefault().notify(ex);
-        }
-
-        if (lm != null) {
-            containerDelegate.setLayout(lm);
+            if (lm != null) {
+                containerDelegate.setLayout(lm);
+            }
         }
     }
 
