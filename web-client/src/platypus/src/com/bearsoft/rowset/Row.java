@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.bearsoft.rowset.Utils.JsObject;
+import com.bearsoft.rowset.beans.HasPropertyListeners;
 import com.bearsoft.rowset.beans.PropertyChangeEvent;
 import com.bearsoft.rowset.beans.PropertyChangeListener;
 import com.bearsoft.rowset.beans.PropertyChangeSupport;
@@ -28,7 +29,7 @@ import com.google.gwt.core.client.JavaScriptObject;
  * 
  * @author mg
  */
-public class Row {
+public class Row implements HasPropertyListeners {
 
     protected String entityName;
     protected List<Change> log;
@@ -155,6 +156,11 @@ public class Row {
         vetoableChangeSupport.removeVetoableChangeListener(l);
     }
 
+    @Override
+    public PropertyChangeListener[] getPropertyChangeListeners() {
+    	return propertyChangeSupport.getPropertyChangeListeners();
+    }
+    
 	/**
 	 * Returns whether the row is updated at whole or partially. The updated
 	 * flag is <code>true</code> if <code>setColumnObject()</code> or

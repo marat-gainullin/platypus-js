@@ -1,7 +1,5 @@
 package com.eas.client.form.published.widgets.model;
 
-import java.util.Date;
-
 import com.bearsoft.gwt.ui.widgets.ExplicitDoubleBox;
 import com.bearsoft.rowset.Utils;
 import com.eas.client.form.ControlsUtils;

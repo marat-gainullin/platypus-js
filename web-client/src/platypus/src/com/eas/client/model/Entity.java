@@ -142,29 +142,29 @@ public class Entity implements RowsetListener, HasPublished{
 		var published = aEntity.@com.eas.client.model.Entity::getPublished()();
 		// array interface
 		@com.bearsoft.rowset.Rowset::addRowsetContentJsListener(Lcom/bearsoft/rowset/Rowset;Lcom/google/gwt/core/client/JavaScriptObject;)(rowset, function(){
-            Array.prototype.splice.call(target, 0, target.length);
+            Array.prototype.splice.call(published, 0, published.length);
             var rLength = rowset.@com.bearsoft.rowset.Rowset::size()();
             for (var aCursorPos = 1; aCursorPos <= rLength; aCursorPos++) {
-            	var nRow = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(aCursorPos);
-                Array.prototype.push.call(published, nRow.@com.bearsoft.rowset.Row::getPublished()());
+            	var nRow = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(aCursorPos);    
+            	var rowFacade = @com.bearsoft.rowset.Row::publishFacade(Lcom/bearsoft/rowset/Row;Lcom/google/gwt/core/client/JavaScriptObject;)(nRow, null);
+                Array.prototype.push.call(published, rowFacade);
             }
 		});
-        Object.defineProperty(target, "fill", {
+        Object.defineProperty(published, "fill", {
             value: function () {
                 throw '\'fill\' is unsupported in BoundArray because of it\'s distinct values requirement';
             }
         });
-        Object.defineProperty(target, "pop", {
+        Object.defineProperty(published, "pop", {
             value: function () {
                 if (published.length > 0) {
             		var nRow = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(published.length);
                     rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(published.length);
-                    Array.prototype.pop.call(published);
-                    return nRow.@com.bearsoft.rowset.Row::getPublished()();
+                    return Array.prototype.pop.call(published);
                 }
             }
         });
-        Object.defineProperty(target, "push", {
+        Object.defineProperty(published, "push", {
             value: function () {
                 for (var a = 0; a < arguments.length; a++) {
                 	var justInserted = aEntity.@com.eas.client.model.Entity::jsInsertAt(IZLcom/google/gwt/core/client/JavaScriptObject;)(published.length, a < arguments.length - 1, arguments[a]);
@@ -172,18 +172,17 @@ public class Entity implements RowsetListener, HasPublished{
                 return Array.prototype.push.apply(published, arguments);
             }
         });
-        Object.defineProperty(target, "reverse", {
+        Object.defineProperty(published, "reverse", {
             value: function () {
                 rowset.@com.bearsoft.rowset.Rowset::reverse()();
             }
         });
-        Object.defineProperty(target, "shift", {
+        Object.defineProperty(published, "shift", {
             value: function () {
                 if (published.length > 0) {
             		var nRow = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(1);
                     rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(1);
-                    Array.prototype.shift.call(published);
-                    return nRow.@com.bearsoft.rowset.Row::getPublished()();
+                    return Array.prototype.shift.call(published);
                 }
             }
         });
@@ -192,7 +191,7 @@ public class Entity implements RowsetListener, HasPublished{
             var s2 = (o2 + '');
             return s1 > s2 ? 1 : s1 < s2 ? -1 : 0;
         };
-        Object.defineProperty(target, "sort", {
+        Object.defineProperty(published, "sort", {
             value: function () {
                 if (arguments.length <= 0 || !aEntity.@com.eas.client.model.Entity::jsSort(Ljava/lang/Object;)(arguments[0])) {
                     var compareFunc = defaultCompareFunction;
@@ -204,7 +203,7 @@ public class Entity implements RowsetListener, HasPublished{
                 return published;
             }
         });
-        Object.defineProperty(target, "splice", {
+        Object.defineProperty(published, "splice", {
             value: function () {
                 if (arguments.length > 0) {
                     var beginToDeleteAt = arguments[0];
@@ -223,16 +222,16 @@ public class Entity implements RowsetListener, HasPublished{
                         insertAt++;
                     }
                 }
-                return Array.prototype.splice.apply(target, arguments);
+                return Array.prototype.splice.apply(published, arguments);
             }
         });
 
-        Object.defineProperty(target, "unshift", {
+        Object.defineProperty(published, "unshift", {
             value: function () {
                 for (var a = 0; a < arguments.length; a++) {
                     var justInserted = aEntity.@com.eas.client.model.Entity::jsInsertAt(IZLcom/google/gwt/core/client/JavaScriptObject;)(a + 1, a < arguments.length - 1, arguments[a]);
                 }
-                return Array.prototype.unshift.apply(target, arguments);
+                return Array.prototype.unshift.apply(published, arguments);
             }
         });		
 		// cursor interface 

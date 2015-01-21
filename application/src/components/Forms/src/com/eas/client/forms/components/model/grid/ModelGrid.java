@@ -1091,36 +1091,40 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     }
 
     protected void bind() {
-        if (data != null && com.eas.script.ScriptUtils.isInitialized()) {
-            Object modelData = field != null && !field.isEmpty() ? ModelWidget.getPathData(data, field) : data;
-            if (rowsModel != null) {
-                modelData = jdk.nashorn.api.scripting.ScriptUtils.wrap(modelData);
-                if (modelData instanceof JSObject) {
-                    JSObject jsModelData = (JSObject) modelData;
-                    unbindCursor();
-                    rowsModel.setData(jsModelData);
-                    bindCursor(jsModelData);
-                }
-            }
-            if (field != null && !field.isEmpty()) {
-                boundToData = com.eas.script.ScriptUtils.listen(data, field, new AbstractJSObject() {
-
-                    @Override
-                    public Object call(Object thiz, Object... args) {
-                        Object newModelData = ModelWidget.getPathData(data, field);
-                        if (rowsModel != null) {
-                            newModelData = jdk.nashorn.api.scripting.ScriptUtils.wrap(newModelData);
-                            if (newModelData instanceof JSObject) {
-                                JSObject jsModelData = (JSObject) newModelData;
-                                unbindCursor();
-                                rowsModel.setData(jsModelData);
-                                bindCursor(jsModelData);
-                            }
-                        }
-                        return null;
+        if (data != null) {
+            if (com.eas.script.ScriptUtils.isInitialized()) {
+                Object modelData = field != null && !field.isEmpty() ? ModelWidget.getPathData(data, field) : data;
+                if (rowsModel != null) {
+                    modelData = jdk.nashorn.api.scripting.ScriptUtils.wrap(modelData);
+                    if (modelData instanceof JSObject) {
+                        JSObject jsModelData = (JSObject) modelData;
+                        unbindCursor();
+                        rowsModel.setData(jsModelData);
+                        bindCursor(jsModelData);
                     }
+                }
+                if (field != null && !field.isEmpty()) {
+                    boundToData = com.eas.script.ScriptUtils.listen(data, field, new AbstractJSObject() {
 
-                });
+                        @Override
+                        public Object call(Object thiz, Object... args) {
+                            Object newModelData = ModelWidget.getPathData(data, field);
+                            if (rowsModel != null) {
+                                newModelData = jdk.nashorn.api.scripting.ScriptUtils.wrap(newModelData);
+                                if (newModelData instanceof JSObject) {
+                                    JSObject jsModelData = (JSObject) newModelData;
+                                    unbindCursor();
+                                    rowsModel.setData(jsModelData);
+                                    bindCursor(jsModelData);
+                                }
+                            }
+                            return null;
+                        }
+
+                    });
+                }
+            } else {
+                rowsModel.setData(data);
             }
         }
     }
@@ -1131,6 +1135,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
             unlisten.call(null, new Object[]{});
             boundToData = null;
         }
+        rowsModel.setData(null);
     }
 
     @ScriptFunction

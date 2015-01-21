@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.bearsoft.rowset.Utils.JsObject;
+import com.bearsoft.rowset.beans.HasPropertyListeners;
 import com.bearsoft.rowset.beans.PropertyChangeListener;
 import com.bearsoft.rowset.beans.PropertyChangeSupport;
 import com.bearsoft.rowset.changes.Change;
@@ -51,7 +52,7 @@ import com.google.gwt.core.client.JavaScriptObject;
  * 
  * @author mg
  */
-public class Rowset {
+public class Rowset implements HasPropertyListeners{
 
 	public static final String BAD_FLOW_PROVIDER_RESULT_MSG = "Flow Provider must return at least an empty rowset";
 	// rowset's data changes log.
@@ -194,6 +195,11 @@ public class Rowset {
 		propertyChangeSupport.removePropertyChangeListener(aPropertyName, l);
 	}
 
+    @Override
+    public PropertyChangeListener[] getPropertyChangeListeners() {
+    	return propertyChangeSupport.getPropertyChangeListeners();
+    }
+    
 	public void firePropertyChange(String aPropertyName, Object aOldValue, Object aNewValue) {
 		propertyChangeSupport.firePropertyChange(aPropertyName, aOldValue, aNewValue);
 	}
@@ -646,7 +652,7 @@ public class Rowset {
 		}
 		toInsert.setLog(log);
 		toInsert.setEntityName(flow != null ? flow.getEntityId() : "");
-		if (rowsetChangeSupport.fireWillInsertEvent(insertingRow, aAjusting)) {
+		if (rowsetChangeSupport.fireWillInsertEvent(toInsert, aAjusting)) {
 			insertingRow = toInsert;
 			try {
 				initColumns(insertingRow, initingValues);

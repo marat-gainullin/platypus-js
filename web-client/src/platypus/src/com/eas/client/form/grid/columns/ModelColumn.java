@@ -10,7 +10,6 @@ import com.bearsoft.gwt.ui.widgets.grid.cells.StringEditorCell;
 import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
 import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.Utils.JsObject;
-import com.bearsoft.rowset.sorting.SortingCriterion;
 import com.eas.client.form.Publisher;
 import com.eas.client.form.grid.rows.PathComparator;
 import com.eas.client.form.js.JsEvents;
@@ -48,7 +47,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 	protected JavaScriptObject onRender;
 	protected JavaScriptObject onSelect;
 
-	public ModelColumn(Cell<Object> aCell) {
+	protected ModelColumn(Cell<Object> aCell) {
 		super(aCell);
 	}
 
@@ -285,7 +284,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 	public static PublishedCell calcContextPublishedCell(JavaScriptObject aThis, JavaScriptObject aOnRender, com.google.gwt.cell.client.Cell.Context context, String aField, String aDisplay)
 	        throws Exception {
 		if (aOnRender != null) {
-			JavaScriptObject renderedRow = renderedRow(context);
+			JavaScriptObject renderedRow = renderedElement(context);
 			if (renderedRow != null) {
 				Object data = aField != null && !aField.isEmpty() ? Utils.getPathData(renderedRow, aField) : null;
 				PublishedCell cell = Publisher.publishCell(data, aDisplay);
@@ -298,7 +297,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 		return null;
 	}
 
-	protected static JavaScriptObject renderedRow(com.google.gwt.cell.client.Cell.Context context) throws Exception {
+	protected static JavaScriptObject renderedElement(com.google.gwt.cell.client.Cell.Context context) throws Exception {
 		Object key = context.getKey();
 		return key instanceof JavaScriptObject ? (JavaScriptObject) key : null;
 	}

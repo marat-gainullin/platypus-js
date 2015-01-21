@@ -7,6 +7,7 @@ import com.bearsoft.rowset.beans.HasPropertyListeners;
 import com.bearsoft.rowset.beans.PropertyChangeEvent;
 import com.bearsoft.rowset.beans.PropertyChangeListener;
 import com.bearsoft.rowset.beans.PropertyChangeSupport;
+import com.eas.client.model.Entity;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.core.client.Scheduler;
@@ -82,7 +83,7 @@ public class Utils {
 		public final native boolean isArray()/*-{
 			return Array.isArray(this);
 		}-*/;
-		
+
 		public final native int length()/*-{
 			return this.length;
 		}-*/;
@@ -122,7 +123,7 @@ public class Utils {
 		public final native Object apply(JavaScriptObject aThis, JavaScriptObject aArgs)/*-{
 			return this.apply(aThis, aArgs != null ? aArgs : []);
 		}-*/;
-		
+
 		public final native JavaScriptObject newObject()/*-{
 			var constr = this;
 			return new constr();
@@ -568,6 +569,8 @@ public class Utils {
 	}-*/;
 
 	public static HandlerRegistration tryListenProperty(Object aTarget, final String aPropertyName, final JavaScriptObject aListener) {
+		if (aTarget instanceof Entity)
+			aTarget = ((Entity) aTarget).getRowset();
 		if (aTarget instanceof HasPropertyListeners) {
 			final HasPropertyListeners listenersContainer = (HasPropertyListeners) aTarget;
 			final PropertyChangeListener plistener = new PropertyChangeListener() {
