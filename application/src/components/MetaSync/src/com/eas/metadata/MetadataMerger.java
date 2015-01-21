@@ -18,6 +18,7 @@ import com.eas.client.DatabasesClient;
 import com.eas.client.SqlCompiledQuery;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
+import com.eas.client.sqldrivers.Db2SqlDriver;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
 import java.util.*;
@@ -499,12 +500,16 @@ public class MetadataMerger {
                             String[] sqls4ModifyingField = driver.getSqls4ModifyingField(dSchema, dTableName, dField, sField);
                             cntErrors += executeSQL(sqls4ModifyingField, "step 7.3 - modify columns");
 
-                            //!!!!!!!!!!!!!!!!!!!! только в MySQL !!!!!!!!!!!!!!!!!!!!
+                            //!!!!!!!!!!!!!!!!!!!! только в MySQL и H2 !!!!!!!!!!!!!!!!!!!!
                             //!!!!!!!!!!!!!!!!! пока нет default value !!!!!!!!!!!!!!!
-                            if ("MySql".equalsIgnoreCase(destDialect)) {
-                                Field fld = dField.copy();
-                                fld.setDescription("");
-                                dFields.add(dFields.find(dFieldName), fld);
+                            if ("MySql".equalsIgnoreCase(destDialect) || "H2".equalsIgnoreCase(destDialect)) {
+                                for (int i = 1; i <= dFields.getLength(); i++) {
+                                    Field fld = dFields.get(i);
+                                    if (dFieldName.equalsIgnoreCase(fld.getName())) {
+                                        fld.setDescription("");
+                                        break;
+                                    }
+                                }
                             }
                             processed = true;
                         }
@@ -716,6 +721,10 @@ public class MetadataMerger {
                     }
                 }
             }
+        }
+        //???????
+        if (driver instanceof Db2SqlDriver && numSql > 0) {
+            executeSQL("commit", "commit");
         }
         log(Level.INFO, "Merge metadata finished");
     }

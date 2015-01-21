@@ -5,8 +5,6 @@
 package com.eas.client.sqldrivers;
 
 import com.bearsoft.rowset.Converter;
-import com.bearsoft.rowset.Row;
-import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.ForeignKeySpec;
@@ -31,6 +29,10 @@ import java.util.Set;
  */
 public class Db2SqlDriver extends SqlDriver {
 
+    // настройка экранирования наименования объектов БД
+    private final TwinString[] charsForWrap = {new TwinString("\"", "\"")};
+    private final char[] restrictedChars = {' ', ',', '\'', '"'};
+
     protected static final String SET_SCHEMA_CLAUSE = "SET SCHEMA %s";
     protected static final String GET_SCHEMA_CLAUSE = "VALUES CURRENT SCHEMA";
     protected static final String CREATE_SCHEMA_CLAUSE = "CREATE SCHEMA %s";
@@ -48,28 +50,21 @@ public class Db2SqlDriver extends SqlDriver {
             + "select s.NAME as " + ClientConstants.JDBCCOLS_TABLE_SCHEM
             + " from SYSIBM.SYSSCHEMATA as s"
             + " order by " + ClientConstants.JDBCCOLS_TABLE_SCHEM;
-    protected static final String SQL_ALL_TABLES = ""
+    protected static final String SQL_ALL_TABLES_AND_ALL_VIEWS = ""
             + "select t.NAME as " + ClientConstants.JDBCCOLS_TABLE_NAME
             + ", t.CREATOR as " + ClientConstants.JDBCCOLS_TABLE_SCHEM
-            + ", '" + ClientConstants.JDBCPKS_TABLE_TYPE_TABLE + "' as " + ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME
-            + " from SYSIBM.SYSTABLES as t where t.TYPE = 'T'";
-    protected static final String SQL_ALL_VIEWS = ""
-            + "select v.NAME as " + ClientConstants.JDBCCOLS_TABLE_NAME
-            + ", v.CREATOR as " + ClientConstants.JDBCCOLS_TABLE_SCHEM
-            + ", '" + ClientConstants.JDBCPKS_TABLE_TYPE_VIEW + "' as " + ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME
-            + " from SYSIBM.SYSTABLES as v where v.TYPE = 'V'";
-    protected static final String SQL_ALL_TABLES_AND_ALL_VIEWS = ""
-            + SQL_ALL_TABLES
-            + " union all "
-            + SQL_ALL_VIEWS
-            + " order by " + ClientConstants.JDBCCOLS_TABLE_NAME;
+            + ", (case when t.TYPE = 'T' then '" + ClientConstants.JDBCPKS_TABLE_TYPE_TABLE + "' else '" + ClientConstants.JDBCPKS_TABLE_TYPE_VIEW + "' end) as " + ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME
+            + ", t.REMARKS as " + ClientConstants.JDBCCOLS_REMARKS
+            + " from SYSIBM.SYSTABLES as t where t.TYPE in ('T','V')"
+            + " order by CREATOR, NAME";
     protected static final String SQL_TABLES_AND_VIEWS = ""
-            + SQL_ALL_TABLES
-            + " and Upper(t.CREATOR) = Upper('%s')"
-            + " union all "
-            + SQL_ALL_VIEWS
-            + " and Upper(v.CREATOR) = Upper('%s')"
-            + " order by " + ClientConstants.JDBCCOLS_TABLE_NAME;
+            + "select t.NAME as " + ClientConstants.JDBCCOLS_TABLE_NAME
+            + ", t.CREATOR as " + ClientConstants.JDBCCOLS_TABLE_SCHEM
+            + ", (case when t.TYPE = 'T' then '" + ClientConstants.JDBCPKS_TABLE_TYPE_TABLE + "' else '" + ClientConstants.JDBCPKS_TABLE_TYPE_VIEW + "' end) as " + ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME
+            + ", t.REMARKS as " + ClientConstants.JDBCCOLS_REMARKS
+            + " from SYSIBM.SYSTABLES as t where t.TYPE in ('T','V')"
+            + " and CREATOR = '%s'"
+            + " order by CREATOR, NAME";
     protected static final String SQL_COLUMNS = ""
             + "select "
             + "c.TABLE_SCHEM as " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ", "
@@ -86,7 +81,7 @@ public class Db2SqlDriver extends SqlDriver {
             + "c.NULLABLE as " + ClientConstants.JDBCCOLS_NULLABLE
             + " from SYSIBM.SQLCOLUMNS as c"
             + " inner join SYSIBM.SYSTABLES as t on (t.NAME = c.TABLE_NAME and c.TABLE_SCHEM = t.CREATOR)"
-            + " where Upper(c.TABLE_SCHEM) = Upper('%s') and Upper(c.TABLE_NAME) in (%s)"
+            + " where c.TABLE_SCHEM = '%s' and Upper(c.TABLE_NAME) in (%s)"
             + " order by c.TABLE_NAME, c.ORDINAL_POSITION";
     protected static final String SQL_PRIMARY_KEYS = ""
             + "select "
@@ -95,7 +90,7 @@ public class Db2SqlDriver extends SqlDriver {
             + "tpk.COLUMN_NAME as " + ClientConstants.JDBCPKS_COLUMN_NAME + ", "
             + "tpk.PK_NAME as " + ClientConstants.JDBCPKS_CONSTRAINT_NAME
             + " FROM SYSIBM.SQLPRIMARYKEYS as tpk"
-            + " where Upper(tpk.TABLE_SCHEM) = Upper('%s') and Upper(tpk.TABLE_NAME) in (%s)"
+            + " where tpk.TABLE_SCHEM = '%s' and Upper(tpk.TABLE_NAME) in (%s)"
             + " order by tpk.TABLE_SCHEM, tpk.TABLE_NAME, tpk.KEY_SEQ";
     protected static final String SQL_FOREIGN_KEYS = ""
             + "select "
@@ -111,16 +106,8 @@ public class Db2SqlDriver extends SqlDriver {
             + "tfk.PKCOLUMN_NAME as " + ClientConstants.JDBCFKS_FKPKCOLUMN_NAME + ", "
             + "tfk.PK_NAME as " + ClientConstants.JDBCFKS_FKPK_NAME + " "
             + "from SYSIBM.SQLFOREIGNKEYS as tfk "
-            + "where Upper(tfk.FKTABLE_SCHEM) = Upper('%s') and Upper(tfk.FKTABLE_NAME) in (%s) "
+            + "where tfk.FKTABLE_SCHEM = '%s' and Upper(tfk.FKTABLE_NAME) in (%s) "
             + "order by tfk.FKTABLE_SCHEM, tfk.FKTABLE_NAME, tfk.KEY_SEQ";
-    protected static final String SQL_COLUMNS_COMMENTS = ""
-            + "select "
-            + "c.REMARKS as " + ClientConstants.F_COLUMNS_COMMENTS_COMMENT_FIELD_NAME + ", "
-            + "c.TABLE_NAME as " + ClientConstants.JDBCCOLS_TABLE_NAME + ", "
-            + "c.COLUMN_NAME as " + ClientConstants.F_COLUMNS_COMMENTS_FIELD_FIELD_NAME + " "
-            + "from SYSIBM.SQLCOLUMNS as c "
-            + "where Upper(c.TABLE_SCHEM) = Upper('%s') and Upper(c.TABLE_NAME) in (%s) "
-            + "order by c.COLUMN_NAME";
     protected static final String SQL_INDEXES = ""
             + "select "
             + "  TABLE_CAT,"
@@ -140,17 +127,9 @@ public class Db2SqlDriver extends SqlDriver {
             + "        tpk.TABLE_NAME = i.TABLE_NAME and tpk.PK_NAME = i.INDEX_NAME) > 0 then 0 else 1 end) " + ClientConstants.JDBCIDX_PRIMARY_KEY + ","
             + "  null " + ClientConstants.JDBCIDX_FOREIGN_KEY + " "
             + "from SYSIBM.SQLSTATISTICS as i "
-            + "where Upper(" + ClientConstants.JDBCIDX_TABLE_SCHEM + ") = Upper('%s') and Upper(" + ClientConstants.JDBCIDX_TABLE_NAME + ") in (%s)"
+            + "where " + ClientConstants.JDBCIDX_TABLE_SCHEM + " = '%s' and Upper(" + ClientConstants.JDBCIDX_TABLE_NAME + ") in (%s)"
             + " and column_name is not null "
             + "order by TABLE_CAT,TABLE_NAME,ORDINAL_POSITION ";
-    protected static final String SQL_ALL_TABLES_COMMENTS = ""
-            + "select tbl.*, "
-            + "tbl.REMARKS as " + ClientConstants.F_TABLE_COMMENTS_COMMENT_FIELD_NAME + " "
-            + "from SYSIBM.SQLTABLES as tbl "
-            + "where Upper(tbl.TABLE_SCHEM) = Upper('%s')";
-    protected static final String SQL_TABLES_COMMENTS = ""
-            + SQL_ALL_TABLES_COMMENTS
-            + " and Upper(tbl.TABLE_NAME) in (%s)";
     protected static final String SQL_PARENTS_LIST = ""
             + "with recursive parents(mdent_id, "
             + "mdent_name, "
@@ -197,10 +176,11 @@ public class Db2SqlDriver extends SqlDriver {
 
     @Override
     public String getSql4TablesEnumeration(String schema4Sql) {
-        if (schema4Sql == null) {
+        if (schema4Sql == null || schema4Sql.isEmpty()) {
             return SQL_ALL_TABLES_AND_ALL_VIEWS;
         } else {
-            return String.format(SQL_TABLES_AND_VIEWS, schema4Sql, schema4Sql);
+            String schema = prepareName(schema4Sql);
+            return String.format(SQL_TABLES_AND_VIEWS, schema, schema);
         }
     }
 
@@ -220,7 +200,7 @@ public class Db2SqlDriver extends SqlDriver {
     @Override
     public String getSql4TableColumns(String aOwnerName, Set<String> aTableNames) {
         if (aTableNames != null && !aTableNames.isEmpty()) {
-            return String.format(SQL_COLUMNS, aOwnerName, constructIn(aTableNames).toUpperCase());
+            return String.format(SQL_COLUMNS, prepareName(aOwnerName), constructIn(aTableNames).toUpperCase());
         } else {
             return null;
         }
@@ -229,7 +209,7 @@ public class Db2SqlDriver extends SqlDriver {
     @Override
     public String getSql4TablePrimaryKeys(String aOwnerName, Set<String> aTableNames) {
         if (aTableNames != null && !aTableNames.isEmpty()) {
-            return String.format(SQL_PRIMARY_KEYS, aOwnerName, constructIn(aTableNames).toUpperCase());
+            return String.format(SQL_PRIMARY_KEYS, prepareName(aOwnerName), constructIn(aTableNames).toUpperCase());
         } else {
             return null;
         }
@@ -238,16 +218,7 @@ public class Db2SqlDriver extends SqlDriver {
     @Override
     public String getSql4TableForeignKeys(String aOwnerName, Set<String> aTableNames) {
         if (aTableNames != null && !aTableNames.isEmpty()) {
-            return String.format(SQL_FOREIGN_KEYS, aOwnerName, constructIn(aTableNames).toUpperCase());
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public String getSql4ColumnsComments(String aOwnerName, Set<String> aTableNames) {
-        if (aTableNames != null && !aTableNames.isEmpty()) {
-            return String.format(SQL_COLUMNS_COMMENTS, aOwnerName, constructIn(aTableNames).toUpperCase());
+            return String.format(SQL_FOREIGN_KEYS, prepareName(aOwnerName), constructIn(aTableNames).toUpperCase());
         } else {
             return null;
         }
@@ -256,7 +227,7 @@ public class Db2SqlDriver extends SqlDriver {
     @Override
     public String getSql4Indexes(String aOwnerName, Set<String> aTableNames) {
         if (aTableNames != null && !aTableNames.isEmpty()) {
-            return String.format(SQL_INDEXES, aOwnerName, constructIn(aTableNames).toUpperCase());
+            return String.format(SQL_INDEXES, prepareName(aOwnerName), constructIn(aTableNames).toUpperCase());
         } else {
             return null;
         }
@@ -264,9 +235,9 @@ public class Db2SqlDriver extends SqlDriver {
 
     @Override
     public String[] getSql4CreateColumnComment(String aOwnerName, String aTableName, String aFieldName, String aDescription) {
-        aOwnerName = wrapName(aOwnerName);
-        aTableName = wrapName(aTableName);
-        aFieldName = wrapName(aFieldName);
+        aOwnerName = wrapNameIfRequired(aOwnerName);
+        aTableName = wrapNameIfRequired(aTableName);
+        aFieldName = wrapNameIfRequired(aFieldName);
         String sqlText = aOwnerName == null ? StringUtils.join(".", aTableName, aFieldName) : StringUtils.join(".", aOwnerName, aTableName, aFieldName);
         if (aDescription == null) {
             aDescription = "";
@@ -276,43 +247,11 @@ public class Db2SqlDriver extends SqlDriver {
 
     @Override
     public String getSql4CreateTableComment(String aOwnerName, String aTableName, String aDescription) {
-        String sqlText = StringUtils.join(".", wrapName(aOwnerName), wrapName(aTableName));
+        String sqlText = StringUtils.join(".", wrapNameIfRequired(aOwnerName), wrapNameIfRequired(aTableName));
         if (aDescription == null) {
             aDescription = "";
         }
         return "comment on table " + sqlText + " is '" + aDescription + "'";
-    }
-
-    @Override
-    public String getSql4TableComments(String aOwnerName, Set<String> aTableNames) {
-        aOwnerName = wrapName(aOwnerName);
-        if (aTableNames != null && !aTableNames.isEmpty()) {
-            return String.format(SQL_TABLES_COMMENTS, aOwnerName.toUpperCase(), constructIn(aTableNames).toUpperCase());
-        } else if (aOwnerName != null && !aOwnerName.isEmpty()) {
-            return String.format(SQL_ALL_TABLES_COMMENTS, aOwnerName.toUpperCase());
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public String getColumnNameFromCommentsDs(Row aRow) throws RowsetException {
-        return (String) aRow.getColumnObject(aRow.getFields().find(ClientConstants.F_COLUMNS_COMMENTS_FIELD_FIELD_NAME));
-    }
-
-    @Override
-    public String getColumnCommentFromCommentsDs(Row aRow) throws RowsetException {
-        return (String) aRow.getColumnObject(aRow.getFields().find(ClientConstants.F_COLUMNS_COMMENTS_COMMENT_FIELD_NAME));
-    }
-
-    @Override
-    public String getTableNameFromCommentsDs(Row aRow) throws RowsetException {
-        return (String) aRow.getColumnObject(aRow.getFields().find(ClientConstants.F_TABLE_COMMENTS_NAME_FIELD_NAME));
-    }
-
-    @Override
-    public String getTableCommentFromCommentsDs(Row aRow) throws RowsetException {
-        return (String) aRow.getColumnObject(aRow.getFields().find(ClientConstants.F_TABLE_COMMENTS_COMMENT_FIELD_NAME));
     }
 
     @Override
@@ -327,7 +266,7 @@ public class Db2SqlDriver extends SqlDriver {
 
     @Override
     public String getSql4DropFkConstraint(String aSchemaName, ForeignKeySpec aFk) {
-        String constraintName = wrapName(aFk.getCName());
+        String constraintName = wrapNameIfRequired(aFk.getCName());
         String tableName = makeFullName(aSchemaName, aFk.getTable());
         return "alter table " + tableName + " drop constraint " + constraintName;
     }
@@ -351,7 +290,7 @@ public class Db2SqlDriver extends SqlDriver {
         String fieldsList = "";
         for (int i = 0; i < aIndex.getColumns().size(); i++) {
             DbTableIndexColumnSpec column = aIndex.getColumns().get(i);
-            fieldsList += wrapName(column.getColumnName());
+            fieldsList += wrapNameIfRequired(column.getColumnName());
             if (i != aIndex.getColumns().size() - 1) {
                 fieldsList += ", ";
             }
@@ -362,10 +301,10 @@ public class Db2SqlDriver extends SqlDriver {
     @Override
     public String getSql4EmptyTableCreation(String aSchemaName, String aTableName, String aPkFieldName) {
         String tableName = makeFullName(aSchemaName, aTableName);
-        aPkFieldName = wrapName(aPkFieldName);
+        aPkFieldName = wrapNameIfRequired(aPkFieldName);
         return "CREATE TABLE " + tableName + " ("
                 + aPkFieldName + " DECIMAL(18,0) NOT NULL,"
-                + "CONSTRAINT " + wrapName(aTableName + PKEY_NAME_SUFFIX) + " PRIMARY KEY (" + aPkFieldName + "))";
+                + "CONSTRAINT " + wrapNameIfRequired(generatePkName(aTableName, PKEY_NAME_SUFFIX)) + " PRIMARY KEY (" + aPkFieldName + "))";
     }
 
     @Override
@@ -413,7 +352,7 @@ public class Db2SqlDriver extends SqlDriver {
 
     @Override
     public String getSql4FieldDefinition(Field aField) {
-        String fieldDefinition = wrapName(aField.getName()) + " " + getFieldTypeDefinition(aField);
+        String fieldDefinition = wrapNameIfRequired(aField.getName()) + " " + getFieldTypeDefinition(aField);
         return fieldDefinition;
     }
 
@@ -422,7 +361,7 @@ public class Db2SqlDriver extends SqlDriver {
         List<String> sqls = new ArrayList<>();
         Field newFieldMd = aNewFieldMd.copy();
         String fullTableName = makeFullName(aSchemaName, aTableName);
-        String updateDefinition = String.format(ALTER_FIELD_SQL_PREFIX, fullTableName) + wrapName(aOldFieldMd.getName()) + " ";
+        String updateDefinition = String.format(ALTER_FIELD_SQL_PREFIX, fullTableName) + wrapNameIfRequired(aOldFieldMd.getName()) + " ";
         String fieldDefination = getFieldTypeDefinition(newFieldMd);
 
         DataTypeInfo newTypeInfo = newFieldMd.getTypeInfo();
@@ -466,7 +405,7 @@ public class Db2SqlDriver extends SqlDriver {
         String fullTableName = makeFullName(aSchemaName, aTableName);
         return new String[]{
             getSql4VolatileTable(fullTableName),
-            String.format(DROP_FIELD_SQL_PREFIX, fullTableName) + wrapName(aFieldName),
+            String.format(DROP_FIELD_SQL_PREFIX, fullTableName) + wrapNameIfRequired(aFieldName),
             getSql4ReorgTable(fullTableName)
         };
     }
@@ -477,8 +416,7 @@ public class Db2SqlDriver extends SqlDriver {
     @Override
     public String[] getSqls4RenamingField(String aSchemaName, String aTableName, String aOldFieldName, Field aNewFieldMd) {
         String fullTableName = makeFullName(aSchemaName, aTableName);
-        aOldFieldName = wrapName(aOldFieldName);
-        String sqlText = String.format(SQL_RENAME_FIELD, fullTableName, aOldFieldName, wrapName(aNewFieldMd.getName()));
+        String sqlText = String.format(SQL_RENAME_FIELD, fullTableName, wrapNameIfRequired(aOldFieldName), wrapNameIfRequired(aNewFieldMd.getName()));
         return new String[]{
             getSql4VolatileTable(fullTableName),
             sqlText,
@@ -487,11 +425,11 @@ public class Db2SqlDriver extends SqlDriver {
     }
 
     private String getSql4VolatileTable(String aTableName) {
-        return String.format(VOLATILE_TABLE, wrapName(aTableName));
+        return String.format(VOLATILE_TABLE, aTableName);
     }
 
     private String getSql4ReorgTable(String aTableName) {
-        return String.format(REORG_TABLE, wrapName(aTableName));
+        return String.format(REORG_TABLE, aTableName);
     }
 
     @Override
@@ -528,7 +466,7 @@ public class Db2SqlDriver extends SqlDriver {
     public void applyContextToConnection(Connection aConnection, String aSchema) throws Exception {
         if (aSchema != null && !aSchema.isEmpty()) {
             try (Statement stmt = aConnection.createStatement()) {
-                stmt.execute(String.format(SET_SCHEMA_CLAUSE, wrapName(aSchema)));
+                stmt.execute(String.format(SET_SCHEMA_CLAUSE, wrapNameIfRequired(aSchema)));
             }
         }
     }
@@ -549,18 +487,18 @@ public class Db2SqlDriver extends SqlDriver {
             ForeignKeySpec fk = listFk.get(0);
             String fkTableName = makeFullName(aSchemaName, fk.getTable());
             String fkName = fk.getCName();
-            String fkColumnName = wrapName(fk.getField());
+            String fkColumnName = wrapNameIfRequired(fk.getField());
 
             PrimaryKeySpec pk = fk.getReferee();
             String pkSchemaName = pk.getSchema();
             String pkTableName = makeFullName(aSchemaName, pk.getTable());
-            String pkColumnName = wrapName(pk.getField());
+            String pkColumnName = wrapNameIfRequired(pk.getField());
 
             for (int i = 1; i < listFk.size(); i++) {
                 fk = listFk.get(i);
                 pk = fk.getReferee();
-                fkColumnName += ", " + wrapName(fk.getField());
-                pkColumnName += ", " + wrapName(pk.getField());
+                fkColumnName += ", " + wrapNameIfRequired(fk.getField());
+                pkColumnName += ", " + wrapNameIfRequired(pk.getField());
             }
 
             /**
@@ -582,7 +520,7 @@ public class Db2SqlDriver extends SqlDriver {
             }
             //fkRule += " NOT ENFORCED";
             return String.format("ALTER TABLE %s ADD CONSTRAINT %s"
-                    + " FOREIGN KEY (%s) REFERENCES %s (%s) %s", fkTableName, fkName.isEmpty() ? "" : wrapName(fkName), fkColumnName, pkTableName, pkColumnName, fkRule);
+                    + " FOREIGN KEY (%s) REFERENCES %s (%s) %s", fkTableName, fkName.isEmpty() ? "" : wrapNameIfRequired(fkName), fkColumnName, pkTableName, pkColumnName, fkRule);
         }
         return null;
     }
@@ -594,15 +532,14 @@ public class Db2SqlDriver extends SqlDriver {
             PrimaryKeySpec pk = listPk.get(0);
             String tableName = pk.getTable();
             String pkTableName = makeFullName(aSchemaName, tableName);
-            String pkName = wrapName(tableName + PKEY_NAME_SUFFIX);
-            String pkColumnName = wrapName(pk.getField());
+            String pkName = wrapNameIfRequired(generatePkName(tableName, PKEY_NAME_SUFFIX));
+            String pkColumnName = wrapNameIfRequired(pk.getField());
             for (int i = 1; i < listPk.size(); i++) {
                 pk = listPk.get(i);
-                pkColumnName += ", " + wrapName(pk.getField());
+                pkColumnName += ", " + wrapNameIfRequired(pk.getField());
             }
             return new String[]{
                 getSql4VolatileTable(pkTableName),
-                //                String.format("ALTER TABLE %s ADD %s PRIMARY KEY (%s)", pkTableName, (pkName.isEmpty() ? "" : "CONSTRAINT "+ wrapName(pkName)), pkColumnName),
                 String.format("ALTER TABLE %s ADD CONSTRAINT %s PRIMARY KEY (%s)", pkTableName, pkName, pkColumnName),
                 getSql4ReorgTable(pkTableName)
             };
@@ -622,9 +559,28 @@ public class Db2SqlDriver extends SqlDriver {
         sqls.add(getSql4VolatileTable(fullTableName));
         sqls.add(String.format(SqlDriver.ADD_FIELD_SQL_PREFIX, fullTableName) + getSql4FieldDefinition(aField));
         if (!aField.isNullable()) {
-            sqls.add(String.format(ALTER_FIELD_SQL_PREFIX, fullTableName) + wrapName(aField.getName()) + " set not null");
+            sqls.add(String.format(ALTER_FIELD_SQL_PREFIX, fullTableName) + wrapNameIfRequired(aField.getName()) + " set not null");
         }
         sqls.add(getSql4ReorgTable(fullTableName));
         return (String[]) sqls.toArray(new String[sqls.size()]);
+    }
+
+    @Override
+    public TwinString[] getCharsForWrap() {
+        return charsForWrap;
+    }
+
+    @Override
+    public char[] getRestrictedChars() {
+        return restrictedChars;
+    }
+
+    @Override
+    public boolean isHadWrapped(String aName) {
+        return isHaveLowerCase(aName);
+    }
+
+    private String prepareName(String aName) {
+        return (isWrappedName(aName) ? unwrapName(aName) : aName.toUpperCase());
     }
 }

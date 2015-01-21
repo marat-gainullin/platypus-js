@@ -10,9 +10,6 @@
 package com.eas.client.sqldrivers;
 
 import com.bearsoft.rowset.Converter;
-import com.bearsoft.rowset.Row;
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.bearsoft.rowset.metadata.PrimaryKeySpec;
@@ -35,10 +32,25 @@ import java.util.logging.Logger;
  */
 public abstract class SqlDriver {
 
-    // символы для экранирования имен схем,таблиц,колонок,индексов и т.д.
-    private String leftCharForWrap = "\"";
-    private String rightCharForWrap = "\"";
-    private String[] wrappedChars = new String[]{" "};
+    protected class TwinString {
+
+        private final String left;
+        private final String right;
+
+        TwinString(String aLeft, String aRight) {
+            left = aLeft;
+            right = aRight;
+        }
+
+        public String getLeft() {
+            return left;
+        }
+
+        public String getRight() {
+            return right;
+        }
+    }
+
     // error codes
     protected static final String EAS_TABLE_ALREADY_EXISTS = "EAS_TABLE_ALREADY_EXISTS";
     protected static final String EAS_TABLE_DOESNT_EXISTS = "EAS_TABLE_DOESNT_EXISTS";
@@ -48,15 +60,16 @@ public abstract class SqlDriver {
     public static final String ADD_FIELD_SQL_PREFIX = "alter table %s add ";
 
     public static final String PKEY_NAME_SUFFIX = "_pk";
-    
+
     public SqlDriver() {
         super();
     }
 
     /**
      * Adds tables, foreign keys etc. to a database for in database users space
+     *
      * @param aConnection
-     * @throws Exception 
+     * @throws Exception
      */
     public void initializeUsersSpace(Connection aConnection) throws Exception {
         if (!checkUsersSpaceInitialized(aConnection)) {
@@ -68,8 +81,9 @@ public abstract class SqlDriver {
 
     /**
      * Adds tables, foreign keys etc. to a database for database versioning
+     *
      * @param aConnection
-     * @throws Exception 
+     * @throws Exception
      */
     public void initializeVersion(Connection aConnection) throws Exception {
         if (!checkVersionInitialized(aConnection)) {
@@ -112,7 +126,7 @@ public abstract class SqlDriver {
      * @return
      */
     public abstract String getUsersSpaceInitResourceName();
-    
+
     /**
      *
      * Gets database versioning initial script location and file name.
@@ -120,7 +134,7 @@ public abstract class SqlDriver {
      * @return
      */
     public abstract String getVersionInitResourceName();
-    
+
     /**
      * Returns subset of jdbc types, supported by particular database. The trick
      * is that database uses own identifiers for it's types and we need an extra
@@ -215,16 +229,6 @@ public abstract class SqlDriver {
 
     /**
      * *
-     * Returns sql query text for getting column comments metadata for tables.
-     *
-     * @param aOwnerName Schema name
-     * @param aTableNames Tables names set
-     * @return
-     */
-    public abstract String getSql4ColumnsComments(String aOwnerName, Set<String> aTableNames);
-
-    /**
-     * *
      * Returns sql query text for getting indexes metadata for tables.
      *
      * @param aOwnerName Schema name
@@ -248,16 +252,6 @@ public abstract class SqlDriver {
 
     /**
      * *
-     * Returns sql query text for getting comments metadata for tables.
-     *
-     * @param aOwnerName Schema name
-     * @param aTableNames Tables names set
-     * @return
-     */
-    public abstract String getSql4TableComments(String aOwnerName, Set<String> aTableNames);
-
-    /**
-     * *
      * Returns sql clause to set table's comment.
      *
      * @param aOwnerName Schema name
@@ -266,46 +260,6 @@ public abstract class SqlDriver {
      * @return Sql text
      */
     public abstract String getSql4CreateTableComment(String aOwnerName, String aTableName, String aDescription);
-
-    /**
-     * *
-     * Finds column name from comment's rowset on current cursor position.
-     *
-     * @param aRow
-     * @return Column name
-     * @throws RowsetException Rowset exception
-     */
-    public abstract String getColumnNameFromCommentsDs(Row aRow) throws RowsetException;
-
-    /**
-     * *
-     * Finds column comment from comment's rowset on current cursor position.
-     *
-     * @param aRow
-     * @return Column name
-     * @throws RowsetException Rowset exception
-     */
-    public abstract String getColumnCommentFromCommentsDs(Row aRow) throws RowsetException;
-
-    /**
-     * *
-     * Finds table name from comment's rowset on current cursor position.
-     *
-     * @param aRow
-     * @return Column name
-     * @throws RowsetException Rowset exception
-     */
-    public abstract String getTableNameFromCommentsDs(Row aRow) throws RowsetException;
-
-    /**
-     * *
-     * Finds table comment from comment's rowset on current cursor position.
-     *
-     * @param aRow
-     * @return Column name
-     * @throws RowsetException Rowset exception
-     */
-    public abstract String getTableCommentFromCommentsDs(Row aRow) throws RowsetException;
 
     /**
      * *
@@ -428,7 +382,7 @@ public abstract class SqlDriver {
      *
      * @param aSchemaName Schema name
      * @param aTableName Name of the table with that field
-     * @param aField A field information 
+     * @param aField A field information
      * @return Sql array string for field modification.
      */
     public abstract String[] getSqls4AddingField(String aSchemaName, String aTableName, Field aField);
@@ -443,13 +397,13 @@ public abstract class SqlDriver {
      * @return Sql string generted.
      */
     public String[] getSql4DroppingField(String aSchemaName, String aTableName, String aFieldName) {
-        String fullTableName = wrapName(aTableName);
+        String fullTableName = wrapNameIfRequired(aTableName);
         if (aSchemaName != null && !aSchemaName.isEmpty()) {
-            fullTableName = wrapName(aSchemaName) + "." + fullTableName;
+            fullTableName = wrapNameIfRequired(aSchemaName) + "." + fullTableName;
         }
         return new String[]{
-                    String.format(DROP_FIELD_SQL_PREFIX, fullTableName) + wrapName(aFieldName)
-                };
+            String.format(DROP_FIELD_SQL_PREFIX, fullTableName) + wrapNameIfRequired(aFieldName)
+        };
     }
 
     /**
@@ -503,7 +457,7 @@ public abstract class SqlDriver {
                         }
                     } catch (Exception ex) {
                         aConnection.rollback();
-                        Logger.getLogger(SqlDriver.class.getName()).log(Level.WARNING, "Error applying SQL script. {0}", ex.getMessage());       
+                        Logger.getLogger(SqlDriver.class.getName()).log(Level.WARNING, "Error applying SQL script. {0}", ex.getMessage());
                     }
                 }
             }
@@ -527,7 +481,7 @@ public abstract class SqlDriver {
         }
         return false;
     }
-    
+
     private boolean checkVersionInitialized(Connection aConnection) {
         try {
             try (PreparedStatement stmt = aConnection.prepareStatement(String.format(SQLUtils.SQL_MAX_COMMON_BY_FIELD, ClientConstants.F_VERSION_VALUE, ClientConstants.F_VERSION_VALUE, ClientConstants.T_MTD_VERSION))) {
@@ -545,7 +499,7 @@ public abstract class SqlDriver {
         }
         return false;
     }
-    
+
     private String readUsersSpaceInitScriptResource() throws IOException {
         String resName = getUsersSpaceInitResourceName();
         return readScriptResource(resName);
@@ -555,7 +509,7 @@ public abstract class SqlDriver {
         String resName = getVersionInitResourceName();
         return readScriptResource(resName);
     }
-    
+
     protected String readScriptResource(String resName) throws IOException {
         try (InputStream is = SqlDriver.class.getResourceAsStream(resName)) {
             byte[] data = new byte[is.available()];
@@ -564,60 +518,143 @@ public abstract class SqlDriver {
         }
     }
 
+    public String makeFullName(String aSchemaName, String aName) {
+        String name = wrapNameIfRequired(aName);
+        if (aSchemaName != null && !aSchemaName.isEmpty()) {
+            name = wrapNameIfRequired(aSchemaName) + "." + name;
+        }
+        return name;
+    }
+
     protected String constructIn(Set<String> strings) {
-        String tablesIn = "";
-        for (String lString : strings) {
-            if (tablesIn.isEmpty()) {
-                tablesIn = "'" + lString + "'";
-            } else {
-                tablesIn += ", '" + lString + "'";
+        StringBuilder sb = new StringBuilder();
+        String delimiter = "";
+        for (String l : strings) {
+            sb.append(delimiter).append("'").append(l.replaceAll("'", "''")).append("'");
+            delimiter = ", ";
+        }
+        return sb.toString();
+    }
+
+    abstract public TwinString[] getCharsForWrap();
+
+    abstract public char[] getRestrictedChars();
+
+    abstract public boolean isHadWrapped(String aName);
+
+    protected boolean isHaveLowerCase(String aValue) {
+        if (aValue != null) {
+            for (char c : aValue.toCharArray()) {
+                if (Character.isLowerCase(c)) {
+                    return true;
+                }
             }
         }
-        return tablesIn;
+        return false;
+    }
+
+    protected boolean isHaveUpperCase(String aValue) {
+        if (aValue != null) {
+            for (char c : aValue.toCharArray()) {
+                if (Character.isUpperCase(c)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
-     * *
+     * 
      * Wrapping names containing restricted symbols.
      *
      * @param aName Name to wrap
      * @return Wrapped text
      */
-    public String wrapName(String aName) {
-        if (aName != null && !aName.isEmpty()
-                && !aName.startsWith(leftCharForWrap) && !aName.endsWith(rightCharForWrap)) {
-            if (wrappedChars != null && wrappedChars.length > 0) {
-                for (String s : wrappedChars) {
-                    if (aName.indexOf(s) >= 0) {
-                        return leftCharForWrap + aName + rightCharForWrap;
+    public String wrapNameIfRequired(String aName) {
+        return wrapName(aName, isRequiredWrap(aName));
+    }
+
+    public String wrapName(String aName, boolean requiredOnly) {
+        if (aName != null && !aName.isEmpty() && !isWrappedName(aName) && requiredOnly) {
+            TwinString[] twinsWrap = getCharsForWrap();
+            if (twinsWrap != null && twinsWrap.length > 0) {
+                String wrapL = twinsWrap[0].getLeft();
+                String wrapR = twinsWrap[0].getRight();
+                StringBuilder sb = new StringBuilder();
+                sb.append(wrapL);
+                if (wrapL.length() == 1) {
+                    if (wrapL.equals(wrapR)) {
+                        sb.append(aName.replaceAll(wrapL, wrapL + wrapL));
+                    } else {
+                        sb.append(aName.replaceAll(wrapL, wrapL + wrapL).replaceAll(wrapR, wrapR + wrapR));
+                    }
+                } else {
+                    sb.append(aName);
+                }
+                sb.append(wrapR);
+                return sb.toString();
+            }
+        }
+        return aName;
+    }
+
+    public String unwrapName(String aName) {
+        int wrapLength = getWrapLength(aName);
+        if (wrapLength > 0) {
+            int length = aName.length();
+            String left = aName.substring(0, wrapLength);
+            String right = aName.substring(length - wrapLength);
+            if (left.equals(right)) {
+                return aName.substring(wrapLength, length - wrapLength).replaceAll(left + right, left);
+            }
+            return aName.substring(wrapLength, length - wrapLength);
+        }
+        return aName;
+    }
+
+    public boolean isWrappedName(String aName) {
+        return getWrapLength(aName) > 0;
+    }
+
+    public int getWrapLength(String aName) {
+        if (aName != null && !aName.isEmpty()) {
+            TwinString[] twins = getCharsForWrap();
+
+            if (twins != null) {
+                for (TwinString twin : twins) {
+                    String left = twin.getLeft();
+                    String right = twin.getRight();
+                    if (aName.startsWith(left) && aName.endsWith(right)) {
+                        return left.length();
                     }
                 }
             }
-            return aName;
-        } else {
-            return aName;
         }
+        return 0;
     }
 
-    /**
-     * *
-     * Sets wrapping symbols
-     *
-     * @param aLeftChar Left char
-     * @param aRightChar Right char
-     * @param aWrappedSpecChars Array of chars to wrap
-     */
-    public void setWrap(String aLeftChar, String aRightChar, String[] aWrappedSpecChars) {
-        leftCharForWrap = aLeftChar;
-        rightCharForWrap = aRightChar;
-        wrappedChars = aWrappedSpecChars;
-    }
-    
-    public String makeFullName(String aSchemaName, String aName) {
-        String name = wrapName(aName);
-        if (aSchemaName != null && !aSchemaName.isEmpty()) {
-            name = wrapName(aSchemaName) + "." + name;
+    public boolean isRequiredWrap(String aName) {
+        if (aName != null && !aName.isEmpty()) {
+            char[] restricted = getRestrictedChars();
+            assert restricted != null;
+            for (char c : aName.toCharArray()) {
+                for (char rC : restricted) {
+                    if (c == rC) {
+                        return true;
+                    }
+                }
+            }
         }
-        return name;
+        return false;
+    }
+
+    public String generatePkName(String aTableName, String aSuffix) {
+        int wrapLength = getWrapLength(aTableName);
+        StringBuilder sb = new StringBuilder();
+        sb.append(aTableName.substring(0, aTableName.length() - wrapLength));
+        sb.append(aSuffix);
+        sb.append(aTableName.substring(aTableName.length() - wrapLength));
+        return sb.toString();
     }
 }
