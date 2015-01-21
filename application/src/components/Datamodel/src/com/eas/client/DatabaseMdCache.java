@@ -17,7 +17,6 @@ import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.bearsoft.rowset.metadata.PrimaryKeySpec;
-import com.eas.client.metadata.DbTableComments;
 import com.eas.client.metadata.DbTableIndexes;
 import com.eas.client.metadata.DbTableKeys;
 import com.eas.client.cache.FreqCache;
@@ -122,21 +121,24 @@ public class DatabaseMdCache {
             SqlCompiledQuery query = new SqlCompiledQuery(client, datasourceName, queryText);
             Rowset rs = query.executeQuery(null, null);
             int colIndex = rs.getFields().find(ClientConstants.JDBCCOLS_TABLE_NAME);
+            int colRemarks = rs.getFields().find(ClientConstants.JDBCCOLS_REMARKS);
             assert colIndex > 0;
+            assert colRemarks > 0;
             tablesFields.clear();
-            Set<String> tablesNames = new HashSet<>();
+            Map<String, String> tablesNames = new HashMap<>();
             for (Row r : rs.getCurrent()) {
                 String lTableName = (String) r.getColumnObject(colIndex);
-                tablesNames.add(lTableName);
+                String lRemarks = (String) r.getColumnObject(colRemarks);
+                tablesNames.put(lTableName, lRemarks);
                 if (tablesNames.size() >= 100) {
-                    Map<String, Fields> md = tablesFields.query(aSchema, tablesNames, aFullMetadata);
-                    tablesFields.fill(aSchema, md);
+                    Map<String, Fields> md = tablesFields.query(aSchema, tablesNames.keySet(), aFullMetadata);
+                    tablesFields.fill(aSchema, md, tablesNames);
                     tablesNames.clear();
                 }
             }
             if (!tablesNames.isEmpty()) {
-                Map<String, Fields> md = tablesFields.query(aSchema, tablesNames, aFullMetadata);
-                tablesFields.fill(aSchema, md);
+                Map<String, Fields> md = tablesFields.query(aSchema, tablesNames.keySet(), aFullMetadata);
+                tablesFields.fill(aSchema, md, tablesNames);
             }
         }
     }
@@ -159,11 +161,10 @@ public class DatabaseMdCache {
             super();
         }
 
-        protected void merge(String aSchema, Map<String, Fields> aTablesFields, Map<String, DbTableKeys> aTablesKeys, Map<String, DbTableComments> aTablesComments) throws Exception {
+        protected void merge(String aSchema, Map<String, Fields> aTablesFields, Map<String, DbTableKeys> aTablesKeys) throws Exception {
             aTablesFields.keySet().stream().forEach((String lTableName) -> {
                 Fields fields = aTablesFields.get(lTableName);
                 DbTableKeys keys = aTablesKeys.get(lTableName);
-                DbTableComments comments = aTablesComments.get(lTableName);
                 if (keys != null) {
                     keys.getPks().entrySet().stream().forEach((Entry<String, PrimaryKeySpec> pkEntry) -> {
                         Field f = fields.get(pkEntry.getKey());
@@ -178,23 +179,15 @@ public class DatabaseMdCache {
                         }
                     });
                 }
-                if (comments != null) {
-                    fields.setTableDescription(comments.getTableComment());
-                    comments.getFieldsComments().entrySet().stream().forEach((Entry<String, String> cEntry) -> {
-                        Field f = fields.get(cEntry.getKey());
-                        if (f != null) {
-                            f.setDescription(cEntry.getValue());
-                        }
-                    });
-                }
             });
         }
 
-        protected void fill(String aSchema, Map<String, Fields> aTablesFields) throws Exception {
+        protected void fill(String aSchema, Map<String, Fields> aTablesFields, Map<String, String> aTablesDescriptions) throws Exception {
             if (aTablesFields != null && !aTablesFields.isEmpty()) {
                 synchronized (lock) {
                     aTablesFields.keySet().stream().forEach((String lTableName) -> {
                         Fields fields = aTablesFields.get(lTableName);
+                        fields.setTableDescription(aTablesDescriptions.get(lTableName));
                         String fullTableName = lTableName;
                         if (aSchema != null && !aSchema.isEmpty()) {
                             fullTableName = aSchema + "." + fullTableName;
@@ -266,8 +259,6 @@ public class DatabaseMdCache {
                 }
                 if (!tables2Retrive.isEmpty()) {
                     Rowset tablesColumnsRs = null;
-                    Rowset tablesCommentsRs = null;
-                    Rowset columnsCommentsRs = null;
                     Rowset primaryKeysRs = null;
                     Rowset foreignKeysRs = null;
                     String colsSql = driver.getSql4TableColumns(schema4Sql, tables2Retrive);
@@ -279,29 +270,21 @@ public class DatabaseMdCache {
                         primaryKeysRs = new SqlCompiledQuery(client, datasourceName, sqlPks).executeQuery(null, null);
                     }
                     if (aFullMetadata) {
-                        String sqlTC = driver.getSql4TableComments(schema4Sql, tables2Retrive);
-                        String sqlCC = driver.getSql4ColumnsComments(schema4Sql, tables2Retrive);
-                        if (sqlTC != null && !sqlTC.isEmpty()
-                                && sqlCC != null && !sqlCC.isEmpty()) {
-                            tablesCommentsRs = new SqlCompiledQuery(client, datasourceName, sqlTC).executeQuery(null, null);
-                            columnsCommentsRs = new SqlCompiledQuery(client, datasourceName, sqlCC).executeQuery(null, null);
-                        }
                         String sqlFks = driver.getSql4TableForeignKeys(schema4Sql, tables2Retrive);
                         if (sqlFks != null && !sqlFks.isEmpty()) {
                             foreignKeysRs = new SqlCompiledQuery(client, datasourceName, sqlFks).executeQuery(null, null);
                         }
                     }
-                    return read(tablesColumnsRs, tablesCommentsRs, columnsCommentsRs, primaryKeysRs, foreignKeysRs, aSchema, driver);
+                    return read(tablesColumnsRs, primaryKeysRs, foreignKeysRs, aSchema, driver);
                 }
             }
             return null;
         }
 
-        protected Map<String, Fields> read(Rowset aTablesColumnsRs, Rowset aTablesCommentsRs, Rowset aColumnsCommentsRs, Rowset aPrimaryKeysRs, Rowset aForeignKeysRs, String aSchema, SqlDriver sqlDriver) throws Exception {
+        protected Map<String, Fields> read(Rowset aTablesColumnsRs, Rowset aPrimaryKeysRs, Rowset aForeignKeysRs, String aSchema, SqlDriver sqlDriver) throws Exception {
             Map<String, Fields> columns = readTablesColumns(aTablesColumnsRs, aSchema, sqlDriver);
             Map<String, DbTableKeys> keys = readTablesKeys(aPrimaryKeysRs, aForeignKeysRs, aSchema, sqlDriver);
-            Map<String, DbTableComments> comments = readTablesComments(aTablesCommentsRs, aColumnsCommentsRs, aSchema, sqlDriver);
-            merge(aSchema, columns, keys, comments);
+            merge(aSchema, columns, keys);
             return columns;
         }
 
@@ -315,7 +298,7 @@ public class DatabaseMdCache {
                 }
                 int JDBCCOLS_TABLE_INDEX = colIndicies.get(ClientConstants.JDBCCOLS_TABLE_NAME);
                 int JDBCCOLS_COLUMN_INDEX = colIndicies.get(ClientConstants.JDBCCOLS_COLUMN_NAME);
-                //int JDBCCOLS_REMARKS_INDEX = colIndicies.get(ClientConstants.JDBCCOLS_REMARKS);
+                int JDBCCOLS_REMARKS_INDEX = colIndicies.get(ClientConstants.JDBCCOLS_REMARKS);
                 int JDBCCOLS_DATA_TYPE_INDEX = colIndicies.get(ClientConstants.JDBCCOLS_DATA_TYPE);
                 int JDBCCOLS_TYPE_NAME_INDEX = colIndicies.get(ClientConstants.JDBCCOLS_TYPE_NAME);
                 int JDBCCOLS_COLUMN_SIZE_INDEX = colIndicies.get(ClientConstants.JDBCCOLS_COLUMN_SIZE);
@@ -330,9 +313,8 @@ public class DatabaseMdCache {
                         tabledFields.put(fTableName, fields);
                     }
                     String fName = (String) r.getColumnObject(JDBCCOLS_COLUMN_INDEX);
-                    //String fDescription = (String)r.getColumnObject(JDBCCOLS_REMARKS_INDEX);
-                    //Field field = new Field(fName, fDescription);
-                    Field field = new Field(fName.toLowerCase());
+                    String fDescription = (String) r.getColumnObject(JDBCCOLS_REMARKS_INDEX);
+                    Field field = new Field(fName.toLowerCase(), fDescription);
                     field.setOriginalName(fName);
                     String rdbmsTypeName = (String) r.getColumnObject(JDBCCOLS_TYPE_NAME_INDEX);
                     Integer correctType = sqlDriver.getJdbcTypeByRDBMSTypename(rdbmsTypeName);
@@ -458,31 +440,6 @@ public class DatabaseMdCache {
             }
             return tabledKeys;
         }
-
-        protected Map<String, DbTableComments> readTablesComments(Rowset tcRowset, Rowset ccRowset, String aOwner, SqlDriver aDrv) throws Exception {
-            Map<String, DbTableComments> tabledComments = new HashMap<>();
-            for (Row r : tcRowset.getCurrent()) {
-                String lTableName = aDrv.getTableNameFromCommentsDs(r);
-                DbTableComments lTableComments = tabledComments.get(lTableName);
-                if (lTableComments == null) {
-                    lTableComments = new DbTableComments();
-                    tabledComments.put(lTableName, lTableComments);
-                }
-                lTableComments.setTableComment(aDrv.getTableCommentFromCommentsDs(r));
-            }
-
-            for (Row r : ccRowset.getCurrent()) {
-                String lTableName = aDrv.getTableNameFromCommentsDs(r);
-                DbTableComments lTableComments = tabledComments.get(lTableName);
-                if (lTableComments == null) {
-                    lTableComments = new DbTableComments();
-                    tabledComments.put(lTableName, lTableComments);
-                }
-                lTableComments.setFieldComment(aDrv.getColumnNameFromCommentsDs(r), aDrv.getColumnCommentFromCommentsDs(r));
-            }
-            return tabledComments;
-        }
-
     }
 
     public DbTableIndexes getTableIndexes(String aTableName) throws Exception {

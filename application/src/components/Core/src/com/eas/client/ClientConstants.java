@@ -74,11 +74,6 @@ public class ClientConstants {
     public static final String JDBCPKS_TABLE_TYPE_TABLE = "TABLE";
     public static final String JDBCPKS_TABLE_TYPE_VIEW = "VIEW";
     
-    public static final String F_TABLE_COMMENTS_COMMENT_FIELD_NAME = "COMMENTS";
-    public static final String F_COLUMNS_COMMENTS_FIELD_FIELD_NAME = "COLUMN_NAME";
-    public static final String F_COLUMNS_COMMENTS_COMMENT_FIELD_NAME = "COMMENTS";
-    public static final String F_TABLE_COMMENTS_NAME_FIELD_NAME = "TABLE_NAME";
-    
     public static final String STORED_QUERY_REF_PREFIX = "#";
     // Java properties names
     public static final String USER_DIR_PROP_NAME = "user.dir";

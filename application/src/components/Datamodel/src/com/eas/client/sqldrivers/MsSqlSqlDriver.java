@@ -5,9 +5,7 @@
 package com.eas.client.sqldrivers;
 
 import com.bearsoft.rowset.Converter;
-import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.RowsetConverter;
-import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.bearsoft.rowset.metadata.PrimaryKeySpec;
@@ -28,6 +26,10 @@ import java.util.Set;
  */
 public class MsSqlSqlDriver extends SqlDriver {
 
+    // настройка экранирования наименования объектов БД
+    private final TwinString[] charsForWrap = {new TwinString("\"", "\""), new TwinString("[", "]")};
+    private final char[] restrictedChars = {' ', ',', '\'', '"'};
+
     protected static final String COMMIT_DDL_CLAUSE = "begin %s; commit; end";
     protected static final String GET_SCHEMA_CLAUSE = "SELECT SCHEMA_NAME()";
     protected static final String CREATE_SCHEMA_CLAUSE = "CREATE SCHEMA %s";
@@ -40,20 +42,67 @@ public class MsSqlSqlDriver extends SqlDriver {
         EAS_TABLE_ALREADY_EXISTS
     };
     public static final String SQL_ALL_TABLES = ""
-            + "Select"
-            + " t.name as " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
-            + " s.name as " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
-            + " (case type_desc when 'USER_TABLE' then '" + ClientConstants.JDBCPKS_TABLE_TYPE_TABLE + "' else type_desc end) as " + ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME + " "
-            + "from sys.all_objects as t inner join sys.schemas as s on (s.schema_id = t.schema_id) "
-            + "where t.type in  ('U','V')";
-    public static final String SQL_SCHEMA_TABLES = SQL_ALL_TABLES
-            + " and Upper(s.name)=Upper('%s')"
-            + " order by " + ClientConstants.JDBCCOLS_TABLE_SCHEM + "," + ClientConstants.JDBCCOLS_TABLE_NAME;
+            + "with schemas as (select name, schema_id from sys.schemas),"
+            + "tables as ("
+            + "  SELECT"
+            + "    '" + ClientConstants.JDBCPKS_TABLE_TYPE_TABLE + "' as " + ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME + ","
+            + "    schemas.name as " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
+            + "    tbl.name as " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
+            + "    tbl.object_id"
+            + "  FROM sys.tables AS tbl"
+            + "    INNER JOIN schemas ON schemas.schema_id = tbl.schema_id "
+            + "  union all"
+            + "  SELECT"
+            + "    '" + ClientConstants.JDBCPKS_TABLE_TYPE_VIEW + "' as " + ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME + ","
+            + "    schemas.name as " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
+            + "    tbl.name as " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
+            + "    tbl.object_id"
+            + "  FROM sys.views AS tbl"
+            + "    INNER JOIN schemas ON schemas.schema_id = tbl.schema_id "
+            + ")"
+            + "select "
+            + "  '' TABLE_CAT,"
+            + "  " + ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME + ","
+            + "  " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
+            + "  " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
+            + "  p.value as " + ClientConstants.JDBCCOLS_REMARKS + " "
+            + "from tables "
+            + "  INNER JOIN sys.extended_properties AS p ON p.major_id=tables.object_id AND p.minor_id=0 AND p.class=1 AND UPPER(p.name) LIKE UPPER('%description%')";
+
+    public static final String SQL_SCHEMA_TABLES = ""
+            + "with schemas as (select name, schema_id from sys.schemas where name = '%s'),"
+            + "tables as ("
+            + "  SELECT"
+            + "    '" + ClientConstants.JDBCPKS_TABLE_TYPE_TABLE + "' as " + ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME + ","
+            + "    schemas.name as " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
+            + "    tbl.name as " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
+            + "    tbl.object_id"
+            + "  FROM sys.tables AS tbl"
+            + "    INNER JOIN schemas ON schemas.schema_id = tbl.schema_id "
+            + "  union all"
+            + "  SELECT"
+            + "    '" + ClientConstants.JDBCPKS_TABLE_TYPE_VIEW + "' as " + ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME + ","
+            + "    schemas.name as " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
+            + "    tbl.name as " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
+            + "    tbl.object_id"
+            + "  FROM sys.views AS tbl"
+            + "    INNER JOIN schemas ON schemas.schema_id = tbl.schema_id "
+            + ")"
+            + "select "
+            + "  '' TABLE_CAT,"
+            + "  " + ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME + ","
+            + "  " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
+            + "  " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
+            + "  p.value as " + ClientConstants.JDBCCOLS_REMARKS + " "
+            + "from tables "
+            + "  LEFT JOIN sys.extended_properties AS p ON p.major_id=tables.object_id AND p.minor_id=0 AND p.class=1 AND UPPER(p.name) = UPPER('ms_description') "
+            + "order by " + ClientConstants.JDBCCOLS_TABLE_SCHEM + "," + ClientConstants.JDBCCOLS_TABLE_NAME;
     public static final String SQL_SCHEMAS = ""
             + "Select s.name as " + ClientConstants.JDBCCOLS_TABLE_SCHEM + " from sys.schemas as s "
             + "order by " + ClientConstants.JDBCCOLS_TABLE_SCHEM;
     public static final String SQL_COLUMNS = ""
             + "SELECT "
+            + "  ''  TABLE_CAT,"
             + " schemas.name AS " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
             + " tables.name AS " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
             + " columns.name AS " + ClientConstants.JDBCCOLS_COLUMN_NAME + ","
@@ -64,12 +113,13 @@ public class MsSqlSqlDriver extends SqlDriver {
             + " columns.scale as decimal_digits,"
             + " columns.precision as NUM_PREC_RADIX,"
             + " (case columns.is_nullable when 1 then 1 else 0 end) as nullable," //в выражении case происходит конвертация типов
-            + " null as REMARKS "
+            + " cast(sys.extended_properties.value as varchar(200)) as " + ClientConstants.JDBCCOLS_REMARKS + " "
             + "FROM sys.columns AS columns"
             + " INNER JOIN sys.tables AS tables ON columns.object_id = tables.object_id"
             + " INNER JOIN sys.schemas AS schemas ON schemas.schema_id = tables.schema_id"
             + " INNER JOIN sys.types as types on columns.user_type_id = types.user_type_id "
-            + "WHERE Upper(schemas.name)=Upper('%s') and Upper(tables.name) in (%s) ";
+            + " LEFT OUTER JOIN sys.extended_properties ON sys.extended_properties.major_id = columns.object_id AND sys.extended_properties.minor_id = columns.column_id "
+            + "WHERE schemas.name='%s' and tables.name in (%s) ";
     public static final String SQL_PRIMARY_KEYS = ""
             + "SELECT"
             + " schemas.name as " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
@@ -131,37 +181,6 @@ public class MsSqlSqlDriver extends SqlDriver {
             + " INNER JOIN sys.indexes AS indexes ON indexes.object_id = clindexes.object_id and indexes.index_id = clindexes.index_id "
             + "WHERE Upper(schemas.name) = Upper('%s') AND Upper(tables.name) in (%s) "
             + "ORDER BY non_unique, type, index_name, ordinal_position";
-    public static final String SQL_COLUMNS_COMMENTS = ""
-            + "SELECT"
-            + " schemas.name AS " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
-            + " tables.name AS " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
-            + " columns.name AS " + ClientConstants.JDBCCOLS_COLUMN_NAME + ","
-            + " cast(sys.extended_properties.value as varchar(200)) AS COMMENTS "
-            + "FROM sys.columns AS columns"
-            + " INNER JOIN sys.tables AS tables ON columns.object_id = tables.object_id"
-            + " INNER JOIN sys.schemas AS schemas ON schemas.schema_id = tables.schema_id"
-            + " LEFT OUTER JOIN sys.extended_properties ON sys.extended_properties.major_id = columns.object_id AND sys.extended_properties.minor_id = columns.column_id "
-            + "WHERE (UPPER(sys.extended_properties.name) LIKE UPPER('%%description%%')) and Upper(schemas.name)=Upper('%s') and Upper(tables.name) in (%s)";
-    public static final String SQL_TABLE_COMMENTS = ""
-            + "SELECT"
-            + " schemas.name AS " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
-            + " tables.name AS " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
-            + " cast(sys.extended_properties.value as varchar(200)) AS COMMENTS "
-            + "FROM sys.tables AS tables"
-            + " INNER JOIN sys.schemas AS schemas ON schemas.schema_id = tables.schema_id"
-            + " LEFT OUTER JOIN sys.extended_properties ON sys.extended_properties.major_id = tables.object_id AND "
-            + " (sys.extended_properties.minor_id IS NULL OR sys.extended_properties.minor_id = 0) "
-            + "WHERE (UPPER(sys.extended_properties.name) LIKE UPPER('%%description%%')) and Upper(schemas.name)=Upper('%s') and Upper(tables.name) in (%s)";
-    public static final String SQL_ALL_OWNER_TABLES_COMMENTS = ""
-            + "SELECT"
-            + " schemas.name AS " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
-            + " tables.name AS " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
-            + " cast(sys.extended_properties.value as varchar(200)) AS COMMENTS "
-            + "FROM sys.tables AS tables"
-            + " INNER JOIN sys.schemas AS schemas ON schemas.schema_id = tables.schema_id"
-            + " LEFT OUTER JOIN sys.extended_properties ON sys.extended_properties.major_id = tables.object_id AND"
-            + " (sys.extended_properties.minor_id IS NULL OR sys.extended_properties.minor_id = 0) "
-            + "WHERE (UPPER(sys.extended_properties.name) LIKE UPPER('%%description%%')) and Upper(schemas.name)=Upper('%s')";
     protected static final String ADD_COLUMN_COMMENT_CLAUSE = ""
             + "begin "
             + "begin try "
@@ -186,7 +205,6 @@ public class MsSqlSqlDriver extends SqlDriver {
 
     public MsSqlSqlDriver() {
         super();
-        setWrap("[", "]", new String[]{" "});
     }
 
     @Override
@@ -194,7 +212,7 @@ public class MsSqlSqlDriver extends SqlDriver {
         String tablesIn = "";
         if (aTableNames != null && !aTableNames.isEmpty()) {
             tablesIn = constructIn(aTableNames);
-            return String.format(SQL_COLUMNS, aOwnerName, tablesIn.toUpperCase());
+            return String.format(SQL_COLUMNS, prepareName(aOwnerName), tablesIn.toUpperCase());
         } else {
             return null;
         }
@@ -205,7 +223,7 @@ public class MsSqlSqlDriver extends SqlDriver {
         String tablesIn = "";
         if (aTableNames != null && !aTableNames.isEmpty()) {
             tablesIn = constructIn(aTableNames);
-            return String.format(SQL_PRIMARY_KEYS, aOwnerName, tablesIn.toUpperCase());
+            return String.format(SQL_PRIMARY_KEYS, prepareName(aOwnerName), tablesIn.toUpperCase());
         } else {
             return null;
         }
@@ -216,7 +234,7 @@ public class MsSqlSqlDriver extends SqlDriver {
         String tablesIn = "";
         if (aTableNames != null && !aTableNames.isEmpty()) {
             tablesIn = constructIn(aTableNames);
-            return String.format(SQL_FOREIGN_KEYS, aOwnerName, tablesIn.toUpperCase());
+            return String.format(SQL_FOREIGN_KEYS, prepareName(aOwnerName), tablesIn.toUpperCase());
         } else {
             return null;
         }
@@ -226,52 +244,10 @@ public class MsSqlSqlDriver extends SqlDriver {
     public String getSql4Indexes(String aOwnerName, Set<String> aTableNames) {
         if (aTableNames != null && !aTableNames.isEmpty()) {
             String tablesIn = constructIn(aTableNames);
-            return String.format(SQL_INDEX_KEYS, aOwnerName, tablesIn.toUpperCase());
+            return String.format(SQL_INDEX_KEYS, prepareName(aOwnerName), tablesIn.toUpperCase());
         } else {
             return null;
         }
-    }
-
-    @Override
-    public String getSql4ColumnsComments(String aOwnerName, Set<String> aTableNames) {
-        String tablesIn = "";
-        if (aTableNames != null && !aTableNames.isEmpty()) {
-            tablesIn = constructIn(aTableNames);
-            return String.format(SQL_COLUMNS_COMMENTS, aOwnerName, tablesIn.toUpperCase());
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public String getSql4TableComments(String aOwnerName, Set<String> aTableNames) {
-        String tablesIn = "";
-        if (aTableNames != null && !aTableNames.isEmpty()) {
-            tablesIn = constructIn(aTableNames);
-            return String.format(SQL_TABLE_COMMENTS, aOwnerName, tablesIn.toUpperCase());
-        } else {
-            return String.format(SQL_ALL_OWNER_TABLES_COMMENTS, aOwnerName);
-        }
-    }
-
-    @Override
-    public String getColumnNameFromCommentsDs(Row aRow) throws RowsetException {
-        return (String) aRow.getColumnObject(aRow.getFields().find(ClientConstants.F_COLUMNS_COMMENTS_FIELD_FIELD_NAME));
-    }
-
-    @Override
-    public String getColumnCommentFromCommentsDs(Row aRow) throws RowsetException {
-        return (String) aRow.getColumnObject(aRow.getFields().find(ClientConstants.F_COLUMNS_COMMENTS_COMMENT_FIELD_NAME));
-    }
-
-    @Override
-    public String getTableNameFromCommentsDs(Row aRow) throws RowsetException {
-        return (String) aRow.getColumnObject(aRow.getFields().find(ClientConstants.F_TABLE_COMMENTS_NAME_FIELD_NAME));
-    }
-
-    @Override
-    public String getTableCommentFromCommentsDs(Row aRow) throws RowsetException {
-        return (String) aRow.getColumnObject(aRow.getFields().find(ClientConstants.F_TABLE_COMMENTS_COMMENT_FIELD_NAME));
     }
 
     @Override
@@ -284,8 +260,8 @@ public class MsSqlSqlDriver extends SqlDriver {
     public String getSql4EmptyTableCreation(String aSchemaName, String aTableName, String aPkFieldName) {
         String fullName = makeFullName(aSchemaName, aTableName);
         return String.format(COMMIT_DDL_CLAUSE, "CREATE TABLE " + fullName + " ("
-                + wrapName(aPkFieldName) + " NUMERIC(18, 0) NOT NULL,"
-                + "CONSTRAINT " + wrapName(aTableName + PKEY_NAME_SUFFIX) + " PRIMARY KEY (" + wrapName(aPkFieldName) + " ASC))");
+                + wrapNameIfRequired(aPkFieldName) + " NUMERIC(18, 0) NOT NULL,"
+                + "CONSTRAINT " + wrapNameIfRequired(generatePkName(aTableName, PKEY_NAME_SUFFIX)) + " PRIMARY KEY (" + wrapNameIfRequired(aPkFieldName) + " ASC))");
     }
 
     @Override
@@ -326,7 +302,7 @@ public class MsSqlSqlDriver extends SqlDriver {
      */
     @Override
     public String getSql4FieldDefinition(Field aField) {
-        String fieldName = wrapName(aField.getName());
+        String fieldName = wrapNameIfRequired(aField.getName());
         String fieldDefinition = fieldName + " " + getFieldTypeDefinition(aField);
 
         if (!aField.isNullable()) {
@@ -340,7 +316,7 @@ public class MsSqlSqlDriver extends SqlDriver {
     @Override
     public String getSql4DropFkConstraint(String aSchemaName, ForeignKeySpec aFk) {
         String tableName = makeFullName(aSchemaName, aFk.getTable());
-        String sqlText = "ALTER TABLE " + tableName + " DROP CONSTRAINT " + wrapName(aFk.getCName());
+        String sqlText = "ALTER TABLE " + tableName + " DROP CONSTRAINT " + wrapNameIfRequired(aFk.getCName());
         return String.format(COMMIT_DDL_CLAUSE, sqlText);
     }
 
@@ -398,7 +374,7 @@ public class MsSqlSqlDriver extends SqlDriver {
         if (aDescription == null) {
             aDescription = "";
         }
-        return new String[]{String.format(ADD_COLUMN_COMMENT_CLAUSE, wrapName(aOwnerName), wrapName(aTableName), wrapName(aFieldName), aDescription, wrapName(aOwnerName), wrapName(aTableName), wrapName(aFieldName))};
+        return new String[]{String.format(ADD_COLUMN_COMMENT_CLAUSE, unwrapName(aOwnerName), unwrapName(aTableName), unwrapName(aFieldName), aDescription, unwrapName(aOwnerName), unwrapName(aTableName), unwrapName(aFieldName))};
     }
 
     @Override
@@ -406,7 +382,7 @@ public class MsSqlSqlDriver extends SqlDriver {
         if (aDescription == null) {
             aDescription = "";
         }
-        return String.format(ADD_TABLE_COMMENT_CLAUSE, aOwnerName, aTableName, aDescription, aOwnerName, aTableName);
+        return String.format(ADD_TABLE_COMMENT_CLAUSE, unwrapName(aOwnerName), unwrapName(aTableName), aDescription, unwrapName(aOwnerName), unwrapName(aTableName));
     }
 
     @Override
@@ -427,13 +403,13 @@ public class MsSqlSqlDriver extends SqlDriver {
     @Override
     public String getSql4DropIndex(String aSchemaName, String aTableName, String aIndexName) {
         aTableName = makeFullName(aSchemaName, aTableName);
-        return String.format(COMMIT_DDL_CLAUSE, "drop index " + wrapName(aIndexName) + " on " + aTableName);
+        return String.format(COMMIT_DDL_CLAUSE, "drop index " + wrapNameIfRequired(aIndexName) + " on " + aTableName);
     }
 
     @Override
     public String getSql4CreateIndex(String aSchemaName, String aTableName, DbTableIndexSpec aIndex) {
         assert aIndex.getColumns().size() > 0 : "index definition must consist of at least 1 column";
-        String indexName = wrapName(aIndex.getName());
+        String indexName = wrapNameIfRequired(aIndex.getName());
         String tableName = makeFullName(aSchemaName, aTableName);
         String modifier = "";
         /*
@@ -447,7 +423,7 @@ public class MsSqlSqlDriver extends SqlDriver {
         String fieldsList = "";
         for (int i = 0; i < aIndex.getColumns().size(); i++) {
             DbTableIndexColumnSpec column = aIndex.getColumns().get(i);
-            fieldsList += wrapName(column.getColumnName()) + " asc";
+            fieldsList += wrapNameIfRequired(column.getColumnName()) + " asc";
             if (i != aIndex.getColumns().size() - 1) {
                 fieldsList += ", ";
             }
@@ -457,11 +433,11 @@ public class MsSqlSqlDriver extends SqlDriver {
 
     @Override
     public String getSql4TablesEnumeration(String schema4Sql) {
-        if (schema4Sql == null) {
+        if (schema4Sql == null || schema4Sql.isEmpty()) {
             return SQL_ALL_TABLES
                     + " order by " + ClientConstants.JDBCCOLS_TABLE_SCHEM + "," + ClientConstants.JDBCCOLS_TABLE_NAME;
         } else {
-            return String.format(SQL_SCHEMA_TABLES, schema4Sql);
+            return String.format(SQL_SCHEMA_TABLES, prepareName(schema4Sql));
         }
     }
 
@@ -480,7 +456,7 @@ public class MsSqlSqlDriver extends SqlDriver {
 
     @Override
     public String getSql4DropPkConstraint(String aSchemaName, PrimaryKeySpec aPk) {
-        String constraintName = wrapName(aPk.getCName());
+        String constraintName = wrapNameIfRequired(aPk.getCName());
         String tableName = makeFullName(aSchemaName, aPk.getTable());
         return String.format(COMMIT_DDL_CLAUSE, "alter table " + tableName + " drop constraint " + constraintName);
     }
@@ -491,18 +467,18 @@ public class MsSqlSqlDriver extends SqlDriver {
             ForeignKeySpec fk = listFk.get(0);
             String fkTableName = makeFullName(aSchemaName, fk.getTable());
             String fkName = fk.getCName();
-            String fkColumnName = wrapName(fk.getField());
+            String fkColumnName = wrapNameIfRequired(fk.getField());
 
             PrimaryKeySpec pk = fk.getReferee();
             String pkSchemaName = pk.getSchema();
             String pkTableName = makeFullName(aSchemaName, pk.getTable());
-            String pkColumnName = wrapName(pk.getField());
+            String pkColumnName = wrapNameIfRequired(pk.getField());
 
             for (int i = 1; i < listFk.size(); i++) {
                 fk = listFk.get(i);
                 pk = fk.getReferee();
-                fkColumnName += ", " + wrapName(fk.getField());
-                pkColumnName += ", " + wrapName(pk.getField());
+                fkColumnName += ", " + wrapNameIfRequired(fk.getField());
+                pkColumnName += ", " + wrapNameIfRequired(pk.getField());
             }
 
             String fkRule = "";
@@ -535,7 +511,7 @@ public class MsSqlSqlDriver extends SqlDriver {
                     break;
             }
             return String.format(COMMIT_DDL_CLAUSE, String.format("ALTER TABLE %s ADD CONSTRAINT %s"
-                    + " FOREIGN KEY (%s) REFERENCES %s (%s) %s", fkTableName, fkName.isEmpty() ? "" : wrapName(fkName), fkColumnName, pkTableName, pkColumnName, fkRule));
+                    + " FOREIGN KEY (%s) REFERENCES %s (%s) %s", fkTableName, fkName.isEmpty() ? "" : wrapNameIfRequired(fkName), fkColumnName, pkTableName, pkColumnName, fkRule));
         }
         return null;
     }
@@ -547,11 +523,11 @@ public class MsSqlSqlDriver extends SqlDriver {
             PrimaryKeySpec pk = listPk.get(0);
             String tableName = pk.getTable();
             String pkTableName = makeFullName(aSchemaName, tableName);
-            String pkName = wrapName(tableName + PKEY_NAME_SUFFIX);
-            String pkColumnName = wrapName(pk.getField());
+            String pkName = wrapNameIfRequired(generatePkName(tableName, PKEY_NAME_SUFFIX));
+            String pkColumnName = wrapNameIfRequired(pk.getField());
             for (int i = 1; i < listPk.size(); i++) {
                 pk = listPk.get(i);
-                pkColumnName += ", " + wrapName(pk.getField());
+                pkColumnName += ", " + wrapNameIfRequired(pk.getField());
             }
             return new String[]{
                 String.format(COMMIT_DDL_CLAUSE, String.format("ALTER TABLE %s ADD CONSTRAINT %s PRIMARY KEY (%s)", pkTableName, pkName, pkColumnName))
@@ -571,5 +547,24 @@ public class MsSqlSqlDriver extends SqlDriver {
         return new String[]{
             String.format(COMMIT_DDL_CLAUSE, String.format(SqlDriver.ADD_FIELD_SQL_PREFIX, fullTableName) + getSql4FieldDefinition(aField))
         };
+    }
+
+    @Override
+    public TwinString[] getCharsForWrap() {
+        return charsForWrap;
+    }
+
+    @Override
+    public char[] getRestrictedChars() {
+        return restrictedChars;
+    }
+
+    @Override
+    public boolean isHadWrapped(String aName) {
+        return false;
+    }
+
+    private String prepareName(String aName) {
+        return (isWrappedName(aName) ? unwrapName(aName) : aName);
     }
 }
