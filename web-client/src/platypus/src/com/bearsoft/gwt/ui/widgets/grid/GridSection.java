@@ -10,12 +10,16 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.cell.client.Cell;
+import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.dom.client.TableColElement;
 import com.google.gwt.dom.client.TableRowElement;
 import com.google.gwt.dom.client.TableSectionElement;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -23,6 +27,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.HasKeyboardPagingPolicy;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.client.Event;
+import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.ProvidesKey;
 
@@ -45,6 +50,41 @@ public class GridSection<T> extends CellTable<T> {
 		setLoadingIndicator(null);
 		setEmptyTableWidget(null);
 		getElement().getStyle().setProperty("borderCollapse", "collapse");
+		setKeyboardSelectionHandler(new CellTableKeyboardSelectionHandler<T>(this) {
+
+			@Override
+			public void onCellPreview(CellPreviewEvent<T> event) {
+				NativeEvent nativeEvent = event.getNativeEvent();
+				String eventType = event.getNativeEvent().getType();
+				if (BrowserEvents.KEYDOWN.equals(eventType) && !event.isCellEditing()) {
+					/*
+					 * Handle keyboard navigation, unless the cell is being
+					 * edited. If the cell is being edited, we do not want to
+					 * change rows.
+					 * 
+					 * Prevent default on navigation events to prevent default
+					 * scrollbar behavior.
+					 */
+					int oldRow = GridSection.this.getKeyboardSelectedRow();
+					int oldColumn = GridSection.this.getKeyboardSelectedColumn();
+					boolean isRtl = LocaleInfo.getCurrentLocale().isRTL();
+					int keyCodeLineEnd = isRtl ? KeyCodes.KEY_LEFT : KeyCodes.KEY_RIGHT;
+					int keyCodeLineStart = isRtl ? KeyCodes.KEY_RIGHT : KeyCodes.KEY_LEFT;
+					int keyCode = nativeEvent.getKeyCode();
+					super.onCellPreview(event);
+					if (keyCode == keyCodeLineEnd) {
+						GridSection.this.setKeyboardSelectedRow(oldRow);
+						if (GridSection.this.getKeyboardSelectedColumn() < oldColumn)
+							GridSection.this.setKeyboardSelectedColumn(oldColumn);
+					} else if (keyCode == keyCodeLineStart) {
+						GridSection.this.setKeyboardSelectedRow(oldRow);
+						if (GridSection.this.getKeyboardSelectedColumn() > oldColumn)
+							GridSection.this.setKeyboardSelectedColumn(oldColumn);
+					}
+				} else
+					super.onCellPreview(event);
+			}
+		});
 	}
 
 	protected boolean ctrlKey;
@@ -240,16 +280,20 @@ public class GridSection<T> extends CellTable<T> {
 				TableRowElement row = rows.getItem(i);
 				NodeList<TableCellElement> cells = row.getCells();
 				if (cells.getLength() > 0) {
-					TableCellElement toRerender = cells.getItem(0);
-					SafeHtmlBuilder sb = new SafeHtmlBuilder();
-					T object = data.get(start + i);
-					Cell.Context cx = new Cell.Context(start + i, aIndex, keys.getKey(object));
-					cell.render(cx, column.getValue(object), sb);
-					// Take into account, that cell builder supports some maps
-					// to cells' divs
-					// and generates them. So we have to work with first <div>
-					// in <td>.
-					toRerender.getFirstChildElement().setInnerSafeHtml(sb.toSafeHtml());
+					TableCellElement toRerender = cells.getItem(aIndex);
+					if (toRerender != null) {
+						SafeHtmlBuilder sb = new SafeHtmlBuilder();
+						T object = data.get(start + i);
+						Cell.Context cx = new Cell.Context(start + i, aIndex, keys.getKey(object));
+						cell.render(cx, column.getValue(object), sb);
+						// Take into account, that cell builder supports some
+						// maps
+						// to cells' divs
+						// and generates them. So we have to work with first
+						// <div>
+						// in <td>.
+						toRerender.getFirstChildElement().setInnerSafeHtml(sb.toSafeHtml());
+					}
 				}
 			}
 		}

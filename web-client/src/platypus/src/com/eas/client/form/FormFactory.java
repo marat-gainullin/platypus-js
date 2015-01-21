@@ -529,7 +529,7 @@ public class FormFactory {
 		case "BoxPane": {
 			int hgap = Utils.getIntegerAttribute(anElement, "hgap", 0);
 			int vgap = Utils.getIntegerAttribute(anElement, "vgap", 0);
-			int orientation = Utils.getIntegerAttribute(anElement, "orientation", 2);
+			int orientation = Utils.getIntegerAttribute(anElement, "orientation", Orientation.HORIZONTAL);
 			BoxPane boxPane = new BoxPane(orientation, hgap, vgap);
 			Publisher.publish(boxPane);
 			readGeneralProps(anElement, boxPane);
@@ -928,7 +928,8 @@ public class FormFactory {
 			// aTarget.setSize(prefSize.width + "px", prefSize.height + "px");
 			((FlowPane) parent).add((Widget) aTarget);
 		} else if (parent instanceof GridPane) {
-			((GridPane) parent).add((Widget) aTarget);
+			GridPane gridPane = (GridPane)parent;
+			gridPane.addToFreeCell((Widget) aTarget);
 		} else if (parent instanceof AnchorsPane) {
 			Element constraintsElement = Utils.getElementByTagName(anElement, "AnchorsPaneConstraints");
 			MarginConstraints constraints = readMarginConstraints(constraintsElement);

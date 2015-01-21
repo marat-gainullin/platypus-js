@@ -92,6 +92,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -99,6 +100,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import jdk.nashorn.api.scripting.JSObject;
 import org.openide.util.Exceptions;
 import org.w3c.dom.DOMException;
@@ -162,8 +164,14 @@ public class PersistenceManager {
                 }
 
                 @Override
-                protected JComponent createBoxPane(int axis, int hgap, int vgap) {
+                protected JComponent createBoxPane(int orientation, int hgap, int vgap) {
                     JComponent res = new FormUtils.Panel();
+                    int axis = BoxLayout.X_AXIS;
+                    if (orientation == Orientation.HORIZONTAL) {
+                        axis = BoxLayout.X_AXIS;
+                    } else if (orientation == Orientation.VERTICAL) {
+                        axis = BoxLayout.Y_AXIS;
+                    }
                     res.setLayout(new BoxLayout(res, axis, hgap, vgap));
                     return res;
                 }
@@ -427,7 +435,7 @@ public class PersistenceManager {
             try (OutputStream out = formObject.getFormEntry().getFile().getOutputStream()) {
                 out.write(content.getBytes(SettingsConstants.COMMON_ENCODING));
             }
-        } catch (Exception ex) {
+        } catch (ParserConfigurationException | DOMException | IOException ex) {
             throw new PersistenceException(ex);
         }
     }

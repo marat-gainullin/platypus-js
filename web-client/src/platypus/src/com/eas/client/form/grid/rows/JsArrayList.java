@@ -73,10 +73,13 @@ public class JsArrayList implements List<JavaScriptObject> {
 	};
 
 	protected final JsObject data;
+	protected final JsObject splice;
 
 	public JsArrayList(JavaScriptObject aData) {
 		super();
 		data = aData.cast();
+		JavaScriptObject oSplice = data.getJs("splice");
+		splice = oSplice != null ? oSplice.<JsObject>cast() : null;
 	}
 
 	@Override
@@ -209,11 +212,23 @@ public class JsArrayList implements List<JavaScriptObject> {
 
 	@Override
 	public void add(int index, JavaScriptObject element) {
+		JsArrayMixed args = JavaScriptObject.createArray().cast();
+		args.push(index);
+		args.push(0);
+		args.push(element);
+		splice.apply(data, args);
 	}
 
 	@Override
 	public JavaScriptObject remove(int index) {
-		return null;
+		JavaScriptObject res = data.<JsArrayMixed> cast().getObject(index);
+		if(res != null){
+			JsArrayMixed args = JavaScriptObject.createArray().cast();
+			args.push(index);
+			args.push(1);
+			splice.apply(data, args);
+		}
+		return res;
 	}
 
 	@Override

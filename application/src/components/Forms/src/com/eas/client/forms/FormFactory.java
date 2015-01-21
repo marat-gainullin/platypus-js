@@ -608,7 +608,7 @@ public class FormFactory {
             case "BoxPane": {
                 int hgap = XmlDomUtils.readIntegerAttribute(anElement, "hgap", 0);
                 int vgap = XmlDomUtils.readIntegerAttribute(anElement, "vgap", 0);
-                int orientation = XmlDomUtils.readIntegerAttribute(anElement, "orientation", BoxLayout.LINE_AXIS);
+                int orientation = XmlDomUtils.readIntegerAttribute(anElement, "orientation", Orientation.HORIZONTAL);
                 JComponent boxPane = createBoxPane(orientation, hgap, vgap);
                 readGeneralProps(anElement, boxPane);
                 return boxPane;
@@ -813,8 +813,8 @@ public class FormFactory {
         return new CardPane(hgap, vgap);
     }
 
-    protected JComponent createBoxPane(int axis, int hgap, int vgap) {
-        return new BoxPane(axis, hgap, vgap);
+    protected JComponent createBoxPane(int orientation, int hgap, int vgap) {
+        return new BoxPane(orientation, hgap, vgap);
     }
 
     protected JComponent createBorderPane(int hgap, int vgap) {

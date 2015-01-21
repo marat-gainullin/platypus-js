@@ -33,16 +33,16 @@ public class GridSelectionEventManager<T> extends DefaultSelectionEventManager<T
 	 *            the action to handle
 	 * @param selectionModel
 	 *            the {@link SelectionModel} to update
-	 */
+	 */            
 	protected void handleMultiSelectionEvent(CellPreviewEvent<T> event, SelectAction action, MultiSelectionModel<? super T> selectionModel) {
 		NativeEvent nativeEvent = event.getNativeEvent();
 		String type = nativeEvent.getType();
 		if (BrowserEvents.CLICK.equals(type)) {
-			/*
-			 * Update selection on click. Selection is toggled only if the user
-			 * presses the ctrl key. If the user does not press the control key,
-			 * selection is additive.
-			 */
+			
+//			  Update selection on click. Selection is toggled only if the user
+//			  presses the ctrl key. If the user does not press the control key,
+//			  selection is additive.
+			 
 			boolean shift = nativeEvent.getShiftKey();
 			boolean ctrlOrMeta = nativeEvent.getCtrlKey() || nativeEvent.getMetaKey();
 			boolean clearOthers = (translator == null) ? !ctrlOrMeta : translator.clearCurrentSelection(event);
@@ -54,21 +54,17 @@ public class GridSelectionEventManager<T> extends DefaultSelectionEventManager<T
 			boolean shift = nativeEvent.getShiftKey();
 			boolean ctrlOrMeta = nativeEvent.getCtrlKey() || nativeEvent.getMetaKey();
 			int keyCode = nativeEvent.getKeyCode();
-			if (keyCode == KeyCodes.KEY_SPACE) {
-				/*
-				 * Update selection when the space bar is pressed. The spacebar
-				 * always toggles selection, regardless of whether the control
-				 * key is pressed.
-				 */
+			if (keyCode == KeyCodes.KEY_SPACE) {				
+//				  Update selection when the space bar is pressed. The spacebar
+//				  always toggles selection, regardless of whether the control
+//				  key is pressed.				 
 				boolean clearOthers = (translator == null) ? false : translator.clearCurrentSelection(event);
 				if (action == null || action == SelectAction.DEFAULT) {
 					action = SelectAction.TOGGLE;
 				}
 				doMultiSelection(selectionModel, event.getDisplay(), event.getIndex(), event.getValue(), action, shift, clearOthers);
-			} else if (keyCode == KeyCodes.KEY_UP) {
-				/*
-				 * Update selection when the up key is pressed. 
-				 */
+			} else if (keyCode == KeyCodes.KEY_UP) {				
+//				  Update selection when the up key is pressed. 				 
 				boolean clearOthers = (translator == null) ? !ctrlOrMeta : translator.clearCurrentSelection(event);
 				if (action == null || action == SelectAction.DEFAULT) {
 					action = ctrlOrMeta ? SelectAction.TOGGLE : SelectAction.SELECT;
@@ -81,10 +77,8 @@ public class GridSelectionEventManager<T> extends DefaultSelectionEventManager<T
 						doMultiSelection(selectionModel, event.getDisplay(), idxToSelect, itemToSelect, action, shift, clearOthers);
 					}
 				}
-			} else if (keyCode == KeyCodes.KEY_DOWN) {
-				/*
-				 * Update selection when the down key is pressed.
-				 */
+			} else if (keyCode == KeyCodes.KEY_DOWN) {				
+//				 Update selection when the down key is pressed.				 
 				boolean clearOthers = (translator == null) ? !ctrlOrMeta : translator.clearCurrentSelection(event);
 				if (action == null || action == SelectAction.DEFAULT) {
 					action = ctrlOrMeta ? SelectAction.TOGGLE : SelectAction.SELECT;
@@ -97,7 +91,8 @@ public class GridSelectionEventManager<T> extends DefaultSelectionEventManager<T
 						doMultiSelection(selectionModel, event.getDisplay(), idxToSelect, itemToSelect, action, shift, clearOthers);
 					}
 				}
-			}
+			}else
+				super.handleMultiSelectionEvent(event, action, selectionModel);
 		}
 	}
 

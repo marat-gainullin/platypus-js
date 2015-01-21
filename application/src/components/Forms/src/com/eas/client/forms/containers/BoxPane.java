@@ -69,12 +69,12 @@ public class BoxPane extends JPanel implements HasPublished, HasContainerEvents,
     }
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"orientation", "hgap", "vgap"})
-    public BoxPane(int aOrientaion, int aHgap, int aVgap) {
+    public BoxPane(int aOrientation, int aHgap, int aVgap) {
         super();
         int axis = BoxLayout.X_AXIS;
-        if (aOrientaion == Orientation.HORIZONTAL) {
+        if (aOrientation == Orientation.HORIZONTAL) {
             axis = BoxLayout.X_AXIS;
-        } else if (aOrientaion == Orientation.VERTICAL) {
+        } else if (aOrientation == Orientation.VERTICAL) {
             axis = BoxLayout.Y_AXIS;
         }
         BoxLayout layout = new BoxLayout(this, axis, aHgap, aVgap);

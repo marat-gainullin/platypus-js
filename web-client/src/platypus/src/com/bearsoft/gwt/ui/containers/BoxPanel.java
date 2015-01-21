@@ -42,6 +42,14 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 	public void setOrientation(int aValue) {
 		if (orientation != aValue) {
 			orientation = aValue;
+			for (int i = 0; i < getWidgetCount(); i++) {
+				Widget w = getWidget(i);
+				formatWidget(w);
+			}
+			if(orientation == Orientation.HORIZONTAL)
+				ajustWidth();
+			else
+				ajustHeight();
 			onResize();
 		}
 	}
@@ -76,8 +84,7 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 		}
 	}
 
-	@Override
-	public void add(Widget child) {
+	protected void formatWidget(Widget child){
 		if (orientation == Orientation.HORIZONTAL) {
 			child.getElement().getStyle().clearTop();
 			child.getElement().getStyle().clearBottom();
@@ -104,18 +111,29 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 			child.getElement().getStyle().setPosition(Style.Position.RELATIVE);
 			child.getElement().getStyle().setDisplay(Style.Display.BLOCK);
 			child.getElement().getStyle().setLeft(0, Style.Unit.PX);
-			// if(child instanceof FocusWidget){
 			child.getElement().getStyle().clearRight();
 			child.getElement().getStyle().setWidth(100, Style.Unit.PCT);
 			CommonResources.INSTANCE.commons().ensureInjected();
 			child.getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
-			/*
-			 * } else { child.getElement().getStyle().setRight(0,
-			 * Style.Unit.PX); child.getElement().getStyle().clearWidth(); }
-			 */
 			if (getWidgetCount() > 0) {
 				child.getElement().getStyle().setMarginTop(vgap, Style.Unit.PX);
 			}
+			super.add(child, getElement().<Element> cast());
+			if (isAttached()) {
+				ajustHeight();
+			}
+		}
+	}
+	
+	@Override
+	public void add(Widget child) {
+		formatWidget(child);
+		if (orientation == Orientation.HORIZONTAL) {
+			super.add(child, getElement().<Element> cast());
+			if (isAttached()) {
+				ajustWidth();
+			}
+		} else {
 			super.add(child, getElement().<Element> cast());
 			if (isAttached()) {
 				ajustHeight();

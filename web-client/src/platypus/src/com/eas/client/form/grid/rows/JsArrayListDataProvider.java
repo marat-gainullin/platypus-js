@@ -20,15 +20,16 @@ public class JsArrayListDataProvider extends ListDataProvider<JavaScriptObject> 
 
 	protected JsObject data;
 	protected HandlerRegistration boundToData;
+	protected HandlerRegistration boundToDataElements;
 	protected Map<JavaScriptObject, Integer> indicies;
 	protected Runnable onResize;
-	protected Runnable onLoadStart;
+	protected Runnable onChange;
 	protected Callback<Void, String> onError;
 
-	public JsArrayListDataProvider(Runnable aOnResize, Runnable aOnLoadStart, Callback<Void, String> aOnError) {
+	public JsArrayListDataProvider(Runnable aOnResize, Runnable aOnChange, Callback<Void, String> aOnError) {
 		super();
 		onResize = aOnResize;
-		onLoadStart = aOnLoadStart;
+		onChange = aOnChange;
 		onError = aOnError;
 	}
 
@@ -37,6 +38,23 @@ public class JsArrayListDataProvider extends ListDataProvider<JavaScriptObject> 
 		return data;
 	}
 
+	protected boolean changesQueued;
+	
+	protected void enqueueChanges(){
+		changesQueued = true;
+		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+			@Override
+			public void execute() {
+				if (changesQueued) {
+					changesQueued = false;
+					if(onChange != null)
+						onChange.run();
+				}
+			}
+		});
+	}
+	
 	protected boolean readdQueued;
 
 	private void enqueueReadd() {
@@ -47,9 +65,20 @@ public class JsArrayListDataProvider extends ListDataProvider<JavaScriptObject> 
 			public void execute() {
 				if (readdQueued) {
 					readdQueued = false;
+					if(boundToDataElements != null){
+						boundToDataElements.removeHandler();
+						boundToDataElements = null;
+					}
 					getList().clear();
-					if (data != null)
+					if (data != null){
 						getList().addAll(new JsArrayList(data));
+						boundToDataElements = Utils.listenElements(data, new PropertyChangeListener(){
+
+							@Override
+                            public void propertyChange(PropertyChangeEvent evt) {
+								enqueueChanges();
+                            }});
+					}
 					if (onResize != null)
 						onResize.run();
 				}
@@ -67,11 +96,6 @@ public class JsArrayListDataProvider extends ListDataProvider<JavaScriptObject> 
 			});
 			enqueueReadd();
 		}
-	}
-
-	@Override
-	public void flush() {
-		super.flush();
 	}
 
 	protected void unbind() {

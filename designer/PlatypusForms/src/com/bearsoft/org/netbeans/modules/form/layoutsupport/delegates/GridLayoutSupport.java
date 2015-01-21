@@ -114,7 +114,7 @@ public class GridLayoutSupport extends AbstractLayoutSupport {
                     }
                 }, // NOI18N
                 new FormProperty<Integer>(
-                "cols", // NOI18N
+                "columns", // NOI18N
                 Integer.TYPE,
                 getBundle().getString("PROP_cols"), // NOI18N
                 getBundle().getString("HINT_cols")) {

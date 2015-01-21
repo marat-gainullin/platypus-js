@@ -42,6 +42,7 @@ import com.eas.client.form.grid.rows.JsArrayTreeDataProvider;
 import com.eas.client.form.grid.rows.JsDataContainer;
 import com.eas.client.form.grid.rows.JsTree;
 import com.eas.client.form.grid.selection.CheckBoxesEventTranslator;
+import com.eas.client.form.grid.selection.HasSelectionLead;
 import com.eas.client.form.grid.selection.MultiJavaScriptObjectSelectionModel;
 import com.eas.client.form.published.HasBinding;
 import com.eas.client.form.published.HasComponentPopupMenu;
@@ -54,9 +55,12 @@ import com.eas.client.form.published.PublishedComponent;
 import com.eas.client.form.published.PublishedStyle;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -71,6 +75,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.view.client.CellPreviewEvent;
@@ -87,23 +92,6 @@ import com.google.gwt.view.client.SetSelectionModel;
 public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, HasOnRender, HasComponentPopupMenu, HasEventsExecutor, HasEnabled, HasShowHandlers, HasHideHandlers, HasResizeHandlers,
         HasBinding {
 
-	//
-	public static final int SERVICE_COLUMN_WIDTH = 22;
-
-	protected class ServiceColumnRerenderer {
-		/*
-		 * @Override public void rowsetScrolled(RowsetScrollEvent event) { if
-		 * (getDataColumnCount() > 0 && getDataColumn(0) instanceof
-		 * UsualServiceColumn) { if (frozenColumns > 0) {
-		 * frozenLeft.redrawAllRowsInColumn(0, ModelGrid.this.dataProvider);
-		 * scrollableLeft.redrawAllRowsInColumn(0, ModelGrid.this.dataProvider);
-		 * } else { frozenRight.redrawAllRowsInColumn(0,
-		 * ModelGrid.this.dataProvider);
-		 * scrollableRight.redrawAllRowsInColumn(0,
-		 * ModelGrid.this.dataProvider); } } }
-		 */
-	}
-
 	protected boolean enabled = true;
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
@@ -115,7 +103,7 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 	protected JavaScriptObject data;
 	protected String field;
 	protected HandlerRegistration boundToData;
-	protected ServiceColumnRerenderer markerRerenderer = new ServiceColumnRerenderer();
+	protected HandlerRegistration boundToCursor;
 	protected JavaScriptObject onRender;
 	protected PublishedComponent published;
 	protected FindWindow finder;
@@ -135,19 +123,69 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 
 			@Override
 			public void onKeyUp(KeyUpEvent event) {
-				if (event.getNativeKeyCode() == KeyCodes.KEY_DELETE && deletable) {
+				Object oData = data != null && field != null && !field.isEmpty() ? Utils.getPathData(data, field) : data;
+				JsObject jsData = oData instanceof JavaScriptObject ? ((JavaScriptObject) oData).<JsObject> cast() : null;
+				if (jsData != null) {
 					if (getSelectionModel() instanceof SetSelectionModel<?>) {
-						SetSelectionModel<JavaScriptObject> rowSelection = (SetSelectionModel<JavaScriptObject>) getSelectionModel();
+						final SetSelectionModel<JavaScriptObject> rowsSelection = (SetSelectionModel<JavaScriptObject>) getSelectionModel();
+						if (event.getNativeKeyCode() == KeyCodes.KEY_DELETE && deletable) {
+							int deletedAt = -1;
+							for (int i = jsData.length() - 1; i >= 0; i--) {
+								JavaScriptObject element = jsData.getSlot(i);
+								if (rowsSelection.isSelected(element)) {
+									jsData.splice(i, 1);
+									deletedAt = i;
+								}
+							}
+							if (deletedAt != -1) {
+								int newLength = jsData.length();
+								if (deletedAt >= newLength)
+									deletedAt = newLength - 1;
+								if (deletedAt >= 0) {
+									final JavaScriptObject toSelect = jsData.getSlot(deletedAt);
+									Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+										@Override
+										public void execute() {
+											Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+												@Override
+												public void execute() {
+													makeVisible(toSelect, true);
+												}
+											});
+										}
+
+									});
+								}
+							}
+						} else if (event.getNativeKeyCode() == KeyCodes.KEY_INSERT && insertable) {
+							int insertAt = -1;
+							if (rowsSelection instanceof HasSelectionLead<?> && dataProvider instanceof IndexOfProvider<?>) {
+								JavaScriptObject lead = ((HasSelectionLead<JavaScriptObject>) rowsSelection).getLead();
+								insertAt = ((IndexOfProvider<JavaScriptObject>) dataProvider).indexOf(lead);
+								insertAt++;
+								JavaScriptObject oElementClass = jsData.getJs("elementClass");
+								JsObject elementClass = oElementClass != null ? oElementClass.<JsObject> cast() : null;
+								final JavaScriptObject inserted = elementClass != null ? elementClass.newObject() : JavaScriptObject.createObject();
+								jsData.splice(insertAt, 0, inserted);
+								Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+									@Override
+									public void execute() {
+										Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+											@Override
+											public void execute() {
+												makeVisible(inserted, true);
+											}
+										});
+									}
+
+								});
+							}
+						}
 					}
-				} else if (event.getNativeKeyCode() == KeyCodes.KEY_INSERT && insertable) {
-					/*
-					 * JavaScriptObject iserted = null; if (inserted != null &&
-					 * getSelectionModel() instanceof SetSelectionModel<?>) {
-					 * SetSelectionModel<JavaScriptObject> rowSelection =
-					 * (SetSelectionModel<JavaScriptObject>)
-					 * getSelectionModel(); rowSelection.clear();
-					 * rowSelection.setSelected(inserted, true); }
-					 */
 				}
 			}
 
@@ -183,7 +221,35 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		}
 	}
 
+	protected boolean serviceColumnsRedrawQueued;
+
+	protected void enqueueServiceColumnsRedraw() {
+		serviceColumnsRedrawQueued = true;
+		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+			@Override
+			public void execute() {
+				if (serviceColumnsRedrawQueued) {
+					serviceColumnsRedrawQueued = false;
+					for (int i = 0; i < getDataColumnCount(); i++) {
+						ModelColumn col = (ModelColumn) getDataColumn(i);
+						if (col instanceof UsualServiceColumn) {
+							if (i < frozenColumns) {
+								frozenLeft.redrawAllRowsInColumn(i, dataProvider);
+								scrollableLeft.redrawAllRowsInColumn(i, dataProvider);
+							} else {
+								frozenRight.redrawAllRowsInColumn(i - frozenColumns, dataProvider);
+								scrollableRight.redrawAllRowsInColumn(i - frozenColumns, dataProvider);
+							}
+						}
+					}
+				}
+			}
+		});
+	}
+
 	protected void applyRows() {
+		unbindCursor();
 		if (sortHandlerReg != null)
 			sortHandlerReg.removeHandler();
 		Runnable onResize = new Runnable() {
@@ -191,6 +257,14 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 			public void run() {
 				ModelGrid.this.getElement().<XElement> cast().unmask();
 				setupVisibleRanges();
+				((IndexOfProvider<?>) dataProvider).rescan();
+			}
+
+		};
+		Runnable onChange = new Runnable() {
+			@Override
+			public void run() {
+				ModelGrid.this.redraw();
 			}
 
 		};
@@ -222,11 +296,23 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 
 				});
 			} else {
-				setDataProvider(new JsArrayListDataProvider(onResize, null, null));
+				setDataProvider(new JsArrayListDataProvider(onResize, onChange, null));
 				sortHandler = new ListMultiSortHandler<>(dataProvider.getList(), onSort);
+			}
+			for (int colIndex = 0; colIndex < getDataColumnCount(); colIndex++) {
+				ModelColumn modelCol = (ModelColumn) getDataColumn(colIndex);
+				sortHandler.setComparator(modelCol, modelCol.getComparator());
 			}
 			sortHandlerReg = addColumnSortHandler(sortHandler);
 			((JsDataContainer) getDataProvider()).setData(jsData);
+			boundToCursor = Utils.listen(jsData, "cursor", new PropertyChangeListener() {
+
+				@Override
+				public void propertyChange(PropertyChangeEvent evt) {
+					enqueueServiceColumnsRedraw();
+				}
+
+			});
 		} else {
 			setDataProvider(null);
 		}
@@ -272,6 +358,14 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		if (boundToData != null) {
 			boundToData.removeHandler();
 			boundToData = null;
+		}
+		unbindCursor();
+	}
+
+	protected void unbindCursor() {
+		if (boundToCursor != null) {
+			boundToCursor.removeHandler();
+			boundToCursor = null;
 		}
 	}
 
@@ -636,11 +730,11 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 	private native static void publish(ModelGrid aWidget, JavaScriptObject aPublished)/*-{
 		aPublished.select = function(aRow) {
 			if (aRow != null && aRow != undefined)
-				aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::selectRow(Lcom/google/gwt/core/client/JavaScriptObject;)(aRow);
+				aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::selectElement(Lcom/google/gwt/core/client/JavaScriptObject;)(aRow);
 		};
 		aPublished.unselect = function(aRow) {
 			if (aRow != null && aRow != undefined)
-				aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::unselectRow(Lcom/google/gwt/core/client/JavaScriptObject;)(aRow);
+				aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::unselectElement(Lcom/google/gwt/core/client/JavaScriptObject;)(aRow);
 		};
 		aPublished.clearSelection = function() {
 			aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::clearSelection()();
@@ -779,12 +873,12 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		onRender = aValue;
 	}
 
-	public void selectRow(JavaScriptObject aRow) {
-		getSelectionModel().setSelected(aRow, true);
+	public void selectElement(JavaScriptObject aElement) {
+		getSelectionModel().setSelected(aElement, true);
 	}
 
-	public void unselectRow(JavaScriptObject aRow) {
-		getSelectionModel().setSelected(aRow, false);
+	public void unselectElement(JavaScriptObject anElement) {
+		getSelectionModel().setSelected(anElement, false);
 	}
 
 	public List<JavaScriptObject> getJsSelected() throws Exception {
@@ -829,8 +923,43 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		insertable = aValue;
 	}
 
-	public boolean makeVisible(JavaScriptObject aRow, boolean needToSelect) {
-		return false;
+	public boolean makeVisible(JavaScriptObject anElement, boolean needToSelect) {
+		IndexOfProvider<JavaScriptObject> indexOfProvider = (IndexOfProvider<JavaScriptObject>) dataProvider;
+		int index = indexOfProvider.indexOf(anElement);
+		if (index > -1) {
+			if (index >= 0 && index < frozenRows) {
+				TableCellElement leftCell = frozenLeft.getCell(index, 0);
+				if (leftCell != null) {
+					leftCell.scrollIntoView();
+				} else {
+					TableCellElement rightCell = frozenRight.getCell(index, 0);
+					if (rightCell != null)
+						rightCell.scrollIntoView();
+				}
+			} else {
+				TableCellElement leftCell = scrollableLeft.getCell(index, 0);
+				if (leftCell != null) {
+					leftCell.scrollIntoView();
+				} else {
+					TableCellElement rightCell = scrollableRight.getCell(index, 0);
+					if (rightCell != null)
+						rightCell.scrollIntoView();
+				}
+			}
+			if (needToSelect) {
+				clearSelection();
+				selectElement(anElement);
+				if (index >= 0 && index < frozenRows) {
+					frozenLeft.setKeyboardSelectedRow(index, true);
+					frozenRight.setKeyboardSelectedRow(index, true);
+				} else {
+					scrollableLeft.setKeyboardSelectedRow(index - frozenRows, true);
+					scrollableRight.setKeyboardSelectedRow(index - frozenRows, true);
+				}
+			}
+			return true;
+		} else
+			return false;
 	}
 
 	public void find() {

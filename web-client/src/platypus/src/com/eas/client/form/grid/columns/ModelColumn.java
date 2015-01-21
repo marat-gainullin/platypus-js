@@ -10,7 +10,9 @@ import com.bearsoft.gwt.ui.widgets.grid.cells.StringEditorCell;
 import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
 import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.Utils.JsObject;
+import com.bearsoft.rowset.sorting.SortingCriterion;
 import com.eas.client.form.Publisher;
+import com.eas.client.form.grid.rows.PathComparator;
 import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.PublishedCell;
@@ -49,7 +51,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 	public ModelColumn(Cell<Object> aCell) {
 		super(aCell);
 	}
-	
+
 	public ModelColumn() {
 		super(new TreeExpandableCell<JavaScriptObject, Object>(new StringEditorCell()));
 		if (getTargetCell() instanceof RenderedEditorCell<?>) {
@@ -86,6 +88,10 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 		return ((TreeExpandableCell<JavaScriptObject, Object>) getCell()).getCell();
 	}
 
+	public Comparator<JavaScriptObject> getComparator() {
+		return comparator;
+	}
+
 	public ModelGrid getGrid() {
 		return grid;
 	}
@@ -120,8 +126,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 	public void setField(String aValue) {
 		if (field == null ? aValue != null : !field.equals(aValue)) {
 			field = aValue;
-			// comparator = new RowsComparator(new
-			// SortingCriterion(columnModelRef.getColIndex(), true));
+			comparator = new PathComparator(field, true);
 		}
 	}
 

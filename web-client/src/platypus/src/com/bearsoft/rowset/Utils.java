@@ -82,6 +82,18 @@ public class Utils {
 		public final native boolean isArray()/*-{
 			return Array.isArray(this);
 		}-*/;
+		
+		public final native int length()/*-{
+			return this.length;
+		}-*/;
+
+		public final native JavaScriptObject splice(int aIndex, int howManyToDelete, JavaScriptObject toInsert)/*-{
+			return this.splice(aIndex, howManyToDelete, toInsert);
+		}-*/;
+
+		public final native JavaScriptObject splice(int aIndex, int howManyToDelete)/*-{
+			return this.splice(aIndex, howManyToDelete);
+		}-*/;
 
 		public final native JsArrayString keys()/*-{
 			return Object.keys(this);
@@ -109,6 +121,11 @@ public class Utils {
 
 		public final native Object apply(JavaScriptObject aThis, JavaScriptObject aArgs)/*-{
 			return this.apply(aThis, aArgs != null ? aArgs : []);
+		}-*/;
+		
+		public final native JavaScriptObject newObject()/*-{
+			var constr = this;
+			return new constr();
 		}-*/;
 	}
 
@@ -435,77 +452,120 @@ public class Utils {
 		}
 	}-*/;
 
+	private static native JavaScriptObject observeElements(JavaScriptObject aTarget, JavaScriptObject aPropListener)/*-{
+	    function subscribe(aData, aListener) {
+	        if (aData.unwrap) {
+	        	var nHandler = @com.bearsoft.rowset.Utils::tryListenProperty(Ljava/lang/Object;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aData.unwrap(), null, aListener);
+	        	if(nHandler != null)
+	        		return function(){
+	        			nHandler.@com.google.gwt.event.shared.HandlerRegistration::removeHandler()();
+	        		};
+	        }
+	        if($wnd.Object.observe){
+	        	var observer = function(changes){
+        			aListener(null);
+	        	};
+	        	if(Array.isArray(aData)){
+		        	Array.observe(aData, observer);
+		        	return function (){
+		        		Array.unobserve(aData, observer);
+		        	};
+	        	}else{
+		        	Object.observe(aData, observer);
+		        	return function (){
+		        		Object.unobserve(aData, observer);
+		        	};
+	        	}
+	        }
+	        return null;
+	    }
+		var subscribed = [];
+		for(var i = 0; i < aTarget.length; i++){
+			var remover = subscribe(aTarget[i], aPropListener);
+			if(remover){
+				subscribed.push(remover);
+			}
+		}
+	    return {
+	        unlisten: function () {
+	            subscribed.forEach(function (aEntry) {
+	                aEntry();
+	            });
+	        }
+	    };
+	}-*/;
+
 	private static native JavaScriptObject observePath(JavaScriptObject aTarget, String aPath, JavaScriptObject aPropListener)/*-{
-    function subscribe(aData, aListener, aPropName) {
-        if (aData.unwrap) {
-        	var nHandler = @com.bearsoft.rowset.Utils::tryListenProperty(Ljava/lang/Object;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aData.unwrap(), aPropName, aListener);
-        	if(nHandler != null)
-        		return function(){
-        			nHandler.@com.google.gwt.event.shared.HandlerRegistration::removeHandler()();
-        		};
-        }
-        if($wnd.Object.observe){
-        	var observer = function(changes){
-        		var touched = false;
-        		changes.forEach(function(change){
-        			if(change.name == aPropName)
-        				touched = true;
-        		});
-        		if(touched){
-        			aListener(typeof aData[aPropName] != 'undefined' ? aData[aPropName] : null);
-        		}
-        	};
-        	if(Array.isArray(aData)){
-	        	Array.observe(aData, observer);
-	        	return function (){
-	        		Array.unobserve(aData, observer);
+	    function subscribe(aData, aListener, aPropName) {
+	        if (aData.unwrap) {
+	        	var nHandler = @com.bearsoft.rowset.Utils::tryListenProperty(Ljava/lang/Object;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aData.unwrap(), aPropName, aListener);
+	        	if(nHandler != null)
+	        		return function(){
+	        			nHandler.@com.google.gwt.event.shared.HandlerRegistration::removeHandler()();
+	        		};
+	        }
+	        if($wnd.Object.observe){
+	        	var observer = function(changes){
+	        		var touched = false;
+	        		changes.forEach(function(change){
+	        			if(change.name == aPropName || (change.type == 'splice' && aPropName == 'length'))
+	        				touched = true;
+	        		});
+	        		if(touched){
+	        			aListener(typeof aData[aPropName] != 'undefined' ? aData[aPropName] : null);
+	        		}
 	        	};
-        	}else{
-	        	Object.observe(aData, observer);
-	        	return function (){
-	        		Object.unobserve(aData, observer);
-	        	};
-        	}
-        }
-        return null;
-    }
-    var subscribed = [];
-    function listenPath() {
-        subscribed = [];
-        var data = aTarget;
-        var path = aPath.split('.');
-        for (var i = 0; i < path.length; i++) {
-            var propName = path[i];
-            var listener = i === path.length - 1 ? aPropListener : function (evt) {
-                subscribed.forEach(function (aEntry) {
-                    aEntry();
-                });
-                listenPath();
-                aPropListener(evt);
-            };
-            var cookie = subscribe(data, listener, propName);
-            if (cookie) {
-                subscribed.push(cookie);
-                if (data[propName])
-                    data = data[propName];
-                else
-                    break;
-            } else {
-                break;
-            }
-        }
-    }
-    if (aTarget) {
-        listenPath();
-    }
-    return {
-        unlisten: function () {
-            subscribed.forEach(function (aEntry) {
-                aEntry();
-            });
-        }
-    };
-}-*/;
+	        	if(Array.isArray(aData)){
+		        	Array.observe(aData, observer);
+		        	return function (){
+		        		Array.unobserve(aData, observer);
+		        	};
+	        	}else{
+		        	Object.observe(aData, observer);
+		        	return function (){
+		        		Object.unobserve(aData, observer);
+		        	};
+	        	}
+	        }
+	        return null;
+	    }
+	    var subscribed = [];
+	    function listenPath() {
+	        subscribed = [];
+	        var data = aTarget;
+	        var path = aPath.split('.');
+	        for (var i = 0; i < path.length; i++) {
+	            var propName = path[i];
+	            var listener = i === path.length - 1 ? aPropListener : function (evt) {
+	                subscribed.forEach(function (aEntry) {
+	                    aEntry();
+	                });
+	                listenPath();
+	                aPropListener(evt);
+	            };
+	            var cookie = subscribe(data, listener, propName);
+	            if (cookie) {
+	                subscribed.push(cookie);
+	                if (data[propName])
+	                    data = data[propName];
+	                else
+	                    break;
+	            } else {
+	                break;
+	            }
+	        }
+	    }
+	    if (aTarget) {
+	        listenPath();
+	    }
+	    return {
+	        unlisten: function () {
+	            subscribed.forEach(function (aEntry) {
+	                aEntry();
+	            });
+	        }
+	    };
+	}-*/;
 
 	public static HandlerRegistration tryListenProperty(Object aTarget, final String aPropertyName, final JavaScriptObject aListener) {
 		if (aTarget instanceof HasPropertyListeners) {
@@ -513,8 +573,8 @@ public class Utils {
 			final PropertyChangeListener plistener = new PropertyChangeListener() {
 
 				protected native void invokeListener(JavaScriptObject aTarget, JavaScriptObject aEvent)/*-{
-		aTarget(aEvent.newValue);
-	}-*/;
+					aTarget(aEvent.newValue);
+				}-*/;
 
 				@Override
 				public void propertyChange(PropertyChangeEvent evt) {
@@ -522,19 +582,40 @@ public class Utils {
 				}
 
 			};
-			listenersContainer.addPropertyChangeListener(aPropertyName, plistener);
-			return new HandlerRegistration() {
-				@Override
-				public void removeHandler() {
-					listenersContainer.removePropertyChangeListener(aPropertyName, plistener);
-				}
-			};
+			if (aPropertyName != null && !aPropertyName.isEmpty()) {
+				listenersContainer.addPropertyChangeListener(aPropertyName, plistener);
+				return new HandlerRegistration() {
+					@Override
+					public void removeHandler() {
+						listenersContainer.removePropertyChangeListener(aPropertyName, plistener);
+					}
+				};
+			} else {
+				listenersContainer.addPropertyChangeListener(plistener);
+				return new HandlerRegistration() {
+					@Override
+					public void removeHandler() {
+						listenersContainer.removePropertyChangeListener(plistener);
+					}
+				};
+			}
 		}
 		return null;
 	}
 
 	public static HandlerRegistration listen(JavaScriptObject anElement, String aPath, PropertyChangeListener aListener) {
 		final JsObject listener = observePath(anElement, aPath, PropertyChangeSupport.publishListener(aListener)).cast();
+		return new HandlerRegistration() {
+			@Override
+			public void removeHandler() {
+				JsObject unlisten = listener.getJs("unlisten").cast();
+				unlisten.apply(listener, null);
+			}
+		};
+	}
+
+	public static HandlerRegistration listenElements(JavaScriptObject anElements, PropertyChangeListener aListener) {
+		final JsObject listener = observeElements(anElements, PropertyChangeSupport.publishListener(aListener)).cast();
 		return new HandlerRegistration() {
 			@Override
 			public void removeHandler() {
