@@ -9,6 +9,9 @@ public class UsualServiceColumn extends ModelColumn {
 
 	public UsualServiceColumn() {
 		super();
+		designedWidth = 22;
+		minWidth = designedWidth;
+		maxWidth = designedWidth;
 		((TreeExpandableCell<JavaScriptObject, Object>)getCell()).setCell(new RowMarkerCell(){
 
 			@Override

@@ -70,14 +70,14 @@ public class CardLayoutSupport extends AbstractLayoutSupport {
     /**
      * The icon for CardLayout.
      */
-    private static final String iconURL =
-            "com/bearsoft/org/netbeans/modules/form/beaninfo/swing/cardLayout.gif"; // NOI18N
+    private static final String iconURL
+            = "com/bearsoft/org/netbeans/modules/form/beaninfo/swing/cardLayout.gif"; // NOI18N
     /**
      * The icon for CardLayout.
      */
-    private static final String icon32URL =
-            "com/bearsoft/org/netbeans/modules/form/beaninfo/swing/cardLayout32.gif"; // NOI18N
-    
+    private static final String icon32URL
+            = "com/bearsoft/org/netbeans/modules/form/beaninfo/swing/cardLayout32.gif"; // NOI18N
+
     private CardLayoutConstraints currentCard;
     private FormProperty<?>[] properties;
 
@@ -214,7 +214,7 @@ public class CardLayoutSupport extends AbstractLayoutSupport {
 
     @Override
     protected FormProperty<?>[] getProperties() {
-        if(properties == null)
+        if (properties == null) {
             properties = new FormProperty[]{
                 new FormProperty<Integer>(
                 "hgap", // NOI18N
@@ -224,14 +224,14 @@ public class CardLayoutSupport extends AbstractLayoutSupport {
 
                     @Override
                     public Integer getValue() {
-                        return ((CardLayout)getRadLayout().getBeanInstance()).getHgap();
+                        return ((CardLayout) getRadLayout().getBeanInstance()).getHgap();
                     }
 
                     @Override
                     public void setValue(Integer aValue) {
                         int oldValue = getValue();
                         int hgap = aValue != null ? aValue : 0;
-                        ((CardLayout)getRadLayout().getBeanInstance()).setHgap(hgap);
+                        ((CardLayout) getRadLayout().getBeanInstance()).setHgap(hgap);
                         propertyValueChanged(oldValue, hgap);
                     }
 
@@ -253,14 +253,14 @@ public class CardLayoutSupport extends AbstractLayoutSupport {
 
                     @Override
                     public Integer getValue() {
-                        return ((CardLayout)getRadLayout().getBeanInstance()).getVgap();
+                        return ((CardLayout) getRadLayout().getBeanInstance()).getVgap();
                     }
 
                     @Override
                     public void setValue(Integer aValue) {
                         int oldValue = getValue();
                         int vgap = aValue != null ? aValue : 0;
-                        ((CardLayout)getRadLayout().getBeanInstance()).setVgap(vgap);
+                        ((CardLayout) getRadLayout().getBeanInstance()).setVgap(vgap);
                         propertyValueChanged(oldValue, vgap);
                     }
 
@@ -275,6 +275,7 @@ public class CardLayoutSupport extends AbstractLayoutSupport {
                     }
                 } // NOI18N
             };
+        }
         return properties;
     }
 
@@ -302,17 +303,17 @@ public class CardLayoutSupport extends AbstractLayoutSupport {
             LayoutConstraints<?> newConstraints,
             int newIndex,
             Graphics g) {
-        if (!(containerDelegate.getLayout() instanceof CardLayout)) {
+        if (containerDelegate.getLayout() instanceof CardLayout) {
+            Dimension sz = containerDelegate.getSize();
+            Insets insets = containerDelegate.getInsets();
+            sz.width -= insets.left + insets.right;
+            sz.height -= insets.top + insets.bottom;
+
+            g.drawRect(0, 0, sz.width, sz.height);
+            return true;
+        } else {
             return false;
         }
-
-        Dimension sz = containerDelegate.getSize();
-        Insets insets = containerDelegate.getInsets();
-        sz.width -= insets.left + insets.right;
-        sz.height -= insets.top + insets.bottom;
-
-        g.drawRect(0, 0, sz.width, sz.height);
-        return true;
     }
 
     // ---------

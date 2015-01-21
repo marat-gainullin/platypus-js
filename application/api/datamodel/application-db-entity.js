@@ -153,23 +153,6 @@
              */
             P.ApplicationDbEntity.prototype.onScrolled = {};
         }
-        Object.defineProperty(this, "cursorPos", {
-            get: function() {
-                var value = delegate.cursorPos;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.cursorPos = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ApplicationDbEntity){
-            /**
-             * Current position of cursor (1-based). There are two special values: 0 - before first; length + 1 - after last;
-             * @property cursorPos
-             * @memberOf ApplicationDbEntity
-             */
-            P.ApplicationDbEntity.prototype.cursorPos = 0;
-        }
         Object.defineProperty(this, "elementClass", {
             get: function() {
                 var value = delegate.elementClass;
@@ -186,6 +169,23 @@
              * @memberOf ApplicationDbEntity
              */
             P.ApplicationDbEntity.prototype.elementClass = {};
+        }
+        Object.defineProperty(this, "cursorPos", {
+            get: function() {
+                var value = delegate.cursorPos;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.cursorPos = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ApplicationDbEntity){
+            /**
+             * Current position of cursor (1-based). There are two special values: 0 - before first; length + 1 - after last;
+             * @property cursorPos
+             * @memberOf ApplicationDbEntity
+             */
+            P.ApplicationDbEntity.prototype.cursorPos = 0;
         }
         Object.defineProperty(this, "onFiltered", {
             get: function() {
@@ -265,9 +265,9 @@
          * @method find
          * @memberOf ApplicationDbEntity
          */
-        P.ApplicationDbEntity.prototype.find = function(pairs) {
+        P.ApplicationDbEntity.prototype.find = function(criteria) {
             var delegate = this.unwrap();
-            var value = delegate.find(P.boxAsJava(pairs));
+            var value = delegate.find(P.boxAsJava(criteria));
             return P.boxAsJs(value);
         };
 
@@ -308,15 +308,15 @@
         };
 
         /**
-         * Creates an instace of filter object to filter rowset data in-place using specified constraints objects.
-         * @param fields The filter conditions fields in following form: entity.schema.propName or just a propName in a string form.
-         * @return a comparator object.
-         * @method createFilter
+         * Requeries the entity's data. Forses the entity to refresh its data, no matter if its parameters has changed or not.
+         * @param onSuccess The callback function for refresh data on success event (optional).
+         * @param onFailure The callback function for refresh data on failure event (optional).
+         * @method requery
          * @memberOf ApplicationDbEntity
          */
-        P.ApplicationDbEntity.prototype.createFilter = function(fields) {
+        P.ApplicationDbEntity.prototype.requery = function(onSuccess, onFailure) {
             var delegate = this.unwrap();
-            var value = delegate.createFilter(P.boxAsJava(fields));
+            var value = delegate.requery(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
             return P.boxAsJs(value);
         };
 
@@ -330,6 +330,19 @@
         P.ApplicationDbEntity.prototype.createSorting = function(pairs) {
             var delegate = this.unwrap();
             var value = delegate.createSorting(P.boxAsJava(pairs));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Creates an instace of filter object to filter rowset data in-place using specified constraints objects.
+         * @param fields The filter conditions fields in following form: entity.schema.propName or just a propName in a string form.
+         * @return a comparator object.
+         * @method createFilter
+         * @memberOf ApplicationDbEntity
+         */
+        P.ApplicationDbEntity.prototype.createFilter = function(fields) {
+            var delegate = this.unwrap();
+            var value = delegate.createFilter(P.boxAsJava(fields));
             return P.boxAsJs(value);
         };
 
@@ -356,19 +369,6 @@
         P.ApplicationDbEntity.prototype.scrollTo = function(row) {
             var delegate = this.unwrap();
             var value = delegate.scrollTo(P.boxAsJava(row));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Requeries the entity's data. Forses the entity to refresh its data, no matter if its parameters has changed or not.
-         * @param onSuccess The callback function for refresh data on success event (optional).
-         * @param onFailure The callback function for refresh data on failure event (optional).
-         * @method requery
-         * @memberOf ApplicationDbEntity
-         */
-        P.ApplicationDbEntity.prototype.requery = function(onSuccess, onFailure) {
-            var delegate = this.unwrap();
-            var value = delegate.requery(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
             return P.boxAsJs(value);
         };
 

@@ -414,9 +414,9 @@ public class Row implements HasPublished {
             List<ChangeValue> keys = new ArrayList<>();
             for (int i = 1; i <= fields.getFieldsCount(); i++) {
                 Field field = fields.get(i);
-                // Some tricky processing of primary key modification case ...
+                // Some tricky processing of primary keys modification case ...
                 if (field.isPk()) {
-                    Object value = aRow.getCurrentValues()[i - 1];
+                    Object value = aRow.currentValues.get(i - 1);
                     if (i == colIndex) {
                         value = oldValue;
                     }

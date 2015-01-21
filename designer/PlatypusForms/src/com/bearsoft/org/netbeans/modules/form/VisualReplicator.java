@@ -87,6 +87,7 @@ public class VisualReplicator {
         super();
         formEditor = aFormEditor;
         designRestrictions = aDesignRestrictions;
+        topDesignComponent = formEditor.getFormModel().getTopDesignComponent();
     }
 
     // ---------

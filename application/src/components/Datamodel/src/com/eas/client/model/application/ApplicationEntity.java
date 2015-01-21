@@ -34,6 +34,9 @@ import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
+import com.eas.util.ListenerRegistration;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -71,6 +74,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     //
     protected JSObject published;
     protected Rowset rowset;
+    protected ListenerRegistration cursorListener;
     protected Locator locator;
     protected boolean valid;
     protected Future<Void> pending;
@@ -839,7 +843,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
                                     pValue = leftRowset.getCurrentRow().getColumnObject(leftRowset.getFields().find(relation.getLeftField().getName()));
                                 } catch (InvalidColIndexException ex) {
                                     pValue = RowsetUtils.UNDEFINED_SQL_VALUE;
-                                    Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "while assigning parameter:" + relation.getRightParameter() + " in entity: " + getTitle() + " [" + String.valueOf(getEntityId()) + "]", ex);
+                                    Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, "while assigning parameter:" + relation.getRightParameter() + " in entity: " + getTitle() + " [" + String.valueOf(getEntityId()) + "]", ex);
                                 }
                             } else {
                                 pValue = RowsetUtils.UNDEFINED_SQL_VALUE;
@@ -861,7 +865,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
                                 }
                                 pValue = ScriptUtils.toJava(pValue);
                             } else {
-                                Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "Parameter of left query must present (Relation points to query parameter in entity: {0} [{1}], but query parameter is absent)", new Object[]{getTitle(), String.valueOf(getEntityId())});
+                                Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, "Parameter of left query must present (Relation points to query parameter in entity: {0} [{1}], but query parameter is absent)", new Object[]{getTitle(), String.valueOf(getEntityId())});
                             }
                         }
                         Parameter selfPm = relation.getRightParameter();
@@ -872,7 +876,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
                             }
                         }
                     } else {
-                        Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "Relation with no left entity detected");
+                        Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, "Relation with no left entity detected");
                     }
                 }
             }
@@ -950,19 +954,19 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
                                         fValue = leftRowset.getCurrentRow().getColumnObject(leftRowset.getFields().find(rel.getLeftField().getName()));
                                     } else {
                                         fValue = RowsetUtils.UNDEFINED_SQL_VALUE;
-                                        Logger.getLogger(Entity.class.getName()).log(Level.FINE, "Failed to achieve value for filtering field:{0} in entity: {1} [{2}]. The source rowset has bad position (before first or after last).", new Object[]{rel.getRightField(), getTitle(), String.valueOf(getEntityId())});
+                                        Logger.getLogger(ApplicationEntity.class.getName()).log(Level.FINE, "Failed to achieve value for filtering field:{0} in entity: {1} [{2}]. The source rowset has bad position (before first or after last).", new Object[]{rel.getRightField(), getTitle(), String.valueOf(getEntityId())});
                                     }
                                 } else {
                                     fValue = RowsetUtils.UNDEFINED_SQL_VALUE;
-                                    Logger.getLogger(Entity.class.getName()).log(Level.FINE, "Failed to achieve value for filtering field:{0} in entity: {1} [{2}]. The source rowset has no any rows.", new Object[]{rel.getRightField(), getTitle(), String.valueOf(getEntityId())});
+                                    Logger.getLogger(ApplicationEntity.class.getName()).log(Level.FINE, "Failed to achieve value for filtering field:{0} in entity: {1} [{2}]. The source rowset has no any rows.", new Object[]{rel.getRightField(), getTitle(), String.valueOf(getEntityId())});
                                 }
                             } catch (InvalidColIndexException ex) {
-                                Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "while achieving value for filtering field:" + rel.getRightField() + " in entity: " + getTitle() + " [" + String.valueOf(getEntityId()) + "]", ex);
+                                Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, "while achieving value for filtering field:" + rel.getRightField() + " in entity: " + getTitle() + " [" + String.valueOf(getEntityId()) + "]", ex);
                                 throw ex;
                             }
                         } else {
                             fValue = RowsetUtils.UNDEFINED_SQL_VALUE;
-                            Logger.getLogger(Entity.class.getName()).log(Level.FINE, "Failed to achieve value for filtering field:{0} in entity: {1} [{2}]. The source rowset is absent.", new Object[]{rel.getRightField(), getTitle(), String.valueOf(getEntityId())});
+                            Logger.getLogger(ApplicationEntity.class.getName()).log(Level.FINE, "Failed to achieve value for filtering field:{0} in entity: {1} [{2}]. The source rowset is absent.", new Object[]{rel.getRightField(), getTitle(), String.valueOf(getEntityId())});
                         }
                     } else {
                         Parameter leftParameter = rel.getLeftParameter();
@@ -972,7 +976,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
                                 fValue = leftParameter.getDefaultValue();
                             }
                         } else {
-                            Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, "Parameter of left query must present (Relation points to query parameter, but query parameter with specified name is absent)");
+                            Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, "Parameter of left query must present (Relation points to query parameter, but query parameter with specified name is absent)");
                         }
                     }
                     Converter conv = rowset.getConverter();
@@ -990,7 +994,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
 
             }
         } catch (Exception ex) {
-            Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
             throw ex;
         }
     }
@@ -1027,14 +1031,14 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
 
     @Override
     public void rowsetScrolled(RowsetScrollEvent aEvent) {
-        Rowset easRs = aEvent.getRowset();
-        if (aEvent.getNewRowIndex() >= 0 && aEvent.getNewRowIndex() <= easRs.size() + 1) {
+        resignOnCursor();
+        if (aEvent.getNewRowIndex() >= 0 && aEvent.getNewRowIndex() <= rowset.size() + 1) {
             try {
                 // call script method
                 executeScriptEvent(onScrolled, new CursorPositionChangedEvent(this, aEvent.getOldRowIndex(), aEvent.getNewRowIndex()));
                 internalExecuteChildren(false);
             } catch (Exception ex) {
-                Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -1071,45 +1075,49 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
 
     @Override
     public void rowInserted(final RowsetInsertEvent event) {
+         resignOnCursor();
         try {
             // call script method
             executeScriptEvent(onInserted, new EntityInstanceInsertEvent(this, event.getRow()));
             internalExecuteChildren(false);
         } catch (Exception ex) {
-            Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     @Override
     public void rowDeleted(final RowsetDeleteEvent event) {
+        resignOnCursor();
         try {
             // call script method
             executeScriptEvent(onDeleted, new EntityInstanceDeleteEvent(this, event.getRow()));
             internalExecuteChildren(false);
         } catch (Exception ex) {
-            Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     @Override
     public void rowsetFiltered(RowsetFilterEvent event) {
+        resignOnCursor();
         try {
             // call script method
             executeScriptEvent(onFiltered, new PublishedSourcedEvent(this));
             internalExecuteChildren(false);
         } catch (Exception ex) {
-            Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     @Override
     public void rowsetSorted(RowsetSortEvent event) {
         try {
+            resignOnCursor();
             // call script method
             executeScriptEvent(onFiltered, new PublishedSourcedEvent(this));
             internalExecuteChildren(false);
         } catch (Exception ex) {
-            Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -1119,40 +1127,47 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
 
     @Override
     public void rowsetRequeried(RowsetRequeryEvent event) {
+        resignOnCursor();
         try {
-            assert rowset != null;
             filterRowset();
             // call script method
             executeScriptEvent(onRequeried, new PublishedSourcedEvent(this));
             internalExecuteChildren(false);
         } catch (Exception ex) {
-            Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     @Override
     public void rowsetNextPageFetched(RowsetNextPageEvent event) {
+        resignOnCursor();
         try {
-            assert rowset != null;
             filterRowset();
             // call script method
             executeScriptEvent(onRequeried, new PublishedSourcedEvent(this));
             internalExecuteChildren(false);
         } catch (Exception ex) {
-            Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     @Override
-    public void rowsetNetError(RowsetNetErrorEvent rnee) {
-    }
-
-    @Override
-    public void rowsetSaved(RowsetSaveEvent event) {
-    }
-
-    @Override
     public void rowsetRolledback(RowsetRollbackEvent event) {
+        resignOnCursor();
+        try {
+            filterRowset();
+            internalExecuteChildren(false);
+        } catch (Exception ex) {
+            Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    @Override
+    public void rowsetSaved(RowsetSaveEvent rse) {
+    }
+
+    @Override
+    public void rowsetNetError(RowsetNetErrorEvent rnee) {
     }
 
     @Override
@@ -1173,6 +1188,27 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     @Override
     public boolean willNextPageFetch(RowsetNextPageEvent event) {
         return true;
+    }
+
+    protected void resignOnCursor() {
+        if (cursorListener != null) {
+            cursorListener.remove();
+            cursorListener = null;
+        }
+        Row cursor = rowset.getCurrentRow();
+        if (cursor != null) {
+            final PropertyChangeListener cursorPropsListener = (PropertyChangeEvent evt) -> {
+                try {
+                    internalExecuteChildren(false);
+                } catch (Exception ex) {
+                    Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            };
+            cursor.addPropertyChangeListener(cursorPropsListener);
+            cursorListener = () -> {
+                cursor.removePropertyChangeListener(cursorPropsListener);
+            };
+        }
     }
 
     @Override

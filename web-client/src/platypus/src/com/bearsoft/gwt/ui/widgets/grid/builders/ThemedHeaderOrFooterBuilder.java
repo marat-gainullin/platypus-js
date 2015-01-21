@@ -37,7 +37,7 @@ import java.util.Map;
 public class ThemedHeaderOrFooterBuilder<T> extends AbstractHeaderOrFooterBuilder<T> {
 
 	protected int rowsHeight = 18;
-	protected List<HeaderNode> headerNodes;
+	protected List<HeaderNode<T>> headerNodes;
 	protected HasSortList sortListHolder;
 
 	public ThemedHeaderOrFooterBuilder(AbstractCellTable<T> table, boolean isFooter) {
@@ -49,12 +49,12 @@ public class ThemedHeaderOrFooterBuilder<T> extends AbstractHeaderOrFooterBuilde
 		sortListHolder = aSortListHolder;
 	}
 
-	public ThemedHeaderOrFooterBuilder(AbstractCellTable<T> table, boolean isFooter, List<HeaderNode> aHeaderNodes) {
+	public ThemedHeaderOrFooterBuilder(AbstractCellTable<T> table, boolean isFooter, List<HeaderNode<T>> aHeaderNodes) {
 		super(table, isFooter);
 		headerNodes = aHeaderNodes;
 	}
 
-	public ThemedHeaderOrFooterBuilder(AbstractCellTable<T> table, boolean isFooter, List<HeaderNode> aHeaderNodes, int aRowsHeight) {
+	public ThemedHeaderOrFooterBuilder(AbstractCellTable<T> table, boolean isFooter, List<HeaderNode<T>> aHeaderNodes, int aRowsHeight) {
 		super(table, isFooter);
 		rowsHeight = aRowsHeight;
 		headerNodes = aHeaderNodes;
@@ -76,11 +76,11 @@ public class ThemedHeaderOrFooterBuilder<T> extends AbstractHeaderOrFooterBuilde
 		rowsHeight = aValue;
 	}
 
-	public List<HeaderNode> getHeaderNodes() {
+	public List<HeaderNode<T>> getHeaderNodes() {
 		return headerNodes;
 	}
 
-	public void setHeaderNodes(List<HeaderNode> aNodes) {
+	public void setHeaderNodes(List<HeaderNode<T>> aNodes) {
 		if (headerNodes != aNodes) {
 			headerNodes = aNodes;
 			HeaderAnalyzer.analyze(headerNodes);
@@ -114,13 +114,13 @@ public class ThemedHeaderOrFooterBuilder<T> extends AbstractHeaderOrFooterBuilde
 				}
 			}
 			if (hasHeadersOrFooters) {
-				List<HeaderNode> headersForest;
+				List<HeaderNode<T>> headersForest;
 				if (headerNodes == null) {
 					headersForest = new ArrayList<>();
 					for (int curColumn = 0; curColumn < columnCount; curColumn++) {
 						Header<?> headerOrFooter = getHeader(curColumn);
-						HeaderNode hn = new HeaderNode();
-						hn.setHeader(headerOrFooter);
+						HeaderNode<T> hn = new HeaderNode<T>();
+						hn.setHeader((Header<String>)headerOrFooter);
 						headersForest.add(hn);
 					}
 				} else {
@@ -152,9 +152,9 @@ public class ThemedHeaderOrFooterBuilder<T> extends AbstractHeaderOrFooterBuilde
 		}
 	}
 
-	protected void buildNodes(List<HeaderNode> aHeaders, Map<Column<T, ?>, ColumnSortList.ColumnSortInfo> sortedColumns) {
+	protected void buildNodes(List<HeaderNode<T>> aHeaders, Map<Column<T, ?>, ColumnSortList.ColumnSortInfo> sortedColumns) {
 		// AbstractCellTable<T> table = getTable();
-		List<HeaderNode> children = new ArrayList<>();
+		List<HeaderNode<T>> children = new ArrayList<>();
 		boolean isFooter = isBuildingFooter();
 		// Get the common style names.
 		String className = isBuildingFooter() ? ThemedGridResources.instance.cellTableStyle().cellTableFooter() : ThemedGridResources.instance.cellTableStyle().cellTableHeader();
@@ -164,7 +164,7 @@ public class ThemedHeaderOrFooterBuilder<T> extends AbstractHeaderOrFooterBuilde
 		TableRowBuilder tr = startRow();
 		// Loop through all column header nodes.
 		for (int i = 0; i < aHeaders.size(); i++) {
-			HeaderNode headerNode = aHeaders.get(i);
+			HeaderNode<T> headerNode = aHeaders.get(i);
 			children.addAll(headerNode.getChildren());
 			Header<?> headerOrFooter = headerNode.getHeader();
 			Column<T, ?> column = null;

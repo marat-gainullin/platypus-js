@@ -5,6 +5,8 @@
 package com.bearsoft.gwt.ui.widgets.grid;
 
 import com.bearsoft.gwt.ui.dnd.XDataTransfer;
+import com.eas.client.form.published.PublishedColor;
+import com.eas.client.form.published.PublishedFont;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.core.client.GWT;
@@ -23,6 +25,9 @@ import com.google.gwt.user.cellview.client.Header;
 public class DraggableHeader<T> extends Header<String> implements HasColumn<T> {
 
 	protected String title;
+	protected PublishedColor background;
+	protected PublishedColor foreground;
+	protected PublishedFont font;
 	protected GridSection<T> table;
 	protected Element hostElement;
 	protected Column<T, ?> column;
@@ -73,6 +78,30 @@ public class DraggableHeader<T> extends Header<String> implements HasColumn<T> {
 
 	public void setTitle(String aValue) {
 		title = aValue;
+	}
+
+	public PublishedColor getBackground() {
+		return background;
+	}
+
+	public void setBackground(PublishedColor aValue) {
+		background = aValue;
+	}
+
+	public PublishedColor getForeground() {
+		return foreground;
+	}
+
+	public void setForeground(PublishedColor aValue) {
+		foreground = aValue;
+	}
+
+	public PublishedFont getFont() {
+		return font;
+	}
+
+	public void setFont(PublishedFont aValue) {
+		font = aValue;
 	}
 
 	public boolean isResizable() {

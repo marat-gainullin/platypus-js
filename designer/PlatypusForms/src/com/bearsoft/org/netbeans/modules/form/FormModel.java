@@ -133,7 +133,7 @@ public class FormModel {
     private final List<RADComponent<?>> otherComponents = new ArrayList<>(10);
     // holds both topRADComponent and otherComponents
     private ModelContainer modelContainer;
-    private final Map<String, RADComponent<?>> namesToComponents = new LinkedHashMap<>();
+    private final Map<String, RADComponent<?>> namesToComponents = new HashMap<>();
     private boolean formLoaded;
     private UndoRedo.Manager undoRedoManager;
     private boolean undoRedoRecording;
@@ -208,6 +208,8 @@ public class FormModel {
     public java.util.List<RADComponent<?>> getOrderedComponentList() {
         java.util.List<RADComponent<?>> list = new ArrayList<>(namesToComponents.size());
         collectRadComponents(getModelContainer(), list);
+        list.add(getTopRADComponent());
+        collectRadComponents(getTopRADComponent(), list);
         return list;
     }
 

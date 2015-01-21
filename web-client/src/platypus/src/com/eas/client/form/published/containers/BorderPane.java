@@ -3,6 +3,8 @@ package com.eas.client.form.published.containers;
 import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.gwt.ui.containers.BorderPanel;
 import com.eas.client.form.EventsExecutor;
+import com.eas.client.form.HorizontalPosition;
+import com.eas.client.form.VerticalPosition;
 import com.eas.client.form.events.AddEvent;
 import com.eas.client.form.events.AddHandler;
 import com.eas.client.form.events.HasAddHandlers;
@@ -27,12 +29,11 @@ import com.google.gwt.event.logical.shared.HasResizeHandlers;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.touch.client.Point;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Widget;
 
-public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers,
-		HasHideHandlers, HasResizeHandlers, HasAddHandlers, HasRemoveHandlers, HasChildrenPosition {
+public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers, HasAddHandlers,
+        HasRemoveHandlers, HasChildrenPosition {
 
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
@@ -168,22 +169,21 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 		return res;
 	}
 
-	public void add(Widget aWidget, Direction aDirection, Point aSize) {
-		Direction d = getResolvedDirection(aDirection);
-		switch (d) {
-		case WEST:
-			setLeftComponent(aWidget, aSize.getX());
+	public void add(Widget aWidget, int aPlace, int aSize) {
+		switch (aPlace) {
+		case HorizontalPosition.LEFT:
+			setLeftComponent(aWidget, aSize);
 			break;
-		case EAST:
-			setRightComponent(aWidget, aSize.getX());
+		case HorizontalPosition.RIGHT:
+			setRightComponent(aWidget, aSize);
 			break;
-		case NORTH:
-			setTopComponent(aWidget, aSize.getY());
+		case VerticalPosition.TOP:
+			setTopComponent(aWidget, aSize);
 			break;
-		case SOUTH:
-			setBottomComponent(aWidget, aSize.getY());
+		case VerticalPosition.BOTTOM:
+			setBottomComponent(aWidget, aSize);
 			break;
-		case CENTER:
+		default:
 			setCenterComponent(aWidget);
 			break;
 		}
@@ -205,10 +205,10 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 			if (old != null)
 				remove(old);
 			Widget centerWidget = super.getCenter();
-			if(centerWidget != null)
+			if (centerWidget != null)
 				super.remove(centerWidget);
 			addWest(w, size);
-			if(centerWidget != null)
+			if (centerWidget != null)
 				super.add(centerWidget);
 			AddEvent.fire(this, w);
 		}
@@ -230,10 +230,10 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 			if (old != null)
 				remove(old);
 			Widget centerWidget = super.getCenter();
-			if(centerWidget != null)
+			if (centerWidget != null)
 				super.remove(centerWidget);
 			addEast(w, size);
-			if(centerWidget != null)
+			if (centerWidget != null)
 				super.add(centerWidget);
 			AddEvent.fire(this, w);
 		}
@@ -255,10 +255,10 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 			if (old != null)
 				remove(old);
 			Widget centerWidget = super.getCenter();
-			if(centerWidget != null)
+			if (centerWidget != null)
 				super.remove(centerWidget);
 			addNorth(w, size);
-			if(centerWidget != null)
+			if (centerWidget != null)
 				super.add(centerWidget);
 			AddEvent.fire(this, w);
 		}
@@ -280,10 +280,10 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 			if (old != null)
 				remove(old);
 			Widget centerWidget = super.getCenter();
-			if(centerWidget != null)
+			if (centerWidget != null)
 				super.remove(centerWidget);
 			addSouth(w, size);
-			if(centerWidget != null)
+			if (centerWidget != null)
 				super.add(centerWidget);
 			AddEvent.fire(this, w);
 		}

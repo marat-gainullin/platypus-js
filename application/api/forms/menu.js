@@ -463,22 +463,19 @@
              */
             P.Menu.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
+        Object.defineProperty(this, "count", {
             get: function() {
-                var value = delegate.onActionPerformed;
+                var value = delegate.count;
                 return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
             }
         });
         if(!P.Menu){
             /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
+             * The count of the menu items.
+             * @property count
              * @memberOf Menu
              */
-            P.Menu.prototype.onActionPerformed = {};
+            P.Menu.prototype.count = 0;
         }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
@@ -497,19 +494,22 @@
              */
             P.Menu.prototype.onKeyReleased = {};
         }
-        Object.defineProperty(this, "count", {
+        Object.defineProperty(this, "onActionPerformed", {
             get: function() {
-                var value = delegate.count;
+                var value = delegate.onActionPerformed;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
             }
         });
         if(!P.Menu){
             /**
-             * The count of the menu items.
-             * @property count
+             * Main action performed event handler function.
+             * @property onActionPerformed
              * @memberOf Menu
              */
-            P.Menu.prototype.count = 0;
+            P.Menu.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -784,17 +784,6 @@
         };
 
         /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf Menu
-         */
-        P.Menu.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Gets the container's n-th component.
          * @param index the component's index in the container
          * @return the child component
@@ -804,6 +793,17 @@
         P.Menu.prototype.child = function(index) {
             var delegate = this.unwrap();
             var value = delegate.child(P.boxAsJava(index));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Tries to acquire focus for this component.
+         * @method focus
+         * @memberOf Menu
+         */
+        P.Menu.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
             return P.boxAsJs(value);
         };
 

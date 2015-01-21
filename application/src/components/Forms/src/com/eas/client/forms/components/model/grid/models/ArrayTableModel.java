@@ -32,19 +32,16 @@ public class ArrayTableModel extends ArrayModel implements TableModel {
      * Constructor, accepting a elements rowset.
      *
      * @param aColumns
-     * @param aRows
+     * @param aData
      * @param aOnRender
      */
-    public ArrayTableModel(TableColumnModel aColumns, JSObject aRows, JSObject aOnRender) {
-        super(aColumns, aRows, aOnRender);
-        // TODO: move to ModelGrid.setData() when refactored events listening
-        //rowsRowsetListener = new TabularRowsRowsetListener(this, rowsRowset);
-        //rowsRowset.addRowsetListener(rowsRowsetListener);
+    public ArrayTableModel(TableColumnModel aColumns, JSObject aData, JSObject aOnRender) {
+        super(aColumns, aData, aOnRender);
     }
 
     @Override
     public int getRowCount() {
-        int rowCount = elements != null ? JSType.toInteger(elements.getMember("length")) : 0;
+        int rowCount = data != null ? JSType.toInteger(data.getMember("length")) : 0;
         return rowCount > 0 && rowCount != Integer.MAX_VALUE ? rowCount : 0;
     }
 
@@ -56,7 +53,7 @@ public class ArrayTableModel extends ArrayModel implements TableModel {
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         if (columnIndex >= 0 && columnIndex < columns.getColumnCount()) {
-            Object oElement = elements.getSlot(rowIndex);
+            Object oElement = data.getSlot(rowIndex);
             if (oElement instanceof JSObject) {
                 return getValue((JSObject) oElement, columnIndex);
             } else {
@@ -70,7 +67,7 @@ public class ArrayTableModel extends ArrayModel implements TableModel {
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
         if (columnIndex >= 0 && columnIndex < columns.getColumnCount()) {
-            Object oElement = elements.getSlot(rowIndex);
+            Object oElement = data.getSlot(rowIndex);
             if (oElement instanceof JSObject) {
                 setValue((JSObject) oElement, columnIndex, aValue);
             }
@@ -157,10 +154,10 @@ public class ArrayTableModel extends ArrayModel implements TableModel {
     public int elementToIndex(JSObject anElement) {
         if (locator == null) {
             locator = new HashMap<>();
-            int length = JSType.toInteger(elements.getMember("length"));
+            int length = JSType.toInteger(data.getMember("length"));
             if (length != Integer.MAX_VALUE) {
                 for (int i = 0; i < length; i++) {
-                    Object oElement = elements.getSlot(i);
+                    Object oElement = data.getSlot(i);
                     locator.put(oElement, i);
                 }
             }
@@ -170,7 +167,7 @@ public class ArrayTableModel extends ArrayModel implements TableModel {
     }
     
     public JSObject indexToElement(int aIdx) {
-        Object element = elements.getSlot(aIdx);
+        Object element = data.getSlot(aIdx);
         return element instanceof Undefined ? null : (JSObject)element;
     }
     

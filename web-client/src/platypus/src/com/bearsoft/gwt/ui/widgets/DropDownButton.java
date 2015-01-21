@@ -6,6 +6,7 @@
 package com.bearsoft.gwt.ui.widgets;
 
 import com.bearsoft.gwt.ui.CommonResources;
+import com.bearsoft.gwt.ui.HasImageParagraph;
 import com.bearsoft.gwt.ui.HasImageResource;
 import com.bearsoft.gwt.ui.XElement;
 import com.google.gwt.dom.client.Style;
@@ -54,7 +55,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
  * @author mg
  */
 public class DropDownButton extends Composite implements HasText, HasHTML, RequiresResize, HasClickHandlers, HasDoubleClickHandlers, HasEnabled, HasAllMouseHandlers, HasAllTouchHandlers,
-        HasImageResource {
+        HasImageResource, HasImageParagraph {
 
 	protected FlowPanel container = new FlowPanel();
 	protected SimplePanel contentWrapper = new SimplePanel();
@@ -62,6 +63,10 @@ public class DropDownButton extends Composite implements HasText, HasHTML, Requi
 	protected SimplePanel chevron = new SimplePanel();
 	protected MenuBar menu;
 
+	public DropDownButton() {
+		this("", false, null);
+	}
+	
 	public DropDownButton(String aTitle, boolean asHtml, MenuBar aMenu) {
 		this(aTitle, asHtml, null, aMenu);
 	}
@@ -160,18 +165,22 @@ public class DropDownButton extends Composite implements HasText, HasHTML, Requi
 		}
 	}
 
+	@Override
 	public int getVerticalAlignment() {
 		return content.getVerticalAlignment();
 	}
 
+	@Override
 	public void setVerticalAlignment(int aValue) {
 		content.setVerticalAlignment(aValue);
 	}
 
+	@Override
 	public int getHorizontalAlignment() {
 		return content.getHorizontalAlignment();
 	}
 
+	@Override
 	public void setHorizontalAlignment(int aValue) {
 		content.setHorizontalAlignment(aValue);
 	}
@@ -196,26 +205,32 @@ public class DropDownButton extends Composite implements HasText, HasHTML, Requi
 		content.setHTML(aValue);
 	}
 
+	@Override
 	public int getIconTextGap() {
 		return content.getIconTextGap();
 	}
 
+	@Override
 	public void setIconTextGap(int aValue) {
 		content.setIconTextGap(aValue);
 	}
 
+	@Override
 	public int getHorizontalTextPosition() {
 		return content.getHorizontalTextPosition();
 	}
 
+	@Override
 	public void setHorizontalTextPosition(int aValue) {
 		content.setHorizontalTextPosition(aValue);
 	}
 
+	@Override
 	public int getVerticalTextPosition() {
 		return content.getVerticalTextPosition();
 	}
 
+	@Override
 	public void setVerticalTextPosition(int aValue) {
 		content.setVerticalTextPosition(aValue);
 	}

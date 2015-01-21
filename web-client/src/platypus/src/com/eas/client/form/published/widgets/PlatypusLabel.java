@@ -170,22 +170,22 @@ public class PlatypusLabel extends ImageLabel implements HasJsFacade, HasCompone
 			get : function() {
 				var position = aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::getHorizontalTextPosition()();
 				switch(position) { 
-					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::LEFT :	return $wnd.P.HorizontalPosition.LEFT; 
-					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::RIGHT :	return $wnd.P.HorizontalPosition.RIGHT; 
-					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER :	return $wnd.P.HorizontalPosition.CENTER;
+					case @com.bearsoft.gwt.ui.HasImageParagraph::LEFT :	return $wnd.P.HorizontalPosition.LEFT; 
+					case @com.bearsoft.gwt.ui.HasImageParagraph::RIGHT :	return $wnd.P.HorizontalPosition.RIGHT; 
+					case @com.bearsoft.gwt.ui.HasImageParagraph::CENTER :	return $wnd.P.HorizontalPosition.CENTER;
 					default : return null; 
 				}	
 			},
 			set : function(aValue) {
 				switch (aValue) {
 					case $wnd.P.HorizontalPosition.LEFT:
-						aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::setHorizontalTextPosition(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::LEFT);
+						aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::setHorizontalTextPosition(I)(@com.bearsoft.gwt.ui.HasImageParagraph::LEFT);
 						break;
 					case $wnd.P.HorizontalPosition.RIGHT:
-						aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::setHorizontalTextPosition(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::RIGHT);
+						aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::setHorizontalTextPosition(I)(@com.bearsoft.gwt.ui.HasImageParagraph::RIGHT);
 						break;
 					case $wnd.P.HorizontalPosition.CENTER:
-						aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::setHorizontalTextPosition(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER);
+						aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::setHorizontalTextPosition(I)(@com.bearsoft.gwt.ui.HasImageParagraph::CENTER);
 						break;
 				}
 			}
@@ -194,22 +194,22 @@ public class PlatypusLabel extends ImageLabel implements HasJsFacade, HasCompone
 			get : function() {
 				var position = aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::getVerticalTextPosition()();
 				switch(position) { 
-					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::TOP :	return $wnd.P.VerticalPosition.TOP; 
-					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::BOTTOM :	return $wnd.P.VerticalPosition.BOTTOM; 
-					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER :	return $wnd.P.VerticalPosition.CENTER;
+					case @com.bearsoft.gwt.ui.HasImageParagraph::TOP :	return $wnd.P.VerticalPosition.TOP; 
+					case @com.bearsoft.gwt.ui.HasImageParagraph::BOTTOM :	return $wnd.P.VerticalPosition.BOTTOM; 
+					case @com.bearsoft.gwt.ui.HasImageParagraph::CENTER :	return $wnd.P.VerticalPosition.CENTER;
 					default : return null;
 				} 
 			},
 			set : function(aValue) {
 				switch (aValue) {
 					case $wnd.P.VerticalPosition.TOP:
-						aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::setVerticalTextPosition(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::TOP);
+						aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::setVerticalTextPosition(I)(@com.bearsoft.gwt.ui.HasImageParagraph::TOP);
 						break;
 					case $wnd.P.VerticalPosition.BOTTOM:
-						aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::setVerticalTextPosition(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::BOTTOM);
+						aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::setVerticalTextPosition(I)(@com.bearsoft.gwt.ui.HasImageParagraph::BOTTOM);
 						break;
 					case $wnd.P.VerticalPosition.CENTER:
-						aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::setVerticalTextPosition(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER);
+						aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::setVerticalTextPosition(I)(@com.bearsoft.gwt.ui.HasImageParagraph::CENTER);
 						break;
 				}
 			}
@@ -219,22 +219,22 @@ public class PlatypusLabel extends ImageLabel implements HasJsFacade, HasCompone
 			get : function() {
 				var position = aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::getHorizontalAlignment()();
 				switch(position) { 
-					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::LEFT :	return $wnd.P.HorizontalPosition.LEFT; 
-					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::RIGHT :	return $wnd.P.HorizontalPosition.RIGHT; 
-					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER :	return $wnd.P.HorizontalPosition.CENTER;
+					case @com.bearsoft.gwt.ui.HasImageParagraph::LEFT :	return $wnd.P.HorizontalPosition.LEFT; 
+					case @com.bearsoft.gwt.ui.HasImageParagraph::RIGHT :	return $wnd.P.HorizontalPosition.RIGHT; 
+					case @com.bearsoft.gwt.ui.HasImageParagraph::CENTER :	return $wnd.P.HorizontalPosition.CENTER;
 					default : return null; 
 				}	
 			},
 			set : function(aValue) {
 				switch (aValue) {
 					case $wnd.P.HorizontalPosition.LEFT:
-						aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::setHorizontalAlignment(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::LEFT);
+						aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::setHorizontalAlignment(I)(@com.bearsoft.gwt.ui.HasImageParagraph::LEFT);
 						break;
 					case $wnd.P.HorizontalPosition.RIGHT:
-						aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::setHorizontalAlignment(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::RIGHT);
+						aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::setHorizontalAlignment(I)(@com.bearsoft.gwt.ui.HasImageParagraph::RIGHT);
 						break;
 					case $wnd.P.HorizontalPosition.CENTER:
-						aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::setHorizontalAlignment(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER);
+						aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::setHorizontalAlignment(I)(@com.bearsoft.gwt.ui.HasImageParagraph::CENTER);
 						break;
 				}
 			}
@@ -243,22 +243,22 @@ public class PlatypusLabel extends ImageLabel implements HasJsFacade, HasCompone
 			get : function() {
 				var position = aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::getVerticalAlignment()();
 				switch(position) { 
-					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::TOP :	return $wnd.P.VerticalPosition.TOP; 
-					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::BOTTOM :	return $wnd.P.VerticalPosition.BOTTOM; 
-					case @com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER :	return $wnd.P.VerticalPosition.CENTER;
+					case @com.bearsoft.gwt.ui.HasImageParagraph::TOP :	return $wnd.P.VerticalPosition.TOP; 
+					case @com.bearsoft.gwt.ui.HasImageParagraph::BOTTOM :	return $wnd.P.VerticalPosition.BOTTOM; 
+					case @com.bearsoft.gwt.ui.HasImageParagraph::CENTER :	return $wnd.P.VerticalPosition.CENTER;
 					default : return null;
 				} 
 			},
 			set : function(aValue) {
 				switch (aValue) {
 					case $wnd.P.VerticalPosition.TOP:
-						aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::setVerticalAlignment(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::TOP);
+						aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::setVerticalAlignment(I)(@com.bearsoft.gwt.ui.HasImageParagraph::TOP);
 						break;
 					case $wnd.P.VerticalPosition.BOTTOM:
-						aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::setVerticalAlignment(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::BOTTOM);
+						aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::setVerticalAlignment(I)(@com.bearsoft.gwt.ui.HasImageParagraph::BOTTOM);
 						break;
 					case $wnd.P.VerticalPosition.CENTER:
-						aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::setVerticalAlignment(I)(@com.bearsoft.gwt.ui.widgets.ImageParagraph::CENTER);
+						aWidget.@com.eas.client.form.published.widgets.PlatypusLabel::setVerticalAlignment(I)(@com.bearsoft.gwt.ui.HasImageParagraph::CENTER);
 						break;
 				}
 			}

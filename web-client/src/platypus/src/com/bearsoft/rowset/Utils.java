@@ -3,12 +3,17 @@ package com.bearsoft.rowset;
 import java.util.Date;
 import java.util.Map;
 
+import com.bearsoft.rowset.beans.HasPropertyListeners;
+import com.bearsoft.rowset.beans.PropertyChangeEvent;
+import com.bearsoft.rowset.beans.PropertyChangeListener;
+import com.bearsoft.rowset.beans.PropertyChangeSupport;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.xml.client.Element;
 import com.google.gwt.xml.client.Node;
 import com.google.gwt.xml.client.NodeList;
@@ -39,7 +44,7 @@ public class Utils {
 		public final native double getDouble(String aName)/*-{
 			return +this[aName];
 		}-*/;
-		
+
 		public final native JavaScriptObject getJs(String aName)/*-{
 			return this[aName];
 		}-*/;
@@ -47,11 +52,11 @@ public class Utils {
 		public final native void setJs(String aName, JavaScriptObject aValue)/*-{
 			return this[aName] = aValue;
 		}-*/;
-		
+
 		public final native void setJava(String aName, Object aValue)/*-{
 			return this[aName] = $wnd.P.boxAsJs(aValue);
 		}-*/;
-	
+
 		public final native boolean has(String aName)/*-{
 			return typeof this[aName] != 'undefined';
 		}-*/;
@@ -63,7 +68,7 @@ public class Utils {
 		public final native void defineProperty(String aName, JavaScriptObject aDefinition)/*-{
 			Object.defineProperty(this, aName, aDefinition);
 		}-*/;
-		
+
 		public final native void inject(String aName, JavaScriptObject aValue)/*-{
 			if (aName != null) {
 				Object.defineProperty(this, aName, {
@@ -77,31 +82,31 @@ public class Utils {
 		public final native boolean isArray()/*-{
 			return Array.isArray(this);
 		}-*/;
-		
+
 		public final native JsArrayString keys()/*-{
 			return Object.keys(this);
 		}-*/;
-		
+
 		public final native JavaScriptObject getSlot(int i)/*-{
 			return this[i];
 		}-*/;
-		
+
 		public final native void setSlot(int i, JavaScriptObject aValue)/*-{
 			this[i] = aValue;
 		}-*/;
-		
+
 		public final native void setSlot(int i, int aValue)/*-{
 			this[i] = aValue;
 		}-*/;
-		
+
 		public final native void setSlot(int i, String aValue)/*-{
 			this[i] = aValue;
 		}-*/;
-		
+
 		public final native void setSlot(int i, boolean aValue)/*-{
 			this[i] = aValue;
 		}-*/;
-		
+
 		public final native Object apply(JavaScriptObject aThis, JavaScriptObject aArgs)/*-{
 			return this.apply(aThis, aArgs != null ? aArgs : []);
 		}-*/;
@@ -330,18 +335,25 @@ public class Utils {
 	}
 
 	public static int getPxAttribute(Element aTag, String aName, int aDefValue) throws Exception {
-		if (aTag.hasAttribute(aName)){
+		if (aTag.hasAttribute(aName)) {
 			String value = aTag.getAttribute(aName);
-			if(value.endsWith("px"))
+			if (value.endsWith("px"))
 				value = value.substring(0, value.length() - 2);
 			return Integer.valueOf(value);
-		}else
+		} else
 			return aDefValue;
 	}
-	
+
 	public static float getFloatAttribute(Element aTag, String aName, float aDefValue) throws Exception {
 		if (aTag.hasAttribute(aName))
 			return Float.valueOf(aTag.getAttribute(aName));
+		else
+			return aDefValue;
+	}
+
+	public static double getDoubleAttribute(Element aTag, String aName, double aDefValue) throws Exception {
+		if (aTag.hasAttribute(aName))
+			return Double.valueOf(aTag.getAttribute(aName));
 		else
 			return aDefValue;
 	}
@@ -381,4 +393,154 @@ public class Utils {
         }	
         return m;
     }-*/;
+
+	public static native Object getPathData(JavaScriptObject anElement, String aPath)/*-{
+		if (anElement != null && aPath != null && aPath != '') {
+			var target = anElement;
+			var path = aPath.split('.');
+			var propName = path[0];
+			for ( var i = 1; i < path.length; i++) {
+				var target = target[propName];
+				if (!target) {
+					propName = null;
+				} else
+					propName = path[i];
+			}
+			if (propName != null) {
+				var javaValue = $wnd.P.boxAsJava(target[propName]);
+				return javaValue;
+			} else
+				return null;
+		} else
+			return null;
+	}-*/;
+
+	public static native void setPathData(JavaScriptObject anElement, String aPath, Object aValue)/*-{
+		if (aPath != null && aPath != '') {
+			var target = anElement;
+			var path = aPath.split('.');
+			var propName = path[0];
+			for ( var i = 1; i < path.length; i++) {
+				var target = target[propName];
+				if (!target) {
+					propName = null;
+				} else {
+					propName = path[i];
+				}
+			}
+			if (propName != null) {
+				var jsData = $wnd.P.boxAsJs(aValue);
+				target[propName] = jsData;
+			}
+		}
+	}-*/;
+
+	private static native JavaScriptObject observePath(JavaScriptObject aTarget, String aPath, JavaScriptObject aPropListener)/*-{
+    function subscribe(aData, aListener, aPropName) {
+        if (aData.unwrap) {
+        	var nHandler = @com.bearsoft.rowset.Utils::tryListenProperty(Ljava/lang/Object;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aData.unwrap(), aPropName, aListener);
+        	if(nHandler != null)
+        		return function(){
+        			nHandler.@com.google.gwt.event.shared.HandlerRegistration::removeHandler()();
+        		};
+        }
+        if($wnd.Object.observe){
+        	var observer = function(changes){
+        		var touched = false;
+        		changes.forEach(function(change){
+        			if(change.name == aPropName)
+        				touched = true;
+        		});
+        		if(touched){
+        			aListener(typeof aData[aPropName] != 'undefined' ? aData[aPropName] : null);
+        		}
+        	};
+        	if(Array.isArray(aData)){
+	        	Array.observe(aData, observer);
+	        	return function (){
+	        		Array.unobserve(aData, observer);
+	        	};
+        	}else{
+	        	Object.observe(aData, observer);
+	        	return function (){
+	        		Object.unobserve(aData, observer);
+	        	};
+        	}
+        }
+        return null;
+    }
+    var subscribed = [];
+    function listenPath() {
+        subscribed = [];
+        var data = aTarget;
+        var path = aPath.split('.');
+        for (var i = 0; i < path.length; i++) {
+            var propName = path[i];
+            var listener = i === path.length - 1 ? aPropListener : function (evt) {
+                subscribed.forEach(function (aEntry) {
+                    aEntry();
+                });
+                listenPath();
+                aPropListener(evt);
+            };
+            var cookie = subscribe(data, listener, propName);
+            if (cookie) {
+                subscribed.push(cookie);
+                if (data[propName])
+                    data = data[propName];
+                else
+                    break;
+            } else {
+                break;
+            }
+        }
+    }
+    if (aTarget) {
+        listenPath();
+    }
+    return {
+        unlisten: function () {
+            subscribed.forEach(function (aEntry) {
+                aEntry();
+            });
+        }
+    };
+}-*/;
+
+	public static HandlerRegistration tryListenProperty(Object aTarget, final String aPropertyName, final JavaScriptObject aListener) {
+		if (aTarget instanceof HasPropertyListeners) {
+			final HasPropertyListeners listenersContainer = (HasPropertyListeners) aTarget;
+			final PropertyChangeListener plistener = new PropertyChangeListener() {
+
+				protected native void invokeListener(JavaScriptObject aTarget, JavaScriptObject aEvent)/*-{
+		aTarget(aEvent.newValue);
+	}-*/;
+
+				@Override
+				public void propertyChange(PropertyChangeEvent evt) {
+					invokeListener(aListener, PropertyChangeSupport.publishEvent(evt));
+				}
+
+			};
+			listenersContainer.addPropertyChangeListener(aPropertyName, plistener);
+			return new HandlerRegistration() {
+				@Override
+				public void removeHandler() {
+					listenersContainer.removePropertyChangeListener(aPropertyName, plistener);
+				}
+			};
+		}
+		return null;
+	}
+
+	public static HandlerRegistration listen(JavaScriptObject anElement, String aPath, PropertyChangeListener aListener) {
+		final JsObject listener = observePath(anElement, aPath, PropertyChangeSupport.publishListener(aListener)).cast();
+		return new HandlerRegistration() {
+			@Override
+			public void removeHandler() {
+				JsObject unlisten = listener.getJs("unlisten").cast();
+				unlisten.apply(listener, null);
+			}
+		};
+	}
 }

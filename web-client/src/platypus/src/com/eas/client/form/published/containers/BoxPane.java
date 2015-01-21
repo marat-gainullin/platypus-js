@@ -1,7 +1,8 @@
 package com.eas.client.form.published.containers;
 
+import com.bearsoft.gwt.ui.Orientation;
 import com.bearsoft.gwt.ui.XElement;
-import com.bearsoft.gwt.ui.containers.HorizontalBoxPanel;
+import com.bearsoft.gwt.ui.containers.BoxPanel;
 import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.events.AddEvent;
 import com.eas.client.form.events.AddHandler;
@@ -31,7 +32,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Widget;
 
-public class HBoxPane extends HorizontalBoxPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers, HasAddHandlers,
+public class BoxPane extends BoxPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers, HasAddHandlers,
         HasRemoveHandlers, HasChildrenPosition {
 
 	protected EventsExecutor eventsExecutor;
@@ -40,13 +41,15 @@ public class HBoxPane extends HorizontalBoxPanel implements HasJsFacade, HasEnab
 	protected String name;
 	protected JavaScriptObject published;
 
-	public HBoxPane() {
+	public BoxPane() {
 		super();
 	}
 
-	public HBoxPane(int aHGap) {
+	public BoxPane(int aOrientation, int aHGap, int aVGap) {
 		super();
 		setHgap(aHGap);
+		setVgap(aVGap);
+		setOrientation(aOrientation);
 	}
 
 	@Override
@@ -165,6 +168,16 @@ public class HBoxPane extends HorizontalBoxPanel implements HasJsFacade, HasEnab
 		AddEvent.fire(this, child);
 	}
 
+	public void add(Widget child, int size) {
+		super.add(child);
+		AddEvent.fire(this, child);
+		if(orientation == Orientation.HORIZONTAL){
+			ajustWidth(child, size);
+		}else{
+			ajustHeight(child, size);
+		}
+	}
+
 	@Override
 	public boolean remove(Widget w) {
 		boolean res = super.remove(w);
@@ -177,6 +190,11 @@ public class HBoxPane extends HorizontalBoxPanel implements HasJsFacade, HasEnab
 	@Override
 	protected void setAjustedWidth(double aValue) {
 		published.<PublishedComponent>cast().setWidth(aValue);
+	}
+
+	@Override
+	protected void setAjustedHeight(double aValue) {
+		published.<PublishedComponent> cast().setHeight(aValue);
 	}
 
 	@Override

@@ -807,9 +807,12 @@
         });
         Object.defineProperty(target, "push", {
             value: function () {
+                var entityName = rowset.getFlowProvider().getEntityId();
+                var nFields = rowset.getFields();
                 for (var a = 0; a < arguments.length; a++) {
-                    var justInserted = rowset.insertAt(rowset.size() + 1, a < arguments.length - 1, objectToInsertIniting(arguments[a]));
+                    var justInserted = new RowClass(entityName, nFields);
                     justInserted.setPublished(publishRow(justInserted, arguments[a]));
+                    rowset.insertAt(justInserted, a < arguments.length - 1, rowset.size() + 1, objectToInsertIniting(arguments[a]));
                 }
                 return Array.prototype.push.apply(target, arguments);
             }
@@ -861,9 +864,12 @@
                         rowset.deleteAt(beginToDeleteAt + 1, needToAdd);
                     }
                     var insertAt = beginToDeleteAt;
+                    var entityName = rowset.getFlowProvider().getEntityId();
+                    var nFields = rowset.getFields();
                     for (var a = 2; a < arguments.length; a++) {
-                        var justInserted = rowset.insertAt(insertAt + 1, a < arguments.length - 1, objectToInsertIniting(arguments[a]));
+                        var justInserted = new RowClass(entityName, nFields);
                         justInserted.setPublished(publishRow(justInserted, arguments[a]));
+                        rowset.insertAt(justInserted, a < arguments.length - 1, insertAt + 1, objectToInsertIniting(arguments[a]));
                         insertAt++;
                     }
                 }
@@ -873,9 +879,12 @@
 
         Object.defineProperty(target, "unshift", {
             value: function () {
+                var entityName = rowset.getFlowProvider().getEntityId();
+                var nFields = rowset.getFields();
                 for (var a = 0; a < arguments.length; a++) {
-                    var justInserted = rowset.insertAt(a + 1, a < arguments.length - 1, objectToInsertIniting(arguments[a]));
+                    var justInserted = new RowClass(entityName, nFields);
                     justInserted.setPublished(publishRow(justInserted, arguments[a]));
+                    rowset.insertAt(justInserted, a < arguments.length - 1, a + 1, objectToInsertIniting(arguments[a]));
                 }
                 return Array.prototype.unshift.apply(target, arguments);
             }

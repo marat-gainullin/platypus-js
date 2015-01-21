@@ -1,6 +1,6 @@
 package com.bearsoft.gwt.ui.widgets;
 
-import com.bearsoft.gwt.ui.HasImageResource;
+import com.bearsoft.gwt.ui.HasImageParagraph;
 import com.bearsoft.gwt.ui.XElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -22,40 +22,9 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 
-public class ImageParagraph extends FocusWidget implements HasText, HasHTML, RequiresResize, HasClickHandlers, HasDoubleClickHandlers, Focusable, HasEnabled, HasAllMouseHandlers, HasAllTouchHandlers,
-        HasImageResource {
-
-	/**
-	 * The central position in an area. Used for both compass-direction
-	 * constants (NORTH, etc.) and box-orientation constants (TOP, etc.).
-	 */
-	public static final int CENTER = 0;
-	/**
-	 * Identifies the leading edge of text for use with left-to-right and
-	 * right-to-left languages. Used by buttons and labels.
-	 */
-	public static final int LEADING = 10;
-	/**
-	 * Identifies the trailing edge of text for use with left-to-right and
-	 * right-to-left languages. Used by buttons and labels.
-	 */
-	public static final int TRAILING = 11;
-	/**
-	 * Box-orientation constant used to specify the left side of a box.
-	 */
-	public static final int LEFT = 2;
-	/**
-	 * Box-orientation constant used to specify the right side of a box.
-	 */
-	public static final int RIGHT = 4;
-	/**
-	 * Box-orientation constant used to specify the top of a box.
-	 */
-	public static final int TOP = 1;
-	/**
-	 * Box-orientation constant used to specify the bottom of a box.
-	 */
-	public static final int BOTTOM = 3;
+public class ImageParagraph extends FocusWidget implements HasText, HasHTML, RequiresResize, HasClickHandlers,
+                                                           HasDoubleClickHandlers, Focusable, HasEnabled, HasAllMouseHandlers,
+                                                           HasAllTouchHandlers, HasImageParagraph {
 
 	// forms api
 	protected String text;
@@ -183,11 +152,11 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Req
 				backgroundPosition = "left";
 				contentStyle.setPaddingLeft(iconTextGap + image.getWidth(), Style.Unit.PX);
 				contentStyle.setPaddingRight(0, Style.Unit.PX);
-			} else {	
+			} else {
 				int imageWidth = image.getWidth();
 				int contentWidth = content.getOffsetWidth();
 				int imageOverflow = imageWidth - (contentWidth - contentPaddingLeft - contentPaddingRight);
-				if(text == null || text.isEmpty())
+				if (text == null || text.isEmpty())
 					imageOverflow = imageWidth;
 				if (imageOverflow < 0)
 					imageOverflow = 0;
@@ -212,7 +181,7 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Req
 				int imageHeight = image.getHeight();
 				int contentHeight = content.getOffsetHeight();
 				int imageOverflow = imageHeight - (contentHeight - contentPaddingTop - contentPaddingBottom);
-				if(text == null || text.isEmpty())
+				if (text == null || text.isEmpty())
 					imageOverflow = imageHeight;
 				if (imageOverflow < 0)
 					imageOverflow = 0;

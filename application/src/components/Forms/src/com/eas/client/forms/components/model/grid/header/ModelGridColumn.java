@@ -128,14 +128,14 @@ public class ModelGridColumn extends GridColumnsNode implements HasPublished {
 
     @ScriptFunction
     @Override
-    public boolean isEditable() {
-        return super.isEditable();
+    public boolean isReadonly() {
+        return super.isReadonly();
     }
 
     @ScriptFunction
     @Override
-    public void setEditable(boolean aValue) {
-        super.setEditable(aValue);
+    public void setReadonly(boolean aValue) {
+        super.setReadonly(aValue);
     }
 
     @ScriptFunction

@@ -27,6 +27,8 @@ import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.Utils.JsObject;
+import com.bearsoft.rowset.beans.PropertyChangeEvent;
+import com.bearsoft.rowset.beans.PropertyChangeListener;
 import com.bearsoft.rowset.beans.PropertyChangeSupport;
 import com.bearsoft.rowset.events.RowsetDeleteEvent;
 import com.bearsoft.rowset.events.RowsetFilterEvent;
@@ -61,6 +63,7 @@ import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayMixed;
 import com.google.gwt.core.client.JsArrayString;
+import com.google.gwt.event.shared.HandlerRegistration;
 
 /**
  * 
@@ -82,6 +85,7 @@ public class Entity implements RowsetListener, HasPublished{
 	// runtime
 	protected Rowset rowset;
 	protected Filter filter;
+	protected HandlerRegistration cursorListener;
 	protected List<Integer> filterConstraints = new ArrayList<Integer>();
 	// to preserve relation order
 	protected List<Relation> rtInFilterRelations;
@@ -121,7 +125,7 @@ public class Entity implements RowsetListener, HasPublished{
             if (!defs.containsKey(aName)) {
                 rowset.getFields().putOrmDefinition(aName, aDefinition);
             } else {
-                Logger.getLogger(Entity.class.getName()).log(Level.FINE, String.format("ORM property %s redefinition attempt on entity %s %s.", aName, name != null && !name.isEmpty() ? name : "", title != null && !title.isEmpty() ? "[" + title + "]" : ""));
+                Logger.getLogger(Entity.class.getName()).log(Level.FINE, "ORM property "+aName+" redefinition attempt on entity "+(name != null && !name.isEmpty() ? name : "")+" "+(title != null && !title.isEmpty() ? "[" + title + "]" : "")+".");
             }
         }
     }
@@ -137,7 +141,7 @@ public class Entity implements RowsetListener, HasPublished{
 		
 		var published = aEntity.@com.eas.client.model.Entity::getPublished()();
 		// array interface
-		rowset.@com.bearsoft.rowset.Rowset::addRowsetContentJsListener(Lcom/bearsoft/rowset/Rowset;Lcom/bearsoft/rowset/Utils$JsObject;)(rowset, function(){
+		@com.bearsoft.rowset.Rowset::addRowsetContentJsListener(Lcom/bearsoft/rowset/Rowset;Lcom/google/gwt/core/client/JavaScriptObject;)(rowset, function(){
             Array.prototype.splice.call(target, 0, target.length);
             var rLength = rowset.@com.bearsoft.rowset.Rowset::size()();
             for (var aCursorPos = 1; aCursorPos <= rLength; aCursorPos++) {
@@ -998,6 +1002,7 @@ public class Entity implements RowsetListener, HasPublished{
 
 	@Override
 	public void rowsetScrolled(RowsetScrollEvent aEvent) {
+        resignOnCursor();
 		Rowset eventRowset = aEvent.getRowset();
 		assert eventRowset == rowset;
 		if (aEvent.getNewRowIndex() >= 0 && aEvent.getNewRowIndex() <= eventRowset.size() + 1) {
@@ -1043,6 +1048,7 @@ public class Entity implements RowsetListener, HasPublished{
 
 	@Override
 	public void rowInserted(RowsetInsertEvent aEvent) {
+        resignOnCursor();
 		try {
 			internalExecuteChildren(false);
 			// call script method
@@ -1055,6 +1061,7 @@ public class Entity implements RowsetListener, HasPublished{
 
 	@Override
 	public void rowDeleted(RowsetDeleteEvent aEvent) {
+        resignOnCursor();
 		try {
 			internalExecuteChildren(false);
 			// call script method
@@ -1067,6 +1074,7 @@ public class Entity implements RowsetListener, HasPublished{
 
 	@Override
 	public void rowsetSorted(RowsetSortEvent event) {
+        resignOnCursor();
 		try {
 			internalExecuteChildren(false);
 			// call script method
@@ -1079,8 +1087,8 @@ public class Entity implements RowsetListener, HasPublished{
 
 	@Override
 	public void rowsetRequeried(RowsetRequeryEvent event) {
+        resignOnCursor();
 		try {
-            assert rowset != null;
 			filterRowset();
 			JavaScriptObject publishedEvent = JsEvents.publishSourcedEvent(jsPublished);
 			Utils.executeScriptEventVoid(jsPublished, onRequeried, publishedEvent);
@@ -1096,9 +1104,9 @@ public class Entity implements RowsetListener, HasPublished{
 
 	@Override
 	public void rowsetFiltered(RowsetFilterEvent event) {
+        resignOnCursor();
 		try {
-			if (!rowset.isEmpty())
-				internalExecuteChildren(false);
+			internalExecuteChildren(false);
 			// call script method
 			JavaScriptObject publishedEvent = JsEvents.publishSourcedEvent(jsPublished);
 			Utils.executeScriptEventVoid(jsPublished, onFiltered, publishedEvent);
@@ -1113,6 +1121,13 @@ public class Entity implements RowsetListener, HasPublished{
 
 	@Override
 	public void rowsetRolledback(RowsetRollbackEvent event) {
+        resignOnCursor();
+        try {
+            filterRowset();
+            internalExecuteChildren(false);
+        } catch (Exception ex) {
+            Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
+        }
 	}
 
 	@Override
@@ -1133,6 +1148,32 @@ public class Entity implements RowsetListener, HasPublished{
 	public boolean willSort(RowsetSortEvent event) {
 		return true;
 	}
+
+    protected void resignOnCursor() {
+        if (cursorListener != null) {
+            cursorListener.removeHandler();
+            cursorListener = null;
+        }
+        final Row cursor = rowset.getCurrentRow();
+        if (cursor != null) {
+            final PropertyChangeListener cursorPropsListener = new PropertyChangeListener(){
+            	public void propertyChange(PropertyChangeEvent evt) {
+                    try {
+                        internalExecuteChildren(false);
+                    } catch (Exception ex) {
+                        Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+            	}
+            };
+            cursor.addPropertyChangeListener(cursorPropsListener);
+            cursorListener = new HandlerRegistration(){
+            	@Override
+            	public void removeHandler() {
+                    cursor.removePropertyChangeListener(cursorPropsListener);
+            	}
+            };
+        }
+    }
 
 	protected void assign(Entity appTarget) throws Exception {
 		appTarget.setEntityId(entityId);
@@ -1196,7 +1237,7 @@ public class Entity implements RowsetListener, HasPublished{
 		return result != null ? Row.publishFacade(result, null) : null;
 	}
 	
-    public static final String BAD_PRIMARY_KEYS_MSG = "Bad primary keys detected. Required one and only one primary key field, but %d found.";
+    public static final String BAD_PRIMARY_KEYS_MSG = "Bad primary keys detected. Required one and only one primary key field, but found: ";
     
 	public Row findById(Object aValue) throws Exception {
         Fields fields = rowset.getFields();
@@ -1212,7 +1253,7 @@ public class Entity implements RowsetListener, HasPublished{
                 return null;
             }
         } else {
-            Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, String.format(BAD_PRIMARY_KEYS_MSG, pks.size()));
+            Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, BAD_PRIMARY_KEYS_MSG + pks.size());
         }
         return null;
 	}

@@ -464,22 +464,19 @@
              */
             P.GridPane.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
+        Object.defineProperty(this, "count", {
             get: function() {
-                var value = delegate.onActionPerformed;
+                var value = delegate.count;
                 return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
             }
         });
         if(!P.GridPane){
             /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
+             * Generated property jsDoc.
+             * @property count
              * @memberOf GridPane
              */
-            P.GridPane.prototype.onActionPerformed = {};
+            P.GridPane.prototype.count = 0;
         }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
@@ -498,19 +495,22 @@
              */
             P.GridPane.prototype.onKeyReleased = {};
         }
-        Object.defineProperty(this, "count", {
+        Object.defineProperty(this, "onActionPerformed", {
             get: function() {
-                var value = delegate.count;
+                var value = delegate.onActionPerformed;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
             }
         });
         if(!P.GridPane){
             /**
-             * Generated property jsDoc.
-             * @property count
+             * Main action performed event handler function.
+             * @property onActionPerformed
              * @memberOf GridPane
              */
-            P.GridPane.prototype.count = 0;
+            P.GridPane.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -801,17 +801,6 @@
         };
 
         /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf GridPane
-         */
-        P.GridPane.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Gets the component with the specified row and column.
          * @param row the row of the component
          * @param column the column of the component
@@ -821,6 +810,17 @@
         P.GridPane.prototype.child = function(row, column) {
             var delegate = this.unwrap();
             var value = delegate.child(P.boxAsJava(row), P.boxAsJava(column));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Tries to acquire focus for this component.
+         * @method focus
+         * @memberOf GridPane
+         */
+        P.GridPane.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
             return P.boxAsJs(value);
         };
 

@@ -38,19 +38,6 @@
         }
     };
         /**
-         * Logs out from  user's session on a server.
-         * @param onSuccess The function to be invoked after the logout (optional).
-         * @param onFailure The function to be invoked when exception raised while logout process (optional).
-         * @method logout
-         * @memberOf PlatypusPrincipal
-         */
-        P.PlatypusPrincipal.prototype.logout = function(onSuccess, onFailure) {
-            var delegate = this.unwrap();
-            var value = delegate.logout(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Checks if a user have a specified role.
          * @param role a role's name to test.
          * @return <code>true</code> if the user has the role.
@@ -60,6 +47,19 @@
         P.PlatypusPrincipal.prototype.hasRole = function(arg0) {
             var delegate = this.unwrap();
             var value = delegate.hasRole(P.boxAsJava(arg0));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Logs out from  user's session on a server.
+         * @param onSuccess The function to be invoked after the logout (optional).
+         * @param onFailure The function to be invoked when exception raised while logout process (optional).
+         * @method logout
+         * @memberOf PlatypusPrincipal
+         */
+        P.PlatypusPrincipal.prototype.logout = function(onSuccess, onFailure) {
+            var delegate = this.unwrap();
+            var value = delegate.logout(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
             return P.boxAsJs(value);
         };
 

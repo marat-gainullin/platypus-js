@@ -17,6 +17,7 @@ import com.eas.client.forms.components.model.ModelSpin;
 import com.eas.client.forms.components.model.grid.ModelGrid;
 import com.eas.client.forms.components.model.grid.columns.ModelColumn;
 import com.eas.client.forms.components.model.grid.header.ModelGridColumn;
+import com.eas.client.forms.components.model.grid.header.ServiceGridColumn;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.designer.application.module.EntityJSObject;
@@ -192,6 +193,12 @@ public class RADModelGrid extends RADVisualComponent<ModelGrid> implements Compo
                     int rowsetColumnsCount = fields.getFieldsCount();
                     fireRawColumnsChanges = false;
                     try {
+                        RADModelGridColumn serviceRadColumn = new RADModelGridColumn();
+                        serviceRadColumn.initialize(getFormModel());
+                        ServiceGridColumn serviceColumn = new ServiceGridColumn();
+                        serviceRadColumn.setBeanInstance(serviceColumn);
+                        serviceRadColumn.setStoredName(getFormModel().findFreeComponentName("colService"));
+                        getFormModel().addComponent(serviceRadColumn, this, true);
                         for (int i = 1; i <= rowsetColumnsCount; i++) {
                             Field columnField = fields.get(i);
                             RADModelGridColumn radColumn = new RADModelGridColumn();
@@ -221,9 +228,13 @@ public class RADModelGrid extends RADVisualComponent<ModelGrid> implements Compo
                                 case java.sql.Types.INTEGER:
                                 case java.sql.Types.REAL:
                                 case java.sql.Types.TINYINT:
-                                case java.sql.Types.SMALLINT:
-                                    radColumn.getViewControl().setInstance(new ModelSpin());
-                                    break;
+                                case java.sql.Types.SMALLINT: {
+                                    ModelSpin editor = new ModelSpin();
+                                    editor.setMin(-Double.MAX_VALUE);
+                                    editor.setMax(Double.MAX_VALUE);
+                                    radColumn.getViewControl().setInstance(editor);
+                                }
+                                break;
                                 // Logical
                                 case java.sql.Types.BOOLEAN:
                                 case java.sql.Types.BIT:
@@ -232,9 +243,12 @@ public class RADModelGrid extends RADVisualComponent<ModelGrid> implements Compo
                                 // Date and time
                                 case java.sql.Types.DATE:
                                 case java.sql.Types.TIME:
-                                case java.sql.Types.TIMESTAMP:
-                                    radColumn.getViewControl().setInstance(new ModelDate());
-                                    break;
+                                case java.sql.Types.TIMESTAMP: {
+                                    ModelDate editor = new ModelDate();
+                                    editor.setDateFormat("dd.MM.yyyy HH:mm:ss.SSS");
+                                    radColumn.getViewControl().setInstance(editor);
+                                }
+                                break;
                                 default:
                                     // ModelFormattedField already installed in the column's view
                                     break;

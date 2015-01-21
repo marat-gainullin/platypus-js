@@ -62,7 +62,7 @@ public class ModuleStructureRequestHandler extends SessionRequestHandler<ModuleS
     }
 
     private void checkModuleRoles(Session aSession, String aModuleName, AppElementFiles aAppElementFiles) throws Exception {
-        if (aAppElementFiles.hasExtension(PlatypusFiles.JAVASCRIPT_EXTENSION)) {
+        if (aAppElementFiles != null && aAppElementFiles.hasExtension(PlatypusFiles.JAVASCRIPT_EXTENSION)) {
             ScriptDocument jsDoc = serverCore.getScriptsConfigs().get(aModuleName, aAppElementFiles);
             Set<String> rolesAllowed = jsDoc.getModuleAllowedRoles();
             if (rolesAllowed != null && !aSession.getPrincipal().hasAnyRole(rolesAllowed)) {

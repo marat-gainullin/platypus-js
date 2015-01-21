@@ -8,7 +8,6 @@ import com.bearsoft.org.netbeans.modules.form.FormModel;
 import com.bearsoft.org.netbeans.modules.form.FormUtils;
 import com.bearsoft.org.netbeans.modules.form.RADComponent;
 import com.bearsoft.org.netbeans.modules.form.RADVisualContainer;
-import com.bearsoft.org.netbeans.modules.form.RADVisualFormContainer;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
 import com.eas.client.forms.Form;
 import com.eas.client.forms.components.model.grid.ModelGrid;

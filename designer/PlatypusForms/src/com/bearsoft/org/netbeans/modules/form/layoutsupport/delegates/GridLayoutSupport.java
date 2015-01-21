@@ -53,6 +53,7 @@ import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Insets;
+import java.awt.LayoutManager;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.beans.BeanInfo;
@@ -312,6 +313,13 @@ public class GridLayoutSupport extends AbstractLayoutSupport {
         assistantParams = newIndex;
         return newIndex;
     }
+
+    @Override
+    protected LayoutManager cloneLayoutInstance(Container container, Container containerDelegate) throws Exception {
+        GridLayout layout = (GridLayout)getRadLayout().getBeanInstance();
+        return new GridLayout(layout.getRows(), layout.getColumns(), layout.getHgap(), layout.getVgap());
+    }
+    
     private int assistantParams;
 
     @Override

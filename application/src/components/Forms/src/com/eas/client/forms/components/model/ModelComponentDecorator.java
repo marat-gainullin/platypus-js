@@ -57,6 +57,7 @@ import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
@@ -420,6 +421,18 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
         }
     }
 
+    @ScriptFunction(jsDoc = COMPONENT_POPUP_MENU_JSDOC)
+    @Override
+    public JPopupMenu getComponentPopupMenu() {
+        return super.getComponentPopupMenu();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setComponentPopupMenu(JPopupMenu aMenu) {
+        super.setComponentPopupMenu(aMenu);
+    }
+
     @ScriptFunction
     @Override
     public Cursor getCursor() {
@@ -668,23 +681,18 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     protected boolean settingValueToJs;
 
     protected void bind() {
-        if (data != null && field != null && !field.isEmpty()) {
+        if (data != null && field != null && !field.isEmpty() && com.eas.script.ScriptUtils.isInitialized()) {
             boundToData = com.eas.script.ScriptUtils.listen(data, field, new AbstractJSObject() {
 
                 @Override
                 public Object call(Object thiz, Object... args) {
                     if (!settingValueToJs) {
-                        if (args.length >= 1 && args[0] instanceof JSObject) {
-                            JSObject jsEvt = (JSObject) args[0];
-                            if (jsEvt.hasMember("newValue")) {
-                                settingValueFromJs = true;
-                                try {
-                                    Object newValue = jsEvt.getMember("newValue");
-                                    setJsValue(newValue instanceof Undefined ? null : newValue);
-                                } finally {
-                                    settingValueFromJs = false;
-                                }
-                            }
+                        settingValueFromJs = true;
+                        try {
+                            Object newValue = ModelWidget.getPathData(data, field);
+                            setJsValue(newValue instanceof Undefined ? null : newValue);
+                        } finally {
+                            settingValueFromJs = false;
                         }
                     }
                     return null;

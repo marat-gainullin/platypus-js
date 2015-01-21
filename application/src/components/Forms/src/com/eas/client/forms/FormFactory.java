@@ -472,7 +472,7 @@ public class FormFactory {
                 ModelSpin modelSpin = new ModelSpin();
                 readGeneralProps(anElement, modelSpin);
                 double min = XmlDomUtils.readDoubleAttribute(anElement, "min", 0.0d);
-                double step = XmlDomUtils.readDoubleAttribute(anElement, "step", 0.0d);
+                double step = XmlDomUtils.readDoubleAttribute(anElement, "step", 1.0d);
                 double max = XmlDomUtils.readDoubleAttribute(anElement, "max", 100.0d);
                 try {
                     modelSpin.setMin(min);
@@ -581,7 +581,7 @@ public class FormFactory {
                     try {
                         grid.setData(resolveEntity(entityName));
                     } catch (Exception ex) {
-                        Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, "While setting data to named model's property ({0}) to widget {1} exception occured: {2}", new Object[]{entityName, grid.getName(), ex.getMessage()});
+                        Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, "While setting data to property ({0}) of widget {1} exception occured: {2}", new Object[]{entityName, grid.getName(), ex.getMessage()});
                     }
                 }
                 return grid;
@@ -1225,7 +1225,7 @@ public class FormFactory {
             ScriptColor foreground = new ScriptColor(anElement.getAttribute("foreground"));
             aNode.setForeground(foreground);
         }
-        aNode.setEditable(XmlDomUtils.readBooleanAttribute(anElement, "editable", Boolean.TRUE));
+        aNode.setReadonly(XmlDomUtils.readBooleanAttribute(anElement, "readonly", Boolean.FALSE));
         aNode.setEnabled(XmlDomUtils.readBooleanAttribute(anElement, "enabled", Boolean.TRUE));
         Font font = readFont(anElement);
         if (font != null) {
