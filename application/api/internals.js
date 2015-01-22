@@ -98,13 +98,71 @@
                     return sourcePublishedEntity.find(sourcePublishedEntity.schema[sourceFieldName], this[targetFieldName]);
                 };
             });
-    ScriptUtils.setIsArrayFunc(function(aInstance){
-        return aInstance instanceof Array; 
-    });        
-    ScriptUtils.setMakeObjFunc(function(){
-        return {}; 
-    });        
-    ScriptUtils.setMakeArrayFunc(function(){
-        return []; 
-    });        
+    ScriptUtils.setIsArrayFunc(function (aInstance) {
+        return aInstance instanceof Array;
+    });
+    ScriptUtils.setMakeObjFunc(function () {
+        return {};
+    });
+    ScriptUtils.setMakeArrayFunc(function () {
+        return [];
+    });
+
+    var PAdapterClass = Java.type("com.eas.client.scripts.PropertyChangeListenerJSAdapter");
+
+    function subscribe(aData, aListener, aPropName) {
+        if (aData.unwrap) {
+            var target = aData.unwrap();
+            if(target.getRowset)
+                target = target.getRowset();
+            if (target.addPropertyChangeListener) {
+                var adapter = new PAdapterClass(aListener);
+                target.addPropertyChangeListener(aPropName, adapter);
+                return function () {
+                    target.removePropertyChangeListener(aPropName, adapter);
+                };
+            }
+        }
+        return null;
+    }
+
+    function listen(aTarget, aPath, aListener) {
+        var subscribed = [];
+        function listenPath() {
+            subscribed = [];
+            var data = aTarget;
+            var path = aPath.split(".");
+            for (var i = 0; i < path.length; i++) {
+                var propName = path[i];
+                var listener = i === path.length - 1 ? aListener : function (evt) {
+                    subscribed.forEach(function (aEntry) {
+                        aEntry();
+                    });
+                    listenPath();
+                    aListener(evt);
+                };
+                var cookie = subscribe(data, listener, propName);
+                if (cookie) {
+                    subscribed.push(cookie);
+                    if (data[propName])
+                        data = data[propName];
+                    else
+                        break;
+                } else {
+                    break;
+                }
+            }
+        }
+        if (aTarget) {
+            listenPath();
+        }
+        return {
+            unlisten: function () {
+                subscribed.forEach(function (aEntry) {
+                    aEntry();
+                });
+            }
+        };
+    }
+    ScriptUtils.setListenFunc(listen);
 })();
