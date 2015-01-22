@@ -1,6 +1,6 @@
 package com.eas.client.converters;
 
-public interface RowValueConverter<N> {
+public interface ValueConverter<N> {
 
 	public N convert(Object aValue);
 	

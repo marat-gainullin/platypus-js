@@ -35,6 +35,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Focusable;
+import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -45,7 +46,8 @@ import com.google.gwt.user.client.ui.ValueBox;
  * @author mg
  * @param <T>
  */
-public abstract class SpinnerBox<T> extends Composite implements RequiresResize, HasValue<T>, HasValueChangeHandlers<T>, IsEditor<LeafValueEditor<T>>, Focusable, HasAllKeyHandlers, HasFocusHandlers, HasBlurHandlers {
+public abstract class SpinnerBox<T> extends Composite implements RequiresResize, HasValue<T>, HasText, HasValueChangeHandlers<T>, IsEditor<LeafValueEditor<T>>, Focusable, HasAllKeyHandlers,
+        HasFocusHandlers, HasBlurHandlers {
 
 	protected FlowPanel container = new FlowPanel();
 	protected SimplePanel left = new SimplePanel();
@@ -205,6 +207,16 @@ public abstract class SpinnerBox<T> extends Composite implements RequiresResize,
 	protected abstract void increment();
 
 	protected abstract void decrement();
+
+	@Override
+	public String getText() {
+		return field.getText();
+	}
+
+	@Override
+	public void setText(String text) {
+		field.setText(text);
+	}
 
 	@Override
 	public void setFocus(boolean focused) {

@@ -304,7 +304,7 @@ public class Utils {
 	public static Object toJava(Object aValue) throws Exception {
 		if (aValue instanceof JavaScriptObject)
 			return unwrap((JavaScriptObject) aValue);
-		else if (aValue instanceof Number || aValue instanceof Boolean || aValue instanceof String)
+		else if (aValue instanceof Number || aValue instanceof Boolean || aValue instanceof String || aValue instanceof Date)
 			return aValue;
 		else
 			return null;

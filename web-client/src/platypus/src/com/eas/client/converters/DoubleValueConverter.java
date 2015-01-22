@@ -2,7 +2,7 @@ package com.eas.client.converters;
 
 import java.util.Date;
 
-public class DoubleRowValueConverter implements RowValueConverter<Double> {
+public class DoubleValueConverter implements ValueConverter<Double> {
 
 	@Override
 	public Double convert(Object aValue) {

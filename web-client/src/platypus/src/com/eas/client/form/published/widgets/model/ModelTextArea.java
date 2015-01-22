@@ -2,6 +2,7 @@ package com.eas.client.form.published.widgets.model;
 
 import com.bearsoft.gwt.ui.widgets.NullableTextArea;
 import com.bearsoft.rowset.Utils;
+import com.eas.client.converters.StringValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.published.HasEmptyText;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -12,8 +13,14 @@ public class ModelTextArea extends ModelDecoratorBox<String> implements HasEmpty
 
 	public ModelTextArea() {
 		super(new NullableTextArea());
-		((NullableTextArea)decorated).getElement().getStyle().setProperty("wordWrap", "normal");
-		((NullableTextArea)decorated).getElement().getStyle().setProperty("resize", "none");
+		((NullableTextArea) decorated).getElement().getStyle().setProperty("wordWrap", "normal");
+		((NullableTextArea) decorated).getElement().getStyle().setProperty("resize", "none");
+	}
+
+	@Override
+	public String convert(Object aValue) {
+		StringValueConverter c = new StringValueConverter();
+		return c.convert(aValue);
 	}
 
 	@Override
@@ -73,6 +80,11 @@ public class ModelTextArea extends ModelDecoratorBox<String> implements HasEmpty
 	}
 
 	@Override
+	public void setText(String text) {
+		setValue(text);
+	}
+
+	@Override
 	public String getValue() {
 		return super.getValue();
 	}
@@ -81,19 +93,16 @@ public class ModelTextArea extends ModelDecoratorBox<String> implements HasEmpty
 	public void setValue(String value) {
 		super.setValue(value);
 	}
-	
+
 	@Override
-	public Object getJsValue(){
+	public Object getJsValue() {
 		return Utils.toJs(getValue());
 	}
 
 	@Override
 	public void setJsValue(Object aValue) throws Exception {
 		Object javaValue = Utils.toJava(aValue);
-		if (javaValue == null || javaValue instanceof String)
-			setValue((String) javaValue, true);
-		else
-			throw new IllegalArgumentException("A value of type 'String' expected");
+		setValue(convert(javaValue), true);
 	}
 
 }

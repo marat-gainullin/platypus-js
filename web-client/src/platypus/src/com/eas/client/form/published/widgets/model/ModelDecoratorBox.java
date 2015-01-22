@@ -34,9 +34,10 @@ import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HasValue;
 
-public abstract class ModelDecoratorBox<T> extends DecoratorBox<T> implements HasJsFacade, HasJsValue, HasCustomEditing, HasBinding, HasOnRender, HasOnSelect, HasComponentPopupMenu, HasEventsExecutor,
+public abstract class ModelDecoratorBox<T> extends DecoratorBox<T> implements HasJsFacade, HasJsValue, HasText, HasCustomEditing, HasBinding, HasOnRender, HasOnSelect, HasComponentPopupMenu, HasEventsExecutor,
         HasShowHandlers, HasHideHandlers, HasResizeHandlers {
 
 	protected EventsExecutor eventsExecutor;
@@ -206,6 +207,8 @@ public abstract class ModelDecoratorBox<T> extends DecoratorBox<T> implements Ha
 
 	protected PublishedCell cellToRender;
 
+	public abstract T convert(Object aValue);
+	
 	public void setValue(T value, boolean fireEvents) {
 		settingValue = true;
 		try{

@@ -1,25 +1,29 @@
 package com.eas.client.form.grid.columns;
 
 import java.util.Comparator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.bearsoft.gwt.ui.widgets.grid.GridColumn;
 import com.bearsoft.gwt.ui.widgets.grid.GridSection;
 import com.bearsoft.gwt.ui.widgets.grid.cells.CellHasReadonly;
 import com.bearsoft.gwt.ui.widgets.grid.cells.RenderedEditorCell;
-import com.bearsoft.gwt.ui.widgets.grid.cells.StringEditorCell;
 import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
 import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.Utils.JsObject;
 import com.eas.client.form.Publisher;
+import com.eas.client.form.grid.cells.CheckBoxCell;
 import com.eas.client.form.grid.rows.PathComparator;
 import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.PublishedCell;
 import com.eas.client.form.published.PublishedStyle;
+import com.eas.client.form.published.widgets.model.ModelCheck;
 import com.eas.client.form.published.widgets.model.ModelDecoratorBox;
 import com.eas.client.form.published.widgets.model.ModelGrid;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.FieldUpdater;
+import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayMixed;
 import com.google.gwt.core.client.Scheduler;
@@ -28,12 +32,13 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 
 public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements FieldUpdater<JavaScriptObject, Object>, ChangesHost, HasPublished {
 
 	protected String field;
-	protected ModelDecoratorBox<Object> editor;
+	protected ModelDecoratorBox<? extends Object> editor;
 	protected ModelGrid grid;
 	protected double minWidth = 15;
 	protected double maxWidth = Integer.MAX_VALUE;
@@ -52,32 +57,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 	}
 
 	public ModelColumn() {
-		super(new TreeExpandableCell<JavaScriptObject, Object>(new StringEditorCell()));
-		if (getTargetCell() instanceof RenderedEditorCell<?>) {
-			((RenderedEditorCell<Object>) getTargetCell()).setReadonly(new CellHasReadonly() {
-
-				@Override
-				public boolean isReadonly() {
-					return readonly || !grid.isEditable();
-				}
-
-			});
-			((RenderedEditorCell<Object>) getTargetCell()).setOnEditorClose(new RenderedEditorCell.EditorCloser() {
-				@Override
-				public void closed(Element aTable) {
-					final GridSection<?> toFocus = GridSection.getInstance(aTable);
-					if (toFocus != null) {
-						Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
-							@Override
-							public void execute() {
-								toFocus.setFocus(true);
-							}
-						});
-					}
-				}
-			});
-		}
+		super(new TreeExpandableCell<JavaScriptObject, Object>(null));
 		setFieldUpdater(this);
 		setDefaultSortAscending(true);
 		setPublished(JavaScriptObject.createObject());
@@ -264,11 +244,11 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 		}
 	}
 
-	public ModelDecoratorBox<Object> getEditor() {
+	public ModelDecoratorBox<? extends Object> getEditor() {
 		return editor;
 	}
 
-	public void setEditor(ModelDecoratorBox<Object> aEditor) {
+	public void setEditor(ModelDecoratorBox<? extends Object> aEditor) {
 		if (editor != aEditor) {
 			if (editor != null) {
 				editor.setOnSelect(null);
@@ -277,6 +257,76 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 			if (editor != null) {
 				editor.setOnSelect(onSelect);
 				editor.setPublished(JavaScriptObject.createObject());
+			}
+			if (editor instanceof ModelCheck) {
+				((TreeExpandableCell<JavaScriptObject, Object>) getCell()).setCell(new CheckBoxCell() {
+					@Override
+					public void render(com.google.gwt.cell.client.Cell.Context context, Object aValue, SafeHtmlBuilder sb) {
+						try {
+							if (getEditor() instanceof ModelDecoratorBox<?>) {
+								ModelDecoratorBox<Object> modelEditor = (ModelDecoratorBox<Object>) getEditor();
+								aValue = modelEditor.convert(Utils.toJava(aValue));
+							}
+							super.render(context, aValue, sb);
+						} catch (Exception ex) {
+							Logger.getLogger(ModelColumn.class.getName()).log(Level.SEVERE, null, ex);
+						}
+					}
+
+				});
+			} else {
+				((TreeExpandableCell<JavaScriptObject, Object>) getCell()).setCell(new RenderedEditorCell<Object>(editor) {
+					@Override
+					protected void renderCell(com.google.gwt.cell.client.Cell.Context context, Object value, SafeHtmlBuilder sb) {
+						try {
+							if (getEditor() instanceof ModelDecoratorBox<?>) {
+								ModelDecoratorBox<Object> modelEditor = (ModelDecoratorBox<Object>) getEditor();
+								value = modelEditor.convert(Utils.toJava(value));
+							}
+							super.renderCell(context, value, sb);
+						} catch (Exception ex) {
+							Logger.getLogger(ModelColumn.class.getName()).log(Level.SEVERE, null, ex);
+						}
+					}
+
+					@Override
+					public void startEditing(com.google.gwt.cell.client.Cell.Context context, Element aBoxPositionTemplate, Element aBoxParent, Object value, ValueUpdater<Object> valueUpdater,
+					        Runnable onEditorClose) {
+						try {
+							if (getEditor() instanceof ModelDecoratorBox<?>) {
+								ModelDecoratorBox<Object> modelEditor = (ModelDecoratorBox<Object>) getEditor();
+								value = modelEditor.convert(Utils.toJava(value));
+							}
+							super.startEditing(context, aBoxPositionTemplate, aBoxParent, value, valueUpdater, onEditorClose);
+						} catch (Exception ex) {
+							Logger.getLogger(ModelColumn.class.getName()).log(Level.SEVERE, null, ex);
+						}
+					}
+				});
+				RenderedEditorCell<Object> cell = (RenderedEditorCell<Object>) getTargetCell();
+				cell.setReadonly(new CellHasReadonly() {
+
+					@Override
+					public boolean isReadonly() {
+						return readonly || !grid.isEditable();
+					}
+
+				});
+				((RenderedEditorCell<Object>) getTargetCell()).setOnEditorClose(new RenderedEditorCell.EditorCloser() {
+					@Override
+					public void closed(Element aTable) {
+						final GridSection<?> toFocus = GridSection.getInstance(aTable);
+						if (toFocus != null) {
+							Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+								@Override
+								public void execute() {
+									toFocus.setFocus(true);
+								}
+							});
+						}
+					}
+				});
 			}
 		}
 	}

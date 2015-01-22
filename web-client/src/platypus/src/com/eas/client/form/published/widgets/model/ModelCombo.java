@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 import com.bearsoft.gwt.ui.widgets.StyledListBox;
 import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.utils.IDGenerator;
-import com.eas.client.converters.StringRowValueConverter;
+import com.eas.client.converters.StringValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.JavaScriptObjectKeyProvider;
 import com.eas.client.form.events.ActionEvent;
@@ -53,7 +53,6 @@ public class ModelCombo extends ModelDecoratorBox<Object> implements HasEmptyTex
 	protected static final String CUSTOM_DROPDOWN_CLASS = "combo-field-custom-dropdown";
 	protected JavaScriptObjectKeyProvider rowKeyProvider = new JavaScriptObjectKeyProvider();
 	protected String emptyText;
-	protected StringRowValueConverter converter = new StringRowValueConverter();
 	protected String emptyValueKey = String.valueOf(IDGenerator.genId());
 	protected boolean forceRedraw;
 	protected JavaScriptObject displayList;
@@ -100,10 +99,6 @@ public class ModelCombo extends ModelDecoratorBox<Object> implements HasEmptyTex
 		};
 	}
 
-	public StringRowValueConverter getConverter() {
-		return converter;
-	}
-
 	public void setValue(Object value, boolean fireEvents) {
 		super.setValue(value, fireEvents);
 		try {
@@ -123,6 +118,11 @@ public class ModelCombo extends ModelDecoratorBox<Object> implements HasEmptyTex
 		}
 	}
 
+	@Override
+	public Object convert(Object aValue) {
+	    return aValue;
+	}
+	
 	public boolean isForceRedraw() {
 		return forceRedraw;
 	}
@@ -179,6 +179,10 @@ public class ModelCombo extends ModelDecoratorBox<Object> implements HasEmptyTex
 
 	public String getText() {
 		return ((StyledListBox<Object>) decorated).getText();
+	}
+
+	@Override
+	public void setText(String text) {
 	}
 
 	@Override

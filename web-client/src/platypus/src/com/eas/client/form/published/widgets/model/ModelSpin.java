@@ -2,6 +2,7 @@ package com.eas.client.form.published.widgets.model;
 
 import com.bearsoft.gwt.ui.widgets.ExplicitDoubleBox;
 import com.bearsoft.rowset.Utils;
+import com.eas.client.converters.DoubleValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.events.ActionEvent;
 import com.eas.client.form.events.ActionHandler;
@@ -13,6 +14,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.HasText;
 
 public class ModelSpin extends ModelDecoratorBox<Double> implements HasEmptyText, HasActionHandlers {
 
@@ -56,9 +58,9 @@ public class ModelSpin extends ModelDecoratorBox<Double> implements HasEmptyText
 
 	@Override
 	protected HandlerManager createHandlerManager() {
-	    return super.createHandlerManager();
+		return super.createHandlerManager();
 	}
-	
+
 	@Override
 	public String getEmptyText() {
 		return emptyText;
@@ -68,6 +70,21 @@ public class ModelSpin extends ModelDecoratorBox<Double> implements HasEmptyText
 	public void setEmptyText(String aValue) {
 		emptyText = aValue;
 		ControlsUtils.applyEmptyText(getElement(), emptyText);
+	}
+
+	@Override
+	public String getText() {
+		return ((HasText) decorated).getText();
+	}
+
+	public void setText(String aValue) {
+		((HasText) decorated).setText(aValue);
+	}
+
+	@Override
+	public Double convert(Object aValue) {
+		DoubleValueConverter c = new DoubleValueConverter();
+		return c.convert(aValue);
 	}
 
 	public void setPublished(JavaScriptObject aValue) {
@@ -106,13 +123,10 @@ public class ModelSpin extends ModelDecoratorBox<Double> implements HasEmptyText
 		});
 		Object.defineProperty(aPublished, "text", {
 			get : function() {
-				var v = aPublished.value;
-				return v != null ? aPublished.value + '' : '';
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelSpin::getText()();
 			},
 			set : function(aValue) {
-				var v = parseFloat(aValue);
-				if (!isNaN(v))
-					aPublished.value = v;
+				aWidget.@com.eas.client.form.published.widgets.model.ModelSpin::setText(Ljava/lang/String;)(aValue != null ? aValue + '' : '');
 			}
 		});
 		Object.defineProperty(aPublished, "min", {
@@ -182,17 +196,14 @@ public class ModelSpin extends ModelDecoratorBox<Double> implements HasEmptyText
 	}
 
 	@Override
-	public Object getJsValue(){
+	public Object getJsValue() {
 		return Utils.toJs(getValue());
 	}
 
 	@Override
 	public void setJsValue(Object aValue) throws Exception {
 		Object javaValue = Utils.toJava(aValue);
-		if (javaValue == null || javaValue instanceof Double)
-			setValue((Double) javaValue, true);
-		else
-			throw new IllegalArgumentException("A value of type 'Number' expected");
+		setValue(convert(javaValue), true);
 	}
 
 	@Override

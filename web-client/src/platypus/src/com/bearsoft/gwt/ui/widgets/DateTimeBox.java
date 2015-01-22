@@ -38,6 +38,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Focusable;
+import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -50,7 +51,8 @@ import java.util.Date;
  * 
  * @author mg
  */
-public class DateTimeBox extends Composite implements RequiresResize, HasValue<Date>, HasValueChangeHandlers<Date>, IsEditor<LeafValueEditor<Date>>, Focusable, HasAllKeyHandlers, HasFocusHandlers, HasBlurHandlers {
+public class DateTimeBox extends Composite implements RequiresResize, HasValue<Date>, HasText, HasValueChangeHandlers<Date>, IsEditor<LeafValueEditor<Date>>, Focusable, HasAllKeyHandlers,
+        HasFocusHandlers, HasBlurHandlers {
 
 	private static final DateBox.DefaultFormat DEFAULT_FORMAT = GWT.create(DateBox.DefaultFormat.class);
 
@@ -248,6 +250,14 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 
 	public String getText() {
 		return field.getTextBox().getText();
+	}
+
+	@Override
+	public void setText(String text) {
+		Date newValue = field.getFormat().parse(field, text, false);
+		if (newValue != null) {
+			setValue(newValue, true);
+		}
 	}
 
 	/**

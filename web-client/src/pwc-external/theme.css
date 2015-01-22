@@ -56,15 +56,15 @@
 }
 
 .gwt-SliderBar-knob-enabled{
-    background-image: url(slider.gif);
+    background-image: url(slider.png);
 }
 
 .gwt-SliderBar-knob-disabled{
-    background-image: url(slider-disabled.gif);
+    background-image: url(slider-disabled.png);
 }
 
 .gwt-SliderBar-knob-sliding{
-    background-image: url(slider-sliding.gif);
+    background-image: url(slider-sliding.png);
 }
 
 .gwt-SliderBar-tick {

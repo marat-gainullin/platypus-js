@@ -2,7 +2,7 @@ package com.eas.client.converters;
 
 import java.util.Date;
 
-public class BooleanRowValueConverter implements RowValueConverter<Boolean> {
+public class BooleanValueConverter implements ValueConverter<Boolean> {
 
 	@Override
 	public Boolean convert(Object aValue) {

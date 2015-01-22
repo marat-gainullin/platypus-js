@@ -2,6 +2,7 @@ package com.eas.client.form.published.widgets.model;
 
 import com.bearsoft.gwt.ui.widgets.NullableCheckBox;
 import com.bearsoft.rowset.Utils;
+import com.eas.client.converters.BooleanValueConverter;
 import com.eas.client.form.events.ActionEvent;
 import com.eas.client.form.events.ActionHandler;
 import com.eas.client.form.events.HasActionHandlers;
@@ -88,12 +89,23 @@ public class ModelCheck extends ModelDecoratorBox<Boolean> implements HasActionH
 		});
 	}-*/;
 
+	@Override
 	public String getText() {
-		return ((CheckBox) decorated).getText();
+		return getValue() != null ? (getValue() ? "true" : "false") : "";
 	}
 
-	public void setText(String aValue) {
-		((CheckBox) decorated).setText(aValue);
+	@Override
+	public void setText(String aText) {
+		if (aText == null)
+			setValue(null);
+		else
+			setValue(!aText.isEmpty());
+	}
+
+	@Override
+	public Boolean convert(Object aValue) {
+		BooleanValueConverter c = new BooleanValueConverter();
+		return c.convert(aValue);
 	}
 
 	@Override
@@ -108,21 +120,18 @@ public class ModelCheck extends ModelDecoratorBox<Boolean> implements HasActionH
 
 	@Override
 	protected void clearValue() {
-	    super.clearValue();
+		super.clearValue();
 		ActionEvent.fire(this, this);
 	}
 
 	@Override
-	public Object getJsValue(){
+	public Object getJsValue() {
 		return Utils.toJs(getValue());
 	}
 
 	@Override
 	public void setJsValue(Object aValue) throws Exception {
 		Object javaValue = Utils.toJava(aValue);
-		if (javaValue == null || javaValue instanceof Boolean)
-			setValue((Boolean) javaValue, true);
-		else
-			throw new IllegalArgumentException("A value of type 'Boolean' expected");
+		setValue(convert(javaValue), true);
 	}
 }

@@ -4,6 +4,7 @@ import java.text.ParseException;
 
 import com.bearsoft.gwt.ui.widgets.FormattedObjectBox;
 import com.bearsoft.rowset.Utils;
+import com.eas.client.converters.StringValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.events.ActionEvent;
 import com.eas.client.form.events.ActionHandler;
@@ -80,6 +81,12 @@ public class ModelFormattedField extends ModelDecoratorBox<Object> implements Ha
 	}
 
 	@Override
+	public Object convert(Object aValue) {
+		StringValueConverter c = new StringValueConverter();
+		return c.convert(aValue);
+	}
+
+	@Override
 	public String getEmptyText() {
 		return emptyText;
 	}
@@ -138,7 +145,7 @@ public class ModelFormattedField extends ModelDecoratorBox<Object> implements Ha
 	}
 
 	public void setJsValue(Object value) throws Exception {
-		setValue(Utils.toJava(value), true);
+		setValue(convert(Utils.toJava(value)), true);
 	}
 
 	@Override

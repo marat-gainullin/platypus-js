@@ -4,12 +4,12 @@ import java.util.Date;
 
 import com.bearsoft.gwt.ui.widgets.DateTimeBox;
 import com.bearsoft.rowset.Utils;
+import com.eas.client.converters.DateValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.events.ActionEvent;
 import com.eas.client.form.events.ActionHandler;
 import com.eas.client.form.events.HasActionHandlers;
 import com.eas.client.form.published.HasEmptyText;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -20,12 +20,10 @@ import com.google.gwt.user.datepicker.client.DateBox;
 public class ModelDate extends ModelDecoratorBox<Date> implements HasEmptyText, HasActionHandlers {
 
 	protected String emptyText;
-	private static final DateBox.DefaultFormat DEFAULT_FORMAT = GWT.create(DateBox.DefaultFormat.class);
 	protected String format;
 
 	public ModelDate() {
 		super(new DateTimeBox());
-		format = DEFAULT_FORMAT.getDateTimeFormat().getPattern();
 	}
 
 	protected int actionHandlers;
@@ -72,9 +70,21 @@ public class ModelDate extends ModelDecoratorBox<Date> implements HasEmptyText, 
 		((DateTimeBox) decorated).setFormat(new DateBox.DefaultFormat(dtFormat));
 	}
 
+	@Override
+	public Date convert(Object aValue) {
+		DateValueConverter c = new DateValueConverter();
+		return c.convert(aValue);
+	}
+
+	@Override
 	public String getText() {
 		DateTimeBox box = (DateTimeBox) decorated;
 		return box.getText();
+	}
+
+	@Override
+	public void setText(String text) {
+		((DateTimeBox) decorated).setText(text);
 	}
 
 	@Override
@@ -128,17 +138,14 @@ public class ModelDate extends ModelDecoratorBox<Date> implements HasEmptyText, 
 	}-*/;
 
 	@Override
-	public Object getJsValue(){
+	public Object getJsValue() {
 		return Utils.toJs(getValue());
 	}
 
 	@Override
 	public void setJsValue(Object aValue) throws Exception {
 		Object javaValue = Utils.toJava(aValue);
-		if (javaValue == null || javaValue instanceof Date)
-			setValue((Date) javaValue, true);
-		else
-			throw new IllegalArgumentException("A value of type 'Date' expected");
+		setValue(convert(javaValue), true);
 	}
 
 	@Override

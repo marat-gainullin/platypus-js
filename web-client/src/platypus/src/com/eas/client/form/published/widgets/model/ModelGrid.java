@@ -129,35 +129,47 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 					if (getSelectionModel() instanceof SetSelectionModel<?>) {
 						final SetSelectionModel<JavaScriptObject> rowsSelection = (SetSelectionModel<JavaScriptObject>) getSelectionModel();
 						if (event.getNativeKeyCode() == KeyCodes.KEY_DELETE && deletable) {
-							int deletedAt = -1;
-							for (int i = jsData.length() - 1; i >= 0; i--) {
-								JavaScriptObject element = jsData.getSlot(i);
-								if (rowsSelection.isSelected(element)) {
-									jsData.splice(i, 1);
-									deletedAt = i;
+							final List<JavaScriptObject> viewElements = dataProvider.getList();
+							if (!viewElements.isEmpty() && rowsSelection.getSelectedSet() != null && !rowsSelection.getSelectedSet().isEmpty()) {
+								// calculate some view sugar
+								int lastSelectedViewIndex = -1;
+								for (int i = viewElements.size() - 1; i >= 0; i--) {
+									JavaScriptObject element = viewElements.get(i);
+									if (rowsSelection.isSelected(element)) {
+										lastSelectedViewIndex = i;
+										break;
+									}
 								}
-							}
-							if (deletedAt != -1) {
-								int newLength = jsData.length();
-								if (deletedAt >= newLength)
-									deletedAt = newLength - 1;
-								if (deletedAt >= 0) {
-									final JavaScriptObject toSelect = jsData.getSlot(deletedAt);
-									Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+								// actually delete selected elements
+								int deletedAt = -1;
+								for (int i = jsData.length() - 1; i >= 0; i--) {
+									JavaScriptObject element = jsData.getSlot(i);
+									if (rowsSelection.isSelected(element)) {
+										jsData.splice(i, 1);
+										deletedAt = i;
+									}
+								}
+								final int viewIndexToSelect = lastSelectedViewIndex;
+								Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
-										@Override
-										public void execute() {
-											Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+									@Override
+									public void execute() {
+										Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
-												@Override
-												public void execute() {
+											@Override
+											public void execute() {
+												int vIndex = viewIndexToSelect;
+												if (vIndex >= 0 && !viewElements.isEmpty()) {
+													if (vIndex >= viewElements.size())
+														vIndex = viewElements.size() - 1;
+													JavaScriptObject toSelect = viewElements.get(vIndex);
 													makeVisible(toSelect, true);
 												}
-											});
-										}
+											}
+										});
+									}
 
-									});
-								}
+								});
 							}
 						} else if (event.getNativeKeyCode() == KeyCodes.KEY_INSERT && insertable) {
 							int insertAt = -1;
