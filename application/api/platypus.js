@@ -1462,4 +1462,3 @@ if (!P) {
     P.async = function (aWorkerFunc, aOnSuccess, aOnFailure) {
     };
 }
- 
