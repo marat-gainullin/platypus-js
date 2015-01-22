@@ -15,9 +15,9 @@
 	<set-property name="gwt.logging.systemHandler" value="DISABLED" />
 	<set-property name="gwt.logging.simpleRemoteHandler" value="DISABLED" />
 	<!--  The following is to pretty stack traces. Should be removed from production -->
-	<set-property name="compiler.stackMode" value="emulated" />
+	<!-- set-property name="compiler.stackMode" value="emulated" />
 	<set-configuration-property name="compiler.emulatedStack.recordLineNumbers" value="true" />
-	<set-configuration-property name="compiler.emulatedStack.recordFileNames" value="true" />
+	<set-configuration-property name="compiler.emulatedStack.recordFileNames" value="true" /-->
     <!-- Inherit the default GWT style sheet. You can change -->
     <!-- the theme of your GWT application by uncommenting -->
     <!-- any one of the following lines. -->

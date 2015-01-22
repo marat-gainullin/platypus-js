@@ -133,11 +133,5 @@ public class ModelCheck extends ModelDecoratorBox<Boolean> implements HasActionH
 	public void setJsValue(Object aValue) throws Exception {
 		Object javaValue = Utils.toJava(aValue);
 		setValue(convert(javaValue), true);
-	}
-	
-	@Override
-	protected void clearValue() {
-	    super.clearValue();
-		ActionEvent.fire(this, this);
-	}
+	}	
 }
