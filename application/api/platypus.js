@@ -1,3 +1,4 @@
+ajsefhjshefjahsjfhasjfhj
 (function () {
     load("classpath:internals.js");
     //this === global;
