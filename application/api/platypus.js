@@ -1,4 +1,3 @@
-ajsefhjshefjahsjfhasjfhj
 (function () {
     load("classpath:internals.js");
     //this === global;
@@ -1463,4 +1462,3 @@ if (!P) {
     P.async = function (aWorkerFunc, aOnSuccess, aOnFailure) {
     };
 }
- 
