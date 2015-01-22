@@ -356,23 +356,6 @@
              */
             P.ModelFormattedField.prototype.format = '';
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelFormattedField){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf ModelFormattedField
-             */
-            P.ModelFormattedField.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -389,6 +372,23 @@
              * @memberOf ModelFormattedField
              */
             P.ModelFormattedField.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelFormattedField){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf ModelFormattedField
+             */
+            P.ModelFormattedField.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -660,7 +660,7 @@
              */
             P.ModelFormattedField.prototype.onSelect = {};
         }
-        Object.defineProperty(this, "jsValue", {
+        Object.defineProperty(this, "value", {
             get: function() {
                 var value = delegate.jsValue;
                 return P.boxAsJs(value);
@@ -675,7 +675,24 @@
              * @property jsValue
              * @memberOf ModelFormattedField
              */
-            P.ModelFormattedField.prototype.jsValue = {};
+            P.ModelFormattedField.prototype.value = {};
+        }
+        Object.defineProperty(this, "componentPopupMenu", {
+            get: function() {
+                var value = delegate.componentPopupMenu;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.componentPopupMenu = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelFormattedField){
+            /**
+             * <code>PopupMenu</code> that assigned for this component.
+             * @property componentPopupMenu
+             * @memberOf ModelFormattedField
+             */
+            P.ModelFormattedField.prototype.componentPopupMenu = {};
         }
         Object.defineProperty(this, "top", {
             get: function() {

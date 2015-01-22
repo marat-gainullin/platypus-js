@@ -305,23 +305,6 @@
              */
             P.ModelTextArea.prototype.onComponentHidden = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelTextArea){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf ModelTextArea
-             */
-            P.ModelTextArea.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -338,6 +321,23 @@
              * @memberOf ModelTextArea
              */
             P.ModelTextArea.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelTextArea){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf ModelTextArea
+             */
+            P.ModelTextArea.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -609,7 +609,7 @@
              */
             P.ModelTextArea.prototype.onSelect = {};
         }
-        Object.defineProperty(this, "jsValue", {
+        Object.defineProperty(this, "value", {
             get: function() {
                 var value = delegate.jsValue;
                 return P.boxAsJs(value);
@@ -624,7 +624,24 @@
              * @property jsValue
              * @memberOf ModelTextArea
              */
-            P.ModelTextArea.prototype.jsValue = {};
+            P.ModelTextArea.prototype.value = {};
+        }
+        Object.defineProperty(this, "componentPopupMenu", {
+            get: function() {
+                var value = delegate.componentPopupMenu;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.componentPopupMenu = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelTextArea){
+            /**
+             * <code>PopupMenu</code> that assigned for this component.
+             * @property componentPopupMenu
+             * @memberOf ModelTextArea
+             */
+            P.ModelTextArea.prototype.componentPopupMenu = {};
         }
         Object.defineProperty(this, "top", {
             get: function() {

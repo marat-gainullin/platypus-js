@@ -305,23 +305,6 @@
              */
             P.ModelCombo.prototype.onComponentHidden = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelCombo){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf ModelCombo
-             */
-            P.ModelCombo.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -338,6 +321,23 @@
              * @memberOf ModelCombo
              */
             P.ModelCombo.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelCombo){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf ModelCombo
+             */
+            P.ModelCombo.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -660,7 +660,7 @@
              */
             P.ModelCombo.prototype.onSelect = {};
         }
-        Object.defineProperty(this, "jsValue", {
+        Object.defineProperty(this, "value", {
             get: function() {
                 var value = delegate.jsValue;
                 return P.boxAsJs(value);
@@ -675,7 +675,24 @@
              * @property jsValue
              * @memberOf ModelCombo
              */
-            P.ModelCombo.prototype.jsValue = {};
+            P.ModelCombo.prototype.value = {};
+        }
+        Object.defineProperty(this, "componentPopupMenu", {
+            get: function() {
+                var value = delegate.componentPopupMenu;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.componentPopupMenu = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelCombo){
+            /**
+             * <code>PopupMenu</code> that assigned for this component.
+             * @property componentPopupMenu
+             * @memberOf ModelCombo
+             */
+            P.ModelCombo.prototype.componentPopupMenu = {};
         }
         Object.defineProperty(this, "top", {
             get: function() {

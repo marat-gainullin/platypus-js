@@ -326,7 +326,7 @@
              * @property value
              * @memberOf PasswordField
              */
-            P.PasswordField.prototype.value = '';
+            P.PasswordField.prototype.value = {};
         }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
@@ -478,23 +478,6 @@
              */
             P.PasswordField.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.PasswordField){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf PasswordField
-             */
-            P.PasswordField.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -511,6 +494,23 @@
              * @memberOf PasswordField
              */
             P.PasswordField.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.PasswordField){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf PasswordField
+             */
+            P.PasswordField.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

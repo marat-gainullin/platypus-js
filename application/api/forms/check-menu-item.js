@@ -182,7 +182,7 @@
              */
             P.CheckMenuItem.prototype.onComponentMoved = {};
         }
-        Object.defineProperty(this, "jsValue", {
+        Object.defineProperty(this, "value", {
             get: function() {
                 var value = delegate.jsValue;
                 return P.boxAsJs(value);
@@ -197,7 +197,7 @@
              * @property jsValue
              * @memberOf CheckMenuItem
              */
-            P.CheckMenuItem.prototype.jsValue = {};
+            P.CheckMenuItem.prototype.value = {};
         }
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {
@@ -459,23 +459,6 @@
              */
             P.CheckMenuItem.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.CheckMenuItem){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf CheckMenuItem
-             */
-            P.CheckMenuItem.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -492,6 +475,23 @@
              * @memberOf CheckMenuItem
              */
             P.CheckMenuItem.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.CheckMenuItem){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf CheckMenuItem
+             */
+            P.CheckMenuItem.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

@@ -260,12 +260,12 @@
     };
         /**
          *
-         * @method insertColumnNode
+         * @method addColumnNode
          * @memberOf ModelGridColumn
          */
-        P.ModelGridColumn.prototype.insertColumnNode = function(position, node) {
+        P.ModelGridColumn.prototype.addColumnNode = function(node) {
             var delegate = this.unwrap();
-            var value = delegate.insertColumnNode(P.boxAsJava(position), P.boxAsJava(node));
+            var value = delegate.addColumnNode(P.boxAsJava(node));
             return P.boxAsJs(value);
         };
 
@@ -282,12 +282,12 @@
 
         /**
          *
-         * @method addColumnNode
+         * @method insertColumnNode
          * @memberOf ModelGridColumn
          */
-        P.ModelGridColumn.prototype.addColumnNode = function(node) {
+        P.ModelGridColumn.prototype.insertColumnNode = function(position, node) {
             var delegate = this.unwrap();
-            var value = delegate.addColumnNode(P.boxAsJava(node));
+            var value = delegate.insertColumnNode(P.boxAsJava(position), P.boxAsJava(node));
             return P.boxAsJs(value);
         };
 

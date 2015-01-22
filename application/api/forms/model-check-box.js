@@ -280,7 +280,7 @@
              */
             P.ModelCheckBox.prototype.onSelect = {};
         }
-        Object.defineProperty(this, "jsValue", {
+        Object.defineProperty(this, "value", {
             get: function() {
                 var value = delegate.jsValue;
                 return P.boxAsJs(value);
@@ -295,7 +295,24 @@
              * @property jsValue
              * @memberOf ModelCheckBox
              */
-            P.ModelCheckBox.prototype.jsValue = {};
+            P.ModelCheckBox.prototype.value = {};
+        }
+        Object.defineProperty(this, "componentPopupMenu", {
+            get: function() {
+                var value = delegate.componentPopupMenu;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.componentPopupMenu = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelCheckBox){
+            /**
+             * <code>PopupMenu</code> that assigned for this component.
+             * @property componentPopupMenu
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.componentPopupMenu = {};
         }
         Object.defineProperty(this, "top", {
             get: function() {
@@ -545,23 +562,6 @@
              */
             P.ModelCheckBox.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelCheckBox){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf ModelCheckBox
-             */
-            P.ModelCheckBox.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -578,6 +578,23 @@
              * @memberOf ModelCheckBox
              */
             P.ModelCheckBox.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelCheckBox){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

@@ -182,7 +182,7 @@
              */
             P.RadioMenuItem.prototype.onComponentMoved = {};
         }
-        Object.defineProperty(this, "jsValue", {
+        Object.defineProperty(this, "value", {
             get: function() {
                 var value = delegate.jsValue;
                 return P.boxAsJs(value);
@@ -197,7 +197,7 @@
              * @property jsValue
              * @memberOf RadioMenuItem
              */
-            P.RadioMenuItem.prototype.jsValue = {};
+            P.RadioMenuItem.prototype.value = {};
         }
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {
@@ -295,23 +295,6 @@
              */
             P.RadioMenuItem.prototype.onMouseEntered = {};
         }
-        Object.defineProperty(this, "selected", {
-            get: function() {
-                var value = delegate.selected;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.selected = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.RadioMenuItem){
-            /**
-             * <code>true</code> if the menu item is selected.
-             * @property selected
-             * @memberOf RadioMenuItem
-             */
-            P.RadioMenuItem.prototype.selected = true;
-        }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
                 var value = delegate.toolTipText;
@@ -328,6 +311,23 @@
              * @memberOf RadioMenuItem
              */
             P.RadioMenuItem.prototype.toolTipText = '';
+        }
+        Object.defineProperty(this, "selected", {
+            get: function() {
+                var value = delegate.selected;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.selected = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.RadioMenuItem){
+            /**
+             * <code>true</code> if the menu item is selected.
+             * @property selected
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.selected = true;
         }
         Object.defineProperty(this, "element", {
             get: function() {
@@ -479,23 +479,6 @@
              */
             P.RadioMenuItem.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.RadioMenuItem){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf RadioMenuItem
-             */
-            P.RadioMenuItem.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -512,6 +495,23 @@
              * @memberOf RadioMenuItem
              */
             P.RadioMenuItem.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.RadioMenuItem){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

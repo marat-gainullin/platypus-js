@@ -387,7 +387,7 @@ public class Rowset {
                                 List<Row> rows = aRowset.getCurrent();
                                 aRowset.setCurrent(new ArrayList<>());
                                 aRowset.currentToOriginal();
-                                current.stream().filter((checked) -> (checked.isInserted() || checked.isUpdated())).forEach((checked) -> {
+                                current.stream().filter((checked) -> (checked.isInserted()/* || checked.isUpdated() - if uncomment, then same rows will be fetched form a database*/)).forEach((checked) -> {
                                     rows.add(checked);
                                 });
                                 rows.stream().forEach((Row aRow) -> {
@@ -437,7 +437,7 @@ public class Rowset {
                         List<Row> rows = rowset.getCurrent();
                         rowset.setCurrent(new ArrayList<>());
                         rowset.currentToOriginal();
-                        current.stream().filter((checked) -> (checked.isInserted() || checked.isUpdated())).forEach((checked) -> {
+                        current.stream().filter((checked) -> (checked.isInserted()/* || checked.isUpdated() - if uncomment, then same rows will be fetched form a database*/)).forEach((checked) -> {
                             rows.add(checked);
                         });
                         rows.stream().forEach((Row aRow) -> {

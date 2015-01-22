@@ -212,7 +212,7 @@
              */
             P.TextField.prototype.onComponentMoved = {};
         }
-        Object.defineProperty(this, "jsValue", {
+        Object.defineProperty(this, "value", {
             get: function() {
                 var value = delegate.jsValue;
                 return P.boxAsJs(value);
@@ -227,7 +227,7 @@
              * @property jsValue
              * @memberOf TextField
              */
-            P.TextField.prototype.jsValue = {};
+            P.TextField.prototype.value = {};
         }
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {
@@ -478,23 +478,6 @@
              */
             P.TextField.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.TextField){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf TextField
-             */
-            P.TextField.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -511,6 +494,23 @@
              * @memberOf TextField
              */
             P.TextField.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.TextField){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf TextField
+             */
+            P.TextField.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

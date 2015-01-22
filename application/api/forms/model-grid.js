@@ -1,14 +1,14 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.components.model.ModelDate");
+    var javaClass = Java.type("com.eas.client.forms.components.model.grid.ModelGrid");
     javaClass.setPublisher(function(aDelegate) {
-        return new P.ModelDate(aDelegate);
+        return new P.ModelGrid(aDelegate);
     });
     
     /**
-     * A model component that shows a date.
-     * @constructor ModelDate ModelDate
+     * Generated constructor.
+     * @constructor ModelGrid ModelGrid
      */
-    P.ModelDate = function () {
+    P.ModelGrid = function () {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -19,26 +19,9 @@
                 return delegate;
             }
         });
-        if(P.ModelDate.superclass)
-            P.ModelDate.superclass.constructor.apply(this, arguments);
+        if(P.ModelGrid.superclass)
+            P.ModelGrid.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        Object.defineProperty(this, "selectOnly", {
-            get: function() {
-                var value = delegate.selectOnly;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.selectOnly = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * Generated property jsDoc.
-             * @property selectOnly
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.selectOnly = true;
-        }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
                 var value = delegate.onMouseReleased;
@@ -48,13 +31,13 @@
                 delegate.onMouseReleased = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
              * Mouse released event handler function.
              * @property onMouseReleased
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.onMouseReleased = {};
+            P.ModelGrid.prototype.onMouseReleased = {};
         }
         Object.defineProperty(this, "data", {
             get: function() {
@@ -65,64 +48,13 @@
                 delegate.data = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
-             * Object, bound to the widget.
+             * Generated property jsDoc.
              * @property data
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.data = {};
-        }
-        Object.defineProperty(this, "nullable", {
-            get: function() {
-                var value = delegate.nullable;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.nullable = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * Generated property jsDoc.
-             * @property nullable
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.nullable = true;
-        }
-        Object.defineProperty(this, "onValueChange", {
-            get: function() {
-                var value = delegate.onValueChange;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onValueChange = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * Value change handler.
-             * @property onValueChange
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.onValueChange = {};
-        }
-        Object.defineProperty(this, "dateFormat", {
-            get: function() {
-                var value = delegate.dateFormat;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.dateFormat = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * Generated property jsDoc.
-             * @property dateFormat
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.dateFormat = '';
+            P.ModelGrid.prototype.data = {};
         }
         Object.defineProperty(this, "foreground", {
             get: function() {
@@ -133,13 +65,30 @@
                 delegate.foreground = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
-             * The foreground color of this component.
+             * Generated property jsDoc.
              * @property foreground
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.foreground = {};
+            P.ModelGrid.prototype.foreground = {};
+        }
+        Object.defineProperty(this, "childrenField", {
+            get: function() {
+                var value = delegate.childrenField;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.childrenField = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * Generated property jsDoc.
+             * @property childrenField
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.childrenField = '';
         }
         Object.defineProperty(this, "onComponentMoved", {
             get: function() {
@@ -150,13 +99,47 @@
                 delegate.onComponentMoved = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
              * Component moved event handler function.
              * @property onComponentMoved
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.onComponentMoved = {};
+            P.ModelGrid.prototype.onComponentMoved = {};
+        }
+        Object.defineProperty(this, "insertable", {
+            get: function() {
+                var value = delegate.insertable;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.insertable = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * Determines if grid allows row insertion.
+             * @property insertable
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.insertable = true;
+        }
+        Object.defineProperty(this, "frozenColumns", {
+            get: function() {
+                var value = delegate.frozenColumns;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.frozenColumns = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * Generated property jsDoc.
+             * @property frozenColumns
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.frozenColumns = 0;
         }
         Object.defineProperty(this, "onRender", {
             get: function() {
@@ -167,13 +150,14 @@
                 delegate.onRender = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
-             * Component's rendering event handler function.
+             * General render event handler.
+             * This hanler be called on each cell's rendering in the case when no render handler is provided for the conrete column.
              * @property onRender
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.onRender = {};
+            P.ModelGrid.prototype.onRender = {};
         }
         Object.defineProperty(this, "parent", {
             get: function() {
@@ -181,30 +165,13 @@
                 return P.boxAsJs(value);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
              * Parent container of this widget.
              * @property parentWidget
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.parent = {};
-        }
-        Object.defineProperty(this, "text", {
-            get: function() {
-                var value = delegate.text;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.text = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * Generated property jsDoc.
-             * @property text
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.text = '';
+            P.ModelGrid.prototype.parent = {};
         }
         Object.defineProperty(this, "onMouseEntered", {
             get: function() {
@@ -215,13 +182,13 @@
                 delegate.onMouseEntered = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
              * Mouse entered over the component event handler function.
              * @property onMouseEntered
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.onMouseEntered = {};
+            P.ModelGrid.prototype.onMouseEntered = {};
         }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
@@ -232,13 +199,13 @@
                 delegate.toolTipText = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
-             * The tooltip string that has been set with.
+             * Generated property jsDoc.
              * @property toolTipText
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.toolTipText = '';
+            P.ModelGrid.prototype.toolTipText = '';
         }
         Object.defineProperty(this, "element", {
             get: function() {
@@ -246,13 +213,13 @@
                 return P.boxAsJs(value);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
              * Native API. Returns low level html element. Applicable only in HTML5 client.
              * @property element
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.element = {};
+            P.ModelGrid.prototype.element = {};
         }
         Object.defineProperty(this, "height", {
             get: function() {
@@ -263,13 +230,13 @@
                 delegate.height = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
              * Height of the component.
              * @property height
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.height = 0;
+            P.ModelGrid.prototype.height = 0;
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -280,13 +247,13 @@
                 delegate.onComponentShown = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
              * Component shown event handler function.
              * @property onComponentShown
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.onComponentShown = {};
+            P.ModelGrid.prototype.onComponentShown = {};
         }
         Object.defineProperty(this, "visible", {
             get: function() {
@@ -297,13 +264,13 @@
                 delegate.visible = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
              * Determines whether this component should be visible when its parent is visible.
              * @property visible
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.visible = true;
+            P.ModelGrid.prototype.visible = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
@@ -314,13 +281,13 @@
                 delegate.onComponentHidden = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
              * Component hidden event handler function.
              * @property onComponentHidden
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.onComponentHidden = {};
+            P.ModelGrid.prototype.onComponentHidden = {};
         }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
@@ -331,13 +298,13 @@
                 delegate.onActionPerformed = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
              * Main action performed event handler function.
              * @property onActionPerformed
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.onActionPerformed = {};
+            P.ModelGrid.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
@@ -348,13 +315,13 @@
                 delegate.onKeyReleased = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
              * Key released event handler function.
              * @property onKeyReleased
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.onKeyReleased = {};
+            P.ModelGrid.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -365,13 +332,13 @@
                 delegate.focusable = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
              * Determines whether this component may be focused.
              * @property focusable
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.focusable = true;
+            P.ModelGrid.prototype.focusable = true;
         }
         Object.defineProperty(this, "onKeyTyped", {
             get: function() {
@@ -382,13 +349,13 @@
                 delegate.onKeyTyped = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
              * Key typed event handler function.
              * @property onKeyTyped
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.onKeyTyped = {};
+            P.ModelGrid.prototype.onKeyTyped = {};
         }
         Object.defineProperty(this, "onMouseWheelMoved", {
             get: function() {
@@ -399,30 +366,27 @@
                 delegate.onMouseWheelMoved = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
              * Mouse wheel moved event handler function.
              * @property onMouseWheelMoved
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.onMouseWheelMoved = {};
+            P.ModelGrid.prototype.onMouseWheelMoved = {};
         }
         Object.defineProperty(this, "field", {
             get: function() {
                 var value = delegate.field;
                 return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.field = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
-             * Model binding field.
+             * Generated property jsDoc.
              * @property field
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.field = '';
+            P.ModelGrid.prototype.field = '';
         }
         Object.defineProperty(this, "left", {
             get: function() {
@@ -433,13 +397,13 @@
                 delegate.left = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
              * Horizontal coordinate of the component.
              * @property left
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.left = 0;
+            P.ModelGrid.prototype.left = 0;
         }
         Object.defineProperty(this, "background", {
             get: function() {
@@ -450,13 +414,13 @@
                 delegate.background = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
-             * The background color of this component.
+             * Generated property jsDoc.
              * @property background
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.background = {};
+            P.ModelGrid.prototype.background = {};
         }
         Object.defineProperty(this, "name", {
             get: function() {
@@ -464,30 +428,47 @@
                 return P.boxAsJs(value);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
-             * Generated property jsDoc.
+             * Gets name of this component.
              * @property name
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.name = '';
+            P.ModelGrid.prototype.name = '';
         }
-        Object.defineProperty(this, "cursor", {
+        Object.defineProperty(this, "showVerticalLines", {
             get: function() {
-                var value = delegate.cursor;
+                var value = delegate.showVerticalLines;
                 return P.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.cursor = P.boxAsJava(aValue);
+                delegate.showVerticalLines = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
+            /**
+             * Determines if grid shows vertical lines.
+             * @property showVerticalLines
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.showVerticalLines = true;
+        }
+        Object.defineProperty(this, "frozenRows", {
+            get: function() {
+                var value = delegate.frozenRows;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.frozenRows = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelGrid){
             /**
              * Generated property jsDoc.
-             * @property cursor
-             * @memberOf ModelDate
+             * @property frozenRows
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.cursor = {};
+            P.ModelGrid.prototype.frozenRows = 0;
         }
         Object.defineProperty(this, "onMouseDragged", {
             get: function() {
@@ -498,13 +479,13 @@
                 delegate.onMouseDragged = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
              * Mouse dragged event handler function.
              * @property onMouseDragged
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.onMouseDragged = {};
+            P.ModelGrid.prototype.onMouseDragged = {};
         }
         Object.defineProperty(this, "onFocusLost", {
             get: function() {
@@ -515,47 +496,30 @@
                 delegate.onFocusLost = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
              * Keyboard focus lost by the component event handler function.
              * @property onFocusLost
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.onFocusLost = {};
+            P.ModelGrid.prototype.onFocusLost = {};
         }
-        Object.defineProperty(this, "emptyText", {
+        Object.defineProperty(this, "deletable", {
             get: function() {
-                var value = delegate.emptyText;
+                var value = delegate.deletable;
                 return P.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.emptyText = P.boxAsJava(aValue);
+                delegate.deletable = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
-             * Generated property jsDoc.
-             * @property emptyText
-             * @memberOf ModelDate
+             * Determines if grid allows to delete rows.
+             * @property deletable
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.emptyText = '';
-        }
-        Object.defineProperty(this, "icon", {
-            get: function() {
-                var value = delegate.icon;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.icon = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * Generated property jsDoc.
-             * @property icon
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.icon = {};
+            P.ModelGrid.prototype.deletable = true;
         }
         Object.defineProperty(this, "onMousePressed", {
             get: function() {
@@ -566,13 +530,13 @@
                 delegate.onMousePressed = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
              * Mouse pressed event handler function.
              * @property onMousePressed
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.onMousePressed = {};
+            P.ModelGrid.prototype.onMousePressed = {};
         }
         Object.defineProperty(this, "error", {
             get: function() {
@@ -583,14 +547,14 @@
                 delegate.error = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
              * An error message of this component.
              * Validation procedure may set this property and subsequent focus lost event will clear it.
              * @property error
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.error = '';
+            P.ModelGrid.prototype.error = '';
         }
         Object.defineProperty(this, "enabled", {
             get: function() {
@@ -601,47 +565,13 @@
                 delegate.enabled = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
              * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
              * @property enabled
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.enabled = true;
-        }
-        Object.defineProperty(this, "onSelect", {
-            get: function() {
-                var value = delegate.onSelect;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onSelect = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * Component's selection event handler function.
-             * @property onSelect
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.onSelect = {};
-        }
-        Object.defineProperty(this, "value", {
-            get: function() {
-                var value = delegate.jsValue;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.jsValue = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * Widget's value.
-             * @property jsValue
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.value = {};
+            P.ModelGrid.prototype.enabled = true;
         }
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {
@@ -652,13 +582,13 @@
                 delegate.componentPopupMenu = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
-             * <code>PopupMenu</code> that assigned for this component.
+             * Generated property jsDoc.
              * @property componentPopupMenu
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.componentPopupMenu = {};
+            P.ModelGrid.prototype.componentPopupMenu = {};
         }
         Object.defineProperty(this, "top", {
             get: function() {
@@ -669,13 +599,13 @@
                 delegate.top = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
              * Vertical coordinate of the component.
              * @property top
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.top = 0;
+            P.ModelGrid.prototype.top = 0;
         }
         Object.defineProperty(this, "onComponentResized", {
             get: function() {
@@ -686,13 +616,30 @@
                 delegate.onComponentResized = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
              * Component resized event handler function.
              * @property onComponentResized
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.onComponentResized = {};
+            P.ModelGrid.prototype.onComponentResized = {};
+        }
+        Object.defineProperty(this, "oddRowsColor", {
+            get: function() {
+                var value = delegate.oddRowsColor;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.oddRowsColor = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * Odd rows color.
+             * @property oddRowsColor
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.oddRowsColor = {};
         }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
@@ -703,13 +650,13 @@
                 delegate.onMouseMoved = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
              * Mouse moved event handler function.
              * @property onMouseMoved
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.onMouseMoved = {};
+            P.ModelGrid.prototype.onMouseMoved = {};
         }
         Object.defineProperty(this, "opaque", {
             get: function() {
@@ -720,13 +667,13 @@
                 delegate.opaque = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
              * True if this component is completely opaque.
              * @property opaque
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.opaque = true;
+            P.ModelGrid.prototype.opaque = true;
         }
         Object.defineProperty(this, "editable", {
             get: function() {
@@ -737,13 +684,13 @@
                 delegate.editable = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
-             * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
+             * Determines if gris cells are editable.
              * @property editable
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.editable = true;
+            P.ModelGrid.prototype.editable = true;
         }
         Object.defineProperty(this, "nextFocusableComponent", {
             get: function() {
@@ -754,13 +701,30 @@
                 delegate.nextFocusableComponent = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
+            /**
+             * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
+             * @property nextFocusableComponent
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.nextFocusableComponent = {};
+        }
+        Object.defineProperty(this, "parentField", {
+            get: function() {
+                var value = delegate.parentField;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.parentField = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelGrid){
             /**
              * Generated property jsDoc.
-             * @property nextFocusableComponent
-             * @memberOf ModelDate
+             * @property parentField
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.nextFocusableComponent = {};
+            P.ModelGrid.prototype.parentField = '';
         }
         Object.defineProperty(this, "component", {
             get: function() {
@@ -768,13 +732,13 @@
                 return P.boxAsJs(value);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
              * Native API. Returns low level swing component. Applicable only in J2SE swing client.
              * @property component
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.component = {};
+            P.ModelGrid.prototype.component = {};
         }
         Object.defineProperty(this, "onFocusGained", {
             get: function() {
@@ -785,13 +749,30 @@
                 delegate.onFocusGained = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
              * Keyboard focus gained by the component event.
              * @property onFocusGained
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.onFocusGained = {};
+            P.ModelGrid.prototype.onFocusGained = {};
+        }
+        Object.defineProperty(this, "rowsHeight", {
+            get: function() {
+                var value = delegate.rowsHeight;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.rowsHeight = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * The height of grid's rows.
+             * @property rowsHeight
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.rowsHeight = 0;
         }
         Object.defineProperty(this, "onMouseClicked", {
             get: function() {
@@ -802,13 +783,13 @@
                 delegate.onMouseClicked = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
              * Mouse clicked event handler function.
              * @property onMouseClicked
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.onMouseClicked = {};
+            P.ModelGrid.prototype.onMouseClicked = {};
         }
         Object.defineProperty(this, "onMouseExited", {
             get: function() {
@@ -819,13 +800,13 @@
                 delegate.onMouseExited = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
              * Mouse exited over the component event handler function.
              * @property onMouseExited
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.onMouseExited = {};
+            P.ModelGrid.prototype.onMouseExited = {};
         }
         Object.defineProperty(this, "width", {
             get: function() {
@@ -836,13 +817,64 @@
                 delegate.width = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
              * Width of the component.
              * @property width
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.width = 0;
+            P.ModelGrid.prototype.width = 0;
+        }
+        Object.defineProperty(this, "showHorizontalLines", {
+            get: function() {
+                var value = delegate.showHorizontalLines;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.showHorizontalLines = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * Determines if grid shows horizontal lines.
+             * @property showHorizontalLines
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.showHorizontalLines = true;
+        }
+        Object.defineProperty(this, "gridColor", {
+            get: function() {
+                var value = delegate.gridColor;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.gridColor = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * The color of the grid.
+             * @property gridColor
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.gridColor = {};
+        }
+        Object.defineProperty(this, "showOddRowsInOtherColor", {
+            get: function() {
+                var value = delegate.showOddRowsInOtherColor;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.showOddRowsInOtherColor = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * Determines if grid shows odd rows if other color.
+             * @property showOddRowsInOtherColor
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.showOddRowsInOtherColor = true;
         }
         Object.defineProperty(this, "font", {
             get: function() {
@@ -853,13 +885,13 @@
                 delegate.font = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
              * Generated property jsDoc.
              * @property font
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.font = {};
+            P.ModelGrid.prototype.font = {};
         }
         Object.defineProperty(this, "onKeyPressed", {
             get: function() {
@@ -870,21 +902,103 @@
                 delegate.onKeyPressed = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelDate){
+        if(!P.ModelGrid){
             /**
              * Key pressed event handler function.
              * @property onKeyPressed
-             * @memberOf ModelDate
+             * @memberOf ModelGrid
              */
-            P.ModelDate.prototype.onKeyPressed = {};
+            P.ModelGrid.prototype.onKeyPressed = {};
         }
     };
         /**
+         * Shows find dialog.
+         * @deprecated Use find() instead.
+         * @method find
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.find = function() {
+            var delegate = this.unwrap();
+            var value = delegate.find();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Selects the specified element.
+         * @param instance Entity's instance to be selected.
+         * @method select
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.select = function(instance) {
+            var delegate = this.unwrap();
+            var value = delegate.select(P.boxAsJava(instance));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Clears current selection.
+         * @method clearSelection
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.clearSelection = function() {
+            var delegate = this.unwrap();
+            var value = delegate.clearSelection();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Unselects the specified element.
+         * @param instance Entity's instance to be unselected
+         * @method unselect
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.unselect = function(instance) {
+            var delegate = this.unwrap();
+            var value = delegate.unselect(P.boxAsJava(instance));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
+         * @method try2StopAnyEditing
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.try2StopAnyEditing = function() {
+            var delegate = this.unwrap();
+            var value = delegate.try2StopAnyEditing();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
+         * @method try2CancelAnyEditing
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.try2CancelAnyEditing = function() {
+            var delegate = this.unwrap();
+            var value = delegate.try2CancelAnyEditing();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Makes specified instance visible.
+         * @param instance Entity's instance to make visible.
+         * @param need2select true to select the instance (optional).
+         * @method makeVisible
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.makeVisible = function(instance, need2select) {
+            var delegate = this.unwrap();
+            var value = delegate.makeVisible(P.boxAsJava(instance), P.boxAsJava(need2select));
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Tries to acquire focus for this component.
          * @method focus
-         * @memberOf ModelDate
+         * @memberOf ModelGrid
          */
-        P.ModelDate.prototype.focus = function() {
+        P.ModelGrid.prototype.focus = function() {
             var delegate = this.unwrap();
             var value = delegate.focus();
             return P.boxAsJs(value);
@@ -893,11 +1007,55 @@
         /**
          * Redraw the component.
          * @method redraw
-         * @memberOf ModelDate
+         * @memberOf ModelGrid
          */
-        P.ModelDate.prototype.redraw = function() {
+        P.ModelGrid.prototype.redraw = function() {
             var delegate = this.unwrap();
             var value = delegate.redraw();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
+         * @method addColumnNode
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.addColumnNode = function(arg0) {
+            var delegate = this.unwrap();
+            var value = delegate.addColumnNode(P.boxAsJava(arg0));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
+         * @method removeColumnNode
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.removeColumnNode = function(arg0) {
+            var delegate = this.unwrap();
+            var value = delegate.removeColumnNode(P.boxAsJava(arg0));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
+         * @method insertColumnNode
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.insertColumnNode = function(arg0, arg1) {
+            var delegate = this.unwrap();
+            var value = delegate.insertColumnNode(P.boxAsJava(arg0), P.boxAsJava(arg1));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
+         * @method elementByModelIndex
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.elementByModelIndex = function(arg0) {
+            var delegate = this.unwrap();
+            var value = delegate.elementByModelIndex(P.boxAsJava(arg0));
             return P.boxAsJs(value);
         };
 
