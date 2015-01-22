@@ -283,17 +283,18 @@ public class PlatypusClientApplication {
                 }
                 ScriptedResource.init(app);
                 ScriptedResource._require(new String[]{""}, new ConcurrentSkipListSet<>(), (Void v) -> {
-                    JSObject p = ScriptUtils.lookupInGlobal("P");
-                    if (p != null) {
-                        Object ready = p.getMember("ready");
-                        if (ready instanceof JSObject && ((JSObject) ready).isFunction()) {
-                            ((JSObject) ready).call(null, new Object[]{});
-                        } else {
-                            throw new IllegalStateException("P.ready is missing or is not a function. Nothing to do :-(");
-                        }
-                    } else {
-                        throw new IllegalStateException("Platypus js API is not initialized (global.P is missing).");
-                    }
+//                    JSObject p = ScriptUtils.lookupInGlobal("P");
+//                    if (p != null) {
+//                        Object ready = p.getMember("ready");
+//                        if (ready instanceof JSObject && ((JSObject) ready).isFunction()) {
+//                            ((JSObject) ready).call(null, new Object[]{});
+//                        } 
+//                        else {
+//                            throw new IllegalStateException("P.ready is missing or is not a function. Nothing to do :-(");
+//                        }
+//                    } else {
+//                        throw new IllegalStateException("Platypus js API is not initialized (global.P is missing).");
+//                    }
                 }, (Exception ex) -> {
                     Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, ex);
                 });
