@@ -7,7 +7,6 @@ package com.eas.client.form.grid.cells;
 
 import com.bearsoft.gwt.ui.widgets.StyledListBox;
 import com.bearsoft.gwt.ui.widgets.grid.cells.RenderedEditorCell;
-import com.bearsoft.rowset.Row;
 import com.eas.client.form.published.widgets.model.ModelCombo;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Widget;
@@ -28,6 +27,7 @@ public class PlatypusLookupEditorCell extends RenderedEditorCell<Object> {
 
 	@Override
 	protected void renderCell(Context context, Object value, SafeHtmlBuilder sb) {
+		/*
 		if (getEditor() instanceof ModelCombo) {
 			try {
 				ModelCombo combo = (ModelCombo) getEditor();
@@ -42,5 +42,6 @@ public class PlatypusLookupEditorCell extends RenderedEditorCell<Object> {
 		} else {
 			sb.appendEscaped(String.valueOf(value));
 		}
+				*/
 	}
 }

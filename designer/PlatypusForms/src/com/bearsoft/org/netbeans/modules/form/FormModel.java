@@ -49,9 +49,8 @@ import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutConstraints;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutSupportDelegate;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
-import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.MarginLayoutSupport;
-import com.eas.dbcontrols.DbControlPanel;
-import java.awt.Container;
+import com.eas.client.forms.Form;
+import com.eas.client.forms.components.model.ModelComponentDecorator;
 import java.beans.Introspector;
 import java.util.*;
 import java.util.logging.Level;
@@ -75,16 +74,23 @@ import org.openide.util.MutexException;
 public class FormModel {
 
     // name of the form is name of the DataObject
-    private PlatypusFormDataObject dataObject;
+    private final PlatypusFormDataObject dataObject;
+    private final Form form;
     private RADVisualContainer<?> topDesignComponent;
-    private AssistantModel assistantModel = new AssistantModel();
+    private final AssistantModel assistantModel = new AssistantModel();
     private String formName;
     private boolean readOnly;
 
-    public FormModel(PlatypusFormDataObject aDataObject) {
+    public FormModel(PlatypusFormDataObject aDataObject, Form aForm) {
+        super();
         dataObject = aDataObject;
+        form = aForm;
         setName(aDataObject.getName());
         setReadOnly(aDataObject.isReadOnly());
+    }
+
+    public Form getForm() {
+        return form;
     }
 
     public PlatypusFormDataObject getDataObject() {
@@ -106,7 +112,7 @@ public class FormModel {
     }
 
     public String findFreeComponentName(Class<?> compClass) {
-        return findFreeComponentName(FormUtils.getPlatypusControlClass(compClass).getSimpleName());
+        return findFreeComponentName(compClass.getSimpleName());
     }
 
     public String findFreeComponentName(String baseName) {
@@ -121,15 +127,13 @@ public class FormModel {
         }
         return generatedName;
     }
-    // the class on which the form is based (which is extended in the java file)
-    private Class<?> formBaseClass;
     // the top radcomponent of the form (null if form is based on Object)
     private RADVisualContainer<?> topRADComponent;
     // other components - out of the main hierarchy under topRADComponent
-    private List<RADComponent<?>> otherComponents = new ArrayList<>(10);
+    private final List<RADComponent<?>> otherComponents = new ArrayList<>(10);
     // holds both topRADComponent and otherComponents
     private ModelContainer modelContainer;
-    private Map<String, RADComponent<?>> namesToComponents = new HashMap<>();
+    private final Map<String, RADComponent<?>> namesToComponents = new HashMap<>();
     private boolean formLoaded;
     private UndoRedo.Manager undoRedoManager;
     private boolean undoRedoRecording;
@@ -141,37 +145,7 @@ public class FormModel {
     private List<FormModelEvent> eventList;
     private boolean firing;
     private RADComponentCreator metaCreator;
-    private FormSettings settings = new FormSettings();
-    private boolean freeDesignDefaultLayout;
-
-    /**
-     * This methods sets the form base class (which is in fact the superclass of
-     * the form class in source java file). It is used for initializing the top
-     * meta component, and is also presented as the top component in designer
-     * and inspector.
-     *
-     * @param formClass form base class.
-     * @throws java.lang.Exception if anything goes wrong.
-     */
-    public void setFormBaseClass(Class<? extends Container> formClass) throws Exception {
-        if (formBaseClass != null) {
-            throw new IllegalStateException("Form type already initialized."); // NOI18N
-        }
-        if (FormUtils.isVisualizableClass(formClass) && FormUtils.isContainer(formClass)) {
-            RADVisualContainer<?> topComp = new RADVisualFormContainer();
-            topRADComponent = topComp;
-            topDesignComponent = topRADComponent;
-            topComp.initialize(this);
-            topComp.initInstance(formClass);
-            ((RADVisualFormContainer) topComp).setLayoutSupportDelegate(new MarginLayoutSupport());
-            topComp.setInModel(true);
-            formBaseClass = formClass;
-        }
-    }
-
-    public Class<?> getFormBaseClass() {
-        return formBaseClass;
-    }
+    private final FormSettings settings = new FormSettings();
 
     final void setName(String name) {
         formName = name;
@@ -234,6 +208,8 @@ public class FormModel {
     public java.util.List<RADComponent<?>> getOrderedComponentList() {
         java.util.List<RADComponent<?>> list = new ArrayList<>(namesToComponents.size());
         collectRadComponents(getModelContainer(), list);
+        list.add(getTopRADComponent());
+        collectRadComponents(getTopRADComponent(), list);
         return list;
     }
 
@@ -246,7 +222,7 @@ public class FormModel {
     public Collection<RADComponent<?>> getAllComponents() {
         return Collections.unmodifiableCollection(namesToComponents.values());
     }
-
+/*
     public List<RADComponent<?>> getNonVisualComponents() {
         List<RADComponent<?>> list = new ArrayList<>(otherComponents.size());
         for (RADComponent<?> radComp : otherComponents) {
@@ -256,7 +232,7 @@ public class FormModel {
         }
         return list;
     }
-
+*/
     public List<RADComponent<?>> getVisualComponents() {
         List<RADComponent<?>> list = new ArrayList<>(namesToComponents.size());
         for (Map.Entry<String, RADComponent<?>> e : namesToComponents.entrySet()) {
@@ -329,6 +305,7 @@ public class FormModel {
      *
      * @param radComp component to add.
      * @param parentContainer parent of the added component.
+     * @param aIndex
      * @param aConstraints layout constraints.
      * @param newlyAdded is newly added?
      */
@@ -437,8 +414,8 @@ public class FormModel {
     static void setInModelRecursively(RADComponent<?> radComp, boolean inModel) {
         if (radComp instanceof ComponentContainer) {
             RADComponent<?>[] comps = ((ComponentContainer) radComp).getSubBeans();
-            for (int i = 0; i < comps.length; i++) {
-                setInModelRecursively(comps[i], inModel);
+            for (RADComponent<?> comp : comps) {
+                setInModelRecursively(comp, inModel);
             }
         }
         radComp.setInModel(inModel);
@@ -507,31 +484,30 @@ public class FormModel {
         return undoRedoManager;
     }
 
-    public void setColumnViewImpl(RADModelGridColumn aColumn, RADColumnView<? super DbControlPanel> aView) {
+    public void setColumnViewImpl(RADModelGridColumn aColumn, RADColumnView<? super ModelComponentDecorator> aView) {
         if (aColumn.getViewControl() != null) {
-            RADColumnView<? super DbControlPanel> oldView = aColumn.getViewControl();
+            RADColumnView<? super ModelComponentDecorator> oldView = aColumn.getViewControl();
             aColumn.setViewControl(aView);
             fireColumnViewExchanged(aColumn, oldView, aView);
         }
+    }
+
+    void initFormComponent(RADVisualFormContainer formComp) {
+        topRADComponent = formComp;
+        topDesignComponent = formComp;
     }
 
     // [Undo manager performing undo/redo in AWT event thread should not be
     //  probably implemented here - in FormModel - but seperately.]
     class UndoRedoManager extends UndoRedo.Manager {
 
-        private Mutex.ExceptionAction<Object> runUndo = new Mutex.ExceptionAction<Object>() {
-            @Override
-            public Object run() throws Exception {
-                superUndo();
-                return null;
-            }
+        private final Mutex.ExceptionAction<Object> runUndo = () -> {
+            superUndo();
+            return null;
         };
-        private Mutex.ExceptionAction<Object> runRedo = new Mutex.ExceptionAction<Object>() {
-            @Override
-            public Object run() throws Exception {
-                superRedo();
-                return null;
-            }
+        private final Mutex.ExceptionAction<Object> runRedo = () -> {
+            superRedo();
+            return null;
         };
 
         public void superUndo() throws CannotUndoException {
@@ -745,8 +721,8 @@ public class FormModel {
      */
     public FormModelEvent fireColumnViewExchanged(
             RADModelGridColumn aRadColumn,
-            RADColumnView<? super DbControlPanel> oldView,
-            RADColumnView<? super DbControlPanel> newView) {
+            RADColumnView<? super ModelComponentDecorator> oldView,
+            RADColumnView<? super ModelComponentDecorator> newView) {
         t("firing column view exchange, column: " // NOI18N
                 + (aRadColumn != null ? aRadColumn.getName() : "null")); // NOI18N
 
@@ -773,15 +749,18 @@ public class FormModel {
         t("firing component added: " // NOI18N
                 + (radComp != null ? radComp.getName() : "null")); // NOI18N
 
-        FormModelEvent ev = new FormModelEvent(this, FormModelEvent.COMPONENT_ADDED);
-        ev.setAddData(radComp, radComp.getParent(), addedNew);
-        sendEvent(ev);
+        if (radComp != null) {
+            FormModelEvent ev = new FormModelEvent(this, FormModelEvent.COMPONENT_ADDED);
+            ev.setAddData(radComp, radComp.getParent(), addedNew);
+            sendEvent(ev);
 
-        if (undoRedoRecording && radComp != null) {
-            addUndoableEdit(ev.getUndoableEdit());
+            if (undoRedoRecording) {
+                addUndoableEdit(ev.getUndoableEdit());
+            }
+            return ev;
+        } else {
+            return null;
         }
-
-        return ev;
     }
 
     /**
@@ -825,7 +804,7 @@ public class FormModel {
             int[] perm) {
         t("firing components reorder in container: " // NOI18N
                 + (radCont instanceof RADComponent
-                ? ((RADComponent) radCont).getName() : "<top>")); // NOI18N
+                        ? ((RADComponent) radCont).getName() : "<top>")); // NOI18N
 
         FormModelEvent ev = new FormModelEvent(this, FormModelEvent.COMPONENTS_REORDERED);
         ev.setComponentAndContainer(null, radCont);
@@ -871,6 +850,34 @@ public class FormModel {
     }
 
     /**
+     * Fires an event informing about changing a property of a form. An
+     * undoable edit is created and registered automatically.
+     *
+     * @param aFormRootNode
+     * @param propName name of the changed property.
+     * @param oldValue old value of the property.
+     * @param newValue new value of the property.
+     * @return event that has been fired.
+     */
+    public FormModelEvent fireFormPropertyChanged(FormRootNode aFormRootNode,
+            String propName,
+            Object oldValue,
+            Object newValue) {
+        t("firing form property change, property: " + propName); // NOI18N
+
+        FormModelEvent ev = new FormModelEvent(this, FormModelEvent.FORM_PROPERTY_CHANGED);
+        ev.setFormRootNode(aFormRootNode);
+        ev.setProperty(propName, oldValue, newValue);
+        sendEvent(ev);
+
+        if (undoRedoRecording && propName != null && oldValue != newValue) {
+            addUndoableEdit(ev.getUndoableEdit());
+        }
+
+        return ev;
+    }
+    
+    /**
      * Fires an event informing about changing a synthetic property of a
      * component. An undoable edit is created and registered automatically.
      *
@@ -894,86 +901,6 @@ public class FormModel {
         sendEvent(ev);
 
         if (undoRedoRecording && propName != null && oldValue != newValue) {
-            addUndoableEdit(ev.getUndoableEdit());
-        }
-
-        return ev;
-    }
-
-    /**
-     * Fires an event informing about attaching a new event to an event handler
-     * (createdNew parameter indicates whether the event handler was created
-     * first). An undoable edit is created and registered automatically.
-     *
-     * @param event event for which the handler was created.
-     * @param handler name of the event handler.
-     * @param bodyText body of the event handler.
-     * @param annotationText
-     * @param createdNew newly created event handler?
-     * @return event that has been fired.
-     */
-    public FormModelEvent fireEventHandlerAdded(Event event,
-            String handler,
-            String bodyText,
-            String annotationText,
-            boolean createdNew) {
-        t("event handler added: " + handler); // NOI18N
-
-        FormModelEvent ev = new FormModelEvent(this, FormModelEvent.EVENT_HANDLER_ADDED);
-        ev.setEvent(event, handler, bodyText, annotationText, createdNew);
-        sendEvent(ev);
-
-        if (undoRedoRecording && event != null && handler != null) {
-            addUndoableEdit(ev.getUndoableEdit());
-        }
-
-        return ev;
-    }
-
-    /**
-     * Fires an event informing about detaching an event from event handler
-     * (handlerDeleted parameter indicates whether the handler was deleted as
-     * the last event was detached). An undoable edit is created and registered
-     * automatically.
-     *
-     * @param event event for which the handler was removed.
-     * @param handler removed event handler.
-     * @param handlerDeleted was deleted?
-     * @return event that has been fired.
-     */
-    public FormModelEvent fireEventHandlerRemoved(Event event,
-            String handler,
-            boolean handlerDeleted) {
-        t("firing event handler removed: " + handler); // NOI18N
-
-        FormModelEvent ev = new FormModelEvent(this, FormModelEvent.EVENT_HANDLER_REMOVED);
-        ev.setEvent(event, handler, null, null, handlerDeleted);
-        sendEvent(ev);
-
-        if (undoRedoRecording && event != null && handler != null) {
-            addUndoableEdit(ev.getUndoableEdit());
-        }
-
-        return ev;
-    }
-
-    /**
-     * Fires an event informing about renaming an event handler. An undoable
-     * edit is created and registered automatically.
-     *
-     * @param oldHandlerName old name of the event handler.
-     * @param newHandlerName new name of the event handler.
-     * @return event that has been fired.
-     */
-    public FormModelEvent fireEventHandlerRenamed(String oldHandlerName,
-            String newHandlerName) {
-        t("event handler renamed: " + oldHandlerName + " to " + newHandlerName); // NOI18N
-
-        FormModelEvent ev = new FormModelEvent(this, FormModelEvent.EVENT_HANDLER_RENAMED);
-        ev.setEvent(oldHandlerName, newHandlerName);
-        sendEvent(ev);
-
-        if (undoRedoRecording && oldHandlerName != null && newHandlerName != null) {
             addUndoableEdit(ev.getUndoableEdit());
         }
 
@@ -1046,11 +973,8 @@ public class FormModel {
 
         if (eventList == null) {
             eventList = new ArrayList<>();
-            java.awt.EventQueue.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    firePendingEvents();
-                }
+            java.awt.EventQueue.invokeLater(() -> {
+                firePendingEvents();
             });
         }
         eventList.add(ev);
@@ -1134,18 +1058,9 @@ public class FormModel {
                 modified = true;
             }
         }
-        for (int i = 0; i < targets.size(); i++) {
-            FormModelListener l = targets.get(i);
+        for (FormModelListener l : targets) {
             l.formChanged(events);
         }
-    }
-
-    public boolean isFreeDesignDefaultLayout() {
-        return freeDesignDefaultLayout;
-    }
-
-    void setFreeDesignDefaultLayout(boolean aValue) {
-        freeDesignDefaultLayout = aValue;
     }
 
     // ---------------
@@ -1154,25 +1069,19 @@ public class FormModel {
 
         @Override
         public RADComponent<?>[] getSubBeans() {
-            int n = otherComponents.size();
-            if (topRADComponent != null) {
-                n++;
-            }
-            RADComponent<?>[] comps = new RADComponent<?>[n];
-            otherComponents.toArray(comps);
-            if (topRADComponent != null) {
-                comps[n - 1] = topRADComponent;
-            }
-            return comps;
+            return otherComponents.toArray(new RADComponent<?>[]{});
+        }
+
+        @Override
+        public int getSubBeansCount() {
+            return otherComponents.size();
         }
 
         @Override
         public void initSubComponents(RADComponent<?>[] initComponents) {
             otherComponents.clear();
-            for (int i = 0; i < initComponents.length; i++) {
-                if (initComponents[i] != topRADComponent) {
-                    add(initComponents[i]);
-                }
+            for (RADComponent<?> initComponent : initComponents) {
+                    add(initComponent);
             }
         }
 
@@ -1201,11 +1110,7 @@ public class FormModel {
 
         @Override
         public int getIndexOf(RADComponent<?> comp) {
-            int index = otherComponents.indexOf(comp);
-            if (index < 0 && comp == topRADComponent) {
-                index = otherComponents.size();
-            }
-            return index;
+            return otherComponents.indexOf(comp);
         }
     }
     // ---------------

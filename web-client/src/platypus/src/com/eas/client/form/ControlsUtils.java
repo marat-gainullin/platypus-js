@@ -6,7 +6,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.bearsoft.gwt.ui.XElement;
-import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Utils;
 import com.eas.client.form.MarginConstraints.Margin;
 import com.eas.client.form.js.JsEvents;
@@ -20,8 +19,6 @@ import com.eas.client.form.published.containers.BorderPane;
 import com.eas.client.form.published.containers.MarginsPane;
 import com.eas.client.form.published.containers.SplitPane;
 import com.eas.client.form.published.menu.PlatypusMenuBar;
-import com.eas.client.form.published.widgets.model.ModelElementRef;
-import com.eas.client.model.Entity;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
@@ -105,7 +102,7 @@ public class ControlsUtils {
 		}-*/;
 	}
 
-	public static void jsSelectFile(final JavaScriptObject aCallback,final String aFileTypes) {
+	public static void jsSelectFile(final JavaScriptObject aCallback, final String aFileTypes) {
 		if (aCallback != null) {
 			selectFile(new Callback<JavaScriptObject, String>() {
 
@@ -122,14 +119,14 @@ public class ControlsUtils {
 				public void onFailure(String reason) {
 				}
 
-			},aFileTypes);
+			}, aFileTypes);
 		}
 	}
 
 	public static void selectFile(final Callback<JavaScriptObject, String> aCallback, String aFileTypes) {
 		final XFileUploadField fu = new XFileUploadField();
 		fu.getElement().getStyle().setDisplay(Style.Display.NONE);
-		if (aFileTypes != null){
+		if (aFileTypes != null) {
 			fu.getElement().setAttribute("accept", aFileTypes);
 		}
 		RootPanel.get().add(fu);
@@ -284,21 +281,12 @@ public class ControlsUtils {
 	 * @return
 	 * @throws Exception
 	 */
-	public static PublishedCell calcStandalonePublishedCell(JavaScriptObject aEventThis, JavaScriptObject cellFunction, Row aRow, String aDisplay, ModelElementRef aModelElement,
+	public static PublishedCell calcStandalonePublishedCell(JavaScriptObject aEventThis, JavaScriptObject cellFunction, JavaScriptObject aRow, String aDisplay, String aField,
 	        PublishedCell aAlreadyCell) throws Exception {
-		if (aEventThis != null && aModelElement != null && cellFunction != null) {
+		if (aEventThis != null && aField != null && !aField.isEmpty() && cellFunction != null) {
 			if (aRow != null) {
-				PublishedCell cell = aAlreadyCell != null ? aAlreadyCell : Publisher.publishCell(Utils.toJs(aRow.getColumnObject(aModelElement.getColIndex())), aDisplay);
-				Object[] rowIds = aRow.getPKValues();
-				if (rowIds != null) {
-					for (int i = 0; i < rowIds.length; i++)
-						rowIds[i] = Utils.toJs(rowIds[i]);
-				}
-				Utils.executeScriptEventVoid(
-				        aEventThis,
-				        cellFunction,
-				        JsEvents.publishOnRenderEvent(aEventThis, rowIds != null && rowIds.length > 0 ? (rowIds.length > 1 ? Utils.toJsArray(rowIds) : rowIds[0]) : null, null,
-				                Entity.publishRowFacade(aRow, aModelElement.entity, null), cell));
+				PublishedCell cell = aAlreadyCell != null ? aAlreadyCell : Publisher.publishCell(Utils.getPathData(aRow, aField), aDisplay);
+				Utils.executeScriptEventVoid(aEventThis, cellFunction, JsEvents.publishOnRenderEvent(aEventThis, null, null, aRow, cell));
 				return cell;
 			}
 		}

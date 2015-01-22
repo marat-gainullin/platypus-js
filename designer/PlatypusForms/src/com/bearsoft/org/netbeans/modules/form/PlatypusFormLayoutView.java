@@ -53,7 +53,7 @@ import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.MarginLayo
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.MarginLayoutSupport.MarginLayoutConstraints;
 import com.bearsoft.org.netbeans.modules.form.menu.MenuEditLayer;
 import com.bearsoft.org.netbeans.modules.form.palette.PaletteUtils;
-import com.eas.controls.layouts.margin.MarginConstraints;
+import com.eas.client.forms.layouts.MarginConstraints;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
@@ -136,7 +136,6 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
     private boolean initialized = false;
     MultiViewElementCallback multiViewObserver;
     private ExplorerManager explorerManager;
-    private ProxyLookup lookup;
     private AssistantView assistantView;
     private PreferenceChangeListener settingsListener;
     private PropertyChangeListener paletteListener;
@@ -219,7 +218,7 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
             }
             formModel.addFormModelListener(formModelListener);
 
-            replicator = new VisualReplicator(true, FormUtils.getViewConverters());
+            replicator = new VisualReplicator(formEditor, true);
 
             resetTopDesignComponent(false);
             handleLayer.setViewOnly(formModel.isReadOnly());
@@ -422,31 +421,28 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
 
     private void attachSettingsListener() {
         if (settingsListener == null) {
-            settingsListener = new PreferenceChangeListener() {
-                @Override
-                public void preferenceChange(PreferenceChangeEvent evt) {
-                    String propName = evt.getKey();
-                    switch (propName) {
-                        case FormLoaderSettings.PROP_ASSISTANT_SHOWN:
-                            updateAssistant();
-                            break;
-                        case FormLoaderSettings.PROP_SELECTION_BORDER_SIZE:
-                        case FormLoaderSettings.PROP_SELECTION_BORDER_COLOR:
-                        case FormLoaderSettings.PROP_CONNECTION_BORDER_COLOR:
-                        case FormLoaderSettings.PROP_FORMDESIGNER_BACKGROUND_COLOR:
-                        case FormLoaderSettings.PROP_FORMDESIGNER_BORDER_COLOR: {
-                            updateVisualSettings();
-                            break;
-                        }
-                        case FormLoaderSettings.PROP_PALETTE_IN_TOOLBAR: {
-                            getFormToolBar().showPaletteButton(FormLoaderSettings.getInstance().isPaletteInToolBar());
-                            break;
-                        }
-                        case FormLoaderSettings.PROP_GRID_X:
-                        case FormLoaderSettings.PROP_GRID_Y:
-                            updateVisualSettings();
-                            break;
+            settingsListener = (PreferenceChangeEvent evt) -> {
+                String propName = evt.getKey();
+                switch (propName) {
+                    case FormLoaderSettings.PROP_ASSISTANT_SHOWN:
+                        updateAssistant();
+                        break;
+                    case FormLoaderSettings.PROP_SELECTION_BORDER_SIZE:
+                    case FormLoaderSettings.PROP_SELECTION_BORDER_COLOR:
+                    case FormLoaderSettings.PROP_CONNECTION_BORDER_COLOR:
+                    case FormLoaderSettings.PROP_FORMDESIGNER_BACKGROUND_COLOR:
+                    case FormLoaderSettings.PROP_FORMDESIGNER_BORDER_COLOR: {
+                        updateVisualSettings();
+                        break;
                     }
+                    case FormLoaderSettings.PROP_PALETTE_IN_TOOLBAR: {
+                        getFormToolBar().showPaletteButton(FormLoaderSettings.getInstance().isPaletteInToolBar());
+                        break;
+                    }
+                    case FormLoaderSettings.PROP_GRID_X:
+                    case FormLoaderSettings.PROP_GRID_Y:
+                        updateVisualSettings();
+                        break;
                 }
             };
             FormLoaderSettings.getPreferences().addPreferenceChangeListener(settingsListener);
@@ -462,24 +458,21 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
 
     private void attachPaletteListener() {
         if (paletteListener == null) {
-            paletteListener = new PropertyChangeListener() {
-                @Override
-                public void propertyChange(PropertyChangeEvent evt) {
-                    if (PaletteController.PROP_SELECTED_ITEM.equals(evt.getPropertyName())) {
-                        if (formModel != null && formModel.isFormLoaded() && !formModel.isReadOnly()) {
-                            // PENDING should be done for all cloned designers
-                            if (evt.getNewValue() == null) {
-                                if (getDesignerMode() == PlatypusFormLayoutView.MODE_ADD) {
-                                    setDesignerMode(PlatypusFormLayoutView.MODE_SELECT);
-                                }
-                            } else {
-                                if (getDesignerMode() == PlatypusFormLayoutView.MODE_ADD) {
-                                    // Change in the selected palette item means unselection
-                                    // of the old item and selection of the new one
-                                    setDesignerMode(PlatypusFormLayoutView.MODE_SELECT);
-                                }
-                                setDesignerMode(PlatypusFormLayoutView.MODE_ADD);
+            paletteListener = (PropertyChangeEvent evt) -> {
+                if (PaletteController.PROP_SELECTED_ITEM.equals(evt.getPropertyName())) {
+                    if (formModel != null && formModel.isFormLoaded() && !formModel.isReadOnly()) {
+                        // PENDING should be done for all cloned designers
+                        if (evt.getNewValue() == null) {
+                            if (getDesignerMode() == PlatypusFormLayoutView.MODE_ADD) {
+                                setDesignerMode(PlatypusFormLayoutView.MODE_SELECT);
                             }
+                        } else {
+                            if (getDesignerMode() == PlatypusFormLayoutView.MODE_ADD) {
+                                // Change in the selected palette item means unselection
+                                // of the old item and selection of the new one
+                                setDesignerMode(PlatypusFormLayoutView.MODE_SELECT);
+                            }
+                            setDesignerMode(PlatypusFormLayoutView.MODE_ADD);
                         }
                     }
                 }
@@ -499,11 +492,12 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
      * Данный метод предназначен для использования вне дизайнера форм.
      *
      * @param radComp
+     * @param aFormEditor
      * @param previewInfo
      * @return
      * @throws Exception
      */
-    public static Container createFormView(final RADComponent<?> radComp, final FormLAF.PreviewInfo previewInfo)
+    public static Container createFormView(final RADComponent<?> radComp, final FormEditor aFormEditor, final FormLAF.PreviewInfo previewInfo)
             throws Exception {
         Container result = null;
         FormModel formModel = radComp.getFormModel();
@@ -514,9 +508,10 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                     new Mutex.ExceptionAction<Container>() {
                         @Override
                         public Container run() throws Exception {
-                            VisualReplicator r = new VisualReplicator(false, FormUtils.getViewConverters());
-                            r.setTopRADComponent(radComp);
-                            Container container = (Container) r.createClone();
+                            VisualReplicator r = new VisualReplicator(aFormEditor, false);
+                            Container rootView = (Container) r.createClone();
+                            Container container = new JFrame();
+                            container.add(rootView);
                             if (container instanceof RootPaneContainer) {
                                 JRootPane rootPane = ((RootPaneContainer) container).getRootPane();
                                 JLayeredPane newPane = new JLayeredPane() {
@@ -533,8 +528,8 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                                 // Copy components from the original layered pane into our one
                                 JLayeredPane oldPane = rootPane.getLayeredPane();
                                 Component[] comps = oldPane.getComponents();
-                                for (int i = 0; i < comps.length; i++) {
-                                    newPane.add(comps[i], Integer.valueOf(oldPane.getLayer(comps[i])));
+                                for (Component comp : comps) {
+                                    newPane.add(comp, Integer.valueOf(oldPane.getLayer(comp)));
                                 }
                                 // Use our layered pane that knows about LAF switching
                                 rootPane.setLayeredPane(newPane);
@@ -563,13 +558,13 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
     Point pointFromComponentToHandleLayer(Point p, Component sourceComp) {
         Component commonParent = layeredPane;
         Component comp = sourceComp;
-        while (comp != commonParent) {
+        while (comp != null && comp != commonParent) {
             p.x += comp.getX();
             p.y += comp.getY();
             comp = comp.getParent();
         }
         comp = handleLayer;
-        while (comp != commonParent) {
+        while (comp != null && comp != commonParent) {
             p.x -= comp.getX();
             p.y -= comp.getY();
             comp = comp.getParent();
@@ -659,92 +654,83 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
         PaletteUtils.clearPaletteSelection();
     }
 
-    // -------
-    // designer size
-    Dimension getDesignerSize() {
-        return componentLayer.getDesignerSize();
-    }
+    /*
+     // -------
+     // designer size
+     Dimension getDesignerSize() {
+     return componentLayer.getDesignerSize();
+     }
 
-    void setDesignerSize(Dimension size, Dimension oldSize) {
-        if (topDesignComponent instanceof RADVisualFormContainer) {
-            ((RADVisualFormContainer) topDesignComponent).setDesignerSize(size);
-        }
-    }
+     void setDesignerSize(Dimension size, Dimension oldSize) {
+     componentLayer.setDesignerSize(size);
+     }
+    
+     public void resetDesignerSize() {
+     setDesignerSize(null, null);
+     }
 
-    public void resetDesignerSize() {
-        setDesignerSize(null, null);
-    }
+     private void setupDesignerSize() {
+     if (topDesignComponent instanceof RADVisualFormContainer) {
+     Dimension size = ((RADVisualFormContainer) topDesignComponent).getDesignerSize();
+     if (size == null) {   // use default size if no stored size is available and
+     // layout form or top design comp is root in the form (but not a container)
+     size = new Dimension(400, 300);
+     }
+     Dimension setSize = componentLayer.setDesignerSize(size); // null computes preferred size
+     storeDesignerSize(setSize);
+     }
+     }
+     */
+    /*
+     private void checkDesignerSize() {
+     if (formModel.isFreeDesignDefaultLayout()
+     && topDesignComponent instanceof RADVisualComponent
+     && !(topDesignComponent instanceof RADVisualFormContainer)) {   // new layout container defining designer size
+     // designer size not defined explicitly - check minimum size
+     Component topComp = getTopDesignComponentView();
+     Component topCont = null;
+     if (topDesignComponent instanceof RADVisualContainer<?>) {
+     topCont = ((RADVisualContainer<?>) topDesignComponent).getContainerDelegate(topComp);
+     }
+     if (topCont == null) {
+     topCont = topComp;
+     }
+     // can't rely on minimum size of the container wrap - e.g. menu bar
+     // returns wrong min height
+     int wDiff = topComp.getWidth() - topCont.getWidth();
+     int hDiff = topComp.getHeight() - topCont.getHeight();
 
-    void storeDesignerSize(Dimension size) { // without firing model change
-        if (topDesignComponent instanceof RADVisualFormContainer) {
-            ((RADVisualFormContainer) topDesignComponent).setDesignerSizeImpl(size);
-        }
-    }
+     Dimension designerSize = new Dimension(getDesignerSize());
+     designerSize.width -= wDiff;
+     designerSize.height -= hDiff;
+     Dimension minSize = topCont.getMinimumSize();
+     boolean corrected = false;
+     if (designerSize.width < minSize.width) {
+     designerSize.width = minSize.width;
+     corrected = true;
+     }
+     if (designerSize.height < minSize.height) {
+     designerSize.height = minSize.height;
+     corrected = true;
+     }
 
-    private void setupDesignerSize() {
-        if (topDesignComponent instanceof RADVisualFormContainer) {
-            Dimension size = null;
-            size = ((RADVisualFormContainer) topDesignComponent).getDesignerSize();
-            if (size == null
-                    && (!formModel.isFreeDesignDefaultLayout()
-                    || topDesignComponent == formModel.getTopRADComponent())) {   // use default size if no stored size is available and
-                // layout form or top design comp is root in the form (but not a container)
-                size = new Dimension(400, 300);
-            }
-            Dimension setSize = componentLayer.setDesignerSize(size); // null computes preferred size
-            storeDesignerSize(setSize);
-        }
-    }
+     if (corrected) {
+     designerSize.width += wDiff;
+     designerSize.height += hDiff;
 
-    private void checkDesignerSize() {
-        if (formModel.isFreeDesignDefaultLayout()
-                && topDesignComponent instanceof RADVisualComponent
-                && !(topDesignComponent instanceof RADVisualFormContainer)) {   // new layout container defining designer size
-            // designer size not defined explicitly - check minimum size
-            Component topComp = getTopDesignComponentView();
-            Component topCont = null;
-            if (topDesignComponent instanceof RADVisualContainer<?>) {
-                topCont = ((RADVisualContainer<?>) topDesignComponent).getContainerDelegate(topComp);
-            }
-            if (topCont == null) {
-                topCont = topComp;
-            }
-            // can't rely on minimum size of the container wrap - e.g. menu bar
-            // returns wrong min height
-            int wDiff = topComp.getWidth() - topCont.getWidth();
-            int hDiff = topComp.getHeight() - topCont.getHeight();
-
-            Dimension designerSize = new Dimension(getDesignerSize());
-            designerSize.width -= wDiff;
-            designerSize.height -= hDiff;
-            Dimension minSize = topCont.getMinimumSize();
-            boolean corrected = false;
-            if (designerSize.width < minSize.width) {
-                designerSize.width = minSize.width;
-                corrected = true;
-            }
-            if (designerSize.height < minSize.height) {
-                designerSize.height = minSize.height;
-                corrected = true;
-            }
-
-            if (corrected) {
-                designerSize.width += wDiff;
-                designerSize.height += hDiff;
-
-                // hack: we need the size correction in the undo/redo
-                if (formModel.isCompoundEditInProgress()) {
-                    FormModelEvent ev = new FormModelEvent(formModel, FormModelEvent.SYNTHETIC_PROPERTY_CHANGED);
-                    ev.setComponentAndContainer(topDesignComponent, null);
-                    ev.setProperty(FormModelEvent.PROP_DESIGNER_SIZE, getDesignerSize(), designerSize);
-                    formModel.addUndoableEdit(ev.getUndoableEdit());
-                }
-                componentLayer.setDesignerSize(designerSize);
-                storeDesignerSize(designerSize);
-            }
-        }
-    }
-
+     // hack: we need the size correction in the undo/redo
+     if (formModel.isCompoundEditInProgress()) {
+     FormModelEvent ev = new FormModelEvent(formModel, FormModelEvent.SYNTHETIC_PROPERTY_CHANGED);
+     ev.setComponentAndContainer(topDesignComponent, null);
+     ev.setProperty(FormModelEvent.PROP_DESIGNER_SIZE, getDesignerSize(), designerSize);
+     formModel.addUndoableEdit(ev.getUndoableEdit());
+     }
+     componentLayer.setDesignerSize(designerSize);
+     storeDesignerSize(designerSize);
+     }
+     }
+     }
+     */
     // ---------
     // components selection
     public java.util.List<RADComponent<?>> getSelectedComponents() {
@@ -778,11 +764,9 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
 
     public void setSelectedComponents(RADComponent<?>[] radComps) {
         clearSelectionImpl();
-
-        for (int i = 0; i < radComps.length; i++) {
-            addComponentToSelectionImpl(radComps[i]);
+        for (RADComponent<?> radComp : radComps) {
+            addComponentToSelectionImpl(radComp);
         }
-
         repaintSelection();
         updateNodesSelection();
     }
@@ -815,8 +799,8 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
     }
 
     void addComponentsToSelection(RADVisualComponent<?>[] radComps) {
-        for (int i = 0; i < radComps.length; i++) {
-            addComponentToSelectionImpl(radComps[i]);
+        for (RADVisualComponent<?> radComp : radComps) {
+            addComponentToSelectionImpl(radComp);
         }
         repaintSelection();
         updateNodesSelection();
@@ -851,7 +835,7 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
             RADVisualComponent<?> visualComp = (RADVisualComponent<?>) radComp;
             if (!visualComp.isMenuComponent()) {
                 RADVisualContainer<?> radCont = visualComp.getParentComponent();
-                if ((radCont != null) && JScrollPane.class.isAssignableFrom(radCont.getBeanInstance().getClass())
+                if ((radCont != null) && ScrollPane.class.isAssignableFrom(radCont.getBeanInstance().getClass())
                         && isInDesigner(radCont)) {   // substitute with scroll pane...
                     return radCont;
                 }
@@ -1121,7 +1105,7 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                             break; // NOI18N
                     }
                 } else if (bean instanceof JRadioButton) {
-                    FormProperty<?> property = radComp.<FormProperty<?>>getProperty("buttonGroup"); // NOI18N
+                    RADProperty<?> property = radComp.<RADProperty<?>>getProperty("buttonGroup"); // NOI18N
                     try {
                         if ((property != null) && (property.getValue() == null)) {
                             context = "buttonGroup"; // NOI18N
@@ -1131,12 +1115,6 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                     }
                 } else if ((bean instanceof JPanel) && (getTopDesignComponent() != radComp) && (Math.random() < 0.2)) {
                     context = "designThisContainer"; // NOI18N
-                } else if ((bean instanceof JComboBox) && (Math.random() < 0.4)) {
-                    context = "comboBoxModel"; // NOI18N
-                } else if ((bean instanceof JList) && (Math.random() < 0.4)) {
-                    context = "listModel"; // NOI18N
-                } else if ((bean instanceof JTable) && (Math.random() < 0.4)) {
-                    context = "tableModel"; // NOI18N
                 } else if (bean instanceof JScrollPane) {
                     JScrollPane scrollPane = (JScrollPane) bean;
                     if ((scrollPane.getViewport() != null)
@@ -1331,9 +1309,9 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
      */
     Collection<String> selectedLayoutComponentNames() {
         List<String> selectedIds = new ArrayList<>();
-        for (RADComponent<?> radComp : getSelectedLayoutComponents()) {
+        getSelectedLayoutComponents().stream().forEach((radComp) -> {
             selectedIds.add(radComp.getName());
-        }
+        });
         return selectedIds;
     }
 
@@ -1381,7 +1359,7 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
             Node[] empty = new Node[]{};
             explorerManager.setSelectedNodes(empty);
             setActivatedNodes(empty);
-                // Hack. When multi-view element with no any activated node is activated,
+            // Hack. When multi-view element with no any activated node is activated,
             // NetBeans' property sheet stay with a node from previous multi-view element.
             // So, we need to simulate non-empty activated nodes.
             if (activated == null || activated.length <= 0) {
@@ -1456,33 +1434,23 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                     return;
                 }
             } else {
-                property = radComp.<FormProperty<String>>getRADProperty("text"); // NOI18N
+                property = radComp.<RADProperty<String>>getProperty("text"); // NOI18N
                 if (property == null) {
                     return; // should not happen
                 }
-            }
-
-            String editText;
-            try {
-                editText = property.getValue();
-            } catch (Exception ex) { // should not happen
-                Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage(), ex);
-                return;
             }
 
             editedProperty = property;
 
             getInPlaceEditLayer();
             try {
-                textEditLayer.setEditedComponent(comp, editText);
-            } catch (IllegalArgumentException ex) {
+                textEditLayer.setEditedComponent(comp, property.getValue());
+                textEditLayer.setVisible(true);
+                handleLayer.setVisible(false);
+                textEditLayer.requestFocus();
+            } catch (Exception ex) {
                 notifyCannotEditInPlace();
-                return;
             }
-
-            textEditLayer.setVisible(true);
-            handleLayer.setVisible(false);
-            textEditLayer.requestFocus();
         }
     }
 
@@ -1657,7 +1625,7 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
             super.componentShowing();
             finishComponentShowing();
         } catch (PersistenceException ex) {
-            Exceptions.printStackTrace(ex);
+            ErrorManager.getDefault().notify(ErrorManager.EXCEPTION, ex);
         }
     }
 
@@ -1665,6 +1633,7 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
         if (!formEditor.isFormLoaded()) {
             long ms = System.currentTimeMillis();
             formEditor.loadForm();
+            formEditor.reportErrors(FormEditor.FormOperation.LOADING);
             Logger.getLogger(FormEditor.class.getName()).log(Level.FINER, "Opening form time 3: {0}ms", (System.currentTimeMillis() - ms)); // NOI18N
         }
         if (formEditor.isFormLoaded()) {
@@ -1672,14 +1641,11 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
             PlatypusFormSupport.checkFormGroupVisibility();
             // hack: after IDE starts, if some form is opened but not active in
             // winsys, we need to select it in FormInspector
-            EventQueue.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    if (formEditor != null && formEditor.isFormLoaded()
-                            && FormInspector.exists()
-                            && FormInspector.getInstance().getFocusedForm() == null) {
-                        FormInspector.getInstance().focusForm(PlatypusFormLayoutView.this);
-                    }
+            EventQueue.invokeLater(() -> {
+                if (formEditor != null && formEditor.isFormLoaded()
+                        && FormInspector.exists()
+                        && FormInspector.getInstance().getFocusedForm() == null) {
+                    FormInspector.getInstance().focusForm(PlatypusFormLayoutView.this);
                 }
             });
         }
@@ -1696,11 +1662,8 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
         super.componentOpened();
         if ((formEditor == null) && (multiViewObserver != null)) { // Issue 67879
             multiViewObserver.getTopComponent().close();
-            EventQueue.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    PlatypusFormSupport.checkFormGroupVisibility();
-                }
+            EventQueue.invokeLater(() -> {
+                PlatypusFormSupport.checkFormGroupVisibility();
             });
         }
     }
@@ -1776,11 +1739,8 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
         @Override
         public void formChanged(final FormModelEvent[] events) {
             if (!EventQueue.isDispatchThread()) {
-                EventQueue.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        processEvents(events);
-                    }
+                EventQueue.invokeLater(() -> {
+                    processEvents(events);
                 });
             } else {
                 processEvents(events);
@@ -1808,12 +1768,9 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                 if (!modifying) {
                     return;
                 }
-
                 assert EventQueue.isDispatchThread();
             }
-
             events = aEvents;
-
             if (lafBlock) { // Look&Feel UI defaults remapping needed
                 FormLAF.executeWithLookAndFeel(formModel, this);
             } else {
@@ -1824,20 +1781,11 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
         @Override
         public void run() {
             if (events == null) {
-                Object originalVisualComp = (topDesignComponent == null) ? null : replicator.getClonedComponent(topDesignComponent);
-                Dimension originalSize = originalVisualComp instanceof JComponent
-                        ? ((JComponent) originalVisualComp).getSize() : null;
-                replicator.setTopRADComponent(topDesignComponent);
+                replicator.setTopDesignComponent(topDesignComponent);
                 JComponent formClone = (JComponent) replicator.createClone();
                 if (formClone != null) {
                     formClone.setVisible(true);
                     componentLayer.setTopDesignComponent(formClone);
-                    if (originalSize != null) {
-                        componentLayer.setDesignerSize(originalSize);
-                        checkDesignerSize();
-                    } else {
-                        setupDesignerSize();
-                    }
                 }
             } else {
                 FormModelEvent[] levents = events;
@@ -1887,8 +1835,12 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                         }
                         if (prevType != FormModelEvent.COMPONENT_ADDED
                                 || prevContainer != radContainer) {
-                            replicator.updateAddedComponents(radContainer);
-                            updateDone = true;
+                            try {
+                                replicator.updateAddedComponents(radContainer);
+                                updateDone = true;
+                            } catch (Exception ex) {
+                                Exceptions.printStackTrace(ex);
+                            }
                         }
                         updateNodeChildren(radContainer);
                     } else if (type == FormModelEvent.COMPONENT_REMOVED) {
@@ -1917,46 +1869,64 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                             updateWholeDesigner();
                             return;
                         } else {
-                            replicator.removeComponent(ev.getComponent(), ev.getContainer());
-                            updateDone = true;
+                            try {
+                                replicator.removeComponent(ev.getComponent(), ev.getContainer());
+                                updateDone = true;
+                            } catch (Exception ex) {
+                                Exceptions.printStackTrace(ex);
+                            }
                         }
                         updateNodeChildren(radContainer);
                     } else if (type == FormModelEvent.COMPONENTS_REORDERED) {
                         if (prevType != FormModelEvent.COMPONENTS_REORDERED
                                 || prevContainer != radContainer) {
-                            replicator.reorderComponents(radContainer);
-                            updateDone = true;
+                            try {
+                                replicator.reorderComponents(radContainer);
+                                updateDone = true;
+                            } catch (Exception ex) {
+                                Exceptions.printStackTrace(ex);
+                            }
                         }
                         updateNodeChildren(radContainer);
                     } else if (type == FormModelEvent.COMPONENT_PROPERTY_CHANGED) {
-                        RADProperty<?> eventProperty = ev.getComponentProperty();
-                        replicator.updateComponentProperty(eventProperty);
-                        updateDone = true;
+                        try {
+                            RADProperty<?> eventProperty = ev.getComponentProperty();
+                            replicator.updateComponentProperty(eventProperty);
+                            updateDone = true;
+                        } catch (Exception ex) {
+                            Exceptions.printStackTrace(ex);
+                        }
                     } else if (type == FormModelEvent.TOP_DESIGN_COMPONENT_CHANGED) {
                         setTopDesignComponent((RADVisualContainer<?>) ev.getComponent(), true);
                     } else if (type == FormModelEvent.SYNTHETIC_PROPERTY_CHANGED) {
                         switch (ev.getPropertyName()) {
-                            case FormModelEvent.PROP_DESIGNER_SIZE:
-                                //Dimension oldSize = (Dimension) ev.getOldPropertyValue();
-                                if (ev.getComponent() == topDesignComponent) {
-                                    Dimension size = (Dimension) ev.getNewPropertyValue();
-                                    componentLayer.setDesignerSize(size);
-                                    componentLayer.revalidate();
-                                    if (topDesignComponent instanceof RADVisualFormContainer) {
-                                        storeDesignerSize(size);
-                                    }
-                                    updateDone = true;
-                                }
-                                break;
+                            /*
+                             case FormModelEvent.PROP_DESIGNER_SIZE:
+                             //Dimension oldSize = (Dimension) ev.getOldPropertyValue();
+                             if (ev.getComponent() == topDesignComponent) {
+                             Dimension size = (Dimension) ev.getNewPropertyValue();
+                             componentLayer.setDesignerSize(size);
+                             componentLayer.revalidate();
+                             updateDone = true;
+                             }
+                             break;
+                             */
                             case RADComponent.COMPONENT_NAME_PROP_NAME:
-                                String oldName = (String) ev.getOldPropertyValue();
-                                String newName = (String) ev.getNewPropertyValue();
-                                RADComponent<?> comp = ev.getComponent();
-                                comp.setStoredName(oldName);
-                                replicator.removeComponent(comp, null);
-                                comp.setStoredName(newName);
-                                replicator.addComponent(comp);
-                                updateDone = true;
+                                try {
+                                    String oldName = (String) ev.getOldPropertyValue();
+                                    String newName = (String) ev.getNewPropertyValue();
+                                    replicator.renameComponent(oldName, newName);
+                                    /*
+                                     RADComponent<?> comp = ev.getComponent();
+                                     comp.setStoredName(oldName);
+                                     replicator.removeComponent(comp, null);
+                                     comp.setStoredName(newName);
+                                     replicator.addComponent(comp);
+                                     */
+                                    updateDone = true;
+                                } catch (Exception ex) {
+                                    Exceptions.printStackTrace(ex);
+                                }
                                 break;
                         }
                     } else if (type == FormModelEvent.COLUMN_VIEW_EXCHANGED) {
@@ -1978,10 +1948,12 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                     setSelectedNode(nodeToSelect);
                 }
 
-                if (updateDone) {
-                    // check if not smaller than minimum size
-                    checkDesignerSize();
-                }
+                /*
+                 if (updateDone) {
+                 // check if not smaller than minimum size
+                 checkDesignerSize();
+                 }
+                 */
             }
         }
     }
@@ -1996,15 +1968,15 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
         /**
          * Dimension to align in.
          */
-        private int dimension;
+        private final int dimension;
         /**
          * Requested alignment.
          */
-        private int alignment;
+        private final int alignment;
         /**
          * Group/Align action.
          */
-        private boolean closed;
+        private final boolean closed;
 
         /**
          * Creates action that aligns selected components in the specified
@@ -2056,7 +2028,7 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                 if (action != null && action.isEnabled()) {
                     try {
                         mAlign.align(dimension, alignment);
-                    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                    } catch (Exception ex) {
                         ErrorManager.getDefault().notify(ex);
                     }
                 }
@@ -2155,7 +2127,7 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
         /**
          * Dimension of resizability.
          */
-        private int dimension;
+        private final int dimension;
 
         /**
          * Creates action that changes the resizability of the component.
@@ -2183,7 +2155,7 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
             if (mAlign.canResize()) {
                 try {
                     mAlign.resize(dimension);
-                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                } catch (Exception ex) {
                     ErrorManager.getDefault().notify(ex);
                 }
             }

@@ -4,8 +4,7 @@ import java.text.ParseException;
 
 import com.bearsoft.gwt.ui.widgets.FormattedObjectBox;
 import com.bearsoft.rowset.Utils;
-import com.bearsoft.rowset.metadata.Field;
-import com.eas.client.converters.ObjectRowValueConverter;
+import com.eas.client.converters.StringValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.events.ActionEvent;
 import com.eas.client.form.events.ActionHandler;
@@ -16,7 +15,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 
-public class ModelFormattedField extends PublishedDecoratorBox<Object> implements HasEmptyText, HasActionHandlers {
+public class ModelFormattedField extends ModelDecoratorBox<Object> implements HasEmptyText, HasActionHandlers {
 
 	protected String emptyText;
 
@@ -57,15 +56,15 @@ public class ModelFormattedField extends PublishedDecoratorBox<Object> implement
 	}
 
 	public String getFormat() {
-		return ((FormattedObjectBox) decorated).getPattern();
+		return ((FormattedObjectBox) decorated).getFormat();
 	}
 
 	public void setFormat(String aValue) throws ParseException {
-		((FormattedObjectBox) decorated).setPattern(aValue);
+		((FormattedObjectBox) decorated).setFormat(aValue);
 	}
 
-	public void setFormatType(int aFormatType, String aPattern) throws ParseException {
-		((FormattedObjectBox) decorated).setFormatType(aFormatType, aPattern);
+	public void setValueType(int aValue) throws ParseException {
+		((FormattedObjectBox) decorated).setValueType(aValue);
 	}
 
 	public String getText() {
@@ -81,12 +80,10 @@ public class ModelFormattedField extends PublishedDecoratorBox<Object> implement
 		}
 	}
 
-	public String getPattern() {
-		return ((FormattedObjectBox) decorated).getPattern();
-	}
-
-	public void setPattern(String aPattern) throws ParseException {
-		((FormattedObjectBox) decorated).setPattern(aPattern);
+	@Override
+	public Object convert(Object aValue) {
+		StringValueConverter c = new StringValueConverter();
+		return c.convert(aValue);
 	}
 
 	@Override
@@ -135,10 +132,10 @@ public class ModelFormattedField extends PublishedDecoratorBox<Object> implement
 		});
 		Object.defineProperty(aPublished, "format", {
 			get : function() {
-				return aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::getPattern()();
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::getFormat()();
 			},
 			set : function(aValue) {
-				aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::setPattern(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
+				aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::setFormat(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
 			}
 		});
 	}-*/;
@@ -148,17 +145,12 @@ public class ModelFormattedField extends PublishedDecoratorBox<Object> implement
 	}
 
 	public void setJsValue(Object value) throws Exception {
-		setValue(Utils.toJava(value), true);
+		setValue(convert(Utils.toJava(value)), true);
 	}
 
 	@Override
 	protected void clearValue() {
 		super.clearValue();
 		ActionEvent.fire(this, this);
-	}
-
-	@Override
-	public void setBinding(Field aField) throws Exception {
-		super.setBinding(aField, new ObjectRowValueConverter());
 	}
 }

@@ -1,22 +1,21 @@
 package com.eas.client.form.grid.columns;
 
-import com.bearsoft.rowset.Row;
+import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
 import com.eas.client.form.grid.cells.CheckBoxCell;
-import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.view.client.SelectionModel;
+import com.google.gwt.core.client.JavaScriptObject;
 
-public class CheckServiceColumn extends Column<Row, Boolean>{
+public class CheckServiceColumn extends ModelColumn {
 
-	protected SelectionModel<Row> selectionModel;
-	
-	public CheckServiceColumn(SelectionModel<Row> aSelectionModel) {
-	    super(new CheckBoxCell());
-	    selectionModel = aSelectionModel;
+	public CheckServiceColumn() {
+	    super(new TreeExpandableCell<JavaScriptObject, Object>(new CheckBoxCell()));
+		designedWidth = 22;
+		minWidth = designedWidth;
+		maxWidth = designedWidth;
     }
 
 	@Override
-    public Boolean getValue(Row object) {
-	    return selectionModel.isSelected(object);
+    public Boolean getValue(JavaScriptObject object) {
+	    return grid.getSelectionModel().isSelected(object);
     }
 
 }

@@ -45,11 +45,13 @@ package com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates;
 
 import com.bearsoft.org.netbeans.modules.form.FormProperty;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.*;
-import com.eas.controls.layouts.box.BoxLayout;
+import com.eas.client.forms.Orientation;
+import com.eas.client.forms.layouts.BoxLayout;
 import java.awt.*;
 import java.beans.*;
 import java.lang.reflect.InvocationTargetException;
 import javax.swing.JPanel;
+import org.openide.util.ImageUtilities;
 
 /**
  * Support class for BoxLayout. This is an example of support for layout manager
@@ -61,7 +63,18 @@ import javax.swing.JPanel;
 // Expects ltr orientation of the designer
 public class BoxLayoutSupport extends AbstractLayoutSupport {
 
-    private int axis = BoxLayout.X_AXIS;
+    /**
+     * The icon for BoxLayout.
+     */
+    private static final String iconURL
+            = "com/bearsoft/org/netbeans/modules/form/beaninfo/swing/boxLayout.gif"; // NOI18N
+    /**
+     * The icon for BoxLayout.
+     */
+    private static final String icon32URL
+            = "com/bearsoft/org/netbeans/modules/form/beaninfo/swing/boxLayout32.gif"; // NOI18N
+
+    private int orientation = Orientation.HORIZONTAL;
     private int hgap;
     private int vgap;
     private FormProperty<?>[] properties;
@@ -74,6 +87,25 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
     @Override
     public Class<?> getSupportedClass() {
         return BoxLayout.class;
+    }
+
+    /**
+     * Provides an icon to be used for the layout node in Component Inspector.
+     * Only 16x16 color icon is required.
+     *
+     * @param type is one of BeanInfo constants: ICON_COLOR_16x16,
+     * ICON_COLOR_32x32, ICON_MONO_16x16, ICON_MONO_32x32
+     * @return icon to be displayed for node in Component Inspector
+     */
+    @Override
+    public Image getIcon(int type) {
+        switch (type) {
+            case BeanInfo.ICON_COLOR_16x16:
+            case BeanInfo.ICON_MONO_16x16:
+                return ImageUtilities.loadImage(iconURL);
+            default:
+                return ImageUtilities.loadImage(icon32URL);
+        }
     }
 
     /**
@@ -131,7 +163,7 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
                 continue;
             }
             Rectangle b = components[i].getBounds();
-            if ((axis == BoxLayout.X_AXIS) || (axis == BoxLayout.LINE_AXIS)) {
+            if (orientation == Orientation.HORIZONTAL) {
                 if (posInCont.x < b.x + b.width / 2) {
                     assistantParams += i;
                     return i;
@@ -191,7 +223,7 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
 
             if ((components.length == 0) || ((components.length == 1) && (components[0] == component))) {
                 Insets ins = containerDelegate.getInsets();
-                rect = (axis == BoxLayout.X_AXIS || axis == BoxLayout.LINE_AXIS)
+                rect = (orientation == Orientation.HORIZONTAL)
                         ? new Rectangle(ins.left, ins.top,
                                 30, containerSize.height)
                         : new Rectangle(ins.left, ins.top,
@@ -202,12 +234,12 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
                     comp = components[components.length - 2];
                 }
                 Rectangle b = comp.getBounds();
-                rect = (axis == BoxLayout.X_AXIS || axis == BoxLayout.LINE_AXIS)
+                rect = (orientation == Orientation.HORIZONTAL)
                         ? new Rectangle(b.x + b.width - 10, b.y, 30, b.height)
                         : new Rectangle(b.x, b.y + b.height - 10, b.width, 20);
             } else {
                 Rectangle b = components[newIndex].getBounds();
-                rect = (axis == BoxLayout.X_AXIS || axis == BoxLayout.LINE_AXIS)
+                rect = (orientation == Orientation.HORIZONTAL)
                         ? new Rectangle(b.x - 10, b.y, 30, b.height)
                         : new Rectangle(b.x, b.y - 10, b.width, 20);
             }
@@ -285,6 +317,12 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
     @Override
     protected LayoutManager cloneLayoutInstance(Container container,
             Container containerDelegate) {
+        int axis = BoxLayout.X_AXIS;
+        if (orientation == Orientation.HORIZONTAL) {
+            axis = BoxLayout.X_AXIS;
+        } else if (orientation == Orientation.VERTICAL) {
+            axis = BoxLayout.Y_AXIS;
+        }
         return new BoxLayout(containerDelegate, axis, hgap, vgap);
     }
 
@@ -339,38 +377,31 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
             // bean property - we must create a special FormProperty
             properties = new FormProperty<?>[]{
                 new FormProperty<Integer>(
-                "axis", // NOI18N
+                "orientation", // NOI18N
                 Integer.TYPE,
                 getBundle().getString("PROP_axis"), // NOI18N
                 getBundle().getString("HINT_axis")) // NOI18N
                 {
-                    protected BoxAxisEditor editor;
+                    protected BoxOrientationEditor editor;
 
                     @Override
                     public PropertyEditor getPropertyEditor() {
                         if (editor == null) {
-                            editor = new BoxAxisEditor();
+                            editor = new BoxOrientationEditor();
                         }
                         return editor;
                     }
 
                     @Override
                     public Integer getValue() {
-                        return axis;
+                        return orientation;
                     }
 
                     @Override
                     public void setValue(Integer value) {
                         Integer oldValue = getValue();
-                        int ax = value;
-                        if (ax == BoxLayout.X_AXIS || ax == BoxLayout.Y_AXIS
-                                || ax == BoxLayout.LINE_AXIS || ax == BoxLayout.PAGE_AXIS) {
-                            if (axis != ax) {
-                                axis = ax;
-                                setChanged(axis != BoxLayout.X_AXIS);
-                                propertyValueChanged(oldValue, value);
-                            }
-                        }
+                        orientation = value;
+                        propertyValueChanged(oldValue, value);
                     }
 
                     @Override
@@ -380,7 +411,7 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
 
                     @Override
                     public Integer getDefaultValue() {
-                        return BoxLayout.X_AXIS;
+                        return Orientation.HORIZONTAL;
                     }
                 },
                 new FormProperty<Integer>(
@@ -398,7 +429,6 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
                     public void setValue(Integer aValue) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
                         int oldValue = hgap;
                         hgap = aValue != null ? aValue : 0;
-                        setChanged(hgap != 0);
                         propertyValueChanged(oldValue, hgap);
                     }
 
@@ -427,7 +457,6 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
                     public void setValue(Integer aValue) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
                         int oldValue = vgap;
                         vgap = aValue != null ? aValue : 0;
-                        setChanged(vgap != 0);
                         propertyValueChanged(oldValue, vgap);
                     }
 
@@ -459,42 +488,23 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
         return "axis".equals(propName) ? getProperties()[0] : null; // NOI18N
     }
 
-    /*
-     private static Constructor getBoxLayoutConstructor() {
-     if (boxLayoutConstructor == null) {
-     try {
-     boxLayoutConstructor = BoxLayout.class.getConstructor(
-     new Class<?>[]{Container.class, Integer.TYPE});
-     } catch (NoSuchMethodException ex) { // should not happen
-     ErrorManager.getDefault().notify(ex);
-     }
-     }
-     return boxLayoutConstructor;
-     }
-     */
     // --------------
     /**
      * PropertyEditor for axis property of BoxLayoutSupport.
      */
-    public static final class BoxAxisEditor extends PropertyEditorSupport {
+    public static final class BoxOrientationEditor extends PropertyEditorSupport {
 
         private final String[] tags = {
-            getBundle().getString("VALUE_axis_line"), // NOI18N
-            getBundle().getString("VALUE_axis_page"), // NOI18N
             getBundle().getString("VALUE_axis_x"), // NOI18N
             getBundle().getString("VALUE_axis_y") // NOI18N
         };
         private final Integer[] values = {
-            BoxLayout.LINE_AXIS,
-            BoxLayout.PAGE_AXIS,
-            BoxLayout.X_AXIS,
-            BoxLayout.Y_AXIS
+            Orientation.HORIZONTAL,
+            Orientation.VERTICAL
         };
         private final String[] javaInitStrings = {
-            com.eas.controls.layouts.box.BoxLayout.class.getName() + ".LINE_AXIS", // NOI18N
-            com.eas.controls.layouts.box.BoxLayout.class.getName() + ".PAGE_AXIS", // NOI18N
-            com.eas.controls.layouts.box.BoxLayout.class.getName() + ".X_AXIS", // NOI18N
-            com.eas.controls.layouts.box.BoxLayout.class.getName() + ".Y_AXIS" // NOI18N
+            BoxLayout.class.getName() + ".X_AXIS", // NOI18N
+            BoxLayout.class.getName() + ".Y_AXIS" // NOI18N
         };
 
         @Override

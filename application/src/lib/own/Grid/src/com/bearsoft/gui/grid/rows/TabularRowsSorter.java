@@ -23,16 +23,6 @@ import javax.swing.table.TableModel;
  */
 public class TabularRowsSorter<M extends TableModel> extends RowSorter<M> {
 
-    protected static class SorterRow {
-
-        public int modelIndex = -1;
-
-        public SorterRow(int aModelRowIndex) {
-            super();
-            modelIndex = aModelRowIndex;
-        }
-    }
-
     public boolean applySelection(ListSelectionModel aSelection) {
         boolean res = true;
         if (viewSelection != null) {
@@ -71,11 +61,11 @@ public class TabularRowsSorter<M extends TableModel> extends RowSorter<M> {
         return cacheSelection;
     }
 
-    protected class SorterRowComparator implements Comparator<SorterRow> {
+    protected class SorterRowComparator implements Comparator<Integer> {
 
         @Override
-        public int compare(SorterRow o1, SorterRow o2) {
-            return compareRows(o1.modelIndex, o2.modelIndex);
+        public int compare(Integer o1, Integer o2) {
+            return compareRows(o1, o2);
         }
     }
     protected M model;
@@ -241,6 +231,7 @@ public class TabularRowsSorter<M extends TableModel> extends RowSorter<M> {
     }
 
     public int compareRows(int row1, int row2) {
+        int order = 0;
         for (int i = 0; i < criteria.size(); i++) {
             SortKey key = criteria.get(i);
             if (key.getSortOrder() != SortOrder.UNSORTED) {
@@ -249,30 +240,35 @@ public class TabularRowsSorter<M extends TableModel> extends RowSorter<M> {
                 if (o1 instanceof Comparable<?> && o2 instanceof Comparable<?>) {
                     Comparable<Object> c1 = (Comparable<Object>) o1;
                     Comparable<Object> c2 = (Comparable<Object>) o2;
-                    int order = c1.compareTo(c2);
-                    if (order != 0) {
-                        return key.getSortOrder() == SortOrder.DESCENDING ? -order : order;
-                    }
+                    order = c1.compareTo(c2);
+                } else if (o1 == null && o2 != null) {
+                    order = 1;
+                } else if (o1 != null && o2 == null) {
+                    order = -1;
+                }
+                order = key.getSortOrder() == SortOrder.DESCENDING ? -order : order;
+                if (order != 0) {
+                    break;
                 }
             }
         }
-        return 0;
+        return order;
     }
 
     private void sort() {
         ListSelectionModel savedSelection = saveSelection();
         try {
             modelRowCount = model.getRowCount();
-            SorterRow[] modelRows = new SorterRow[modelRowCount];
+            Integer[] modelRows = new Integer[modelRowCount];
             for (int i = 0; i < modelRows.length; i++) {
-                modelRows[i] = new SorterRow(i);
+                modelRows[i] = i;
             }
             Arrays.sort(modelRows, new SorterRowComparator());
             viewToModel = new int[modelRows.length];
             modelToView = new int[modelRows.length];
             for (int i = 0; i < modelRows.length; i++) {
-                viewToModel[i] = modelRows[i].modelIndex;
-                modelToView[modelRows[i].modelIndex] = i;
+                viewToModel[i] = modelRows[i];
+                modelToView[modelRows[i]] = i;
             }
             fireSortOrderChanged();
         } finally {

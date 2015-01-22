@@ -1,45 +1,38 @@
 package com.eas.client.form.grid.cells.rowmarker;
 
 import com.bearsoft.gwt.ui.widgets.grid.cells.RenderedEditorCell;
-import com.bearsoft.rowset.Row;
-import com.bearsoft.rowset.Rowset;
+import com.bearsoft.rowset.Utils.JsObject;
 import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.safecss.shared.SafeStylesBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 
-public class RowMarkerCell extends AbstractCell<Row> {
+public abstract class RowMarkerCell extends AbstractCell<Object> {
 	
-	protected Rowset rowsSource;
-
-	public RowMarkerCell(Rowset aRowsSource) {
+	public RowMarkerCell() {
 		super();
-		rowsSource = aRowsSource;
 	}
 
-	public Rowset getRowsSource() {
-		return rowsSource;
-	}
-
-	public void setRowsSource(Rowset aValue) {
-		rowsSource = aValue;
-	}
-
+	public abstract JavaScriptObject getRowsData();
+	
 	@Override
-	public void render(Context context, Row value, SafeHtmlBuilder sb) {
+	public void render(Context context, Object value, SafeHtmlBuilder sb) {
 		RowMarkerResources.INSTANCE.style().ensureInjected();
 		StringBuilder leftClasses = new StringBuilder();
 		leftClasses.append(RowMarkerResources.INSTANCE.style().rowMarkerLeft());
 		StringBuilder rightClasses = new StringBuilder();
 		rightClasses.append(RowMarkerResources.INSTANCE.style().rowMarkerRight());
-		boolean currentRow = rowsSource != null && rowsSource.getCurrentRow() == value;
+		JavaScriptObject rows = getRowsData();
+		boolean currentRow = rows != null && rows.<JsObject>cast().getJs("cursor") == value;
 		if (currentRow)
 			rightClasses.append(" ").append(RowMarkerResources.INSTANCE.style().rowMarkerCurrent());
+		/*
 		if (value.isInserted())
 			leftClasses.append(" ").append(RowMarkerResources.INSTANCE.style().rowMarkerNew());
 		else if (value.isUpdated())
 			leftClasses.append(" ").append(RowMarkerResources.INSTANCE.style().rowMarkerEdited());
-		
+		*/		
 		SafeHtmlBuilder content = new SafeHtmlBuilder();
 		content.appendHtmlConstant("<div class=\"" + leftClasses.toString() + "\">&nbsp;</div><div class=\"" + rightClasses.toString() + "\">&nbsp;</div>");
 		RenderedEditorCell.CellsResources.INSTANCE.tablecell().ensureInjected();

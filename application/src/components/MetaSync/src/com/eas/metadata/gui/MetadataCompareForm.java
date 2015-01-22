@@ -1073,7 +1073,7 @@ public class MetadataCompareForm extends javax.swing.JFrame {
         new Thread() {
             @Override
             public void run() {
-                try (DatabasesClientWithResource dbResource = new DatabasesClientWithResource(new DbConnectionSettings(destUrl, destUser, destPassword), null)) {
+                try (DatabasesClientWithResource dbResource = new DatabasesClientWithResource(new DbConnectionSettings(destUrl, destUser, destPassword))) {
                     DatabasesClient client = dbResource.getClient();
                     for (int i = 0; i < size; i++) {
                         if (sqlModel.isChoiced(i)) {

@@ -8,7 +8,6 @@ import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.exceptions.RowsetException;
-import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +22,7 @@ public class ParametersRowset extends Rowset {
     protected class ParametersRowWrapper extends Row {
 
         ParametersRowWrapper() {
-            super(params);
+            super("params", params);
         }
 
         @Override
@@ -35,11 +34,11 @@ public class ParametersRowset extends Rowset {
         public boolean setColumnObject(int aColIndex, Object aColValue) throws RowsetException {
             if (!smartEquals(getColumnObject(aColIndex), aColValue)) {
                 Object oldColValue = getColumnObject(aColIndex);
-                if (ParametersRowset.this.rowsetChangeSupport.fireWillChangeEvent(ParametersRowWrapper.this, aColIndex, oldColValue, aColValue)) {
+                //if (ParametersRowset.this.rowsetChangeSupport.fireWillChangeEvent(ParametersRowWrapper.this, aColIndex, oldColValue, aColValue)) {
                     params.get(aColIndex).setValue(aColValue);
-                    ParametersRowset.this.rowsetChangeSupport.fireRowChangedEvent(ParametersRowWrapper.this, aColIndex, oldColValue);
+                    //ParametersRowset.this.rowsetChangeSupport.fireRowChangedEvent(ParametersRowWrapper.this, aColIndex, oldColValue);
                     return true;
-                }
+                //}
             }
             return false;
         }
@@ -82,43 +81,6 @@ public class ParametersRowset extends Rowset {
     }
 
     @Override
-    public boolean next() {
-        return currentRowPos++ < 1;
-    }
-
-    @Override
-    public boolean previous() {
-        return currentRowPos-- > 1;
-    }
-
-    @Override
-    public Object getObject(int aColIndex) {
-        if (aColIndex >= 1 && aColIndex <= params.getParametersCount()) {
-            return params.get(aColIndex).getValue();
-        }
-        return null;
-    }
-
-    @Override
-    public boolean updateObject(int aColIndex, Object aValue) throws RowsetException {
-        if (aColIndex >= 1 && aColIndex <= params.getParametersCount()) {
-            Parameter param = params.get(aColIndex);
-            if (converter != null) {
-                aValue = converter.convert2RowsetCompatible(aValue, param.getTypeInfo());
-            }
-            Object oldValue = param.getValue();
-            if (!Row.smartEquals(oldValue, aValue)) {
-                if (rowsetChangeSupport.fireWillChangeEvent(paramRow, aColIndex, oldValue, aValue)) {
-                    params.get(aColIndex).setValue(aValue);
-                    rowsetChangeSupport.fireRowChangedEvent(paramRow, aColIndex, oldValue);
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    @Override
     public Row getCurrentRow() {
         return paramRow;
     }
@@ -140,53 +102,11 @@ public class ParametersRowset extends Rowset {
     }
 
     @Override
-    public boolean isBeforeFirst() {
-        return false;
-    }
-
-    @Override
-    public boolean isAfterLast() {
-        return false;
-    }
-
-    @Override
-    public boolean first() {
-        return true;
-    }
-
-    @Override
-    public boolean last() {
-        return true;
-    }
-
-    @Override
-    public int getCursorPos() {
-        return 1;
-    }
-
-    @Override
-    public boolean absolute(int row) {
-        return row == 1;
-    }
-
-    @Override
-    public void insert() {
-    }
-
-    @Override
-    public void insert(Object... initingValues) throws RowsetException {
-    }
-
-    @Override
     public void insert(Row toInsert, boolean aAjusting) throws RowsetException {
     }
 
     @Override
     public void insert(Row toInsert, boolean aAjusting, Object... initingValues) throws RowsetException {
-    }
-
-    @Override
-    public void delete() {
     }
 
     @Override
@@ -205,7 +125,4 @@ public class ParametersRowset extends Rowset {
     protected void generateInsert(Row aRow) {
     }
 
-    @Override
-    protected void generateUpdate(int colIndex, Row aRow, Object oldValue, Object newValue) {
-    }
 }

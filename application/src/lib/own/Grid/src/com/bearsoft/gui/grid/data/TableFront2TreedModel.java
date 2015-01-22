@@ -31,7 +31,6 @@ public class TableFront2TreedModel<T> implements TableModel {
     protected Set<T> expanded = new HashSet<>();
     protected List<T> front;
     protected Map<T, Integer> frontIndexes = new HashMap<>();
-    protected ChildrenFetcher<T> childrenFetcher;
 
     protected class TreedDataListener implements TreedModelListener<T> {
 
@@ -135,20 +134,14 @@ public class TableFront2TreedModel<T> implements TableModel {
         }
     }
 
-    public TableFront2TreedModel(TreedModel<T> aTreedModel) {
-        this(aTreedModel, null);
-    }
-
     /**
      * Table front constructor. Constructs a lazy tree front.
      * @param aTreedModel - Deep treed model, containing data.
-     * @param aChildrenFetcher - Fetcher object for lazy trees.
      */
-    public TableFront2TreedModel(TreedModel<T> aTreedModel, ChildrenFetcher<T> aChildrenFetcher) {
+    public TableFront2TreedModel(TreedModel<T> aTreedModel) {
         super();
         treedModel = aTreedModel;
         treedModel.addTreedModelListener(new TreedDataListener());
-        childrenFetcher = aChildrenFetcher;
     }
 
     /**
@@ -262,7 +255,7 @@ public class TableFront2TreedModel<T> implements TableModel {
     /**
      * Builds path to specified element if the element belongs to the model.
      * @param anElement Element to build path to.
-     * @return ArrayList<T> of elements comprising the path, excluding root null element.
+     * @return ArrayList&lt;T&gt; of elements comprising the path, excluding root null element.
      */
     public List<T> buildPathTo(T anElement) {
         List<T> path = new ArrayList<>();
@@ -344,24 +337,8 @@ public class TableFront2TreedModel<T> implements TableModel {
                 int firstRow = getIndexOf(children.get(0));
                 int lastRow = getIndexOf(children.get(children.size() - 1));
                 fireRowsInserted(firstRow, lastRow);
-            } else if (childrenFetcher != null) {// children.isEmpty()
-                final T element2Expand = anElement;
-                expanded.add(element2Expand); // To prevent re-fetching.
-                Runnable completer = new Runnable() {
-
-                    public void run() {
-                        List<T> fetchedChildren = treedModel.getChildrenOf(element2Expand);
-                        if (!fetchedChildren.isEmpty()) {
-                            invalidateFront();
-                            int firstRow = getIndexOf(fetchedChildren.get(0));
-                            int lastRow = getIndexOf(fetchedChildren.get(fetchedChildren.size() - 1));
-                            fireRowsInserted(firstRow, lastRow);
-                        }
-                        int fetchedRowIndex = getIndexOf(anElement);
-                        fireRowChanged(0, fetchedRowIndex);
-                    }
-                };
-                childrenFetcher.fetch(element2Expand, completer, aAsynchronous);
+            } else {// children.isEmpty()
+                // TODO: fire an event about empty folder expansion attempt
             }
         }
     }

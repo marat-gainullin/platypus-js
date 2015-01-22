@@ -1,28 +1,115 @@
 package com.eas.client.form.grid.cells;
 
-import com.google.gwt.cell.client.CheckboxCell;
+import com.google.gwt.cell.client.AbstractEditableCell;
+import com.google.gwt.cell.client.Cell;
+import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.shared.GWT;
+import com.google.gwt.dom.client.BrowserEvents;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.InputElement;
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 
-public class CheckBoxCell extends CheckboxCell {
-	
-	protected interface CheckBoxTemplate extends SafeHtmlTemplates{
-		@Template("<input type=\"checkbox\" style=\"vertical-align: middle;\" tabindex=\"-1\" checked/>")
+public class CheckBoxCell extends AbstractEditableCell<Object, Boolean> {
+
+	protected interface CheckBoxTemplate extends SafeHtmlTemplates {
+		@Template("<input type=\"checkbox\" style=\"vertical-align: middle; width: 100%;\" tabindex=\"-1\" checked/>")
 		public SafeHtml checked();
-		@Template("<input type=\"checkbox\" style=\"vertical-align: middle;\" tabindex=\"-1\"/>")
+
+		@Template("<input type=\"checkbox\" style=\"vertical-align: middle; width: 100%;\" tabindex=\"-1\"/>")
 		public SafeHtml unchecked();
 	}
-	
-	private static final CheckBoxTemplate template = GWT.create(CheckBoxTemplate.class);
-	
+
+	private static final CheckBoxTemplate checkTemplate = GWT.create(CheckBoxTemplate.class);
+
+	protected interface RadioTemplate extends SafeHtmlTemplates {
+		@Template("<input name=\"{0}\" type=\"radio\" style=\"vertical-align: middle; width: 100%;\" tabindex=\"-1\" checked/>")
+		public SafeHtml checked(String aGroupName);
+
+		@Template("<input name=\"{0}\" type=\"radio\" style=\"vertical-align: middle; width: 100%;\" tabindex=\"-1\"/>")
+		public SafeHtml unchecked(String aGroupName);
+	}
+
+	private static final RadioTemplate radioTemplate = GWT.create(RadioTemplate.class);
+
+	protected String groupName;
+
 	public CheckBoxCell() {
-		super(true, false);
+		this(null);
+	}
+
+	public CheckBoxCell(String aGroupName) {
+		super(BrowserEvents.CHANGE, BrowserEvents.KEYDOWN);
+		groupName = aGroupName;
+	}
+
+	public String getGroupName() {
+		return groupName;
+	}
+
+	public void setGroupName(String aValue) {
+		groupName = aValue;
 	}
 
 	@Override
-	public void render(com.google.gwt.cell.client.Cell.Context context, Boolean value, SafeHtmlBuilder sb) {
+	public boolean dependsOnSelection() {
+		return true;
+	}
+
+	@Override
+	public boolean handlesSelection() {
+		return false;
+	}
+
+	@Override
+	public boolean isEditing(com.google.gwt.cell.client.Cell.Context context, Element parent, Object value) {
+		return false;
+	}
+
+	@Override
+	public void onBrowserEvent(Context context, Element parent, Object value, NativeEvent event, ValueUpdater<Object> valueUpdater) {
+		String type = event.getType();
+
+		boolean enterPressed = BrowserEvents.KEYDOWN.equals(type) && event.getKeyCode() == KeyCodes.KEY_ENTER;
+		if (BrowserEvents.CHANGE.equals(type) || enterPressed) {
+			InputElement input = parent.getFirstChild().cast();
+			Boolean isChecked = input.isChecked();
+
+			/*
+			 * Toggle the value if the enter key was pressed and the cell
+			 * handles selection or doesn't depend on selection. If the cell
+			 * depends on selection but doesn't handle selection, then ignore
+			 * the enter key and let the SelectionEventManager determine which
+			 * keys will trigger a change.
+			 */
+			if (enterPressed && (handlesSelection() || !dependsOnSelection())) {
+				isChecked = !isChecked;
+				input.setChecked(isChecked);
+			}
+
+			/*
+			 * Save the new value. However, if the cell depends on the
+			 * selection, then do not save the value because we can get into an
+			 * inconsistent state.
+			 */
+			if (value != isChecked && !dependsOnSelection()) {
+				setViewData(context.getKey(), isChecked);
+			} else {
+				clearViewData(context.getKey());
+			}
+
+			if (valueUpdater != null) {
+				valueUpdater.update(isChecked);
+			}
+		}
+	}
+
+	@Override
+	public void render(Cell.Context context, Object aValue, SafeHtmlBuilder sb) {
+		Boolean value = (Boolean) aValue;
 		// Get the view data.
 		Object key = context.getKey();
 		Boolean viewData = getViewData(key);
@@ -31,10 +118,18 @@ public class CheckBoxCell extends CheckboxCell {
 			viewData = null;
 		}
 
-		if (value != null && (viewData != null ? viewData : value)) {
-			sb.append(template.checked());
+		if (groupName != null) {
+			if (value != null && (viewData != null ? viewData : value)) {
+				sb.append(radioTemplate.checked(groupName));
+			} else {
+				sb.append(radioTemplate.unchecked(groupName));
+			}
 		} else {
-			sb.append(template.unchecked());
+			if (value != null && (viewData != null ? viewData : value)) {
+				sb.append(checkTemplate.checked());
+			} else {
+				sb.append(checkTemplate.unchecked());
+			}
 		}
 	}
 }

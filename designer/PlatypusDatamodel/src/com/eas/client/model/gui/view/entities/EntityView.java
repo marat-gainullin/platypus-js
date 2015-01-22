@@ -32,7 +32,7 @@ import com.eas.client.model.gui.view.FieldsParametersListCellRenderer;
 import com.eas.client.model.gui.view.IconsListCellRenderer;
 import com.eas.client.model.query.QueryEntity;
 import com.eas.client.model.query.QueryParametersEntity;
-import com.eas.gui.CascadedStyle;
+import com.eas.gui.ScriptColor;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Point2D;
@@ -257,8 +257,8 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
                 if (isOpaque() && g instanceof Graphics2D) {
                     Graphics2D g2d = (Graphics2D) g;
                     Color backColor = getBackground();
-                    Color ltBackColor = CascadedStyle.brighterColor(backColor, 0.85);
-                    Color dkBackColor = CascadedStyle.darkerColor(backColor, 0.95);
+                    Color ltBackColor = ScriptColor.brighter(backColor, 0.85);
+                    Color dkBackColor = ScriptColor.darker(backColor, 0.95);
                     Dimension size = getSize();
                     Paint gradient1 = new GradientPaint(new Point2D.Float(0, 0), ltBackColor, new Point2D.Float(0, size.height / 2), backColor);
                     Paint gradient2 = new GradientPaint(new Point2D.Float(0, size.height / 2 + 1), dkBackColor, new Point2D.Float(0, size.height), backColor);

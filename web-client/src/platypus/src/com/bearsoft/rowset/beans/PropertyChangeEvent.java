@@ -4,6 +4,9 @@
  */
 package com.bearsoft.rowset.beans;
 
+import com.bearsoft.rowset.Utils;
+import com.google.gwt.core.client.JavaScriptObject;
+
 /**
  *
  * @author mg
@@ -48,6 +51,10 @@ public class PropertyChangeEvent{
         return newValue;
     }
 
+    public Object getJsNewValue() {
+        return Utils.toJs(newValue);
+    }
+    
     /**
      * Gets the old value for the property, expressed as an Object.
      *
@@ -58,13 +65,17 @@ public class PropertyChangeEvent{
         return oldValue;
     }
 
+    public Object getJsOldValue() {
+        return Utils.toJs(oldValue);
+    }
+
     /**
      * Sets the propagationId object for the event.
      *
-     * @param propagationId  The propagationId object for the event.
+     * @param aValue  The propagationId object for the event.
      */
-    public void setPropagationId(Object propagationId) {
-        this.propagationId = propagationId;
+    public void setPropagationId(Object aValue) {
+        propagationId = aValue;
     }
 
     /**
@@ -129,5 +140,5 @@ public class PropertyChangeEvent{
         sb.append("; source=").append(getSource().toString());
         return sb.append("]").toString();
     }
-
+    
 }

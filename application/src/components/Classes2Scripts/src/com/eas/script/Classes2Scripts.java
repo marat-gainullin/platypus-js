@@ -11,7 +11,6 @@ import com.eas.util.PropertiesUtils;
 import com.eas.util.StringUtils;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
@@ -35,7 +34,6 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * The utility application to convert JavaScript API classes with
@@ -228,7 +226,7 @@ public class Classes2Scripts {
     private void processJar(File jarFile) throws IOException, ClassNotFoundException {
         try (JarFile jar = new JarFile(jarFile)) {
             Logger.getLogger(Classes2Scripts.class.getName())
-                    .log(Level.INFO, "Processing jar: {0}", new String[]{jarFile.getAbsolutePath()});
+                    .log(Level.FINE, "Processing jar: {0}", new String[]{jarFile.getAbsolutePath()});
             URLClassLoader cl = new URLClassLoader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
             Enumeration<JarEntry> e = jar.entries();
             while (e.hasMoreElements()) {
@@ -246,7 +244,7 @@ public class Classes2Scripts {
                                     subDir.mkdir();
                                 }
                                 Logger.getLogger(Classes2Scripts.class.getName())
-                                        .log(Level.INFO, "\tClass name: {0}", new String[]{className});
+                                        .log(Level.FINE, "\tClass name: {0}", new String[]{className});
                                 File resultFile = new File(subDir, FileNameSupport.getFileName(jsConstructor.name) + ".js"); //NOI18N
                                 FileUtils.writeString(resultFile, js, SettingsConstants.COMMON_ENCODING);
                                 depsPaths.add(getRelativePath(destDirectory, resultFile));
@@ -462,7 +460,11 @@ public class Classes2Scripts {
         StringBuilder sb = new StringBuilder();
         int i = ident;
         sb.append(getIndentStr(i));
-        sb.append("Object.defineProperty(").append("this, \"").append(property.apiName).append("\", {\n");
+        String apiPropName = property.name;
+        if (property.apiName != null && !property.apiName.isEmpty()) {
+            apiPropName = property.apiName;
+        }
+        sb.append("Object.defineProperty(").append("this, \"").append(apiPropName).append("\", {\n");
         sb.append(getIndentStr(++i));
         assert property.readable;
         sb.append("get: function() {\n");
@@ -495,7 +497,7 @@ public class Classes2Scripts {
         sb.append("});\n");
         sb.append(getIndentStr(i)).append("if(!P.").append(namespace).append("){\n");
         sb.append(getPropertyJsDoc(namespace, property, ++i)).append("\n");
-        sb.append(getIndentStr(i)).append("P.").append(namespace).append(".prototype.").append(property.apiName).append(" = ").append(getDefaultLiteralOfType(property.typeName)).append(";\n");
+        sb.append(getIndentStr(i)).append("P.").append(namespace).append(".prototype.").append(apiPropName).append(" = ").append(getDefaultLiteralOfType(property.typeName)).append(";\n");
         sb.append(getIndentStr(--i)).append("}");
         return sb.toString();
     }

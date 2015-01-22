@@ -43,9 +43,6 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
-import java.awt.*;
-import java.lang.ref.Reference;
-import java.lang.ref.SoftReference;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -61,7 +58,7 @@ public class BeanSupport {
     public static final Object NO_VALUE = null;
     // -----------------------------------------------------------------------------
     // Private variables
-    private static Map<Class<?>, Object> instancesCache = new HashMap<>(30);
+    private static final Map<Class<?>, Object> instancesCache = new HashMap<>(30);
 
     // -----------------------------------------------------------------------------
     // Public methods
@@ -101,19 +98,6 @@ public class BeanSupport {
     }
 
     /**
-     * Utility method that obtains icon for a bean class. (This method is
-     * currently used only for obtaining default icons for AWT components. Other
-     * icons should be provided by BeanInfo.)
-     *
-     * @param beanClass class of the bean
-     * @param iconType not used
-     * @return icon for the bean class
-     */
-    public static Image getBeanIcon(Class<?> beanClass, int iconType) {
-        return getIconForDefault(beanClass);
-    }
-
-    /**
      * A utility method that returns a class of event adapter for specified
      * listener. It works only on known listeners from java.awt.event. Null is
      * returned for unknown listeners.
@@ -140,62 +124,5 @@ public class BeanSupport {
         } else {
             return null; // not found
         }
-    }
-    // -----------------------------------------------------------------------------
-    // Private methods
-    static Reference<Map<String, Object>> imageCache;
-
-    private static synchronized Image getIconForDefault(Class<?> klass) {
-        Map<String, Object> icons;
-        if ((imageCache == null) || ((icons = imageCache.get()) == null)) {
-            icons = createImageCache();
-            imageCache = new SoftReference<>(icons);
-        }
-
-        String name = klass.getName();
-        Object img = icons.get(name);
-
-        if (img == null) {
-            return null;
-        }
-
-        if (img instanceof Image) {
-            return (Image) img;
-        } else {
-            Image image = java.awt.Toolkit.getDefaultToolkit().createImage(
-                    BeanSupport.class.getResource((String) img));
-            icons.put(name, image);
-            return image;
-        }
-    }
-
-    private static Map<String, Object> createImageCache() {
-        Map<String, Object> map = new HashMap<>();
-
-        map.put("java.awt.Label", "/com/bearsoft/org/netbeans/modules/form/beaninfo/awt/label.gif"); // NOI18N
-        map.put("java.awt.Button", "/com/bearsoft/org/netbeans/modules/form/beaninfo/awt/button.gif"); // NOI18N
-        map.put("java.awt.TextField", "/com/bearsoft/org/netbeans/modules/form/beaninfo/awt/textfield.gif"); // NOI18N
-        map.put("java.awt.TextArea", "/com/bearsoft/org/netbeans/modules/form/beaninfo/awt/textarea.gif"); // NOI18N
-        map.put("java.awt.Checkbox", "/com/bearsoft/org/netbeans/modules/form/beaninfo/awt/checkbox.gif"); // NOI18N
-        map.put("java.awt.Choice", "/com/bearsoft/org/netbeans/modules/form/beaninfo/awt/choice.gif"); // NOI18N
-        map.put("java.awt.List", "/com/bearsoft/org/netbeans/modules/form/beaninfo/awt/list.gif"); // NOI18N
-        map.put("java.awt.Scrollbar", "/com/bearsoft/org/netbeans/modules/form/beaninfo/awt/scrollbar.gif"); // NOI18N
-        map.put("java.awt.ScrollPane", "v/org/netbeans/modules/form/beaninfo/awt/scrollpane.gif"); // NOI18N
-        map.put("java.awt.Panel", "/com/bearsoft/org/netbeans/modules/form/beaninfo/awt/panel.gif"); // NOI18N
-        map.put("java.awt.Canvas", "/com/bearsoft/org/netbeans/modules/form/beaninfo/awt/canvas.gif"); // NOI18N
-        map.put("java.awt.MenuBar", "/com/bearsoft/org/netbeans/modules/form/beaninfo/awt/menubar.gif"); // NOI18N
-        map.put("java.awt.PopupMenu", "/com/bearsoft/org/netbeans/modules/form/beaninfo/awt/popupmenu.gif"); // NOI18N
-        map.put("java.awt.Menu", "/com/bearsoft/org/netbeans/modules/form/resources/menu.gif"); // NOI18N
-        map.put("java.awt.MenuItem", "/com/bearsoft/org/netbeans/modules/form/resources/menuItem.gif"); // NOI18N
-        map.put("java.awt.CheckboxMenuItem", "/com/bearsoft/org/netbeans/modules/form/resources/menuItemCheckbox.gif"); // NOI18N
-        map.put("com.bearsoft.org.netbeans.modules.form.Separator", "/com/bearsoft/org/netbeans/modules/form/resources/menuSeparator.gif"); // NOI18N
-
-        map.put("java.applet.Applet", "/com/bearsoft/org/netbeans/modules/form/resources/palette/applet.gif"); // NOI18N
-        map.put("java.awt.Dialog", "/com/bearsoft/org/netbeans/modules/form/resources/palette/dialog_16.png"); // NOI18N
-        map.put("java.awt.Frame", "/com/bearsoft/org/netbeans/modules/form/resources/palette/frame_16.png"); // NOI18N
-
-        map.put("javax.swing.JApplet", "/com/bearsoft/org/netbeans/modules/form/resources/palette/applet.gif"); // NOI18N
-
-        return map;
     }
 }

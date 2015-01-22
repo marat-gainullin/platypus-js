@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.components.PasswordField");
+    var javaClass = Java.type("com.eas.client.forms.components.PasswordField");
     javaClass.setPublisher(function(aDelegate) {
         return new P.PasswordField(null, aDelegate);
     });
@@ -58,20 +58,6 @@
              */
             P.PasswordField.prototype.onMouseDragged = {};
         }
-        Object.defineProperty(this, "parent", {
-            get: function() {
-                var value = delegate.parent;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.PasswordField){
-            /**
-             * Gets the parent of this component.
-             * @property parent
-             * @memberOf PasswordField
-             */
-            P.PasswordField.prototype.parent = {};
-        }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
                 var value = delegate.onMouseReleased;
@@ -105,6 +91,23 @@
              * @memberOf PasswordField
              */
             P.PasswordField.prototype.onFocusLost = {};
+        }
+        Object.defineProperty(this, "onValueChange", {
+            get: function() {
+                var value = delegate.onValueChange;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onValueChange = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.PasswordField){
+            /**
+             * Value change handler.
+             * @property onValueChange
+             * @memberOf PasswordField
+             */
+            P.PasswordField.prototype.onValueChange = {};
         }
         Object.defineProperty(this, "emptyText", {
             get: function() {
@@ -161,6 +164,9 @@
             get: function() {
                 var value = delegate.error;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.error = P.boxAsJava(aValue);
             }
         });
         if(!P.PasswordField){
@@ -256,6 +262,20 @@
              * @memberOf PasswordField
              */
             P.PasswordField.prototype.onComponentResized = {};
+        }
+        Object.defineProperty(this, "parent", {
+            get: function() {
+                var value = delegate.parentWidget;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.PasswordField){
+            /**
+             * Parent container of this widget.
+             * @property parentWidget
+             * @memberOf PasswordField
+             */
+            P.PasswordField.prototype.parent = {};
         }
         Object.defineProperty(this, "text", {
             get: function() {
@@ -458,23 +478,6 @@
              */
             P.PasswordField.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.PasswordField){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf PasswordField
-             */
-            P.PasswordField.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -491,6 +494,23 @@
              * @memberOf PasswordField
              */
             P.PasswordField.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.PasswordField){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf PasswordField
+             */
+            P.PasswordField.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

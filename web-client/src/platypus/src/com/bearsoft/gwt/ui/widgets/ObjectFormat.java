@@ -108,20 +108,14 @@ public class ObjectFormat {
 		super();
 	}
 
-	public ObjectFormat(int aType, String aPattern) throws ParseException {
+	public ObjectFormat(int aType) throws ParseException {
 		super();
-		setFormatType(aType, aPattern);
+		setValueType(aType);
 	}
 
-	public void setFormatType(int aType, String aPattern) throws ParseException {
+	public void setValueType(int aType) throws ParseException {
 		type = aType;
-		pattern = aPattern;
 		constructFormat();
-	}
-
-	public ObjectFormat(Object aValue) throws ParseException {
-		super();
-		setFormatTypeByValue(aValue);
 	}
 
 	public void setFormatTypeByValue(Object aValue) throws ParseException {
@@ -161,10 +155,11 @@ public class ObjectFormat {
 			} else {
 				assert false;
 			}
-	} else if (type == TEXT) {
-		bypassFormat = new BypassFormat();
+		} else if (type == TEXT) {
+			bypassFormat = new BypassFormat();
+		}
 	}
-	}
+
 	public boolean isEmpty() {
 		return numberFormat == null && dateFormat == null && maskFormat == null && regExpFormat == null && bypassFormat == null;
 	}

@@ -44,8 +44,8 @@ public class SortingTest extends RowsetBaseTest {
     protected void checkPkSequence(long[] aPks, Rowset aRowset) throws InvalidCursorPositionException, InvalidColIndexException {
         assertEquals(aPks.length, aRowset.size());
         for (int i = 1; i <= aRowset.size(); i++) {
-            aRowset.absolute(i);
-            assertTrue(Row.smartEquals(aRowset.getObject(1), aPks[i - 1]));
+            aRowset.setCursorPos(i);
+            assertTrue(Row.smartEquals(aRowset.getCurrentRow().getColumnObject(1), aPks[i - 1]));
         }
     }
 

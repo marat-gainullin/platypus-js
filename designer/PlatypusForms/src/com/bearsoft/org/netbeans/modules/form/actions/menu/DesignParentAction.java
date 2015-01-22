@@ -157,14 +157,14 @@ public class DesignParentAction extends NodeAction {
                 boolean topCompIncluded = false;
                 RADComponent<?> parent = comp.getParentComponent();
                 while (parent != null) {
-                    list.add(new DesignParentMenuItem(parent, parent == topComp, getMenuItemListener()));
+                    list.add(new DesignParentMenuItem(parent, getMenuItemListener()));
                     if (parent == topComp) {
                         topCompIncluded = true;
                     }
                     parent = parent.getParentComponent();
                 }
                 if (!topCompIncluded && topComp != null) {
-                    list.add(new DesignParentMenuItem(topComp, true, getMenuItemListener()));
+                    list.add(new DesignParentMenuItem(topComp, getMenuItemListener()));
                 }
                 for (ListIterator<JMenuItem> it = list.listIterator(list.size()); it.hasPrevious();) {
                     menu.add(it.previous());
@@ -179,20 +179,15 @@ public class DesignParentAction extends NodeAction {
         }
         return menuItemListener;
     }
-/*
-    private static PlatypusFormLayoutView getDesigner(RADComponent<?> comp) {
-        return FormEditor.getFormDesigner(comp.getFormModel());
-    }
-*/
+
     private static class DesignParentMenuItem extends JMenuItem {
 
-        private RADComponent<?> radc;
+        private final RADComponent<?> radc;
 
-        public DesignParentMenuItem(RADComponent<?> c, boolean top, ActionListener l) {
+        public DesignParentMenuItem(RADComponent<?> c, ActionListener l) {
             super();
             radc = c;
-            setText(top ? NbBundle.getMessage(DesignParentAction.class, "ACT_DesignParentTopMenuItemName") // NOI18N
-                    : c.getName());
+            setText(c.getName());
             addActionListener(l);
             setEnabled(radc != null && radc != radc.getFormModel().getTopDesignComponent());
         }

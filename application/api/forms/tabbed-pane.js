@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.containers.TabbedPane");
+    var javaClass = Java.type("com.eas.client.forms.containers.TabbedPane");
     javaClass.setPublisher(function(aDelegate) {
         return new P.TabbedPane(aDelegate);
     });
@@ -56,20 +56,6 @@
              * @memberOf TabbedPane
              */
             P.TabbedPane.prototype.onMouseDragged = {};
-        }
-        Object.defineProperty(this, "parent", {
-            get: function() {
-                var value = delegate.parent;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.TabbedPane){
-            /**
-             * Gets the parent of this component.
-             * @property parent
-             * @memberOf TabbedPane
-             */
-            P.TabbedPane.prototype.parent = {};
         }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
@@ -143,6 +129,9 @@
             get: function() {
                 var value = delegate.error;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.error = P.boxAsJava(aValue);
             }
         });
         if(!P.TabbedPane){
@@ -272,6 +261,20 @@
              * @memberOf TabbedPane
              */
             P.TabbedPane.prototype.onComponentResized = {};
+        }
+        Object.defineProperty(this, "parent", {
+            get: function() {
+                var value = delegate.parentWidget;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.TabbedPane){
+            /**
+             * Parent container of this widget.
+             * @property parentWidget
+             * @memberOf TabbedPane
+             */
+            P.TabbedPane.prototype.parent = {};
         }
         Object.defineProperty(this, "onMouseEntered", {
             get: function() {
@@ -471,23 +474,6 @@
              */
             P.TabbedPane.prototype.count = 0;
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.TabbedPane){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf TabbedPane
-             */
-            P.TabbedPane.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -504,6 +490,23 @@
              * @memberOf TabbedPane
              */
             P.TabbedPane.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.TabbedPane){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf TabbedPane
+             */
+            P.TabbedPane.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -573,23 +576,6 @@
              */
             P.TabbedPane.prototype.selectedIndex = 0;
         }
-        Object.defineProperty(this, "onItemSelected", {
-            get: function() {
-                var value = delegate.onItemSelected;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onItemSelected = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.TabbedPane){
-            /**
-             * Event that is fired when one of the components is selected in this tabbed pane.
-             * @property onItemSelected
-             * @memberOf TabbedPane
-             */
-            P.TabbedPane.prototype.onItemSelected = {};
-        }
         Object.defineProperty(this, "onComponentRemoved", {
             get: function() {
                 var value = delegate.onComponentRemoved;
@@ -606,6 +592,23 @@
              * @memberOf TabbedPane
              */
             P.TabbedPane.prototype.onComponentRemoved = {};
+        }
+        Object.defineProperty(this, "onItemSelected", {
+            get: function() {
+                var value = delegate.onItemSelected;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onItemSelected = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.TabbedPane){
+            /**
+             * Event that is fired when one of the components is selected in this tabbed pane.
+             * @property onItemSelected
+             * @memberOf TabbedPane
+             */
+            P.TabbedPane.prototype.onItemSelected = {};
         }
         Object.defineProperty(this, "component", {
             get: function() {
@@ -791,19 +794,6 @@
         };
 
         /**
-         * Gets the container's n-th component.
-         * @param index the component's index in the container
-         * @return the child component
-         * @method child
-         * @memberOf TabbedPane
-         */
-        P.TabbedPane.prototype.child = function(index) {
-            var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(index));
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Removes the specified component from this container.
          * @param component the component to remove
          * @method remove
@@ -823,6 +813,19 @@
         P.TabbedPane.prototype.clear = function() {
             var delegate = this.unwrap();
             var value = delegate.clear();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Gets the container's n-th component.
+         * @param index the component's index in the container
+         * @return the child component
+         * @method child
+         * @memberOf TabbedPane
+         */
+        P.TabbedPane.prototype.child = function(index) {
+            var delegate = this.unwrap();
+            var value = delegate.child(P.boxAsJava(index));
             return P.boxAsJs(value);
         };
 

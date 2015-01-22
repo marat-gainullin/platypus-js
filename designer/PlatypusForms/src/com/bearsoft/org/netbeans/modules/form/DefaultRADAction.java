@@ -113,7 +113,7 @@ public class DefaultRADAction extends CookieAction {
         if (activatedNodes != null && activatedNodes.length == 1) {
             RADComponentCookie radCookie = activatedNodes[0].getLookup().lookup(RADComponentCookie.class);
             if (radCookie != null) {
-                Class<?> scriptClass = FormUtils.getPlatypusControlClass(radCookie.getRADComponent().getBeanClass());
+                Class<?> scriptClass = radCookie.getRADComponent().getBeanClass();
                 return JsCodeGenerator.getInstance().hasDefaultEventHandler(scriptClass);
             }
         }
@@ -130,9 +130,9 @@ public class DefaultRADAction extends CookieAction {
         if (activatedNodes != null && activatedNodes.length == 1) {
             RADComponentCookie radCookie = activatedNodes[0].getLookup().lookup(RADComponentCookie.class);
             if (radCookie != null) {
-                Class<?> scritpClass = FormUtils.getPlatypusControlClass(radCookie.getRADComponent().getBeanClass());
+                Class<?> scriptClass = radCookie.getRADComponent().getBeanClass();
                 PlatypusFormDataObject dataObject = radCookie.getRADComponent().getFormModel().getDataObject();
-                JsCodeGenerator.getInstance().generateEventHandler(radCookie.getRADComponent().getName(), scritpClass, dataObject);
+                JsCodeGenerator.getInstance().generateEventHandler(radCookie.getRADComponent().getName(), scriptClass, dataObject);
             }
         }
     }

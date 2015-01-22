@@ -24,6 +24,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Focusable;
+import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -64,16 +65,17 @@ public abstract class WidgetEditorCell<C> extends AbstractEditableCell<C, Widget
 
 	public void setEditor(Widget aEditor) {
 		editor = aEditor;
-		if (editor instanceof HasValue<?>) {
+		if (editor == null || ((editor instanceof HasValue<?>) && (editor instanceof HasText))) {
 			valueHost = (HasValue<C>) editor;
 		} else {
-			throw new IllegalArgumentException("Editor must implement interface HasValue<C>");
+			throw new IllegalArgumentException("Editor must implement interfaces HasValue<?> and HasText");
 		}
 		if (editor instanceof Focusable) {
 			focusHost = (Focusable) editor;
 			focusHost.setTabIndex(1);
 		}
-		editor.getElement().getStyle().setBorderWidth(0, Style.Unit.PX);
+		if (editor != null)
+			editor.getElement().getStyle().setBorderWidth(0, Style.Unit.PX);
 	}
 
 	protected static class UpdaterRef<C> {

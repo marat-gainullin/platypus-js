@@ -49,7 +49,6 @@ import java.beans.*;
 import java.lang.reflect.*;
 import java.util.Objects;
 import javax.swing.plaf.UIResource;
-import org.openide.ErrorManager;
 
 /**
  * Implementation of properties for (meta)components (class RADComponent).
@@ -57,16 +56,16 @@ import org.openide.ErrorManager;
  * provides read and write methods to get and set property values.
  *
  * @author Tomas Pavek
+ * @param <T>
  */
 public class RADProperty<T> extends FormProperty<T> {
 
-    private RADComponent<?> component;
-    private PropertyDescriptor desc;
+    private final RADComponent<?> component;
+    private final PropertyDescriptor desc;
     private T defaultValue;
 
     public RADProperty(RADComponent<?> aRadComp, PropertyDescriptor propdesc) throws IllegalAccessException, InvocationTargetException {
-        super(new FormPropertyContext.Component(aRadComp),
-                propdesc.getName(),
+        super(propdesc.getName(),
                 (Class<T>) propdesc.getPropertyType(),
                 propdesc.getDisplayName(),
                 propdesc.getShortDescription());
@@ -115,75 +114,15 @@ public class RADProperty<T> extends FormProperty<T> {
         }
 
         Object beanInstance = component.getBeanInstance();
-        try {
-            // invoke the setter method
-            T oldValue = getValue();
-            writeMethod.invoke(beanInstance, new Object[]{value});
-            setChanged(defaultValue != value);
-            propertyValueChanged(oldValue, value);
-        } catch (InvocationTargetException ex) {
-            // annotate exception
-            String message = FormUtils.getFormattedBundleString(
-                    "MSG_ERR_WRITING_TO_PROPERTY", // NOI18N
-                    new Object[]{getDisplayName()});
-
-            Throwable tex = ex.getTargetException();
-            if (tex instanceof IllegalArgumentException) {
-                ErrorManager.getDefault().annotate(
-                        tex, ErrorManager.WARNING, null,
-                        message, null, null);
-                // Issue 73627
-                if ("contentType".equals(getName()) && (beanInstance instanceof javax.swing.JTextPane)) { // NOI18N
-                    return;
-                }
-                throw (IllegalArgumentException) tex;
-            } else if (tex instanceof IllegalAccessException) {
-                ErrorManager.getDefault().annotate(
-                        tex, ErrorManager.WARNING, null,
-                        message, null, null);
-                throw (IllegalAccessException) tex;
-            } else if (value == null && tex instanceof NullPointerException) {
-                IllegalArgumentException iae = new IllegalArgumentException();
-                ErrorManager.getDefault().annotate(
-                        iae, ErrorManager.WARNING, null,
-                        message, null, null);
-                throw iae;
-            }
-
-            ErrorManager.getDefault().annotate(
-                    ex, ErrorManager.WARNING, null,
-                    message, null, null);
-
-            throw ex;
-        }
+        // invoke the setter method
+        T oldValue = getValue();
+        writeMethod.invoke(beanInstance, new Object[]{value});
+        propertyValueChanged(oldValue, value);
     }
 
     @Override
     public boolean supportsDefaultValue() {
         return true;
-    }
-
-    @Override
-    public boolean isDefaultValue() {
-        try {
-            Object currentValue = getValue();
-            if (currentValue instanceof Color || currentValue instanceof java.awt.Font || currentValue instanceof java.awt.Cursor) {
-                if (getComponent().getBeanInstance() instanceof Component) {
-                    RADVisualContainer<?> radContainer = getComponent().getParentComponent();
-                    if (radContainer != null) {
-                        RADProperty<?> parentProp = radContainer.getProperty(getName());
-                        if (parentProp != null) {
-                            if (currentValue instanceof UIResource || currentValue == parentProp.getValue()) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-            return Objects.deepEquals(currentValue, defaultValue);
-        } catch (IllegalAccessException | InvocationTargetException ex) {
-            return false;
-        }
     }
 
     @Override

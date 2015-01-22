@@ -4,73 +4,89 @@
  */
 package com.bearsoft.org.netbeans.modules.form.bound;
 
+import com.bearsoft.gui.grid.header.GridColumnsNode;
 import com.bearsoft.org.netbeans.modules.form.ComponentContainer;
 import com.bearsoft.org.netbeans.modules.form.RADComponent;
 import com.bearsoft.org.netbeans.modules.form.RADProperty;
 import com.bearsoft.org.netbeans.modules.form.RADVisualComponent;
-import com.bearsoft.org.netbeans.modules.form.editors.EnumEditor;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
-import com.eas.client.model.ModelElementRef;
+import com.eas.client.forms.components.model.ModelCheckBox;
+import com.eas.client.forms.components.model.ModelDate;
+import com.eas.client.forms.components.model.ModelSpin;
+import com.eas.client.forms.components.model.grid.ModelGrid;
+import com.eas.client.forms.components.model.grid.columns.ModelColumn;
+import com.eas.client.forms.components.model.grid.header.ModelGridColumn;
+import com.eas.client.forms.components.model.grid.header.ServiceGridColumn;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
-import com.eas.dbcontrols.DbControlDesignInfo;
-import com.eas.dbcontrols.DbControlPanel;
-import com.eas.dbcontrols.DbControlsUtils;
-import com.eas.dbcontrols.date.DbDate;
-import com.eas.dbcontrols.date.DbDateDesignInfo;
-import com.eas.dbcontrols.grid.DbGrid;
-import com.eas.dbcontrols.grid.DbGridColumn;
-import com.eas.dbcontrols.grid.DbGridRowsColumnsDesignInfo;
-import com.eas.dbcontrols.visitors.DbSwingFactory;
+import com.eas.designer.application.module.EntityJSObject;
 import com.eas.util.StringUtils;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.openide.util.Exceptions;
 
 /**
  *
  * @author mg
  */
-public class RADModelGrid extends RADVisualComponent<DbGrid> implements ComponentContainer {
-
-    public interface ModelGridListener extends ModelControlListener {
-
-        public Object onRender(Object evt);
-    }
+public class RADModelGrid extends RADVisualComponent<ModelGrid> implements ComponentContainer {
 
     protected List<RADModelGridColumn> columns = new ArrayList<>();
     protected boolean fireRawColumnsChanges = true;
 
-    public void fireRawColumnsChanged() {
+    private static void scanLeaves(List<ModelColumn> beanColumns, RADComponent<?>[] aColumns) {
+        for (RADComponent<?> designColumn : aColumns) {
+            if (!((RADModelGridColumn) designColumn).getBeanInstance().hasChildren()) {
+                beanColumns.add((ModelColumn) ((RADModelGridColumn) designColumn).getBeanInstance().getTableColumn());
+            } else {
+                scanLeaves(beanColumns, ((RADModelGridColumn) designColumn).getSubBeans());
+            }
+        }
+    }
+
+    @Override
+    protected void setBeanInstance(ModelGrid aBeanInstance) {
+        ModelGrid bean = super.getBeanInstance();
+        if (bean != null) {
+            bean.setData(null);
+        }
+        super.setBeanInstance(aBeanInstance);
+    }
+
+    public void resetBeanColumnsAndHeader() throws Exception {
         if (fireRawColumnsChanges) {
-            getBeanInstance().initializeDesign();
+            List<ModelColumn> beanColumns = new ArrayList<>();
+            scanLeaves(beanColumns, columns.toArray(new RADModelGridColumn[]{}));
+            getBeanInstance().setColumns(beanColumns.toArray(new ModelColumn[]{}));
+            List<GridColumnsNode> headerRoots = new ArrayList<>();
+            columns.stream().forEach((RADModelGridColumn aDesignColumn) -> {
+                headerRoots.add(aDesignColumn.getBeanInstance());
+            });
+            getBeanInstance().setHeader(headerRoots);
         }
     }
 
     @Override
-    public DbGrid cloneBeanInstance(Collection<RADProperty<?>> relativeProperties) {
-        DbGrid clonedGrid = super.cloneBeanInstance(relativeProperties);
-        clonedGrid.setHeader(getBeanInstance().getHeader());
-        clonedGrid.initializeDesign();
-        return clonedGrid;
-    }
-
-    @Override
-    protected RADProperty<?> createBeanProperty(PropertyDescriptor desc, Object[] propAccessClsf, Object[] propParentChildDepClsf) {
-        if (desc != null && "rowsHeaderType".equals(desc.getName())) {
-            desc.setValue(EnumEditor.ENUMERATION_VALUES_KEY, new Object[]{
-                        "Usual", DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_USUAL, "DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_USUAL",
-                        "CheckBoxes", DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_CHECKBOX, "DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_CHECKBOX",
-                        "RadioButtons", DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_RADIOBUTTON, "DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_RADIOBUTTON",
-                        "None", DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_NONE, "DbGridRowsColumnsDesignInfo.ROWS_HEADER_TYPE_NONE"
-                    });
+    public ModelGrid cloneBeanInstance(Collection<RADProperty<?>> relativeProperties) {
+        try {
+            ModelGrid clonedGrid = super.cloneBeanInstance(relativeProperties);
+            ModelColumn[] targetColumns = new ModelColumn[getBeanInstance().getColumnModel().getColumnCount()];
+            for (int i = 0; i < targetColumns.length; i++) {
+                ModelColumn sourceCol = (ModelColumn) getBeanInstance().getColumnModel().getColumn(i);
+                targetColumns[i] = sourceCol;
+            }
+            clonedGrid.setColumns(targetColumns);
+            clonedGrid.setHeader(getBeanInstance().getHeader());
+            clonedGrid.setData(getBeanInstance().getData());
+            return clonedGrid;
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+            return null;
         }
-        RADProperty<?> prop = super.createBeanProperty(desc, propAccessClsf, propParentChildDepClsf);
-        return prop;
     }
 
     @Override
@@ -79,56 +95,69 @@ public class RADModelGrid extends RADVisualComponent<DbGrid> implements Componen
     }
 
     @Override
+    public int getSubBeansCount() {
+        return columns.size();
+    }
+
+    @Override
     public void initSubComponents(RADComponent<?>[] initComponents) {
-        columns.clear();
-        getBeanInstance().getHeader().clear();
-        for (int i = 0; i < initComponents.length; i++) {
-            if (initComponents[i] instanceof RADModelGridColumn) {
-                RADModelGridColumn radColumn = (RADModelGridColumn) initComponents[i];
-                radColumn.setParent(this);
-                columns.add(radColumn);
-                getBeanInstance().getHeader().add(radColumn.getBeanInstance());
+        try {
+            columns.clear();
+            getBeanInstance().getHeader().clear();
+            for (int i = 0; i < initComponents.length; i++) {
+                if (initComponents[i] instanceof RADModelGridColumn) {
+                    RADModelGridColumn radColumn = (RADModelGridColumn) initComponents[i];
+                    radColumn.setParent(this);
+                    columns.add(radColumn);
+                }
             }
+            resetBeanColumnsAndHeader();
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
         }
-        fireRawColumnsChanged();
     }
 
     @Override
     public void reorderSubComponents(int[] perm) {
-        DbGrid modelGrid = getBeanInstance();
-        RADModelGridColumn[] oldColumns = columns.toArray(new RADModelGridColumn[]{});
-        DbGridColumn[] oldRawColumns = modelGrid.getHeader().toArray(new DbGridColumn[]{});
-        assert perm.length == oldColumns.length;
-        assert perm.length == oldRawColumns.length;
-        for (int i = 0; i < columns.size(); i++) {
-            columns.set(perm[i], oldColumns[i]);
+        try {
+            ModelGrid modelGrid = getBeanInstance();
+            RADModelGridColumn[] oldColumns = columns.toArray(new RADModelGridColumn[]{});
+            GridColumnsNode[] oldRawColumns = modelGrid.getHeader().toArray(new GridColumnsNode[]{});
+            assert perm.length == oldColumns.length;
+            assert perm.length == oldRawColumns.length;
+            for (int i = 0; i < columns.size(); i++) {
+                columns.set(perm[i], oldColumns[i]);
+            }
+            resetBeanColumnsAndHeader();
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
         }
-        for (int i = 0; i < modelGrid.getHeader().size(); i++) {
-            modelGrid.getHeader().set(perm[i], oldRawColumns[i]);
-        }
-        fireRawColumnsChanged();
     }
 
     @Override
     public void add(RADComponent<?> comp) {
-        if (comp instanceof RADModelGridColumn) {
-            RADModelGridColumn radColumn = (RADModelGridColumn) comp;
-            columns.add(radColumn);
-            if (radColumn.isInModel()) {
-                getBeanInstance().getHeader().add(radColumn.getBeanInstance());
+        try {
+            if (comp instanceof RADModelGridColumn) {
+                RADModelGridColumn radColumn = (RADModelGridColumn) comp;
+                columns.add(radColumn);
             }
+            resetBeanColumnsAndHeader();
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
         }
-        fireRawColumnsChanged();
     }
 
     @Override
     public void remove(RADComponent<?> comp) {
-        if (comp instanceof RADModelGridColumn) {
-            RADModelGridColumn radColumn = (RADModelGridColumn) comp;
-            columns.remove(radColumn);
-            getBeanInstance().getHeader().remove(radColumn.getBeanInstance());
+        try {
+            if (comp instanceof RADModelGridColumn) {
+                RADModelGridColumn radColumn = (RADModelGridColumn) comp;
+                columns.remove(radColumn);
+            }
+            resetBeanColumnsAndHeader();
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
         }
-        fireRawColumnsChanged();
     }
 
     @Override
@@ -144,27 +173,41 @@ public class RADModelGrid extends RADVisualComponent<DbGrid> implements Componen
         fireRawColumnsChanges = aValue;
     }
 
+    @Override
+    protected RADProperty<?> createCheckedBeanProperty(PropertyDescriptor desc) throws InvocationTargetException, IllegalAccessException {
+        if ("parentField".equals(desc.getName()) || "childrenField".equals(desc.getName())) {
+            return new EntityJSObjectFieldProperty(this, desc, "");
+        } else {
+            return super.createCheckedBeanProperty(desc);
+        }
+    }
+
     public void fillColumns() throws Exception {
-        ApplicationDbModel model = (ApplicationDbModel)getBeanInstance().getModel();
-        if (model != null) {
-            if (getBeanInstance().getRowsDatasource() != null
-                    && getBeanInstance().getRowsDatasource().getEntityId() != null) {
-                Long rowsEntityId = getBeanInstance().getRowsDatasource().getEntityId();
-                ApplicationDbEntity rowsEntity = model.getEntityById(rowsEntityId);
+        EntityJSObject jsEntity = (EntityJSObject) getBeanInstance().getData();
+        if (jsEntity != null) {
+            ApplicationDbModel model = jsEntity.getEntity().getModel();
+            if (model != null) {
+                ApplicationDbEntity rowsEntity = jsEntity.getEntity();
                 if (rowsEntity != null && rowsEntity.getFields() != null && rowsEntity.getFields().getFieldsCount() > 0) {
                     Fields fields = rowsEntity.getFields();
                     int rowsetColumnsCount = fields.getFieldsCount();
                     fireRawColumnsChanges = false;
                     try {
+                        RADModelGridColumn serviceRadColumn = new RADModelGridColumn();
+                        serviceRadColumn.initialize(getFormModel());
+                        ServiceGridColumn serviceColumn = new ServiceGridColumn();
+                        serviceRadColumn.setBeanInstance(serviceColumn);
+                        serviceRadColumn.setStoredName(getFormModel().findFreeComponentName("colService"));
+                        getFormModel().addComponent(serviceRadColumn, this, true);
                         for (int i = 1; i <= rowsetColumnsCount; i++) {
                             Field columnField = fields.get(i);
                             RADModelGridColumn radColumn = new RADModelGridColumn();
                             radColumn.initialize(getFormModel());
-                            radColumn.initInstance(DbGridColumn.class);
+                            ModelGridColumn column = new ModelGridColumn();
+                            radColumn.setBeanInstance(column);
                             String colBaseName = (columnField.getName() != null && !columnField.getName().isEmpty()) ? columnField.getName() : "Column";
-                            colBaseName = "col"+StringUtils.capitalize(colBaseName);
+                            colBaseName = "col" + StringUtils.capitalize(colBaseName);
                             radColumn.setStoredName(getFormModel().findFreeComponentName(colBaseName));
-                            DbGridColumn column = radColumn.getBeanInstance();
 
                             int lwidth = 50;
                             if (lwidth >= column.getWidth()) {
@@ -174,38 +217,47 @@ public class RADModelGrid extends RADVisualComponent<DbGrid> implements Componen
                             if (description != null && !description.isEmpty()) {
                                 column.setTitle(description);
                             }
-                            ModelElementRef fieldRef = new ModelElementRef();
-                            fieldRef.setEntityId(rowsEntity.getEntityId());
-                            fieldRef.setFieldName(columnField.getName());
-                            column.setDatamodelElement(fieldRef);
-                            Class<?>[] compatibleControlsClasses = DbControlsUtils.getCompatibleControls(columnField.getTypeInfo().getSqlType());
-                            if (compatibleControlsClasses != null && compatibleControlsClasses.length > 0) {
-                                Class<?> lControlClass = compatibleControlsClasses[0];
-                                if (lControlClass != null) {
-                                    Class<?> infoClass = DbControlsUtils.getDesignInfoClass(lControlClass);
-                                    if (infoClass != null) {
-                                        try {
-                                            DbControlDesignInfo cdi = (DbControlDesignInfo) infoClass.newInstance();
-                                            cdi.setDatamodelElement(fieldRef);
-                                            if (cdi instanceof DbDateDesignInfo) {
-                                                DbDateDesignInfo dateDi = (DbDateDesignInfo) cdi;
-                                                dateDi.setDateFormat(DbDate.DD_MM_YYYY_HH_MM_SS);
-                                            }
-                                            DbSwingFactory factory = new DbSwingFactory();
-                                            cdi.accept(factory);
-                                            assert factory.getComp() instanceof DbControlPanel;
-                                            radColumn.getViewControl().setInstance((DbControlPanel) factory.getComp());
-                                        } catch (InstantiationException | IllegalAccessException ex) {
-                                            Logger.getLogger(RADModelGrid.class.getName()).log(Level.SEVERE, null, ex);
-                                        }
-                                    }
+                            column.setField(columnField.getName());
+                            switch (columnField.getTypeInfo().getSqlType()) {
+                                // Numbers
+                                case java.sql.Types.NUMERIC:
+                                case java.sql.Types.BIGINT:
+                                case java.sql.Types.DECIMAL:
+                                case java.sql.Types.DOUBLE:
+                                case java.sql.Types.FLOAT:
+                                case java.sql.Types.INTEGER:
+                                case java.sql.Types.REAL:
+                                case java.sql.Types.TINYINT:
+                                case java.sql.Types.SMALLINT: {
+                                    ModelSpin editor = new ModelSpin();
+                                    editor.setMin(-Double.MAX_VALUE);
+                                    editor.setMax(Double.MAX_VALUE);
+                                    radColumn.getViewControl().setInstance(editor);
                                 }
+                                break;
+                                // Logical
+                                case java.sql.Types.BOOLEAN:
+                                case java.sql.Types.BIT:
+                                    radColumn.getViewControl().setInstance(new ModelCheckBox());
+                                    break;
+                                // Date and time
+                                case java.sql.Types.DATE:
+                                case java.sql.Types.TIME:
+                                case java.sql.Types.TIMESTAMP: {
+                                    ModelDate editor = new ModelDate();
+                                    editor.setDateFormat("dd.MM.yyyy HH:mm:ss.SSS");
+                                    radColumn.getViewControl().setInstance(editor);
+                                }
+                                break;
+                                default:
+                                    // ModelFormattedField already installed in the column's view
+                                    break;
                             }
                             getFormModel().addComponent(radColumn, this, true);
                         }
                     } finally {
                         fireRawColumnsChanges = true;
-                        fireRawColumnsChanged();
+                        resetBeanColumnsAndHeader();
                     }
                 }
             }

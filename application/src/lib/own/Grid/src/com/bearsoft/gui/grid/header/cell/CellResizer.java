@@ -4,10 +4,11 @@
  */
 package com.bearsoft.gui.grid.header.cell;
 
-import com.bearsoft.gui.grid.header.GridColumnsGroup;
+import com.bearsoft.gui.grid.header.GridColumnsNode;
 import com.bearsoft.gui.grid.header.MultiLevelHeader;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -15,6 +16,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.table.TableColumn;
 
 /**
  *
@@ -53,18 +55,43 @@ public class CellResizer extends MouseAdapter {
             cell.getHeader().setPressed4ResizeColGroup(cell.getColGroup());
         } else if (pt.x >= d.width - MultiLevelHeader.PICK_MARGIN_SIZE - 1) {
             rightPt = pt;
-            cell.getHeader().setResizingColGroup(cell.getColGroup());
-            cell.getHeader().setPressed4ResizeColGroup(cell.getColGroup());
+            GridColumnsNode resizingNode = cell.getColGroup();
+            cell.getHeader().setResizingColGroup(resizingNode);
+            cell.getHeader().setPressed4ResizeColGroup(resizingNode);
+            GridColumnsNode resizingLeaf = null;
+            List<GridColumnsNode> leaves = new ArrayList<>();
+            MultiLevelHeader.achieveLeaves(cell.getColGroup(), leaves);
+            assert !leaves.isEmpty();
+            for (int i = leaves.size() - 1; i >= 0; i--) {
+                GridColumnsNode leaf = leaves.get(i);
+                if (leaf.getTableColumn().getResizable()) {
+                    resizingLeaf = leaf;
+                    break;
+                }
+            }
+            if (resizingLeaf != null) {
+                header.getTable().getTableHeader().setResizingColumn(resizingLeaf.getTableColumn());
+                resizingColumnMaxWidth = resizingLeaf.getTableColumn().getMaxWidth();
+            }
+
         } else {
             leftPt = null;
             rightPt = null;
         }
     }
+    private int resizingColumnMaxWidth;
 
     @Override
     public void mouseReleased(MouseEvent e) {
         leftPt = null;
         rightPt = null;
+        TableColumn resizingColumn = header.getTable().getTableHeader().getResizingColumn();
+        if (resizingColumn != null) {
+            EventQueue.invokeLater(() -> {
+                //resizingColumn.setMaxWidth(resizingColumnMaxWidth);
+                header.getTable().getTableHeader().setResizingColumn(null);
+            });
+        }
         cell.getHeader().setResizingColGroup(null);
         cell.getHeader().setPressed4ResizeColGroup(null);
     }
@@ -72,24 +99,29 @@ public class CellResizer extends MouseAdapter {
     @Override
     public void mouseDragged(MouseEvent e) {
         if (rightPt != null) {
-            Point newRightPt = e.getPoint();
-            int dWidth = newRightPt.x - rightPt.x;
-            List<GridColumnsGroup> leaves = new ArrayList<>();
-            MultiLevelHeader.achieveLeaves(cell.getColGroup(), leaves);
-            assert !leaves.isEmpty();
-            if (Math.abs(dWidth) > leaves.size()) {
-                Dimension oldSize = cell.getSize();
-                Dimension newSize = cell.getSize();
-                newSize.width += dWidth;
-                if (newSize.width >= MultiLevelHeader.PICK_MARGIN_SIZE * 2
-                        && (HeaderCell.isValidCellBoundary(e.getComponent()) || dWidth > 0)) {
-                    cell.invalidate();
-                    header.setPreferredWidth2LeafColGroups(leaves, oldSize.width, newSize.width);
-                    if (oldSize.width != cell.getSize().width) {
-                        rightPt = newRightPt;
-                        int dX = cell.getSize().width - newSize.width;
-                        rightPt.x += dX;
+            TableColumn resizingColumn = header.getTable().getTableHeader().getResizingColumn();
+            if (resizingColumn != null && resizingColumn.getResizable()) {
+                Point newRightPt = e.getPoint();
+                int dWidth = newRightPt.x - rightPt.x;
+                List<GridColumnsNode> leaves = new ArrayList<>();
+                MultiLevelHeader.achieveLeaves(cell.getColGroup(), leaves);
+                assert !leaves.isEmpty();
+                if (Math.abs(dWidth) > leaves.size()) {
+                    int newWidth = newRightPt.x;
+                    for (int i = leaves.size() - 1; i >= 0; i--) {
+                        GridColumnsNode leaf = leaves.get(i);
+                        if (leaf.getTableColumn() != resizingColumn) {
+                            newWidth -= leaf.getTableColumn().getWidth();
+                        }
                     }
+                    if (newWidth < 0) {
+                        newWidth = 0;
+                    }
+                    resizingColumn.setWidth(newWidth);
+                    resizingColumn.setPreferredWidth(newWidth);
+                    resizingColumn.setMaxWidth(newWidth);
+                    header.invalidate();
+                    header.repaint();
                 }
             }
         } else if (leftPt != null) {

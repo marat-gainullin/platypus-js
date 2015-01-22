@@ -20,7 +20,8 @@ public final class NewApplicationElementVisualNamePanel extends JPanel implement
     protected NewApplicationElementWizardNamePanel panel;
     protected FileObject targetFolder;
 
-    /** Creates new form NewApplicationElementVisualPanel1 */
+    /** Creates new form NewApplicationElementVisualPanel1
+     * @param aWizardStep */
     public NewApplicationElementVisualNamePanel(NewApplicationElementWizardNamePanel aWizardStep) {
         initComponents();
         panel = aWizardStep;
@@ -30,6 +31,12 @@ public final class NewApplicationElementVisualNamePanel extends JPanel implement
 
     public String getApplicationElementName() {
         return txtApplicationElementName.getText();
+    }
+
+    @Override
+    public void addNotify() {
+        super.addNotify();
+        txtApplicationElementName.requestFocus();
     }
 
     public boolean valid(WizardDescriptor wd) {

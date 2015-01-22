@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.containers.FlowPane");
+    var javaClass = Java.type("com.eas.client.forms.containers.FlowPane");
     javaClass.setPublisher(function(aDelegate) {
         return new P.FlowPane(null, null, aDelegate);
     });
@@ -59,20 +59,6 @@
              * @memberOf FlowPane
              */
             P.FlowPane.prototype.onMouseDragged = {};
-        }
-        Object.defineProperty(this, "parent", {
-            get: function() {
-                var value = delegate.parent;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.FlowPane){
-            /**
-             * Gets the parent of this component.
-             * @property parent
-             * @memberOf FlowPane
-             */
-            P.FlowPane.prototype.parent = {};
         }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
@@ -146,6 +132,9 @@
             get: function() {
                 var value = delegate.error;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.error = P.boxAsJava(aValue);
             }
         });
         if(!P.FlowPane){
@@ -275,6 +264,20 @@
              * @memberOf FlowPane
              */
             P.FlowPane.prototype.onComponentResized = {};
+        }
+        Object.defineProperty(this, "parent", {
+            get: function() {
+                var value = delegate.parentWidget;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.FlowPane){
+            /**
+             * Parent container of this widget.
+             * @property parentWidget
+             * @memberOf FlowPane
+             */
+            P.FlowPane.prototype.parent = {};
         }
         Object.defineProperty(this, "onMouseEntered", {
             get: function() {
@@ -457,23 +460,6 @@
              */
             P.FlowPane.prototype.count = 0;
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.FlowPane){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf FlowPane
-             */
-            P.FlowPane.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -490,6 +476,23 @@
              * @memberOf FlowPane
              */
             P.FlowPane.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.FlowPane){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf FlowPane
+             */
+            P.FlowPane.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -741,19 +744,6 @@
         };
 
         /**
-         * Gets the container's n-th component.
-         * @param index the component's index in the container
-         * @return the child component
-         * @method child
-         * @memberOf FlowPane
-         */
-        P.FlowPane.prototype.child = function(index) {
-            var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(index));
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Removes the specified component from this container.
          * @param component the component to remove
          * @method remove
@@ -773,6 +763,19 @@
         P.FlowPane.prototype.clear = function() {
             var delegate = this.unwrap();
             var value = delegate.clear();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Gets the container's n-th component.
+         * @param index the component's index in the container
+         * @return the child component
+         * @method child
+         * @memberOf FlowPane
+         */
+        P.FlowPane.prototype.child = function(index) {
+            var delegate = this.unwrap();
+            var value = delegate.child(P.boxAsJava(index));
             return P.boxAsJs(value);
         };
 

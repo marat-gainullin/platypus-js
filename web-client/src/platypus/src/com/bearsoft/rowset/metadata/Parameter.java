@@ -11,6 +11,7 @@ package com.bearsoft.rowset.metadata;
 
 import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.utils.RowsetUtils;
+import com.google.gwt.core.client.JavaScriptObject;
 
 import java.sql.ParameterMetaData;
 
@@ -28,10 +29,10 @@ import java.sql.ParameterMetaData;
 public class Parameter extends Field {
 
 	protected int mode = ParameterMetaData.parameterModeIn;
-	protected Double selectionForm = null;
-	protected Object defaultValue = null;
-	protected Object value = null;
-	protected boolean modified = false;
+	protected Double selectionForm;
+	protected Object defaultValue;
+	protected Object value;
+	protected boolean modified;
 
 	/**
 	 * The default constructor.
@@ -293,4 +294,28 @@ public class Parameter extends Field {
 	public Parameter copy() {
 		return new Parameter(this);
 	}
+
+	@Override
+	public void setPublished(JavaScriptObject aPublished) {
+		super.setPublished(aPublished);
+		if (jsPublished != null) {
+			publishFacade(jsPublished, this);
+		}
+	}
+
+	public static native void publishFacade(JavaScriptObject aTarget, Parameter aField)/*-{
+		Object.defineProperty(aTarget, "modified", {
+			get : function() {
+				return aField.@com.bearsoft.rowset.metadata.Parameter::isModified()();
+			}
+		});
+		Object.defineProperty(aTarget, "value", {
+			get : function() {
+				return $wnd.P.boxAsJs(aField.@com.bearsoft.rowset.metadata.Parameter::getJsValue()());
+			},
+			set : function(aValue) {
+				aField.@com.bearsoft.rowset.metadata.Parameter::setJsValue(Ljava/lang/Object;)($wnd.P.boxAsJava(aValue));
+			}
+		});
+	}-*/;
 }

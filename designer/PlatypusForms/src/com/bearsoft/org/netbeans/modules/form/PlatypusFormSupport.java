@@ -43,12 +43,14 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
+import com.bearsoft.org.netbeans.modules.form.editors.EntityJSObjectEditor;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import com.eas.designer.application.module.PlatypusModuleDatamodelDescription;
 import com.eas.designer.application.module.PlatypusModuleSourceDescription;
 import com.eas.designer.application.module.PlatypusModuleSupport;
 import java.awt.Cursor;
 import java.awt.EventQueue;
+import java.beans.PropertyEditorManager;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -64,6 +66,7 @@ import javax.swing.JPanel;
 import javax.swing.text.Document;
 import javax.swing.text.Position;
 import javax.swing.text.StyledDocument;
+import jdk.nashorn.api.scripting.JSObject;
 import org.netbeans.core.api.multiview.MultiViewHandler;
 import org.netbeans.core.api.multiview.MultiViews;
 import org.netbeans.core.spi.multiview.*;
@@ -101,6 +104,10 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
      */
     public static final String iconURL
             = "com/bearsoft/org/netbeans/modules/form/resources/form.gif"; // NOI18N
+
+    static {// because of crazy netbeans class loaders
+        PropertyEditorManager.registerEditor(JSObject.class, EntityJSObjectEditor.class);
+    }
     private UndoRedo.Manager editorUndoManager;
     private FormEditor formEditor;
 
@@ -230,7 +237,7 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
      * exceptions. Runs in AWT event dispatch thread, returns after the form is
      * loaded (even if not called from AWT thread).
      *
-     * @return whether the form is loaded (true also if it already was)
+     * @throws com.bearsoft.org.netbeans.modules.form.PersistenceException
      */
     public void loadForm() throws PersistenceException {
         // Ensure initialization of the formEditor
@@ -268,7 +275,6 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
 
     // ------------
     // other interface methods
-
     /**
      * @return data object representing the form
      */
@@ -298,7 +304,7 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
      * data don't affect the java source file (generated code).
      */
     void markFormModified() {
-        if (formEditor != null && formEditor.isFormLoaded() && !dataObject.isModified()) {
+        if (formEditor != null && formEditor.isFormLoaded()) {
             notifyModified();
         }
     }

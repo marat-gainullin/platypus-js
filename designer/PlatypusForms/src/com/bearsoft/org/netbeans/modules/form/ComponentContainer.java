@@ -51,6 +51,8 @@ public interface ComponentContainer {
 
     public RADComponent<?>[] getSubBeans();
 
+    public int getSubBeansCount();
+    
     public void initSubComponents(RADComponent<?>[] initComponents);
 
     public void reorderSubComponents(int[] perm);

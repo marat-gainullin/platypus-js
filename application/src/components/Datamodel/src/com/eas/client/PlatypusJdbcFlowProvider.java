@@ -5,14 +5,11 @@
 package com.eas.client;
 
 import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.dataflow.JdbcFlowProvider;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.queries.ContextHost;
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
 import javax.sql.DataSource;
 
@@ -29,7 +26,6 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
     protected DatabasesClient client;
     protected DatabaseMdCache cache;
     protected ContextHost contextHost;
-    protected List<Change> changeLog = new ArrayList<>();
 
     public PlatypusJdbcFlowProvider(DatabasesClient aClient, String aDataSourceName, String aEntityName, DataSource aDataSource, Consumer<Runnable> aDataPuller, DatabaseMdCache aCache, String aClause, Fields aExpectedFields, ContextHost aContextHost) throws Exception {
         super(aDataSourceName, aDataSource, aDataPuller, aCache.getConnectionDriver().getConverter(), aClause, aExpectedFields);
@@ -44,11 +40,6 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
         return entityName;
     }
 
-    @Override
-    public List<Change> getChangeLog() {
-        return changeLog;
-    }
-    
     @Override
     public Rowset refresh(Parameters aParams, Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception {
         return super.refresh(aParams, onSuccess, onFailure);

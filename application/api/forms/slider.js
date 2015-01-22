@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.components.Slider");
+    var javaClass = Java.type("com.eas.client.forms.components.Slider");
     javaClass.setPublisher(function(aDelegate) {
         return new P.Slider(null, null, null, null, aDelegate);
     });
@@ -64,20 +64,6 @@
              */
             P.Slider.prototype.onMouseDragged = {};
         }
-        Object.defineProperty(this, "parent", {
-            get: function() {
-                var value = delegate.parent;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.Slider){
-            /**
-             * Gets the parent of this component.
-             * @property parent
-             * @memberOf Slider
-             */
-            P.Slider.prototype.parent = {};
-        }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
                 var value = delegate.onMouseReleased;
@@ -111,6 +97,23 @@
              * @memberOf Slider
              */
             P.Slider.prototype.onFocusLost = {};
+        }
+        Object.defineProperty(this, "onValueChange", {
+            get: function() {
+                var value = delegate.onValueChange;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onValueChange = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Slider){
+            /**
+             * Value change handler.
+             * @property onValueChange
+             * @memberOf Slider
+             */
+            P.Slider.prototype.onValueChange = {};
         }
         Object.defineProperty(this, "onMousePressed", {
             get: function() {
@@ -150,6 +153,9 @@
             get: function() {
                 var value = delegate.error;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.error = P.boxAsJava(aValue);
             }
         });
         if(!P.Slider){
@@ -246,6 +252,20 @@
              */
             P.Slider.prototype.onComponentResized = {};
         }
+        Object.defineProperty(this, "parent", {
+            get: function() {
+                var value = delegate.parentWidget;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Slider){
+            /**
+             * Parent container of this widget.
+             * @property parentWidget
+             * @memberOf Slider
+             */
+            P.Slider.prototype.parent = {};
+        }
         Object.defineProperty(this, "text", {
             get: function() {
                 var value = delegate.text;
@@ -291,7 +311,7 @@
         });
         if(!P.Slider){
             /**
-             * The slider's current value.
+             * Slider's value. Can't be null.
              * @property value
              * @memberOf Slider
              */
@@ -361,23 +381,6 @@
              * @memberOf Slider
              */
             P.Slider.prototype.onComponentShown = {};
-        }
-        Object.defineProperty(this, "orientation", {
-            get: function() {
-                var value = delegate.orientation;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.orientation = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Slider){
-            /**
-             * This slider's vertical or horizontal orientation: Orientation.VERTICAL or Orientation.HORIZONTAL
-             * @property orientation
-             * @memberOf Slider
-             */
-            P.Slider.prototype.orientation = 0;
         }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
@@ -464,23 +467,6 @@
              */
             P.Slider.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Slider){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf Slider
-             */
-            P.Slider.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -497,6 +483,23 @@
              * @memberOf Slider
              */
             P.Slider.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Slider){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf Slider
+             */
+            P.Slider.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

@@ -289,43 +289,7 @@ public class FormLAF {
     static <T> T executeWithLookAndFeel(final FormModel formModel, final Mutex.ExceptionAction<T> act)
             throws Exception {
         try {
-            return Mutex.EVENT.readAccess(new Mutex.ExceptionAction<T>() {
-                @Override
-                public T run() throws Exception {
-                    // FIXME(-ttran) needs to hold a lock on UIDefaults to
-                    // prevent other threads from creating Swing components
-                    // in the mean time
-                    synchronized (Introspector.class) {
-                        synchronized (UIManager.getDefaults()) {
-                            boolean restoreAfter = true;
-                            try {
-                                if (lafBlockEntered) {
-                                    restoreAfter = false;
-                                } else {
-                                    lafBlockEntered = true;
-                                    useDesignerLookAndFeel(formModel);
-                                    restoreAfter = true;
-                                }
-                                return act.run();
-                            } finally {
-                                if (restoreAfter) {
-                                    useIDELookAndFeel();
-                                    lafBlockEntered = false;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        } catch (MutexException ex) {
-            throw ex.getException();
-        }
-    }
-
-    public static void executeWithLookAndFeel(final FormModel formModel, final Runnable run) {
-        Mutex.EVENT.readAccess(new Mutex.Action<Object>() {
-            @Override
-            public Object run() {
+            return Mutex.EVENT.readAccess((Mutex.ExceptionAction<T>) () -> {
                 // FIXME(-ttran) needs to hold a lock on UIDefaults to
                 // prevent other threads from creating Swing components
                 // in the mean time
@@ -340,7 +304,7 @@ public class FormLAF {
                                 useDesignerLookAndFeel(formModel);
                                 restoreAfter = true;
                             }
-                            run.run();
+                            return act.run();
                         } finally {
                             if (restoreAfter) {
                                 useIDELookAndFeel();
@@ -349,8 +313,38 @@ public class FormLAF {
                         }
                     }
                 }
-                return null;
+            });
+        } catch (MutexException ex) {
+            throw ex.getException();
+        }
+    }
+
+    public static void executeWithLookAndFeel(final FormModel formModel, final Runnable run) {
+        Mutex.EVENT.readAccess((Mutex.Action<Object>) () -> {
+            // FIXME(-ttran) needs to hold a lock on UIDefaults to
+            // prevent other threads from creating Swing components
+            // in the mean time
+            synchronized (Introspector.class) {
+                synchronized (UIManager.getDefaults()) {
+                    boolean restoreAfter = true;
+                    try {
+                        if (lafBlockEntered) {
+                            restoreAfter = false;
+                        } else {
+                            lafBlockEntered = true;
+                            useDesignerLookAndFeel(formModel);
+                            restoreAfter = true;
+                        }
+                        run.run();
+                    } finally {
+                        if (restoreAfter) {
+                            useIDELookAndFeel();
+                            lafBlockEntered = false;
+                        }
+                    }
+                }
             }
+            return null;
         });
     }
 

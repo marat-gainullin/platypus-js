@@ -4,6 +4,7 @@
  */
 package com.eas.designer.application.query;
 
+import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
@@ -713,9 +714,8 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
             SqlCompiledQuery schemasQuery = new SqlCompiledQuery(basesProxy, datasourceName, sql4Schemas);
             Rowset schemasRowset = schemasQuery.executeQuery(null, null);
             int schemaColIndex = schemasRowset.getFields().find(ClientConstants.JDBCCOLS_TABLE_SCHEM);
-            schemasRowset.beforeFirst();
-            while (schemasRowset.next()) {
-                String schemaName = schemasRowset.getString(schemaColIndex);
+            for (Row r : schemasRowset.getCurrent()) {
+                String schemaName = (String)r.getColumnObject(schemaColIndex);
                 schemas.add(schemaName);
             }
         }
@@ -739,9 +739,8 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
             Rowset tablesRowset = tablesQuery.executeQuery(null, null);
             //int schemaColIndex = tablesRowset.getFields().find(ClientConstants.JDBCCOLS_TABLE_SCHEM);
             int tableColIndex = tablesRowset.getFields().find(ClientConstants.JDBCCOLS_TABLE_NAME);
-            tablesRowset.beforeFirst();
-            while (tablesRowset.next()) {
-                String cachedTableName = (aSchema != null ? aSchema + "." : "") + tablesRowset.getString(tableColIndex);
+            for (Row r : tablesRowset.getCurrent()) {
+                String cachedTableName = (aSchema != null ? aSchema + "." : "") + (String)r.getColumnObject(tableColIndex);
                 Fields fields = mdCache.getTableMetadata(cachedTableName);
                 tables.put(cachedTableName/*.toLowerCase()*/, fields);
             }

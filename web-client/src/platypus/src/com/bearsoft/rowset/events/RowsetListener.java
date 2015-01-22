@@ -62,15 +62,6 @@ public interface RowsetListener {
 	public boolean willInsertRow(RowsetInsertEvent event);
 
 	/**
-	 * Row before change event handler/validator.
-	 * 
-	 * @param event
-	 *            - describes old and new field values.
-	 * @return result indicating that change is leagal.
-	 */
-	public boolean willChangeRow(RowChangeEvent event);
-
-	/**
 	 * Rowset before delete event handler/validator.
 	 * 
 	 * @param event
@@ -167,19 +158,6 @@ public interface RowsetListener {
 	 *            <code>Rowset</code> object that is the source of the event
 	 */
 	public void rowInserted(RowsetInsertEvent event);
-
-	/**
-	 * Notifies registered listeners that a <code>Rowset</code> object have got
-	 * a change in one of its rows.
-	 * <P>
-	 * The source of the event can be retrieved with the method
-	 * <code>event.getSource</code>.
-	 * 
-	 * @param event
-	 *            a <code>RowsetEvent</code> object that contains the
-	 *            <code>Rowset</code> object that is the source of the event
-	 */
-	public void rowChanged(RowChangeEvent event);
 
 	/**
 	 * Notifies registered listeners that a row has beeen deleted from the

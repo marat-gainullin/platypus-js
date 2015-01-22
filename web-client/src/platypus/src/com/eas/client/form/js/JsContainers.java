@@ -97,11 +97,7 @@ public class JsContainers {
 					aHGap = 0;
 				if(arguments.length < 1)
 					aOrientation = $wnd.P.Orientation.HORIZONTAL;
-				if(aOrientation == $wnd.P.Orientation.VERTICAL){
-					aComponent = @com.eas.client.form.published.containers.VBoxPane::new(I)(aVGap);
-				} else {
-					aComponent = @com.eas.client.form.published.containers.HBoxPane::new(I)(aHGap);
-				}
+				aComponent = @com.eas.client.form.published.containers.BoxPane::new(III)(aOrientation, aHGap, aVGap);
 			}
 
 			var published = this;
@@ -115,14 +111,13 @@ public class JsContainers {
 				if(toAdd && toAdd.unwrap){
 					if(toAdd.parent == published)
 						throw 'A widget already added to this container';
+					aComponent.@com.eas.client.form.published.containers.BoxPane::add(Lcom/google/gwt/user/client/ui/Widget;)(toAdd.unwrap());
 					if (aOrientation == $wnd.P.Orientation.VERTICAL) {
 						var widgetHeight = toAdd.height;
-						aComponent.@com.eas.client.form.published.containers.VBoxPane::add(Lcom/google/gwt/user/client/ui/Widget;)(toAdd.unwrap());
-						aComponent.@com.bearsoft.gwt.ui.containers.VerticalBoxPanel::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(toAdd.unwrap(), widgetHeight);
+						aComponent.@com.bearsoft.gwt.ui.containers.BoxPanel::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(toAdd.unwrap(), widgetHeight);
 					} else { 
 						var widgetWidth = toAdd.width;
-						aComponent.@com.eas.client.form.published.containers.HBoxPane::add(Lcom/google/gwt/user/client/ui/Widget;)(toAdd.unwrap());
-						aComponent.@com.bearsoft.gwt.ui.containers.HorizontalBoxPanel::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(toAdd.unwrap(), widgetWidth);
+						aComponent.@com.bearsoft.gwt.ui.containers.BoxPanel::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(toAdd.unwrap(), widgetWidth);
 					}
 				}
 			}
@@ -136,13 +131,13 @@ public class JsContainers {
 			Object.defineProperty(published, "hgap", {
 				get : function(){
 					if(published.orientation == $wnd.P.Orientation.HORIZONTAL)
-						return aComponent.@com.eas.client.form.published.containers.HBoxPane::getHgap()();
+						return aComponent.@com.eas.client.form.published.containers.BoxPane::getHgap()();
 					else
 						return _hgap;
 				},
 				set : function(aValue){
 					if(published.orientation == $wnd.P.Orientation.HORIZONTAL)
-						aComponent.@com.eas.client.form.published.containers.HBoxPane::setHgap(I)(aValue * 1);
+						aComponent.@com.eas.client.form.published.containers.BoxPane::setHgap(I)(aValue * 1);
 					else
 						_hgap = aValue * 1;
 				}
@@ -151,13 +146,13 @@ public class JsContainers {
 			Object.defineProperty(published, "vgap", {
 				get : function(){
 					if(published.orientation == $wnd.P.Orientation.VERTICAL)
-						return aComponent.@com.eas.client.form.published.containers.VBoxPane::getVgap()();
+						return aComponent.@com.eas.client.form.published.containers.BoxPane::getVgap()();
 					else
 						return _vgap;
 				},
 				set : function(aValue){
 					if(published.orientation == $wnd.P.Orientation.VERTICAL)
-						aComponent.@com.eas.client.form.published.containers.VBoxPane::setVgap(I)(aValue * 1);
+						aComponent.@com.eas.client.form.published.containers.BoxPane::setVgap(I)(aValue * 1);
 					else
 						_vgap = aValue * 1;
 				}
@@ -341,7 +336,7 @@ public class JsContainers {
 				},
 				set : function(aValue) {
 					if(aValue != null) {
-						var margin = @com.eas.client.form.MarginConstraints.Margin::new(Ljava/lang/String;)('' + aValue);
+						var margin = @com.eas.client.form.MarginConstraints.Margin::parse(Ljava/lang/String;)('' + aValue);
 						aConstraints.@com.eas.client.form.MarginConstraints::setLeft(Lcom/eas/client/form/MarginConstraints$Margin;)(margin);
 					}
 				}
@@ -352,7 +347,7 @@ public class JsContainers {
 				},
 				set : function(aValue) {
 					if(aValue != null) {
-						var margin = @com.eas.client.form.MarginConstraints.Margin::new(Ljava/lang/String;)('' + aValue);
+						var margin = @com.eas.client.form.MarginConstraints.Margin::parse(Ljava/lang/String;)('' + aValue);
 						aConstraints.@com.eas.client.form.MarginConstraints::setWidth(Lcom/eas/client/form/MarginConstraints$Margin;)(margin);
 					}
 				}
@@ -363,7 +358,7 @@ public class JsContainers {
 				},
 				set : function(aValue) {
 					if(aValue != null) {
-						var margin = @com.eas.client.form.MarginConstraints.Margin::new(Ljava/lang/String;)('' + aValue);
+						var margin = @com.eas.client.form.MarginConstraints.Margin::parse(Ljava/lang/String;)('' + aValue);
 						aConstraints.@com.eas.client.form.MarginConstraints::setRight(Lcom/eas/client/form/MarginConstraints$Margin;)(margin);
 					}
 				}
@@ -374,7 +369,7 @@ public class JsContainers {
 				},
 				set : function(aValue) {
 					if(aValue != null) {
-						var margin = @com.eas.client.form.MarginConstraints.Margin::new(Ljava/lang/String;)('' + aValue);
+						var margin = @com.eas.client.form.MarginConstraints.Margin::parse(Ljava/lang/String;)('' + aValue);
 						aConstraints.@com.eas.client.form.MarginConstraints::setTop(Lcom/eas/client/form/MarginConstraints$Margin;)(margin);
 					}
 				}
@@ -385,7 +380,7 @@ public class JsContainers {
 				},
 				set : function(aValue) {
 					if(aValue != null) {
-						var margin = @com.eas.client.form.MarginConstraints.Margin::new(Ljava/lang/String;)('' + aValue);
+						var margin = @com.eas.client.form.MarginConstraints.Margin::parse(Ljava/lang/String;)('' + aValue);
 						aConstraints.@com.eas.client.form.MarginConstraints::setHeight(Lcom/eas/client/form/MarginConstraints$Margin;)(margin);
 					}
 				}
@@ -396,7 +391,7 @@ public class JsContainers {
 				},
 				set : function(aValue) {
 					if(aValue != null) {
-						var margin = @com.eas.client.form.MarginConstraints.Margin::new(Ljava/lang/String;)('' + aValue);
+						var margin = @com.eas.client.form.MarginConstraints.Margin::parse(Ljava/lang/String;)('' + aValue);
 						aConstraints.@com.eas.client.form.MarginConstraints::setBottom(Lcom/eas/client/form/MarginConstraints$Margin;)(margin);
 					}
 				}

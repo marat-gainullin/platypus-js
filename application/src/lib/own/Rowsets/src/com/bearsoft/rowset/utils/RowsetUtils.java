@@ -9,9 +9,6 @@
  */
 package com.bearsoft.rowset.utils;
 
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.locators.Locator;
-import com.bearsoft.rowset.metadata.Field;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,7 +27,6 @@ import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -346,6 +342,7 @@ public class RowsetUtils {
         return "";
     }
 
+    /*
     public static Locator generatePkLocator(Rowset aRowset) {
         List<Field> pks = aRowset.getFields().getPrimaryKeys();
         Locator res = aRowset.createLocator();
@@ -359,4 +356,5 @@ public class RowsetUtils {
         }
         return res;
     }
+    */
 }

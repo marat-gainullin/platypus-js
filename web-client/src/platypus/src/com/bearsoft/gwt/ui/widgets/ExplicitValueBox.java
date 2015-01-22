@@ -36,13 +36,8 @@ public class ExplicitValueBox<T> extends ValueBox<T> {
 		addChangeHandler(new ChangeHandler() {
 			public void onChange(ChangeEvent event) {
 				if (!settingValue) {
-					T newValue;
-					try {
-						newValue = getValueOrThrow();
-					} catch (ParseException ex) {
-						newValue = null;
-					}
-					setValue(newValue, true);
+					String text = ExplicitValueBox.super.getText();
+					setText(text);
 				}
 			}
 		});
@@ -86,6 +81,11 @@ public class ExplicitValueBox<T> extends ValueBox<T> {
 	}
 
 	@Override
+	public String getText() {
+		return renderer.render(value);
+	}
+
+	@Override
 	public void setText(String text) {
 		try {
 			T newValue;
@@ -95,11 +95,11 @@ public class ExplicitValueBox<T> extends ValueBox<T> {
 				newValue = parser.parse(text);
 			setValue(newValue, true);
 		} catch (ParseException e) {
-			// super.setText is not called, so no op
+			super.setText(text);
 		}
 	}
 
-	protected void resetText(){
+	protected void resetText() {
 		settingValue = true;
 		try {
 			super.setText(renderer.render(getValue()));
@@ -107,7 +107,7 @@ public class ExplicitValueBox<T> extends ValueBox<T> {
 			settingValue = false;
 		}
 	}
-	
+
 	public HandlerRegistration addValueChangeHandler(ValueChangeHandler<T> handler) {
 		return addHandler(handler, ValueChangeEvent.getType());
 	}

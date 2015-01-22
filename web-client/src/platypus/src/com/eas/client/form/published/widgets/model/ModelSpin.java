@@ -1,8 +1,8 @@
 package com.eas.client.form.published.widgets.model;
 
 import com.bearsoft.gwt.ui.widgets.ExplicitDoubleBox;
-import com.bearsoft.rowset.metadata.Field;
-import com.eas.client.converters.DoubleRowValueConverter;
+import com.bearsoft.rowset.Utils;
+import com.eas.client.converters.DoubleValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.events.ActionEvent;
 import com.eas.client.form.events.ActionHandler;
@@ -12,10 +12,10 @@ import com.eas.client.form.published.widgets.ConstraintedSpinnerBox;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.HasText;
 
-public class ModelSpin extends PublishedDecoratorBox<Double> implements HasEmptyText, HasActionHandlers {
+public class ModelSpin extends ModelDecoratorBox<Double> implements HasEmptyText, HasActionHandlers {
 
 	protected String emptyText;
 
@@ -56,11 +56,6 @@ public class ModelSpin extends PublishedDecoratorBox<Double> implements HasEmpty
 	}
 
 	@Override
-	protected HandlerManager createHandlerManager() {
-	    return super.createHandlerManager();
-	}
-	
-	@Override
 	public String getEmptyText() {
 		return emptyText;
 	}
@@ -69,6 +64,21 @@ public class ModelSpin extends PublishedDecoratorBox<Double> implements HasEmpty
 	public void setEmptyText(String aValue) {
 		emptyText = aValue;
 		ControlsUtils.applyEmptyText(getElement(), emptyText);
+	}
+
+	@Override
+	public String getText() {
+		return ((HasText) decorated).getText();
+	}
+
+	public void setText(String aValue) {
+		((HasText) decorated).setText(aValue);
+	}
+
+	@Override
+	public Double convert(Object aValue) {
+		DoubleValueConverter c = new DoubleValueConverter();
+		return c.convert(aValue);
 	}
 
 	public void setPublished(JavaScriptObject aValue) {
@@ -107,13 +117,10 @@ public class ModelSpin extends PublishedDecoratorBox<Double> implements HasEmpty
 		});
 		Object.defineProperty(aPublished, "text", {
 			get : function() {
-				var v = aPublished.value;
-				return v != null ? aPublished.value + '' : '';
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelSpin::getText()();
 			},
 			set : function(aValue) {
-				var v = parseFloat(aValue);
-				if (!isNaN(v))
-					aPublished.value = v;
+				aWidget.@com.eas.client.form.published.widgets.model.ModelSpin::setText(Ljava/lang/String;)(aValue != null ? aValue + '' : '');
 			}
 		});
 		Object.defineProperty(aPublished, "min", {
@@ -183,14 +190,20 @@ public class ModelSpin extends PublishedDecoratorBox<Double> implements HasEmpty
 	}
 
 	@Override
-	protected void clearValue() {
-		super.clearValue();
-		ActionEvent.fire(this, this);
+	public Object getJsValue() {
+		return Utils.toJs(getValue());
 	}
 
 	@Override
-	public void setBinding(Field aField) throws Exception {
-		super.setBinding(aField, new DoubleRowValueConverter());
+	public void setJsValue(Object aValue) throws Exception {
+		Object javaValue = Utils.toJava(aValue);
+		setValue(convert(javaValue), true);
+	}
+
+	@Override
+	protected void clearValue() {
+		super.clearValue();
+		ActionEvent.fire(this, this);
 	}
 
 	public Double getMin() {

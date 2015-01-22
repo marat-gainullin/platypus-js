@@ -44,6 +44,7 @@
 package com.bearsoft.org.netbeans.modules.form.menu;
 
 import com.bearsoft.org.netbeans.modules.form.FormInspector;
+import com.bearsoft.org.netbeans.modules.form.FormUtils;
 import com.bearsoft.org.netbeans.modules.form.RADComponent;
 import com.bearsoft.org.netbeans.modules.form.RADComponentNode;
 import com.bearsoft.org.netbeans.modules.form.actions.menu.AlignAction;
@@ -51,7 +52,6 @@ import com.bearsoft.org.netbeans.modules.form.palette.PaletteItem;
 import com.bearsoft.org.netbeans.modules.form.palette.PaletteUtils;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.SortedSet;
@@ -132,7 +132,7 @@ public class AddSubItemAction extends NodeAction {
 
     private class AddListener implements ActionListener {
 
-        private PaletteItem pItem;
+        private final PaletteItem pItem;
 
         public AddListener(PaletteItem pItem) {
             this.pItem = pItem;
@@ -146,7 +146,7 @@ public class AddSubItemAction extends NodeAction {
                     if (nd instanceof RADComponentNode) {
                         RADComponentNode rnode = (RADComponentNode) nd;
                         RADComponent<?> comp = rnode.getRADComponent();
-                        MenuEditLayer.addComponentToEndOfMenu(comp, pItem);
+                        FormUtils.addComponentToEndOfContainer(comp, pItem);
                     }
                 }
             } catch (Exception ex) {
@@ -159,13 +159,10 @@ public class AddSubItemAction extends NodeAction {
         //only create this menu the first time it is called
         if (!(menu.getMenuComponentCount() > 0)) {
             Set<Class<?>> classes = new HashSet<>();
-            SortedSet<PaletteItem> items = new TreeSet<>(new Comparator<PaletteItem>() {
-                @Override
-                public int compare(PaletteItem item1, PaletteItem item2) {
-                    String name1 = item1.getNode().getDisplayName();
-                    String name2 = item2.getNode().getDisplayName();
-                    return name1.compareTo(name2);
-                }
+            SortedSet<PaletteItem> items = new TreeSet<>((PaletteItem item1, PaletteItem item2) -> {
+                String name1 = item1.getNode().getDisplayName();
+                String name2 = item2.getNode().getDisplayName();
+                return name1.compareTo(name2);
             });
             for (PaletteItem item : PaletteUtils.getAllItems()) {
                 Class<?> clazz = item.getComponentClass();

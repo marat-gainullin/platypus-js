@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.events.FocusEvent");
+    var javaClass = Java.type("com.eas.client.forms.events.FocusEvent");
     javaClass.setPublisher(function(aDelegate) {
         return new P.FocusEvent(aDelegate);
     });
@@ -30,7 +30,7 @@
         });
         if(!P.FocusEvent){
             /**
-             * The source component object of the event.
+             * The source object of the event.
              * @property source
              * @memberOf FocusEvent
              */

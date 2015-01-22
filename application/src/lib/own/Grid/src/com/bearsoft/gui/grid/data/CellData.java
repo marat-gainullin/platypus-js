@@ -4,7 +4,6 @@
  */
 package com.bearsoft.gui.grid.data;
 
-import com.eas.gui.CascadedStyle;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
@@ -17,47 +16,23 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class CellData implements Comparable<Object>, HasPublished  {
+public class CellData implements HasPublished  {
 
-    public CascadedStyle style;
     public Object data;
-    public Object display;
+    public String display;
 
     private static JSObject publisher;
     protected JSObject published;
     /**
      * Simple constructor for controls models data.
      *
-     * @param aStyle CascadedStyle instance, holding information about style of
-     * the cell, row or other unit of a control.
      * @param aData Real data, took from subject area data.
      * @param aDisplay Data, thet should be displayed instead of real data
-     * @see CascadedStyle
      */
-    public CellData(CascadedStyle aStyle, Object aData, Object aDisplay) {
+    public CellData(Object aData, String aDisplay) {
         super();
-        style = aStyle;
         data = aData;
         display = aDisplay;
-    }
-
-    /**
-     * Returns CascadedStyle instance of this data unit.
-     *
-     * @return CascadedStyle instance.
-     * @see CascadedStyle
-     */
-    @ScriptFunction(jsDoc = ""
-            + "/**\n"
-            + " * The cell's style.\n"
-            + " */")
-    public CascadedStyle getStyle() {
-        return style;
-    }
-
-    @ScriptFunction
-    public void setStyle(CascadedStyle aValue) {
-        style = aValue;
     }
 
     /**
@@ -87,27 +62,8 @@ public class CellData implements Comparable<Object>, HasPublished  {
     }
 
     @ScriptFunction
-    public void setDisplay(Object aValue) {
+    public void setDisplay(String aValue) {
         display = aValue;
-    }
-
-    @Override
-    public int compareTo(Object o) {
-        if (o instanceof CellData) {
-            CellData cd = (CellData) o;
-            Object o1 = display != null ? display : data;
-            Object o2 = cd.display != null ? cd.display : cd.data;
-            if (o1 instanceof Comparable<?> && o2 instanceof Comparable<?>) {
-                Comparable<Object> c1 = (Comparable<Object>) o1;
-                Comparable<Object> c2 = (Comparable<Object>) o2;
-                return c1.compareTo(c2);
-            } else if (o1 == null && o2 != null) {
-                return -1;
-            } else if (o2 == null && o1 != null) {
-                return 1;
-            }
-        }
-        return 0;
     }
 
     @Override

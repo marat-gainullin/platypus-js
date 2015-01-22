@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<palette_item version="1.0">
+  <component classname="com.eas.client.forms.menu.Menu" type="menu" />
+  <icon16 urlvalue="nbres:/com/bearsoft/org/netbeans/modules/form/resources/palette/menu_16.png" />
+  <icon32 urlvalue="nbres:/com/bearsoft/org/netbeans/modules/form/resources/palette/menu_32.png" />
+  <description localizing-bundle="com.bearsoft.org.netbeans.modules.form.resources.Bundle"
+               display-name-key="NAME_Menu"
+               tooltip-key="HINT_Menu" />
+</palette_item>

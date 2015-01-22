@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.Anchors");
+    var javaClass = Java.type("com.eas.client.forms.Anchors");
     javaClass.setPublisher(function(aDelegate) {
         return new P.Anchors(null, null, null, null, null, null, aDelegate);
     });

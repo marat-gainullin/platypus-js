@@ -46,14 +46,14 @@ public class BinarySerializationTest extends RowsetBaseTest {
     public void readAfterWriteTest() throws RowsetException, IOException, ProtoReaderException {
         System.out.println("readAfterWriteTest");
         Rowset rowset = initRowset();
-        rowset.beforeFirst();
+        rowset.setCursorPos(0);
         Object[] writtenData = writeSamples(rowset);
         Object[] anotherWrittenData = writeSamples(rowset);
         for (int i = 0; i < anotherWrittenData.length; i++) {
             BinaryRowsetReader reader = new BinaryRowsetReader();
             Rowset rs = reader.read((byte[]) anotherWrittenData[i]);
             checkRowsetCorrespondToTestData(rs);
-            rs.beforeFirst();
+            rs.setCursorPos(0);
             BinaryRowsetWriter writer = new BinaryRowsetWriter();
             byte[] rowsetData = writer.write(rs);
             reader = new BinaryRowsetReader();
@@ -87,7 +87,7 @@ public class BinarySerializationTest extends RowsetBaseTest {
     public void customSerializationTest1() throws RowsetException, IOException, ProtoReaderException {
         System.out.println("customSerializationTest1");
         Rowset rowset = initRowset();
-        rowset.beforeFirst();
+        rowset.setCursorPos(0);
         Object[] writtenData = writeCustomSamples(rowset);
         Object[] anotherWrittenData = writeCustomSamples(rowset);
         boolean sameSerializer = true;
@@ -100,7 +100,7 @@ public class BinarySerializationTest extends RowsetBaseTest {
             }
             reader.addSerializer(DataTypeInfo.BLOB, ser);
             Rowset rs = reader.read((byte[]) anotherWrittenData[i]);
-            rs.beforeFirst();
+            rs.setCursorPos(0);
             BinaryRowsetWriter writer = new BinaryRowsetWriter();
             writer.addSerializer(DataTypeInfo.CLOB, ser);
             if (sameSerializer) {
@@ -119,7 +119,7 @@ public class BinarySerializationTest extends RowsetBaseTest {
         System.out.println("customSerializationTest2");
         CompactLobsSerializer ser = new CompactLobsSerializer();
         Rowset rowset = initRowset();
-        rowset.beforeFirst();
+        rowset.setCursorPos(0);
         Object[] writtenData = writeCustomSamples(rowset);
         Object[] anotherWrittenData = writeCustomSamples(rowset);
         for (int i = 0; i < anotherWrittenData.length; i++) {
@@ -127,7 +127,7 @@ public class BinarySerializationTest extends RowsetBaseTest {
             reader.addSerializer(DataTypeInfo.CLOB, ser);
             reader.addSerializer(DataTypeInfo.BLOB, ser);
             Rowset rs = reader.read((byte[]) anotherWrittenData[i]);
-            rs.beforeFirst();
+            rs.setCursorPos(0);
             BinaryRowsetWriter writer = new BinaryRowsetWriter();
             writer.addSerializer(DataTypeInfo.CLOB, ser);
             writer.addSerializer(DataTypeInfo.BLOB, ser);

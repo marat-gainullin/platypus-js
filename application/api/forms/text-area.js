@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.components.TextArea");
+    var javaClass = Java.type("com.eas.client.forms.components.TextArea");
     javaClass.setPublisher(function(aDelegate) {
         return new P.TextArea(null, aDelegate);
     });
@@ -58,20 +58,6 @@
              */
             P.TextArea.prototype.onMouseDragged = {};
         }
-        Object.defineProperty(this, "parent", {
-            get: function() {
-                var value = delegate.parent;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.TextArea){
-            /**
-             * Gets the parent of this component.
-             * @property parent
-             * @memberOf TextArea
-             */
-            P.TextArea.prototype.parent = {};
-        }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
                 var value = delegate.onMouseReleased;
@@ -105,6 +91,23 @@
              * @memberOf TextArea
              */
             P.TextArea.prototype.onFocusLost = {};
+        }
+        Object.defineProperty(this, "onValueChange", {
+            get: function() {
+                var value = delegate.onValueChange;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onValueChange = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.TextArea){
+            /**
+             * Value change handler.
+             * @property onValueChange
+             * @memberOf TextArea
+             */
+            P.TextArea.prototype.onValueChange = {};
         }
         Object.defineProperty(this, "emptyText", {
             get: function() {
@@ -161,6 +164,9 @@
             get: function() {
                 var value = delegate.error;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.error = P.boxAsJava(aValue);
             }
         });
         if(!P.TextArea){
@@ -205,6 +211,23 @@
              * @memberOf TextArea
              */
             P.TextArea.prototype.onComponentMoved = {};
+        }
+        Object.defineProperty(this, "jsValue", {
+            get: function() {
+                var value = delegate.jsValue;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.jsValue = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.TextArea){
+            /**
+             * Widget's value.
+             * @property jsValue
+             * @memberOf TextArea
+             */
+            P.TextArea.prototype.jsValue = {};
         }
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {
@@ -257,6 +280,20 @@
              */
             P.TextArea.prototype.onComponentResized = {};
         }
+        Object.defineProperty(this, "parent", {
+            get: function() {
+                var value = delegate.parentWidget;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.TextArea){
+            /**
+             * Parent container of this widget.
+             * @property parentWidget
+             * @memberOf TextArea
+             */
+            P.TextArea.prototype.parent = {};
+        }
         Object.defineProperty(this, "text", {
             get: function() {
                 var value = delegate.text;
@@ -290,23 +327,6 @@
              * @memberOf TextArea
              */
             P.TextArea.prototype.onMouseEntered = {};
-        }
-        Object.defineProperty(this, "value", {
-            get: function() {
-                var value = delegate.value;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.value = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.TextArea){
-            /**
-             * Generated property jsDoc.
-             * @property value
-             * @memberOf TextArea
-             */
-            P.TextArea.prototype.value = {};
         }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
@@ -458,23 +478,6 @@
              */
             P.TextArea.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.TextArea){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf TextArea
-             */
-            P.TextArea.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -491,6 +494,23 @@
              * @memberOf TextArea
              */
             P.TextArea.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.TextArea){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf TextArea
+             */
+            P.TextArea.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

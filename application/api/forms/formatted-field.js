@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.components.FormattedField");
+    var javaClass = Java.type("com.eas.client.forms.components.FormattedField");
     javaClass.setPublisher(function(aDelegate) {
         return new P.FormattedField(null, aDelegate);
     });
@@ -58,20 +58,6 @@
              */
             P.FormattedField.prototype.onMouseDragged = {};
         }
-        Object.defineProperty(this, "parent", {
-            get: function() {
-                var value = delegate.parent;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.FormattedField){
-            /**
-             * Gets the parent of this component.
-             * @property parent
-             * @memberOf FormattedField
-             */
-            P.FormattedField.prototype.parent = {};
-        }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
                 var value = delegate.onMouseReleased;
@@ -105,6 +91,23 @@
              * @memberOf FormattedField
              */
             P.FormattedField.prototype.onFocusLost = {};
+        }
+        Object.defineProperty(this, "onValueChange", {
+            get: function() {
+                var value = delegate.onValueChange;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onValueChange = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.FormattedField){
+            /**
+             * Value change handler.
+             * @property onValueChange
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.onValueChange = {};
         }
         Object.defineProperty(this, "emptyText", {
             get: function() {
@@ -140,6 +143,23 @@
              */
             P.FormattedField.prototype.onMousePressed = {};
         }
+        Object.defineProperty(this, "onParse", {
+            get: function() {
+                var value = delegate.onParse;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onParse = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.FormattedField){
+            /**
+             * Generated property jsDoc.
+             * @property onParse
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.onParse = {};
+        }
         Object.defineProperty(this, "foreground", {
             get: function() {
                 var value = delegate.foreground;
@@ -161,6 +181,9 @@
             get: function() {
                 var value = delegate.error;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.error = P.boxAsJava(aValue);
             }
         });
         if(!P.FormattedField){
@@ -205,6 +228,23 @@
              * @memberOf FormattedField
              */
             P.FormattedField.prototype.onComponentMoved = {};
+        }
+        Object.defineProperty(this, "jsValue", {
+            get: function() {
+                var value = delegate.jsValue;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.jsValue = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.FormattedField){
+            /**
+             * Widget's value.
+             * @property jsValue
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.jsValue = {};
         }
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {
@@ -257,6 +297,37 @@
              */
             P.FormattedField.prototype.onComponentResized = {};
         }
+        Object.defineProperty(this, "valueType", {
+            get: function() {
+                var value = delegate.valueType;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.valueType = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.FormattedField){
+            /**
+             * ValueType hint for the field. It is used to determine, how to interpret format pattern.
+             * @property valueType
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.valueType = 0;
+        }
+        Object.defineProperty(this, "parent", {
+            get: function() {
+                var value = delegate.parentWidget;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.FormattedField){
+            /**
+             * Parent container of this widget.
+             * @property parentWidget
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.parent = {};
+        }
         Object.defineProperty(this, "text", {
             get: function() {
                 var value = delegate.text;
@@ -290,23 +361,6 @@
              * @memberOf FormattedField
              */
             P.FormattedField.prototype.onMouseEntered = {};
-        }
-        Object.defineProperty(this, "value", {
-            get: function() {
-                var value = delegate.value;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.value = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.FormattedField){
-            /**
-             * The value of this component.
-             * @property value
-             * @memberOf FormattedField
-             */
-            P.FormattedField.prototype.value = {};
         }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
@@ -389,6 +443,23 @@
              * @memberOf FormattedField
              */
             P.FormattedField.prototype.onMouseMoved = {};
+        }
+        Object.defineProperty(this, "onFormat", {
+            get: function() {
+                var value = delegate.onFormat;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onFormat = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.FormattedField){
+            /**
+             * Generated property jsDoc.
+             * @property onFormat
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.onFormat = {};
         }
         Object.defineProperty(this, "opaque", {
             get: function() {
@@ -475,23 +546,6 @@
              */
             P.FormattedField.prototype.format = '';
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.FormattedField){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf FormattedField
-             */
-            P.FormattedField.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -508,6 +562,23 @@
              * @memberOf FormattedField
              */
             P.FormattedField.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.FormattedField){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

@@ -45,16 +45,14 @@ package com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates;
 
 import com.bearsoft.org.netbeans.modules.form.FormLoaderSettings;
 import com.bearsoft.org.netbeans.modules.form.FormProperty;
-import com.bearsoft.org.netbeans.modules.form.FormPropertyContext;
 import com.bearsoft.org.netbeans.modules.form.RADComponent;
 import com.bearsoft.org.netbeans.modules.form.RADComponentCreator;
 import com.bearsoft.org.netbeans.modules.form.RADVisualContainer;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.AbstractLayoutSupport;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutConstraints;
-import com.eas.controls.layouts.constraints.MarginConstraintsDesignInfo;
-import com.eas.controls.layouts.margin.Margin;
-import com.eas.controls.layouts.margin.MarginConstraints;
-import com.eas.controls.layouts.margin.MarginLayout;
+import com.eas.client.forms.layouts.Margin;
+import com.eas.client.forms.layouts.MarginConstraints;
+import com.eas.client.forms.layouts.MarginLayout;
 import java.awt.*;
 import java.beans.BeanInfo;
 import java.beans.PropertyChangeEvent;
@@ -64,7 +62,6 @@ import java.beans.PropertyVetoException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import org.openide.util.ImageUtilities;
-import org.openide.util.NbBundle;
 
 /**
  * Support class for AbsoluteLayout - for absolute positioning and sizing of
@@ -79,16 +76,16 @@ import org.openide.util.NbBundle;
 public class MarginLayoutSupport extends AbstractLayoutSupport {
 
     /**
-     * The icon for AbsoluteLayout.
+     * The icon for MarginLayout.
      */
-    private static String iconURL =
+    private static final String iconURL =
             "com/bearsoft/org/netbeans/modules/form/layoutsupport/resources/AbsoluteLayout.gif"; // NOI18N
     /**
-     * The icon for AbsoluteLayout.
+     * The icon for MarginLayout.
      */
-    private static String icon32URL =
+    private static final String icon32URL =
             "com/bearsoft/org/netbeans/modules/form/layoutsupport/resources/AbsoluteLayout32.gif"; // NOI18N
-    private static FormLoaderSettings formSettings = FormLoaderSettings.getInstance();
+    private static final FormLoaderSettings formSettings = FormLoaderSettings.getInstance();
     final static private String stateIllegalMessage = "Отсутствуют необходимые значения для вычисления  {0}";
 
     /**
@@ -99,11 +96,6 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
     @Override
     public Class<?> getSupportedClass() {
         return MarginLayout.class;
-    }
-
-    @Override
-    public String getDisplayName() {
-        return NbBundle.getMessage(MarginLayoutSupport.class, "NAME_MARGIN_LAYOUNT");
     }
 
     /**
@@ -175,8 +167,7 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
      * container (or just for mouse cursor being moved over container, without
      * any component).
      *
-     * @param container instance of a real container over/in which the component
-     * is dragged
+     * @param aContainer
      * @param aContainerDelegate effective container delegate of the container
      * (for layout managers we always use container delegate instead of the
      * container)
@@ -278,12 +269,9 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
      * any component). For AbsoluteLayout, it simply paints a rectangle
      * corresponding to the component position and size.
      *
-     * @param container instance of a real container over/in which the component
-     * is dragged
-     * @param containerDelegate effective container delegate of the container
-     * (for layout managers we always use container delegate instead of the
-     * container)
+     * @param aContainer
      * @param component the real component being dragged, can be null
+     * @param aContainerDelegate
      * @param newConstraints component layout constraints to be presented
      * @param newIndex component's index position to be presented; not used for
      * AbsoluteLayout
@@ -353,12 +341,11 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
      * This method should calculate layout constraints for a component being
      * resized.
      *
-     * @param container instance of a real container in which the component is
-     * resized
-     * @param containerDelegate effective container delegate of the container
-     * (e.g. like content pane of JFrame)
+     * @param aContainer
      * @param component real component being resized
+     * @param aContainerDelegate
      * @param index position of the component in its container
+     * @param originalBounds
      * @param sizeChanges Insets object with size differences
      * @param posInCont position of mouse in the container delegate
      * @return component layout constraints for resized component; null if
@@ -756,8 +743,7 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
         Rectangle minh = null, minw = null, minwh = null;
         Pair pminh = null, pminw = null, pminwh = null;
         Rectangle rrH = null, rrW = null, rrHH = null, rrWW = null;
-        for (int i = 0; i < compsBounds.size(); i++) {
-            Rectangle neighbourBounds = compsBounds.get(i);
+        for (Rectangle neighbourBounds : compsBounds) {
             Pair pret = getDistance(g, aContainer, compBounds, neighbourBounds);
             if (pret != null) {
                 if (pret.p1.x < pret.p2.x && pret.p1.y < pret.p2.y) {//направление слева-направо
@@ -858,10 +844,14 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
         private FormProperty<?>[] properties;
 
         public MarginLayoutConstraints(Margin left, Margin top, Margin right, Margin bottom, Margin width, Margin height) {
-            super();
-            constraints = new MarginConstraints(left, top, right, bottom, width, height);
+            this(new MarginConstraints(left, top, right, bottom, width, height));
         }
 
+        public MarginLayoutConstraints(MarginConstraints aConstraints) {
+            super();
+            constraints = aConstraints;
+        }
+        
         public FormProperty<Margin> getMLeft() {
             checkProperties();
             return mleft;
@@ -1063,7 +1053,7 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
         }
 
         protected FormProperty<?>[] createProperties() {
-            mleft = new FormProperty<Margin>("mleft", // NOI18N
+            mleft = new FormProperty<Margin>("left", // NOI18N
                     Margin.class,
                     getBundle().getString("PROPM_posl"), // NOI18N
                     getBundle().getString("HINTM_posl")) {
@@ -1100,12 +1090,8 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
                 public Margin getDefaultValue() {
                     return null;
                 }
-
-                @Override
-                public void setPropertyContext(FormPropertyContext ctx) { // disabling this method due to limited persistence
-                }
             };
-            mtop = new FormProperty<Margin>("mtop", // NOI18N
+            mtop = new FormProperty<Margin>("top", // NOI18N
                     Margin.class,
                     getBundle().getString("PROPM_post"), // NOI18N
                     getBundle().getString("HINTM_post")) {
@@ -1142,12 +1128,8 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
                 public Margin getDefaultValue() {
                     return null;
                 }
-
-                @Override
-                public void setPropertyContext(FormPropertyContext ctx) { // disabling this method due to limited persistence
-                }
             };
-            mright = new FormProperty<Margin>("mright", // NOI18N
+            mright = new FormProperty<Margin>("right", // NOI18N
                     Margin.class,
                     getBundle().getString("PROPM_posr"), // NOI18N
                     getBundle().getString("HINTM_posr")) {
@@ -1184,12 +1166,8 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
                 public Margin getDefaultValue() {
                     return null;
                 }
-
-                @Override
-                public void setPropertyContext(FormPropertyContext ctx) { // disabling this method due to limited persistence
-                }
             };
-            mbottom = new FormProperty<Margin>("mbottom", // NOI18N
+            mbottom = new FormProperty<Margin>("bottom", // NOI18N
                     Margin.class,
                     getBundle().getString("PROPM_posb"), // NOI18N
                     getBundle().getString("HINTM_posb")) { // NOI18N
@@ -1226,12 +1204,8 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
                 public Margin getDefaultValue() {
                     return null;
                 }
-
-                @Override
-                public void setPropertyContext(FormPropertyContext ctx) { // disabling this method due to limited persistence
-                } // capabilities (compatibility with previous versions)
             };
-            mwidth = new FormProperty<Margin>("mwidth", // NOI18N
+            mwidth = new FormProperty<Margin>("width", // NOI18N
                     Margin.class,
                     getBundle().getString("PROPM_width"), // NOI18N
                     getBundle().getString("HINTM_width")) { // NOI18N
@@ -1268,12 +1242,8 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
                 public Margin getDefaultValue() {
                     return null;
                 }
-
-                @Override
-                public void setPropertyContext(FormPropertyContext ctx) { // disabling this method due to limited persistence
-                } // capabilities (compatibility with previous versions)
             };
-            mheight = new FormProperty<Margin>("mheight", // NOI18N
+            mheight = new FormProperty<Margin>("height", // NOI18N
                     Margin.class,
                     getBundle().getString("PROPM_height"), // NOI18N
                     getBundle().getString("HINTM_height")) { // NOI18N
@@ -1310,10 +1280,6 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
                 public Margin getDefaultValue() {
                     return null;
                 }
-
-                @Override
-                public void setPropertyContext(FormPropertyContext ctx) { // disabling this method due to limited persistence
-                } // capabilities (compatibility with previous versions)
             };
             return new FormProperty<?>[]{mleft, mtop, mright, mbottom, mwidth, mheight};
         }
@@ -1338,7 +1304,7 @@ public class MarginLayoutSupport extends AbstractLayoutSupport {
 
         @Override
         public void setAsText(String text) throws IllegalArgumentException {
-            Margin m = MarginConstraintsDesignInfo.parseMargin(text);
+            Margin m = Margin.parse(text);
             setValue(m);
         }
 

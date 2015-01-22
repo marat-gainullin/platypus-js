@@ -11,7 +11,7 @@
  * Development and Distribution License("CDDL") (collectively, the
  * "License"). You may not use this file except in compliance with the
  * License. You can obtain a copy of the License at
- * http://www.netbeans.org/cddl-gplv2.html
+ * http://www.netbeans.org/cddl-gplv2.html 
  * or nbbuild/licenses/CDDL-GPL-2-CP. See the License for the
  * specific language governing permissions and limitations under the
  * License.  When distributing the software, include this License Header
@@ -46,23 +46,23 @@ package com.bearsoft.org.netbeans.modules.form;
 import com.bearsoft.org.netbeans.modules.form.actions.*;
 import com.bearsoft.org.netbeans.modules.form.actions.menu.DesignParentAction;
 import com.bearsoft.org.netbeans.modules.form.actions.menu.EditContainerAction;
+import com.bearsoft.org.netbeans.modules.form.bound.AddGridColumnAction;
 import com.bearsoft.org.netbeans.modules.form.bound.RADColumnView;
+import com.bearsoft.org.netbeans.modules.form.bound.RADModelGrid;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.*;
 import com.bearsoft.org.netbeans.modules.form.menu.AddSubItemAction;
 import com.bearsoft.org.netbeans.modules.form.menu.InsertMenuAction;
 import com.bearsoft.org.netbeans.modules.form.menu.MenuEditLayer;
 import com.bearsoft.org.netbeans.modules.form.palette.PaletteUtils;
+import com.eas.client.forms.components.model.grid.header.ModelGridColumn;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Image;
 import java.awt.datatransfer.*;
-import java.beans.*;
-import java.security.*;
 import java.text.MessageFormat;
 import java.util.*;
 import javax.swing.Action;
-import org.openide.ErrorManager;
 import org.openide.actions.*;
 import org.openide.nodes.*;
 import org.openide.util.*;
@@ -70,23 +70,23 @@ import org.openide.util.actions.SystemAction;
 import org.openide.util.datatransfer.NewType;
 import org.openide.util.datatransfer.PasteType;
 
-public class RADComponentNode extends FormNode
-        implements RADComponentCookie, FormPropertyCookie {
+public class RADComponentNode extends FormNode implements RADComponentCookie, FormPropertyCookie {
 
     private static final DefaultRADAction DEFAULT_ACTION = new DefaultRADAction();
     private final static MessageFormat nodeNameFormat
             = new MessageFormat(
                     FormUtils.getBundleString("FMT_ComponentNodeName")); // NOI18N
+    /*
     private final static MessageFormat nodeNoNameFormat
             = new MessageFormat(
                     FormUtils.getBundleString("FMT_UnnamedComponentNodeName")); // NOI18N
+    */
     private RADComponent<?> component;
     private boolean highlightDisplayName;
-    private Map<Integer, Image> img = new HashMap<>();
+    private final Map<Integer, Image> img = new HashMap<>();
 
     public RADComponentNode(RADComponent<?> aComponent) {
-        this(aComponent instanceof ComponentContainer ? new RADChildren((ComponentContainer) aComponent) : Children.LEAF,
-                aComponent);
+        this(aComponent instanceof ComponentContainer ? new RADChildren((ComponentContainer) aComponent) : Children.LEAF, aComponent);
     }
 
     protected RADComponentNode(Children children, RADComponent<?> aComponent) {
@@ -99,14 +99,8 @@ public class RADComponentNode extends FormNode
     }
 
     final void updateName() {
-        String compClassName = FormUtils.getPlatypusControlClass(component.getBeanClass()).getSimpleName();
-        if (component == component.getFormModel().getTopRADComponent()) {
-            setDisplayName(nodeNoNameFormat.format(
-                    new Object[]{compClassName}));
-        } else {
-            setDisplayName(nodeNameFormat.format(
-                    new Object[]{getName(), compClassName}));
-        }
+        String compClassName = component.getBeanClass().getSimpleName();
+        setDisplayName(nodeNameFormat.format(new Object[]{getName(), compClassName}));
     }
 
     public void fireComponentPropertiesChange() {
@@ -128,38 +122,30 @@ public class RADComponentNode extends FormNode
         if (icon != null) {
             return icon;
         }
-
         // try to get a special icon
-        icon = BeanSupport.getBeanIcon(component.getBeanClass(), iconType);
+        if (!iconsInitialized) {
+            // getIconForClass invokes getNodes(true) which cannot be called in Mutex
+            EventQueue.invokeLater(() -> {
+                Image icon1 = PaletteUtils.getIconForClass(component.getBeanClass().getName(), iconType, true);
+                iconsInitialized = true;
+                if (icon1 != null) {
+                    img.put(iconType, icon1);
+                    fireIconChange();
+                }
+            });
+        } else {
+            icon = PaletteUtils.getIconForClass(component.getBeanClass().getName(), iconType, false);
+        }
+
         if (icon == null) {
-            if (!iconsInitialized) {
-                // getIconForClass invokes getNodes(true) which cannot be called in Mutex
-                EventQueue.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        Image icon = PaletteUtils.getIconForClass(component.getBeanClass().getName(), iconType, true);
-                        iconsInitialized = true;
-                        if (icon != null) {
-                            img.put(iconType, icon);
-                            fireIconChange();
-                        }
-                    }
-                });
-            } else {
-                icon = PaletteUtils.getIconForClass(component.getBeanClass().getName(), iconType, false);
+            // get icon from BeanInfo
+            java.beans.BeanInfo bi = component.getBeanInfo();
+            if (bi != null) {
+                icon = bi.getIcon(iconType);
             }
-
             if (icon == null) {
-                // get icon from BeanInfo
-                java.beans.BeanInfo bi = component.getBeanInfo();
-                if (bi != null) {
-                    icon = bi.getIcon(iconType);
-                }
-
-                if (icon == null) {
-                    // use default icon
-                    icon = super.getIcon(iconType);
-                }
+                // use default icon
+                icon = super.getIcon(iconType);
             }
         }
         img.put(iconType, icon);
@@ -190,7 +176,7 @@ public class RADComponentNode extends FormNode
     public NewType[] getNewTypes() {
         return component.getNewTypes();
     }
-    
+
     @Override
     public Action getPreferredAction() {
         return DEFAULT_ACTION;
@@ -209,30 +195,13 @@ public class RADComponentNode extends FormNode
                 }
                 lactions.add(SystemAction.get(CopyAction.class));
             } else if (!(component instanceof RADColumnView)) {
-                /* If you whant ot uncomment folowing code, you have to refactor
-                 * action to avoid breaking of model-view pattern
-                 if (InPlaceEditLayer.supportsEditingFor(component.getBeanClass(), false)) {
-                 lactions.add(SystemAction.get(InPlaceEditAction.class));
-                 }
-                 */
                 if (SelectGridColumnViewAction.isEditableComponent(component)) {
                     lactions.add(SystemAction.get(SelectGridColumnViewAction.class));
                     addSeparator(lactions);
                 }
-                if (component != topComp) {
-                    lactions.add(SystemAction.get(ChangeComponentNameAction.class));
-                } else {
-                    lactions.add(SystemAction.get(TestAction.class));
-                }
+                lactions.add(SystemAction.get(ChangeComponentNameAction.class));
                 lactions.add(null);
 
-                java.util.List<RADProperty<?>> actionProps = component.getActionProperties();
-                for (RADProperty<?> prop : actionProps) {
-                    Action action = PropertyAction.createIfEditable(prop);
-                    if (action != null) {
-                        lactions.add(action);
-                    }
-                }
                 addSeparator(lactions);
 
                 if (component instanceof ComponentContainer) {
@@ -267,8 +236,13 @@ public class RADComponentNode extends FormNode
             lactions.add(null);
 
             javax.swing.Action[] superActions = super.getActions(context);
-            lactions.addAll(Arrays.asList(superActions));
-
+            if (superActions != null && superActions.length > 0) {
+                lactions.addAll(Arrays.asList(superActions));
+                lactions.add(null);
+            }
+            if (component == topComp) {
+                lactions.add(SystemAction.get(TestAction.class));
+            }
             this.actions = new Action[lactions.size()];
             lactions.toArray(this.actions);
         }
@@ -291,12 +265,13 @@ public class RADComponentNode extends FormNode
     private void addContainerActions(List<Action> actions) {
         if (component instanceof RADVisualContainer<?> && !((RADVisualContainer<?>) component).hasDedicatedLayoutSupport()) {
             actions.add(SystemAction.get(SelectLayoutAction.class));
-            actions.add(SystemAction.get(CustomizeLayoutAction.class));
         }
         if (MenuEditLayer.isMenuBarContainer(component)) {
             actions.add(SystemAction.get(InsertMenuAction.class));
         } else if (MenuEditLayer.isMenuRelatedContainer(component)) {
             actions.add(SystemAction.get(AddSubItemAction.class));
+        } else if (component instanceof RADModelGrid || component instanceof RADModelGridColumn) {
+            actions.add(SystemAction.get(AddGridColumnAction.class));
         } else { // only use the AddAction for non-menu containers
             actions.add(SystemAction.get(AddAction.class));
         }
@@ -329,11 +304,13 @@ public class RADComponentNode extends FormNode
      * Set the system name. Fires a property change event. Also may change the
      * display name according to {@link #displayFormat}.
      *
-     * @param s the new name
+     * @param aValue the new name
      */
     @Override
-    public void setName(String s) {
-        component.setName(s);
+    public void setName(String aValue) {
+        if (aValue != null && !aValue.isEmpty()) {
+            component.setName(aValue);
+        }
     }
 
     /**
@@ -343,8 +320,7 @@ public class RADComponentNode extends FormNode
      */
     @Override
     public boolean canRename() {
-        return !component.isReadOnly()
-                && component != component.getFormModel().getTopRADComponent();
+        return !component.isReadOnly();
     }
 
     /**
@@ -396,8 +372,7 @@ public class RADComponentNode extends FormNode
      */
     @Override
     public boolean hasCustomizer() {
-        return !component.isReadOnly()
-                && ((component.getBeanInfo().getBeanDescriptor().getCustomizerClass() != null));
+        return false;
     }
 
     /**
@@ -407,75 +382,7 @@ public class RADComponentNode extends FormNode
      */
     @Override
     protected Component createCustomizer() {
-        Class<?> customizerClass = component.getBeanInfo().getBeanDescriptor().getCustomizerClass();
-        if (customizerClass != null) {
-            Object customizerObject;
-            try {
-                customizerObject = customizerClass.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                ErrorManager.getDefault().notify(ErrorManager.WARNING, e);
-                return null;
-            }
-
-            if (customizerObject instanceof Component && customizerObject instanceof Customizer) {
-                Customizer customizer = (Customizer) customizerObject;
-                customizer.setObject(component.getBeanInstance());
-                if (customizerObject instanceof FormAwareEditor) {
-                    // Hack - returns some property
-                    FormProperty<?> prop = (FormProperty<?>) component.getProperties()[0].getProperties()[0];
-                    ((FormAwareEditor) customizerObject).setContext(component.getFormModel(), (FormProperty<?>) prop);
-                }
-                customizer.addPropertyChangeListener(new PropertyChangeListener() {
-                    @Override
-                    public void propertyChange(PropertyChangeEvent evt) {
-                        FormProperty<?>[] properties;
-                        if (evt.getPropertyName() != null) {
-                            FormProperty<?> changedProperty
-                                    = component.<FormProperty<?>>getRADProperty(evt.getPropertyName());
-                            if (changedProperty != null) {
-                                properties = new FormProperty<?>[]{changedProperty};
-                            } else {
-                                return; // non-existing property?
-                            }
-                        } else {
-                            properties = component.getAllBeanProperties();
-                            evt = null;
-                        }
-                        updatePropertiesFromCustomizer(properties, evt);
-                    }
-                });
-                // [undo/redo for customizer probably does not work...]
-                return (Component) customizerObject;
-            } else {
-                return null;
-            }
-        } else {
-            return null;
-        }
-    }
-
-    private void updatePropertiesFromCustomizer(
-            final FormProperty<?>[] properties,
-            final PropertyChangeEvent evt) {
-        // we run this as privileged to avoid security problems - because
-        // the property change is fired from untrusted bean customizer code
-        AccessController.doPrivileged(new PrivilegedAction<Object>() {
-            @Override
-            public Object run() {
-                Object oldValue = evt != null ? evt.getOldValue() : null;
-                Object newValue = evt != null ? evt.getNewValue() : null;
-
-                for (int i = 0; i < properties.length; i++) {
-                    FormProperty<Object> prop = (FormProperty<Object>) properties[i];
-                    try {
-                        prop.propertyValueChanged(oldValue, newValue);
-                    } catch (Exception ex) { // unlikely to happen
-                        ErrorManager.getDefault().notify(ex);
-                    }
-                }
-                return null;
-            }
-        });
+        return null;
     }
 
     // -----------------------------------------------------------------------------------------
@@ -556,14 +463,14 @@ public class RADComponentNode extends FormNode
     // FormPropertyCookie implementation
     @Override
     public FormProperty<?> getProperty(String name) {
-        return component.getPropertyByName(name, FormProperty.class, true);
+        return component.getProperty(name);
     }
 
     // -----------------------------------------------------------------------------
     // Innerclasses
     public static class RADChildren extends FormNodeChildren {
 
-        private ComponentContainer container;
+        private final ComponentContainer container;
         private RADLayout keyLayout;
 
         public RADChildren(ComponentContainer aContainer) {
@@ -580,7 +487,7 @@ public class RADComponentNode extends FormNode
                 keyLayout = ((RADVisualContainer<?>) container).getLayoutSupport().getLayoutDelegate().getRadLayout();
                 keys.add(keyLayout);
             }
-            if (container instanceof RADModelGridColumn) {
+            if (container instanceof RADModelGridColumn && ((RADModelGridColumn)container).getBeanInstance() instanceof ModelGridColumn) {
                 RADModelGridColumn col = (RADModelGridColumn) container;
                 keys.add(col.getViewControl());
             }

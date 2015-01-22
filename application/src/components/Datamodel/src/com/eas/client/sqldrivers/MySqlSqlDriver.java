@@ -5,9 +5,7 @@
 package com.eas.client.sqldrivers;
 
 import com.bearsoft.rowset.Converter;
-import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.RowsetConverter;
-import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.bearsoft.rowset.metadata.PrimaryKeySpec;
@@ -30,6 +28,10 @@ import java.util.Set;
  */
 public class MySqlSqlDriver extends SqlDriver {
 
+    // настройка экранирования наименования объектов БД
+    private final TwinString[] charsForWrap = {new TwinString("`", "`")};
+    private final char[] restrictedChars = {' ', ',', '\'', '"'};
+
     protected static final int[] mySqlErrorCodes = {};
     protected static final String[] platypusErrorMessages = {};
     protected Converter converter = new RowsetConverter();
@@ -47,17 +49,20 @@ public class MySqlSqlDriver extends SqlDriver {
     //    1 - имя таблицы(представления) 
     //    2 - имя схемы-владельца 
     //    3 - тип (TABLE/VIEW)
+    //    4 - комментарий
     public static final String SQL_TABLES_VIEWS = ""
             + "SELECT"
             + "  " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
             + "  " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
-            + "  " + ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME + " "
+            + "  " + ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME + ","
+            + "  " + ClientConstants.JDBCCOLS_REMARKS + " "
             + "FROM"
             + "("
             + "SELECT"
             + "  table_name AS " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
             + "  table_schema AS " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
-            + "  (CASE table_type WHEN 'BASE TABLE' THEN '" + ClientConstants.JDBCPKS_TABLE_TYPE_TABLE + "' ELSE table_type END) AS " + ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME + " "
+            + "  (CASE table_type WHEN 'BASE TABLE' THEN '" + ClientConstants.JDBCPKS_TABLE_TYPE_TABLE + "' ELSE table_type END) AS " + ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME + ","
+            + "  table_comment AS " + ClientConstants.JDBCCOLS_REMARKS + " "
             + "FROM  information_schema.tables"
             + ") tables_views_alias ";
     public static final String SQL_ALL_TABLES_VIEWS = SQL_TABLES_VIEWS
@@ -119,51 +124,6 @@ public class MySqlSqlDriver extends SqlDriver {
             + "WHERE table_schema = '%s' AND table_name in (%s) "
             + "ORDER BY table_schema, table_name, ordinal_position"
             + ") columns_alias";
-    //-------------------------------------        
-    // комментарии к колонке 
-    //    1 - комментарий
-    //    2 - имя схемы
-    //    3 - имя таблицы
-    //    4 - имя колонки
-    public static final String SQL_COLUMNS_COMMENTS = ""
-            + "SELECT"
-            + "  " + ClientConstants.F_COLUMNS_COMMENTS_COMMENT_FIELD_NAME + ","
-            + "  " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
-            + "  " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
-            + "  " + ClientConstants.F_COLUMNS_COMMENTS_FIELD_FIELD_NAME + " "
-            + "FROM"
-            + "("
-            + "SELECT"
-            + "  column_comment AS " + ClientConstants.F_COLUMNS_COMMENTS_COMMENT_FIELD_NAME + ","
-            + "  table_schema AS " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
-            + "  table_name AS " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
-            + "  column_name AS " + ClientConstants.F_COLUMNS_COMMENTS_FIELD_FIELD_NAME + " "
-            + "FROM information_schema.columns "
-            + "WHERE table_schema = '%s' AND table_name in (%s) "
-            + "ORDER BY table_schema, table_name, ordinal_position"
-            + ") column_comments_alias";
-    //---------------------------------------------------------------------
-    // комментарии к таблицам 
-    //    1 - имя схемы
-    //    2 - имя таблицы
-    //    3 - комментарий
-    protected static final String SQL_ALL_OWNER_TABLES_COMMENTS = ""
-            + "SELECT"
-            + "  " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
-            + "  " + ClientConstants.F_TABLE_COMMENTS_NAME_FIELD_NAME + ","
-            + "  " + ClientConstants.F_TABLE_COMMENTS_COMMENT_FIELD_NAME + " "
-            + "FROM"
-            + "("
-            + "SELECT"
-            + "  table_schema AS " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
-            + "  table_name AS " + ClientConstants.F_TABLE_COMMENTS_NAME_FIELD_NAME + ","
-            + "  table_comment AS " + ClientConstants.F_TABLE_COMMENTS_COMMENT_FIELD_NAME + " "
-            + "FROM  information_schema.tables "
-            + ") table_comments_alias "
-            + "WHERE "
-            + "  " + ClientConstants.JDBCCOLS_TABLE_SCHEM + " = '%s' ";
-    protected static final String SQL_TABLE_COMMENTS = SQL_ALL_OWNER_TABLES_COMMENTS
-            + "AND " + ClientConstants.JDBCCOLS_TABLE_NAME + " in (%s)";
     //-----------------------------------------------------------
     // индексы
     //    1 - категория(?) таблицы (??? - не используется)
@@ -216,7 +176,7 @@ public class MySqlSqlDriver extends SqlDriver {
             + "  null AS FILTER_CONDITION,"
             + "  (case when index_name = 'PRIMARY' then 0 else 1 end) AS " + ClientConstants.JDBCIDX_PRIMARY_KEY + ","
             + " (SELECT distinct r.constraint_name FROM  information_schema.referential_constraints r "
-            + "       WHERE r.constraint_catalog = s.table_catalog AND r.constraint_schema = s.table_schema  AND"
+            + "       WHERE r.constraint_catalog = s.table_catalog AND r.constraint_schema = s.table_schema AND"
             + "       r.table_name = s.table_name and r.constraint_name = s.index_name ) AS " + ClientConstants.JDBCIDX_FOREIGN_KEY + " "
             + "FROM information_schema.statistics s "
             + "WHERE table_schema = '%s' AND table_name in (%s) "
@@ -329,7 +289,6 @@ public class MySqlSqlDriver extends SqlDriver {
 
     public MySqlSqlDriver() {
         super();
-        setWrap("`", "`", new String[]{" "});
     }
 
     @Override
@@ -346,12 +305,12 @@ public class MySqlSqlDriver extends SqlDriver {
     public String getUsersSpaceInitResourceName() {
         return "/" + MySqlSqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/MySqlInitUsersSpace.sql";
     }
-    
+
     @Override
     public String getVersionInitResourceName() {
         return "/" + MySqlSqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/MySqlInitVersion.sql";
     }
-    
+
     @Override
     public Set<Integer> getSupportedJdbcDataTypes() {
         return resolver.getSupportedJdbcDataTypes();
@@ -361,7 +320,7 @@ public class MySqlSqlDriver extends SqlDriver {
     public String getSql4TableColumns(String aOwnerName, Set<String> aTableNames) {
         if (aTableNames != null && !aTableNames.isEmpty()) {
             String tablesIn = constructIn(aTableNames);
-            return String.format(SQL_COLUMNS, aOwnerName, tablesIn);
+            return String.format(SQL_COLUMNS, prepareName(aOwnerName), tablesIn);
         } else {
             return null;
         }
@@ -371,7 +330,7 @@ public class MySqlSqlDriver extends SqlDriver {
     public String getSql4TablePrimaryKeys(String aOwnerName, Set<String> aTableNames) {
         if (aTableNames != null && !aTableNames.isEmpty()) {
             String tablesIn = constructIn(aTableNames);
-            return String.format(SQL_PRIMARY_KEYS, aOwnerName, tablesIn);
+            return String.format(SQL_PRIMARY_KEYS, prepareName(aOwnerName), tablesIn);
         } else {
             return null;
         }
@@ -380,16 +339,7 @@ public class MySqlSqlDriver extends SqlDriver {
     @Override
     public String getSql4TableForeignKeys(String aOwnerName, Set<String> aTableNames) {
         if (aTableNames != null && !aTableNames.isEmpty()) {
-            return String.format(SQL_FOREIGN_KEYS, aOwnerName, constructIn(aTableNames));
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public String getSql4ColumnsComments(String aOwnerName, Set<String> aTableNames) {
-        if (aTableNames != null && !aTableNames.isEmpty()) {
-            return String.format(SQL_COLUMNS_COMMENTS, aOwnerName, constructIn(aTableNames));
+            return String.format(SQL_FOREIGN_KEYS, prepareName(aOwnerName), constructIn(aTableNames));
         } else {
             return null;
         }
@@ -399,7 +349,7 @@ public class MySqlSqlDriver extends SqlDriver {
     public String getSql4Indexes(String aOwnerName, Set<String> aTableNames) {
         if (aTableNames != null && !aTableNames.isEmpty()) {
             String tablesIn = constructIn(aTableNames);
-            return String.format(SQL_INDEX_KEYS, aOwnerName, tablesIn);
+            return String.format(SQL_INDEX_KEYS, prepareName(aOwnerName), tablesIn);
         } else {
             return null;
         }
@@ -407,10 +357,7 @@ public class MySqlSqlDriver extends SqlDriver {
 
     @Override
     public String[] getSql4CreateColumnComment(String aOwnerName, String aTableName, String aFieldName, String aDescription) {
-        String schemaClause = ((aOwnerName != null && !aOwnerName.trim().isEmpty()) ? wrapName(aOwnerName) + "." : "");
-        aOwnerName = wrapName(aOwnerName);
-        aTableName = wrapName(aTableName);
-        aFieldName = wrapName(aFieldName);
+        String schemaClause = ((aOwnerName != null && !aOwnerName.trim().isEmpty()) ? wrapNameIfRequired(aOwnerName) + "." : "");
         if (aDescription == null) {
             aDescription = "";
         }
@@ -446,8 +393,8 @@ public class MySqlSqlDriver extends SqlDriver {
                 + "   PREPARE result_select FROM @select_stm;"
                 + "   EXECUTE result_select;"
                 + "   DROP PREPARE result_select;"
-                + "   SET @stm = CONCAT('ALTER TABLE ', IF(LENGTH(aOwnerName), CONCAT(aOwnerName,'.'), ''), aTableName,"
-                + "   	' MODIFY COLUMN ',aFieldName,' ',@define_column,"
+                + "   SET @stm = CONCAT('ALTER TABLE ', IF(LENGTH(aOwnerName), CONCAT('`',aOwnerName,'`.'), ''), '`',aTableName,'`'"
+                + "   	' MODIFY COLUMN `',aFieldName,'` ',@define_column,"
                 + "     IF(aDescription is null,'''',CONCAT(' COMMENT ''',aDescription,'''')));"
                 + "   PREPARE alter_stm FROM @stm;"
                 + "   EXECUTE alter_stm;"
@@ -455,18 +402,9 @@ public class MySqlSqlDriver extends SqlDriver {
                 + "   SET res = CONCAT(@select_stm,';',@stm); "
                 + "END";
         String sql2 = "CALL " + schemaClause + "setColumnComment('"
-                + aOwnerName + "','" + aTableName + "','" + aFieldName + "','" + aDescription + "',@a)";
+                + unwrapName(aOwnerName) + "','" + unwrapName(aTableName) + "','" + unwrapName(aFieldName) + "','" + aDescription + "',@a)";
         String sql3 = "DROP PROCEDURE " + schemaClause + "setColumnComment";
         return new String[]{sql0, sql1, sql2, sql3};
-    }
-
-    @Override
-    public String getSql4TableComments(String aOwnerName, Set<String> aTableNames) {
-        if (aTableNames != null && !aTableNames.isEmpty()) {
-            return String.format(SQL_TABLE_COMMENTS, aOwnerName, constructIn(aTableNames));
-        } else {
-            return String.format(SQL_ALL_OWNER_TABLES_COMMENTS, aOwnerName);
-        }
     }
 
     @Override
@@ -479,45 +417,13 @@ public class MySqlSqlDriver extends SqlDriver {
     }
 
     @Override
-    public String getColumnNameFromCommentsDs(Rowset rs) throws RowsetException {
-        if (!rs.isAfterLast() && !rs.isBeforeFirst()) {
-            return (String) rs.getObject(rs.getFields().find(ClientConstants.F_COLUMNS_COMMENTS_FIELD_FIELD_NAME));
-        }
-        return null;
-    }
-
-    @Override
-    public String getColumnCommentFromCommentsDs(Rowset rs) throws RowsetException {
-        if (!rs.isAfterLast() && !rs.isBeforeFirst()) {
-            return (String) rs.getObject(rs.getFields().find(ClientConstants.F_COLUMNS_COMMENTS_COMMENT_FIELD_NAME));
-        }
-        return null;
-    }
-
-    @Override
-    public String getTableNameFromCommentsDs(Rowset rs) throws RowsetException {
-        if (!rs.isAfterLast() && !rs.isBeforeFirst()) {
-            return (String) rs.getObject(rs.getFields().find(ClientConstants.F_TABLE_COMMENTS_NAME_FIELD_NAME));
-        }
-        return null;
-    }
-
-    @Override
-    public String getTableCommentFromCommentsDs(Rowset rs) throws RowsetException {
-        if (!rs.isAfterLast() && !rs.isBeforeFirst()) {
-            return (String) rs.getObject(rs.getFields().find(ClientConstants.F_TABLE_COMMENTS_COMMENT_FIELD_NAME));
-        }
-        return null;
-    }
-
-    @Override
     public String getSql4DropTable(String aSchemaName, String aTableName) {
         return "DROP TABLE " + makeFullName(aSchemaName, aTableName);
     }
 
     @Override
     public String getSql4DropIndex(String aSchemaName, String aTableName, String aIndexName) {
-        return String.format("DROP INDEX %s ON %s", wrapName(aIndexName), makeFullName(aSchemaName, aTableName));
+        return String.format("DROP INDEX %s ON %s", wrapNameIfRequired(aIndexName), makeFullName(aSchemaName, aTableName));
     }
 
     @Override
@@ -525,7 +431,7 @@ public class MySqlSqlDriver extends SqlDriver {
 
         String fkTableName = makeFullName(aSchemaName, aFk.getTable());
         String fkName = aFk.getCName();
-        return String.format("ALTER TABLE %s DROP FOREIGN KEY %s", fkTableName, wrapName(fkName));
+        return String.format("ALTER TABLE %s DROP FOREIGN KEY %s", fkTableName, wrapNameIfRequired(fkName));
     }
 
     @Override
@@ -541,18 +447,18 @@ public class MySqlSqlDriver extends SqlDriver {
             ForeignKeySpec fk = listFk.get(0);
             String fkTableName = makeFullName(aSchemaName, fk.getTable());
             String fkName = fk.getCName();
-            String fkColumnName = wrapName(fk.getField());
+            String fkColumnName = wrapNameIfRequired(fk.getField());
 
             PrimaryKeySpec pk = fk.getReferee();
             String pkSchemaName = pk.getSchema();
             String pkTableName = makeFullName(aSchemaName, pk.getTable());
-            String pkColumnName = wrapName(pk.getField());
+            String pkColumnName = wrapNameIfRequired(pk.getField());
 
             for (int i = 1; i < listFk.size(); i++) {
                 fk = listFk.get(i);
                 pk = fk.getReferee();
-                fkColumnName += ", " + wrapName(fk.getField());
-                pkColumnName += ", " + wrapName(pk.getField());
+                fkColumnName += ", " + wrapNameIfRequired(fk.getField());
+                pkColumnName += ", " + wrapNameIfRequired(pk.getField());
             }
 
             String fkRule = "";
@@ -585,8 +491,7 @@ public class MySqlSqlDriver extends SqlDriver {
                     break;
             }
             return String.format("ALTER TABLE %s ADD CONSTRAINT %s"
-                    + " FOREIGN KEY (%s) REFERENCES %s (%s) %s", fkTableName, fkName.isEmpty() ? "" : wrapName(fkName), fkColumnName, pkTableName, pkColumnName, fkRule);
-
+                    + " FOREIGN KEY (%s) REFERENCES %s (%s) %s", fkTableName, fkName.isEmpty() ? "" : wrapNameIfRequired(fkName), fkColumnName, pkTableName, pkColumnName, fkRule);
 
         }
         return null;
@@ -600,7 +505,7 @@ public class MySqlSqlDriver extends SqlDriver {
         String fieldsList = "";
         for (int i = 0; i < aIndex.getColumns().size(); i++) {
             DbTableIndexColumnSpec column = aIndex.getColumns().get(i);
-            fieldsList += wrapName(column.getColumnName());
+            fieldsList += wrapNameIfRequired(column.getColumnName());
             if (!column.isAscending()) {
                 fieldsList += " DESC";
             }
@@ -609,7 +514,7 @@ public class MySqlSqlDriver extends SqlDriver {
             }
         }
         return "CREATE " + (aIndex.isUnique() ? "UNIQUE " : "")
-                + "INDEX " + wrapName(aIndex.getName()) + (aIndex.isHashed() ? " USING HASH " : " ")
+                + "INDEX " + wrapNameIfRequired(aIndex.getName()) + (aIndex.isHashed() ? " USING HASH " : " ")
                 + "ON " + tableName + " (" + fieldsList + ")";
     }
 
@@ -617,7 +522,7 @@ public class MySqlSqlDriver extends SqlDriver {
     public String getSql4EmptyTableCreation(String aSchemaName, String aTableName, String aPkFieldName) {
         String fullName = makeFullName(aSchemaName, aTableName);
         return String.format("CREATE TABLE %s (%s DECIMAL(18,0) NOT NULL,"
-                + "CONSTRAINT PRIMARY KEY (%s)) ENGINE=InnoDB", fullName, wrapName(aPkFieldName), wrapName(aPkFieldName));
+                + "CONSTRAINT PRIMARY KEY (%s)) ENGINE=InnoDB", fullName, wrapNameIfRequired(aPkFieldName), wrapNameIfRequired(aPkFieldName));
     }
 
     @Override
@@ -656,7 +561,7 @@ public class MySqlSqlDriver extends SqlDriver {
 
     @Override
     public String getSql4FieldDefinition(Field aField) {
-        String fieldDefinition = wrapName(aField.getName()) + " " + getFieldTypeDefinition(aField);
+        String fieldDefinition = wrapNameIfRequired(aField.getName()) + " " + getFieldTypeDefinition(aField);
         if (!aField.isSigned() && SQLUtils.getTypeGroup(aField.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.NUMBERS) {
             fieldDefinition += " UNSIGNED";
         }
@@ -676,7 +581,7 @@ public class MySqlSqlDriver extends SqlDriver {
     @Override
     public String[] getSqls4RenamingField(String aSchemaName, String aTableName, String aOldFieldName, Field aNewFieldMd) {
         String fullTableName = makeFullName(aSchemaName, aTableName);
-        return new String[]{String.format("ALTER TABLE %s CHANGE %s %s", fullTableName, wrapName(aOldFieldName), getSql4FieldDefinition(aNewFieldMd))};
+        return new String[]{String.format("ALTER TABLE %s CHANGE %s %s", fullTableName, wrapNameIfRequired(aOldFieldName), getSql4FieldDefinition(aNewFieldMd))};
     }
 
     @Override
@@ -686,10 +591,10 @@ public class MySqlSqlDriver extends SqlDriver {
 
     @Override
     public String getSql4TablesEnumeration(String schema4Sql) {
-        if (schema4Sql == null) {
+        if (schema4Sql == null || schema4Sql.isEmpty()) {
             return SQL_ALL_TABLES_VIEWS;
         } else {
-            return String.format(SQL_SCHEMA_TABLES_VIEWS, schema4Sql);
+            return String.format(SQL_SCHEMA_TABLES_VIEWS, prepareName(schema4Sql));
         }
     }
 
@@ -715,7 +620,7 @@ public class MySqlSqlDriver extends SqlDriver {
     public void applyContextToConnection(Connection aConnection, String aSchema) throws Exception {
         if (aSchema != null && !aSchema.isEmpty()) {
             try (Statement stmt = aConnection.createStatement()) {
-                stmt.execute(String.format(SET_SCHEMA_CLAUSE, wrapName(aSchema)));
+                stmt.execute(String.format(SET_SCHEMA_CLAUSE, wrapNameIfRequired(aSchema)));
             }
         }
     }
@@ -727,11 +632,11 @@ public class MySqlSqlDriver extends SqlDriver {
             PrimaryKeySpec pk = listPk.get(0);
             String tableName = pk.getTable();
             String pkTableName = makeFullName(aSchemaName, tableName);
-            String pkName = wrapName(tableName + PKEY_NAME_SUFFIX);
-            String pkColumnName = wrapName(pk.getField());
+            String pkName = wrapNameIfRequired(generatePkName(tableName, PKEY_NAME_SUFFIX));
+            String pkColumnName = wrapNameIfRequired(pk.getField());
             for (int i = 1; i < listPk.size(); i++) {
                 pk = listPk.get(i);
-                pkColumnName += ", " + wrapName(pk.getField());
+                pkColumnName += ", " + wrapNameIfRequired(pk.getField());
             }
             return new String[]{
                 String.format("ALTER TABLE %s ADD CONSTRAINT %s PRIMARY KEY (%s)", pkTableName, pkName, pkColumnName)
@@ -757,5 +662,24 @@ public class MySqlSqlDriver extends SqlDriver {
         return new String[]{
             String.format(SqlDriver.ADD_FIELD_SQL_PREFIX, fullTableName) + getSql4FieldDefinition(aField)
         };
+    }
+
+    @Override
+    public TwinString[] getCharsForWrap() {
+        return charsForWrap;
+    }
+
+    @Override
+    public char[] getRestrictedChars() {
+        return restrictedChars;
+    }
+
+    @Override
+    public boolean isHadWrapped(String aName) {
+        return false;
+    }
+
+    private String prepareName(String aName) {
+        return (isWrappedName(aName) ? unwrapName(aName) : aName);
     }
 }

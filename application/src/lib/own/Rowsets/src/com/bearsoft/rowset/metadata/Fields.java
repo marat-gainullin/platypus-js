@@ -34,6 +34,7 @@ public class Fields implements HasPublished {
     protected CollectionEditingSupport<Fields, Field> collectionSupport = new CollectionEditingSupport<>(this);
     protected JSObject instanceConstructor;
     protected Map<String, Object> ormDefinitions = new HashMap<>();
+    protected Map<String, Collection<String>> ormExpandings = new HashMap<>();
     protected JSObject published;
 
     /**
@@ -67,17 +68,23 @@ public class Fields implements HasPublished {
         }
     }
 
-    /**
-     * Rowset's rows' wrapper class-closure function
-     *
-     * @return
-     */
     public JSObject getInstanceConstructor() {
         return instanceConstructor;
     }
 
     public void setInstanceConstructor(JSObject aValue) {
         instanceConstructor = aValue;
+    }
+
+    public void addOrmScalarExpanding(String aBaseName, String aName) {
+        if (aName != null && !aName.isEmpty() && aBaseName != null && !aBaseName.isEmpty()) {
+            Collection<String> expandings = ormExpandings.get(aBaseName);
+            if (expandings == null) {
+                expandings = new HashSet<>();
+                ormExpandings.put(aBaseName, expandings);
+            }
+            expandings.add(aName);
+        }
     }
 
     public void putOrmDefinition(String aName, JSObject aDefinition) {
@@ -90,6 +97,10 @@ public class Fields implements HasPublished {
 
     public Map<String, Object> getOrmDefinitions() {
         return Collections.unmodifiableMap(ormDefinitions);
+    }
+
+    public Map<String, Collection<String>> getOrmExpandings() {
+        return ormExpandings;
     }
 
     public PropertyChangeSupport getChangeSupport() {
@@ -554,7 +565,7 @@ public class Fields implements HasPublished {
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = (JSObject)publisher.call(null, new Object[]{this});
+            published = (JSObject) publisher.call(null, new Object[]{this});
         }
         return published;
     }

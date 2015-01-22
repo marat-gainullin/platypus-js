@@ -27,12 +27,15 @@ import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.sqldrivers.SqlDriver;
+import com.eas.metadata.testdefine.Db2TestDefine;
 import com.eas.metadata.testdefine.PostgreTestDefine;
 import com.eas.metadata.testdefine.H2TestDefine;
+import com.eas.metadata.testdefine.MsSqlTestDefine;
 import com.eas.metadata.testdefine.MySqlTestDefine;
 import com.eas.metadata.testdefine.OracleTestDefine;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -55,19 +58,35 @@ public class MetadataSynchronizerTest {
 
     private int cntTabs = 0;
     private final String XML_NAME = "test.xml";
-    private SourceDbSetting[] sourceDbSetting = {
-        new SourceDbSetting(new DbConnection("jdbc:oracle:thin:@research.office.altsoft.biz:1521/DBALT", "test1", "test1", "test1"), Database.ORACLE, new OracleTestDefine()),
-        new SourceDbSetting(new DbConnection("jdbc:postgresql://192.168.10.1:5432/Trans", "test1", "test1", "test1"), Database.POSTGRESQL, new PostgreTestDefine()),
+//    private SourceDbSetting[] sourceDbSetting = {
+//        new SourceDbSetting(new DbConnection("jdbc:oracle:thin:@research.office.altsoft.biz:1521/DBALT", "test1", "test1", "test1"), Database.ORACLE, new OracleTestDefine()),
+//        new SourceDbSetting(new DbConnection("jdbc:postgresql://192.168.10.1:5432/Trans", "test1", "test1", "test1"), Database.POSTGRESQL, new PostgreTestDefine()),
+//        new SourceDbSetting(new DbConnection("jdbc:mysql://192.168.10.205:3306/test1", "test1", "test1", "test1"), Database.MYSQL, new MySqlTestDefine()),
+//        //        new SourceDbSetting(new DbConnection("jdbc:db2://192.168.10.154:50000/test", "test1", "dba", "masterkey"), Database.DB2, new Db2TestDefine()),
+//        new SourceDbSetting(new DbConnection("jdbc:h2:tcp://localhost/~/test", "test1", "test1", "test1"), Database.H2, new H2TestDefine()), //        new SourceDbSetting(new DbConnection("jdbc:jtds:sqlserver://192.168.10.154:1433/test1", "dbo", "test1", "1test1"), Database.MSSQL, new MsSqlTestDefine())
+//    };
+//    private DestinationDbSetting[] destinationDbSetting = {
+//        new DestinationDbSetting(new DbConnection("jdbc:oracle:thin:@research.office.altsoft.biz:1521/DBALT", "test2", "test2", "test2"), Database.ORACLE),
+//        new DestinationDbSetting(new DbConnection("jdbc:postgresql://192.168.10.1:5432/Trans", "test2", "test2", "test2"), Database.POSTGRESQL),
+//        new DestinationDbSetting(new DbConnection("jdbc:mysql://192.168.10.205:3306/test2", "test2", "test2", "test2"), Database.MYSQL),
+//        //        new DestinationDbSetting(new DbConnection("jdbc:db2://192.168.10.154:50000/test", "test2", "dba", "masterkey"), Database.DB2),
+//        new DestinationDbSetting(new DbConnection("jdbc:h2:tcp://localhost/~/test", "test2", "test2", "test2"), Database.H2), //        new DestinationDbSetting(new DbConnection("jdbc:jtds:sqlserver://192.168.10.154:1433/test2", "dbo", "test2", "2test2"), Database.MSSQL)
+//    };
+    private final SourceDbSetting[] sourceDbSetting = {
+        new SourceDbSetting(new DbConnection("jdbc:oracle:thin:@research.office.altsoft.biz:1521/DBALT", "test1", "test1", "ptest1"), Database.ORACLE, new OracleTestDefine()),
+        new SourceDbSetting(new DbConnection("jdbc:postgresql://192.168.10.52:5432/tst_db", "schema1", "user1", "puser1"), Database.POSTGRESQL, new PostgreTestDefine()),
         new SourceDbSetting(new DbConnection("jdbc:mysql://192.168.10.205:3306/test1", "test1", "test1", "test1"), Database.MYSQL, new MySqlTestDefine()),
-        //        new SourceDbSetting(new DbConnection("jdbc:db2://192.168.10.154:50000/test", "test1", "dba", "masterkey"), Database.DB2, new Db2TestDefine()),
-        new SourceDbSetting(new DbConnection("jdbc:h2:tcp://localhost/~/test", "test1", "test1", "test1"), Database.H2, new H2TestDefine()), //        new SourceDbSetting(new DbConnection("jdbc:jtds:sqlserver://192.168.10.154:1433/test1", "dbo", "test1", "1test1"), Database.MSSQL, new MsSqlTestDefine())
+        new SourceDbSetting(new DbConnection("jdbc:db2://192.168.10.52:50000/tst_db", "schema1", "test1", "ptest1"), Database.DB2, new Db2TestDefine()),
+        new SourceDbSetting(new DbConnection("jdbc:h2:tcp://localhost/~/test", "schema1", "test1", "ptest1"), Database.H2, new H2TestDefine()), 
+        new SourceDbSetting(new DbConnection("jdbc:jtds:sqlserver://192.168.10.52:1433/tst2_db", "schema1", "test1", "ptest1"), Database.MSSQL, new MsSqlTestDefine())
     };
-    private DestinationDbSetting[] destinationDbSetting = {
-        new DestinationDbSetting(new DbConnection("jdbc:oracle:thin:@research.office.altsoft.biz:1521/DBALT", "test2", "test2", "test2"), Database.ORACLE),
-        new DestinationDbSetting(new DbConnection("jdbc:postgresql://192.168.10.1:5432/Trans", "test2", "test2", "test2"), Database.POSTGRESQL),
+    private final DestinationDbSetting[] destinationDbSetting = {
+        new DestinationDbSetting(new DbConnection("jdbc:oracle:thin:@research.office.altsoft.biz:1521/DBALT", "test2", "test2", "ptest2"), Database.ORACLE),
+        new DestinationDbSetting(new DbConnection("jdbc:postgresql://192.168.10.52:5432/tst_db", "schema2", "user1", "puser1"), Database.POSTGRESQL),
         new DestinationDbSetting(new DbConnection("jdbc:mysql://192.168.10.205:3306/test2", "test2", "test2", "test2"), Database.MYSQL),
-        //        new DestinationDbSetting(new DbConnection("jdbc:db2://192.168.10.154:50000/test", "test2", "dba", "masterkey"), Database.DB2),
-        new DestinationDbSetting(new DbConnection("jdbc:h2:tcp://localhost/~/test", "test2", "test2", "test2"), Database.H2), //        new DestinationDbSetting(new DbConnection("jdbc:jtds:sqlserver://192.168.10.154:1433/test2", "dbo", "test2", "2test2"), Database.MSSQL)
+        new DestinationDbSetting(new DbConnection("jdbc:db2://192.168.10.52:50000/tst_db", "schema2", "test1", "ptest1"), Database.DB2),
+        new DestinationDbSetting(new DbConnection("jdbc:h2:tcp://localhost/~/test", "schema2", "test2", "ptest2"), Database.H2), 
+        new DestinationDbSetting(new DbConnection("jdbc:jtds:sqlserver://192.168.10.52:1433/tst2_db", "schema2", "test1", "ptest1"), Database.MSSQL)
     };
 
     @BeforeClass
@@ -113,7 +132,8 @@ public class MetadataSynchronizerTest {
         Logger logger = MetadataSynchronizer.initLogger(MetadataSynchronizerTest.class.getName(), Level.ALL, false);
         try {
             logger.addHandler(MetadataSynchronizer.createFileHandler(logName + ".log", "UTF-8", new LineLogFormatter()));
-            printText(cntTabs++, "*** runAllTestsDb ***");
+            Date d1 = new Date();
+            printText(cntTabs++, "*** runAllTestsDb ***    " + d1);
             printText(cntTabs, "source: \t(url=", srcDbConnection.getUrl(), " \tschema=", srcDbConnection.getSchema(), " \tuser=", srcDbConnection.getUser(), ")");
             printText(cntTabs, "destination: \t(url=", destDbConnection.getUrl(), " \tschema=", destDbConnection.getSchema(), " \tuser=", destDbConnection.getUser(), ")");
 
@@ -122,7 +142,8 @@ public class MetadataSynchronizerTest {
             runAllTestsFields(logName, aSourceSetting, aDestinationSetting);
             runAllTestIndexes(logName, aSourceSetting, aDestinationSetting);
             runAllTestKeys(logName, aSourceSetting, aDestinationSetting);
-            printText(--cntTabs, "*** end runAllTestsDb ***");
+            long s = (new Date().getTime() - d1.getTime()) / 1000;
+            printText(--cntTabs, "*** end runAllTestsDb ***    (" + s/60 + " min " + s%60 + " sec)");
         } finally {
             MetadataSynchronizer.closeLogHandlers(logger);
         }
@@ -1020,7 +1041,7 @@ public class MetadataSynchronizerTest {
     private DatabasesClientWithResource createClient(DbConnection aDbConnection) throws Exception {
 //        DbConnectionSettings settings = new DbConnectionSettings(aDbConnection.getUrl(), aDbConnection.getUser(), aDbConnection.getPassword(), aDbConnection.getSchema(), null);
         DbConnectionSettings settings = new DbConnectionSettings(aDbConnection.getUrl(), aDbConnection.getUser(), aDbConnection.getPassword());
-        return new DatabasesClientWithResource(settings, null);
+        return new DatabasesClientWithResource(settings);
     }
 
     private void clearSchema(DbConnection aDbConnection) throws Exception {

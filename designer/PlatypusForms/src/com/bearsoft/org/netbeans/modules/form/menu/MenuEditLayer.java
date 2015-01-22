@@ -48,6 +48,7 @@ import com.bearsoft.org.netbeans.modules.form.actions.PropertyAction;
 import com.bearsoft.org.netbeans.modules.form.editors.IconEditor.NbImageIcon;
 import com.bearsoft.org.netbeans.modules.form.palette.PaletteItem;
 import com.bearsoft.org.netbeans.modules.form.palette.PaletteUtils;
+import com.eas.client.forms.menu.MenuItem;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -393,14 +394,11 @@ public class MenuEditLayer extends JPanel {
             formDesigner.getFormModel().addFormModelListener(menuBarFormListener);
         }
         if (paletteListener == null) {
-            paletteListener = new PropertyChangeListener() {
-                @Override
-                public void propertyChange(PropertyChangeEvent evt) {
-                    if (PaletteUtils.getSelectedItem() == null
-                            || !isMenuRelatedComponentClass(PaletteUtils.getSelectedItem().getComponentClass())) {
-                        if (dragop != null && dragop.isStarted()) {
-                            dragop.fastEnd();
-                        }
+            paletteListener = (PropertyChangeEvent evt) -> {
+                if (PaletteUtils.getSelectedItem() == null
+                        || !isMenuRelatedComponentClass(PaletteUtils.getSelectedItem().getComponentClass())) {
+                    if (dragop != null && dragop.isStarted()) {
+                        dragop.fastEnd();
                     }
                 }
             };
@@ -426,22 +424,19 @@ public class MenuEditLayer extends JPanel {
 
     private void configureSelectionListener() {
         if (selectionListener == null) {
-            selectionListener = new PropertyChangeListener() {
-                @Override
-                public void propertyChange(PropertyChangeEvent evt) {
-                    if (isAlive) {
-                        Node[] newNodes = (Node[]) evt.getNewValue();
-                        List<RADVisualComponent<?>> selectedNodes = new ArrayList<>();
-                        for (Node n : newNodes) {
-                            if (n instanceof RADComponentNode) {
-                                RADComponentNode radn = (RADComponentNode) n;
-                                if (radn.getRADComponent() instanceof RADVisualComponent<?>) {
-                                    selectedNodes.add((RADVisualComponent<?>) radn.getRADComponent());
-                                }
+            selectionListener = (PropertyChangeEvent evt) -> {
+                if (isAlive) {
+                    Node[] newNodes = (Node[]) evt.getNewValue();
+                    List<RADVisualComponent<?>> selectedNodes = new ArrayList<>();
+                    for (Node n : newNodes) {
+                        if (n instanceof RADComponentNode) {
+                            RADComponentNode radn = (RADComponentNode) n;
+                            if (radn.getRADComponent() instanceof RADVisualComponent<?>) {
+                                selectedNodes.add((RADVisualComponent<?>) radn.getRADComponent());
                             }
                         }
-                        setSelectedRADComponents(selectedNodes);
                     }
+                    setSelectedRADComponents(selectedNodes);
                 }
             };
             formDesigner.addPropertyChangeListener("activatedNodes", selectionListener); // NOI18N
@@ -475,16 +470,12 @@ public class MenuEditLayer extends JPanel {
                 hackedPopupFactory.getPopup(menu, null, 0, 0);
 
                 // do later so that the component will definitely be on screen by then
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            popup.show(menu, 0, menu.getHeight());
-                        } catch (Exception ex) {
-                            ErrorManager.getDefault().notify(ex);
-                            //ignore anyexceptions caused by showing the popups
-                        }
-
+                java.awt.EventQueue.invokeLater(() -> {
+                    try {
+                        popup.show(menu, 0, menu.getHeight());
+                    } catch (Exception ex) {
+                        ErrorManager.getDefault().notify(ex);
+                        //ignore anyexceptions caused by showing the popups
                     }
                 });
             }
@@ -848,7 +839,7 @@ public class MenuEditLayer extends JPanel {
     }
 
     private Color getNormalBackground(RADComponent<?> radComp, Component c) {
-        RADProperty<Color> prop = radComp.<RADProperty<Color>>getRADProperty("background"); // NOI18N
+        RADProperty<Color> prop = radComp.<RADProperty<Color>>getProperty("background"); // NOI18N
         Color color = null;
         if (prop != null) {
             try {
@@ -1135,13 +1126,6 @@ public class MenuEditLayer extends JPanel {
         }
     }
 
-    public static boolean addComponentToEndOfMenu(RADComponent<?> targetContainer, PaletteItem paletteItem) throws Exception {
-        FormModel model = targetContainer.getFormModel();
-        RADComponentCreator creator = model.getComponentCreator();
-        creator.precreateVisualComponent(paletteItem.getComponentClassSource());
-        return creator.addPrecreatedComponent(targetContainer, -1, null);
-    }
-
     // change the look of the component to reflect the newly added state.
     // this mainly means making the foreground color light gray.
     void configureNewComponent(RADComponent<?> item) {
@@ -1291,9 +1275,9 @@ public class MenuEditLayer extends JPanel {
     private void updateIcon(RADComponent<?> rad) {
         try {
             Component comp = formDesigner.getComponent(rad);
-            if (comp instanceof JMenuItem) {
-                JMenuItem item = (JMenuItem) comp;
-                RADProperty<?> icon_prop = rad.<RADProperty<?>>getRADProperty("icon");
+            if (comp instanceof MenuItem) {
+                MenuItem item = (MenuItem) comp;
+                RADProperty<?> icon_prop = rad.<RADProperty<?>>getProperty("icon");
                 Object value = icon_prop.getValue();
                 // extract the new value
                 Icon icon = null;
@@ -1301,7 +1285,7 @@ public class MenuEditLayer extends JPanel {
                     icon = (Icon) value;
                 }
                 if (value instanceof NbImageIcon) {
-                    icon = ((NbImageIcon) value).getIcon();
+                    icon = (NbImageIcon) value;
                 }
                 // do the actual update
                 if (!(item.getIcon() instanceof WrapperIcon) && !isTopLevelMenu(item)) {
@@ -1368,12 +1352,7 @@ public class MenuEditLayer extends JPanel {
     }
 
     public boolean doesFormContainMenuBar() {
-        for (RADComponent<?> comp : formDesigner.getFormModel().getAllComponents()) {
-            if (JMenuBar.class.isAssignableFrom(comp.getBeanClass())) {
-                return true;
-            }
-        }
-        return false;
+        return formDesigner.getFormModel().getAllComponents().stream().anyMatch((comp) -> (JMenuBar.class.isAssignableFrom(comp.getBeanClass())));
     }
 
     private class GlassLayerMouseListener extends MouseInputAdapter {
@@ -1529,7 +1508,7 @@ public class MenuEditLayer extends JPanel {
 
         private void showIconEditor(RADComponent<?> comp) {
             try {
-                RADProperty<?> prop = comp.<RADProperty<?>>getRADProperty("icon"); // NOI18N
+                RADProperty<?> prop = comp.<RADProperty<?>>getProperty("icon"); // NOI18N
                 new PropertyAction(prop).actionPerformed(null);
             } catch (Throwable th) {
                 ErrorManager.getDefault().notify(th);
@@ -1538,7 +1517,7 @@ public class MenuEditLayer extends JPanel {
 
         private void showAcceleratorEditor(RADComponent<?> comp) {
             try {
-                RADProperty<?> prop = comp.<RADProperty<?>>getRADProperty("accelerator"); // NOI18N
+                RADProperty<?> prop = comp.<RADProperty<?>>getProperty("accelerator"); // NOI18N
                 new PropertyAction(prop).actionPerformed(null);
             } catch (Throwable th) {
                 ErrorManager.getDefault().notify(th);

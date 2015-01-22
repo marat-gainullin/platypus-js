@@ -1,22 +1,29 @@
 package com.eas.client.form.grid.columns;
 
-import com.bearsoft.rowset.Row;
-import com.eas.client.form.grid.cells.RadioButtonCell;
-import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.view.client.SelectionModel;
+import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
+import com.eas.client.form.grid.cells.CheckBoxCell;
+import com.eas.client.form.published.widgets.model.ModelGrid;
+import com.google.gwt.core.client.JavaScriptObject;
 
-public class RadioServiceColumn extends Column<Row, Boolean> {
+public class RadioServiceColumn extends ModelColumn {
 
-	protected SelectionModel<Row> selectionModel;
-
-	public RadioServiceColumn(String aGroupName, SelectionModel<Row> aSelectionModel) {
-		super(new RadioButtonCell(aGroupName));
-		selectionModel = aSelectionModel;
+	public RadioServiceColumn() {
+		super(new TreeExpandableCell<JavaScriptObject, Object>(new CheckBoxCell("")));
+		designedWidth = 22;
+		minWidth = designedWidth;
+		maxWidth = designedWidth;
 	}
 
 	@Override
-	public Boolean getValue(Row object) {
-		return selectionModel.isSelected(object);
+	public Boolean getValue(JavaScriptObject object) {
+		return grid.getSelectionModel().isSelected(object);
 	}
 
+	@Override
+	public void setGrid(ModelGrid aValue) {
+		((CheckBoxCell) getTargetCell()).setGroupName("");
+		super.setGrid(aValue);
+		if (aValue != null)
+			((CheckBoxCell) getTargetCell()).setGroupName(aValue.getGroupName());
+	}
 }

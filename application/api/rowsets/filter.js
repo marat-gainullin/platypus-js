@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.bearsoft.rowset.filters.Filter");
+    var javaClass = Java.type("com.bearsoft.rowset.ordering.Filter");
     javaClass.setPublisher(function(aDelegate) {
         return new P.Filter(aDelegate);
     });

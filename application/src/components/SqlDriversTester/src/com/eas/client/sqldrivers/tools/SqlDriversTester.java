@@ -4,8 +4,10 @@
  */
 package com.eas.client.sqldrivers.tools;
 
+import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.changes.Change;
+import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
@@ -17,8 +19,11 @@ import com.eas.client.DatabaseMdCache;
 import com.eas.client.DatabasesClient;
 import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.SqlCompiledQuery;
+//import com.eas.client.DbClient;
+//import com.eas.client.DbMetadataCache;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
+//import com.eas.client.queries.SqlCompiledQuery;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.sqldrivers.Db2SqlDriver;
 import com.eas.client.sqldrivers.H2SqlDriver;
@@ -47,27 +52,27 @@ import javax.swing.event.PopupMenuListener;
 public class SqlDriversTester extends JFrame {
 
     //--- общие переменные ---
-    private Connection connectJDBC;   // для jdbc connection
-    private SqlDriver platypusDriver; // для jdbc connection
-    private DatabasesClient client;           // для platypus connection
+    private Connection connectJDBC = null;   // для jdbc connection
+    private SqlDriver platypusDriver = null; // для jdbc connection
+    private DatabasesClient client = null;           // для platypus connection
     private SqlDriver driver = null;         // для platypus connection
     private Map<String, Object[]> jdbcSets = new HashMap<>();
     //--- переменные для SELECT ---
-    private String[] sqls_select;
+    private String[] sqls_select = null;
     //--- переменные для TABLE ---
-    private String[] sqls_table;
+    private String[] sqls_table = null;
     //--- переменные для FIELD ---
-    private String[] sqls_field;
+    private String[] sqls_field = null;
     private Fields fields;
     private Field oldField_field;
     //--- переменные для  commentsDS---
-    private String[] sqls_commentsDS;
+    private String[] sqls_commentsDS = null;
     //--- переменные для INDEX ---
-    private String[] sqls_index;
+    private String[] sqls_index = null;
     //--- переменные для  PK ---
-    private String[] sqls_pk;
+    private String[] sqls_pk = null;
     //--- переменные для  FK ---
-    private String[] sqls_fk;
+    private String[] sqls_fk = null;
     //--- компоненты для панели CONNECT к БД ---
     private JComboBox comboDB_connect = new JComboBox();
     private JTextField fldDriver_connect = new JTextField("", 50);
@@ -94,8 +99,8 @@ public class SqlDriversTester extends JFrame {
     private JRadioButton rb_getSql4SchemasEnumeration = new JRadioButton("getSql4SchemasEnumeration()");
     private JRadioButton rb_getSql4TableColumns = new JRadioButton("getSql4TableColumns(String aOwnerName, Set<String> aTableNames)");
     private JRadioButton rb_getSql4TablesEnumeration = new JRadioButton("getSql4TablesEnumeration(String schema4Sql)");
-    private JRadioButton rb_getSql4ColumnsComments = new JRadioButton("getSql4ColumnsComments(String aOwnerName, Set<String> aTableNames)");
-    private JRadioButton rb_getSql4TableComments = new JRadioButton("getSql4TableComments(String aOwnerName, Set<String> aTableNames)");
+//    private JRadioButton rb_getSql4ColumnsComments = new JRadioButton("getSql4ColumnsComments(String aOwnerName, Set<String> aTableNames)");
+//    private JRadioButton rb_getSql4TableComments = new JRadioButton("getSql4TableComments(String aOwnerName, Set<String> aTableNames)");
     private JRadioButton rb_getSql4Indexes = new JRadioButton("getSql4Indexes(String aOwnerName, Set<String> aTableNames");
     private JRadioButton rb_getSql4TableForeignKeys = new JRadioButton("getSql4TableForeignKeys(String aOwnerName, Set<String> aTableNames)");
     private JRadioButton rb_getSql4TablePrimaryKeys = new JRadioButton("getSql4TablePrimaryKeys(String aOwnerName, Set<String> aTableNames)");
@@ -201,24 +206,24 @@ public class SqlDriversTester extends JFrame {
     private JRadioButton rb_getSql4CreateFkConstraint2 = new JRadioButton("getSql4CreateFkConstraint(String aSchemaName, List<ForeignKeySpec> listFk)");
     private JRadioButton rb_getSql4DropFkConstraint = new JRadioButton("getSql4DropFkConstraint(String aSchemaName, ForeignKeySpec aFk)");
     private JButton btnRun_fk = new JButton("Execute");
-    //--- компоненты тестирования sql для COMMENTDS  ---
-    private JTextArea textSql_commentDS = new JTextArea("", 3, 50);
-    private JTextArea textLog_commentDS = new JTextArea("", 3, 50);
-    private JTextField fldSchema_commentDS = new JTextField("", 20);
-    private JTextField fldTable1_commentDS = new JTextField("", 20);
-    private JTextField fldTable2_commentDS = new JTextField("", 20);
-    private JRadioButton rb2_getSql4SchemasEnumeration = new JRadioButton("getSql4SchemasEnumeration()");
-    private JRadioButton rb2_getSql4TableColumns = new JRadioButton("getSql4TableColumns(String aOwnerName, Set<String> aTableNames)");
-    private JRadioButton rb2_getSql4TablesEnumeration = new JRadioButton("getSql4TablesEnumeration(String schema4Sql)");
-    private JRadioButton rb2_getSql4ColumnsComments = new JRadioButton("getSql4ColumnsComments(String aOwnerName, Set<String> aTableNames)");
-    private JRadioButton rb2_getSql4TableComments = new JRadioButton("getSql4TableComments(String aOwnerName, Set<String> aTableNames)");
-    private JRadioButton rb2_getSql4Indexes = new JRadioButton("getSql4Indexes(String aOwnerName, Set<String> aTableNames");
-    private JRadioButton rb2_getSql4TableForeignKeys = new JRadioButton("getSql4TableForeignKeys(String aOwnerName, Set<String> aTableNames)");
-    private JRadioButton rb2_getSql4TablePrimaryKeys = new JRadioButton("getSql4TablePrimaryKeys(String aOwnerName, Set<String> aTableNames)");
-    private JButton btnGetColumnNameFromCommentsDs_commentDS = new JButton("getColumnNameFromCommentsDs(Rowset rs)");
-    private JButton btnGetColumnCommentFromCommentsDs_commentDS = new JButton("getColumnCommentFromCommentsDs(Rowset rs)");
-    private JButton btnGetTableNameFromCommentsDs_commentDS = new JButton("getTableNameFromCommentsDs(Rowset rs)");
-    private JButton btnGetTableCommentFromCommentsDs_commentDS = new JButton("getTableCommentFromCommentsDs(Rowset rs)");
+//    //--- компоненты тестирования sql для COMMENTDS  ---
+//    private JTextArea textSql_commentDS = new JTextArea("", 3, 50);
+//    private JTextArea textLog_commentDS = new JTextArea("", 3, 50);
+//    private JTextField fldSchema_commentDS = new JTextField("", 20);
+//    private JTextField fldTable1_commentDS = new JTextField("", 20);
+//    private JTextField fldTable2_commentDS = new JTextField("", 20);
+//    private JRadioButton rb2_getSql4SchemasEnumeration = new JRadioButton("getSql4SchemasEnumeration()");
+//    private JRadioButton rb2_getSql4TableColumns = new JRadioButton("getSql4TableColumns(String aOwnerName, Set<String> aTableNames)");
+//    private JRadioButton rb2_getSql4TablesEnumeration = new JRadioButton("getSql4TablesEnumeration(String schema4Sql)");
+//    private JRadioButton rb2_getSql4ColumnsComments = new JRadioButton("getSql4ColumnsComments(String aOwnerName, Set<String> aTableNames)");
+//    private JRadioButton rb2_getSql4TableComments = new JRadioButton("getSql4TableComments(String aOwnerName, Set<String> aTableNames)");
+//    private JRadioButton rb2_getSql4Indexes = new JRadioButton("getSql4Indexes(String aOwnerName, Set<String> aTableNames");
+//    private JRadioButton rb2_getSql4TableForeignKeys = new JRadioButton("getSql4TableForeignKeys(String aOwnerName, Set<String> aTableNames)");
+//    private JRadioButton rb2_getSql4TablePrimaryKeys = new JRadioButton("getSql4TablePrimaryKeys(String aOwnerName, Set<String> aTableNames)");
+//    private JButton btnGetColumnNameFromCommentsDs_commentDS = new JButton("getColumnNameFromCommentsDs(Rowset rs)");
+//    private JButton btnGetColumnCommentFromCommentsDs_commentDS = new JButton("getColumnCommentFromCommentsDs(Rowset rs)");
+//    private JButton btnGetTableNameFromCommentsDs_commentDS = new JButton("getTableNameFromCommentsDs(Rowset rs)");
+//    private JButton btnGetTableCommentFromCommentsDs_commentDS = new JButton("getTableCommentFromCommentsDs(Rowset rs)");
     //--- компоненты тестирования UserSql ******
     private JTextArea textSql_user = new JTextArea("", 3, 50);
     private JTextArea textLog_user = new JTextArea("", 3, 50);
@@ -245,12 +250,19 @@ public class SqlDriversTester extends JFrame {
         // 4-пароль БД
         // 5-драйвер platypus для данной БД
         //            n       ,              0                               ,1                                 ,2        ,3       ,4         ,5
-        jdbcSets.put("oracle", new Object[]{"oracle.jdbc.driver.OracleDriver", "jdbc:oracle:thin:@research.office.altsoft.biz:1521/DBALT", "test1", "test1", "test1", new OracleSqlDriver()});
-        jdbcSets.put("postgre", new Object[]{"org.postgresql.Driver", "jdbc:postgresql://192.168.10.1:5432/Trans", "test1", "test1", "test1", new PostgreSqlDriver()});
-        jdbcSets.put("db2", new Object[]{"com.ibm.db2.jcc.DB2Driver", "jdbc:db2://192.168.10.154:50000/test", "test1", "dba", "masterkey", new Db2SqlDriver()});
-        jdbcSets.put("mssql", new Object[]{"net.sourceforge.jtds.jdbc.Driver", "jdbc:jtds:sqlserver://192.168.10.154:1433/test1", "dbo", "test1", "1test1", new MsSqlSqlDriver()});
-        jdbcSets.put("mysql", new Object[]{"com.mysql.jdbc.Driver", "jdbc:mysql://192.168.10.205:3306/test1", "test1", "test1", "test1", new MySqlSqlDriver()});
-        jdbcSets.put("h2", new Object[]{"org.h2.Driver", "jdbc:h2:tcp://localhost/~/test", "test1", "test1", "test1", new H2SqlDriver()});
+//        jdbcSets.put("oracle", new Object[]{"oracle.jdbc.driver.OracleDriver", "jdbc:oracle:thin:@research.office.altsoft.biz:1521/DBALT", "test1", "test1", "test1", new OracleSqlDriver()});
+//        jdbcSets.put("postgre", new Object[]{"org.postgresql.Driver", "jdbc:postgresql://192.168.10.1:5432/Trans", "test1", "test1", "test1", new PostgreSqlDriver()});
+//        jdbcSets.put("db2", new Object[]{"com.ibm.db2.jcc.DB2Driver", "jdbc:db2://192.168.10.154:50000/test", "test1", "dba", "masterkey", new Db2SqlDriver()});
+//        jdbcSets.put("mssql", new Object[]{"net.sourceforge.jtds.jdbc.Driver", "jdbc:jtds:sqlserver://192.168.10.154:1433/test1", "dbo", "test1", "1test1", new MsSqlSqlDriver()});
+//        jdbcSets.put("mysql", new Object[]{"com.mysql.jdbc.Driver", "jdbc:mysql://192.168.10.205:3306/test1", "test1", "test1", "test1", new MySqlSqlDriver()});
+//        jdbcSets.put("h2", new Object[]{"org.h2.Driver", "jdbc:h2:tcp://localhost/~/test", "test1", "test1", "test1", new H2SqlDriver()});
+        jdbcSets.put("oracle", new Object[]{"oracle.jdbc.driver.OracleDriver", "jdbc:oracle:thin:@research.office.altsoft.biz:1521/DBALT", "test1", "test1", "ptest1", new OracleSqlDriver()});
+        jdbcSets.put("postgre", new Object[]{"org.postgresql.Driver", "jdbc:postgresql://192.168.10.52:5432/tst_db", "schema1", "user1", "puser1", new PostgreSqlDriver()});
+        jdbcSets.put("db2", new Object[]{"com.ibm.db2.jcc.DB2Driver", "jdbc:db2://192.168.10.52:50000/tst_db", "schema1", "test1", "ptest1", new Db2SqlDriver()});
+        jdbcSets.put("mssql", new Object[]{"net.sourceforge.jtds.jdbc.Driver", "jdbc:jtds:sqlserver://192.168.10.52:1433/tst1_db", "schema1", "test1", "ptest1", new MsSqlSqlDriver()});
+        jdbcSets.put("mysql-linux", new Object[]{"com.mysql.jdbc.Driver", "jdbc:mysql://192.168.10.205:3306/test1", "schema1", "test1", "test1", new MySqlSqlDriver()});
+        jdbcSets.put("mysql-win8", new Object[]{"com.mysql.jdbc.Driver", "jdbc:mysql://192.168.10.52:3306/tst_db", "schema1", "test1", "ptest1", new MySqlSqlDriver()});
+        jdbcSets.put("h2", new Object[]{"org.h2.Driver", "jdbc:h2:tcp://localhost/~/test", "schema1", "test1", "ptest1", new H2SqlDriver()});
         for (String dbName : jdbcSets.keySet()) {
             comboDB_connect.addItem(dbName);
         }
@@ -275,7 +287,6 @@ public class SqlDriversTester extends JFrame {
         } catch (Exception ex) {
             Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
         }
-        setVisible(true);
     }
 
     /**
@@ -374,8 +385,8 @@ public class SqlDriversTester extends JFrame {
         pnWest_select.add(rb_getSql4SchemasEnumeration);
         pnWest_select.add(rb_getSql4TablesEnumeration);
         pnWest_select.add(rb_getSql4TableColumns);
-        pnWest_select.add(rb_getSql4TableComments);
-        pnWest_select.add(rb_getSql4ColumnsComments);
+//        pnWest_select.add(rb_getSql4TableComments);
+//        pnWest_select.add(rb_getSql4ColumnsComments);
         pnWest_select.add(rb_getSql4Indexes);
         pnWest_select.add(rb_getSql4TablePrimaryKeys);
         pnWest_select.add(rb_getSql4TableForeignKeys);
@@ -384,8 +395,8 @@ public class SqlDriversTester extends JFrame {
         buttonGroup_select.add(rb_getSql4SchemasEnumeration);
         buttonGroup_select.add(rb_getSql4TableColumns);
         buttonGroup_select.add(rb_getSql4TablesEnumeration);
-        buttonGroup_select.add(rb_getSql4ColumnsComments);
-        buttonGroup_select.add(rb_getSql4TableComments);
+//        buttonGroup_select.add(rb_getSql4ColumnsComments);
+//        buttonGroup_select.add(rb_getSql4TableComments);
         buttonGroup_select.add(rb_getSql4Indexes);
         buttonGroup_select.add(rb_getSql4TableForeignKeys);
         buttonGroup_select.add(rb_getSql4TablePrimaryKeys);
@@ -606,55 +617,55 @@ public class SqlDriversTester extends JFrame {
         pnMain_field.add(spCenterH_field, BorderLayout.CENTER);
         pnMain_field.add(pnSouth_field, BorderLayout.SOUTH);
 
-        //--- панель тестирования  commentDS *************
-        JPanel pnMain_commentDS = new JPanel(new BorderLayout());
-        JPanel pnWest_commentDS = new JPanel(new VerticalFlowLayout(0, 0, 0, true, false));
-        JPanel pnWest1_commentDS = new JPanel(new GridLayout(3, 2));
-
-        pnWest1_commentDS.add(new JLabel("схема"));
-        pnWest1_commentDS.add(fldSchema_commentDS);
-        pnWest1_commentDS.add(new JLabel("таблица1"));
-        pnWest1_commentDS.add(fldTable1_commentDS);
-        pnWest1_commentDS.add(new JLabel("таблица2"));
-        pnWest1_commentDS.add(fldTable2_commentDS);
-
-        pnWest_commentDS.add(new JLabel("Параметры sql:"));
-        pnWest_commentDS.add(pnWest1_commentDS);
-
-        pnWest_commentDS.add(new JLabel("Методы драйвера:"));
-        pnWest_commentDS.add(rb2_getSql4SchemasEnumeration);
-        pnWest_commentDS.add(rb2_getSql4TablesEnumeration);
-        pnWest_commentDS.add(rb2_getSql4TableColumns);
-        pnWest_commentDS.add(rb2_getSql4TableComments);
-        pnWest_commentDS.add(rb2_getSql4ColumnsComments);
-        pnWest_commentDS.add(rb2_getSql4Indexes);
-        pnWest_commentDS.add(rb2_getSql4TablePrimaryKeys);
-        pnWest_commentDS.add(rb2_getSql4TableForeignKeys);
-
-        ButtonGroup buttonGroup_commentDS = new ButtonGroup();
-        buttonGroup_commentDS.add(rb2_getSql4SchemasEnumeration);
-        buttonGroup_commentDS.add(rb2_getSql4TableColumns);
-        buttonGroup_commentDS.add(rb2_getSql4TablesEnumeration);
-        buttonGroup_commentDS.add(rb2_getSql4ColumnsComments);
-        buttonGroup_commentDS.add(rb2_getSql4TableComments);
-        buttonGroup_commentDS.add(rb2_getSql4Indexes);
-        buttonGroup_commentDS.add(rb2_getSql4TableForeignKeys);
-        buttonGroup_commentDS.add(rb2_getSql4TablePrimaryKeys);
-
-        JPanel pnSouth_commentDS = new JPanel(new GridLayout(2, 2));
-        pnSouth_commentDS.add(btnGetTableNameFromCommentsDs_commentDS);
-        pnSouth_commentDS.add(btnGetTableCommentFromCommentsDs_commentDS);
-        pnSouth_commentDS.add(btnGetColumnNameFromCommentsDs_commentDS);
-        pnSouth_commentDS.add(btnGetColumnCommentFromCommentsDs_commentDS);
-
-        JSplitPane spCenter2_commentDS = new JSplitPane(JSplitPane.VERTICAL_SPLIT, new JScrollPane(textSql_commentDS), textLog_commentDS);
-        spCenter2_commentDS.setDividerLocation(100);
-
-        JSplitPane spCenterH_commentDS = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(pnWest_commentDS), spCenter2_commentDS);
-        spCenterH_commentDS.setDividerLocation(370);
-
-        pnMain_commentDS.add(spCenterH_commentDS, BorderLayout.CENTER);
-        pnMain_commentDS.add(pnSouth_commentDS, BorderLayout.SOUTH);
+//        //--- панель тестирования  commentDS *************
+//        JPanel pnMain_commentDS = new JPanel(new BorderLayout());
+//        JPanel pnWest_commentDS = new JPanel(new VerticalFlowLayout(0, 0, 0, true, false));
+//        JPanel pnWest1_commentDS = new JPanel(new GridLayout(3, 2));
+//
+//        pnWest1_commentDS.add(new JLabel("схема"));
+//        pnWest1_commentDS.add(fldSchema_commentDS);
+//        pnWest1_commentDS.add(new JLabel("таблица1"));
+//        pnWest1_commentDS.add(fldTable1_commentDS);
+//        pnWest1_commentDS.add(new JLabel("таблица2"));
+//        pnWest1_commentDS.add(fldTable2_commentDS);
+//
+//        pnWest_commentDS.add(new JLabel("Параметры sql:"));
+//        pnWest_commentDS.add(pnWest1_commentDS);
+//
+//        pnWest_commentDS.add(new JLabel("Методы драйвера:"));
+//        pnWest_commentDS.add(rb2_getSql4SchemasEnumeration);
+//        pnWest_commentDS.add(rb2_getSql4TablesEnumeration);
+//        pnWest_commentDS.add(rb2_getSql4TableColumns);
+//        pnWest_commentDS.add(rb2_getSql4TableComments);
+//        pnWest_commentDS.add(rb2_getSql4ColumnsComments);
+//        pnWest_commentDS.add(rb2_getSql4Indexes);
+//        pnWest_commentDS.add(rb2_getSql4TablePrimaryKeys);
+//        pnWest_commentDS.add(rb2_getSql4TableForeignKeys);
+//
+//        ButtonGroup buttonGroup_commentDS = new ButtonGroup();
+//        buttonGroup_commentDS.add(rb2_getSql4SchemasEnumeration);
+//        buttonGroup_commentDS.add(rb2_getSql4TableColumns);
+//        buttonGroup_commentDS.add(rb2_getSql4TablesEnumeration);
+//        buttonGroup_commentDS.add(rb2_getSql4ColumnsComments);
+//        buttonGroup_commentDS.add(rb2_getSql4TableComments);
+//        buttonGroup_commentDS.add(rb2_getSql4Indexes);
+//        buttonGroup_commentDS.add(rb2_getSql4TableForeignKeys);
+//        buttonGroup_commentDS.add(rb2_getSql4TablePrimaryKeys);
+//
+//        JPanel pnSouth_commentDS = new JPanel(new GridLayout(2, 2));
+//        pnSouth_commentDS.add(btnGetTableNameFromCommentsDs_commentDS);
+//        pnSouth_commentDS.add(btnGetTableCommentFromCommentsDs_commentDS);
+//        pnSouth_commentDS.add(btnGetColumnNameFromCommentsDs_commentDS);
+//        pnSouth_commentDS.add(btnGetColumnCommentFromCommentsDs_commentDS);
+//
+//        JSplitPane spCenter2_commentDS = new JSplitPane(JSplitPane.VERTICAL_SPLIT, new JScrollPane(textSql_commentDS), textLog_commentDS);
+//        spCenter2_commentDS.setDividerLocation(100);
+//
+//        JSplitPane spCenterH_commentDS = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(pnWest_commentDS), spCenter2_commentDS);
+//        spCenterH_commentDS.setDividerLocation(370);
+//
+//        pnMain_commentDS.add(spCenterH_commentDS, BorderLayout.CENTER);
+//        pnMain_commentDS.add(pnSouth_commentDS, BorderLayout.SOUTH);
 
         //--- панель тестирования  INDEX *************
         JPanel pnMain_index = new JPanel(new BorderLayout());
@@ -908,7 +919,7 @@ public class SqlDriversTester extends JFrame {
         tabbedPane.addTab("jdbc-index", pnMain_index);
         tabbedPane.addTab("jdbc-pkey", pnMain_pk);
         tabbedPane.addTab("jdbc-fkey", pnMain_fk);
-        tabbedPane.addTab("platypus-commentDs", pnMain_commentDS);
+//        tabbedPane.addTab("platypus-commentDs", pnMain_commentDS);
         tabbedPane.addTab("jdbc-userScript", pnMain_user);
         tabbedPane.addTab("jdbc-getTypeInfo", pnMain_typeinfo);
         tabbedPane.addTab("jdbc-getSelectInfo", pnMain_selectinfo);
@@ -925,8 +936,8 @@ public class SqlDriversTester extends JFrame {
         rb_getSql4SchemasEnumeration.addActionListener(clickAction);
         rb_getSql4TableColumns.addActionListener(clickAction);
         rb_getSql4TablesEnumeration.addActionListener(clickAction);
-        rb_getSql4ColumnsComments.addActionListener(clickAction);
-        rb_getSql4TableComments.addActionListener(clickAction);
+//        rb_getSql4ColumnsComments.addActionListener(clickAction);
+//        rb_getSql4TableComments.addActionListener(clickAction);
         rb_getSql4Indexes.addActionListener(clickAction);
         rb_getSql4TableForeignKeys.addActionListener(clickAction);
         rb_getSql4TablePrimaryKeys.addActionListener(clickAction);
@@ -966,19 +977,19 @@ public class SqlDriversTester extends JFrame {
         btnRun_user.addActionListener(clickAction);
         btnSelect_user.addActionListener(clickAction);
 
-        rb2_getSql4SchemasEnumeration.addActionListener(clickAction);
-        rb2_getSql4TableColumns.addActionListener(clickAction);
-        rb2_getSql4TablesEnumeration.addActionListener(clickAction);
-        rb2_getSql4ColumnsComments.addActionListener(clickAction);
-        rb2_getSql4TableComments.addActionListener(clickAction);
-        rb2_getSql4Indexes.addActionListener(clickAction);
-        rb2_getSql4TableForeignKeys.addActionListener(clickAction);
-        rb2_getSql4TablePrimaryKeys.addActionListener(clickAction);
-
-        btnGetColumnCommentFromCommentsDs_commentDS.addActionListener(clickAction);
-        btnGetColumnNameFromCommentsDs_commentDS.addActionListener(clickAction);
-        btnGetTableCommentFromCommentsDs_commentDS.addActionListener(clickAction);
-        btnGetTableNameFromCommentsDs_commentDS.addActionListener(clickAction);
+//        rb2_getSql4SchemasEnumeration.addActionListener(clickAction);
+//        rb2_getSql4TableColumns.addActionListener(clickAction);
+//        rb2_getSql4TablesEnumeration.addActionListener(clickAction);
+//        rb2_getSql4ColumnsComments.addActionListener(clickAction);
+//        rb2_getSql4TableComments.addActionListener(clickAction);
+//        rb2_getSql4Indexes.addActionListener(clickAction);
+//        rb2_getSql4TableForeignKeys.addActionListener(clickAction);
+//        rb2_getSql4TablePrimaryKeys.addActionListener(clickAction);
+//
+//        btnGetColumnCommentFromCommentsDs_commentDS.addActionListener(clickAction);
+//        btnGetColumnNameFromCommentsDs_commentDS.addActionListener(clickAction);
+//        btnGetTableCommentFromCommentsDs_commentDS.addActionListener(clickAction);
+//        btnGetTableNameFromCommentsDs_commentDS.addActionListener(clickAction);
 
         btnMD_typeinfo.addActionListener(clickAction);
 
@@ -1004,20 +1015,20 @@ public class SqlDriversTester extends JFrame {
                 textLog = textLog_select;
                 table = table_select;
                 break;
-            case 9:
+            case 8:
                 sqls = new String[]{textSql_user.getText()};
                 textSql = textSql_user;
                 textLog = textLog_user;
                 table = table_user;
                 break;
-            case 10:
+            case 9:
                 try {
                     table_typeinfo.setModel(new JDBCModel(connectJDBC.getMetaData().getTypeInfo()));
                 } catch (SQLException ex) {
                     Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 break;
-            case 11:
+            case 10:
                 Statement st = null;
                 try {
                     table_selectinfo.setModel(new SqlFieldModel(null));
@@ -1115,7 +1126,7 @@ public class SqlDriversTester extends JFrame {
                 textLog = textLog_fk;
                 break;
 
-            case 9:
+            case 8:
                 sqls = new String[]{textSql_user.getText()};
                 textSql = textSql_user;
                 textLog = textLog_user;
@@ -1221,22 +1232,22 @@ public class SqlDriversTester extends JFrame {
 
                 schemaName = fldSchema_fk.getText();
                 break;
-            case 8:
-                textSql = textSql_commentDS;
-                textLog = textLog_commentDS;
-
-                schemaName = fldSchema_commentDS.getText();
-                tablesSet.clear();
-                tableName = fldTable1_commentDS.getText();
-                if (tableName != null && !tableName.isEmpty()) {
-                    tablesSet.add(tableName);
-                }
-                tableName = fldTable2_commentDS.getText();
-                if (tableName != null && !tableName.isEmpty()) {
-                    tablesSet.add(tableName);
-                }
-
-                break;
+//            case 8:
+//                textSql = textSql_commentDS;
+//                textLog = textLog_commentDS;
+//
+//                schemaName = fldSchema_commentDS.getText();
+//                tablesSet.clear();
+//                tableName = fldTable1_commentDS.getText();
+//                if (tableName != null && !tableName.isEmpty()) {
+//                    tablesSet.add(tableName);
+//                }
+//                tableName = fldTable2_commentDS.getText();
+//                if (tableName != null && !tableName.isEmpty()) {
+//                    tablesSet.add(tableName);
+//                }
+//
+//                break;
 
         }
         if (connectJDBC != null && platypusDriver != null) {
@@ -1249,12 +1260,12 @@ public class SqlDriversTester extends JFrame {
             if (source == rb_getSql4TablesEnumeration) {
                 sqls = new String[]{platypusDriver.getSql4TablesEnumeration(schemaName)};
             }
-            if (source == rb_getSql4ColumnsComments) {
-                sqls = new String[]{platypusDriver.getSql4ColumnsComments(schemaName, tablesSet)};
-            }
-            if (source == rb_getSql4TableComments) {
-                sqls = new String[]{platypusDriver.getSql4TableComments(schemaName, tablesSet)};
-            }
+//            if (source == rb_getSql4ColumnsComments) {
+//                sqls = new String[]{platypusDriver.getSql4ColumnsComments(schemaName, tablesSet)};
+//            }
+//            if (source == rb_getSql4TableComments) {
+//                sqls = new String[]{platypusDriver.getSql4TableComments(schemaName, tablesSet)};
+//            }
             if (source == rb_getSql4Indexes) {
                 sqls = new String[]{platypusDriver.getSql4Indexes(schemaName, tablesSet)};
             }
@@ -1354,36 +1365,10 @@ public class SqlDriversTester extends JFrame {
                 tableName = (String) comboTable_field.getSelectedItem();
                 String sName = fldSchema_field.getText();
                 if (!sName.isEmpty()) {
-                    tableName = driver.wrapName(sName) + "." + driver.wrapName(tableName);
+                    tableName = driver.wrapNameIfRequired(sName) + "." + driver.wrapNameIfRequired(tableName);
                 }
                 sqls = new String[]{String.format(SqlDriver.ADD_FIELD_SQL_PREFIX, tableName) + driver.getSql4FieldDefinition(newField_field)};
             }
-
-            if (source == rb2_getSql4SchemasEnumeration) {
-                sqls = new String[]{driver.getSql4SchemasEnumeration()};
-            }
-            if (source == rb2_getSql4TableColumns) {
-                sqls = new String[]{driver.getSql4TableColumns(schemaName, tablesSet)};
-            }
-            if (source == rb2_getSql4TablesEnumeration) {
-                sqls = new String[]{driver.getSql4TablesEnumeration(schemaName)};
-            }
-            if (source == rb2_getSql4ColumnsComments) {
-                sqls = new String[]{driver.getSql4ColumnsComments(schemaName, tablesSet)};
-            }
-            if (source == rb2_getSql4TableComments) {
-                sqls = new String[]{driver.getSql4TableComments(schemaName, tablesSet)};
-            }
-            if (source == rb2_getSql4Indexes) {
-                sqls = new String[]{driver.getSql4Indexes(schemaName, tablesSet)};
-            }
-            if (source == rb2_getSql4TableForeignKeys) {
-                sqls = new String[]{driver.getSql4TableForeignKeys(schemaName, tablesSet)};
-            }
-            if (source == rb2_getSql4TablePrimaryKeys) {
-                sqls = new String[]{driver.getSql4TablePrimaryKeys(schemaName, tablesSet)};
-            }
-
         }
 
         String all_sql = "";
@@ -1435,7 +1420,7 @@ public class SqlDriversTester extends JFrame {
         Logger.getLogger(SqlDriversTester.class.getName()).log(Level.INFO, "Start creating connection to schema {0}", aSchema);
         try {
             DbConnectionSettings settings = new DbConnectionSettings(aUrl, aUser, aPassword);
-            DatabasesClient dbClient = new DatabasesClientWithResource(settings, null).getClient();
+            DatabasesClient dbClient = new DatabasesClientWithResource(settings).getClient();
             Logger.getLogger(SqlDriversTester.class.getName()).log(Level.INFO, "Connect to schema {0} created", dbClient.getConnectionSchema(null));
             return dbClient;
         } catch (Exception ex) {
@@ -1529,71 +1514,6 @@ public class SqlDriversTester extends JFrame {
             if (source == btnMD_selectinfo) {
                 runSelect(tabIndex);
             }
-
-            // --- Platypus ---
-            if (driver != null) {
-
-                if (source == btnGetColumnCommentFromCommentsDs_commentDS) {
-                    try {
-                        SqlCompiledQuery q = new SqlCompiledQuery(client, null, sqls_commentsDS[0]);
-                        Rowset rs = q.executeQuery(null, null);
-                        textLog_commentDS.append("count records=" + rs.size() + "\n");
-                        rs.next();
-                        String res = driver.getColumnCommentFromCommentsDs(rs);
-                        res = (res != null ? "'" + res + "'" : res);
-                        textLog_commentDS.append("first result=" + res + "\n");
-
-                    } catch (Exception ex) {
-                        textLog_commentDS.append("ERROR !!!\nException: " + ex + "\n\n");
-                        Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-                if (source == btnGetColumnNameFromCommentsDs_commentDS) {
-                    try {
-                        SqlCompiledQuery q = new SqlCompiledQuery(client, null, sqls_commentsDS[0]);
-                        Rowset rs = q.executeQuery(null, null);
-                        textLog_commentDS.append("count records=" + rs.size() + "\n");
-                        rs.next();
-                        String res = driver.getColumnNameFromCommentsDs(rs);
-                        res = (res != null ? "'" + res + "'" : res);
-                        textLog_commentDS.append("first result=" + res + "\n");
-
-                    } catch (Exception ex) {
-                        textLog_commentDS.append("ERROR !!!\nException: " + ex + "\n\n");
-                        Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-                if (source == btnGetTableCommentFromCommentsDs_commentDS) {
-                    try {
-                        SqlCompiledQuery q = new SqlCompiledQuery(client, null, sqls_commentsDS[0]);
-                        Rowset rs = q.executeQuery(null, null);
-                        textLog_commentDS.append("count records=" + rs.size() + "\n");
-                        rs.next();
-                        String res = driver.getTableCommentFromCommentsDs(rs);
-                        res = (res != null ? "'" + res + "'" : res);
-                        textLog_commentDS.append("first result=" + res + "\n");
-
-                    } catch (Exception ex) {
-                        textLog_commentDS.append("ERROR !!!\nException: " + ex + "\n\n");
-                        Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-                if (source == btnGetTableNameFromCommentsDs_commentDS) {
-                    try {
-                        SqlCompiledQuery q = new SqlCompiledQuery(client, null, sqls_commentsDS[0]);
-                        Rowset rs = q.executeQuery(null, null);
-                        textLog_commentDS.append("count records=" + rs.size() + "\n");
-                        rs.next();
-                        String res = driver.getTableNameFromCommentsDs(rs);
-                        res = (res != null ? "'" + res + "'" : res);
-                        textLog_commentDS.append("first result=" + res + "\n");
-
-                    } catch (Exception ex) {
-                        textLog_commentDS.append("ERROR !!!\nException: " + ex + "\n\n");
-                        Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            }
         }
     };
     /**
@@ -1649,7 +1569,7 @@ public class SqlDriversTester extends JFrame {
             fldSchema_pk.setText(schemaName);
             fldSchema_fk.setText(schemaName);
             fldRefereeSchema_fk.setText(schemaName);
-            fldSchema_commentDS.setText(schemaName);
+//            fldSchema_commentDS.setText(schemaName);
         }
     }
 
@@ -1720,29 +1640,40 @@ public class SqlDriversTester extends JFrame {
                 Rowset rowsetTablesList = query.executeQuery(null, null);
                 Fields fieldsTable = rowsetTablesList.getFields();
 
-                if (rowsetTablesList.first()) {
+//                if (rowsetTablesList.first()) {
                     int tableColIndex = fieldsTable.find(ClientConstants.JDBCCOLS_TABLE_NAME);
                     int tableTypeColIndex = fieldsTable.find(ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME);
                     int cnt = 0;
-                    do {
-                        // each table
-                        String tableType = null;
-                        if (tableTypeColIndex > 0) {
-                            tableType = rowsetTablesList.getString(tableTypeColIndex);
-                        }
+//                    do {
+                    for (Row r : rowsetTablesList.getCurrent()) {
+//                        // each table
+//                        String tableType = null;
+//                        if (tableTypeColIndex > 0) {
+//                            tableType = rowsetTablesList.getString(tableTypeColIndex);
+//                        }
+//                        if (tableType == null || tableType.equalsIgnoreCase(ClientConstants.JDBCPKS_TABLE_TYPE_TABLE)) {
+//                            String tableName = rowsetTablesList.getString(tableColIndex);
+//                            comboTable_field.addItem(tableName);
+//                            cnt++;
+//                        }
+//                    } while (rowsetTablesList.next());
+                        String tableType = (String) r.getColumnObject(tableTypeColIndex);
                         if (tableType == null || tableType.equalsIgnoreCase(ClientConstants.JDBCPKS_TABLE_TYPE_TABLE)) {
-                            String tableName = rowsetTablesList.getString(tableColIndex);
+                            String tableName = (String) r.getColumnObject(tableColIndex);
                             comboTable_field.addItem(tableName);
                             cnt++;
                         }
-                    } while (rowsetTablesList.next());
+                    }    
                     textLog.append("Ok!!!     Rows count: " + cnt + "\n");
-                }
-
-            } catch (Exception ex) {
+                } catch (Exception ex) {
                 textLog.append("Error !!!\nException: " + ex + "\n\n");
                 Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
             }
+
+//            } catch (Exception ex) {
+//                textLog.append("Error !!!\nException: " + ex + "\n\n");
+//                Logger.getLogger(SqlDriversTester.class.getName()).log(Level.SEVERE, null, ex);
+//            }
         } else {
             textLog.append("\nError !!! Нет Platypus-клиента\n\n");
         }
@@ -1956,6 +1887,9 @@ public class SqlDriversTester extends JFrame {
     }
 
     private void logout() {
+        if (client != null) {
+            //client.shutdown();
+        }
         if (connectJDBC != null) {
             try {
                 connectJDBC.close();
@@ -1971,6 +1905,7 @@ public class SqlDriversTester extends JFrame {
     public static void main(String[] args) {
         // TODO code application logic here
         SqlDriversTester sqlDriversTester = new SqlDriversTester();
+        sqlDriversTester.setVisible(true);
 
     }
 }

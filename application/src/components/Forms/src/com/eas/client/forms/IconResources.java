@@ -5,7 +5,6 @@
 package com.eas.client.forms;
 
 import com.eas.client.scripts.ScriptedResource;
-import com.eas.resources.images.IconCache;
 import com.eas.script.ScriptUtils;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,7 +41,7 @@ public class IconResources {
     }
     
     protected static ImageIcon loadSync(String imageName) throws Exception {
-        ImageIcon icon = IconCache.load(imageName);
+        ImageIcon icon = IconCache.getIcon(imageName);
         if (icon != null) {
             return icon;
         } else {

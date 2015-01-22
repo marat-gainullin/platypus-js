@@ -125,7 +125,7 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
                 case RequestsTags.TAG_ROWSET:
                     BinaryRowsetReader rsReader = new PlatypusRowsetReader(rsp.getExpectedFields());
                     Rowset rowset = rsReader.read(reader.getSubStream());
-                    rowset.beforeFirst();
+                    rowset.setCursorPos(0);
                     rsp.setRowset(rowset);
                     break;
                 case RequestsTags.TAG_UPDATE_COUNT:

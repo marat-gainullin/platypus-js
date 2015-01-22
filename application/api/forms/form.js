@@ -125,20 +125,6 @@
              */
             P.Form.prototype.onWindowMinimized = {};
         }
-        Object.defineProperty(this, "view", {
-            get: function() {
-                var value = delegate.view;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.Form){
-            /**
-             * Top level widget of a form.
-             * @property view
-             * @memberOf Form
-             */
-            P.Form.prototype.view = {};
-        }
         Object.defineProperty(this, "top", {
             get: function() {
                 var value = delegate.top;

@@ -482,8 +482,8 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                     SqlCompiledQuery query = new SqlCompiledQuery(model.getBasesProxy(), tableEntity.getTableDatasourceName(), "select count(*) cnt from " + fullTableName);
                     Rowset rs = query.executeQuery(null, null);
                     if (rs != null) {
-                        if (rs.first()) {
-                            Object cnt = rs.getObject(1);
+                        if (!rs.isEmpty()) {
+                            Object cnt = rs.getRow(1).getColumnObject(1);
                             if (cnt instanceof Number) {
                                 return ((Number) cnt).intValue();
                             } else {
@@ -797,8 +797,8 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                     SqlCompiledQuery query = new SqlCompiledQuery(model.getBasesProxy(), tableEntity.getTableDatasourceName(), "select count(*) cnt from " + fullTableName);
                     Rowset rs = query.executeQuery(null, null);
                     if (rs != null) {
-                        if (rs.first()) {
-                            Object cnt = rs.getObject(1);
+                        if (!rs.isEmpty()) {
+                            Object cnt = rs.getRow(1).getColumnObject(1);
                             if (cnt instanceof Number) {
                                 return ((Number) cnt).intValue();
                             } else {

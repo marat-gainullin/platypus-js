@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.components.model.ModelDate");
+    var javaClass = Java.type("com.eas.client.forms.components.model.ModelDate");
     javaClass.setPublisher(function(aDelegate) {
         return new P.ModelDate(aDelegate);
     });
@@ -22,53 +22,22 @@
         if(P.ModelDate.superclass)
             P.ModelDate.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        Object.defineProperty(this, "cursor", {
+        Object.defineProperty(this, "selectOnly", {
             get: function() {
-                var value = delegate.cursor;
+                var value = delegate.selectOnly;
                 return P.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.cursor = P.boxAsJava(aValue);
+                delegate.selectOnly = P.boxAsJava(aValue);
             }
         });
         if(!P.ModelDate){
             /**
-             * The mouse <code>Cursor</code> over this component.
-             * @property cursor
+             * Generated property jsDoc.
+             * @property selectOnly
              * @memberOf ModelDate
              */
-            P.ModelDate.prototype.cursor = {};
-        }
-        Object.defineProperty(this, "onMouseDragged", {
-            get: function() {
-                var value = delegate.onMouseDragged;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMouseDragged = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * Mouse dragged event handler function.
-             * @property onMouseDragged
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.onMouseDragged = {};
-        }
-        Object.defineProperty(this, "parent", {
-            get: function() {
-                var value = delegate.parent;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * Gets the parent of this component.
-             * @property parent
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.parent = {};
+            P.ModelDate.prototype.selectOnly = true;
         }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
@@ -87,22 +56,56 @@
              */
             P.ModelDate.prototype.onMouseReleased = {};
         }
-        Object.defineProperty(this, "onFocusLost", {
+        Object.defineProperty(this, "data", {
             get: function() {
-                var value = delegate.onFocusLost;
+                var value = delegate.data;
                 return P.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onFocusLost = P.boxAsJava(aValue);
+                delegate.data = P.boxAsJava(aValue);
             }
         });
         if(!P.ModelDate){
             /**
-             * Keyboard focus lost by the component event handler function.
-             * @property onFocusLost
+             * Object, bound to the widget.
+             * @property data
              * @memberOf ModelDate
              */
-            P.ModelDate.prototype.onFocusLost = {};
+            P.ModelDate.prototype.data = {};
+        }
+        Object.defineProperty(this, "nullable", {
+            get: function() {
+                var value = delegate.nullable;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.nullable = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelDate){
+            /**
+             * Generated property jsDoc.
+             * @property nullable
+             * @memberOf ModelDate
+             */
+            P.ModelDate.prototype.nullable = true;
+        }
+        Object.defineProperty(this, "onValueChange", {
+            get: function() {
+                var value = delegate.onValueChange;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onValueChange = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelDate){
+            /**
+             * Value change handler.
+             * @property onValueChange
+             * @memberOf ModelDate
+             */
+            P.ModelDate.prototype.onValueChange = {};
         }
         Object.defineProperty(this, "dateFormat", {
             get: function() {
@@ -121,40 +124,6 @@
              */
             P.ModelDate.prototype.dateFormat = '';
         }
-        Object.defineProperty(this, "emptyText", {
-            get: function() {
-                var value = delegate.emptyText;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.emptyText = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * Generated property jsDoc.
-             * @property emptyText
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.emptyText = '';
-        }
-        Object.defineProperty(this, "onMousePressed", {
-            get: function() {
-                var value = delegate.onMousePressed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMousePressed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * Mouse pressed event handler function.
-             * @property onMousePressed
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.onMousePressed = {};
-        }
         Object.defineProperty(this, "foreground", {
             get: function() {
                 var value = delegate.foreground;
@@ -171,38 +140,6 @@
              * @memberOf ModelDate
              */
             P.ModelDate.prototype.foreground = {};
-        }
-        Object.defineProperty(this, "error", {
-            get: function() {
-                var value = delegate.error;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * An error message of this component.
-             * Validation procedure may set this property and subsequent focus lost event will clear it.
-             * @property error
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.error = '';
-        }
-        Object.defineProperty(this, "enabled", {
-            get: function() {
-                var value = delegate.enabled;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.enabled = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
-             * @property enabled
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.enabled = true;
         }
         Object.defineProperty(this, "onComponentMoved", {
             get: function() {
@@ -221,74 +158,6 @@
              */
             P.ModelDate.prototype.onComponentMoved = {};
         }
-        Object.defineProperty(this, "onSelect", {
-            get: function() {
-                var value = delegate.onSelect;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onSelect = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * Component's selection event handler function.
-             * @property onSelect
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.onSelect = {};
-        }
-        Object.defineProperty(this, "expanded", {
-            get: function() {
-                var value = delegate.expanded;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.expanded = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * Sets up the control appearance. If true, than calndar panel is displayed, otherwise date/time combo is displayed.
-             * @property expanded
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.expanded = true;
-        }
-        Object.defineProperty(this, "componentPopupMenu", {
-            get: function() {
-                var value = delegate.componentPopupMenu;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.componentPopupMenu = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * <code>PopupMenu</code> that assigned for this component.
-             * @property componentPopupMenu
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.componentPopupMenu = {};
-        }
-        Object.defineProperty(this, "top", {
-            get: function() {
-                var value = delegate.top;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.top = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * Vertical coordinate of the component.
-             * @property top
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.top = 0;
-        }
         Object.defineProperty(this, "onRender", {
             get: function() {
                 var value = delegate.onRender;
@@ -306,36 +175,19 @@
              */
             P.ModelDate.prototype.onRender = {};
         }
-        Object.defineProperty(this, "onComponentResized", {
+        Object.defineProperty(this, "parent", {
             get: function() {
-                var value = delegate.onComponentResized;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onComponentResized = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * Component resized event handler function.
-             * @property onComponentResized
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.onComponentResized = {};
-        }
-        Object.defineProperty(this, "model", {
-            get: function() {
-                var value = delegate.model;
+                var value = delegate.parentWidget;
                 return P.boxAsJs(value);
             }
         });
         if(!P.ModelDate){
             /**
-             * Model of the component. It will be used for data binding.
-             * @property model
+             * Parent container of this widget.
+             * @property parentWidget
              * @memberOf ModelDate
              */
-            P.ModelDate.prototype.model = {};
+            P.ModelDate.prototype.parent = {};
         }
         Object.defineProperty(this, "text", {
             get: function() {
@@ -370,23 +222,6 @@
              * @memberOf ModelDate
              */
             P.ModelDate.prototype.onMouseEntered = {};
-        }
-        Object.defineProperty(this, "value", {
-            get: function() {
-                var value = delegate.value;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.value = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * Component's value.
-             * @property value
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.value = {};
         }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
@@ -453,40 +288,6 @@
              */
             P.ModelDate.prototype.onComponentShown = {};
         }
-        Object.defineProperty(this, "onMouseMoved", {
-            get: function() {
-                var value = delegate.onMouseMoved;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMouseMoved = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * Mouse moved event handler function.
-             * @property onMouseMoved
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.onMouseMoved = {};
-        }
-        Object.defineProperty(this, "opaque", {
-            get: function() {
-                var value = delegate.opaque;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.opaque = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * True if this component is completely opaque.
-             * @property opaque
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.opaque = true;
-        }
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
@@ -521,39 +322,22 @@
              */
             P.ModelDate.prototype.onComponentHidden = {};
         }
-        Object.defineProperty(this, "editable", {
+        Object.defineProperty(this, "onKeyReleased", {
             get: function() {
-                var value = delegate.editable;
+                var value = delegate.onKeyReleased;
                 return P.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.editable = P.boxAsJava(aValue);
+                delegate.onKeyReleased = P.boxAsJava(aValue);
             }
         });
         if(!P.ModelDate){
             /**
-             * Determines if component is editable.
-             * @property editable
+             * Key released event handler function.
+             * @property onKeyReleased
              * @memberOf ModelDate
              */
-            P.ModelDate.prototype.editable = true;
-        }
-        Object.defineProperty(this, "nextFocusableComponent", {
-            get: function() {
-                var value = delegate.nextFocusableComponent;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.nextFocusableComponent = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
-             * @property nextFocusableComponent
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.nextFocusableComponent = {};
+            P.ModelDate.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
@@ -571,23 +355,6 @@
              * @memberOf ModelDate
              */
             P.ModelDate.prototype.onActionPerformed = {};
-        }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -640,20 +407,6 @@
              */
             P.ModelDate.prototype.onMouseWheelMoved = {};
         }
-        Object.defineProperty(this, "component", {
-            get: function() {
-                var value = delegate.component;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * Native API. Returns low level swing component. Applicable only in J2SE swing client.
-             * @property component
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.component = {};
-        }
         Object.defineProperty(this, "field", {
             get: function() {
                 var value = delegate.field;
@@ -665,28 +418,11 @@
         });
         if(!P.ModelDate){
             /**
-             * Model entity's field.
+             * Model binding field.
              * @property field
              * @memberOf ModelDate
              */
-            P.ModelDate.prototype.field = {};
-        }
-        Object.defineProperty(this, "onFocusGained", {
-            get: function() {
-                var value = delegate.onFocusGained;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onFocusGained = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * Keyboard focus gained by the component event.
-             * @property onFocusGained
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.onFocusGained = {};
+            P.ModelDate.prototype.field = '';
         }
         Object.defineProperty(this, "left", {
             get: function() {
@@ -722,6 +458,324 @@
              */
             P.ModelDate.prototype.background = {};
         }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelDate){
+            /**
+             * Generated property jsDoc.
+             * @property name
+             * @memberOf ModelDate
+             */
+            P.ModelDate.prototype.name = '';
+        }
+        Object.defineProperty(this, "cursor", {
+            get: function() {
+                var value = delegate.cursor;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.cursor = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelDate){
+            /**
+             * Generated property jsDoc.
+             * @property cursor
+             * @memberOf ModelDate
+             */
+            P.ModelDate.prototype.cursor = {};
+        }
+        Object.defineProperty(this, "onMouseDragged", {
+            get: function() {
+                var value = delegate.onMouseDragged;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseDragged = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelDate){
+            /**
+             * Mouse dragged event handler function.
+             * @property onMouseDragged
+             * @memberOf ModelDate
+             */
+            P.ModelDate.prototype.onMouseDragged = {};
+        }
+        Object.defineProperty(this, "onFocusLost", {
+            get: function() {
+                var value = delegate.onFocusLost;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onFocusLost = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelDate){
+            /**
+             * Keyboard focus lost by the component event handler function.
+             * @property onFocusLost
+             * @memberOf ModelDate
+             */
+            P.ModelDate.prototype.onFocusLost = {};
+        }
+        Object.defineProperty(this, "emptyText", {
+            get: function() {
+                var value = delegate.emptyText;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.emptyText = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelDate){
+            /**
+             * Generated property jsDoc.
+             * @property emptyText
+             * @memberOf ModelDate
+             */
+            P.ModelDate.prototype.emptyText = '';
+        }
+        Object.defineProperty(this, "icon", {
+            get: function() {
+                var value = delegate.icon;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.icon = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelDate){
+            /**
+             * Generated property jsDoc.
+             * @property icon
+             * @memberOf ModelDate
+             */
+            P.ModelDate.prototype.icon = {};
+        }
+        Object.defineProperty(this, "onMousePressed", {
+            get: function() {
+                var value = delegate.onMousePressed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMousePressed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelDate){
+            /**
+             * Mouse pressed event handler function.
+             * @property onMousePressed
+             * @memberOf ModelDate
+             */
+            P.ModelDate.prototype.onMousePressed = {};
+        }
+        Object.defineProperty(this, "error", {
+            get: function() {
+                var value = delegate.error;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.error = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelDate){
+            /**
+             * An error message of this component.
+             * Validation procedure may set this property and subsequent focus lost event will clear it.
+             * @property error
+             * @memberOf ModelDate
+             */
+            P.ModelDate.prototype.error = '';
+        }
+        Object.defineProperty(this, "enabled", {
+            get: function() {
+                var value = delegate.enabled;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.enabled = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelDate){
+            /**
+             * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
+             * @property enabled
+             * @memberOf ModelDate
+             */
+            P.ModelDate.prototype.enabled = true;
+        }
+        Object.defineProperty(this, "onSelect", {
+            get: function() {
+                var value = delegate.onSelect;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onSelect = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelDate){
+            /**
+             * Component's selection event handler function.
+             * @property onSelect
+             * @memberOf ModelDate
+             */
+            P.ModelDate.prototype.onSelect = {};
+        }
+        Object.defineProperty(this, "jsValue", {
+            get: function() {
+                var value = delegate.jsValue;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.jsValue = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelDate){
+            /**
+             * Widget's value.
+             * @property jsValue
+             * @memberOf ModelDate
+             */
+            P.ModelDate.prototype.jsValue = {};
+        }
+        Object.defineProperty(this, "top", {
+            get: function() {
+                var value = delegate.top;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.top = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelDate){
+            /**
+             * Vertical coordinate of the component.
+             * @property top
+             * @memberOf ModelDate
+             */
+            P.ModelDate.prototype.top = 0;
+        }
+        Object.defineProperty(this, "onComponentResized", {
+            get: function() {
+                var value = delegate.onComponentResized;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onComponentResized = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelDate){
+            /**
+             * Component resized event handler function.
+             * @property onComponentResized
+             * @memberOf ModelDate
+             */
+            P.ModelDate.prototype.onComponentResized = {};
+        }
+        Object.defineProperty(this, "onMouseMoved", {
+            get: function() {
+                var value = delegate.onMouseMoved;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseMoved = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelDate){
+            /**
+             * Mouse moved event handler function.
+             * @property onMouseMoved
+             * @memberOf ModelDate
+             */
+            P.ModelDate.prototype.onMouseMoved = {};
+        }
+        Object.defineProperty(this, "opaque", {
+            get: function() {
+                var value = delegate.opaque;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.opaque = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelDate){
+            /**
+             * True if this component is completely opaque.
+             * @property opaque
+             * @memberOf ModelDate
+             */
+            P.ModelDate.prototype.opaque = true;
+        }
+        Object.defineProperty(this, "editable", {
+            get: function() {
+                var value = delegate.editable;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.editable = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelDate){
+            /**
+             * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
+             * @property editable
+             * @memberOf ModelDate
+             */
+            P.ModelDate.prototype.editable = true;
+        }
+        Object.defineProperty(this, "nextFocusableComponent", {
+            get: function() {
+                var value = delegate.nextFocusableComponent;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.nextFocusableComponent = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelDate){
+            /**
+             * Generated property jsDoc.
+             * @property nextFocusableComponent
+             * @memberOf ModelDate
+             */
+            P.ModelDate.prototype.nextFocusableComponent = {};
+        }
+        Object.defineProperty(this, "component", {
+            get: function() {
+                var value = delegate.component;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelDate){
+            /**
+             * Native API. Returns low level swing component. Applicable only in J2SE swing client.
+             * @property component
+             * @memberOf ModelDate
+             */
+            P.ModelDate.prototype.component = {};
+        }
+        Object.defineProperty(this, "onFocusGained", {
+            get: function() {
+                var value = delegate.onFocusGained;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onFocusGained = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelDate){
+            /**
+             * Keyboard focus gained by the component event.
+             * @property onFocusGained
+             * @memberOf ModelDate
+             */
+            P.ModelDate.prototype.onFocusGained = {};
+        }
         Object.defineProperty(this, "onMouseClicked", {
             get: function() {
                 var value = delegate.onMouseClicked;
@@ -756,20 +810,6 @@
              */
             P.ModelDate.prototype.onMouseExited = {};
         }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.name = '';
-        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -798,7 +838,7 @@
         });
         if(!P.ModelDate){
             /**
-             * The font of this component.
+             * Generated property jsDoc.
              * @property font
              * @memberOf ModelDate
              */
@@ -823,17 +863,6 @@
         }
     };
         /**
-         * Redraw the component.
-         * @method redraw
-         * @memberOf ModelDate
-         */
-        P.ModelDate.prototype.redraw = function() {
-            var delegate = this.unwrap();
-            var value = delegate.redraw();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf ModelDate
@@ -841,6 +870,17 @@
         P.ModelDate.prototype.focus = function() {
             var delegate = this.unwrap();
             var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Redraw the component.
+         * @method redraw
+         * @memberOf ModelDate
+         */
+        P.ModelDate.prototype.redraw = function() {
+            var delegate = this.unwrap();
+            var value = delegate.redraw();
             return P.boxAsJs(value);
         };
 

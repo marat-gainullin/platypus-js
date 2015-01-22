@@ -52,6 +52,7 @@ import java.util.*;
 import javax.swing.*;
 import org.openide.ErrorManager;
 import org.openide.awt.Mnemonics;
+import org.openide.nodes.PropertyEditorRegistration;
 import org.openide.util.NbBundle;
 
 /**
@@ -59,13 +60,14 @@ import org.openide.util.NbBundle;
  *
  * @author Jan Stola
  */
+@PropertyEditorRegistration(targetType = javax.swing.KeyStroke.class)
 public class KeyStrokeEditor extends PropertyEditorSupport
         implements NamedPropertyEditor {
 
-    private String TXT_CTRL;
-    private String TXT_ALT;
-    private String TXT_SHIFT;
-    private String TXT_META;
+    private final String TXT_CTRL;
+    private final String TXT_ALT;
+    private final String TXT_SHIFT;
+    private final String TXT_META;
 
     public KeyStrokeEditor() {
         ResourceBundle bundle = org.openide.util.NbBundle.getBundle(KeyStrokeEditor.class);

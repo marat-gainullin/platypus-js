@@ -10,8 +10,6 @@
 package com.eas.client.sqldrivers;
 
 import com.bearsoft.rowset.Converter;
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.ForeignKeySpec;
@@ -37,6 +35,10 @@ import java.util.Set;
  */
 public class OracleSqlDriver extends SqlDriver {
 
+    // настройка экранирования наименования объектов БД
+    private final TwinString[] charsForWrap = {new TwinString("\"", "\"")};
+    private final char[] restrictedChars = {' ', ',', '\'', '"'};
+
     protected static final Converter converter = new OracleConverter();
     protected static final OracleTypesResolver resolver = new OracleTypesResolver();
     protected static final String SET_SCHEMA_CLAUSE = "alter session set current_schema = %s";
@@ -52,26 +54,23 @@ public class OracleSqlDriver extends SqlDriver {
         EAS_TABLE_ALREADY_EXISTS,
         EAS_TABLE_DOESNT_EXISTS
     };
-    public static final String SQL_ALL_TABLES = ""
-            + "select t.TABLE_NAME as " + ClientConstants.JDBCCOLS_TABLE_NAME + ", t.OWNER as " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ", '" + ClientConstants.JDBCPKS_TABLE_TYPE_TABLE + "' as " + ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME + " from sys.ALL_TABLES t ";
-    public static final String SQL_ALL_VIEWS = ""
-            + "select v.VIEW_NAME as " + ClientConstants.JDBCCOLS_TABLE_NAME + ", v.OWNER as " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ", '" + ClientConstants.JDBCPKS_TABLE_TYPE_VIEW + "' as " + ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME + " from sys.ALL_VIEWS v ";
     public static final String SQL_ALL_TABLES_VIEWS = ""
-            + SQL_ALL_TABLES
-            + " union "
-            + SQL_ALL_VIEWS
-            + " order by " + ClientConstants.JDBCCOLS_TABLE_SCHEM + "," + ClientConstants.JDBCCOLS_TABLE_NAME;
-    public static final String SQL_SCHEMA_TABLES = ""
-            + SQL_ALL_TABLES
-            + "where Upper(t.OWNER) = Upper('%s') ";
-    public static final String SQL_SCHEMA_VIEWS = ""
-            + SQL_ALL_VIEWS
-            + "where Upper(v.OWNER) = Upper('%s')";
+            + "select "
+            + " OWNER as " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
+            + " TABLE_NAME as " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
+            + " TABLE_TYPE as " + ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME + ","
+            + " COMMENTS as " + ClientConstants.JDBCCOLS_REMARKS + " "
+            + "from all_tab_comments "
+            + "order by " + ClientConstants.JDBCCOLS_TABLE_SCHEM + "," + ClientConstants.JDBCCOLS_TABLE_NAME;
     public static final String SQL_SCHEMA_TABLES_VIEWS = ""
-            + SQL_SCHEMA_TABLES
-            + " union "
-            + SQL_SCHEMA_VIEWS
-            + " order by " + ClientConstants.JDBCCOLS_TABLE_SCHEM + "," + ClientConstants.JDBCCOLS_TABLE_NAME;
+            + "select "
+            + " OWNER as " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
+            + " TABLE_NAME as " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
+            + " TABLE_TYPE as " + ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME + ","
+            + " COMMENTS as " + ClientConstants.JDBCCOLS_REMARKS + " "
+            + "from all_tab_comments "
+            + "where OWNER = '%s' "
+            + "order by " + ClientConstants.JDBCCOLS_TABLE_SCHEM + "," + ClientConstants.JDBCCOLS_TABLE_NAME;
     public static final String SQL_SCHEMAS = ""
             + "select u.USERNAME as " + ClientConstants.JDBCCOLS_TABLE_SCHEM + " from sys.ALL_USERS u "
             + "order by " + ClientConstants.JDBCCOLS_TABLE_SCHEM;
@@ -91,15 +90,15 @@ public class OracleSqlDriver extends SqlDriver {
             + " t.data_scale decimal_digits,"
             + " 10 AS num_prec_radix,"
             + " decode(t.nullable, 'N', 0, 1) AS nullable,"
-            + " NULL remarks,"
+            + " c.comments " + ClientConstants.JDBCCOLS_REMARKS + ", "
             + " t.data_default column_def,"
             + " 0 AS sql_data_type,"
             + " 0 AS sql_datetime_sub,"
             + " t.data_length char_octet_length,"
             + " t.column_id ordinal_position,"
             + " decode(t.nullable, 'N', 'NO', 'YES') AS is_nullable "
-            + "FROM all_tab_columns t "
-            + "WHERE Upper(t.owner) = Upper('%s') "
+            + "FROM all_tab_columns t, sys.all_col_comments c "
+            + "WHERE t.owner = '%s' and t.owner = c.owner and t.table_name = c.table_name and t.column_name = c.column_name "
             + "AND Upper(t.table_name) in (%s) "
             + "ORDER BY table_schem, table_name, ordinal_position";
     protected static final String SQL_PRIMARY_KEYS = ""
@@ -115,7 +114,7 @@ public class OracleSqlDriver extends SqlDriver {
             + " AND k.constraint_name = c.constraint_name"
             + " AND k.table_name = c.table_name"
             + " AND k.owner = c.owner"
-            + " AND Upper(k.owner) = Upper('%s')"
+            + " AND k.owner = '%s'"
             + " AND Upper(k.table_name) in (%s) "
             + "ORDER BY c.owner,c.table_name,c.position";
     protected static final String SQL_FOREIGN_KEYS = ""
@@ -128,7 +127,7 @@ public class OracleSqlDriver extends SqlDriver {
             + "             table_name fktable_name,"
             + "             delete_rule,deferrable,deferred"
             + "          from all_constraints t"
-            + "          where constraint_type = 'R' and upper(owner) = upper('%s') and Upper(table_name) in (%s)),"
+            + "          where constraint_type = 'R' and owner = '%s' and Upper(table_name) in (%s)),"
             + " fpkey as (select"
             + "              fktable_schem,"
             + "              fk_name,"
@@ -160,70 +159,6 @@ public class OracleSqlDriver extends SqlDriver {
             + "   inner join all_cons_columns pcol on fpkey.pktable_schem = pcol.owner and  fpkey.pk_name = pcol.constraint_name"
             + " where fcol.position = pcol.position "
             + " order by pktable_schem, pktable_name, key_seq";
-    /* marat
-     + "with "
-     + "cols as (select * from all_cons_columns ac where upper(ac.owner) = Upper('%s')),"
-     + "cons as (select * from all_constraints ac where upper(ac.owner) = Upper('%s'))"
-     + "select * from "
-     + "(select "
-     + "  null fktable_cat"
-     + ", c.owner fktable_schem"
-     + ", c.table_name fktable_name"
-     + ", c.column_name fkcolumn_name"
-     + ", c.POSITION key_seq"
-     + ", cs.constraint_name fk_name"
-     + ", null update_rule"
-     + ", cs.r_constraint_name pk_name"
-     + ", decode(cs.delete_rule, 'CASCADE', 0, 'SET NULL', 2, 1) as delete_rule"
-     + ", decode(cs.DEFERRABLE, 'DEFERRABLE', 5, 'NOT DEFERRABLE', 7, 'DEFERRED', 6) deferrability"
-     + ", cs.deferred  "
-     + "  from (select * from cols where cols.table_name in(%s)) c inner join (select * from cons where cons.constraint_type='R') cs on (c.constraint_name = cs.constraint_name)"
-     + ") rc"
-     + "    inner join"
-     + "(select"
-     + "  null pktable_cat"
-     + ", c.owner pktable_schem"
-     + ", c.table_name pktable_name"
-     + ", c.column_name pkcolumn_name"
-     + ", c.POSITION key_seq"
-     + ", cs.constraint_name"
-     + "  from cols c inner join (select * from cons where cons.constraint_type='P') cs on (c.constraint_name = cs.constraint_name)"
-     + ") pc"
-     + "    on (rc.pk_name = pc.constraint_name and rc.key_seq = pc.key_seq) "
-     + "order by pc.pktable_schem, pc.pktable_name, pc.key_seq";
-     */
-    /*
-     + "SELECT"
-     + " NULL pktable_cat,"
-     + " p.owner pktable_schem,"
-     + " p.table_name pktable_name,"
-     + " pc.column_name pkcolumn_name,"
-     + " NULL fktable_cat,"
-     + " f.owner fktable_schem,"
-     + " f.table_name fktable_name,"
-     + " fc.column_name fkcolumn_name,"
-     + " fc.position key_seq,"
-     + " null as update_rule,"
-     + " decode(f.delete_rule, 'CASCADE', 0, 'SET NULL', 2, 1) as delete_rule,"
-     + " f.constraint_name fk_name,"
-     + "p.constraint_name pk_name,"
-     + " decode(f.deferrable, 'DEFERRABLE', 5, 'NOT DEFERRABLE', 7, 'DEFERRED', 6) deferrability "
-     + "FROM all_cons_columns pc, all_constraints p, all_cons_columns fc, all_constraints f "
-     + "WHERE f.constraint_type = 'R'"
-     + " AND p.owner = f.r_owner"
-     + " AND p.constraint_name = f.r_constraint_name"
-     + " AND p.constraint_type = 'P'"
-     + " AND pc.owner = p.owner"
-     + " AND pc.constraint_name = p.constraint_name"
-     + " AND pc.table_name = p.table_name"
-     + " AND fc.owner = f.owner"
-     + " AND fc.constraint_name = f.constraint_name"
-     + " AND fc.table_name = f.table_name"
-     + " AND fc.position = pc.position"
-     + " AND Upper(p.owner) = Upper('%s')"
-     + " AND Upper(f.table_name) in (%s) "
-     + "ORDER BY pktable_schem, pktable_name, key_seq ";
-     */
     protected static final String SQL_INDEX_KEYS = ""
             + "SELECT"
             + " null table_cat,"
@@ -243,25 +178,19 @@ public class OracleSqlDriver extends SqlDriver {
             + "  and k.constraint_type = 'P' AND k.constraint_name = i.index_name) > 0 then 0 else 1 end) " + ClientConstants.JDBCIDX_PRIMARY_KEY + ","
             + " null " + ClientConstants.JDBCIDX_FOREIGN_KEY + " "
             + "FROM all_indexes i, all_ind_columns c "
-            + "WHERE Upper(i.owner) = Upper('%s')"
+            + "WHERE i.owner = '%s'"
             + " AND Upper(i.table_name) in (%s)"
             + " AND i.index_name = c.index_name"
             + " AND i.table_owner = c.table_owner"
             + " AND i.table_name = c.table_name"
             + " AND i.owner = c.index_owner "
             + "ORDER BY non_unique, type, index_name, ordinal_position ";
-    protected static final String SQL_COLUMNS_COMMENTS = ""
-            + "select * from sys.all_col_comments all_col_comments"
-            + " where Upper(owner) = Upper('%s') and Upper(table_name) in (%s)";
-    protected static final String SQL_TABLE_COMMENTS = ""
-            + "select * from sys.all_tab_comments all_tab_comments "
-            + "where Upper(owner) = Upper('%s') and Upper(table_name) in (%s)";
 
     @Override
     public String getSql4TableColumns(String aOwnerName, Set<String> aTableNames) {
         if (aTableNames != null && !aTableNames.isEmpty()) {
             String tablesIn = constructIn(aTableNames);
-            return String.format(SQL_COLUMNS, aOwnerName.toUpperCase(), tablesIn.toUpperCase());
+            return String.format(SQL_COLUMNS, prepareName(aOwnerName), tablesIn.toUpperCase());
         } else {
             return null;
         }
@@ -271,7 +200,7 @@ public class OracleSqlDriver extends SqlDriver {
     public String getSql4Indexes(String aOwnerName, Set<String> aTableNames) {
         if (aTableNames != null && !aTableNames.isEmpty()) {
             String tablesIn = constructIn(aTableNames);
-            return String.format(SQL_INDEX_KEYS, aOwnerName.toUpperCase(), tablesIn.toUpperCase());
+            return String.format(SQL_INDEX_KEYS, prepareName(aOwnerName), tablesIn.toUpperCase());
         } else {
             return null;
         }
@@ -281,7 +210,7 @@ public class OracleSqlDriver extends SqlDriver {
     public String getSql4TablePrimaryKeys(String aOwnerName, Set<String> aTableNames) {
         if (aTableNames != null && !aTableNames.isEmpty()) {
             String tablesIn = constructIn(aTableNames);
-            return String.format(SQL_PRIMARY_KEYS, aOwnerName.toUpperCase(), tablesIn.toUpperCase());
+            return String.format(SQL_PRIMARY_KEYS, prepareName(aOwnerName), tablesIn.toUpperCase());
         } else {
             return null;
         }
@@ -291,63 +220,10 @@ public class OracleSqlDriver extends SqlDriver {
     public String getSql4TableForeignKeys(String aOwnerName, Set<String> aTableNames) {
         if (aTableNames != null && !aTableNames.isEmpty()) {
             String tablesList = constructIn(aTableNames).toUpperCase();
-//marat            return String.format(SQL_FOREIGN_KEYS, aOwnerName, aOwnerName, tablesList);
-            return String.format(SQL_FOREIGN_KEYS, aOwnerName, tablesList);
+            return String.format(SQL_FOREIGN_KEYS, prepareName(aOwnerName), tablesList);
         } else {
             return null;
         }
-    }
-
-    @Override
-    public String getSql4ColumnsComments(String aOwnerName, Set<String> aTableNames) {
-        if (aTableNames != null && !aTableNames.isEmpty()) {
-            return String.format(SQL_COLUMNS_COMMENTS, aOwnerName.toUpperCase(), constructIn(aTableNames).toUpperCase());
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public String getSql4TableComments(String aOwnerName, Set<String> aTableNames) {
-        if (aTableNames != null && !aTableNames.isEmpty()) {
-            return String.format(SQL_TABLE_COMMENTS, aOwnerName.toUpperCase(), constructIn(aTableNames).toUpperCase());
-        } else if (aOwnerName != null && !aOwnerName.isEmpty()) {
-            return String.format("select * from sys.all_tab_comments all_tab_comments where Upper(owner) = Upper('%s')", aOwnerName.toUpperCase());
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public String getColumnNameFromCommentsDs(Rowset rs) throws RowsetException {
-        if (!rs.isAfterLast() && !rs.isBeforeFirst()) {
-            return (String) rs.getObject(rs.getFields().find(ClientConstants.F_COLUMNS_COMMENTS_FIELD_FIELD_NAME));
-        }
-        return null;
-    }
-
-    @Override
-    public String getColumnCommentFromCommentsDs(Rowset rs) throws RowsetException {
-        if (!rs.isAfterLast() && !rs.isBeforeFirst()) {
-            return (String) rs.getObject(rs.getFields().find(ClientConstants.F_COLUMNS_COMMENTS_COMMENT_FIELD_NAME));
-        }
-        return null;
-    }
-
-    @Override
-    public String getTableNameFromCommentsDs(Rowset rs) throws RowsetException {
-        if (!rs.isAfterLast() && !rs.isBeforeFirst()) {
-            return (String) rs.getObject(rs.getFields().find(ClientConstants.F_TABLE_COMMENTS_NAME_FIELD_NAME));
-        }
-        return null;
-    }
-
-    @Override
-    public String getTableCommentFromCommentsDs(Rowset rs) throws RowsetException {
-        if (!rs.isAfterLast() && !rs.isBeforeFirst()) {
-            return (String) rs.getObject(rs.getFields().find(ClientConstants.F_TABLE_COMMENTS_COMMENT_FIELD_NAME));
-        }
-        return null;
     }
 
     @Override
@@ -358,10 +234,10 @@ public class OracleSqlDriver extends SqlDriver {
     @Override
     public String getSql4EmptyTableCreation(String aSchemaName, String aTableName, String aPkFieldName) {
         String fullName = makeFullName(aSchemaName, aTableName);
-        aPkFieldName = wrapName(aPkFieldName);
+        aPkFieldName = wrapNameIfRequired(aPkFieldName);
         return "CREATE TABLE " + fullName + " ("
                 + aPkFieldName + " NUMBER NOT NULL,"
-                + "CONSTRAINT " + wrapName(aTableName + PKEY_NAME_SUFFIX) + " PRIMARY KEY (" + aPkFieldName + "))";
+                + "CONSTRAINT " + wrapNameIfRequired(generatePkName(aTableName, PKEY_NAME_SUFFIX)) + " PRIMARY KEY (" + aPkFieldName + "))";
     }
 
     @Override
@@ -408,8 +284,7 @@ public class OracleSqlDriver extends SqlDriver {
     }
 
     private String getSql4FieldDefinition(Field aField, boolean aCurrentNullable) {
-
-        String fieldDefinition = wrapName(aField.getName()) + " " + getFieldTypeDefinition(aField);
+        String fieldDefinition = wrapNameIfRequired(aField.getName()) + " " + getFieldTypeDefinition(aField);
 
         if (aField.isNullable()) {
             if (!aCurrentNullable) {
@@ -425,7 +300,7 @@ public class OracleSqlDriver extends SqlDriver {
 
     @Override
     public String getSql4DropFkConstraint(String aSchemaName, ForeignKeySpec aFk) {
-        String constraintName = wrapName(aFk.getCName());
+        String constraintName = wrapNameIfRequired(aFk.getCName());
         String tableName = makeFullName(aSchemaName, aFk.getTable());
         return "alter table " + tableName + " drop constraint " + constraintName;
     }
@@ -456,7 +331,7 @@ public class OracleSqlDriver extends SqlDriver {
     public void applyContextToConnection(Connection aConnection, String aSchema) throws Exception {
         if (aSchema != null && !aSchema.isEmpty()) {
             try (Statement stmt = aConnection.createStatement()) {
-                stmt.execute(String.format(SET_SCHEMA_CLAUSE, wrapName(aSchema)));
+                stmt.execute(String.format(SET_SCHEMA_CLAUSE, wrapNameIfRequired(aSchema)));
             }
         }
     }
@@ -474,7 +349,7 @@ public class OracleSqlDriver extends SqlDriver {
         List<String> sqls = new ArrayList<>();
         Field newFieldMd = aNewFieldMd.copy();
         String fullTableName = makeFullName(aSchemaName, aTableName);
-        String updateDefinition = String.format(MODIFY_FIELD_SQL_PREFIX, fullTableName) + wrapName(aOldFieldMd.getName()) + " ";
+        String updateDefinition = String.format(MODIFY_FIELD_SQL_PREFIX, fullTableName) + wrapNameIfRequired(aOldFieldMd.getName()) + " ";
         String fieldDefination = getFieldTypeDefinition(newFieldMd);
 
         DataTypeInfo newTypeInfo = newFieldMd.getTypeInfo();
@@ -509,7 +384,7 @@ public class OracleSqlDriver extends SqlDriver {
     @Override
     public String[] getSqls4RenamingField(String aSchemaName, String aTableName, String aOldFieldName, Field aNewFieldMd) {
         String fullTableName = makeFullName(aSchemaName, aTableName);
-        String sqlText = String.format(RENAME_FIELD_SQL_PREFIX, fullTableName, wrapName(aOldFieldName), wrapName(aNewFieldMd.getName()));
+        String sqlText = String.format(RENAME_FIELD_SQL_PREFIX, fullTableName, wrapNameIfRequired(aOldFieldName), wrapNameIfRequired(aNewFieldMd.getName()));
         return new String[]{
             sqlText
         };
@@ -517,10 +392,10 @@ public class OracleSqlDriver extends SqlDriver {
 
     @Override
     public String[] getSql4CreateColumnComment(String aOwnerName, String aTableName, String aFieldName, String aDescription) {
-        aOwnerName = wrapName(aOwnerName);
-        aTableName = wrapName(aTableName);
-        aFieldName = wrapName(aFieldName);
-        String sqlText = aOwnerName == null ? StringUtils.join(".", aTableName, aFieldName) : StringUtils.join(".", aOwnerName, aTableName, aFieldName);
+        String ownerName = wrapNameIfRequired(aOwnerName);
+        String tableName = wrapNameIfRequired(aTableName);
+        String fieldName = wrapNameIfRequired(aFieldName);
+        String sqlText = ownerName == null ? StringUtils.join(".", tableName, fieldName) : StringUtils.join(".", ownerName, tableName, fieldName);
         if (aDescription == null) {
             aDescription = "";
         }
@@ -529,7 +404,7 @@ public class OracleSqlDriver extends SqlDriver {
 
     @Override
     public String getSql4CreateTableComment(String aOwnerName, String aTableName, String aDescription) {
-        String sqlText = StringUtils.join(".", wrapName(aOwnerName), wrapName(aTableName));
+        String sqlText = StringUtils.join(".", wrapNameIfRequired(aOwnerName), wrapNameIfRequired(aTableName));
         if (aDescription == null) {
             aDescription = "";
         }
@@ -573,7 +448,7 @@ public class OracleSqlDriver extends SqlDriver {
         String fieldsList = "";
         for (int i = 0; i < aIndex.getColumns().size(); i++) {
             DbTableIndexColumnSpec column = aIndex.getColumns().get(i);
-            fieldsList += wrapName(column.getColumnName());
+            fieldsList += wrapNameIfRequired(column.getColumnName());
             if (i != aIndex.getColumns().size() - 1) {
                 fieldsList += ", ";
             }
@@ -583,11 +458,10 @@ public class OracleSqlDriver extends SqlDriver {
 
     @Override
     public String getSql4TablesEnumeration(String schema4Sql) {
-        if (schema4Sql == null) {
+        if (schema4Sql == null || schema4Sql.isEmpty()) {
             return SQL_ALL_TABLES_VIEWS;
         } else {
-            schema4Sql = schema4Sql.toUpperCase();
-            return String.format(SQL_SCHEMA_TABLES_VIEWS, schema4Sql, schema4Sql);
+            return String.format(SQL_SCHEMA_TABLES_VIEWS, prepareName(schema4Sql));
         }
     }
 
@@ -619,18 +493,18 @@ public class OracleSqlDriver extends SqlDriver {
             ForeignKeySpec fk = listFk.get(0);
             String fkTableName = makeFullName(aSchemaName, fk.getTable());
             String fkName = fk.getCName();
-            String fkColumnName = wrapName(fk.getField());
+            String fkColumnName = wrapNameIfRequired(fk.getField());
 
             PrimaryKeySpec pk = fk.getReferee();
             String pkSchemaName = pk.getSchema();
             String pkTableName = makeFullName(aSchemaName, pk.getTable());
-            String pkColumnName = wrapName(pk.getField());
+            String pkColumnName = wrapNameIfRequired(pk.getField());
 
             for (int i = 1; i < listFk.size(); i++) {
                 fk = listFk.get(i);
                 pk = fk.getReferee();
-                fkColumnName += ", " + wrapName(fk.getField());
-                pkColumnName += ", " + wrapName(pk.getField());
+                fkColumnName += ", " + wrapNameIfRequired(fk.getField());
+                pkColumnName += ", " + wrapNameIfRequired(pk.getField());
             }
 
             String fkRule = "";
@@ -652,7 +526,7 @@ public class OracleSqlDriver extends SqlDriver {
                 fkRule += " DEFERRABLE INITIALLY DEFERRED";
             }
             return String.format("ALTER TABLE %s ADD (CONSTRAINT %s"
-                    + " FOREIGN KEY (%s) REFERENCES %s (%s) %s)", fkTableName, fkName.isEmpty() ? "" : wrapName(fkName), fkColumnName, pkTableName, pkColumnName, fkRule);
+                    + " FOREIGN KEY (%s) REFERENCES %s (%s) %s)", fkTableName, fkName.isEmpty() ? "" : wrapNameIfRequired(fkName), fkColumnName, pkTableName, pkColumnName, fkRule);
         }
         return null;
     }
@@ -662,11 +536,11 @@ public class OracleSqlDriver extends SqlDriver {
         if (listPk != null && listPk.size() > 0) {
             PrimaryKeySpec pk = listPk.get(0);
             String tableName = pk.getTable();
-            String pkName = wrapName(tableName + PKEY_NAME_SUFFIX);
-            String pkColumnName = wrapName(pk.getField());
+            String pkName = wrapNameIfRequired(generatePkName(tableName, PKEY_NAME_SUFFIX));
+            String pkColumnName = wrapNameIfRequired(pk.getField());
             for (int i = 1; i < listPk.size(); i++) {
                 pk = listPk.get(i);
-                pkColumnName += ", " + wrapName(pk.getField());
+                pkColumnName += ", " + wrapNameIfRequired(pk.getField());
             }
             return new String[]{
                 String.format("ALTER TABLE %s ADD CONSTRAINT %s PRIMARY KEY (%s)", makeFullName(aSchemaName, tableName), pkName, pkColumnName)
@@ -686,5 +560,24 @@ public class OracleSqlDriver extends SqlDriver {
         return new String[]{
             String.format(SqlDriver.ADD_FIELD_SQL_PREFIX, fullTableName) + getSql4FieldDefinition(aField)
         };
+    }
+
+    @Override
+    public TwinString[] getCharsForWrap() {
+        return charsForWrap;
+    }
+
+    @Override
+    public char[] getRestrictedChars() {
+        return restrictedChars;
+    }
+
+    @Override
+    public boolean isHadWrapped(String aName) {
+        return isHaveLowerCase(aName);
+    }
+
+    private String prepareName(String aName) {
+        return (isWrappedName(aName) ? unwrapName(aName) : aName.toUpperCase());
     }
 }

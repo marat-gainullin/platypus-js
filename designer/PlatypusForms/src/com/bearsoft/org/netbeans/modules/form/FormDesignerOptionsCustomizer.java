@@ -75,7 +75,6 @@ public final class FormDesignerOptionsCustomizer extends JPanel implements Actio
     private boolean listen = false;
 
     public FormDesignerOptionsCustomizer() {
-        //ButtonGroup group = new ButtonGroup();
         loc(cbFold, "Fold"); // NOI18N
         loc(cbAssistant, "Assistant"); // NOI18N
         cbAutoI18n.addItem(loc("CTL_AUTO_RESOURCE_DEFAULT")); // NOI18N

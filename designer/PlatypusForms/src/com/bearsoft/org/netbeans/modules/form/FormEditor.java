@@ -56,7 +56,6 @@ import org.openide.NotifyDescriptor;
 import org.openide.awt.UndoRedo;
 import org.openide.loaders.DataObject;
 import org.openide.nodes.Node;
-import org.openide.util.Mutex;
 
 /**
  * Form editor.
@@ -85,7 +84,7 @@ public class FormEditor {
     /**
      * Persistence manager responsible for saving the form
      */
-    private PersistenceManager persistenceManager;
+    private PersistenceManager persistenceManager = new PersistenceManager();
     /**
      * An indicator whether the form has been loaded (from the .form file)
      */
@@ -93,7 +92,7 @@ public class FormEditor {
     /**
      * The DataObject of the form
      */
-    private PlatypusFormDataObject formDataObject;
+    private final PlatypusFormDataObject formDataObject;
     private PropertyChangeListener dataObjectListener;
 
     // -----
@@ -104,7 +103,7 @@ public class FormEditor {
     /**
      * @return root node representing the form (in pair with the class node)
      */
-    public final FormNode getFormRootNode() {
+    public final FormRootNode getFormRootNode() {
         return formRootNode;
     }
 
@@ -140,54 +139,29 @@ public class FormEditor {
     /**
      * This method performs the form data loading. All open/load methods go
      * through this one.
+     *
+     * @throws com.bearsoft.org.netbeans.modules.form.PersistenceException
      */
     public void loadForm() throws PersistenceException {
         if (!formLoaded) {
             resetPersistenceErrorLog(); // clear log of errors
-            // first find PersistenceManager for loading the form
-            if (persistenceManager == null) {
-                persistenceManager = findPersistenceManager(formDataObject);
-            }
-            // create and register new FormModel instance
-            formModel = new FormModel(formDataObject);
-
-            //openForms.put(formModel, this);
             Logger.getLogger("TIMER").log(Level.FINE, "FormModel", new Object[]{formDataObject.getPrimaryFile(), formModel}); // NOI18N
             // load the form data (FormModel) and report errors
             try {
-                FormLAF.<Object>executeWithLookAndFeel(formModel, new Mutex.ExceptionAction<Object>() {
-                    @Override
-                    public Object run() throws Exception {
-                        persistenceManager.loadForm(formDataObject,
-                                formModel,
-                                persistenceErrors);
-                        formModel.setModified(false);
-                        return null;
-                    }
-                });
-            } catch (PersistenceException ex) { // some fatal error occurred
-                persistenceManager = null;
-                //openForms.remove(formModel);
-                formModel = null;
-                throw ex;
-            } catch (Exception ex) { // should not happen, but for sure...
-                ErrorManager.getDefault().notify(ex);
-                persistenceManager = null;
-                //openForms.remove(formModel);
-                formModel = null;
-                return;
+                formModel = persistenceManager.loadForm(formDataObject, persistenceErrors);
+                formModel.setModified(false);
+                // form is successfully loaded...
+                formLoaded = true;
+                formModel.fireFormLoaded();
+                // create form nodes hierarchy and add it to SourceChildren
+                formRootNode = new FormRootNode(formModel);
+                formRootNode.getChildren().getNodes();
+                formDataObject.getNodeDelegate().getChildren().add(new Node[]{formRootNode});
+
+                attachDataObjectListener();
+            } catch (Exception ex) {
+                throw new PersistenceException(ex);
             }
-
-            // form is successfully loaded...
-            formLoaded = true;
-
-            formModel.fireFormLoaded();
-            // create form nodes hierarchy and add it to SourceChildren
-            formRootNode = new FormRootNode(formModel);
-            formRootNode.getChildren().getNodes();
-            formDataObject.getNodeDelegate().getChildren().add(new Node[]{formRootNode});
-
-            attachDataObjectListener();
         }
     }
 
@@ -213,7 +187,7 @@ public class FormEditor {
         if (formLoaded && !formDataObject.formFileReadOnly() && !formModel.isReadOnly() && formModel.isModified()) {
             formModel.fireFormToBeSaved();
             resetPersistenceErrorLog();
-            persistenceManager.saveForm(formDataObject, formModel, persistenceErrors);
+            persistenceManager.saveForm(formDataObject, this, persistenceErrors);
             formModel.setModified(false);
         }
     }
@@ -238,83 +212,6 @@ public class FormEditor {
         }
     }
 
-    /**
-     * Finds PersistenceManager that can load and save the form.
-     */
-    private PersistenceManager findPersistenceManager(PlatypusFormDataObject aFormDataObject)
-            throws PersistenceException {
-        List<PersistenceManager> perisitenceManagers = PersistenceManager.getManagers();
-        if (perisitenceManagers.isEmpty()) { // there's no PersistenceManager available
-            PersistenceException ex = new PersistenceException(
-                    "No persistence manager registered"); // NOI18N
-            ErrorManager.getDefault().annotate(
-                    ex,
-                    ErrorManager.ERROR,
-                    null,
-                    FormUtils.getBundleString("MSG_ERR_NoPersistenceManager"), // NOI18N
-                    null,
-                    null);
-            throw ex;
-        }
-
-        for (PersistenceManager pm : perisitenceManagers) {
-            synchronized (pm) {
-                try {
-                    if (pm.canLoadForm(aFormDataObject)) {
-                        resetPersistenceErrorLog();
-                        return pm;
-                    }
-                } catch (PersistenceException ex) {
-                    logPersistenceError(ex);
-                    // [continue on exception?]
-                }
-            }
-        }
-
-        // no PersistenceManager is able to load the form
-        PersistenceException ex;
-        if (!anyPersistenceError()) {
-            // no error occurred, the format is just unknown
-            ex = new PersistenceException("Form file format not recognized"); // NOI18N
-            ErrorManager.getDefault().annotate(
-                    ex,
-                    ErrorManager.ERROR,
-                    null,
-                    FormUtils.getBundleString("MSG_ERR_NotRecognizedForm"), // NOI18N
-                    null,
-                    null);
-        } else { // some errors occurred when recognizing the form file format
-            Throwable annotateT = null;
-            int n = persistenceErrors.size();
-            if (n == 1) { // just one exception occurred
-                ex = (PersistenceException) persistenceErrors.get(0);
-                Throwable t = ex.getOriginalException();
-                annotateT = t != null ? t : ex;
-                n = 0;
-            } else { // there were more exceptions
-                ex = new PersistenceException("Form file cannot be loaded"); // NOI18N
-                annotateT = ex;
-            }
-            ErrorManager.getDefault().annotate(
-                    annotateT,
-                    FormUtils.getBundleString("MSG_ERR_LoadingErrors") // NOI18N
-            );
-            for (int i = 0; i < n; i++) {
-                PersistenceException pe = (PersistenceException) persistenceErrors.get(i);
-                Throwable t = pe.getOriginalException();
-                ErrorManager.getDefault().annotate(ex, (t != null ? t : pe));
-            }
-            // all the exceptions were attached to the main exception to
-            // be thrown, so the log can be cleared
-            resetPersistenceErrorLog();
-        }
-        throw ex;
-    }
-
-    private void logPersistenceError(Throwable t) {
-        logPersistenceError(t, -1);
-    }
-
     boolean anyPersistenceError() {
         return persistenceErrors != null && !persistenceErrors.isEmpty();
     }
@@ -329,8 +226,6 @@ public class FormEditor {
             return; // no errors or warnings logged
         }
         final ErrorManager errorManager = ErrorManager.getDefault();
-        final PlatypusPersistenceManager persistManager
-                = (PlatypusPersistenceManager) persistenceManager;
 
         boolean checkLoadingErrors = operation == FormOperation.LOADING && formLoaded;
         boolean anyNonFatalLoadingError = false; // was there a real error?
@@ -339,7 +234,7 @@ public class FormEditor {
 
         for (Throwable t : persistenceErrors) {
             if (t instanceof PersistenceException) {
-                Throwable th = ((PersistenceException) t).getOriginalException();
+                Throwable th = ((PersistenceException) t).getCause();
                 if (th != null) {
                     t = th;
                 }
@@ -378,30 +273,27 @@ public class FormEditor {
             final String wholeMsg = userErrorMsgs.append(
                     FormUtils.getBundleString("MSG_FormLoadedWithErrors")).toString();  // NOI18N
 
-            java.awt.EventQueue.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    // for some reason this would be displayed before the
-                    // ErrorManager if not invoked later
-                    if (isFormLoaded()) {// issue #164444
-                        JButton viewOnly = new JButton(FormUtils.getBundleString("CTL_ViewOnly"));		// NOI18N
-                        JButton allowEditing = new JButton(FormUtils.getBundleString("CTL_AllowEditing"));	// NOI18N                                        
+            java.awt.EventQueue.invokeLater(() -> {
+                // for some reason this would be displayed before the
+                // ErrorManager if not invoked later
+                if (isFormLoaded()) {// issue #164444
+                    JButton viewOnly = new JButton(FormUtils.getBundleString("CTL_ViewOnly"));		// NOI18N
+                    JButton allowEditing = new JButton(FormUtils.getBundleString("CTL_AllowEditing"));	// NOI18N
 
-                        Object ret = DialogDisplayer.getDefault().notify(new NotifyDescriptor(
-                                wholeMsg,
-                                FormUtils.getBundleString("CTL_FormLoadedWithErrors"), // NOI18N
-                                NotifyDescriptor.DEFAULT_OPTION,
-                                NotifyDescriptor.WARNING_MESSAGE,
-                                new Object[]{viewOnly, allowEditing, NotifyDescriptor.CANCEL_OPTION},
-                                viewOnly));
+                    Object ret = DialogDisplayer.getDefault().notify(new NotifyDescriptor(
+                            wholeMsg,
+                            FormUtils.getBundleString("CTL_FormLoadedWithErrors"), // NOI18N
+                            NotifyDescriptor.DEFAULT_OPTION,
+                            NotifyDescriptor.WARNING_MESSAGE,
+                            new Object[]{viewOnly, allowEditing, NotifyDescriptor.CANCEL_OPTION},
+                            viewOnly));
 
-                        if (ret == viewOnly) {
-                            setFormReadOnly();
-                        } else if (ret == allowEditing) {
-                            destroyInvalidComponents();
-                        } else { // close form
-                            closeForm();
-                        }
+                    if (ret == viewOnly) {
+                        setFormReadOnly();
+                    } else if (ret == allowEditing) {
+                        destroyInvalidComponents();
+                    } else { // close form
+                        closeForm();
                     }
                 }
             });
@@ -455,14 +347,11 @@ public class FormEditor {
             // remove nodes hierarchy
             if (formDataObject.isValid()) {
                 // Avoiding deadlock (issue 51796)
-                java.awt.EventQueue.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (formDataObject.isValid()) {
-                            formDataObject.getNodeDelegate().getChildren().remove(new Node[]{formRootNode});
-                        }
-                        formRootNode = null;
+                java.awt.EventQueue.invokeLater(() -> {
+                    if (formDataObject.isValid()) {
+                        formDataObject.getNodeDelegate().getChildren().remove(new Node[]{formRootNode});
                     }
+                    formRootNode = null;
                 });
             }
 
@@ -478,21 +367,18 @@ public class FormEditor {
 
     private void attachDataObjectListener() {
         if (dataObjectListener == null) {
-            dataObjectListener = new PropertyChangeListener() {
-                @Override
-                public void propertyChange(PropertyChangeEvent ev) {
-                    switch (ev.getPropertyName()) {
-                        case DataObject.PROP_NAME:
-                            // PlatypusFormDataObject's name has changed
-                            String name = formDataObject.getName();
-                            formModel.setName(name);
-                            formRootNode.updateName(name);
-                            // multiview updated by FormEditorSupport
-                            // code regenerated by FormRefactoringUpdate
-                            break;
-                        case DataObject.PROP_COOKIE:
-                            break;
-                    }
+            dataObjectListener = (PropertyChangeEvent ev) -> {
+                switch (ev.getPropertyName()) {
+                    case DataObject.PROP_NAME:
+                        // PlatypusFormDataObject's name has changed
+                        String name = formDataObject.getName();
+                        formModel.setName(name);
+                        formRootNode.updateName(name);
+                        // multiview updated by FormEditorSupport
+                        // code regenerated by FormRefactoringUpdate
+                        break;
+                    case DataObject.PROP_COOKIE:
+                        break;
                 }
             };
             formDataObject.addPropertyChangeListener(dataObjectListener);

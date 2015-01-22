@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.components.DesktopPane");
+    var javaClass = Java.type("com.eas.client.forms.components.DesktopPane");
     javaClass.setPublisher(function(aDelegate) {
         return new P.DesktopPane(aDelegate);
     });
@@ -56,20 +56,6 @@
              * @memberOf DesktopPane
              */
             P.DesktopPane.prototype.onMouseDragged = {};
-        }
-        Object.defineProperty(this, "parent", {
-            get: function() {
-                var value = delegate.parent;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.DesktopPane){
-            /**
-             * Gets the parent of this component.
-             * @property parent
-             * @memberOf DesktopPane
-             */
-            P.DesktopPane.prototype.parent = {};
         }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
@@ -143,6 +129,9 @@
             get: function() {
                 var value = delegate.error;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.error = P.boxAsJava(aValue);
             }
         });
         if(!P.DesktopPane){
@@ -238,6 +227,20 @@
              * @memberOf DesktopPane
              */
             P.DesktopPane.prototype.onComponentResized = {};
+        }
+        Object.defineProperty(this, "parent", {
+            get: function() {
+                var value = delegate.parentWidget;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.DesktopPane){
+            /**
+             * Parent container of this widget.
+             * @property parentWidget
+             * @memberOf DesktopPane
+             */
+            P.DesktopPane.prototype.parent = {};
         }
         Object.defineProperty(this, "onMouseEntered", {
             get: function() {
@@ -406,23 +409,6 @@
              */
             P.DesktopPane.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.DesktopPane){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf DesktopPane
-             */
-            P.DesktopPane.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -439,6 +425,23 @@
              * @memberOf DesktopPane
              */
             P.DesktopPane.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.DesktopPane){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf DesktopPane
+             */
+            P.DesktopPane.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -682,6 +685,28 @@
         };
 
         /**
+         * Tries to acquire focus for this component.
+         * @method focus
+         * @memberOf DesktopPane
+         */
+        P.DesktopPane.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Maximizes all frames on the pane.
+         * @method maximizeAll
+         * @memberOf DesktopPane
+         */
+        P.DesktopPane.prototype.maximizeAll = function() {
+            var delegate = this.unwrap();
+            var value = delegate.maximizeAll();
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Minimizes all frames on the pane.
          * @method minimizeAll
          * @memberOf DesktopPane
@@ -700,28 +725,6 @@
         P.DesktopPane.prototype.restoreAll = function() {
             var delegate = this.unwrap();
             var value = delegate.restoreAll();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Maximizes all frames on the pane.
-         * @method maximizeAll
-         * @memberOf DesktopPane
-         */
-        P.DesktopPane.prototype.maximizeAll = function() {
-            var delegate = this.unwrap();
-            var value = delegate.maximizeAll();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf DesktopPane
-         */
-        P.DesktopPane.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
             return P.boxAsJs(value);
         };
 

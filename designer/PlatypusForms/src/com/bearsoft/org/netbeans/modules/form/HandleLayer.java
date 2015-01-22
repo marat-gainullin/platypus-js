@@ -43,21 +43,58 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
+import com.bearsoft.gui.grid.header.GridColumnsNode;
 import com.bearsoft.org.netbeans.modules.form.assistant.AssistantModel;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGrid;
-import com.bearsoft.org.netbeans.modules.form.bound.RADModelMap;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.*;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.MarginLayoutSupport;
 import com.bearsoft.org.netbeans.modules.form.menu.MenuEditLayer;
 import com.bearsoft.org.netbeans.modules.form.palette.PaletteItem;
 import com.bearsoft.org.netbeans.modules.form.palette.PaletteUtils;
-import java.awt.*;
+import com.eas.client.forms.components.CheckBox;
+import com.eas.client.forms.components.RadioButton;
+import com.eas.client.forms.containers.ButtonGroup;
+import com.eas.client.forms.containers.ScrollPane;
+import com.eas.client.forms.containers.TabbedPane;
+import com.eas.client.forms.menu.MenuBar;
+import java.awt.AWTKeyStroke;
+import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Composite;
+import java.awt.Container;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.EventQueue;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.KeyboardFocusManager;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.Stroke;
 import java.awt.datatransfer.*;
 import java.awt.dnd.*;
 import java.awt.event.*;
+import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.*;
-import javax.swing.*;
+import javax.swing.AbstractButton;
+import javax.swing.Action;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JViewport;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.ToolTipManager;
+import javax.swing.UIManager;
 import org.netbeans.spi.palette.PaletteController;
 import org.openide.DialogDisplayer;
 import org.openide.ErrorManager;
@@ -65,6 +102,7 @@ import org.openide.NotifyDescriptor;
 import org.openide.awt.StatusDisplayer;
 import org.openide.nodes.Node;
 import org.openide.nodes.NodeOp;
+import org.openide.util.Exceptions;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.Utilities;
@@ -101,12 +139,15 @@ public class HandleLayer extends JPanel {
                     if (formDesigner.getDesignerMode() == PlatypusFormLayoutView.MODE_SELECT
                             && !draggingEnded && !endDragging(e)) {   // there was no dragging, so mouse release may have other meaning
                         boolean modifier = e.isControlDown() || e.isAltDown() || e.isShiftDown();
-                        if ((resizeType & DESIGNER_RESIZING) != 0
-                                && e.getClickCount() == 2
-                                && !modifier
-                                && !viewOnly) {   // doubleclick on designer's resizing border
-                            setUserDesignerSize();
-                        } else if (prevLeftMousePoint != null
+                        /*
+                         if ((resizeType & DESIGNER_RESIZING) != 0
+                         && e.getClickCount() == 2
+                         && !modifier
+                         && !viewOnly) {   // doubleclick on designer's resizing border
+                         setUserDesignerSize();
+                         } else 
+                         */
+                        if (prevLeftMousePoint != null
                                 && prevLeftMousePoint.distance(e.getPoint()) <= 3
                                 && !modifier) {   // second click on the same place in a component
                             RADComponent<?> radComp = getRadComponentAt(e.getPoint(), COMP_SELECTED);
@@ -141,8 +182,8 @@ public class HandleLayer extends JPanel {
                 if (null != item) {
                     StatusDisplayer.getDefault().setStatusText(
                             FormUtils.getFormattedBundleString(
-                            "FMT_MSG_AddingComponent", // NOI18N
-                            new String[]{item.getNode().getDisplayName()}));
+                                    "FMT_MSG_AddingComponent", // NOI18N
+                                    new String[]{item.getNode().getDisplayName()}));
                 }
             }
         }
@@ -230,9 +271,9 @@ public class HandleLayer extends JPanel {
                     if (!viewOnly
                             && !e.isControlDown() && (!e.isShiftDown() || e.isAltDown())
                             && (resizeType != 0 || lastLeftMousePoint.distance(p) > 6)) {   // start component dragging
-                        RADVisualComponent<?>[] draggedComps =
-                                (resizeType & DESIGNER_RESIZING) == 0 ? getComponentsToDrag()
-                                : new RADVisualComponent<?>[]{formDesigner.getTopDesignComponent()};
+                        RADVisualComponent<?>[] draggedComps
+                                = (resizeType & DESIGNER_RESIZING) == 0 ? getComponentsToDrag()
+                                        : new RADVisualComponent<?>[]{formDesigner.getTopDesignComponent()};
                         if (draggedComps != null) {
                             if (resizeType == 0) {
                                 componentDrag = new ExistingComponentDrag(
@@ -354,15 +395,15 @@ public class HandleLayer extends JPanel {
         Set<AWTKeyStroke> keys = new HashSet<>();
         keys.add(
                 AWTKeyStroke.getAWTKeyStroke(9,
-                InputEvent.CTRL_DOWN_MASK,
-                true));
+                        InputEvent.CTRL_DOWN_MASK,
+                        true));
         setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS,
                 keys);
         keys.clear();
         keys.add(
                 AWTKeyStroke.getAWTKeyStroke(9,
-                InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK,
-                true));
+                        InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK,
+                        true));
         setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS,
                 keys);
 
@@ -471,7 +512,7 @@ public class HandleLayer extends JPanel {
         Component component = formDesigner.getComponent(radComp);
         Container parent = component != null ? component.getParent() : null;
 
-        if (parent != null && component.isShowing()) {
+        if (parent != null && component != null && component.isShowing()) {
             Rectangle selRect = component.getBounds();
             Rectangle selParentRect = parent.getBounds();
             convertRectangleFromComponent(selRect, parent);
@@ -562,8 +603,7 @@ public class HandleLayer extends JPanel {
         }
     }
     /**
-     * Length of the (shortest) lines in
-     * <code>ButtonGroup</code> visualization.
+     * Length of the (shortest) lines in <code>ButtonGroup</code> visualization.
      */
     private static final int BUTTON_GROUP_OFFSET = 5;
     /**
@@ -573,8 +613,7 @@ public class HandleLayer extends JPanel {
     private static final boolean BUTTON_GROUP_COLUMNS_FIRST = false;
 
     /**
-     * Visualization of
-     * <code>ButtonGroup</code>s.
+     * Visualization of <code>ButtonGroup</code>s.
      *
      * @param g graphics object.
      */
@@ -649,7 +688,7 @@ public class HandleLayer extends JPanel {
                         } else {
                             return null;
                         }
-                    } catch (Exception ex) {
+                    } catch (IllegalAccessException | InvocationTargetException ex) {
                         ErrorManager.getDefault().notify(ex);
                     }
                 }
@@ -750,12 +789,7 @@ public class HandleLayer extends JPanel {
                             Rectangle bound = compBounds.get(button);
                             cutOrder.add(new int[]{columns ? bound.x : bound.y, j});
                         }
-                        Collections.sort(cutOrder, new Comparator<int[]>() {
-                            @Override
-                            public int compare(int[] i1, int[] i2) {
-                                return (i1[0] == i2[0]) ? (i1[1] - i2[1]) : (i1[0] - i2[0]);
-                            }
-                        });
+                        Collections.sort(cutOrder, (int[] i1, int[] i2) -> (i1[0] == i2[0]) ? (i1[1] - i2[1]) : (i1[0] - i2[0]));
                         cuts = new ArrayList<>(buttons.size());
                         groups = (java.util.List<AbstractButton>[]) new java.util.List<?>[buttons.size()];
                         for (int[] ii : cutOrder) {
@@ -786,13 +820,13 @@ public class HandleLayer extends JPanel {
             if (groups[count].size() == 1) {
                 AbstractButton button = groups[count].get(0);
                 Rectangle bound = compBounds.get(button);
-                if ((button instanceof JRadioButton) || (button instanceof JCheckBox)) {
+                if ((button instanceof RadioButton) || (button instanceof CheckBox)) {
                     Dimension dim = button.getPreferredSize();
                     Insets insets = button.getInsets();
                     int textPos = columns ? button.getHorizontalTextPosition() : button.getVerticalTextPosition();
                     Icon icon = button.getIcon();
                     if (icon == null) {
-                        icon = UIManager.getIcon((button instanceof JRadioButton) ? "RadioButton.icon" : "CheckBox.icon"); // NOI18N
+                        icon = UIManager.getIcon((button instanceof RadioButton) ? "RadioButton.icon" : "CheckBox.icon"); // NOI18N
                     }
                     if (icon != null) {
                         off = columns ? icon.getIconWidth() : icon.getIconHeight();
@@ -1187,7 +1221,7 @@ public class HandleLayer extends JPanel {
                 && hitRadComp instanceof RADVisualContainer<?>) {
             RADVisualComponent<?>[] sub = ((RADVisualContainer<?>) hitRadComp).getSubComponents();
             Component scroll = formDesigner.getComponent(hitRadComp);
-            if (sub.length > 0 && scroll instanceof JScrollPane) {
+            if (sub.length > 0 && scroll instanceof ScrollPane) {
                 Point p = e.getPoint();
                 convertPointToComponent(p, scroll);
                 Component clicked = SwingUtilities.getDeepestComponentAt(scroll, p.x, p.y);
@@ -1540,7 +1574,7 @@ public class HandleLayer extends JPanel {
                         setToolTipText(null);
                     }
                 } else if (getToolTipText() == null) {
-                    Dimension size = formDesigner.getComponentLayer().getDesignerSize();
+                    Dimension size = formDesigner.getTopDesignComponent().getBeanInstance().getSize();
 
                     MessageFormat mf;
                     if (viewOnly) {
@@ -1559,7 +1593,7 @@ public class HandleLayer extends JPanel {
 
                     String hint = mf.format(
                             new Object[]{new Integer(size.width),
-                        new Integer(size.height)});
+                                new Integer(size.height)});
                     setToolTipText(hint);
                     ToolTipManager.sharedInstance().mouseEntered(e);
                 }
@@ -1760,38 +1794,39 @@ public class HandleLayer extends JPanel {
         }
         setCursor(cursor);
     }
+    /*
+     private void setUserDesignerSize() {
+     NotifyDescriptor.InputLine input = new NotifyDescriptor.InputLine(
+     FormUtils.getBundleString("CTL_SetDesignerSize_Label"), // NOI18N
+     FormUtils.getBundleString("CTL_SetDesignerSize_Title")); // NOI18N
+     Dimension size = formDesigner.getComponentLayer().getDesignerSize();
+     input.setInputText(Integer.toString(size.width) + ", " // NOI18N
+     + Integer.toString(size.height));
 
-    private void setUserDesignerSize() {
-        NotifyDescriptor.InputLine input = new NotifyDescriptor.InputLine(
-                FormUtils.getBundleString("CTL_SetDesignerSize_Label"), // NOI18N
-                FormUtils.getBundleString("CTL_SetDesignerSize_Title")); // NOI18N
-        Dimension size = formDesigner.getComponentLayer().getDesignerSize();
-        input.setInputText(Integer.toString(size.width) + ", " // NOI18N
-                + Integer.toString(size.height));
-
-        if (DialogDisplayer.getDefault().notify(input) == NotifyDescriptor.OK_OPTION) {
-            String txt = input.getInputText();
-            int i = txt.indexOf(',');
-            if (i > 0) {
-                int n = txt.length();
-                try {
-                    int w = Integer.parseInt(txt.substring(0, i));
-                    i++;
-                    while (i < n && txt.charAt(i) == ' ') {
-                        i++;
-                    }
-                    int h = Integer.parseInt(txt.substring(i, n));
-                    if (w >= 0 && h >= 0) {
-                        size = new Dimension(w, h);
-                        formDesigner.setDesignerSize(size, null);
-                        setToolTipText(null);
-                        setCursor(Cursor.getDefaultCursor());
-                    }
-                } catch (NumberFormatException ex) {
-                } // silently ignore, do nothing
-            }
-        }
-    }
+     if (DialogDisplayer.getDefault().notify(input) == NotifyDescriptor.OK_OPTION) {
+     String txt = input.getInputText();
+     int i = txt.indexOf(',');
+     if (i > 0) {
+     int n = txt.length();
+     try {
+     int w = Integer.parseInt(txt.substring(0, i));
+     i++;
+     while (i < n && txt.charAt(i) == ' ') {
+     i++;
+     }
+     int h = Integer.parseInt(txt.substring(i, n));
+     if (w >= 0 && h >= 0) {
+     size = new Dimension(w, h);
+     formDesigner.setDesignerSize(size, null);
+     setToolTipText(null);
+     setCursor(Cursor.getDefaultCursor());
+     }
+     } catch (NumberFormatException ex) {
+     } // silently ignore, do nothing
+     }
+     }
+     }
+     */
 
     private LayoutConstraints<?> getConstraintsAtPoint(RADVisualComponent<?> radComp, Point point, Point hotSpot) {
         RADVisualContainer<?> radCont = radComp instanceof RADVisualContainer
@@ -1808,7 +1843,7 @@ public class HandleLayer extends JPanel {
 
     private static boolean substituteForContainer(RADVisualContainer<?> radCont) {
         return radCont != null
-                && radCont.getBeanClass().isAssignableFrom(JScrollPane.class)
+                && radCont.getBeanClass().isAssignableFrom(ScrollPane.class)
                 && radCont.getSubComponents().length > 0;
     }
 
@@ -1933,23 +1968,19 @@ public class HandleLayer extends JPanel {
             java.util.List<Component> subContainers = new ArrayList<>();
 
             Component[] comps;
-            if (cont instanceof JTabbedPane) {
-                Component selectedTab = ((JTabbedPane) cont).getSelectedComponent();
+            if (cont instanceof TabbedPane) {
+                Component selectedTab = ((TabbedPane) cont).getSelectedComponent();
                 comps = (selectedTab == null) ? new Component[0] : new Component[]{selectedTab};
             } else {
                 comps = cont.getComponents();
             }
-            for (int i = 0; i < comps.length; i++) {
-                Component comp = comps[i];
-                Rectangle bounds = convertRectangleFromComponent(
-                        comps[i].getBounds(), cont);
+            for (Component comp : comps) {
+                Rectangle bounds = convertRectangleFromComponent(comp.getBounds(), cont);
                 boolean intersects = selRect.intersects(bounds);
-
                 RADComponent<?> radComp = formDesigner.getRadComponent(comp);
                 if (radComp != null && intersects && radComp instanceof RADVisualComponent<?>) {
                     toSelect.add((RADVisualComponent<?>) radComp);
                 }
-
                 if (intersects && comp instanceof Container) {
                     subContainers.add(comp);
                 }
@@ -2040,7 +2071,7 @@ public class HandleLayer extends JPanel {
         final RADVisualContainer<?> getSourceContainer() {
             return movingComponents != null && movingComponents.length > 0
                     && formDesigner.getTopDesignComponent() != movingComponents[0]
-                    ? movingComponents[0].getParentComponent() : null;
+                            ? movingComponents[0].getParentComponent() : null;
         }
 
         final boolean isTopComponent() {
@@ -2203,12 +2234,9 @@ public class HandleLayer extends JPanel {
                 showingComponents = null;
             } else {
                 // re-init in next AWT round - to have the designer updated
-                EventQueue.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        init();
-                        move(e);
-                    }
+                EventQueue.invokeLater(() -> {
+                    init();
+                    move(e);
                 });
             }
             return retVal;
@@ -2315,7 +2343,7 @@ public class HandleLayer extends JPanel {
                 // restricted dragging - within the same container, or one level up
                 fixedTarget = (modifiers & InputEvent.SHIFT_MASK) != 0
                         || formDesigner.getTopDesignComponent() == radCont
-                        ? radCont : radCont.getParentComponent();
+                                ? radCont : radCont.getParentComponent();
             }
 
             // layout component dragger requires coordinates related to HandleLayer
@@ -2400,7 +2428,7 @@ public class HandleLayer extends JPanel {
                 RADVisualContainer<?> formRootContainer = ((RADVisualContainer<?>) movingComponents[0]);
                 realDrag = formRootContainer.getLayoutSupport() != null && formRootContainer.getLayoutSupport().getLayoutDelegate() != null;
                 fixedTarget = null;
-                originalSize = formDesigner.getComponentLayer().getDesignerSize();
+                originalSize = formDesigner.getTopDesignComponent().getBeanInstance().getSize();
             } else if (sourceCont != null) {
                 realDrag = sourceCont.getLayoutSupport() != null;
                 fixedTarget = sourceCont;
@@ -2423,34 +2451,16 @@ public class HandleLayer extends JPanel {
                 if (targetContainer != null) {
                     dragger.dropComponents(p, targetContainer);
                 }
-                /*
-                 * Will be returned to working code without RADVisualFormContainer when structural changes 
-                 * of replicants/real components in the form will be clear.
-                 * Also, we have to investigate undo/redo functioning.
-                 if (isTopComponent()) {
-                 Dimension newSize = new Dimension(movingBounds[0].width, movingBounds[0].height);
-                 formDesigner.setDesignerSize(newSize, originalSize);
-                 formDesigner.getComponentLayer().revalidate();
-                 }
-                 */
                 if (isTopComponent()) {
                     Dimension newSize = new Dimension(movingBounds[0].width, movingBounds[0].height);
-                    if (formDesigner.getTopDesignComponent() instanceof RADVisualFormContainer) {
-                        formDesigner.setDesignerSize(newSize, originalSize);
-                    } else {
-                        formDesigner.getComponentLayer().setDesignerSize(newSize);
-                        getFormModel().fireSyntheticPropertyChanged(formDesigner.getTopDesignComponent(), FormModelEvent.PROP_DESIGNER_SIZE, originalSize, newSize);
-                    }
+                    formDesigner.getFormModel().fireComponentPropertyChanged(
+                            formDesigner.getTopDesignComponent(), "width", originalSize.width, newSize.width);
+                    formDesigner.getFormModel().fireComponentPropertyChanged(
+                            formDesigner.getTopDesignComponent(), "height", originalSize.height, newSize.height);
                 }
             } else { // resizing canceled
                 if (isTopComponent()) {
-                    // just revert ComponentLayer's designer size (don't need to go through PlatypusFormLayoutView)
-                    ComponentLayer compLayer = formDesigner.getComponentLayer();
-                    if (!compLayer.getDesignerSize().equals(originalSize)) {
-                        compLayer.setDesignerSize(originalSize);
-                        compLayer.revalidate();
-                    }
-                    compLayer.repaint();
+                    changeTopCompSize(originalSize);
                 } else { // add resized component back
                     formDesigner.updateContainerLayout(getSourceContainer()); //, false);
                 }
@@ -2458,12 +2468,32 @@ public class HandleLayer extends JPanel {
             return true;
         }
 
+        protected void changeTopCompSize(Dimension newSize) {
+            try {
+                formDesigner.getFormModel().setUndoRedoRecording(false);
+                try {
+                    RADProperty<Integer> widthProp = formDesigner.getTopDesignComponent().<RADProperty<Integer>>getProperty("width");
+                    if (widthProp != null) {
+                        widthProp.setValue(newSize.width);
+                    }
+                    RADProperty<Integer> heightProp = formDesigner.getTopDesignComponent().<RADProperty<Integer>>getProperty("height");
+                    if (heightProp != null) {
+                        heightProp.setValue(newSize.height);
+                    }
+                } finally {
+                    formDesigner.getFormModel().setUndoRedoRecording(true);
+                }
+            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        }
+
         @Override
         void move(Point p, int modifiers) {
             targetContainer = getTargetContainer(p, modifiers);
 
             if (isTopComponent()) {
-                Rectangle r = formDesigner.getComponentLayer().getDesignerInnerBounds();
+                Rectangle r = formDesigner.getTopDesignComponent().getBeanInstance().getBounds();//formDesigner.getComponentLayer().getDesignerInnerBounds();
                 int w = r.width;
                 int h = r.height;
                 if ((resizeType & LayoutSupportManager.RESIZE_DOWN) != 0) {
@@ -2487,8 +2517,11 @@ public class HandleLayer extends JPanel {
                  */
                 if (isTopComponent()/* && formDesigner.getTopDesignComponent() instanceof RADVisualFormContainer*/) {
                     Dimension size = new Dimension(movingBounds[0].width, movingBounds[0].height);
-                    formDesigner.getComponentLayer().setDesignerSize(size);
-                    formDesigner.getComponentLayer().revalidate();
+                    changeTopCompSize(size);
+                    /*
+                     formDesigner.getComponentLayer().setDesignerSize(size);
+                     formDesigner.getComponentLayer().revalidate();
+                     */
                 }
             } else {
                 if (realDrag && targetContainer != null && targetContainer.getLayoutSupport() != null) {
@@ -2551,9 +2584,9 @@ public class HandleLayer extends JPanel {
 
         @Override
         final void init() { // can be re-inited
-            RADVisualComponent<?> precreated =
-                    getComponentCreator().precreateVisualComponent(
-                    paletteItem.getComponentClassSource());
+            RADVisualComponent<?> precreated
+                    = getComponentCreator().precreateVisualComponent(
+                            paletteItem.getComponentClassSource());
             if (precreated != null) {
                 if (movingComponents == null) {
                     setMovingComponents(new RADVisualComponent<?>[]{precreated});
@@ -2663,30 +2696,13 @@ public class HandleLayer extends JPanel {
                     RADComponent<?> targetComponent = targetContainer;
                     int mode = ((modifiers & InputEvent.ALT_MASK) != 0) ? COMP_SELECTED : COMP_DEEPEST;
                     RADComponent<?> hittedComponent = HandleLayer.this.getRadComponentAt(p, mode);
-                    if (javax.swing.border.Border.class.isAssignableFrom(paletteItem.getComponentClass())
-                            || (hittedComponent instanceof RADModelGrid && com.eas.dbcontrols.grid.DbGridColumn.class.isAssignableFrom(paletteItem.getComponentClass()))
-                            || (hittedComponent instanceof RADModelMap && com.eas.client.geo.RowsetFeatureDescriptor.class.isAssignableFrom(paletteItem.getComponentClass()))) {
+                    if ((hittedComponent instanceof RADModelGrid && GridColumnsNode.class.isAssignableFrom(paletteItem.getComponentClass()))) {
                         targetComponent = hittedComponent;
                     }
                     addedComponent = getComponentCreator().createComponent(
                             paletteItem.getComponentClassSource(), targetComponent, null, false);
                     if (addedComponent == null) {
                         repaint();
-                    }
-                }
-                if (addedComponent != null) {
-                    java.beans.BeanDescriptor bDesc = addedComponent.getBeanInfo().getBeanDescriptor();
-                    if ((bDesc != null) && (bDesc.getValue("customizeOnCreation") != null)) { // NOI18N
-                        modifiers &= ~InputEvent.SHIFT_MASK;
-                        EventQueue.invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                RADComponentNode node = addedComponent.getNodeReference();
-                                if (node.hasCustomizer()) {
-                                    org.openide.nodes.NodeOperation.getDefault().customize(node);
-                                }
-                            }
-                        });
                     }
                 }
                 if ((modifiers & InputEvent.SHIFT_MASK) != 0) {
@@ -2777,7 +2793,7 @@ public class HandleLayer extends JPanel {
                 }
                 //switch to the menu layer if this is a menu component other than JMenuBar
                 if (item != null && MenuEditLayer.isMenuRelatedComponentClass(item.getComponentClass())
-                        && !JMenuBar.class.isAssignableFrom(item.getComponentClass())) {
+                        && !MenuBar.class.isAssignableFrom(item.getComponentClass())) {
                     if (!formDesigner.getMenuEditLayer().isDragProxying()) {
                         formDesigner.getMenuEditLayer().startNewMenuComponentDragAndDrop(item);
                         return;

@@ -5,7 +5,6 @@
 package com.eas.client.threetier;
 
 import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.exceptions.FlowProviderFailedException;
 import com.bearsoft.rowset.exceptions.RowsetException;
@@ -13,8 +12,6 @@ import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.AppConnection;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -30,7 +27,6 @@ public class PlatypusFlowProvider implements FlowProvider {
     protected boolean procedure;
     protected String entityName;
     protected AppConnection conn;
-    protected List<Change> changeLog = new ArrayList<>();
 
     public PlatypusFlowProvider(PlatypusClient aClient, String aEntityName, Fields aExpectedFields) {
         super();
@@ -104,10 +100,5 @@ public class PlatypusFlowProvider implements FlowProvider {
 
     @Override
     public void setPageSize(int aValue) {
-    }
-
-    @Override
-    public List<Change> getChangeLog() {
-        return changeLog;
     }
 }

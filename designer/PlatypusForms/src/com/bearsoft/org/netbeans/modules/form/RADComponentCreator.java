@@ -43,33 +43,53 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
+import com.bearsoft.gui.grid.header.GridColumnsNode;
 import com.bearsoft.org.netbeans.modules.form.bound.RADColumnView;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGrid;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
-import com.bearsoft.org.netbeans.modules.form.bound.RADModelMap;
-import com.bearsoft.org.netbeans.modules.form.bound.RADModelMapLayer;
 import com.bearsoft.org.netbeans.modules.form.bound.RADModelScalarComponent;
-import com.bearsoft.org.netbeans.modules.form.editors.NbBorder;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.*;
-import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.AbsoluteLayoutSupport;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.MarginLayoutSupport;
-import com.eas.client.geo.RowsetFeatureDescriptor;
-import com.eas.controls.HtmlContentEditorKit;
-import com.eas.dbcontrols.DbControl;
-import com.eas.dbcontrols.DbControlPanel;
-import com.eas.dbcontrols.ScalarDbControl;
-import com.eas.dbcontrols.grid.DbGrid;
-import com.eas.dbcontrols.grid.DbGridColumn;
-import com.eas.dbcontrols.image.DbImage;
-import com.eas.dbcontrols.map.DbMap;
-import com.eas.dbcontrols.text.DbText;
-import java.awt.*;
+import com.eas.client.forms.components.Button;
+import com.eas.client.forms.components.CheckBox;
+import com.eas.client.forms.components.DesktopPane;
+import com.eas.client.forms.components.DropDownButton;
+import com.eas.client.forms.components.FormattedField;
+import com.eas.client.forms.components.HtmlArea;
+import com.eas.client.forms.components.Label;
+import com.eas.client.forms.components.PasswordField;
+import com.eas.client.forms.components.ProgressBar;
+import com.eas.client.forms.components.RadioButton;
+import com.eas.client.forms.components.Slider;
+import com.eas.client.forms.components.TextArea;
+import com.eas.client.forms.components.TextField;
+import com.eas.client.forms.components.ToggleButton;
+import com.eas.client.forms.components.model.ModelCheckBox;
+import com.eas.client.forms.components.model.ModelComponentDecorator;
+import com.eas.client.forms.components.model.ModelFormattedField;
+import com.eas.client.forms.components.model.ModelTextArea;
+import com.eas.client.forms.components.model.ModelWidget;
+import com.eas.client.forms.components.model.grid.ModelGrid;
+import com.eas.client.forms.containers.ButtonGroup;
+import com.eas.client.forms.containers.ScrollPane;
+import com.eas.client.forms.containers.ToolBar;
+import com.eas.client.forms.menu.CheckMenuItem;
+import com.eas.client.forms.menu.Menu;
+import com.eas.client.forms.menu.MenuBar;
+import com.eas.client.forms.menu.MenuItem;
+import com.eas.client.forms.menu.MenuSeparator;
+import com.eas.client.forms.menu.PopupMenu;
+import com.eas.client.forms.menu.RadioMenuItem;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.LayoutManager;
 import java.util.*;
-import javax.swing.*;
-import javax.swing.border.Border;
+import javax.swing.AbstractButton;
+import javax.swing.JComponent;
+import javax.swing.SwingConstants;
 import org.openide.*;
-import org.openide.util.Mutex;
-import org.openide.util.NbBundle;
 
 /**
  * This class represents an access point for adding new components to FormModel.
@@ -84,7 +104,7 @@ public class RADComponentCreator {
 
     private enum TargetType {
 
-        LAYOUT, BORDER, VISUAL, OTHER
+        LAYOUT, VISUAL, OTHER
     }
 
     private enum ComponentType {
@@ -98,14 +118,7 @@ public class RADComponentCreator {
         private ComponentType componentType; // type of radcomponent to be added/applied
         private RADComponent<?> targetComponent; // actual target component (after adjustments)
     }
-    private static final FormProperty.Filter COPIED_PROPERTY_FILTER = new FormProperty.Filter() {
-        @Override
-        public boolean accept(FormProperty<?> property) {
-            // don't copy name property
-            return !property.isDefaultValue() && !"name".equals(property.getName());
-        }
-    };
-    private FormModel formModel;
+    private final FormModel formModel;
     private RADVisualComponent<?> preRadComp;
 
     RADComponentCreator(FormModel model) {
@@ -159,13 +172,7 @@ public class RADComponentCreator {
         }
 
         try { // Look&Feel UI defaults remapping needed
-            return FormLAF.<RADComponent<?>>executeWithLookAndFeel(formModel,
-                    new Mutex.ExceptionAction<RADComponent<?>>() {
-                        @Override
-                        public RADComponent<?> run() throws Exception {
-                            return copyComponent2(sourceComp, null, target);
-                        }
-                    });
+            return FormLAF.<RADComponent<?>>executeWithLookAndFeel(formModel, () -> copyComponent2(sourceComp, null, target));
         } catch (Exception ex) { // should not happen
             ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
             return null;
@@ -213,9 +220,7 @@ public class RADComponentCreator {
 
     public static boolean canApplyComponent(Class<?> beanClass, RADComponent<?> targetComp) {
         TargetInfo target = getTargetInfo(beanClass, targetComp, false, false);
-        return target != null
-                && (target.targetType == TargetType.BORDER
-                || target.targetType == TargetType.LAYOUT);
+        return target != null && target.targetType == TargetType.LAYOUT;
     }
 
     // --------
@@ -229,8 +234,6 @@ public class RADComponentCreator {
 
         // no preview component if this is a window, applet, or not visual
         if (compClass == null
-                || java.awt.Window.class.isAssignableFrom(compClass)
-                || java.applet.Applet.class.isAssignableFrom(compClass)
                 // JPopupMenu can't be used as a visual component (added to a container)
                 || javax.swing.JPopupMenu.class.isAssignableFrom(compClass)
                 || !FormUtils.isVisualizableClass(compClass)) {
@@ -242,14 +245,10 @@ public class RADComponentCreator {
         }
 
         try { // Look&Feel UI defaults remapping needed
-            FormLAF.<RADVisualComponent<?>>executeWithLookAndFeel(formModel,
-                    new Mutex.ExceptionAction<RADVisualComponent<?>>() {
-                        @Override
-                        public RADVisualComponent<?> run() throws Exception {
-                            preRadComp = createVisualComponent(compClass);
-                            return preRadComp;
-                        }
-                    });
+            FormLAF.<RADVisualComponent<?>>executeWithLookAndFeel(formModel, () -> {
+                preRadComp = createVisualComponent(compClass);
+                return preRadComp;
+            });
             return preRadComp;
         } catch (Exception ex) { // should not happen
             ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
@@ -297,20 +296,15 @@ public class RADComponentCreator {
 
         final TargetInfo target = getTargetInfo(compClass, targetComp,
                 !exactTargetMatch, !exactTargetMatch);
-        if (target == null) {
-            return null;
-        }
+        if (target != null) {
 
-        try { // Look&Feel UI defaults remapping needed
-            return FormLAF.<RADComponent<?>>executeWithLookAndFeel(formModel,
-                    new Mutex.ExceptionAction<RADComponent<?>>() {
-                        @Override
-                        public RADComponent<?> run() throws Exception {
-                            return createAndAddComponent2(compClass, target, aConstraints);
-                        }
-                    });
-        } catch (Exception ex) { // should not happen
-            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
+            try { // Look&Feel UI defaults remapping needed
+                return FormLAF.<RADComponent<?>>executeWithLookAndFeel(formModel, () -> createAndAddComponent2(compClass, target, aConstraints));
+            } catch (Exception ex) { // should not happen
+                ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
+                return null;
+            }
+        } else {
             return null;
         }
     }
@@ -321,23 +315,19 @@ public class RADComponentCreator {
         RADComponent<?> targetComp = target.targetComponent;
         if (target.targetType == TargetType.LAYOUT) {
             return setContainerLayout((Class<LayoutManager>) compClass, targetComp);
-        }
-        if (target.targetType == TargetType.BORDER & targetComp instanceof RADVisualComponent<?>) {
-            return setComponentBorder((Class<Border>) compClass, (RADVisualComponent<?>) targetComp);
-        }
-        RADComponent<?> newRadComp = null;
-        if (target.componentType == ComponentType.VISUAL) {
-            newRadComp = addVisualComponent((Class<? extends Component>) compClass, targetComp, -1, aConstraints);
         } else {
-            if (ButtonGroup.class.isAssignableFrom(compClass)) {
-                newRadComp = addButtonGroup((Class<ButtonGroup>) compClass, targetComp);
-            } else if (DbGridColumn.class.isAssignableFrom(compClass)) {
-                newRadComp = addGridColumn((Class<DbGridColumn>) compClass, targetComp);
-            } else if (RowsetFeatureDescriptor.class.isAssignableFrom(compClass)) {
-                newRadComp = addMapLayer((Class<RowsetFeatureDescriptor>) compClass, targetComp);
+            RADComponent<?> newRadComp = null;
+            if (target.componentType == ComponentType.VISUAL) {
+                newRadComp = addVisualComponent((Class<? extends Component>) compClass, targetComp, -1, aConstraints);
+            } else {
+                if (ButtonGroup.class.isAssignableFrom(compClass)) {
+                    newRadComp = addButtonGroup((Class<ButtonGroup>) compClass, targetComp);
+                } else if (GridColumnsNode.class.isAssignableFrom(compClass)) {
+                    newRadComp = addGridColumn((Class<GridColumnsNode>) compClass, targetComp);
+                }
             }
+            return newRadComp;
         }
-        return newRadComp;
     }
 
     private RADComponent<?> copyComponent2(RADComponent<?> sourceComp,
@@ -348,8 +338,6 @@ public class RADComponentCreator {
         // apply the cloned instance, but don't copy the meta component
         if (target.targetType == TargetType.LAYOUT) {
             return copyAndApplyLayout(sourceComp, targetComp);
-        } else if (target.targetType == TargetType.BORDER) {
-            return copyAndApplyBorder(sourceComp, (RADVisualComponent<?>) targetComp);
         } else {
             // in other cases we need a copy of the source radcomponent
             if (sourceComp instanceof RADVisualComponent<?>) {
@@ -384,8 +372,6 @@ public class RADComponentCreator {
             } else if (target.targetType == TargetType.OTHER) {
                 if (copiedComp instanceof RADButtonGroup) {
                     addButtonGroup((RADButtonGroup) copiedComp, targetComp, newlyAdded);
-                } else if (copiedComp instanceof RADModelMapLayer) {
-                    addMapLayer((RADModelMapLayer) copiedComp, targetComp, newlyAdded);
                 } else if (copiedComp instanceof RADModelGridColumn) {
                     addGridColumn((RADModelGridColumn) copiedComp, targetComp, newlyAdded);
                 }
@@ -421,19 +407,11 @@ public class RADComponentCreator {
                 } else {
                     return null;
                 }
-            } else if (Border.class.isAssignableFrom(beanClass)) { // border
-                if (targetComp instanceof RADVisualComponent
-                        && JComponent.class.isAssignableFrom(targetComp.getBeanClass())) {
-                    target.targetType = TargetType.BORDER;
-                } else {
-                    return null;
-                }
             } else if (FormUtils.isVisualizableClass(beanClass)) {
                 // visual component
-                if (targetComp != null
-                        && (java.awt.Window.class.isAssignableFrom(beanClass)
+                if (java.awt.Window.class.isAssignableFrom(beanClass)
                         || java.applet.Applet.class.isAssignableFrom(beanClass)
-                        || !java.awt.Component.class.isAssignableFrom(beanClass))) {
+                        || !java.awt.Component.class.isAssignableFrom(beanClass)) {
                     // visual component that cna't have a parent
                     if (defaultToOthers) {
                         targetComp = null; // will go to Other Components
@@ -466,7 +444,7 @@ public class RADComponentCreator {
         if (targetComp == null) {
             target.targetType = TargetType.OTHER;
         } else {
-            if (targetComp instanceof RADModelMap || targetComp instanceof RADModelGrid) {
+            if (targetComp instanceof RADModelGrid) {
                 target.targetType = TargetType.OTHER;
             } else if (targetComp instanceof RADModelGridColumn) {
                 target.targetType = TargetType.OTHER;
@@ -495,7 +473,7 @@ public class RADComponentCreator {
 
     static boolean isTransparentLayoutComponent(RADComponent<?> radComp) {
         return radComp != null
-                && radComp.getBeanClass() == JScrollPane.class; // NOI18N
+                && radComp.getBeanClass() == ScrollPane.class; // NOI18N
     }
 
     // ---------
@@ -513,16 +491,12 @@ public class RADComponentCreator {
                 }
             } else if (sourceComp instanceof RADModelGrid) {
                 newComp = new RADModelGrid();
-            } else if (sourceComp instanceof RADModelMap) {
-                newComp = new RADModelMap();
             } else {
                 newComp = new RADVisualComponent<>();
             }
         } else {
             if (sourceComp instanceof RADModelGridColumn) {
                 newComp = new RADModelGridColumn();
-            } else if (sourceComp instanceof RADModelMapLayer) {
-                newComp = new RADModelMapLayer();
             } else if (sourceComp instanceof RADButtonGroup) {
                 newComp = new RADButtonGroup();
             }
@@ -561,12 +535,12 @@ public class RADComponentCreator {
 
             // 2nd - clone layout support
             if (sourceComp instanceof RADVisualContainer<?>) {
-                RADVisualComponent<?>[] newComps =
-                        new RADVisualComponent<?>[newSubs.length];
+                RADVisualComponent<?>[] newComps
+                        = new RADVisualComponent<?>[newSubs.length];
                 System.arraycopy(newSubs, 0, newComps, 0, newSubs.length);
 
-                LayoutSupportManager sourceLayout =
-                        ((RADVisualContainer<?>) sourceComp).getLayoutSupport();
+                LayoutSupportManager sourceLayout
+                        = ((RADVisualContainer<?>) sourceComp).getLayoutSupport();
 
                 if (sourceLayout != null) {
                     RADVisualContainer<?> newCont = (RADVisualContainer<?>) newComp;
@@ -579,10 +553,9 @@ public class RADComponentCreator {
                 assert newComp instanceof RADModelGridColumn;
                 RADModelGridColumn sourceColumn = (RADModelGridColumn) sourceComp;
                 RADModelGridColumn newColumn = (RADModelGridColumn) newComp;
-                RADColumnView<? super DbControlPanel> newColumnView = (RADColumnView<? super DbControlPanel>) makeCopy(sourceColumn.getViewControl());
+                RADColumnView<? super ModelComponentDecorator> newColumnView = (RADColumnView<? super ModelComponentDecorator>) makeCopy(sourceColumn.getViewControl());
                 // Let's revoke some work, obsolete for column view component
                 newColumnView.setInModel(false);
-                newColumnView.getBeanInstance().setModel(null);
                 if (newColumnView.getConstraints() != null) {
                     newColumnView.getConstraints().clear();
                 }
@@ -596,26 +569,23 @@ public class RADComponentCreator {
         if (formModel == sourceComp.getFormModel()) {
             copyMode |= FormUtils.PASS_DESIGN_VALUES;
         }
-        java.util.List<RADProperty<?>> filtered = sourceComp.getBeanProperties(COPIED_PROPERTY_FILTER, false);
-        java.util.List<String> filteredNames = new ArrayList<>();
-        for (RADProperty<?> prop : filtered) {
-            filteredNames.add(prop.getName());
+        java.util.List<RADProperty<?>> filtered = new ArrayList<>();
+        for (RADProperty<?> prop : sourceComp.getBeanProperties()) {
+            if (!prop.isDefaultValue()) {
+                filtered.add(prop);
+            }
         }
+        java.util.List<String> filteredNames = new ArrayList<>();
+        filtered.stream().forEach((prop) -> {
+            filteredNames.add(prop.getName());
+        });
         RADProperty<?>[] sourceProps = filtered.toArray(new RADProperty<?>[]{});
         RADProperty<?>[] newProps = newComp.getBeanProperties(filteredNames.toArray(new String[]{}));
         assert sourceProps.length == newProps.length;
 
         FormUtils.copyProperties(sourceProps, newProps, copyMode);
-        // 5th - make model-aware controls aware of our model
-        if (sourceComp.getBeanInstance() instanceof DbControl) {
-            assert newComp.getBeanInstance() instanceof DbControl;
-            DbControl destDbControl = (DbControl) newComp.getBeanInstance();
-            if (formModel.getDataObject().getBasesProxy() != null) {
-                destDbControl.setModel(formModel.getDataObject().getModel());
-            }
-        }
 
-        // 6th - copy layout constraints
+        // 5th - copy layout constraints
         if (sourceComp instanceof RADVisualComponent<?>
                 && newComp instanceof RADVisualComponent<?>) {
             Map<String, LayoutConstraints<?>> constraints = ((RADVisualComponent<?>) sourceComp).getConstraints();
@@ -624,10 +594,6 @@ public class RADComponentCreator {
             for (Map.Entry<String, LayoutConstraints<?>> entry : constraints.entrySet()) {
                 String layoutClassName = entry.getKey();
                 LayoutConstraints<?> clonedConstr = entry.getValue().cloneConstraints();
-                if (clonedConstr instanceof AbsoluteLayoutSupport.AbsoluteLayoutConstraints) {
-                    AbsoluteLayoutSupport.AbsoluteLayoutConstraints ac = (AbsoluteLayoutSupport.AbsoluteLayoutConstraints) clonedConstr;
-                    ac.offset(10, 10);
-                }
                 if (clonedConstr instanceof MarginLayoutSupport.MarginLayoutConstraints) {
                     // We assume, that component has a parent and it is not the root container
                     // because it has a constraints
@@ -662,11 +628,9 @@ public class RADComponentCreator {
         RADVisualComponent<?> newRadComp = null;
         RADVisualContainer<?> newRadCont = FormUtils.isContainer(compClass) ? new RADVisualContainer<>() : null;
         // initialize radcomponent and its bean instance
-        if (DbGrid.class.isAssignableFrom(compClass)) {
+        if (ModelGrid.class.isAssignableFrom(compClass)) {
             newRadComp = new RADModelGrid();
-        } else if (DbMap.class.isAssignableFrom(compClass)) {
-            newRadComp = new RADModelMap();
-        } else if (ScalarDbControl.class.isAssignableFrom(compClass)) {
+        } else if (ModelWidget.class.isAssignableFrom(compClass)) {
             newRadComp = new RADModelScalarComponent<>();
         } else {
             newRadComp = newRadCont == null ? new RADVisualComponent<>() : newRadCont;
@@ -723,9 +687,9 @@ public class RADComponentCreator {
             LayoutConstraints<?> aConstraints,
             boolean newlyAdded) throws Exception {
         // Issue 65254: beware of nested JScrollPanes
-        if ((targetComp != null) && JScrollPane.class.isAssignableFrom(targetComp.getBeanClass())) {
+        if ((targetComp != null) && ScrollPane.class.isAssignableFrom(targetComp.getBeanClass())) {
             Object bean = newRadComp.getBeanInstance();
-            if (bean instanceof JScrollPane) {
+            if (bean instanceof ScrollPane) {
                 RADVisualContainer<?> radCont = (RADVisualContainer<?>) newRadComp;
                 newRadComp = radCont.getSubComponent(0);
             }
@@ -755,19 +719,12 @@ public class RADComponentCreator {
         } else {
             formModel.addComponent(newRadComp, null, newlyAdded);
         }
-
-        if (newRadComp.getBeanInstance() instanceof DbControl) {
-            DbControl dbControl = (DbControl) newRadComp.getBeanInstance();
-            if (formModel.getDataObject().getBasesProxy() != null) {
-                dbControl.setModel(formModel.getDataObject().getModel());
-            }
-        }
         return newRadComp;
     }
 
     private RADButtonGroup addButtonGroup(Class<ButtonGroup> compClass,
             RADComponent<?> targetComp) throws Exception {
-        assert javax.swing.ButtonGroup.class.isAssignableFrom(compClass);
+        assert ButtonGroup.class.isAssignableFrom(compClass);
         RADButtonGroup newRadComp = new RADButtonGroup();
         newRadComp.initialize(formModel);
         if (!initComponentInstance(newRadComp, compClass)) {
@@ -780,19 +737,19 @@ public class RADComponentCreator {
     private void addButtonGroup(RADButtonGroup newRadComp,
             RADComponent<?> targetComp,
             boolean newlyAdded) {
-        ComponentContainer targetCont =
-                targetComp instanceof ComponentContainer
+        ComponentContainer targetCont
+                = targetComp instanceof ComponentContainer
                 && !(targetComp instanceof RADVisualContainer<?>)
-                ? (ComponentContainer) targetComp : null;
+                        ? (ComponentContainer) targetComp : null;
         if (newlyAdded) {
             newRadComp.setStoredName(formModel.findFreeComponentName(ButtonGroup.class));
         }
         formModel.addComponent(newRadComp, targetCont, newlyAdded);
     }
 
-    private RADModelGridColumn addGridColumn(Class<DbGridColumn> compClass,
+    private RADModelGridColumn addGridColumn(Class<GridColumnsNode> compClass,
             RADComponent<?> targetComp) throws Exception {
-        assert DbGridColumn.class.isAssignableFrom(compClass);
+        assert GridColumnsNode.class.isAssignableFrom(compClass);
         RADModelGridColumn newRadComp = new RADModelGridColumn();
         newRadComp.initialize(formModel);
         if (initComponentInstance(newRadComp, compClass)) {
@@ -806,40 +763,13 @@ public class RADComponentCreator {
     private void addGridColumn(RADModelGridColumn newComp,
             RADComponent<?> targetComp,
             boolean newlyAdded) {
-        ComponentContainer targetCont =
-                targetComp instanceof RADModelGrid
+        ComponentContainer targetCont
+                = targetComp instanceof RADModelGrid
                 || targetComp instanceof RADModelGridColumn
-                ? (ComponentContainer) targetComp : null;
+                        ? (ComponentContainer) targetComp : null;
         if (newlyAdded) {
             if (!newComp.isInModel() || formModel.getRADComponent(newComp.getName()) != newComp) {
                 newComp.setStoredName(formModel.findFreeComponentName("Column"));
-            }
-        }
-        formModel.addComponent(newComp, targetCont, newlyAdded);
-    }
-
-    private RADModelMapLayer addMapLayer(Class<RowsetFeatureDescriptor> compClass,
-            RADComponent<?> targetComp) throws Exception {
-        assert RowsetFeatureDescriptor.class.isAssignableFrom(compClass);
-        RADModelMapLayer newRadComp = new RADModelMapLayer();
-        newRadComp.initialize(formModel);
-        if (initComponentInstance(newRadComp, compClass)) {
-            addMapLayer(newRadComp, targetComp, true);
-            return newRadComp;
-        } else {
-            return null;
-        }
-    }
-
-    private void addMapLayer(RADModelMapLayer newComp,
-            RADComponent<?> targetComp,
-            boolean newlyAdded) {
-        ComponentContainer targetCont =
-                targetComp instanceof RADModelMap
-                ? (ComponentContainer) targetComp : null;
-        if (newlyAdded) {
-            if (!newComp.isInModel() || formModel.getRADComponent(newComp.getName()) != newComp) {
-                newComp.setStoredName(formModel.findFreeComponentName("Layer"));
             }
         }
         formModel.addComponent(newComp, targetCont, newlyAdded);
@@ -863,10 +793,10 @@ public class RADComponentCreator {
         try {
             if (LayoutManager.class.isAssignableFrom(layoutClass)) {
                 // LayoutManager -> find LayoutSupportDelegate for it
-                layoutDelegate = LayoutSupportRegistry.getRegistry(formModel).createSupportForLayout(layoutClass);
+                layoutDelegate = LayoutSupportRegistry.createSupportForLayout(layoutClass);
             } else if (LayoutSupportDelegate.class.isAssignableFrom(layoutClass)) {
                 // LayoutSupportDelegate -> use it directly
-                layoutDelegate = LayoutSupportRegistry.createSupportInstance(layoutClass);
+                layoutDelegate = (LayoutSupportDelegate) layoutClass.newInstance();
             }
         } catch (Exception | LinkageError ex) {
             t = ex;
@@ -885,10 +815,10 @@ public class RADComponentCreator {
         if (layoutDelegate == null) {
             DialogDisplayer.getDefault().notify(
                     new NotifyDescriptor.Message(
-                    FormUtils.getFormattedBundleString(
-                    "FMT_ERR_LayoutNotFound", // NOI18N
-                    new Object[]{layoutClass.getName()}),
-                    NotifyDescriptor.WARNING_MESSAGE));
+                            FormUtils.getFormattedBundleString(
+                                    "FMT_ERR_LayoutNotFound", // NOI18N
+                                    new Object[]{layoutClass.getName()}),
+                            NotifyDescriptor.WARNING_MESSAGE));
 
             return null;
         }
@@ -917,9 +847,9 @@ public class RADComponentCreator {
             RADVisualContainer<?> targetCont = (RADVisualContainer<?>) setContainerLayout((Class<LayoutManager>) sourceComp.getBeanClass(), targetComp);
 
             // copy properties additionally to handle design values
-            FormProperty<?>[] sourceProps = sourceComp.getKnownBeanProperties();
-            FormProperty<?>[] targetProps =
-                    targetCont.getLayoutSupport().getAllProperties();
+            FormProperty<?>[] sourceProps = sourceComp.getBeanProperties();
+            FormProperty<?>[] targetProps
+                    = targetCont.getLayoutSupport().getAllProperties();
             int copyMode = FormUtils.CHANGED_ONLY
                     | FormUtils.DISABLE_CHANGE_FIRING;
             if (formModel == sourceComp.getFormModel()) {
@@ -932,73 +862,6 @@ public class RADComponentCreator {
         }
 
         return targetComp;
-    }
-
-    private RADComponent<?> setComponentBorder(Class<? extends Border> borderClass,
-            RADVisualComponent<?> targetComp) {
-        FormProperty<NbBorder> prop = getBorderProperty(targetComp);
-        if (prop != null) {
-            try { // set border property
-                Border border = CreationFactory.<Border>createInstance(borderClass);
-                prop.setValue(new NbBorder(border));
-            } catch (Exception | LinkageError ex) {
-                showInstErrorMessage(ex);
-                return null;
-            }
-            return targetComp;
-        } else {
-            return null;
-        }
-    }
-
-    private void setComponentBorderProperty(NbBorder borderInstance,
-            RADVisualComponent<?> targetComp) {
-        FormProperty<NbBorder> prop = getBorderProperty(targetComp);
-        if (prop != null) {
-            try { // set border property
-                prop.setValue(borderInstance);
-            } catch (Exception ex) { // should not happen
-                ErrorManager.getDefault().notify(ex);
-            }
-        }
-    }
-
-    private RADComponent<?> copyAndApplyBorder(RADComponent<?> sourceComp,
-            RADVisualComponent<?> targetComp) {
-        try {
-            Border borderInstance = (Border) sourceComp.createBeanInstance();
-            NbBorder designBorder = new NbBorder(borderInstance);
-
-            FormProperty<?>[] sourceProps = sourceComp.getKnownBeanProperties();
-            FormProperty<?>[] targetProps = designBorder.getProperties();
-            int copyMode = FormUtils.CHANGED_ONLY | FormUtils.DISABLE_CHANGE_FIRING;
-            if (formModel == sourceComp.getFormModel()) {
-                copyMode |= FormUtils.PASS_DESIGN_VALUES;
-            }
-
-            FormUtils.copyProperties(sourceProps, targetProps, copyMode);
-
-            setComponentBorderProperty(designBorder, targetComp);
-        } catch (Exception | LinkageError ex) { // ignore
-            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
-        }
-
-        return targetComp;
-    }
-
-    private FormProperty<NbBorder> getBorderProperty(RADComponent<?> targetComp) {
-        FormProperty<NbBorder> prop;
-        if (JComponent.class.isAssignableFrom(targetComp.getBeanClass())
-                && (prop = targetComp.<FormProperty<NbBorder>>getRADProperty("border")) != null) // NOI18N
-        {
-            return prop;
-        }
-
-        DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message(
-                FormUtils.getBundleString("MSG_BorderNotApplicable"), // NOI18N
-                NotifyDescriptor.INFORMATION_MESSAGE));
-
-        return null;
     }
 
     // --------
@@ -1065,97 +928,40 @@ public class RADComponentCreator {
         Map<String, Object> changes = new HashMap<>();
 
         changes.put("name", varName);
-        if (comp instanceof JLabel) {
-            if ("".equals(((JLabel) comp).getText())) { // NOI18N
-                changes.put("text", varName); // NOI18N
-            }
-        } else if (comp instanceof JTextField) {
-            if ("".equals(((JTextField) comp).getText())) { // NOI18N
-                changes.put("text", varName); // NOI18N
-            }
-        } else if (comp instanceof JMenuItem) {
-            if ("".equals(((JMenuItem) comp).getText())) { // NOI18N
-                changes.put("text", varName); // NOI18N
-            }
-            if (comp instanceof JCheckBoxMenuItem) {
-                changes.put("selected", Boolean.TRUE); // NOI18N
-            }
-            if (comp instanceof JRadioButtonMenuItem) {
-                changes.put("selected", Boolean.TRUE); // NOI18N
-            }
-        } else if (comp instanceof AbstractButton) { // JButton, JToggleButton, JCheckBox, JRadioButton
-            String txt = ((AbstractButton) comp).getText();
-            if ((txt == null) || "".equals(txt)) { // NOI18N
-                changes.put("text", varName); // NOI18N
-            }
-//            if (comp instanceof JCheckBox || comp instanceof JRadioButton) {
-//                if (((JToggleButton)comp).getBorder() instanceof javax.swing.plaf.UIResource) {
-//                    changes.put("border", BorderFactory.createEmptyBorder()); // NOI18N
-//                    changes.put("margin", new Insets(0, 0, 0, 0)); // NOI18N
-//                }
-//            }
-        } else if (comp instanceof JTable) {
-        } else if (comp instanceof JToolBar) {
-            changes.put("rollover", true); // NOI18N
-        } else if (comp instanceof JInternalFrame) {
-            changes.put("visible", true); // NOI18N
-        } else if (comp instanceof Button) {
-            if ("".equals(((Button) comp).getLabel())) { // NOI18N
-                changes.put("label", varName); // NOI18N
-            }
-        } else if (comp instanceof Checkbox) {
-            if ("".equals(((Checkbox) comp).getLabel())) { // NOI18N
-                changes.put("label", varName); // NOI18N
-            }
-        } else if (comp instanceof Label) {
-            if ("".equals(((Label) comp).getText())) { // NOI18N
-                changes.put("text", varName); // NOI18N
-            }
-        } else if (comp instanceof TextField) {
-            if ("".equals(((TextField) comp).getText())) { // NOI18N
-                changes.put("text", varName); // NOI18N
-            }
-        } else if (comp instanceof JComboBox<?>) {
-            ComboBoxModel<String> model = ((JComboBox<String>) comp).getModel();
-            if ((model == null) || (model.getSize() == 0)) {
-                String prefix = NbBundle.getMessage(RADComponentCreator.class, "FMT_CreatorComboBoxItem"); // NOI18N
-                prefix += ' ';
-                ComboBoxModel<String> propValue = new DefaultComboBoxModel<>(new String[]{
-                            prefix + 1, prefix + 2, prefix + 3, prefix + 4
-                        });
-                changes.put("model", propValue); // NOI18N
-            }
-
-        } else if (comp instanceof JList<?>) {
-            ListModel<String> model = ((JList<String>) comp).getModel();
-            if ((model == null) || (model.getSize() == 0)) {
-                String prefix = NbBundle.getMessage(RADComponentCreator.class, "FMT_CreatorListItem"); // NOI18N
-                prefix += ' ';
-                DefaultListModel<String> defaultModel = new DefaultListModel<>();
-                for (int i = 1; i < 6; i++) {
-                    defaultModel.addElement(prefix + i); // NOI18N
-                }
-                changes.put("model", defaultModel); // NOI18N
-            }
-        } else if (comp instanceof JTextArea) {
-            JTextArea textArea = (JTextArea) comp;
-            if (textArea.getRows() == 0) {
-                changes.put("rows", new Integer(5)); // NOI18N
-            }
-            if (textArea.getColumns() == 0) {
-                changes.put("columns", new Integer(20)); // NOI18N
-            }
-        } else if (comp instanceof JTextPane) {
-            ((JTextPane) comp).setContentType("text/plain");
-        } else if (comp instanceof JEditorPane) {
-            ((JEditorPane) comp).setEditorKitForContentType("text/html", new HtmlContentEditorKit());
-            ((JEditorPane) comp).setContentType("text/html");
+        if (comp instanceof MenuItem) {
+            changes.put("text", varName); // NOI18N
+        } else if (comp instanceof CheckMenuItem) {
+            changes.put("text", varName); // NOI18N
+            changes.put("selected", Boolean.TRUE); // NOI18N
+        } else if (comp instanceof RadioMenuItem) {
+            changes.put("text", varName); // NOI18N
+            changes.put("selected", Boolean.TRUE); // NOI18N
+        } else if (comp instanceof Menu) {
+            changes.put("text", varName); // NOI18N
+        } else if (comp instanceof Label
+                || comp instanceof Button
+                || comp instanceof ToggleButton
+                || comp instanceof DropDownButton
+                || comp instanceof RadioButton
+                || comp instanceof CheckBox
+                || comp instanceof ModelCheckBox
+                || comp instanceof Label
+                || comp instanceof TextField
+                || comp instanceof PasswordField
+                || comp instanceof FormattedField
+                || comp instanceof TextArea
+                || comp instanceof HtmlArea
+                || comp instanceof ModelTextArea
+                || comp instanceof ModelFormattedField) {
+            changes.put("text", varName); // NOI18N
+        }else if(comp instanceof FormUtils.Panel){
+            changes.put("background", Color.white); // NOI18N
         }
 
         for (Map.Entry<String, Object> change : changes.entrySet()) {
             String propName = change.getKey();
             Object propValue = change.getValue();
-            FormProperty<Object> prop = newRadComp.<FormProperty<Object>>getRADProperty(propName);
+            RADProperty<Object> prop = newRadComp.<RADProperty<Object>>getProperty(propName);
             if (prop != null) {
                 try {
                     prop.setChangeFiring(false);
@@ -1171,7 +977,7 @@ public class RADComponentCreator {
         if (shouldEncloseByScrollPane(newRadComp.getBeanInstance())) {
             // hack: automatically enclose some components into scroll pane
             // [PENDING check for undo/redo!]
-            RADVisualContainer<?> radScroll = (RADVisualContainer<?>) createVisualComponent(JScrollPane.class);
+            RADVisualContainer<?> radScroll = (RADVisualContainer<?>) createVisualComponent(ScrollPane.class);
             // Mark this scroll pane as automatically created.
             // Some action (e.g. delete) behave differently on
             // components in such scroll panes.
@@ -1181,27 +987,31 @@ public class RADComponentCreator {
             radScroll.getLayoutSupport().addComponentsToContainer(
                     scroll, scroll, new Component[]{inScroll}, 0);
             newRadComp = radScroll;
-        } else if (newRadComp instanceof RADVisualContainer<?> && newRadComp.getBeanInstance() instanceof JMenuBar) {
+        } else if (newRadComp instanceof RADVisualContainer<?> && newRadComp.getBeanInstance() instanceof MenuBar) {
             // for menubars create initial menu [temporary?]
             RADVisualContainer<?> menuCont = (RADVisualContainer<?>) newRadComp;
             Container menuBar = (Container) menuCont.getBeanInstance();
-            RADVisualComponent<?> menuComp = createVisualComponent(JMenu.class);
-            menuComp.setStoredName(formModel.findFreeComponentName("mnuFile"));
+            RADVisualComponent<?> menuComp = createVisualComponent(Menu.class);
+            String menuFileName = formModel.findFreeComponentName("mnuFile");
+            menuComp.setStoredName(menuFileName);
+            menuComp.getBeanInstance().setName(menuFileName);
             try {
-                (menuComp.<RADProperty<String>>getRADProperty("text")) // NOI18N
+                (menuComp.<RADProperty<String>>getProperty("text")) // NOI18N
                         .setValue(FormUtils.getBundleString("CTL_DefaultFileMenu")); // NOI18N
             } catch (Exception ex) {
-                // never mind, ignore
+                // nevermind, ignore
             }
             Component menu = (Component) menuComp.getBeanInstance();
             menuCont.add(menuComp);
             menuCont.getLayoutSupport().addComponentsToContainer(
                     menuBar, menuBar, new Component[]{menu}, 0);
 
-            menuComp = createVisualComponent(JMenu.class);
-            menuComp.setStoredName(formModel.findFreeComponentName("mnuEdit"));
+            menuComp = createVisualComponent(Menu.class);
+            String mnuEditName = formModel.findFreeComponentName("mnuEdit");
+            menuComp.setStoredName(mnuEditName);
+            menuComp.getBeanInstance().setName(mnuEditName);
             try {
-                (menuComp.<RADProperty<String>>getRADProperty("text")) // NOI18N
+                (menuComp.<RADProperty<String>>getProperty("text")) // NOI18N
                         .setValue(FormUtils.getBundleString("CTL_DefaultEditMenu")); // NOI18N
             } catch (Exception ex) {
                 // never mind, ignore
@@ -1215,9 +1025,8 @@ public class RADComponentCreator {
     }
 
     private static boolean shouldEncloseByScrollPane(Object bean) {
-        return (bean instanceof JList) || (bean instanceof JTable)
-                || (bean instanceof JTree) || (bean instanceof JTextArea)
-                || (bean instanceof JTextPane) || (bean instanceof JEditorPane);
+        return bean instanceof TextArea
+                || bean instanceof HtmlArea || bean instanceof ModelTextArea;
     }
 
     /**
@@ -1228,18 +1037,10 @@ public class RADComponentCreator {
     private static void defaultTargetInit(RADComponent<?> radComp, RADComponent<?> target) {
         Object targetComp = target != null ? target.getBeanInstance() : null;
 
-        if (radComp.getBeanClass().equals(JSeparator.class)) {
-            if (targetComp instanceof JToolBar) {
-                // hack: change JSeparator to JToolBar.Separator
+        if (radComp.getBeanClass().equals(MenuSeparator.class)) {
+            if (targetComp instanceof Menu || targetComp instanceof PopupMenu) {
                 try {
-                    radComp.initInstance(JToolBar.Separator.class);
-                } catch (Exception ex) {
-                } // should not fail with JDK class
-                return;
-            } else if (targetComp instanceof JMenu || targetComp instanceof JPopupMenu) {
-                // hack: change JSeparator to JPopupMenu.Separator
-                try {
-                    radComp.initInstance(JPopupMenu.Separator.class);
+                    radComp.initInstance(MenuSeparator.class);
                 } catch (Exception ex) {
                 } // should not fail with JDK class
                 return;
@@ -1250,7 +1051,7 @@ public class RADComponentCreator {
         Object comp = radComp.getBeanInstance();
         Map<String, Object> changes = null;
 
-        if (comp instanceof AbstractButton && targetComp instanceof JToolBar) {
+        if (comp instanceof AbstractButton && targetComp instanceof ToolBar) {
             if (changes == null) {
                 changes = new HashMap<>();
             }
@@ -1261,7 +1062,7 @@ public class RADComponentCreator {
 
         if (changes != null) {
             for (Map.Entry<String, Object> e : changes.entrySet()) {
-                FormProperty<Object> prop = radComp.<FormProperty<Object>>getRADProperty(e.getKey());
+                RADProperty<Object> prop = radComp.<RADProperty<Object>>getProperty(e.getKey());
                 if (prop != null) {
                     try {
                         prop.setChangeFiring(false);
@@ -1278,24 +1079,23 @@ public class RADComponentCreator {
     public static Dimension prepareDefaultLayoutSize(Component comp, boolean isContainer) {
         int width = -1;
         int height = -1;
-        if (comp instanceof JToolBar || comp instanceof JMenuBar) {
+        if (comp instanceof Label || comp instanceof AbstractButton) {
+            width = 70;
+            height = 20;
+        } else if (comp instanceof ToolBar || comp instanceof MenuBar) {
             width = 100;
-            height = 25;
+            height = 20;
+        } else if (comp instanceof ProgressBar || comp instanceof Slider) {
+            width = 130;
+            height = 20;
         } else if (isContainer) {
-            if (comp instanceof Window || comp instanceof java.applet.Applet) {
-                width = 400;
-                height = 300;
-            } else {
-                width = 100;
-                height = 100;
-            }
-        } else if (comp instanceof JSeparator) {
-            width = 50;
-            height = 10;
-        } else if (comp instanceof DbImage) {
             width = 100;
             height = 100;
-        } else if (comp instanceof DbText) {
+        } else if (comp instanceof TextArea
+                || comp instanceof ModelTextArea
+                || comp instanceof HtmlArea
+                || comp instanceof ModelGrid
+                || comp instanceof DesktopPane) {
             width = 100;
             height = 100;
         }

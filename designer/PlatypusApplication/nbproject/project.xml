@@ -197,6 +197,9 @@
                 </test-type>
             </test-dependencies>
             <public-packages>
+                <package>com.bearsoft.gui.grid.columns</package>
+                <package>com.bearsoft.gui.grid.header</package>
+                <package>com.bearsoft.gui.grid.header.cell</package>
                 <package>com.bearsoft.routing</package>
                 <package>com.bearsoft.routing.graph</package>
                 <package>com.bearsoft.routing.gui</package>
@@ -215,13 +218,18 @@
                 <package>com.eas.client.events</package>
                 <package>com.eas.client.exceptions</package>
                 <package>com.eas.client.forms</package>
-                <package>com.eas.client.forms.api</package>
-                <package>com.eas.client.forms.api.components</package>
-                <package>com.eas.client.forms.api.components.model</package>
-                <package>com.eas.client.forms.api.containers</package>
-                <package>com.eas.client.forms.api.events</package>
-                <package>com.eas.client.forms.api.menu</package>
-                <package>com.eas.client.geo</package>
+                <package>com.eas.client.forms.components</package>
+                <package>com.eas.client.forms.components.model</package>
+                <package>com.eas.client.forms.components.model.grid</package>
+                <package>com.eas.client.forms.components.model.grid.columns</package>
+                <package>com.eas.client.forms.components.model.grid.header</package>
+                <package>com.eas.client.forms.components.model.grid.models</package>
+                <package>com.eas.client.forms.components.rt</package>
+                <package>com.eas.client.forms.containers</package>
+                <package>com.eas.client.forms.events</package>
+                <package>com.eas.client.forms.events.rt</package>
+                <package>com.eas.client.forms.layouts</package>
+                <package>com.eas.client.forms.menu</package>
                 <package>com.eas.client.login</package>
                 <package>com.eas.client.metadata</package>
                 <package>com.eas.client.model</package>
@@ -235,36 +243,11 @@
                 <package>com.eas.client.reports</package>
                 <package>com.eas.client.resourcepool</package>
                 <package>com.eas.client.scripts</package>
-                <package>com.eas.client.scripts.store</package>
                 <package>com.eas.client.settings</package>
                 <package>com.eas.client.sqldrivers</package>
                 <package>com.eas.client.sqldrivers.converters</package>
                 <package>com.eas.client.sqldrivers.resolvers</package>
                 <package>com.eas.client.utils.scalableui</package>
-                <package>com.eas.controls</package>
-                <package>com.eas.controls.borders</package>
-                <package>com.eas.controls.containers</package>
-                <package>com.eas.controls.layouts</package>
-                <package>com.eas.controls.layouts.box</package>
-                <package>com.eas.controls.layouts.constraints</package>
-                <package>com.eas.controls.layouts.margin</package>
-                <package>com.eas.controls.menus</package>
-                <package>com.eas.controls.plain</package>
-                <package>com.eas.controls.visitors</package>
-                <package>com.eas.dbcontrols</package>
-                <package>com.eas.dbcontrols.check</package>
-                <package>com.eas.dbcontrols.combo</package>
-                <package>com.eas.dbcontrols.date</package>
-                <package>com.eas.dbcontrols.grid</package>
-                <package>com.eas.dbcontrols.grid.rt</package>
-                <package>com.eas.dbcontrols.grid.rt.columns</package>
-                <package>com.eas.dbcontrols.image</package>
-                <package>com.eas.dbcontrols.label</package>
-                <package>com.eas.dbcontrols.map</package>
-                <package>com.eas.dbcontrols.scheme</package>
-                <package>com.eas.dbcontrols.spin</package>
-                <package>com.eas.dbcontrols.text</package>
-                <package>com.eas.dbcontrols.visitors</package>
                 <package>com.eas.deploy</package>
                 <package>com.eas.design</package>
                 <package>com.eas.designer.application</package>
@@ -274,7 +257,6 @@
                 <package>com.eas.designer.application.utils</package>
                 <package>com.eas.gui</package>
                 <package>com.eas.metadata</package>
-                <package>com.eas.resources.images</package>
                 <package>com.eas.script</package>
                 <package>com.eas.server</package>
                 <package>com.eas.server.httpservlet</package>
@@ -391,8 +373,20 @@
                 <package>rpc</package>
             </public-packages>
             <class-path-extension>
+                <runtime-relative-path>ext/poi-3.9-20121203.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/poi-3.9-20121203.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/gt-api-10.3.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/gt-api-10.3.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
                 <runtime-relative-path>ext/jai_core-1.1.3.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/jai_core-1.1.3.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/gt-opengis-10.3.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/gt-opengis-10.3.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/gt-metadata-10.3.jar</runtime-relative-path>
@@ -411,6 +405,14 @@
                 <binary-origin>release/modules/ext/Modules.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
+                <runtime-relative-path>ext/ojdbc6.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/ojdbc6.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/postgresql-8.4-701.jdbc4.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/postgresql-8.4-701.jdbc4.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
                 <runtime-relative-path>ext/Rowsets.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/Rowsets.jar</binary-origin>
             </class-path-extension>
@@ -419,12 +421,24 @@
                 <binary-origin>release/modules/ext/h2-1.3.167.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
+                <runtime-relative-path>ext/jcommon-1.0.18.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/jcommon-1.0.18.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
                 <runtime-relative-path>ext/Forms.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/Forms.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/gt-render-10.3.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/gt-render-10.3.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/Deploy.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/Deploy.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/CommonUtils.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/CommonUtils.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/jtds-1.2.3.jar</runtime-relative-path>
@@ -447,6 +461,10 @@
                 <binary-origin>release/modules/ext/SqlParser.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
+                <runtime-relative-path>ext/MetaSync.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/MetaSync.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
                 <runtime-relative-path>ext/Grid.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/Grid.jar</binary-origin>
             </class-path-extension>
@@ -455,80 +473,8 @@
                 <binary-origin>release/modules/ext/db2jcc.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/geoapi-2.3-M1.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/geoapi-2.3-M1.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/Routing.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/Routing.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/mysql-connector-java-5.1.20-bin.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/mysql-connector-java-5.1.20-bin.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/commons-beanutils-1.8.2.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/commons-beanutils-1.8.2.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/jsr-275-1.0-beta-2.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/jsr-275-1.0-beta-2.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/j-interopdeps.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/j-interopdeps.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/poi-3.9-20121203.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/poi-3.9-20121203.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/gt-api-10.3.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/gt-api-10.3.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/gt-opengis-10.3.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/gt-opengis-10.3.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/ojdbc6.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/ojdbc6.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/postgresql-8.4-701.jdbc4.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/postgresql-8.4-701.jdbc4.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/Controls.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/Controls.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/jcommon-1.0.18.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/jcommon-1.0.18.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/Deploy.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/Deploy.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/CommonUtils.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/CommonUtils.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/ServletSupport.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/ServletSupport.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/MetaSync.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/MetaSync.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
                 <runtime-relative-path>ext/BinaryTags.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/BinaryTags.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/DbControls.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/DbControls.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/jfreechart-1.0.15.jar</runtime-relative-path>
@@ -555,6 +501,10 @@
                 <binary-origin>release/modules/ext/Datamodel.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
+                <runtime-relative-path>ext/geoapi-2.3-M1.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/geoapi-2.3-M1.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
                 <runtime-relative-path>ext/j-interop.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/j-interop.jar</binary-origin>
             </class-path-extension>
@@ -567,16 +517,28 @@
                 <binary-origin>release/modules/ext/gt-main-10.3.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/GeoAddon.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/GeoAddon.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/GeoPane.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/GeoPane.jar</binary-origin>
+                <runtime-relative-path>ext/Routing.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/Routing.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/jcifs-1.2.19.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/jcifs-1.2.19.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/mysql-connector-java-5.1.20-bin.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/mysql-connector-java-5.1.20-bin.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/commons-beanutils-1.8.2.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/commons-beanutils-1.8.2.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/ServletSupport.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/ServletSupport.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/jsr-275-1.0-beta-2.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/jsr-275-1.0-beta-2.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/gt-jdbc-oracle-10.3.jar</runtime-relative-path>
@@ -589,6 +551,10 @@
             <class-path-extension>
                 <runtime-relative-path>ext/IconLib.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/IconLib.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/j-interopdeps.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/j-interopdeps.jar</binary-origin>
             </class-path-extension>
         </data>
     </configuration>

@@ -43,17 +43,10 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
-import com.eas.controls.layouts.margin.MarginLayout;
+import com.eas.client.forms.layouts.MarginLayout;
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 import javax.swing.*;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.LineBorder;
-import javax.swing.border.MatteBorder;
-import javax.swing.border.SoftBevelBorder;
-import javax.swing.border.TitledBorder;
 import org.openide.ErrorManager;
 
 /**
@@ -123,41 +116,9 @@ public class CreationFactory {
     private CreationFactory() {
     }
 
-    // -----------
     // creation methods
-    public static <C> C createDefaultInstance(final Class<?> cls)
-            throws Exception {
-        Object cl = UIManager.get("ClassLoader"); // NOI18N
-        ClassLoader systemCl = org.openide.util.Lookup.getDefault().lookup(ClassLoader.class);
-        if (cl == systemCl) {
-            UIManager.put("ClassLoader", null); // NOI18N
-        }
-        Object instance;
-        if (LineBorder.class.isAssignableFrom(cls)) {
-            instance = new LineBorder(Color.black);
-        } else if (EtchedBorder.class.isAssignableFrom(cls)) {
-            instance = new EtchedBorder(Color.black, Color.black);
-        } else if (TitledBorder.class.isAssignableFrom(cls)) {
-            instance = new TitledBorder(new LineBorder(Color.black, 1), "", 0, 0, FormUtils.getDefaultAWTFont(), Color.black);
-        } else if (MatteBorder.class.isAssignableFrom(cls)) {
-            instance = new MatteBorder(0, 0, 0, 0, Color.black);
-        } else if (SoftBevelBorder.class.isAssignableFrom(cls)) {
-            instance = new SoftBevelBorder(SoftBevelBorder.LOWERED, Color.black, Color.black, Color.black, Color.black);
-        } else if (BevelBorder.class.isAssignableFrom(cls)) {
-            instance = new BevelBorder(BevelBorder.LOWERED, Color.black, Color.black, Color.black, Color.black);
-        } else if (EmptyBorder.class.isAssignableFrom(cls)) {
-            instance = new EmptyBorder(1, 1, 1, 1);
-        } else if (JTabbedPane.class.isAssignableFrom(cls)) {
-            instance = new JTabbedPane() {
-                @Override
-                public void setSelectedComponent(Component c) {
-                    setSelectedIndex(indexOfComponent(c));
-                }
-            };
-        } else {
-            instance = cls.newInstance();
-        }
-        UIManager.put("ClassLoader", cl); // NOI18N
+    public static <C> C createDefaultInstance(final Class<?> cls) throws Exception {
+        Object instance = cls.newInstance();
         initAfterCreation(instance);
         return (C) instance;
     }

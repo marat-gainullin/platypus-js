@@ -47,10 +47,7 @@ import com.bearsoft.org.netbeans.modules.form.*;
 import com.bearsoft.org.netbeans.modules.form.palette.PaletteItem;
 import com.bearsoft.org.netbeans.modules.form.palette.PaletteMenuView;
 import javax.swing.*;
-import org.openide.DialogDisplayer;
-import org.openide.NotifyDescriptor;
 import org.openide.nodes.Node;
-import org.openide.nodes.NodeAcceptor;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
 import org.openide.util.actions.CallableSystemAction;
@@ -105,70 +102,40 @@ public class AddAction extends CallableSystemAction {
     @Override
     public JMenuItem getPopupPresenter() {
         JMenuItem menu = new PaletteMenuView(
-                new NodeAcceptor() {
-                    @Override
-                    public boolean acceptNodes(Node[] nodes) {
-                        if (nodes.length != 1) {
-                            return false;
+                (Node[] nodes) -> {
+                    if (nodes.length != 1) {
+                        return false;
+                    }
+                    PaletteItem paletteItem = nodes[0].getLookup().lookup(PaletteItem.class);
+                    if (paletteItem == null) {
+                        return false;
+                    }
+                    nodes = getNodes();
+                    if (nodes.length == 0) {
+                        return false;
+                    }
+                    boolean added = false;
+                    for (int i = 0; i < nodes.length; i++) {
+                        FormCookie formCookie = nodes[i].getLookup().lookup(FormCookie.class);
+                        if (formCookie == null) {
+                            continue;
                         }
-
-                        PaletteItem paletteItem = nodes[0].getLookup().lookup(PaletteItem.class);
-                        if (paletteItem == null) {
-                            return false;
-                        }
-                        String chooseBeanType = null;
-                        if (PaletteItem.TYPE_CHOOSE_BEAN.equals(paletteItem.getExplicitComponentType())) {
-                            NotifyDescriptor.InputLine desc = new NotifyDescriptor.InputLine(
-                                    FormUtils.getBundleString("MSG_Choose_Bean"), // NOI18N
-                                    FormUtils.getBundleString("TITLE_Choose_Bean")); // NOI18N
-                            DialogDisplayer.getDefault().notify(desc);
-                            if (NotifyDescriptor.OK_OPTION.equals(desc.getValue())) {
-                                chooseBeanType = desc.getInputText();
-                            } else {
-                                return false;
-                            }
-                        }
-
-                        nodes = getNodes();
-                        if (nodes.length == 0) {
-                            return false;
-                        }
-
-                        boolean added = false;
-
-                        for (int i = 0; i < nodes.length; i++) {
-                            FormCookie formCookie = nodes[i].getLookup().lookup(FormCookie.class);
-                            if (formCookie == null) {
+                        RADComponentCookie radCookie = nodes[i].getLookup().lookup(RADComponentCookie.class);
+                        RADComponent<?> targetComponent;
+                        if (radCookie != null) {
+                            targetComponent = radCookie.getRADComponent();
+                            if (!(targetComponent instanceof ComponentContainer)) {
                                 continue;
                             }
-
-                            RADComponentCookie radCookie = nodes[i].getLookup().lookup(RADComponentCookie.class);
-                            RADComponent<?> targetComponent;
-                            if (radCookie != null) {
-                                targetComponent = radCookie.getRADComponent();
-                                if (!(targetComponent instanceof ComponentContainer)) {
-                                    continue;
-                                }
-                            } else {
-                                targetComponent = null;
-                            }
-
-                            FormModel formModel = formCookie.getFormModel();
-                            /*
-                             if (chooseBeanType != null) {
-                             paletteItem.setClassFromCurrentProject(chooseBeanType,
-                             FormEditor.getFormDataObject(formModel).getPrimaryFile());
-                             }
-                             */
-                            if (formModel.getComponentCreator().createComponent(
-                                    paletteItem.getComponentClassSource(), targetComponent, null)
-                                    != null) {
-                                added = true;
-                            }
+                        } else {
+                            targetComponent = null;
                         }
-
-                        return added;
+                        FormModel formModel = formCookie.getFormModel();
+                        if (formModel.getComponentCreator().createComponent(paletteItem.getComponentClassSource(), targetComponent, null) != null) {
+                            added = true;
+                        }
                     }
+                    return added;
                 });
 
         menu.setText(getName());

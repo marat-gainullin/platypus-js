@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.components.model.ModelCombo");
+    var javaClass = Java.type("com.eas.client.forms.components.model.ModelCombo");
     javaClass.setPublisher(function(aDelegate) {
         return new P.ModelCombo(aDelegate);
     });
@@ -22,19 +22,22 @@
         if(P.ModelCombo.superclass)
             P.ModelCombo.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        Object.defineProperty(this, "parent", {
+        Object.defineProperty(this, "selectOnly", {
             get: function() {
-                var value = delegate.parent;
+                var value = delegate.selectOnly;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.selectOnly = P.boxAsJava(aValue);
             }
         });
         if(!P.ModelCombo){
             /**
-             * Gets the parent of this component.
-             * @property parent
+             * Generated property jsDoc.
+             * @property selectOnly
              * @memberOf ModelCombo
              */
-            P.ModelCombo.prototype.parent = {};
+            P.ModelCombo.prototype.selectOnly = true;
         }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
@@ -52,6 +55,57 @@
              * @memberOf ModelCombo
              */
             P.ModelCombo.prototype.onMouseReleased = {};
+        }
+        Object.defineProperty(this, "data", {
+            get: function() {
+                var value = delegate.data;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.data = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelCombo){
+            /**
+             * Object, bound to the widget.
+             * @property data
+             * @memberOf ModelCombo
+             */
+            P.ModelCombo.prototype.data = {};
+        }
+        Object.defineProperty(this, "nullable", {
+            get: function() {
+                var value = delegate.nullable;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.nullable = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelCombo){
+            /**
+             * Generated property jsDoc.
+             * @property nullable
+             * @memberOf ModelCombo
+             */
+            P.ModelCombo.prototype.nullable = true;
+        }
+        Object.defineProperty(this, "onValueChange", {
+            get: function() {
+                var value = delegate.onValueChange;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onValueChange = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelCombo){
+            /**
+             * Value change handler.
+             * @property onValueChange
+             * @memberOf ModelCombo
+             */
+            P.ModelCombo.prototype.onValueChange = {};
         }
         Object.defineProperty(this, "foreground", {
             get: function() {
@@ -104,24 +158,27 @@
              */
             P.ModelCombo.prototype.onRender = {};
         }
-        Object.defineProperty(this, "model", {
+        Object.defineProperty(this, "parent", {
             get: function() {
-                var value = delegate.model;
+                var value = delegate.parentWidget;
                 return P.boxAsJs(value);
             }
         });
         if(!P.ModelCombo){
             /**
-             * Model of the component. It will be used for data binding.
-             * @property model
+             * Parent container of this widget.
+             * @property parentWidget
              * @memberOf ModelCombo
              */
-            P.ModelCombo.prototype.model = {};
+            P.ModelCombo.prototype.parent = {};
         }
         Object.defineProperty(this, "text", {
             get: function() {
                 var value = delegate.text;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.text = P.boxAsJava(aValue);
             }
         });
         if(!P.ModelCombo){
@@ -248,23 +305,6 @@
              */
             P.ModelCombo.prototype.onComponentHidden = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelCombo){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf ModelCombo
-             */
-            P.ModelCombo.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -281,6 +321,23 @@
              * @memberOf ModelCombo
              */
             P.ModelCombo.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelCombo){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf ModelCombo
+             */
+            P.ModelCombo.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -316,6 +373,23 @@
              */
             P.ModelCombo.prototype.onKeyTyped = {};
         }
+        Object.defineProperty(this, "displayList", {
+            get: function() {
+                var value = delegate.displayList;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.displayList = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelCombo){
+            /**
+             * List of displayed options in a dropdown list of the component.
+             * @property displayList
+             * @memberOf ModelCombo
+             */
+            P.ModelCombo.prototype.displayList = {};
+        }
         Object.defineProperty(this, "list", {
             get: function() {
                 var value = delegate.list;
@@ -327,7 +401,7 @@
         });
         if(!P.ModelCombo){
             /**
-             * Determines if component shown as list.
+             * Determines if component shown as a list.
              * @property list
              * @memberOf ModelCombo
              */
@@ -361,11 +435,11 @@
         });
         if(!P.ModelCombo){
             /**
-             * Model entity's field.
+             * Model binding field.
              * @property field
              * @memberOf ModelCombo
              */
-            P.ModelCombo.prototype.field = {};
+            P.ModelCombo.prototype.field = '';
         }
         Object.defineProperty(this, "left", {
             get: function() {
@@ -409,7 +483,7 @@
         });
         if(!P.ModelCombo){
             /**
-             * Gets name of this component.
+             * Generated property jsDoc.
              * @property name
              * @memberOf ModelCombo
              */
@@ -430,7 +504,7 @@
              * @property displayField
              * @memberOf ModelCombo
              */
-            P.ModelCombo.prototype.displayField = {};
+            P.ModelCombo.prototype.displayField = '';
         }
         Object.defineProperty(this, "cursor", {
             get: function() {
@@ -443,7 +517,7 @@
         });
         if(!P.ModelCombo){
             /**
-             * The mouse <code>Cursor</code> over this component.
+             * Generated property jsDoc.
              * @property cursor
              * @memberOf ModelCombo
              */
@@ -500,6 +574,23 @@
              */
             P.ModelCombo.prototype.emptyText = '';
         }
+        Object.defineProperty(this, "icon", {
+            get: function() {
+                var value = delegate.icon;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.icon = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelCombo){
+            /**
+             * Generated property jsDoc.
+             * @property icon
+             * @memberOf ModelCombo
+             */
+            P.ModelCombo.prototype.icon = {};
+        }
         Object.defineProperty(this, "onMousePressed", {
             get: function() {
                 var value = delegate.onMousePressed;
@@ -521,6 +612,9 @@
             get: function() {
                 var value = delegate.error;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.error = P.boxAsJava(aValue);
             }
         });
         if(!P.ModelCombo){
@@ -566,22 +660,22 @@
              */
             P.ModelCombo.prototype.onSelect = {};
         }
-        Object.defineProperty(this, "componentPopupMenu", {
+        Object.defineProperty(this, "jsValue", {
             get: function() {
-                var value = delegate.componentPopupMenu;
+                var value = delegate.jsValue;
                 return P.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.componentPopupMenu = P.boxAsJava(aValue);
+                delegate.jsValue = P.boxAsJava(aValue);
             }
         });
         if(!P.ModelCombo){
             /**
-             * <code>PopupMenu</code> that assigned for this component.
-             * @property componentPopupMenu
+             * Widget's value.
+             * @property jsValue
              * @memberOf ModelCombo
              */
-            P.ModelCombo.prototype.componentPopupMenu = {};
+            P.ModelCombo.prototype.jsValue = {};
         }
         Object.defineProperty(this, "top", {
             get: function() {
@@ -616,23 +710,6 @@
              * @memberOf ModelCombo
              */
             P.ModelCombo.prototype.onComponentResized = {};
-        }
-        Object.defineProperty(this, "value", {
-            get: function() {
-                var value = delegate.value;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.value = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelCombo){
-            /**
-             * Component's value.
-             * @property value
-             * @memberOf ModelCombo
-             */
-            P.ModelCombo.prototype.value = {};
         }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
@@ -679,7 +756,7 @@
         });
         if(!P.ModelCombo){
             /**
-             * Determines if component is editable.
+             * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
              * @property editable
              * @memberOf ModelCombo
              */
@@ -696,28 +773,11 @@
         });
         if(!P.ModelCombo){
             /**
-             * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
+             * Generated property jsDoc.
              * @property nextFocusableComponent
              * @memberOf ModelCombo
              */
             P.ModelCombo.prototype.nextFocusableComponent = {};
-        }
-        Object.defineProperty(this, "valueField", {
-            get: function() {
-                var value = delegate.valueField;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.valueField = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelCombo){
-            /**
-             * Value field of the component.
-             * @property valueField
-             * @memberOf ModelCombo
-             */
-            P.ModelCombo.prototype.valueField = {};
         }
         Object.defineProperty(this, "component", {
             get: function() {
@@ -812,7 +872,7 @@
         });
         if(!P.ModelCombo){
             /**
-             * The font of this component.
+             * Generated property jsDoc.
              * @property font
              * @memberOf ModelCombo
              */
@@ -837,17 +897,6 @@
         }
     };
         /**
-         * Redraw the component.
-         * @method redraw
-         * @memberOf ModelCombo
-         */
-        P.ModelCombo.prototype.redraw = function() {
-            var delegate = this.unwrap();
-            var value = delegate.redraw();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf ModelCombo
@@ -855,6 +904,17 @@
         P.ModelCombo.prototype.focus = function() {
             var delegate = this.unwrap();
             var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Redraw the component.
+         * @method redraw
+         * @memberOf ModelCombo
+         */
+        P.ModelCombo.prototype.redraw = function() {
+            var delegate = this.unwrap();
+            var value = delegate.redraw();
             return P.boxAsJs(value);
         };
 

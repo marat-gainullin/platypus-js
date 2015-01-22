@@ -5,7 +5,7 @@
 package com.bearsoft.rowset.events;
 
 import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.ordering.HashOrderer;
+import com.bearsoft.rowset.ordering.Filter;
 
 /**
  * Event that occurs before and after <code>Rowset</code> is filtered
@@ -14,7 +14,7 @@ import com.bearsoft.rowset.ordering.HashOrderer;
  */
 public class RowsetFilterEvent extends RowsetEvent {
 
-    protected HashOrderer filter;
+    protected Filter filter;
 
     /**
      * Event constructor.
@@ -27,7 +27,7 @@ public class RowsetFilterEvent extends RowsetEvent {
      * @param aKind Event kind (before or after)
      * @see RowsetEventMoment
      */
-    public RowsetFilterEvent(Rowset source, HashOrderer aFilter, RowsetEventMoment aKind) {
+    public RowsetFilterEvent(Rowset source, Filter aFilter, RowsetEventMoment aKind) {
         super(source, aKind);
         filter = aFilter;
     }

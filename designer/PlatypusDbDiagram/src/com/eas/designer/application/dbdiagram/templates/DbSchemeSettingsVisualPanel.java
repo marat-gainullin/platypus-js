@@ -232,7 +232,7 @@ public class DbSchemeSettingsVisualPanel extends javax.swing.JPanel {
                 panel.fireChangeEvent();
             } catch (Exception ex) {
                 panel.fireChangeEvent();
-                Exceptions.printStackTrace(ex);
+                ErrorManager.getDefault().notify(ex);
             }
         }
     }//GEN-LAST:event_txtConnectionActionPerformed

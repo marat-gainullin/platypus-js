@@ -18,7 +18,7 @@ import jdk.nashorn.api.scripting.JSObject;
 @ScriptObj(jsDoc = "/**\n"
         + "* Mouse cursor constansts.\n"
         + "*/")
-public class Cursor implements HasPublished{
+public class Cursor extends java.awt.Cursor implements HasPublished{
 
     private static final Cursor CROSSHAIR = new Cursor(java.awt.Cursor.CROSSHAIR_CURSOR);
     private static final Cursor DEFAULT = new Cursor(java.awt.Cursor.DEFAULT_CURSOR);
@@ -40,28 +40,13 @@ public class Cursor implements HasPublished{
     protected JSObject published;
     private static JSObject publisher;
 
-    public Cursor(java.awt.Cursor aDelegate) {
-        super();
-        delegate = aDelegate;
-    }
-
     @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * Constructs new cursor object.\n"
             + " * @param type Type of new cursor.\n"
             + " */", params = {"type"})
     public Cursor(int aCursorType) {
-        super();
-        delegate = new java.awt.Cursor(aCursorType);
-    }
-
-    public java.awt.Cursor unwrap() {
-        return delegate;
-    }
-
-    @Override
-    public String toString() {
-        return delegate.getName();
+        super(aCursorType);
     }
 
     public static Cursor getCROSSHAIR() {

@@ -4,8 +4,6 @@
  */
 package com.bearsoft.rowset.events;
 
-import com.eas.design.Designable;
-import com.eas.design.Undesignable;
 
 /**
  * Rowset's events listener interface.
@@ -30,7 +28,6 @@ public interface RowsetListener {
      * @param event of the rowset.
      * @return flag allowing filtering.
      */
-    @Undesignable
     public boolean willFilter(RowsetFilterEvent event);
 
     /**
@@ -41,7 +38,6 @@ public interface RowsetListener {
      * @param event of the rowset.
      * @return flag allowing requering.
      */
-    @Undesignable
     public boolean willRequery(RowsetRequeryEvent event);
 
     /**
@@ -50,7 +46,6 @@ public interface RowsetListener {
      *
      * @param event of the rowset.
      */
-    @Undesignable
     public void beforeRequery(RowsetRequeryEvent event);
     
     /**
@@ -61,7 +56,6 @@ public interface RowsetListener {
      * @param event of the rowset.
      * @return flag allowing paging.
      */
-    @Undesignable
     public boolean willNextPageFetch(RowsetNextPageEvent event);
 
     /**
@@ -70,17 +64,7 @@ public interface RowsetListener {
      * @param event - describes row inserting.
      * @return result indicating that inserting is leagal.
      */
-    @Designable(displayName="willInsert", description="willInsert")
     public boolean willInsertRow(RowsetInsertEvent event);
-
-    /**
-     * Row before change event handler/validator.
-     *
-     * @param event - describes old and new field values.
-     * @return result indicating that change is leagal.
-     */
-    @Designable(displayName="willChange", description="willChange")
-    public boolean willChangeRow(RowChangeEvent event);
 
     /**
      * Rowset before delete event handler/validator.
@@ -88,7 +72,6 @@ public interface RowsetListener {
      * @param event - describes row deleting.
      * @return result indicating that deleting is leagal.
      */
-    @Designable(displayName="willDelete", description="willDelete")
     public boolean willDeleteRow(RowsetDeleteEvent event);
 
     /**
@@ -97,7 +80,6 @@ public interface RowsetListener {
      * @param event - describes sorting.
      * @return result indicating that sorting is leagal.
      */
-    @Undesignable
     public boolean willSort(RowsetSortEvent event);
 
     /**
@@ -105,7 +87,6 @@ public interface RowsetListener {
      *
      * @param event - describing filter that has filtered the rowset.
      */
-    @Designable(displayName="onFiltered", description="After filter event")
     public void rowsetFiltered(RowsetFilterEvent event);
 
     public void rowsetNetError(RowsetNetErrorEvent event);
@@ -115,7 +96,6 @@ public interface RowsetListener {
      *
      * @param event of the rowset
      */
-    @Designable(displayName="onRequeried", description="After requery event")
     public void rowsetRequeried(RowsetRequeryEvent event);
 
     /**
@@ -123,7 +103,6 @@ public interface RowsetListener {
      *
      * @param event of the rowset
      */
-    @Undesignable
     public void rowsetNextPageFetched(RowsetNextPageEvent event);
 
     /**
@@ -132,7 +111,6 @@ public interface RowsetListener {
      *
      * @param event of the rowset
      */
-    @Undesignable
     public void rowsetSaved(RowsetSaveEvent event);
 
     /**
@@ -141,7 +119,6 @@ public interface RowsetListener {
      *
      * @param event of the rowset
      */
-    @Undesignable
     public void rowsetRolledback(RowsetRollbackEvent event);
 
     /**
@@ -153,7 +130,6 @@ public interface RowsetListener {
      * @param event a <code>RowsetEvent</code> object that contains        the <code>Rowset</code> object that is the source of the
      * event
      */
-    @Designable(displayName="onScrolled", description="After cursor position change event")
     public void rowsetScrolled(RowsetScrollEvent event);
 
     /**
@@ -165,7 +141,6 @@ public interface RowsetListener {
      * @param event a <code>RowsetEvent</code> object that contains        the <code>Rowset</code> object that is the source of the
      * event
      */
-    @Undesignable
     public void rowsetSorted(RowsetSortEvent event);
 
     /**
@@ -177,20 +152,7 @@ public interface RowsetListener {
      * @param event a <code>RowsetEvent</code> object that contains        the <code>Rowset</code> object that is the source of the
      * event
      */
-    @Designable(displayName="onInserted", description="After insert event")
     public void rowInserted(RowsetInsertEvent event);
-
-    /**
-     * Notifies registered listeners that a
-     * <code>Rowset</code> object have got a change in one of its rows. <P> The
-     * source of the event can be retrieved with the method
-     * <code>event.getSource</code>.
-     *
-     * @param event a <code>RowsetEvent</code> object that contains        the <code>Rowset</code> object that is the source of the
-     * event
-     */
-    @Designable(displayName="onChanged", description="After each object change event")
-    public void rowChanged(RowChangeEvent event);
 
     /**
      * Notifies registered listeners that a row has beeen deleted from the
@@ -201,6 +163,5 @@ public interface RowsetListener {
      * @param event a <code>RowsetEvent</code> object that contains        the <code>Rowset</code> object that is the source of the
      * event
      */
-    @Designable(displayName="onDeleted", description="After delete event")
     public void rowDeleted(RowsetDeleteEvent event);
 }

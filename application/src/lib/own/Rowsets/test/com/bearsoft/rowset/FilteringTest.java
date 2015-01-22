@@ -9,14 +9,13 @@ import com.bearsoft.rowset.events.RowsetInsertEvent;
 import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
 import com.bearsoft.rowset.exceptions.RowsetException;
-import com.bearsoft.rowset.filters.Filter;
-import com.bearsoft.rowset.locators.Locator;
+import com.bearsoft.rowset.ordering.Filter;
 import com.bearsoft.rowset.sorting.RowsComparator;
 import com.bearsoft.rowset.sorting.SortingCriterion;
-import com.bearsoft.rowset.utils.KeySet;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -59,74 +58,47 @@ public class FilteringTest extends RowsetBaseTest {
         EventsReciver lreciver = new EventsReciver();
         rowset.addRowsetListener(lreciver);
         for (int i = 2; i <= fields.getFieldsCount(); i++) {
-            for (Locator locator : rowset.getLocators()) {
-                locator.validate();
-            }
-            Locator loc = rowset.createLocator();
-            loc.beginConstrainting();
-            loc.addConstraint(i);
-            loc.endConstrainting();
-            loc.validate();
-
-            assertEquals(rowset.getLocators().length, i - 1);
-            Filter hf = rowset.createFilter();
-            hf.beginConstrainting();
-            hf.addConstraint(i);
-            hf.endConstrainting();
-            checkAllLocatorsAreValid(rowset);
+            Filter filter = rowset.createFilter(Arrays.asList(new Integer[]{i}));
             if (rowset.getActiveFilter() != null) {
-                rowset.getActiveFilter().cancelFilter();
+                rowset.getActiveFilter().cancel();
                 assertNull(rowset.getActiveFilter());
             }
-            hf.build();
-            KeySet ks = new KeySet();
+            List<Object> ks = new ArrayList<>();
             ks.add(filtersKeys[i - 2]);
-            hf.filterRowset(ks);
-            checkAllLocatorsAreInvalid(rowset);
+            filter.apply(ks);
             assertEquals(rowsetPks[i - 2].length, rowset.size());
-            assertEquals(hf.getOriginalRows().size(), testData.length);
+            assertEquals(filter.getOriginalRows().size(), testData.length);
             checkRowsetPks(rowset, rowsetPks[i - 2]);
 
-            hf.cancelFilter();
+            filter.cancel();
             assertEquals(rowset.size(), testData.length);
 
-            hf.refilterRowset();
-            checkAllLocatorsAreInvalid(rowset);
+            filter.refilterRowset();
             assertEquals(rowset.size(), rowsetPks[i - 2].length);
-            assertEquals(hf.getOriginalRows().size(), testData.length);
+            assertEquals(filter.getOriginalRows().size(), testData.length);
             checkRowsetPks(rowset, rowsetPks[i - 2]);
 
             SortingCriterion sc1 = new SortingCriterion(i, false);
             List<SortingCriterion> criteria = new ArrayList<>();
             criteria.add(sc1);
             rowset.sort(new RowsComparator(criteria));
-            checkAllLocatorsAreInvalid(rowset);
 
             sc1 = new SortingCriterion(1, true);
             criteria = new ArrayList<>();
             criteria.add(sc1);
             rowset.sort(new RowsComparator(criteria));
-            checkAllLocatorsAreInvalid(rowset);
         }
         assertEquals(lreciver.willSort, (fields.getFieldsCount() - 1) * 2);
         assertEquals(lreciver.willSort, (fields.getFieldsCount() - 1) * 2);
-
-        Locator[] locators = rowset.getLocators();
-        assertEquals(locators.length, fields.getFieldsCount() - 1);
-        for (int i = 0; i < locators.length; i++) {
-            rowset.removeLocator(locators[i]);
-        }
-        locators = rowset.getLocators();
-        assertEquals(locators.length, 0);
 
         Filter[] filters = rowset.getFilters();
         assertEquals(filters.length, fields.getFieldsCount() - 1);
-        for (int i = 0; i < filters.length; i++) {
-            rowset.removeFilter(filters[i]);
+        for (Filter filter : filters) {
+            rowset.removeFilter(filter);
         }
         filters = rowset.getFilters();
         assertEquals(filters.length, 0);
-
+        //
         assertEquals(rowset.size(), testData.length);
     }
 
@@ -136,33 +108,26 @@ public class FilteringTest extends RowsetBaseTest {
         Rowset rowset = initRowset();
         EventsReciver lreciver = new EventsReciver();
         rowset.addRowsetListener(lreciver);
-        Filter filter = rowset.createFilter();
-        filter.beginConstrainting();
-        filter.addConstraint(2);
-        filter.addConstraint(3);
-        filter.addConstraint(5);
-        filter.addConstraint(6);
-        filter.endConstrainting();
-        filter.build();
+        Filter filter = rowset.createFilter(Arrays.asList(new Integer[]{2, 3, 5, 6}));
         assertEquals(rowset.getFilters().length, 1);
-        filter.filterRowset(filterCrudMultiKey);
-        assertTrue(rowset.first());
-        assertTrue(rowset.next());
-        assertTrue(rowset.next());
-        assertFalse(rowset.next());
-        assertTrue(rowset.first());
+        filter.apply(filterCrudMultiKey);
+        assertTrue(rowset.setCursorPos(1));
+        assertTrue(rowset.setCursorPos(2));
+        assertTrue(rowset.setCursorPos(3));
+        assertFalse(rowset.setCursorPos(4));
+        assertTrue(rowset.setCursorPos(1));
         checkRowsetPks(rowset, crudPks);
-        assertTrue(rowset.first());
+        assertTrue(rowset.setCursorPos(1));
 
-        rowset.insert();
+        rowset.insert(new Row(rowset.getFlowProvider().getEntityId(), rowset.getFields()), false);
         // lt's test pks generating capability
-        assertNotNull(rowset.getObject(1));
+        assertNotNull(rowset.getCurrentRow().getColumnObject(1));
         // let's test filter's initing capability
-        assertTrue(Row.smartEquals(rowset.getObject(2), filterCrudMultiKey[0]));
-        assertTrue(Row.smartEquals(rowset.getObject(3), filterCrudMultiKey[1]));
-        assertTrue(Row.smartEquals(rowset.getObject(5), filterCrudMultiKey[2]));
-        assertTrue(Row.smartEquals(rowset.getObject(6), filterCrudMultiKey[3]));
-        assertEquals(rowset.size(), 4);
+        assertTrue(Row.smartEquals(rowset.getCurrentRow().getColumnObject(2), filterCrudMultiKey[0]));
+        assertTrue(Row.smartEquals(rowset.getCurrentRow().getColumnObject(3), filterCrudMultiKey[1]));
+        assertTrue(Row.smartEquals(rowset.getCurrentRow().getColumnObject(5), filterCrudMultiKey[2]));
+        assertTrue(Row.smartEquals(rowset.getCurrentRow().getColumnObject(6), filterCrudMultiKey[3]));
+        assertEquals(4, rowset.size());
         /*
         // Let's see what happens when we try to change column, that doesn't belong to filter's criteria set.
         rowset.updateObject(8, "some updated string");
@@ -176,27 +141,20 @@ public class FilteringTest extends RowsetBaseTest {
     public void filteredCRUD2Test() throws InvalidCursorPositionException, InvalidColIndexException, RowsetException {
         System.out.println("filteredUpdateAndModifiedFieldsTest");
         Rowset rowset = initRowset();
-        rowset.first();
-        rowset.updateObject(7, new BigInteger("34267"));
+        rowset.setCursorPos(1);
+        rowset.getCurrentRow().setColumnObject(7, new BigInteger("34267"));
         EventsReciver lreciver = new EventsReciver();
         rowset.addRowsetListener(lreciver);
-        Filter filter = rowset.createFilter();
-        filter.beginConstrainting();
-        filter.addConstraint(2);
-        filter.addConstraint(3);
-        filter.addConstraint(5);
-        filter.addConstraint(6);
-        filter.endConstrainting();
-        filter.build();
+        Filter filter = rowset.createFilter(Arrays.asList(new Integer[]{2, 3, 5, 6}));
         assertEquals(rowset.getFilters().length, 1);
-        filter.filterRowset(filterCrudMultiKey);
-        assertTrue(rowset.first());
-        assertTrue(rowset.next());
-        assertTrue(rowset.next());
-        assertFalse(rowset.next());
-        assertTrue(rowset.first());
+        filter.apply(filterCrudMultiKey);
+        assertTrue(rowset.setCursorPos(1));
+        assertTrue(rowset.setCursorPos(2));
+        assertTrue(rowset.setCursorPos(3));
+        assertFalse(rowset.setCursorPos(4));
+        assertTrue(rowset.setCursorPos(1));
         checkRowsetPks(rowset, crudPks);
-        assertTrue(rowset.first());
+        assertTrue(rowset.setCursorPos(1));
         assertEquals(3, rowset.size());
     }
 
@@ -209,14 +167,14 @@ public class FilteringTest extends RowsetBaseTest {
         @Override
         public boolean willInsertRow(RowsetInsertEvent event) {
             try {
-                event.getRowset().updateObject(1, 765234);
-                event.getRowset().updateObject(2, "ncvhdu");
-                event.getRowset().updateObject(3, new Date(millis + 87));
-                event.getRowset().updateObject(4, true);
-                event.getRowset().updateObject(5, "ncncncncn");
-                event.getRowset().updateObject(6, null);
-                event.getRowset().updateObject(7, new BigInteger("38746583645"));
-                event.getRowset().updateObject(8, 10101010);
+                event.getRowset().getCurrentRow().setColumnObject(1, 765234);
+                event.getRowset().getCurrentRow().setColumnObject(2, "ncvhdu");
+                event.getRowset().getCurrentRow().setColumnObject(3, new Date(millis + 87));
+                event.getRowset().getCurrentRow().setColumnObject(4, true);
+                event.getRowset().getCurrentRow().setColumnObject(5, "ncncncncn");
+                event.getRowset().getCurrentRow().setColumnObject(6, null);
+                event.getRowset().getCurrentRow().setColumnObject(7, new BigInteger("38746583645"));
+                event.getRowset().getCurrentRow().setColumnObject(8, 10101010);
             } catch (RowsetException ex) {
                 Logger.getLogger(FilteringTest.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -230,214 +188,177 @@ public class FilteringTest extends RowsetBaseTest {
         Rowset rowset = initRowset();
         EventsReciver lreciver = new EventsReciver();
         rowset.addRowsetListener(lreciver);
-        Filter filter = rowset.createFilter();
-        filter.beginConstrainting();
-        filter.addConstraint(2);
-        filter.addConstraint(3);
-        filter.addConstraint(5);
-        filter.addConstraint(6);
-        filter.endConstrainting();
-        filter.build();
+        Filter filter = rowset.createFilter(Arrays.asList(new Integer[]{2, 3, 5, 6}));
         assertEquals(rowset.getFilters().length, 1);
-        filter.filterRowset(filterCrudMultiKey);
-        assertTrue(rowset.first());
-        assertTrue(rowset.next());
-        assertTrue(rowset.next());
-        assertFalse(rowset.next());
-        assertTrue(rowset.first());
+        filter.apply(filterCrudMultiKey);
+        assertTrue(rowset.setCursorPos(1));
+        assertTrue(rowset.setCursorPos(2));
+        assertTrue(rowset.setCursorPos(3));
+        assertFalse(rowset.setCursorPos(4));
+        assertTrue(rowset.setCursorPos(1));
         checkRowsetPks(rowset, crudPks);
-        assertTrue(rowset.first());
+        assertTrue(rowset.setCursorPos(1));
         assertEquals(rowset.size(), 3);
 
         rowset.addRowsetListener(new NewRowsIniter());
-        rowset.insert(new Object[]{1, 34L, rowset.getFields().get(4), null, rowset.getFields().get(5), "user supplied data for inserting", rowset.getFields().get(6), null, rowset.getFields().get(7), 76549076});
+        rowset.insert(new Row(rowset.getFlowProvider().getEntityId(), rowset.getFields()), false, new Object[]{1, 34L, rowset.getFields().get(4), null, rowset.getFields().get(5), "user supplied data for inserting", rowset.getFields().get(6), null, rowset.getFields().get(7), 76549076});
         // let's test pks generating capability
-        assertEquals(rowset.getObject(1), new BigDecimal(34L));
+        assertEquals(rowset.getCurrentRow().getColumnObject(1), new BigDecimal(34L));
         // let's test filter's initing capability, overriding user supplied values, where needed
-        assertTrue(Row.smartEquals(rowset.getObject(2), filterCrudMultiKey[0]));
-        assertTrue(Row.smartEquals(rowset.getObject(3), filterCrudMultiKey[1]));
-        assertTrue(Row.smartEquals(rowset.getObject(5), filterCrudMultiKey[2]));
-        assertTrue(Row.smartEquals(rowset.getObject(6), filterCrudMultiKey[3]));
+        assertTrue(Row.smartEquals(rowset.getCurrentRow().getColumnObject(2), filterCrudMultiKey[0]));
+        assertTrue(Row.smartEquals(rowset.getCurrentRow().getColumnObject(3), filterCrudMultiKey[1]));
+        assertTrue(Row.smartEquals(rowset.getCurrentRow().getColumnObject(5), filterCrudMultiKey[2]));
+        assertTrue(Row.smartEquals(rowset.getCurrentRow().getColumnObject(6), filterCrudMultiKey[3]));
         // let's test user supplied values initing capability
-        assertTrue(Row.smartEquals(rowset.getObject(4), null));
-        assertTrue(Row.smartEquals(rowset.getObject(7), 76549076));
+        assertTrue(Row.smartEquals(rowset.getCurrentRow().getColumnObject(4), null));
+        assertTrue(Row.smartEquals(rowset.getCurrentRow().getColumnObject(7), 76549076));
         // let's test event handler initing capability
-        assertTrue(Row.smartEquals(rowset.getObject(8), "10101010"));// converter work illustration. There was a number, setted, but string is returned
-        assertEquals(rowset.size(), 4);
-        filter.cancelFilter();
-        assertEquals(rowset.size(), testData.length + 1);
+        assertTrue(Row.smartEquals(rowset.getCurrentRow().getColumnObject(8), "10101010"));// converter work illustration. There was a number, setted, but string is returned
+        assertEquals(4, rowset.size());
+        filter.cancel();
+        assertEquals(testData.length + 1, rowset.size());
         filter.refilterRowset();
-        assertEquals(rowset.size(), 4);
-        filter.cancelFilter();
-        assertEquals(rowset.size(), testData.length + 1);
+        assertEquals(4, rowset.size());
+        filter.cancel();
+        assertEquals(testData.length + 1, rowset.size());
         filter.refilterRowset();
-        assertEquals(rowset.size(), 4);
-        assertTrue(rowset.first());
-        assertTrue(rowset.next());
-        assertTrue(rowset.next());
-        rowset.delete();
-        assertEquals(rowset.size(), 3);
-        filter.cancelFilter();
-        assertEquals(rowset.size(), testData.length); // it was deleted, compensating an insert
+        assertEquals(4, rowset.size());
+        assertTrue(rowset.setCursorPos(1));
+        assertTrue(rowset.setCursorPos(2));
+        assertTrue(rowset.setCursorPos(3));
+        rowset.deleteAt(3);
+        assertEquals(3, rowset.size());
+        filter.cancel();
+        assertEquals(testData.length, rowset.size()); // it was deleted, compensating an insert
         filter.refilterRowset();
-        assertEquals(rowset.size(), 3);
+        assertEquals(3, rowset.size());
         rowset.deleteAll();
-        assertEquals(rowset.size(), 0);
-        filter.cancelFilter();
-        assertEquals(rowset.size(), testData.length - 3);
+        assertEquals(0, rowset.size());
+        filter.cancel();
+        assertEquals(testData.length - 3, rowset.size());
         filter.refilterRowset();
-        assertEquals(rowset.size(), 0);
+        assertEquals(0, rowset.size());
         assertTrue(rowset.isEmpty());
         // let's test update for filtered rowset
         // let's start with inserting some data
         for (int i = 0; i < 10; i++) {
-            rowset.insert(new Object[]{1, 34L, rowset.getFields().get(4), null, rowset.getFields().get(5), "user supplied data for inserting", rowset.getFields().get(6), null, rowset.getFields().get(7), 76549076});
+            rowset.insert(new Row(rowset.getFlowProvider().getEntityId(), rowset.getFields()), false, new Object[]{1, 34L, rowset.getFields().get(4), null, rowset.getFields().get(5), "user supplied data for inserting", rowset.getFields().get(6), null, rowset.getFields().get(7), 76549076});
             // let's test pks generating capability
-            assertEquals(rowset.getObject(1), new BigDecimal(34L));
+            assertEquals(rowset.getCurrentRow().getColumnObject(1), new BigDecimal(34L));
             // let's test filter's initing capability, overriding user supplied values, where needed
-            assertTrue(Row.smartEquals(rowset.getObject(2), filterCrudMultiKey[0]));
-            assertTrue(Row.smartEquals(rowset.getObject(3), filterCrudMultiKey[1]));
-            assertTrue(Row.smartEquals(rowset.getObject(5), filterCrudMultiKey[2]));
-            assertTrue(Row.smartEquals(rowset.getObject(6), filterCrudMultiKey[3]));
+            assertTrue(Row.smartEquals(rowset.getCurrentRow().getColumnObject(2), filterCrudMultiKey[0]));
+            assertTrue(Row.smartEquals(rowset.getCurrentRow().getColumnObject(3), filterCrudMultiKey[1]));
+            assertTrue(Row.smartEquals(rowset.getCurrentRow().getColumnObject(5), filterCrudMultiKey[2]));
+            assertTrue(Row.smartEquals(rowset.getCurrentRow().getColumnObject(6), filterCrudMultiKey[3]));
             // let's test user supplied values initing capability
-            assertTrue(Row.smartEquals(rowset.getObject(4), null));
-            assertTrue(Row.smartEquals(rowset.getObject(7), 76549076));
+            assertTrue(Row.smartEquals(rowset.getCurrentRow().getColumnObject(4), null));
+            assertTrue(Row.smartEquals(rowset.getCurrentRow().getColumnObject(7), 76549076));
             // let's test event handler initing capability
-            assertTrue(Row.smartEquals(rowset.getObject(8), "10101010")); //converter work illustration
+            assertTrue(Row.smartEquals(rowset.getCurrentRow().getColumnObject(8), "10101010")); //converter work illustration
         }
-        assertEquals(rowset.size(), 10);
+        assertEquals(10, rowset.size());
         // let's update non criteria field and try to see what we get
-        assertTrue(rowset.absolute(7));
+        assertTrue(rowset.setCursorPos(7));
         Date _4Data = new Date(millis + 3453);
         String _8Data = "nonfiltering field data";
         Long _9Data = 86869595975L;
-        rowset.updateObject(4, _4Data);
-        rowset.updateObject(8, _8Data);
-        rowset.updateObject(7, _9Data);
-        assertEquals(rowset.size(), 10);
+        rowset.getCurrentRow().setColumnObject(4, _4Data);
+        rowset.getCurrentRow().setColumnObject(8, _8Data);
+        rowset.getCurrentRow().setColumnObject(7, _9Data);
+        assertEquals(10, rowset.size());
         // let's update criteria field and try to see what we get
         Boolean _2Data = true;
         String _5Data = "llllLLLLL__lll";
         BigDecimal _6Data = new BigDecimal(52367f);
-        rowset.updateObject(2, _2Data);
-        assertEquals(rowset.size(), 10 - 1); // 2 field is filtering criteria, and so, row goes into another subset of rows in corresponding filter
-        rowset.updateObject(5, _5Data);
-        assertEquals(rowset.size(), 10 - 2); // 5 field is filtering criteria, and so, !one more! row goes into another subset of rows in corresponding filter
-        rowset.updateObject(6, _6Data);
-        assertEquals(rowset.size(), 10 - 3); // 6 field is filtering criteria, and so, !one more! row goes into another subset of rows in corresponding filter
+        rowset.getCurrentRow().setColumnObject(2, _2Data);
+        assertEquals(10 - 1, rowset.size()); // 2 field is filtering criteria, and so, row goes into another subset of rows in corresponding filter
+        rowset.getCurrentRow().setColumnObject(5, _5Data);
+        assertEquals(10 - 2, rowset.size()); // 5 field is filtering criteria, and so, !one more! row goes into another subset of rows in corresponding filter
+        rowset.getCurrentRow().setColumnObject(6, _6Data);
+        assertEquals(10 - 3, rowset.size()); // 6 field is filtering criteria, and so, !one more! row goes into another subset of rows in corresponding filter
         //rowset.getActiveFilter().refilterRowset(); refilterRowset occurs immediatly after updateObject
         //assertEquals(rowset.size(), 10-3);
 
         rowset.setImmediateFilter(false);
-        rowset.updateObject(2, _2Data);
-        rowset.updateObject(5, _5Data);
-        rowset.updateObject(6, _6Data);
-        assertEquals(rowset.size(), 7);
+        rowset.getCurrentRow().setColumnObject(2, _2Data);
+        rowset.getCurrentRow().setColumnObject(5, _5Data);
+        rowset.getCurrentRow().setColumnObject(6, _6Data);
+        assertEquals(7, rowset.size());
         rowset.getActiveFilter().refilterRowset();
-        assertEquals(rowset.size(), 6);
+        assertEquals(6, rowset.size());
 
-        rowset.updateObject(2, _2Data);
-        rowset.updateObject(5, _5Data);
-        rowset.updateObject(6, _6Data);
-        assertEquals(rowset.size(), 6);
+        rowset.getCurrentRow().setColumnObject(2, _2Data);
+        rowset.getCurrentRow().setColumnObject(5, _5Data);
+        rowset.getCurrentRow().setColumnObject(6, _6Data);
+        assertEquals(6, rowset.size());
         rowset.getActiveFilter().refilterRowset();
-        assertEquals(rowset.size(), 5);
+        assertEquals(5, rowset.size());
 
-        rowset.updateObject(2, _2Data);
-        rowset.updateObject(5, _5Data);
-        rowset.updateObject(6, _6Data);
-        assertEquals(rowset.size(), 5);
+        rowset.getCurrentRow().setColumnObject(2, _2Data);
+        rowset.getCurrentRow().setColumnObject(5, _5Data);
+        rowset.getCurrentRow().setColumnObject(6, _6Data);
+        assertEquals(5, rowset.size());
         rowset.getActiveFilter().refilterRowset();
-        assertEquals(rowset.size(), 4);
+        assertEquals(4, rowset.size());
 
-        filter.filterRowset(new Object[]{_2Data, filterCrudMultiKey[1], _5Data, _6Data});
-        assertEquals(rowset.size(), 3);
-        filter.cancelFilter();
-        assertEquals(rowset.size(), testData.length - 3 + 10);
+        filter.apply(new Object[]{_2Data, filterCrudMultiKey[1], _5Data, _6Data});
+        assertEquals(3, rowset.size());
+        filter.cancel();
+        assertEquals(testData.length - 3 + 10, rowset.size());
         filter.refilterRowset();
-        assertEquals(rowset.size(), 3);
+        assertEquals(3, rowset.size());
     }
 
     @Test
     public void filters1ConditionChainTest() throws InvalidCursorPositionException, InvalidColIndexException, RowsetException {
-        System.out.println("filtersChainTest");
+        System.out.println("filters1ConditionChainTest");
         Rowset rowset = initRowset();
         EventsReciver lreciver = new EventsReciver();
         rowset.addRowsetListener(lreciver);
         List<Filter> lfilters = new ArrayList<>();
         for (int i = 2; i <= fields.getFieldsCount(); i++) {
-            Filter hf = rowset.createFilter();
-            hf.beginConstrainting();
-            hf.addConstraint(i);
-            hf.endConstrainting();
-            lfilters.add(hf);
-            hf.validate();
+            Filter filter = rowset.createFilter(Arrays.asList(new Integer[]{i}));
+            lfilters.add(filter);
             assertEquals(rowset.size(), testData.length);
         }
-
         for (int i = 0; i < lfilters.size(); i++) {
-            for (Locator locator : rowset.getLocators()) {
-                locator.validate();
-            }
-            Locator loc = rowset.createLocator();
-            loc.beginConstrainting();
-            loc.addConstraint(i);
-            loc.endConstrainting();
-            loc.validate();
-
-            assertEquals(rowset.getLocators().length, i + 1);
             if (i > 0) {
                 assertTrue(rowset.getActiveFilter() == lfilters.get(i - 1));
             }
-            Filter hf = lfilters.get(i);
-            KeySet ks = new KeySet();
-            ks.add(filtersKeys[i]);
-            checkAllLocatorsAreValid(rowset);
-            hf.filterRowset(ks);
-            checkAllLocatorsAreInvalid(rowset);
+            Filter filter = lfilters.get(i);
+            filter.apply(filtersKeys[i]);
             assertEquals(rowsetPks[i].length, rowset.size());
-            assertEquals(testData.length, hf.getOriginalRows().size());
+            assertEquals(testData.length, filter.getOriginalRows().size());
             checkRowsetPks(rowset, rowsetPks[i]);
 
             SortingCriterion sc1 = new SortingCriterion(i + 2, false);
             List<SortingCriterion> criteria = new ArrayList<>();
             criteria.add(sc1);
             rowset.sort(new RowsComparator(criteria));
-            checkAllLocatorsAreInvalid(rowset);
 
             sc1 = new SortingCriterion(1, true);
             criteria = new ArrayList<>();
             criteria.add(sc1);
             rowset.sort(new RowsComparator(criteria));
-            checkAllLocatorsAreInvalid(rowset);
         }
 
         assertNotNull(rowset.getActiveFilter());
-        rowset.getActiveFilter().cancelFilter();
+        rowset.getActiveFilter().cancel();
         assertNull(rowset.getActiveFilter());
         assertEquals(rowset.size(), testData.length);
-        checkAllLocatorsAreInvalid(rowset);
 
         assertEquals(lreciver.willSort, (fields.getFieldsCount() - 1) * 2);
         assertEquals(lreciver.willSort, (fields.getFieldsCount() - 1) * 2);
 
-
-        Locator[] locators = rowset.getLocators();
-        assertEquals(locators.length, fields.getFieldsCount() - 1);
-        for (int i = 0; i < locators.length; i++) {
-            rowset.removeLocator(locators[i]);
-        }
-        locators = rowset.getLocators();
-        assertEquals(locators.length, 0);
 
         Filter[] filters = rowset.getFilters();
         assertEquals(filters.length, fields.getFieldsCount() - 1);
-        for (int i = 0; i < filters.length; i++) {
-            rowset.removeFilter(filters[i]);
+        for (Filter filter : filters) {
+            rowset.removeFilter(filter);
         }
         filters = rowset.getFilters();
         assertEquals(filters.length, 0);
-
+        //
         assertEquals(rowset.size(), testData.length);
     }
 
@@ -446,20 +367,18 @@ public class FilteringTest extends RowsetBaseTest {
         Rowset rowset = initRowset();
         EventsReciver lreciver = new EventsReciver();
         rowset.addRowsetListener(lreciver);
-        Filter filter = rowset.createFilter();
-        filter.beginConstrainting();
+        List<Integer> fieldsIndicies = new ArrayList<>();
         for (int i = 2; i <= fields.getFieldsCount(); i++) {
-            filter.addConstraint(i);
+            fieldsIndicies.add(i);
         }
-        filter.endConstrainting();
-        filter.build();
+        Filter filter = rowset.createFilter(fieldsIndicies);
         assertEquals(rowset.getFilters().length, 1);
-        filter.filterRowset(filterMultiKey1);
-        assertTrue(rowset.first());
-        assertFalse(rowset.next());
-        assertTrue(rowset.first());
-        assertTrue(Row.smartEquals(filter.getRowset().getObject(1), mkRowsetPk1));
-        assertTrue(Row.smartEquals(rowset.getObject(1), mkRowsetPk1));
+        filter.apply(filterMultiKey1);
+        assertTrue(rowset.setCursorPos(1));
+        assertFalse(rowset.setCursorPos(2));
+        assertTrue(rowset.setCursorPos(1));
+        assertTrue(Row.smartEquals(filter.getRowset().getCurrentRow().getColumnObject(1), mkRowsetPk1));
+        assertTrue(Row.smartEquals(rowset.getCurrentRow().getColumnObject(1), mkRowsetPk1));
     }
 
     @Test
@@ -467,114 +386,96 @@ public class FilteringTest extends RowsetBaseTest {
         Rowset rowset = initRowset();
         EventsReciver lreciver = new EventsReciver();
         rowset.addRowsetListener(lreciver);
-        Filter filter1 = rowset.createFilter();
-        filter1.beginConstrainting();
+        List<Integer> filedsIndices = new ArrayList<>();
         for (int i = 2; i <= fields.getFieldsCount(); i++) {
-            filter1.addConstraint(i);
+            filedsIndices.add(i);
         }
-        filter1.endConstrainting();
-        filter1.validate();
+        Filter filter1 = rowset.createFilter(filedsIndices);
         assertEquals(rowset.getFilters().length, 1);
-        Filter filter2 = rowset.createFilter();
-        filter2.beginConstrainting();
+        List<Integer> filedsIndices2 = new ArrayList<>();
         for (int i = 2; i <= fields.getFieldsCount(); i++) {
-            filter2.addConstraint(i);
+            filedsIndices2.add(i);
         }
-        filter2.endConstrainting();
-        filter2.validate();
+        Filter filter2 = rowset.createFilter(filedsIndices2);
         assertEquals(rowset.getFilters().length, 2);
 
-        filter1.filterRowset(filterMultiKey1);
-        assertTrue(rowset.first());
-        assertFalse(rowset.next());
-        assertTrue(rowset.first());
-        assertTrue(Row.smartEquals(filter1.getRowset().getObject(1), mkRowsetPk1));
-        assertTrue(Row.smartEquals(rowset.getObject(1), mkRowsetPk1));
+        filter1.apply(filterMultiKey1);
+        assertTrue(rowset.setCursorPos(1));
+        assertFalse(rowset.setCursorPos(2));
+        assertTrue(rowset.setCursorPos(1));
+        assertTrue(Row.smartEquals(filter1.getRowset().getCurrentRow().getColumnObject(1), mkRowsetPk1));
+        assertTrue(Row.smartEquals(rowset.getCurrentRow().getColumnObject(1), mkRowsetPk1));
         assertTrue(rowset.getActiveFilter() == filter1);
 
-        filter1.filterRowset(filterMultiKey2);
-        assertTrue(rowset.first());
-        assertFalse(rowset.next());
-        assertTrue(rowset.first());
-        assertTrue(Row.smartEquals(filter1.getRowset().getObject(1), mkRowsetPk2));
-        assertTrue(Row.smartEquals(rowset.getObject(1), mkRowsetPk2));
+        filter1.apply(filterMultiKey2);
+        assertTrue(rowset.setCursorPos(1));
+        assertFalse(rowset.setCursorPos(2));
+        assertTrue(rowset.setCursorPos(1));
+        assertTrue(Row.smartEquals(filter1.getRowset().getCurrentRow().getColumnObject(1), mkRowsetPk2));
+        assertTrue(Row.smartEquals(rowset.getCurrentRow().getColumnObject(1), mkRowsetPk2));
         assertTrue(rowset.getActiveFilter() == filter1);
 
-        filter2.filterRowset(filterMultiKey2);
-        assertTrue(rowset.first());
-        assertFalse(rowset.next());
-        assertTrue(rowset.first());
-        assertTrue(Row.smartEquals(filter2.getRowset().getObject(1), mkRowsetPk2));
-        assertTrue(Row.smartEquals(rowset.getObject(1), mkRowsetPk2));
+        filter2.apply(filterMultiKey2);
+        assertTrue(rowset.setCursorPos(1));
+        assertFalse(rowset.setCursorPos(2));
+        assertTrue(rowset.setCursorPos(1));
+        assertTrue(Row.smartEquals(filter2.getRowset().getCurrentRow().getColumnObject(1), mkRowsetPk2));
+        assertTrue(Row.smartEquals(rowset.getCurrentRow().getColumnObject(1), mkRowsetPk2));
         assertTrue(rowset.getActiveFilter() == filter2);
 
-        filter2.filterRowset(filterMultiKey1);
-        assertTrue(rowset.first());
-        assertFalse(rowset.next());
-        assertTrue(rowset.first());
-        assertTrue(Row.smartEquals(filter2.getRowset().getObject(1), mkRowsetPk1));
-        assertTrue(Row.smartEquals(rowset.getObject(1), mkRowsetPk1));
+        filter2.apply(filterMultiKey1);
+        assertTrue(rowset.setCursorPos(1));
+        assertFalse(rowset.setCursorPos(2));
+        assertTrue(rowset.setCursorPos(1));
+        assertTrue(Row.smartEquals(filter2.getRowset().getCurrentRow().getColumnObject(1), mkRowsetPk1));
+        assertTrue(Row.smartEquals(rowset.getCurrentRow().getColumnObject(1), mkRowsetPk1));
         assertTrue(rowset.getActiveFilter() == filter2);
 
-        filter1.filterRowset(filterMultiKey2);
-        assertTrue(rowset.first());
-        assertFalse(rowset.next());
-        assertTrue(rowset.first());
-        assertTrue(Row.smartEquals(filter1.getRowset().getObject(1), mkRowsetPk2));
-        assertTrue(Row.smartEquals(rowset.getObject(1), mkRowsetPk2));
+        filter1.apply(filterMultiKey2);
+        assertTrue(rowset.setCursorPos(1));
+        assertFalse(rowset.setCursorPos(2));
+        assertTrue(rowset.setCursorPos(1));
+        assertTrue(Row.smartEquals(filter1.getRowset().getCurrentRow().getColumnObject(1), mkRowsetPk2));
+        assertTrue(Row.smartEquals(rowset.getCurrentRow().getColumnObject(1), mkRowsetPk2));
         assertTrue(rowset.getActiveFilter() == filter1);
 
-        filter2.filterRowset(filterMultiKey1);
-        assertTrue(rowset.first());
-        assertFalse(rowset.next());
-        assertTrue(rowset.first());
-        assertTrue(Row.smartEquals(filter2.getRowset().getObject(1), mkRowsetPk1));
-        assertTrue(Row.smartEquals(rowset.getObject(1), mkRowsetPk1));
+        filter2.apply(filterMultiKey1);
+        assertTrue(rowset.setCursorPos(1));
+        assertFalse(rowset.setCursorPos(2));
+        assertTrue(rowset.setCursorPos(1));
+        assertTrue(Row.smartEquals(filter2.getRowset().getCurrentRow().getColumnObject(1), mkRowsetPk1));
+        assertTrue(Row.smartEquals(rowset.getCurrentRow().getColumnObject(1), mkRowsetPk1));
         assertTrue(rowset.getActiveFilter() == filter2);
 
-        filter1.filterRowset(filterMultiKey1);
-        assertTrue(rowset.first());
-        assertFalse(rowset.next());
-        assertTrue(rowset.first());
-        assertTrue(Row.smartEquals(filter1.getRowset().getObject(1), mkRowsetPk1));
-        assertTrue(Row.smartEquals(rowset.getObject(1), mkRowsetPk1));
+        filter1.apply(filterMultiKey1);
+        assertTrue(rowset.setCursorPos(1));
+        assertFalse(rowset.setCursorPos(2));
+        assertTrue(rowset.setCursorPos(1));
+        assertTrue(Row.smartEquals(filter1.getRowset().getCurrentRow().getColumnObject(1), mkRowsetPk1));
+        assertTrue(Row.smartEquals(rowset.getCurrentRow().getColumnObject(1), mkRowsetPk1));
         assertTrue(rowset.getActiveFilter() == filter1);
 
-        filter2.filterRowset(filterMultiKey2);
-        assertTrue(rowset.first());
-        assertFalse(rowset.next());
-        assertTrue(rowset.first());
-        assertTrue(Row.smartEquals(filter2.getRowset().getObject(1), mkRowsetPk2));
-        assertTrue(Row.smartEquals(rowset.getObject(1), mkRowsetPk2));
+        filter2.apply(filterMultiKey2);
+        assertTrue(rowset.setCursorPos(1));
+        assertFalse(rowset.setCursorPos(2));
+        assertTrue(rowset.setCursorPos(1));
+        assertTrue(Row.smartEquals(filter2.getRowset().getCurrentRow().getColumnObject(1), mkRowsetPk2));
+        assertTrue(Row.smartEquals(rowset.getCurrentRow().getColumnObject(1), mkRowsetPk2));
         assertTrue(rowset.getActiveFilter() == filter2);
 
-        filter1.filterRowset(filterMultiKey2);
-        assertTrue(rowset.first());
-        assertFalse(rowset.next());
-        assertTrue(rowset.first());
-        assertTrue(Row.smartEquals(filter1.getRowset().getObject(1), mkRowsetPk2));
-        assertTrue(Row.smartEquals(rowset.getObject(1), mkRowsetPk2));
+        filter1.apply(filterMultiKey2);
+        assertTrue(rowset.setCursorPos(1));
+        assertFalse(rowset.setCursorPos(2));
+        assertTrue(rowset.setCursorPos(1));
+        assertTrue(Row.smartEquals(filter1.getRowset().getCurrentRow().getColumnObject(1), mkRowsetPk2));
+        assertTrue(Row.smartEquals(rowset.getCurrentRow().getColumnObject(1), mkRowsetPk2));
         assertTrue(rowset.getActiveFilter() == filter1);
-    }
-
-    private void checkAllLocatorsAreInvalid(Rowset aRowset) {
-        Locator[] locators = aRowset.getLocators();
-        for (int i = 0; i < locators.length; i++) {
-            assertFalse(locators[i].isValid());
-        }
-    }
-
-    private void checkAllLocatorsAreValid(Rowset aRowset) {
-        Locator[] locators = aRowset.getLocators();
-        for (int i = 0; i < locators.length; i++) {
-            assertTrue(locators[i].isValid());
-        }
     }
 
     private void checkRowsetPks(Rowset aRowset, int[] aPks) throws InvalidCursorPositionException, InvalidColIndexException {
         for (int i = 1; i <= aRowset.size(); i++) {
-            assertTrue(aRowset.absolute(i));
-            assertTrue(Row.smartEquals(aRowset.getObject(1), aPks[i - 1]));
+            assertTrue(aRowset.setCursorPos(i));
+            assertTrue(Row.smartEquals(aRowset.getCurrentRow().getColumnObject(1), aPks[i - 1]));
         }
     }
 }

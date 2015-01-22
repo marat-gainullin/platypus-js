@@ -32,14 +32,14 @@ public class GridPanel extends Grid implements RequiresResize, ProvidesResize, I
 		super();
 		setCellPadding(0);
 		setCellSpacing(0);
-		getElement().<XElement>cast().addResizingTransitionEnd(this);
+		getElement().<XElement> cast().addResizingTransitionEnd(this);
 	}
 
 	public GridPanel(int aRows, int aCols) {
 		super(aRows, aCols);
 		setCellPadding(0);
 		setCellSpacing(0);
-		getElement().<XElement>cast().addResizingTransitionEnd(this);
+		getElement().<XElement> cast().addResizingTransitionEnd(this);
 	}
 
 	public int getHgap() {
@@ -134,15 +134,28 @@ public class GridPanel extends Grid implements RequiresResize, ProvidesResize, I
 		if (child != null) {
 			Element we = child.getElement();
 			Element wpe = we.getParentElement();
-			//if (child instanceof FocusWidget) {
-				we.getStyle().clearRight();
-				we.getStyle().clearBottom();
-				we.getStyle().setWidth(wpe.getClientWidth() - hgap, Style.Unit.PX);
-				we.getStyle().setHeight(wpe.getClientHeight() - vgap, Style.Unit.PX);
-				com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().ensureInjected();
-				child.getElement().addClassName(com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().borderSized());
-			//}
+			we.getStyle().clearRight();
+			we.getStyle().clearBottom();
+			//we.getStyle().setWidth(wpe.getClientWidth() - hgap, Style.Unit.PX);
+			//we.getStyle().setHeight(wpe.getClientHeight() - vgap, Style.Unit.PX);
+			we.getStyle().setWidth(100, Style.Unit.PCT);
+			we.getStyle().setHeight(100, Style.Unit.PCT);
+			com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().ensureInjected();
+			child.getElement().addClassName(com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().borderSized());
 		}
+	}
+
+	public boolean addToFreeCell(Widget aWidget) {
+		for (int row = 0; row < getRowCount(); row++) {
+			for (int col = 0; col < getColumnCount(); col++) {
+				Widget w = getWidget(row, col);
+				if (w == null) {
+					setWidget(row, col, aWidget);
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	@Override
@@ -181,7 +194,7 @@ public class GridPanel extends Grid implements RequiresResize, ProvidesResize, I
 		for (int i = 0; i < numRows; i++) {
 			for (int j = 0; j < numColumns; j++) {
 				Widget w = getWidget(i, j);
-				checkFocusWidgetWidthHeight(w);
+				//checkFocusWidgetWidthHeight(w);
 				if (w instanceof RequiresResize) {
 					((RequiresResize) w).onResize();
 				}

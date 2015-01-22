@@ -100,7 +100,7 @@ class DefaultLayoutSupport extends AbstractLayoutSupport {
     @Override
     protected void deriveChangedPropertiesFromInstance(RADLayout metaLayout) {
         Map<String, Object> map = new HashMap<>();
-        for (RADProperty<Object> prop : (RADProperty<Object>[])metaLayout.getAllBeanProperties()) {
+        for (RADProperty<Object> prop : (RADProperty<Object>[])metaLayout.getBeanProperties()) {
             if (prop.canRead() && prop.canWrite()) {
                 try {
                     map.put(prop.getName(), prop.getValue());
@@ -111,7 +111,7 @@ class DefaultLayoutSupport extends AbstractLayoutSupport {
         }
         try {
             metaLayout.setInstance(createDefaultLayoutInstance());
-            for (RADProperty<Object> prop : (RADProperty<Object>[])metaLayout.getAllBeanProperties()) {
+            for (RADProperty<Object> prop : (RADProperty<Object>[])metaLayout.getBeanProperties()) {
                 if (prop.canRead() && prop.canWrite() && map.containsKey(prop.getName())) {
                     try {
                         prop.setValue(map.get(prop.getName()));

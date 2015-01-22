@@ -2,14 +2,14 @@ package com.eas.client.form.grid;
 
 import java.util.List;
 
+import com.bearsoft.gwt.ui.Orientation;
 import com.bearsoft.gwt.ui.containers.AnchorsPanel;
-import com.bearsoft.gwt.ui.containers.HorizontalBoxPanel;
-import com.bearsoft.gwt.ui.containers.VerticalBoxPanel;
+import com.bearsoft.gwt.ui.containers.BoxPanel;
 import com.bearsoft.gwt.ui.containers.window.ToolsCaption;
 import com.bearsoft.gwt.ui.containers.window.WindowPanel;
 import com.bearsoft.gwt.ui.containers.window.WindowPopupPanel;
 import com.bearsoft.gwt.ui.widgets.grid.Grid;
-import com.bearsoft.rowset.Row;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.core.shared.GWT;
@@ -42,12 +42,12 @@ public class FindWindow extends WindowPanel {
 	private Button btnFind;
 	private Button closeButton;
 
-	private Grid<Row> grid;
+	private Grid<JavaScriptObject> grid;
 
 	private int row;
 	private int col;
 
-	public FindWindow(Grid<Row> aGrid) {
+	public FindWindow(Grid<JavaScriptObject> aGrid) {
 		super();
 		popup.setResizable(false);
 		popup.setMinimizable(false);
@@ -103,10 +103,11 @@ public class FindWindow extends WindowPanel {
 			}
 		});
 
-		VerticalBoxPanel findBox = new VerticalBoxPanel();
+		BoxPanel findBox = new BoxPanel();
+		findBox.setOrientation(Orientation.VERTICAL);
 		findBox.setVgap(10);
 
-		HorizontalBoxPanel settingsBox = new HorizontalBoxPanel();
+		BoxPanel settingsBox = new BoxPanel();
 		settingsBox.setHgap(10);
 		settingsBox.add(checkCase);
 		settingsBox.add(checkWhole);
@@ -136,7 +137,7 @@ public class FindWindow extends WindowPanel {
 	}
 
 	public boolean findNext() {
-		List<Row> data = grid.getDataProvider().getList();
+		List<JavaScriptObject> data = grid.getDataProvider().getList();
 		boolean caseSensitive = checkCase.getValue();
 		boolean wholeString = checkWhole.getValue();
 		String findText = field.getText();
@@ -208,9 +209,9 @@ public class FindWindow extends WindowPanel {
 	}
 
 	private void selectCell(int aRow, int aCol) {
-		List<Row> data = grid.getDataProvider().getList();
+		List<JavaScriptObject> data = grid.getDataProvider().getList();
 		if (grid.getSelectionModel() instanceof SetSelectionModel) {
-			SetSelectionModel<Row> ssm = (SetSelectionModel<Row>) grid.getSelectionModel();
+			SetSelectionModel<JavaScriptObject> ssm = (SetSelectionModel<JavaScriptObject>) grid.getSelectionModel();
 			ssm.clear();
 			ssm.setSelected(data.get(aRow), true);
 		}

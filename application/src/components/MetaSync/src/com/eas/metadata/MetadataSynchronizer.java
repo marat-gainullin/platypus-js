@@ -4,6 +4,7 @@
  */
 package com.eas.metadata;
 
+import com.bearsoft.rowset.Row;
 import com.eas.metadata.gui.MetadataSynchronizerForm;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.exceptions.InvalidColIndexException;
@@ -282,7 +283,7 @@ public class MetadataSynchronizer {
 
         DBStructure srcDBStructure = null;
         if (!emptyFrom) {
-            try (DatabasesClientWithResource dbResorce = new DatabasesClientWithResource(new DbConnectionSettings(urlFrom, userFrom, passwordFrom), null)) {
+            try (DatabasesClientWithResource dbResorce = new DatabasesClientWithResource(new DbConnectionSettings(urlFrom, userFrom, passwordFrom))) {
                 srcDBStructure = readDBStructure(dbResorce.getClient(), schemaFrom);
                 if (!emptyXml) {
                     serializeMetadata(srcDBStructure, fileXml);
@@ -294,7 +295,7 @@ public class MetadataSynchronizer {
         }
 
         if (!emptyTo && srcDBStructure != null) {
-            try (DatabasesClientWithResource dbResorce = new DatabasesClientWithResource(new DbConnectionSettings(urlTo, userTo, passwordTo), null)) {
+            try (DatabasesClientWithResource dbResorce = new DatabasesClientWithResource(new DbConnectionSettings(urlTo, userTo, passwordTo))) {
                 DatabasesClient client = dbResorce.getClient();
                 MetadataMerger metadataMerger = new MetadataMerger(client, schemaTo, srcDBStructure, readDBStructure(client, schemaTo), isNoExecute(), isNoDropTables(), tablesList, systemLogger, sqlLogger, errorLogger, needSqlsList);
                 metadataMerger.run();
@@ -303,7 +304,7 @@ public class MetadataSynchronizer {
 
             // re-read structure destination for compare with source
             if (infoLogger != null) {
-                try (DatabasesClientWithResource dbResorce = new DatabasesClientWithResource(new DbConnectionSettings(urlTo, userTo, passwordTo), null)) {
+                try (DatabasesClientWithResource dbResorce = new DatabasesClientWithResource(new DbConnectionSettings(urlTo, userTo, passwordTo))) {
                     MetadataUtils.printCompareMetadata(srcDBStructure, readDBStructure(dbResorce.getClient(), schemaTo), infoLogger);
                 }
             }
@@ -342,18 +343,18 @@ public class MetadataSynchronizer {
             Fields fieldsTable = rowsetTablesList.getFields();
 
             mdCache.fillTablesCacheBySchema(dbSchema, true);
-            if (rowsetTablesList.first()) {
+            if (!rowsetTablesList.isEmpty()) {
                 List<String> tableNamesList = new ArrayList<>();
                 int tableColIndex = fieldsTable.find(ClientConstants.JDBCCOLS_TABLE_NAME);
                 int tableTypeColIndex = fieldsTable.find(ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME);
-                do {
+                for (Row r : rowsetTablesList.getCurrent()) {
                     // each table
                     String tableType = null;
                     if (tableTypeColIndex > 0) {
-                        tableType = rowsetTablesList.getString(tableTypeColIndex);
+                        tableType = (String) r.getColumnObject(tableTypeColIndex);
                     }
                     if (tableType == null || tableType.equalsIgnoreCase(ClientConstants.JDBCPKS_TABLE_TYPE_TABLE)) {
-                        String tableName = rowsetTablesList.getString(tableColIndex);
+                        String tableName = (String) r.getColumnObject(tableColIndex);
                         String tableNameUpper = tableName.toUpperCase();
 
                         TableStructure tblStructure = new TableStructure();
@@ -373,7 +374,7 @@ public class MetadataSynchronizer {
 
                         mdStructure.put(tableNameUpper, tblStructure);
                     }
-                } while (rowsetTablesList.next());
+                }
 
                 // get indexes and primary keys
                 int begPos = 0;
@@ -463,7 +464,7 @@ public class MetadataSynchronizer {
      * @throws Exception
      */
     public DBStructure readDBStructure(String aUrl, String aSchema, String aUser, String aPassword) throws Exception {
-        try (DatabasesClientWithResource dbResource = new DatabasesClientWithResource(new DbConnectionSettings(aUrl, aUser, aPassword), null)) {
+        try (DatabasesClientWithResource dbResource = new DatabasesClientWithResource(new DbConnectionSettings(aUrl, aUser, aPassword))) {
             return readDBStructure(dbResource.getClient(), aSchema);
         }
     }
@@ -502,7 +503,7 @@ public class MetadataSynchronizer {
         rootElement.appendChild(tablesElement);
 
         //sort table names
-        SortedSet<String> sortedNames=new TreeSet<>();
+        SortedSet<String> sortedNames = new TreeSet<>();
         sortedNames.addAll(tablesStructure.keySet());
         // for all tables
 //        for (String tableName : tablesStructure.keySet()) {
@@ -882,104 +883,102 @@ public class MetadataSynchronizer {
      */
     private int addIndexFromRowset(Map<String, TableStructure> aMDStructure, Rowset aRowset) throws InvalidColIndexException, InvalidCursorPositionException {
         int cnt = 0;
-        if (aRowset.first()) {
-            Fields fields = aRowset.getFields();
-            int nCol_Idx_TableName = fields.find(ClientConstants.JDBCIDX_TABLE_NAME);
-            int nCol_Idx_Name = fields.find(ClientConstants.JDBCIDX_INDEX_NAME);
-            int nCol_Idx_Non_Uni = fields.find(ClientConstants.JDBCIDX_NON_UNIQUE);
-            int nCol_Idx_Type = fields.find(ClientConstants.JDBCIDX_TYPE);
-            int nCol_Idx_ColumnName = fields.find(ClientConstants.JDBCIDX_COLUMN_NAME);
-            int nCol_Idx_Asc = fields.find(ClientConstants.JDBCIDX_ASC_OR_DESC);
-            int nCol_Idx_OrdinalPosition = fields.find(ClientConstants.JDBCIDX_ORDINAL_POSITION);
-            int nCol_Idx_PKey = fields.find(ClientConstants.JDBCIDX_PRIMARY_KEY);
-            int nCol_Idx_FKey = fields.find(ClientConstants.JDBCIDX_FOREIGN_KEY);
+        Fields fields = aRowset.getFields();
+        int nCol_Idx_TableName = fields.find(ClientConstants.JDBCIDX_TABLE_NAME);
+        int nCol_Idx_Name = fields.find(ClientConstants.JDBCIDX_INDEX_NAME);
+        int nCol_Idx_Non_Uni = fields.find(ClientConstants.JDBCIDX_NON_UNIQUE);
+        int nCol_Idx_Type = fields.find(ClientConstants.JDBCIDX_TYPE);
+        int nCol_Idx_ColumnName = fields.find(ClientConstants.JDBCIDX_COLUMN_NAME);
+        int nCol_Idx_Asc = fields.find(ClientConstants.JDBCIDX_ASC_OR_DESC);
+        int nCol_Idx_OrdinalPosition = fields.find(ClientConstants.JDBCIDX_ORDINAL_POSITION);
+        int nCol_Idx_PKey = fields.find(ClientConstants.JDBCIDX_PRIMARY_KEY);
+        int nCol_Idx_FKey = fields.find(ClientConstants.JDBCIDX_FOREIGN_KEY);
 
-            do {
-                String tableName = aRowset.getString(nCol_Idx_TableName);
-                String tableNameUpper = tableName.toUpperCase();
-                TableStructure tableStructure = aMDStructure.get(tableNameUpper);
-                Map<String, DbTableIndexSpec> tableIndexSpecs = tableStructure.getTableIndexSpecs();
-                if (tableIndexSpecs == null) {
-                    tableIndexSpecs = new HashMap<>();
-                }
-                DbTableIndexSpec idxSpec = null;
-                String idxName = "";
+        for (Row r : aRowset.getCurrent()) {
+            String tableName = (String) r.getColumnObject(nCol_Idx_TableName);
+            String tableNameUpper = tableName.toUpperCase();
+            TableStructure tableStructure = aMDStructure.get(tableNameUpper);
+            Map<String, DbTableIndexSpec> tableIndexSpecs = tableStructure.getTableIndexSpecs();
+            if (tableIndexSpecs == null) {
+                tableIndexSpecs = new HashMap<>();
+            }
+            DbTableIndexSpec idxSpec = null;
+            String idxName = "";
 
-                Object oIdxName = aRowset.getObject(nCol_Idx_Name);
-                if (oIdxName != null && oIdxName instanceof String) {
-                    idxName = (String) oIdxName;
+            Object oIdxName = r.getColumnObject(nCol_Idx_Name);
+            if (oIdxName != null && oIdxName instanceof String) {
+                idxName = (String) oIdxName;
 
-                    idxSpec = tableIndexSpecs.get(idxName);
-                    if (idxSpec == null) {
-                        idxSpec = new DbTableIndexSpec();
-                        idxSpec.setName(idxName);
-                    }
+                idxSpec = tableIndexSpecs.get(idxName);
+                if (idxSpec == null) {
+                    idxSpec = new DbTableIndexSpec();
+                    idxSpec.setName(idxName);
                 }
-                assert idxSpec != null;
+            }
+            assert idxSpec != null;
 
-                Object oNonUnique = aRowset.getObject(nCol_Idx_Non_Uni);
-                if (oNonUnique != null) {
-                    boolean isUnique = false;
-                    if (oNonUnique instanceof Number) {
-                        isUnique = !(((Number) oNonUnique).intValue() != 0);
-                    }
-                    idxSpec.setUnique(isUnique);
+            Object oNonUnique = r.getColumnObject(nCol_Idx_Non_Uni);
+            if (oNonUnique != null) {
+                boolean isUnique = false;
+                if (oNonUnique instanceof Number) {
+                    isUnique = !(((Number) oNonUnique).intValue() != 0);
                 }
-                Object oType = aRowset.getObject(nCol_Idx_Type);
-                if (oType != null) {
-                    if (oType instanceof Number) {
-                        short type = ((Number) oType).shortValue();
-                        idxSpec.setClustered(false);
-                        idxSpec.setHashed(false);
-                        switch (type) {
-                            case DatabaseMetaData.tableIndexClustered:
-                                idxSpec.setClustered(true);
-                                break;
-                            case DatabaseMetaData.tableIndexHashed:
-                                idxSpec.setHashed(true);
-                                break;
-                            case DatabaseMetaData.tableIndexStatistic:
-                                break;
-                            case DatabaseMetaData.tableIndexOther:
-                                break;
-                        }
-                    }
-                }
-                Object oColumnName = aRowset.getObject(nCol_Idx_ColumnName);
-                if (oColumnName != null && oColumnName instanceof String) {
-                    String sColumnName = (String) oColumnName;
-                    DbTableIndexColumnSpec column = idxSpec.getColumn(sColumnName);
-                    if (column == null) {
-                        column = new DbTableIndexColumnSpec(sColumnName, true);
-                        idxSpec.addColumn(column);
-                    }
-                    Object oAsc = aRowset.getObject(nCol_Idx_Asc);
-                    if (oAsc != null && oAsc instanceof String) {
-                        String sAsc = (String) oAsc;
-                        column.setAscending(sAsc.toLowerCase().equals("a"));
-                    }
-                    Object oPosition = aRowset.getObject(nCol_Idx_OrdinalPosition);
-                    if (oPosition != null && oPosition instanceof Number) {
-                        column.setOrdinalPosition((int) ((Number) oPosition).shortValue());
+                idxSpec.setUnique(isUnique);
+            }
+            Object oType = r.getColumnObject(nCol_Idx_Type);
+            if (oType != null) {
+                if (oType instanceof Number) {
+                    short type = ((Number) oType).shortValue();
+                    idxSpec.setClustered(false);
+                    idxSpec.setHashed(false);
+                    switch (type) {
+                        case DatabaseMetaData.tableIndexClustered:
+                            idxSpec.setClustered(true);
+                            break;
+                        case DatabaseMetaData.tableIndexHashed:
+                            idxSpec.setHashed(true);
+                            break;
+                        case DatabaseMetaData.tableIndexStatistic:
+                            break;
+                        case DatabaseMetaData.tableIndexOther:
+                            break;
                     }
                 }
-                Object oPKey = aRowset.getObject(nCol_Idx_PKey);
-                if (oPKey != null) {
-                    boolean isPKey = false;
-                    if (oPKey instanceof Number) {
-                        isPKey = !(((Number) oPKey).intValue() != 0);
-                    }
-                    idxSpec.setPKey(isPKey);
+            }
+            Object oColumnName = r.getColumnObject(nCol_Idx_ColumnName);
+            if (oColumnName != null && oColumnName instanceof String) {
+                String sColumnName = (String) oColumnName;
+                DbTableIndexColumnSpec column = idxSpec.getColumn(sColumnName);
+                if (column == null) {
+                    column = new DbTableIndexColumnSpec(sColumnName, true);
+                    idxSpec.addColumn(column);
                 }
-                Object oFKeyName = aRowset.getObject(nCol_Idx_FKey);
-                if (oFKeyName != null && oFKeyName instanceof String) {
-                    String fKeyName = (String) oFKeyName;
-                    idxSpec.setFKeyName(fKeyName);
+                Object oAsc = r.getColumnObject(nCol_Idx_Asc);
+                if (oAsc != null && oAsc instanceof String) {
+                    String sAsc = (String) oAsc;
+                    column.setAscending(sAsc.toLowerCase().equals("a"));
                 }
-                tableIndexSpecs.put(idxName, idxSpec);
-                tableStructure.setTableIndexSpecs(tableIndexSpecs);
-                cnt++;
-            } while (aRowset.next());
+                Object oPosition = r.getColumnObject(nCol_Idx_OrdinalPosition);
+                if (oPosition != null && oPosition instanceof Number) {
+                    column.setOrdinalPosition((int) ((Number) oPosition).shortValue());
+                }
+            }
+            Object oPKey = r.getColumnObject(nCol_Idx_PKey);
+            if (oPKey != null) {
+                boolean isPKey = false;
+                if (oPKey instanceof Number) {
+                    isPKey = !(((Number) oPKey).intValue() != 0);
+                }
+                idxSpec.setPKey(isPKey);
+            }
+            Object oFKeyName = r.getColumnObject(nCol_Idx_FKey);
+            if (oFKeyName != null && oFKeyName instanceof String) {
+                String fKeyName = (String) oFKeyName;
+                idxSpec.setFKeyName(fKeyName);
+            }
+            tableIndexSpecs.put(idxName, idxSpec);
+            tableStructure.setTableIndexSpecs(tableIndexSpecs);
+            cnt++;
         }
         return cnt;
     }
@@ -995,39 +994,36 @@ public class MetadataSynchronizer {
      */
     private int addPKeysFromRowset(Map<String, TableStructure> aMDStructure, Rowset aRowset) throws InvalidColIndexException, InvalidCursorPositionException {
         int cnt = 0;
+        Fields fieldsPK = aRowset.getFields();
+        int pkNameColIndex = fieldsPK.find(ClientConstants.JDBCPKS_CONSTRAINT_NAME);
+        int pkSchemaColIndex = fieldsPK.find(ClientConstants.JDBCPKS_TABLE_SCHEM);
+        int pkTableColIndex = fieldsPK.find(ClientConstants.JDBCPKS_TABLE_NAME);
+        int pkFieldColIndex = fieldsPK.find(ClientConstants.JDBCPKS_COLUMN_NAME);
 
-        if (aRowset.first()) {
-            Fields fieldsPK = aRowset.getFields();
-            int pkNameColIndex = fieldsPK.find(ClientConstants.JDBCPKS_CONSTRAINT_NAME);
-            int pkSchemaColIndex = fieldsPK.find(ClientConstants.JDBCPKS_TABLE_SCHEM);
-            int pkTableColIndex = fieldsPK.find(ClientConstants.JDBCPKS_TABLE_NAME);
-            int pkFieldColIndex = fieldsPK.find(ClientConstants.JDBCPKS_COLUMN_NAME);
+        for (Row r : aRowset.getCurrent()) {
+            String pkSchema = (String) r.getColumnObject(pkSchemaColIndex);
+            String pkTable = (String) r.getColumnObject(pkTableColIndex);
+            String pkField = (String) r.getColumnObject(pkFieldColIndex);
+            String pkCName = (String) r.getColumnObject(pkNameColIndex);
 
-            do {
-                String pkSchema = aRowset.getString(pkSchemaColIndex);
-                String pkTable = aRowset.getString(pkTableColIndex);
-                String pkField = aRowset.getString(pkFieldColIndex);
-                String pkCName = aRowset.getString(pkNameColIndex);
+            String tableNameUpper = pkTable.toUpperCase();
 
-                String tableNameUpper = pkTable.toUpperCase();
+            PrimaryKeySpec pkSpec = new PrimaryKeySpec();
+            pkSpec.setSchema(pkSchema);
+            pkSpec.setTable(pkTable);
+            pkSpec.setField(pkField);
+            pkSpec.setCName(pkCName);
 
-                PrimaryKeySpec pkSpec = new PrimaryKeySpec();
-                pkSpec.setSchema(pkSchema);
-                pkSpec.setTable(pkTable);
-                pkSpec.setField(pkField);
-                pkSpec.setCName(pkCName);
+            TableStructure tblStructure = aMDStructure.get(tableNameUpper);
+            tblStructure.setPKeyCName(pkCName);
+            List<PrimaryKeySpec> tablePKeySpecs = tblStructure.getTablePKeySpecs();
+            if (tablePKeySpecs == null) {
+                tablePKeySpecs = new ArrayList<>();
+            }
+            tablePKeySpecs.add(pkSpec);
+            tblStructure.setTablePKeySpecs(tablePKeySpecs);
 
-                TableStructure tblStructure = aMDStructure.get(tableNameUpper);
-                tblStructure.setPKeyCName(pkCName);
-                List<PrimaryKeySpec> tablePKeySpecs = tblStructure.getTablePKeySpecs();
-                if (tablePKeySpecs == null) {
-                    tablePKeySpecs = new ArrayList<>();
-                }
-                tablePKeySpecs.add(pkSpec);
-                tblStructure.setTablePKeySpecs(tablePKeySpecs);
-
-                cnt++;
-            } while (aRowset.next());
+            cnt++;
         }
         return cnt;
     }
@@ -1044,63 +1040,74 @@ public class MetadataSynchronizer {
     private int addFKeysFromRowset(Map<String, TableStructure> aMDStructure, Rowset aRowset) throws InvalidColIndexException, InvalidCursorPositionException {
         int cnt = 0;
 
-        if (aRowset.first()) {
-            Fields fieldsFK = aRowset.getFields();
-            int refSchemaColIndex = fieldsFK.find(ClientConstants.JDBCFKS_FKPKTABLE_SCHEM);
-            int refTableColIndex = fieldsFK.find(ClientConstants.JDBCFKS_FKPKTABLE_NAME);
-            int refPKeyNameColIndex = fieldsFK.find(ClientConstants.JDBCFKS_FKPK_NAME);
-            int refColumnColIndex = fieldsFK.find(ClientConstants.JDBCFKS_FKPKCOLUMN_NAME);
+        Fields fieldsFK = aRowset.getFields();
+        int refSchemaColIndex = fieldsFK.find(ClientConstants.JDBCFKS_FKPKTABLE_SCHEM);
+        int refTableColIndex = fieldsFK.find(ClientConstants.JDBCFKS_FKPKTABLE_NAME);
+        int refPKeyNameColIndex = fieldsFK.find(ClientConstants.JDBCFKS_FKPK_NAME);
+        int refColumnColIndex = fieldsFK.find(ClientConstants.JDBCFKS_FKPKCOLUMN_NAME);
 
-            int schemaColIndex = fieldsFK.find(ClientConstants.JDBCFKS_FKTABLE_SCHEM);
-            int tableColIndex = fieldsFK.find(ClientConstants.JDBCFKS_FKTABLE_NAME);
-            int fKeyNameColIndex = fieldsFK.find(ClientConstants.JDBCFKS_FK_NAME);
-            int columnColIndex = fieldsFK.find(ClientConstants.JDBCFKS_FKCOLUMN_NAME);
-            //????            fieldsFK.find("KEY_SEQ");
-            int updateRuleColIndex = fieldsFK.find(ClientConstants.JDBCFKS_FKUPDATE_RULE);
-            int deleteRuleColIndex = fieldsFK.find(ClientConstants.JDBCFKS_FKDELETE_RULE);
-            int deferrabilityColIndex = fieldsFK.find(ClientConstants.JDBCFKS_FKDEFERRABILITY);
+        int schemaColIndex = fieldsFK.find(ClientConstants.JDBCFKS_FKTABLE_SCHEM);
+        int tableColIndex = fieldsFK.find(ClientConstants.JDBCFKS_FKTABLE_NAME);
+        int fKeyNameColIndex = fieldsFK.find(ClientConstants.JDBCFKS_FK_NAME);
+        int columnColIndex = fieldsFK.find(ClientConstants.JDBCFKS_FKCOLUMN_NAME);
+        //????            fieldsFK.find("KEY_SEQ");
+        int updateRuleColIndex = fieldsFK.find(ClientConstants.JDBCFKS_FKUPDATE_RULE);
+        int deleteRuleColIndex = fieldsFK.find(ClientConstants.JDBCFKS_FKDELETE_RULE);
+        int deferrabilityColIndex = fieldsFK.find(ClientConstants.JDBCFKS_FKDEFERRABILITY);
 
-            do {
-                String refSchemaName = aRowset.getString(refSchemaColIndex);
-                String refTableName = aRowset.getString(refTableColIndex);
-                String refPKeyName = aRowset.getString(refPKeyNameColIndex);
-                String refColumnName = aRowset.getString(refColumnColIndex);
+        for (Row r : aRowset.getCurrent()) {
+            String refSchemaName = (String) r.getColumnObject(refSchemaColIndex);
+            String refTableName = (String) r.getColumnObject(refTableColIndex);
+            String refPKeyName = (String) r.getColumnObject(refPKeyNameColIndex);
+            String refColumnName = (String) r.getColumnObject(refColumnColIndex);
 
-                String schemaName = aRowset.getString(schemaColIndex);
-                String tableName = aRowset.getString(tableColIndex);
-                String fKeyName = aRowset.getString(fKeyNameColIndex);
-                String columnName = aRowset.getString(columnColIndex);
+            String schemaName = (String) r.getColumnObject(schemaColIndex);
+            String tableName = (String) r.getColumnObject(tableColIndex);
+            String fKeyName = (String) r.getColumnObject(fKeyNameColIndex);
+            String columnName = (String) r.getColumnObject(columnColIndex);
 
-                Short updateRule = aRowset.getShort(updateRuleColIndex);
-                Short deleteRule = aRowset.getShort(deleteRuleColIndex);
-                Short deferrability = aRowset.getShort(deferrabilityColIndex);
+            Short updateRule = null;
+            Object oupdateRule = r.getColumnObject(updateRuleColIndex);
+            if (oupdateRule instanceof Number) {
+                updateRule = ((Number) oupdateRule).shortValue();
+            }
+            Short deleteRule = null;
+            Object odeleteRule = r.getColumnObject(deleteRuleColIndex);
+            if (odeleteRule instanceof Number) {
+                deleteRule = ((Number) odeleteRule).shortValue();
+            }
 
-                String tableNameUpper = tableName.toUpperCase();
+            Short deferrability = null;
+            Object odeferrability = r.getColumnObject(deferrabilityColIndex);
+            if (odeferrability instanceof Number) {
+                deferrability = ((Number) odeferrability).shortValue();
+            }
 
-                TableStructure tblStructure = aMDStructure.get(tableNameUpper);
-                Map<String, List<ForeignKeySpec>> allFKeySpecs = tblStructure.getTableFKeySpecs();
-                if (allFKeySpecs == null) {
-                    allFKeySpecs = new HashMap();
-                }
-                List<ForeignKeySpec> fKeySpecs = allFKeySpecs.get(fKeyName);
-                if (fKeySpecs == null) {
-                    fKeySpecs = new ArrayList();
-                }
-                ForeignKeySpec fKeySpec = new ForeignKeySpec();
-                fKeySpec.setSchema(schemaName);
-                fKeySpec.setTable(tableName);
-                fKeySpec.setField(columnName);
-                fKeySpec.setCName(fKeyName);
-                fKeySpec.setReferee(new PrimaryKeySpec(refSchemaName, refTableName, refColumnName, refPKeyName));
-                fKeySpec.setFkDeleteRule(deleteRule != null ? ForeignKeySpec.ForeignKeyRule.valueOf(deleteRule) : null);
-                fKeySpec.setFkUpdateRule(updateRule != null ? ForeignKeySpec.ForeignKeyRule.valueOf(updateRule) : null);
-                fKeySpec.setFkDeferrable(deferrability != null && deferrability == 5 ? true : false);
+            String tableNameUpper = tableName.toUpperCase();
 
-                fKeySpecs.add(fKeySpec);
-                allFKeySpecs.put(fKeyName, fKeySpecs);
-                tblStructure.setTableFKeySpecs(allFKeySpecs);
-                cnt++;
-            } while (aRowset.next());
+            TableStructure tblStructure = aMDStructure.get(tableNameUpper);
+            Map<String, List<ForeignKeySpec>> allFKeySpecs = tblStructure.getTableFKeySpecs();
+            if (allFKeySpecs == null) {
+                allFKeySpecs = new HashMap();
+            }
+            List<ForeignKeySpec> fKeySpecs = allFKeySpecs.get(fKeyName);
+            if (fKeySpecs == null) {
+                fKeySpecs = new ArrayList();
+            }
+            ForeignKeySpec fKeySpec = new ForeignKeySpec();
+            fKeySpec.setSchema(schemaName);
+            fKeySpec.setTable(tableName);
+            fKeySpec.setField(columnName);
+            fKeySpec.setCName(fKeyName);
+            fKeySpec.setReferee(new PrimaryKeySpec(refSchemaName, refTableName, refColumnName, refPKeyName));
+            fKeySpec.setFkDeleteRule(deleteRule != null ? ForeignKeySpec.ForeignKeyRule.valueOf(deleteRule) : null);
+            fKeySpec.setFkUpdateRule(updateRule != null ? ForeignKeySpec.ForeignKeyRule.valueOf(updateRule) : null);
+            fKeySpec.setFkDeferrable(deferrability != null && deferrability == 5 ? true : false);
+
+            fKeySpecs.add(fKeySpec);
+            allFKeySpecs.put(fKeyName, fKeySpecs);
+            tblStructure.setTableFKeySpecs(allFKeySpecs);
+            cnt++;
         }
         return cnt;
     }

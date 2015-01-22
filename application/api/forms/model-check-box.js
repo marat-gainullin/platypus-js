@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.components.model.ModelCheckBox");
+    var javaClass = Java.type("com.eas.client.forms.components.model.ModelCheckBox");
     javaClass.setPublisher(function(aDelegate) {
         return new P.ModelCheckBox(null, aDelegate);
     });
@@ -35,7 +35,7 @@
         });
         if(!P.ModelCheckBox){
             /**
-             * The mouse <code>Cursor</code> over this component.
+             * Generated property jsDoc.
              * @property cursor
              * @memberOf ModelCheckBox
              */
@@ -58,19 +58,22 @@
              */
             P.ModelCheckBox.prototype.onMouseDragged = {};
         }
-        Object.defineProperty(this, "parent", {
+        Object.defineProperty(this, "selectOnly", {
             get: function() {
-                var value = delegate.parent;
+                var value = delegate.selectOnly;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.selectOnly = P.boxAsJava(aValue);
             }
         });
         if(!P.ModelCheckBox){
             /**
-             * Gets the parent of this component.
-             * @property parent
+             * Generated property jsDoc.
+             * @property selectOnly
              * @memberOf ModelCheckBox
              */
-            P.ModelCheckBox.prototype.parent = {};
+            P.ModelCheckBox.prototype.selectOnly = true;
         }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
@@ -89,6 +92,40 @@
              */
             P.ModelCheckBox.prototype.onMouseReleased = {};
         }
+        Object.defineProperty(this, "data", {
+            get: function() {
+                var value = delegate.data;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.data = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelCheckBox){
+            /**
+             * Object, bound to the widget.
+             * @property data
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.data = {};
+        }
+        Object.defineProperty(this, "nullable", {
+            get: function() {
+                var value = delegate.nullable;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.nullable = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelCheckBox){
+            /**
+             * Generated property jsDoc.
+             * @property nullable
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.nullable = true;
+        }
         Object.defineProperty(this, "onFocusLost", {
             get: function() {
                 var value = delegate.onFocusLost;
@@ -105,6 +142,40 @@
              * @memberOf ModelCheckBox
              */
             P.ModelCheckBox.prototype.onFocusLost = {};
+        }
+        Object.defineProperty(this, "onValueChange", {
+            get: function() {
+                var value = delegate.onValueChange;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onValueChange = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelCheckBox){
+            /**
+             * Value change handler.
+             * @property onValueChange
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.onValueChange = {};
+        }
+        Object.defineProperty(this, "icon", {
+            get: function() {
+                var value = delegate.icon;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.icon = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelCheckBox){
+            /**
+             * Generated property jsDoc.
+             * @property icon
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.icon = {};
         }
         Object.defineProperty(this, "onMousePressed", {
             get: function() {
@@ -144,6 +215,9 @@
             get: function() {
                 var value = delegate.error;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.error = P.boxAsJava(aValue);
             }
         });
         if(!P.ModelCheckBox){
@@ -206,22 +280,22 @@
              */
             P.ModelCheckBox.prototype.onSelect = {};
         }
-        Object.defineProperty(this, "componentPopupMenu", {
+        Object.defineProperty(this, "jsValue", {
             get: function() {
-                var value = delegate.componentPopupMenu;
+                var value = delegate.jsValue;
                 return P.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.componentPopupMenu = P.boxAsJava(aValue);
+                delegate.jsValue = P.boxAsJava(aValue);
             }
         });
         if(!P.ModelCheckBox){
             /**
-             * <code>PopupMenu</code> that assigned for this component.
-             * @property componentPopupMenu
+             * Widget's value.
+             * @property jsValue
              * @memberOf ModelCheckBox
              */
-            P.ModelCheckBox.prototype.componentPopupMenu = {};
+            P.ModelCheckBox.prototype.jsValue = {};
         }
         Object.defineProperty(this, "top", {
             get: function() {
@@ -274,19 +348,19 @@
              */
             P.ModelCheckBox.prototype.onComponentResized = {};
         }
-        Object.defineProperty(this, "model", {
+        Object.defineProperty(this, "parent", {
             get: function() {
-                var value = delegate.model;
+                var value = delegate.parentWidget;
                 return P.boxAsJs(value);
             }
         });
         if(!P.ModelCheckBox){
             /**
-             * Model of the component. It will be used for data binding.
-             * @property model
+             * Parent container of this widget.
+             * @property parentWidget
              * @memberOf ModelCheckBox
              */
-            P.ModelCheckBox.prototype.model = {};
+            P.ModelCheckBox.prototype.parent = {};
         }
         Object.defineProperty(this, "text", {
             get: function() {
@@ -320,23 +394,6 @@
              * @memberOf ModelCheckBox
              */
             P.ModelCheckBox.prototype.onMouseEntered = {};
-        }
-        Object.defineProperty(this, "value", {
-            get: function() {
-                var value = delegate.value;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.value = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelCheckBox){
-            /**
-             * Component's value.
-             * @property value
-             * @memberOf ModelCheckBox
-             */
-            P.ModelCheckBox.prototype.value = {};
         }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
@@ -471,22 +528,6 @@
              */
             P.ModelCheckBox.prototype.onComponentHidden = {};
         }
-        Object.defineProperty(this, "editable", {
-            get: function() {
-                var value = delegate.editable;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.editable = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelCheckBox){
-            /**
-             * @property editable
-             * @memberOf ModelCheckBox
-             * Determines if component is editable.*/
-            P.ModelCheckBox.prototype.editable = true;
-        }
         Object.defineProperty(this, "nextFocusableComponent", {
             get: function() {
                 var value = delegate.nextFocusableComponent;
@@ -498,28 +539,11 @@
         });
         if(!P.ModelCheckBox){
             /**
-             * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
+             * Generated property jsDoc.
              * @property nextFocusableComponent
              * @memberOf ModelCheckBox
              */
             P.ModelCheckBox.prototype.nextFocusableComponent = {};
-        }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelCheckBox){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf ModelCheckBox
-             */
-            P.ModelCheckBox.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
@@ -537,6 +561,23 @@
              * @memberOf ModelCheckBox
              */
             P.ModelCheckBox.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelCheckBox){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -614,11 +655,11 @@
         });
         if(!P.ModelCheckBox){
             /**
-             * Model entity's field.
+             * Model binding field.
              * @property field
              * @memberOf ModelCheckBox
              */
-            P.ModelCheckBox.prototype.field = {};
+            P.ModelCheckBox.prototype.field = '';
         }
         Object.defineProperty(this, "onFocusGained", {
             get: function() {
@@ -713,7 +754,7 @@
         });
         if(!P.ModelCheckBox){
             /**
-             * Gets name of this component.
+             * Generated property jsDoc.
              * @property name
              * @memberOf ModelCheckBox
              */
@@ -747,7 +788,7 @@
         });
         if(!P.ModelCheckBox){
             /**
-             * The font of this component.
+             * Generated property jsDoc.
              * @property font
              * @memberOf ModelCheckBox
              */
@@ -772,17 +813,6 @@
         }
     };
         /**
-         * Redraw the component.
-         * @method redraw
-         * @memberOf ModelCheckBox
-         */
-        P.ModelCheckBox.prototype.redraw = function() {
-            var delegate = this.unwrap();
-            var value = delegate.redraw();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf ModelCheckBox
@@ -790,6 +820,17 @@
         P.ModelCheckBox.prototype.focus = function() {
             var delegate = this.unwrap();
             var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Redraw the component.
+         * @method redraw
+         * @memberOf ModelCheckBox
+         */
+        P.ModelCheckBox.prototype.redraw = function() {
+            var delegate = this.unwrap();
+            var value = delegate.redraw();
             return P.boxAsJs(value);
         };
 

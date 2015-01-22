@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.containers.BoxPane");
+    var javaClass = Java.type("com.eas.client.forms.containers.BoxPane");
     javaClass.setPublisher(function(aDelegate) {
         return new P.BoxPane(null, null, null, aDelegate);
     });
@@ -61,20 +61,6 @@
              * @memberOf BoxPane
              */
             P.BoxPane.prototype.onMouseDragged = {};
-        }
-        Object.defineProperty(this, "parent", {
-            get: function() {
-                var value = delegate.parent;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.BoxPane){
-            /**
-             * Gets the parent of this component.
-             * @property parent
-             * @memberOf BoxPane
-             */
-            P.BoxPane.prototype.parent = {};
         }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
@@ -148,6 +134,9 @@
             get: function() {
                 var value = delegate.error;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.error = P.boxAsJava(aValue);
             }
         });
         if(!P.BoxPane){
@@ -295,6 +284,20 @@
              */
             P.BoxPane.prototype.vgap = 0;
         }
+        Object.defineProperty(this, "parent", {
+            get: function() {
+                var value = delegate.parentWidget;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.BoxPane){
+            /**
+             * Parent container of this widget.
+             * @property parentWidget
+             * @memberOf BoxPane
+             */
+            P.BoxPane.prototype.parent = {};
+        }
         Object.defineProperty(this, "onMouseEntered", {
             get: function() {
                 var value = delegate.onMouseEntered;
@@ -312,23 +315,6 @@
              */
             P.BoxPane.prototype.onMouseEntered = {};
         }
-        Object.defineProperty(this, "hgap", {
-            get: function() {
-                var value = delegate.hgap;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.hgap = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.BoxPane){
-            /**
-             * Box horizontal gap between components.
-             * @property hgap
-             * @memberOf BoxPane
-             */
-            P.BoxPane.prototype.hgap = 0;
-        }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
                 var value = delegate.toolTipText;
@@ -345,6 +331,23 @@
              * @memberOf BoxPane
              */
             P.BoxPane.prototype.toolTipText = '';
+        }
+        Object.defineProperty(this, "hgap", {
+            get: function() {
+                var value = delegate.hgap;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.hgap = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.BoxPane){
+            /**
+             * Box horizontal gap between components.
+             * @property hgap
+             * @memberOf BoxPane
+             */
+            P.BoxPane.prototype.hgap = 0;
         }
         Object.defineProperty(this, "element", {
             get: function() {
@@ -507,23 +510,6 @@
              */
             P.BoxPane.prototype.count = 0;
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.BoxPane){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf BoxPane
-             */
-            P.BoxPane.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -540,6 +526,23 @@
              * @memberOf BoxPane
              */
             P.BoxPane.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.BoxPane){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf BoxPane
+             */
+            P.BoxPane.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -810,19 +813,6 @@
         P.BoxPane.prototype.clear = function() {
             var delegate = this.unwrap();
             var value = delegate.clear();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Gets the container's n-th component.
-         * @param index the component's index in the container
-         * @return the child component
-         * @method child
-         * @memberOf BoxPane
-         */
-        P.BoxPane.prototype.child = function(index) {
-            var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(index));
             return P.boxAsJs(value);
         };
 

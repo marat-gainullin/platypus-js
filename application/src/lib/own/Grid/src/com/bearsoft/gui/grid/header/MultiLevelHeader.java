@@ -5,14 +5,13 @@
 package com.bearsoft.gui.grid.header;
 
 import com.bearsoft.gui.grid.header.cell.HeaderCell;
-import com.eas.gui.CascadedStyle;
+import com.eas.gui.ScriptColor;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.Point2D;
 import java.util.*;
 import java.util.List;
-import java.util.Map.Entry;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.RowSorter;
@@ -30,25 +29,22 @@ public class MultiLevelHeader extends JPanel {
 
     public static final int PICK_MARGIN_SIZE = 2;
     // design data
-    protected Map<TableColumn, GridColumnsGroup> tc2gridParentGroups;
     protected TableColumnModel columnModel;
     protected RowSorter<? extends TableModel> rowSorter;
-    protected InnerColumnsListener columnModelListner;
+    //protected InnerColumnsListener columnModelListner;
     protected RowSorterListener sorterListener;
     protected JTable table;
     // calculated data
     protected MultiLevelHeader neightbour;
-    protected boolean regenerateable;
-    protected List<GridColumnsGroup> roots;
-    protected Map<GridColumnsGroup, GridBagConstraints> group2Constraints = new HashMap<>();
-    protected GridColumnsGroup pressed4ResizeColGroup;
-    protected GridColumnsGroup resizingColGroup;
-    protected GridColumnsGroup movingColGroup;
+    protected List<GridColumnsNode> roots;
+    protected Map<GridColumnsNode, GridBagConstraints> group2Constraints = new HashMap<>();
+    protected GridColumnsNode pressed4ResizeColGroup;
+    protected GridColumnsNode resizingColGroup;
+    protected GridColumnsNode movingColGroup;
     protected JTableHeader[] slaveHeaders;
 
     public MultiLevelHeader() {
         super();
-        tc2gridParentGroups = new HashMap<>();
     }
 
     public void setSlaveHeaders(JTableHeader... aSlaveHeaders) {
@@ -63,14 +59,6 @@ public class MultiLevelHeader extends JPanel {
         neightbour = aValue;
     }
 
-    public boolean isRegenerateable() {
-        return regenerateable;
-    }
-
-    public void setRegenerateable(boolean aValue) {
-        regenerateable = aValue;
-    }
-
     @Override
     public void scrollRectToVisible(Rectangle aRect) {
     }
@@ -81,10 +69,12 @@ public class MultiLevelHeader extends JPanel {
 
     public final void setColumnModel(TableColumnModel aModel) {
         columnModel = aModel;
-        columnModelListner = new InnerColumnsListener(this);
-        if (columnModel != null) {
-            columnModel.addColumnModelListener(columnModelListner);
-        }
+        /*
+         columnModelListner = new InnerColumnsListener(this);
+         if (columnModel != null) {
+         columnModel.addColumnModelListener(columnModelListner);
+         }
+         */
     }
 
     public RowSorter<? extends TableModel> getRowSorter() {
@@ -106,52 +96,38 @@ public class MultiLevelHeader extends JPanel {
     public void setTable(JTable aValue) {
         table = aValue;
     }
+    /*
+     public InnerColumnsListener getColumnModelListener() {
+     return columnModelListner;
+     }
+     */
 
-    public InnerColumnsListener getColumnModelListener() {
-        return columnModelListner;
-    }
-
-    public GridColumnsGroup getPressed4ResizeColGroup() {
+    public GridColumnsNode getPressed4ResizeColGroup() {
         return pressed4ResizeColGroup;
     }
 
-    public void setPressed4ResizeColGroup(GridColumnsGroup aColGroup) {
-        if (aColGroup == null || aColGroup.isResizeable()) {
+    public void setPressed4ResizeColGroup(GridColumnsNode aColGroup) {
+        if (aColGroup == null || aColGroup.isResizable()) {
             pressed4ResizeColGroup = aColGroup;
         }
     }
 
-    public GridColumnsGroup getResizingColGroup() {
+    public GridColumnsNode getResizingColGroup() {
         return resizingColGroup;
     }
 
-    public void setResizingColGroup(GridColumnsGroup aColGroup) {
-        if (aColGroup == null || aColGroup.isResizeable()) {
+    public void setResizingColGroup(GridColumnsNode aColGroup) {
+        if (aColGroup == null || aColGroup.isResizable()) {
             resizingColGroup = aColGroup;
-            postResizingColumn(resizingColGroup);
         }
     }
 
-    private void postResizingColumn(GridColumnsGroup aColGroup) {
-        TableColumn tCol = null;
-        if (aColGroup != null) {
-            List<GridColumnsGroup> leaves = new ArrayList<>();
-            MultiLevelHeader.achieveLeaves(aColGroup, leaves);
-            tCol = leaves.get(leaves.size() - 1).getTableColumn();
-        }
-        if (slaveHeaders != null) {
-            for (JTableHeader header : slaveHeaders) {
-                header.setResizingColumn(tCol);
-            }
-        }
-    }
-
-    public GridColumnsGroup getMovingColGroup() {
+    public GridColumnsNode getMovingColGroup() {
         return movingColGroup;
     }
 
-    public void setMovingColGroup(GridColumnsGroup aColGroup) {
-        if (aColGroup == null || aColGroup.isMoveable()) {
+    public void setMovingColGroup(GridColumnsNode aColGroup) {
+        if (aColGroup == null || aColGroup.isMovable()) {
             movingColGroup = aColGroup;
         }
     }
@@ -182,34 +158,15 @@ public class MultiLevelHeader extends JPanel {
         return d;
     }
 
-    /**
-     * Returns table column to parent columns groups mapping. It's considered,
-     * that such mapping is performed somewhere out of the MultiLevelHeader
-     * class. If such work is not performed correctly, i.e. in column model will
-     * be found a column with no mapping, separate grid column group will be
-     * created. It will be top level group without any children and without a
-     * parent.
-     *
-     * @return Table column to it's parent groups mapping.
-     */
-    public Map<TableColumn, GridColumnsGroup> getColumnsParents() {
-        return tc2gridParentGroups;
-    }
-
-    private int processGroups1(List<GridColumnsGroup> aGroups, int aLevel, int maxLevel) {
+    private int processGroups1(List<GridColumnsNode> aGroups, int aLevel, int maxLevel) {
         int deepChildrenCount = 0;
-        for (int i = 0; i < aGroups.size(); i++) {
-            GridColumnsGroup group = aGroups.get(i);
+        for (GridColumnsNode group : aGroups) {
             GridBagConstraints constraints = group2Constraints.get(group);
             if (constraints == null) {
                 constraints = new GridBagConstraints();
-                if (group.isLeaf()) {
-                    constraints.weightx = 1;
-                } else {
-                    constraints.weightx = 0;
-                }
+                constraints.weightx = 0;
                 constraints.weighty = 1;
-                constraints.anchor = GridBagConstraints.CENTER;
+                constraints.anchor = GridBagConstraints.WEST;
                 constraints.fill = GridBagConstraints.BOTH;
                 group2Constraints.put(group, constraints);
             }
@@ -228,12 +185,12 @@ public class MultiLevelHeader extends JPanel {
         return deepChildrenCount;
     }
 
-    private void processGroups2(List<GridColumnsGroup> aGroups) {
+    private void processGroups2(List<GridColumnsNode> aGroups) {
         if (!aGroups.isEmpty()) {
-            GridColumnsGroup group = aGroups.get(0);
+            GridColumnsNode group = aGroups.get(0);
             GridBagConstraints constraints = group2Constraints.get(group);
             assert constraints != null;
-            if (group.getParent() != null && !group.getParent().isSubstitute()) {
+            if (group.getParent() != null) {
                 GridBagConstraints parentConstraints = group2Constraints.get(group.getParent());
                 assert parentConstraints != null;
                 constraints.gridx = parentConstraints.gridx;
@@ -243,8 +200,8 @@ public class MultiLevelHeader extends JPanel {
             processGroups2(group.getChildren());
         }
         for (int i = 1; i < aGroups.size(); i++) {
-            GridColumnsGroup groupPrev = aGroups.get(i - 1);
-            GridColumnsGroup group = aGroups.get(i);
+            GridColumnsNode groupPrev = aGroups.get(i - 1);
+            GridColumnsNode group = aGroups.get(i);
             GridBagConstraints constraints = group2Constraints.get(group);
             assert constraints != null;
             GridBagConstraints prevConstraints = group2Constraints.get(groupPrev);
@@ -254,11 +211,11 @@ public class MultiLevelHeader extends JPanel {
         }
     }
 
-    private int getMaxLevel(int aLevel, List<GridColumnsGroup> aRoots) {
+    private int getMaxLevel(int aLevel, List<GridColumnsNode> aRoots) {
         int maxLevel = aLevel;
-        for (int i = 0; i < aRoots.size(); i++) {
-            if (aRoots.get(i).hasChildren()) {
-                int level = getMaxLevel(aLevel + 1, aRoots.get(i).getChildren());
+        for (GridColumnsNode aRoot : aRoots) {
+            if (aRoot.hasChildren()) {
+                int level = getMaxLevel(aLevel + 1, aRoot.getChildren());
                 if (level > maxLevel) {
                     maxLevel = level;
                 }
@@ -267,50 +224,65 @@ public class MultiLevelHeader extends JPanel {
         return maxLevel;
     }
 
-    protected GridColumnsGroup getRoot(GridColumnsGroup aGroup) {
-        GridColumnsGroup cGroup = aGroup;
-        GridColumnsGroup rGroup = aGroup;
+    protected GridColumnsNode getRoot(GridColumnsNode aGroup) {
+        GridColumnsNode cGroup = aGroup;
+        GridColumnsNode rGroup = aGroup;
         while (cGroup.getParent() != null) {
             cGroup = cGroup.getParent();
-            if (!cGroup.isSubstitute()) {
-                rGroup = cGroup;
-            }
+            rGroup = cGroup;
         }
         return rGroup;
     }
 
     public void regenerate() {
-        if (regenerateable) {
-            removeAll();
-            if (columnModel == null) {
-                throw new NullPointerException("TreedTableHeader needs a column model, but it is absent.");
-            }
-            group2Constraints.clear();
-            roots = wrapColumnsCalculateRoots();
-            int maxLevel = getMaxLevel(0, roots);
-            processGroups1(roots, 0, maxLevel);
-            processGroups2(roots);
-            fillControl();
-            invalidate();
-            repaint();
+        removeAll();
+        if (columnModel == null) {
+            throw new NullPointerException("TreedTableHeader needs a column model, but it is absent.");
         }
+        group2Constraints.clear();
+        if (roots == null) {
+            setRoots(wrapColumnsCalculateRoots());
+        }
+        int maxLevel = getMaxLevel(0, roots);
+        processGroups1(roots, 0, maxLevel);
+        processGroups2(roots);
+        fillControl();
+        invalidate();
+        repaint();
     }
 
-    public List<GridColumnsGroup> getRoots() {
+    public List<GridColumnsNode> getRoots() {
         return roots;
     }
 
-    protected List<GridColumnsGroup> wrapColumnsCalculateRoots() {
-        List<GridColumnsGroup> res = new ArrayList<>();
-        Set<GridColumnsGroup> reviewed = new HashSet<>();
+    private void clearTableColumn(List<GridColumnsNode> aForest) {
+        for (GridColumnsNode node : aForest) {
+            node.setTableColumn(null);
+            node.setStyleSource(null);
+            clearTableColumn(node.getChildren());
+        }
+    }
+
+    public final void setRoots(List<GridColumnsNode> aValue) {
+        if (roots != aValue) {
+            if (roots != null) {
+                clearTableColumn(roots);// avoid GridColumnsNode leak
+            }
+            roots = aValue;
+            if (roots != null) {
+                List<GridColumnsNode> leaves = new ArrayList<>();
+                MultiLevelHeader.achieveLeaves(roots, leaves);
+            }
+        }
+    }
+
+    protected List<GridColumnsNode> wrapColumnsCalculateRoots() {
+        List<GridColumnsNode> res = new ArrayList<>();
+        Set<GridColumnsNode> reviewed = new HashSet<>();
         for (int i = 0; i < columnModel.getColumnCount(); i++) {
             TableColumn col = columnModel.getColumn(i);
-            GridColumnsGroup group = new GridColumnsGroup(col);
-            GridColumnsGroup parentGroup = tc2gridParentGroups.get(col);
-            if (parentGroup != null) {
-                group.setParent(parentGroup);
-            }
-            GridColumnsGroup rGroup = getRoot(group);
+            GridColumnsNode group = new GridColumnsNode(col);
+            GridColumnsNode rGroup = getRoot(group);
             if (!reviewed.contains(rGroup)) {
                 reviewed.add(rGroup);
                 res.add(rGroup);
@@ -322,12 +294,27 @@ public class MultiLevelHeader extends JPanel {
     private void fillControl() {
         setFocusCycleRoot(false);
         setLayout(new GridBagLayout());
-        for (Entry<GridColumnsGroup, GridBagConstraints> entry : group2Constraints.entrySet()) {
-            add(new HeaderCell(entry.getKey(), this), entry.getValue());
+        int maxRow = -1;
+        int maxColumn = -1;
+        for (Map.Entry<GridColumnsNode, GridBagConstraints> entry : group2Constraints.entrySet()) {
+            GridBagConstraints gbc = entry.getValue();
+            if (maxRow < gbc.gridy) {
+                maxRow = gbc.gridy;
+            }
+            if (maxColumn < gbc.gridx) {
+                maxColumn = gbc.gridx;
+            }
+            add(new HeaderCell(entry.getKey(), this), gbc);
         }
+        GridBagConstraints goatGbc = new GridBagConstraints();
+        goatGbc.gridx = maxColumn + 1;
+        goatGbc.gridy = maxRow + 1;
+        goatGbc.weightx = 1;
+        goatGbc.weighty = 1;
+        add(new HeaderCell(new GridColumnsNode(), this), goatGbc);
     }
 
-    public static void achieveLeaves(GridColumnsGroup aGroup, List<GridColumnsGroup> aLeaves) {
+    public static void achieveLeaves(GridColumnsNode aGroup, List<GridColumnsNode> aLeaves) {
         if (aGroup.isLeaf()) {
             aLeaves.add(aGroup);
         }
@@ -335,33 +322,23 @@ public class MultiLevelHeader extends JPanel {
             achieveLeaves(aGroup.getChildren().get(i), aLeaves);
         }
     }
-
-    public void checkStructure() {
-        List<GridColumnsGroup> leaves = new ArrayList<>();
-        for (int i = 0; i < roots.size(); i++) {
-            MultiLevelHeader.achieveLeaves(roots.get(i), leaves);
-        }
-        assert leaves.size() == columnModel.getColumnCount();
-        for (int i = 0; i < leaves.size(); i++) {
-            assert leaves.get(i).getTableColumn() == columnModel.getColumn(i);
+    
+    public static void achieveLeaves(List<GridColumnsNode> aRoots, List<GridColumnsNode> aLeaves) {
+        for (GridColumnsNode node : aRoots) {
+            if (node.isLeaf()) {
+                aLeaves.add(node);
+            } else {
+                achieveLeaves(node.getChildren(), aLeaves);
+            }
         }
     }
 
-    public void setPreferredWidth2LeafColGroups(List<GridColumnsGroup> aGroups, int oldWidth, int newWidth) {
-        float fW = (float) (newWidth - oldWidth) / (float) aGroups.size();
-        int totalWidth = 0;
-        for (int i = 0; i < aGroups.size(); i++) {
-            GridColumnsGroup colGroup = aGroups.get(i);
-            assert colGroup.getChildren().isEmpty() : "setPreferredWidth2LeafColGroups is intended only for leaf column groups.";
-            assert colGroup.getTableColumn() != null : "Leaf column group without a table column found.";
-            int dW = Math.round(fW);
-            int newChildWidth = colGroup.getWidth() + dW;
-            totalWidth += newChildWidth;
-            if (i == aGroups.size() - 1 && totalWidth != newWidth) {
-                newChildWidth += newWidth - totalWidth;
-            }
-            colGroup.setWidth(newChildWidth);
-            //colGroup.getTableColumn().setPreferredWidth(newChildWidth);
+    public void checkStructure() {
+        List<GridColumnsNode> leaves = new ArrayList<>();
+        MultiLevelHeader.achieveLeaves(roots, leaves);
+        assert leaves.size() == columnModel.getColumnCount();
+        for (int i = 0; i < leaves.size(); i++) {
+            assert leaves.get(i).getTableColumn() == columnModel.getColumn(i);
         }
     }
 
@@ -384,11 +361,11 @@ public class MultiLevelHeader extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        if (g instanceof Graphics2D) {
+        if (isOpaque() && g instanceof Graphics2D) {
             Graphics2D g2d = (Graphics2D) g;
             Color backColor = getBackground();
-            Color ltBackColor = CascadedStyle.brighterColor(backColor, 0.95);
-            Color dkBackColor = CascadedStyle.darkerColor(backColor, 0.95);
+            Color ltBackColor = ScriptColor.brighter(backColor, 0.95);
+            Color dkBackColor = ScriptColor.darker(backColor, 0.95);
             Dimension size = getSize();
             Paint gradient1 = new GradientPaint(new Point2D.Float(0, 0), ltBackColor, new Point2D.Float(0, size.height / 2), backColor);
             Paint gradient2 = new GradientPaint(new Point2D.Float(0, size.height / 2 + 1), dkBackColor, new Point2D.Float(0, size.height), backColor);

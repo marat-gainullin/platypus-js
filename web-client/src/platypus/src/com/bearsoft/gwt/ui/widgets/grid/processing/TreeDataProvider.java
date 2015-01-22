@@ -85,8 +85,8 @@ public class TreeDataProvider<T> extends ListDataProvider<T> implements IndexOfP
 		onResize = aOnResize;
 		tree = aTreedModel;
 		childrenFetcher = aChildrenFetcher;
-		getList().addAll(tree.getChildrenOf(null));// Let's fill with forest
-		                                           // roots.
+		// Let's fill with roots forest
+		getList().addAll(tree.getChildrenOf(null));
 		tree.addChangesHandler(new Tree.ChangeHandler<T>() {
 
 			@Override

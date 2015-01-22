@@ -4,8 +4,11 @@
  */
 package com.bearsoft.org.netbeans.modules.form.bound;
 
+import com.bearsoft.org.netbeans.modules.form.RADProperty;
 import com.bearsoft.org.netbeans.modules.form.RADVisualComponent;
-import com.eas.dbcontrols.DbControlPanel;
+import com.eas.client.forms.components.model.ModelComponentDecorator;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * @author mg
@@ -14,11 +17,22 @@ import com.eas.dbcontrols.DbControlPanel;
  * visual component.
  * @see RADModelMapLayer
  */
-public class RADModelScalarComponent<M extends DbControlPanel> extends RADVisualComponent<M> {
-    public interface ValueHostListener extends ModelControlListener {
+public class RADModelScalarComponent<M extends ModelComponentDecorator> extends RADVisualComponent<M> {
 
-        public Object onSelect(Object aField);
-
-        public Object onRender(Object evt);
+    public RADModelScalarComponent() {
+        super();
     }
+
+    @Override
+    protected RADProperty<?> createCheckedBeanProperty(PropertyDescriptor desc) throws InvocationTargetException, IllegalAccessException {
+        switch (desc.getName()) {
+            case "field":
+                return new EntityJSObjectFieldProperty(this, desc, "cursor.");
+            case "displayField":// only ModelCombo case
+                return new EntityJSObjectFieldProperty(this, desc, "");
+            default:
+                return super.createCheckedBeanProperty(desc);
+        }
+    }
+
 }

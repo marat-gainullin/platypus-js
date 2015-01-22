@@ -7,7 +7,7 @@ package com.eas.designer.application.query.result;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.eas.dbcontrols.DbControlPanel;
+import com.eas.client.forms.components.rt.HasValue;
 import com.eas.designer.application.query.editing.SqlTextEditsComplementor;
 import com.eas.designer.application.query.lexer.SqlLanguageHierarchy;
 import com.eas.designer.application.query.result.QueryResultsView.PageSizeItem;
@@ -171,7 +171,7 @@ public class QuerySetupView extends javax.swing.JPanel {
     public Parameters acceptParametersValues() {
         parametersGrid.getControls().entrySet().stream().forEach((cEntry) -> {
             try {
-                ((Parameter)cEntry.getKey()).setValue(((DbControlPanel)cEntry.getValue()).getValue());
+                ((Parameter)cEntry.getKey()).setValue(((HasValue)cEntry.getValue()).getValue());
             } catch (Exception ex) {
                 Exceptions.printStackTrace(ex);
             }

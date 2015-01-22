@@ -6,15 +6,12 @@ package com.eas.designer.application.query.result;
 
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
-import com.eas.client.model.application.ApplicationDbModel;
-import com.eas.dbcontrols.DbControlDesignInfo;
-import com.eas.dbcontrols.DbControlPanel;
-import com.eas.dbcontrols.DbControlsUtils;
-import com.eas.dbcontrols.ScalarDbControl;
-import com.eas.dbcontrols.check.DbCheck;
-import com.eas.dbcontrols.date.DbDate;
-import com.eas.dbcontrols.date.DbDateDesignInfo;
-import com.eas.dbcontrols.visitors.DbSwingFactory;
+import com.eas.client.forms.Forms;
+import com.eas.client.forms.components.model.ModelCheckBox;
+import com.eas.client.forms.components.model.ModelDate;
+import com.eas.client.forms.components.model.ModelWidget;
+import com.eas.client.forms.components.rt.HasEditable;
+import com.eas.client.forms.components.rt.HasValue;
 import java.awt.Component;
 import java.util.ArrayList;
 import java.util.EventObject;
@@ -23,9 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
+import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.event.CellEditorListener;
@@ -49,13 +44,12 @@ public class ParametersGrid extends JTable {
     protected Parameters params;
     protected String labelTitle = "Characteristic";
     protected String valueTitle = "Value";
-    protected Map<Parameter, ScalarDbControl> controls = new HashMap<>();
-    protected List<ScalarDbControl> controlsList = new ArrayList<>();
+    protected Map<Parameter, ModelWidget> controls = new HashMap<>();
+    protected List<ModelWidget> controlsList = new ArrayList<>();
     protected Set<String> hidingFields = new HashSet<>();
     protected boolean filterPrimaryKeys;
     protected boolean filterForeignKeys;
     protected boolean editable = true;
-    protected String booleanFieldsMask;
 
     public boolean isFilterForeignKeys() {
         return filterForeignKeys;
@@ -73,22 +67,14 @@ public class ParametersGrid extends JTable {
         filterPrimaryKeys = aValue;
     }
 
-    public String getBooleanFieldsMask() {
-        return booleanFieldsMask;
-    }
-
-    public void setBooleanFieldsMask(String aValue) {
-        booleanFieldsMask = aValue;
-    }
-
     public boolean isEditable() {
         return editable;
     }
 
     public void setEditable(boolean aValue) {
         editable = aValue;
-        controls.values().stream().filter((control) -> (control instanceof DbControlPanel)).forEach((control) -> {
-            ((DbControlPanel) control).setEditable(aValue);
+        controls.values().stream().filter((control) -> (control instanceof HasEditable)).forEach((control) -> {
+            ((HasEditable) control).setEditable(aValue);
         });
     }
 
@@ -193,7 +179,7 @@ public class ParametersGrid extends JTable {
         public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
             assert table == ParametersGrid.this;
             if (row >= 0 && row < controlsList.size()) {
-                ScalarDbControl control = controlsList.get(row);
+                ModelWidget control = controlsList.get(row);
                 assert control instanceof Component;
                 return (Component) control;
             }
@@ -245,8 +231,8 @@ public class ParametersGrid extends JTable {
 
     public ParametersGrid() {
         super();
-        labelTitle = DbControlsUtils.getLocalizedString(labelTitle);
-        valueTitle = DbControlsUtils.getLocalizedString(valueTitle);
+        labelTitle = Forms.getLocalizedString(labelTitle);
+        valueTitle = Forms.getLocalizedString(valueTitle);
         setModel(new EntityFieldsModel());
         setAutoResizeMode(AUTO_RESIZE_LAST_COLUMN);
         TableColumn tc = getColumnModel().getColumn(VALUE_COLUMN_INDEX);
@@ -315,7 +301,7 @@ public class ParametersGrid extends JTable {
         }
     }
 
-    public Map<Parameter, ScalarDbControl> getControls() {
+    public Map<Parameter, ModelWidget> getControls() {
         return controls;
     }
 
@@ -323,64 +309,32 @@ public class ParametersGrid extends JTable {
         assert params != null;
         cleanup();
         // fill in the controls
-        // TODO: Hack of DbControlPanel. Remove after widgets refactoring
-        ApplicationDbModel fakeModel = new ApplicationDbModel(null);
         int cCount = params.getFieldsCount();
         for (int i = 0; i < cCount; i++) {
             Parameter param = params.get(i + 1);
-            Class<?>[] compatibleControlsClasses = DbControlsUtils.getCompatibleControls(param.getTypeInfo().getSqlType());
-            if (compatibleControlsClasses != null && compatibleControlsClasses.length > 0) {
-                Class<?> lControlClass = compatibleControlsClasses[0];
-                if (booleanFieldsMask != null && Pattern.matches(booleanFieldsMask, param.getName())) {
-                    lControlClass = DbCheck.class;
-                }
-                if (lControlClass != null) {
-                    Class<?> infoClass = DbControlsUtils.getDesignInfoClass(lControlClass);
-                    if (infoClass != null) {
-                        Logger.getLogger(ParametersGrid.class.getName()).log(Level.FINEST, "Creating control for parameter {0} of type {1} with control class {2}", new Object[]{param.getName(), param.getTypeInfo().getSqlTypeName(), lControlClass.getName()});
-                        DbControlDesignInfo cdi = (DbControlDesignInfo) infoClass.newInstance();
-                        if (cdi instanceof DbDateDesignInfo) {
-                            DbDateDesignInfo dateDesignInfo = (DbDateDesignInfo) cdi;
-                            if (param.getTypeInfo().getSqlType() == java.sql.Types.TIMESTAMP) {
-                                dateDesignInfo.setDateFormat(DbDate.DD_MM_YYYY_HH_MM_SS);
-                            } else if (param.getTypeInfo().getSqlType() == java.sql.Types.TIME) {
-                                dateDesignInfo.setDateFormat(DbDate.HH_MM_SS);
-                            }
-                        }
-                        DbSwingFactory factory = new DbSwingFactory(null);
-                        cdi.accept(factory);
-                        assert factory.getComp() instanceof ScalarDbControl;
-                        ScalarDbControl control = (ScalarDbControl) factory.getComp();
-                        control.setModel(fakeModel);
-                        control.setStandalone(true);
-                        control.configure();
-                        control.setBorderless(true);
-
-                        if (control instanceof DbControlPanel) {
-                            ((DbControlPanel) control).setBorder(null);
-                            ((DbControlPanel) control).setEditable(editable);
-                            ((DbControlPanel) control).setName(param.getName());
-                            if (control instanceof DbCheck) {
-                                ((DbControlPanel) control).setAlign(SwingConstants.CENTER);
-                            }
-                            ((DbControlPanel) control).setValue(param.getValue());
-                        }
-                        controls.put(param, control);
-                        controlsList.add(control);
-                    }
-                }
+            ModelWidget widget = Forms.chooseWidgetByType(param.getTypeInfo());
+            if (param.getTypeInfo().getSqlType() == java.sql.Types.TIMESTAMP) {
+                ((ModelDate) widget).setDateFormat("dd.MM.yyyy HH:mm:ss");
+            } else if (param.getTypeInfo().getSqlType() == java.sql.Types.TIME) {
+                ((ModelDate) widget).setDateFormat("HH:mm:ss");
             }
+            ((JComponent) widget).setBorder(null);
+            if (widget instanceof HasEditable) {
+                ((HasEditable) widget).setEditable(editable);
+            }
+            ((JComponent) widget).setName(param.getName());
+            if (widget instanceof ModelCheckBox) {
+                ((ModelCheckBox) widget).setAlign(SwingConstants.CENTER);
+            }
+            ((HasValue) widget).setValue(param.getValue());
+            controls.put(param, widget);
+            controlsList.add(widget);
         }
         // notify all of change
         ((EntityFieldsModel) getModel()).fireDataChanged();
     }
 
     protected void cleanup() throws Exception {
-        // cleanup
-        for (ScalarDbControl control : controls.values()) {
-            control.setModel(null);
-            control.cleanup();
-        }
         controls.clear();
         controlsList.clear();
     }

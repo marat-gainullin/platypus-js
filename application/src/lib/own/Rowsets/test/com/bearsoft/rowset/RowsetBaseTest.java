@@ -4,7 +4,8 @@
  */
 package com.bearsoft.rowset;
 
-import com.bearsoft.rowset.events.RowChangeEvent;
+import com.bearsoft.rowset.dataflow.FlowBaseTest.JdbcFlowProviderAdapter;
+import com.bearsoft.rowset.dataflow.FlowBaseTest.ObservingResourcesProvider;
 import com.bearsoft.rowset.events.RowsetDeleteEvent;
 import com.bearsoft.rowset.events.RowsetFilterEvent;
 import com.bearsoft.rowset.events.RowsetInsertEvent;
@@ -24,6 +25,7 @@ import com.bearsoft.rowset.metadata.Fields;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
+import javax.sql.DataSource;
 import javax.sql.rowset.serial.SerialBlob;
 import static org.junit.Assert.*;
 import org.junit.BeforeClass;
@@ -67,7 +69,7 @@ public class RowsetBaseTest {
 
     protected void checkRowsetCorrespondToTestData(Rowset rowset) throws InvalidColIndexException, InvalidCursorPositionException {
         for (int i = 1; i <= rowset.size(); i++) {
-            rowset.absolute(i);
+            rowset.setCursorPos(i);
             for (int colIndex = 1; colIndex <= rowset.getFields().getFieldsCount(); colIndex++) {
                 Object tstData = testData[i - 1][colIndex - 1];
                 // check of converter work
@@ -81,7 +83,7 @@ public class RowsetBaseTest {
                     }
                 }
                 //
-                assertEquals(rowset.getObject(colIndex), tstData);
+                assertEquals(rowset.getCurrentRow().getColumnObject(colIndex), tstData);
             }
         }
     }
@@ -89,12 +91,12 @@ public class RowsetBaseTest {
     protected void fillInRowset(Rowset rowset) throws InvalidCursorPositionException, InvalidColIndexException, RowsetException {
         for (int i = 0; i < testData.length; i++) {
             int oldSize = rowset.size();
-            rowset.insert();
+            rowset.insert(new Row(rowset.getFlowProvider().getEntityId(), rowset.getFields()), false);
             if (oldSize < rowset.size()) {
                 assertTrue(rowset.getRow(rowset.getCursorPos()) == rowset.getCurrentRow());
                 assertTrue(rowset.getCurrentRow().isInserted());
                 for (int colIndex = 0; colIndex < fields.getFieldsCount(); colIndex++) {
-                    rowset.updateObject(colIndex + 1, testData[i][colIndex]);
+                    rowset.getCurrentRow().setColumnObject(colIndex + 1, testData[i][colIndex]);
                 }
             }
         }
@@ -145,6 +147,8 @@ public class RowsetBaseTest {
 
     protected Rowset initRowset() throws InvalidCursorPositionException, InvalidColIndexException, RowsetException {
         Rowset rowset = new Rowset(fields);
+        DataSource ds = new ObservingResourcesProvider("", null, 0, 0, 0);
+        rowset.setFlowProvider(new JdbcFlowProviderAdapter("test-source", ds, new RowsetConverter(), "test-clause"));
         // initial filling tests
         assertTrue(rowset.isEmpty());
         fillInRowset(rowset);
@@ -155,6 +159,7 @@ public class RowsetBaseTest {
         assertFalse(rowset.isEmpty());
         rowset.currentToOriginal();
         assertFalse(rowset.isEmpty());
+        checkRowsetCorrespondToTestData(rowset);
         return rowset;
     }
 
@@ -168,7 +173,6 @@ public class RowsetBaseTest {
         public boolean allowSort = true;
         public boolean allowDelete = true;
         public boolean allowInsert = true;
-        public boolean allowChange = true;
         public boolean allowFilter = true;
         public boolean allowRequery = true;
         public boolean allowPaging = true;
@@ -229,12 +233,6 @@ public class RowsetBaseTest {
         }
 
         @Override
-        public boolean willChangeRow(RowChangeEvent event) {
-            ++willChange;
-            return allowChange;
-        }
-
-        @Override
         public boolean willDeleteRow(RowsetDeleteEvent event) {
             ++willDelete;
             return allowDelete;
@@ -277,10 +275,12 @@ public class RowsetBaseTest {
             ++inserted;
         }
 
+        /*
         @Override
         public void rowChanged(RowChangeEvent event) {
             ++changed;
         }
+        */
 
         @Override
         public void rowDeleted(RowsetDeleteEvent event) {
@@ -294,10 +294,12 @@ public class RowsetBaseTest {
 
         @Override
         public void beforeRequery(RowsetRequeryEvent event) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
 
         @Override
         public void rowsetNetError(RowsetNetErrorEvent event) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
     }
 }

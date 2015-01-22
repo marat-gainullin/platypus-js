@@ -51,6 +51,7 @@ import com.bearsoft.org.netbeans.modules.form.FormProperty;
  * of the layout support extensions - alongside LayoutSupportDelegate, which
  * takes care about container layout as a whole.
  *
+ * @param <T>
  * @see LayoutSupportDelegate
  *
  * @author Tomas Pavek

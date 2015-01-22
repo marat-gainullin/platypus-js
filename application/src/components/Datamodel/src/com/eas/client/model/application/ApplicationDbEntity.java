@@ -9,6 +9,7 @@ import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.changes.Command;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
+import com.bearsoft.rowset.ordering.Locator;
 import com.eas.client.DatabaseMdCache;
 import com.eas.client.SQLUtils;
 import com.eas.client.SqlCompiledQuery;
@@ -174,8 +175,9 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
         Rowset oldRowset = rowset;
         if (rowset != null) {
             rowset.removeRowsetListener(this);
-            unforwardChangeLog();
+            rowset.setLog(null);
             rowset = null;
+            locator = null;
         }
         if (query != null) {
             SqlCompiledQuery compiled = query.compile();
@@ -188,8 +190,10 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
                     resolver.resolve2Application(field);
                 });
             }
-            forwardChangeLog();
+            rowset.setLog(getChangeLog());
             rowset.addRowsetListener(this);
+            locator = new Locator();
+            locator.setRowset(rowset);
             changeSupport.firePropertyChange("rowset", oldRowset, rowset);
         }
     }

@@ -3,7 +3,6 @@ package com.eas.client.form;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.bearsoft.rowset.events.RowChangeEvent;
 import com.bearsoft.rowset.events.RowsetAdapter;
 import com.bearsoft.rowset.events.RowsetDeleteEvent;
 import com.bearsoft.rowset.events.RowsetEvent;
@@ -76,11 +75,6 @@ public class CrossUpdater extends RowsetAdapter {
 	public void rowInserted(RowsetInsertEvent event) {
 		if (!event.isAjusting())
 			onChange.onSuccess(event);
-	}
-
-	@Override
-	public void rowChanged(RowChangeEvent event) {
-		onChange.onSuccess(event);
 	}
 
 	@Override

@@ -9,8 +9,6 @@
  */
 package com.bearsoft.rowset.metadata;
 
-import com.bearsoft.rowset.utils.CollectionEditingSupport;
-import com.eas.client.model.Entity;
 import com.google.gwt.core.client.JavaScriptObject;
 
 import java.util.*;
@@ -23,13 +21,15 @@ import java.util.*;
 public class Fields {
 
 	private static final String DEFAULT_PARAM_NAME_PREFIX = "Field";
-	protected String tableDescription = null;
+	protected String tableDescription;
 	protected List<Field> fields = new ArrayList<>();
-	protected Entity owner;
 	// Map of field name to it's index (0-based)
 	protected Map<String, Integer> fieldsHash;
-	protected CollectionEditingSupport<Fields, Field> collectionSupport = new CollectionEditingSupport<>(this);
-
+	//
+    protected JavaScriptObject instanceConstructor;
+    protected Map<String, JavaScriptObject> ormDefinitions = new HashMap<>();
+    protected Map<String, Collection<String>> ormExpandings = new HashMap<>();
+    
 	/**
 	 * The default constructor.
 	 */
@@ -64,17 +64,40 @@ public class Fields {
 		}
 	}
 
-	public Entity getOwner() {
-		return owner;
-	}
+    public JavaScriptObject getInstanceConstructor() {
+        return instanceConstructor;
+    }
 
-	public void setOwner(Entity aOwner) {
-		owner = aOwner;
-	}
+    public void setInstanceConstructor(JavaScriptObject aValue) {
+        instanceConstructor = aValue;
+    }
 
-	public CollectionEditingSupport<Fields, Field> getCollectionSupport() {
-		return collectionSupport;
-	}
+    public void addOrmScalarExpanding(String aBaseName, String aName) {
+        if (aName != null && !aName.isEmpty() && aBaseName != null && !aBaseName.isEmpty()) {
+            Collection<String> expandings = ormExpandings.get(aBaseName);
+            if (expandings == null) {
+                expandings = new HashSet<>();
+                ormExpandings.put(aBaseName, expandings);
+            }
+            expandings.add(aName);
+        }
+    }
+
+    public void putOrmDefinition(String aName, JavaScriptObject aDefinition) {
+        if (aName != null && !aName.isEmpty() && aDefinition != null) {
+            if (!ormDefinitions.containsKey(aName)) {
+                ormDefinitions.put(aName, aDefinition);
+            }
+        }
+    }
+
+    public Map<String, JavaScriptObject> getOrmDefinitions() {
+        return Collections.unmodifiableMap(ormDefinitions);
+    }
+
+    public Map<String, Collection<String>> getOrmExpandings() {
+        return ormExpandings;
+    }
 
 	/**
 	 * Rebuild hashmap with fields by name mapping.
@@ -267,11 +290,8 @@ public class Fields {
 	 */
 	public void clear() {
 		if (fields != null) {
-			Collection<Field> oldCollection = fields.subList(0, fields.size());
 			fields.clear();
 			invalidateFieldsHash();
-			collectionSupport.fireElementsRemoved(oldCollection);
-			collectionSupport.fireCleared();
 		}
 	}
 
@@ -335,7 +355,6 @@ public class Fields {
 			boolean res = fields.add(aField);
 			aField.setOwner(this);
 			invalidateFieldsHash();
-			collectionSupport.fireElementAdded(aField);
 			return res;
 		}
 		return false;
@@ -355,7 +374,6 @@ public class Fields {
 			fields.add(index - 1, aField);
 			aField.setOwner(this);
 			invalidateFieldsHash();
-			collectionSupport.fireElementAdded(aField);
 		}
 	}
 
@@ -371,7 +389,6 @@ public class Fields {
 		int oldSize = fields.size();
 		fields.remove(aField);
 		invalidateFieldsHash();
-		collectionSupport.fireElementRemoved(aField);
 		return oldSize > fields.size();
 	}
 
@@ -469,4 +486,44 @@ public class Fields {
 	public JavaScriptObject getPublished() {
 		return jsPublished;
 	}
+	
+	public static native JavaScriptObject publishFacade(Fields aFields) throws Exception/*-{
+		if(aFields != null){
+			var published = aFields.@com.bearsoft.rowset.metadata.Fields::getPublished()();
+			if(published == null){
+				published = {
+					getFieldsCount : function() {
+						return aFields.@com.bearsoft.rowset.metadata.Fields::getFieldsCount()();
+					},
+					isEmpty : function() {
+						return aFields.@com.bearsoft.rowset.metadata.Fields::isEmpty()();
+					},
+					get : function(aFieldIndex) {
+						return @com.bearsoft.rowset.metadata.Field::publishFacade(Lcom/bearsoft/rowset/metadata/Field;)(aFields.@com.bearsoft.rowset.metadata.Fields::get(I)(aFieldIndex));
+					},
+					getTableDescription : function() {
+						return aFields.@com.bearsoft.rowset.metadata.Fields::getTableDescription()();
+					},
+					unwrap : function(){
+						return aFields;
+					}
+				};
+				
+				Object.defineProperty(published, "empty", { get : function(){ return published.isEmpty()}});
+				Object.defineProperty(published, "tableDescription", { get : function(){ return published.getTableDescription()}});
+				var fieldsCount = published.getFieldsCount();
+				
+				for(var i = 0; i < fieldsCount; i++){
+					(function(){
+						var _i = i;
+						Object.defineProperty(published, (_i+""), { get : function(){ return published.get(_i+1) }});
+						Object.defineProperty(published, published.get(_i+1).name, { get : function(){ return published.get(_i+1) }});
+					})();
+				}
+				aFields.@com.bearsoft.rowset.metadata.Fields::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+			}
+			return published;
+		}else
+			return null;
+	}-*/;
 }

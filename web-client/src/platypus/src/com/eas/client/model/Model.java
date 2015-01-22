@@ -34,6 +34,8 @@ import com.eas.client.form.published.HasPublished;
 import com.eas.client.model.js.JsModel;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 
 /**
  * @author mg
@@ -51,7 +53,7 @@ public class Model implements HasPublished {
 	protected JavaScriptObject jsPublished;
 
 	public static class RequeryProcess {
-        public Collection<Entity> entities;
+		public Collection<Entity> entities;
 		public Map<Entity, String> errors = new HashMap<Entity, String>();
 		public Callback<Rowset, String> callback;
 
@@ -59,7 +61,7 @@ public class Model implements HasPublished {
 			super();
 			entities = aEntities;
 			callback = aCallback;
-            assert callback != null : "aCallback argument is required.";
+			assert callback != null : "aCallback argument is required.";
 		}
 
 		protected String assembleErrors() {
@@ -79,7 +81,7 @@ public class Model implements HasPublished {
 			callback.onFailure("Canceled");
 		}
 
-		public void success(){
+		public void success() {
 			callback.onSuccess(null);
 		}
 
@@ -88,9 +90,9 @@ public class Model implements HasPublished {
 		}
 
 		public void end() {
-			if (errors.isEmpty()){
+			if (errors.isEmpty()) {
 				success();
-			}else{
+			} else {
 				failure();
 			}
 		}
@@ -289,7 +291,6 @@ public class Model implements HasPublished {
 		validateQueries();
 		for (Entity entity : entities.values()) {
 			JavaScriptObject publishedEntity = JsModel.publish(entity);
-			Entity.publishRows(publishedEntity);
 			if (entity.getName() != null && !entity.getName().isEmpty()) {
 				jsPublished.<JsObject> cast().inject(entity.getName(), publishedEntity);
 			}
@@ -330,7 +331,9 @@ public class Model implements HasPublished {
 					_self.enumerable = true;
 					_self.configurable = false;
 					_self.get = function() {
-						var found = targetEntity.find(targetEntity.schema[targetFieldName], this[sourceFieldName]);
+						var criteria = {};
+						criteria[targetFieldName] = this[sourceFieldName];
+						var found = targetEntity.find(criteria);
 						return found.length == 0 ? null : (found.length == 1 ? found[0] : found);
 					};
 					_self.set = function(aValue) {
@@ -342,7 +345,9 @@ public class Model implements HasPublished {
 					_self.enumerable = true;
 					_self.configurable = false;
 					_self.get = function() {
-						var res = sourceEntity.find(sourceEntity.schema[sourceFieldName], this[targetFieldName]);
+						var criteria = {};
+						criteria[sourceFieldName] = this[targetFieldName];
+						var res = sourceEntity.find(criteria);
 						if (res && res.length > 0) {
 							return res;
 						} else {
@@ -456,7 +461,7 @@ public class Model implements HasPublished {
 	}
 
 	public Entity getEntityById(String aId) {
-			return entities.get(aId);
+		return entities.get(aId);
 	}
 
 	public void setEntities(Map<String, Entity> aValue) {
@@ -471,23 +476,24 @@ public class Model implements HasPublished {
 		relations = aRelations;
 	}
 
-    public void executeEntities(boolean refresh, Set<Entity> toExecute) throws Exception {
-        if (refresh) {
-            for(Entity entity : toExecute) {
-                entity.invalidate();
-            };
-        }
-        for (Entity entity : toExecute) {
-            if (!entity.getQuery().isManual()) {
-                entity.internalExecute(null);
-            }
-        }
-    }
+	public void executeEntities(boolean refresh, Set<Entity> toExecute) throws Exception {
+		if (refresh) {
+			for (Entity entity : toExecute) {
+				entity.invalidate();
+			}
+			;
+		}
+		for (Entity entity : toExecute) {
+			if (!entity.getQuery().isManual()) {
+				entity.internalExecute(null);
+			}
+		}
+	}
 
 	private Set<Entity> rootEntities() {
 		final Set<Entity> rootEntities = new HashSet<>();
 		for (Entity entity : entities.values()) {
-			if(entity.getInRelations().isEmpty())
+			if (entity.getInRelations().isEmpty())
 				rootEntities.add(entity);
 		}
 		return rootEntities;
@@ -553,22 +559,33 @@ public class Model implements HasPublished {
 		return false;
 	}
 
-	public Cancellable save(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
-		return client.requestCommit(changeLog, new CallbackAdapter<Void, String>() {
-
+	public void save(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) {
+		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+			// Scheduling is needed because of asynchronous nature of Object.observe's callback calling process.
 			@Override
-			protected void doWork(Void aVoid) throws Exception {
-				commited();
-				if (onSuccess != null)
-					Utils.invokeJsFunction(onSuccess);
-			}
-
-			@Override
-			public void onFailure(String aReason) {
+			public void execute() {
 				try {
-					rolledback();
-					if (onFailure != null)
-						Utils.executeScriptEventVoid(jsPublished, onFailure, aReason);
+					client.requestCommit(changeLog, new CallbackAdapter<Void, String>() {
+
+						@Override
+						protected void doWork(Void aVoid) throws Exception {
+							commited();
+							if (onSuccess != null)
+								Utils.invokeJsFunction(onSuccess);
+						}
+
+						@Override
+						public void onFailure(String aReason) {
+							try {
+								rolledback();
+								if (onFailure != null)
+									Utils.executeScriptEventVoid(jsPublished, onFailure, aReason);
+							} catch (Exception ex) {
+								Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
+							}
+						}
+
+					});
 				} catch (Exception ex) {
 					Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
 				}
@@ -631,19 +648,19 @@ public class Model implements HasPublished {
 	}
 
 	public void requery(Callback<Rowset, String> aCallback) throws Exception {
-        changeLog.clear();
-        if (process != null) {
-            process.cancel();
-        }
-        if (aCallback != null) {
-            process = new RequeryProcess(entities.values(), aCallback);
-        }
-        revert();
-        executeEntities(true, rootEntities());
-        if (!isPending() && process != null) {
-            process.end();
-            process = null;
-        }
+		changeLog.clear();
+		if (process != null) {
+			process.cancel();
+		}
+		if (aCallback != null) {
+			process = new RequeryProcess(entities.values(), aCallback);
+		}
+		revert();
+		executeEntities(true, rootEntities());
+		if (!isPending() && process != null) {
+			process.end();
+			process = null;
+		}
 	}
 
 	public void execute(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
@@ -668,17 +685,17 @@ public class Model implements HasPublished {
 	}
 
 	public void execute(Callback<Rowset, String> aCallback) throws Exception {
-        if (process != null) {
-            process.cancel();
-        }
-        if (aCallback != null) {
-            process = new RequeryProcess(entities.values(), aCallback);
-        }
-        executeEntities(false, rootEntities());
-        if (!isPending() && process != null) {
-            process.end();
-            process = null;
-        }
+		if (process != null) {
+			process.cancel();
+		}
+		if (aCallback != null) {
+			process = new RequeryProcess(entities.values(), aCallback);
+		}
+		executeEntities(false, rootEntities());
+		if (!isPending() && process != null) {
+			process.end();
+			process = null;
+		}
 	}
 
 	public void validateQueries() throws Exception {

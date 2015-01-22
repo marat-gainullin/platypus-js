@@ -5,7 +5,7 @@
 package com.bearsoft.org.netbeans.modules.form.bound;
 
 import com.bearsoft.org.netbeans.modules.form.RADProperty;
-import com.eas.dbcontrols.DbControlPanel;
+import com.eas.client.forms.components.model.ModelComponentDecorator;
 import java.beans.PropertyDescriptor;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -15,7 +15,7 @@ import java.util.Set;
  *
  * @author mg
  */
-public class RADColumnView<M extends DbControlPanel> extends RADModelScalarComponent<M> {
+public class RADColumnView<M extends ModelComponentDecorator> extends RADModelScalarComponent<M> {
 
     protected static Set<String> hiddenProps = new HashSet<>(Arrays.asList(new String[]{
         "visible",
@@ -25,8 +25,8 @@ public class RADColumnView<M extends DbControlPanel> extends RADModelScalarCompo
         "toolTipText",
         "text",
         "selected",
-        "model",
-        "datamodelElement",
+        "field",
+        "data",
         "componentPopupMenu",
         "cursor",
         "editable",
@@ -34,19 +34,25 @@ public class RADColumnView<M extends DbControlPanel> extends RADModelScalarCompo
         "focusable",
         "font",
         "icon",
+        "left",
+        "top",
+        "width",
+        "height",
+        "error",
         "nextFocusableComponent",
         "opaque"
     }));
     
     public RADColumnView() {
         super();
+        setInModel(false);
         setStoredName("view");
     }
 
     @Override
-    protected RADProperty createBeanProperty(PropertyDescriptor desc, Object[] propAccessClsf, Object[] propParentChildDepClsf) {
+    protected RADProperty createBeanProperty(PropertyDescriptor desc) {
         if (!hiddenProps.contains(desc.getName())) {
-            return super.createBeanProperty(desc, propAccessClsf, propParentChildDepClsf);
+            return super.createBeanProperty(desc);
         } else {
             return null;
         }

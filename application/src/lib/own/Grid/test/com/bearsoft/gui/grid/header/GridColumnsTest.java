@@ -2,11 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.bearsoft.gui.grid.header;
 
-import com.eas.gui.CascadedStyle;
+import com.eas.gui.FontStyle;
 import java.awt.Color;
+import java.awt.Font;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -17,11 +17,10 @@ import static org.junit.Assert.*;
 public class GridColumnsTest {
 
     @Test
-    public void equalsAssignTest()
-    {
-        GridColumnsGroup col = new GridColumnsGroup();
-        GridColumnsGroup col1 = new GridColumnsGroup();
-        GridColumnsGroup childCol = new GridColumnsGroup();
+    public void equalsAssignTest() throws Exception {
+        GridColumnsNode col = new GridColumnsNode();
+        GridColumnsNode col1 = new GridColumnsNode();
+        GridColumnsNode childCol = new GridColumnsNode();
 
         assertTrue(col.isEqual(col1));
 
@@ -35,22 +34,12 @@ public class GridColumnsTest {
         col.assign(col1);
         assertTrue(col.isEqual(col1));
 
-        col.setEditable(!col.isEditable());
+        col.setReadonly(col.isReadonly());
         assertFalse(col.isEqual(col1));
         col.assign(col1);
         assertTrue(col.isEqual(col1));
 
         col.setEnabled(!col.isEnabled());
-        assertFalse(col.isEqual(col1));
-        col.assign(col1);
-        assertTrue(col.isEqual(col1));
-
-        col.setName("some name");
-        assertFalse(col.isEqual(col1));
-        col.assign(col1);
-        assertTrue(col.isEqual(col1));
-
-        col.setPlain(!col.isPlain());
         assertFalse(col.isEqual(col1));
         col.assign(col1);
         assertTrue(col.isEqual(col1));
@@ -61,11 +50,6 @@ public class GridColumnsTest {
         assertTrue(col.isEqual(col1));
 
         col.setSelectOnly(!col.isSelectOnly());
-        assertFalse(col.isEqual(col1));
-        col.assign(col1);
-        assertTrue(col.isEqual(col1));
-
-        col.setSubstitute(!col.isSubstitute());
         assertFalse(col.isEqual(col1));
         col.assign(col1);
         assertTrue(col.isEqual(col1));
@@ -90,13 +74,22 @@ public class GridColumnsTest {
         col.assign(col1);
         assertTrue(col.isEqual(col1));
 
-        col.setStyle(new CascadedStyle());
-        col.getStyle().setBackground(Color.darkGray);
+        col.setBackground(Color.darkGray);
         assertFalse(col.isEqual(col1));
         col.assign(col1);
         assertTrue(col.isEqual(col1));
 
-        col.addChild(childCol);
+        col.setForeground(Color.cyan);
+        assertFalse(col.isEqual(col1));
+        col.assign(col1);
+        assertTrue(col.isEqual(col1));
+
+        col.setFont(new Font("Arial", FontStyle.ITALIC, 7));
+        assertFalse(col.isEqual(col1));
+        col.assign(col1);
+        assertTrue(col.isEqual(col1));
+
+        col.addColumnNode(childCol);
         assertFalse(col.isEqual(col1));
         col.assign(col1);
         assertTrue(col.isEqual(col1));

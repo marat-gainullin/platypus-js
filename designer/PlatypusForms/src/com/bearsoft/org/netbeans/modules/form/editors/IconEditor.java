@@ -43,37 +43,27 @@
  */
 package com.bearsoft.org.netbeans.modules.form.editors;
 
-import com.bearsoft.org.netbeans.modules.form.FormAwareEditor;
+import com.bearsoft.org.netbeans.modules.form.FormCookie;
 import com.bearsoft.org.netbeans.modules.form.FormModel;
 import com.bearsoft.org.netbeans.modules.form.FormProperty;
 import com.bearsoft.org.netbeans.modules.form.PlatypusFormDataObject;
-import com.eas.resources.images.IconCache;
-import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Image;
 import java.beans.*;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import org.openide.ErrorManager;
-import org.openide.explorer.ExplorerManager;
 import org.openide.explorer.propertysheet.ExPropertyEditor;
 import org.openide.explorer.propertysheet.PropertyEnv;
-import org.openide.explorer.view.ListView;
 import org.openide.filesystems.FileObject;
-import org.openide.filesystems.FileSystem;
-import org.openide.filesystems.FileUtil;
-import org.openide.filesystems.JarFileSystem;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
+import org.openide.nodes.PropertyEditorRegistration;
 
 /**
  * PropertyEditor for Icons. Depends on existing DataObject for images. Images
@@ -83,26 +73,22 @@ import org.openide.nodes.Node;
  *
  * @author Jan Jancura, Jan Stola, Tomas Pavek
  */
-public class IconEditor extends PropertyEditorSupport implements ExPropertyEditor, FormAwareEditor {
+@PropertyEditorRegistration(targetType = {javax.swing.Icon.class, java.awt.Image.class, javax.swing.ImageIcon.class})
+public class IconEditor extends PropertyEditorSupport implements ExPropertyEditor {
 
-    /** Type constant for icons from URL. */
+    /**
+     * Type constant for icons from URL.
+     */
     public static final int TYPE_URL = 1;
-    /** Type constant for icons from file. */
+    /**
+     * Type constant for icons from file.
+     */
     public static final int TYPE_FILE = 2;
-    
+
     public static final String RESOURCES_IMAGES_ANCHOR = "thumbs.cp";
     //
     private static String[] currentFiles;
-    private static Node rootNode;
-    private static FileObject currentFolder;
-    //
-    private PropertyEnv env;
     private PlatypusFormDataObject dataObject;
-
-    @Override
-    public void setContext(FormModel formModel, FormProperty<?> property) {
-        dataObject = formModel.getDataObject();
-    }
 
     protected static class ImageNode extends AbstractNode {
 
@@ -148,7 +134,7 @@ public class IconEditor extends PropertyEditorSupport implements ExPropertyEdito
         @Override
         protected Node[] createNodes(String key) {
             try {
-                return new Node[]{new ImageNode(getJarResourceFolder().getFileObject(key))};
+                return new Node[]{new ImageNode(getProjectSrcFolder().getFileObject(key))};
             } catch (Exception ex) {
                 return new Node[]{};
             }
@@ -157,8 +143,16 @@ public class IconEditor extends PropertyEditorSupport implements ExPropertyEdito
 
     @Override
     public void attachEnv(PropertyEnv aEnv) {
-        env = aEnv;
-        env.getFeatureDescriptor().setValue("canEditAsText", Boolean.TRUE); // NOI18N
+        aEnv.getFeatureDescriptor().setValue("canEditAsText", Boolean.TRUE); // NOI18N
+        Object bean = aEnv.getBeans()[0];
+        if (bean instanceof Node) {
+            Node node = (Node) bean;
+            FormCookie formCookie = node.getLookup().lookup(FormCookie.class);
+            if (formCookie != null && aEnv.getFeatureDescriptor() instanceof FormProperty<?>) {
+                dataObject = formCookie.getFormModel().getDataObject();
+                //(FormProperty<?>) aEnv.getFeatureDescriptor());
+            }
+        }
     }
 
     @Override
@@ -228,43 +222,24 @@ public class IconEditor extends PropertyEditorSupport implements ExPropertyEdito
         }
     }
 
-    /**
-     * Returns the "current folder" which is used to resolve short file names,
-     * its content is offered via getTags(), and it is also selected in the
-     * custom editor.
-     *
-     * @return the current folder used to pick image files from preferentially
-     */
-    public static FileObject getJarResourceFolder() throws Exception {
-        if (currentFolder == null) {
-            URL url = IconCache.getImageUrl(RESOURCES_IMAGES_ANCHOR);
-            FileSystem jfs = new JarFileSystem(FileUtil.archiveOrDirForURL(FileUtil.getArchiveFile(url)));
-            currentFolder = jfs.findResource("/" + IconCache.class.getPackage().getName().replace(".", "/"));
-        }
-        return currentFolder;
-    }
-
-    public static FileObject getProjectSrcFolder(PlatypusFormDataObject dataObject) throws Exception {
-        return dataObject.getProject().getSrcRoot();
-    }
-
     public FileObject getProjectSrcFolder() throws Exception {
         return dataObject.getProject().getSrcRoot();
     }
-    
-    private Node getCurrentRootNode() throws Exception {
-        if (rootNode == null) {
-            rootNode = new AbstractNode(new FileChildren());
-        }
-        return rootNode;
-    }
+    /*    
+     private Node getCurrentRootNode() throws Exception {
+     if (rootNode == null) {
+     rootNode = new AbstractNode(new FileChildren());
+     }
+     return rootNode;
+     }
+     */
 
     /**
      * @return names of files (without path) available in current folder
      */
     public String[] getCurrentFileNames() throws Exception {
         if (currentFiles == null) {
-            FileObject folder = getProjectSrcFolder(dataObject);
+            FileObject folder = getProjectSrcFolder();
             assert folder != null;
             List<String> list = new ArrayList<>();
             for (FileObject fo : folder.getChildren()) {
@@ -304,67 +279,48 @@ public class IconEditor extends PropertyEditorSupport implements ExPropertyEdito
     public static NbImageIcon iconFromResourceName(PlatypusFormDataObject dataObject, String resName) throws Exception {
         Matcher htppMatcher = pattern.matcher(resName);
         if (htppMatcher.matches()) {
-            return new NbImageIcon(TYPE_URL, resName, new ImageIcon(new URL(resName)));
+            return new NbImageIcon(dataObject, new URL(resName), TYPE_URL, resName);
         } else {
-            FileObject fo = getProjectSrcFolder(dataObject).getFileObject(resName);
-            fo = fo != null ? fo : getJarResourceFolder().getFileObject(resName);
+            FileObject fo = dataObject.getProject().getSrcRoot().getFileObject(resName);
             if (fo != null) {
-                try {
-                    try {
-                        Image image = ImageIO.read(fo.toURL());
-                        if (image != null) { // issue 157546
-                            return new NbImageIcon(TYPE_FILE, resName, new ImageIcon(image));
-                        }
-                    } catch (IllegalArgumentException iaex) { 
-                        Logger.getLogger(IconEditor.class.getName()).log(Level.INFO, null, iaex);
-                        return new NbImageIcon(TYPE_URL, resName, new ImageIcon(fo.toURL()));
-                    }
-                } catch (IOException ex) { // should not happen
-                    Logger.getLogger(IconEditor.class.getName()).log(Level.WARNING, null, ex);
-                }
+                return new NbImageIcon(dataObject, fo.toURL(), TYPE_FILE, resName);
             }
         }
         return null;
     }
 
-    public static class NbImageIcon {
+    public static class NbImageIcon extends ImageIcon {
 
-        private int type;
-        
+        private final int type;
+
         /**
          * Name of the icon in icon library.
          */
-        private String name;
-        /**
-         * The icon itself.
-         */
-        private Icon icon;
+        private final String name;
+        protected PlatypusFormDataObject dataObject;
 
-        public NbImageIcon(int aType, String aName, Icon aIcon) {
-            super();
+        public NbImageIcon(PlatypusFormDataObject aDataObject, URL aURL, int aType, String aName) {
+            super(aURL);
+            dataObject = aDataObject;
             type = aType;
             name = aName;
-            icon = aIcon;
         }
 
         public int getType() {
             return type;
         }
-        
+
         public String getName() {
             return name;
         }
 
-        public Icon getIcon() {
-            return icon;
+        @Override
+        public Image getImage() {
+            return super.getImage();
         }
 
-        public Image getImage() {
-            return icon instanceof ImageIcon ? ((ImageIcon)icon).getImage() : null;
-        }
-        
-        public NbImageIcon copy(FormProperty<?> formProperty) {
-            return new NbImageIcon(type, name, icon);
+        public NbImageIcon copy(FormProperty<?> formProperty) throws Exception {
+            return iconFromResourceName(dataObject, name);
         }
     }
 }

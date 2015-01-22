@@ -4,7 +4,7 @@
  */
 package com.bearsoft.gui.grid.header.cell;
 
-import com.bearsoft.gui.grid.header.GridColumnsGroup;
+import com.bearsoft.gui.grid.header.GridColumnsNode;
 import com.bearsoft.gui.grid.header.MultiLevelHeader;
 import java.awt.Color;
 import java.awt.Container;
@@ -44,13 +44,13 @@ public class CellHighlighter extends MouseAdapter {
         if (innerPressed) {
             cell.setBorder(pressedBorder);
         }
-        GridColumnsGroup pressedColGroup = cell.getHeader().getPressed4ResizeColGroup();
-        GridColumnsGroup movingColGroup = cell.getHeader().getMovingColGroup();
+        GridColumnsNode pressedColGroup = cell.getHeader().getPressed4ResizeColGroup();
+        GridColumnsNode movingColGroup = cell.getHeader().getMovingColGroup();
         if ((pressedColGroup == null && movingColGroup == null)
                 || (pressedColGroup == cell.getColGroup() || movingColGroup == cell.getColGroup())) {
             if (cell.getColGroup().isSortable()
-                    || cell.getColGroup().isMoveable()
-                    || cell.getColGroup().isResizeable()) {
+                    || cell.getColGroup().isMovable()
+                    || cell.getColGroup().isResizable()) {
                 originalBackground = cell.getBackground();
                 cell.setBackground(originalBackground.brighter());
                 cell.setRolledover(true);
@@ -62,8 +62,8 @@ public class CellHighlighter extends MouseAdapter {
 
     @Override
     public void mouseExited(MouseEvent e) {
-        GridColumnsGroup pressedColGroup = cell.getHeader().getPressed4ResizeColGroup();
-        GridColumnsGroup movingColGroup = cell.getHeader().getMovingColGroup();
+        GridColumnsNode pressedColGroup = cell.getHeader().getPressed4ResizeColGroup();
+        GridColumnsNode movingColGroup = cell.getHeader().getMovingColGroup();
         if (pressedColGroup == null && movingColGroup == null) {
             cell.setBorder(originalBorder);
             cell.setBackground(originalBackground);
@@ -78,7 +78,7 @@ public class CellHighlighter extends MouseAdapter {
         Dimension d = cell.getSize();
         if (e.getX() >= MultiLevelHeader.PICK_MARGIN_SIZE
                 && e.getX() < d.width - MultiLevelHeader.PICK_MARGIN_SIZE - 1) {
-            if (cell.getColGroup().isSortable() || cell.getColGroup().isMoveable()) {
+            if (cell.getColGroup().isSortable() || cell.getColGroup().isMovable()) {
                 cell.setBorder(pressedBorder);
                 innerPressed = true;
             }
@@ -114,8 +114,8 @@ public class CellHighlighter extends MouseAdapter {
     }
 
     private void configureCursors(Point pt) {
-        GridColumnsGroup resizingColGroup = cell.getHeader().getResizingColGroup();
-        GridColumnsGroup movingColGroup = cell.getHeader().getMovingColGroup();
+        GridColumnsNode resizingColGroup = cell.getHeader().getResizingColGroup();
+        GridColumnsNode movingColGroup = cell.getHeader().getMovingColGroup();
         if (resizingColGroup != null) {
             cell.getHeader().setCursor(Cursor.getPredefinedCursor(Cursor.W_RESIZE_CURSOR));
         } else if (movingColGroup != null) {
@@ -123,8 +123,8 @@ public class CellHighlighter extends MouseAdapter {
         } else {
             Dimension d = cell.getSize();
             if (cell.contains(pt) && pt.x >= 0 && pt.x < MultiLevelHeader.PICK_MARGIN_SIZE) {
-                Container header = cell.getParent();
-                LayoutManager l = header.getLayout();
+                Container cellParent = cell.getParent();
+                LayoutManager l = cellParent.getLayout();
                 if (l instanceof GridBagLayout) {
                     GridBagLayout gl = (GridBagLayout) l;
                     GridBagConstraints c = gl.getConstraints(cell);
@@ -137,7 +137,7 @@ public class CellHighlighter extends MouseAdapter {
                     cell.getHeader().setCursor(Cursor.getPredefinedCursor(Cursor.W_RESIZE_CURSOR));
                 }
             } else if (cell.contains(pt) && pt.x >= d.width - MultiLevelHeader.PICK_MARGIN_SIZE - 1 && pt.x < d.width) {
-                cell.getHeader().setCursor(Cursor.getPredefinedCursor(Cursor.W_RESIZE_CURSOR));
+                cell.getHeader().setCursor(Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR));
             } else {
                 cell.getHeader().setCursor(Cursor.getDefaultCursor());
             }

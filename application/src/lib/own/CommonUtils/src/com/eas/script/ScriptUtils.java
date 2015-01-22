@@ -59,6 +59,7 @@ public class ScriptUtils {
     protected static JSObject isArrayFunc;
     protected static JSObject makeObjFunc;
     protected static JSObject makeArrayFunc;
+    protected static JSObject listenFunc;
     protected static ScriptEngine engine;
     // Thread locals
     protected static ThreadLocal<Object> lock = new ThreadLocal<>();
@@ -86,6 +87,10 @@ public class ScriptUtils {
                 Logger.getLogger(ScriptUtils.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+    }
+
+    public static boolean isInitialized() {
+        return engine != null;
     }
 
     public static void initServices(int aMaxThreads) {
@@ -349,6 +354,11 @@ public class ScriptUtils {
         makeArrayFunc = aValue;
     }
 
+    public static void setListenFunc(JSObject aValue) {
+        assert listenFunc == null;
+        listenFunc = aValue;
+    }
+
     public static Object toJava(Object aValue) {
         if (aValue instanceof ScriptObject) {
             aValue = jdk.nashorn.api.scripting.ScriptUtils.wrap(aValue);
@@ -439,27 +449,6 @@ public class ScriptUtils {
         return sb.toString();
     }
 
-    public static Object[] jsObjectToCriteria(Object[] values) {
-        if (values.length == 1) {
-            JSObject criteria = null;
-            if (values[0] instanceof ScriptObject) {
-                criteria = (JSObject) jdk.nashorn.api.scripting.ScriptUtils.wrap(values[0]);
-            } else if (values[0] instanceof JSObject) {
-                criteria = (JSObject) values[0];
-            }
-            if (criteria != null) {
-                Set<String> jsKeys = criteria.keySet();
-                values = new Object[jsKeys.size() * 2];
-                int i = -1;
-                for (String jsKey : jsKeys) {
-                    values[++i] = jsKey;
-                    values[++i] = ScriptUtils.toJava(criteria.getMember(jsKey));
-                }
-            }
-        }
-        return values;
-    }
-
     /**
      * Searches for all <code>this</code> aliases in a constructor.
      *
@@ -545,6 +534,12 @@ public class ScriptUtils {
     public static JSObject makeArray() {
         assert makeArrayFunc != null : SCRIPT_NOT_INITIALIZED;
         Object oResult = makeArrayFunc.call(null, new Object[]{});
+        return (JSObject) oResult;
+    }
+
+    public static JSObject listen(JSObject aTarget, String aPath, JSObject aCallback) {
+        assert listenFunc != null : SCRIPT_NOT_INITIALIZED;
+        Object oResult = listenFunc.call(null, new Object[]{aTarget, aPath, aCallback});
         return (JSObject) oResult;
     }
 

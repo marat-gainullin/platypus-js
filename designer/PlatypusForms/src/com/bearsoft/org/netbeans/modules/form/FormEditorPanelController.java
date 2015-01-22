@@ -56,7 +56,7 @@ import org.openide.util.Lookup;
  */
 public final class FormEditorPanelController extends OptionsPanelController {
 
-    private FormDesignerOptionsCustomizer customizer = new FormDesignerOptionsCustomizer();
+    private final FormDesignerOptionsCustomizer customizer = new FormDesignerOptionsCustomizer();
     private boolean initialized = false;
 
     @Override

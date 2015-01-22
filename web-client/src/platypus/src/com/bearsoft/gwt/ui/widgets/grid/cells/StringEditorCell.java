@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  * @author mg
  */
-public class StringEditorCell extends RenderedEditorCell<String> {
+public class StringEditorCell extends RenderedEditorCell<Object> {
 
 	protected MaskFormat format;
 
@@ -42,7 +42,7 @@ public class StringEditorCell extends RenderedEditorCell<String> {
 	}
 
 	@Override
-	protected void renderCell(Context context, String value, SafeHtmlBuilder sb) {
+	protected void renderCell(Context context, Object value, SafeHtmlBuilder sb) {
 		if (format != null) {
 			try {
 				sb.appendEscaped(format.format(value));
@@ -50,7 +50,7 @@ public class StringEditorCell extends RenderedEditorCell<String> {
 				sb.appendEscaped(e.getMessage());
 			}
 		} else {
-			sb.appendEscaped(value != null ? value : "");
+			sb.appendEscaped(value != null ? value.toString() : "");
 		}
 	}
 }

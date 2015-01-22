@@ -24,13 +24,15 @@ import com.google.gwt.safecss.shared.SafeStylesBuilder;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.ui.HasText;
+import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
  * 
  * @author mg
  */
-public abstract class RenderedEditorCell<T> extends WidgetEditorCell<T> {
+public class RenderedEditorCell<T> extends WidgetEditorCell<T> {
 
 	public interface CellsResources extends ClientBundle {
 
@@ -138,7 +140,15 @@ public abstract class RenderedEditorCell<T> extends WidgetEditorCell<T> {
 		}
 	}
 
-	protected abstract void renderCell(Context context, T value, SafeHtmlBuilder sb);
+	protected void renderCell(Context context, T value, SafeHtmlBuilder sb) {
+		if (editor != null) {
+			((HasValue<T>)editor).setValue(value);
+			String display = ((HasText)editor).getText();
+			sb.appendEscaped(display);
+		} else {
+			sb.appendEscaped(value != null ? value.toString() : "");
+		}
+	}
 
 	public void onBrowserEvent(Cell.Context context, Element parent, T value, NativeEvent event, ValueUpdater<T> valueUpdater) {
 		if (readonly == null || !readonly.isReadonly()) {

@@ -44,14 +44,27 @@
 package com.bearsoft.org.netbeans.modules.form;
 
 import com.bearsoft.org.netbeans.modules.form.actions.*;
+import com.eas.client.forms.Form;
+import com.eas.design.Designable;
+import com.eas.design.Undesignable;
+import com.eas.script.ScriptFunction;
 import java.awt.datatransfer.Transferable;
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.TreeMap;
 import javax.swing.Action;
 import org.openide.actions.PasteAction;
 import org.openide.actions.ReorderAction;
 import org.openide.nodes.*;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.util.actions.SystemAction;
 import org.openide.util.datatransfer.PasteType;
@@ -62,15 +75,90 @@ import org.openide.util.datatransfer.PasteType;
  *
  * @author Tomas Pavek
  */
-class FormRootNode extends FormNode {
+public class FormRootNode extends FormNode {
 
-    private FormProperty<?>[] allProperties;
+    private Map<String, FormProperty<?>> propsByName;
+    private List<PropertySet> propSets;
+    private final PropertyChangeListener propsListener = (PropertyChangeEvent evt) -> {
+        if (evt.getSource() instanceof FormRootProperty<?> && FormProperty.PROP_VALUE.equals(evt.getPropertyName())) {
+            formModel.fireFormPropertyChanged(FormRootNode.this, ((FormRootProperty<?>)evt.getSource()).getName(), evt.getOldValue(), evt.getNewValue());
+        }
+    };
 
-    public FormRootNode(FormModel formModel) {
-        super(new RootChildren(formModel), formModel);
+    public FormRootNode(FormModel aFormModel) {
+        super(new RootChildren(aFormModel), aFormModel);
         setName("Form Root Node"); // NOI18N
         setIconBaseWithExtension("com/bearsoft/org/netbeans/modules/form/resources/formDesigner.gif"); // NOI18N
         updateName(formModel.getName());
+    }
+
+    public FormProperty<?> getProperty(String propertyName) {
+        return propsByName.get(propertyName);
+    }
+
+    public FormProperty[] getFormProperties(){
+        checkPropertiesSets();
+        return propsByName.values().toArray(new FormProperty[]{});
+    }
+    
+    @Override
+    public PropertySet[] getPropertySets() {
+        checkPropertiesSets();
+        return propSets.toArray(new PropertySet[]{});
+    }
+
+    protected void checkPropertiesSets() {
+        if (propSets == null) {
+            try {
+                propSets = new ArrayList<>();
+                propsByName = new TreeMap<>();
+                Map<String, List<FormProperty<?>>> propsByCategory = new TreeMap<>();
+                BeanInfo bi = Introspector.getBeanInfo(Form.class, java.beans.Introspector.IGNORE_ALL_BEANINFO);
+                for (PropertyDescriptor descriptor : bi.getPropertyDescriptors()) {
+                    if (descriptor.getReadMethod() != null && descriptor.getWriteMethod() != null) {
+                        Designable designable = descriptor.getReadMethod().getAnnotation(Designable.class);
+                        ScriptFunction scriptFunction = descriptor.getReadMethod().getAnnotation(ScriptFunction.class);
+                        if (designable == null) {
+                            designable = descriptor.getWriteMethod().getAnnotation(Designable.class);
+                        }
+                        if (scriptFunction == null) {
+                            scriptFunction = descriptor.getWriteMethod().getAnnotation(ScriptFunction.class);
+                        }
+                        if ((designable != null || scriptFunction != null)
+                                && !descriptor.getReadMethod().isAnnotationPresent(Undesignable.class) && !descriptor.getWriteMethod().isAnnotationPresent(Undesignable.class)) {
+                            String category = "general";
+                            if (designable != null && designable.category() != null && !designable.category().isEmpty()) {
+                                category = designable.category();
+                            }
+                            List<FormProperty<?>> catProps = propsByCategory.get(category);
+                            if (catProps == null) {
+                                catProps = new ArrayList<>();
+                                propsByCategory.put(category, catProps);
+                            }
+                            FormProperty<?> prop = new FormRootProperty<>(formModel, descriptor);
+                            prop.addPropertyChangeListener(propsListener);
+                            catProps.add(prop);
+                            propsByName.put(prop.getName(), prop);
+                        }
+                    }
+                }
+                final ResourceBundle bundle = FormUtils.getBundle();
+                propsByCategory.entrySet().stream().forEach((Map.Entry<String, List<FormProperty<?>>> aEntry) -> {
+                    final String category = aEntry.getKey();
+                    final List<FormProperty<?>> props = aEntry.getValue();
+                    if (props.size() > 0) {
+                        propSets.add(new Node.PropertySet(category, bundle.getString("CTL_" + category), bundle.getString("CTL_" + category + "Hint")) {
+                            @Override
+                            public Node.Property<?>[] getProperties() {
+                                return props.toArray(new Node.Property<?>[]{});
+                            }
+                        });
+                    }
+                });
+            } catch (Exception ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        }
     }
 
     @Override
@@ -111,10 +199,6 @@ class FormRootNode extends FormNode {
         return ((RootChildren) getChildren()).othersNode;
     }
 
-    FormProperty<?>[] getAllProperties() {
-        return allProperties;
-    }
-
     @Override
     protected void createPasteTypes(Transferable t, java.util.List<PasteType> s) {
         if (isModifiableContainer()) {
@@ -152,7 +236,7 @@ class FormRootNode extends FormNode {
     static class RootChildren extends FormNodeChildren {
 
         static final RADVisualContainer<?> OTHERS_ROOT = new RADVisualContainer<>();
-        private FormModel formModel;
+        private final FormModel formModel;
         private FormOthersNode othersNode;
 
         protected RootChildren(FormModel aFormModel) {
@@ -188,12 +272,7 @@ class FormRootNode extends FormNode {
                 node = othersNode = new FormOthersNode(formModel);
             } else {
                 assert key instanceof RADVisualComponent<?>;
-                node = new RADComponentNode((RADVisualComponent<?>) key) {
-                    @Override
-                    public String getDisplayName() {
-                        return NbBundle.getMessage(FormRootNode.class, "CTL_VisualComponents");
-                    }
-                };
+                node = new RADComponentNode((RADVisualComponent<?>) key);
                 key.setNodeReference((RADComponentNode) node);
             }
             node.getChildren().getNodes(); // enforce subnodes creation

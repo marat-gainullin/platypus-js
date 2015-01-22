@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.events.ComponentEvent");
+    var javaClass = Java.type("com.eas.client.forms.events.ComponentEvent");
     javaClass.setPublisher(function(aDelegate) {
         return new P.ComponentEvent(aDelegate);
     });
@@ -30,7 +30,7 @@
         });
         if(!P.ComponentEvent){
             /**
-             * The source component object of the event.
+             * The source object of the event.
              * @property source
              * @memberOf ComponentEvent
              */

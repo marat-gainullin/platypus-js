@@ -61,8 +61,8 @@ public class FormattedObjectBox extends ExplicitValueBox<Object> {
 		format = aFormat;
 	}
 
-	public void setFormatType(int aType, String aPattern) throws ParseException {
-		format.setFormatType(aType, aPattern);
+	public void setValueType(int aType) throws ParseException {
+		format.setValueType(aType);
 	}
 
 	@Override
@@ -77,13 +77,13 @@ public class FormattedObjectBox extends ExplicitValueBox<Object> {
 		super.setValue(aValue, fireEvents);
 	}
 
-	public String getPattern() {
+	public String getFormat() {
 		return format != null ? format.getPattern() : null;
 	}
 
-	public void setPattern(String aPattern) throws ParseException {
-		if (format != null && (aPattern == null ? getPattern() != null : !aPattern.equals(getPattern()))) {
-			format.setPattern(aPattern);
+	public void setFormat(String aValue) throws ParseException {
+		if (format != null ? !format.equals(aValue) : aValue != null) {
+			format.setPattern(aValue);
 			resetText();
 		}
 	}

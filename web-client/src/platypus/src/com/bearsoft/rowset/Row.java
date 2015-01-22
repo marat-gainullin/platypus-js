@@ -1,16 +1,23 @@
 package com.bearsoft.rowset;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import com.bearsoft.rowset.Utils.JsObject;
+import com.bearsoft.rowset.beans.HasPropertyListeners;
 import com.bearsoft.rowset.beans.PropertyChangeEvent;
 import com.bearsoft.rowset.beans.PropertyChangeListener;
 import com.bearsoft.rowset.beans.PropertyChangeSupport;
 import com.bearsoft.rowset.beans.VetoableChangeListener;
 import com.bearsoft.rowset.beans.VetoableChangeSupport;
+import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.changes.Insert;
+import com.bearsoft.rowset.changes.Update;
 import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Field;
@@ -22,8 +29,10 @@ import com.google.gwt.core.client.JavaScriptObject;
  * 
  * @author mg
  */
-public class Row {
+public class Row implements HasPropertyListeners {
 
+    protected String entityName;
+    protected List<Change> log;
 	protected Fields fields;
 	protected PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 	protected VetoableChangeSupport vetoableChangeSupport = new VetoableChangeSupport(this);
@@ -35,23 +44,29 @@ public class Row {
 	protected Insert insertChange;
 
 	/**
-	 * Row's POJO-like constructor.
-	 */
-	public Row() {
-		super();
-	}
-
-	/**
 	 * Constructs the row with column count equals to colCount values vectors
 	 * allocated.
 	 * 
 	 * @param colCount
 	 *            - column count that you whant to be in this row.
 	 */
-	public Row(Fields aFields) {
+	public Row(String aEntityName, Fields aFields) {
 		super();
+        entityName = aEntityName;
 		setFields(aFields);
 	}
+
+    public List<Change> getLog() {
+        return log;
+    }
+
+    public void setLog(List<Change> aValue) {
+        log = aValue;
+    }
+
+    public void setEntityName(String aValue) {
+        entityName = aValue;
+    }
 
 	@Override
 	public boolean equals(Object obj) {
@@ -116,23 +131,36 @@ public class Row {
 	public PropertyChangeSupport getChangeSupport() {
 		return propertyChangeSupport;
 	}
+	
+    public void addPropertyChangeListener(PropertyChangeListener l) {
+        propertyChangeSupport.addPropertyChangeListener(l);
+    }
 
-	public void addPropertyChangeListener(PropertyChangeListener l) {
-		propertyChangeSupport.addPropertyChangeListener(l);
-	}
+    public void addPropertyChangeListener(String aPropertyName, PropertyChangeListener l) {
+        propertyChangeSupport.addPropertyChangeListener(aPropertyName, l);
+    }
 
-	public void removePropertyChangeListener(PropertyChangeListener l) {
-		propertyChangeSupport.removePropertyChangeListener(l);
-	}
+    public void removePropertyChangeListener(PropertyChangeListener l) {
+        propertyChangeSupport.removePropertyChangeListener(l);
+    }
 
-	public void addVetoableChangeListener(VetoableChangeListener l) {
-		vetoableChangeSupport.addVetoableChangeListener(l);
-	}
+    public void removePropertyChangeListener(String aPropertyName, PropertyChangeListener l) {
+        propertyChangeSupport.removePropertyChangeListener(aPropertyName, l);
+    }
 
-	public void removeVetoableChangeListener(VetoableChangeListener l) {
-		vetoableChangeSupport.removeVetoableChangeListener(l);
-	}
+    public void addVetoableChangeListener(VetoableChangeListener l) {
+        vetoableChangeSupport.addVetoableChangeListener(l);
+    }
 
+    public void removeVetoableChangeListener(VetoableChangeListener l) {
+        vetoableChangeSupport.removeVetoableChangeListener(l);
+    }
+
+    @Override
+    public PropertyChangeListener[] getPropertyChangeListeners() {
+    	return propertyChangeSupport.getPropertyChangeListeners();
+    }
+    
 	/**
 	 * Returns whether the row is updated at whole or partially. The updated
 	 * flag is <code>true</code> if <code>setColumnObject()</code> or
@@ -277,7 +305,7 @@ public class Row {
 	 *            ordinal position of the column. It's value lies within the
 	 *            range of [1: <code>getColumnCount()</code>].
 	 * @param aValue
-	 *            value that you whant to be setted to the column as the current
+	 *            value that you want to be setted to the column as the current
 	 *            column value.
 	 * @throws InvalidColIndexException
 	 *             if colIndex < 1 or colIndex > <code>getColumnCount()</code>
@@ -287,13 +315,26 @@ public class Row {
 			Field field = fields.get(aColIndex);
 			aValue = Converter.convert2RowsetCompatible(aValue, field.getTypeInfo());
 			if (!smartEquals(getColumnObject(aColIndex), aValue)) {
-				Object oldColValue = currentValues.get(aColIndex - 1);
-				PropertyChangeEvent event = new PropertyChangeEvent(this, field.getName(), oldColValue, aValue);
+				Object oldValue = currentValues.get(aColIndex - 1);
+				PropertyChangeEvent event = new PropertyChangeEvent(this, field.getName(), oldValue, aValue);
 				event.setPropagationId(aColIndex);
 				if (checkChange(event)) {
+                    Map<String, Object> expandedOldValues = new HashMap<>();
+                    Collection<String> expandings = fields.getOrmExpandings().get(field.getName());
+                    if (expandings != null && jsPublished != null) {
+                        for(String aOrmScalarProperty : expandings){
+                            expandedOldValues.put(aOrmScalarProperty, jsPublished.<JsObject>cast().getJava(aOrmScalarProperty));
+                        };
+                    }
 					currentValues.set(aColIndex - 1, aValue);
 					updated.add(aColIndex);
+                    generateUpdate(aColIndex, oldValue, aValue);
 					propertyChangeSupport.firePropertyChange(event);
+                    if (expandings != null && jsPublished != null) {
+                        for(String aOrmScalarProperty : expandings){
+                            propertyChangeSupport.firePropertyChange(aOrmScalarProperty, expandedOldValues.get(aOrmScalarProperty), jsPublished.<JsObject>cast().getJava(aOrmScalarProperty));
+                        };
+                    }
 				}
 			}
 		} else {
@@ -305,6 +346,61 @@ public class Row {
 			}
 		}
 	}
+
+    protected void generateUpdate(int colIndex, Object oldValue, Object newValue) {
+        if (fields != null && log != null) {
+            Field field = fields.get(colIndex);
+            boolean insertComplemented = tryToComplementInsert(field, newValue);
+            if (!insertComplemented) {
+                Update update = new Update(entityName);
+                update.data = new Change.Value[]{new Change.Value(field.getName(), newValue, field.getTypeInfo())};
+                update.keys = generateChangeLogKeys(colIndex, this, oldValue);
+                log.add(update);
+            }
+        }
+    }
+
+    private boolean tryToComplementInsert(Field field, Object newValue) {
+        boolean insertComplemented = false;
+        if (insertChange != null && !field.isNullable()) {
+            boolean met = false;
+            for (Change.Value value : insertChange.data) {
+                if (value.name.equalsIgnoreCase(field.getName())) {
+                    met = true;
+                    break;
+                }
+            }
+            if (!met) {
+                Change.Value[] newdata = new Change.Value[insertChange.data.length + 1];
+                newdata[newdata.length - 1] = new Change.Value(field.getName(), newValue, field.getTypeInfo());
+                System.arraycopy(insertChange.data, 0, newdata, 0, insertChange.data.length);
+                insertChange.data = newdata;
+                insertComplemented = true;
+            }
+        }
+        return insertComplemented;
+    }
+
+    public static Change.Value[] generateChangeLogKeys(int colIndex, Row aRow, Object oldValue) {
+        Fields fields = aRow.getFields();
+        if (fields != null) {
+            List<Change.Value> keys = new ArrayList<>();
+            for (int i = 1; i <= fields.getFieldsCount(); i++) {
+                Field field = fields.get(i);
+                // Some tricky processing of primary key modification case ...
+                if (field.isPk()) {
+                    Object value = aRow.getCurrentValues()[i - 1];
+                    if (i == colIndex) {
+                        value = oldValue;
+                    }
+                    keys.add(new Change.Value(field.getName(), value, field.getTypeInfo()));
+                }
+            }
+            return keys.toArray(new Change.Value[]{});
+        } else {
+            return null;
+        }
+    }
 
 	public Object getFieldObject(String aFieldName) throws Exception {
 		int colIndex = fields.find(aFieldName);
@@ -491,4 +587,47 @@ public class Row {
 	public JavaScriptObject getPublished() {
 		return jsPublished;
 	}
+	
+	public void publishOrmProps(JavaScriptObject aTarget){
+		for(Map.Entry<String, JavaScriptObject> entry : fields.getOrmDefinitions().entrySet()){
+			aTarget.<JsObject>cast().defineProperty(entry.getKey(), entry.getValue());
+		}
+	}
+	
+	public static native JavaScriptObject publishFacade(Row aRow, JavaScriptObject aTarget)/*-{
+		var published = aRow.@com.bearsoft.rowset.Row::getPublished()();
+		if(published == null){
+			var nFields = aRow.@com.bearsoft.rowset.Row::getFields()();
+			if(aTarget){
+				published = aTarget;
+			}else{
+				var elClass = nFields.@com.bearsoft.rowset.metadata.Fields::getInstanceConstructor()();
+				if(elClass != null && typeof elClass == "function")
+					published = new elClass();
+				else
+					published = {};
+			} 
+			Object.defineProperty(published, "unwrap", { get : function(){
+				return function() {
+					return aRow;
+				}
+			}});
+			var fieldsCount = nFields.@com.bearsoft.rowset.metadata.Fields::getFieldsCount()();
+			var schema = @com.bearsoft.rowset.metadata.Fields::publishFacade(Lcom/bearsoft/rowset/metadata/Fields;)(nFields);
+			for(var i = 0; i < fieldsCount; i++){
+				(function(){
+					var _i = i;
+					var propDesc = {
+						 get : function(){ return $wnd.P.boxAsJs(aRow.@com.bearsoft.rowset.Row::getFieldObject(Ljava/lang/String;)(schema[_i].name)); },
+						 set : function(aValue){ aRow.@com.bearsoft.rowset.Row::setFieldObject(Ljava/lang/String;Ljava/lang/Object;)(schema[_i].name, $wnd.P.boxAsJava(aValue)); }
+					};
+					Object.defineProperty(published, schema[_i].name, propDesc);
+					Object.defineProperty(published, (_i+""),     propDesc);
+				})();
+			}
+			aRow.@com.bearsoft.rowset.Row::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+			aRow.@com.bearsoft.rowset.Row::publishOrmProps(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+		}
+		return published;
+	}-*/;
 }

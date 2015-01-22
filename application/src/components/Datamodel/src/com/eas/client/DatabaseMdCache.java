@@ -9,12 +9,14 @@
  */
 package com.eas.client;
 
+import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
+import com.bearsoft.rowset.exceptions.InvalidColIndexException;
+import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.bearsoft.rowset.metadata.PrimaryKeySpec;
-import com.eas.client.metadata.DbTableComments;
 import com.eas.client.metadata.DbTableIndexes;
 import com.eas.client.metadata.DbTableKeys;
 import com.eas.client.cache.FreqCache;
@@ -25,6 +27,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -117,22 +121,24 @@ public class DatabaseMdCache {
             SqlCompiledQuery query = new SqlCompiledQuery(client, datasourceName, queryText);
             Rowset rs = query.executeQuery(null, null);
             int colIndex = rs.getFields().find(ClientConstants.JDBCCOLS_TABLE_NAME);
+            int colRemarks = rs.getFields().find(ClientConstants.JDBCCOLS_REMARKS);
             assert colIndex > 0;
+            assert colRemarks > 0;
             tablesFields.clear();
-            Set<String> tablesNames = new HashSet<>();
-            rs.beforeFirst();
-            while (rs.next()) {
-                String lTableName = rs.getString(colIndex);
-                tablesNames.add(lTableName);
+            Map<String, String> tablesNames = new HashMap<>();
+            for (Row r : rs.getCurrent()) {
+                String lTableName = (String) r.getColumnObject(colIndex);
+                String lRemarks = (String) r.getColumnObject(colRemarks);
+                tablesNames.put(lTableName, lRemarks);
                 if (tablesNames.size() >= 100) {
-                    Map<String, Fields> md = tablesFields.query(aSchema, tablesNames, aFullMetadata);
-                    tablesFields.fill(aSchema, md);
+                    Map<String, Fields> md = tablesFields.query(aSchema, tablesNames.keySet(), aFullMetadata);
+                    tablesFields.fill(aSchema, md, tablesNames);
                     tablesNames.clear();
                 }
             }
             if (!tablesNames.isEmpty()) {
-                Map<String, Fields> md = tablesFields.query(aSchema, tablesNames, aFullMetadata);
-                tablesFields.fill(aSchema, md);
+                Map<String, Fields> md = tablesFields.query(aSchema, tablesNames.keySet(), aFullMetadata);
+                tablesFields.fill(aSchema, md, tablesNames);
             }
         }
     }
@@ -155,11 +161,10 @@ public class DatabaseMdCache {
             super();
         }
 
-        protected void merge(String aSchema, Map<String, Fields> aTablesFields, Map<String, DbTableKeys> aTablesKeys, Map<String, DbTableComments> aTablesComments) throws Exception {
+        protected void merge(String aSchema, Map<String, Fields> aTablesFields, Map<String, DbTableKeys> aTablesKeys) throws Exception {
             aTablesFields.keySet().stream().forEach((String lTableName) -> {
                 Fields fields = aTablesFields.get(lTableName);
                 DbTableKeys keys = aTablesKeys.get(lTableName);
-                DbTableComments comments = aTablesComments.get(lTableName);
                 if (keys != null) {
                     keys.getPks().entrySet().stream().forEach((Entry<String, PrimaryKeySpec> pkEntry) -> {
                         Field f = fields.get(pkEntry.getKey());
@@ -174,23 +179,15 @@ public class DatabaseMdCache {
                         }
                     });
                 }
-                if (comments != null) {
-                    fields.setTableDescription(comments.getTableComment());
-                    comments.getFieldsComments().entrySet().stream().forEach((Entry<String, String> cEntry) -> {
-                        Field f = fields.get(cEntry.getKey());
-                        if (f != null) {
-                            f.setDescription(cEntry.getValue());
-                        }
-                    });
-                }
             });
         }
 
-        protected void fill(String aSchema, Map<String, Fields> aTablesFields) throws Exception {
+        protected void fill(String aSchema, Map<String, Fields> aTablesFields, Map<String, String> aTablesDescriptions) throws Exception {
             if (aTablesFields != null && !aTablesFields.isEmpty()) {
                 synchronized (lock) {
                     aTablesFields.keySet().stream().forEach((String lTableName) -> {
                         Fields fields = aTablesFields.get(lTableName);
+                        fields.setTableDescription(aTablesDescriptions.get(lTableName));
                         String fullTableName = lTableName;
                         if (aSchema != null && !aSchema.isEmpty()) {
                             fullTableName = aSchema + "." + fullTableName;
@@ -262,8 +259,6 @@ public class DatabaseMdCache {
                 }
                 if (!tables2Retrive.isEmpty()) {
                     Rowset tablesColumnsRs = null;
-                    Rowset tablesCommentsRs = null;
-                    Rowset columnsCommentsRs = null;
                     Rowset primaryKeysRs = null;
                     Rowset foreignKeysRs = null;
                     String colsSql = driver.getSql4TableColumns(schema4Sql, tables2Retrive);
@@ -275,29 +270,21 @@ public class DatabaseMdCache {
                         primaryKeysRs = new SqlCompiledQuery(client, datasourceName, sqlPks).executeQuery(null, null);
                     }
                     if (aFullMetadata) {
-                        String sqlTC = driver.getSql4TableComments(schema4Sql, tables2Retrive);
-                        String sqlCC = driver.getSql4ColumnsComments(schema4Sql, tables2Retrive);
-                        if (sqlTC != null && !sqlTC.isEmpty()
-                                && sqlCC != null && !sqlCC.isEmpty()) {
-                            tablesCommentsRs = new SqlCompiledQuery(client, datasourceName, sqlTC).executeQuery(null, null);
-                            columnsCommentsRs = new SqlCompiledQuery(client, datasourceName, sqlCC).executeQuery(null, null);
-                        }
                         String sqlFks = driver.getSql4TableForeignKeys(schema4Sql, tables2Retrive);
                         if (sqlFks != null && !sqlFks.isEmpty()) {
                             foreignKeysRs = new SqlCompiledQuery(client, datasourceName, sqlFks).executeQuery(null, null);
                         }
                     }
-                    return read(tablesColumnsRs, tablesCommentsRs, columnsCommentsRs, primaryKeysRs, foreignKeysRs, aSchema, driver);
+                    return read(tablesColumnsRs, primaryKeysRs, foreignKeysRs, aSchema, driver);
                 }
             }
             return null;
         }
 
-        protected Map<String, Fields> read(Rowset aTablesColumnsRs, Rowset aTablesCommentsRs, Rowset aColumnsCommentsRs, Rowset aPrimaryKeysRs, Rowset aForeignKeysRs, String aSchema, SqlDriver sqlDriver) throws Exception {
+        protected Map<String, Fields> read(Rowset aTablesColumnsRs, Rowset aPrimaryKeysRs, Rowset aForeignKeysRs, String aSchema, SqlDriver sqlDriver) throws Exception {
             Map<String, Fields> columns = readTablesColumns(aTablesColumnsRs, aSchema, sqlDriver);
             Map<String, DbTableKeys> keys = readTablesKeys(aPrimaryKeysRs, aForeignKeysRs, aSchema, sqlDriver);
-            Map<String, DbTableComments> comments = readTablesComments(aTablesCommentsRs, aColumnsCommentsRs, aSchema, sqlDriver);
-            merge(aSchema, columns, keys, comments);
+            merge(aSchema, columns, keys);
             return columns;
         }
 
@@ -311,49 +298,50 @@ public class DatabaseMdCache {
                 }
                 int JDBCCOLS_TABLE_INDEX = colIndicies.get(ClientConstants.JDBCCOLS_TABLE_NAME);
                 int JDBCCOLS_COLUMN_INDEX = colIndicies.get(ClientConstants.JDBCCOLS_COLUMN_NAME);
-                //int JDBCCOLS_REMARKS_INDEX = colIndicies.get(ClientConstants.JDBCCOLS_REMARKS);
+                int JDBCCOLS_REMARKS_INDEX = colIndicies.get(ClientConstants.JDBCCOLS_REMARKS);
                 int JDBCCOLS_DATA_TYPE_INDEX = colIndicies.get(ClientConstants.JDBCCOLS_DATA_TYPE);
                 int JDBCCOLS_TYPE_NAME_INDEX = colIndicies.get(ClientConstants.JDBCCOLS_TYPE_NAME);
                 int JDBCCOLS_COLUMN_SIZE_INDEX = colIndicies.get(ClientConstants.JDBCCOLS_COLUMN_SIZE);
                 int JDBCCOLS_DECIMAL_DIGITS_INDEX = colIndicies.get(ClientConstants.JDBCCOLS_DECIMAL_DIGITS);
                 int JDBCCOLS_NUM_PREC_RADIX_INDEX = colIndicies.get(ClientConstants.JDBCCOLS_NUM_PREC_RADIX);
                 int JDBCCOLS_NULLABLE_INDEX = colIndicies.get(ClientConstants.JDBCCOLS_NULLABLE);
-                colsRs.beforeFirst();
-                while (colsRs.next()) {
-                    String fTableName = colsRs.getString(JDBCCOLS_TABLE_INDEX);
+                for (Row r : colsRs.getCurrent()) {
+                    String fTableName = (String) r.getColumnObject(JDBCCOLS_TABLE_INDEX);
                     Fields fields = tabledFields.get(fTableName);
                     if (fields == null) {
                         fields = new Fields();
                         tabledFields.put(fTableName, fields);
                     }
-                    String fName = colsRs.getString(JDBCCOLS_COLUMN_INDEX);
-                    //String fDescription = colsRs.getString(JDBCCOLS_REMARKS_INDEX);
-                    //Field field = new Field(fName, fDescription);
-                    Field field = new Field(fName.toLowerCase());
+                    String fName = (String) r.getColumnObject(JDBCCOLS_COLUMN_INDEX);
+                    String fDescription = (String) r.getColumnObject(JDBCCOLS_REMARKS_INDEX);
+                    Field field = new Field(fName.toLowerCase(), fDescription);
                     field.setOriginalName(fName);
-                    String rdbmsTypeName = colsRs.getString(JDBCCOLS_TYPE_NAME_INDEX);
+                    String rdbmsTypeName = (String) r.getColumnObject(JDBCCOLS_TYPE_NAME_INDEX);
                     Integer correctType = sqlDriver.getJdbcTypeByRDBMSTypename(rdbmsTypeName);
                     if (correctType != null) {
                         field.getTypeInfo().setSqlType(correctType);
                     } else {
-                        field.getTypeInfo().setSqlType(colsRs.getInt(JDBCCOLS_DATA_TYPE_INDEX));
+                        Object oSqlType = r.getColumnObject(JDBCCOLS_DATA_TYPE_INDEX);
+                        if (oSqlType instanceof Number) {
+                            field.getTypeInfo().setSqlType(((Number) oSqlType).intValue());
+                        }
                     }
                     field.getTypeInfo().setSqlTypeName(rdbmsTypeName);
-                    Integer iSize = colsRs.getInt(JDBCCOLS_COLUMN_SIZE_INDEX);
-                    if (iSize != null) {
-                        field.setSize(iSize);
+                    Object oSize = r.getColumnObject(JDBCCOLS_COLUMN_SIZE_INDEX);
+                    if (oSize instanceof Number) {
+                        field.setSize(((Number) oSize).intValue());
                     }
-                    Integer iScale = colsRs.getInt(JDBCCOLS_DECIMAL_DIGITS_INDEX);
-                    if (iScale != null) {
-                        field.setScale(iScale);
+                    Object oScale = r.getColumnObject(JDBCCOLS_DECIMAL_DIGITS_INDEX);
+                    if (oScale instanceof Number) {
+                        field.setScale(((Number) oScale).intValue());
                     }
-                    Integer iPrecision = colsRs.getInt(JDBCCOLS_NUM_PREC_RADIX_INDEX);
-                    if (iPrecision != null) {
-                        field.setPrecision(iPrecision);
+                    Object oPrecision = r.getColumnObject(JDBCCOLS_NUM_PREC_RADIX_INDEX);
+                    if (oPrecision instanceof Number) {
+                        field.setPrecision(((Number) oPrecision).intValue());
                     }
-                    Integer iNullable = colsRs.getInt(JDBCCOLS_NULLABLE_INDEX);
-                    if (iNullable != null) {
-                        field.setNullable(iNullable == ResultSetMetaData.columnNullable);
+                    Object oNullable = r.getColumnObject(JDBCCOLS_NULLABLE_INDEX);
+                    if (oNullable instanceof Number) {
+                        field.setNullable(((Number) oNullable).intValue() == ResultSetMetaData.columnNullable);
                     }
                     field.setSchemaName(aSchema);
                     field.setTableName(fTableName);
@@ -382,12 +370,11 @@ public class DatabaseMdCache {
                 int JDBCPKS_COLUMN_NAME_INDEX = colsIndicies.get(ClientConstants.JDBCPKS_COLUMN_NAME);
                 int JDBCPKS_CONSTRAINT_NAME_INDEX = colsIndicies.get(ClientConstants.JDBCPKS_CONSTRAINT_NAME);
 
-                pksRs.beforeFirst();
-                while (pksRs.next()) {
-                    String lpkSchema = pksRs.getString(JDBCPKS_TABLE_SCHEM_INDEX);
-                    String lpkTableName = pksRs.getString(JDBCPKS_TABLE_NAME_INDEX);
-                    String lpkField = pksRs.getString(JDBCPKS_COLUMN_NAME_INDEX);
-                    String lpkName = pksRs.getString(JDBCPKS_CONSTRAINT_NAME_INDEX);
+                for (Row r : pksRs.getCurrent()) {
+                    String lpkSchema = (String) r.getColumnObject(JDBCPKS_TABLE_SCHEM_INDEX);
+                    String lpkTableName = (String) r.getColumnObject(JDBCPKS_TABLE_NAME_INDEX);
+                    String lpkField = (String) r.getColumnObject(JDBCPKS_COLUMN_NAME_INDEX);
+                    String lpkName = (String) r.getColumnObject(JDBCPKS_CONSTRAINT_NAME_INDEX);
                     DbTableKeys dbPksFks = tabledKeys.get(lpkTableName);
                     if (dbPksFks == null) {
                         dbPksFks = new DbTableKeys(lpkTableName);
@@ -417,20 +404,31 @@ public class DatabaseMdCache {
                 int JDBCFKS_FKPKTABLE_NAME_INDEX = colsIndicies.get(ClientConstants.JDBCFKS_FKPKTABLE_NAME);
                 int JDBCFKS_FKPKCOLUMN_NAME_INDEX = colsIndicies.get(ClientConstants.JDBCFKS_FKPKCOLUMN_NAME);
                 int JDBCFKS_FKPK_NAME_INDEX = colsIndicies.get(ClientConstants.JDBCFKS_FKPK_NAME);
-                fksRs.beforeFirst();
-                while (fksRs.next()) {
-                    String lfkSchema = fksRs.getString(JDBCFKS_FKTABLE_SCHEM_INDEX);
-                    String lfkTableName = fksRs.getString(JDBCFKS_FKTABLE_NAME_INDEX);
-                    String lfkField = fksRs.getString(JDBCFKS_FKCOLUMN_NAME_INDEX);
-                    String lfkName = fksRs.getString(JDBCFKS_FK_NAME_INDEX);
-                    Short lfkUpdateRule = fksRs.getShort(JDBCFKS_FKUPDATE_RULE_INDEX);
-                    Short lfkDeleteRule = fksRs.getShort(JDBCFKS_FKDELETE_RULE_INDEX);
-                    Short lfkDeferability = fksRs.getShort(JDBCFKS_FKDEFERRABILITY_INDEX);
+                for (Row r : fksRs.getCurrent()) {
+                    String lfkSchema = (String) r.getColumnObject(JDBCFKS_FKTABLE_SCHEM_INDEX);
+                    String lfkTableName = (String) r.getColumnObject(JDBCFKS_FKTABLE_NAME_INDEX);
+                    String lfkField = (String) r.getColumnObject(JDBCFKS_FKCOLUMN_NAME_INDEX);
+                    String lfkName = (String) r.getColumnObject(JDBCFKS_FK_NAME_INDEX);
+                    Short lfkUpdateRule = null;
+                    Object ofkUpdateRule = r.getColumnObject(JDBCFKS_FKUPDATE_RULE_INDEX);
+                    if (ofkUpdateRule instanceof Number) {
+                        lfkUpdateRule = ((Number) ofkUpdateRule).shortValue();
+                    }
+                    Short lfkDeleteRule = null;
+                    Object ofkDeleteRule = r.getColumnObject(JDBCFKS_FKDELETE_RULE_INDEX);
+                    if (ofkDeleteRule instanceof Number) {
+                        lfkDeleteRule = ((Number) ofkDeleteRule).shortValue();
+                    }
+                    Short lfkDeferability = null;
+                    Object ofkDeferability = r.getColumnObject(JDBCFKS_FKDEFERRABILITY_INDEX);
+                    if (ofkDeferability instanceof Number) {
+                        lfkDeferability = ((Number) ofkDeferability).shortValue();
+                    }
                     //
-                    String lpkSchema = fksRs.getString(JDBCFKS_FKPKTABLE_SCHEM_INDEX);
-                    String lpkTableName = fksRs.getString(JDBCFKS_FKPKTABLE_NAME_INDEX);
-                    String lpkField = fksRs.getString(JDBCFKS_FKPKCOLUMN_NAME_INDEX);
-                    String lpkName = fksRs.getString(JDBCFKS_FKPK_NAME_INDEX);
+                    String lpkSchema = (String) r.getColumnObject(JDBCFKS_FKPKTABLE_SCHEM_INDEX);
+                    String lpkTableName = (String) r.getColumnObject(JDBCFKS_FKPKTABLE_NAME_INDEX);
+                    String lpkField = (String) r.getColumnObject(JDBCFKS_FKPKCOLUMN_NAME_INDEX);
+                    String lpkName = (String) r.getColumnObject(JDBCFKS_FKPK_NAME_INDEX);
                     //
                     DbTableKeys dbPksFks = tabledKeys.get(lfkTableName);
                     if (dbPksFks == null) {
@@ -442,33 +440,6 @@ public class DatabaseMdCache {
             }
             return tabledKeys;
         }
-
-        protected Map<String, DbTableComments> readTablesComments(Rowset tcRowset, Rowset ccRowset, String aOwner, SqlDriver aDrv) throws Exception {
-            Map<String, DbTableComments> tabledComments = new HashMap<>();
-            tcRowset.beforeFirst();
-            while (tcRowset.next()) {
-                String lTableName = aDrv.getTableNameFromCommentsDs(tcRowset);
-                DbTableComments lTableComments = tabledComments.get(lTableName);
-                if (lTableComments == null) {
-                    lTableComments = new DbTableComments();
-                    tabledComments.put(lTableName, lTableComments);
-                }
-                lTableComments.setTableComment(aDrv.getTableCommentFromCommentsDs(tcRowset));
-            }
-
-            ccRowset.beforeFirst();
-            while (ccRowset.next()) {
-                String lTableName = aDrv.getTableNameFromCommentsDs(ccRowset);
-                DbTableComments lTableComments = tabledComments.get(lTableName);
-                if (lTableComments == null) {
-                    lTableComments = new DbTableComments();
-                    tabledComments.put(lTableName, lTableComments);
-                }
-                lTableComments.setFieldComment(aDrv.getColumnNameFromCommentsDs(ccRowset), aDrv.getColumnCommentFromCommentsDs(ccRowset));
-            }
-            return tabledComments;
-        }
-
     }
 
     public DbTableIndexes getTableIndexes(String aTableName) throws Exception {
@@ -521,10 +492,13 @@ public class DatabaseMdCache {
                             SqlCompiledQuery indexesQuery = new SqlCompiledQuery(client, datasourceName, sql4IndexesText);
                             Rowset indexesRs = indexesQuery.executeQuery(null, null);
                             if (indexesRs != null) {
-                                indexesRs.beforeFirst();
-                                while (indexesRs.next()) {
-                                    dbTableIndexes.addIndexByDsRow(indexesRs);
-                                }
+                                indexesRs.getCurrent().stream().forEach((r) -> {
+                                    try {
+                                        dbTableIndexes.addIndexByDsRow(r);
+                                    } catch (InvalidColIndexException | InvalidCursorPositionException ex) {
+                                        Logger.getLogger(DatabaseMdCache.class.getName()).log(Level.SEVERE, null, ex);
+                                    }
+                                });
                                 dbTableIndexes.sortIndexesColumns();
                             }
                             return dbTableIndexes;

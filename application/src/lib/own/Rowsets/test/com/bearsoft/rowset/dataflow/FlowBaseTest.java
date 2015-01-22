@@ -5,15 +5,12 @@
 package com.bearsoft.rowset.dataflow;
 
 import com.bearsoft.rowset.Converter;
-import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.resourcepool.BearCallableStatement;
 import com.bearsoft.rowset.resourcepool.BearDatabaseConnection;
 import com.bearsoft.rowset.resourcepool.BearPreparedStatement;
 import com.bearsoft.rowset.resourcepool.BearResourcePool;
 import java.io.PrintWriter;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
@@ -53,10 +50,8 @@ public class FlowBaseTest {
     public void dummyTest() {
     }
 
-    public class JdbcFlowProviderAdapter<JKT> extends JdbcFlowProvider<JKT> {
+    public static class JdbcFlowProviderAdapter<JKT> extends JdbcFlowProvider<JKT> {
 
-        protected List<Change> changeLog = new ArrayList<>();
-        
         public JdbcFlowProviderAdapter(JKT aJdbcSourceTag, DataSource aDataSource, Converter aConverter, String aClause) {
             super(aJdbcSourceTag, aDataSource, null, aConverter, aClause, null);
         }
@@ -73,18 +68,9 @@ public class FlowBaseTest {
         public String getEntityId() {
             return "testEntity";
         }
-
-        @Override
-        public List<Change> getChangeLog() {
-            return changeLog;
-        }
-
-        public void commit(Connection aConnection) throws Exception
-        {
-        }
     }
 
-    protected class ObservingResourcesProvider extends BearResourcePool<BearDatabaseConnection> implements DataSource {
+    public static class ObservingResourcesProvider extends BearResourcePool<BearDatabaseConnection> implements DataSource {
 
         protected String url;
         protected Properties props;

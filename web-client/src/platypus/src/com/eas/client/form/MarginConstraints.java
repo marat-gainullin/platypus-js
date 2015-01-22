@@ -5,6 +5,7 @@ import com.google.gwt.dom.client.Style;
 public class MarginConstraints {
 
 	public static class Margin {
+
 		public int value;
 		public Style.Unit unit = Style.Unit.PX;
 
@@ -16,21 +17,6 @@ public class MarginConstraints {
 			super();
 			value = aValue;
 			unit = aUnit;
-		}
-
-		public Margin(String aDefinition) {
-			super();
-			String definition = aDefinition.toLowerCase();
-			if (definition.endsWith(Style.Unit.PX.getType())) {
-				value = Integer.valueOf(aDefinition.substring(0, aDefinition.length() - 2));
-				unit = Style.Unit.PX;
-			} else if (definition.endsWith(Style.Unit.PCT.getType())) {
-				value = Integer.valueOf(aDefinition.substring(0, aDefinition.length() - 1));
-				unit = Style.Unit.PCT;
-			} else {
-				value = Integer.valueOf(definition);
-				unit = Style.Unit.PX;
-			}
 		}
 
 		public void setPlainValue(int aValue, int aContainerSize) {
@@ -45,6 +31,23 @@ public class MarginConstraints {
 				return value;
 			else
 				return Math.round((float) value / (float) 100 * (float) aContainerSize);
+		}
+		
+		public static Margin parse(String aDefinition) {
+			String definition = aDefinition.toLowerCase();
+			Style.Unit unit;
+			int value;
+			if (definition.endsWith(Style.Unit.PX.getType())) {
+				value = Integer.valueOf(aDefinition.substring(0, aDefinition.length() - 2));
+				unit = Style.Unit.PX;
+			} else if (definition.endsWith(Style.Unit.PCT.getType())) {
+				value = Integer.valueOf(aDefinition.substring(0, aDefinition.length() - 1));
+				unit = Style.Unit.PCT;
+			} else {
+				value = Integer.valueOf(definition);
+				unit = Style.Unit.PX;
+			}
+			return new Margin(value, unit);
 		}
 	}
 

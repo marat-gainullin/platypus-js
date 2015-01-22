@@ -5,9 +5,8 @@
 package com.bearsoft.gui.grid.header.cell;
 
 import com.bearsoft.gui.grid.IconCache;
-import com.bearsoft.gui.grid.header.GridColumnsGroup;
+import com.bearsoft.gui.grid.header.GridColumnsNode;
 import com.bearsoft.gui.grid.header.MultiLevelHeader;
-import com.eas.gui.CascadedStyle;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -23,6 +22,7 @@ import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
+import javax.swing.JButton;
 import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -37,16 +37,15 @@ import javax.swing.text.View;
 
 /**
  *
- * @author Gala
+ * @author mg
  */
-public class HeaderCell extends JEditorPane implements PropertyChangeListener {
+public class HeaderCell extends JEditorPane {
 
-    public static final Color defaultBackgroundColor = (new CascadedStyle()).getBackground();
     public static final Color defaultEdgeColor = new Color(118, 187, 246);
     public static final Color defaultBottomColor = new Color(248, 169, 0);
     public static final Color defaultBottomLightColor = new Color(252, 194, 71);
-    private static int SORTING_INDEX_TEXT_INSET = 2;
-    private static Font SORTING_ORDER_FONT = new Font(Font.SERIF, 0, 9);
+    private static final int SORTING_INDEX_TEXT_INSET = 2;
+    private static final Font SORTING_ORDER_FONT = new Font(Font.SERIF, 0, 9);
     public static final String HTML_TEMPLATE = ""
             + "<html>"
             + "  <head>"
@@ -58,7 +57,7 @@ public class HeaderCell extends JEditorPane implements PropertyChangeListener {
             + "  </body>"
             + "</html>";
     protected MultiLevelHeader header;
-    protected GridColumnsGroup colGroup;
+    protected GridColumnsNode colGroup;
     protected JPanel samplePanel = new JPanel();
     protected boolean rolledover = false;
     protected boolean leftRolledover = false;
@@ -66,28 +65,29 @@ public class HeaderCell extends JEditorPane implements PropertyChangeListener {
     protected Color uiEdgeColor;
     protected Color rolledOverOutlineColor = new Color(168, 216, 235);
     protected Color rolledOverFillColor = new Color(231, 239, 243);
-    protected PropertyChangeListener groupListener = new PropertyChangeListener() {
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-            if ("style".equals(evt.getPropertyName())) {
-                applyStyle();
-            }
+    protected PropertyChangeListener groupListener = (PropertyChangeEvent evt) -> {
+        if ("background".equals(evt.getPropertyName())) {
+            setBackground((Color) evt.getNewValue());
+        } else if ("foreground".equals(evt.getPropertyName())) {
+            setForeground((Color) evt.getNewValue());
+        } else if ("font".equals(evt.getPropertyName())) {
+            setFont((Font) evt.getNewValue());
+        } else if ("title".equals(evt.getPropertyName())
+                && (evt.getNewValue() == null || evt.getNewValue() instanceof String)) {
+            applyTitle();
+        } else if ("width".equals(evt.getPropertyName()) || "preferredWidth".equals(evt.getPropertyName())
+                || "maxWidth".equals(evt.getPropertyName()) || "minWidth".equals(evt.getPropertyName())) {
+            invalidate();
         }
     };
 
-    public HeaderCell(GridColumnsGroup aColGroup, MultiLevelHeader aHeader) {
+    public HeaderCell(GridColumnsNode aColGroup, MultiLevelHeader aHeader) {
         super();
-        setColGroup(aColGroup);
-        header = aHeader;
         setEditable(false);
         setFocusable(false);
         setContentType("text/html");
-        String title = colGroup.getTitle();
-        if (title == null || title.isEmpty()) {
-            title = colGroup.getName();
-        }
-        setText(String.format(HTML_TEMPLATE, getFont().getFamily(), getFont().getSize(), getFont().isBold() ? "bold" : "normal", title));
-        applyStyle();
+        header = aHeader;
+        setColGroup(aColGroup);
         setBorder(createCellRaisedBorder());
         setAutoscrolls(false);
         CellHighlighter highlighter = new CellHighlighter(this);
@@ -103,51 +103,33 @@ public class HeaderCell extends JEditorPane implements PropertyChangeListener {
         addMouseListener(toggler);
         setOpaque(false);
         updateUIData();
-        if (colGroup.getTableColumn() != null) {
-            colGroup.getTableColumn().addPropertyChangeListener(this);
-        }
         setDoubleBuffered(true);
         setOpaque(false);
+        putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
     }
 
-    public void applyStyle() {        
-        if (getBackground() != colGroup.getStyle().getBackground() && (getBackground() == null || !getBackground().equals(colGroup.getStyle().getBackground()))) {
-            setBackground(colGroup.getStyle().getBackground());
-        }
-        if (getForeground() != colGroup.getStyle().getForeground() && (getForeground() == null || !getForeground().equals(colGroup.getStyle().getForeground()))) {
-            setForeground(colGroup.getStyle().getForeground());
-        }
-        setFont(toNativeFont(colGroup.getStyle().getFont()));
-        String title = colGroup.getTitle();
-        if (title == null || title.isEmpty()) {
-            title = colGroup.getName();
-        }
-        setText(String.format(HTML_TEMPLATE, getFont().getFamily(), getFont().getSize(), getFont().isBold() ? "bold" : "normal", title));
-    }
-
-    public static java.awt.Font toNativeFont(com.eas.gui.Font aFont) {
-        return new java.awt.Font(aFont.getFamily(), CascadedStyle.fontStyleToNativeFontStyle(aFont.getStyle()), aFont.getSize());
-    }
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getSource() == colGroup.getTableColumn()) {
-            if ("headerValue".equals(evt.getPropertyName())
-                    && evt.getNewValue() instanceof String) {
-                setText(String.format(HTML_TEMPLATE, getFont().getFamily(), getFont().getSize(), getFont().isBold() ? "bold" : "normal", (String) evt.getNewValue()));
-            } else if ("width".equals(evt.getPropertyName()) && evt.getNewValue() instanceof Integer) {
-                invalidate();
-            }
+    protected void applyTitle() {
+        if (colGroup != null) {
+            String title = colGroup.getTitle();
+            setText(String.format(HTML_TEMPLATE, getFont().getFamily(), getFont().getSize(), getFont().isBold() ? "bold" : "normal", title != null ? title : ""));
         }
     }
 
     @Override
-    public void removeNotify() {
-        if (colGroup.getTableColumn() != null) {
-            colGroup.getTableColumn().removePropertyChangeListener(this);
-        }
-        super.removeNotify();
+    public void setFont(Font font) {
+        super.setFont(font);
+        applyTitle();
     }
+
+    @Override
+    public void setForeground(Color fg) {
+        super.setForeground(fg);
+    }
+    /*
+     public static java.awt.Font toNativeFont(com.eas.gui.Font aFont) {
+     return new java.awt.Font(aFont.getFamily(), CascadedStyle.fontStyleToNativeFontStyle(aFont.getStyle()), aFont.getSize());
+     }
+     */
 
     protected final void updateUIData() {
         uiEdgeColor = UIManager.getColor("InternalFrame.activeTitleGradient");
@@ -159,26 +141,41 @@ public class HeaderCell extends JEditorPane implements PropertyChangeListener {
 
     @Override
     public Dimension getMinimumSize() {
-        Dimension d = super.getMinimumSize();
-        View view = getUI().getRootView(this);
-        if (view != null) {
-            d.width = Math.round(view.getMinimumSpan(View.X_AXIS));
+        if (colGroup.isLeaf()) {
+            Dimension d = super.getMinimumSize();
+            View view = getUI().getRootView(this);
+            if (view != null) {
+                d.width = Math.round(view.getMinimumSpan(View.X_AXIS));
+            }
+            return new Dimension(Math.max(d.width, colGroup.getMinWidth()), d.height);
+        } else {
+            Dimension d = super.getPreferredSize();
+            return new Dimension(0, d.height);
         }
-        return new Dimension(Math.max(d.width, colGroup.getMinWidth()), d.height);
     }
 
     @Override
     public Dimension getMaximumSize() {
-        Dimension d = super.getMaximumSize();
-        return new Dimension(Math.min(d.width, colGroup.getMaxWidth()), d.height);
+        if (colGroup.isLeaf()) {
+            Dimension d = super.getMaximumSize();
+            return new Dimension(Math.min(d.width, colGroup.getMaxWidth()), d.height);
+        } else {
+            Dimension d = super.getPreferredSize();
+            return new Dimension(Integer.MAX_VALUE, d.height);
+        }
     }
 
     @Override
     public Dimension getPreferredSize() {
-        int colGroupPWidth = colGroup.getWidth();
-        setSize(colGroupPWidth, Integer.MAX_VALUE / 2);
-        Dimension d = super.getPreferredSize();
-        return new Dimension(colGroupPWidth, d.height);
+        if (colGroup.isLeaf()) {
+            int colGroupPWidth = colGroup.getWidth();
+            setSize(colGroupPWidth, Integer.MAX_VALUE / 2);
+            Dimension d = super.getPreferredSize();
+            return new Dimension(colGroupPWidth, d.height);
+        } else {
+            Dimension d = super.getPreferredSize();
+            return new Dimension(0, d.height);
+        }
     }
 
     private int checkSortOrder() {
@@ -219,17 +216,20 @@ public class HeaderCell extends JEditorPane implements PropertyChangeListener {
         }
     }
 
-    public GridColumnsGroup getColGroup() {
+    public GridColumnsNode getColGroup() {
         return colGroup;
     }
 
-    public void setColGroup(GridColumnsGroup aValue) {
-        if (colGroup != null) {
-            colGroup.getChangeSupport().removePropertyChangeListener(groupListener);
-        }
-        colGroup = aValue;
-        if (colGroup != null) {
-            colGroup.getChangeSupport().addPropertyChangeListener(groupListener);
+    public void setColGroup(GridColumnsNode aValue) {
+        if (colGroup != aValue) {
+            if (colGroup != null) {
+                colGroup.getChangeSupport().removePropertyChangeListener(groupListener);
+            }
+            colGroup = aValue;
+            if (colGroup != null) {
+                colGroup.getChangeSupport().addPropertyChangeListener(groupListener);
+            }
+            applyTitle();
         }
     }
 
@@ -291,9 +291,6 @@ public class HeaderCell extends JEditorPane implements PropertyChangeListener {
             Dimension d = getSize();
             if (leftRolledover || rightRolledover) {
                 g2d.setColor(rolledOverFillColor);
-                g2d.fillRect(0, 0, d.width, d.height);
-            } else if (!defaultBackgroundColor.equals(getBackground())) {// isOpaque() is replaced with non-default background color
-                g2d.setColor(getBackground());
                 g2d.fillRect(0, 0, d.width, d.height);
             }
             if (getColGroup().isLeaf() && !rolledover && !leftRolledover && !rightRolledover) {

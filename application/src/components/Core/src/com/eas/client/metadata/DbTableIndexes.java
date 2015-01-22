@@ -4,7 +4,7 @@
  */
 package com.eas.client.metadata;
 
-import com.bearsoft.rowset.Rowset;
+import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
 import com.bearsoft.rowset.utils.CollectionEditingSupport;
@@ -42,8 +42,8 @@ public class DbTableIndexes {
         return indexes;
     }
 
-    public void addIndexByDsRow(Rowset indexesRs) throws InvalidColIndexException, InvalidCursorPositionException {
-        Object oIdxName = indexesRs.getObject(indexesRs.getFields().find(ClientConstants.JDBCIDX_INDEX_NAME));
+    public void addIndexByDsRow(Row aRow) throws InvalidColIndexException, InvalidCursorPositionException {
+        Object oIdxName = aRow.getColumnObject(aRow.getFields().find(ClientConstants.JDBCIDX_INDEX_NAME));
         if (oIdxName != null && oIdxName instanceof String) {
             String idxName = (String) oIdxName;
             DbTableIndexSpec idxSpec = indexes.get(idxName);
@@ -53,7 +53,7 @@ public class DbTableIndexes {
                 indexes.put(idxName, idxSpec);
                 collectionSupport.fireElementAdded(idxSpec);
             }
-            Object oNonUnique = indexesRs.getObject(indexesRs.getFields().find(ClientConstants.JDBCIDX_NON_UNIQUE));
+            Object oNonUnique = aRow.getColumnObject(aRow.getFields().find(ClientConstants.JDBCIDX_NON_UNIQUE));
             if (oNonUnique != null) {
                 boolean isUnique = false;
                 if (oNonUnique instanceof Number) {
@@ -61,7 +61,7 @@ public class DbTableIndexes {
                 }
                 idxSpec.setUnique(isUnique);
             }
-            Object oType = indexesRs.getObject(indexesRs.getFields().find(ClientConstants.JDBCIDX_TYPE));
+            Object oType = aRow.getColumnObject(aRow.getFields().find(ClientConstants.JDBCIDX_TYPE));
             if (oType != null) {
                 if (oType instanceof Number) {
                     short type = ((Number) oType).shortValue();
@@ -81,7 +81,7 @@ public class DbTableIndexes {
                     }
                 }
             }
-            Object oColumnName = indexesRs.getObject(indexesRs.getFields().find(ClientConstants.JDBCIDX_COLUMN_NAME));
+            Object oColumnName = aRow.getColumnObject(aRow.getFields().find(ClientConstants.JDBCIDX_COLUMN_NAME));
             if (oColumnName != null && oColumnName instanceof String) {
                 String sColumnName = (String) oColumnName;
                 DbTableIndexColumnSpec column = idxSpec.getColumn(sColumnName);
@@ -89,18 +89,18 @@ public class DbTableIndexes {
                     column = new DbTableIndexColumnSpec(sColumnName, true);
                     idxSpec.addColumn(column);
                 }
-                Object oAsc = indexesRs.getObject(indexesRs.getFields().find(ClientConstants.JDBCIDX_ASC_OR_DESC));
+                Object oAsc = aRow.getColumnObject(aRow.getFields().find(ClientConstants.JDBCIDX_ASC_OR_DESC));
                 if (oAsc != null && oAsc instanceof String) {
                     String sAsc = (String) oAsc;
                     column.setAscending(sAsc.toLowerCase().equals("a"));
                 }
-                Object oPosition = indexesRs.getObject(indexesRs.getFields().find(ClientConstants.JDBCIDX_ORDINAL_POSITION));
+                Object oPosition = aRow.getColumnObject(aRow.getFields().find(ClientConstants.JDBCIDX_ORDINAL_POSITION));
                 if (oPosition != null && oPosition instanceof Number) {
                     column.setOrdinalPosition((int)((Number)oPosition).shortValue());
                 }
             }
             //???
-            Object oPKey = indexesRs.getObject(indexesRs.getFields().find(ClientConstants.JDBCIDX_PRIMARY_KEY));
+            Object oPKey = aRow.getColumnObject(aRow.getFields().find(ClientConstants.JDBCIDX_PRIMARY_KEY));
             if (oPKey != null) {
                 boolean isPKey = false;
                 if (oPKey instanceof Number) {
@@ -109,7 +109,7 @@ public class DbTableIndexes {
                 idxSpec.setPKey(isPKey);
             }
             //???
-            Object oFKeyName = indexesRs.getObject(indexesRs.getFields().find(ClientConstants.JDBCIDX_FOREIGN_KEY));
+            Object oFKeyName = aRow.getColumnObject(aRow.getFields().find(ClientConstants.JDBCIDX_FOREIGN_KEY));
             if (oFKeyName != null && oFKeyName instanceof String) {
                 String fKeyName = (String) oFKeyName;
                 idxSpec.setFKeyName(fKeyName);

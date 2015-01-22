@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.components.ProgressBar");
+    var javaClass = Java.type("com.eas.client.forms.components.ProgressBar");
     javaClass.setPublisher(function(aDelegate) {
         return new P.ProgressBar(null, null, aDelegate);
     });
@@ -60,20 +60,6 @@
              */
             P.ProgressBar.prototype.onMouseDragged = {};
         }
-        Object.defineProperty(this, "parent", {
-            get: function() {
-                var value = delegate.parent;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ProgressBar){
-            /**
-             * Gets the parent of this component.
-             * @property parent
-             * @memberOf ProgressBar
-             */
-            P.ProgressBar.prototype.parent = {};
-        }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
                 var value = delegate.onMouseReleased;
@@ -107,6 +93,23 @@
              * @memberOf ProgressBar
              */
             P.ProgressBar.prototype.onFocusLost = {};
+        }
+        Object.defineProperty(this, "onValueChange", {
+            get: function() {
+                var value = delegate.onValueChange;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onValueChange = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ProgressBar){
+            /**
+             * Value change handler.
+             * @property onValueChange
+             * @memberOf ProgressBar
+             */
+            P.ProgressBar.prototype.onValueChange = {};
         }
         Object.defineProperty(this, "onMousePressed", {
             get: function() {
@@ -146,6 +149,9 @@
             get: function() {
                 var value = delegate.error;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.error = P.boxAsJava(aValue);
             }
         });
         if(!P.ProgressBar){
@@ -241,6 +247,20 @@
              * @memberOf ProgressBar
              */
             P.ProgressBar.prototype.onComponentResized = {};
+        }
+        Object.defineProperty(this, "parent", {
+            get: function() {
+                var value = delegate.parentWidget;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ProgressBar){
+            /**
+             * Parent container of this widget.
+             * @property parentWidget
+             * @memberOf ProgressBar
+             */
+            P.ProgressBar.prototype.parent = {};
         }
         Object.defineProperty(this, "text", {
             get: function() {
@@ -443,23 +463,6 @@
              */
             P.ProgressBar.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ProgressBar){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf ProgressBar
-             */
-            P.ProgressBar.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -476,6 +479,23 @@
              * @memberOf ProgressBar
              */
             P.ProgressBar.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ProgressBar){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf ProgressBar
+             */
+            P.ProgressBar.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

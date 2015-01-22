@@ -46,7 +46,6 @@ package com.bearsoft.org.netbeans.modules.form.layoutsupport;
 import com.bearsoft.org.netbeans.modules.form.*;
 import java.awt.*;
 import java.beans.*;
-import org.openide.nodes.Node;
 
 /**
  * Meta component representing a LayoutManager instance as a JavaBean.
@@ -55,7 +54,7 @@ import org.openide.nodes.Node;
  */
 public class RADLayout extends RADComponent<LayoutManager> {
 
-    private AbstractLayoutSupport abstLayoutDelegate;
+    private final AbstractLayoutSupport abstLayoutDelegate;
 
     public RADLayout(AbstractLayoutSupport layoutDelegate,
             LayoutManager lmInstance) {
@@ -66,26 +65,11 @@ public class RADLayout extends RADComponent<LayoutManager> {
     }
 
     @Override
-    protected void createPropertySets(java.util.List<Node.PropertySet> propSets) {
-        super.createPropertySets(propSets);
-        // RADComponent provides also Code Generation properties for which
-        // we have no use here (yet) - so we remove them now
-        for (int i = 0, n = propSets.size(); i < n; i++) {
-            Node.PropertySet propSet = propSets.get(i);
-            if (!"properties".equals(propSet.getName()) // NOI18N
-                    && !"properties2".equals(propSet.getName())) { // NOI18N
-                propSets.remove(i);
-                i--;
-                n--;
-            }
-        }
-    }
-
-    @Override
-    protected PropertyChangeListener createPropertyListener() {
+    protected RADProperty<?> createBeanProperty(PropertyDescriptor desc) {
+        RADProperty<?> res = super.createBeanProperty(desc);
         // cannot reuse RADComponent.PropertyListener, because this is not
         // a regular RADComponent (properties have a special meaning)
-        return null;
+        res.removePropertyChangeListener(propertyListener);
+        return res;
     }
-
 }

@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.menu.RadioMenuItem");
+    var javaClass = Java.type("com.eas.client.forms.menu.RadioMenuItem");
     javaClass.setPublisher(function(aDelegate) {
         return new P.RadioMenuItem(null, null, null, aDelegate);
     });
@@ -61,20 +61,6 @@
              * @memberOf RadioMenuItem
              */
             P.RadioMenuItem.prototype.onMouseDragged = {};
-        }
-        Object.defineProperty(this, "parent", {
-            get: function() {
-                var value = delegate.parent;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.RadioMenuItem){
-            /**
-             * The parent container.
-             * @property parent
-             * @memberOf RadioMenuItem
-             */
-            P.RadioMenuItem.prototype.parent = {};
         }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
@@ -148,6 +134,9 @@
             get: function() {
                 var value = delegate.error;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.error = P.boxAsJava(aValue);
             }
         });
         if(!P.RadioMenuItem){
@@ -192,6 +181,23 @@
              * @memberOf RadioMenuItem
              */
             P.RadioMenuItem.prototype.onComponentMoved = {};
+        }
+        Object.defineProperty(this, "jsValue", {
+            get: function() {
+                var value = delegate.jsValue;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.jsValue = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.RadioMenuItem){
+            /**
+             * Widget's value.
+             * @property jsValue
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.jsValue = {};
         }
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {
@@ -243,6 +249,20 @@
              * @memberOf RadioMenuItem
              */
             P.RadioMenuItem.prototype.onComponentResized = {};
+        }
+        Object.defineProperty(this, "parent", {
+            get: function() {
+                var value = delegate.parentWidget;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.RadioMenuItem){
+            /**
+             * Parent container of this widget.
+             * @property parentWidget
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.parent = {};
         }
         Object.defineProperty(this, "text", {
             get: function() {
@@ -374,23 +394,6 @@
              */
             P.RadioMenuItem.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "buttonGroup", {
-            get: function() {
-                var value = delegate.buttonGroup;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.buttonGroup = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.RadioMenuItem){
-            /**
-             * The ButtonGroup this component belongs to.
-             * @property buttonGroup
-             * @memberOf RadioMenuItem
-             */
-            P.RadioMenuItem.prototype.buttonGroup = {};
-        }
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
@@ -424,6 +427,23 @@
              * @memberOf RadioMenuItem
              */
             P.RadioMenuItem.prototype.visible = true;
+        }
+        Object.defineProperty(this, "buttonGroup", {
+            get: function() {
+                var value = delegate.buttonGroup;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.buttonGroup = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.RadioMenuItem){
+            /**
+             * The ButtonGroup this component belongs to.
+             * @property buttonGroup
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.buttonGroup = {};
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
@@ -459,23 +479,6 @@
              */
             P.RadioMenuItem.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.RadioMenuItem){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf RadioMenuItem
-             */
-            P.RadioMenuItem.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -492,6 +495,23 @@
              * @memberOf RadioMenuItem
              */
             P.RadioMenuItem.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.RadioMenuItem){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

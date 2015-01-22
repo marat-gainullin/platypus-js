@@ -4,7 +4,7 @@
  */
 package com.bearsoft.gui.grid.header.cell;
 
-import com.bearsoft.gui.grid.header.GridColumnsGroup;
+import com.bearsoft.gui.grid.header.GridColumnsNode;
 import com.bearsoft.gui.grid.header.MultiLevelHeader;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -75,7 +75,7 @@ public class CellMover extends MouseAdapter {
                         leftHighlight = false;
                     }
                     // end of ajusting block
-                    if (targetCell.getColGroup().isMoveable()) {
+                    if (targetCell.getColGroup().isMovable()) {
                         if (targetIndex < selfIndex || (targetIndex - selfIndex) > 1) {
                             if (leftHighlight) {
                                 targetCell.setLeftRolledover(true);
@@ -93,11 +93,11 @@ public class CellMover extends MouseAdapter {
     public void mouseReleased(MouseEvent e) {
         MultiLevelHeader header = cell.getHeader();
         if (selfIndex != -1 && targetIndex != -1) {
-            GridColumnsGroup targetColGroup = neightbourColGroup(targetIndex);
-            if (targetColGroup == null || targetColGroup.isMoveable()) {
+            GridColumnsNode targetColGroup = neightbourColGroup(targetIndex);
+            if (targetColGroup == null || targetColGroup.isMovable()) {
                 TableColumnModel columnModel = header.getColumnModel();
-                GridColumnsGroup movingColGroup = getNeightbourByIndex(selfIndex);
-                List<GridColumnsGroup> leaves = new ArrayList<>();
+                GridColumnsNode movingColGroup = getNeightbourByIndex(selfIndex);
+                List<GridColumnsNode> leaves = new ArrayList<>();
                 MultiLevelHeader.achieveLeaves(movingColGroup, leaves);
                 TableColumn movingTableColumn = leaves.get(0).getTableColumn();
                 int movingTableColumnIndex = getTableColumnIndex(columnModel, movingTableColumn);
@@ -108,8 +108,8 @@ public class CellMover extends MouseAdapter {
                 }
                 int targetTableColumnIndex = calcTargetColumnIndex(columnModel);
                 // Actual work. It will produce events, but we have to disable them
-                header.getColumnModelListener().setEventsEnabled(false);
-                try {
+                //header.getColumnModelListener().setEventsEnabled(false);
+                //try {
                     for (int i = 0; i < movingColumns.size(); i++) {
                         if (movingTableColumnIndex > targetTableColumnIndex) {
                             columnModel.moveColumn(movingTableColumnIndex + i, targetTableColumnIndex + i);
@@ -117,9 +117,9 @@ public class CellMover extends MouseAdapter {
                             columnModel.moveColumn(movingTableColumnIndex, targetTableColumnIndex - 1);
                         }
                     }
-                } finally {
-                    header.getColumnModelListener().setEventsEnabled(true);
-                }
+//                } finally {
+//                    header.getColumnModelListener().setEventsEnabled(true);
+//                }
                 if (selfIndex < targetIndex) {
                     moveColGroup(selfIndex, targetIndex - 1);
                 } else {
@@ -139,8 +139,8 @@ public class CellMover extends MouseAdapter {
     }
 
     private int calcTargetColumnIndex(TableColumnModel columnModel) {
-        List<GridColumnsGroup> leaves = new ArrayList<>();
-        GridColumnsGroup targetColGroup = getNeightbourByIndex(targetIndex);
+        List<GridColumnsNode> leaves = new ArrayList<>();
+        GridColumnsNode targetColGroup = getNeightbourByIndex(targetIndex);
         if (targetColGroup == null) {
             targetColGroup = getNeightbourByIndex(targetIndex - 1);
             assert targetColGroup != null;
@@ -156,7 +156,7 @@ public class CellMover extends MouseAdapter {
         }
     }
 
-    private int getIndexInParent(GridColumnsGroup aColGroup) {
+    private int getIndexInParent(GridColumnsNode aColGroup) {
         if (aColGroup.getParent() == null) {
             return cell.getHeader().getRoots().indexOf(aColGroup);
         } else {
@@ -164,8 +164,8 @@ public class CellMover extends MouseAdapter {
         }
     }
 
-    private GridColumnsGroup getNeightbourByIndex(int aIndex) {
-        GridColumnsGroup parent = cell.getColGroup().getParent();
+    private GridColumnsNode getNeightbourByIndex(int aIndex) {
+        GridColumnsNode parent = cell.getColGroup().getParent();
         if (parent != null) {
             if (aIndex >= 0 && aIndex < parent.getChildren().size()) {
                 return parent.getChildren().get(aIndex);
@@ -190,8 +190,8 @@ public class CellMover extends MouseAdapter {
         return -1;
     }
 
-    private GridColumnsGroup neightbourColGroup(int targetIndex) {
-        List<GridColumnsGroup> neightbours = null;
+    private GridColumnsNode neightbourColGroup(int targetIndex) {
+        List<GridColumnsNode> neightbours = null;
         if (cell.getColGroup().getParent() != null) {
             neightbours = cell.getColGroup().getParent().getChildren();
         } else {
@@ -201,13 +201,13 @@ public class CellMover extends MouseAdapter {
     }
 
     private void moveColGroup(int aSelfIndex, int aTargetIndex) {
-        List<GridColumnsGroup> neightbours = null;
+        List<GridColumnsNode> neightbours = null;
         if (cell.getColGroup().getParent() != null) {
             neightbours = cell.getColGroup().getParent().getChildren();
         } else {
             neightbours = cell.getHeader().getRoots();
         }
-        GridColumnsGroup moving = neightbours.remove(aSelfIndex);
+        GridColumnsNode moving = neightbours.remove(aSelfIndex);
         neightbours.add(aTargetIndex, moving);
     }
 }

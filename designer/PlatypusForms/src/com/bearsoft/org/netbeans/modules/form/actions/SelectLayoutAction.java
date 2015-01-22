@@ -46,7 +46,7 @@ package com.bearsoft.org.netbeans.modules.form.actions;
 import com.bearsoft.org.netbeans.modules.form.*;
 import com.bearsoft.org.netbeans.modules.form.palette.PaletteItem;
 import com.bearsoft.org.netbeans.modules.form.palette.PaletteUtils;
-import com.eas.controls.layouts.margin.MarginLayout;
+import com.eas.client.forms.layouts.MarginLayout;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -213,10 +213,7 @@ public class SelectLayoutAction extends CallableSystemAction {
 
         private boolean isContainersLayout(RADVisualContainer<?> container, PaletteItem layout) {
             return container != null && container.getLayoutSupport() != null
-                    && (container.getLayoutSupport().getLayoutDelegate().getSupportedClass() == layout.getComponentClass()
-                    || (container.getLayoutSupport().getLayoutDelegate().getClass() == com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.NullLayoutSupport.class
-                    && layout.getComponentClass() == com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.NullLayoutSupport.class)
-                    && container.getLayoutSupport() != null);
+                    && container.getLayoutSupport().getLayoutDelegate().getSupportedClass() == layout.getComponentClass();
         }
 
         private static void setBoldFontForMenuText(JMenuItem mi) {

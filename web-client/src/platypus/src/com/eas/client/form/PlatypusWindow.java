@@ -26,15 +26,13 @@ import com.bearsoft.gwt.ui.containers.window.events.MoveEvent;
 import com.bearsoft.gwt.ui.containers.window.events.MoveHandler;
 import com.bearsoft.gwt.ui.containers.window.events.RestoreEvent;
 import com.bearsoft.gwt.ui.containers.window.events.RestoreHandler;
-import com.bearsoft.rowset.CallbackAdapter;
 import com.bearsoft.rowset.Utils;
 import com.eas.client.application.AppClient;
-import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.form.js.JsEvents;
-import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.HasJsName;
+import com.eas.client.form.published.HasPublished;
+import com.eas.client.form.published.PublishedComponent;
 import com.eas.client.form.published.containers.AnchorsPane;
-import com.eas.client.form.published.menu.PlatypusMenuBar;
 import com.eas.client.form.published.widgets.DesktopPane;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -42,13 +40,10 @@ import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.event.logical.shared.OpenHandler;
-import com.google.gwt.event.logical.shared.ResizeEvent;
-import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.touch.client.Point;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xhr.client.XMLHttpRequest;
 
@@ -89,14 +84,10 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 		}
 	}
 
-	protected double viewPreferredWidth;
-	protected double viewPreferredHeight;
 	protected JavaScriptObject published;
 
 	protected ToolsCaption caption;
-	protected String iconImage;
 	protected Point location;
-	protected Point viewSize;
 	protected Widget view;
 	protected WindowPopupPanel popup;
 
@@ -138,13 +129,6 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 				location = p;
 			}
 		});
-		addResizeHandler(new ResizeHandler() {
-
-			@Override
-			public void onResize(ResizeEvent event) {
-				viewSize = new Point(event.getWidth(), event.getHeight());
-			}
-		});
 		setClosable(true);
 		setMaximizable(maximizable);
 		setMinimizable(minimizable);
@@ -155,18 +139,6 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 
 		caption.setHTML(title);
 		caption.setText(title);
-		if (iconImage != null && !iconImage.isEmpty())
-			PlatypusImageResource.load(iconImage, new CallbackAdapter<ImageResource, String>() {
-				@Override
-				protected void doWork(ImageResource aResult) throws Exception {
-					setIcon(aResult);
-				}
-
-				@Override
-				public void onFailure(String reason) {
-					Logger.getLogger(PlatypusWindow.class.getName()).log(Level.SEVERE, "Window failed to load title icon. " + reason);
-				}
-			});
 		registerWindowListeners();
 	}
 
@@ -196,8 +168,6 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 		if (published != aValue) {
 			published = aValue;
 			publishFormFacade(published, view, this);
-			if (view instanceof HasWidgets)
-				publishComponentsFacades(published, (HasWidgets) view);
 		}
 	}
 
@@ -206,22 +176,6 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 			handlersResolver.run();
 			handlersResolver = null;
 		}
-	}
-
-	public double getViewPreferredWidth() {
-		return viewPreferredWidth;
-	}
-
-	public void setViewPreferredWidth(double aWidth) {
-		viewPreferredWidth = aWidth;
-	}
-
-	public double getViewPreferredHeight() {
-		return viewPreferredHeight;
-	}
-
-	public void setViewPreferredHeight(double aHeight) {
-		viewPreferredHeight = aHeight;
 	}
 
 	public JavaScriptObject submit(String aAction, final JavaScriptObject aDoneCallback) {
@@ -271,9 +225,8 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	public void show(boolean aModal, final JavaScriptObject aCallback, DesktopPane aDesktop) {
 		popup = new WindowPopupPanel(this, autoHide, aModal);
 		popup.setWidget(view);
-		boolean wasSize = viewSize != null;
-		double actualWidth = wasSize ? viewSize.getX() : viewPreferredWidth;
-		double actualHeight = wasSize ? viewSize.getY() : viewPreferredHeight;
+		double actualWidth = view instanceof HasPublished ? ((HasPublished)view).getPublished().<PublishedComponent>cast().getWidth() : 0;
+		double actualHeight = view instanceof HasPublished ? ((HasPublished)view).getPublished().<PublishedComponent>cast().getHeight() : 0;
 		popup.setSize(actualWidth, actualHeight);
 		if (locationByPlatform) {
 			if (aDesktop != null) {
@@ -456,36 +409,6 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	protected native static void invokeDialogCallback(JavaScriptObject aCallback, Object aSelectedValue)/*-{
 		aCallback($wnd.P.boxAsJs(aSelectedValue));
 	}-*/;
-
-	// TODO: remove this code when ui branch will come
-	private void publishComponentsFacades(JavaScriptObject aTarget, HasWidgets aView) {
-		java.util.Iterator<Widget> wIt = aView.iterator();
-		while (wIt.hasNext()) {
-			Widget w = wIt.next();
-			if (w instanceof HasJsName && w instanceof HasPublished) {
-				aTarget.<Utils.JsObject> cast().inject(((HasJsName) w).getJsName(), ((HasPublished) w).getPublished());
-			}
-			if (w instanceof HasWidgets){
-				publishComponentsFacades(aTarget, (HasWidgets) w);
-			}else if(w instanceof PlatypusMenuBar){
-				PlatypusMenuBar bar = (PlatypusMenuBar)w;
-				publishPlatypusMenuBarFacades(aTarget, bar);
-			} 
-		}
-	}
-
-	// TODO: remove this code when ui branch will come
-	private void publishPlatypusMenuBarFacades(JavaScriptObject aTarget, PlatypusMenuBar aView) {
-		for (int i = 0; i < aView.getCount(); i++) {
-			UIObject w = aView.getItem(i);
-			if (w instanceof HasJsName && w instanceof HasPublished) {
-				aTarget.<Utils.JsObject> cast().inject(((HasJsName) w).getJsName(), ((HasPublished) w).getPublished());
-			}
-			if (w instanceof PlatypusMenuBar){
-				publishPlatypusMenuBarFacades(aTarget, (PlatypusMenuBar) w);
-			} 
-		}
-	}
 	
 	protected native static void publishFormFacade(JavaScriptObject aPublished, Widget aView, PlatypusWindow aForm)/*-{
         Object.defineProperty(aPublished, "view", {
@@ -757,14 +680,6 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
         })();
     }-*/;
 
-	public String getIconImage() {
-		return iconImage;
-	}
-
-	public void setIconImage(String aValue) {
-		iconImage = aValue;
-	}
-
 	public int getDefaultCloseOperation() {
 		return defaultCloseOperation;
 	}
@@ -869,8 +784,6 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 
 	public void setWidth(double aValue) {
 		super.setWidth(aValue + "px");
-		if (viewSize == null)
-			viewPreferredWidth = aValue;
 	}
 
 	public double getHeight() {
@@ -879,8 +792,6 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 
 	public void setHeight(double aValue) {
 		super.setHeight(aValue + "px");
-		if (viewSize == null)
-			viewPreferredHeight = aValue;
 	}
 
 	@Override

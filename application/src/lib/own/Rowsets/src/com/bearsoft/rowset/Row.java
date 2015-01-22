@@ -1,6 +1,9 @@
 package com.bearsoft.rowset;
 
+import com.bearsoft.rowset.changes.Change;
+import com.bearsoft.rowset.changes.ChangeValue;
 import com.bearsoft.rowset.changes.Insert;
+import com.bearsoft.rowset.changes.Update;
 import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Field;
@@ -9,6 +12,7 @@ import com.bearsoft.rowset.utils.RowsetUtils;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
+import com.eas.script.ScriptUtils;
 import java.beans.*;
 import java.math.BigDecimal;
 import java.util.*;
@@ -22,10 +26,11 @@ import jdk.nashorn.api.scripting.JSObject;
 public class Row implements HasPublished {
 
     private static JSObject publisher;
+    //
+    protected String entityName;
+    protected List<Change> log;
     protected Fields fields;
     protected Converter converter = new RowsetConverter();
-    protected PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
-    protected VetoableChangeSupport vetoableChangeSupport = new VetoableChangeSupport(this);
     protected BitSet updated = new BitSet(10);
     protected boolean deleted;
     protected boolean inserted;
@@ -33,23 +38,33 @@ public class Row implements HasPublished {
     protected List<Object> currentValues = new ArrayList<>();
     protected Insert insertChange;
     protected JSObject published;
-
-    /**
-     * Row's POJO-like constructor.
-     */
-    public Row() {
-        super();
-    }
+    //
+    protected PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+    protected VetoableChangeSupport vetoableChangeSupport = new VetoableChangeSupport(this);
 
     /**
      * Constructs the row with column count equals to colCount values vectors
      * allocated.
      *
+     * @param aEntityName
      * @param aFields
      */
-    public Row(Fields aFields) {
+    public Row(String aEntityName, Fields aFields) {
         super();
+        entityName = aEntityName;
         setFields(aFields);
+    }
+
+    public List<Change> getLog() {
+        return log;
+    }
+
+    public void setLog(List<Change> aValue) {
+        log = aValue;
+    }
+
+    public void setEntityName(String aValue) {
+        entityName = aValue;
     }
 
     @Override
@@ -134,8 +149,16 @@ public class Row implements HasPublished {
         propertyChangeSupport.addPropertyChangeListener(l);
     }
 
+    public void addPropertyChangeListener(String aPropertyName, PropertyChangeListener l) {
+        propertyChangeSupport.addPropertyChangeListener(aPropertyName, l);
+    }
+
     public void removePropertyChangeListener(PropertyChangeListener l) {
         propertyChangeSupport.removePropertyChangeListener(l);
+    }
+
+    public void removePropertyChangeListener(String aPropertyName, PropertyChangeListener l) {
+        propertyChangeSupport.removePropertyChangeListener(aPropertyName, l);
     }
 
     public void addVetoableChangeListener(VetoableChangeListener l) {
@@ -277,45 +300,6 @@ public class Row implements HasPublished {
     }
 
     /**
-     * Sets current value of particular column.
-     *
-     * @param aColIndex ordinal position of the column. It's value lies within
-     * the range of [1: <code>getColumnCount()</code>].
-     * @param aColValue value that you whant to be setted to the column as the
-     * current column value.
-     * @return
-     * @throws InvalidColIndexException if colIndex < 1 or colIndex >
-     * <code>getColumnCount()</code>
-     */
-    public boolean setColumnObject(int aColIndex, Object aColValue) throws RowsetException {
-        if (aColIndex >= 1 && aColIndex <= getColumnCount()) {
-            Field field = fields.get(aColIndex);
-            if (converter != null) {
-                aColValue = converter.convert2RowsetCompatible(aColValue, field.getTypeInfo());
-            }
-            if (!smartEquals(getColumnObject(aColIndex), aColValue)) {
-                Object oldColValue = currentValues.get(aColIndex - 1);
-                PropertyChangeEvent event = new PropertyChangeEvent(this, field.getName(), oldColValue, aColValue);
-                event.setPropagationId(aColIndex);
-                if (checkChange(event)) {
-                    currentValues.set(aColIndex - 1, aColValue);
-                    updated.set(aColIndex - 1, true);
-                    propertyChangeSupport.firePropertyChange(event);
-                    return true;
-                }
-            }
-        } else {
-            if (aColIndex < 1) {
-                throw new InvalidColIndexException("colIndex < 1");
-            }
-            if (aColIndex > getColumnCount()) {
-                throw new InvalidColIndexException("colIndex > getColumnCount()");
-            }
-        }
-        return false;
-    }
-
-    /**
      * Returns current column value.
      *
      * @param colIndex ordinal position of the column. It's value lies within
@@ -335,6 +319,113 @@ public class Row implements HasPublished {
             } else {
                 throw new InvalidColIndexException("unexpected");
             }
+        }
+    }
+
+    /**
+     * Sets current value of particular column.
+     *
+     * @param aColIndex ordinal position of the column. It's value lies within
+     * the range of [1: <code>getColumnCount()</code>].
+     * @param aValue value that you whant to be setted to the column as the
+     * current column value.
+     * @return
+     * @throws InvalidColIndexException if colIndex < 1 or colIndex >
+     * <code>getColumnCount()</code>
+     */
+    public boolean setColumnObject(int aColIndex, Object aValue) throws RowsetException {
+        if (aColIndex >= 1 && aColIndex <= getColumnCount()) {
+            Field field = fields.get(aColIndex);
+            if (converter != null) {
+                aValue = converter.convert2RowsetCompatible(aValue, field.getTypeInfo());
+            }
+            if (!smartEquals(getColumnObject(aColIndex), aValue)) {
+                Object oldValue = currentValues.get(aColIndex - 1);
+                PropertyChangeEvent event = new PropertyChangeEvent(this, field.getName(), oldValue, aValue);
+                event.setPropagationId(aColIndex);
+                if (checkChange(event)) {
+                    Map<String, Object> expandedOldValues = new HashMap<>();
+                    Collection<String> expandings = fields.getOrmExpandings().get(field.getName());
+                    if (expandings != null) {
+                        expandings.stream().forEach((String aOrmScalarProperty) -> {
+                            expandedOldValues.put(aOrmScalarProperty, ScriptUtils.toJava(getPublished().getMember(aOrmScalarProperty)));
+                        });
+                    }
+                    currentValues.set(aColIndex - 1, aValue);
+                    updated.set(aColIndex - 1, true);
+                    generateUpdate(aColIndex, oldValue, aValue);
+                    propertyChangeSupport.firePropertyChange(event);
+                    if (expandings != null) {
+                        expandings.stream().forEach((String aOrmScalarProperty) -> {
+                            propertyChangeSupport.firePropertyChange(aOrmScalarProperty, expandedOldValues.get(aOrmScalarProperty), ScriptUtils.toJava(getPublished().getMember(aOrmScalarProperty)));
+                        });
+                    }
+                    return true;
+                }
+            }
+        } else {
+            if (aColIndex < 1) {
+                throw new InvalidColIndexException("colIndex < 1");
+            }
+            if (aColIndex > getColumnCount()) {
+                throw new InvalidColIndexException("colIndex > getColumnCount()");
+            }
+        }
+        return false;
+    }
+
+    protected void generateUpdate(int colIndex, Object oldValue, Object newValue) {
+        if (fields != null && log != null) {
+            Field field = fields.get(colIndex);
+            boolean insertComplemented = tryToComplementInsert(field, newValue);
+            if (!insertComplemented) {
+                Update update = new Update(entityName);
+                update.data = new ChangeValue[]{new ChangeValue(field.getName(), newValue, field.getTypeInfo())};
+                update.keys = generateChangeLogKeys(colIndex, this, oldValue);
+                log.add(update);
+            }
+        }
+    }
+
+    private boolean tryToComplementInsert(Field field, Object newValue) {
+        boolean insertComplemented = false;
+        if (insertChange != null && !insertChange.consumed && !field.isNullable()) {
+            boolean met = false;
+            for (ChangeValue value : insertChange.data) {
+                if (value.name.equalsIgnoreCase(field.getName())) {
+                    met = true;
+                    break;
+                }
+            }
+            if (!met) {
+                ChangeValue[] newdata = new ChangeValue[insertChange.data.length + 1];
+                newdata[newdata.length - 1] = new ChangeValue(field.getName(), newValue, field.getTypeInfo());
+                System.arraycopy(insertChange.data, 0, newdata, 0, insertChange.data.length);
+                insertChange.data = newdata;
+                insertComplemented = true;
+            }
+        }
+        return insertComplemented;
+    }
+
+    public static ChangeValue[] generateChangeLogKeys(int colIndex, Row aRow, Object oldValue) {
+        Fields fields = aRow.getFields();
+        if (fields != null) {
+            List<ChangeValue> keys = new ArrayList<>();
+            for (int i = 1; i <= fields.getFieldsCount(); i++) {
+                Field field = fields.get(i);
+                // Some tricky processing of primary keys modification case ...
+                if (field.isPk()) {
+                    Object value = aRow.currentValues.get(i - 1);
+                    if (i == colIndex) {
+                        value = oldValue;
+                    }
+                    keys.add(new ChangeValue(field.getName(), value, field.getTypeInfo()));
+                }
+            }
+            return keys.toArray(new ChangeValue[]{});
+        } else {
+            return null;
         }
     }
 
@@ -453,18 +544,6 @@ public class Row implements HasPublished {
     }
 
     /**
-     * Returns an internal representation of row's data. It's not recomended to
-     * add or remove any elements from the list returned. Furthermore, if you
-     * have changed some elements of the list, than you must set internal
-     * updated flags in some way.
-     *
-     * @return Internal row's data values list.
-     */
-    List<Object> getInternalCurrentValues() {
-        return currentValues;
-    }
-
-    /**
      * Tests if two values are equal to each other. It casts both values to big
      * decimal format if they are numbers.
      *
@@ -496,7 +575,7 @@ public class Row implements HasPublished {
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = (JSObject)publisher.call(null, new Object[]{this});
+            published = (JSObject) publisher.call(null, new Object[]{this});
         }
         return published;
     }

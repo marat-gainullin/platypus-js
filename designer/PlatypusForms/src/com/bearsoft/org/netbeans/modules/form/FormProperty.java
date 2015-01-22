@@ -48,6 +48,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 import org.openide.ErrorManager;
 import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
 
 /**
  * This class provides basic implementation of properties used in form module
@@ -75,19 +76,10 @@ import org.openide.nodes.Node;
  * sheet about changing current property editor of a property.
  *
  * @author Tomas Pavek
+ * @param <T>
  */
 public abstract class FormProperty<T> extends Node.Property<T> {
 
-    public static interface Filter {
-
-        public boolean accept(FormProperty<?> property);
-    }
-    public static final Filter CHANGED_PROPERTY_FILTER = new Filter() {
-        @Override
-        public boolean accept(FormProperty<?> property) {
-            return property.isChanged();
-        }
-    };
     // --------------------
     // constants
     public static final String PROP_VALUE = "propertyValue"; // NOI18N
@@ -110,17 +102,14 @@ public abstract class FormProperty<T> extends Node.Property<T> {
     // ------------------------
     // variables
     protected int accessType = NORMAL_RW;
-    FormPropertyContext propertyContext;
-    boolean valueChanged = false; // non-default value that came in through setValue
-    FormPropertyEditor<?> formPropertyEditor;
     private PropertyChangeSupport changeSupport;
     private VetoableChangeSupport vetoableChangeSupport;
     private boolean fireChanges = true;
+    protected Boolean settedToDefault;
 
     // ---------------------------
     // constructors
-    protected FormProperty(FormPropertyContext aPropertyContext,
-            String name, Class<T> type,
+    protected FormProperty(String name, Class<T> type,
             String displayName, String shortDescription) {
         super(type);
         setValue(CHANGE_IMMEDIATE_PROP_NAME, Boolean.FALSE); // NOI18N
@@ -128,36 +117,12 @@ public abstract class FormProperty<T> extends Node.Property<T> {
         setName(name);
         setDisplayName(displayName);
         setShortDescription(getDescriptionWithType(shortDescription, getValueType()));
-
-        propertyContext = aPropertyContext;
         setHidden("name".equals(name));
     }
 
-    protected FormProperty(FormPropertyContext aPropertyContext, Class<T> type) {
-        super(type);
-        setValue(CHANGE_IMMEDIATE_PROP_NAME, Boolean.FALSE); // NOI18N
-        propertyContext = aPropertyContext;
-    }
-
-    // constructor of property without PropertyContext
-    // setPropertyContext(...) should be called explicitly then
-    protected FormProperty(String name, Class<T> type,
-            String displayName, String shortDescription) {
-        super(type);
-        setValue(CHANGE_IMMEDIATE_PROP_NAME, Boolean.FALSE); // NOI18N
-        setName(name);
-        setDisplayName(displayName);
-        setShortDescription(getDescriptionWithType(shortDescription, getValueType()));
-        propertyContext = FormPropertyContext.EmptyImpl.getInstance();
-    }
-
-    // constructor of property without PropertyContext;
-    // setPropertyContext(...) must be called explicitly before the property
-    // is used first time
     protected FormProperty(Class<T> type) {
         super(type);
         setValue(CHANGE_IMMEDIATE_PROP_NAME, Boolean.FALSE); // NOI18N
-        propertyContext = FormPropertyContext.EmptyImpl.getInstance();
     }
 
     static String getDescriptionWithType(String description, Class<?> valueType) {
@@ -173,19 +138,13 @@ public abstract class FormProperty<T> extends Node.Property<T> {
     // getter, setter & related methods
     @Override
     public String getHtmlDisplayName() {
-        //!isDefaultValue() is substituted with isChanged() for performance reasons
-        if (isChanged()) {
+        if (!isDefaultValue()) {
             return "<b>" + getDisplayName(); // NOI18N
         } else {
             return null;
         }
     }
 
-    // ------------------------------
-    // boolean flags
-    /**
-     * Tests whether the property is readable.
-     */
     @Override
     public boolean canRead() {
         return (accessType & NO_READ_PROP) == 0;
@@ -199,9 +158,6 @@ public abstract class FormProperty<T> extends Node.Property<T> {
         return (accessType & DETACHED_WRITE) == 0;
     }
 
-    /**
-     * Tests whether the property is writable.
-     */
     @Override
     public boolean canWrite() {
         return (accessType & NO_WRITE_PROP) == 0;
@@ -213,60 +169,6 @@ public abstract class FormProperty<T> extends Node.Property<T> {
 
     public void setAccessType(int aValue) {
         accessType = aValue;
-    }
-
-    /**
-     * Tests whether this property is marked as "changed". This method returns
-     * true if the value of the property is different from the default value and
-     * if it is accessible and replicable (readable and writeable property).
-     *
-     * @return <code>true</code> if the property was changed, * * * * returns
-     * <code>false</code> otherwise.
-     */
-    public boolean isChanged() {
-        return valueChanged;
-    }
-
-    /**
-     * Sets explicitly the flag indicating changed property.
-     *
-     * @param changed determines whether this property was changed.
-     */
-    public void setChanged(boolean changed) {
-        valueChanged = changed;
-    }
-
-    // --------------------------------
-    // property editors
-    /**
-     * Gets a property editor for this property. This method implements
-     * Node.Property.getPropertyEditor() and need not be further overriden. It
-     * enables using of multiple individual editors by constructing
-     * FormPropertyEditor class. There are other methods for controling the
-     * FormPropertyEditor class here - see: getCurrentEditor(),
-     * setCurrentEditor(...) and getExpliciteEditor().
-     */
-    @Override
-    public PropertyEditor getPropertyEditor() {
-        if (propertyContext.useMultipleEditors()) {
-            if (formPropertyEditor == null) {
-                try {
-                    formPropertyEditor = new FormPropertyEditor<>(this);
-                } catch (IllegalAccessException | InvocationTargetException ex) {
-                }
-            }
-            return formPropertyEditor;
-        } else {
-            return super.getPropertyEditor();
-        }
-    }
-
-    public FormPropertyContext getPropertyContext() {
-        return propertyContext;
-    }
-
-    public void setPropertyContext(FormPropertyContext aContext) {
-        propertyContext = aContext;
     }
 
     /**
@@ -282,8 +184,16 @@ public abstract class FormProperty<T> extends Node.Property<T> {
     }
 
     @Override
-    public boolean isDefaultValue() {
-        return supportsDefaultValue() ? !isChanged() : true;
+    public final boolean isDefaultValue() {
+        try {
+            if (settedToDefault == null) {
+                settedToDefault = supportsDefaultValue() ? Objects.equals(getValue(), getDefaultValue()) : false;
+            }
+            return settedToDefault;
+        } catch (IllegalAccessException | InvocationTargetException ex) {
+            Exceptions.printStackTrace(ex);
+            return false;
+        }
     }
 
     /**
@@ -305,8 +215,7 @@ public abstract class FormProperty<T> extends Node.Property<T> {
      * invocation problem.
      */
     @Override
-    public void restoreDefaultValue() throws IllegalAccessException,
-            InvocationTargetException {
+    public void restoreDefaultValue() throws IllegalAccessException, InvocationTargetException {
         T oldValue = null;
         T defValue = getDefaultValue();
 
@@ -319,7 +228,6 @@ public abstract class FormProperty<T> extends Node.Property<T> {
         }
         if (!Objects.deepEquals(defValue, oldValue)) {
             setValue(defValue);
-            setChanged(false);
         }
     }
 
@@ -361,7 +269,8 @@ public abstract class FormProperty<T> extends Node.Property<T> {
         fireChanges = fire;
     }
 
-    protected void propertyValueChanged(T old, T current) {
+    protected final void propertyValueChanged(T old, T current) {
+        settedToDefault = null;// invalidate default state
         if (fireChanges) {
             try {
                 firePropertyChange(PROP_VALUE, old, current);

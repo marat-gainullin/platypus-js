@@ -69,7 +69,7 @@ public class RowTest {
     }
 
     public void testMoveCurrentToOriginalImpl() throws Exception {
-        Row instance = new Row(testFields);
+        Row instance = new Row("testValues", testFields);
         for (int i = 0; i < testValues.length; i++) {
             instance.setColumnObject(i + 1, testValues[i]);
         }
@@ -96,7 +96,7 @@ public class RowTest {
     @Test
     public void testMoveOriginalToCurrent() throws Exception {
         System.out.println("moveOriginalToCurrent");
-        Row instance = new Row(testFields);
+        Row instance = new Row("testValues", testFields);
         for (int i = 0; i < testValues.length; i++) {
             instance.setColumnObject(i + 1, testValues[i]);
         }
@@ -121,7 +121,7 @@ public class RowTest {
     @Test
     public void testGetColumnCount() {
         System.out.println("getColumnCount");
-        Row instance = new Row(testFields);
+        Row instance = new Row("testValues", testFields);
         int expResult = testValues.length;
         int result = instance.getColumnCount();
         assertEquals(expResult, result);
@@ -130,7 +130,7 @@ public class RowTest {
     @Test
     public void testColIndexException() throws Exception {
         System.out.println("testColIndexException");
-        Row instance = new Row(testFields);
+        Row instance = new Row("testValues", testFields);
         int expResult = testValues.length;
         int result = instance.getColumnCount();
         assertEquals(expResult, result);
@@ -154,7 +154,7 @@ public class RowTest {
     @Test
     public void testSetColumnObject() throws Exception {
         System.out.println("setColumnObject");
-        Row instance = new Row(testFields);
+        Row instance = new Row("testValues", testFields);
         for (int colIndex = 1; colIndex <= testValues.length; colIndex++) {
             Object colValue = testValues[colIndex - 1];
             instance.setColumnObject(colIndex, colValue);
@@ -169,7 +169,7 @@ public class RowTest {
     @Test
     public void testGetOriginalValues() throws Exception {
         System.out.println("getOriginalValues");
-        Row instance = new Row(testFields);
+        Row instance = new Row("testValues", testFields);
         for (int colIndex = 1; colIndex <= testValues.length; colIndex++) {
             Object colValue = testValues[colIndex - 1];
             instance.setColumnObject(colIndex, colValue);
@@ -191,7 +191,7 @@ public class RowTest {
     @Test
     public void testGetCurrentValues() throws Exception {
         System.out.println("getCurrentValues");
-        Row instance = new Row(testFields);
+        Row instance = new Row("testValues", testFields);
         for (int colIndex = 1; colIndex <= testValues.length; colIndex++) {
             Object colValue = testValues[colIndex - 1];
             instance.setColumnObject(colIndex, colValue);
@@ -210,7 +210,7 @@ public class RowTest {
     @Test
     public void testDeleted() throws Exception {
         System.out.println("deleted flag");
-        Row instance = new Row(testFields);
+        Row instance = new Row("testValues", testFields);
         for (int colIndex = 1; colIndex <= testValues.length; colIndex++) {
             Object colValue = testValues[colIndex - 1];
             instance.setColumnObject(colIndex, colValue);
@@ -236,7 +236,7 @@ public class RowTest {
     @Test
     public void testColumnUpdated() throws Exception {
         System.out.println("testColumnUpdated");
-        Row instance = new Row(testFields);
+        Row instance = new Row("testValues", testFields);
         for (int i = 0; i < cols2Update.length; i++) {
             instance.setColumnObject(cols2Update[i], testValues[cols2Update[i]]);
         }
@@ -277,7 +277,7 @@ public class RowTest {
     @Test
     public void testGetUpdatedColumns() throws Exception {
         System.out.println("testGetUpdatedColumns");
-        Row instance = new Row(testFields);
+        Row instance = new Row("testValues", testFields);
         for (int i = 0; i < cols2Update.length; i++) {
             instance.setColumnObject(cols2Update[i], testValues[cols2Update[i]]);
         }

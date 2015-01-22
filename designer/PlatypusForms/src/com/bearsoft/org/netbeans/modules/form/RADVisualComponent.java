@@ -53,10 +53,11 @@ import org.openide.nodes.*;
 /**
  *
  * @author Ian Formanek
+ * @param <C>
  */
 public class RADVisualComponent<C extends Component> extends RADComponent<C> {
 
-    private Map<String, LayoutConstraints<?>> constraints = new HashMap<>();
+    private final Map<String, LayoutConstraints<?>> constraints = new HashMap<>();
     private FormProperty<?>[] constraintsProperties;
     private ConstraintsListenerConvertor constraintsListener;
 
@@ -133,6 +134,14 @@ public class RADVisualComponent<C extends Component> extends RADComponent<C> {
         return null;
     }
 
+    @Override
+    public void setStoredName(String name) {
+        super.setStoredName(name);
+        C comp = getBeanInstance();
+        if(comp != null)
+            comp.setName(getName());
+    }
+
     // -----------------------------------------------------------------------------
     // Layout constraints management
     /**
@@ -164,23 +173,20 @@ public class RADVisualComponent<C extends Component> extends RADComponent<C> {
     @Override
     protected synchronized void createPropertySets(List<Node.PropertySet> propSets) {
         super.createPropertySets(propSets);
-        if (!SUPPRESS_PROPERTY_TABS) {
-            if (constraintsProperties == null) {
-                createConstraintsProperties();
-            }
-            if (constraintsProperties != null && constraintsProperties.length > 0) {
-                propSets.add(propSets.size() - 1,
-                        new Node.PropertySet("layout", // NOI18N
-                        FormUtils.getBundleString("CTL_LayoutTab"), // NOI18N
-                        FormUtils.getBundleString("CTL_LayoutTabHint")) // NOI18N
-                        {
-                            @Override
-                            public FormProperty<?>[] getProperties() {
-                                FormProperty<?>[] props = getConstraintsProperties();
-                                return (props == null) ? NO_PROPERTIES : props;
-                            }
-                        });
-            }
+        if (constraintsProperties == null) {
+            createConstraintsProperties();
+        }
+        if (constraintsProperties != null && constraintsProperties.length > 0) {
+            propSets.add(new Node.PropertySet("layout", // NOI18N
+                    FormUtils.getBundleString("CTL_LayoutTab"), // NOI18N
+                    FormUtils.getBundleString("CTL_LayoutTabHint")) // NOI18N
+                    {
+                        @Override
+                        public FormProperty<?>[] getProperties() {
+                            FormProperty<?>[] props = getConstraintsProperties();
+                            return (props == null) ? NO_PROPERTIES : props;
+                        }
+                    });
         }
     }
 
@@ -233,14 +239,10 @@ public class RADVisualComponent<C extends Component> extends RADComponent<C> {
                 for (int i = 0; i < constraintsProperties.length; i++) {
                     constraintsProperties[i].addVetoableChangeListener(getConstraintsListener());
                     constraintsProperties[i].addPropertyChangeListener(getConstraintsListener());
-
-                    constraintsProperties[i].setPropertyContext(new FormPropertyContext.Component(this));
-
                     if (isReadOnly() || !isValid()) {
                         int type = constraintsProperties[i].getAccessType() | FormProperty.NO_WRITE;
                         constraintsProperties[i].setAccessType(type);
                     }
-                    nameToProperty.put(constraintsProperties[i].getName(), constraintsProperties[i]);
                 }
             }
         }
@@ -264,8 +266,8 @@ public class RADVisualComponent<C extends Component> extends RADComponent<C> {
             if (FormProperty.PROP_VALUE.equals(eventName)) {
                 LayoutSupportManager layoutSupport = getParentLayoutSupport();
                 int index = getComponentIndex();
-                LayoutConstraints<?> constraints =
-                        layoutSupport.getConstraints(index);
+                LayoutConstraints<?> constraints
+                        = layoutSupport.getConstraints(index);
 
                 ev = new PropertyChangeEvent(constraints,
                         ((FormProperty<?>) source).getName(),

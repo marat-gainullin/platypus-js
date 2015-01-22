@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.api.menu.PopupMenu");
+    var javaClass = Java.type("com.eas.client.forms.menu.PopupMenu");
     javaClass.setPublisher(function(aDelegate) {
         return new P.PopupMenu(aDelegate);
     });
@@ -55,20 +55,6 @@
              * @memberOf PopupMenu
              */
             P.PopupMenu.prototype.onMouseDragged = {};
-        }
-        Object.defineProperty(this, "parent", {
-            get: function() {
-                var value = delegate.parent;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.PopupMenu){
-            /**
-             * Gets the parent of this component.
-             * @property parent
-             * @memberOf PopupMenu
-             */
-            P.PopupMenu.prototype.parent = {};
         }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
@@ -142,6 +128,9 @@
             get: function() {
                 var value = delegate.error;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.error = P.boxAsJava(aValue);
             }
         });
         if(!P.PopupMenu){
@@ -271,6 +260,20 @@
              * @memberOf PopupMenu
              */
             P.PopupMenu.prototype.onComponentResized = {};
+        }
+        Object.defineProperty(this, "parent", {
+            get: function() {
+                var value = delegate.parentWidget;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.PopupMenu){
+            /**
+             * Parent container of this widget.
+             * @property parentWidget
+             * @memberOf PopupMenu
+             */
+            P.PopupMenu.prototype.parent = {};
         }
         Object.defineProperty(this, "onMouseEntered", {
             get: function() {
@@ -453,23 +456,6 @@
              */
             P.PopupMenu.prototype.count = 0;
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.PopupMenu){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf PopupMenu
-             */
-            P.PopupMenu.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -486,6 +472,23 @@
              * @memberOf PopupMenu
              */
             P.PopupMenu.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.PopupMenu){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf PopupMenu
+             */
+            P.PopupMenu.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -737,19 +740,6 @@
         };
 
         /**
-         * Gets the container's n-th component.
-         * @param index the component's index in the container
-         * @return the child component
-         * @method child
-         * @memberOf PopupMenu
-         */
-        P.PopupMenu.prototype.child = function(index) {
-            var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(index));
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Removes the specified component from this container.
          * @param component the component to remove
          * @method remove
@@ -769,6 +759,19 @@
         P.PopupMenu.prototype.clear = function() {
             var delegate = this.unwrap();
             var value = delegate.clear();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Gets the container's n-th component.
+         * @param index the component's index in the container
+         * @return the child component
+         * @method child
+         * @memberOf PopupMenu
+         */
+        P.PopupMenu.prototype.child = function(index) {
+            var delegate = this.unwrap();
+            var value = delegate.child(P.boxAsJava(index));
             return P.boxAsJs(value);
         };
 
