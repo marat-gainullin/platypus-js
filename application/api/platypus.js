@@ -4,13 +4,6 @@
     var global = this;
     var oldP = global.P;
     global.P = {};
-    Object.defineProperty(global.P, "restore", {
-        value: function () {
-            var ns = global.P;
-            global.P = oldP;
-            return ns;
-        }
-    });
     /*
      global.P = this; // global scope of api - for legacy applications
      global.P.restore = function() {
@@ -31,7 +24,6 @@
     var RowClass = Java.type("com.bearsoft.rowset.Row");
     var FieldsClass = Java.type("com.bearsoft.rowset.metadata.Fields");
     var IDGeneratorClass = Java.type("com.bearsoft.rowset.utils.IDGenerator");
-    var PropertyChangeSupportClass = Java.type("java.beans.PropertyChangeSupport");
     var RowsetJSAdapterClass = Java.type("com.bearsoft.rowset.events.RowsetJSAdapter");
     var RowsComparatorClass = Java.type("com.bearsoft.rowset.sorting.RowsComparator");
     var ScriptTimerTaskClass = Java.type("com.eas.client.scripts.ScriptTimerTask");
@@ -107,10 +99,50 @@
         value: boxAsJs
     });
 
+    function invokeDelayed(aTimeout, aTarget) {
+        if (arguments.length < 2)
+            throw "invokeDelayed needs 2 arguments - timeout, callback.";
+        //
+        var lock = ScriptUtilsClass.getLock();
+        var req = ScriptUtilsClass.getRequest();
+        var resp = ScriptUtilsClass.getResponse();
+        var session = ScriptUtilsClass.getSession();
+        var principal = PlatypusPrincipalClass.getInstance();
+        //
+        ScriptTimerTaskClass.schedule(function () {
+            ScriptUtilsClass.setLock(lock);
+            ScriptUtilsClass.setRequest(req);
+            ScriptUtilsClass.setResponse(resp);
+            ScriptUtilsClass.setSession(session);
+            PlatypusPrincipalClass.setInstance(principal);
+            try {
+                ScriptUtilsClass.locked(aTarget, lock);
+            } finally {
+                ScriptUtilsClass.setLock(null);
+                ScriptUtilsClass.setRequest(null);
+                ScriptUtilsClass.setResponse(null);
+                ScriptUtilsClass.setSession(null);
+                PlatypusPrincipalClass.setInstance(null);
+            }
+        }, aTimeout);
+    }
+
+    Object.defineProperty(P, "invokeDelayed", {get: function () {
+            return invokeDelayed;
+        }});
+
     var serverCoreClass;
     try {
         serverCoreClass = Java.type('com.eas.server.PlatypusServerCore');
         // in server (EE or standalone)
+
+        function invokeLater(aTarget) {
+            invokeDelayed(1, aTarget);
+        }
+
+        Object.defineProperty(P, "invokeLater", {get: function () {
+                return invokeLater;
+            }});
         load("classpath:server-deps.js");
     } catch (e) {
         serverCoreClass = null;
@@ -120,64 +152,25 @@
         var KeyEventClass = Java.type("java.awt.event.KeyEvent");
         var SwingUtilitiesClass = Java.type("javax.swing.SwingUtilities");
         var FileChooserClass = Java.type("javax.swing.JFileChooser");
+        var FileFilter = Java.type("javax.swing.filechooser.FileNameExtensionFilter");
         var ColorChooserClass = Java.type("javax.swing.JColorChooser");
         var OptionPaneClass = Java.type("javax.swing.JOptionPane");
         var ColorClass = Java.type("com.eas.gui.ScriptColor");
         var FormClass = Java.type("com.eas.client.forms.Form");
         var FormLoaderClass = Java.type('com.eas.client.scripts.ModelFormLoader');
         var IconResourcesClass = Java.type("com.eas.client.forms.IconResources");
-        var HorizontalPositionClass = Java.type("com.eas.client.forms.HorizontalPosition");
-        var VerticalPositionClass = Java.type("com.eas.client.forms.VerticalPosition");
-        var OrientationClass = Java.type("com.eas.client.forms.Orientation");
-        /** 
-         * invokeLater - invokes given function in AWT event thread
-         */
-        Function.prototype.invokeLater = function () {
-            var func = this;
-            var args = arguments;
-            SwingUtilitiesClass.invokeLater(function () {
-                func.apply(func, args);
-            });
-        };
-        /** 
-         * Thread - schedules given function in the pool thread
-         */
-        Function.prototype.invokeDelayed = function () {
-            var func = this;
-            var args = arguments;
-            if (!args || !args.length || args.length < 1)
-                throw "invokeDelayed needs at least 1 argument - timeout value.";
-            var userArgs = [];
-            for (var i = 1; i < args.length; i++) {
-                userArgs.push(args[i]);
-            }
-            //
-            var lock = ScriptUtilsClass.getLock();
-            var req = ScriptUtilsClass.getRequest();
-            var resp = ScriptUtilsClass.getResponse();
-            var session = ScriptUtilsClass.getSession();
-            var principal = PlatypusPrincipalClass.getInstance();
-            //
-            ScriptTimerTaskClass.schedule(function () {
-                ScriptUtilsClass.setLock(lock);
-                ScriptUtilsClass.setRequest(req);
-                ScriptUtilsClass.setResponse(resp);
-                ScriptUtilsClass.setSession(session);
-                PlatypusPrincipalClass.setInstance(principal);
-                try {
-                    ScriptUtilsClass.locked(function () {
-                        func.apply(func, userArgs);
-                    }, lock);
-                } finally {
-                    ScriptUtilsClass.setLock(null);
-                    ScriptUtilsClass.setRequest(null);
-                    ScriptUtilsClass.setResponse(null);
-                    ScriptUtilsClass.setSession(null);
-                    PlatypusPrincipalClass.setInstance(null);
-                }
-            }, args[0]);
-            // HTML5 client doesn't support cancel feature and so, we don't support it too.
-        };
+        var HorizontalPositionClass = Java.type("com.eas.client.forms.api.HorizontalPosition");
+        var VerticalPositionClass = Java.type("com.eas.client.forms.api.VerticalPosition");
+        var OrientationClass = Java.type("com.eas.client.forms.api.Orientation");
+
+        function invokeLater(aTarget) {
+            SwingUtilitiesClass.invokeLater(aTarget);
+        }
+
+        Object.defineProperty(P, "invokeLater", {get: function () {
+                return invokeLater;
+            }});
+        //
         Object.defineProperty(P.Color, "black", {value: new P.Color(0, 0, 0)});
         Object.defineProperty(P.Color, "BLACK", {value: new P.Color(0, 0, 0)});
         Object.defineProperty(P.Color, "blue", {value: new P.Color(0, 0, 0xff)});
@@ -255,13 +248,21 @@
          * @param save flag tells whether this is a save dialog or not
          * @return selected file or else null
          */
-        function fileDialog(curDir, save) {
+        function fileDialog(curDir, save, aFileFilter) {
             var result;
             function _fileDialog() {
                 if (!curDir) {
                     curDir = ".";
                 }
                 var dialog = new FileChooserClass(new FileClass(curDir));
+                if (aFileFilter) {
+                    var name = aFileFilter;
+                    aFileFilter = aFileFilter.replace(/ /g, "");
+                    aFileFilter = aFileFilter.replace(/\./g, "");
+                    var array = [];
+                    array = aFileFilter.split(",");
+                    dialog.setFileFilter(new FileFilter(name, array));
+                }
                 var res = save ? dialog.showSaveDialog(null) :
                         dialog.showOpenDialog(null);
                 if (res === FileChooserClass.APPROVE_OPTION) {
@@ -272,20 +273,32 @@
             }
 
             _fileDialog();
-            return result !== null ? result.getPath() : null;
+            return result !== null ? result : null;
         }
         fileDialog.docString = "show a file dialog box";
 
-        function selectFile(curDir, aCallback) {
-            if (aCallback) {
-                (function () {
-                    var file = fileDialog(curDir, false);
+        /**
+         * Opens a Select file dialog box 
+         *
+         * @param Callback
+         * @param file name filter string
+         * @param curDir current directory [optional]
+         * @return selected file or else null
+         */
+        function selectFile(aCallback, aFileFilter, curDir) {
+//            if (aCallback) {
+            invokeLater(function () {
+                var file = fileDialog(curDir, false, aFileFilter);
+                if (file) {
                     aCallback(file);
-                }).invokeLater();
-            } else {
-                return fileDialog(curDir, false);
-            }
+                }
+            });
+//            } else {
+//                return fileDialog(curDir, false, aFileFilter);
+//            }
         }
+
+
         Object.defineProperty(P, "selectFile", {
             value: selectFile
         });
@@ -318,10 +331,10 @@
         directoryDialog.docString = "shows a directory dialog box";
         function selectDirectory(curDir, aCallback) {
             if (aCallback) {
-                (function () {
+                invokeLater(function () {
                     var file = directoryDialog(curDir);
                     aCallback(file);
-                }).invokeLater();
+                });
             } else {
                 return directoryDialog(curDir);
             }
@@ -355,10 +368,10 @@
         colorDialog.docString = "shows a color chooser dialog box";
         function selectColor(title, color, aCallback) {
             if (aCallback) {
-                (function () {
+                invokeLater(function () {
                     var selected = colorDialog(title, color);
                     aCallback(selected);
-                }).invokeLater();
+                });
             } else {
                 return colorDialog(title, color);
             }
@@ -577,32 +590,35 @@
          */
         function loadForm(aName, aModel, aTarget) {
             var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
-            var formDocument = ScriptedResourceClass.getApp().getForms().get(aName, files);
-            var formFactory = FormLoaderClass.load(formDocument, ScriptedResourceClass.getApp(), aModel);
-            var form = formFactory.form;
-            if (aTarget) {
-                P.Form.call(aTarget, null, aName, form);
+            if (files) {
+                var formDocument = ScriptedResourceClass.getApp().getForms().get(aName, files);
+                var designInfo = FormLoaderClass.load(formDocument, ScriptedResourceClass.getApp());
+                var form = new FormClass(aName, designInfo, aModel ? aModel.unwrap() : null, null);
+                if (aTarget) {
+                    P.Form.call(aTarget, null, aName, form);
+                } else {
+                    aTarget = new P.Form(null, aName, form);
+                }
+                form.injectPublished(aTarget);
+                if (!form.title)
+                    form.title = aName;
+                var comps = form.publishedComponents;
+                for (var c = 0; c < comps.length; c++) {
+                    (function () {
+                        var comp = comps[c];
+                        if (comp.name) {
+                            Object.defineProperty(aTarget, comp.name, {
+                                get: function () {
+                                    return comp;
+                                }
+                            });
+                        }
+                    })();
+                }
+                return aTarget;
             } else {
-                aTarget = new P.Form(null, aName, form);
+                throw "Form layout '" + aName + "' missing.";
             }
-            form.injectPublished(aTarget);
-            if (!form.title)
-                form.title = aName;
-            var comps = formFactory.getWidgetsList();
-            for (var c = 0; c < comps.length; c++) {
-                (function () {
-                    var comp = EngineUtilsClass.unwrap(boxAsJs(comps[c]));
-                    //P.Logger.info("comp: " + comp + "; comp.name: " + comp.name);
-                    if (comp.name) {
-                        Object.defineProperty(aTarget, comp.name, {
-                            get: function () {
-                                return comp;
-                            }
-                        });
-                    }
-                })();
-            }
-            return aTarget;
         }
         Object.defineProperty(P, "loadForm", {value: loadForm});
     }
@@ -743,13 +759,11 @@
                 Object.defineProperty(target, n, valueAccessorDesc);
             })();
         }
-        if (!target.schema)
-            Object.defineProperty(target, "schema", {value: nnFields.getPublished()});
         // ORM mutable scalar and readonly collection properties
         var ormDefs = nnFields.getOrmDefinitions();
-        for each (var defsEntry in ormDefs.entrySet()) {
-            var def = EngineUtilsClass.unwrap(defsEntry.getValue());
-            Object.defineProperty(target, defsEntry.getKey(), def);
+        for each (var o in ormDefs.keySet()) {
+            var def = EngineUtilsClass.unwrap(ormDefs.get(o));
+            Object.defineProperty(target, o, def);
         }
         Object.defineProperty(target, "unwrap", {
             value: function () {
@@ -760,15 +774,14 @@
     }
 
     function BoundArray() {
-        if (BoundArray.superclass)
-            BoundArray.superclass.constructor.apply(this, arguments);
+        BoundArray.superclass.constructor.apply(this, arguments);
         var target = this;
         var rowset = this.unwrap().getRowset();
         var adapter = new RowsetJSAdapterClass();
         rowset.addRowsetListener(adapter);
         adapter.rowsetFiltered = function () {
             Array.prototype.splice.call(target, 0, target.length);
-            var rows = rowset.getCurrent();
+            var rows = rowset.current;
             for each (var aRow in rows) {
                 Array.prototype.push.call(target, EngineUtilsClass.unwrap(aRow.getPublished()));
             }
@@ -783,7 +796,7 @@
             // ignore
         };
         adapter.rowsetRolledback = function (event) {
-            adapter.rowsetFiltered(null);
+            // ignore
         };
         adapter.rowsetScrolled = function (event) {
             // ignore
@@ -791,6 +804,20 @@
         adapter.rowsetSorted = function (event) {
             adapter.rowsetFiltered(null);
         };
+        adapter.rowInserted = function (event) {
+            if (!event.ajusting)
+                adapter.rowsetFiltered(null);
+        };
+        adapter.rowChanged = function (event) {
+            if (event.oldRowCount != event.newRowCount) {
+                adapter.rowsetFiltered(null);
+            }
+        };
+        adapter.rowDeleted = function (event) {
+            if (!event.ajusting)
+                adapter.rowsetFiltered(null);
+        };
+
         Object.defineProperty(target, "fill", {
             value: function () {
                 throw '\'fill\' is unsupported in BoundArray because of it\'s distinct values requirement';
@@ -800,21 +827,32 @@
             value: function () {
                 if (!rowset.empty) {
                     var res = rowset.getRow(rowset.size());
-                    rowset.deleteAt(rowset.size());
-                    return Array.prototype.pop.call(target);
+                    rowset.deleteAt(rowset.size(), true);
+                    Array.prototype.pop.call(target);
+                    return res.getPublished();
                 }
             }
         });
         Object.defineProperty(target, "push", {
             value: function () {
-                var entityName = rowset.getFlowProvider().getEntityId();
-                var nFields = rowset.getFields();
-                for (var a = 0; a < arguments.length; a++) {
-                    var justInserted = new RowClass(entityName, nFields);
-                    justInserted.setPublished(publishRow(justInserted, arguments[a]));
-                    rowset.insertAt(justInserted, a < arguments.length - 1, rowset.size() + 1, objectToInsertIniting(arguments[a]));
+                var justInserted;
+                if (arguments.length > 1) {
+                    for (var a = 0; a < arguments.length; a++) {
+                        var initing = objectToInsertIniting(arguments[a]);
+                        var justInserted = new RowClass();
+                        justInserted.setFields(rowset.getFields());
+                        justInserted.setPublished(publishRow(justInserted, arguments[a]));
+                        rowset.insertAt(justInserted, rowset.size() + 1, a < arguments.length - 1, initing);
+                    }
+                } else if (arguments.length === 1) {
+                    var initing = objectToInsertIniting(arguments[0]);
+                    var justInserted = new RowClass();
+                    justInserted.setFields(rowset.getFields());
+                    justInserted.setPublished(publishRow(justInserted, arguments[0]));
+                    rowset.insertAt(justInserted, rowset.size() + 1, true, initing);
+                    Array.prototype.push.call(target, justInserted.getPublished());
                 }
-                return Array.prototype.push.apply(target, arguments);
+                return target.length;
             }
         });
         Object.defineProperty(target, "reverse", {
@@ -826,8 +864,9 @@
             value: function () {
                 if (!rowset.empty) {
                     var res = rowset.getRow(1);
-                    rowset.deleteAt(1);
-                    return Array.prototype.shift.call(target);
+                    rowset.deleteAt(1, true);
+                    Array.prototype.shift.call(target);
+                    return res.getPublished();
                 }
             }
         });
@@ -859,55 +898,121 @@
                         howManyToDelete = arguments[1];
                     }
                     var needToAdd = arguments.length > 2;
-                    var deleted = 0;
-                    while (!rowset.empty && deleted++ < howManyToDelete) {
+                    var deleted = [];
+                    while (!rowset.empty && deleted.length < howManyToDelete) {
+                        var rowToDelete = rowset.getRow(beginToDeleteAt + 1);
+                        deleted.push(rowToDelete);
                         rowset.deleteAt(beginToDeleteAt + 1, needToAdd);
                     }
                     var insertAt = beginToDeleteAt;
-                    var entityName = rowset.getFlowProvider().getEntityId();
-                    var nFields = rowset.getFields();
                     for (var a = 2; a < arguments.length; a++) {
-                        var justInserted = new RowClass(entityName, nFields);
+                        var initing = objectToInsertIniting(arguments[a]);
+                        var justInserted = new RowClass();
+                        justInserted.setFields(rowset.getFields());
                         justInserted.setPublished(publishRow(justInserted, arguments[a]));
-                        rowset.insertAt(justInserted, a < arguments.length - 1, insertAt + 1, objectToInsertIniting(arguments[a]));
+                        rowset.insertAt(justInserted, insertAt + 1, a < arguments.length - 1, initing);
                         insertAt++;
                     }
+                    return deleted;
+                } else {
+                    return [];
                 }
-                return Array.prototype.splice.apply(target, arguments);
             }
         });
 
         Object.defineProperty(target, "unshift", {
             value: function () {
-                var entityName = rowset.getFlowProvider().getEntityId();
-                var nFields = rowset.getFields();
-                for (var a = 0; a < arguments.length; a++) {
-                    var justInserted = new RowClass(entityName, nFields);
-                    justInserted.setPublished(publishRow(justInserted, arguments[a]));
-                    rowset.insertAt(justInserted, a < arguments.length - 1, a + 1, objectToInsertIniting(arguments[a]));
+                var justInserted;
+                if (arguments.length > 1) {
+                    for (var a = 0; a < arguments.length; a++) {
+                        var initing = objectToInsertIniting(arguments[a]);
+                        var justInserted = new RowClass();
+                        justInserted.setFields(rowset.getFields());
+                        justInserted.setPublished(publishRow(justInserted, arguments[a]));
+                        rowset.insertAt(justInserted, a + 1, a < arguments.length - 1, initing);
+                    }
+                } else if (arguments.length === 1) {
+                    var initing = objectToInsertIniting(arguments[0]);
+                    var justInserted = new RowClass();
+                    justInserted.setFields(rowset.getFields());
+                    justInserted.setPublished(publishRow(justInserted, arguments[0]));
+                    rowset.insertAt(justInserted, 1, true, initing);
+                    Array.prototype.unshift.call(target, justInserted.getPublished());
                 }
-                return Array.prototype.unshift.apply(target, arguments);
+                return target.length;
             }
         });
 
+        /*
+         Object.defineProperty(target, "insert", {
+         value: function () {
+         var initing = new JavaArrayClass(arguments.length);
+         for (var v = 0; v < arguments.length; v++)
+         initing[v] = boxAsJava(arguments[v]);
+         rowset.insert(initing);
+         }
+         });
+         
+         Object.defineProperty(target, "insertAt", {
+         value: function () {
+         if (arguments.length > 0) {
+         var index = arguments[0];
+         var initing = new JavaArrayClass(arguments.length - 1);
+         for (var v = 1; v < arguments.length; v++)
+         initing[v - 1] = boxAsJava(arguments[v]);
+         rowset.insertAt(index, false, initing);
+         }
+         }
+         });
+         */
+
         Object.defineProperty(target, "createFilter", {
-            value: function (aConstraints) {
+            value: function () {
                 var nEntity = this.unwrap();
-                return boxAsJs(nEntity.createFilter(aConstraints));
+                var varargs = new JavaArrayClass(arguments.length);
+                var args = arguments.length === 1 && Array.isArray(arguments[0]) ? arguments[0] : arguments;
+                for (var v = 0; v < args.length; v++)
+                    varargs[v] = boxAsJava(args[v]);
+                return boxAsJs(nEntity.createFilter(varargs));
             }
         });
 
         Object.defineProperty(target, "createSorting", {
-            value: function (aCriteria) {
+            value: function () {
                 var nEntity = this.unwrap();
-                return boxAsJs(nEntity.createSorting(aCriteria));
+                var args = arguments.length === 1 ? arguments[0] : arguments;
+                if (Array.isArray(args) || args === arguments) {
+                    var varargs = new JavaArrayClass(args.length);
+                    for (var v = 0; v < args.length; v++)
+                        varargs[v] = boxAsJava(args[v]);
+                    return boxAsJs(nEntity.createSorting(varargs));
+                } else {
+                    return boxAsJs(nEntity.createSorting(args));
+                }
             }
         });
 
         Object.defineProperty(target, "find", {
-            value: function (aCriteria) {                
+            value: function () {
+                var found;
                 var nEntity = this.unwrap();
-                return EngineUtilsClass.unwrap(nEntity.find(aCriteria));
+                var args = arguments.length === 1 ? arguments[0] : arguments;
+                if (Array.isArray(args) || args === arguments) {
+                    var varargs = new JavaArrayClass(args.length);
+                    for (var v = 0; v < args.length; v++)
+                        varargs[v] = boxAsJava(args[v]);
+                    found = nEntity.find(varargs);
+                } else {
+                    found = nEntity.find(args);
+                }
+                if (!found.tag) {
+                    var res = [];
+                    for (var f = 0; f < found.size(); f++) {
+                        res.push(EngineUtilsClass.unwrap(found[f].getPublished()));
+                    }
+                    found.tag = res;
+                }
+                return found.tag;
             }
         });
     }
@@ -928,9 +1033,6 @@
                 });
             })();
         }
-        Object.defineProperty(target, "length", {
-            value: nFields.size()
-        });
         return target;
     });
 
@@ -954,93 +1056,92 @@
      */
     function loadModel(aName, aTarget) {
         var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
-        var modelDocument = ScriptedResourceClass.getApp().getModels().get(aName, files);
-        var model = ModelLoaderClass.load(modelDocument, ScriptedResourceClass.getApp());
-        var modelCTor;
-        if (model instanceof TwoTierModelClass) {
-            modelCTor = P.ApplicationDbModel;
-        } else if (model instanceof ThreeTierModelClass) {
-            modelCTor = P.ApplicationPlatypusModel;
-        } else {
-            throw "Can't determine model's type.";
-        }
-        if (aTarget) {
-            modelCTor.call(aTarget, model);
-        } else {
-            aTarget = new modelCTor(model);
-        }
-        function publishEntity(nEntity) {
-            var published = EngineUtilsClass.unwrap(nEntity.getPublished());
-            var pSchema = {};
-            Object.defineProperty(published, "schema", {
-                value: pSchema
-            });
-            var nFields = nEntity.getFields().toCollection();
-            for (var n = 0; n < nFields.size(); n++) {
-                (function () {
-                    var nField = nFields[n];
-                    // schema
-                    var schemaDesc = {
-                        value: nField.getPublished()
-                    };
-                    Object.defineProperty(pSchema, nField.name, schemaDesc);
-                    Object.defineProperty(pSchema, n, schemaDesc);
-                })();
+        if (files) {
+            var modelDocument = ScriptedResourceClass.getApp().getModels().get(aName, files);
+            var model = ModelLoaderClass.load(modelDocument, ScriptedResourceClass.getApp());
+            var modelCTor;
+            if (model instanceof TwoTierModelClass) {
+                modelCTor = P.ApplicationDbModel;
+            } else if (model instanceof ThreeTierModelClass) {
+                modelCTor = P.ApplicationPlatypusModel;
+            } else {
+                throw "Can't determine model's type.";
             }
-            // entity.params.p1 syntax
-            var nParameters = nEntity.getQuery().getParameters();
-            var ncParameters = nParameters.toCollection();
-            var pParams = {};
-            for (var p = 0; p < ncParameters.size(); p++) {
-                (function () {
-                    var nParameter = ncParameters[p];
-                    var pDesc = {
-                        get: function () {
-                            return boxAsJs(nParameter.value);
-                        },
-                        set: function (aValue) {
-                            nParameter.value = boxAsJava(aValue);
-                        }
-                    };
-                    Object.defineProperty(pParams, nParameter.name, pDesc);
-                    Object.defineProperty(pParams, p, pDesc);
-                })();
+            if (aTarget) {
+                modelCTor.call(aTarget, model);
+            } else {
+                aTarget = new modelCTor(model);
             }
-            Object.defineProperty(pParams, "length", {value: ncParameters.size()});
-            Object.defineProperty(published, "params", {value: pParams});
-            // entity.params.schema.p1 syntax
-            var pParamsSchema = EngineUtilsClass.unwrap(nParameters.getPublished());
-            Object.defineProperty(pParams, "schema", {value: pParamsSchema});
-            Object.defineProperty(pSchema, "length", {
-                get: function () {
-                    return nFields.size();
+            function publishEntity(nEntity) {
+                var published = EngineUtilsClass.unwrap(nEntity.getPublished());
+                var pSchema = {};
+                Object.defineProperty(published, "schema", {
+                    value: pSchema
+                });
+                var nFields = nEntity.getFields().toCollection();
+                for (var n = 0; n < nFields.size(); n++) {
+                    (function () {
+                        var nField = nFields[n];
+                        // schema
+                        var schemaDesc = {
+                            value: nField.getPublished()
+                        };
+                        Object.defineProperty(pSchema, nField.name, schemaDesc);
+                        Object.defineProperty(pSchema, n, schemaDesc);
+                    })();
                 }
-            });
-            return published;
-        }
-        var entities = model.entities();
-        for each (var enEntity in entities) {
-            enEntity.validateQuery();
-            if (enEntity.name) {
-                (function () {
-                    var ppEntity = publishEntity(enEntity);
-                    Object.defineProperty(aTarget, enEntity.name, {
-                        value: ppEntity,
-                        enumerable: true
-                    });
-                })();
+                // entity.params.p1 syntax
+                var nParameters = nEntity.getQuery().getParameters();
+                var ncParameters = nParameters.toCollection();
+                var pParams = {};
+                for (var p = 0; p < ncParameters.size(); p++) {
+                    (function () {
+                        var nParameter = ncParameters[p];
+                        var pDesc = {
+                            get: function () {
+                                return boxAsJs(nParameter.jsValue/*because of UNDEFINED_SQL_VALUE*/);
+                            },
+                            set: function (aValue) {
+                                nParameter.jsValue/*because of UNDEFINED_SQL_VALUE*/ = boxAsJava(aValue);
+                            }
+                        };
+                        Object.defineProperty(pParams, nParameter.name, pDesc);
+                        Object.defineProperty(pParams, p, pDesc);
+                    })();
+                }
+                Object.defineProperty(published, "params", {value: pParams});
+                // entity.params.schema.p1 syntax
+                var pParamsSchema = EngineUtilsClass.unwrap(nParameters.getPublished());
+                if (!pParams.schema)
+                    Object.defineProperty(pParams, "schema", {value: pParamsSchema});
+                return published;
             }
+            var entities = model.entities();
+            for each (var enEntity in entities) {
+                enEntity.validateQuery();
+                if (enEntity.name) {
+                    (function () {
+                        var ppEntity = publishEntity(enEntity);
+                        Object.defineProperty(aTarget, enEntity.name, {
+                            value: ppEntity,
+                            enumerable: true
+                        });
+                    })();
+                }
+            }
+            model.createORMDefinitions();
+            aTarget.loadEntity = function (queryName) {
+                var lnEntity = model.loadEntity(P.boxAsJava(queryName));
+                return publishEntity(lnEntity);
+            };
+            aTarget.createEntity = function (sqlText, datasourceName) {
+                var lnEntity = model.createEntity(P.boxAsJava(sqlText), P.boxAsJava(datasourceName));
+                return publishEntity(lnEntity);
+            };
+            return aTarget;
+        } else {
+            throw "Model definition '" + aName + "' missing.";
         }
-        model.createORMDefinitions();
-        aTarget.loadEntity = function (queryName) {
-            var lnEntity = model.loadEntity(P.boxAsJava(queryName));
-            return publishEntity(lnEntity);
-        };
-        aTarget.createEntity = function (sqlText, datasourceName) {
-            var lnEntity = model.createEntity(P.boxAsJava(sqlText), P.boxAsJava(datasourceName));
-            return publishEntity(lnEntity);
-        };
-        return aTarget;
     }
     Object.defineProperty(P, "loadModel", {value: loadModel});
     /**
@@ -1052,13 +1153,17 @@
      */
     function loadTemplate(aName, aData, aTarget) {
         var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
-        var reportConfig = ScriptedResourceClass.getApp().getReports().get(aName, files);
-        if (aTarget) {
-            P.ReportTemplate.call(aTarget, reportConfig, aData);
+        if (files) {
+            var reportConfig = ScriptedResourceClass.getApp().getReports().get(aName, files);
+            if (aTarget) {
+                P.ReportTemplate.call(aTarget, reportConfig, aData);
+            } else {
+                aTarget = new P.ReportTemplate(reportConfig, aData);
+            }
+            return aTarget;
         } else {
-            aTarget = new P.ReportTemplate(reportConfig, aData);
+            throw "Report template '" + aName + "' missing.";
         }
-        return aTarget;
     }
     Object.defineProperty(P, "loadTemplate", {value: loadTemplate});
     /**
@@ -1102,7 +1207,7 @@
                             };
                         });
                     } else {
-                        throw "Access denied for module" + aModuleName + ". May be denied public access.";
+                        throw "Access denied for module " + aModuleName + ". May be denied public access.";
                     }
                 } else {
                     throw "This architecture does not support server modules.";
@@ -1315,6 +1420,24 @@ if (!P) {
     P.loadTemplate = function (aModuleName, aData) {
     };
     /**
+     * Consists of show forms.
+     * @type Array
+     */
+    P.Form.shown = [];
+    /**
+     * Fast scan of P.Form.shown.
+     * @param aFormKey form key value.
+     * @returns {P.Form} instance
+     */
+    P.Form.getShownForm = function (aFormKey) {
+    };
+    /**
+     * P.Form.shown change handler.
+     * @returns {Function}
+     */
+    P.Form.onChange = function () {
+    };
+    /**
      * Constructs server module network proxy.
      * @constructor
      */
@@ -1461,5 +1584,19 @@ if (!P) {
      */
     P.async = function (aWorkerFunc, aOnSuccess, aOnFailure) {
     };
+    /**
+     * Posts an execution request into browser's event loop.
+     * @param {Function} aCallback
+     * @returns {undefined}
+     */
+    P.invokeLater = function (aCallback) {
+    };
+    /**
+     * Utilizes browser's setTimeput in a safe way to calls aCallback after some period of time.
+     * @param {Number} aTimeout Period of time to delay.
+     * @param {Function} aCallback
+     * @returns {undefined}
+     */
+    P.invokeDelayed = function (aTimeout, aCallback) {
+    };
 }
- 
