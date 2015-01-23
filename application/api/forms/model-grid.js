@@ -924,6 +924,17 @@
         };
 
         /**
+         * Clears current selection.
+         * @method clearSelection
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.clearSelection = function() {
+            var delegate = this.unwrap();
+            var value = delegate.clearSelection();
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Selects the specified element.
          * @param instance Entity's instance to be selected.
          * @method select
@@ -932,17 +943,6 @@
         P.ModelGrid.prototype.select = function(instance) {
             var delegate = this.unwrap();
             var value = delegate.select(P.boxAsJava(instance));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Clears current selection.
-         * @method clearSelection
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.clearSelection = function() {
-            var delegate = this.unwrap();
-            var value = delegate.clearSelection();
             return P.boxAsJs(value);
         };
 
@@ -1017,6 +1017,17 @@
 
         /**
          *
+         * @method elementByModelIndex
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.elementByModelIndex = function(arg0) {
+            var delegate = this.unwrap();
+            var value = delegate.elementByModelIndex(P.boxAsJava(arg0));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
          * @method addColumnNode
          * @memberOf ModelGrid
          */
@@ -1045,17 +1056,6 @@
         P.ModelGrid.prototype.insertColumnNode = function(arg0, arg1) {
             var delegate = this.unwrap();
             var value = delegate.insertColumnNode(P.boxAsJava(arg0), P.boxAsJava(arg1));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         *
-         * @method elementByModelIndex
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.elementByModelIndex = function(arg0) {
-            var delegate = this.unwrap();
-            var value = delegate.elementByModelIndex(P.boxAsJava(arg0));
             return P.boxAsJs(value);
         };
 

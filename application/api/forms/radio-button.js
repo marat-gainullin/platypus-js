@@ -332,23 +332,6 @@
              */
             P.RadioButton.prototype.onMouseEntered = {};
         }
-        Object.defineProperty(this, "toolTipText", {
-            get: function() {
-                var value = delegate.toolTipText;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.toolTipText = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.RadioButton){
-            /**
-             * The tooltip string that has been set with.
-             * @property toolTipText
-             * @memberOf RadioButton
-             */
-            P.RadioButton.prototype.toolTipText = '';
-        }
         Object.defineProperty(this, "selected", {
             get: function() {
                 var value = delegate.selected;
@@ -365,6 +348,23 @@
              * @memberOf RadioButton
              */
             P.RadioButton.prototype.selected = true;
+        }
+        Object.defineProperty(this, "toolTipText", {
+            get: function() {
+                var value = delegate.toolTipText;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.toolTipText = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.RadioButton){
+            /**
+             * The tooltip string that has been set with.
+             * @property toolTipText
+             * @memberOf RadioButton
+             */
+            P.RadioButton.prototype.toolTipText = '';
         }
         Object.defineProperty(this, "element", {
             get: function() {

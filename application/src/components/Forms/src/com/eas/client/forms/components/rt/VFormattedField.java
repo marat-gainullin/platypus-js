@@ -125,23 +125,27 @@ public abstract class VFormattedField extends JFormattedTextField implements Has
                     throw new ParseException(t.getMessage(), 0);
                 }
             } else {
-                switch (valueType) {
-                    case DATE:
-                        return dateFormat.format(value);
-                    case TIME:
-                        return dateFormat.format(value);
-                    case NUMBER:
-                        return numberFormat.format(value);
-                    case PERCENT:
-                        return numberFormat.format(value);
-                    case CURRENCY:
-                        return numberFormat.format(value);
-                    case MASK:
-                        return maskFormatter.valueToString(value);
-                    case REGEXP:
-                        return value != null ? value.toString() : "";
-                    default:
-                        return value != null ? value.toString() : "";
+                try {
+                    switch (valueType) {
+                        case DATE:
+                            return dateFormat.format(value);
+                        case TIME:
+                            return dateFormat.format(value);
+                        case NUMBER:
+                            return numberFormat.format(value);
+                        case PERCENT:
+                            return numberFormat.format(value);
+                        case CURRENCY:
+                            return numberFormat.format(value);
+                        case MASK:
+                            return maskFormatter.valueToString(value);
+                        case REGEXP:
+                            return value != null ? value.toString() : "";
+                        default:
+                            return value != null ? value.toString() : "";
+                    }
+                } catch (IllegalArgumentException ex) {
+                    throw new ParseException(ex.getMessage(), 0);
                 }
             }
         }

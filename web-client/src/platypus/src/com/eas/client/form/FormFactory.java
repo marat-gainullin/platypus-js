@@ -124,7 +124,7 @@ public class FormFactory {
 
 	public void parse() throws Exception {
 		if (!element.hasAttribute("view")) {
-			throw new IllegalStateException("Old form format delected. Please open the form with a new form designer and re save it.");
+			throw new IllegalStateException("Old form format detected. Please open the form with a new form designer and re-save it.");
 		} else {
 			rootContainerName = element.getAttribute("view");
 			Node childNode = element.getFirstChild();
@@ -969,34 +969,38 @@ public class FormFactory {
 				String columnType = childTag.getTagName();
 				switch (columnType) {
 				case "CheckGridColumn": {
-					CheckHeaderNode columnn = new CheckHeaderNode();
-					readColumnNode(columnn, childTag);
-					nodes.add(columnn);
+					CheckHeaderNode column = new CheckHeaderNode();
+					Publisher.publish(column);
+					readColumnNode(column, childTag);
+					nodes.add(column);
 					List<HeaderNode<JavaScriptObject>> children = readColumns(childTag);
-					columnn.getChildren().addAll(children);
+					column.getChildren().addAll(children);
 					break;
 				}
 				case "RadioGridColumn": {
-					RadioHeaderNode columnn = new RadioHeaderNode();
-					readColumnNode(columnn, childTag);
-					nodes.add(columnn);
+					RadioHeaderNode column = new RadioHeaderNode();
+					Publisher.publish(column);
+					readColumnNode(column, childTag);
+					nodes.add(column);
 					List<HeaderNode<JavaScriptObject>> children = readColumns(childTag);
-					columnn.getChildren().addAll(children);
+					column.getChildren().addAll(children);
 					break;
 				}
 				case "ServiceGridColumn": {
-					ServiceHeaderNode columnn = new ServiceHeaderNode();
-					readColumnNode(columnn, childTag);
-					nodes.add(columnn);
+					ServiceHeaderNode column = new ServiceHeaderNode();
+					Publisher.publish(column);
+					readColumnNode(column, childTag);
+					nodes.add(column);
 					List<HeaderNode<JavaScriptObject>> children = readColumns(childTag);
-					columnn.getChildren().addAll(children);
+					column.getChildren().addAll(children);
 					break;
 				}
 				case "ModelGridColumn": {
-					ModelHeaderNode columnn = new ModelHeaderNode();
-					readColumnNode(columnn, childTag);
+					ModelHeaderNode column = new ModelHeaderNode();
+					Publisher.publish(column);
+					readColumnNode(column, childTag);
 					if (childTag.hasAttribute("field")) {
-						columnn.setField(childTag.getAttribute("field"));
+						column.setField(childTag.getAttribute("field"));
 					}
 					Node _childNode = childTag.getFirstChild();
 					while (_childNode != null) {
@@ -1004,7 +1008,7 @@ public class FormFactory {
 							Element _childTag = (Element) _childNode;
 							UIObject editorComp = readWidget(_childTag);
 							if (editorComp instanceof ModelDecoratorBox<?>) {
-								ModelColumn col = (ModelColumn) columnn.getColumn();
+								ModelColumn col = (ModelColumn) column.getColumn();
 								col.setEditor((ModelDecoratorBox<Object>) editorComp);
 								// ModelWidget viewComp = (ModelWidget)
 								// readWidget((Element) _childNode);
@@ -1014,9 +1018,9 @@ public class FormFactory {
 						}
 						_childNode = _childNode.getNextSibling();
 					}
-					nodes.add(columnn);
+					nodes.add(column);
 					List<HeaderNode<JavaScriptObject>> children = readColumns(childTag);
-					columnn.getChildren().addAll(children);
+					column.getChildren().addAll(children);
 					break;
 				}
 				}

@@ -17,7 +17,7 @@ public class PlatypusTextEditorCell extends RenderedEditorCell<String> {
 
 	@Override
 	protected void renderCell(com.google.gwt.cell.client.Cell.Context context, String value, SafeHtmlBuilder sb) {
-		sb.appendEscaped(value);
+		sb.appendEscaped(value != null ? value : "");
 	}
 
 }

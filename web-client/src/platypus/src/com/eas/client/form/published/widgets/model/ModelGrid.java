@@ -40,7 +40,6 @@ import com.eas.client.form.grid.columns.UsualServiceColumn;
 import com.eas.client.form.grid.rows.JsArrayListDataProvider;
 import com.eas.client.form.grid.rows.JsArrayTreeDataProvider;
 import com.eas.client.form.grid.rows.JsDataContainer;
-import com.eas.client.form.grid.rows.JsTree;
 import com.eas.client.form.grid.selection.CheckBoxesEventTranslator;
 import com.eas.client.form.grid.selection.HasSelectionLead;
 import com.eas.client.form.grid.selection.MultiJavaScriptObjectSelectionModel;
@@ -75,7 +74,6 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
-import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.view.client.CellPreviewEvent;
@@ -546,10 +544,12 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 
 	public void setHeader(List<HeaderNode<JavaScriptObject>> aHeader) {
 		if (header != aHeader) {
+			unpublishColumnNodes(header);
 			header = aHeader;
 			if (autoRefreshHeader) {
 				applyColumns();
 			}
+			publishColumnNodes(header);
 		}
 	}
 
@@ -729,12 +729,22 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		}
 	}
 
+	protected void unpublishColumnNodes(List<HeaderNode<JavaScriptObject>> aNodes) {
+		for (HeaderNode<JavaScriptObject> node : aNodes) {
+			String jsName = ((HasJsName) node).getJsName();
+			if (jsName != null && !jsName.isEmpty()) {
+				published.<JsObject> cast().deleteProperty(jsName);
+			}
+			unpublishColumnNodes(node.getChildren());
+		}
+	}
+
 	protected void publishColumnNodes(List<HeaderNode<JavaScriptObject>> aNodes) {
 		for (HeaderNode<JavaScriptObject> node : aNodes) {
 			String jsName = ((HasJsName) node).getJsName();
 			if (jsName != null && !jsName.isEmpty()) {
 				HasPublished pCol = (HasPublished) node;
-				published.<JsObject> cast().inject(jsName, pCol.getPublished());
+				published.<JsObject> cast().inject(jsName, pCol.getPublished(), true);
 			}
 			publishColumnNodes(node.getChildren());
 		}

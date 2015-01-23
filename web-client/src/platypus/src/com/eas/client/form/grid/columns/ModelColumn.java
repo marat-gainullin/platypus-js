@@ -28,9 +28,13 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayMixed;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.InputElement;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -140,7 +144,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 
 	@Override
 	public void update(int aIndex, JavaScriptObject anElement, Object value) {
-		if (anElement != null && field != null && !field.isEmpty()) {
+		if (anElement != null && field != null && !field.isEmpty() && !readonly && grid.isEditable()) {
 			Utils.setPathData(anElement, field, value);
 		}
 	}
@@ -260,6 +264,17 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 			}
 			if (editor instanceof ModelCheck) {
 				((TreeExpandableCell<JavaScriptObject, Object>) getCell()).setCell(new CheckBoxCell() {
+					@Override
+					public void onBrowserEvent(com.google.gwt.cell.client.Cell.Context context, Element parent, Object value, NativeEvent event, ValueUpdater<Object> valueUpdater) {
+						String type = event.getType();
+						if (BrowserEvents.CHANGE.equals(type) && (readonly || !grid.isEditable())) {
+							InputElement input = parent.getFirstChild().cast();
+							boolean checked = input.isChecked();
+							input.setChecked(!checked);
+						} else
+							super.onBrowserEvent(context, parent, value, event, valueUpdater);
+					}
+
 					@Override
 					public void render(com.google.gwt.cell.client.Cell.Context context, Object aValue, SafeHtmlBuilder sb) {
 						try {

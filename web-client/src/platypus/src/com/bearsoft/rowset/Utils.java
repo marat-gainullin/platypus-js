@@ -70,9 +70,15 @@ public class Utils {
 			Object.defineProperty(this, aName, aDefinition);
 		}-*/;
 
-		public final native void inject(String aName, JavaScriptObject aValue)/*-{
+		
+		public final void inject(String aName, JavaScriptObject aValue){
+			inject(aName, aValue, false);
+		}
+		
+		public final native void inject(String aName, JavaScriptObject aValue, boolean aConfigurable)/*-{
 			if (aName != null) {
 				Object.defineProperty(this, aName, {
+					configurable : aConfigurable,
 					get : function() {
 						return aValue;
 					}

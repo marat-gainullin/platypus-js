@@ -709,17 +709,15 @@ public class Application {
 				}
 			};
 		}
-				
+	    $wnd.P.serverModules = {};
 		$wnd.P.ServerModule = function(aModuleName){
 			if(!(this instanceof $wnd.P.ServerModule))
 				throw 'use P.ServerModule(...) please.';
-			if(!$wnd.P.serverModules)
-				throw 'No server modules proxies.';
 			var moduleData = $wnd.P.serverModules[aModuleName];
 			if(!moduleData)
 				throw 'No server module proxy for module: ' + aModuleName;
 			if(!moduleData.isPermitted)
-				throw 'AccessControlException';
+				throw 'Access to server module ' + aModuleName + ' is not permitted.';
 			var self = this;
 			for (var i = 0; i < moduleData.functions.length; i++) {
 				var funcName = moduleData.functions[i];

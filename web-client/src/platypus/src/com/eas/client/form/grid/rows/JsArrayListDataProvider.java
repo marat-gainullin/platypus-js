@@ -39,8 +39,8 @@ public class JsArrayListDataProvider extends ListDataProvider<JavaScriptObject> 
 	}
 
 	protected boolean changesQueued;
-	
-	protected void enqueueChanges(){
+
+	protected void enqueueChanges() {
 		changesQueued = true;
 		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
@@ -48,13 +48,13 @@ public class JsArrayListDataProvider extends ListDataProvider<JavaScriptObject> 
 			public void execute() {
 				if (changesQueued) {
 					changesQueued = false;
-					if(onChange != null)
+					if (onChange != null)
 						onChange.run();
 				}
 			}
 		});
 	}
-	
+
 	protected boolean readdQueued;
 
 	private void enqueueReadd() {
@@ -65,19 +65,20 @@ public class JsArrayListDataProvider extends ListDataProvider<JavaScriptObject> 
 			public void execute() {
 				if (readdQueued) {
 					readdQueued = false;
-					if(boundToDataElements != null){
+					if (boundToDataElements != null) {
 						boundToDataElements.removeHandler();
 						boundToDataElements = null;
 					}
 					getList().clear();
-					if (data != null){
+					if (data != null) {
 						getList().addAll(new JsArrayList(data));
-						boundToDataElements = Utils.listenElements(data, new PropertyChangeListener(){
+						boundToDataElements = Utils.listenElements(data, new PropertyChangeListener() {
 
 							@Override
-                            public void propertyChange(PropertyChangeEvent evt) {
+							public void propertyChange(PropertyChangeEvent evt) {
 								enqueueChanges();
-                            }});
+							}
+						});
 					}
 					if (onResize != null)
 						onResize.run();

@@ -53,12 +53,12 @@ public class TableFieldNode extends FieldNode {
     @Override
     protected UndoableEdit editName(String val) {
         String oldVal = field.getName();
-        if (!oldVal.equalsIgnoreCase(val)) {
+        if (oldVal == null ? val != null : !oldVal.equalsIgnoreCase(val)) {
             CompoundEdit section = new NotSavableDbStructureCompoundEdit();
             Field oldContent = new Field(field);
             Field newContent = new Field(field);
             newContent.setName(val);
-            Set<Relation<FieldsEntity>> toProcessRels = FieldsEntity.<FieldsEntity>getInOutRelationsByEntityField((FieldsEntity)getEntity(), field);
+            Set<Relation<FieldsEntity>> toProcessRels = FieldsEntity.<FieldsEntity>getInOutRelationsByEntityField((FieldsEntity) getEntity(), field);
             Logger.getLogger(TableFieldNode.class.getName()).fine(String.format("Changing field from %s to %s\n", oldVal, val)); //NOI18N        
             try {
                 // we have to recreate foreign keys in order to them to be compatible with new field names
@@ -103,96 +103,104 @@ public class TableFieldNode extends FieldNode {
 
     @Override
     protected UndoableEdit editDescription(String val) {
-        Field oldContent = new Field(field);
-        Field content = new Field(field);
-        content.setDescription(val);
-        try {
-            ModifyFieldEdit dbEdit = new ModifyFieldEdit(sqlActionsController, getEntity().getTableName(), getEntity().getFields(), oldContent, content);
-            dbEdit.redo();
-            CompoundEdit section = new NotSavableDbStructureCompoundEdit();
-            section.addEdit(super.editDescription(val));
-            section.addEdit(dbEdit);
-            section.end();
-            return section;
-        } catch (Exception ex) {
-            Logger.getLogger(TableFieldNode.class.getName()).log(Level.SEVERE, "Field modification error: {0}", ex.getMessage());
-            NotifyDescriptor d = new NotifyDescriptor.Message(ex.getMessage(), NotifyDescriptor.ERROR_MESSAGE);
-            DialogDisplayer.getDefault().notify(d);
+        if (field.getDescription() == null ? val != null : !field.getDescription().equals(val)) {
+            Field oldContent = new Field(field);
+            Field content = new Field(field);
+            content.setDescription(val);
+            try {
+                ModifyFieldEdit dbEdit = new ModifyFieldEdit(sqlActionsController, getEntity().getTableName(), getEntity().getFields(), oldContent, content);
+                dbEdit.redo();
+                CompoundEdit section = new NotSavableDbStructureCompoundEdit();
+                section.addEdit(super.editDescription(val));
+                section.addEdit(dbEdit);
+                section.end();
+                return section;
+            } catch (Exception ex) {
+                Logger.getLogger(TableFieldNode.class.getName()).log(Level.SEVERE, "Field modification error: {0}", ex.getMessage());
+                NotifyDescriptor d = new NotifyDescriptor.Message(ex.getMessage(), NotifyDescriptor.ERROR_MESSAGE);
+                DialogDisplayer.getDefault().notify(d);
+                return null;
+            }
+        } else {
             return null;
         }
     }
 
     @Override
     protected UndoableEdit editType(Integer val) {
-        try {
-            Field oldContent = new Field(field);
-            Field newContent = new Field(field);
-            newContent.setTypeInfo(DataTypeInfo.valueOf(val));
-            //
-            DbSchemeModel model = (DbSchemeModel) getEntity().getModel();
-            DatabasesClient client = model.getBasesProxy();
-            String datasourceName = model.getDatasourceName();
-            SqlDriver driver = client.getDbMetadataCache(datasourceName).getConnectionDriver();
-            driver.getTypesResolver().resolve2RDBMS(newContent);
+        if (field.getTypeInfo().getSqlType() != val) {
+            try {
+                Field oldContent = new Field(field);
+                Field newContent = new Field(field);
+                newContent.setTypeInfo(DataTypeInfo.valueOf(val));
+                //
+                DbSchemeModel model = (DbSchemeModel) getEntity().getModel();
+                DatabasesClient client = model.getBasesProxy();
+                String datasourceName = model.getDatasourceName();
+                SqlDriver driver = client.getDbMetadataCache(datasourceName).getConnectionDriver();
+                driver.getTypesResolver().resolve2RDBMS(newContent);
 
-            CompoundEdit section = new NotSavableDbStructureCompoundEdit();
-            Set<Relation<FieldsEntity>> rels = FieldsEntity.<FieldsEntity>getInOutRelationsByEntityField((FieldsEntity)getEntity(), field);
-            int rCount = DbStructureUtils.getRecordsCountByField((FieldsEntity) getEntity(), oldContent.getName());
-            String msg = null;
-            String promtMsg1 = "areYouSureReTypeFieldInRelationsPresent"; //NOI18N
-            String promtMsg2 = "areYouSureReTypeFieldDataPresent"; //NOI18N
-            String promtMsg3 = "areYouSureReTypeFieldInRelationsDataPresent"; //NOI18N
-            if (SQLUtils.getTypeGroup(newContent.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.LOBS || SQLUtils.getTypeGroup(oldContent.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.LOBS) {
-                promtMsg1 = "areYouSureBlobFieldInRelationsPresent"; //NOI18N
-                promtMsg2 = "areYouSureBlobFieldDataPresent"; //NOI18N
-                promtMsg3 = "areYouSureBlobFieldInRelationsDataPresent"; //NOI18N
-            }
-            if (rCount == 0 && !rels.isEmpty()) {
-                msg = DbStructureUtils.getString(promtMsg1, String.valueOf(rels.size()), null);
-            } else if (rCount > 0 && rels.isEmpty()) {
-                msg = DbStructureUtils.getString(promtMsg2, String.valueOf(rCount), null);
-            } else if (rCount > 0 && !rels.isEmpty()) {
-                msg = DbStructureUtils.getString(promtMsg3, String.valueOf(rels.size()), String.valueOf(rCount));
-            }
-            if (msg == null || confirm(msg)) {
-                // we have to remove foreign keys because of types incompatibility
-                if (rels != null) {
-                    for (Relation<FieldsEntity> rel2Del : rels) {
-                        ForeignKeySpec fkSpec = DbStructureUtils.constructFkSpecByRelation(rel2Del);
-                        DropFkEdit dEdit = new DropFkEdit(sqlActionsController, fkSpec, field);
-                        dEdit.redo();
-                        section.addEdit(dEdit);
+                CompoundEdit section = new NotSavableDbStructureCompoundEdit();
+                Set<Relation<FieldsEntity>> rels = FieldsEntity.<FieldsEntity>getInOutRelationsByEntityField((FieldsEntity) getEntity(), field);
+                int rCount = DbStructureUtils.getRecordsCountByField((FieldsEntity) getEntity(), oldContent.getName());
+                String msg = null;
+                String promtMsg1 = "areYouSureReTypeFieldInRelationsPresent"; //NOI18N
+                String promtMsg2 = "areYouSureReTypeFieldDataPresent"; //NOI18N
+                String promtMsg3 = "areYouSureReTypeFieldInRelationsDataPresent"; //NOI18N
+                if (SQLUtils.getTypeGroup(newContent.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.LOBS || SQLUtils.getTypeGroup(oldContent.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.LOBS) {
+                    promtMsg1 = "areYouSureBlobFieldInRelationsPresent"; //NOI18N
+                    promtMsg2 = "areYouSureBlobFieldDataPresent"; //NOI18N
+                    promtMsg3 = "areYouSureBlobFieldInRelationsDataPresent"; //NOI18N
+                }
+                if (rCount == 0 && !rels.isEmpty()) {
+                    msg = DbStructureUtils.getString(promtMsg1, String.valueOf(rels.size()), null);
+                } else if (rCount > 0 && rels.isEmpty()) {
+                    msg = DbStructureUtils.getString(promtMsg2, String.valueOf(rCount), null);
+                } else if (rCount > 0 && !rels.isEmpty()) {
+                    msg = DbStructureUtils.getString(promtMsg3, String.valueOf(rels.size()), String.valueOf(rCount));
+                }
+                if (msg == null || confirm(msg)) {
+                    // we have to remove foreign keys because of types incompatibility
+                    if (rels != null) {
+                        for (Relation<FieldsEntity> rel2Del : rels) {
+                            ForeignKeySpec fkSpec = DbStructureUtils.constructFkSpecByRelation(rel2Del);
+                            DropFkEdit dEdit = new DropFkEdit(sqlActionsController, fkSpec, field);
+                            dEdit.redo();
+                            section.addEdit(dEdit);
+                        }
                     }
-                }
-                // change the field type
-                ModifyFieldEdit dbEdit = new ModifyFieldEdit(sqlActionsController, getEntity().getTableName(), getEntity().getFields(), oldContent, newContent);
-                dbEdit.redo();
-                section.addEdit(dbEdit);
-                if (rels != null) {
-                    for (Relation rel : rels) {
-                        DeleteRelationEdit drEdit = new DeleteRelationEdit(rel);
-                        drEdit.redo();
-                        section.addEdit(drEdit);
+                    // change the field type
+                    ModifyFieldEdit dbEdit = new ModifyFieldEdit(sqlActionsController, getEntity().getTableName(), getEntity().getFields(), oldContent, newContent);
+                    dbEdit.redo();
+                    section.addEdit(dbEdit);
+                    if (rels != null) {
+                        for (Relation rel : rels) {
+                            DeleteRelationEdit drEdit = new DeleteRelationEdit(rel);
+                            drEdit.redo();
+                            section.addEdit(drEdit);
+                        }
                     }
+                    newContent.setFk(null);
+                    ChangeFieldEdit diagramEdit = new ChangeFieldEdit(oldContent, newContent, field, getEntity());
+                    diagramEdit.redo();
+                    section.addEdit(diagramEdit);
+                    section.end();
+                    try {
+                        sqlActionsController.getBasesProxy().dbTableChanged(getEntity().getTableDatasourceName(), getEntity().getTableSchemaName(), getEntity().getTableName());
+                    } catch (Exception ex) {
+                        Logger.getLogger(TableFieldNode.class.getName()).log(Level.SEVERE, null, ex); //NOI18N
+                    }
+                    return section;
+                } else {
+                    return null;
                 }
-                newContent.setFk(null);
-                ChangeFieldEdit diagramEdit = new ChangeFieldEdit(oldContent, newContent, field, getEntity());
-                diagramEdit.redo();
-                section.addEdit(diagramEdit);
-                section.end();
-                try {
-                    sqlActionsController.getBasesProxy().dbTableChanged(getEntity().getTableDatasourceName(), getEntity().getTableSchemaName(), getEntity().getTableName());
-                } catch (Exception ex) {
-                    Logger.getLogger(TableFieldNode.class.getName()).log(Level.SEVERE, null, ex); //NOI18N
-                }
-                return section;
-            } else {
+            } catch (Exception ex) {
+                Logger.getLogger(TableFieldNode.class.getName()).log(Level.WARNING, "Field modification error", ex); //NOI18N
+                NotifyDescriptor d = new NotifyDescriptor.Message(ex.getMessage(), NotifyDescriptor.ERROR_MESSAGE);
+                DialogDisplayer.getDefault().notify(d);
                 return null;
             }
-        } catch (Exception ex) {
-            Logger.getLogger(TableFieldNode.class.getName()).log(Level.WARNING, "Field modification error", ex); //NOI18N
-            NotifyDescriptor d = new NotifyDescriptor.Message(ex.getMessage(), NotifyDescriptor.ERROR_MESSAGE);
-            DialogDisplayer.getDefault().notify(d);
+        } else {
             return null;
         }
     }
@@ -204,63 +212,75 @@ public class TableFieldNode extends FieldNode {
 
     @Override
     protected UndoableEdit editSize(Integer val) {
-        Field oldContent = new Field(field);
-        Field content = new Field(field);
-        content.setSize(val);
-        try {
-            ModifyFieldEdit dbEdit = new ModifyFieldEdit(sqlActionsController, getEntity().getTableName(), getEntity().getFields(), oldContent, content);
-            dbEdit.redo();
-            CompoundEdit section = new NotSavableDbStructureCompoundEdit();
-            section.addEdit(super.editSize(val));
-            section.addEdit(dbEdit);
-            section.end();
-            return section;
-        } catch (Exception ex) {
-            Logger.getLogger(TableFieldNode.class.getName()).log(Level.SEVERE, "Field modification error: {0}", ex.getMessage()); //NOI18N
-            NotifyDescriptor d = new NotifyDescriptor.Message(ex.getMessage(), NotifyDescriptor.ERROR_MESSAGE);
-            DialogDisplayer.getDefault().notify(d);
+        if (field.getSize() != val) {
+            Field oldContent = new Field(field);
+            Field content = new Field(field);
+            content.setSize(val);
+            try {
+                ModifyFieldEdit dbEdit = new ModifyFieldEdit(sqlActionsController, getEntity().getTableName(), getEntity().getFields(), oldContent, content);
+                dbEdit.redo();
+                CompoundEdit section = new NotSavableDbStructureCompoundEdit();
+                section.addEdit(super.editSize(val));
+                section.addEdit(dbEdit);
+                section.end();
+                return section;
+            } catch (Exception ex) {
+                Logger.getLogger(TableFieldNode.class.getName()).log(Level.SEVERE, "Field modification error: {0}", ex.getMessage()); //NOI18N
+                NotifyDescriptor d = new NotifyDescriptor.Message(ex.getMessage(), NotifyDescriptor.ERROR_MESSAGE);
+                DialogDisplayer.getDefault().notify(d);
+                return null;
+            }
+        } else {
             return null;
         }
     }
 
     @Override
     protected UndoableEdit editScale(Integer val) {
-        Field oldContent = new Field(field);
-        Field content = new Field(field);
-        content.setScale(val);
-        try {
-            ModifyFieldEdit dbEdit = new ModifyFieldEdit(sqlActionsController, getEntity().getTableName(), getEntity().getFields(), oldContent, content);
-            dbEdit.redo();
-            CompoundEdit section = new NotSavableDbStructureCompoundEdit();
-            section.addEdit(super.editScale(val));
-            section.addEdit(dbEdit);
-            section.end();
-            return section;
-        } catch (Exception ex) {
-            Logger.getLogger(TableFieldNode.class.getName()).log(Level.SEVERE, "Field modification error: {0}", ex.getMessage()); //NOI18N
-            NotifyDescriptor d = new NotifyDescriptor.Message(ex.getMessage(), NotifyDescriptor.ERROR_MESSAGE);
-            DialogDisplayer.getDefault().notify(d);
+        if (field.getScale() != val) {
+            Field oldContent = new Field(field);
+            Field content = new Field(field);
+            content.setScale(val);
+            try {
+                ModifyFieldEdit dbEdit = new ModifyFieldEdit(sqlActionsController, getEntity().getTableName(), getEntity().getFields(), oldContent, content);
+                dbEdit.redo();
+                CompoundEdit section = new NotSavableDbStructureCompoundEdit();
+                section.addEdit(super.editScale(val));
+                section.addEdit(dbEdit);
+                section.end();
+                return section;
+            } catch (Exception ex) {
+                Logger.getLogger(TableFieldNode.class.getName()).log(Level.SEVERE, "Field modification error: {0}", ex.getMessage()); //NOI18N
+                NotifyDescriptor d = new NotifyDescriptor.Message(ex.getMessage(), NotifyDescriptor.ERROR_MESSAGE);
+                DialogDisplayer.getDefault().notify(d);
+                return null;
+            }
+        } else {
             return null;
         }
     }
 
     @Override
     protected UndoableEdit editNullable(Boolean val) {
-        Field oldContent = new Field(field);
-        Field content = new Field(field);
-        content.setNullable(val);
-        try {
-            ModifyFieldEdit dbEdit = new ModifyFieldEdit(sqlActionsController, getEntity().getTableName(), getEntity().getFields(), oldContent, content);
-            dbEdit.redo();
-            CompoundEdit section = new NotSavableDbStructureCompoundEdit();
-            section.addEdit(super.editNullable(val));
-            section.addEdit(dbEdit);
-            section.end();
-            return section;
-        } catch (Exception ex) {
-            Logger.getLogger(TableFieldNode.class.getName()).log(Level.SEVERE, "Field modification error: {0}", ex.getMessage()); //NOI18N
-            NotifyDescriptor d = new NotifyDescriptor.Message(ex.getMessage(), NotifyDescriptor.ERROR_MESSAGE);
-            DialogDisplayer.getDefault().notify(d);
+        if (field.isNullable() != val) {
+            Field oldContent = new Field(field);
+            Field content = new Field(field);
+            content.setNullable(val);
+            try {
+                ModifyFieldEdit dbEdit = new ModifyFieldEdit(sqlActionsController, getEntity().getTableName(), getEntity().getFields(), oldContent, content);
+                dbEdit.redo();
+                CompoundEdit section = new NotSavableDbStructureCompoundEdit();
+                section.addEdit(super.editNullable(val));
+                section.addEdit(dbEdit);
+                section.end();
+                return section;
+            } catch (Exception ex) {
+                Logger.getLogger(TableFieldNode.class.getName()).log(Level.SEVERE, "Field modification error: {0}", ex.getMessage()); //NOI18N
+                NotifyDescriptor d = new NotifyDescriptor.Message(ex.getMessage(), NotifyDescriptor.ERROR_MESSAGE);
+                DialogDisplayer.getDefault().notify(d);
+                return null;
+            }
+        } else {
             return null;
         }
     }

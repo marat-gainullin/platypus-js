@@ -1,5 +1,9 @@
 package com.eas.client.form;
 
+import com.eas.client.form.grid.columns.header.CheckHeaderNode;
+import com.eas.client.form.grid.columns.header.ModelHeaderNode;
+import com.eas.client.form.grid.columns.header.RadioHeaderNode;
+import com.eas.client.form.grid.columns.header.ServiceHeaderNode;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.PublishedCell;
 import com.eas.client.form.published.PublishedComponent;
@@ -158,6 +162,22 @@ public class Publisher {
 	
 	public native static PublishedComponent publish(ModelGrid aComponent)/*-{
 		return new $wnd.P.ModelGrid(aComponent);
+	}-*/;
+
+	public native static PublishedComponent publish(CheckHeaderNode aComponent)/*-{
+		return new $wnd.P.CheckGridColumn(aComponent);
+	}-*/;
+
+	public native static PublishedComponent publish(RadioHeaderNode aComponent)/*-{
+		return new $wnd.P.RadioGridColumn(aComponent);
+	}-*/;
+
+	public native static PublishedComponent publish(ServiceHeaderNode aComponent)/*-{
+		return new $wnd.P.ServiceGridColumn(aComponent);
+	}-*/;
+
+	public native static PublishedComponent publish(ModelHeaderNode aComponent)/*-{
+		return new $wnd.P.ModelGridColumn(aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(ModelCheck aComponent)/*-{

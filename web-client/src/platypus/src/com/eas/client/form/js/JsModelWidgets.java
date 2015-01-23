@@ -30,14 +30,80 @@ public class JsModelWidgets {
 		};	
 		
 		// **************************************************************************
+		$wnd.P.CheckGridColumn = function () {
+			var aComponent = arguments.length > 0 ? arguments[0] : null;
+			
+			if (!(this instanceof $wnd.P.CheckGridColumn)) {
+				throw  ' use  "new P.CheckGridColumn()" !';
+			}
+
+			var published = this;
+			var injected = aComponent != null;
+			aComponent = injected ? aComponent : @com.eas.client.form.grid.columns.header.CheckHeaderNode::new()(); 
+			published.unwrap = function() {
+				return aComponent;
+			};
+        	aComponent.@com.eas.client.form.published.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+			return published;
+		};	
+		
+		// **************************************************************************
+		$wnd.P.RadioGridColumn = function () {
+			var aComponent = arguments.length > 0 ? arguments[0] : null;
+			
+			if (!(this instanceof $wnd.P.RadioGridColumn)) {
+				throw  ' use  "new P.RadioGridColumn()" !';
+			}
+
+			var published = this;
+			var injected = aComponent != null;
+			aComponent = injected ? aComponent : @com.eas.client.form.grid.columns.header.RadioHeaderNode::new()(); 
+			published.unwrap = function() {
+				return aComponent;
+			};
+        	aComponent.@com.eas.client.form.published.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+			return published;
+		};	
+		
+		// **************************************************************************
+		$wnd.P.ServiceGridColumn = function () {
+			var aComponent = arguments.length > 0 ? arguments[0] : null;
+			
+			if (!(this instanceof $wnd.P.ServiceGridColumn)) {
+				throw  ' use  "new P.ServiceGridColumn()" !';
+			}
+
+			var published = this;
+			var injected = aComponent != null;
+			aComponent = injected ? aComponent : @com.eas.client.form.grid.columns.header.ServiceHeaderNode::new()(); 
+			published.unwrap = function() {
+				return aComponent;
+			};
+        	aComponent.@com.eas.client.form.published.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+			return published;
+		};	
+		
+		// **************************************************************************
+		$wnd.P.ModelGridColumn = function () {
+			var aComponent = arguments.length > 0 ? arguments[0] : null;
+			
+			if (!(this instanceof $wnd.P.ModelGridColumn)) {
+				throw  ' use  "new P.ModelGridColumn()" !';
+			}
+
+			var published = this;
+			var injected = aComponent != null;
+			aComponent = injected ? aComponent : @com.eas.client.form.grid.columns.header.ModelHeaderNode::new()(); 
+			published.unwrap = function() {
+				return aComponent;
+			};
+        	aComponent.@com.eas.client.form.published.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+			return published;
+		};	
+		
+		// **************************************************************************
 		$wnd.P.ModelImage = function () {
 			throw 'P.ModelImage is unsupported in Html5 client'; 
-		}
-		$wnd.P.ModelMap = function () {
-			throw 'P.ModelMap is unsupported in Html5 client'; 
-		}
-		$wnd.P.ModelScheme = function () {
-			throw 'P.ModelScheme is unsupported in Html5 client'; 
 		}
 		// **************************************************************************
 		$wnd.P.ModelCheckBox = function (aText) {

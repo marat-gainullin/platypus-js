@@ -820,9 +820,6 @@ public class AppClient {
 	}
 
 	public static native void addServerModule(String aModuleName, String aStructure) throws Exception /*-{
-		if (!$wnd.P.serverModules) {
-			$wnd.P.serverModules = {};
-		}
 		$wnd.P.serverModules[aModuleName] = JSON.parse(aStructure);
 	}-*/;
 

@@ -144,7 +144,7 @@ public class RenderedEditorCell<T> extends WidgetEditorCell<T> {
 		if (editor != null) {
 			((HasValue<T>)editor).setValue(value);
 			String display = ((HasText)editor).getText();
-			sb.appendEscaped(display);
+			sb.appendEscaped(display != null ? display : "");
 		} else {
 			sb.appendEscaped(value != null ? value.toString() : "");
 		}
