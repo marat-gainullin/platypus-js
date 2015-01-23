@@ -239,7 +239,7 @@ public class Entity implements RowsetListener, HasPublished{
 		});
 		Object.defineProperty(published, "findById", {
 			value : function(aValue) {
-				return aEntity.@com.eas.client.model.Entity::findById(Ljava/lang/Object;)($wnd.P.boxAsJava(aValue));
+				return aEntity.@com.eas.client.model.Entity::jsFindById(Ljava/lang/Object;)($wnd.P.boxAsJava(aValue));
 			}
 		});
 		//

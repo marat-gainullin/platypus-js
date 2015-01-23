@@ -31,31 +31,6 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements HasEmptyText, HasActionHandlers {
 
-	/*
-	 * protected CrossUpdater updater = new CrossUpdater(new
-	 * Callback<RowsetEvent, RowsetEvent>() {
-	 * 
-	 * @Override public void onFailure(RowsetEvent reason) { }
-	 * 
-	 * @Override public void onSuccess(RowsetEvent result) { if (displayElement
-	 * != null && displayElement.isCorrect() && valueElement != null &&
-	 * valueElement.isCorrect()) { try { Rowset displayRowset =
-	 * displayElement.entity != null ? displayElement.entity.getRowset() : null;
-	 * Rowset valueRowset = valueElement.entity != null ?
-	 * valueElement.entity.getRowset() : null; RowsetEvent event = (RowsetEvent)
-	 * result; if (event != null && (event.getRowset() == displayRowset ||
-	 * event.getRowset() == valueRowset)) { if (event instanceof RowChangeEvent)
-	 * { RowChangeEvent change = (RowChangeEvent) event; if
-	 * (change.getOldRowCount() == change.getNewRowCount()) { if
-	 * (change.getRowset() == displayRowset && change.getFieldIndex() ==
-	 * displayElement.getColIndex() || change.getRowset() == valueRowset &&
-	 * change.getFieldIndex() == valueElement.getColIndex()) { redraw(); } }
-	 * else { redraw(); } } else { redraw(); } } } catch (Exception e) {
-	 * e.printStackTrace(); } } }
-	 * 
-	 * });
-	 */
-
 	protected static final String CUSTOM_DROPDOWN_CLASS = "combo-field-custom-dropdown";
 	protected JavaScriptObjectKeyProvider rowKeyProvider = new JavaScriptObjectKeyProvider();
 	protected String emptyText;
