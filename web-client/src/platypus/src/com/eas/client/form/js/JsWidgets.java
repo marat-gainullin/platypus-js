@@ -782,6 +782,15 @@ public class JsWidgets {
 				},
 				configurable : true
 			});
+			Object.defineProperty(published, "onValueChange", {
+				get : function() {
+					return executor.@com.eas.client.form.EventsExecutor::getValueChanged()();
+				},
+				set : function(aValue) {
+					executor.@com.eas.client.form.EventsExecutor::setValueChanged(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				},
+				configurable : true
+			});
 		}
 	
 	}-*/;
