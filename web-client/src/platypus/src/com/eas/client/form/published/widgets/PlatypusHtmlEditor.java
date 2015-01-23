@@ -16,27 +16,68 @@ import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
+import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
+import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.RichTextArea;
+import com.google.gwt.event.dom.client.ChangeHandler;
 
-public class PlatypusHtmlEditor extends RichTextArea implements HasJsFacade, HasEmptyText, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize {
+public class PlatypusHtmlEditor extends RichTextArea implements HasJsFacade,HasValueChangeHandlers<String>, HasEmptyText, HasValue<String>, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize {
 	
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
 	protected String emptyText;
 	protected String name;	
 	protected JavaScriptObject published;
-
+	private boolean isNull=true;
+	
 	public PlatypusHtmlEditor(){
 		super();
 		getElement().<XElement>cast().addResizingTransitionEnd(this);
+		addDomHandler(new ChangeHandler(){
+
+			@Override
+			public void onChange(ChangeEvent event) {
+				isNull = false;
+				ValueChangeEvent.fire(PlatypusHtmlEditor.this, getValue());
+			}}, ChangeEvent.getType());
 	}
+	
+	@Override
+	  public String getValue() {
+	    return isNull? null : getHTML();
+	  }
+
+	  @Override
+	  public void setValue(String value) {
+	    isNull = value == null;
+	    if (isNull){
+	    	value="";
+	    }
+	    SafeHtml html = SimpleHtmlSanitizer.sanitizeHtml(value);
+	    setHTML(html);
+	  }
+
+	  @Override
+	  public void setValue(String value, boolean fireEvents) {
+	    SafeHtml html = SimpleHtmlSanitizer.sanitizeHtml(value);
+	    setHTML(html);
+	    if (fireEvents) {
+	      ValueChangeEvent.fireIfNotEqual(this, getHTML(), value);
+	    }
+	  }
+	  
 	
 	@Override
 	public HandlerRegistration addResizeHandler(ResizeHandler handler) {
@@ -149,10 +190,10 @@ public class PlatypusHtmlEditor extends RichTextArea implements HasJsFacade, Has
 	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
 		Object.defineProperty(published, "value", {
 			get : function() {
-				return aWidget.@com.eas.client.form.published.widgets.PlatypusHtmlEditor::getHTML()();
+				return aWidget.@com.eas.client.form.published.widgets.PlatypusHtmlEditor::getValue()();
 			},
 			set : function(aValue) {
-				aWidget.@com.eas.client.form.published.widgets.PlatypusHtmlEditor::setHTML(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
+				aWidget.@com.eas.client.form.published.widgets.PlatypusHtmlEditor::setValue(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
 			}
 		});
 		Object.defineProperty(published, "text", {
@@ -172,4 +213,10 @@ public class PlatypusHtmlEditor extends RichTextArea implements HasJsFacade, Has
 			}
 		});
 	}-*/;
+	
+	@Override
+	public HandlerRegistration addValueChangeHandler(
+			ValueChangeHandler<String> handler) {
+		return super.addHandler(handler, ValueChangeEvent.getType());
+	};
 }

@@ -66,10 +66,13 @@ import com.google.gwt.event.dom.client.MouseWheelEvent;
 import com.google.gwt.event.dom.client.MouseWheelHandler;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
 import com.google.gwt.event.logical.shared.HasSelectionHandlers;
+import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
@@ -98,6 +101,7 @@ public class EventsExecutor {
 	private JavaScriptObject keyReleased;
 	// TODO: Add event for tabs, radio group and cards selection.
 	private JavaScriptObject itemSelected;
+	private JavaScriptObject valueChanged;
 
 	private static enum MOUSE {
 		NULL, PRESSED, MOVED, DRAGGED
@@ -196,6 +200,10 @@ public class EventsExecutor {
 
 	public JavaScriptObject getKeyReleased() {
 		return keyReleased;
+	}
+	
+	public JavaScriptObject getValueChanged() {
+		return valueChanged;
 	}
 
 	protected HandlerRegistration mouseOutReg;
@@ -715,6 +723,29 @@ public class EventsExecutor {
 					}
 
 				});
+			}
+		}
+	}
+	
+	protected HandlerRegistration valueChangedReg;
+	
+	public void setValueChanged(JavaScriptObject aValue) {
+		if (valueChanged != aValue) {
+			if (valueChangedReg != null) {
+				valueChangedReg.removeHandler();
+				valueChangedReg = null;
+			}
+			valueChanged = aValue;
+			if (component instanceof HasValueChangeHandlers<?>) {
+				valueChangedReg = ((HasValueChangeHandlers<Object>) component).addValueChangeHandler(new ValueChangeHandler<Object>() {
+					
+					@Override
+					public void onValueChange(ValueChangeEvent<Object> event) {
+						JavaScriptObject published = ((HasPublished) event.getSource()).getPublished();
+						executeEvent(valueChanged, JsEvents.publishSourcedEvent(published));
+					}
+				});
+				
 			}
 		}
 	}
