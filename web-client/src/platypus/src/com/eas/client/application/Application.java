@@ -592,13 +592,21 @@ public class Application {
 		};
 		$wnd.P.loadForm = function(appElementName, aModel, aTarget) {
 			var appElementDoc = aClient.@com.eas.client.application.AppClient::getFormDocument(Ljava/lang/String;)(appElementName);
-			var nativeForm = @com.eas.client.form.store.XmlDom2Form::transform(Lcom/google/gwt/xml/client/Document;Lcom/google/gwt/core/client/JavaScriptObject;)(appElementDoc, aModel);
+			var factory = @com.eas.client.form.store.XmlDom2Form::transform(Lcom/google/gwt/xml/client/Document;Lcom/google/gwt/core/client/JavaScriptObject;)(appElementDoc, aModel);
+			var nativeForm = factory.@com.eas.client.form.FormFactory::getForm()(); 
 			if(aTarget)
 				$wnd.P.Form.call(aTarget, null, appElementName, nativeForm);
 			else
 				aTarget = new $wnd.P.Form(null, appElementName, nativeForm);
 			if(!aTarget.title)
 				aTarget.title = appElementName;
+			var nwList = factory.@com.eas.client.form.FormFactory::getWidgetsList()();
+			for(var i = 0; i < nwList.@java.util.List::size()(); i++){
+				var nWidget = nwList.@java.util.List::get(I)(i);
+				var pWidget = nWidget.@com.eas.client.form.published.HasPublished::getPublished()();
+				if(pWidget.name)
+					aTarget[pWidget.name] = pWidget;
+			}
 			return aTarget;
 		};
 		$wnd.P.HTML5 = "Html5 client";
