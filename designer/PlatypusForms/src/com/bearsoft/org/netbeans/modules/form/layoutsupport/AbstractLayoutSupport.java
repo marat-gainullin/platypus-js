@@ -989,11 +989,6 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate {
         return radLayout;
     }
 
-    // ---------
-    // utility methods
-    /**
-     * Used only internally.
-     */
     protected static ResourceBundle getBundle() {
         return org.openide.util.NbBundle.getBundle(AbstractLayoutSupport.class);
     }

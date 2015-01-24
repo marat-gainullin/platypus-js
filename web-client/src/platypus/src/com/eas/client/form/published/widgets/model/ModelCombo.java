@@ -35,7 +35,6 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 	protected JavaScriptObjectKeyProvider rowKeyProvider = new JavaScriptObjectKeyProvider();
 	protected String emptyText;
 	protected String emptyValueKey = String.valueOf(IDGenerator.genId());
-	protected boolean forceRedraw;
 	protected JavaScriptObject displayList;
 	protected String displayField;
 	protected HandlerRegistration boundToList;
@@ -83,8 +82,29 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 	}
 
 	public void setValue(JavaScriptObject value, boolean fireEvents) {
+		StyledListBox<JavaScriptObject> box = (StyledListBox<JavaScriptObject>) decorated;
+		int newValueIndex = box.indexOf(value);
+		if(newValueIndex == -1){
+			if(!list)
+				box.clear();
+			injectValueItem(value);
+		}
 		super.setValue(value, fireEvents);
 	}
+
+	private void injectValueItem(JavaScriptObject value) {
+		StyledListBox<JavaScriptObject> box = (StyledListBox<JavaScriptObject>) decorated;
+	    String label = calcLabel(value);
+	    if (value != null) {
+	    	box.addItem(label != null ? label : "", value.toString(), value, "");
+	    } else {
+	    	if (label == null)
+	    		label = emptyText;
+	    	box.addItem(label != null ? label : "", emptyValueKey, null, "");
+	    	OptionElement emptyTextOption = box.getItem(box.getItemCount() - 1);
+	    	emptyTextOption.getStyle().setDisplay(Style.Display.NONE);
+	    }
+    }
 
 	@Override
 	protected void clearValue() {
@@ -101,55 +121,43 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 		return aValue instanceof JavaScriptObject ? (JavaScriptObject) aValue : null;
 	}
 
-	public boolean isForceRedraw() {
-		return forceRedraw;
-	}
-
-	public void setForceRedraw(boolean aValue) {
-		forceRedraw = aValue;
-	}
-
 	public void redraw() {
 		try {
-			if ((((Widget) decorated).isAttached() || forceRedraw)) {
+			if ((((Widget) decorated).isAttached())) {
 				StyledListBox<JavaScriptObject> box = (StyledListBox<JavaScriptObject>) decorated;
-				box.clear();
 				box.setSelectedIndex(-1);
+				box.clear();
 				JavaScriptObject value = getValue();
-				String label = value != null ? new StringValueConverter().convert(Utils.getPathData(value, displayField)) : "";
-				PublishedCell cell = ControlsUtils.calcValuedPublishedCell(published, onRender, value, label != null ? label : "", null);
-				if (cell != null && cell.getDisplay() != null && !cell.getDisplay().isEmpty()) {
-					label = cell.getDisplay();
-				}
-				if (value != null) {
-					box.addItem(label != null ? label : "", value.toString(), value, "");
-				} else {
-					if (label == null)
-						label = emptyText;
-					box.addItem(label != null ? label : "", emptyValueKey, null, "");
-					OptionElement emptyTextOption = box.getItem(box.getItemCount() - 1);
-					if (list) {
-						emptyTextOption.getStyle().setDisplay(Style.Display.NONE);
-					}
-					box.setSelectedIndex(0);
-				}
+				boolean valueMet = false;
 				if (ModelCombo.this.list && displayList != null) {
 					List<JavaScriptObject> jsoList = new JsArrayList(displayList);
-					for (JavaScriptObject listItem : jsoList) {
-						if (listItem != value) {
-							String _label = listItem != null ? new StringValueConverter().convert(Utils.getPathData(listItem, displayField)) : "";
-							PublishedCell _cell = ControlsUtils.calcValuedPublishedCell(published, onRender, listItem, _label != null ? _label : "", null);
-							if (_cell != null && _cell.getDisplay() != null && !_cell.getDisplay().isEmpty()) {
-								label = _cell.getDisplay();
-							}
-							box.addItem(_label, listItem.toString(), listItem, "");
+					for (int i = 0; i < jsoList.size(); i++) {
+						JavaScriptObject listItem = jsoList.get(i);
+						String _label = calcLabel(listItem);
+						box.addItem(_label, listItem.toString(), listItem, "");
+						if(listItem == value){
+							valueMet = true;
 						}
 					}
 				}
+				if(!valueMet){
+					injectValueItem(value);
+				}
+				int valueIndex = box.indexOf(value);
+				box.setSelectedIndex(valueIndex);
 			}
 		} catch (Exception e) {
 			Logger.getLogger(ModelCombo.class.getName()).log(Level.SEVERE, e.getMessage(), e);
 		}
+	}
+
+	public String calcLabel(JavaScriptObject aValue) {
+		String label = aValue != null ? new StringValueConverter().convert(Utils.getPathData(aValue, displayField)) : "";
+		PublishedCell cell = ControlsUtils.calcValuedPublishedCell(published, onRender, aValue, label != null ? label : "", null);
+		if (cell != null && cell.getDisplay() != null && !cell.getDisplay().isEmpty()) {
+			label = cell.getDisplay();
+		}
+		return label;
 	}
 
 	protected HasValue<JavaScriptObject> getDecorated() {

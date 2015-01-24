@@ -18,7 +18,6 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.HasDirection;
-import com.google.gwt.i18n.client.HasDirection.Direction;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.ListBox;
 
@@ -67,7 +66,7 @@ public class StyledListBox<T> extends ListBox implements HasValue<T> {
 	}
 
 	@Override
-	public void insertItem(String aLabel, Direction dir, String value, int index) {
+	public void insertItem(String aLabel, HasDirection.Direction dir, String value, int index) {
 		super.insertItem(aLabel != null ? aLabel : "", dir, value, index);
 		if (index == -1) {
 			associatedValues.add(null);
@@ -138,40 +137,54 @@ public class StyledListBox<T> extends ListBox implements HasValue<T> {
 		setValue(aValue, false);
 	}
 
-	public String getText(){
-		Integer idx = indicies != null ? indicies.get(value) : null;
-		if(idx != null){
+	public String getText() {
+		int idx = indexOf(value);
+		if (idx != -1) {
 			return getItemText(idx);
-		}else{
+		} else {
 			return null;
 		}
 	}
-	
-	public String getText(T aValue){
+
+	public String getText(T aValue) {
+		validateLocator();
 		Integer idx = indicies.get(aValue);
-		if(idx != null){
+		if (idx != null) {
 			return getItemText(idx);
-		}else{
+		} else {
 			return null;
 		}
 	}
-	
+
+	public int indexOf(T aValue) {
+		validateLocator();
+		Integer idx = indicies.get(aValue);
+		if (idx != null) {
+			return idx;
+		} else {
+			return -1;
+		}
+	}
+
 	@Override
 	public void setValue(T aValue, boolean fireEvents) {
-		value = aValue;
+		if (value != aValue) {
+			value = aValue;
+			int index = indexOf(aValue);
+			setSelectedIndex(index);
+			if (fireEvents) {
+				ValueChangeEvent.fire(StyledListBox.this, value);
+			}
+		}
+	}
+
+	private void validateLocator() {
 		if (indicies == null) {
 			indicies = new HashMap<>();
 			for (int i = 0; i < associatedValues.size(); i++) {
 				T association = associatedValues.get(i);
 				indicies.put(association, i);
 			}
-		}
-		Integer index = indicies.get(aValue);
-		if (index == null)
-			index = -1;
-		setSelectedIndex(index);
-		if (fireEvents) {
-			ValueChangeEvent.fire(StyledListBox.this, value);
 		}
 	}
 }

@@ -46,11 +46,15 @@ package com.bearsoft.org.netbeans.modules.form;
 import com.bearsoft.org.netbeans.modules.form.RADProperty.FakePropertyDescriptor;
 import com.bearsoft.org.netbeans.modules.form.editors.EnumEditor;
 import com.bearsoft.org.netbeans.modules.form.editors.IconEditor;
+import com.eas.client.forms.HorizontalPosition;
 import com.eas.client.forms.Orientation;
+import com.eas.client.forms.VerticalPosition;
 import com.eas.client.forms.components.FormattedField;
+import com.eas.client.forms.components.model.ModelFormattedField;
 import com.eas.client.forms.components.rt.HasGroup;
 import com.eas.client.forms.components.rt.VFormattedField;
 import com.eas.client.forms.containers.ButtonGroup;
+import com.eas.client.forms.containers.ScrollPane;
 import com.eas.client.forms.containers.SplitPane;
 import com.eas.design.Designable;
 import com.eas.design.Undesignable;
@@ -63,6 +67,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractButton;
+import javax.swing.JScrollPane;
 import org.openide.ErrorManager;
 import org.openide.nodes.*;
 import org.openide.util.datatransfer.NewType;
@@ -575,10 +580,22 @@ public abstract class RADComponent<C> {
                 return new ComponentProperty(this, desc);
             } else if (javax.swing.Icon.class.isAssignableFrom(desc.getPropertyType()) || java.awt.Image.class.isAssignableFrom(desc.getPropertyType())) {
                 return new IconProperty(this, desc);
-            } else if ("valueType".equals(desc.getName()) && FormattedField.class.isAssignableFrom(beanClass)) {
+            } else if ("valueType".equals(desc.getName()) && (FormattedField.class.isAssignableFrom(beanClass) || ModelFormattedField.class.isAssignableFrom(beanClass))) {
                 return new ValueTypeProperty(this, desc);
             } else if ("orientation".equals(desc.getName()) && SplitPane.class.isAssignableFrom(beanClass)) {
                 return new OrientationProperty(this, desc);
+            } else if ("horizontalScrollBarPolicy".equals(desc.getName()) && ScrollPane.class.isAssignableFrom(beanClass)) {
+                return new HorizontalScrollPolicyProperty(this, desc);
+            } else if ("verticalScrollBarPolicy".equals(desc.getName()) && ScrollPane.class.isAssignableFrom(beanClass)) {
+                return new VerticalScrollPolicyProperty(this, desc);
+            } else if ("horizontalAlignment".equals(desc.getName())) {
+                return new HorizontalPositionProperty(this, desc);
+            } else if ("verticalAlignment".equals(desc.getName())) {
+                return new VerticalPositionProperty(this, desc);
+            } else if ("horizontalTextPosition".equals(desc.getName())) {
+                return new HorizontalPositionProperty(this, desc);
+            } else if ("verticalTextPosition".equals(desc.getName())) {
+                return new VerticalPositionProperty(this, desc);
             } else {
                 return new RADProperty<>(this, desc);
             }
@@ -682,12 +699,7 @@ public abstract class RADComponent<C> {
     static class ValueTypeProperty extends RADProperty<Integer> {
 
         private EnumEditor editor = new EnumEditor(new Object[]{
-            FormUtils.getBundleString("CTL_RegExp"), VFormattedField.REGEXP, "REGEXP"
-           ,FormUtils.getBundleString("CTL_Mask"), VFormattedField.MASK, "MASK"
-           ,FormUtils.getBundleString("CTL_Number"), VFormattedField.NUMBER, "NUMBER"
-           ,FormUtils.getBundleString("CTL_Percent"), VFormattedField.PERCENT, "PERCENT"
-           ,FormUtils.getBundleString("CTL_DateTime"), VFormattedField.DATE, "DATE"
-           ,FormUtils.getBundleString("CTL_Currency"), VFormattedField.CURRENCY, "CURRENCY"
+            FormUtils.getBundleString("CTL_RegExp"), VFormattedField.REGEXP, "REGEXP", FormUtils.getBundleString("CTL_Mask"), VFormattedField.MASK, "MASK", FormUtils.getBundleString("CTL_Number"), VFormattedField.NUMBER, "NUMBER", FormUtils.getBundleString("CTL_Percent"), VFormattedField.PERCENT, "PERCENT", FormUtils.getBundleString("CTL_DateTime"), VFormattedField.DATE, "DATE", FormUtils.getBundleString("CTL_Currency"), VFormattedField.CURRENCY, "CURRENCY"
         });
 
         ValueTypeProperty(RADComponent<?> comp, PropertyDescriptor aDesc) throws IllegalAccessException, InvocationTargetException {
@@ -701,14 +713,81 @@ public abstract class RADComponent<C> {
 
     }
 
-    static class OrientationProperty extends RADProperty<Integer> {
+    public static class OrientationProperty extends RADProperty<Integer> {
 
         private EnumEditor editor = new EnumEditor(new Object[]{
-            FormUtils.getBundleString("CTL_Horizontal"), Orientation.HORIZONTAL, "HORIZONTAL"
-           ,FormUtils.getBundleString("CTL_Vertical"), Orientation.VERTICAL, "VERTICAL"
+            FormUtils.getBundleString("CTL_Horizontal"), Orientation.HORIZONTAL, "HORIZONTAL", FormUtils.getBundleString("CTL_Vertical"), Orientation.VERTICAL, "VERTICAL"
         });
 
         OrientationProperty(RADComponent<?> comp, PropertyDescriptor aDesc) throws IllegalAccessException, InvocationTargetException {
+            super(comp, aDesc);
+        }
+
+        @Override
+        public PropertyEditor getPropertyEditor() {
+            return editor;
+        }
+
+    }
+
+    static class HorizontalPositionProperty extends RADProperty<Integer> {
+
+        private EnumEditor editor = new EnumEditor(new Object[]{
+            FormUtils.getBundleString("CTL_Left"), HorizontalPosition.LEFT, "LEFT", FormUtils.getBundleString("CTL_Center"), HorizontalPosition.CENTER, "CENTER", FormUtils.getBundleString("CTL_Right"), HorizontalPosition.RIGHT, "RIGHT"
+        });
+
+        HorizontalPositionProperty(RADComponent<?> comp, PropertyDescriptor aDesc) throws IllegalAccessException, InvocationTargetException {
+            super(comp, aDesc);
+        }
+
+        @Override
+        public PropertyEditor getPropertyEditor() {
+            return editor;
+        }
+
+    }
+
+    static class VerticalPositionProperty extends RADProperty<Integer> {
+
+        private EnumEditor editor = new EnumEditor(new Object[]{
+            FormUtils.getBundleString("CTL_Top"), VerticalPosition.TOP, "TOP", FormUtils.getBundleString("CTL_Center"), VerticalPosition.CENTER, "CENTER", FormUtils.getBundleString("CTL_Bottom"), VerticalPosition.BOTTOM, "BOTTOM"
+        });
+
+        VerticalPositionProperty(RADComponent<?> comp, PropertyDescriptor aDesc) throws IllegalAccessException, InvocationTargetException {
+            super(comp, aDesc);
+        }
+
+        @Override
+        public PropertyEditor getPropertyEditor() {
+            return editor;
+        }
+
+    }
+
+    static class HorizontalScrollPolicyProperty extends RADProperty<Integer> {
+
+        private EnumEditor editor = new EnumEditor(new Object[]{
+            FormUtils.getBundleString("CTL_Always"), JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS, "HORIZONTAL_SCROLLBAR_ALWAYS", FormUtils.getBundleString("CTL_Never"), JScrollPane.HORIZONTAL_SCROLLBAR_NEVER, "HORIZONTAL_SCROLLBAR_NEVER", FormUtils.getBundleString("CTL_Auto"), JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED, "HORIZONTAL_SCROLLBAR_AS_NEEDED"
+        });
+
+        HorizontalScrollPolicyProperty(RADComponent<?> comp, PropertyDescriptor aDesc) throws IllegalAccessException, InvocationTargetException {
+            super(comp, aDesc);
+        }
+
+        @Override
+        public PropertyEditor getPropertyEditor() {
+            return editor;
+        }
+
+    }
+
+    static class VerticalScrollPolicyProperty extends RADProperty<Integer> {
+
+        private EnumEditor editor = new EnumEditor(new Object[]{
+            FormUtils.getBundleString("CTL_Always"), JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, "VERTICAL_SCROLLBAR_ALWAYS", FormUtils.getBundleString("CTL_Never"), JScrollPane.VERTICAL_SCROLLBAR_NEVER, "VERTICAL_SCROLLBAR_NEVER", FormUtils.getBundleString("CTL_Auto"), JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, "VERTICAL_SCROLLBAR_AS_NEEDED"
+        });
+
+        VerticalScrollPolicyProperty(RADComponent<?> comp, PropertyDescriptor aDesc) throws IllegalAccessException, InvocationTargetException {
             super(comp, aDesc);
         }
 

@@ -382,12 +382,12 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
                 getBundle().getString("PROP_axis"), // NOI18N
                 getBundle().getString("HINT_axis")) // NOI18N
                 {
-                    protected BoxOrientationEditor editor;
+                    protected OrientationEditor editor;
 
                     @Override
                     public PropertyEditor getPropertyEditor() {
                         if (editor == null) {
-                            editor = new BoxOrientationEditor();
+                            editor = new OrientationEditor();
                         }
                         return editor;
                     }
@@ -488,11 +488,7 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
         return "axis".equals(propName) ? getProperties()[0] : null; // NOI18N
     }
 
-    // --------------
-    /**
-     * PropertyEditor for axis property of BoxLayoutSupport.
-     */
-    public static final class BoxOrientationEditor extends PropertyEditorSupport {
+    public static final class OrientationEditor extends PropertyEditorSupport {
 
         private final String[] tags = {
             getBundle().getString("VALUE_axis_x"), // NOI18N

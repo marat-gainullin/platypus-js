@@ -1,7 +1,9 @@
 package com.bearsoft.gwt.ui;
 
+import com.google.gwt.user.client.ui.HasText;
 
-public interface HasImageParagraph extends HasImageResource {
+
+public interface HasImageParagraph extends HasImageResource, HasText {
 
 	/**
 	 * The central position in an area. Used for both compass-direction

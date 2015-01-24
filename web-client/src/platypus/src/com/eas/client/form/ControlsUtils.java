@@ -293,10 +293,14 @@ public class ControlsUtils {
 		return null;
 	}
 
-	public static PublishedCell calcValuedPublishedCell(JavaScriptObject aEventThis, JavaScriptObject cellFunction, Object aValue, String aDisplay, PublishedCell aAlreadyCell) throws Exception {
+	public static PublishedCell calcValuedPublishedCell(JavaScriptObject aEventThis, JavaScriptObject cellFunction, Object aValue, String aDisplay, PublishedCell aAlreadyCell) {
 		if (aEventThis != null && cellFunction != null) {
 			PublishedCell cell = aAlreadyCell != null ? aAlreadyCell : Publisher.publishCell(Utils.toJs(aValue), aDisplay);
-			Utils.executeScriptEventVoid(aEventThis, cellFunction, JsEvents.publishOnRenderEvent(aEventThis, null, null, null, cell));
+			try {
+	            Utils.executeScriptEventVoid(aEventThis, cellFunction, JsEvents.publishOnRenderEvent(aEventThis, null, null, null, cell));
+            } catch (Exception ex) {
+            	Logger.getLogger(ControlsUtils.class.getName()).log(Level.SEVERE, null, ex);
+            }
 			return cell;
 		} else {
 			return null;

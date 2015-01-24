@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import com.bearsoft.gwt.ui.HasImageParagraph;
 import com.bearsoft.gwt.ui.HasImageResource;
 import com.bearsoft.gwt.ui.Orientation;
+import com.bearsoft.gwt.ui.widgets.ImageButton;
 import com.bearsoft.gwt.ui.widgets.ObjectFormat;
 import com.bearsoft.gwt.ui.widgets.grid.header.HeaderNode;
 import com.bearsoft.rowset.CallbackAdapter;
@@ -214,48 +215,19 @@ public class FormFactory {
 			final PlatypusLabel label = new PlatypusLabel();
 			Publisher.publish(label);
 			readGeneralProps(anElement, label);
-			if (anElement.hasAttribute("icon")) {
-				String iconImage = anElement.getAttribute("icon");
-				if (iconImage != null && !iconImage.isEmpty()) {
-					PlatypusImageResource.load(iconImage, new CallbackAdapter<ImageResource, String>() {
-						@Override
-						protected void doWork(ImageResource aResult) throws Exception {
-							label.setImageResource(aResult);
-						}
-
-						@Override
-						public void onFailure(String reason) {
-							Logger.getLogger(PlatypusWindow.class.getName()).log(Level.SEVERE, "Factory failed to load label icon. " + reason);
-						}
-					});
-				}
-			}
-			if (anElement.hasAttribute("text")) {
-				label.setText(anElement.getAttribute("text"));
-			}
-			label.setHorizontalAlignment(Utils.getIntegerAttribute(anElement, "horizontalAlignment", PlatypusLabel.LEADING));
-			label.setVerticalAlignment(Utils.getIntegerAttribute(anElement, "verticalAlignment", PlatypusLabel.CENTER));
-			label.setIconTextGap(Utils.getIntegerAttribute(anElement, "iconTextGap", 4));
-			label.setHorizontalTextPosition(Utils.getIntegerAttribute(anElement, "horizontalTextPosition", PlatypusLabel.TRAILING));
-			label.setVerticalTextPosition(Utils.getIntegerAttribute(anElement, "verticalTextPosition", PlatypusLabel.CENTER));
-			/*
-			 * if (anElement.hasAttribute("labelFor")) { String labelForName =
-			 * anElement.getAttribute("labelFor"); resolvers.add((Map<String,
-			 * UIObject> aWidgets) -> { if (aWidgets.containsKey(labelForName))
-			 * { label.setLabelFor(aWidgets.get(labelForName)); } }); }
-			 */
+			readImageParagraph(anElement, label);
 			return label;
 		case "Button":
 			PlatypusButton button = new PlatypusButton();
 			Publisher.publish(button);
 			readGeneralProps(anElement, button);
-			readButton(anElement, button);
+			readImageParagraph(anElement, button);
 			return button;
 		case "DropDownButton":
 			final PlatypusSplitButton dropDownButton = new PlatypusSplitButton();
 			Publisher.publish(dropDownButton);
 			readGeneralProps(anElement, dropDownButton);
-			readButton(anElement, dropDownButton);
+			readImageParagraph(anElement, dropDownButton);
 			if (anElement.hasAttribute("dropDownMenu")) {
 				final String dropDownMenuName = anElement.getAttribute("dropDownMenu");
 				resolvers.add(new Runnable() {
@@ -281,7 +253,7 @@ public class FormFactory {
 			PlatypusCheckBox checkBox = new PlatypusCheckBox();
 			Publisher.publish(checkBox);
 			readGeneralProps(anElement, checkBox);
-			readButton(anElement, checkBox);
+			readImageParagraph(anElement, checkBox);
 			if (anElement.hasAttribute("selected")) {
 				boolean selected = Utils.getBooleanAttribute(anElement, "selected", Boolean.FALSE);
 				checkBox.setValue(selected);
@@ -346,7 +318,7 @@ public class FormFactory {
 			PlatypusRadioButton radio = new PlatypusRadioButton();
 			Publisher.publish(radio);
 			readGeneralProps(anElement, radio);
-			readButton(anElement, radio);
+			readImageParagraph(anElement, radio);
 			if (anElement.hasAttribute("selected")) {
 				boolean selected = Utils.getBooleanAttribute(anElement, "selected", Boolean.FALSE);
 				radio.setValue(selected);
@@ -378,7 +350,7 @@ public class FormFactory {
 			PlatypusToggleButton toggle = new PlatypusToggleButton();
 			Publisher.publish(toggle);
 			readGeneralProps(anElement, toggle);
-			readButton(anElement, toggle);
+			readImageParagraph(anElement, toggle);
 			return toggle;
 		case "DesktopPane":
 			DesktopPane desktop = new DesktopPane();
@@ -633,7 +605,7 @@ public class FormFactory {
 			PlatypusMenuItemImageText menuitem = new PlatypusMenuItemImageText();
 			Publisher.publish(menuitem);
 			readGeneralProps(anElement, menuitem);
-			readButton(anElement, menuitem);
+			readImageParagraph(anElement, menuitem);
 			if (anElement.hasAttribute("text")) {
 				menuitem.setText(anElement.getAttribute("text"));
 			}
@@ -642,7 +614,7 @@ public class FormFactory {
 			PlatypusMenuItemCheckBox checkMenuItem = new PlatypusMenuItemCheckBox();
 			Publisher.publish(checkMenuItem);
 			readGeneralProps(anElement, checkMenuItem);
-			readButton(anElement, checkMenuItem);
+			readImageParagraph(anElement, checkMenuItem);
 			if (anElement.hasAttribute("selected")) {
 				boolean selected = Utils.getBooleanAttribute(anElement, "selected", Boolean.FALSE);
 				checkMenuItem.setValue(selected);
@@ -655,7 +627,7 @@ public class FormFactory {
 			PlatypusMenuItemRadioButton radioMenuItem = new PlatypusMenuItemRadioButton();
 			Publisher.publish(radioMenuItem);
 			readGeneralProps(anElement, radioMenuItem);
-			readButton(anElement, radioMenuItem);
+			readImageParagraph(anElement, radioMenuItem);
 			if (anElement.hasAttribute("selected")) {
 				boolean selected = Utils.getBooleanAttribute(anElement, "selected", Boolean.FALSE);
 				radioMenuItem.setValue(selected);
@@ -684,7 +656,7 @@ public class FormFactory {
 		}
 	}
 
-	protected void readButton(Element anElement, final UIObject button) throws Exception {
+	protected void readImageParagraph(Element anElement, final UIObject button) throws Exception {
 		if (anElement.hasAttribute("icon") && button instanceof HasImageResource) {
 			String iconImage = anElement.getAttribute("icon");
 			PlatypusImageResource.load(iconImage, new CallbackAdapter<ImageResource, String>() {
@@ -704,10 +676,10 @@ public class FormFactory {
 		}
 		if (button instanceof HasImageParagraph) {
 			HasImageParagraph hip = (HasImageParagraph) button;
-			hip.setHorizontalAlignment(Utils.getIntegerAttribute(anElement, "horizontalAlignment", HasImageParagraph.LEADING));
+			hip.setHorizontalAlignment(Utils.getIntegerAttribute(anElement, "horizontalAlignment", button instanceof ImageButton ? HasImageParagraph.CENTER : HasImageParagraph.LEFT));
 			hip.setVerticalAlignment(Utils.getIntegerAttribute(anElement, "verticalAlignment", HasImageParagraph.CENTER));
 			hip.setIconTextGap(Utils.getIntegerAttribute(anElement, "iconTextGap", 4));
-			hip.setHorizontalTextPosition(Utils.getIntegerAttribute(anElement, "horizontalTextPosition", HasImageParagraph.TRAILING));
+			hip.setHorizontalTextPosition(Utils.getIntegerAttribute(anElement, "horizontalTextPosition", HasImageParagraph.RIGHT));
 			hip.setVerticalTextPosition(Utils.getIntegerAttribute(anElement, "verticalTextPosition", HasImageParagraph.CENTER));
 		}
 	}

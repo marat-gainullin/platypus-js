@@ -58,8 +58,7 @@ public class EnumEditor extends PropertyEditorSupport implements NamedPropertyEd
     public static final String ENUMERATION_VALUES_KEY = "enumerationValues";
 
     /**
-     * array of object triplets describing the enumeration 0 - displayed label 1
-     * - value 2 - code string.
+     * Array of object triplets describing the enumeration 0 - displayed label 1 - value 2 - code string.
      */
     private final Object[] enumerationValues;
 
