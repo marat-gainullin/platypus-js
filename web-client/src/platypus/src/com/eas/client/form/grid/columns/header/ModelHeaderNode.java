@@ -175,8 +175,9 @@ public class ModelHeaderNode extends HeaderNode<JavaScriptObject> implements Has
 	public void setPublished(JavaScriptObject aValue) {
 		if (published != aValue) {
 			published = aValue;
+			((ModelColumn) column).setPublished(published);
 			if (published != null) {
-				publish(this, published);
+				publish(this, published);				
 			}
 		}
 	}

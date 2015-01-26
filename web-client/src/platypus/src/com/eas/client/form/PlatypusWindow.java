@@ -27,6 +27,7 @@ import com.bearsoft.gwt.ui.containers.window.events.MoveHandler;
 import com.bearsoft.gwt.ui.containers.window.events.RestoreEvent;
 import com.bearsoft.gwt.ui.containers.window.events.RestoreHandler;
 import com.bearsoft.rowset.Utils;
+import com.bearsoft.rowset.Utils.JsObject;
 import com.eas.client.application.AppClient;
 import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.published.HasJsName;
@@ -394,10 +395,10 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	public void close(Object aSelected, JavaScriptObject aCallback) {
 		if (isOpened()) {
 			if (popup != null) {
-				WindowPopupPanel popupClosed = popup;
-				popup.close();// popup became null
-				if (popupClosed.isModal() && !popupClosed.isAttached() && aCallback != null)
-					invokeDialogCallback(aCallback, Utils.toJs(aSelected));
+				boolean wasModal = popup.isModal();
+				popup.close();// popup became null and view has been detached
+				if (wasModal && aCallback != null)
+					aCallback.<JsObject>cast().call(published, Utils.toJs(aSelected));
 			} else {
 				if (view.isAttached()) {
 					view.removeFromParent();
@@ -406,10 +407,6 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 		}
 	}
 
-	protected native static void invokeDialogCallback(JavaScriptObject aCallback, Object aSelectedValue)/*-{
-		aCallback($wnd.P.boxAsJs(aSelectedValue));
-	}-*/;
-	
 	protected native static void publishFormFacade(JavaScriptObject aPublished, Widget aView, PlatypusWindow aForm)/*-{
         Object.defineProperty(aPublished, "view", {
 	        get : function() {

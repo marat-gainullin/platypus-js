@@ -511,8 +511,8 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 
 	@Override
 	protected void onDetach() {
-		fireCloseEvent();
 		super.onDetach();
+		fireCloseEvent();
 	}
 
 	protected void fireCloseEvent() {

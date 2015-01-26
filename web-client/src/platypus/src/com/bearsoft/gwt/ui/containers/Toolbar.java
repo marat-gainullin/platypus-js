@@ -196,8 +196,8 @@ public class Toolbar extends SimplePanel implements IndexedPanel, ProvidesResize
 
     @Override
     protected void onDetach() {
-        super.onDetach();
         orphan(chevron);
+        super.onDetach();
     }
 
     @Override

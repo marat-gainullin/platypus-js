@@ -7,11 +7,14 @@ import java.util.logging.Logger;
 import com.bearsoft.gwt.ui.widgets.grid.GridColumn;
 import com.bearsoft.gwt.ui.widgets.grid.GridSection;
 import com.bearsoft.gwt.ui.widgets.grid.cells.CellHasReadonly;
+import com.bearsoft.gwt.ui.widgets.grid.cells.CellRenderer;
 import com.bearsoft.gwt.ui.widgets.grid.cells.RenderedEditorCell;
 import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
 import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.Utils.JsObject;
+import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.Publisher;
+import com.eas.client.form.grid.RenderedCellContext;
 import com.eas.client.form.grid.cells.CheckBoxCell;
 import com.eas.client.form.grid.rows.PathComparator;
 import com.eas.client.form.js.JsEvents;
@@ -22,6 +25,7 @@ import com.eas.client.form.published.widgets.model.ModelCheck;
 import com.eas.client.form.published.widgets.model.ModelDecoratorBox;
 import com.eas.client.form.published.widgets.model.ModelGrid;
 import com.google.gwt.cell.client.Cell;
+import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -37,6 +41,8 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.client.ui.HasText;
+import com.google.gwt.user.client.ui.HasValue;
 
 public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements FieldUpdater<JavaScriptObject, Object>, ChangesHost, HasPublished {
 
@@ -293,7 +299,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 					@Override
 					protected void renderCell(com.google.gwt.cell.client.Cell.Context context, Object value, SafeHtmlBuilder sb) {
 						try {
-							if (getEditor() instanceof ModelDecoratorBox<?>) {
+							if (editor instanceof ModelDecoratorBox<?>) {
 								ModelDecoratorBox<Object> modelEditor = (ModelDecoratorBox<Object>) getEditor();
 								value = modelEditor.convert(Utils.toJava(value));
 							}
@@ -326,7 +332,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 					}
 
 				});
-				((RenderedEditorCell<Object>) getTargetCell()).setOnEditorClose(new RenderedEditorCell.EditorCloser() {
+				cell.setOnEditorClose(new RenderedEditorCell.EditorCloser() {
 					@Override
 					public void closed(Element aTable) {
 						final GridSection<?> toFocus = GridSection.getInstance(aTable);
@@ -341,20 +347,62 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 						}
 					}
 				});
+				cell.setRenderer(new CellRenderer<Object>() {
+
+					@Override
+					public boolean render(Context context, String aId, Object value, SafeHtmlBuilder sb) {
+						JavaScriptObject onRender = ModelColumn.this.getOnRender() != null ? ModelColumn.this.getOnRender() : ModelColumn.this.getGrid().getOnRender();
+						if (onRender != null) {
+							if (editor instanceof ModelDecoratorBox<?>) {
+								ModelDecoratorBox<Object> modelEditor = (ModelDecoratorBox<Object>) getEditor();
+								value = modelEditor.convert(Utils.toJava(value));
+							}
+							((HasValue<Object>) editor).setValue(value);
+							String display = ((HasText) editor).getText();
+							PublishedStyle styleToRender = null;
+							SafeHtmlBuilder lsb = new SafeHtmlBuilder();
+							PublishedCell cellToRender = calcContextPublishedCell(ModelColumn.this.getPublished(), onRender, context, ModelColumn.this.getField(), display);
+							if (cellToRender != null) {
+								styleToRender = cellToRender.getStyle();
+								if (cellToRender.getDisplay() != null)
+									display = cellToRender.getDisplay();
+							}
+
+							if (display == null)
+								lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
+							else
+								lsb.append(SafeHtmlUtils.fromString(display));
+							styleToRender = grid.complementPublishedStyle(styleToRender);
+							String decorId = ControlsUtils.renderDecorated(lsb, aId, styleToRender, sb);
+							if (cellToRender != null) {
+								if (context instanceof RenderedCellContext) {
+									((RenderedCellContext) context).setStyle(styleToRender);
+								}
+								ModelColumn.bindDisplayCallback(decorId, cellToRender);
+								if (cellToRender.getStyle() != null) {
+									ModelColumn.bindIconCallback(cellToRender.getStyle(), decorId);
+								}
+							}
+							return true;
+						} else {
+							return false;
+						}
+					}
+
+				});
 			}
 		}
 	}
 
-	public static PublishedCell calcContextPublishedCell(JavaScriptObject aThis, JavaScriptObject aOnRender, com.google.gwt.cell.client.Cell.Context context, String aField, String aDisplay)
-	        throws Exception {
+	public static PublishedCell calcContextPublishedCell(JavaScriptObject aThis, JavaScriptObject aOnRender, com.google.gwt.cell.client.Cell.Context context, String aField, String aDisplay) {
 		if (aOnRender != null) {
 			Object key = context.getKey();
-			JavaScriptObject renderedRow = key instanceof JavaScriptObject ? (JavaScriptObject) key : null;
-			if (renderedRow != null) {
-				Object data = aField != null && !aField.isEmpty() ? Utils.getPathData(renderedRow, aField) : null;
+			JavaScriptObject renderedElement = key instanceof JavaScriptObject ? (JavaScriptObject) key : null;
+			if (renderedElement != null) {
+				Object data = aField != null && !aField.isEmpty() ? Utils.getPathData(renderedElement, aField) : null;
 				PublishedCell cell = Publisher.publishCell(data, aDisplay);
 				JsArrayMixed args = JavaScriptObject.createArray().cast();
-				args.push(JsEvents.publishOnRenderEvent(aThis, null, null, renderedRow, cell));
+				args.push(JsEvents.publishOnRenderEvent(aThis, null, null, renderedElement, cell));
 				aOnRender.<JsObject> cast().apply(aThis, args);
 				return cell;
 			}
@@ -362,7 +410,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 		return null;
 	}
 
-	protected void bindDisplayCallback(final String aTargetElementId, final PublishedCell aCell) {
+	protected static void bindDisplayCallback(final String aTargetElementId, final PublishedCell aCell) {
 		aCell.setDisplayCallback(new Runnable() {
 			@Override
 			public void run() {

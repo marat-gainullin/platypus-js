@@ -130,6 +130,10 @@ public class Utils {
 			return this.apply(aThis, aArgs != null ? aArgs : []);
 		}-*/;
 
+		public final native Object call(JavaScriptObject aThis, Object aArg)/*-{
+			return this.call(aThis, $wnd.P.boxAsJs(aArg));
+		}-*/;
+
 		public final native JavaScriptObject newObject()/*-{
 			var constr = this;
 			return new constr();
@@ -292,7 +296,7 @@ public class Utils {
 			return aValue;
 	}
 
-	public static native Object unwrap(JavaScriptObject aValue) throws Exception/*-{
+	public static native Object unwrap(JavaScriptObject aValue)/*-{
 		if (aValue == null || aValue == undefined)
 			return null;
 		else if (aValue instanceof Date || aValue instanceof $wnd.Date || aValue.constructor.name == "Date")
@@ -307,7 +311,7 @@ public class Utils {
 			return aValue;
 	}-*/;
 
-	public static Object toJava(Object aValue) throws Exception {
+	public static Object toJava(Object aValue) {
 		if (aValue instanceof JavaScriptObject)
 			return unwrap((JavaScriptObject) aValue);
 		else if (aValue instanceof Number || aValue instanceof Boolean || aValue instanceof String || aValue instanceof Date)
