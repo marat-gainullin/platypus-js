@@ -7,6 +7,7 @@ package com.eas.client.forms.components;
 import com.eas.client.forms.Forms;
 import com.eas.client.forms.HasComponentEvents;
 import com.eas.client.forms.HasJsName;
+import com.eas.client.forms.HorizontalPosition;
 import com.eas.client.forms.Widget;
 import com.eas.client.forms.events.ActionEvent;
 import com.eas.client.forms.events.ComponentEvent;
@@ -57,6 +58,7 @@ public class Button extends JButton implements HasPublished, HasComponentEvents,
     public Button(String aText, Icon aIcon, int aIconTextGap, JSObject aActionPerformedHandler) {
         super(aText, aIcon);
         super.setIconTextGap(aIconTextGap);
+        super.setHorizontalTextPosition(HorizontalPosition.RIGHT);
         setOnActionPerformed(aActionPerformedHandler);
     }
 

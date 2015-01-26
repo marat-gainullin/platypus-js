@@ -7,6 +7,7 @@ package com.eas.client.forms.components;
 import com.eas.client.forms.Forms;
 import com.eas.client.forms.HasComponentEvents;
 import com.eas.client.forms.HasJsName;
+import com.eas.client.forms.HorizontalPosition;
 import com.eas.client.forms.Widget;
 import com.eas.client.forms.events.ActionEvent;
 import com.eas.client.forms.events.ComponentEvent;
@@ -47,6 +48,7 @@ public class Label extends JLabel implements HasPublished, HasComponentEvents, H
     public Label(String aText, Icon aIcon, int aIconTextGap) {
         super(aText, aIcon, JLabel.LEFT);
         super.setIconTextGap(aIconTextGap);
+        super.setHorizontalTextPosition(HorizontalPosition.RIGHT);
     }
 
     public Label(String aText, Icon aIcon) {
@@ -677,7 +679,7 @@ public class Label extends JLabel implements HasPublished, HasComponentEvents, H
     public void setOnKeyTyped(JSObject aValue) {
         eventsProxy.getHandlers().put(ControlEventsIProxy.keyTyped, aValue);
     }
-    
+
     // published parent
     @ScriptFunction(name = "parent", jsDoc = PARENT_JSDOC)
     @Override

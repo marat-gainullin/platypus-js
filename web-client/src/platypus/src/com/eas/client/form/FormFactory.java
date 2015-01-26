@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import com.bearsoft.gwt.ui.HasImageParagraph;
 import com.bearsoft.gwt.ui.HasImageResource;
 import com.bearsoft.gwt.ui.Orientation;
+import com.bearsoft.gwt.ui.widgets.DropDownButton;
 import com.bearsoft.gwt.ui.widgets.ImageButton;
 import com.bearsoft.gwt.ui.widgets.ObjectFormat;
 import com.bearsoft.gwt.ui.widgets.grid.header.HeaderNode;
@@ -676,7 +677,7 @@ public class FormFactory {
 		}
 		if (button instanceof HasImageParagraph) {
 			HasImageParagraph hip = (HasImageParagraph) button;
-			hip.setHorizontalAlignment(Utils.getIntegerAttribute(anElement, "horizontalAlignment", button instanceof ImageButton ? HasImageParagraph.CENTER : HasImageParagraph.LEFT));
+			hip.setHorizontalAlignment(Utils.getIntegerAttribute(anElement, "horizontalAlignment", button instanceof ImageButton || button instanceof DropDownButton ? HasImageParagraph.CENTER : HasImageParagraph.LEFT));
 			hip.setVerticalAlignment(Utils.getIntegerAttribute(anElement, "verticalAlignment", HasImageParagraph.CENTER));
 			hip.setIconTextGap(Utils.getIntegerAttribute(anElement, "iconTextGap", 4));
 			hip.setHorizontalTextPosition(Utils.getIntegerAttribute(anElement, "horizontalTextPosition", HasImageParagraph.RIGHT));
@@ -800,7 +801,7 @@ public class FormFactory {
 				});
 			}
 		}
-		if (aTarget instanceof Widget && aTarget instanceof HasPublished) {
+		if (aTarget instanceof Widget && aTarget instanceof HasPublished && !(aTarget instanceof PlatypusMenu)) {
 			Dimension prefSize = readPrefSize(anElement);
 			if (prefSize != null) {
 				PublishedComponent pComp = ((HasPublished) aTarget).getPublished().<PublishedComponent> cast();

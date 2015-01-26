@@ -59,14 +59,14 @@ public class DropDownButton extends Composite implements HasText, HasHTML, Requi
 
 	protected FlowPanel container = new FlowPanel();
 	protected SimplePanel contentWrapper = new SimplePanel();
-	protected ImageLabel content;
+	protected ImageButton content;
 	protected SimplePanel chevron = new SimplePanel();
 	protected MenuBar menu;
 
 	public DropDownButton() {
 		this("", false, null);
 	}
-	
+
 	public DropDownButton(String aTitle, boolean asHtml, MenuBar aMenu) {
 		this(aTitle, asHtml, null, aMenu);
 	}
@@ -77,7 +77,7 @@ public class DropDownButton extends Composite implements HasText, HasHTML, Requi
 		container.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 		container.getElement().getStyle().setPosition(Style.Position.RELATIVE);
 		menu = aMenu;
-		
+
 		contentWrapper.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 		contentWrapper.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
 		contentWrapper.getElement().getStyle().setTop(0, Style.Unit.PX);
@@ -85,11 +85,9 @@ public class DropDownButton extends Composite implements HasText, HasHTML, Requi
 		contentWrapper.getElement().getStyle().setLeft(0, Style.Unit.PX);
 		contentWrapper.getElement().getStyle().setPadding(0, Style.Unit.PX);
 		contentWrapper.getElement().getStyle().setMargin(0, Style.Unit.PX);
-		
-		content = new ImageLabel(aTitle, asHtml, aImage);
+
+		content = new ImageButton(aTitle, asHtml, aImage);
 		content.getElement().addClassName("dropdown-button");
-		content.setHorizontalTextPosition(ImageParagraph.RIGHT);
-		content.setVerticalTextPosition(ImageParagraph.CENTER);
 		content.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 		content.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
 		content.getElement().getStyle().setTop(0, Style.Unit.PX);
@@ -100,10 +98,11 @@ public class DropDownButton extends Composite implements HasText, HasHTML, Requi
 		contentWrapper.setWidget(content);
 
 		chevron.getElement().addClassName("dropdown-menu");
-		chevron.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+		chevron.getElement().getStyle().setDisplay(menu != null ? Style.Display.INLINE_BLOCK : Style.Display.NONE);
+		chevron.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
+		chevron.getElement().getStyle().setRight(0, Style.Unit.PX);
+		chevron.getElement().getStyle().setTop(0, Style.Unit.PX);
 		chevron.getElement().getStyle().setHeight(100, Style.Unit.PCT);
-		chevron.getElement().getStyle().setVerticalAlign(Style.VerticalAlign.TOP);
-		chevron.getElement().getStyle().setPosition(Style.Position.RELATIVE);
 		chevron.getElement().getStyle().setPadding(0, Style.Unit.PX);
 		chevron.getElement().setInnerHTML("&nbsp;");
 
@@ -127,14 +126,10 @@ public class DropDownButton extends Composite implements HasText, HasHTML, Requi
 				DropDownButton.this.fireEvent(event);
 			}
 		});
-		organizeContentWrapperRight();
-		getElement().<XElement>cast().addResizingTransitionEnd(this);
+		contentWrapper.getElement().getStyle().setRight(menu != null ? chevron.getElement().getOffsetWidth() : 0, Style.Unit.PX);
+		getElement().<XElement> cast().addResizingTransitionEnd(this);
 	}
 
-	protected void organizeContentWrapperRight(){
-		contentWrapper.getElement().getStyle().setRight(chevron.getElement().getOffsetWidth(), Style.Unit.PCT);
-	}
-	
 	protected void showMenu() {
 		if (menu != null) {
 			final PopupPanel pp = new PopupPanel();
@@ -151,15 +146,15 @@ public class DropDownButton extends Composite implements HasText, HasHTML, Requi
 	}
 
 	public void setMenu(MenuBar aMenu) {
-		if (menu != null && menu.getParent() != null) {
-			menu.removeFromParent();
+		if (menu != aMenu) {
+			menu = aMenu;
+			chevron.getElement().getStyle().setDisplay(menu != null ? Style.Display.INLINE_BLOCK : Style.Display.NONE);
+			contentWrapper.getElement().getStyle().setRight(menu != null ? chevron.getElement().getOffsetWidth() : 0, Style.Unit.PX);
 		}
-		menu = aMenu;
 	}
 
 	@Override
 	public void onResize() {
-		organizeContentWrapperRight();
 		if (content instanceof RequiresResize) {
 			((RequiresResize) content).onResize();
 		}
@@ -248,7 +243,6 @@ public class DropDownButton extends Composite implements HasText, HasHTML, Requi
 	@Override
 	protected void onAttach() {
 		super.onAttach();
-		organizeContentWrapperRight();
 	}
 
 	@Override

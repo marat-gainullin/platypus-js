@@ -13,7 +13,6 @@ import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JPopupMenu;
-import javax.swing.SwingConstants;
 
 /**
  *
@@ -72,7 +71,6 @@ public class JDropDownButton extends JButton {
      */
     public JDropDownButton(String text, Icon icon) {
         super(text, icon);
-        super.setHorizontalAlignment(SwingConstants.LEFT);
     }
 
     public JPopupMenu getDropDownMenu() {
@@ -97,10 +95,6 @@ public class JDropDownButton extends JButton {
         Dimension sMax = super.getMaximumSize();
         Dimension pref = getPreferredSize();
         return new Dimension(Math.max(sMax.width, pref.width), sMax.height);
-    }
-
-    @Override
-    public void setHorizontalAlignment(int alignment) {
     }
 
     @Override

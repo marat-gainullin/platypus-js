@@ -9,8 +9,8 @@ import com.eas.client.forms.HasComponentEvents;
 import com.eas.client.forms.components.rt.HasGroup;
 import com.eas.client.forms.HasJsName;
 import com.eas.client.forms.HasJsValue;
-import static com.eas.client.forms.HasJsValue.JS_VALUE_JSDOC;
 import com.eas.client.forms.HasOnValueChange;
+import com.eas.client.forms.HorizontalPosition;
 import com.eas.client.forms.Widget;
 import com.eas.client.forms.containers.ButtonGroup;
 import com.eas.client.forms.events.ActionEvent;
@@ -62,6 +62,7 @@ public class ToggleButton extends VToggleButton implements HasOnValueChange, Has
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text", "icon", "selected", "iconTextGap", "actionPerformed"})
     public ToggleButton(String aText, Icon aIcon, boolean aSelected, int aIconTextGap, JSObject aActionPerformedHandler) {
         super(aText, aIcon, aSelected, aIconTextGap);
+        super.setHorizontalTextPosition(HorizontalPosition.RIGHT);
         setOnActionPerformed(aActionPerformedHandler);
     }
 

@@ -348,7 +348,8 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 	public static PublishedCell calcContextPublishedCell(JavaScriptObject aThis, JavaScriptObject aOnRender, com.google.gwt.cell.client.Cell.Context context, String aField, String aDisplay)
 	        throws Exception {
 		if (aOnRender != null) {
-			JavaScriptObject renderedRow = renderedElement(context);
+			Object key = context.getKey();
+			JavaScriptObject renderedRow = key instanceof JavaScriptObject ? (JavaScriptObject) key : null;
 			if (renderedRow != null) {
 				Object data = aField != null && !aField.isEmpty() ? Utils.getPathData(renderedRow, aField) : null;
 				PublishedCell cell = Publisher.publishCell(data, aDisplay);
@@ -361,12 +362,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 		return null;
 	}
 
-	protected static JavaScriptObject renderedElement(com.google.gwt.cell.client.Cell.Context context) throws Exception {
-		Object key = context.getKey();
-		return key instanceof JavaScriptObject ? (JavaScriptObject) key : null;
-	}
-
-	protected void bindGridDisplayCallback(final String aTargetElementId, final PublishedCell aCell) {
+	protected void bindDisplayCallback(final String aTargetElementId, final PublishedCell aCell) {
 		aCell.setDisplayCallback(new Runnable() {
 			@Override
 			public void run() {
