@@ -72,20 +72,6 @@ import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.internal.runtime.Undefined;
 
-/*
- === from setValueToRowset ===
- if (rsEntity != null && rsEntity.getRowset() != null && colIndex != 0
- && !setValue2Rowset(value)) {
- // if the value has been rejected by rowset we must
- // reflect rowset's value in the control.
- setEditingValue(getValueFromRowset());
- }
- === from setValue ===
- if (aValue instanceof Number) {
- aValue = Double.valueOf(((Number) aValue).doubleValue());
- }
- === .style and .display processing ? ===
- */
 /**
  *
  * @author mg
@@ -224,11 +210,11 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     }
 
     public void fireCellEditingCompleted() {
-        editorListeners.stream().forEach((l) -> {
+        for (CellEditorListener l : editorListeners.toArray(new CellEditorListener[]{})) {
             if (l instanceof ModelCellEditingListener) {
                 ((ModelCellEditingListener) l).cellEditingCompleted();
             }
-        });
+        };
     }
 
     protected final void checkEvents(Component aComp) {

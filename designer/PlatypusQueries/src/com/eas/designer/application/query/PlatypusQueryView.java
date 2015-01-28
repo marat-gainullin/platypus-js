@@ -466,6 +466,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
 
         JDropDownButton addBtn = new JDropDownButton();
         addBtn.setFocusable(false);
+        addBtn.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         addBtn.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         addBtn.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         addBtn.setMaximumSize(BTN_DIMENSION);

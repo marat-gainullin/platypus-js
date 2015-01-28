@@ -276,17 +276,17 @@ public class ControlsUtils {
 	 * 
 	 * @param aEventThis
 	 * @param cellFunction
-	 * @param aRow
+	 * @param aData
 	 * @param aModelElement
 	 * @return
 	 * @throws Exception
 	 */
-	public static PublishedCell calcStandalonePublishedCell(JavaScriptObject aEventThis, JavaScriptObject cellFunction, JavaScriptObject aRow, String aDisplay, String aField,
+	public static PublishedCell calcStandalonePublishedCell(JavaScriptObject aEventThis, JavaScriptObject cellFunction, JavaScriptObject aData, String aField, String aDisplay,
 	        PublishedCell aAlreadyCell) throws Exception {
 		if (aEventThis != null && aField != null && !aField.isEmpty() && cellFunction != null) {
-			if (aRow != null) {
-				PublishedCell cell = aAlreadyCell != null ? aAlreadyCell : Publisher.publishCell(Utils.getPathData(aRow, aField), aDisplay);
-				Utils.executeScriptEventVoid(aEventThis, cellFunction, JsEvents.publishOnRenderEvent(aEventThis, null, null, aRow, cell));
+			if (aData != null) {
+				PublishedCell cell = aAlreadyCell != null ? aAlreadyCell : Publisher.publishCell(Utils.getPathData(aData, aField), aDisplay);
+				Utils.executeScriptEventVoid(aEventThis, cellFunction, JsEvents.publishOnRenderEvent(aEventThis, null, null, aData, cell));
 				return cell;
 			}
 		}

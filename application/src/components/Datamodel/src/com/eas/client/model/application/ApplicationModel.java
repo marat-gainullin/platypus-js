@@ -8,6 +8,7 @@ import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.compacts.CompactBlob;
 import com.bearsoft.rowset.compacts.CompactClob;
 import com.bearsoft.rowset.metadata.Field;
+import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.model.Model;
@@ -190,26 +191,25 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
             if (scalarPropertyName == null || scalarPropertyName.isEmpty()) {
                 scalarPropertyName = aRelation.getRightEntity().getName();
             }
-            if (scalarPropertyName != null && !scalarPropertyName.isEmpty()) {
-                aRelation.getLeftEntity().putOrmDefinition(
-                        scalarPropertyName,
-                        ScriptUtils.scalarPropertyDefinition(
-                                (JSObject) aRelation.getRightEntity().getPublished(),
-                                aRelation.getRightField().getName(),
-                                aRelation.getLeftField().getName()));
-                aRelation.getLeftEntity().addOrmScalarExpanding(aRelation.getLeftField().getName(), scalarPropertyName);
-            }
             String collectionPropertyName = aRelation.getCollectionPropertyName();
             if (collectionPropertyName == null || collectionPropertyName.isEmpty()) {
                 collectionPropertyName = aRelation.getLeftEntity().getName();
             }
+            if (scalarPropertyName != null && !scalarPropertyName.isEmpty()) {
+                aRelation.getLeftEntity().putOrmScalarDefinition(
+                        scalarPropertyName,
+                        new Fields.OrmDef(aRelation.getLeftField().getName(), scalarPropertyName, collectionPropertyName, ScriptUtils.scalarPropertyDefinition(
+                                (JSObject) aRelation.getRightEntity().getPublished(),
+                                aRelation.getRightField().getName(),
+                                aRelation.getLeftField().getName())));
+            }
             if (collectionPropertyName != null && !collectionPropertyName.isEmpty()) {
-                aRelation.getRightEntity().putOrmDefinition(
+                aRelation.getRightEntity().putOrmCollectionDefinition(
                         collectionPropertyName,
-                        ScriptUtils.collectionPropertyDefinition(
+                        new Fields.OrmDef(collectionPropertyName, scalarPropertyName, ScriptUtils.collectionPropertyDefinition(
                                 (JSObject) aRelation.getLeftEntity().getPublished(),
                                 aRelation.getRightField().getName(),
-                                aRelation.getLeftField().getName()));
+                                aRelation.getLeftField().getName())));
             }
         });
     }

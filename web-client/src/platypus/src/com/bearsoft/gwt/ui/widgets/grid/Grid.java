@@ -122,7 +122,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 	protected boolean showVerticalLines = true;
 	protected boolean showOddRowsInOtherColor = true;
 	protected PublishedColor gridColor;
-	protected PublishedColor oddRowsColor;
+	protected PublishedColor oddRowsColor = PublishedColor.create(238, 250, 217, 255);
 
 	protected String dynamicTDClassName = "grid-td-" + Document.get().createUniqueId();
 	protected String dynamicCellClassName = "grid-cell-" + Document.get().createUniqueId();

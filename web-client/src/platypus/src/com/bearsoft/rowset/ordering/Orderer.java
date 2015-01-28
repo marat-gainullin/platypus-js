@@ -13,7 +13,6 @@ import com.bearsoft.rowset.beans.PropertyChangeEvent;
 import com.bearsoft.rowset.beans.PropertyChangeListener;
 import com.bearsoft.rowset.events.RowsetAdapter;
 import com.bearsoft.rowset.events.RowsetDeleteEvent;
-import com.bearsoft.rowset.events.RowsetEventsEarlyAccess;
 import com.bearsoft.rowset.events.RowsetInsertEvent;
 import com.bearsoft.rowset.events.RowsetRequeryEvent;
 import com.bearsoft.rowset.events.RowsetRollbackEvent;
@@ -35,7 +34,7 @@ import java.util.logging.Logger;
  * 
  * @author mg
  */
-public class Orderer extends RowsetAdapter implements RowsetEventsEarlyAccess, RowsetContainer {
+public class Orderer extends RowsetAdapter implements RowsetContainer {
 
 	public static final String CANT_ADD_CONSTRAINT_WHILE_NOT_CONSTRAINTING = "can\'t add constraint while constrainting is not begun";
 	public static final String CANT_APPLY_NULL_KEY_SET = "can\'t apply null key set";

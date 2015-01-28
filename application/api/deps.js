@@ -35,13 +35,6 @@ try {
 }
 
 try {
-    load('classpath:db-controls/cell-render-event.js');
-    printf('db-controls API loaded.');
-} catch (e) {
-    printf('db-controls API skipped.');
-}
-
-try {
     load('classpath:forms/action-event.js');
     load('classpath:forms/anchors-pane.js');
     load('classpath:forms/anchors.js');
@@ -128,19 +121,4 @@ try {
     printf('rowsets API loaded.');
 } catch (e) {
     printf('rowsets API skipped.');
-}
-
-try {
-    load('classpath:server/session.js');
-    printf('server API loaded.');
-} catch (e) {
-    printf('server API skipped.');
-}
-
-try {
-    load('classpath:servlet-support/web-socket-client-session.js');
-    load('classpath:servlet-support/web-socket-server-session.js');
-    printf('servlet-support API loaded.');
-} catch (e) {
-    printf('servlet-support API skipped.');
 }

@@ -14,6 +14,7 @@ import com.eas.client.forms.events.ComponentEvent;
 import com.eas.client.forms.events.MouseEvent;
 import com.eas.client.forms.events.rt.ControlEventsIProxy;
 import com.eas.client.forms.layouts.MarginLayout;
+import com.eas.client.forms.layouts.ScrollPaneLayout;
 import com.eas.design.Undesignable;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
@@ -32,6 +33,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -49,6 +51,7 @@ public class ScrollPane extends JScrollPane implements HasPublished, HasContaine
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"view"})
     public ScrollPane(JComponent aComp) {
         super(aComp);
+        setLayout(new ScrollPaneLayout());
     }
 
     public ScrollPane() {
@@ -70,13 +73,31 @@ public class ScrollPane extends JScrollPane implements HasPublished, HasContaine
     @ScriptFunction
     @Override
     public int getVerticalScrollBarPolicy() {
-        return super.getVerticalScrollBarPolicy();
+        int res = super.getVerticalScrollBarPolicy();
+        switch (res) {
+            case ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER:
+                return ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER;
+            case ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS:
+                return ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS;
+            default:
+                return ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
+        }
     }
 
     @ScriptFunction
     @Override
     public void setVerticalScrollBarPolicy(int policy) {
-        super.setVerticalScrollBarPolicy(policy);
+        switch (policy) {
+            case ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER:
+                super.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+                break;
+            case ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS:
+                super.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+                break;
+            default:
+                super.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+                break;
+        }
     }
 
     @ScriptFunction(jsDoc = JS_NAME_DOC)
@@ -721,7 +742,7 @@ public class ScrollPane extends JScrollPane implements HasPublished, HasContaine
     public void setOnComponentRemoved(JSObject aValue) {
         eventsProxy.getHandlers().put(ControlEventsIProxy.componentRemoved, aValue);
     }
-    
+
     // published parent
     @ScriptFunction(name = "parent", jsDoc = PARENT_JSDOC)
     @Override

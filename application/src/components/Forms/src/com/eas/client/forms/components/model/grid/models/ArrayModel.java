@@ -26,6 +26,7 @@ public abstract class ArrayModel {
     protected JSObject generalOnRender;
     protected JSObject data;
     protected JSObject boundToData;
+    protected JSObject boundToDataElements;
 
     public ArrayModel(TableColumnModel aColumns, JSObject aData, JSObject aGeneralOnRender) {
         super();
@@ -35,16 +36,45 @@ public abstract class ArrayModel {
     }
 
     protected boolean elementsChangedEnqueued;
-    protected void enqueueElementsChanged(){
+
+    protected void enqueueElementsChanged() {
+        if (boundToDataElements != null) {
+            JSObject unlisten = (JSObject) boundToDataElements.getMember("unlisten");
+            unlisten.call(null, new Object[]{});
+            boundToDataElements = null;
+        }
         elementsChangedEnqueued = true;
-        EventQueue.invokeLater(()->{
-            if(elementsChangedEnqueued){
+        EventQueue.invokeLater(() -> {
+            if (elementsChangedEnqueued) {
                 elementsChangedEnqueued = false;
+                if (data != null && com.eas.script.ScriptUtils.isInitialized()) {
+                    boundToDataElements = com.eas.script.ScriptUtils.listenElements(data, new AbstractJSObject() {
+
+                        @Override
+                        public Object call(Object thiz, Object... args) {
+                            enqueueElementsDataChanged();
+                            return null;
+                        }
+
+                    });
+                }
                 fireElementsChanged();
             }
         });
     }
-    
+
+    protected boolean elementsDataChangedEnqueued;
+
+    protected void enqueueElementsDataChanged() {
+        elementsDataChangedEnqueued = true;
+        EventQueue.invokeLater(() -> {
+            if (elementsDataChangedEnqueued) {
+                elementsDataChangedEnqueued = false;
+                fireElementsDataChanged();
+            }
+        });
+    }
+
     protected void bind() {
         if (data != null && com.eas.script.ScriptUtils.isInitialized()) {
             boundToData = com.eas.script.ScriptUtils.listen(data, "length", new AbstractJSObject() {
@@ -64,6 +94,11 @@ public abstract class ArrayModel {
             JSObject unlisten = (JSObject) boundToData.getMember("unlisten");
             unlisten.call(null, new Object[]{});
             boundToData = null;
+        }
+        if (boundToDataElements != null) {
+            JSObject unlisten = (JSObject) boundToDataElements.getMember("unlisten");
+            unlisten.call(null, new Object[]{});
+            boundToDataElements = null;
         }
     }
 

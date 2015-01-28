@@ -61,6 +61,7 @@ import com.eas.client.forms.menu.MenuSeparator;
 import com.eas.client.forms.menu.PopupMenu;
 import com.eas.client.forms.menu.RadioMenuItem;
 import com.eas.gui.ScriptColor;
+import com.eas.script.HasPublished;
 import com.eas.xml.dom.XmlDomUtils;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -584,6 +585,11 @@ public class FormFactory {
                         Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, "While setting data to property ({0}) of widget {1} exception occured: {2}", new Object[]{entityName, grid.getName(), ex.getMessage()});
                     }
                 }
+                if (anElement.hasAttribute("field")) {
+                    String dataPropertyPath = anElement.getAttribute("field");
+                    grid.setField(dataPropertyPath);
+                }
+                injectColumns(grid, roots);
                 return grid;
             }
             // containers   
@@ -1260,5 +1266,13 @@ public class FormFactory {
         aNode.setSelectOnly(XmlDomUtils.readBooleanAttribute(anElement, "selectOnly", Boolean.FALSE));
         aNode.setSortable(XmlDomUtils.readBooleanAttribute(anElement, "sortable", Boolean.TRUE));
         aNode.setVisible(XmlDomUtils.readBooleanAttribute(anElement, "visible", Boolean.TRUE));
+    }
+
+    private void injectColumns(ModelGrid grid, List<GridColumnsNode> roots) {
+        JSObject publishedGrid = grid.getPublished();
+        roots.stream().forEach((node) -> {
+            publishedGrid.setMember(((ModelColumn)node.getTableColumn()).getName(), ((HasPublished)node).getPublished());
+            injectColumns(grid, node.getChildren());
+        });
     }
 }

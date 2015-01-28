@@ -4,7 +4,6 @@
  */
 package com.eas.client.forms.components.model;
 
-import static com.eas.client.forms.HasJsValue.JS_VALUE_JSDOC;
 import com.eas.client.forms.components.rt.HasEditable;
 import com.eas.client.forms.components.rt.HasEmptyText;
 import com.eas.client.forms.components.rt.VComboBox;
@@ -14,29 +13,45 @@ import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.EventQueue;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JTable;
+import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.internal.runtime.JSType;
 
 /**
  *
  * @author mg
  */
-public class ModelCombo extends ModelComponentDecorator<VComboBox, Object> implements HasPublished, HasEmptyText, HasEditable {
+public class ModelCombo extends ModelComponentDecorator<VComboBox<JSObject>, Object> implements HasPublished, HasEmptyText, HasEditable {
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
             + " * A model component that combines a button or editable field and a drop-down list.\n"
             + " */";
 
+    protected Object injected;
     protected JSObject displayList;
-    protected JSObject values;
+    protected JSObject boundToList;
     protected String displayField;
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC)
     public ModelCombo() {
         super();
         setDecorated(new VComboBox());
+        decorated.setRenderer(new DefaultListCellRenderer() {
+
+            @Override
+            public Component getListCellRendererComponent(JList<? extends Object> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                setText(renderValue(value));
+                return this;
+            }
+        });
     }
 
     @ScriptFunction(name = "value", jsDoc = JS_VALUE_JSDOC)
@@ -49,7 +64,23 @@ public class ModelCombo extends ModelComponentDecorator<VComboBox, Object> imple
     @ScriptFunction
     @Override
     public void setJsValue(Object aValue) {
-        setValue(aValue);
+        Object oldValue = getJsValue();
+        if (oldValue != aValue) {
+            DefaultComboBoxModel<JSObject> dm = ((DefaultComboBoxModel<JSObject>) decorated.getModel());
+            int newValueIndex = dm.getIndexOf(aValue);
+            if (injected != null) {
+                int injectedValueIndex = dm.getIndexOf(injected);
+                if (injectedValueIndex != -1) {
+                    dm.removeElementAt(injectedValueIndex);
+                }
+            }
+            injected = null;
+            if (aValue instanceof JSObject && newValueIndex == -1) {
+                dm.addElement((JSObject) aValue);
+                injected = aValue;
+            }
+            setValue(aValue);
+        }
     }
 
     @Override
@@ -69,6 +100,40 @@ public class ModelCombo extends ModelComponentDecorator<VComboBox, Object> imple
         publisher = aPublisher;
     }
 
+    protected boolean listChangedEnqueued;
+
+    protected void enqueueListChanged() {
+        listChangedEnqueued = true;
+        EventQueue.invokeLater(() -> {
+            if (listChangedEnqueued) {
+                listChangedEnqueued = false;
+                refill();
+            }
+        });
+    }
+
+    protected void unbindList(){
+        if(boundToList != null){
+            JSObject unlisten = (JSObject) boundToList.getMember("unlisten");
+            unlisten.call(null, new Object[]{});
+            boundToList = null;
+        }
+    }
+    
+    protected void bindList(){
+        if (displayList != null && com.eas.script.ScriptUtils.isInitialized()) {
+            boundToList = com.eas.script.ScriptUtils.listen(displayList, "length", new AbstractJSObject() {
+
+                @Override
+                public Object call(Object thiz, Object... args) {
+                    enqueueListChanged();
+                    return null;
+                }
+
+            });
+        }
+    }
+    
     private static final String DISPLAY_LIST_JSDOC = ""
             + "/**\n"
             + "* List of displayed options in a dropdown list of the component.\n"
@@ -83,9 +148,38 @@ public class ModelCombo extends ModelComponentDecorator<VComboBox, Object> imple
     @ScriptFunction
     public void setDisplayList(JSObject aValue) throws Exception {
         if (displayList != aValue) {
+            unbindList();
             displayList = aValue;
+            bindList();
+            refill();
             decorated.revalidate();
             decorated.repaint();
+        }
+    }
+
+    protected void refill() {
+        JSObject value = (JSObject) getJsValue();
+        DefaultComboBoxModel<JSObject> dm = ((DefaultComboBoxModel<JSObject>) decorated.getModel());
+        dm.removeAllElements();
+        boolean valueMet = false;
+        if (displayList != null && list) {
+            int length = JSType.toInteger(displayList.getMember("length"));
+            for (int i = 0; i < length; i++) {
+                Object oItem = displayList.getSlot(i);
+                if (oItem instanceof JSObject) {
+                    if (oItem.equals(value)) {
+                        valueMet = true;
+                    }
+                    dm.addElement((JSObject) oItem);
+                }
+            }
+        }
+        if (value != null) {
+            if (!valueMet) {
+                dm.addElement(value);
+                injected = value;
+            }
+            dm.setSelectedItem(value);
         }
     }
 
@@ -125,6 +219,7 @@ public class ModelCombo extends ModelComponentDecorator<VComboBox, Object> imple
     public void setList(boolean aValue) throws Exception {
         if (list != aValue) {
             list = aValue;
+            refill();
             decorated.revalidate();
             decorated.repaint();
         }
@@ -165,7 +260,7 @@ public class ModelCombo extends ModelComponentDecorator<VComboBox, Object> imple
     }
 
     private String renderValue(Object aValue) {
-        return "[fix me]";
+        return aValue instanceof JSObject ? JSType.toString(ModelWidget.getPathData((JSObject) aValue, displayField)) : "";
     }
 
     @Override

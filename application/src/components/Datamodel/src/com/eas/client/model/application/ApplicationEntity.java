@@ -206,25 +206,27 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
                     keyValues.add(convertedValue);
                 }
             }
-            if (!constraints.isEmpty() && constraints.size() == keyValues.size()) {
-                Orderer loc = checkUserOrderer(constraints);
-                Subset res = loc.get(keyValues);
-                if (res != null) {
-                    if (res.getPublished() == null) {
-                        JSObject jsRes = ScriptUtils.makeArray();
-                        JSObject jsPush = (JSObject) jsRes.getMember("push");
-                        List<Object> pushArgs = new ArrayList<>();
-                        res.stream().forEach((Row r) -> {
-                            JSObject jsRow = r.getPublished();
-                            pushArgs.add(jdk.nashorn.api.scripting.ScriptUtils.unwrap(jsRow));
-                        });
-                        jsPush.call(jsRes, pushArgs.toArray());
-                        res.setPublished(jsRes);
+            if (!constraints.isEmpty()) {
+                if (constraints.size() == keyValues.size()) {
+                    Orderer loc = checkUserOrderer(constraints);
+                    Subset res = loc.get(keyValues);
+                    if (res != null) {
+                        if (res.getPublished() == null) {
+                            JSObject jsRes = ScriptUtils.makeArray();
+                            JSObject jsPush = (JSObject) jsRes.getMember("push");
+                            List<Object> pushArgs = new ArrayList<>();
+                            res.stream().forEach((Row r) -> {
+                                JSObject jsRow = r.getPublished();
+                                pushArgs.add(jdk.nashorn.api.scripting.ScriptUtils.unwrap(jsRow));
+                            });
+                            jsPush.call(jsRes, pushArgs.toArray());
+                            res.setPublished(jsRes);
+                        }
+                        return res.getPublished();
                     }
-                    return res.getPublished();
+                } else {
+                    Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, BAD_FIND_AGRUMENTS_MSG);
                 }
-            } else {
-                Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, BAD_FIND_AGRUMENTS_MSG);
             }
         } else {
             Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, BAD_FIND_AGRUMENTS_MSG);
@@ -232,15 +234,21 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         return null;
     }
 
-    private static final String FIND_BY_ID_JSDOC = ""
-            + "/**\n"
-            + "* Finds row by its key. Key must a single property.\n"
-            + "* @param key the unique identifier of the row.\n"
-            + "* @return a row object or <code>null</code> if nothing is found.\n"
-            + "*/";
-
-    @ScriptFunction(jsDoc = FIND_BY_ID_JSDOC, params = {"key"})
+    @ScriptFunction(jsDoc = FIND_BY_KEY_JSDOC, params = {"key"})
     public Row findById(Object aValue) throws Exception {
+        Logger.getLogger(ApplicationEntity.class.getName()).log(Level.WARNING, "Deprecated \"findById\" call detected. Plaese, use findByKey instead.");
+        return findByKey(aValue);
+    }
+    
+    private static final String FIND_BY_KEY_JSDOC = ""
+            + "/**\n"
+            + " * Finds an object by its key. Key must be a single property.\n"
+            + " * @param key the unique identifier of the row.\n"
+            + " * @return An object or <code>null</code> if nothing is found.\n"
+            + " */";
+
+    @ScriptFunction(jsDoc = FIND_BY_KEY_JSDOC, params = {"key"})
+    public Row findByKey(Object aValue) throws Exception {
         Fields fields = rowset.getFields();
         List<Integer> pks = fields.getPrimaryKeysIndicies();
         if (pks.size() == 1) {
@@ -607,23 +615,34 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         changeSupport.firePropertyChange("willScroll", oldValue, aValue);
     }
 
-    public void addOrmScalarExpanding(String aBaseName, String aName) {
-        rowset.getFields().addOrmScalarExpanding(aBaseName, aName);
-    }
-
-    public void putOrmDefinition(String aName, JSObject aDefinition) {
+    public void putOrmScalarDefinition(String aName, Fields.OrmDef aDefinition) {
         if (aName != null && !aName.isEmpty() && aDefinition != null) {
-            Map<String, Object> defs = rowset.getFields().getOrmDefinitions();
+            Map<String, Fields.OrmDef> defs = rowset.getFields().getOrmScalarDefinitions();
             if (!defs.containsKey(aName)) {
-                rowset.getFields().putOrmDefinition(aName, aDefinition);
+                rowset.getFields().putOrmScalarDefinition(aName, aDefinition);
             } else {
                 Logger.getLogger(ApplicationEntity.class.getName()).log(Level.FINE, String.format("ORM property %s redefinition attempt on entity %s %s.", aName, name != null && !name.isEmpty() ? name : "", title != null && !title.isEmpty() ? "[" + title + "]" : ""));
             }
         }
     }
 
-    public Map<String, Object> getOrmDefinitions() {
-        return rowset.getFields().getOrmDefinitions();
+    public Map<String, Fields.OrmDef> getOrmScalarDefinitions() {
+        return rowset.getFields().getOrmScalarDefinitions();
+    }
+
+    public void putOrmCollectionDefinition(String aName, Fields.OrmDef aDefinition) {
+        if (aName != null && !aName.isEmpty() && aDefinition != null) {
+            Map<String, Fields.OrmDef> defs = rowset.getFields().getOrmCollectionsDefinitions();
+            if (!defs.containsKey(aName)) {
+                rowset.getFields().putOrmCollectionDefinition(aName, aDefinition);
+            } else {
+                Logger.getLogger(ApplicationEntity.class.getName()).log(Level.FINE, String.format("ORM property %s redefinition attempt on entity %s %s.", aName, name != null && !name.isEmpty() ? name : "", title != null && !title.isEmpty() ? "[" + title + "]" : ""));
+            }
+        }
+    }
+
+    public Map<String, Fields.OrmDef> getOrmCollectionsDefinitions() {
+        return rowset.getFields().getOrmCollectionsDefinitions();
     }
 
     @Override
@@ -1075,7 +1094,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
 
     @Override
     public void rowInserted(final RowsetInsertEvent event) {
-         resignOnCursor();
+        resignOnCursor();
         try {
             // call script method
             executeScriptEvent(onInserted, new EntityInstanceInsertEvent(this, event.getRow()));

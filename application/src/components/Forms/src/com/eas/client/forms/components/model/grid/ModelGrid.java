@@ -33,6 +33,7 @@ import com.eas.client.forms.events.rt.ControlEventsIProxy;
 import com.eas.client.forms.layouts.MarginLayout;
 import com.eas.design.Designable;
 import com.eas.design.Undesignable;
+import com.eas.gui.ScriptColor;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
@@ -365,7 +366,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     protected boolean editable = true;
     protected boolean insertable = true;
     protected boolean deletable = true;
-    protected Color oddRowsColor;
+    protected Color oddRowsColor = new ScriptColor("#efefef");
     protected Color gridColor;
     // data
     protected ArrayModel rowsModel;
@@ -1101,6 +1102,9 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
                         unbindCursor();
                         rowsModel.setData(jsModelData);
                         bindCursor(jsModelData);
+                    } else {
+                        unbindCursor();
+                        rowsModel.setData(null);
                     }
                 }
                 if (field != null && !field.isEmpty()) {
@@ -1116,6 +1120,9 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
                                     unbindCursor();
                                     rowsModel.setData(jsModelData);
                                     bindCursor(jsModelData);
+                                } else {
+                                    unbindCursor();
+                                    rowsModel.setData(null);
                                 }
                             }
                             return null;

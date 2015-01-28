@@ -1,6 +1,8 @@
 package com.eas.client.form.published.widgets.model;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,6 +37,7 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 	protected JavaScriptObjectKeyProvider rowKeyProvider = new JavaScriptObjectKeyProvider();
 	protected String emptyText;
 	protected String emptyValueKey = String.valueOf(IDGenerator.genId());
+	protected JavaScriptObject injected;
 	protected JavaScriptObject displayList;
 	protected String displayField;
 	protected HandlerRegistration boundToList;
@@ -81,30 +84,39 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 		};
 	}
 
-	public void setValue(JavaScriptObject value, boolean fireEvents) {
-		StyledListBox<JavaScriptObject> box = (StyledListBox<JavaScriptObject>) decorated;
-		int newValueIndex = box.indexOf(value);
-		if(newValueIndex == -1){
-			if(!list)
-				box.clear();
-			injectValueItem(value);
+	public void setValue(JavaScriptObject aValue, boolean fireEvents) {
+		JavaScriptObject oldValue = getValue();
+		if (oldValue != aValue) {
+			StyledListBox<JavaScriptObject> box = (StyledListBox<JavaScriptObject>) decorated;
+			int newValueIndex = box.indexOf(aValue);
+			if (injected != null) {
+				int injectedValueIndex = box.indexOf(injected);
+				if (injectedValueIndex != -1) {
+					box.removeItem(injectedValueIndex);
+				}
+			}
+			injected = null;
+			if (aValue != null && newValueIndex == -1) {
+				injectValueItem(aValue);
+				injected = aValue;
+			}
+			super.setValue(aValue, fireEvents);
 		}
-		super.setValue(value, fireEvents);
 	}
 
 	private void injectValueItem(JavaScriptObject value) {
 		StyledListBox<JavaScriptObject> box = (StyledListBox<JavaScriptObject>) decorated;
-	    String label = calcLabel(value);
-	    if (value != null) {
-	    	box.addItem(label != null ? label : "", value.toString(), value, "");
-	    } else {
-	    	if (label == null)
-	    		label = emptyText;
-	    	box.addItem(label != null ? label : "", emptyValueKey, null, "");
-	    	OptionElement emptyTextOption = box.getItem(box.getItemCount() - 1);
-	    	emptyTextOption.getStyle().setDisplay(Style.Display.NONE);
-	    }
-    }
+		String label = calcLabel(value);
+		if (value != null) {
+			box.addItem(label != null ? label : "", value.toString(), value, "");
+		} else {
+			if (label == null)
+				label = emptyText;
+			box.addItem(label != null ? label : "", emptyValueKey, null, "");
+			OptionElement emptyTextOption = box.getItem(box.getItemCount() - 1);
+			emptyTextOption.getStyle().setDisplay(Style.Display.NONE);
+		}
+	}
 
 	@Override
 	protected void clearValue() {
@@ -124,10 +136,11 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 	public void redraw() {
 		try {
 			if ((((Widget) decorated).isAttached())) {
+				JavaScriptObject value = getValue();
 				StyledListBox<JavaScriptObject> box = (StyledListBox<JavaScriptObject>) decorated;
 				box.setSelectedIndex(-1);
 				box.clear();
-				JavaScriptObject value = getValue();
+				injected = null;
 				boolean valueMet = false;
 				if (ModelCombo.this.list && displayList != null) {
 					List<JavaScriptObject> jsoList = new JsArrayList(displayList);
@@ -135,13 +148,14 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 						JavaScriptObject listItem = jsoList.get(i);
 						String _label = calcLabel(listItem);
 						box.addItem(_label, listItem.toString(), listItem, "");
-						if(listItem == value){
+						if (listItem == value) {
 							valueMet = true;
 						}
 					}
 				}
-				if(!valueMet){
+				if (!valueMet && value != null) {
 					injectValueItem(value);
+					injected = value;
 				}
 				int valueIndex = box.indexOf(value);
 				box.setSelectedIndex(valueIndex);
@@ -239,7 +253,6 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 				box.getElement().addClassName(CUSTOM_DROPDOWN_CLASS);
 			else
 				box.getElement().removeClassName(CUSTOM_DROPDOWN_CLASS);
-			// target.setReadOnly(!editable || selectOnly || !list);
 			redraw();
 		}
 	}

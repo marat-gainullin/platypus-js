@@ -17,6 +17,7 @@ import java.beans.*;
 import java.math.BigDecimal;
 import java.util.*;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.internal.runtime.JSType;
 
 /**
  * This class serves as the values holder.
@@ -65,37 +66,6 @@ public class Row implements HasPublished {
 
     public void setEntityName(String aValue) {
         entityName = aValue;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        return super.equals(obj);
-    }
-
-    @Override
-    public int hashCode() {
-        try {
-            boolean pks = false;
-            int hashCode = 1;
-            for (int i = 1; i <= fields.getFieldsCount(); i++) {
-                Field field = fields.get(i);
-                if (field.isPk()) {
-                    pks = true;
-                    Object obj = getColumnObject(i);
-                    hashCode = 31 * hashCode + (obj == null ? 0 : obj.hashCode());
-                }
-            }
-            if (pks) {
-                return hashCode;
-            } else {
-                return super.hashCode();
-            }
-        } catch (InvalidColIndexException ex) {
-            return super.hashCode();
-        }
     }
 
     /**
@@ -344,21 +314,29 @@ public class Row implements HasPublished {
                 PropertyChangeEvent event = new PropertyChangeEvent(this, field.getName(), oldValue, aValue);
                 event.setPropagationId(aColIndex);
                 if (checkChange(event)) {
-                    Map<String, Object> expandedOldValues = new HashMap<>();
-                    Collection<String> expandings = fields.getOrmExpandings().get(field.getName());
-                    if (expandings != null) {
-                        expandings.stream().forEach((String aOrmScalarProperty) -> {
-                            expandedOldValues.put(aOrmScalarProperty, ScriptUtils.toJava(getPublished().getMember(aOrmScalarProperty)));
-                        });
-                    }
+                    Fields.OrmDef expanding = fields.getOrmScalarExpandings().get(field.getName());
+                    Object expandingOldValue = expanding != null && expanding.getName() != null && !expanding.getName().isEmpty() ? ScriptUtils.toJava(getPublished().getMember(expanding.getName())) : null;
+                    Set<Runnable> oppositeOldScalars = field.isPk() ? gatherOppositeScalarsChangesFirerers() : null;
                     currentValues.set(aColIndex - 1, aValue);
                     updated.set(aColIndex - 1, true);
                     generateUpdate(aColIndex, oldValue, aValue);
                     propertyChangeSupport.firePropertyChange(event);
-                    if (expandings != null) {
-                        expandings.stream().forEach((String aOrmScalarProperty) -> {
-                            propertyChangeSupport.firePropertyChange(aOrmScalarProperty, expandedOldValues.get(aOrmScalarProperty), ScriptUtils.toJava(getPublished().getMember(aOrmScalarProperty)));
+                    if (expanding != null && expanding.getName() != null && !expanding.getName().isEmpty()
+                            && expanding.getOppositeName() != null && !expanding.getOppositeName().isEmpty()) {
+                        Object expandingNewValue = ScriptUtils.toJava(getPublished().getMember(expanding.getName()));
+                        propertyChangeSupport.firePropertyChange(expanding.getName(), expandingOldValue, expandingNewValue);
+                        fireChangeOfOppositeCollection(expandingOldValue, expanding.getOppositeName(), expanding.getJsDef());
+                        fireChangeOfOppositeCollection(expandingNewValue, expanding.getOppositeName(), expanding.getJsDef());
+                    }
+                    if (field.isPk()) {
+                        oppositeOldScalars.stream().forEach((Runnable fire) -> {
+                            fire.run();
                         });
+                        Set<Runnable> oppositeNewScalars = gatherOppositeScalarsChangesFirerers();
+                        oppositeNewScalars.stream().forEach((Runnable fire) -> {
+                            fire.run();
+                        });
+                        fireChangeOfSelfCollections();
                     }
                     return true;
                 }
@@ -590,5 +568,81 @@ public class Row implements HasPublished {
 
     public static void setPublisher(JSObject aPublisher) {
         publisher = aPublisher;
+    }
+
+    protected void fireChangeOfSelfCollections() {
+        fields.getOrmCollectionsDefinitions().keySet().stream().forEach((selfCollectionName) -> {
+            propertyChangeSupport.firePropertyChange(selfCollectionName, null, new Object());
+        });
+    }
+
+    protected Set<Runnable> gatherOppositeScalarsChangesFirerers() {
+        Set<Runnable> firerers = new HashSet<>();
+        if (published != null) {
+            fields.getOrmCollectionsDefinitions().entrySet().stream().forEach((entry) -> {
+                String collectionName = entry.getKey();
+                String oppositeName = entry.getValue().getOppositeName();
+                if (collectionName != null && !collectionName.isEmpty()
+                        && oppositeName != null && !oppositeName.isEmpty()) {
+                    Object oCollection = published.getMember(collectionName);
+                    if (oCollection instanceof JSObject) {
+                        JSObject jsCollection = (JSObject) oCollection;
+                        int length = JSType.toInteger(jsCollection.getMember("length"));
+                        for (int i = 0; i < length; i++) {
+                            Object oRowFacade = jsCollection.getSlot(i);
+                            if (oRowFacade instanceof JSObject) {
+                                JSObject jsRowFacade = (JSObject) oRowFacade;
+                                Object oUnwrap = jsRowFacade.getMember("unwrap");
+                                if (oUnwrap instanceof JSObject) {
+                                    JSObject unwrap = (JSObject) oUnwrap;
+                                    Object oRow = unwrap.call(null, new Object[]{});
+                                    if (oRow instanceof Row) {
+                                        Row oppositeRow = (Row) oRow;
+                                        firerers.add(() -> {
+                                            oppositeRow.getChangeSupport().firePropertyChange(oppositeName, null, new Object());
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        return firerers;
+    }
+
+    public void fireChangesOfOppositeScalars() {
+        Set<Runnable> oppositeNewScalars = gatherOppositeScalarsChangesFirerers();
+        oppositeNewScalars.stream().forEach((Runnable fire) -> {
+            fire.run();
+        });
+    }
+
+    public void fireChangesOfOppositeCollections() {
+        fields.getOrmScalarExpandings().values().stream().forEach((expanding) -> {
+            Object expandingValue = expanding != null && expanding.getName() != null && !expanding.getName().isEmpty() ? ScriptUtils.toJava(getPublished().getMember(expanding.getName())) : null;
+            if (expanding != null && expanding.getName() != null && !expanding.getName().isEmpty()
+                    && expanding.getOppositeName() != null && !expanding.getOppositeName().isEmpty()) {
+                fireChangeOfOppositeCollection(expandingValue, expanding.getOppositeName(), expanding.getJsDef());
+            }
+        });
+    }
+
+    private void fireChangeOfOppositeCollection(Object aExpandingValue, String oppositeName, JSObject def) {
+        if (aExpandingValue instanceof JSObject) {
+            JSObject jsExpanding = (JSObject) aExpandingValue;
+            if (jsExpanding.hasMember("unwrap")) {
+                Object oUnwrap = jsExpanding.getMember("unwrap");
+                if (oUnwrap instanceof JSObject) {
+                    JSObject unwrap = (JSObject) oUnwrap;
+                    Object oRow = unwrap.call(null, new Object[]{});
+                    if (oRow instanceof Row) {
+                        Row row = (Row) oRow;
+                        row.getChangeSupport().firePropertyChange(oppositeName, null, new Object());
+                    }
+                }
+            }
+        }
     }
 }

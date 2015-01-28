@@ -110,36 +110,71 @@ public class Entity implements RowsetListener, HasPublished{
 		queryName = aQueryName;
 	}
 
-    public void putOrmDefinition(String aName, JavaScriptObject aDefinition) {
+    public void putOrmScalarDefinition(String aName, Fields.OrmDef aDefinition) {
         if (aName != null && !aName.isEmpty() && aDefinition != null) {
-            Map<String, JavaScriptObject> defs = rowset.getFields().getOrmDefinitions();
+            Map<String, Fields.OrmDef> defs = rowset.getFields().getOrmScalarDefinitions();
             if (!defs.containsKey(aName)) {
-                rowset.getFields().putOrmDefinition(aName, aDefinition);
+                rowset.getFields().putOrmScalarDefinition(aName, aDefinition);
             } else {
-                Logger.getLogger(Entity.class.getName()).log(Level.FINE, "ORM property "+aName+" redefinition attempt on entity "+(name != null && !name.isEmpty() ? name : "")+" "+(title != null && !title.isEmpty() ? "[" + title + "]" : "")+".");
+                Logger.getLogger(Entity.class.getName()).log(Level.FINE, "ORM property "+aName+" redefinition attempt on entity "+name != null && !name.isEmpty() ? name : ""+" "+title != null && !title.isEmpty() ? "[" + title + "]" : ""+".");
             }
         }
     }
 
-    public Map<String, JavaScriptObject> getOrmDefinitions() {
-        return rowset.getFields().getOrmDefinitions();
+    public Map<String, Fields.OrmDef> getOrmScalarDefinitions() {
+        return rowset.getFields().getOrmScalarDefinitions();
+    }
+
+    public void putOrmCollectionDefinition(String aName, Fields.OrmDef aDefinition) {
+        if (aName != null && !aName.isEmpty() && aDefinition != null) {
+            Map<String, Fields.OrmDef> defs = rowset.getFields().getOrmCollectionsDefinitions();
+            if (!defs.containsKey(aName)) {
+                rowset.getFields().putOrmCollectionDefinition(aName, aDefinition);
+            } else {
+                Logger.getLogger(Entity.class.getName()).log(Level.FINE, "ORM property "+aName+" redefinition attempt on entity "+name != null && !name.isEmpty() ? name : ""+" "+title != null && !title.isEmpty() ? "[" + title + "]" : ""+".");
+            }
+        }
+    }
+
+    public Map<String, Fields.OrmDef> getOrmCollectionsDefinitions() {
+        return rowset.getFields().getOrmCollectionsDefinitions();
     }
 
 	private static native JavaScriptObject publishFacade(Entity aEntity)/*-{
 
+        function copyProps(aObject) {
+            var shadow = {};
+            for (var pn in aObject) {
+                var pName = pn + '';
+                shadow[pName] = aObject[pName];
+            }
+            return shadow;
+        }
+        function applyProps(aShadow, aTarget) {
+            for (var pn in aShadow) {
+                var pName = pn + '';
+                aTarget[pName] = aShadow[pName];
+            }
+        }
 		var rowset = aEntity.@com.eas.client.model.Entity::getRowset()();
 		var nFields = aEntity.@com.eas.client.model.Entity::getFields()();
 		
 		var published = aEntity.@com.eas.client.model.Entity::getPublished()();
 		// array interface
 		@com.bearsoft.rowset.Rowset::addRowsetContentJsListener(Lcom/bearsoft/rowset/Rowset;Lcom/google/gwt/core/client/JavaScriptObject;)(rowset, function(){
+            var eventedRows = [];
             Array.prototype.splice.call(published, 0, published.length);
             var rLength = rowset.@com.bearsoft.rowset.Rowset::size()();
             for (var aCursorPos = 1; aCursorPos <= rLength; aCursorPos++) {
             	var nRow = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(aCursorPos);    
             	var rowFacade = @com.bearsoft.rowset.Row::publishFacade(Lcom/bearsoft/rowset/Row;Lcom/google/gwt/core/client/JavaScriptObject;)(nRow, null);
                 Array.prototype.push.call(published, rowFacade);
+                eventedRows.push(nRow);
             }
+            eventedRows.forEach(function (nEventedRow) {
+            	nEventedRow.@com.bearsoft.rowset.Row::fireChangesOfOppositeCollections()();
+            	nEventedRow.@com.bearsoft.rowset.Row::fireChangesOfOppositeScalars()();
+            });
 		});
         Object.defineProperty(published, "fill", {
             value: function () {
@@ -151,16 +186,28 @@ public class Entity implements RowsetListener, HasPublished{
                 if (published.length > 0) {
             		var nRow = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(published.length);
                     rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(published.length);
-                    return Array.prototype.pop.call(published);
+                    var res = Array.prototype.pop.call(published);
+	            	nRow.@com.bearsoft.rowset.Row::fireChangesOfOppositeCollections()();
+	            	nRow.@com.bearsoft.rowset.Row::fireChangesOfOppositeScalars()();
+                    return res;
                 }
             }
         });
         Object.defineProperty(published, "push", {
             value: function () {
+                var eventedRows = [];
                 for (var a = 0; a < arguments.length; a++) {
-                	var justInserted = aEntity.@com.eas.client.model.Entity::jsInsertAt(IZLcom/google/gwt/core/client/JavaScriptObject;)(published.length, a < arguments.length - 1, arguments[a]);
+                    var shadow = copyProps(arguments[a]);// to avoid re initing by injected structure without values
+                	var insertedRow = aEntity.@com.eas.client.model.Entity::jsInsertAt(IZLcom/google/gwt/core/client/JavaScriptObject;)(published.length, a < arguments.length - 1, arguments[a]);
+                    applyProps(shadow, arguments[a]);
+                    eventedRows.push(insertedRow);
                 }
-                return Array.prototype.push.apply(published, arguments);
+                var res = Array.prototype.push.apply(published, arguments);
+                eventedRows.forEach(function (aEventedRow) {
+                    aEventedRow.@com.bearsoft.rowset.Row::fireChangesOfOppositeCollections();
+                    aEventedRow.@com.bearsoft.rowset.Row::fireChangesOfOppositeScalars();
+                });
+                return res;
             }
         });
         Object.defineProperty(published, "reverse", {
@@ -173,7 +220,10 @@ public class Entity implements RowsetListener, HasPublished{
                 if (published.length > 0) {
             		var nRow = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(1);
                     rowset.@com.bearsoft.rowset.Rowset::deleteAt(I)(1);
-                    return Array.prototype.shift.call(published);
+                    var res = Array.prototype.shift.call(published);
+	            	nRow.@com.bearsoft.rowset.Row::fireChangesOfOppositeCollections()();
+	            	nRow.@com.bearsoft.rowset.Row::fireChangesOfOppositeScalars()();
+                    return res;
                 }
             }
         });
@@ -196,6 +246,7 @@ public class Entity implements RowsetListener, HasPublished{
         });
         Object.defineProperty(published, "splice", {
             value: function () {
+               	var eventedRows = [];
                 if (arguments.length > 0) {
                     var beginToDeleteAt = arguments[0];
                     var howManyToDelete = published.length;
@@ -205,24 +256,43 @@ public class Entity implements RowsetListener, HasPublished{
                     var needToAdd = arguments.length > 2;
                     var deleted = 0;
                     while (!rowset.@com.bearsoft.rowset.Rowset::isEmpty()() && deleted++ < howManyToDelete) {
+                    	var deletedRow = rowset.@com.bearsoft.rowset.Rowset::getRow(I)(beginToDeleteAt + 1);
                         rowset.@com.bearsoft.rowset.Rowset::deleteAt(IZ)(beginToDeleteAt + 1, needToAdd);
+                        eventedRows.push(deletedRow);
                     }
                     var insertAt = beginToDeleteAt;
                     for (var a = 2; a < arguments.length; a++) {
-                        var justInserted = aEntity.@com.eas.client.model.Entity::jsInsertAt(IZLcom/google/gwt/core/client/JavaScriptObject;)(insertAt + 1, a < arguments.length - 1, arguments[a]);
+                    	var shadow = copyProps(arguments[a]);// to avoid re initing by injected structure without values
+                        var insertedRow = aEntity.@com.eas.client.model.Entity::jsInsertAt(IZLcom/google/gwt/core/client/JavaScriptObject;)(insertAt + 1, a < arguments.length - 1, arguments[a]);
+                        applyProps(shadow, arguments[a]);
+                        eventedRows.push(insertedRow);
                         insertAt++;
                     }
                 }
-                return Array.prototype.splice.apply(published, arguments);
+                var res = Array.prototype.splice.apply(published, arguments);
+                eventedRows.forEach(function (aEventedRow) {
+                    aEventedRow.@com.bearsoft.rowset.Row::fireChangesOfOppositeCollections();
+                    aEventedRow.@com.bearsoft.rowset.Row::fireChangesOfOppositeScalars();
+                });
+                return res;
             }
         });
 
         Object.defineProperty(published, "unshift", {
             value: function () {
+                var eventedRows = [];
                 for (var a = 0; a < arguments.length; a++) {
-                    var justInserted = aEntity.@com.eas.client.model.Entity::jsInsertAt(IZLcom/google/gwt/core/client/JavaScriptObject;)(a + 1, a < arguments.length - 1, arguments[a]);
+                  	var shadow = copyProps(arguments[a]);// to avoid re initing by injected structure without values
+                    var insertedRow = aEntity.@com.eas.client.model.Entity::jsInsertAt(IZLcom/google/gwt/core/client/JavaScriptObject;)(a + 1, a < arguments.length - 1, arguments[a]);
+                    applyProps(shadow, arguments[a]);
+                    eventedRows.push(insertedRow);
                 }
-                return Array.prototype.unshift.apply(published, arguments);
+                var res = Array.prototype.unshift.apply(published, arguments);
+                eventedRows.forEach(function (aEventedRow) {
+                    aEventedRow.@com.bearsoft.rowset.Row::fireChangesOfOppositeCollections();
+                    aEventedRow.@com.bearsoft.rowset.Row::fireChangesOfOppositeScalars();
+                });
+                return res;
             }
         });		
 		// cursor interface 
@@ -237,11 +307,15 @@ public class Entity implements RowsetListener, HasPublished{
 				return aEntity.@com.eas.client.model.Entity::jsFind(Lcom/google/gwt/core/client/JavaScriptObject;)(aCriteria);
 			}
 		});
-		Object.defineProperty(published, "findById", {
+		Object.defineProperty(published, "findByKey", {
 			value : function(aValue) {
 				return aEntity.@com.eas.client.model.Entity::jsFindById(Ljava/lang/Object;)($wnd.P.boxAsJava(aValue));
 			}
 		});
+		published.findById = function(){
+			P.Logger.warning("Deprecated \"findById\" call detected. Plaese, use findByKey instead.");
+			return published.findByKey.apply(published, arguments);
+		};
 		//
 		Object.defineProperty(published, "enqueueUpdate", {
 			value : function() {
@@ -1397,24 +1471,11 @@ public class Entity implements RowsetListener, HasPublished{
 		rowset.sort(comparator);
 	}
 
-	public void jsInsertAt(int aIndex, boolean aAjusting, JavaScriptObject aTarget) throws Exception {
-        Fields fields = rowset.getFields();
-        List<Object> constraints = new ArrayList<>();
-        JsArrayString jsKeys = aTarget.<JsObject>cast().keys();
-        for (int i = 0; i < jsKeys.length();i++) {
-        	String key = jsKeys.get(i);
-            int fieldIndex = fields.find(key);
-            if (fieldIndex != -1) {
-                Field field = fields.get(key);
-                constraints.add(fieldIndex);
-                Object javaValue = aTarget.<JsObject>cast().getJava(key);
-                Object convertedValue = Converter.convert2RowsetCompatible(javaValue, field.getTypeInfo());
-                constraints.add(convertedValue);
-            }
-        }
+	public Row jsInsertAt(int aIndex, boolean aAjusting, JavaScriptObject aTarget) throws Exception {
 		Row inserted = new Row(rowset.getFlowProvider().getEntityId(), rowset.getFields());
 		Row.publishFacade(inserted, aTarget);
-		rowset.insertAt(inserted, aAjusting, aIndex, constraints.toArray());
+		rowset.insertAt(inserted, aAjusting, aIndex, null);
+		return inserted;
 	}
 
 	public boolean jsSort(Object aSorting) throws InvalidCursorPositionException{

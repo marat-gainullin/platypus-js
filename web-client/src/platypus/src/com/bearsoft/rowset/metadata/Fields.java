@@ -1,12 +1,3 @@
-/* Datamodel license.
- * Exclusive rights on this code in any form
- * are belong to it's author. This code was
- * developed for commercial purposes only. 
- * For any questions and any actions with this
- * code in any form you have to contact to it's
- * author.
- * All rights reserved.
- */
 package com.bearsoft.rowset.metadata;
 
 import com.google.gwt.core.client.JavaScriptObject;
@@ -20,6 +11,42 @@ import java.util.*;
  */
 public class Fields {
 
+    public static class OrmDef {
+
+        private final String baseName;// if not null, -> property is a scalar orm expanding
+        private final String name;
+        private final String oppositeName;
+        private final JavaScriptObject jsDef;
+
+        public OrmDef(String aName, String aOppositeName, JavaScriptObject aJsDef) {
+            this(null, aName, aOppositeName, aJsDef);
+        }
+        
+        public OrmDef(String aBaseName, String aName, String aOppositeName, JavaScriptObject aDef) {
+            baseName = aBaseName;
+            name = aName;
+            oppositeName = aOppositeName;
+            jsDef = aDef;
+        }
+
+        public String getBaseName() {
+            return baseName;
+        }
+
+        public String getOppositeName() {
+            return oppositeName;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public JavaScriptObject getJsDef() {
+            return jsDef;
+        }
+
+    }
+
 	private static final String DEFAULT_PARAM_NAME_PREFIX = "Field";
 	protected String tableDescription;
 	protected List<Field> fields = new ArrayList<>();
@@ -27,8 +54,9 @@ public class Fields {
 	protected Map<String, Integer> fieldsHash;
 	//
     protected JavaScriptObject instanceConstructor;
-    protected Map<String, JavaScriptObject> ormDefinitions = new HashMap<>();
-    protected Map<String, Collection<String>> ormExpandings = new HashMap<>();
+    protected Map<String, OrmDef> ormScalarDefinitions = new HashMap<>();
+    protected Map<String, OrmDef> ormCollectionsDefinitions = new HashMap<>();
+    protected Map<String, OrmDef> ormScalarExpandings = new HashMap<>();
     
 	/**
 	 * The default constructor.
@@ -72,31 +100,33 @@ public class Fields {
         instanceConstructor = aValue;
     }
 
-    public void addOrmScalarExpanding(String aBaseName, String aName) {
-        if (aName != null && !aName.isEmpty() && aBaseName != null && !aBaseName.isEmpty()) {
-            Collection<String> expandings = ormExpandings.get(aBaseName);
-            if (expandings == null) {
-                expandings = new HashSet<>();
-                ormExpandings.put(aBaseName, expandings);
-            }
-            expandings.add(aName);
-        }
-    }
-
-    public void putOrmDefinition(String aName, JavaScriptObject aDefinition) {
+    public void putOrmScalarDefinition(String aName, OrmDef aDefinition) {
         if (aName != null && !aName.isEmpty() && aDefinition != null) {
-            if (!ormDefinitions.containsKey(aName)) {
-                ormDefinitions.put(aName, aDefinition);
+            if (!ormScalarDefinitions.containsKey(aName)) {
+                ormScalarDefinitions.put(aName, aDefinition);
+                ormScalarExpandings.put(aDefinition.getBaseName(), aDefinition);
             }
         }
     }
 
-    public Map<String, JavaScriptObject> getOrmDefinitions() {
-        return Collections.unmodifiableMap(ormDefinitions);
+    public Map<String, OrmDef> getOrmScalarDefinitions() {
+        return Collections.unmodifiableMap(ormScalarDefinitions);
     }
 
-    public Map<String, Collection<String>> getOrmExpandings() {
-        return ormExpandings;
+    public Map<String, OrmDef> getOrmScalarExpandings() {
+        return Collections.unmodifiableMap(ormScalarExpandings);
+    }
+
+    public void putOrmCollectionDefinition(String aName, OrmDef aDefinition) {
+        if (aName != null && !aName.isEmpty() && aDefinition != null) {
+            if (!ormCollectionsDefinitions.containsKey(aName)) {
+                ormCollectionsDefinitions.put(aName, aDefinition);
+            }
+        }
+    }
+
+    public Map<String, OrmDef> getOrmCollectionsDefinitions() {
+        return Collections.unmodifiableMap(ormCollectionsDefinitions);
     }
 
 	/**

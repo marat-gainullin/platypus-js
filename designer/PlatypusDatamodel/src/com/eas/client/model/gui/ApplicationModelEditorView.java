@@ -123,6 +123,7 @@ public class ApplicationModelEditorView extends JPanel implements Customizer {
         modelView.addContainerListener(new ScalableValidator());
 
         btnAddQuery = new JDropDownButton(modelView.getActionMap().get(AddQueryAction.class.getSimpleName()));
+        btnAddQuery.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         btnAddQuery.setHideActionText(true);
         btnAddQuery.setDropDownMenu(popupNew);
         btnAddQuery.setMinimumSize(BTN_DIMENSION);

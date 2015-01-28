@@ -60,6 +60,7 @@ public class ScriptUtils {
     protected static JSObject makeObjFunc;
     protected static JSObject makeArrayFunc;
     protected static JSObject listenFunc;
+    protected static JSObject listenElementsFunc;
     protected static ScriptEngine engine;
     // Thread locals
     protected static ThreadLocal<Object> lock = new ThreadLocal<>();
@@ -359,6 +360,11 @@ public class ScriptUtils {
         listenFunc = aValue;
     }
 
+    public static void setListenElementsFunc(JSObject aValue) {
+        assert listenElementsFunc == null;
+        listenElementsFunc = aValue;
+    }
+
     public static Object toJava(Object aValue) {
         if (aValue instanceof ScriptObject) {
             aValue = jdk.nashorn.api.scripting.ScriptUtils.wrap(aValue);
@@ -540,6 +546,12 @@ public class ScriptUtils {
     public static JSObject listen(JSObject aTarget, String aPath, JSObject aCallback) {
         assert listenFunc != null : SCRIPT_NOT_INITIALIZED;
         Object oResult = listenFunc.call(null, new Object[]{aTarget, aPath, aCallback});
+        return (JSObject) oResult;
+    }
+
+    public static JSObject listenElements(JSObject aTarget, JSObject aCallback) {
+        assert listenElementsFunc != null : SCRIPT_NOT_INITIALIZED;
+        Object oResult = listenElementsFunc.call(null, new Object[]{aTarget, aCallback});
         return (JSObject) oResult;
     }
 

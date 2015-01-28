@@ -483,6 +483,10 @@ public class FormFactory {
 					        "While setting data to named model's property " + entityName + " to widget " + grid.getJsName() + " exception occured: " + ex.getMessage());
 				}
 			}
+            if (anElement.hasAttribute("field")) {
+                String dataPropertyPath = anElement.getAttribute("field");
+                grid.setField(dataPropertyPath);
+            }
 			return grid;
 		}
 		// containers
@@ -540,8 +544,8 @@ public class FormFactory {
 			Publisher.publish(scroll);
 			readGeneralProps(anElement, scroll);
 			boolean wheelScrollingEnabled = Utils.getBooleanAttribute(anElement, "wheelScrollingEnabled", Boolean.TRUE);
-			int horizontalScrollBarPolicy = Utils.getIntegerAttribute(anElement, "horizontalScrollBarPolicy", ScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-			int verticalScrollBarPolicy = Utils.getIntegerAttribute(anElement, "verticalScrollBarPolicy", ScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+			int horizontalScrollBarPolicy = Utils.getIntegerAttribute(anElement, "horizontalScrollBarPolicy", ScrollPane.SCROLLBAR_AS_NEEDED);
+			int verticalScrollBarPolicy = Utils.getIntegerAttribute(anElement, "verticalScrollBarPolicy", ScrollPane.SCROLLBAR_AS_NEEDED);
 			scroll.setHorizontalScrollBarPolicy(horizontalScrollBarPolicy);
 			scroll.setVerticalScrollBarPolicy(verticalScrollBarPolicy);
 			return scroll;

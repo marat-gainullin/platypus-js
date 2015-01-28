@@ -5,7 +5,6 @@
  */
 package com.eas.client.scripts;
 
-import com.eas.script.ScriptUtils;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import jdk.nashorn.api.scripting.JSObject;

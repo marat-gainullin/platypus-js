@@ -20,6 +20,7 @@ import com.bearsoft.rowset.Utils.JsObject;
 import com.bearsoft.rowset.beans.PropertyChangeSupport;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.metadata.Field;
+import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.application.AppClient;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.model.js.JsModel;
@@ -292,23 +293,31 @@ public class Model implements HasPublished {
 			if (scalarPropertyName == null || scalarPropertyName.isEmpty()) {
 				scalarPropertyName = aRelation.getRightEntity().getName();
 			}
-			if (scalarPropertyName != null && !scalarPropertyName.isEmpty()) {
-				aRelation.getLeftEntity().putOrmDefinition(scalarPropertyName,
-				        ormPropertiedDefiner.scalar(aRelation.getRightEntity().getPublished(), aRelation.getRightField().getName(), aRelation.getLeftField().getName()));
-			}
 			String collectionPropertyName = aRelation.getCollectionPropertyName();
 			if (collectionPropertyName == null || collectionPropertyName.isEmpty()) {
 				collectionPropertyName = aRelation.getLeftEntity().getName();
 			}
-			if (collectionPropertyName != null && !collectionPropertyName.isEmpty()) {
-				aRelation.getRightEntity().putOrmDefinition(collectionPropertyName,
-				        ormPropertiedDefiner.collection(aRelation.getLeftEntity().getPublished(), aRelation.getRightField().getName(), aRelation.getLeftField().getName()));
-			}
+            if (scalarPropertyName != null && !scalarPropertyName.isEmpty()) {
+                aRelation.getLeftEntity().putOrmScalarDefinition(
+                        scalarPropertyName,
+                        new Fields.OrmDef(aRelation.getLeftField().getName(), scalarPropertyName, collectionPropertyName, ormPropertiesDefiner.scalar(
+                                aRelation.getRightEntity().getPublished(),
+                                aRelation.getRightField().getName(),
+                                aRelation.getLeftField().getName())));
+            }
+            if (collectionPropertyName != null && !collectionPropertyName.isEmpty()) {
+                aRelation.getRightEntity().putOrmCollectionDefinition(
+                        collectionPropertyName,
+                        new Fields.OrmDef(collectionPropertyName, scalarPropertyName, ormPropertiesDefiner.collection(
+                                aRelation.getLeftEntity().getPublished(),
+                                aRelation.getRightField().getName(),
+                                aRelation.getLeftField().getName())));
+            }
 		}
 		// ////////////////
 	}
 
-	private static DefinitionsContainer ormPropertiedDefiner = DefinitionsContainer.init();
+	private static DefinitionsContainer ormPropertiesDefiner = DefinitionsContainer.init();
 
 	private static final class DefinitionsContainer extends JavaScriptObject {
 
@@ -322,10 +331,10 @@ public class Model implements HasPublished {
 					_self.enumerable = true;
 					_self.configurable = false;
 					_self.get = function() {
-						var criteria = {};
-						criteria[targetFieldName] = this[sourceFieldName];
-						var found = targetEntity.find(criteria);
-						return found.length == 0 ? null : (found.length == 1 ? found[0] : found);
+						var criterion = {};
+						criterion[targetFieldName] = this[sourceFieldName];
+						var found = targetEntity.find(criterion);
+						return found && found.length == 1 ? found[0] : null;
 					};
 					_self.set = function(aValue) {
 						this[sourceFieldName] = aValue ? aValue[targetFieldName] : null;
@@ -334,16 +343,51 @@ public class Model implements HasPublished {
 				collectionDef : function(sourceEntity, targetFieldName, sourceFieldName) {
 					var _self = this;
 					_self.enumerable = true;
-					_self.configurable = false;
+					_self.configurable = true;
 					_self.get = function() {
-						var criteria = {};
-						criteria[sourceFieldName] = this[targetFieldName];
-						var res = sourceEntity.find(criteria);
-						if (res && res.length > 0) {
-							return res;
-						} else {
-							return [];
-						}
+						var criterion = {};
+                    	var targetKey = this[targetFieldName];
+						criterion[sourceFieldName] = targetKey;
+						var res = sourceEntity.find(criterion);
+	                    if (res == null)// don't edit to === because of undefined
+	                        res = [];
+	                    res.push = function () {
+	                        for (var a = 0; a < arguments.length; a++) {
+	                            var instance = arguments[a];
+	                            instance[sourceFieldName] = targetKey;
+	                        }
+	                        return Array.prototype.push.apply(res, arguments);
+	                    };
+	                    res.unshift = function () {
+	                        for (var a = 0; a < arguments.length; a++) {
+	                            var instance = arguments[a];
+	                            instance[sourceFieldName] = targetKey;
+	                        }
+	                        return Array.prototype.unshift.apply(res, arguments);
+	                    };
+	                    res.splice = function () {
+	                        for (var a = 2; a < arguments.length; a++) {
+	                            var _instance = arguments[a];
+	                            _instance[sourceFieldName] = targetKey;
+	                        }
+	                        var deleted = Array.prototype.splice.apply(res, arguments);
+	                        for (var d = 0; d < deleted.length; d++) {
+	                            var instance = deleted[d];
+	                            instance[sourceFieldName] = null;
+	                        }
+	                        return deleted;
+	                    };
+	                    res.pop = function () {
+	                        var deleted = Array.prototype.pop.apply(res, arguments);
+	                        deleted[sourceFieldName] = null;
+	                        return deleted;
+	                    };
+	                    res.shift = function () {
+	                        var deleted = Array.prototype.shift.apply(res, arguments);
+	                        deleted[sourceFieldName] = null;
+	                        return deleted;
+	                    };
+	                    return res;
 					};
 				}
 			}

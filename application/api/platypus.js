@@ -25,7 +25,7 @@
     var FieldsClass = Java.type("com.bearsoft.rowset.metadata.Fields");
     var IDGeneratorClass = Java.type("com.bearsoft.rowset.utils.IDGenerator");
     var PropertyChangeSupportClass = Java.type("java.beans.PropertyChangeSupport");
-    var RowsetJSAdapterClass = Java.type("com.bearsoft.rowset.events.RowsetJSAdapter");
+    var RowsetJsAdapterClass = Java.type("com.bearsoft.rowset.events.RowsetJsAdapter");
     var RowsComparatorClass = Java.type("com.bearsoft.rowset.sorting.RowsComparator");
     var ScriptTimerTaskClass = Java.type("com.eas.client.scripts.ScriptTimerTask");
     var ScriptedResourceClass = Java.type("com.eas.client.scripts.ScriptedResource");
@@ -606,7 +606,6 @@
             for (var c = 0; c < comps.length; c++) {
                 (function () {
                     var comp = EngineUtilsClass.unwrap(boxAsJs(comps[c]));
-                    //P.Logger.info("comp: " + comp + "; comp.name: " + comp.name);
                     if (comp.name) {
                         Object.defineProperty(aTarget, comp.name, {
                             get: function () {
@@ -616,6 +615,7 @@
                     }
                 })();
             }
+            return aTarget;
         }
         Object.defineProperty(P, "loadForm", {value: loadForm});
     }
@@ -721,19 +721,6 @@
         }
     });
 
-    function objectToInsertIniting(aObject) {
-        var jsIniting = [];
-        for (var pn in aObject) {
-            var pName = pn + '';
-            jsIniting[jsIniting.length] = pName;
-            jsIniting[jsIniting.length] = aObject[pName];
-        }
-        var initing = new JavaArrayClass(jsIniting.length);
-        for (var v = 0; v < jsIniting.length; v++)
-            initing[v] = boxAsJava(jsIniting[v]);
-        return initing;
-    }
-
     function publishRow(aDelegate, aTarget) {
         var nnFields = aDelegate.getFields();
         var instanceCTor = EngineUtilsClass.unwrap(nnFields.getInstanceConstructor());
@@ -757,11 +744,14 @@
             })();
         }
         // ORM mutable scalar and readonly collection properties
-        var ormDefs = nnFields.getOrmDefinitions();
-        for each (var defsEntry in ormDefs.entrySet()) {
-            var def = EngineUtilsClass.unwrap(defsEntry.getValue());
-            Object.defineProperty(target, defsEntry.getKey(), def);
-        }
+        var define = function (aOrmDefs) {
+            for each (var defsEntry in aOrmDefs.entrySet()) {
+                var def = EngineUtilsClass.unwrap(defsEntry.getValue().getJsDef());
+                Object.defineProperty(target, defsEntry.getKey(), def);
+            }
+        };
+        define(nnFields.getOrmScalarDefinitions());
+        define(nnFields.getOrmCollectionsDefinitions());
         Object.defineProperty(target, "unwrap", {
             value: function () {
                 return aDelegate;
@@ -771,18 +761,38 @@
     }
 
     function BoundArray() {
+        function copyProps(aObject) {
+            var shadow = {};
+            for (var pn in aObject) {
+                var pName = pn + '';
+                shadow[pName] = aObject[pName];
+            }
+            return shadow;
+        }
+        function applyProps(aShadow, aTarget) {
+            for (var pn in aShadow) {
+                var pName = pn + '';
+                aTarget[pName] = aShadow[pName];
+            }
+        }
         if (BoundArray.superclass)
             BoundArray.superclass.constructor.apply(this, arguments);
         var target = this;
         var rowset = this.unwrap().getRowset();
-        var adapter = new RowsetJSAdapterClass();
+        var adapter = new RowsetJsAdapterClass();
         rowset.addRowsetListener(adapter);
         adapter.rowsetFiltered = function () {
+            var eventedRows = [];
             Array.prototype.splice.call(target, 0, target.length);
             var rows = rowset.getCurrent();
-            for each (var aRow in rows) {
-                Array.prototype.push.call(target, EngineUtilsClass.unwrap(aRow.getPublished()));
+            for each (var nRow in rows) {
+                Array.prototype.push.call(target, EngineUtilsClass.unwrap(nRow.getPublished()));
+                eventedRows.push(nRow);
             }
+            eventedRows.forEach(function (aEventedRow) {
+                aEventedRow.fireChangesOfOppositeCollections();
+                aEventedRow.fireChangesOfOppositeScalars();
+            });
         };
         adapter.rowsetRequeried = function (event) {
             adapter.rowsetFiltered(null);
@@ -810,22 +820,34 @@
         Object.defineProperty(target, "pop", {
             value: function () {
                 if (!rowset.empty) {
-                    var res = rowset.getRow(rowset.size());
+                    var deletedRow = rowset.getRow(rowset.size());
                     rowset.deleteAt(rowset.size());
-                    return Array.prototype.pop.call(target);
+                    var res = Array.prototype.pop.call(target);
+                    deletedRow.fireChangesOfOppositeCollections();
+                    deletedRow.fireChangesOfOppositeScalars();
+                    return res;
                 }
             }
         });
         Object.defineProperty(target, "push", {
             value: function () {
+                var eventedRows = [];
                 var entityName = rowset.getFlowProvider().getEntityId();
                 var nFields = rowset.getFields();
                 for (var a = 0; a < arguments.length; a++) {
-                    var justInserted = new RowClass(entityName, nFields);
-                    justInserted.setPublished(publishRow(justInserted, arguments[a]));
-                    rowset.insertAt(justInserted, a < arguments.length - 1, rowset.size() + 1, objectToInsertIniting(arguments[a]));
+                    var shadow = copyProps(arguments[a]);// to avoid re initing by injected structure without values
+                    var insertedRow = new RowClass(entityName, nFields);
+                    insertedRow.setPublished(publishRow(insertedRow, arguments[a]));
+                    rowset.insertAt(insertedRow, a < arguments.length - 1, rowset.size() + 1, null);
+                    applyProps(shadow, arguments[a]);
+                    eventedRows.push(insertedRow);
                 }
-                return Array.prototype.push.apply(target, arguments);
+                var res = Array.prototype.push.apply(target, arguments);
+                eventedRows.forEach(function (aEventedRow) {
+                    aEventedRow.fireChangesOfOppositeCollections();
+                    aEventedRow.fireChangesOfOppositeScalars();
+                });
+                return res;
             }
         });
         Object.defineProperty(target, "reverse", {
@@ -836,9 +858,12 @@
         Object.defineProperty(target, "shift", {
             value: function () {
                 if (!rowset.empty) {
-                    var res = rowset.getRow(1);
+                    var deletedRow = rowset.getRow(1);
                     rowset.deleteAt(1);
-                    return Array.prototype.shift.call(target);
+                    var res = Array.prototype.shift.call(target);
+                    deletedRow.fireChangesOfOppositeCollections();
+                    deletedRow.fireChangesOfOppositeScalars();
+                    return res;
                 }
             }
         });
@@ -863,6 +888,7 @@
         });
         Object.defineProperty(target, "splice", {
             value: function () {
+                var eventedRows = [];
                 if (arguments.length > 0) {
                     var beginToDeleteAt = arguments[0];
                     var howManyToDelete = Number.MAX_VALUE;
@@ -872,32 +898,51 @@
                     var needToAdd = arguments.length > 2;
                     var deleted = 0;
                     while (!rowset.empty && deleted++ < howManyToDelete) {
+                        var deletedRow = rowset.getRow(beginToDeleteAt + 1);
                         rowset.deleteAt(beginToDeleteAt + 1, needToAdd);
+                        eventedRows.push(deletedRow);
                     }
                     var insertAt = beginToDeleteAt;
                     var entityName = rowset.getFlowProvider().getEntityId();
                     var nFields = rowset.getFields();
                     for (var a = 2; a < arguments.length; a++) {
-                        var justInserted = new RowClass(entityName, nFields);
-                        justInserted.setPublished(publishRow(justInserted, arguments[a]));
-                        rowset.insertAt(justInserted, a < arguments.length - 1, insertAt + 1, objectToInsertIniting(arguments[a]));
+                        var shadow = copyProps(arguments[a]);// to avoid re initing by injected structure without values
+                        var insertedRow = new RowClass(entityName, nFields);
+                        insertedRow.setPublished(publishRow(insertedRow, arguments[a]));
+                        rowset.insertAt(insertedRow, a < arguments.length - 1, insertAt + 1, null);
+                        applyProps(shadow, arguments[a]);
+                        eventedRows.push(insertedRow);
                         insertAt++;
                     }
                 }
-                return Array.prototype.splice.apply(target, arguments);
+                var res = Array.prototype.splice.apply(target, arguments);
+                eventedRows.forEach(function (aEventedRow) {
+                    aEventedRow.fireChangesOfOppositeCollections();
+                    aEventedRow.fireChangesOfOppositeScalars();
+                });
+                return res;
             }
         });
 
         Object.defineProperty(target, "unshift", {
             value: function () {
+                var eventedRows = [];
                 var entityName = rowset.getFlowProvider().getEntityId();
                 var nFields = rowset.getFields();
                 for (var a = 0; a < arguments.length; a++) {
-                    var justInserted = new RowClass(entityName, nFields);
-                    justInserted.setPublished(publishRow(justInserted, arguments[a]));
-                    rowset.insertAt(justInserted, a < arguments.length - 1, a + 1, objectToInsertIniting(arguments[a]));
+                    var shadow = copyProps(arguments[a]);// to avoid re initing by injected structure without values
+                    var insertedRow = new RowClass(entityName, nFields);
+                    insertedRow.setPublished(publishRow(insertedRow, arguments[a]));
+                    rowset.insertAt(insertedRow, a < arguments.length - 1, a + 1, null);
+                    applyProps(shadow, arguments[a]);
+                    eventedRows.push(insertedRow);
                 }
-                return Array.prototype.unshift.apply(target, arguments);
+                var res = Array.prototype.unshift.apply(target, arguments);
+                eventedRows.forEach(function (aEventedRow) {
+                    aEventedRow.fireChangesOfOppositeCollections();
+                    aEventedRow.fireChangesOfOppositeScalars();
+                });
+                return res;
             }
         });
 
@@ -916,7 +961,7 @@
         });
 
         Object.defineProperty(target, "find", {
-            value: function (aCriteria) {                
+            value: function (aCriteria) {
                 var nEntity = this.unwrap();
                 return EngineUtilsClass.unwrap(nEntity.find(aCriteria));
             }

@@ -23,6 +23,7 @@ import com.bearsoft.rowset.dataflow.FlowProvider;
 import com.bearsoft.rowset.events.RowsetAdapter;
 import com.bearsoft.rowset.events.RowsetChangeSupport;
 import com.bearsoft.rowset.events.RowsetFilterEvent;
+import com.bearsoft.rowset.events.RowsetJsAdapter;
 import com.bearsoft.rowset.events.RowsetListener;
 import com.bearsoft.rowset.events.RowsetRequeryEvent;
 import com.bearsoft.rowset.events.RowsetRollbackEvent;
@@ -1153,32 +1154,7 @@ public class Rowset implements HasPropertyListeners{
 	}
 
 	public static void addRowsetContentJsListener(Rowset aTarget, final JavaScriptObject onContentChanged) {
-		aTarget.addRowsetListener(new RowsetAdapter() {
-
-			protected void contentChanged() {
-				onContentChanged.<JsObject> cast().apply(null, JavaScriptObject.createArray());
-			}
-
-			@Override
-			public void rowsetFiltered(RowsetFilterEvent event) {
-				contentChanged();
-			}
-
-			@Override
-			public void rowsetRequeried(RowsetRequeryEvent event) {
-				contentChanged();
-			}
-
-			@Override
-			public void rowsetRolledback(RowsetRollbackEvent event) {
-				contentChanged();
-			}
-
-			@Override
-			public void rowsetSorted(RowsetSortEvent event) {
-				contentChanged();
-			}
-		});
+		aTarget.addRowsetListener(new RowsetJsAdapter(onContentChanged));
 	}
 
 }

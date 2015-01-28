@@ -7,6 +7,8 @@ package com.bearsoft.rowset.events;
 import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
+import com.bearsoft.rowset.ordering.Locator;
+import com.bearsoft.rowset.ordering.Orderer;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -352,12 +354,17 @@ public class RowsetChangeSupport {
     protected void notifyListeners(Consumer<RowsetListener> aOperation) {
         RowsetListener[] listeners = rowsetListeners.toArray(new RowsetListener[]{});
         for (RowsetListener l : listeners) {
-            if (l instanceof RowsetEventsEarlyAccess) {
+            if (l instanceof Locator || l instanceof Orderer) {
                 aOperation.accept(l);
             }
         }
         for (RowsetListener l : listeners) {
-            if (l != null && !(l instanceof RowsetEventsEarlyAccess)) {
+            if (l instanceof RowsetJsAdapter) {
+                aOperation.accept(l);
+            }
+        }
+        for (RowsetListener l : listeners) {
+            if (!(l instanceof RowsetJsAdapter) && !(l instanceof Locator) && !(l instanceof Orderer)) {
                 aOperation.accept(l);
             }
         }
@@ -367,14 +374,14 @@ public class RowsetChangeSupport {
      * Fires requeriedEvent event to all registered listeners.
      */
     public void fireRequeriedEvent() {
-        notifyCursor();
-        notifyLength();
         if (rowsetListeners != null) {
             RowsetRequeryEvent event = new RowsetRequeryEvent(source, RowsetEventMoment.AFTER);
             notifyListeners((RowsetListener l) -> {
                 l.rowsetRequeried(event);
             });
         }
+        notifyCursor();
+        notifyLength();
     }
 
     protected void notifyCursor() {
@@ -397,28 +404,28 @@ public class RowsetChangeSupport {
      * Fires rowsetNextPageFetched event to all registered listeners.
      */
     public void fireNextPageFetchedEvent() {
-        notifyCursor();
-        notifyLength();
         if (rowsetListeners != null) {
             RowsetNextPageEvent event = new RowsetNextPageEvent(source, RowsetEventMoment.AFTER);
             notifyListeners((RowsetListener l) -> {
                 l.rowsetNextPageFetched(event);
             });
         }
+        notifyCursor();
+        notifyLength();
     }
 
     /**
      * Fires filteredEvent event to all registered listeners.
      */
     public void fireFilteredEvent() {
-        notifyCursor();
-        notifyLength();
         if (rowsetListeners != null) {
             RowsetFilterEvent event = new RowsetFilterEvent(source, source.getActiveFilter(), RowsetEventMoment.AFTER);
             notifyListeners((RowsetListener l) -> {
                 l.rowsetFiltered(event);
             });
         }
+        notifyCursor();
+        notifyLength();
     }
 
     /**
@@ -437,14 +444,14 @@ public class RowsetChangeSupport {
      * Fires savedEvent event to all registered listeners.
      */
     public void fireRolledbackEvent() {
-        notifyCursor();
-        notifyLength();
         if (rowsetListeners != null) {
             RowsetRollbackEvent event = new RowsetRollbackEvent(source);
             notifyListeners((RowsetListener l) -> {
                 l.rowsetRolledback(event);
             });
         }
+        notifyCursor();
+        notifyLength();
     }
 
     /**
@@ -454,26 +461,26 @@ public class RowsetChangeSupport {
      * scrolling has been performed.
      */
     public void fireScrolledEvent(int oldRowIndex) {
-        notifyCursor();
         if (rowsetListeners != null) {
             RowsetScrollEvent event = new RowsetScrollEvent(source, oldRowIndex, source.getCursorPos(), RowsetEventMoment.AFTER);
             notifyListeners((RowsetListener l) -> {
                 l.rowsetScrolled(event);
             });
         }
+        notifyCursor();
     }
 
     /**
      * Fires sortedEvent event to all registered listeners.
      */
     public void fireSortedEvent() {
-        notifyCursor();
         if (rowsetListeners != null) {
             RowsetSortEvent event = new RowsetSortEvent(source, RowsetEventMoment.AFTER);
             notifyListeners((RowsetListener l) -> {
                 l.rowsetSorted(event);
             });
         }
+        notifyCursor();
     }
 
     public void fireNetErrorEvent(Exception anErrorCause) {
@@ -504,14 +511,14 @@ public class RowsetChangeSupport {
      * events element.
      */
     public void fireRowInsertedEvent(Row aRow, boolean aAjusting) {
-        notifyCursor();
-        notifyLength();
         if (rowsetListeners != null) {
             RowsetInsertEvent event = new RowsetInsertEvent(source, aRow, RowsetEventMoment.AFTER, aAjusting);
             notifyListeners((RowsetListener l) -> {
                 l.rowInserted(event);
             });
         }
+        notifyCursor();
+        notifyLength();
     }
 
     /**
@@ -531,13 +538,13 @@ public class RowsetChangeSupport {
      * element.
      */
     public void fireRowDeletedEvent(Row aRow, boolean aAjusting) {
-        notifyCursor();
-        notifyLength();
         if (rowsetListeners != null) {
             RowsetDeleteEvent event = new RowsetDeleteEvent(source, aRow, RowsetEventMoment.AFTER, aAjusting);
             notifyListeners((RowsetListener l) -> {
                 l.rowDeleted(event);
             });
         }
+        notifyCursor();
+        notifyLength();
     }
 }

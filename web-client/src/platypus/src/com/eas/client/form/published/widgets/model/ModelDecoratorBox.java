@@ -29,7 +29,6 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
-import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -216,7 +215,7 @@ public abstract class ModelDecoratorBox<T> extends DecoratorBox<T> implements Ha
 			super.setValue(value, fireEvents);
 			try {
 				if (onRender != null && data != null && field != null && !field.isEmpty()) {
-					//cellToRender = ControlsUtils.calcStandalonePublishedCell(published, onRender, modelElement.entity.getRowset().getCurrentRow(), null, modelElement, cellToRender);
+					cellToRender = ControlsUtils.calcStandalonePublishedCell(published, onRender, data, field, getText(), cellToRender);
 				}
 				if (cellToRender != null) {
 					if (cellToRender.getDisplayCallback() == null) {

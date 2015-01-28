@@ -389,6 +389,7 @@ public class DbSchemeEditorView extends JPanel implements ContainerListener {
 
         JDropDownButton addBtn = new JDropDownButton();
         addBtn.setFocusable(false);
+        addBtn.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         addBtn.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         addBtn.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         addBtn.setMinimumSize(BTN_DIMENSION);

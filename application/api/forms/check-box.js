@@ -314,22 +314,6 @@
              */
             P.CheckBox.prototype.onMouseEntered = {};
         }
-        Object.defineProperty(this, "selected", {
-            get: function() {
-                var value = delegate.selected;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.selected = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.CheckBox){
-            /**
-             * @property selected
-             * @memberOf CheckBox
-             * Determines whether this component is selected.*/
-            P.CheckBox.prototype.selected = true;
-        }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
                 var value = delegate.toolTipText;
@@ -346,6 +330,22 @@
              * @memberOf CheckBox
              */
             P.CheckBox.prototype.toolTipText = '';
+        }
+        Object.defineProperty(this, "selected", {
+            get: function() {
+                var value = delegate.selected;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.selected = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.CheckBox){
+            /**
+             * @property selected
+             * @memberOf CheckBox
+             * Determines whether this component is selected.*/
+            P.CheckBox.prototype.selected = true;
         }
         Object.defineProperty(this, "element", {
             get: function() {

@@ -962,13 +962,6 @@ is divided into following sections:
         </antcall>
         <antcall target="-maybe-call-dep">
             <param name="call.built.properties" value="${built-jar.properties}"/>
-            <param location="${project.DbControls}" name="call.subproject"/>
-            <param location="${project.DbControls}/build.xml" name="call.script"/>
-            <param name="call.target" value="jar"/>
-            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
-        </antcall>
-        <antcall target="-maybe-call-dep">
-            <param name="call.built.properties" value="${built-jar.properties}"/>
             <param location="${project.Forms}" name="call.subproject"/>
             <param location="${project.Forms}/build.xml" name="call.script"/>
             <param name="call.target" value="jar"/>

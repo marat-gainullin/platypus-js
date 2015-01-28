@@ -336,23 +336,6 @@
              */
             P.ToggleButton.prototype.onMouseEntered = {};
         }
-        Object.defineProperty(this, "selected", {
-            get: function() {
-                var value = delegate.selected;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.selected = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ToggleButton){
-            /**
-             * The state of the button.
-             * @property selected
-             * @memberOf ToggleButton
-             */
-            P.ToggleButton.prototype.selected = true;
-        }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
                 var value = delegate.toolTipText;
@@ -369,6 +352,23 @@
              * @memberOf ToggleButton
              */
             P.ToggleButton.prototype.toolTipText = '';
+        }
+        Object.defineProperty(this, "selected", {
+            get: function() {
+                var value = delegate.selected;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.selected = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ToggleButton){
+            /**
+             * The state of the button.
+             * @property selected
+             * @memberOf ToggleButton
+             */
+            P.ToggleButton.prototype.selected = true;
         }
         Object.defineProperty(this, "element", {
             get: function() {

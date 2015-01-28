@@ -16,8 +16,10 @@ import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.forms.components.model.ModelCombo;
 import com.eas.client.model.ModelElementRef;
+import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
+import com.eas.client.model.application.ReferenceRelation;
 import com.eas.client.model.gui.selectors.ModelElementSelector;
 import com.eas.designer.application.module.EntityJSObject;
 import java.awt.Component;
@@ -77,6 +79,14 @@ public class EntityJSObjectFieldEditor extends PropertyEditorSupport implements 
                     tags.add(prefix + aField.getName());
                 });
             }
+            dataEntity.getModel().getReferenceRelationsByEntity(dataEntity).forEach((Relation<ApplicationDbEntity> aRelation) -> {
+                if (aRelation instanceof ReferenceRelation<?>) {
+                    ReferenceRelation<?> rr = (ReferenceRelation<?>) aRelation;
+                    if (rr.getLeftEntity() == dataEntity && rr.getScalarPropertyName() != null && !rr.getScalarPropertyName().isEmpty()) {
+                        tags.add(prefix + rr.getScalarPropertyName());
+                    }
+                }
+            });
             return tags.toArray(new String[]{});
         } else {
             return super.getTags();
@@ -104,119 +114,6 @@ public class EntityJSObjectFieldEditor extends PropertyEditorSupport implements 
         assert value == null || value instanceof String;
         super.setValue(value);
     }
-    /*
-     // In-Place painting section
-     @Override
-     public boolean isPaintable() {
-     return true;
-     }
-
-     @Override
-     public void paintValue(Graphics gfx, Rectangle box) {
-     try {
-     assert getValue() == null || getValue() instanceof ModelElementRef;
-     renderer = new IconsListCellRenderer();
-     renderer.setOpaque(false);
-     ModelElementRef element = (ModelElementRef) getValue();
-     ApplicationDbModel model = formModel.getDataObject().getBasesProxy() != null ? formModel.getDataObject().getModel() : null;
-     if (model != null) {
-     if (element != null) {
-     ApplicationDbEntity entity = model.getEntityById(element.getEntityId());
-     if (entity != null && entity.isQuery()) {
-     Font fieldsFont = DatamodelDesignUtils.getFieldsFont();
-     int iconTextGap = 4;
-     String entityText = entity.getName() != null && !entity.getName().isEmpty() ? entity.getName() : entity.getTitle();
-     Field field = element.getField();
-     if (field != null) {
-     field = entity.getFields().get(field.getName());
-     if (field != null) {
-     element.setField(field);
-     }
-     }
-     if (field != null) {
-     String fieldDescription = field.getDescription();
-     String fieldText = field.getName() != null && !field.getName().isEmpty() ? field.getName() : fieldDescription;
-
-     if (StoredQueryFactory.ABSENT_QUERY_MSG.equals(fieldDescription)) {
-     entityText = String.format(DatamodelDesignUtils.localizeString(StoredQueryFactory.ABSENT_QUERY_MSG), entity.getQueryName());
-     fieldText = "";
-     }
-     if (StoredQueryFactory.CONTENT_EMPTY_MSG.equals(fieldDescription)) {
-     entityText = String.format(DatamodelDesignUtils.localizeString(StoredQueryFactory.CONTENT_EMPTY_MSG), entity.getQueryName());
-     fieldText = "";
-     }
-     String typeName = SQLUtils.getLocalizedTypeName(field.getTypeInfo().getSqlType());
-     if (typeName == null) {
-     typeName = field.getTypeInfo().getSqlTypeName();
-     }
-     Icon pkIcon = null;
-     Icon fkIcon = null;
-     Icon typeIcon = FieldsTypeIconsCache.getIcon16(field.getTypeInfo().getSqlType());
-     if (field.getTypeInfo().getSqlType() == Types.STRUCT || field.getTypeInfo().getSqlType() == Types.OTHER) {
-     String ltext = SQLUtils.getLocalizedTypeName(field.getTypeInfo().getSqlTypeName());
-     if (ltext != null && !ltext.isEmpty()) {
-     typeName = ltext;
-     }
-     String fTypeName = field.getTypeInfo().getSqlTypeName();
-     if (fTypeName != null) {
-     fTypeName = fTypeName.toUpperCase();
-     }
-     Icon licon = FieldsTypeIconsCache.getIcon16(fTypeName);
-     if (licon != null) {
-     typeIcon = licon;
-     }
-     }
-     boolean lisPk = field.isPk();
-     boolean lisFk = field.isFk();
-     if (lisPk) {
-     typeName = SQLUtils.getLocalizedPkName() + "." + typeName;
-     pkIcon = FieldsTypeIconsCache.getPkIcon16();
-     //iconTextGap += pkIcon.getIconWidth() + 2;
-     }
-     if (lisFk) {
-     typeName = SQLUtils.getLocalizedFkName() + "." + typeName;
-     fkIcon = FieldsTypeIconsCache.getFkIcon16();
-     //iconTextGap += fkIcon.getIconWidth() + 2;
-     }
-     prepareIconsRenderer(pkIcon, fkIcon, typeIcon, entityText + "." + fieldText + ":" + typeName, iconTextGap, fieldsFont);
-     } else {
-     prepareIconsRenderer(null, null, null, entityText, iconTextGap, fieldsFont);
-     }
-     } else {
-     renderer.setText("N/A");
-     }
-     } else {
-     renderer.setText("<>");
-     }
-     } else {
-     renderer.setText(NbBundle.getMessage(EntityJSObjectFieldEditor.class, "CTL_ModelUnavailable"));
-     }
-     renderer.setSize(box.getSize());
-     renderer.paint(gfx);
-     } catch (Exception ex) {
-     Logger.getLogger(EntityJSObjectFieldEditor.class.getName()).log(Level.SEVERE, null, ex);
-     }
-     }
-
-     protected void prepareIconsRenderer(Icon aPkIcon, Icon aFkIcon, Icon aTypeIcon, String aText, int aIconTextGap, Font aFont) {//, JList aList) {
-     if (aPkIcon != null && aFkIcon == null) {
-     renderer.setIcon(aTypeIcon);
-     renderer.addIcon(aPkIcon);
-     } else if (aPkIcon == null && aFkIcon != null) {
-     renderer.setIcon(aTypeIcon);
-     renderer.addIcon(aFkIcon);
-     } else if (aPkIcon != null && aFkIcon != null) {
-     renderer.setIcon(aTypeIcon);
-     renderer.addIcon(aPkIcon);
-     renderer.addIcon(aFkIcon);
-     } else {
-     renderer.setIcon(aTypeIcon);
-     }
-     renderer.setText(aText);
-     renderer.setIconTextGap(aIconTextGap);
-     renderer.setFont(aFont);
-     }
-     */
 
     // Elipsis button section
     @Override

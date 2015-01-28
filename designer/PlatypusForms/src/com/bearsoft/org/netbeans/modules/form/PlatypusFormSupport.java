@@ -105,9 +105,6 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Editor
     public static final String iconURL
             = "com/bearsoft/org/netbeans/modules/form/resources/form.gif"; // NOI18N
 
-    static {// because of crazy netbeans class loaders
-        PropertyEditorManager.registerEditor(JSObject.class, EntityJSObjectEditor.class);
-    }
     private UndoRedo.Manager editorUndoManager;
     private FormEditor formEditor;
 

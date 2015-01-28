@@ -40,36 +40,20 @@ public class ScrollPane extends ScrollBoxPanel implements HasJsFacade, HasEnable
 		HasShowHandlers, HasHideHandlers, HasResizeHandlers, HasAddHandlers, HasRemoveHandlers, HasChildrenPosition {
 
 	/**
-	 * Used to set the vertical scroll bar policy so that vertical scrollbars
-	 * are displayed only when needed.
-	 */
-	public static final int VERTICAL_SCROLLBAR_AS_NEEDED = 20;
-	/**
-	 * Used to set the vertical scroll bar policy so that vertical scrollbars
-	 * are never displayed.
-	 */
-	public static final int VERTICAL_SCROLLBAR_NEVER = 21;
-	/**
-	 * Used to set the vertical scroll bar policy so that vertical scrollbars
-	 * are always displayed.
-	 */
-	public static final int VERTICAL_SCROLLBAR_ALWAYS = 22;
-
-	/**
 	 * Used to set the horizontal scroll bar policy so that horizontal
 	 * scrollbars are displayed only when needed.
 	 */
-	public static final int HORIZONTAL_SCROLLBAR_AS_NEEDED = 30;
+	public static final int SCROLLBAR_AS_NEEDED = 30;
 	/**
 	 * Used to set the horizontal scroll bar policy so that horizontal
 	 * scrollbars are never displayed.
 	 */
-	public static final int HORIZONTAL_SCROLLBAR_NEVER = 31;
+	public static final int SCROLLBAR_NEVER = 31;
 	/**
 	 * Used to set the horizontal scroll bar policy so that horizontal
 	 * scrollbars are always displayed.
 	 */
-	public static final int HORIZONTAL_SCROLLBAR_ALWAYS = 32;
+	public static final int SCROLLBAR_ALWAYS = 32;
 
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
@@ -219,26 +203,26 @@ public class ScrollPane extends ScrollBoxPanel implements HasJsFacade, HasEnable
 
 	protected void applyPolicies() {
 		switch (horizontalScrollBarPolicy) {
-		case HORIZONTAL_SCROLLBAR_ALWAYS:
+		case SCROLLBAR_ALWAYS:
 			setHorizontalScrollPolicy(ScrollPolicy.ALLWAYS);
 			break;
-		case HORIZONTAL_SCROLLBAR_AS_NEEDED:
+		case SCROLLBAR_AS_NEEDED:
 			setHorizontalScrollPolicy(ScrollPolicy.AUTO);
 			break;
-		case HORIZONTAL_SCROLLBAR_NEVER:
+		case SCROLLBAR_NEVER:
 			setHorizontalScrollPolicy(ScrollPolicy.NEVER);
 			break;
 		default:
 			setHorizontalScrollPolicy(ScrollPolicy.AUTO);
 		}
 		switch (verticalScrollBarPolicy) {
-		case VERTICAL_SCROLLBAR_ALWAYS:
+		case SCROLLBAR_ALWAYS:
 			setVerticalScrollPolicy(ScrollPolicy.ALLWAYS);
 			break;
-		case VERTICAL_SCROLLBAR_AS_NEEDED:
+		case SCROLLBAR_AS_NEEDED:
 			setVerticalScrollPolicy(ScrollPolicy.AUTO);
 			break;
-		case VERTICAL_SCROLLBAR_NEVER:
+		case SCROLLBAR_NEVER:
 			setVerticalScrollPolicy(ScrollPolicy.NEVER);
 			break;
 		default:

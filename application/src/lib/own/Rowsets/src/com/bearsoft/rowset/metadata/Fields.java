@@ -24,6 +24,42 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class Fields implements HasPublished {
 
+    public static class OrmDef {
+
+        private final String baseName;// if not null, -> property is a scalar orm expanding
+        private final String name;
+        private final String oppositeName;
+        private final JSObject jsDef;
+
+        public OrmDef(String aName, String aOppositeName, JSObject aJsDef) {
+            this(null, aName, aOppositeName, aJsDef);
+        }
+        
+        public OrmDef(String aBaseName, String aName, String aOppositeName, JSObject aDef) {
+            baseName = aBaseName;
+            name = aName;
+            oppositeName = aOppositeName;
+            jsDef = aDef;
+        }
+
+        public String getBaseName() {
+            return baseName;
+        }
+
+        public String getOppositeName() {
+            return oppositeName;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public JSObject getJsDef() {
+            return jsDef;
+        }
+
+    }
+
     private static final String DEFAULT_PARAM_NAME_PREFIX = "Field";
     private static JSObject publisher;
     protected String tableDescription;
@@ -33,8 +69,9 @@ public class Fields implements HasPublished {
     protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
     protected CollectionEditingSupport<Fields, Field> collectionSupport = new CollectionEditingSupport<>(this);
     protected JSObject instanceConstructor;
-    protected Map<String, Object> ormDefinitions = new HashMap<>();
-    protected Map<String, Collection<String>> ormExpandings = new HashMap<>();
+    protected Map<String, OrmDef> ormScalarDefinitions = new HashMap<>();
+    protected Map<String, OrmDef> ormCollectionsDefinitions = new HashMap<>();
+    protected Map<String, OrmDef> ormScalarExpandings = new HashMap<>();
     protected JSObject published;
 
     /**
@@ -76,31 +113,33 @@ public class Fields implements HasPublished {
         instanceConstructor = aValue;
     }
 
-    public void addOrmScalarExpanding(String aBaseName, String aName) {
-        if (aName != null && !aName.isEmpty() && aBaseName != null && !aBaseName.isEmpty()) {
-            Collection<String> expandings = ormExpandings.get(aBaseName);
-            if (expandings == null) {
-                expandings = new HashSet<>();
-                ormExpandings.put(aBaseName, expandings);
-            }
-            expandings.add(aName);
-        }
-    }
-
-    public void putOrmDefinition(String aName, JSObject aDefinition) {
+    public void putOrmScalarDefinition(String aName, OrmDef aDefinition) {
         if (aName != null && !aName.isEmpty() && aDefinition != null) {
-            if (!ormDefinitions.containsKey(aName)) {
-                ormDefinitions.put(aName, aDefinition);
+            if (!ormScalarDefinitions.containsKey(aName)) {
+                ormScalarDefinitions.put(aName, aDefinition);
+                ormScalarExpandings.put(aDefinition.getBaseName(), aDefinition);
             }
         }
     }
 
-    public Map<String, Object> getOrmDefinitions() {
-        return Collections.unmodifiableMap(ormDefinitions);
+    public Map<String, OrmDef> getOrmScalarDefinitions() {
+        return Collections.unmodifiableMap(ormScalarDefinitions);
     }
 
-    public Map<String, Collection<String>> getOrmExpandings() {
-        return ormExpandings;
+    public Map<String, OrmDef> getOrmScalarExpandings() {
+        return Collections.unmodifiableMap(ormScalarExpandings);
+    }
+
+    public void putOrmCollectionDefinition(String aName, OrmDef aDefinition) {
+        if (aName != null && !aName.isEmpty() && aDefinition != null) {
+            if (!ormCollectionsDefinitions.containsKey(aName)) {
+                ormCollectionsDefinitions.put(aName, aDefinition);
+            }
+        }
+    }
+
+    public Map<String, OrmDef> getOrmCollectionsDefinitions() {
+        return Collections.unmodifiableMap(ormCollectionsDefinitions);
     }
 
     public PropertyChangeSupport getChangeSupport() {

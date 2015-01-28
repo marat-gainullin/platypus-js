@@ -9,7 +9,6 @@ import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.RowsetContainer;
 import com.bearsoft.rowset.events.RowsetAdapter;
 import com.bearsoft.rowset.events.RowsetDeleteEvent;
-import com.bearsoft.rowset.events.RowsetEventsEarlyAccess;
 import com.bearsoft.rowset.events.RowsetFilterEvent;
 import com.bearsoft.rowset.events.RowsetInsertEvent;
 import com.bearsoft.rowset.events.RowsetNextPageEvent;
@@ -19,7 +18,7 @@ import com.bearsoft.rowset.events.RowsetSortEvent;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Locator extends RowsetAdapter implements RowsetEventsEarlyAccess, RowsetContainer {
+public class Locator extends RowsetAdapter implements RowsetContainer {
 
     @Override
     public void rowDeleted(RowsetDeleteEvent event) {

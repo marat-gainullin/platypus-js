@@ -178,23 +178,6 @@
              */
             P.SplitPane.prototype.onComponentMoved = {};
         }
-        Object.defineProperty(this, "dividerLocation", {
-            get: function() {
-                var value = delegate.dividerLocation;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.dividerLocation = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.SplitPane){
-            /**
-             * The split pane divider's location in pixels.
-             * @property dividerLocation
-             * @memberOf SplitPane
-             */
-            P.SplitPane.prototype.dividerLocation = 0;
-        }
         Object.defineProperty(this, "onComponentAdded", {
             get: function() {
                 var value = delegate.onComponentAdded;
@@ -211,6 +194,23 @@
              * @memberOf SplitPane
              */
             P.SplitPane.prototype.onComponentAdded = {};
+        }
+        Object.defineProperty(this, "dividerLocation", {
+            get: function() {
+                var value = delegate.dividerLocation;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.dividerLocation = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.SplitPane){
+            /**
+             * The split pane divider's location in pixels.
+             * @property dividerLocation
+             * @memberOf SplitPane
+             */
+            P.SplitPane.prototype.dividerLocation = 0;
         }
         Object.defineProperty(this, "secondComponent", {
             get: function() {

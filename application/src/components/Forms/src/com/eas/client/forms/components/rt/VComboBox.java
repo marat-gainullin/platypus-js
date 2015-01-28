@@ -14,7 +14,7 @@ import javax.swing.text.JTextComponent;
  *
  * @author mg
  */
-public class VComboBox extends JComboBox<Object> implements HasValue<Object>, HasEmptyText, HasEditable {
+public class VComboBox<T> extends JComboBox<T> implements HasValue<T>, HasEmptyText, HasEditable {
 
     protected Object oldValue;
 
@@ -33,13 +33,13 @@ public class VComboBox extends JComboBox<Object> implements HasValue<Object>, Ha
     }
 
     @Override
-    public Object getValue() {
-        return getModel().getSelectedItem();
+    public T getValue() {
+        return (T)getModel().getSelectedItem();
     }
 
     @Override
-    public void setValue(Object aValue) {
-        Object wasValue = getValue();
+    public void setValue(T aValue) {
+        T wasValue = getValue();
         if (wasValue != aValue) {
             getModel().setSelectedItem(aValue);
             if (aValue == null) {

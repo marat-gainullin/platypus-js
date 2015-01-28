@@ -16,9 +16,10 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-@ScriptObj(name = "Color", jsDoc = "/**\n"
-        + "* The <code>Color</code> class is used to encapsulate colors in the default RGB color space.\n"
-        + "*/")
+@ScriptObj(name = "Color", jsDoc = ""
+        + "/**\n"
+        + " * The <code>Color</code> class is used to encapsulate colors in the default RGB color space.\n"
+        + " */")
 public class ScriptColor extends java.awt.Color implements HasPublished {
 
     private static JSObject publisher;

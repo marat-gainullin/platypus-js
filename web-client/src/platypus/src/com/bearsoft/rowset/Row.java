@@ -1,8 +1,6 @@
 package com.bearsoft.rowset;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -31,8 +29,8 @@ import com.google.gwt.core.client.JavaScriptObject;
  */
 public class Row implements HasPropertyListeners {
 
-    protected String entityName;
-    protected List<Change> log;
+	protected String entityName;
+	protected List<Change> log;
 	protected Fields fields;
 	protected PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 	protected VetoableChangeSupport vetoableChangeSupport = new VetoableChangeSupport(this);
@@ -52,21 +50,21 @@ public class Row implements HasPropertyListeners {
 	 */
 	public Row(String aEntityName, Fields aFields) {
 		super();
-        entityName = aEntityName;
+		entityName = aEntityName;
 		setFields(aFields);
 	}
 
-    public List<Change> getLog() {
-        return log;
-    }
+	public List<Change> getLog() {
+		return log;
+	}
 
-    public void setLog(List<Change> aValue) {
-        log = aValue;
-    }
+	public void setLog(List<Change> aValue) {
+		log = aValue;
+	}
 
-    public void setEntityName(String aValue) {
-        entityName = aValue;
-    }
+	public void setEntityName(String aValue) {
+		entityName = aValue;
+	}
 
 	@Override
 	public boolean equals(Object obj) {
@@ -131,36 +129,36 @@ public class Row implements HasPropertyListeners {
 	public PropertyChangeSupport getChangeSupport() {
 		return propertyChangeSupport;
 	}
-	
-    public void addPropertyChangeListener(PropertyChangeListener l) {
-        propertyChangeSupport.addPropertyChangeListener(l);
-    }
 
-    public void addPropertyChangeListener(String aPropertyName, PropertyChangeListener l) {
-        propertyChangeSupport.addPropertyChangeListener(aPropertyName, l);
-    }
+	public void addPropertyChangeListener(PropertyChangeListener l) {
+		propertyChangeSupport.addPropertyChangeListener(l);
+	}
 
-    public void removePropertyChangeListener(PropertyChangeListener l) {
-        propertyChangeSupport.removePropertyChangeListener(l);
-    }
+	public void addPropertyChangeListener(String aPropertyName, PropertyChangeListener l) {
+		propertyChangeSupport.addPropertyChangeListener(aPropertyName, l);
+	}
 
-    public void removePropertyChangeListener(String aPropertyName, PropertyChangeListener l) {
-        propertyChangeSupport.removePropertyChangeListener(aPropertyName, l);
-    }
+	public void removePropertyChangeListener(PropertyChangeListener l) {
+		propertyChangeSupport.removePropertyChangeListener(l);
+	}
 
-    public void addVetoableChangeListener(VetoableChangeListener l) {
-        vetoableChangeSupport.addVetoableChangeListener(l);
-    }
+	public void removePropertyChangeListener(String aPropertyName, PropertyChangeListener l) {
+		propertyChangeSupport.removePropertyChangeListener(aPropertyName, l);
+	}
 
-    public void removeVetoableChangeListener(VetoableChangeListener l) {
-        vetoableChangeSupport.removeVetoableChangeListener(l);
-    }
+	public void addVetoableChangeListener(VetoableChangeListener l) {
+		vetoableChangeSupport.addVetoableChangeListener(l);
+	}
 
-    @Override
-    public PropertyChangeListener[] getPropertyChangeListeners() {
-    	return propertyChangeSupport.getPropertyChangeListeners();
-    }
-    
+	public void removeVetoableChangeListener(VetoableChangeListener l) {
+		vetoableChangeSupport.removeVetoableChangeListener(l);
+	}
+
+	@Override
+	public PropertyChangeListener[] getPropertyChangeListeners() {
+		return propertyChangeSupport.getPropertyChangeListeners();
+	}
+
 	/**
 	 * Returns whether the row is updated at whole or partially. The updated
 	 * flag is <code>true</code> if <code>setColumnObject()</code> or
@@ -319,22 +317,31 @@ public class Row implements HasPropertyListeners {
 				PropertyChangeEvent event = new PropertyChangeEvent(this, field.getName(), oldValue, aValue);
 				event.setPropagationId(aColIndex);
 				if (checkChange(event)) {
-                    Map<String, Object> expandedOldValues = new HashMap<>();
-                    Collection<String> expandings = fields.getOrmExpandings().get(field.getName());
-                    if (expandings != null && jsPublished != null) {
-                        for(String aOrmScalarProperty : expandings){
-                            expandedOldValues.put(aOrmScalarProperty, jsPublished.<JsObject>cast().getJava(aOrmScalarProperty));
-                        };
-                    }
+					Fields.OrmDef expanding = fields.getOrmScalarExpandings().get(field.getName());
+					JavaScriptObject expandingOldValue = expanding != null && expanding.getName() != null && !expanding.getName().isEmpty() ? jsPublished.getJs(expanding.getName()) : null;
+					Set<Runnable> oppositeOldScalars = field.isPk() ? gatherOppositeScalarsChangesFirerers() : null;
 					currentValues.set(aColIndex - 1, aValue);
 					updated.add(aColIndex);
-                    generateUpdate(aColIndex, oldValue, aValue);
+					generateUpdate(aColIndex, oldValue, aValue);
 					propertyChangeSupport.firePropertyChange(event);
-                    if (expandings != null && jsPublished != null) {
-                        for(String aOrmScalarProperty : expandings){
-                            propertyChangeSupport.firePropertyChange(aOrmScalarProperty, expandedOldValues.get(aOrmScalarProperty), jsPublished.<JsObject>cast().getJava(aOrmScalarProperty));
-                        };
-                    }
+					if (expanding != null && expanding.getName() != null && !expanding.getName().isEmpty() && expanding.getOppositeName() != null && !expanding.getOppositeName().isEmpty()) {
+						JavaScriptObject expandingNewValue = jsPublished.getJs(expanding.getName());
+						propertyChangeSupport.firePropertyChange(expanding.getName(), expandingOldValue, expandingNewValue);
+						fireChangeOfOppositeCollection(expandingOldValue, expanding.getOppositeName(), expanding.getJsDef());
+						fireChangeOfOppositeCollection(expandingNewValue, expanding.getOppositeName(), expanding.getJsDef());
+					}
+					if (field.isPk()) {
+						for (Runnable fire : oppositeOldScalars) {
+							fire.run();
+						}
+						;
+						Set<Runnable> oppositeNewScalars = gatherOppositeScalarsChangesFirerers();
+						for (Runnable fire : oppositeNewScalars) {
+							fire.run();
+						}
+						;
+						fireChangeOfSelfCollections();
+					}
 				}
 			}
 		} else {
@@ -347,60 +354,60 @@ public class Row implements HasPropertyListeners {
 		}
 	}
 
-    protected void generateUpdate(int colIndex, Object oldValue, Object newValue) {
-        if (fields != null && log != null) {
-            Field field = fields.get(colIndex);
-            boolean insertComplemented = tryToComplementInsert(field, newValue);
-            if (!insertComplemented) {
-                Update update = new Update(entityName);
-                update.data = new Change.Value[]{new Change.Value(field.getName(), newValue, field.getTypeInfo())};
-                update.keys = generateChangeLogKeys(colIndex, this, oldValue);
-                log.add(update);
-            }
-        }
-    }
+	protected void generateUpdate(int colIndex, Object oldValue, Object newValue) {
+		if (fields != null && log != null) {
+			Field field = fields.get(colIndex);
+			boolean insertComplemented = tryToComplementInsert(field, newValue);
+			if (!insertComplemented) {
+				Update update = new Update(entityName);
+				update.data = new Change.Value[] { new Change.Value(field.getName(), newValue, field.getTypeInfo()) };
+				update.keys = generateChangeLogKeys(colIndex, this, oldValue);
+				log.add(update);
+			}
+		}
+	}
 
-    private boolean tryToComplementInsert(Field field, Object newValue) {
-        boolean insertComplemented = false;
-        if (insertChange != null && !field.isNullable()) {
-            boolean met = false;
-            for (Change.Value value : insertChange.data) {
-                if (value.name.equalsIgnoreCase(field.getName())) {
-                    met = true;
-                    break;
-                }
-            }
-            if (!met) {
-                Change.Value[] newdata = new Change.Value[insertChange.data.length + 1];
-                newdata[newdata.length - 1] = new Change.Value(field.getName(), newValue, field.getTypeInfo());
-                System.arraycopy(insertChange.data, 0, newdata, 0, insertChange.data.length);
-                insertChange.data = newdata;
-                insertComplemented = true;
-            }
-        }
-        return insertComplemented;
-    }
+	private boolean tryToComplementInsert(Field field, Object newValue) {
+		boolean insertComplemented = false;
+		if (insertChange != null && !field.isNullable()) {
+			boolean met = false;
+			for (Change.Value value : insertChange.data) {
+				if (value.name.equalsIgnoreCase(field.getName())) {
+					met = true;
+					break;
+				}
+			}
+			if (!met) {
+				Change.Value[] newdata = new Change.Value[insertChange.data.length + 1];
+				newdata[newdata.length - 1] = new Change.Value(field.getName(), newValue, field.getTypeInfo());
+				System.arraycopy(insertChange.data, 0, newdata, 0, insertChange.data.length);
+				insertChange.data = newdata;
+				insertComplemented = true;
+			}
+		}
+		return insertComplemented;
+	}
 
-    public static Change.Value[] generateChangeLogKeys(int colIndex, Row aRow, Object oldValue) {
-        Fields fields = aRow.getFields();
-        if (fields != null) {
-            List<Change.Value> keys = new ArrayList<>();
-            for (int i = 1; i <= fields.getFieldsCount(); i++) {
-                Field field = fields.get(i);
-                // Some tricky processing of primary key modification case ...
-                if (field.isPk()) {
-                    Object value = aRow.getCurrentValues()[i - 1];
-                    if (i == colIndex) {
-                        value = oldValue;
-                    }
-                    keys.add(new Change.Value(field.getName(), value, field.getTypeInfo()));
-                }
-            }
-            return keys.toArray(new Change.Value[]{});
-        } else {
-            return null;
-        }
-    }
+	public static Change.Value[] generateChangeLogKeys(int colIndex, Row aRow, Object oldValue) {
+		Fields fields = aRow.getFields();
+		if (fields != null) {
+			List<Change.Value> keys = new ArrayList<>();
+			for (int i = 1; i <= fields.getFieldsCount(); i++) {
+				Field field = fields.get(i);
+				// Some tricky processing of primary key modification case ...
+				if (field.isPk()) {
+					Object value = aRow.getCurrentValues()[i - 1];
+					if (i == colIndex) {
+						value = oldValue;
+					}
+					keys.add(new Change.Value(field.getName(), value, field.getTypeInfo()));
+				}
+			}
+			return keys.toArray(new Change.Value[] {});
+		} else {
+			return null;
+		}
+	}
 
 	public Object getFieldObject(String aFieldName) throws Exception {
 		int colIndex = fields.find(aFieldName);
@@ -578,22 +585,103 @@ public class Row implements HasPropertyListeners {
 		}
 	}
 
-	protected JavaScriptObject jsPublished;
+	protected void fireChangeOfSelfCollections() {
+		for (String selfCollectionName : fields.getOrmCollectionsDefinitions().keySet()) {
+			propertyChangeSupport.firePropertyChange(selfCollectionName, null, new Object());
+		}
+	}
+
+	protected Set<Runnable> gatherOppositeScalarsChangesFirerers() {
+		Set<Runnable> firerers = new HashSet<>();
+		if (jsPublished != null) {
+			for (Map.Entry<String, Fields.OrmDef> entry : fields.getOrmCollectionsDefinitions().entrySet()) {
+				String collectionName = entry.getKey();
+				final String oppositeName = entry.getValue().getOppositeName();
+				if (collectionName != null && !collectionName.isEmpty() && oppositeName != null && !oppositeName.isEmpty()) {
+					JavaScriptObject jsCollection = jsPublished.getJs(collectionName);
+					if (jsCollection != null) {
+						Object oLength = jsCollection.<JsObject> cast().getJava("length");
+						int length = oLength instanceof Number ? ((Number) oLength).intValue() : 0;
+						for (int i = 0; i < length; i++) {
+							JavaScriptObject oRowFacade = jsCollection.<JsObject> cast().getSlot(i);
+							if (oRowFacade != null) {
+								JsObject jsRowFacade = oRowFacade.<JsObject> cast();
+								JavaScriptObject oUnwrap = jsRowFacade.getJs("unwrap");
+								if (oUnwrap != null) {
+									JsObject unwrap = oUnwrap.<JsObject> cast();
+									Object oRow = unwrap.apply(jsRowFacade, null);
+									if (oRow instanceof Row) {
+										final Row oppositeRow = (Row) oRow;
+										firerers.add(new Runnable() {
+											public void run() {
+												oppositeRow.getChangeSupport().firePropertyChange(oppositeName, null, new Object());
+											}
+										});
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			;
+		}
+		return firerers;
+	}
+
+	public void fireChangesOfOppositeScalars() {
+		Set<Runnable> oppositeNewScalars = gatherOppositeScalarsChangesFirerers();
+		for (Runnable fire : oppositeNewScalars) {
+			fire.run();
+		}
+		;
+	}
+
+	public void fireChangesOfOppositeCollections() {
+		for (Fields.OrmDef expanding : fields.getOrmScalarExpandings().values()) {
+			JavaScriptObject expandingValue = expanding != null && expanding.getName() != null && !expanding.getName().isEmpty() ? jsPublished.getJs(expanding.getName()) : null;
+			if (expanding != null && expanding.getName() != null && !expanding.getName().isEmpty() && expanding.getOppositeName() != null && !expanding.getOppositeName().isEmpty()) {
+				fireChangeOfOppositeCollection(expandingValue, expanding.getOppositeName(), expanding.getJsDef());
+			}
+		}
+		;
+	}
+
+	private void fireChangeOfOppositeCollection(JavaScriptObject oExpanding, String oppositeName, JavaScriptObject def) {
+		if (oExpanding != null) {
+			JsObject jsExpanding = oExpanding.cast();
+			if (jsExpanding.has("unwrap")) {
+				JavaScriptObject unwrap = jsExpanding.getJs("unwrap");
+				if (unwrap != null) {
+					Object oRow = unwrap.<JsObject> cast().apply(jsExpanding, null);
+					if (oRow instanceof Row) {
+						Row row = (Row) oRow;
+						row.getChangeSupport().firePropertyChange(oppositeName, null, new Object());
+					}
+				}
+			}
+		}
+	}
+
+	protected JsObject jsPublished;
 
 	public void setPublished(JavaScriptObject aPublished) {
-		jsPublished = aPublished;
+		jsPublished = aPublished != null ? aPublished.<JsObject> cast() : null;
 	}
 
 	public JavaScriptObject getPublished() {
 		return jsPublished;
 	}
-	
-	public void publishOrmProps(JavaScriptObject aTarget){
-		for(Map.Entry<String, JavaScriptObject> entry : fields.getOrmDefinitions().entrySet()){
-			aTarget.<JsObject>cast().defineProperty(entry.getKey(), entry.getValue());
+
+	public void publishOrmProps(JavaScriptObject aTarget) {
+		for (Map.Entry<String, Fields.OrmDef> entry : fields.getOrmScalarDefinitions().entrySet()) {
+			aTarget.<JsObject> cast().defineProperty(entry.getKey(), entry.getValue().getJsDef());
+		}
+		for (Map.Entry<String, Fields.OrmDef> entry : fields.getOrmCollectionsDefinitions().entrySet()) {
+			aTarget.<JsObject> cast().defineProperty(entry.getKey(), entry.getValue().getJsDef());
 		}
 	}
-	
+
 	public static native JavaScriptObject publishFacade(Row aRow, JavaScriptObject aTarget)/*-{
 		var published = aRow.@com.bearsoft.rowset.Row::getPublished()();
 		if(published == null){
