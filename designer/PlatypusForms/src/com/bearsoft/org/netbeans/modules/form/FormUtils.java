@@ -43,6 +43,7 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
+import com.bearsoft.org.netbeans.modules.form.editors.IconEditor;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.MarginLayoutSupport;
 import com.bearsoft.org.netbeans.modules.form.palette.PaletteItem;
 import com.eas.client.forms.Forms;
@@ -526,6 +527,9 @@ public class FormUtils {
             return o;
         }
         if (o instanceof JSObject) {
+            return o;
+        }
+        if (o instanceof IconEditor.NbImageIcon) {
             return o;
         }
         throw new CloneNotSupportedException();

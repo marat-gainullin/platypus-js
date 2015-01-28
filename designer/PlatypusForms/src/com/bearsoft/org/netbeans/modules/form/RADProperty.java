@@ -43,12 +43,8 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
-import java.awt.Color;
-import java.awt.Component;
 import java.beans.*;
 import java.lang.reflect.*;
-import java.util.Objects;
-import javax.swing.plaf.UIResource;
 
 /**
  * Implementation of properties for (meta)components (class RADComponent).

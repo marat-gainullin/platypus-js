@@ -319,7 +319,7 @@ public class IconEditor extends PropertyEditorSupport implements ExPropertyEdito
             return super.getImage();
         }
 
-        public NbImageIcon copy(FormProperty<?> formProperty) throws Exception {
+        public NbImageIcon copy() throws Exception {
             return iconFromResourceName(dataObject, name);
         }
     }

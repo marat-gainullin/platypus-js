@@ -589,7 +589,9 @@ public class FormFactory {
                     String dataPropertyPath = anElement.getAttribute("field");
                     grid.setField(dataPropertyPath);
                 }
-                injectColumns(grid, roots);
+                if (com.eas.script.ScriptUtils.isInitialized()) {
+                    injectColumns(grid, roots);
+                }
                 return grid;
             }
             // containers   
@@ -1271,7 +1273,7 @@ public class FormFactory {
     private void injectColumns(ModelGrid grid, List<GridColumnsNode> roots) {
         JSObject publishedGrid = grid.getPublished();
         roots.stream().forEach((node) -> {
-            publishedGrid.setMember(((ModelColumn)node.getTableColumn()).getName(), ((HasPublished)node).getPublished());
+            publishedGrid.setMember(((ModelColumn) node.getTableColumn()).getName(), ((HasPublished) node).getPublished());
             injectColumns(grid, node.getChildren());
         });
     }

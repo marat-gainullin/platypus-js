@@ -803,7 +803,7 @@ public abstract class RADComponent<C> {
 
     static class IconProperty extends RADProperty<IconEditor.NbImageIcon> {
 
-        protected IconEditor.NbImageIcon value;
+//        protected IconEditor.NbImageIcon value;
 
         IconProperty(RADComponent<?> comp, PropertyDescriptor aDesc) throws IllegalAccessException, InvocationTargetException {
             super(comp, aDesc);
@@ -818,7 +818,7 @@ public abstract class RADComponent<C> {
         public IconEditor.NbImageIcon getDefaultValue() {
             return null;
         }
-
+/*
         @Override
         public IconEditor.NbImageIcon getValue() throws IllegalAccessException, InvocationTargetException {
             return value;
@@ -833,6 +833,7 @@ public abstract class RADComponent<C> {
             getPropertyDescriptor().getWriteMethod().invoke(getComponent().getBeanInstance(), new Object[]{value});
             propertyValueChanged(oldValue, value);
         }
+        */
     }
 
     public static class ComponentRef<C> implements ComponentReference<C> {
