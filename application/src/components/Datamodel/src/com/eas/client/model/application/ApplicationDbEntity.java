@@ -112,6 +112,7 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
                         }
                     }
                 }, (Exception ex) -> {
+                    Logger.getLogger(ApplicationDbEntity.class.getName()).log(Level.SEVERE, null, ex);
                     if (!f.isCancelled()) {
                         valid = true;
                         pending = null;

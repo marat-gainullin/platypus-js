@@ -236,7 +236,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
 
     @ScriptFunction(jsDoc = FIND_BY_KEY_JSDOC, params = {"key"})
     public Row findById(Object aValue) throws Exception {
-        Logger.getLogger(ApplicationEntity.class.getName()).log(Level.WARNING, "Deprecated \"findById\" call detected. Plaese, use findByKey instead.");
+        Logger.getLogger(ApplicationEntity.class.getName()).log(Level.WARNING, "Deprecated \"findById\" call detected. Please, use findByKey instead.");
         return findByKey(aValue);
     }
     

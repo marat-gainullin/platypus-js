@@ -313,7 +313,7 @@ public class Entity implements RowsetListener, HasPublished{
 			}
 		});
 		published.findById = function(){
-			P.Logger.warning("Deprecated \"findById\" call detected. Plaese, use findByKey instead.");
+			$wnd.P.Logger.warning("Deprecated \"findById\" call detected. Please, use findByKey instead.");
 			return published.findByKey.apply(published, arguments);
 		};
 		//
@@ -597,24 +597,26 @@ public class Entity implements RowsetListener, HasPublished{
 	
 					@Override
 					public void doWork(Rowset aResult) throws Exception {
-	                    assert pending == f.future : PENDING_ASSUMPTION_FAILED_MSG;
-	                    valid = true;
-	                    pending = null;
-	                    model.terminateProcess(Entity.this, null);
-	                    if (aCallback != null) {
-	                    	aCallback.onSuccess(aResult);
+	                    if(pending == f.future){
+		                    valid = true;
+		                    pending = null;
+		                    model.terminateProcess(Entity.this, null);
+		                    if (aCallback != null) {
+		                    	aCallback.onSuccess(aResult);
+		                    }
 	                    }
 					}
 					
 					@Override
 					public void onFailure(String aMessage) {
-	                    assert pending == f.future : PENDING_ASSUMPTION_FAILED_MSG;
-	                    valid = true;
-	                    pending = null;
-                        model.terminateProcess(Entity.this, aMessage);
-						if(aCallback != null){
-							aCallback.onFailure(aMessage);
-						}
+	                    if(pending == f.future){
+		                    valid = true;
+		                    pending = null;
+	                        model.terminateProcess(Entity.this, aMessage);
+							if(aCallback != null){
+								aCallback.onFailure(aMessage);
+							}
+	                    }
 					}
 					
 				});

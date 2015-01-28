@@ -14,6 +14,8 @@ import com.eas.script.ScriptFunction;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -70,6 +72,7 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
                     }
                 }
             }, (Exception ex) -> {
+                Logger.getLogger(ApplicationPlatypusEntity.class.getName()).log(Level.SEVERE, null, ex);
                 if (!f.isCancelled()) {
                     assert pending == f : PENDING_ASSUMPTION_FAILED_MSG;
                     valid = true;
@@ -126,7 +129,7 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = (JSObject)publisher.call(null, new Object[]{this});
+            published = (JSObject) publisher.call(null, new Object[]{this});
         }
         return published;
     }
