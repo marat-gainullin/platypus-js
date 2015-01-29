@@ -12,7 +12,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.bearsoft.rowset.Utils.JsObject;
 import com.bearsoft.rowset.beans.HasPropertyListeners;
 import com.bearsoft.rowset.beans.PropertyChangeListener;
 import com.bearsoft.rowset.beans.PropertyChangeSupport;
@@ -20,14 +19,9 @@ import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.changes.Delete;
 import com.bearsoft.rowset.changes.Insert;
 import com.bearsoft.rowset.dataflow.FlowProvider;
-import com.bearsoft.rowset.events.RowsetAdapter;
 import com.bearsoft.rowset.events.RowsetChangeSupport;
-import com.bearsoft.rowset.events.RowsetFilterEvent;
 import com.bearsoft.rowset.events.RowsetJsAdapter;
 import com.bearsoft.rowset.events.RowsetListener;
-import com.bearsoft.rowset.events.RowsetRequeryEvent;
-import com.bearsoft.rowset.events.RowsetRollbackEvent;
-import com.bearsoft.rowset.events.RowsetSortEvent;
 import com.bearsoft.rowset.exceptions.FlowProviderFailedException;
 import com.bearsoft.rowset.exceptions.InvalidColIndexException;
 import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
@@ -375,14 +369,13 @@ public class Rowset implements HasPropertyListeners{
 									rows.add(checked);
 								}
 							}
-							setCurrent(rows);
 							for (int r = 0; r < rows.size(); r++) {
 								Row row = rows.get(r);
 								row.setLog(log);
 								row.setEntityName(flow.getEntityId());
 							}
 							setCurrent(rows);
-							currentToOriginal();
+							currentToOriginal(false);
 							// silent first
 							if (!current.isEmpty()) {
 								currentRowPos = 1;
@@ -920,6 +913,10 @@ public class Rowset implements HasPropertyListeners{
 	 * between original and current rows vectors and row's data have place.
 	 */
 	public void currentToOriginal() {
+		currentToOriginal(true);
+	}
+	
+	public void currentToOriginal(boolean aCommited) {
 		original.clear();
 		List<Row> lcurrent = null;
 		if (activeFilter != null && activeFilter.isApplied()) {
@@ -932,7 +929,8 @@ public class Rowset implements HasPropertyListeners{
 			Row row = original.get(i);
 			assert row != null;
 			row.currentToOriginal();
-			row.clearInserted();
+			if(aCommited)
+				row.clearInserted();
 			if (row.isDeleted()) {// Should never happen. Added for code
 				                  // strength in case of mark and sweep row
 				                  // deletion.
@@ -976,8 +974,7 @@ public class Rowset implements HasPropertyListeners{
 	}
 
 	protected void generateInsert(Row aRow) {
-		if (flow != null && flow.getChangeLog() != null) {
-			List<Change> changesLog = flow.getChangeLog();
+		if (log != null && flow != null && flow.getEntityId() != null) {
 			Insert insert = new Insert(flow.getEntityId());
 			List<Change.Value> data = new ArrayList<>();
 			for (int i = 0; i < aRow.getCurrentValues().length; i++) {
@@ -988,7 +985,7 @@ public class Rowset implements HasPropertyListeners{
 				}
 			}
 			insert.data = data.toArray(new Change.Value[] {});
-			changesLog.add(insert);
+			log.add(insert);
 			aRow.setInserted(insert);
 		}
 	}
@@ -1014,11 +1011,10 @@ public class Rowset implements HasPropertyListeners{
 	}
 
 	protected void generateDelete(Row aRow) {
-		if (flow != null && flow.getChangeLog() != null) {
-			List<Change> changesLog = flow.getChangeLog();
+		if (log != null && flow != null && flow.getEntityId() != null) {
 			Delete delete = new Delete(flow.getEntityId());
 			delete.keys = generateChangeLogKeys(-1, aRow, null);
-			changesLog.add(delete);
+			log.add(delete);
 		}
 	}
 

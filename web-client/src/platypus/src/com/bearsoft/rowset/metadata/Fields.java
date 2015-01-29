@@ -517,37 +517,29 @@ public class Fields {
 		return jsPublished;
 	}
 	
-	public static native JavaScriptObject publishFacade(Fields aFields) throws Exception/*-{
+	public static native JavaScriptObject publishFacade(Fields aFields, String aEntityDesc) throws Exception/*-{
 		if(aFields != null){
 			var published = aFields.@com.bearsoft.rowset.metadata.Fields::getPublished()();
 			if(published == null){
 				published = {
-					getFieldsCount : function() {
-						return aFields.@com.bearsoft.rowset.metadata.Fields::getFieldsCount()();
-					},
-					isEmpty : function() {
-						return aFields.@com.bearsoft.rowset.metadata.Fields::isEmpty()();
-					},
-					get : function(aFieldIndex) {
-						return @com.bearsoft.rowset.metadata.Field::publishFacade(Lcom/bearsoft/rowset/metadata/Field;)(aFields.@com.bearsoft.rowset.metadata.Fields::get(I)(aFieldIndex));
-					},
-					getTableDescription : function() {
-						return aFields.@com.bearsoft.rowset.metadata.Fields::getTableDescription()();
-					},
 					unwrap : function(){
 						return aFields;
 					}
 				};
 				
-				Object.defineProperty(published, "empty", { get : function(){ return published.isEmpty()}});
-				Object.defineProperty(published, "tableDescription", { get : function(){ return published.getTableDescription()}});
-				var fieldsCount = published.getFieldsCount();
-				
+				Object.defineProperty(published, "empty", { get : function(){ return aFields.@com.bearsoft.rowset.metadata.Fields::isEmpty()(); }});
+				Object.defineProperty(published, "tableDescription", { get : function(){ return aFields.@com.bearsoft.rowset.metadata.Fields::getTableDescription()()}});
+				var fieldsCount = aFields.@com.bearsoft.rowset.metadata.Fields::getFieldsCount()();				
 				for(var i = 0; i < fieldsCount; i++){
 					(function(){
-						var _i = i;
-						Object.defineProperty(published, (_i+""), { get : function(){ return published.get(_i+1) }});
-						Object.defineProperty(published, published.get(_i+1).name, { get : function(){ return published.get(_i+1) }});
+						var nField = aFields.@com.bearsoft.rowset.metadata.Fields::get(I)(i+1);
+						var nFieldName = nField.@com.bearsoft.rowset.metadata.Field::getName()();
+						var pField = @com.bearsoft.rowset.metadata.Field::publishFacade(Lcom/bearsoft/rowset/metadata/Field;)(nField);
+						if(!published[nFieldName])
+							Object.defineProperty(published, nFieldName, { get : function(){ return pField; }});
+						else
+                            throw "Duplicated field name found: " + nFieldName + " in entity " + aEntityDesc;
+						Object.defineProperty(published, i+"", { get : function(){ return pField; }});
 					})();
 				}
 				aFields.@com.bearsoft.rowset.metadata.Fields::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);

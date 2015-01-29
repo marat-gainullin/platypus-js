@@ -231,7 +231,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         } else {
             Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, BAD_FIND_AGRUMENTS_MSG);
         }
-        return null;
+        return ScriptUtils.makeArray();
     }
 
     @ScriptFunction(jsDoc = FIND_BY_KEY_JSDOC, params = {"key"})

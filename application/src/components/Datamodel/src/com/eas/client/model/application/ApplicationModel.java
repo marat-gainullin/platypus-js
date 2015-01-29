@@ -188,13 +188,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
     public void createORMDefinitions() {
         referenceRelations.stream().forEach((ReferenceRelation<E> aRelation) -> {
             String scalarPropertyName = aRelation.getScalarPropertyName();
-            if (scalarPropertyName == null || scalarPropertyName.isEmpty()) {
-                scalarPropertyName = aRelation.getRightEntity().getName();
-            }
             String collectionPropertyName = aRelation.getCollectionPropertyName();
-            if (collectionPropertyName == null || collectionPropertyName.isEmpty()) {
-                collectionPropertyName = aRelation.getLeftEntity().getName();
-            }
             if (scalarPropertyName != null && !scalarPropertyName.isEmpty()) {
                 aRelation.getLeftEntity().putOrmScalarDefinition(
                         scalarPropertyName,

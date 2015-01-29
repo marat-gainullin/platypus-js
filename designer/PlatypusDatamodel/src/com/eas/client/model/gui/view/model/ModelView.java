@@ -770,6 +770,9 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, M extends Mode
                         if (isParametersEntity(lView.getEntity())) {
                             ltitle = DatamodelDesignUtils.getLocalizedString("Parameters");
                         }
+                        if (ltitle == null || ltitle.isEmpty()) {
+                            ltitle = lView.getEntity().getName();
+                        }
                         lhint += ltitle;
                     }
                     if (leftFieldLabel != null && !leftFieldLabel.isEmpty()) {
@@ -779,6 +782,9 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, M extends Mode
                         String rtitle = rView.getEntity().getTitle();
                         if (isParametersEntity(rView.getEntity())) {
                             rtitle = DatamodelDesignUtils.getLocalizedString("Parameters");
+                        }
+                        if (rtitle == null || rtitle.isEmpty()) {
+                            rtitle = rView.getEntity().getName();
                         }
                         lhint += " -> " + rtitle;
                     }

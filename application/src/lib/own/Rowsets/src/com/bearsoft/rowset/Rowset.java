@@ -388,14 +388,14 @@ public class Rowset {
                                 aRowset.setCurrent(new ArrayList<>());
                                 aRowset.currentToOriginal();
                                 current.stream().filter((checked) -> (checked.isInserted()/* || checked.isUpdated() - if uncomment, then same rows will be fetched form a database*/)).forEach((checked) -> {
-                                    rows.add(checked);
-                                });
+                                            rows.add(checked);
+                                        });
                                 rows.stream().forEach((Row aRow) -> {
                                     aRow.setLog(log);
                                     aRow.setEntityName(flow.getEntityId());
                                 });
                                 setCurrent(rows);
-                                currentToOriginal();
+                                currentToOriginal(false);
                                 // silent first
                                 if (!current.isEmpty()) {
                                     currentRowPos = 1;
@@ -438,14 +438,14 @@ public class Rowset {
                         rowset.setCurrent(new ArrayList<>());
                         rowset.currentToOriginal();
                         current.stream().filter((checked) -> (checked.isInserted()/* || checked.isUpdated() - if uncomment, then same rows will be fetched form a database*/)).forEach((checked) -> {
-                            rows.add(checked);
-                        });
+                                    rows.add(checked);
+                                });
                         rows.stream().forEach((Row aRow) -> {
                             aRow.setLog(log);
                             aRow.setEntityName(flow.getEntityId());
                         });
                         setCurrent(rows);
-                        currentToOriginal();
+                        currentToOriginal(false);
                         // silent first
                         if (!current.isEmpty()) {
                             currentRowPos = 1;
@@ -498,7 +498,7 @@ public class Rowset {
                                         aRow.setEntityName(flow.getEntityId());
                                     });
                                     setCurrent(rows);
-                                    currentToOriginal();
+                                    currentToOriginal(false);
                                     rowsetChangeSupport.fireNextPageFetchedEvent();
                                     onSuccess.accept(true);
                                 } else {
@@ -530,7 +530,7 @@ public class Rowset {
                                     aRow.setEntityName(flow.getEntityId());
                                 });
                                 setCurrent(rows);
-                                currentToOriginal();
+                                currentToOriginal(false);
                                 rowsetChangeSupport.fireNextPageFetchedEvent();
                                 return true;
                             } else {
@@ -1051,6 +1051,10 @@ public class Rowset {
      * between original and current rows vectors and row's data have place.
      */
     public void currentToOriginal() {
+        currentToOriginal(true);
+    }
+
+    public void currentToOriginal(boolean aCommited) {
         original.clear();
         List<Row> lcurrent;
         if (activeFilter != null && activeFilter.isApplied()) {
@@ -1063,7 +1067,9 @@ public class Rowset {
             Row row = original.get(i);
             assert row != null;
             row.currentToOriginal();
-            row.clearInserted();
+            if (aCommited) {
+                row.clearInserted();
+            }
             if (row.isDeleted()) {// Should never happen. Added for code strength in case of mark and sweep row deletion.
                 original.remove(i);
                 lcurrent.remove(i);
@@ -1105,7 +1111,7 @@ public class Rowset {
     }
 
     protected void generateInsert(Row aRow) {
-        if (flow != null && log != null) {
+        if (log != null && flow != null && flow.getEntityId() != null) {
             Insert insert = new Insert(flow.getEntityId());
             List<ChangeValue> data = new ArrayList<>();
             for (int i = 0; i < aRow.getCurrentValues().length; i++) {
@@ -1122,7 +1128,7 @@ public class Rowset {
     }
 
     protected void generateDelete(Row aRow) {
-        if (flow != null && log != null) {
+        if (log != null && flow != null && flow.getEntityId() != null) {
             Delete delete = new Delete(flow.getEntityId());
             delete.keys = Row.generateChangeLogKeys(-1, aRow, null);
             log.add(delete);

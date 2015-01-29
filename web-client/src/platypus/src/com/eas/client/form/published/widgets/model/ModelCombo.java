@@ -1,8 +1,6 @@
 package com.eas.client.form.published.widgets.model;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -42,6 +40,7 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 	protected String displayField;
 	protected HandlerRegistration boundToList;
 	protected HandlerRegistration boundToListElements;
+	protected Runnable onRedraw;
 
 	protected boolean list = true;
 
@@ -50,6 +49,14 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 		StyledListBox<JavaScriptObject> box = (StyledListBox<JavaScriptObject>) decorated;
 		box.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
 		box.getElement().addClassName(CUSTOM_DROPDOWN_CLASS);
+	}
+
+	public Runnable getOnRedraw() {
+		return onRedraw;
+	}
+
+	public void setOnRedraw(Runnable aValue) {
+		onRedraw = aValue;
 	}
 
 	protected int actionHandlers;
@@ -160,6 +167,8 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 				int valueIndex = box.indexOf(value);
 				box.setSelectedIndex(valueIndex);
 			}
+			if(onRedraw != null)
+				onRedraw.run();
 		} catch (Exception e) {
 			Logger.getLogger(ModelCombo.class.getName()).log(Level.SEVERE, e.getMessage(), e);
 		}

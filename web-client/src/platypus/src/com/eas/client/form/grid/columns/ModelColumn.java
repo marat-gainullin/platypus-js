@@ -22,6 +22,7 @@ import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.PublishedCell;
 import com.eas.client.form.published.PublishedStyle;
 import com.eas.client.form.published.widgets.model.ModelCheck;
+import com.eas.client.form.published.widgets.model.ModelCombo;
 import com.eas.client.form.published.widgets.model.ModelDecoratorBox;
 import com.eas.client.form.published.widgets.model.ModelGrid;
 import com.google.gwt.cell.client.Cell;
@@ -239,7 +240,12 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 	}
 
 	public void setOnRender(JavaScriptObject aValue) {
-		onRender = aValue;
+		if (onRender != aValue) {
+			onRender = aValue;
+			if (editor != null) {
+				editor.setOnRender(onRender);
+			}
+		}
 	}
 
 	public JavaScriptObject getOnSelect() {
@@ -247,9 +253,11 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 	}
 
 	public void setOnSelect(JavaScriptObject aValue) {
-		onSelect = aValue;
-		if (editor != null) {
-			editor.setOnSelect(onSelect);
+		if (onSelect != aValue) {
+			onSelect = aValue;
+			if (editor != null) {
+				editor.setOnSelect(onSelect);
+			}
 		}
 	}
 
@@ -257,15 +265,46 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 		return editor;
 	}
 
+	protected boolean gridRedrawQueued;
+
+	protected void enqueueGridRedraw() {
+		gridRedrawQueued = true;
+		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+			@Override
+			public void execute() {
+				if (gridRedrawQueued) {
+					gridRedrawQueued = false;
+					if (grid != null)
+						grid.redraw();
+				}
+			}
+		});
+	}
+
 	public void setEditor(ModelDecoratorBox<? extends Object> aEditor) {
 		if (editor != aEditor) {
 			if (editor != null) {
+				editor.setOnRender(null);
 				editor.setOnSelect(null);
+				if (editor instanceof ModelCombo) {
+					((ModelCombo) editor).setOnRedraw(null);
+				}
 			}
 			editor = aEditor;
 			if (editor != null) {
+				editor.setOnRender(onRender);
 				editor.setOnSelect(onSelect);
-				editor.setPublished(JavaScriptObject.createObject());
+				if (editor instanceof ModelCombo) {
+					((ModelCombo) editor).setOnRedraw(new Runnable() {
+
+						@Override
+						public void run() {
+							enqueueGridRedraw();
+						}
+
+					});
+				}
 			}
 			if (editor instanceof ModelCheck) {
 				((TreeExpandableCell<JavaScriptObject, Object>) getCell()).setCell(new CheckBoxCell() {
@@ -357,8 +396,15 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 								ModelDecoratorBox<Object> modelEditor = (ModelDecoratorBox<Object>) getEditor();
 								value = modelEditor.convert(Utils.toJava(value));
 							}
-							((HasValue<Object>) editor).setValue(value);
-							String display = ((HasText) editor).getText();
+							String display = null;
+							Object oldValue = ((HasValue<Object>) editor).getValue();
+							try {
+								((HasValue<Object>) editor).setValue(value);
+								display = ((HasText) editor).getText();
+							} finally {
+								// We have to take care about old value because of edited cell while grid rendering.
+								((HasValue<Object>) editor).setValue(oldValue);
+							}
 							PublishedStyle styleToRender = null;
 							SafeHtmlBuilder lsb = new SafeHtmlBuilder();
 							PublishedCell cellToRender = calcContextPublishedCell(ModelColumn.this.getPublished(), onRender, context, ModelColumn.this.getField(), display);

@@ -207,7 +207,7 @@ public class PlatypusHttpServlet extends HttpServlet {
             RequestHandler<?, ?> handler = RequestHandlerFactory.getHandler(serverCore, platypusRequest);
             if (handler != null) {
                 Consumer<Exception> onFailure = (Exception ex) -> {
-                    Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, ex.getMessage());
                     try {
                         if (ex instanceof AccessControlException) {
                             /*
@@ -239,20 +239,36 @@ public class PlatypusHttpServlet extends HttpServlet {
                     AsyncContext async = aHttpRequest.startAsync(aHttpRequest, aHttpResponse);
                     crh.handle((Response resp) -> {
                         onSuccess.accept(resp);
-                        async.complete();
+                        try{
+                            async.complete();
+                        }catch(IllegalStateException ex){
+                            Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, ex.getMessage());
+                        }
                     }, (Exception ex) -> {
                         onFailure.accept(ex);
-                        async.complete();
+                        try{
+                            async.complete();
+                        }catch(IllegalStateException ex1){
+                            Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, ex1.getMessage());
+                        }
                     });
                 } else if (handler instanceof SessionRequestHandler<?, ?>) {
                     SessionRequestHandler<?, Response> srh = (SessionRequestHandler<?, Response>) handler;
                     AsyncContext async = aHttpRequest.startAsync(aHttpRequest, aHttpResponse);
                     srh.handle(aPlatypusSession, (Response resp) -> {
                         onSuccess.accept(resp);
-                        async.complete();
+                        try{
+                            async.complete();
+                        }catch(IllegalStateException ex){
+                            Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, ex.getMessage());
+                        }
                     }, (Exception ex) -> {
                         onFailure.accept(ex);
-                        async.complete();
+                        try{
+                            async.complete();
+                        }catch(IllegalStateException ex1){
+                            Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, ex1.getMessage());
+                        }
                     });
                 } else {
                     throw new IllegalStateException("Bad request handler detected");

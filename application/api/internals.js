@@ -101,8 +101,6 @@
                     var targetKey = this[targetFieldName];
                     criterion[sourceFieldName] = targetKey;
                     var res = sourcePublishedEntity.find(criterion);
-                    if (res == null)// don't edit to === because of undefined
-                        res = [];
                     res.push = function () {
                         for (var a = 0; a < arguments.length; a++) {
                             var instance = arguments[a];

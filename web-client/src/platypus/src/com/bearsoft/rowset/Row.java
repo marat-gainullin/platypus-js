@@ -701,7 +701,7 @@ public class Row implements HasPropertyListeners {
 				}
 			}});
 			var fieldsCount = nFields.@com.bearsoft.rowset.metadata.Fields::getFieldsCount()();
-			var schema = @com.bearsoft.rowset.metadata.Fields::publishFacade(Lcom/bearsoft/rowset/metadata/Fields;)(nFields);
+			var schema = nFields.@com.bearsoft.rowset.metadata.Fields::getPublished()();
 			for(var i = 0; i < fieldsCount; i++){
 				(function(){
 					var _i = i;

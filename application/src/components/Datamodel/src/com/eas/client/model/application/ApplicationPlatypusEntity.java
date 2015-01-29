@@ -72,7 +72,7 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
                     }
                 }
             }, (Exception ex) -> {
-                Logger.getLogger(ApplicationPlatypusEntity.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ApplicationPlatypusEntity.class.getName()).log(Level.SEVERE, ex.getMessage());
                 if (!f.isCancelled()) {
                     assert pending == f : PENDING_ASSUMPTION_FAILED_MSG;
                     valid = true;

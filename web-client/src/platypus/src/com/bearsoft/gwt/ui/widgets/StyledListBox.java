@@ -68,11 +68,17 @@ public class StyledListBox<T> extends ListBox implements HasValue<T> {
 	@Override
 	public void insertItem(String aLabel, HasDirection.Direction dir, String value, int index) {
 		super.insertItem(aLabel != null ? aLabel : "", dir, value, index);
-		if (index == -1) {
+		if (index == -1)// crazy gwt ListBox treats -1 as adding to the end
 			associatedValues.add(null);
-		} else {
+		else
 			associatedValues.add(index, null);
-		}
+		indicies = null;
+	}
+
+	@Override
+	public void removeItem(int index) {
+		super.removeItem(index);
+		associatedValues.remove(index);
 		indicies = null;
 	}
 

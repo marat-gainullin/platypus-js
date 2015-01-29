@@ -13,7 +13,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.bearsoft.rowset.CallbackAdapter;
-import com.bearsoft.rowset.Cancellable;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.Utils.JsObject;
@@ -290,13 +289,7 @@ public class Model implements HasPublished {
 		//
 		for (ReferenceRelation aRelation : referenceRelations) {
 			String scalarPropertyName = aRelation.getScalarPropertyName();
-			if (scalarPropertyName == null || scalarPropertyName.isEmpty()) {
-				scalarPropertyName = aRelation.getRightEntity().getName();
-			}
 			String collectionPropertyName = aRelation.getCollectionPropertyName();
-			if (collectionPropertyName == null || collectionPropertyName.isEmpty()) {
-				collectionPropertyName = aRelation.getLeftEntity().getName();
-			}
             if (scalarPropertyName != null && !scalarPropertyName.isEmpty()) {
                 aRelation.getLeftEntity().putOrmScalarDefinition(
                         scalarPropertyName,
@@ -349,8 +342,6 @@ public class Model implements HasPublished {
                     	var targetKey = this[targetFieldName];
 						criterion[sourceFieldName] = targetKey;
 						var res = sourceEntity.find(criterion);
-	                    if (res == null)// don't edit to === because of undefined
-	                        res = [];
 	                    res.push = function () {
 	                        for (var a = 0; a < arguments.length; a++) {
 	                            var instance = arguments[a];

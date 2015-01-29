@@ -7,11 +7,12 @@ package com.eas.designer.application.query.result;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.forms.Forms;
+import com.eas.client.forms.HasJsValue;
 import com.eas.client.forms.components.model.ModelCheckBox;
 import com.eas.client.forms.components.model.ModelDate;
+import com.eas.client.forms.components.model.ModelSpin;
 import com.eas.client.forms.components.model.ModelWidget;
 import com.eas.client.forms.components.rt.HasEditable;
-import com.eas.client.forms.components.rt.HasValue;
 import java.awt.Component;
 import java.util.ArrayList;
 import java.util.EventObject;
@@ -160,9 +161,9 @@ public class ParametersGrid extends JTable {
 
         private void fireDataChanged() {
             TableModelEvent tme = new TableModelEvent(EntityFieldsModel.this);
-            listeners.stream().forEach((tml) -> {
-                tml.tableChanged(tme);
-            });
+            for(TableModelListener l : listeners.toArray(new TableModelListener[]{})){
+                l.tableChanged(tme);
+            }
         }
     }
 
@@ -204,18 +205,18 @@ public class ParametersGrid extends JTable {
         @Override
         public boolean stopCellEditing() {
             ChangeEvent ce = new ChangeEvent(EntityFieldsCellEditor.this);
-            listeners.stream().forEach((l) -> {
+            for(CellEditorListener l : listeners.toArray(new CellEditorListener[]{})){
                 l.editingStopped(ce);
-            });
+            }
             return true;
         }
 
         @Override
         public void cancelCellEditing() {
             ChangeEvent ce = new ChangeEvent(EntityFieldsCellEditor.this);
-            listeners.stream().forEach((l) -> {
+            for(CellEditorListener l : listeners.toArray(new CellEditorListener[]{})){
                 l.editingCanceled(ce);
-            });
+            }
         }
 
         @Override
@@ -313,10 +314,13 @@ public class ParametersGrid extends JTable {
         for (int i = 0; i < cCount; i++) {
             Parameter param = params.get(i + 1);
             ModelWidget widget = Forms.chooseWidgetByType(param.getTypeInfo());
-            if (param.getTypeInfo().getSqlType() == java.sql.Types.TIMESTAMP) {
-                ((ModelDate) widget).setDateFormat("dd.MM.yyyy HH:mm:ss");
-            } else if (param.getTypeInfo().getSqlType() == java.sql.Types.TIME) {
+            int sqlType = param.getTypeInfo().getSqlType();
+            if (sqlType == java.sql.Types.TIMESTAMP) {
+                ((ModelDate) widget).setDateFormat("dd.MM.yyyy HH:mm:ss.SSS");
+            } else if (sqlType == java.sql.Types.TIME) {
                 ((ModelDate) widget).setDateFormat("HH:mm:ss");
+            } else if (sqlType == java.sql.Types.DATE) {
+                ((ModelDate) widget).setDateFormat("dd.MM.yyyy");
             }
             ((JComponent) widget).setBorder(null);
             if (widget instanceof HasEditable) {
@@ -326,7 +330,11 @@ public class ParametersGrid extends JTable {
             if (widget instanceof ModelCheckBox) {
                 ((ModelCheckBox) widget).setAlign(SwingConstants.CENTER);
             }
-            ((HasValue) widget).setValue(param.getValue());
+            if(widget instanceof ModelSpin){
+                ((ModelSpin)widget).setMin(-Double.MAX_VALUE);
+                ((ModelSpin)widget).setMax(Double.MAX_VALUE);
+            }
+            ((HasJsValue) widget).setJsValue(param.getValue());
             controls.put(param, widget);
             controlsList.add(widget);
         }

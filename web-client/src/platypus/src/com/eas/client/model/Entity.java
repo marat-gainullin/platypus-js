@@ -196,9 +196,10 @@ public class Entity implements RowsetListener, HasPublished{
         Object.defineProperty(published, "push", {
             value: function () {
                 var eventedRows = [];
+                var startSize = rowset.@com.bearsoft.rowset.Rowset::size()();
                 for (var a = 0; a < arguments.length; a++) {
                     var shadow = copyProps(arguments[a]);// to avoid re initing by injected structure without values
-                	var insertedRow = aEntity.@com.eas.client.model.Entity::jsInsertAt(IZLcom/google/gwt/core/client/JavaScriptObject;)(published.length, a < arguments.length - 1, arguments[a]);
+                	var insertedRow = aEntity.@com.eas.client.model.Entity::jsInsertAt(IZLcom/google/gwt/core/client/JavaScriptObject;)(startSize + 1 + a, a < arguments.length - 1, arguments[a]);
                     applyProps(shadow, arguments[a]);
                     eventedRows.push(insertedRow);
                 }
@@ -378,14 +379,17 @@ public class Entity implements RowsetListener, HasPublished{
 				var nRow = rowset.@com.bearsoft.rowset.Rowset::getCurrentRow()();
 			    return nRow != null ? @com.bearsoft.rowset.Row::publishFacade(Lcom/bearsoft/rowset/Row;Lcom/google/gwt/core/client/JavaScriptObject;)(nRow, null) : null;
 			}
-		});		    
-		Object.defineProperty(published, "schema",         { get : function(){ return @com.bearsoft.rowset.metadata.Fields::publishFacade(Lcom/bearsoft/rowset/metadata/Fields;)(nFields); }});
+		});	
+		var nEntityTitle = aEntity.@com.eas.client.model.Entity::getTitle()();
+		var nEntityDesc = aEntity.@com.eas.client.model.Entity::getName()() + (nEntityTitle ? " [" + nEntityTitle + "]" : "");	    
+		var pFields = @com.bearsoft.rowset.metadata.Fields::publishFacade(Lcom/bearsoft/rowset/metadata/Fields;Ljava/lang/String;)(nFields, nEntityDesc);
+		Object.defineProperty(published, "schema",         { get : function(){ return pFields; }});
 		// entity.params
 		var nativeQuery = aEntity.@com.eas.client.model.Entity::getQuery()();
 		var nativeParams = nativeQuery.@com.eas.client.queries.Query::getParameters()();
 		var paramsCount = nativeParams.@com.bearsoft.rowset.metadata.Parameters::getParametersCount()();
 		var publishedParams = {};  
-		var publishedParamsSchema = @com.bearsoft.rowset.metadata.Fields::publishFacade(Lcom/bearsoft/rowset/metadata/Fields;)(nativeParams);
+		var publishedParamsSchema = @com.bearsoft.rowset.metadata.Fields::publishFacade(Lcom/bearsoft/rowset/metadata/Fields;Ljava/lang/String;)(nativeParams, "Params of " + nEntityDesc);
 		for(var i = 0; i < paramsCount; i++){
 			(function(){
 				var _i = i;
@@ -1365,7 +1369,7 @@ public class Entity implements RowsetListener, HasPublished{
 		} else {
 			Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, BAD_FIND_AGRUMENTS_MSG);
 		}
-        return null;
+        return JavaScriptObject.createArray();
 	}
 
 	public JavaScriptObject jsCreateFilter(JavaScriptObject aConstraints) throws Exception {

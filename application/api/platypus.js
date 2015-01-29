@@ -1037,7 +1037,10 @@
                         var schemaDesc = {
                             value: nField.getPublished()
                         };
-                        Object.defineProperty(pSchema, nField.name, schemaDesc);
+                        if (!pSchema[nField.name])
+                            Object.defineProperty(pSchema, nField.name, schemaDesc);
+                        else
+                            throw "Duplicated field name found: " + nField.name + " in entity " + nEntity.name + (nEntity.title ? " [" + nEntity.title + "]" : "");
                         Object.defineProperty(pSchema, n, schemaDesc);
                     })();
                 }
