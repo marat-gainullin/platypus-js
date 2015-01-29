@@ -573,6 +573,7 @@ public class Model implements HasPublished {
 	}
 
 	public boolean isModified() throws Exception {
+		/*
 		if (entities != null) {
 			for (Entity ent : entities.values()) {
 				if (ent != null && ent.getRowset() != null) {
@@ -583,6 +584,8 @@ public class Model implements HasPublished {
 			}
 		}
 		return false;
+		*/
+		return !changeLog.isEmpty();
 	}
 
 	public void save(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) {

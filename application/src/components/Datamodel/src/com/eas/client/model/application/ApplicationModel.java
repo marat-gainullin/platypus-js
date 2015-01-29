@@ -296,6 +296,9 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
                 || type == Types.CLOB;
     }
 
+    public abstract boolean isModified() throws Exception;
+        
+    /*
     public boolean isModified() throws Exception {
         if (entities != null) {
             for (E ent : entities.values()) {
@@ -308,6 +311,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
         }
         return false;
     }
+    */
 
     protected static final String SAVE_JSDOC = ""
             + "/**\n"

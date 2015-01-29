@@ -42,7 +42,7 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Sq
 
     @Override
     public <M extends Model<ApplicationDbEntity, ?>> void accept(ModelVisitor<ApplicationDbEntity, M> visitor) {
-        visitor.visit((M)this);
+        visitor.visit((M) this);
     }
 
     public DatabasesClient getBasesProxy() {
@@ -58,6 +58,13 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Sq
     public void addEntity(ApplicationDbEntity aEntity) {
         aEntity.setModel(this);
         super.addEntity(aEntity);
+    }
+
+    @Override
+    public boolean isModified() throws Exception {
+        return changeLogs.values().stream().anyMatch((List<Change> aLog) -> {
+            return !aLog.isEmpty();
+        });
     }
 
     @Override
@@ -182,7 +189,7 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Sq
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = (JSObject)publisher.call(null, new Object[]{this});
+            published = (JSObject) publisher.call(null, new Object[]{this});
         }
         return published;
     }

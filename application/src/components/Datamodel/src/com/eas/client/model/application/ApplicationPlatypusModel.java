@@ -37,9 +37,8 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
 
     @Override
     public <M extends Model<ApplicationPlatypusEntity, ?>> void accept(ModelVisitor<ApplicationPlatypusEntity, M> visitor) {
-        visitor.visit((M)this);
+        visitor.visit((M) this);
     }
-
 
     public ServerDataStorage getServerProxy() {
         return serverProxy;
@@ -60,6 +59,11 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
     @Override
     public int save(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
         return super.save(aOnSuccess, aOnFailure);
+    }
+
+    @Override
+    public boolean isModified() throws Exception {
+        return !changeLog.isEmpty();
     }
 
     @Override
@@ -97,7 +101,7 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = (JSObject)publisher.call(null, new Object[]{this});
+            published = (JSObject) publisher.call(null, new Object[]{this});
         }
         return published;
     }
