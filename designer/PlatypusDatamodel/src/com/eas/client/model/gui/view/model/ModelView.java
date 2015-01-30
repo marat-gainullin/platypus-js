@@ -2270,7 +2270,7 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, M extends Mode
 
         @Override
         public boolean isEnabled() {
-            return true;
+            return getParametersView() != null;
         }
 
         @Override

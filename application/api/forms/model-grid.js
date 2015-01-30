@@ -924,6 +924,17 @@
         };
 
         /**
+         * Clears current selection.
+         * @method clearSelection
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.clearSelection = function() {
+            var delegate = this.unwrap();
+            var value = delegate.clearSelection();
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Selects the specified element.
          * @param instance Entity's instance to be selected.
          * @method select
@@ -936,17 +947,6 @@
         };
 
         /**
-         * Clears current selection.
-         * @method clearSelection
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.clearSelection = function() {
-            var delegate = this.unwrap();
-            var value = delegate.clearSelection();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf ModelGrid
@@ -954,6 +954,29 @@
         P.ModelGrid.prototype.focus = function() {
             var delegate = this.unwrap();
             var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Redraw the component.
+         * @method redraw
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.redraw = function() {
+            var delegate = this.unwrap();
+            var value = delegate.redraw();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Unselects the specified element.
+         * @param instance Entity's instance to be unselected
+         * @method unselect
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.unselect = function(instance) {
+            var delegate = this.unwrap();
+            var value = delegate.unselect(P.boxAsJava(instance));
             return P.boxAsJs(value);
         };
 
@@ -987,29 +1010,6 @@
         P.ModelGrid.prototype.try2CancelAnyEditing = function() {
             var delegate = this.unwrap();
             var value = delegate.try2CancelAnyEditing();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Redraw the component.
-         * @method redraw
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.redraw = function() {
-            var delegate = this.unwrap();
-            var value = delegate.redraw();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Unselects the specified element.
-         * @param instance Entity's instance to be unselected
-         * @method unselect
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.unselect = function(instance) {
-            var delegate = this.unwrap();
-            var value = delegate.unselect(P.boxAsJava(instance));
             return P.boxAsJs(value);
         };
 

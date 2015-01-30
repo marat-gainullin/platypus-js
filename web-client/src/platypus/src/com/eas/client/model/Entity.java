@@ -408,31 +408,31 @@ public class Entity implements RowsetListener, HasPublished{
 				return publishedParams;
 			}
 		});
-		// events
-		Object.defineProperty(published, "willDelete", {
-			get : function(){
-				return aEntity.@com.eas.client.model.Entity::getWillDelete()();
-			},
-			set : function(aValue){
-				aEntity.@com.eas.client.model.Entity::setWillDelete(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
-			}
-		});
-		Object.defineProperty(published, "willInsert", {
-			get : function(){
-				return aEntity.@com.eas.client.model.Entity::getWillInsert()();
-			},
-			set : function(aValue){
-				aEntity.@com.eas.client.model.Entity::setWillInsert(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
-			}
-		});
-		Object.defineProperty(published, "willScroll", {
-			get : function(){
-				return aEntity.@com.eas.client.model.Entity::getWillScroll()();
-			},
-			set : function(aValue){
-				aEntity.@com.eas.client.model.Entity::setWillScroll(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
-			}
-		});
+		// events		
+//		Object.defineProperty(published, "willDelete", {
+//			get : function(){
+//				return aEntity.@com.eas.client.model.Entity::getWillDelete()();
+//			},
+//			set : function(aValue){
+//				aEntity.@com.eas.client.model.Entity::setWillDelete(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+//			}
+//		});
+//		Object.defineProperty(published, "willInsert", {
+//			get : function(){
+//				return aEntity.@com.eas.client.model.Entity::getWillInsert()();
+//			},
+//			set : function(aValue){
+//				aEntity.@com.eas.client.model.Entity::setWillInsert(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+//			}
+//		});
+//		Object.defineProperty(published, "willScroll", {
+//			get : function(){
+//				return aEntity.@com.eas.client.model.Entity::getWillScroll()();
+//			},
+//			set : function(aValue){
+//				aEntity.@com.eas.client.model.Entity::setWillScroll(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+//			}
+//		});
 		Object.defineProperty(published, "onDeleted", {
 			get : function(){
 				return aEntity.@com.eas.client.model.Entity::getOnDeleted()();

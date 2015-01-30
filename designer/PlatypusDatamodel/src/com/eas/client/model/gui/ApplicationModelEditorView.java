@@ -95,13 +95,13 @@ public class ApplicationModelEditorView extends JPanel implements Customizer {
             comboZoom.setSelectedItem(newSelectedZoom);
         }
     }
-    private JScalableScrollPane scalablePane = new JScalableScrollPane();
-    //private JScrollPane scalablePane = new JScrollPane();
-    private ApplicationModelView modelView = null;
-    private JDropDownButton btnAddQuery = null;
+    private final JScalableScrollPane scalablePane = new JScalableScrollPane();
+    //private final JScrollPane scalablePane = new JScrollPane();
+    private ApplicationModelView modelView;
+    private JDropDownButton btnAddQuery;
     private JComboBox<String> comboZoom;
-//    protected ScriptHost scriptHost = null;
-//    protected NamespaceHost namespaceHost = null;
+//    protected ScriptHost scriptHost;
+//    protected NamespaceHost namespaceHost;
     protected DbUndoableEditListener undoListener = new DbUndoableEditListener();
     protected ViewsEntitySelectionListener entitySelectionListener = new ViewsEntitySelectionListener();
     protected UndoManager undo;
@@ -312,7 +312,6 @@ public class ApplicationModelEditorView extends JPanel implements Customizer {
         mnuAddTable = new javax.swing.JMenuItem();
         mainPanel = new javax.swing.JPanel();
         tlbDses = new javax.swing.JToolBar();
-        btnAddField = new javax.swing.JButton();
         btnDelete = new javax.swing.JButton();
         btnZoomIn = new javax.swing.JButton();
         btnZoomOut = new javax.swing.JButton();
@@ -354,17 +353,6 @@ public class ApplicationModelEditorView extends JPanel implements Customizer {
 
         tlbDses.setFloatable(false);
         tlbDses.setRollover(true);
-
-        btnAddField.setAction(modelView.getActionMap().get(com.eas.client.model.gui.view.model.ModelView.AddField.class.getSimpleName()));
-        btnAddField.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/eas/client/model/gui/resources/new.png"))); // NOI18N
-        btnAddField.setFocusable(false);
-        btnAddField.setHideActionText(true);
-        btnAddField.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnAddField.setMaximumSize(new java.awt.Dimension(28, 28));
-        btnAddField.setMinimumSize(new java.awt.Dimension(28, 28));
-        btnAddField.setPreferredSize(new java.awt.Dimension(28, 28));
-        btnAddField.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        tlbDses.add(btnAddField);
 
         btnDelete.setAction(modelView.getActionMap().get(com.eas.client.model.gui.view.model.ModelView.Delete.class.getSimpleName()));
         btnDelete.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/eas/client/model/gui/resources/delete.png"))); // NOI18N
@@ -415,7 +403,6 @@ public class ApplicationModelEditorView extends JPanel implements Customizer {
         add(mainPanel, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnAddField;
     private javax.swing.JButton btnDelete;
     private javax.swing.JButton btnFind;
     private javax.swing.JButton btnZoomIn;

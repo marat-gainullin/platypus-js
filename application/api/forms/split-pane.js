@@ -512,20 +512,6 @@
              */
             P.SplitPane.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "count", {
-            get: function() {
-                var value = delegate.count;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.SplitPane){
-            /**
-             * Gets the number of components in this panel.
-             * @property count
-             * @memberOf SplitPane
-             */
-            P.SplitPane.prototype.count = 0;
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -542,6 +528,20 @@
              * @memberOf SplitPane
              */
             P.SplitPane.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "count", {
+            get: function() {
+                var value = delegate.count;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.SplitPane){
+            /**
+             * Gets the number of components in this panel.
+             * @property count
+             * @memberOf SplitPane
+             */
+            P.SplitPane.prototype.count = 0;
         }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {

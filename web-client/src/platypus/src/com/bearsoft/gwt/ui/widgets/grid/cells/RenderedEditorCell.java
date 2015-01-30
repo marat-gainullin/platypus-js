@@ -142,8 +142,14 @@ public class RenderedEditorCell<T> extends WidgetEditorCell<T> {
 
 	protected void renderCell(Context context, T value, SafeHtmlBuilder sb) {
 		if (editor != null) {
-			((HasValue<T>)editor).setValue(value);
-			String display = ((HasText)editor).getText();
+			String display = null;
+			T oldValue = ((HasValue<T>) editor).getValue();
+			((HasValue<T>) editor).setValue(value);
+			try {
+				display = ((HasText) editor).getText();
+			} finally {
+				((HasValue<T>) editor).setValue(oldValue);
+			}
 			sb.appendEscaped(display != null ? display : "");
 		} else {
 			sb.appendEscaped(value != null ? value.toString() : "");

@@ -37,40 +37,6 @@
              */
             P.ApplicationPlatypusEntity.prototype.cursor = {};
         }
-        Object.defineProperty(this, "willScroll", {
-            get: function() {
-                var value = delegate.willScroll;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.willScroll = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ApplicationPlatypusEntity){
-            /**
-             * The handler function for the event occured before the cursor position changed.
-             * @property willScroll
-             * @memberOf ApplicationPlatypusEntity
-             */
-            P.ApplicationPlatypusEntity.prototype.willScroll = {};
-        }
-        Object.defineProperty(this, "willInsert", {
-            get: function() {
-                var value = delegate.willInsert;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.willInsert = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ApplicationPlatypusEntity){
-            /**
-             * The handler function for the event occured before an entity row has been inserted.
-             * @property willInsert
-             * @memberOf ApplicationPlatypusEntity
-             */
-            P.ApplicationPlatypusEntity.prototype.willInsert = {};
-        }
         Object.defineProperty(this, "onInserted", {
             get: function() {
                 var value = delegate.onInserted;
@@ -203,23 +169,6 @@
              * @memberOf ApplicationPlatypusEntity
              */
             P.ApplicationPlatypusEntity.prototype.onFiltered = {};
-        }
-        Object.defineProperty(this, "willDelete", {
-            get: function() {
-                var value = delegate.willDelete;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.willDelete = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ApplicationPlatypusEntity){
-            /**
-             * The handler function for the event occured before an entity row has been deleted.
-             * @property willDelete
-             * @memberOf ApplicationPlatypusEntity
-             */
-            P.ApplicationPlatypusEntity.prototype.willDelete = {};
         }
     };
         /**

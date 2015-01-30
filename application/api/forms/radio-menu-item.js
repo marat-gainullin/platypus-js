@@ -295,23 +295,6 @@
              */
             P.RadioMenuItem.prototype.onMouseEntered = {};
         }
-        Object.defineProperty(this, "toolTipText", {
-            get: function() {
-                var value = delegate.toolTipText;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.toolTipText = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.RadioMenuItem){
-            /**
-             * The tooltip string that has been set with.
-             * @property toolTipText
-             * @memberOf RadioMenuItem
-             */
-            P.RadioMenuItem.prototype.toolTipText = '';
-        }
         Object.defineProperty(this, "selected", {
             get: function() {
                 var value = delegate.selected;
@@ -328,6 +311,23 @@
              * @memberOf RadioMenuItem
              */
             P.RadioMenuItem.prototype.selected = true;
+        }
+        Object.defineProperty(this, "toolTipText", {
+            get: function() {
+                var value = delegate.toolTipText;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.toolTipText = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.RadioMenuItem){
+            /**
+             * The tooltip string that has been set with.
+             * @property toolTipText
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.toolTipText = '';
         }
         Object.defineProperty(this, "element", {
             get: function() {

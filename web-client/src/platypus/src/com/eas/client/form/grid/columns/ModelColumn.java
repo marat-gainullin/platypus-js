@@ -398,8 +398,8 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 							}
 							String display = null;
 							Object oldValue = ((HasValue<Object>) editor).getValue();
+							((HasValue<Object>) editor).setValue(value);
 							try {
-								((HasValue<Object>) editor).setValue(value);
 								display = ((HasText) editor).getText();
 							} finally {
 								// We have to take care about old value because of edited cell while grid rendering.

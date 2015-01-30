@@ -8,7 +8,6 @@ import com.bearsoft.gwt.ui.widgets.StyledListBox;
 import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.beans.PropertyChangeEvent;
 import com.bearsoft.rowset.beans.PropertyChangeListener;
-import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.converters.StringValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.JavaScriptObjectKeyProvider;
@@ -21,20 +20,17 @@ import com.eas.client.form.published.PublishedCell;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
-import com.google.gwt.dom.client.OptionElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasValue;
-import com.google.gwt.user.client.ui.Widget;
 
 public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements HasEmptyText, HasActionHandlers {
 
 	protected static final String CUSTOM_DROPDOWN_CLASS = "combo-field-custom-dropdown";
 	protected JavaScriptObjectKeyProvider rowKeyProvider = new JavaScriptObjectKeyProvider();
 	protected String emptyText;
-	protected String emptyValueKey = String.valueOf(IDGenerator.genId());
 	protected JavaScriptObject injected;
 	protected JavaScriptObject displayList;
 	protected String displayField;
@@ -112,16 +108,10 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 	}
 
 	private void injectValueItem(JavaScriptObject value) {
-		StyledListBox<JavaScriptObject> box = (StyledListBox<JavaScriptObject>) decorated;
-		String label = calcLabel(value);
 		if (value != null) {
-			box.addItem(label != null ? label : "", value.toString(), value, "");
-		} else {
-			if (label == null)
-				label = emptyText;
-			box.addItem(label != null ? label : "", emptyValueKey, null, "");
-			OptionElement emptyTextOption = box.getItem(box.getItemCount() - 1);
-			emptyTextOption.getStyle().setDisplay(Style.Display.NONE);
+			StyledListBox<JavaScriptObject> box = (StyledListBox<JavaScriptObject>) decorated;
+			String label = calcLabel(value);
+			box.addItem(label != null ? label : "", value.hashCode() + "", value, "");
 		}
 	}
 
@@ -142,32 +132,30 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 
 	public void redraw() {
 		try {
-			if ((((Widget) decorated).isAttached())) {
-				JavaScriptObject value = getValue();
-				StyledListBox<JavaScriptObject> box = (StyledListBox<JavaScriptObject>) decorated;
-				box.setSelectedIndex(-1);
-				box.clear();
-				injected = null;
-				boolean valueMet = false;
-				if (ModelCombo.this.list && displayList != null) {
-					List<JavaScriptObject> jsoList = new JsArrayList(displayList);
-					for (int i = 0; i < jsoList.size(); i++) {
-						JavaScriptObject listItem = jsoList.get(i);
-						String _label = calcLabel(listItem);
-						box.addItem(_label, listItem.toString(), listItem, "");
-						if (listItem == value) {
-							valueMet = true;
-						}
+			JavaScriptObject value = getValue();
+			StyledListBox<JavaScriptObject> box = (StyledListBox<JavaScriptObject>) decorated;
+			box.setSelectedIndex(-1);
+			box.clear();
+			injected = null;
+			boolean valueMet = false;
+			if (ModelCombo.this.list && displayList != null) {
+				List<JavaScriptObject> jsoList = new JsArrayList(displayList);
+				for (int i = 0; i < jsoList.size(); i++) {
+					JavaScriptObject listItem = jsoList.get(i);
+					String _label = calcLabel(listItem);
+					box.addItem(_label, listItem.hashCode() + "", listItem, "");
+					if (listItem == value) {
+						valueMet = true;
 					}
 				}
-				if (!valueMet && value != null) {
-					injectValueItem(value);
-					injected = value;
-				}
-				int valueIndex = box.indexOf(value);
-				box.setSelectedIndex(valueIndex);
 			}
-			if(onRedraw != null)
+			if (!valueMet && value != null) {
+				injectValueItem(value);
+				injected = value;
+			}
+			int valueIndex = box.indexOf(value);
+			box.setSelectedIndex(valueIndex);
+			if (onRedraw != null)
 				onRedraw.run();
 		} catch (Exception e) {
 			Logger.getLogger(ModelCombo.class.getName()).log(Level.SEVERE, e.getMessage(), e);
@@ -237,6 +225,22 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
        Object.defineProperty(aPublished, "text", {
 	       get : function() {
 	           return aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::getText()();
+	       }
+       });
+       Object.defineProperty(aPublished, "displayList", {
+	       get : function() {
+	           return aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::getDisplayList()();
+	       },
+	       set : function(aValue) {
+	           aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setDisplayList(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+	       }
+       });
+       Object.defineProperty(aPublished, "displayField", {
+	       get : function() {
+	           return aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::getDisplayField()();
+	       },
+	       set : function(aValue) {
+	           aWidget.@com.eas.client.form.published.widgets.model.ModelCombo::setDisplayField(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
 	       }
        });
        Object.defineProperty(aPublished, "list", {

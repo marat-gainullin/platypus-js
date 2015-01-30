@@ -14,6 +14,7 @@ import com.eas.client.model.ModelEditingListener;
 import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
+import com.eas.client.model.application.ReferenceRelation;
 import com.eas.client.model.store.ApplicationModel2XmlDom;
 import com.eas.client.model.store.XmlDom2ApplicationModel;
 import com.eas.designer.application.PlatypusUtils;
@@ -65,6 +66,7 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
 
         @Override
         public void entityRemoved(ApplicationDbEntity e) {
+            e.setPublished(null);
             markModelModified();
             e.getChangeSupport().removePropertyChangeListener(this);
         }
@@ -267,12 +269,15 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
             model = readModel();
             modelNode = createModelNode();
             model.addEditingListener(modelChangesObserver);
-            for (ApplicationDbEntity entity : model.getEntities().values()) {
+            model.getEntities().values().stream().forEach((entity) -> {
                 entity.getChangeSupport().addPropertyChangeListener(modelChangesObserver);
-            }
-            for (Relation<ApplicationDbEntity> rel : model.getRelations()) {
+            });
+            model.getRelations().stream().forEach((rel) -> {
                 rel.getChangeSupport().addPropertyChangeListener(modelChangesObserver);
-            }
+            });
+            model.getReferenceRelations().stream().forEach((rel) -> {
+                rel.getChangeSupport().addPropertyChangeListener(modelChangesObserver);
+            });
         }
     }
 

@@ -290,9 +290,6 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
                 }
             });
             explorerManager.setRootContext(dataObject.getModelNode());
-            appModelEditor.getModelView().complementReferenceRelationsByKeys((ReferenceRelation<ApplicationDbEntity> aRelation) -> {
-                appModelEditor.getModelView().getModel().addReferenceRelation(aRelation);
-            });
             getModelView().complementReferenceRelationsByKeys((ReferenceRelation<ApplicationDbEntity> aRelation) -> {
                 try {
                     dataObject.getModel().addReferenceRelation(aRelation);

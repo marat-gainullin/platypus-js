@@ -63,11 +63,11 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     public static final String BAD_PRIMARY_KEYS_MSG = "Bad primary keys detected. Required one and only one primary key field, but %d found.";
     public static final String CANT_CONVERT_TO_MSG = "Can't convert to %s, substituting with null.";
     // for runtime
-    protected JSObject willScroll;
+//    protected JSObject willScroll;
     protected JSObject onScrolled;
-    protected JSObject willInsert;
+//    protected JSObject willInsert;
     protected JSObject onInserted;
-    protected JSObject willDelete;
+//    protected JSObject willDelete;
     protected JSObject onDeleted;
     protected JSObject onRequeried;
     protected JSObject onFiltered;
@@ -563,11 +563,13 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         onScrolled = aValue;
         changeSupport.firePropertyChange("onScrolled", oldValue, aValue);
     }
+    
     private static final String WILL_DELETE_JSDOC = ""
             + "/**\n"
             + "* The handler function for the event occured before an entity row has been deleted.\n"
             + "*/";
 
+    /*
     @ScriptFunction(jsDoc = WILL_DELETE_JSDOC)
     @EventMethod(eventClass = EntityInstanceDeleteEvent.class)
     public JSObject getWillDelete() {
@@ -580,11 +582,13 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         willDelete = aValue;
         changeSupport.firePropertyChange("willDelete", oldValue, aValue);
     }
+    */
     private static final String WILL_INSERT_JSDOC = ""
             + "/**\n"
             + "* The handler function for the event occured before an entity row has been inserted.\n"
             + "*/";
 
+    /*
     @ScriptFunction(jsDoc = WILL_INSERT_JSDOC)
     @EventMethod(eventClass = EntityInstanceInsertEvent.class)
     public JSObject getWillInsert() {
@@ -597,11 +601,13 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         willInsert = aValue;
         changeSupport.firePropertyChange("willInsert", oldValue, aValue);
     }
+    */
     private static final String WILL_SCROLL_JSDOC = ""
             + "/**\n"
             + "* The handler function for the event occured before the cursor position changed.\n"
             + "*/";
 
+    /*
     @ScriptFunction(jsDoc = WILL_SCROLL_JSDOC)
     @EventMethod(eventClass = CursorPositionWillChangeEvent.class)
     public JSObject getWillScroll() {
@@ -614,6 +620,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         willScroll = aValue;
         changeSupport.firePropertyChange("willScroll", oldValue, aValue);
     }
+    */
 
     public void putOrmScalarDefinition(String aName, Fields.OrmDef aDefinition) {
         if (aName != null && !aName.isEmpty() && aDefinition != null) {
@@ -647,7 +654,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
 
     @Override
     public void setPublished(JSObject aValue) {
-        if (published != null) {
+        if (published != null && com.eas.script.ScriptUtils.isInitialized()) {
             throw new AlreadyPublishedException();
         }
         published = aValue;
@@ -1032,6 +1039,8 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
 
     @Override
     public boolean willScroll(final RowsetScrollEvent aEvent) {
+        return true;
+        /*
         boolean res = true;
         assert aEvent.getRowset() == rowset;
         try {
@@ -1046,6 +1055,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
             Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
         }
         return res;
+        */
     }
 
     @Override
@@ -1064,6 +1074,8 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
 
     @Override
     public boolean willInsertRow(final RowsetInsertEvent event) {
+        return true;
+        /*
         // call script method
         try {
             Object sRes = executeScriptEvent(willInsert, new EntityInstanceInsertEvent(this, event.getRow()));
@@ -1074,10 +1086,13 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
             Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
         }
         return true;
+         */
     }
 
     @Override
     public boolean willDeleteRow(final RowsetDeleteEvent event) {
+        return true;
+        /*
         // call script method
         try {
             Object sRes = executeScriptEvent(willDelete, new EntityInstanceDeleteEvent(this, event.getRow()));
@@ -1090,6 +1105,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
             Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
         }
         return true;
+        */
     }
 
     @Override
@@ -1233,9 +1249,9 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     @Override
     protected void assign(E appTarget) throws Exception {
         super.assign(appTarget);
-        appTarget.setWillDelete(willDelete);
-        appTarget.setWillInsert(willInsert);
-        appTarget.setWillScroll(willScroll);
+//        appTarget.setWillDelete(willDelete);
+//        appTarget.setWillInsert(willInsert);
+//        appTarget.setWillScroll(willScroll);
         appTarget.setOnDeleted(onDeleted);
         appTarget.setOnInserted(onInserted);
         appTarget.setOnScrolled(onScrolled);
