@@ -44,7 +44,7 @@ public class OptimisticDateFormatter extends DateFormatter {
         regexPattern = regexPattern.replaceAll("\\:", "\\\\:");
         patt = Pattern.compile(regexPattern);
         try {
-            mf.setMask(datePattern.replaceAll("[mMhHsYyda]", "#"));
+            mf.setMask(datePattern.replaceAll("[mMhHsYydaS]", "#"));
         } catch (ParseException ex) {
             Logger.getLogger(OptimisticDateFormatter.class.getName()).log(Level.SEVERE, null, ex);
         }
