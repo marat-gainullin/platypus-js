@@ -471,7 +471,6 @@ public class JCalendarComboBox extends JPanel implements AncestorListener, Chang
         });
 
         _spinner.setEditor(dEditor);
-        _spinner.getModel().setValue(_selected.getTime());
         _spinner.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {

@@ -12,10 +12,11 @@ import javax.swing.SpinnerDateModel;
  */
 public class NullableSpinnerDateModel extends SpinnerDateModel {
 
-    protected boolean isNull = false;
+    protected boolean isNull;
 
     public NullableSpinnerDateModel() {
         super();
+        setValue(null);
     }
 
     @Override

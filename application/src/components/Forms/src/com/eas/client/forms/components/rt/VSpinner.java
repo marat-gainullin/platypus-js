@@ -7,6 +7,8 @@ package com.eas.client.forms.components.rt;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.ParseException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
 import javax.swing.JSpinner;
@@ -20,8 +22,9 @@ public class VSpinner extends JSpinner implements HasEmptyText, HasEditable {
     protected SpinnerDoubleModel model;
 
     public VSpinner() {
-        super(new SpinnerDoubleModel(0.0d, 0.0d, 100.0d, 1.0d));
+        super(new SpinnerDoubleModel(0.0d, null, null, 1.0d));
         model = (SpinnerDoubleModel) super.getModel();
+        model.setValue(null);
         model.addValueChangeListener(valueChangedAlerter);
     }
 
@@ -38,6 +41,26 @@ public class VSpinner extends JSpinner implements HasEmptyText, HasEditable {
         if (model != null) {
             model.addValueChangeListener(valueChangedAlerter);
         }
+    }
+
+    @Override
+    public Object getNextValue() {
+        try {
+            ((NumberEditor) getEditor()).getTextField().commitEdit();
+        } catch (ParseException ex) {
+            // no op
+        }
+        return super.getNextValue();
+    }
+
+    @Override
+    public Object getPreviousValue() {
+        try {
+            ((NumberEditor) getEditor()).getTextField().commitEdit();
+        } catch (ParseException ex) {
+            // no op
+        }
+        return super.getPreviousValue();
     }
 
     @Override
@@ -72,8 +95,12 @@ public class VSpinner extends JSpinner implements HasEmptyText, HasEditable {
 
     @Override
     public void commitEdit() throws ParseException {
-        if (getModel().getValue() != null) {
+        try {
             super.commitEdit();
+        } catch (ParseException ex) {
+            if ("".equals(getText())) {
+                model.setValue(null);
+            }
         }
     }
 

@@ -17,10 +17,10 @@ import javax.swing.SpinnerNumberModel;
  */
 public class SpinnerDoubleModel extends SpinnerNumberModel {
 
-    protected Double value = 0.0d;
-    protected Double min = 0.0d;
-    protected Double max = 100.0d;
-    protected double step = 1.0d;
+    protected Double value;
+    protected Double min;
+    protected Double max;
+    protected double step;
     protected Set<PropertyChangeListener> valueChangeListeners = new HashSet<>();
 
     public SpinnerDoubleModel(Double aValue, Double aMin, Double aMax, double aStep) {
@@ -66,6 +66,9 @@ public class SpinnerDoubleModel extends SpinnerNumberModel {
 
     @Override
     public void setValue(Object oValue) {
+        if (oValue instanceof Double && ((Double) oValue).isNaN()) {
+            oValue = null;
+        }
         if (oValue != null) {
             assert oValue instanceof Double;
             Double aValue = (Double) oValue;
@@ -87,19 +90,17 @@ public class SpinnerDoubleModel extends SpinnerNumberModel {
     @Override
     public Object getNextValue() {
         if (value == null) {
-            return min != null ? min : 0;
-        } else {
-            return incrementedValue(true);
+            value = 0.0d;
         }
+        return incrementedValue(true);
     }
 
     @Override
     public Object getPreviousValue() {
         if (value == null) {
-            return max != null ? max : 0;
-        } else {
-            return incrementedValue(false);
+            value = 0.0d;
         }
+        return incrementedValue(false);
     }
 
     private Double incrementedValue(boolean dir) {

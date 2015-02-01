@@ -415,9 +415,13 @@ public class FormFactory {
 			ModelSpin modelSpin = new ModelSpin();
 			Publisher.publish(modelSpin);
 			readGeneralProps(anElement, modelSpin);
-			double min = Utils.getDoubleAttribute(anElement, "min", 0.0d);
+			Double min = null;
+                        if(anElement.hasAttribute("min"))
+                            min = Utils.getDoubleAttribute(anElement, "min", -Double.MAX_VALUE);
 			double step = Utils.getDoubleAttribute(anElement, "step", 1.0d);
-			double max = Utils.getDoubleAttribute(anElement, "max", 100.0d);
+                        Double max = null;
+                        if(anElement.hasAttribute("max"))
+                            max = Utils.getDoubleAttribute(anElement, "max", Double.MAX_VALUE);
 			try {
 				modelSpin.setMin(min);
 				modelSpin.setMax(max);

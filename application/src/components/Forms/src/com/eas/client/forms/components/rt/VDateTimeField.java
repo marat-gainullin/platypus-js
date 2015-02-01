@@ -35,7 +35,8 @@ public class VDateTimeField extends JCalendarComboBox implements HasValue<Date>,
         super(true);
         oldValue = NULL_DATE_VALUE.equals(getModel().getValue()) ? null : (Date) getModel().getValue();
         getModel().addChangeListener((ChangeEvent e) -> {
-            Date newValue = NULL_DATE_VALUE.equals(getModel().getValue()) ? null : (Date) getModel().getValue();
+            //Date newValue = NULL_DATE_VALUE.equals(getModel().getValue()) ? null : (Date) getModel().getValue();
+            Date newValue = (Date)getModel().getValue();
             if (!Objects.equals(oldValue, newValue)) {
                 Date oldValueWas = oldValue;
                 oldValue = newValue;
@@ -131,12 +132,13 @@ public class VDateTimeField extends JCalendarComboBox implements HasValue<Date>,
     @Override
     public Date getValue() {
         Date value = (Date) getModel().getValue();
-        return NULL_DATE_VALUE.equals(value) ? null : checkTime(value);
+        return value;
+        //return NULL_DATE_VALUE.equals(value) ? null : checkTime(value);
     }
 
     @Override
     public void setValue(Date aValue) {
-        getModel().setValue(aValue != null ? aValue : NULL_DATE_VALUE);
+        getModel().setValue(aValue);// != null ? aValue : NULL_DATE_VALUE);
     }
 
     @Override

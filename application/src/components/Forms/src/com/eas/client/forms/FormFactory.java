@@ -472,9 +472,13 @@ public class FormFactory {
             case "DbSpinDesignInfo":
                 ModelSpin modelSpin = new ModelSpin();
                 readGeneralProps(anElement, modelSpin);
-                double min = XmlDomUtils.readDoubleAttribute(anElement, "min", 0.0d);
+                Double min = null;
+                if(anElement.hasAttribute("min"))
+                    min = XmlDomUtils.readDoubleAttribute(anElement, "min", -Double.MAX_VALUE);
                 double step = XmlDomUtils.readDoubleAttribute(anElement, "step", 1.0d);
-                double max = XmlDomUtils.readDoubleAttribute(anElement, "max", 100.0d);
+                Double max = null;
+                if(anElement.hasAttribute("max"))
+                    max = XmlDomUtils.readDoubleAttribute(anElement, "max", Double.MAX_VALUE);
                 try {
                     modelSpin.setMin(min);
                     modelSpin.setMax(max);

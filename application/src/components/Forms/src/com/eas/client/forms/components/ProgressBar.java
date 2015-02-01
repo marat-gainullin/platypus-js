@@ -8,7 +8,6 @@ import com.eas.client.forms.Forms;
 import com.eas.client.forms.HasComponentEvents;
 import com.eas.client.forms.HasJsName;
 import com.eas.client.forms.HasOnValueChange;
-import static com.eas.client.forms.HasOnValueChange.ON_VALUE_CHANED_JSDOC;
 import com.eas.client.forms.Widget;
 import com.eas.client.forms.events.ActionEvent;
 import com.eas.client.forms.events.ComponentEvent;
