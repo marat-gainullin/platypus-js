@@ -8,6 +8,7 @@ import com.bearsoft.gwt.ui.widgets.StyledListBox;
 import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.beans.PropertyChangeEvent;
 import com.bearsoft.rowset.beans.PropertyChangeListener;
+import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.converters.StringValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.JavaScriptObjectKeyProvider;
@@ -30,6 +31,7 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 
 	protected static final String CUSTOM_DROPDOWN_CLASS = "combo-field-custom-dropdown";
 	protected JavaScriptObjectKeyProvider rowKeyProvider = new JavaScriptObjectKeyProvider();
+	protected String keyForNullValue = String.valueOf(IDGenerator.genId());
 	protected String emptyText;
 	protected JavaScriptObject injected;
 	protected JavaScriptObject displayList;
@@ -43,6 +45,7 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 	public ModelCombo() {
 		super(new StyledListBox<JavaScriptObject>());
 		StyledListBox<JavaScriptObject> box = (StyledListBox<JavaScriptObject>) decorated;
+		box.addItem("", keyForNullValue, null, "");
 		box.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
 		box.getElement().addClassName(CUSTOM_DROPDOWN_CLASS);
 	}
@@ -99,7 +102,7 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 				}
 			}
 			injected = null;
-			if (aValue != null && newValueIndex == -1) {
+			if (newValueIndex == -1) {
 				injectValueItem(aValue);
 				injected = aValue;
 			}
@@ -107,12 +110,11 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 		}
 	}
 
-	private void injectValueItem(JavaScriptObject value) {
-		if (value != null) {
-			StyledListBox<JavaScriptObject> box = (StyledListBox<JavaScriptObject>) decorated;
-			String label = calcLabel(value);
-			box.addItem(label != null ? label : "", value.hashCode() + "", value, "");
-		}
+	private void injectValueItem(JavaScriptObject aValue) {
+		assert aValue != null : "null met assumption failed in ModelCombo";
+		StyledListBox<JavaScriptObject> box = (StyledListBox<JavaScriptObject>) decorated;
+		String label = calcLabel(aValue);
+		box.addItem(label != null ? label : "", aValue.hashCode() + "", aValue, "");
 	}
 
 	@Override
@@ -136,20 +138,25 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 			StyledListBox<JavaScriptObject> box = (StyledListBox<JavaScriptObject>) decorated;
 			box.setSelectedIndex(-1);
 			box.clear();
+			box.addItem("", keyForNullValue, null, "");
 			injected = null;
 			boolean valueMet = false;
+			if (null == value)
+				valueMet = true;
 			if (ModelCombo.this.list && displayList != null) {
 				List<JavaScriptObject> jsoList = new JsArrayList(displayList);
 				for (int i = 0; i < jsoList.size(); i++) {
 					JavaScriptObject listItem = jsoList.get(i);
+					if(listItem != null){
 					String _label = calcLabel(listItem);
 					box.addItem(_label, listItem.hashCode() + "", listItem, "");
 					if (listItem == value) {
 						valueMet = true;
 					}
+					}
 				}
 			}
-			if (!valueMet && value != null) {
+			if (!valueMet) {
 				injectValueItem(value);
 				injected = value;
 			}
@@ -282,10 +289,10 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 		setValue(convert(aValue), fireEvents);
 	}
 
-	public void clear() {
-		((StyledListBox<JavaScriptObject>) decorated).clear();
-	}
-
+	/*
+	 * public void clear() { ((StyledListBox<JavaScriptObject>)
+	 * decorated).clear(); }
+	 */
 	public JavaScriptObject getDisplayList() {
 		return displayList;
 	}
