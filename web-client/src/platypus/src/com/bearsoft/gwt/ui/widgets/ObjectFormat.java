@@ -113,6 +113,10 @@ public class ObjectFormat {
 		setValueType(aType);
 	}
 
+	public int getValueType() {
+		return type;
+	}
+	
 	public void setValueType(int aType) throws ParseException {
 		type = aType;
 		constructFormat();

@@ -416,12 +416,12 @@ public class FormFactory {
 			Publisher.publish(modelSpin);
 			readGeneralProps(anElement, modelSpin);
 			Double min = null;
-                        if(anElement.hasAttribute("min"))
-                            min = Utils.getDoubleAttribute(anElement, "min", -Double.MAX_VALUE);
+			if (anElement.hasAttribute("min"))
+				min = Utils.getDoubleAttribute(anElement, "min", -Double.MAX_VALUE);
 			double step = Utils.getDoubleAttribute(anElement, "step", 1.0d);
-                        Double max = null;
-                        if(anElement.hasAttribute("max"))
-                            max = Utils.getDoubleAttribute(anElement, "max", Double.MAX_VALUE);
+			Double max = null;
+			if (anElement.hasAttribute("max"))
+				max = Utils.getDoubleAttribute(anElement, "max", Double.MAX_VALUE);
 			try {
 				modelSpin.setMin(min);
 				modelSpin.setMax(max);
@@ -487,10 +487,10 @@ public class FormFactory {
 					        "While setting data to named model's property " + entityName + " to widget " + grid.getJsName() + " exception occured: " + ex.getMessage());
 				}
 			}
-            if (anElement.hasAttribute("field")) {
-                String dataPropertyPath = anElement.getAttribute("field");
-                grid.setField(dataPropertyPath);
-            }
+			if (anElement.hasAttribute("field")) {
+				String dataPropertyPath = anElement.getAttribute("field");
+				grid.setField(dataPropertyPath);
+			}
 			return grid;
 		}
 		// containers
@@ -685,7 +685,8 @@ public class FormFactory {
 		}
 		if (button instanceof HasImageParagraph) {
 			HasImageParagraph hip = (HasImageParagraph) button;
-			hip.setHorizontalAlignment(Utils.getIntegerAttribute(anElement, "horizontalAlignment", button instanceof ImageButton || button instanceof DropDownButton ? HasImageParagraph.CENTER : HasImageParagraph.LEFT));
+			hip.setHorizontalAlignment(Utils.getIntegerAttribute(anElement, "horizontalAlignment", button instanceof ImageButton || button instanceof DropDownButton ? HasImageParagraph.CENTER
+			        : HasImageParagraph.LEFT));
 			hip.setVerticalAlignment(Utils.getIntegerAttribute(anElement, "verticalAlignment", HasImageParagraph.CENTER));
 			hip.setIconTextGap(Utils.getIntegerAttribute(anElement, "iconTextGap", 4));
 			hip.setHorizontalTextPosition(Utils.getIntegerAttribute(anElement, "horizontalTextPosition", HasImageParagraph.RIGHT));
@@ -699,6 +700,9 @@ public class FormFactory {
 			widgetName = anElement.getAttribute("name");
 			((HasJsName) aTarget).setJsName(widgetName);
 		}
+		if(anElement.hasAttribute("nullable") && aTarget instanceof ModelDecoratorBox<?>){
+			((ModelDecoratorBox<?>)aTarget).setNullable(Utils.getBooleanAttribute(anElement, "nullable", true));
+		}
 		/*
 		 * if (anElement.hasAttribute("editable") && aTarget instanceof
 		 * HasEditable) { ((HasEditable)
@@ -708,21 +712,23 @@ public class FormFactory {
 		if (anElement.hasAttribute("emptyText") && aTarget instanceof HasEmptyText) {
 			((HasEmptyText) aTarget).setEmptyText(anElement.getAttribute("emptyText"));
 		}
-		if (anElement.hasAttribute("field") && aTarget instanceof HasBinding) {
-			String fieldPath = anElement.getAttribute("field");
-			try {
-				((HasBinding) aTarget).setField(fieldPath);
-			} catch (Exception ex) {
-				Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, "While setting field (" + fieldPath + ") to widget " + widgetName + " exception occured: " + ex.getMessage());
+		if (aTarget instanceof HasBinding) {
+			if (anElement.hasAttribute("field")) {
+				String fieldPath = anElement.getAttribute("field");
+				try {
+					((HasBinding) aTarget).setField(fieldPath);
+				} catch (Exception ex) {
+					Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, "While setting field (" + fieldPath + ") to widget " + widgetName + " exception occured: " + ex.getMessage());
+				}
 			}
-		}
-		if (anElement.hasAttribute("data") && aTarget instanceof HasBinding) {
-			String entityName = anElement.getAttribute("data");
-			try {
-				((HasBinding) aTarget).setData(resolveEntity(entityName));
-			} catch (Exception ex) {
-				Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE,
-				        "While setting data to named model's property (" + entityName + ") to widget " + widgetName + " exception occured: " + ex.getMessage());
+			if (anElement.hasAttribute("data")) {
+				String entityName = anElement.getAttribute("data");
+				try {
+					((HasBinding) aTarget).setData(resolveEntity(entityName));
+				} catch (Exception ex) {
+					Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE,
+					        "While setting data to named model's property (" + entityName + ") to widget " + widgetName + " exception occured: " + ex.getMessage());
+				}
 			}
 		}
 		if (aTarget instanceof HasEnabled)
@@ -909,7 +915,7 @@ public class FormFactory {
 			// aTarget.setSize(prefSize.width + "px", prefSize.height + "px");
 			((FlowPane) parent).add((Widget) aTarget);
 		} else if (parent instanceof GridPane) {
-			GridPane gridPane = (GridPane)parent;
+			GridPane gridPane = (GridPane) parent;
 			gridPane.addToFreeCell((Widget) aTarget);
 		} else if (parent instanceof AnchorsPane) {
 			Element constraintsElement = Utils.getElementByTagName(anElement, "AnchorsPaneConstraints");
@@ -1050,7 +1056,8 @@ public class FormFactory {
 			}
 		}
 		aNode.setMoveable(Utils.getBooleanAttribute(anElement, "movable", Boolean.TRUE));
-		aNode.setResizable(Utils.getBooleanAttribute(anElement, "resizable", aNode instanceof CheckHeaderNode || aNode instanceof RadioHeaderNode || aNode instanceof ServiceHeaderNode ? Boolean.FALSE : Boolean.TRUE));
+		aNode.setResizable(Utils.getBooleanAttribute(anElement, "resizable", aNode instanceof CheckHeaderNode || aNode instanceof RadioHeaderNode || aNode instanceof ServiceHeaderNode ? Boolean.FALSE
+		        : Boolean.TRUE));
 		// aNode.setSelectOnly(Utils.getBooleanAttribute(anElement,
 		// "selectOnly", Boolean.FALSE));
 		aNode.setSortable(Utils.getBooleanAttribute(anElement, "sortable", Boolean.TRUE));

@@ -24,13 +24,11 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
-import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.RequiresResize;
 
 public class PlatypusFormattedTextField extends FormattedObjectBox implements HasJsFacade, HasEmptyText, HasComponentPopupMenu, HasActionHandlers, HasEventsExecutor, HasShowHandlers, HasHideHandlers,
@@ -201,6 +199,7 @@ public class PlatypusFormattedTextField extends FormattedObjectBox implements Ha
 	public void setPublished(JavaScriptObject aValue) {
 		if (published != aValue) {
 			published = aValue;
+			setEventThis(published);
 			if (published != null) {
 				publish(this, aValue);
 			}
@@ -241,6 +240,22 @@ public class PlatypusFormattedTextField extends FormattedObjectBox implements Ha
 			},
 			set : function(aValue) {
 				aWidget.@com.eas.client.form.published.widgets.PlatypusFormattedTextField::setFormat(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
+			}
+		});
+		Object.defineProperty(published, "onFormat", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.widgets.PlatypusFormattedTextField::getOnFormat()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.widgets.PlatypusFormattedTextField::setOnFormat(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+			}
+		});
+		Object.defineProperty(published, "onParse", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.widgets.PlatypusFormattedTextField::getOnParse()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.widgets.PlatypusFormattedTextField::setOnParse(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 			}
 		});
 	}-*/;

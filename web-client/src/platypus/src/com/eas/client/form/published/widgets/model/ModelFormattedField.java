@@ -3,7 +3,10 @@ package com.eas.client.form.published.widgets.model;
 import java.text.ParseException;
 
 import com.bearsoft.gwt.ui.widgets.FormattedObjectBox;
+import com.bearsoft.gwt.ui.widgets.ObjectFormat;
 import com.bearsoft.rowset.Utils;
+import com.eas.client.converters.DateValueConverter;
+import com.eas.client.converters.DoubleValueConverter;
 import com.eas.client.converters.StringValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.events.ActionEvent;
@@ -11,6 +14,7 @@ import com.eas.client.form.events.ActionHandler;
 import com.eas.client.form.events.HasActionHandlers;
 import com.eas.client.form.published.HasEmptyText;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dev.shell.BrowserChannel.Value.ValueType;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -63,6 +67,10 @@ public class ModelFormattedField extends ModelDecoratorBox<Object> implements Ha
 		((FormattedObjectBox) decorated).setFormat(aValue);
 	}
 
+	public int getValueType() {
+		return ((FormattedObjectBox) decorated).getValueType();
+	}
+
 	public void setValueType(int aValue) throws ParseException {
 		((FormattedObjectBox) decorated).setValueType(aValue);
 	}
@@ -82,8 +90,40 @@ public class ModelFormattedField extends ModelDecoratorBox<Object> implements Ha
 
 	@Override
 	public Object convert(Object aValue) {
-		StringValueConverter c = new StringValueConverter();
-		return c.convert(aValue);
+		switch (getValueType()) {
+		case ObjectFormat.CURRENCY:
+		case ObjectFormat.NUMBER:
+		case ObjectFormat.PERCENT:
+			DoubleValueConverter dc = new DoubleValueConverter();
+			return dc.convert(aValue);
+		case ObjectFormat.DATE:
+		case ObjectFormat.TIME:
+			DateValueConverter dtc = new DateValueConverter();
+			return dtc.convert(aValue);
+		case ObjectFormat.MASK:
+		case ObjectFormat.REGEXP:
+		case ObjectFormat.TEXT:
+			StringValueConverter sc = new StringValueConverter();
+			return sc.convert(aValue);
+		default:
+			return aValue;
+		}
+	}
+
+	public JavaScriptObject getOnParse() {
+		return ((FormattedObjectBox)decorated).getOnParse();
+	}
+
+	public void setOnParse(JavaScriptObject aValue) {
+		((FormattedObjectBox)decorated).setOnParse(aValue);
+	}
+
+	public JavaScriptObject getOnFormat() {
+		return ((FormattedObjectBox)decorated).getOnFormat();
+	}
+
+	public void setOnFormat(JavaScriptObject aValue) {
+		((FormattedObjectBox)decorated).setOnFormat(aValue);
 	}
 
 	@Override
@@ -136,6 +176,22 @@ public class ModelFormattedField extends ModelDecoratorBox<Object> implements Ha
 			},
 			set : function(aValue) {
 				aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::setFormat(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
+			}
+		});
+		Object.defineProperty(aPublished, "onFormat", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::getOnFormat()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::setOnFormat(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+			}
+		});
+		Object.defineProperty(aPublished, "onParse", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::getOnParse()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::setOnParse(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 			}
 		});
 	}-*/;

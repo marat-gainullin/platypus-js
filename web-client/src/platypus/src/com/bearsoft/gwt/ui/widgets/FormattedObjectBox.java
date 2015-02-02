@@ -2,6 +2,10 @@ package com.bearsoft.gwt.ui.widgets;
 
 import java.text.ParseException;
 
+import com.bearsoft.rowset.Utils;
+import com.bearsoft.rowset.Utils.JsObject;
+import com.eas.client.converters.StringValueConverter;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.text.shared.Parser;
@@ -10,21 +14,36 @@ public class FormattedObjectBox extends ExplicitValueBox<Object> {
 
 	public static class PolymorphRenderer extends AbstractRenderer<Object> {
 
-		protected ObjectFormat format;
+		protected FormattedObjectBox box;
 		
-		public PolymorphRenderer(ObjectFormat aFormat) {
+		public PolymorphRenderer() {
 			super();
-			format = aFormat;
 		}
 
+		public FormattedObjectBox getBox() {
+	        return box;
+        }
+		
+		public void setBox(FormattedObjectBox aValue) {
+	        box = aValue;
+        }
+		
 		@Override
 		public String render(Object value) {
-			try {
-				return value != null && format != null ? format.format(value) : "";
-			} catch (ParseException e) {
-				// Logger.getLogger(FormattedObjectBox.class.getName()).log(Level.SEVERE,
-				// e.getMessage());
-				return null;
+			if (box.onFormat != null) {
+				JsObject jsEvent = JsObject.createObject().cast();
+				jsEvent.setJs("source", box.eventThis);
+				jsEvent.setJava("value", value);
+				Object jsRendered = box.onFormat.<JsObject> cast().call(box.eventThis, jsEvent);
+				return new StringValueConverter().convert(Utils.toJava(jsRendered));
+			} else {
+				try {
+					return value != null && box.format != null ? box.format.format(value) : "";
+				} catch (ParseException e) {
+					// Logger.getLogger(FormattedObjectBox.class.getName()).log(Level.SEVERE,
+					// e.getMessage());
+					return null;
+				}
 			}
 		}
 
@@ -32,33 +51,76 @@ public class FormattedObjectBox extends ExplicitValueBox<Object> {
 
 	public static class PolymorphParser implements Parser<Object> {
 
-		protected ObjectFormat format;
+		protected FormattedObjectBox box;
 		
-		public PolymorphParser(ObjectFormat aFormat) {
+		public PolymorphParser() {
 			super();
-			format = aFormat;
 		}
 
+		public FormattedObjectBox getBox() {
+	        return box;
+        }
+		
+		public void setBox(FormattedObjectBox aValue) {
+	        box = aValue;
+        }
+		
 		@Override
 		public Object parse(CharSequence text) throws ParseException {
-			if (format == null || text == null || "".equals(text.toString())) {
-				return null;
+			if (box.onParse != null) {
+				JsObject jsEvent = JsObject.createObject().cast();
+				jsEvent.setJs("source", box.eventThis);
+				jsEvent.setJava("text", text);
+				return box.onParse.<JsObject> cast().call(box.eventThis, jsEvent);
 			} else {
-				return format.parse(text.toString());
+				if (box.format == null || text == null || "".equals(text.toString())) {
+					return null;
+				} else {
+					return box.format.parse(text.toString());
+				}
 			}
 		}
 
 	}
 
 	private ObjectFormat format;
-	
+	private JavaScriptObject onFormat;
+	private JavaScriptObject onParse;
+	private JavaScriptObject eventThis;
+
 	public FormattedObjectBox() {
-		this(new ObjectFormat());
-	}	
-	
-	public FormattedObjectBox(ObjectFormat aFormat) {
-		super(Document.get().createTextInputElement(), new PolymorphRenderer(aFormat), new PolymorphParser(aFormat));
-		format = aFormat;
+		super(Document.get().createTextInputElement(), new PolymorphRenderer(), new PolymorphParser());
+		format = new ObjectFormat();
+		((PolymorphRenderer)renderer).setBox(this);
+		((PolymorphParser)parser).setBox(this);
+	}
+
+	public JavaScriptObject getEventThis() {
+		return eventThis;
+	}
+
+	public void setEventThis(JavaScriptObject aValue) {
+		eventThis = aValue;
+	}
+
+	public JavaScriptObject getOnParse() {
+		return onParse;
+	}
+
+	public void setOnParse(JavaScriptObject aValue) {
+		onParse = aValue;
+	}
+
+	public JavaScriptObject getOnFormat() {
+		return onFormat;
+	}
+
+	public void setOnFormat(JavaScriptObject aValue) {
+		onFormat = aValue;
+	}
+
+	public int getValueType() {
+		return format.getValueType();
 	}
 
 	public void setValueType(int aType) throws ParseException {

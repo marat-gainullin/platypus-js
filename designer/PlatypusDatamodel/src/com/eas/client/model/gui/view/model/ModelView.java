@@ -766,26 +766,14 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, M extends Mode
                         lhint += "<p>";
                     }
                     if (lView != null) {
-                        String ltitle = lView.getEntity().getTitle();
-                        if (isParametersEntity(lView.getEntity())) {
-                            ltitle = DatamodelDesignUtils.getLocalizedString("Parameters");
-                        }
-                        if (ltitle == null || ltitle.isEmpty()) {
-                            ltitle = lView.getEntity().getName();
-                        }
+                        String ltitle = EntityView.getCheckedEntityTitle(lEntity);
                         lhint += ltitle;
                     }
                     if (leftFieldLabel != null && !leftFieldLabel.isEmpty()) {
                         lhint += "." + leftFieldLabel;
                     }
                     if (rView != null) {
-                        String rtitle = rView.getEntity().getTitle();
-                        if (isParametersEntity(rView.getEntity())) {
-                            rtitle = DatamodelDesignUtils.getLocalizedString("Parameters");
-                        }
-                        if (rtitle == null || rtitle.isEmpty()) {
-                            rtitle = rView.getEntity().getName();
-                        }
+                        String rtitle = EntityView.getCheckedEntityTitle(rEntity);
                         lhint += " -> " + rtitle;
                     }
                     if (rightFieldLabel != null && !rightFieldLabel.isEmpty()) {

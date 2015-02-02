@@ -49,7 +49,11 @@ public class ModelSpin extends ModelComponentDecorator<VSpinner, Double> impleme
     @ScriptFunction
     @Override
     public void setJsValue(Object aValue) {
-        setValue(aValue != null ? JSType.toNumber(aValue) : null);
+        if (aValue == null || "".equals(aValue)) {
+            setValue(null);
+        } else {
+            setValue(JSType.toNumber(aValue));
+        }
     }
 
     @Override

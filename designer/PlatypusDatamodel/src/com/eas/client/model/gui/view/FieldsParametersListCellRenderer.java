@@ -52,20 +52,20 @@ public class FieldsParametersListCellRenderer<E extends Entity<?, ?, E>> impleme
             Field field = value;
             Font fieldsFont = fieldFont;
             Set<Relation<E>> lrelations = entity.getInOutRelations();
-                if (entity.getModel().isFieldInRelations(entity, lrelations, field)) {
-                    fieldsFont = bindedFieldFont;
-                }
-            /*
-            if (field instanceof Parameter && !(entity instanceof ApplicationParametersEntity) && !(entity instanceof QueryParametersEntity)) {
-                if (entity.getModel().isParameterInRelations(entity, lrelations, (Parameter)field)) {
-                    fieldsFont = bindedFieldFont;
-                }
-            } else {
-                if (entity.getModel().isFieldInRelations(entity, lrelations, field)) {
-                    fieldsFont = bindedFieldFont;
-                }
+            if (entity.getModel().isFieldInRelations(entity, lrelations, field)) {
+                fieldsFont = bindedFieldFont;
             }
-            */ 
+            /*
+             if (field instanceof Parameter && !(entity instanceof ApplicationParametersEntity) && !(entity instanceof QueryParametersEntity)) {
+             if (entity.getModel().isParameterInRelations(entity, lrelations, (Parameter)field)) {
+             fieldsFont = bindedFieldFont;
+             }
+             } else {
+             if (entity.getModel().isFieldInRelations(entity, lrelations, field)) {
+             fieldsFont = bindedFieldFont;
+             }
+             }
+             */
             String fieldDescription = field.getDescription();
             if (StoredQueryFactory.ABSENT_QUERY_MSG.equals(fieldDescription)) {
                 fieldDescription = String.format(DatamodelDesignUtils.localizeString(StoredQueryFactory.ABSENT_QUERY_MSG), entity.getQueryName());
@@ -133,7 +133,7 @@ public class FieldsParametersListCellRenderer<E extends Entity<?, ?, E>> impleme
         } else {
             iconsRenderer.setIcon(aTypeIcon);
         }
-        iconsRenderer.setText(((aDescription != null && !aDescription.isEmpty()) ? aDescription : aName) + " : " + aTypeName);
+        iconsRenderer.setText(aName + (aDescription != null && !aDescription.isEmpty() ? ("  [ " + aDescription + " ]") : "") + " : " + aTypeName);
         iconsRenderer.setIconTextGap(aIconTextGap);
         iconsRenderer.setFont(aFont);
         iconsRenderer.setBorder(new MatteBorder(0, 0, 1, 0, interFieldsColor));

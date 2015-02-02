@@ -25,8 +25,8 @@ import com.google.gwt.user.client.ui.ValueBox;
 public class ExplicitValueBox<T> extends ValueBox<T> {
 
 	private T value;
-	private Renderer<T> renderer;
-	private Parser<T> parser;
+	protected Renderer<T> renderer;
+	protected Parser<T> parser;
 	private boolean settingValue;
 
 	protected ExplicitValueBox(Element aElement, Renderer<T> aRenderer, Parser<T> aParser) {

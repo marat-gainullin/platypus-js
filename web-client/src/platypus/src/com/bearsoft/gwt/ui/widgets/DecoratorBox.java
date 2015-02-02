@@ -49,6 +49,7 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 	protected FlowPanel container = new FlowPanel();
 	protected HasValue<T> decorated;
 	protected boolean enabled = true;
+	protected boolean nullable = true;
 	protected HandlerRegistration changeValueHandler;
 	protected HandlerRegistration keyDownHandler;
 	protected HandlerRegistration keyUpHandler;
@@ -142,7 +143,22 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 			getElement().<XElement> cast().disabledMask();
 		}
 	}
+	
+	public boolean isNullable() {
+		return nullable;
+	}
 
+	public void setNullable(boolean aValue) {
+		if(nullable != aValue){
+			nullable = aValue;
+			if(nullable){
+				container.add(clearButton);
+			}else{
+				container.remove(clearButton);
+			}
+		}
+    }
+	
 	@Override
 	public void setFocus(boolean focused) {
 		if (decorated instanceof Focusable) {

@@ -362,7 +362,15 @@ public abstract class ModelDecoratorBox<T> extends DecoratorBox<T> implements Ha
 				return aWidget.@com.eas.client.form.published.HasCustomEditing::isEditable()();
 			},
 			set : function(aValue) {
-				aWidget.@com.eas.client.form.published.HasCustomEditing::setEditable(Z)((false != aValue));
+				aWidget.@com.eas.client.form.published.HasCustomEditing::setEditable(Z)(!!aValue);
+			}
+		});
+		Object.defineProperty(aPublished, "nullable", {
+			get : function() {
+				return aWidget.@com.bearsoft.gwt.ui.widgets.DecoratorBox::isNullable()();
+			},
+			set : function(aValue) {
+				aWidget.@com.bearsoft.gwt.ui.widgets.DecoratorBox::setNullable(Z)(!!aValue);
 			}
 		});
 		Object.defineProperty(aPublished, "selectOnly", {
@@ -370,7 +378,7 @@ public abstract class ModelDecoratorBox<T> extends DecoratorBox<T> implements Ha
 				return aWidget.@com.eas.client.form.published.HasCustomEditing::isSelectOnly()();
 			},
 			set : function(aValue) {
-				aWidget.@com.eas.client.form.published.HasCustomEditing::setSelectOnly(Z)((false != aValue));
+				aWidget.@com.eas.client.form.published.HasCustomEditing::setSelectOnly(Z)(!!aValue);
 			}
 		});
 		Object.defineProperty(aPublished, "data", {

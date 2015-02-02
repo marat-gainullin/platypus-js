@@ -42,11 +42,13 @@ public class StyledListBox<T> extends ListBox implements HasValue<T> {
 
 			@Override
 			public void onChange(ChangeEvent event) {
-				int selected = getSelectedIndex();
-				if (selected == -1) {
-					setValue(null, true);
-				} else {
-					setValue(associatedValues.get(selected), true);
+				if (!isMultipleSelect()) {
+					int selected = getSelectedIndex();
+					if (selected == -1) {
+						setValue(null, true);
+					} else {
+						setValue(associatedValues.get(selected), true);
+					}
 				}
 			}
 
