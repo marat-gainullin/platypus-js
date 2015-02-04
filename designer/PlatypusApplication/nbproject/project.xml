@@ -347,29 +347,6 @@
                 <package>org.jfree.ui</package>
                 <package>org.jinterop.dcom.common</package>
                 <package>org.opengis.filter.temporal</package>
-                <package>org.postgresql</package>
-                <package>org.postgresql.copy</package>
-                <package>org.postgresql.core</package>
-                <package>org.postgresql.core.types</package>
-                <package>org.postgresql.core.v2</package>
-                <package>org.postgresql.core.v3</package>
-                <package>org.postgresql.ds</package>
-                <package>org.postgresql.ds.common</package>
-                <package>org.postgresql.ds.jdbc23</package>
-                <package>org.postgresql.ds.jdbc4</package>
-                <package>org.postgresql.fastpath</package>
-                <package>org.postgresql.geometric</package>
-                <package>org.postgresql.gss</package>
-                <package>org.postgresql.jdbc2</package>
-                <package>org.postgresql.jdbc2.optional</package>
-                <package>org.postgresql.jdbc3</package>
-                <package>org.postgresql.jdbc3g</package>
-                <package>org.postgresql.jdbc4</package>
-                <package>org.postgresql.largeobject</package>
-                <package>org.postgresql.ssl</package>
-                <package>org.postgresql.translation</package>
-                <package>org.postgresql.util</package>
-                <package>org.postgresql.xa</package>
                 <package>rpc</package>
             </public-packages>
             <class-path-extension>
@@ -409,10 +386,6 @@
                 <binary-origin>release/modules/ext/ojdbc6.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/postgresql-8.4-701.jdbc4.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/postgresql-8.4-701.jdbc4.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
                 <runtime-relative-path>ext/Rowsets.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/Rowsets.jar</binary-origin>
             </class-path-extension>
@@ -431,6 +404,10 @@
             <class-path-extension>
                 <runtime-relative-path>ext/gt-render-10.3.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/gt-render-10.3.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/postgresql-9.3-1102.jdbc41.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/postgresql-9.3-1102.jdbc41.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/Deploy.jar</runtime-relative-path>
@@ -555,6 +532,10 @@
             <class-path-extension>
                 <runtime-relative-path>ext/j-interopdeps.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/j-interopdeps.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/postgis-jdbc-2.1.0.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/postgis-jdbc-2.1.0.jar</binary-origin>
             </class-path-extension>
         </data>
     </configuration>

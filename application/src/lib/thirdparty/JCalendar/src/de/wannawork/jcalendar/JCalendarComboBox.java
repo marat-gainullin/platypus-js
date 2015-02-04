@@ -526,8 +526,9 @@ public class JCalendarComboBox extends JPanel implements AncestorListener, Chang
         add(btns, BorderLayout.EAST);
         _dropDownButton.setFocusable(false);
         _dropDownButton.addMouseListener(new MouseAdapter() {
+
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mousePressed(MouseEvent e) {
                 if (_dropDownButton.isEnabled()) {
                     if (!isCalendarShown()) {
                         showCalendar();
@@ -538,6 +539,7 @@ public class JCalendarComboBox extends JPanel implements AncestorListener, Chang
                     cancelPopupCalendar();
                 }
             }
+
         });
     }
 
