@@ -38,19 +38,19 @@ public class TableEntityNodeChildren extends EntityNodeChildren<Object> {
 
     @Override
     protected Node[] createNodes(Object key) {
+        locator = null;
         if (key instanceof EntityFieldKey) {
             EntityFieldKey efk = (EntityFieldKey) key;
-            Node node;
             try {
-                node = new TableFieldNode(efk.field, lookup);
+                Node node = new TableFieldNode(efk.field, lookup);
+                return new Node[]{node};
             } catch (Exception ex) {
                 ErrorManager.getDefault().notify(ex);
                 return null;
             }
-            return new Node[]{ node };
         } else if (key instanceof TableIndexesNode.TableIndexesKey) {
             assert entity instanceof FieldsEntity;
-            return new Node[]{ new TableIndexesNode(new TableIndexesChildren((FieldsEntity)entity, lookup), (FieldsEntity)entity, lookup) };
+            return new Node[]{new TableIndexesNode(new TableIndexesChildren((FieldsEntity) entity, lookup), (FieldsEntity) entity, lookup)};
         } else {
             return null;
         }

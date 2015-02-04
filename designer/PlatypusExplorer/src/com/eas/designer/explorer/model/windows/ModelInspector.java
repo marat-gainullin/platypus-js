@@ -9,8 +9,7 @@ import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.SqlQuery;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Relation;
-import com.eas.client.model.gui.selectors.SelectedField;
-import com.eas.client.model.gui.selectors.SelectedParameter;
+import com.eas.client.model.gui.view.model.SelectedField;
 import com.eas.client.model.gui.view.ModelSelectionListener;
 import com.eas.client.model.gui.view.model.ModelView;
 import com.eas.designer.datamodel.nodes.EntityNode;
@@ -377,7 +376,7 @@ public final class ModelInspector extends TopComponent implements ExplorerManage
         }
 
         @Override
-        public void selectionChanged(List<SelectedParameter<E>> aParameters, List<SelectedField<E>> aFields) {
+        public void selectionChanged(List<SelectedField<E>> aParameters, List<SelectedField<E>> aFields) {
             if (aParameters != null || aFields != null) {
                 getExplorerManager().removePropertyChangeListener(nodesReflector);
                 Node[] oldNodes = getExplorerManager().getSelectedNodes();
@@ -412,31 +411,27 @@ public final class ModelInspector extends TopComponent implements ExplorerManage
         return nodesToSelect.toArray(new Node[]{});
     }
 
-    public static <E extends Entity<?, SqlQuery, E>> Node[] convertSelectedToNodes(ModelNode<E, ?> aRootNode, Node[] oldNodes, List<SelectedParameter<E>> aParameters, List<SelectedField<E>> aFields) {
+    public static <E extends Entity<?, SqlQuery, E>> Node[] convertSelectedToNodes(ModelNode<E, ?> aRootNode, Node[] oldNodes, List<SelectedField<E>> aParameters, List<SelectedField<E>> aFields) {
         List<Node> nodesToSelect = new ArrayList<>();
         if (aParameters != null) {
-            for (SelectedParameter<E> sp : aParameters) {
-                Set<E> entities = new HashSet<>();
-                entities.add(sp.entity);
-                Node[] entityNodes = aRootNode.entitiesToNodes(entities);
-                if (entityNodes != null && entityNodes.length == 1) {
-                    Set<Parameter> parameters = new HashSet<>();
-                    parameters.add(sp.parameter);
-                    Node[] paramNodes = ((EntityNode<E>) entityNodes[0]).fieldsToNodes(parameters);
-                    nodesToSelect.addAll(Arrays.asList(paramNodes));
+            for (SelectedField<E> sp : aParameters) {
+                Node entityNode = aRootNode.entityToNode(sp.entity);
+                if (entityNode != null) {
+                    Node paramNode = ((EntityNode<E>) entityNode).fieldToNode(sp.field);
+                    if (paramNode != null) {
+                        nodesToSelect.add(paramNode);
+                    }
                 }
             }
         }
         if (aFields != null) {
             for (SelectedField<E> sf : aFields) {
-                Set<E> entities = new HashSet<>();
-                entities.add(sf.entity);
-                Node[] entityNodes = aRootNode.entitiesToNodes(entities);
-                if (entityNodes != null && entityNodes.length == 1) {
-                    Set<Field> fields = new HashSet<>();
-                    fields.add(sf.field);
-                    Node[] paramNodes = ((EntityNode<E>) entityNodes[0]).fieldsToNodes(fields);
-                    nodesToSelect.addAll(Arrays.asList(paramNodes));
+                Node entityNode = aRootNode.entityToNode(sf.entity);
+                if (entityNode != null) {
+                    Node fieldNode = ((EntityNode<E>) entityNode).fieldToNode(sf.field);
+                    if (fieldNode != null) {
+                        nodesToSelect.add(fieldNode);
+                    }
                 }
             }
         }

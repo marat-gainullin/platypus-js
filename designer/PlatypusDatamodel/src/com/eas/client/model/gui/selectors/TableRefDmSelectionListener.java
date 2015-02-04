@@ -4,6 +4,7 @@
  */
 package com.eas.client.model.gui.selectors;
 
+import com.eas.client.model.gui.view.model.SelectedField;
 import com.eas.client.metadata.TableRef;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Relation;
@@ -31,7 +32,7 @@ public class TableRefDmSelectionListener<E extends Entity<?, ?, E>> implements M
     }
 
     @Override
-    public void selectionChanged(List<SelectedParameter<E>> param, List<SelectedField<E>> field) {
+    public void selectionChanged(List<SelectedField<E>> param, List<SelectedField<E>> field) {
     }
 
     @Override

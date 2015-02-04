@@ -49,12 +49,16 @@ public class ModelDate extends ModelComponentDecorator<VDateTimeField, Date> imp
     @ScriptFunction
     @Override
     public void setJsValue(Object aValue) {
-        if (aValue == null || "".equals(aValue)) {
-            setValue(null);
-        } else if (aValue instanceof Date) {
-            setValue((Date) aValue);
+        if (com.eas.script.ScriptUtils.isInitialized()) {
+            if (aValue == null || "".equals(aValue)) {
+                setValue(null);
+            } else if (aValue instanceof Date) {
+                setValue((Date) aValue);
+            } else {
+                setValue(new Date(JSType.toLong(aValue)));
+            }
         } else {
-            setValue(new Date(JSType.toLong(aValue)));
+            setValue(null);
         }
     }
 

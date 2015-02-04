@@ -11,8 +11,7 @@ import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.model.application.ReferenceRelation;
 import com.eas.client.model.gui.ApplicationModelEditorView;
-import com.eas.client.model.gui.selectors.SelectedField;
-import com.eas.client.model.gui.selectors.SelectedParameter;
+import com.eas.client.model.gui.view.model.SelectedField;
 import com.eas.client.model.gui.view.ModelSelectionListener;
 import com.eas.client.model.gui.view.ModelViewDragHandler;
 import com.eas.client.model.gui.view.entities.EntityView;
@@ -264,7 +263,7 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
                 }
 
                 @Override
-                public void selectionChanged(List<SelectedParameter<ApplicationDbEntity>> aParameters, List<SelectedField<ApplicationDbEntity>> aFields) {
+                public void selectionChanged(List<SelectedField<ApplicationDbEntity>> aParameters, List<SelectedField<ApplicationDbEntity>> aFields) {
                     try {
                         Node[] oldNodes = getActivatedNodes();
                         // Hack. When multi-view element with no any activated node is activated,

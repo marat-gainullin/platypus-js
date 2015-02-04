@@ -208,4 +208,10 @@ public class ToolBarSupport extends AbstractLayoutSupport {
 
         return true;
     }
+
+    @Override
+    public void removeComponent(int index) {
+        // no op here because toolbar latyout has no per-component constraints.
+    }
+        
 }

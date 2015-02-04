@@ -1,9 +1,4 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*
  * DbTablesView.java
  *
  * Created on 05.05.2009, 13:02:21
@@ -11,7 +6,6 @@
 package com.eas.client.model.gui.selectors;
 
 import com.eas.client.DatabasesClient;
-import com.eas.client.dbstructure.DbStructureUtils;
 import com.eas.client.model.gui.IconCache;
 import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.application.utils.DatabaseConnectionRenderer;
@@ -28,6 +22,7 @@ import javax.swing.*;
 import org.netbeans.api.db.explorer.ConnectionManager;
 import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.openide.util.Exceptions;
+import org.openide.util.NbBundle;
 
 /**
  *
@@ -242,18 +237,18 @@ public class DbTablesView extends JPanel {
         btnFind.setAction(getFindAction());
         tools.add(btnFind);
 
-        btnDefaultSchema.setText(DbStructureUtils.getString("btnDefaultSchema.text")); // NOI18N
+        btnDefaultSchema.setText(NbBundle.getMessage(DbTablesView.class, "btnDefaultSchema.text")); // NOI18N
         btnDefaultSchema.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnDefaultSchemaActionPerformed(evt);
             }
         });
 
-        lblSchema.setText(DbStructureUtils.getString("lblSchema.text")); // NOI18N
+        lblSchema.setText(NbBundle.getMessage(DbTablesView.class, "lblSchema.text")); // NOI18N
 
-        lblConnection.setText(DbStructureUtils.getString("lblConnection.text")); // NOI18N
+        lblConnection.setText(NbBundle.getMessage(DbTablesView.class, "lblConnection.text")); // NOI18N
 
-        btnDefaultConnection.setText(DbStructureUtils.getString("btnDefaultConnection.text")); // NOI18N
+        btnDefaultConnection.setText(NbBundle.getMessage(DbTablesView.class, "btnDefaultConnection.text")); // NOI18N
         btnDefaultConnection.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnDefaultConnectionActionPerformed(evt);

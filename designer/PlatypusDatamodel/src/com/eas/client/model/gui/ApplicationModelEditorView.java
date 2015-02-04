@@ -9,8 +9,7 @@ import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.model.gui.selectors.AppElementSelectorCallback;
-import com.eas.client.model.gui.selectors.SelectedField;
-import com.eas.client.model.gui.selectors.SelectedParameter;
+import com.eas.client.model.gui.view.model.SelectedField;
 import com.eas.client.model.gui.selectors.TablesSelectorCallback;
 import com.eas.client.model.gui.view.AddQueryAction;
 import com.eas.client.model.gui.view.ModelSelectionListener;
@@ -43,7 +42,7 @@ public class ApplicationModelEditorView extends JPanel implements Customizer {
     protected class ViewsEntitySelectionListener implements ModelSelectionListener<ApplicationDbEntity> {
 
         @Override
-        public void selectionChanged(List<SelectedParameter<ApplicationDbEntity>> params, List<SelectedField<ApplicationDbEntity>> fields) {
+        public void selectionChanged(List<SelectedField<ApplicationDbEntity>> params, List<SelectedField<ApplicationDbEntity>> fields) {
         }
 
         @Override
@@ -169,99 +168,10 @@ public class ApplicationModelEditorView extends JPanel implements Customizer {
         modelView.addUndoableEditListener(undoListener);
     }
 /*
-    public boolean isNamePresent(Object aHost, String aName) {
-        if (aHost == null || aHost instanceof ApplicationDbModel) {
-            if (aName.equals(ApplicationDbModel.DATASOURCE_METADATA_SCRIPT_NAME) || aName.equals(ApplicationDbModel.PARAMETERS_SCRIPT_NAME)) {
-                return true;
-            }
-            if (modelView != null && modelView.getModel() != null) {
-                return modelView.getModel().isNamePresent(aName, null, null);
-            }
-        } else {
-            Set<String> names = getObjectsNames(aHost);
-            if (names != null) {
-                return names.contains(aName);
-            }
-        }
-        return false;
-    }
-
-    public Object getNamedObject(Object aHost, String aName) {
-        if (aHost instanceof ScriptableRowset<?>) {
-            ScriptableRowset<ApplicationDbEntity> sRowset = (ScriptableRowset<ApplicationDbEntity>) aHost;
-            Fields fields = sRowset.getEntity().getFields();
-            if (aName.equals(ApplicationDbModel.DATASOURCE_METADATA_SCRIPT_NAME)) {
-                return fields;
-            }
-        } else if (aHost instanceof Fields) {
-            Fields fields = (Fields) aHost;
-            for (int i = 1; i <= fields.getFieldsCount(); i++) {
-                Field field = fields.get(i);
-                if (aName.equals(field.getName())) {
-                    return field;
-                }
-            }
-        } else if (aHost == null || aHost instanceof ApplicationDbModel) {
-            switch (aName) {
-                case ApplicationDbModel.PARAMETERS_SCRIPT_NAME:
-                    return new ScriptableRowset<ApplicationDbEntity>(modelView.getModel().getParametersEntity());
-                case ApplicationDbModel.DATASOURCE_METADATA_SCRIPT_NAME:
-                    return modelView.getModel().getParametersEntity().getFields();
-            }
-            for (ApplicationDbEntity ent : modelView.getModel().getAllEntities().values()) {
-                if (ent != null) {
-                    String lName = ent.getName();
-                    if (lName != null && !lName.isEmpty() && lName.equals(aName)) {
-                        return new ScriptableRowset<>(ent);
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    public Set<String> getObjectsNames(Object aHost) {
-        if (aHost instanceof ScriptableRowset<?>) {
-            Set<String> res = new HashSet<>();
-            ScriptableRowset<ApplicationDbEntity> sRowset = (ScriptableRowset<ApplicationDbEntity>) aHost;
-            Fields fields = sRowset.getEntity().getFields();
-            res.add(ApplicationDbModel.DATASOURCE_METADATA_SCRIPT_NAME);
-            for (int i = 1; i <= fields.getFieldsCount(); i++) {
-                Field field = fields.get(i);
-                res.add(field.getName());
-            }
-            return res;
-        } else if (aHost instanceof Fields) {
-            Set<String> res = new HashSet<>();
-            Fields fields = (Fields) aHost;
-            for (int i = 1; i <= fields.getFieldsCount(); i++) {
-                Field field = fields.get(i);
-                res.add(field.getName());
-            }
-            return res;
-        } else if (aHost == null || aHost instanceof ApplicationDbModel) {
-            Set<String> res = new HashSet<>();
-            for (ApplicationDbEntity ent : modelView.getModel().getAllEntities().values()) {
-                if (ent != null) {
-                    String lName = ent.getName();
-                    if (lName != null && !lName.isEmpty()) {
-                        res.add(lName);
-                    }
-                    if (ent instanceof ApplicationParametersEntity) {
-                        res.add(ApplicationDbModel.PARAMETERS_SCRIPT_NAME);
-                        res.add(ApplicationDbModel.DATASOURCE_METADATA_SCRIPT_NAME);
-                    }
-                }
-            }
-            return res;
-        }
-        return null;
-    }
-*/
     public void rerouteConnectors() {
         modelView.rerouteConnectors();
     }
-
+*/
     public void setModel(ApplicationDbModel aModel) throws Exception {
         if (modelView.getModel() != aModel) {
             modelView.setModel(aModel);

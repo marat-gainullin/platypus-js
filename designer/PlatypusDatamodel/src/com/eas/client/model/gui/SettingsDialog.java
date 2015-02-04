@@ -10,7 +10,6 @@
  */
 package com.eas.client.model.gui;
 
-import com.eas.client.dbstructure.DbStructureUtils;
 import java.awt.BorderLayout;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
@@ -97,7 +96,7 @@ public class SettingsDialog extends javax.swing.JDialog {
         bottomPanel.setPreferredSize(new java.awt.Dimension(245, 45));
 
         btnCancel.setAction(new CancelAction());
-        btnCancel.setText(DbStructureUtils.getString("btnCancel")); // NOI18N
+        btnCancel.setText(DatamodelDesignUtils.getString("btnCancel")); // NOI18N
 
         btnOk.setText("OK");
         btnOk.setPreferredSize(btnCancel.getPreferredSize());

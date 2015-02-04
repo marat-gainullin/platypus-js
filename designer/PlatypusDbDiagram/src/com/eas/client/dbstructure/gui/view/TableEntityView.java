@@ -2,10 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.model.gui.view.entities;
+package com.eas.client.dbstructure.gui.view;
 
 import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.client.model.gui.view.EntityViewsManager;
+import com.eas.client.model.gui.view.entities.EntityView;
 
 /**
  *

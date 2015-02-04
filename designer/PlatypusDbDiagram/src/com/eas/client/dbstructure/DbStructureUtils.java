@@ -20,39 +20,6 @@ import java.util.logging.Logger;
  */
 public class DbStructureUtils {
 
-    protected static java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("com/eas/client/dbstructure/messages"); // NOI18N
-
-    public static String getString(String key) {
-        if (key != null && bundle.containsKey(key)) {
-            try {
-                return bundle.getString(key);
-            } catch (Exception ex) {
-                return key;
-            }
-        } else {
-            return key;
-        }
-    }
-
-    public static String getString(String key, String param1, String param2) {
-        if (key != null && bundle.containsKey(key)) {
-            try {
-                String message = bundle.getString(key);
-                if (param1 != null) {
-                    message = message.replace("{1}", param1);
-                }
-                if (param2 != null) {
-                    message = message.replace("{2}", param2);
-                }
-                return message;
-            } catch (Exception ex) {
-                return key;
-            }
-        } else {
-            return key;
-        }
-    }
-
     public static ForeignKeySpec constructFkSpecByRelation(Relation<FieldsEntity> aRel) {
         FieldsEntity lEntity = aRel.getLeftEntity();
         FieldsEntity rEntity = aRel.getRightEntity();

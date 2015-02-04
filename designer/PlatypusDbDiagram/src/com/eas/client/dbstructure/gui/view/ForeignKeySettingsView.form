@@ -66,7 +66,7 @@
           <ComponentRef name="txtName"/>
         </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="com/eas/client/dbstructure/messages.properties" key="lblName" replaceFormat="DbStructureUtils.getString(&quot;{key}&quot;)"/>
+          <ResourceString bundle="com/eas/client/dbstructure/messages.properties" key="lblName" replaceFormat="NbBundle.getMessage(DbStructureUtils.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
     </Component>
@@ -75,7 +75,7 @@
     <Component class="javax.swing.JLabel" name="lblUpdateRule">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="com/eas/client/dbstructure/messages.properties" key="lblUpdateRule" replaceFormat="DbStructureUtils.getString(&quot;{key}&quot;)"/>
+          <ResourceString bundle="com/eas/client/dbstructure/messages.properties" key="lblUpdateRule" replaceFormat="NbBundle.getMessage(DbStructureUtils.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
     </Component>
@@ -87,7 +87,7 @@
     <Component class="javax.swing.JLabel" name="lblDeleteRule">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="com/eas/client/dbstructure/messages.properties" key="lblDeleteRule" replaceFormat="DbStructureUtils.getString(&quot;{key}&quot;)"/>
+          <ResourceString bundle="com/eas/client/dbstructure/messages.properties" key="lblDeleteRule" replaceFormat="NbBundle.getMessage(DbStructureUtils.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
     </Component>
@@ -99,7 +99,7 @@
     <Component class="javax.swing.JCheckBox" name="chkDeferred">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="com/eas/client/dbstructure/messages.properties" key="chkDeferred" replaceFormat="DbStructureUtils.getString(&quot;{key}&quot;)"/>
+          <ResourceString bundle="com/eas/client/dbstructure/messages.properties" key="chkDeferred" replaceFormat="NbBundle.getMessage(DbStructureUtils.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
     </Component>

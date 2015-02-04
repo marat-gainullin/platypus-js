@@ -20,15 +20,13 @@ import com.eas.client.model.Entity;
 public class DeleteFieldEdit<E extends Entity<?, ?, E>> extends FieldsEdit<E> {
 
     protected Field field;
-    protected E fieldsEntity;
     protected int fieldIndex = 0; // inoperable field index
 
     public DeleteFieldEdit(E aEntity, Field aField) {
         super(aEntity);
         field = aField;
-        fieldsEntity = aEntity;
         if (field != null) {
-            fieldIndex = fieldsEntity.getFields().find(field.getName());
+            fieldIndex = entity.getFields().find(field.getName());
         }
         createFieldIfNeeded();
     }
@@ -46,14 +44,14 @@ public class DeleteFieldEdit<E extends Entity<?, ?, E>> extends FieldsEdit<E> {
 
     @Override
     protected void redoWork() {
-        Fields fields = fieldsEntity.getFields();
+        Fields fields = entity.getFields();
         fields.remove(field);
     }
 
     @Override
     protected void undoWork() {
         createFieldIfNeeded();
-        Fields fields = fieldsEntity.getFields();
+        Fields fields = entity.getFields();
         if (field != null) {
             if (fieldIndex >= 1 && fieldIndex <= fields.getFieldsCount() + 1) {
                 fields.add(fieldIndex, field);
@@ -65,7 +63,7 @@ public class DeleteFieldEdit<E extends Entity<?, ?, E>> extends FieldsEdit<E> {
 
     private void createFieldIfNeeded() {
         if (field == null) {
-            field = createField(fieldsEntity);
+            field = createField(entity);
         }
     }
 }

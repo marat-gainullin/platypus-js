@@ -5,18 +5,14 @@
 package com.eas.designer.application.dbdiagram;
 
 import com.bearsoft.rowset.metadata.Field;
-import com.eas.client.DatabasesClient;
 import com.eas.client.dbstructure.gui.DbSchemeEditorView;
 import com.eas.client.model.Relation;
 import com.eas.client.model.dbscheme.FieldsEntity;
-import com.eas.client.model.gui.selectors.SelectedField;
-import com.eas.client.model.gui.selectors.SelectedParameter;
+import com.eas.client.model.gui.view.model.SelectedField;
 import com.eas.client.model.gui.view.ModelSelectionListener;
 import com.eas.client.model.gui.view.entities.EntityView;
-import com.eas.client.model.gui.view.model.DbSchemeModelView;
+import com.eas.client.dbstructure.gui.view.DbSchemeModelView;
 import com.eas.designer.application.project.PlatypusProject;
-import com.eas.designer.application.query.result.QueryResultTopComponent;
-import com.eas.designer.application.query.result.QueryResultsView;
 import com.eas.designer.datamodel.nodes.EntityNode;
 import com.eas.designer.datamodel.nodes.FieldNode;
 import com.eas.designer.explorer.model.windows.ModelInspector;
@@ -125,7 +121,6 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
      */
     static final String ICON_PATH = "com/eas/designer/application/dbdiagram/dbScheme.png";
     private static final String PREFERRED_ID = "PlatypusDbDiagramTopComponent";
-    private static final String QUERY_RESULT_TOPCOMPONENT_PREFFERED_ID = "QueryResultTopComponent";
     protected PlatypusDbDiagramDataObject dataObject;
     protected transient DbSchemeEditorView editor;
     protected transient DataObjectListener dataObjectListener;
@@ -257,17 +252,7 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
                                 ((UndoRedo.Manager) getUndoRedo()).undoableEditHappened(new UndoableEditEvent(this, anEdit));
                                 return true;
                             }
-                        }, (DatabasesClient aBasesProxy, String aDatasourceName, String aSchemaName, String aTableName) -> {
-                            try {
-                                QueryResultsView resultsView = new QueryResultsView(aBasesProxy, aDatasourceName, aSchemaName, aTableName);
-                                QueryResultTopComponent window = (QueryResultTopComponent) WindowManager.getDefault().findTopComponent(QUERY_RESULT_TOPCOMPONENT_PREFFERED_ID);
-                                window.openAtTabPosition(0);
-                                window.addResultsView(resultsView);
-                                window.requestActive();
-                            } catch (Exception ex) {
-                                ErrorManager.getDefault().notify(ex);
-                            }
-                });
+                        });
                 add(editor, BorderLayout.CENTER);
                 updateTitle();
                 dataObject.addPropertyChangeListener(dataObjectListener);
@@ -286,7 +271,7 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
                     }
 
                     @Override
-                    public void selectionChanged(List<SelectedParameter<FieldsEntity>> aParameters, List<SelectedField<FieldsEntity>> aFields) {
+                    public void selectionChanged(List<SelectedField<FieldsEntity>> aParameters, List<SelectedField<FieldsEntity>> aFields) {
                         try {
                             Node[] oldNodes = getActivatedNodes();
                             Node[] newNodes = ModelInspector.convertSelectedToNodes(dataObject.getModelNode(), oldNodes, aParameters, aFields);

@@ -29,8 +29,6 @@ import com.eas.client.model.gui.edits.NewEntityEdit;
 import com.eas.client.model.gui.edits.NotSavableUndoableEditSupport;
 import com.eas.client.model.gui.edits.RelationPolylineEdit;
 import com.eas.client.model.gui.edits.fields.NewFieldEdit;
-import com.eas.client.model.gui.selectors.SelectedField;
-import com.eas.client.model.gui.selectors.SelectedParameter;
 import com.eas.client.model.gui.selectors.TablesSelectorCallback;
 import com.eas.client.model.gui.view.CollapserExpander;
 import com.eas.client.model.gui.view.EntityViewDoubleClickListener;
@@ -103,7 +101,6 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, M extends Mode
     protected FindFrame<E, M> finder;
     protected Component dragTarget;
     protected boolean reallyDragged;
-    protected boolean needRerouteConnectors = true;
     protected com.bearsoft.routing.QuadTree<EntityView<E>> entitiesIndex = new QuadTree<>();
     protected com.bearsoft.routing.QuadTree<Relation<E>> connectorsIndex = new QuadTree<>();
     protected Paths paths;
@@ -111,7 +108,7 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, M extends Mode
     protected Set<Relation<E>> hittedRelations = new HashSet<>();
     protected Set<Relation<E>> selectedRelations = new HashSet<>();
     protected Set<E> selectedEntities = new HashSet<>();
-    protected Set<EntityFieldTuple> selectedFields = new HashSet<>();
+    protected Set<SelectedField<E>> selectedFields = new HashSet<>();
     // interaction
     protected ModelChangesReflector modelListener = new ModelChangesReflector();
     protected NotSavableUndoableEditSupport undoSupport;
@@ -128,8 +125,7 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, M extends Mode
         entityViews.values().stream().forEach((view) -> {
             entitiesIndex.insert(view.getBounds(), view);
         });
-        preparePaths();
-        rerouteConnectors();
+        invalidateConnectors(true);
         checkActions();
         repaint();
     }
@@ -328,6 +324,21 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, M extends Mode
         paintConnectors(g2d, hittedRelations, hittedConnectorsStroke, toFieldConnectorColor, toParameterConnectorColor.darker());
     }
 
+    private boolean reroutingEnqueued;
+
+    private void invalidateConnectors(boolean invalidatePaths) {
+        if (invalidatePaths) {
+            paths = null;
+        }
+        reroutingEnqueued = true;
+        EventQueue.invokeLater(() -> {
+            if (reroutingEnqueued) {
+                reroutingEnqueued = false;
+                rerouteConnectors();
+            }
+        });
+    }
+
     protected class ModelChangesReflector implements ModelEditingListener<E> {
 
         @Override
@@ -414,12 +425,12 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, M extends Mode
         }
     }
 
-    public void fireFieldParamSelected(List<SelectedParameter<E>> aParameters, List<SelectedField<E>> aFields) {
+    public void fireFieldParamSelected(List<SelectedField<E>> aParameters, List<SelectedField<E>> aFields) {
         if (entitySelectionListeners != null) {
             try {
-                for (ModelSelectionListener<E> l : entitySelectionListeners) {
+                entitySelectionListeners.stream().forEach((l) -> {
                     l.selectionChanged(aParameters, aFields);
-                }
+                });
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Exception while firing selection event (fireFieldParamSelected) " + ex.getMessage(), "datamodel", JOptionPane.ERROR_MESSAGE);
                 Logger.getLogger(ModelView.class.getName()).log(Level.SEVERE, "Exception while firing selection event (fireFieldParamSelected) ", ex);
@@ -551,7 +562,7 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, M extends Mode
         return Collections.unmodifiableSet(selectedEntities);
     }
 
-    public Set<EntityFieldTuple> getSelectedFields() {
+    public Set<SelectedField<E>> getSelectedFields() {
         return Collections.unmodifiableSet(selectedFields);
     }
 
@@ -834,8 +845,7 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, M extends Mode
 
         @Override
         public void invalidateConnectors() {
-            rerouteConnectors();
-            repaint();
+            ModelView.this.invalidateConnectors(false);
         }
 
         @Override
@@ -867,14 +877,12 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, M extends Mode
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentMoved(ComponentEvent e) {
-                preparePaths();
-                rerouteConnectors();
+                invalidateConnectors(true);
             }
 
             @Override
             public void componentResized(ComponentEvent e) {
-                preparePaths();
-                rerouteConnectors();
+                invalidateConnectors(true);
             }
         });
     }
@@ -884,7 +892,7 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, M extends Mode
         setModel(aModel);
     }
 
-    protected final void putEditingActions() {
+    protected void putEditingActions() {
         ActionMap am = getActionMap();
         am.put(AddTable.class.getSimpleName(), new AddTable());
         am.put(AddField.class.getSimpleName(), new AddField());
@@ -1177,45 +1185,38 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, M extends Mode
         }
         add(eView, 0);
         entitiesIndex.insert(eView.getBounds(), eView);
-        preparePaths();
-        rerouteConnectors();
+        invalidateConnectors(true);
         eView.addComponentListener(new ComponentListener() {
             @Override
             public void componentHidden(ComponentEvent e) {
                 entitiesIndex.remove(eView.getBounds(), eView);
-                preparePaths();
-                rerouteConnectors();
+                invalidateConnectors(true);
             }
 
             @Override
             public void componentMoved(ComponentEvent e) {
                 entitiesIndex.remove(getUnscaledBounds(), eView);
                 entitiesIndex.insert(eView.getBounds(), eView);
-                preparePaths();
-                rerouteConnectors();
+                invalidateConnectors(true);
             }
 
             @Override
             public void componentResized(ComponentEvent e) {
                 entitiesIndex.remove(getUnscaledBounds(), eView);
                 entitiesIndex.insert(eView.getBounds(), eView);
-                preparePaths();
-                rerouteConnectors();
+                invalidateConnectors(true);
             }
 
             @Override
             public void componentShown(ComponentEvent e) {
                 entitiesIndex.insert(eView.getBounds(), eView);
-                preparePaths();
-                rerouteConnectors();
+                invalidateConnectors(true);
             }
         });
         if (eView.getFieldsList().getParent().getParent() instanceof JViewport) {
             JViewport viewport = (JViewport) eView.getFieldsList().getParent().getParent();
             viewport.addChangeListener((ChangeEvent e) -> {
-                if (paths != null) {
-                    rerouteConnectors();
-                }
+                invalidateConnectors(false);
             });
         }
     }
@@ -1237,14 +1238,12 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, M extends Mode
                 remove(eView);
                 entitiesIndex.remove(eView.getBounds(), eView);
                 eView.shrink();
-                preparePaths();
-                rerouteConnectors();
+                invalidateConnectors(true);
             }
         }
     }
 
     public void removeEntityViews() {
-        needRerouteConnectors = false;
         clearSelection();
         if (!entityViews.isEmpty()) {
             EntityView<?>[] toRemove = entityViews.values().toArray(new EntityView<?>[]{});
@@ -1278,12 +1277,7 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, M extends Mode
         removeEntityViews();
         if (model != null) {
             relationsDesignInfo.clear();
-            needRerouteConnectors = false;
-            try {
-                doCreateEntityViews();
-            } finally {
-                needRerouteConnectors = true;
-            }
+            doCreateEntityViews();
         }
     }
 
@@ -1302,23 +1296,21 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, M extends Mode
     List<Vertex<PathFragment>> graph;
 
     protected void preparePaths() {
-        if (needRerouteConnectors) {
-            Set<Rectangle> obstacles = new HashSet<>();
-            entityViews.values().stream().forEach((eView) -> {
-                obstacles.add(eView.getBounds());
-            });
-            QuadTree<Vertex<PathFragment>> verticesIndex = new QuadTree<>();
-            graph = Sweeper.build(getWidth(), getHeight(), obstacles, verticesIndex);
-            paths = new Paths(graph, verticesIndex);
-        }
+        Set<Rectangle> obstacles = new HashSet<>();
+        entityViews.values().stream().forEach((eView) -> {
+            obstacles.add(eView.getBounds());
+        });
+        QuadTree<Vertex<PathFragment>> verticesIndex = new QuadTree<>();
+        graph = Sweeper.build(getWidth(), getHeight(), obstacles, verticesIndex);
+        paths = new Paths(graph, verticesIndex);
     }
 
     protected Set<Relation<E>> modelRelationsToBeRerouted() {
         return model.getRelations();
     }
 
-    public void rerouteConnectors() {
-        if (model != null && needRerouteConnectors) {
+    protected void rerouteConnectors() {
+        if (model != null) {
             if (paths == null) {
                 preparePaths();
             }
@@ -1334,6 +1326,7 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, M extends Mode
             }
             // Calc connectors
             calcConnectors(filteredRels);
+            invalidate();
             repaint();
         }
     }
@@ -1583,31 +1576,22 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, M extends Mode
 
         @Override
         public void selected(EntityView<E> aView, List<Parameter> aParameters, List<Field> aFields) {
-            List<SelectedParameter<E>> parameters = new ArrayList<>();
+            selectedFields.clear();
+            List<SelectedField<E>> parameters = new ArrayList<>();
             List<SelectedField<E>> fields = new ArrayList<>();
             entityViews.values().stream().forEach((EntityView<E> ev) -> {
-                if (ev != aView) {
-                    List<Parameter> pl = ev.getSelectedParameters();
-                    pl.stream().forEach((p) -> {
-                        parameters.add(new SelectedParameter<>(ev.getEntity(), p));
-                    });
-                    List<Field> fl = ev.getSelectedFields();
-                    fl.stream().forEach((f) -> {
-                        fields.add(new SelectedField<>(ev.getEntity(), f));
-                    });
-                }
-            });
-            aParameters.stream().forEach((p) -> {
-                parameters.add(new SelectedParameter<>(aView.getEntity(), p));
-            });
-            aFields.stream().forEach((f) -> {
-                fields.add(new SelectedField<>(aView.getEntity(), f));
-            });
-            aParameters.stream().forEach((f) -> {
-                selectedFields.add(new EntityFieldTuple(aView.getEntity(), f));
-            });
-            aFields.stream().forEach((f) -> {
-                selectedFields.add(new EntityFieldTuple(aView.getEntity(), f));
+                List<Parameter> pl = ev.getSelectedParameters();
+                pl.stream().forEach((p) -> {
+                    SelectedField<E> sf = new SelectedField<>(ev.getEntity(), p);
+                    parameters.add(sf);
+                    selectedFields.add(sf);
+                });
+                List<Field> fl = ev.getSelectedFields();
+                fl.stream().forEach((f) -> {
+                    SelectedField<E> sf = new SelectedField<>(ev.getEntity(), f);
+                    fields.add(sf);
+                    selectedFields.add(sf);
+                });
             });
             checkActions();
             fireFieldParamSelected(parameters, fields);
@@ -2248,6 +2232,7 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, M extends Mode
                     edit.redo();
                     undoSupport.postEdit(edit);
                 }
+                getParametersView().getFieldsList().setSelectedValue(field, true);
             }
             checkActions();
         }
@@ -2471,33 +2456,34 @@ public abstract class ModelView<E extends Entity<?, SqlQuery, E>, M extends Mode
     }
 
     protected abstract void copySelectedEntities();
+    /*
+     public class EntityFieldTuple {
 
-    public class EntityFieldTuple {
+     public final E entity;
+     public final Field field;
 
-        public final E entity;
-        public final Field field;
+     public EntityFieldTuple(E anEntity, Field aField) {
+     entity = anEntity;
+     field = aField;
+     }
 
-        public EntityFieldTuple(E anEntity, Field aField) {
-            entity = anEntity;
-            field = aField;
-        }
+     @Override
+     public boolean equals(Object obj) {
+     if (obj != null && EntityFieldTuple.class.isAssignableFrom(obj.getClass())) {
+     EntityFieldTuple t = (EntityFieldTuple) obj;
+     return ((entity == null && t.entity == null) || (entity != null && entity.equals(t.entity)))
+     && ((field == null && t.field == null) || (field != null && field.isEqual(t.field)));
+     }
+     return false;
+     }
 
-        @Override
-        public boolean equals(Object obj) {
-            if (obj != null && EntityFieldTuple.class.isAssignableFrom(obj.getClass())) {
-                EntityFieldTuple t = (EntityFieldTuple) obj;
-                return ((entity == null && t.entity == null) || (entity != null && entity.equals(t.entity)))
-                        && ((field == null && t.field == null) || (field != null && field.isEqual(t.field)));
-            }
-            return false;
-        }
-
-        @Override
-        public int hashCode() {
-            int hash = 5;
-            hash = 53 * hash + Objects.hashCode(this.entity);
-            hash = 53 * hash + Objects.hashCode(this.field);
-            return hash;
-        }
-    }
+     @Override
+     public int hashCode() {
+     int hash = 5;
+     hash = 53 * hash + Objects.hashCode(this.entity);
+     hash = 53 * hash + Objects.hashCode(this.field);
+     return hash;
+     }
+     }
+     */
 }

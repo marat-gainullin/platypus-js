@@ -4,6 +4,7 @@
  */
 package com.eas.client.model.gui.selectors;
 
+import com.eas.client.model.gui.view.model.SelectedField;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.model.*;
@@ -61,7 +62,7 @@ public class ModelElementRefSelectionValidator<E extends Entity<?, ?, E>> implem
     }
 
     @Override
-    public void selectionChanged(List<SelectedParameter<E>> aParams, List<SelectedField<E>> aFields) {
+    public void selectionChanged(List<SelectedField<E>> aParams, List<SelectedField<E>> aFields) {
         okAction.setEnabled(false);
         switch (selectionSubject) {
             case ModelElementSelector.PARAMETER_SELECTION_SUBJECT:
@@ -76,7 +77,7 @@ public class ModelElementRefSelectionValidator<E extends Entity<?, ?, E>> implem
                 if ((aFields != null && !aFields.isEmpty()) || (aParams != null && !aParams.isEmpty())) {
                     okAction.setEnabled(true);
                     dmRef.setField(aFields != null && !aFields.isEmpty());
-                    dmRef.setField(dmRef.isField() ? aFields.get(0).field : aParams.get(0).parameter);
+                    dmRef.setField(dmRef.isField() ? aFields.get(0).field : aParams.get(0).field);
                     dmRef.setEntityId(dmRef.isField() ? aFields.get(0).entity.getEntityId() : aParams.get(0).entity.getEntityId());
                 }
                 break;
@@ -84,7 +85,7 @@ public class ModelElementRefSelectionValidator<E extends Entity<?, ?, E>> implem
                 if (aParams != null && !aParams.isEmpty() && !(aParams.get(0).entity instanceof QueryParametersEntity)) {
                     okAction.setEnabled(true);
                     dmRef.setField(false);
-                    dmRef.setField(aParams.get(0).parameter);
+                    dmRef.setField(aParams.get(0).field);
                     dmRef.setEntityId(aParams.get(0).entity.getEntityId());
                 }
                 break;

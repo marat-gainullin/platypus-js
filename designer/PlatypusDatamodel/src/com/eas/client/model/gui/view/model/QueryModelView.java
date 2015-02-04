@@ -152,7 +152,7 @@ public class QueryModelView extends ModelView<QueryEntity, QueryModel> {
     @Override
     protected boolean isSelectedDeletableFields() {
         if (selectedFields != null && !selectedFields.isEmpty()) {
-            for (EntityFieldTuple t : selectedFields) {
+            for (SelectedField<QueryEntity> t : selectedFields) {
                 if (!(t.entity instanceof QueryParametersEntity)) {
                     return false;
                 }
@@ -165,10 +165,15 @@ public class QueryModelView extends ModelView<QueryEntity, QueryModel> {
     @Override
     protected void deleteSelectedFields() {
         if (isSelectedDeletableFields()) {
+            QueryEntity selectedEntity = selectedFields.iterator().next().entity;
+            assert selectedEntity instanceof QueryParametersEntity;
+            EntityView<QueryEntity> qeView = getEntityView(selectedEntity);
+            assert qeView instanceof QueryParametersEntityView;
+            int oldSelectionLeadIndex = qeView.getFieldsList().getSelectionModel().getLeadSelectionIndex();
             AccessibleCompoundEdit section = new AccessibleCompoundEdit();
-            Set<EntityFieldTuple> toDelete = new HashSet<>(selectedFields);
+            Set<SelectedField<QueryEntity>> toDelete = new HashSet<>(selectedFields);
             clearSelection();
-            for (EntityFieldTuple t : toDelete) {
+            for (SelectedField<QueryEntity> t : toDelete) {
                 Set<Relation<QueryEntity>> toDel = Entity.getInOutRelationsByEntityField(t.entity, t.field);
                 for (Relation rel : toDel) {
                     DeleteRelationEdit drEdit = new DeleteRelationEdit(rel);
@@ -181,6 +186,15 @@ public class QueryModelView extends ModelView<QueryEntity, QueryModel> {
             }
             section.end();
             undoSupport.postEdit(section);
+            if (oldSelectionLeadIndex != -1) {
+                int listSize = qeView.getFieldsList().getModel().getSize();
+                if (oldSelectionLeadIndex >= listSize) {
+                    oldSelectionLeadIndex = listSize - 1;
+                }
+                if (oldSelectionLeadIndex >= 0 && oldSelectionLeadIndex < listSize) {
+                    qeView.getFieldsList().getSelectionModel().setSelectionInterval(oldSelectionLeadIndex, oldSelectionLeadIndex);
+                }
+            }
         }
     }
 

@@ -98,8 +98,8 @@ public class TableIndexesNode extends AbstractNode {
 
         public AddIndexAction() {
             super();
-            putValue(Action.NAME, DbStructureUtils.getString(AddIndexAction.class.getSimpleName()));
-            putValue(Action.SHORT_DESCRIPTION, DbStructureUtils.getString(AddIndexAction.class.getSimpleName()));
+            putValue(Action.NAME, NbBundle.getMessage(DbStructureUtils.class, AddIndexAction.class.getSimpleName()));
+            putValue(Action.SHORT_DESCRIPTION, NbBundle.getMessage(DbStructureUtils.class, AddIndexAction.class.getSimpleName()));
         }
 
         @Override
@@ -127,7 +127,7 @@ public class TableIndexesNode extends AbstractNode {
                         edit.redo();
                         getUndo().undoableEditHappened(new UndoableEditEvent(this, edit));
                     } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(null, ex.getLocalizedMessage(), DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(null, ex.getLocalizedMessage(), NbBundle.getMessage(DbStructureUtils.class, "dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }

@@ -311,8 +311,8 @@ public class QueryDocumentEditsComplementor {
 
     public UndoableEdit complementKnownEdits(UndoableEdit anEdit) throws Exception {
         if (anEdit instanceof AccessibleCompoundEdit) {
-            AccessibleCompoundEdit compound = (AccessibleCompoundEdit) anEdit;
             CompoundEdit newCompound = new CompoundEdit();
+            AccessibleCompoundEdit compound = (AccessibleCompoundEdit) anEdit;
             for (UndoableEdit lEdit : compound.getEdits()) {
                 lEdit = complementKnownEdits(lEdit);
                 newCompound.addEdit(lEdit);

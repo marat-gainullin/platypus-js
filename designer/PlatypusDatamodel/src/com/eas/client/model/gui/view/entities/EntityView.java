@@ -14,7 +14,6 @@ import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.utils.CollectionListener;
-import com.eas.client.SQLUtils;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Relation;
 import com.eas.client.model.dbscheme.FieldsEntity;
@@ -531,61 +530,6 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         }
     }
 
-    protected class FieldInformAction extends AbstractAction {
-
-        public FieldInformAction() {
-            super();
-            putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_I, KeyEvent.CTRL_DOWN_MASK));
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            if (fieldsList.hasFocus() && fieldsList.getSelectedValue() != null && fieldsList.getSelectedValue() instanceof Field) {
-                Field fmd = fieldsList.getSelectedValue();
-                String fieldName = fmd.getName();
-
-                assert (fieldName != null && !fieldName.isEmpty());
-
-                String ldesc = fmd.getDescription();
-                String lTypeName = SQLUtils.getLocalizedTypeName(fmd.getTypeInfo().getSqlType());
-                if (fmd.isPk()) {
-                    lTypeName = SQLUtils.getLocalizedPkName() + "." + lTypeName;
-                }
-                if (fmd.isFk()) {
-                    lTypeName = SQLUtils.getLocalizedFkName() + "." + lTypeName;
-                }
-                String lText = (((ldesc != null && !ldesc.isEmpty()) ? fieldName + " (" + ldesc + ") " : fieldName) + " : " + lTypeName);
-                JOptionPane.showInputDialog(EntityView.this, null, entity.getTitle(), JOptionPane.INFORMATION_MESSAGE, null, null, lText);
-            } else if (!(EntityView.this.getEntity() instanceof QueryParametersEntity)) {
-                final E ent = EntityView.this.getEntity();
-                final String info;
-                String name = ent.getName();
-                if (name == null) {
-                    if (ent instanceof QueryEntity) {
-                        name = ((QueryEntity) ent).getAlias();
-                    }
-                    if (name == null) {
-                        name = entity.getTitle();
-                        if (name == null) {
-                            name = "<no name>";
-                        }
-                    }
-                }
-                if (ent.getQueryName() != null) {
-                    info = String.format("%s %s", ent.getQueryName(), name);
-                } else {
-                    final String schema = ent.getTableSchemaName();
-                    if (schema != null && !schema.isEmpty()) {
-                        info = String.format("%s.%s %s", schema, ent.getTableName(), name);
-                    } else {
-                        info = String.format("%s %s", ent.getTableName(), name);
-                    }
-                }
-                JOptionPane.showInputDialog(EntityView.this, null, entity.getTitle(), JOptionPane.INFORMATION_MESSAGE, null, null, info);
-            }
-        }
-    }
-
     protected class EntityViewMoverResizer extends MouseAdapter {
 
         protected class MoveInfo {
@@ -907,21 +851,20 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
                     revalidate();
                     repaint();
                     break;
+                case Entity.X_PROPERTY:
+                    EntityView.this.setLocation((Integer) evt.getNewValue(), EntityView.this.getLocation().y);
+                    break;
+                case Entity.Y_PROPERTY:
+                    EntityView.this.setLocation(EntityView.this.getLocation().x, (Integer) evt.getNewValue());
+                    break;
+                case Entity.WIDTH_PROPERTY:
+                    EntityView.this.setSize((Integer) evt.getNewValue(), EntityView.this.getHeight());
+                    break;
+                case Entity.HEIGHT_PROPERTY:
+                    EntityView.this.setSize(EntityView.this.getWidth(), (Integer) evt.getNewValue());
+                    EntityView.this.reLayout();
+                    break;
                 default:
-                    switch (evt.getPropertyName()) {
-                        case "x":
-                            EntityView.this.setLocation((Integer) evt.getNewValue(), EntityView.this.getLocation().y);
-                            break;
-                        case "y":
-                            EntityView.this.setLocation(EntityView.this.getLocation().x, (Integer) evt.getNewValue());
-                            break;
-                        case "width":
-                            EntityView.this.setSize((Integer) evt.getNewValue(), EntityView.this.getHeight());
-                            break;
-                        case "height":
-                            EntityView.this.setSize(EntityView.this.getWidth(), (Integer) evt.getNewValue());
-                            break;
-                    }
                     // Warning! some non-visual properties changes can arrive from background thread, so don't call reLayout here!
                     break;
             }
@@ -969,9 +912,9 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
 
         @Override
         public void added(Fields fields, Collection<Field> fieldsCollection) {
-            for (Field field : fieldsCollection) {
+            fieldsCollection.stream().forEach((field) -> {
                 field.getChangeSupport().addPropertyChangeListener(fieldsChangesReflector);
-            }
+            });
         }
 
         @Override
@@ -982,9 +925,9 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
 
         @Override
         public void removed(Fields fields, Collection<Field> fieldsCollection) {
-            for (Field field : fieldsCollection) {
+            fieldsCollection.stream().forEach((field) -> {
                 field.getChangeSupport().removePropertyChangeListener(fieldsChangesReflector);
-            }
+            });
             invalidateConnectors();
         }
 
@@ -1031,20 +974,6 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         if (parametersModel != null) {
             parametersModel.fireDataChanged();
         }
-    }
-
-    private void setupActionMap() {
-        ActionMap am = getActionMap();
-        InputMap im = getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-        if (am != null && im != null) {
-            FieldInformAction fia = new FieldInformAction();
-            am.put(FieldInformAction.class.getSimpleName(), fia);
-            im.put((KeyStroke) fia.getValue(Action.ACCELERATOR_KEY), FieldInformAction.class.getSimpleName());
-            am.put(MinimizeRestoreAction.class.getSimpleName(), minimizeRestoreAction);
-            im.put((KeyStroke) minimizeRestoreAction.getValue(Action.ACCELERATOR_KEY), MinimizeRestoreAction.class.getSimpleName());
-        }
-        fieldsList.setActionMap(am);
-        parametersList.setActionMap(am);
     }
 
     @Override
@@ -1107,7 +1036,6 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         minimizeRestoreAction = new MinimizeRestoreAction();
         entitiesManager = aMovesManager;
         initComponents();
-        setupActionMap();
         if (entity != null) {
             entity.getChangeSupport().addPropertyChangeListener(entityChangesReflector);
             if (entity.getFields() != null) {

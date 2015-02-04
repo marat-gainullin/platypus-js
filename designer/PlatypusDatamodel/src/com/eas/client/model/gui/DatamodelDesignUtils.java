@@ -38,6 +38,10 @@ public class DatamodelDesignUtils {
     public static Font bindedFieldsFont = new Font("Arial", Font.BOLD, 12);
     public static String SWITCH_2_DATASOURCES_ACTION_NAME = "SwitchToDatasources";
 
+    public static String getString(String aKey) {
+        return localizeString(aKey);
+    }
+    
     public static String getLocalizedString(String aKey) {
         return localizeString(aKey);
     }

@@ -31,6 +31,7 @@ import javax.swing.undo.UndoableEdit;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
 import org.openide.util.Lookup;
+import org.openide.util.NbBundle;
 
 /**
  *
@@ -153,11 +154,11 @@ public class TableFieldNode extends FieldNode {
                     promtMsg3 = "areYouSureBlobFieldInRelationsDataPresent"; //NOI18N
                 }
                 if (rCount == 0 && !rels.isEmpty()) {
-                    msg = DbStructureUtils.getString(promtMsg1, String.valueOf(rels.size()), null);
+                    msg = NbBundle.getMessage(DbStructureUtils.class, promtMsg1, String.valueOf(rels.size()), null);
                 } else if (rCount > 0 && rels.isEmpty()) {
-                    msg = DbStructureUtils.getString(promtMsg2, String.valueOf(rCount), null);
+                    msg = NbBundle.getMessage(DbStructureUtils.class, promtMsg2, String.valueOf(rCount), null);
                 } else if (rCount > 0 && !rels.isEmpty()) {
-                    msg = DbStructureUtils.getString(promtMsg3, String.valueOf(rels.size()), String.valueOf(rCount));
+                    msg = NbBundle.getMessage(DbStructureUtils.class, promtMsg3, String.valueOf(rels.size()), String.valueOf(rCount));
                 }
                 if (msg == null || confirm(msg)) {
                     // we have to remove foreign keys because of types incompatibility
@@ -206,7 +207,7 @@ public class TableFieldNode extends FieldNode {
     }
 
     private boolean confirm(String message) {
-        NotifyDescriptor d = new NotifyDescriptor.Confirmation(message, DbStructureUtils.getString("dbSchemeEditor"), NotifyDescriptor.OK_CANCEL_OPTION); //NOI18N
+        NotifyDescriptor d = new NotifyDescriptor.Confirmation(message, NbBundle.getMessage(DbStructureUtils.class, "dbSchemeEditor"), NotifyDescriptor.OK_CANCEL_OPTION); //NOI18N
         return NotifyDescriptor.OK_OPTION.equals(DialogDisplayer.getDefault().notify(d));
     }
 

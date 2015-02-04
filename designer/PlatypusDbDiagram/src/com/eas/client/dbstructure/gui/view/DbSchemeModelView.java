@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.model.gui.view.model;
+package com.eas.client.dbstructure.gui.view;
 
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.metadata.Field;
@@ -16,13 +16,11 @@ import com.eas.client.dbstructure.IconCache;
 import com.eas.client.dbstructure.SqlActionsController;
 import com.eas.client.dbstructure.gui.edits.*;
 import com.eas.client.model.gui.SettingsDialog;
-import com.eas.client.dbstructure.gui.view.ForeignKeySettingsView;
 import com.eas.client.metadata.DbTableIndexSpec;
 import com.eas.client.metadata.TableRef;
 import com.eas.client.model.*;
 import com.eas.client.model.dbscheme.DbSchemeModel;
 import com.eas.client.model.dbscheme.FieldsEntity;
-import com.eas.client.model.gui.DatamodelDesignUtils;
 import com.eas.client.model.gui.DmAction;
 import com.eas.client.model.gui.edits.AccessibleCompoundEdit;
 import com.eas.client.model.gui.edits.DeleteEntityEdit;
@@ -30,9 +28,10 @@ import com.eas.client.model.gui.edits.DeleteRelationEdit;
 import com.eas.client.model.gui.edits.NewEntityEdit;
 import com.eas.client.model.gui.edits.NewRelationEdit;
 import com.eas.client.model.gui.edits.fields.DeleteFieldEdit;
+import com.eas.client.model.gui.view.model.SelectedField;
 import com.eas.client.model.gui.selectors.TablesSelectorCallback;
 import com.eas.client.model.gui.view.entities.EntityView;
-import com.eas.client.model.gui.view.entities.TableEntityView;
+import com.eas.client.model.gui.view.model.ModelView;
 import com.eas.client.model.store.DbSchemeModel2XmlDom;
 import com.eas.client.model.store.XmlDom2DbSchemeModel;
 import com.eas.designer.datamodel.nodes.FieldNode;
@@ -110,7 +109,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                                                 && (only4Table == null || only4Table.equalsIgnoreCase(refereeTableName) || only4Table.equalsIgnoreCase(leftTableName))
                                                 && entitiesByTableName.containsKey(refereeTableName.toLowerCase())) {
                                             FieldsEntity refereeEntity = entitiesByTableName.get(refereeTableName.toLowerCase());
-                                            boolean alreadyExist = DatamodelDesignUtils.isRelationAlreadyDefined(entity, entity.getFields().get(fkSpec.getField()), refereeEntity, refereeEntity.getFields().get(fkSpec.getReferee().getField()));
+                                            boolean alreadyExist = isRelationAlreadyDefined(entity, entity.getFields().get(fkSpec.getField()), refereeEntity, refereeEntity.getFields().get(fkSpec.getReferee().getField()));
                                             if (!alreadyExist) {
                                                 Relation<FieldsEntity> fkRelation = new Relation<>(entity, entity.getFields().get(fkSpec.getField()), refereeEntity, refereeEntity.getFields().get(fkSpec.getReferee().getField()));
                                                 fkRelation.setFkName(fkSpec.getCName());
@@ -138,6 +137,28 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
             }
         }
         return added;
+    }
+
+    public static boolean isRelationAlreadyDefined(FieldsEntity leftEntity, Field leftField, FieldsEntity rightEntity, Field rightField) {
+        if (leftEntity != null && rightEntity != null
+                && leftField != null
+                && rightField != null) {
+            Set<Relation<FieldsEntity>> inRels = rightEntity.getInRelations();
+            if (inRels != null) {
+                for (Relation<FieldsEntity> rel : inRels) {
+                    if (rel != null) {
+                        FieldsEntity lEntity = rel.getLeftEntity();
+                        if (lEntity == leftEntity) {
+                            if (leftField == rel.getLeftField()
+                                    && rightField == rel.getRightField()) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     @Override
@@ -218,10 +239,13 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
     @Override
     protected void deleteSelectedFields() {
         if (isSelectedDeletableFields()) {
+            FieldsEntity selectedEntity = selectedFields.iterator().next().entity;
+            EntityView<FieldsEntity> feView = getEntityView(selectedEntity);
+            int oldSelectionLeadIndex = feView.getFieldsList().getSelectionModel().getLeadSelectionIndex();
             AccessibleCompoundEdit section = new AccessibleCompoundEdit();
-            Set<EntityFieldTuple> toDelete = new HashSet<>(selectedFields);
+            Set<SelectedField<FieldsEntity>> toDelete = new HashSet<>(selectedFields);
             clearSelection();
-            for (EntityFieldTuple t : toDelete) {
+            for (SelectedField<FieldsEntity> t : toDelete) {
                 Set<Relation<FieldsEntity>> toDel = FieldsEntity.getInOutRelationsByEntityField(t.entity, t.field);
                 for (Relation rel : toDel) {
                     DeleteRelationEdit drEdit = new DeleteRelationEdit(rel);
@@ -234,6 +258,15 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
             }
             section.end();
             undoSupport.postEdit(section);
+            if (oldSelectionLeadIndex != -1) {
+                int listSize = feView.getFieldsList().getModel().getSize();
+                if (oldSelectionLeadIndex >= listSize) {
+                    oldSelectionLeadIndex = listSize - 1;
+                }
+                if (oldSelectionLeadIndex >= 0 && oldSelectionLeadIndex < listSize) {
+                    feView.getFieldsList().getSelectionModel().setSelectionInterval(oldSelectionLeadIndex, oldSelectionLeadIndex);
+                }
+            }
         }
     }
 
@@ -261,11 +294,11 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
 
     @Override
     protected boolean isSelectedDeletableFields() {
-        return isSelectedFieldsOnOneEntity() && !isSelectedFk();
+        return isSelectedFieldsOnOneEntity() && !isSelectedPk();
     }
 
-    private boolean isSelectedFk() {
-        for (EntityFieldTuple eft : selectedFields) {
+    private boolean isSelectedPk() {
+        for (SelectedField<FieldsEntity> eft : selectedFields) {
             if (eft.field.isPk()) {
                 return true;
             }
@@ -286,34 +319,34 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                 FieldsEntity entity = (FieldsEntity) getEntity();
                 DbSchemeModel model = entity.getModel();
                 if (model != null) {
-                    NewFieldEdit fieldEdit;
                     try {
                         Field field = NewFieldEdit.createField(entity);
                         PropertySheet ps = new PropertySheet();
-                        ps.setNodes(new Node[]{new FieldNode(field, Lookups.fixed(entity), true)});
+                        // FieldNode is used here to avoid in database edits generation by TableFieldNode
+                        FieldNode fieldNode = new FieldNode(field, Lookups.fixed(entity), true);
+                        ps.setNodes(new Node[]{fieldNode});
                         DialogDescriptor dd = new DialogDescriptor(ps, NbBundle.getMessage(DbSchemeModelView.class, "MSG_NewSchemeFieldDialogTitle"));
                         if (DialogDescriptor.OK_OPTION.equals(DialogDisplayer.getDefault().notify(dd))) {
-                            fieldEdit = new NewFieldEdit(sqlController, entity, field);
+                            NewFieldEdit fieldEdit = new NewFieldEdit(sqlController, entity, field);
                             fieldEdit.redo();
-                        } else {
-                            return;
+                            undoSupport.notSavable();
+                            undoSupport.beginUpdate();
+                            try {
+                                undoSupport.postEdit(fieldEdit);
+                                com.eas.client.model.gui.edits.fields.NewFieldEdit edit = new com.eas.client.model.gui.edits.fields.NewFieldEdit(entity, fieldEdit.getField());
+                                edit.redo();
+                                undoSupport.postEdit(edit);
+                                checkActions();
+                            } catch (Exception ex) {
+                                JOptionPane.showMessageDialog(DbSchemeModelView.this, ex.getLocalizedMessage(), NbBundle.getMessage(DbStructureUtils.class, "dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
+                            } finally {
+                                undoSupport.endUpdate();
+                            }
+                            EntityView<FieldsEntity> efView = getEntityView(entity);
+                            efView.getFieldsList().setSelectedValue(field, true);
                         }
                     } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(DbSchemeModelView.this, ex.getLocalizedMessage(), DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
-                    undoSupport.notSavable();
-                    undoSupport.beginUpdate();
-                    try {
-                        undoSupport.postEdit(fieldEdit);
-                        com.eas.client.model.gui.edits.fields.NewFieldEdit edit = new com.eas.client.model.gui.edits.fields.NewFieldEdit(entity, fieldEdit.getField());
-                        edit.redo();
-                        undoSupport.postEdit(edit);
-                        checkActions();
-                    } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(DbSchemeModelView.this, ex.getLocalizedMessage(), DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
-                    } finally {
-                        undoSupport.endUpdate();
+                        JOptionPane.showMessageDialog(DbSchemeModelView.this, ex.getLocalizedMessage(), NbBundle.getMessage(DbStructureUtils.class, "dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }
@@ -336,7 +369,6 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
         public void actionPerformed(ActionEvent e) {
             undoSupport.beginUpdate();
             try {
-                needRerouteConnectors = false;
                 try {
                     super.actionPerformed(e);
                     if (justSelected != null) {
@@ -349,12 +381,8 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                         }
                     }
                 } finally {
-                    SwingUtilities.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            needRerouteConnectors = true;
-                            refreshView();
-                        }
+                    SwingUtilities.invokeLater(() -> {
+                        refreshView();
                     });
                 }
             } finally {
@@ -377,12 +405,12 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
 
         @Override
         public String getDmActionText() {
-            return DbStructureUtils.getString(CreateTableAction.class.getSimpleName());
+            return NbBundle.getMessage(DbStructureUtils.class, CreateTableAction.class.getSimpleName());
         }
 
         @Override
         public String getDmActionHint() {
-            return DbStructureUtils.getString(CreateTableAction.class.getSimpleName() + ".hint");
+            return NbBundle.getMessage(DbStructureUtils.class, CreateTableAction.class.getSimpleName() + ".hint");
         }
 
         @Override
@@ -399,7 +427,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
         public void actionPerformed(ActionEvent e) {
             String tableName = "";
             while (tableName != null && tableName.isEmpty()) {
-                tableName = JOptionPane.showInputDialog(DbSchemeModelView.this, DbStructureUtils.getString("inputTableName"), DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.QUESTION_MESSAGE);
+                tableName = JOptionPane.showInputDialog(DbSchemeModelView.this, NbBundle.getMessage(DbStructureUtils.class, "inputTableName"), NbBundle.getMessage(DbStructureUtils.class, "dbSchemeEditor"), JOptionPane.QUESTION_MESSAGE);
             }
             if (tableName != null) {
                 CompoundEdit section = new DbStructureCompoundEdit();
@@ -407,7 +435,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                 try {
                     edit.redo();
                 } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(DbSchemeModelView.this, ex.getLocalizedMessage(), DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(DbSchemeModelView.this, ex.getLocalizedMessage(), NbBundle.getMessage(DbStructureUtils.class, "dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 section.addEdit(edit);
@@ -424,7 +452,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                     entityEdit.redo();
                     section.addEdit(entityEdit);
                 } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(DbSchemeModelView.this, ex.getLocalizedMessage(), DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(DbSchemeModelView.this, ex.getLocalizedMessage(), NbBundle.getMessage(DbStructureUtils.class, "dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
                 } finally {
                     section.end();
                     undoSupport.postEdit(section);
@@ -448,12 +476,12 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
 
         @Override
         public String getDmActionText() {
-            return DbStructureUtils.getString(DropTableAction.class.getSimpleName());
+            return NbBundle.getMessage(DbStructureUtils.class, DropTableAction.class.getSimpleName());
         }
 
         @Override
         public String getDmActionHint() {
-            return DbStructureUtils.getString(DropTableAction.class.getSimpleName() + ".hint");
+            return NbBundle.getMessage(DbStructureUtils.class, DropTableAction.class.getSimpleName() + ".hint");
         }
 
         @Override
@@ -507,13 +535,13 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                     int rCount = getRecordsCount(tableEntity);
                     String msg = null;
                     if (rCount == 0 && !inRels.isEmpty()) {
-                        msg = DbStructureUtils.getString("areYouSureInRelationsPresent", String.valueOf(inRels.size()), null);
+                        msg = NbBundle.getMessage(DbStructureUtils.class, "areYouSureInRelationsPresent", String.valueOf(inRels.size()), null);
                     } else if (rCount > 0 && inRels.isEmpty()) {
-                        msg = DbStructureUtils.getString("areYouSureDataPresent", String.valueOf(rCount), null);
+                        msg = NbBundle.getMessage(DbStructureUtils.class, "areYouSureDataPresent", String.valueOf(rCount), null);
                     } else if (rCount > 0 && !inRels.isEmpty()) {
-                        msg = DbStructureUtils.getString("areYouSureInRelationsDataPresent", String.valueOf(inRels.size()), String.valueOf(rCount));
+                        msg = NbBundle.getMessage(DbStructureUtils.class, "areYouSureInRelationsDataPresent", String.valueOf(inRels.size()), String.valueOf(rCount));
                     }
-                    if (msg == null || JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(DbSchemeModelView.this, msg, DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)) {
+                    if (msg == null || JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(DbSchemeModelView.this, msg, NbBundle.getMessage(DbStructureUtils.class, "dbSchemeEditor"), JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)) {
                         editDbDiagram(tableEntity, sqlController, e);
                     }
                 }
@@ -528,7 +556,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
             try {
                 edit.redo();
             } catch (Exception ex) {
-                int userChoice = JOptionPane.showConfirmDialog(DbSchemeModelView.this, ex.getLocalizedMessage() + " \n" + DbStructureUtils.getString("removeFromDiagram"), DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
+                int userChoice = JOptionPane.showConfirmDialog(DbSchemeModelView.this, ex.getLocalizedMessage() + " \n" + NbBundle.getMessage(DbStructureUtils.class, "removeFromDiagram"), NbBundle.getMessage(DbStructureUtils.class, "dbSchemeEditor"), JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (userChoice == JOptionPane.YES_OPTION) {
                     if (removeTableAction != null) {
                         removeTableAction.actionPerformed(e);
@@ -564,7 +592,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                             dEdits.add(dEdit);
                         }
                     } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(DbSchemeModelView.this, ex.getLocalizedMessage(), DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(DbSchemeModelView.this, ex.getLocalizedMessage(), NbBundle.getMessage(DbStructureUtils.class, "dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
                         return;
                     }
                     undoSupport.notSavable();
@@ -576,7 +604,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                         try {
                             super.actionPerformed(e);
                         } catch (Exception ex) {
-                            JOptionPane.showMessageDialog(DbSchemeModelView.this, ex.getLocalizedMessage(), DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(DbSchemeModelView.this, ex.getLocalizedMessage(), NbBundle.getMessage(DbStructureUtils.class, "dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
                             return;
                         }
                     } finally {
@@ -600,13 +628,13 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
 
         protected int getDeleteTypeOption() {
             Object[] options = {
-                DbStructureUtils.getString("dlgDeleteFromDiagram"),
-                DbStructureUtils.getString("dlgDropTable"),
-                DbStructureUtils.getString("dlgCancel")
+                NbBundle.getMessage(DbStructureUtils.class, "dlgDeleteFromDiagram"),
+                NbBundle.getMessage(DbStructureUtils.class, "dlgDropTable"),
+                NbBundle.getMessage(DbStructureUtils.class, "dlgCancel")
             };
             return JOptionPane.showOptionDialog(DbSchemeModelView.this,
-                    DbStructureUtils.getString("dlgDeleteTableMsg"),
-                    DbStructureUtils.getString("dlgDeleteTableTitle"),
+                    NbBundle.getMessage(DbStructureUtils.class, "dlgDeleteTableMsg"),
+                    NbBundle.getMessage(DbStructureUtils.class, "dlgDeleteTableTitle"),
                     JOptionPane.YES_NO_CANCEL_OPTION,
                     JOptionPane.QUESTION_MESSAGE,
                     null,
@@ -618,21 +646,8 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
             if (isEnabled()) {
                 // Remove fields from database and the diagram
                 FieldsEntity entity = getSelectedFields().iterator().next().entity;
-                Set<Relation<FieldsEntity>> toConfirm = new HashSet<>();
-                for (EntityFieldTuple etf : getSelectedFields()) {
-                    Set<Relation<FieldsEntity>> toDel = FieldsEntity.<FieldsEntity>getInOutRelationsByEntityField(entity, etf.field);
-                    toConfirm.addAll(toDel);
-                }
-                if (!toConfirm.isEmpty()) {
-                    if (JOptionPane.showConfirmDialog(DbSchemeModelView.this,
-                            DatamodelDesignUtils.getLocalizedString("ifDeleteRelationsReferences"),
-                            DbStructureUtils.getString("dbSchemeEditor"),
-                            JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.CANCEL_OPTION) {
-                        return;
-                    }
-                }
                 CompoundEdit section = new DbStructureCompoundEdit();
-                for (EntityFieldTuple etf : getSelectedFields()) {
+                for (SelectedField<FieldsEntity> etf : getSelectedFields()) {
                     if (etf.field.isFk()) {
                         try {
                             DropFkEdit edit = new DropFkEdit(sqlController, etf.field.getFk(), etf.field);
@@ -643,7 +658,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                             if (section.isSignificant()) {
                                 undoSupport.postEdit(section);
                             }
-                            JOptionPane.showMessageDialog(DbSchemeModelView.this, ex.getLocalizedMessage(), DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(DbSchemeModelView.this, ex.getLocalizedMessage(), NbBundle.getMessage(DbStructureUtils.class, "dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
                             return;
                         }
                     }
@@ -653,7 +668,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                 if (indexes != null) {
                     // collect indexes to drop
                     Set<DbTableIndexSpec> indexes2Drop = new HashSet<>();
-                    for (EntityFieldTuple etf : getSelectedFields()) {
+                    for (SelectedField<FieldsEntity> etf : getSelectedFields()) {
                         Field field = etf.field;
                         // find out what indexes are consist of rsmd field
                         for (DbTableIndexSpec index : indexes) {
@@ -675,8 +690,8 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                         }
                     }
                 }
-                // act with fields
-                for (EntityFieldTuple etf : getSelectedFields()) {
+                // act with fields    
+                for (SelectedField<FieldsEntity> etf : getSelectedFields()) {
                     Field field = etf.field;
                     if (!field.isPk()) {
                         try {
@@ -686,7 +701,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                             if (section.isSignificant()) {
                                 undoSupport.postEdit(section);
                             }
-                            JOptionPane.showMessageDialog(DbSchemeModelView.this, ex.getLocalizedMessage(), DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(DbSchemeModelView.this, ex.getLocalizedMessage(), NbBundle.getMessage(DbStructureUtils.class, "dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
                             return;
                         }
                     }
@@ -718,13 +733,13 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                 int rCount = DbStructureUtils.getRecordsCountByField(entity, field.getName());
                 String msg = null;
                 if (rCount == 0 && !inRels.isEmpty()) {
-                    msg = DbStructureUtils.getString("areYouSureFieldInRelationsPresent", String.valueOf(inRels.size()), null);
+                    msg = NbBundle.getMessage(DbStructureUtils.class, "areYouSureFieldInRelationsPresent", String.valueOf(inRels.size()), null);
                 } else if (rCount > 0 && inRels.isEmpty()) {
-                    msg = DbStructureUtils.getString("areYouSureFieldDataPresent", String.valueOf(rCount), null);
+                    msg = NbBundle.getMessage(DbStructureUtils.class, "areYouSureFieldDataPresent", String.valueOf(rCount), null);
                 } else if (rCount > 0 && !inRels.isEmpty()) {
-                    msg = DbStructureUtils.getString("areYouSureFieldInRelationsDataPresent", String.valueOf(inRels.size()), String.valueOf(rCount));
+                    msg = NbBundle.getMessage(DbStructureUtils.class, "areYouSureFieldInRelationsDataPresent", String.valueOf(inRels.size()), String.valueOf(rCount));
                 }
-                if (msg == null || JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(DbSchemeModelView.this, msg, DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)) {
+                if (msg == null || JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(DbSchemeModelView.this, msg, NbBundle.getMessage(DbStructureUtils.class, "dbSchemeEditor"), JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)) {
                     return doDropField(entity, aEdit, field, e);
                 }
             }
@@ -748,13 +763,13 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                     int rCount = getRecordsCount(tableEntity);
                     String msg = null;
                     if (rCount == 0 && !inRels.isEmpty()) {
-                        msg = DbStructureUtils.getString("areYouSureInRelationsPresent", String.valueOf(inRels.size()), null);
+                        msg = NbBundle.getMessage(DbStructureUtils.class, "areYouSureInRelationsPresent", String.valueOf(inRels.size()), null);
                     } else if (rCount > 0 && inRels.isEmpty()) {
-                        msg = DbStructureUtils.getString("areYouSureDataPresent", String.valueOf(rCount), null);
+                        msg = NbBundle.getMessage(DbStructureUtils.class, "areYouSureDataPresent", String.valueOf(rCount), null);
                     } else if (rCount > 0 && !inRels.isEmpty()) {
-                        msg = DbStructureUtils.getString("areYouSureInRelationsDataPresent", String.valueOf(inRels.size()), String.valueOf(rCount));
+                        msg = NbBundle.getMessage(DbStructureUtils.class, "areYouSureInRelationsDataPresent", String.valueOf(inRels.size()), String.valueOf(rCount));
                     }
-                    if (msg == null || JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(DbSchemeModelView.this, tableEntity.getTableName() + ". " + msg, DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)) {
+                    if (msg == null || JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(DbSchemeModelView.this, tableEntity.getTableName() + ". " + msg, NbBundle.getMessage(DbStructureUtils.class, "dbSchemeEditor"), JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)) {
                         tableEntities.add(tableEntity);
                     }
                 }
@@ -762,7 +777,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                 try {
                     List<FieldsEntity> toDelete = new ArrayList<>();
                     for (FieldsEntity tableEntity : tableEntities) {
-                        if(doDropTable(tableEntity, sqlController, e)){
+                        if (doDropTable(tableEntity, sqlController, e)) {
                             toDelete.add(tableEntity);
                         }
                     }
@@ -781,7 +796,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                 undoSupport.postEdit(edit);
                 return true;
             } catch (Exception ex) {
-                int userChoice = JOptionPane.showConfirmDialog(DbSchemeModelView.this, ex.getLocalizedMessage() + " \n" + DbStructureUtils.getString("removeFromDiagram"), DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
+                int userChoice = JOptionPane.showConfirmDialog(DbSchemeModelView.this, ex.getLocalizedMessage() + " \n" + NbBundle.getMessage(DbStructureUtils.class, "removeFromDiagram"), NbBundle.getMessage(DbStructureUtils.class, "dbSchemeEditor"), JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 return userChoice == JOptionPane.YES_OPTION;
             }
         }
@@ -814,7 +829,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
         }
     }
 
-    public class PasteTablesAction extends ModelView<FieldsEntity,  DbSchemeModel>.Paste {
+    public class PasteTablesAction extends ModelView<FieldsEntity, DbSchemeModel>.Paste {
 
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -834,11 +849,11 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                                         pasteTables(model, doc);
                                     }
                                 } else {
-                                    JOptionPane.showMessageDialog(DbSchemeModelView.this, DbStructureUtils.getString("BadClipboardData"), DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
+                                    JOptionPane.showMessageDialog(DbSchemeModelView.this, NbBundle.getMessage(DbStructureUtils.class, "BadClipboardData"), NbBundle.getMessage(DbStructureUtils.class, "dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
                                 }
                             }
                         } catch (Exception ex) {
-                            JOptionPane.showMessageDialog(DbSchemeModelView.this, DbStructureUtils.getString("BadClipboardData"), DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(DbSchemeModelView.this, NbBundle.getMessage(DbStructureUtils.class, "BadClipboardData"), NbBundle.getMessage(DbStructureUtils.class, "dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
                             Logger.getLogger(PasteTablesAction.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
@@ -899,7 +914,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
             String msg;
             if (!aEntities.isEmpty()) {
                 if (aEntities.size() == 1) {
-                    msg = DbStructureUtils.getString("EAS_TABLE_ALREADY_PRESENT", aEntities.get(0).getTableName() + " (" + aEntities.get(0).getTitle() + ")", null);
+                    msg = NbBundle.getMessage(DbStructureUtils.class, "EAS_TABLE_ALREADY_PRESENT", aEntities.get(0).getTableName() + " (" + aEntities.get(0).getTitle() + ")", null);
                 } else {
                     String tablesList = "";
                     for (int i = 0; i < aEntities.size(); i++) {
@@ -908,9 +923,9 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                         }
                         tablesList += aEntities.get(0).getTableName() + " (" + aEntities.get(0).getTitle() + ")";
                     }
-                    msg = DbStructureUtils.getString("EAS_TABLES_ALREADY_PRESENT", tablesList, null);
+                    msg = NbBundle.getMessage(DbStructureUtils.class, "EAS_TABLES_ALREADY_PRESENT", tablesList, null);
                 }
-                JOptionPane.showMessageDialog(DbSchemeModelView.this, msg, DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(DbSchemeModelView.this, msg, NbBundle.getMessage(DbStructureUtils.class, "dbSchemeEditor"), JOptionPane.INFORMATION_MESSAGE);
             }
         }
     }
@@ -919,7 +934,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
 
         public RelationPropertiesAction() {
             super();
-            putValue(Action.NAME, DbStructureUtils.getString(RelationPropertiesAction.class.getSimpleName()));
+            putValue(Action.NAME, NbBundle.getMessage(DbStructureUtils.class, RelationPropertiesAction.class.getSimpleName()));
             setEnabled(false);
         }
 
@@ -966,7 +981,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
             }
         });
         Dimension size = new Dimension(450, 200);
-        dlg.setTitle(DbStructureUtils.getString("ForeignKeySettingsDialogTitle"));
+        dlg.setTitle(NbBundle.getMessage(DbStructureUtils.class, "ForeignKeySettingsDialogTitle"));
         dlg.setSize(size);
         dlg.setMinimumSize(size);
         dlg.setVisible(true);
@@ -993,7 +1008,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                 try {
                     dbEdit.redo();
                 } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(DbSchemeModelView.this, ex.getLocalizedMessage(), DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(DbSchemeModelView.this, ex.getLocalizedMessage(), NbBundle.getMessage(DbStructureUtils.class, "dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 section.addEdit(dbEdit);
@@ -1007,7 +1022,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                     diagramEdit.recordAfterState(aRelation);
                     section.addEdit(diagramEdit);
                 } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(DbSchemeModelView.this, ex.getLocalizedMessage(), DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(DbSchemeModelView.this, ex.getLocalizedMessage(), NbBundle.getMessage(DbStructureUtils.class, "dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 section.end();
@@ -1019,8 +1034,13 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
     public DbSchemeModelView(TablesSelectorCallback aSelectorCallback) {
         super(aSelectorCallback);
         undoSupport = new DbStructureUndoableEditSupport();
+    }
+
+    @Override
+    protected void putEditingActions() {
+        super.putEditingActions();
         ActionMap am = getActionMap();
-        am.put(AddTableFieldAction.class.getSimpleName(), new AddTableFieldAction());
+        am.put(ModelView.AddField.class.getSimpleName(), new AddTableFieldAction());
         am.put(ModelView.AddTable.class.getSimpleName(), new AddTableAction());
         am.put(ModelView.Delete.class.getSimpleName(), new DropFkRemoveTableAction());
         am.put(ModelView.Paste.class.getSimpleName(), new PasteTablesAction());

@@ -8,6 +8,7 @@ import com.eas.designer.application.query.editing.QueryDocumentEditsComplementor
 import com.eas.designer.application.query.editing.SqlTextEditsComplementor;
 import com.eas.designer.datamodel.ModelUndoProvider;
 import com.eas.designer.explorer.DataObjectProvider;
+import java.awt.EventQueue;
 import java.awt.Rectangle;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -47,7 +48,7 @@ public class PlatypusQuerySupport extends CloneableOpenSupport implements OpenCo
         CloseCookie,
         SaveCookie,
         DataObjectProvider,
-        ModelUndoProvider{
+        ModelUndoProvider {
 
     public Rectangle findPlaceForEntityAdd(int aInitialX, int aInitialY) {
         if (!allEditors.isEmpty()) {
@@ -134,21 +135,23 @@ public class PlatypusQuerySupport extends CloneableOpenSupport implements OpenCo
             @Override
             public void undoableEditHappened(UndoableEditEvent ue) {
                 try {
-                    if (ue.getSource() != dataObject && dataObject.getBasesProxy() != null && !queryDocumentEditsComplementor.isComplementing()
-                            && ue.getEdit() != CloneableEditorSupport.BEGIN_COMMIT_GROUP
-                            && ue.getEdit() != CloneableEditorSupport.END_COMMIT_GROUP) {
-                        UndoableEdit anEdit = null;
-                        if (ue.getSource() == dataObject.getSqlTextDocument()) {
-                            anEdit = complementSqlTextEdit(ue.getEdit());
+                    if (!queryDocumentEditsComplementor.isComplementing()) {
+                        if (ue.getSource() != dataObject && dataObject.getBasesProxy() != null
+                                && ue.getEdit() != CloneableEditorSupport.BEGIN_COMMIT_GROUP
+                                && ue.getEdit() != CloneableEditorSupport.END_COMMIT_GROUP) {
+                            UndoableEdit anEdit;
+                            if (ue.getSource() == dataObject.getSqlTextDocument()) {
+                                anEdit = complementSqlTextEdit(ue.getEdit());
+                            } else {
+                                anEdit = complementQueryDocumentEdit(ue.getEdit());
+                            }
+                            if (anEdit != null) {
+                                ue = new UndoableEditEvent(ue.getSource(), anEdit);
+                                super.undoableEditHappened(ue);
+                            }
                         } else {
-                            anEdit = complementQueryDocumentEdit(ue.getEdit());
-                        }
-                        if (anEdit != null) {
-                            ue = new UndoableEditEvent(ue.getSource(), anEdit);
                             super.undoableEditHappened(ue);
                         }
-                    } else {
-                        super.undoableEditHappened(ue);
                     }
                 } catch (Exception ex) {
                     ErrorManager.getDefault().notify(ex);
@@ -314,20 +317,17 @@ public class PlatypusQuerySupport extends CloneableOpenSupport implements OpenCo
     }
 
     public void closeAllViews() {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    undo.discardAllEdits();
-                    List<CloneableTopComponent> views = getAllViews();
-                    for (CloneableTopComponent view : views) {
-                        view.close();
-                    }
-                    // Take care of memory consumption.
-                    dataObject.shrink();
-                } catch (IOException ex) {
-                    Exceptions.printStackTrace(ex);
+        EventQueue.invokeLater(() -> {
+            try {
+                undo.discardAllEdits();
+                List<CloneableTopComponent> views = getAllViews();
+                for (CloneableTopComponent view : views) {
+                    view.close();
                 }
+                // Take care of memory consumption.
+                dataObject.shrink();
+            } catch (IOException ex) {
+                Exceptions.printStackTrace(ex);
             }
         });
     }

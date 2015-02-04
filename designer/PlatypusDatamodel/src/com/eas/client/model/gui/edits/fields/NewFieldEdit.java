@@ -39,9 +39,4 @@ public class NewFieldEdit<E extends Entity<?, ?, E>> extends DeleteFieldEdit<E> 
     public void setFieldIndex(int aIndex) {
         fieldIndex = aIndex;
     }
-
-    @Override
-    public Field getField() {
-        return field;
-    }
 }

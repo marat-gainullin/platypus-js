@@ -19,6 +19,7 @@ import com.eas.client.model.gui.view.model.ModelView;
 import javax.swing.JOptionPane;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.UndoableEditSupport;
+import org.openide.util.NbBundle;
 
 /**
  *
@@ -44,7 +45,7 @@ public class FksFieldsDragHandler extends RelationsFieldsDragHandler<FieldsEntit
                 cEdit = new CreateFkEdit(sqlActionsController, fkSpec, field);
                 cEdit.redo();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(modelView, ex.getLocalizedMessage(), DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(modelView, ex.getLocalizedMessage(), NbBundle.getMessage(DbStructureUtils.class, "dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
                 return;
             }
             newRel.setFkUpdateRule(ForeignKeySpec.ForeignKeyRule.CASCADE);
@@ -68,7 +69,7 @@ public class FksFieldsDragHandler extends RelationsFieldsDragHandler<FieldsEntit
                     aUndoSupport.endUpdate();
                 }
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(modelView, ex.getLocalizedMessage(), DbStructureUtils.getString("dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(modelView, ex.getLocalizedMessage(), NbBundle.getMessage(DbStructureUtils.class, "dbSchemeEditor"), JOptionPane.ERROR_MESSAGE);
             }
         }
     }

@@ -11,14 +11,12 @@ import com.eas.client.model.Model;
 import com.eas.client.model.ModelEditingValidator;
 import com.eas.client.model.ModelElementRef;
 import com.eas.client.model.Relation;
+import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
-import com.eas.client.model.dbscheme.DbSchemeModel;
 import com.eas.client.model.gui.ResultingDialog;
 import com.eas.client.model.gui.view.entities.EntityView;
 import com.eas.client.model.gui.view.model.ApplicationModelView;
-import com.eas.client.model.gui.view.model.DbSchemeModelView;
 import com.eas.client.model.gui.view.model.ModelView;
-import com.eas.client.model.gui.view.model.QueryModelView;
 import com.eas.client.model.query.QueryModel;
 import com.eas.client.utils.scalableui.JScalableScrollPane;
 import java.awt.Component;
@@ -55,7 +53,7 @@ public class ModelElementSelector {
      */
     public static final int STRICT_DATASOURCE_PARAMETER_SELECTION_SUBJECT = 5;
 
-    public static <E extends Entity<?, SqlQuery, E>> ModelElementRef selectDatamodelElement(final Model<E, ?> aModel, final ModelElementRef aOldValue, int selectionSubject, ModelElementValidator aValidator, Component aParentComponent, String aTitle) {
+    public static ModelElementRef selectDatamodelElement(final ApplicationDbModel aModel, final ModelElementRef aOldValue, int selectionSubject, ModelElementValidator aValidator, Component aParentComponent, String aTitle) {
         if (aModel != null) {
             final ModelElementRef selected = new ModelElementRef();
             ResultingDialog dlg = prepareDialog(aModel, aTitle, selected, selectionSubject, aValidator, aOldValue, null);
@@ -67,15 +65,8 @@ public class ModelElementSelector {
         return null;
     }
 
-    public static <E extends Entity<?, SqlQuery, E>> ResultingDialog prepareDialog(final Model<E, ?> aModel, String aTitle, ModelElementRef trackSubject, int selectionSubject, ModelElementValidator aValidator, final ModelElementRef aOldValue, ActionListener aOkActionListener) {
-        ModelView<E, ?> mView = null;
-        if (aModel instanceof ApplicationDbModel) {
-            mView = (ModelView<E, ?>) new ApplicationModelView((ApplicationDbModel) aModel, null, null);
-        } else if (aModel instanceof QueryModel) {
-            mView = (ModelView<E, ?>) new QueryModelView((QueryModel) aModel, null, null);
-        } else if (aModel instanceof DbSchemeModel) {
-            mView = (ModelView<E, ?>) new DbSchemeModelView((DbSchemeModel) aModel, null);
-        }
+    public static ResultingDialog prepareDialog(final ApplicationDbModel aModel, String aTitle, ModelElementRef trackSubject, int selectionSubject, ModelElementValidator aValidator, final ModelElementRef aOldValue, ActionListener aOkActionListener) {
+        ApplicationModelView mView = new ApplicationModelView((ApplicationDbModel) aModel, null, null);
         mView.setAutoscrolls(true);
         JScalableScrollPane scroll = new JScalableScrollPane();
         scroll.setViewportView(mView);
@@ -84,25 +75,14 @@ public class ModelElementSelector {
         mView.addModelSelectionListener(new ModelElementRefSelectionValidator<>(trackSubject, dlg.getOkAction(), selectionSubject, aValidator));
         dlg.setSize(650, 600);
         dlg.getOkAction().setEnabled(false);
-        mView.addEntityViewDoubleClickListener((EntityView<E> eView, boolean fieldsClicked, boolean paramsClicked) -> {
+        mView.addEntityViewDoubleClickListener((EntityView<ApplicationDbEntity> eView, boolean fieldsClicked, boolean paramsClicked) -> {
             if (dlg.getOkAction().isEnabled()) {
                 dlg.getOkAction().actionPerformed(null);
             }
         });
-        dlg.addWindowListener(new Positioner<E>(aOldValue, aModel, mView));
+        dlg.addWindowListener(new Positioner<ApplicationDbEntity>(aOldValue, aModel, mView));
         return dlg;
     }
-    /*
-     private static class ClonedEntityDesign {
-
-     public Entity entity;
-     public boolean iconified;
-     public int x;
-     public int y;
-     public int width;
-     public int height;
-     }
-     */
 
     private static class Positioner<E extends Entity<?, SqlQuery, E>> extends WindowAdapter {
 

@@ -178,7 +178,8 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 			StyledListBox<JavaScriptObject> box = (StyledListBox<JavaScriptObject>) decorated;
 			box.setSelectedIndex(-1);
 			box.clear();
-			box.addItem("", keyForNullValue, null, "");
+			box.addItem("...", keyForNullValue, null, "");
+			box.setSelectedIndex(0);
 			injected = null;
 			boolean valueMet = false;
 			if (null == value)

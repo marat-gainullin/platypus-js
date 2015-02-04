@@ -13,7 +13,7 @@ import com.eas.client.model.Entity;
  */
 public abstract class FieldsEdit<E extends Entity<?, ?, E>> extends DatamodelEdit {
 
-    protected E entity = null;
+    protected E entity;
 
     public FieldsEdit(E aEntity) {
         super();

@@ -15,9 +15,11 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import org.openide.awt.UndoRedo;
 import org.openide.nodes.Children;
+import org.openide.nodes.Node;
 import org.openide.util.Lookup;
 
 /**
@@ -32,13 +34,13 @@ public abstract class EntityNodeChildren<T> extends Children.Keys<T> implements 
     protected CollectionListener<Fields, Field> fieldsListener = new FieldsToNodesNotifier();
     protected Lookup lookup;
     protected UndoRedo.Manager undoRedo;
+    protected java.util.Map<Field, FieldNode> locator;
 
     public EntityNodeChildren(Entity anEnity, UndoRedo.Manager aUndoReciever, Lookup aLookup) {
         super();
         entity = anEnity;
         lookup = aLookup;
         undoRedo = aUndoReciever;
-        setFields(entity.getFields());
     }
 
     protected abstract T createKey(Field aField);
@@ -62,12 +64,15 @@ public abstract class EntityNodeChildren<T> extends Children.Keys<T> implements 
 
     @Override
     protected void addNotify() {
+        locator = null;
         entity.getChangeSupport().addPropertyChangeListener(Entity.QUERY_VALID_PROPERTY, this);
+        setFields(entity.getFields());
         setKeys(computeKeys());
     }
 
     @Override
     protected void removeNotify() {
+        locator = null;
         entity.getChangeSupport().removePropertyChangeListener(Entity.QUERY_VALID_PROPERTY, this);
         entity.getModel().getChangeSupport().removePropertyChangeListener(this);
         setFields(null);
@@ -76,9 +81,33 @@ public abstract class EntityNodeChildren<T> extends Children.Keys<T> implements 
     }
 
     @Override
+    protected void destroyNodes(Node[] arr) {
+        locator = null;
+        super.destroyNodes(arr);
+    }
+
+    protected void validateLocator() {
+        if (locator == null) {
+            Node[] lnodes = getNodes();// May be implicit locator = null code invocation
+            locator = new HashMap<>();
+            for (Node node : lnodes) {
+                if (node instanceof FieldNode) {
+                    FieldNode fieldNode = (FieldNode) node;
+                    locator.put(fieldNode.getField(), fieldNode);
+                }
+            }
+        }
+    }
+
+    public FieldNode nodeByField(Field aField) {
+        validateLocator();
+        return locator.get(aField);
+    }
+
+    @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if (Entity.QUERY_VALID_PROPERTY.equalsIgnoreCase(evt.getPropertyName())) {
-            setFields(entity.isQuery() ? entity.getFields() : null);
+            setFields(entity.getFields());
             setKeys(computeKeys());
         }
     }

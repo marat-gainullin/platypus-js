@@ -17,18 +17,19 @@ import com.eas.client.model.ModelEditingValidator;
 import com.eas.client.model.Relation;
 import com.eas.client.model.dbscheme.DbSchemeModel;
 import com.eas.client.model.dbscheme.FieldsEntity;
-import com.eas.client.model.gui.DatamodelDesignUtils;
-import com.eas.client.model.gui.selectors.SelectedField;
-import com.eas.client.model.gui.selectors.SelectedParameter;
+import com.eas.client.model.gui.view.model.SelectedField;
 import com.eas.client.model.gui.selectors.TablesSelectorCallback;
 import com.eas.client.model.gui.view.ModelSelectionListener;
 import com.eas.client.model.gui.view.entities.EntityView;
-import com.eas.client.model.gui.view.model.DbSchemeModelView;
-import com.eas.client.model.gui.view.model.DbSchemeModelView.AddTableFieldAction;
-import com.eas.client.model.gui.view.model.DbSchemeModelView.RelationPropertiesAction;
+import com.eas.client.dbstructure.gui.view.DbSchemeModelView;
+import com.eas.client.dbstructure.gui.view.DbSchemeModelView.AddTableFieldAction;
+import com.eas.client.dbstructure.gui.view.DbSchemeModelView.RelationPropertiesAction;
 import com.eas.client.model.gui.view.model.ModelView;
 import com.eas.client.utils.scalableui.JScalableScrollPane;
+import com.eas.client.model.gui.DatamodelDesignUtils;
 import com.eas.client.utils.scalableui.ScaleListener;
+import com.eas.designer.application.query.result.QueryResultTopComponent;
+import com.eas.designer.application.query.result.QueryResultsView;
 import com.eas.gui.JDropDownButton;
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -45,12 +46,17 @@ import javax.swing.*;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.undo.UndoManager;
+import org.openide.ErrorManager;
+import org.openide.util.NbBundle;
+import org.openide.windows.WindowManager;
 
 /**
  *
  * @author Марат
  */
 public class DbSchemeEditorView extends JPanel implements ContainerListener {
+
+    private static final String QUERY_RESULT_TOPCOMPONENT_PREFFERED_ID = "QueryResultTopComponent";
 
     private void checkFkDragHandlers() {
         assert modelView != null;
@@ -91,7 +97,7 @@ public class DbSchemeEditorView extends JPanel implements ContainerListener {
             try {
                 boolean alreadyPresent = schemeModel.getEntityByTableName(entity.getTableName()) != null;
                 if (alreadyPresent) {
-                    JOptionPane.showMessageDialog(DbSchemeEditorView.this, DbStructureUtils.getString("EAS_TABLE_ALREADY_PRESENT", entity.getTableName(), null), getLocalizedString("datamodelTab"), JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(DbSchemeEditorView.this, NbBundle.getMessage(DbStructureUtils.class, "EAS_TABLE_ALREADY_PRESENT", entity.getTableName(), null), getLocalizedString("datamodelTab"), JOptionPane.ERROR_MESSAGE);
                 }
                 return !alreadyPresent;
             } catch (Exception ex) {
@@ -123,8 +129,8 @@ public class DbSchemeEditorView extends JPanel implements ContainerListener {
         public RunQueryAction() {
             super();
             setEnabled(false);
-            putValue(Action.NAME, DbStructureUtils.getString(RunQueryAction.class.getSimpleName()));
-            putValue(Action.SHORT_DESCRIPTION, DbStructureUtils.getString(RunQueryAction.class.getSimpleName() + ".hint"));
+            putValue(Action.NAME, NbBundle.getMessage(DbStructureUtils.class, RunQueryAction.class.getSimpleName()));
+            putValue(Action.SHORT_DESCRIPTION, NbBundle.getMessage(DbStructureUtils.class, RunQueryAction.class.getSimpleName() + ".hint"));
             putValue(Action.SMALL_ICON, com.eas.client.model.gui.IconCache.getIcon("runsql.png")); //NOI18N
         }
 
@@ -132,8 +138,16 @@ public class DbSchemeEditorView extends JPanel implements ContainerListener {
         public void actionPerformed(ActionEvent e) {
             if (isEnabled()) {
                 FieldsEntity ent = modelView.getSelectedEntities().iterator().next();
-                if (ent != null && runQueryCallback != null) {
-                    runQueryCallback.runQuery(ent.getModel().getBasesProxy(), ent.getTableDatasourceName(), ent.getTableSchemaName(), ent.getTableName());
+                if (ent != null) {
+                    try {
+                        QueryResultsView resultsView = new QueryResultsView(ent.getModel().getBasesProxy(), ent.getTableDatasourceName(), ent.getTableSchemaName(), ent.getTableName());
+                        QueryResultTopComponent window = (QueryResultTopComponent) WindowManager.getDefault().findTopComponent(QUERY_RESULT_TOPCOMPONENT_PREFFERED_ID);
+                        window.openAtTabPosition(0);
+                        window.addResultsView(resultsView);
+                        window.requestActive();
+                    } catch (Exception ex) {
+                        ErrorManager.getDefault().notify(ex);
+                    }
                 }
             }
         }
@@ -147,7 +161,7 @@ public class DbSchemeEditorView extends JPanel implements ContainerListener {
     public class UndoAction extends AbstractAction {
 
         public UndoAction() {
-            putValue(Action.NAME, DbStructureUtils.getString(UndoAction.class.getSimpleName()));
+            putValue(Action.NAME, NbBundle.getMessage(DbStructureUtils.class, UndoAction.class.getSimpleName()));
             //putValue(Action.SHORT_DESCRIPTION, DbStructureUtils.getString(UndoAction.class.getSimpleName() + ".hint"));
             putValue(Action.SMALL_ICON, com.eas.client.model.gui.IconCache.getIcon("undo.png"));
             setEnabled(false);
@@ -169,7 +183,7 @@ public class DbSchemeEditorView extends JPanel implements ContainerListener {
     public class RedoAction extends AbstractAction {
 
         public RedoAction() {
-            putValue(Action.NAME, DbStructureUtils.getString(RedoAction.class.getSimpleName()));
+            putValue(Action.NAME, NbBundle.getMessage(DbStructureUtils.class, RedoAction.class.getSimpleName()));
             //putValue(Action.SHORT_DESCRIPTION, DbStructureUtils.getString(RedoAction.class.getSimpleName() + ".hint"));
             putValue(Action.SMALL_ICON, com.eas.client.model.gui.IconCache.getIcon("redo.png"));
             setEnabled(false);
@@ -201,7 +215,7 @@ public class DbSchemeEditorView extends JPanel implements ContainerListener {
     protected class FieldsEntitiesViewsSelectionListener implements ModelSelectionListener<FieldsEntity> {
 
         @Override
-        public void selectionChanged(List<SelectedParameter<FieldsEntity>> parameters, List<SelectedField<FieldsEntity>> fields) {
+        public void selectionChanged(List<SelectedField<FieldsEntity>> parameters, List<SelectedField<FieldsEntity>> fields) {
             checkActions();
         }
 
@@ -227,7 +241,6 @@ public class DbSchemeEditorView extends JPanel implements ContainerListener {
     protected FieldsEntitiesViewsSelectionListener entitySelectionListener = new FieldsEntitiesViewsSelectionListener();
     // misc
     protected JScalableScrollPane dbSchemeScroll;
-    protected RunQueryCallback runQueryCallback;
 //    protected JScrollPane dbSchemeScroll = null;
     protected SqlActionsController sqlController;
     protected static final String[] zoomLevelsData = new String[]{"25%", "50%", "75%", "100%", "150%", "200%", "300%"};
@@ -281,10 +294,9 @@ public class DbSchemeEditorView extends JPanel implements ContainerListener {
         fillProxyActions();
     }
 
-    public DbSchemeEditorView(DbSchemeModel aModel, TablesSelectorCallback aSelectorCallback, UndoManager aUndo, RunQueryCallback aRunQueryCallback) throws Exception {
+    public DbSchemeEditorView(DbSchemeModel aModel, TablesSelectorCallback aSelectorCallback, UndoManager aUndo) throws Exception {
         this(aModel, aSelectorCallback);
         setUndo(aUndo);
-        runQueryCallback = aRunQueryCallback;
     }
 
     protected void registerUndoListeners() {
@@ -404,9 +416,9 @@ public class DbSchemeEditorView extends JPanel implements ContainerListener {
         JButton btnZoomIn = createToolbarButton();
         JButton btnZoomOut = createToolbarButton();
         JButton btnFind = createToolbarButton();
-        
+
         JLabel lblZoom = new JLabel();
-        lblZoom.setText(DbStructureUtils.getString("lblZoom"));
+        lblZoom.setText(NbBundle.getMessage(DbStructureUtils.class, "lblZoom"));
         JPanel pnlZoom = new JPanel(new BorderLayout());
         JPanel pnlZoom1 = new JPanel(new BorderLayout());
         pnlZoom1.add(lblZoom, BorderLayout.CENTER);
@@ -432,7 +444,7 @@ public class DbSchemeEditorView extends JPanel implements ContainerListener {
         toolsDbEntities.add(addBtn);
 
         JButton btnAddField2 = createToolbarButton();
-        btnAddField2.setAction(modelView.getActionMap().get(AddTableFieldAction.class.getSimpleName()));
+        btnAddField2.setAction(modelView.getActionMap().get(ModelView.AddField.class.getSimpleName()));
         toolsDbEntities.add(btnAddField2);
 
         JButton btnDelete = createToolbarButton();
@@ -522,7 +534,7 @@ public class DbSchemeEditorView extends JPanel implements ContainerListener {
 
     public String getLocalizedString(String aKey) {
         try {
-            return DbStructureUtils.getString(aKey);
+            return NbBundle.getMessage(DbStructureUtils.class, aKey);
         } catch (Exception ex) {
             return aKey;
         }

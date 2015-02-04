@@ -68,7 +68,7 @@
               <Connection code="new CancelAction()" type="code"/>
             </Property>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="com/eas/client/dbstructure/messages.properties" key="btnCancel" replaceFormat="DbStructureUtils.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="com/eas/client/dbstructure/messages.properties" key="btnCancel" replaceFormat="DatamodelDesignUtils.getString(&quot;{key}&quot;)"/>
             </Property>
           </Properties>
         </Component>

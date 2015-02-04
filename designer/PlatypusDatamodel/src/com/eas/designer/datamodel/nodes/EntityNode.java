@@ -69,7 +69,7 @@ public class EntityNode<E extends Entity<?, ?, E>> extends AbstractNode implemen
     @Override
     public void destroy() throws IOException {
         entity.getChangeSupport().removePropertyChangeListener(this);
-        ((EntityNodeChildren)getChildren()).removeNotify();
+        ((EntityNodeChildren) getChildren()).removeNotify();
         super.destroy();
     }
 
@@ -127,35 +127,34 @@ public class EntityNode<E extends Entity<?, ?, E>> extends AbstractNode implemen
     @Override
     public String getHtmlDisplayName() {
         return EntityView.getCheckedEntityTitle(entity);
-        /*
-        String displayName = getDisplayName();
-        String name = getName();
-        if (name != null && !name.isEmpty()) {
-            return String.format("<html><b>%s</b> [%s]", name, displayName);
-        } else {
-            return String.format("<html>%s", displayName);
-        }
-        */        
     }
 
     public E getEntity() {
         return entity;
     }
 
-    public Node[] fieldsToNodes(Set<? extends Field> fields) {
+    public Node[] fieldsToNodes(Set<? extends Field> aFields) {
         Set<Node> convertedNodes = new HashSet<>();
-        if (fields != null) {
-            Map<Field, Node> entitiesToNodes = new HashMap<>();
-            for (Node node : getChildren().getNodes()) {
-                if (node instanceof FieldNode) {
-                    entitiesToNodes.put(((FieldNode) node).getField(), node);
+        if (aFields != null) {
+            for (Field field : aFields) {
+                FieldNode fieldNode = ((EntityNodeChildren) getChildren()).nodeByField(field);
+                if (fieldNode != null) {
+                    convertedNodes.add(fieldNode);
                 }
             }
-            for (Field field : fields) {
-                convertedNodes.add(entitiesToNodes.get(field));
-            }
         }
-        return convertedNodes.toArray(new Node[0]);
+        return convertedNodes.toArray(new Node[]{});
+    }
+
+    public Node fieldToNode(Field aField) {
+        Set<Field> fields = new HashSet<>();
+        fields.add(aField);
+        Node[] res = fieldsToNodes(fields);
+        if (res != null && res.length == 1) {
+            return res[0];
+        } else {
+            return null;
+        }
     }
 
     @Override

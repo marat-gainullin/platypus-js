@@ -9,10 +9,10 @@ import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.eas.client.model.ModelEditingListener;
 import com.eas.client.model.Relation;
-import com.eas.client.model.query.QueryModel;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import org.openide.ErrorManager;
 import org.openide.awt.UndoRedo;
 import org.openide.nodes.Children;
@@ -30,6 +30,7 @@ public abstract class ModelNodeChildren<E extends Entity<?, SqlQuery, E>, MV ext
     protected NodePropertiesUndoRecorder undoRecordrer;
     protected UndoRedo.Manager undoReciever;
     protected Lookup lookup;
+    protected java.util.Map<E, EntityNode> locator;
 
     public ModelNodeChildren(MV aModel, UndoRedo.Manager aUndoReciever, Lookup aLookup) {
         super();
@@ -39,14 +40,34 @@ public abstract class ModelNodeChildren<E extends Entity<?, SqlQuery, E>, MV ext
         lookup = aLookup;
     }
 
+    protected void validateLocator(){
+        if(locator == null){
+            Node[] lnodes = getNodes();// May be implicit locator = null code invocation
+            locator = new HashMap<>();
+            for (Node node : lnodes) {
+                if (node instanceof EntityNode) {
+                    EntityNode<E> entityNode = (EntityNode<E>) node;
+                    locator.put(entityNode.getEntity(), entityNode);
+                }
+            }
+        }
+    }
+    
+    public EntityNode nodeByEntity(E e){
+        validateLocator();
+        return locator.get(e);
+    }
+    
     @Override
     protected void addNotify() {
+        locator = null;
         model.addEditingListener(this);
         setKeys(getKeys());
     }
 
     @Override
     public void removeNotify() {
+        locator = null;
         model.removeEditingListener(this);
         setKeys(Collections.EMPTY_SET);
     }
@@ -54,6 +75,7 @@ public abstract class ModelNodeChildren<E extends Entity<?, SqlQuery, E>, MV ext
     @Override
     protected Node[] createNodes(Object key) {
         try {
+            locator = null;
             Node createdNode = createNode((E) key);
             createdNode.addPropertyChangeListener(undoRecordrer);
             return new Node[]{createdNode};
@@ -70,6 +92,7 @@ public abstract class ModelNodeChildren<E extends Entity<?, SqlQuery, E>, MV ext
     @Override
     protected void destroyNodes(Node[] aNodes) {
         try {
+            locator = null;
             for (Node node : aNodes) {
                 node.removePropertyChangeListener(undoRecordrer);
                 node.destroy();

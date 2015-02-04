@@ -32,7 +32,6 @@ public class PostgreSqlDriver extends SqlDriver {
     private final TwinString[] charsForWrap = {new TwinString("\"", "\"")};
     private final char[] restrictedChars = {' ', ',', '\'', '"'};
 
-    protected static final String COMMIT_DDL_CLAUSE = "%s; commit;";
     protected static final Converter converter = new PostgreConverter();
     protected static final PostgreTypesResolver resolver = new PostgreTypesResolver();
     protected static final String SET_SCHEMA_CLAUSE = "set search_path = %s,public";
@@ -276,7 +275,7 @@ public class PostgreSqlDriver extends SqlDriver {
         if (aDescription == null) {
             aDescription = "";
         }
-        return new String[]{String.format(COMMIT_DDL_CLAUSE, String.format("comment on column %s is '%s'", sqlText, aDescription.replaceAll("'", "''")))};
+        return new String[]{String.format("comment on column %s is '%s'", sqlText, aDescription.replaceAll("'", "''"))};
     }
 
     @Override
@@ -285,17 +284,17 @@ public class PostgreSqlDriver extends SqlDriver {
         if (aDescription == null) {
             aDescription = "";
         }
-        return String.format(COMMIT_DDL_CLAUSE, String.format("comment on table %s is '%s'", sqlText, aDescription.replaceAll("'", "''")));
+        return String.format("comment on table %s is '%s'", sqlText, aDescription.replaceAll("'", "''"));
     }
 
     @Override
     public String getSql4DropTable(String aSchemaName, String aTableName) {
-        return String.format(COMMIT_DDL_CLAUSE, "drop table " + makeFullName(aSchemaName, aTableName));
+        return "drop table " + makeFullName(aSchemaName, aTableName) + " cascade";
     }
 
     @Override
     public String getSql4DropIndex(String aSchemaName, String aTableName, String aIndexName) {
-        return String.format(COMMIT_DDL_CLAUSE, "drop index " + makeFullName(aSchemaName, aIndexName));
+        return "drop index " + makeFullName(aSchemaName, aIndexName);
     }
 
     @Override
@@ -319,14 +318,14 @@ public class PostgreSqlDriver extends SqlDriver {
                 fieldsList += ", ";
             }
         }
-        return String.format(COMMIT_DDL_CLAUSE, "create " + modifier + " index " + indexName + " on " + tableName + " " + methodClause + " ( " + fieldsList + " )");
+        return "create " + modifier + " index " + indexName + " on " + tableName + " " + methodClause + " ( " + fieldsList + " )";
     }
 
     @Override
     public String getSql4DropFkConstraint(String aSchemaName, ForeignKeySpec aFk) {
         String constraintName = wrapNameIfRequired(aFk.getCName());
         String tableName = makeFullName(aSchemaName, aFk.getTable());
-        return String.format(COMMIT_DDL_CLAUSE, "alter table " + tableName + " drop constraint " + constraintName);
+        return "alter table " + tableName + " drop constraint " + constraintName + " cascade";
     }
 
     @Override
@@ -340,9 +339,9 @@ public class PostgreSqlDriver extends SqlDriver {
     public String getSql4EmptyTableCreation(String aSchemaName, String aTableName, String aPkFieldName) {
         String fullName = makeFullName(aSchemaName, aTableName);
         String pkFieldName = wrapNameIfRequired(aPkFieldName);
-        return String.format(COMMIT_DDL_CLAUSE, "CREATE TABLE " + fullName + " ("
+        return "CREATE TABLE " + fullName + " ("
                 + pkFieldName + " NUMERIC NOT NULL,"
-                + "CONSTRAINT " + wrapNameIfRequired(generatePkName(aTableName, PKEY_NAME_SUFFIX)) + " PRIMARY KEY (" + pkFieldName + "))");
+                + "CONSTRAINT " + wrapNameIfRequired(generatePkName(aTableName, PKEY_NAME_SUFFIX)) + " PRIMARY KEY (" + pkFieldName + "))";
     }
 
     private String getFieldTypeDefinition(Field aField) {
@@ -413,10 +412,10 @@ public class PostgreSqlDriver extends SqlDriver {
         if (!newSqlTypeName.equalsIgnoreCase(oldSqlTypeName)
                 || (resolver.isSized(newSqlTypeName) && newSize != oldSize)
                 || (resolver.isScaled(newSqlTypeName) && newScale != oldScale)) {
-            sqls.add(String.format(COMMIT_DDL_CLAUSE, updateDefinition + " type " + fieldDefination + " using " + fieldName + "::" + newSqlTypeName));
+            sqls.add(updateDefinition + " type " + fieldDefination + " using " + fieldName + "::" + newSqlTypeName);
         }
         if (oldNullable != newNullable) {
-            sqls.add(String.format(COMMIT_DDL_CLAUSE, updateDefinition + (newNullable ? " drop not null" : " set not null")));
+            sqls.add(updateDefinition + (newNullable ? " drop not null" : " set not null"));
         }
         return (String[]) sqls.toArray(new String[sqls.size()]);
     }
@@ -426,7 +425,7 @@ public class PostgreSqlDriver extends SqlDriver {
         String fullTableName = makeFullName(aSchemaName, aTableName);
         String sqlText = String.format(RENAME_FIELD_SQL_PREFIX, fullTableName, wrapNameIfRequired(aOldFieldName), wrapNameIfRequired(aNewFieldMd.getName()));
         return new String[]{
-            String.format(COMMIT_DDL_CLAUSE, sqlText)
+            sqlText
         };
     }
 
@@ -467,7 +466,7 @@ public class PostgreSqlDriver extends SqlDriver {
     public String getSql4DropPkConstraint(String aSchemaName, PrimaryKeySpec aPk) {
         String constraintName = wrapNameIfRequired(aPk.getCName());
         String tableFullName = makeFullName(aSchemaName, aPk.getTable());
-        return String.format(COMMIT_DDL_CLAUSE, "alter table " + tableFullName + " drop constraint " + constraintName);
+        return "alter table " + tableFullName + " drop constraint " + constraintName;
     }
 
     @Override
@@ -522,8 +521,8 @@ public class PostgreSqlDriver extends SqlDriver {
             if (fk.getFkDeferrable()) {
                 fkRule += " DEFERRABLE INITIALLY DEFERRED";
             }
-            return String.format(COMMIT_DDL_CLAUSE, String.format("ALTER TABLE %s ADD CONSTRAINT %s"
-                    + " FOREIGN KEY (%s) REFERENCES %s (%s) %s", fkTableName, fkName.isEmpty() ? "" : wrapNameIfRequired(fkName), fkColumnName, pkTableName, pkColumnName, fkRule));
+            return String.format("ALTER TABLE %s ADD CONSTRAINT %s"
+                    + " FOREIGN KEY (%s) REFERENCES %s (%s) %s", fkTableName, fkName.isEmpty() ? "" : wrapNameIfRequired(fkName), fkColumnName, pkTableName, pkColumnName, fkRule);
         }
         return null;
     }
@@ -541,7 +540,7 @@ public class PostgreSqlDriver extends SqlDriver {
                 pkColumnName += ", " + wrapNameIfRequired(pk.getField());
             }
             return new String[]{
-                String.format(COMMIT_DDL_CLAUSE, String.format("ALTER TABLE %s ADD CONSTRAINT %s PRIMARY KEY (%s)", pkTableName, pkName, pkColumnName))
+                String.format("ALTER TABLE %s ADD CONSTRAINT %s PRIMARY KEY (%s)", pkTableName, pkName, pkColumnName)
             };
         };
         return null;
@@ -556,7 +555,18 @@ public class PostgreSqlDriver extends SqlDriver {
     public String[] getSqls4AddingField(String aSchemaName, String aTableName, Field aField) {
         String fullTableName = makeFullName(aSchemaName, aTableName);
         return new String[]{
-            String.format(COMMIT_DDL_CLAUSE, String.format(SqlDriver.ADD_FIELD_SQL_PREFIX, fullTableName) + getSql4FieldDefinition(aField))
+            String.format(SqlDriver.ADD_FIELD_SQL_PREFIX, fullTableName) + getSql4FieldDefinition(aField)
+        };
+    }
+
+    @Override
+    public String[] getSql4DroppingField(String aSchemaName, String aTableName, String aFieldName) {
+        String fullTableName = wrapNameIfRequired(aTableName);
+        if (aSchemaName != null && !aSchemaName.isEmpty()) {
+            fullTableName = wrapNameIfRequired(aSchemaName) + "." + fullTableName;
+        }
+        return new String[]{
+            String.format(DROP_FIELD_SQL_PREFIX, fullTableName) + wrapNameIfRequired(aFieldName) + " cascade"
         };
     }
 

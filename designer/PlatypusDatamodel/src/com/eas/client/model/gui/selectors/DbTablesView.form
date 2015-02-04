@@ -149,7 +149,7 @@
     <Component class="javax.swing.JButton" name="btnDefaultSchema">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="com/eas/client/dbstructure/messages.properties" key="btnDefaultSchema.text" replaceFormat="DbStructureUtils.getString(&quot;{key}&quot;)"/>
+          <ResourceString bundle="com/eas/client/model/gui/selectors/Bundle.properties" key="btnDefaultSchema.text" replaceFormat="NbBundle.getMessage(DbTablesView.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Events>
@@ -159,21 +159,21 @@
     <Component class="javax.swing.JLabel" name="lblSchema">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="com/eas/client/dbstructure/messages.properties" key="lblSchema.text" replaceFormat="DbStructureUtils.getString(&quot;{key}&quot;)"/>
+          <ResourceString bundle="com/eas/client/model/gui/selectors/Bundle.properties" key="lblSchema.text" replaceFormat="NbBundle.getMessage(DbTablesView.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="lblConnection">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="com/eas/client/dbstructure/messages.properties" key="lblConnection.text" replaceFormat="DbStructureUtils.getString(&quot;{key}&quot;)"/>
+          <ResourceString bundle="com/eas/client/model/gui/selectors/Bundle.properties" key="lblConnection.text" replaceFormat="NbBundle.getMessage(DbTablesView.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
     </Component>
     <Component class="javax.swing.JButton" name="btnDefaultConnection">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="com/eas/client/dbstructure/messages.properties" key="btnDefaultConnection.text" replaceFormat="DbStructureUtils.getString(&quot;{key}&quot;)"/>
+          <ResourceString bundle="com/eas/client/model/gui/selectors/Bundle.properties" key="btnDefaultConnection.text" replaceFormat="NbBundle.getMessage(DbTablesView.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Events>

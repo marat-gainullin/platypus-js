@@ -25,6 +25,7 @@ public class QueryEntityNodeChildren extends EntityNodeChildren<EntityNodeChildr
 
     @Override
     protected Node[] createNodes(EntityFieldKey key) {
+        locator = null;
         Node node;
         if (key.field instanceof Parameter) {
             node = new QueryModelParameterNode((Parameter) key.field, lookup);

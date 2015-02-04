@@ -7,10 +7,8 @@ package com.eas.designer.application.query;
 
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Parameter;
-import com.eas.client.dbstructure.DbStructureUtils;
 import com.eas.client.model.Relation;
-import com.eas.client.model.gui.selectors.SelectedField;
-import com.eas.client.model.gui.selectors.SelectedParameter;
+import com.eas.client.model.gui.view.model.SelectedField;
 import com.eas.client.model.gui.view.AddQueryAction;
 import com.eas.client.model.gui.view.ModelSelectionListener;
 import com.eas.client.model.gui.view.ModelViewDragHandler;
@@ -165,8 +163,8 @@ public class PlatypusQueryView extends CloneableTopComponent {
 
         public RunQueryAction() {
             super();
-            putValue(Action.NAME, DbStructureUtils.getString(RunQueryAction.class.getSimpleName()));
-            putValue(Action.SHORT_DESCRIPTION, DbStructureUtils.getString(RunQueryAction.class.getSimpleName() + ".hint"));
+            putValue(Action.NAME, NbBundle.getMessage(PlatypusQueryView.class, RunQueryAction.class.getSimpleName()));
+            putValue(Action.SHORT_DESCRIPTION, NbBundle.getMessage(PlatypusQueryView.class, RunQueryAction.class.getSimpleName() + ".hint"));
             putValue(Action.SMALL_ICON, com.eas.client.model.gui.IconCache.getIcon("runsql.png")); //NOI18N
         }
 
@@ -376,7 +374,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
                     }
 
                     @Override
-                    public void selectionChanged(List<SelectedParameter<QueryEntity>> aParameters, List<SelectedField<QueryEntity>> aFields) {
+                    public void selectionChanged(List<SelectedField<QueryEntity>> aParameters, List<SelectedField<QueryEntity>> aFields) {
                         try {
                             Node[] oldNodes = getActivatedNodes();
                             Node[] newNodes = ModelInspector.convertSelectedToNodes(dataObject.getModelNode(), oldNodes, aParameters, aFields);
@@ -503,7 +501,7 @@ public class PlatypusQueryView extends CloneableTopComponent {
         JButton btnFind = createToolbarButton();
 
         JLabel lblZoom = new JLabel();
-        lblZoom.setText(DbStructureUtils.getString("lblZoom"));
+        lblZoom.setText(NbBundle.getMessage(PlatypusQueryView.class, "lblZoom"));
         JPanel pnlZoom = new JPanel(new BorderLayout());
         JPanel pnlZoom1 = new JPanel(new BorderLayout());
         pnlZoom1.add(lblZoom, BorderLayout.CENTER);

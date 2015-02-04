@@ -19,6 +19,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
+import org.openide.util.NbBundle;
 
 /**
  *
@@ -41,16 +42,16 @@ public class ForeignKeySettingsView extends javax.swing.JPanel {
                     switch(option)
                     {
                         case CASCADE:
-                            value = DbStructureUtils.getString("importedKeyCascade");
+                            value = NbBundle.getMessage(DbStructureUtils.class, "importedKeyCascade");
                             break;
                         case SETNULL:
-                            value = DbStructureUtils.getString("importedKeySetNull");
+                            value = NbBundle.getMessage(DbStructureUtils.class, "importedKeySetNull");
                             break;
                         case SETDEFAULT:
-                            value = DbStructureUtils.getString("importedKeySetDefault");
+                            value = NbBundle.getMessage(DbStructureUtils.class, "importedKeySetDefault");
                             break;
                         case NOACTION:
-                            value = DbStructureUtils.getString("importedKeyNoAction");
+                            value = NbBundle.getMessage(DbStructureUtils.class, "importedKeyNoAction");
                             break;
                     }
                 }
@@ -120,13 +121,13 @@ public class ForeignKeySettingsView extends javax.swing.JPanel {
         chkDeferred = new javax.swing.JCheckBox();
 
         lblName.setLabelFor(txtName);
-        lblName.setText(DbStructureUtils.getString("lblName")); // NOI18N
+        lblName.setText(NbBundle.getMessage(DbStructureUtils.class, "lblName")); // NOI18N
 
-        lblUpdateRule.setText(DbStructureUtils.getString("lblUpdateRule")); // NOI18N
+        lblUpdateRule.setText(NbBundle.getMessage(DbStructureUtils.class, "lblUpdateRule")); // NOI18N
 
-        lblDeleteRule.setText(DbStructureUtils.getString("lblDeleteRule")); // NOI18N
+        lblDeleteRule.setText(NbBundle.getMessage(DbStructureUtils.class, "lblDeleteRule")); // NOI18N
 
-        chkDeferred.setText(DbStructureUtils.getString("chkDeferred")); // NOI18N
+        chkDeferred.setText(NbBundle.getMessage(DbStructureUtils.class, "chkDeferred")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);

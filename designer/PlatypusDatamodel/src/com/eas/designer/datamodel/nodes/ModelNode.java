@@ -10,9 +10,7 @@ import com.eas.client.model.Model;
 import com.eas.client.model.gui.IconCache;
 import java.awt.Image;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import org.openide.loaders.DataObject;
 import org.openide.nodes.AbstractNode;
@@ -71,20 +69,16 @@ public class ModelNode<E extends Entity<?, SqlQuery, E>, M extends Model<E, SqlQ
     public Node[] entitiesToNodes(Set<E> entities) {
         Set<Node> convertedNodes = new HashSet<>();
         if (entities != null) {
-            Map<E, Node> entitiesToNodes = new HashMap<>();
-            for (Node node : getChildren().getNodes()) {
-                if (node instanceof EntityNode) {
-                    entitiesToNodes.put(((EntityNode<E>) node).getEntity(), node);
-                }
-            }
-            for (E entity : entities) {
-                convertedNodes.add(entitiesToNodes.get(entity));
-            }
+            entities.forEach((E e)->{
+                EntityNode entityNode = ((ModelNodeChildren)getChildren()).nodeByEntity(e);
+                if(entityNode != null)
+                    convertedNodes.add(entityNode);
+            });
         }
         return convertedNodes.toArray(new Node[0]);
     }
 
-    public Node entitiyToNode(E entity) {
+    public Node entityToNode(E entity) {
         Set<E> entities = new HashSet<>();
         entities.add(entity);
         Node[] res = entitiesToNodes(entities);

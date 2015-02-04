@@ -9,7 +9,6 @@ import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.model.Entity;
 import com.eas.designer.datamodel.nodes.EntityNodeChildren;
 import com.eas.designer.datamodel.nodes.FieldNode;
-import com.eas.designer.datamodel.nodes.ModelParameterNode;
 import com.eas.designer.datamodel.nodes.QueryParameterNode;
 import org.openide.awt.UndoRedo;
 import org.openide.nodes.Node;
@@ -32,6 +31,7 @@ public class ApplicationEntityNodeChildren extends EntityNodeChildren<EntityNode
 
     @Override
     protected Node[] createNodes(EntityFieldKey key) {
+        locator = null;
         Node node;
         if (key.field instanceof Parameter) {
             node = new QueryParameterNode((Parameter) key.field, lookup);

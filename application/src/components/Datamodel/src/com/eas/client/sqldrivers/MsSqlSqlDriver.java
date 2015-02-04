@@ -30,7 +30,6 @@ public class MsSqlSqlDriver extends SqlDriver {
     private final TwinString[] charsForWrap = {new TwinString("\"", "\""), new TwinString("[", "]")};
     private final char[] restrictedChars = {' ', ',', '\'', '"'};
 
-    protected static final String COMMIT_DDL_CLAUSE = "begin %s; commit; end";
     protected static final String GET_SCHEMA_CLAUSE = "SELECT SCHEMA_NAME()";
     protected static final String CREATE_SCHEMA_CLAUSE = "CREATE SCHEMA %s";
     protected static final Converter converter = new RowsetConverter();
@@ -253,15 +252,15 @@ public class MsSqlSqlDriver extends SqlDriver {
     @Override
     public String getSql4DropTable(String aSchemaName, String aTableName) {
         String fullName = makeFullName(aSchemaName, aTableName);
-        return String.format(COMMIT_DDL_CLAUSE, "drop table " + fullName);
+        return "drop table " + fullName;
     }
 
     @Override
     public String getSql4EmptyTableCreation(String aSchemaName, String aTableName, String aPkFieldName) {
         String fullName = makeFullName(aSchemaName, aTableName);
-        return String.format(COMMIT_DDL_CLAUSE, "CREATE TABLE " + fullName + " ("
+        return "CREATE TABLE " + fullName + " ("
                 + wrapNameIfRequired(aPkFieldName) + " NUMERIC(18, 0) NOT NULL,"
-                + "CONSTRAINT " + wrapNameIfRequired(generatePkName(aTableName, PKEY_NAME_SUFFIX)) + " PRIMARY KEY (" + wrapNameIfRequired(aPkFieldName) + " ASC))");
+                + "CONSTRAINT " + wrapNameIfRequired(generatePkName(aTableName, PKEY_NAME_SUFFIX)) + " PRIMARY KEY (" + wrapNameIfRequired(aPkFieldName) + " ASC))";
     }
 
     @Override
@@ -316,8 +315,7 @@ public class MsSqlSqlDriver extends SqlDriver {
     @Override
     public String getSql4DropFkConstraint(String aSchemaName, ForeignKeySpec aFk) {
         String tableName = makeFullName(aSchemaName, aFk.getTable());
-        String sqlText = "ALTER TABLE " + tableName + " DROP CONSTRAINT " + wrapNameIfRequired(aFk.getCName());
-        return String.format(COMMIT_DDL_CLAUSE, sqlText);
+        return "ALTER TABLE " + tableName + " DROP CONSTRAINT " + wrapNameIfRequired(aFk.getCName());
     }
 
     @Override
@@ -359,14 +357,14 @@ public class MsSqlSqlDriver extends SqlDriver {
     public String[] getSqls4ModifyingField(String aSchemaName, String aTableName, Field aOldFieldMd, Field aNewFieldMd) {
         String fullTableName = makeFullName(aSchemaName, aTableName);
         String alterFieldSql = String.format(ALTER_FIELD_SQL_PREFIX, fullTableName);
-        return new String[]{String.format(COMMIT_DDL_CLAUSE, alterFieldSql + getSql4FieldDefinition(aNewFieldMd))};
+        return new String[]{alterFieldSql + getSql4FieldDefinition(aNewFieldMd)};
     }
 
     @Override
     public String[] getSqls4RenamingField(String aSchemaName, String aTableName, String aOldFieldName, Field aNewFieldMd) {
         String fullTableName = makeFullName(aSchemaName, aTableName);
         String sql = String.format("EXEC sp_rename '%s.%s','%s','COLUMN'", fullTableName, aOldFieldName, aNewFieldMd.getName());
-        return new String[]{String.format(COMMIT_DDL_CLAUSE, sql)};
+        return new String[]{sql};
     }
 
     @Override
@@ -403,7 +401,7 @@ public class MsSqlSqlDriver extends SqlDriver {
     @Override
     public String getSql4DropIndex(String aSchemaName, String aTableName, String aIndexName) {
         aTableName = makeFullName(aSchemaName, aTableName);
-        return String.format(COMMIT_DDL_CLAUSE, "drop index " + wrapNameIfRequired(aIndexName) + " on " + aTableName);
+        return "drop index " + wrapNameIfRequired(aIndexName) + " on " + aTableName;
     }
 
     @Override
@@ -428,7 +426,7 @@ public class MsSqlSqlDriver extends SqlDriver {
                 fieldsList += ", ";
             }
         }
-        return String.format(COMMIT_DDL_CLAUSE, "create " + modifier + " index " + indexName + " on " + tableName + "( " + fieldsList + " )");
+        return "create " + modifier + " index " + indexName + " on " + tableName + "( " + fieldsList + " )";
     }
 
     @Override
@@ -449,16 +447,17 @@ public class MsSqlSqlDriver extends SqlDriver {
     @Override
     public String getSql4CreateSchema(String aSchemaName, String aPassword) {
         if (aSchemaName != null && !aSchemaName.isEmpty()) {
-            return String.format(COMMIT_DDL_CLAUSE, String.format(CREATE_SCHEMA_CLAUSE, aSchemaName));
+            return String.format(CREATE_SCHEMA_CLAUSE, aSchemaName);
+        } else {
+            throw new IllegalArgumentException("Schema name is null or empty.");
         }
-        throw new IllegalArgumentException("Schema name is null or empty.");
     }
 
     @Override
     public String getSql4DropPkConstraint(String aSchemaName, PrimaryKeySpec aPk) {
         String constraintName = wrapNameIfRequired(aPk.getCName());
         String tableName = makeFullName(aSchemaName, aPk.getTable());
-        return String.format(COMMIT_DDL_CLAUSE, "alter table " + tableName + " drop constraint " + constraintName);
+        return "alter table " + tableName + " drop constraint " + constraintName;
     }
 
     @Override
@@ -510,8 +509,8 @@ public class MsSqlSqlDriver extends SqlDriver {
                     fkRule += " ON UPDATE set null ";
                     break;
             }
-            return String.format(COMMIT_DDL_CLAUSE, String.format("ALTER TABLE %s ADD CONSTRAINT %s"
-                    + " FOREIGN KEY (%s) REFERENCES %s (%s) %s", fkTableName, fkName.isEmpty() ? "" : wrapNameIfRequired(fkName), fkColumnName, pkTableName, pkColumnName, fkRule));
+            return String.format("ALTER TABLE %s ADD CONSTRAINT %s"
+                    + " FOREIGN KEY (%s) REFERENCES %s (%s) %s", fkTableName, fkName.isEmpty() ? "" : wrapNameIfRequired(fkName), fkColumnName, pkTableName, pkColumnName, fkRule);
         }
         return null;
     }
@@ -530,7 +529,7 @@ public class MsSqlSqlDriver extends SqlDriver {
                 pkColumnName += ", " + wrapNameIfRequired(pk.getField());
             }
             return new String[]{
-                String.format(COMMIT_DDL_CLAUSE, String.format("ALTER TABLE %s ADD CONSTRAINT %s PRIMARY KEY (%s)", pkTableName, pkName, pkColumnName))
+                String.format("ALTER TABLE %s ADD CONSTRAINT %s PRIMARY KEY (%s)", pkTableName, pkName, pkColumnName)
             };
         }
         return null;
@@ -545,7 +544,7 @@ public class MsSqlSqlDriver extends SqlDriver {
     public String[] getSqls4AddingField(String aSchemaName, String aTableName, Field aField) {
         String fullTableName = makeFullName(aSchemaName, aTableName);
         return new String[]{
-            String.format(COMMIT_DDL_CLAUSE, String.format(SqlDriver.ADD_FIELD_SQL_PREFIX, fullTableName) + getSql4FieldDefinition(aField))
+            String.format(SqlDriver.ADD_FIELD_SQL_PREFIX, fullTableName) + getSql4FieldDefinition(aField)
         };
     }
 
