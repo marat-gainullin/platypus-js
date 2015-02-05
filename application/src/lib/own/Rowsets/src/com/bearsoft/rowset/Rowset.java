@@ -1111,7 +1111,7 @@ public class Rowset {
     }
 
     protected void generateInsert(Row aRow) {
-        if (log != null && flow != null && flow.getEntityId() != null) {
+        if (log != null && flow != null) {
             Insert insert = new Insert(flow.getEntityId());
             List<ChangeValue> data = new ArrayList<>();
             for (int i = 0; i < aRow.getCurrentValues().length; i++) {
@@ -1128,7 +1128,7 @@ public class Rowset {
     }
 
     protected void generateDelete(Row aRow) {
-        if (log != null && flow != null && flow.getEntityId() != null) {
+        if (log != null && flow != null) {
             Delete delete = new Delete(flow.getEntityId());
             delete.keys = Row.generateChangeLogKeys(-1, aRow, null);
             log.add(delete);

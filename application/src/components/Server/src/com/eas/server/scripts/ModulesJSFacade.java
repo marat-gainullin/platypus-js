@@ -42,7 +42,7 @@ public class ModulesJSFacade extends AbstractJSObject {
             if (session.getPrincipal() instanceof SystemPlatypusPrincipal) {
                 throw new IllegalStateException(RESIDENT_MODULES_MODIFICATION_MSG);
             } else {
-                session.registerModule((JSObject) value);
+                session.registerModule(name, (JSObject) value);
             }
         } else if (value == null || value instanceof Undefined) {
             session.unregisterModule(name);

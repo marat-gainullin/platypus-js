@@ -162,10 +162,16 @@ public class Session implements HasPublished {
         return modulesInstances.containsKey(aName);
     }
 
-    public synchronized void registerModule(JSObject aModule) {
-        JSObject c = (JSObject) aModule.getMember("constructor");
-        String name = JSType.toString(c.getMember("name"));
-        modulesInstances.put(name, aModule);
+    public void registerModule(JSObject aModule) {
+        registerModule(null, aModule);
+    }
+    
+    public synchronized void registerModule(String aName, JSObject aModule) {
+        if (aName == null || aName.isEmpty()) {
+            JSObject c = (JSObject) aModule.getMember("constructor");
+            aName = JSType.toString(c.getMember("name"));
+        }
+        modulesInstances.put(aName, aModule);
     }
 
     public synchronized void unregisterModule(String aModuleName) {
@@ -237,7 +243,7 @@ public class Session implements HasPublished {
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = (JSObject)publisher.call(null, new Object[]{this});
+            published = (JSObject) publisher.call(null, new Object[]{this});
         }
         return published;
     }
