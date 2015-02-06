@@ -125,12 +125,12 @@
 }
 
 .gwt-Button, .gwt-Button:active, .gwt-Button:hover, .dropdown-button, .dropdown-button:active{
-    color: white;
+    color:#526e4f;
+    text-shadow:0 1px rgba(255,255,255,0.5);
     margin: 0;
     padding: 3px 5px;
     font-size: 14px;
     text-align: center;
-    text-shadow: 0 1px rgba(0, 0, 0, 0.3);
     background-clip: padding-box;
     border: 1px solid;
     border-radius:3px;
@@ -141,23 +141,25 @@
     -webkit-box-shadow: inset 0 1px #fff,inset 0 0 0 1px rgba(255,255,255,0.3),0 1px 1px rgba(0,0,0,0.05);
     box-shadow: inset 0 1px #fff,inset 0 0 0 1px rgba(255,255,255,0.3),0 1px 1px rgba(0,0,0,0.05);
 
-    background: #81c33d;
-    border-color: #7ba845 #77a343 #6f983f;
-    background-image: -webkit-linear-gradient(top, #a0d44d,#72ba35);
-    background-image: -moz-linear-gradient(top, #a0d44d,#72ba35);
-    background-image: -o-linear-gradient(top, #a0d44d,#72ba35);
-    background-image: linear-gradient(to bottom, #a0d44d,#72ba35);
+    border-color:#98cf9f #98cf9f #8ec397;
+    
+    background-color:#bff1bc;
+    background-image:-webkit-linear-gradient(top, #cef4d0, #b2eeaa);
+    background-image:-moz-linear-gradient(top, #cef4d0, #b2eeaa);
+    background-image:-o-linear-gradient(top, #cef4d0, #b2eeaa);
+    background-image:linear-gradient(to bottom, #cef4d0, #b2eeaa);
 }
 
 .gwt-Button:active{
-    background:#75bd35;
-    border-color:#678f3a #75a143 #81b049;
-    background-image:-webkit-linear-gradient(top, #75bd35,#a0d44d);
-    background-image:-moz-linear-gradient(top, #75bd35,#a0d44d);
-    background-image:-o-linear-gradient(top, #75bd35,#a0d44d);
-    background-image:linear-gradient(to bottom, #75bd35,#a0d44d);
+    background-color:#bff1bc;
+    background-image:-webkit-linear-gradient(top, #b2eeaa, #cef4d0);
+    background-image:-moz-linear-gradient(top, #b2eeaa, #cef4d0);
+    background-image:-o-linear-gradient(top, #b2eeaa, #cef4d0);
+    background-image:linear-gradient(to bottom, #b2eeaa, #cef4d0);
 }
-
+.gwt-Button:focus{
+    border-radius:3px;
+}
 .gwt-Button[disabled]{
     background-image:none;
     background-color:lightgray;
@@ -248,12 +250,8 @@
 }
 
 .combo-field-custom-dropdown{
-    -webkit-appearance: none;  /*Removes default chrome and safari style*/
-    -moz-appearance: none; /* Removes Default Firefox style*/
-    background: url('dropdown-arrow.png') no-repeat;  /*Adds background-image*/
+	background: url('dropdown-arrow.png') no-repeat;  /*Adds background-image*/
     background-position: right;  /*Position of the background-image*/
-    text-indent: 0.01px; /* Removes default arrow from firefox*/
-    text-overflow: "";  /*Removes default arrow from firefox*/
 }
 
 .gwt-ListBox{
@@ -561,8 +559,7 @@
     color:#526e4f;
     text-shadow:0 1px rgba(255,255,255,0.5);
     background:#bff1bc;
-    border:1px solid #d7cd89;
-    border-bottom-color:#cec986;
+    border:1px solid;
     border-color:#98cf9f #98cf9f #8ec397;
     border-radius:3px;
     background-image:-webkit-linear-gradient(top, #cef4d0,#b2eeaa);

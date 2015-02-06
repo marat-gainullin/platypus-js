@@ -102,7 +102,7 @@ public class Filter extends Orderer implements HasPublished {
     @Override
     protected void keysChanged(final Row Row, final int aColIndex, final Object aOldValue, final Object aNewValue) throws RowsetException {
         super.keysChanged(Row, aColIndex, aOldValue, aNewValue);
-        if (rowset.isImmediateFilter()) {
+        if (filterApplied && rowset.isImmediateFilter()) {
             refilterRowset();
         }
     }
@@ -260,15 +260,17 @@ public class Filter extends Orderer implements HasPublished {
     public void rowInserted(RowsetInsertEvent event) {
         Row insertingRow = event.getRow();
         // work on rowset's native rows, hided by the filter
-        if (originalPos == 0) { // before first
-            originalRows.add(0, insertingRow);
-            originalPos = 1;
-        } else if (originalPos > originalRows.size()) {
-            originalRows.add(insertingRow);
-            originalPos = originalRows.size();
-        } else {
-            originalRows.add(originalPos, insertingRow);
-            originalPos++;
+        if(filterApplied){
+	        if (originalPos == 0) { // before first
+	            originalRows.add(0, insertingRow);
+	            originalPos = 1;
+	        } else if (originalPos > originalRows.size()) {
+	            originalRows.add(insertingRow);
+	            originalPos = originalRows.size();
+	        } else {
+	            originalRows.add(originalPos, insertingRow);
+	            originalPos++;
+	        }
         }
         super.rowInserted(event);
     }

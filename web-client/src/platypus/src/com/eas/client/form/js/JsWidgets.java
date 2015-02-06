@@ -371,6 +371,10 @@ public class JsWidgets {
 		    },
 		    set : function(aValue) {
 			    comp.@com.google.gwt.user.client.ui.UIObject::setVisible(Z)(aValue);
+		    	if(aPublished.parent instanceof $wnd.P.BoxPane)
+	    			aPublished.parent.unwrap().@com.bearsoft.gwt.ui.containers.BoxPanel::ajustDisplay(Lcom/google/gwt/user/client/ui/Widget;)(aPublished.unwrap());
+		    	else if(aPublished.parent instanceof $wnd.P.ToolBar)
+	    			aPublished.parent.unwrap().@com.bearsoft.gwt.ui.containers.Toolbar::ajustDisplay(Lcom/google/gwt/user/client/ui/Widget;)(aPublished.unwrap());
 		    }
  	    });
 	    Object.defineProperty(aPublished, "enabled", {
@@ -495,6 +499,8 @@ public class JsWidgets {
 		    		@com.eas.client.form.published.containers.FlowPane::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _width);
 		    	}else if(aPublished.parent instanceof $wnd.P.BoxPane && aPublished.parent.orientation == $wnd.P.Orientation.HORIZONTAL){
 	    			aPublished.parent.unwrap().@com.bearsoft.gwt.ui.containers.BoxPanel::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _width);
+		    	}else if(aPublished.parent instanceof $wnd.P.ToolBar){
+	    			aPublished.parent.unwrap().@com.bearsoft.gwt.ui.containers.Toolbar::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _width);
 		    	}else{
 		    		aPublished.element.style.width = aValue + 'px';
 		    	}

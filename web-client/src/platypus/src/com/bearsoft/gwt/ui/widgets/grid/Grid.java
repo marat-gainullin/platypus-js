@@ -795,7 +795,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 		footerRightContainer.getElement().getParentElement().getStyle().setWidth(rw, Style.Unit.PX);
 	}
 
-	private void propagateHeightButScrollable() {
+	protected void propagateHeightButScrollable() {
 		int r0Height = Math.max(headerLeft.getOffsetHeight(), headerRight.getOffsetHeight());
 		headerLeftContainer.getElement().getParentElement().getStyle().setHeight(r0Height, Style.Unit.PX);
 		headerRightContainer.getElement().getParentElement().getStyle().setHeight(r0Height, Style.Unit.PX);
@@ -833,11 +833,16 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 		super.onDetach();
 	}
 
+	protected void onColumnsResize(){
+		// no op here because of natural columns width's
+	}
+	
 	@Override
 	public void onResize() {
 		if (isAttached()) {
 			hive.setSize(getElement().getClientWidth() + "px", getElement().getClientHeight() + "px");
 			propagateHeaderWidth();
+			onColumnsResize();
 			propagateHeightButScrollable();
 			columnsChevron.setHeight(Math.max(headerLeftContainer.getOffsetHeight(), headerRightContainer.getOffsetHeight()) + "px");
 			for (Widget child : new Widget[] { headerLeftContainer, headerRightContainer, frozenLeftContainer, frozenRightContainer, scrollableLeftContainer, scrollableRightContainer }) {

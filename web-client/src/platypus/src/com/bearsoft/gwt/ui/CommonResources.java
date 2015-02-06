@@ -22,6 +22,8 @@ public interface CommonResources extends ClientBundle {
         public String unselectable();
         
         public String borderSized();
+        
+        public String withoutDropdown();
     }
 
     public CommonStyles commons();

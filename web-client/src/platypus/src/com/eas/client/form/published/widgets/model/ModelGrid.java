@@ -1001,25 +1001,43 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 	}
 
 	@Override
+	protected void onColumnsResize() {
+		if (isAttached()) {
+			double prevError = 0;
+			double error = distributeColumnsWidths();
+			while(Math.abs(error) > 0.8 && Math.abs(error - prevError) > 2){
+				prevError = error;
+				error = distributeColumnsWidths();
+			}
+		}
+	}
+
+	protected double distributeColumnsWidths(){
+		List<ModelColumn> availableColumns = new ArrayList<>();
+		double commonWidth = 0;
+		for (int i = 0; i < getDataColumnCount(); i++) {
+			Column<JavaScriptObject, ?> column = getDataColumn(i);
+			ModelColumn mCol = (ModelColumn) column;
+			if (mCol.isVisible()) {
+				commonWidth += mCol.getWidth();
+				availableColumns.add(mCol);
+			}
+		}
+		double widthError = 0;
+		double delta = (scrollableLeftContainer.getElement().getOffsetWidth() + scrollableRightContainer.getElement().getOffsetWidth()) - commonWidth;
+		for (ModelColumn mCol : availableColumns) {
+			double coef = mCol.getWidth() / commonWidth;
+			double newWidth = mCol.getWidth() + delta * coef;
+			setColumnWidth(mCol, newWidth, Style.Unit.PX);
+			widthError += Math.abs(mCol.getWidth() - newWidth);
+		}
+		return widthError;
+	}
+	
+	@Override
 	public void onResize() {
 		super.onResize();
 		if (isAttached()) {
-			List<ModelColumn> availableColumns = new ArrayList<>();
-			double commonWidth = 0;
-			for (int i = 0; i < getDataColumnCount(); i++) {
-				Column<JavaScriptObject, ?> column = getDataColumn(i);
-				ModelColumn mCol = (ModelColumn) column;
-				if (mCol.isVisible()) {
-					commonWidth += mCol.getWidth();
-					availableColumns.add(mCol);
-				}
-			}
-			double delta = (scrollableLeftContainer.getElement().getClientWidth() + scrollableRightContainer.getElement().getClientWidth()) - commonWidth;
-			for (ModelColumn mCol : availableColumns) {
-				double coef = mCol.getWidth() / commonWidth;
-				double newWidth = mCol.getWidth() + delta * coef;
-				setColumnWidth(mCol, newWidth, Style.Unit.PX);
-			}
 			ResizeEvent.fire(this, getElement().getOffsetWidth(), getElement().getOffsetHeight());
 		}
 	}

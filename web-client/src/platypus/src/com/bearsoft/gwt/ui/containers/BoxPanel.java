@@ -45,11 +45,25 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 			for (int i = 0; i < getWidgetCount(); i++) {
 				Widget w = getWidget(i);
 				formatWidget(w);
+				if (i > 0) {
+					if (orientation == Orientation.HORIZONTAL) {
+						if (direction == Direction.LTR) {
+							w.getElement().getStyle().setMarginLeft(hgap, Style.Unit.PX);
+							w.getElement().getStyle().setMarginRight(0, Style.Unit.PX);
+						} else {
+							w.getElement().getStyle().setMarginLeft(0, Style.Unit.PX);
+							w.getElement().getStyle().setMarginRight(hgap, Style.Unit.PX);
+						}
+					} else {
+						w.getElement().getStyle().setMarginTop(vgap, Style.Unit.PX);
+					}
+				}
 			}
-			if(orientation == Orientation.HORIZONTAL)
+			if (orientation == Orientation.HORIZONTAL) {
 				ajustWidth();
-			else
+			} else {
 				ajustHeight();
+			}
 			onResize();
 		}
 	}
@@ -84,7 +98,8 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 		}
 	}
 
-	protected void formatWidget(Widget child){
+	protected void formatWidget(Widget child) {
+		boolean visible = !child.getElement().hasAttribute("aria-hidden");
 		if (orientation == Orientation.HORIZONTAL) {
 			child.getElement().getStyle().clearTop();
 			child.getElement().getStyle().clearBottom();
@@ -92,8 +107,36 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 			child.getElement().getStyle().setHeight(100, Style.Unit.PCT);
 			CommonResources.INSTANCE.commons().ensureInjected();
 			child.getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
-			child.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+			child.getElement().getStyle().setDisplay(visible ? Style.Display.INLINE_BLOCK : Style.Display.NONE);
 			child.getElement().getStyle().setFloat(direction == Direction.LTR ? Style.Float.LEFT : Style.Float.RIGHT);
+		} else {
+			child.getElement().getStyle().setPosition(Style.Position.RELATIVE);
+			child.getElement().getStyle().setDisplay(visible ? Style.Display.BLOCK : Style.Display.NONE);
+			child.getElement().getStyle().setLeft(0, Style.Unit.PX);
+			child.getElement().getStyle().clearRight();
+			child.getElement().getStyle().setWidth(100, Style.Unit.PCT);
+			CommonResources.INSTANCE.commons().ensureInjected();
+			child.getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
+		}
+	}
+
+	public void ajustDisplay(Widget child){
+		if(child.getParent() == this){
+			boolean visible = !child.getElement().hasAttribute("aria-hidden");
+			if (orientation == Orientation.HORIZONTAL) {
+				child.getElement().getStyle().setDisplay(visible ? Style.Display.INLINE_BLOCK : Style.Display.NONE);
+			} else {
+				child.getElement().getStyle().setDisplay(visible ? Style.Display.BLOCK : Style.Display.NONE);
+			}
+			if(child instanceof RequiresResize)
+				((RequiresResize)child).onResize();
+		}
+	}
+	
+	@Override
+	public void add(Widget child) {
+		formatWidget(child);
+		if (orientation == Orientation.HORIZONTAL) {
 			if (getWidgetCount() > 0) {
 				if (direction == Direction.LTR) {
 					child.getElement().getStyle().setMarginLeft(hgap, Style.Unit.PX);
@@ -108,32 +151,9 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 				ajustWidth();
 			}
 		} else {
-			child.getElement().getStyle().setPosition(Style.Position.RELATIVE);
-			child.getElement().getStyle().setDisplay(Style.Display.BLOCK);
-			child.getElement().getStyle().setLeft(0, Style.Unit.PX);
-			child.getElement().getStyle().clearRight();
-			child.getElement().getStyle().setWidth(100, Style.Unit.PCT);
-			CommonResources.INSTANCE.commons().ensureInjected();
-			child.getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
 			if (getWidgetCount() > 0) {
 				child.getElement().getStyle().setMarginTop(vgap, Style.Unit.PX);
 			}
-			super.add(child, getElement().<Element> cast());
-			if (isAttached()) {
-				ajustHeight();
-			}
-		}
-	}
-	
-	@Override
-	public void add(Widget child) {
-		formatWidget(child);
-		if (orientation == Orientation.HORIZONTAL) {
-			super.add(child, getElement().<Element> cast());
-			if (isAttached()) {
-				ajustWidth();
-			}
-		} else {
 			super.add(child, getElement().<Element> cast());
 			if (isAttached()) {
 				ajustHeight();

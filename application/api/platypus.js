@@ -948,15 +948,17 @@
 
         Object.defineProperty(target, "createFilter", {
             value: function (aConstraints) {
+				var constraints = Array.isArray(aConstraints) ? aConstraints : [aConstraints];
                 var nEntity = this.unwrap();
-                return boxAsJs(nEntity.createFilter(aConstraints));
+                return boxAsJs(nEntity.createFilter(constraints));
             }
         });
 
         Object.defineProperty(target, "createSorting", {
             value: function (aCriteria) {
+				var criteria = Array.isArray(aCriteria) ? aCriteria : [aCriteria];
                 var nEntity = this.unwrap();
-                return boxAsJs(nEntity.createSorting(aCriteria));
+                return boxAsJs(nEntity.createSorting(criteria));
             }
         });
 

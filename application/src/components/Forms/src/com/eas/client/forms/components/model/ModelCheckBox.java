@@ -72,11 +72,12 @@ public class ModelCheckBox extends ModelComponentDecorator<VCheckBox, Boolean> i
     @ScriptFunction
     @Override
     public void setJsValue(Object aValue) {
-        if (com.eas.script.ScriptUtils.isInitialized()) {
-            setValue(aValue != null ? JSType.toBoolean(aValue) : null);
-        } else {
+        if (aValue instanceof Boolean) {
+            setValue((Boolean)aValue);
+        }else if(aValue != null){
+            setValue(com.eas.script.ScriptUtils.isInitialized() ? JSType.toBoolean(aValue) : null);
+        }else
             setValue(null);
-        }
     }
 
     @Override

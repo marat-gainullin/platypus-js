@@ -827,12 +827,22 @@ public class QueryResultsView extends javax.swing.JPanel {
     private void loadParametersValues() {
         Preferences modulePreferences = NbPreferences.forModule(QueryResultsView.class);
         Preferences paramsPreferences = modulePreferences.node(queryName);
-        for (Field parameter : parameters.toCollection()) {
-            Preferences paramPreferences = paramsPreferences.node(parameter.getName());
+        for (Field pField : parameters.toCollection()) {
+            Parameter parameter = (Parameter) pField;
+            Preferences paramNode = paramsPreferences.node(parameter.getName());
             try {
-                Object val = converter.convert2RowsetCompatible(paramPreferences.get(VALUE_PREF_KEY, ""), parameter.getTypeInfo()); //NOI18N
-                if (val != null) {
-                    ((Parameter) parameter).setValue(val);
+                int sqlType = parameter.getTypeInfo().getSqlType();
+                if (sqlType == java.sql.Types.DATE || sqlType == java.sql.Types.TIME || sqlType == java.sql.Types.TIME_WITH_TIMEZONE || sqlType == java.sql.Types.TIMESTAMP
+                        || sqlType == java.sql.Types.TIMESTAMP_WITH_TIMEZONE) {
+                    long lValue = paramNode.getLong(VALUE_PREF_KEY, -1);
+                    if (lValue != -1) {
+                        parameter.setValue(new Date(lValue));
+                    }
+                } else {
+                    Object val = converter.convert2RowsetCompatible(paramNode.get(VALUE_PREF_KEY, ""), parameter.getTypeInfo()); //NOI18N
+                    if (val != null) {
+                        ((Parameter) parameter).setValue(val);
+                    }
                 }
             } catch (Exception ex) {
                 //no-op
@@ -843,19 +853,24 @@ public class QueryResultsView extends javax.swing.JPanel {
     private void saveParametersValues() {
         Preferences modulePreferences = NbPreferences.forModule(QueryResultsView.class);
         Preferences paramsPreferences = modulePreferences.node(queryName);
-        for (Field parameter : parameters.toCollection()) {
+        parameters.toCollection().stream().forEach((pField) -> {
             try {
-                Preferences paramPreferences = paramsPreferences.node(parameter.getName());
-                String strVal = (String) converter.convert2RowsetCompatible(((Parameter) parameter).getValue(), DataTypeInfo.VARCHAR);
-                if (strVal != null) {
-                    paramPreferences.put(VALUE_PREF_KEY, strVal);
+                Parameter parameter = (Parameter) pField;
+                Preferences paramNode = paramsPreferences.node(parameter.getName());
+                if (parameter.getValue() instanceof Date) {
+                    paramNode.putLong(VALUE_PREF_KEY, ((Date) parameter.getValue()).getTime());
                 } else {
-                    paramPreferences.remove(VALUE_PREF_KEY);
+                    String strVal = (String) converter.convert2RowsetCompatible(parameter.getValue(), DataTypeInfo.VARCHAR);
+                    if (strVal != null) {
+                        paramNode.put(VALUE_PREF_KEY, strVal);
+                    } else {
+                        paramNode.remove(VALUE_PREF_KEY);
+                    }
                 }
             } catch (Exception ex) {
                 //no-op
             }
-        }
+        });
     }
 
     public static class PageSizeItem {

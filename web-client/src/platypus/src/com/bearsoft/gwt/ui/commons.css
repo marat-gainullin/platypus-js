@@ -17,3 +17,10 @@
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
 }
+
+.withoutDropdown{
+    -webkit-appearance: none;  /*Removes default chrome and safari style*/
+    -moz-appearance: none; /* Removes default Firefox style*/
+    text-indent: 0.01px; /* Removes default arrow from firefox*/
+    text-overflow: "";  /*Removes default arrow from firefox*/
+}

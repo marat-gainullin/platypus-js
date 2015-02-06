@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.bearsoft.gwt.ui.CommonResources;
 import com.bearsoft.gwt.ui.widgets.StyledListBox;
 import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.beans.PropertyChangeEvent;
@@ -21,10 +22,7 @@ import com.eas.client.form.published.PublishedCell;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
-import com.google.gwt.dom.client.OptionElement;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -49,18 +47,10 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 		super(new StyledListBox<JavaScriptObject>());
 		StyledListBox<JavaScriptObject> box = (StyledListBox<JavaScriptObject>) decorated;
 		box.addItem("...", keyForNullValue, null, "");
-		box.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
 		box.getElement().addClassName(CUSTOM_DROPDOWN_CLASS);
-		box.addChangeHandler(new ChangeHandler(){
-
-			@Override
-            public void onChange(ChangeEvent event) {
-				if(!list){
-					checkIfValueVisible();
-				}
-            }
-			
-		});
+		box.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+        CommonResources.INSTANCE.commons().ensureInjected();
+        box.getElement().addClassName(CommonResources.INSTANCE.commons().withoutDropdown());
 	}
 
 	public Runnable getOnRedraw() {
@@ -120,34 +110,12 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 				injected = aValue;
 			}
 			super.setValue(aValue, fireEvents);
-			checkIfValueVisible();
 		}
 	}
 
 	@Override
 	protected void onAttach() {
 		super.onAttach();
-		checkIfValueVisible();
-	}
-
-	protected void checkIfValueVisible() {
-		if (isAttached() && !list) {
-			final JavaScriptObject value = getValue();
-			final StyledListBox<JavaScriptObject> box = (StyledListBox<JavaScriptObject>) decorated;
-			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
-				@Override
-				public void execute() {
-					int valueIndex = box.indexOf(value);
-					if (valueIndex != -1) {
-						OptionElement selectedItem = box.getItem(valueIndex);
-						box.setSelectedIndex(valueIndex);
-						selectedItem.scrollIntoView();
-					}
-				}
-
-			});
-		}
 	}
 
 	private void injectValueItem(JavaScriptObject aValue) {
@@ -309,11 +277,11 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 		if (list != aValue) {
 			list = aValue;
 			StyledListBox<JavaScriptObject> box = (StyledListBox<JavaScriptObject>) decorated;
-			box.setMultipleSelect(!list);
-			if (list)
+			if (list){
 				box.getElement().addClassName(CUSTOM_DROPDOWN_CLASS);
-			else
+			}else{
 				box.getElement().removeClassName(CUSTOM_DROPDOWN_CLASS);
+			}
 			redraw();
 		}
 	}

@@ -335,7 +335,8 @@ public class Entity implements RowsetListener, HasPublished{
 		});
 		Object.defineProperty(published, "createFilter", {
 			value : function(aConstraints) {
-				return aEntity.@com.eas.client.model.Entity::jsCreateFilter(Lcom/google/gwt/core/client/JavaScriptObject;)(aConstraints);
+				var constraints = $wnd.Array.isArray(aConstraints) || Array.isArray(aConstraints) ? aConstraints : [aConstraints];
+				return aEntity.@com.eas.client.model.Entity::jsCreateFilter(Lcom/google/gwt/core/client/JavaScriptObject;)(constraints);
 			}
 		});
 		Object.defineProperty(published, "activeFilter", {
@@ -347,7 +348,8 @@ public class Entity implements RowsetListener, HasPublished{
 		
 		Object.defineProperty(published, "createSorting", {
 			value : function(aCriteria) {
-				return aEntity.@com.eas.client.model.Entity::jsCreateSorting(Lcom/google/gwt/core/client/JavaScriptObject;)(aCriteria);
+				var criteria = $wnd.Array.isArray(aCriteria) || Array.isArray(aCriteria) ? aCriteria : [aCriteria];
+				return aEntity.@com.eas.client.model.Entity::jsCreateSorting(Lcom/google/gwt/core/client/JavaScriptObject;)(criteria);
 			}
 		});
 		Object.defineProperty(published, "removeAll", {

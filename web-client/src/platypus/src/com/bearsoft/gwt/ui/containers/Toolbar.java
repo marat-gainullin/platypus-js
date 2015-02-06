@@ -204,7 +204,15 @@ public class Toolbar extends SimplePanel implements IndexedPanel, ProvidesResize
     public void add(Widget w) {
         content.add(w);
     }
-
+    
+	public void ajustDisplay(Widget child){
+		content.ajustDisplay(child);
+	}
+	
+	public void ajustWidth(Widget child, int aWidth){
+		content.ajustWidth(child, aWidth);
+	}
+	
     @Override
     public void clear() {
         content.clear();
