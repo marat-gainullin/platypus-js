@@ -5,7 +5,7 @@
 package com.eas.server.handlers;
 
 import com.eas.client.login.PlatypusPrincipal;
-import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
+import com.eas.client.login.SystemPlatypusPrincipal;
 import com.eas.script.ScriptUtils;
 import com.eas.sensors.api.Packet;
 import com.eas.sensors.api.PacketReciever;
@@ -36,7 +36,7 @@ public class PositioningPacketReciever implements PacketReciever {
     @Override
     public Object received(Packet aPacket) throws Exception {
         Session session = serverCore.getSessionManager().getSystemSession();
-        PlatypusPrincipal.setInstance(session.getPrincipal());
+        PlatypusPrincipal.setInstance(new SystemPlatypusPrincipal());
         ScriptUtils.setSession(session);
         try {
             serverCore.executeMethod(moduleName, RECIEVER_METHOD_NAME, new Object[]{aPacket}, session, (Object result) -> {

@@ -17,8 +17,8 @@ public class WebSocketPlatypusPrincipal extends PlatypusPrincipal {
 
     protected HandshakeRequest servletRequest;
 
-    public WebSocketPlatypusPrincipal(String aUserName, HandshakeRequest aServletRequest) {
-        super(aUserName, null, Collections.emptySet(), null);
+    public WebSocketPlatypusPrincipal(String aUserName, String aDataContext, HandshakeRequest aServletRequest) {
+        super(aUserName, aDataContext, Collections.emptySet(), null);
         servletRequest = aServletRequest;
     }
 

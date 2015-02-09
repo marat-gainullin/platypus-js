@@ -4,11 +4,14 @@
  */
 package com.eas.server.websocket;
 
+import com.eas.client.ClientConstants;
+import com.eas.client.DatabasesClient;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.script.ScriptUtils;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.SessionManager;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.websocket.CloseReason;
@@ -29,7 +32,29 @@ import jdk.nashorn.api.scripting.JSObject;
 @ServerEndpoint(value = "/{module-name}", configurator = JsServerModuleEndPointConfigurator.class)
 public class JsServerModuleEndPoint {
 
+    public static class SessionPrincipal {
+
+        private final com.eas.server.Session session;
+        private final PlatypusPrincipal principal;
+
+        public SessionPrincipal(com.eas.server.Session aSession, PlatypusPrincipal aPrincipal) {
+            super();
+            session = aSession;
+            principal = aPrincipal;
+        }
+
+        public com.eas.server.Session getSession() {
+            return session;
+        }
+
+        public PlatypusPrincipal getPrincipal() {
+            return principal;
+        }
+
+    }
+
     private static final String PLATYPUS_SESSION_ATTR_NAME = "platypus-session";
+    private static final String PLATYPUS_PRINCIPAL_DATA_CONTEXT_ATTR_NAME = "platypus-principal-data-context";
     private static final String WS_SCRIPT_FACADE = "ws-session-script-facade";
     //
     private static final String WS_ON_OPEN_METHOD_NAME = "onopen";
@@ -44,14 +69,14 @@ public class JsServerModuleEndPoint {
     @OnOpen
     public void sessionOpened(Session websocketSession, @PathParam("module-name") String aModuleName) throws Exception {
         PlatypusServerCore serverCore = lookupPlaypusServerCore();
-        com.eas.server.Session session = lookupPlatypusSession(websocketSession, serverCore);
-        WebSocketServerSession facade = new WebSocketServerSession(websocketSession, session);
+        SessionPrincipal sp = lookupPlatypusSession(websocketSession, serverCore);
+        WebSocketServerSession facade = new WebSocketServerSession(websocketSession, sp.getSession(), sp.getPrincipal());
         websocketSession.getUserProperties().put(WS_SCRIPT_FACADE, facade);
 
-        PlatypusPrincipal.setInstance(session.getPrincipal());
-        ScriptUtils.setSession(session);
+        PlatypusPrincipal.setInstance(sp.getPrincipal());
+        ScriptUtils.setSession(sp.getSession());
         try {
-            serverCore.executeMethod(aModuleName, WS_ON_OPEN_METHOD_NAME, new Object[]{facade.getPublished()}, session, (Object aResult) -> {
+            serverCore.executeMethod(aModuleName, WS_ON_OPEN_METHOD_NAME, new Object[]{facade.getPublished()}, sp.getSession(), (Object aResult) -> {
                 Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "{0} method of {1} module called successfully.", new Object[]{WS_ON_OPEN_METHOD_NAME, aModuleName});
             }, (Exception ex) -> {
                 Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.SEVERE, null, ex);
@@ -106,7 +131,7 @@ public class JsServerModuleEndPoint {
                 if (ScriptUtils.getLock() == null) {
                     ScriptUtils.setLock(lock);
                     ScriptUtils.setSession(facade.getPlatypusSession());
-                    PlatypusPrincipal.setInstance(facade.getPlatypusSession().getPrincipal());
+                    PlatypusPrincipal.setInstance(facade.getPrincipal());
                     ScriptUtils.setRequest(facade.getRequest());
                     ScriptUtils.setResponse(facade.getResponse());
                     try {
@@ -143,16 +168,15 @@ public class JsServerModuleEndPoint {
         return serverCore;
     }
 
-    protected com.eas.server.Session lookupPlatypusSession(Session websocketSession, PlatypusServerCore serverCore) throws Exception, IllegalStateException {
+    protected SessionPrincipal lookupPlatypusSession(Session websocketSession, PlatypusServerCore serverCore) throws Exception, IllegalStateException {
         HandshakeRequest handshake = (HandshakeRequest) websocketSession.getUserProperties().get(JsServerModuleEndPointConfigurator.HANDSHAKE_REQUEST);
+        com.eas.server.Session session = platypusSessionByWebSocketSession(websocketSession, serverCore, websocketSession.getUserPrincipal() != null ? websocketSession.getUserPrincipal().getName() : null);
         PlatypusPrincipal principal = endpointRequestPrincipal(handshake, websocketSession);
-        com.eas.server.Session session = platypusSessionByWebSocketSession(websocketSession, serverCore, principal);
         assert session != null : "Platypus session missing";
-        session.setPrincipal(principal);
-        return session;
+        return new SessionPrincipal(session, principal);
     }
 
-    public static com.eas.server.Session platypusSessionByWebSocketSession(Session websocketSession, PlatypusServerCore aCore, PlatypusPrincipal principal) {
+    public static com.eas.server.Session platypusSessionByWebSocketSession(Session websocketSession, PlatypusServerCore aCore, String aUserName) {
         com.eas.server.Session session;
         SessionManager sessionManager = aCore.getSessionManager();
         synchronized (sessionManager) {// Note: Internal sessionManager's synchronization is done on the same point.
@@ -160,7 +184,19 @@ public class JsServerModuleEndPoint {
             if (platypusSessionId == null) {
                 platypusSessionId = websocketSession.getId();
             }
-            session = sessionManager.getOrCreateSession(principal, platypusSessionId);
+            session = sessionManager.get(platypusSessionId);
+            if (session == null) {
+                session = sessionManager.createSession(platypusSessionId);
+                if (aUserName != null && aCore.getDatabasesClient() != null) {
+                    try {
+                        Map<String, String> userProps = DatabasesClient.getUserProperties(aCore.getDatabasesClient(), aUserName, null, null);
+                        String userContext = userProps.get(ClientConstants.F_USR_CONTEXT);
+                        websocketSession.getUserProperties().put(PLATYPUS_PRINCIPAL_DATA_CONTEXT_ATTR_NAME, userContext);
+                    } catch (Exception ex) {
+                        Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.WARNING, "Could not get user {0} properties (USR_CONTEXT, etc).", aUserName);
+                    }
+                }
+            }
             websocketSession.getUserProperties().put(PLATYPUS_SESSION_ATTR_NAME, platypusSessionId);
         }
         return session;
@@ -168,7 +204,7 @@ public class JsServerModuleEndPoint {
 
     private static PlatypusPrincipal endpointRequestPrincipal(HandshakeRequest aRequest, Session websocketSession) {
         if (aRequest.getUserPrincipal() != null) {
-            return new WebSocketPlatypusPrincipal(aRequest.getUserPrincipal().getName(), aRequest);
+            return new WebSocketPlatypusPrincipal(aRequest.getUserPrincipal().getName(), (String)websocketSession.getUserProperties().get(PLATYPUS_PRINCIPAL_DATA_CONTEXT_ATTR_NAME), aRequest);
         } else {
             return new AnonymousPlatypusPrincipal(websocketSession.getId());
         }

@@ -118,7 +118,6 @@ public class CommitRequestHandler extends SessionRequestHandler<CommitRequest, C
     @Override
     public void handle2(Session aSession, Consumer<CommitRequest.Response> onSuccess, Consumer<Exception> onFailure) {
         DatabasesClient client = getServerCore().getDatabasesClient();
-        aSession.getPrincipal();
         List<Change> changes = getRequest().getChanges();
         ChangesSortProcess process = new ChangesSortProcess(changes.size(), (Map<String, List<Change>> changeLogs) -> {
             try {
@@ -140,7 +139,7 @@ public class CommitRequestHandler extends SessionRequestHandler<CommitRequest, C
                 try {
                     ((LocalQueriesProxy) serverCore.getQueries()).getQuery(change.entityName, (SqlQuery aQuery) -> {
                         if (aQuery.isPublicAccess()) {
-                            AccessControlException aex = checkWritePrincipalPermission(aSession.getPrincipal(), change.entityName, aQuery.getWriteRoles());
+                            AccessControlException aex = checkWritePrincipalPermission(PlatypusPrincipal.getInstance(), change.entityName, aQuery.getWriteRoles());
                             if (aex != null) {
                                 process.complete(null, null, aex, null);
                             } else {

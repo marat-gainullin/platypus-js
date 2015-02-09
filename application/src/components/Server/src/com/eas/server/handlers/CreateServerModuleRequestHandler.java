@@ -120,11 +120,11 @@ public class CreateServerModuleRequestHandler extends SessionRequestHandler<Crea
     public static void checkPrincipalPermission(Session aSession, Set<String> anAllowedRoles, String aModuleName) throws AccessControlException {
         if (anAllowedRoles != null && !anAllowedRoles.isEmpty()) {
             try {
-                PlatypusPrincipal principal = aSession.getPrincipal();
+                PlatypusPrincipal principal = PlatypusPrincipal.getInstance();
                 if (principal == null || !principal.hasAnyRole(anAllowedRoles)) {
                     throw new AccessControlException(String.format("Access denied to %s module for '%s'.",//NOI18N
                             aModuleName,
-                            principal != null ? principal.getName() : null), aSession.getPrincipal() instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
+                            principal != null ? principal.getName() : null), principal instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
                 }
             } catch (Exception ex) {
                 throw new AccessControlException(ex.getMessage());

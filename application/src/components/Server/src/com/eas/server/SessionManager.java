@@ -4,12 +4,8 @@
  */
 package com.eas.server;
 
-import com.eas.client.login.PlatypusPrincipal;
-import com.eas.client.login.SystemPlatypusPrincipal;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 /**
  * Manages active sessions.
@@ -22,17 +18,14 @@ import java.util.Set;
  */
 public class SessionManager {
 
-    private final PlatypusServerCore serverCore;
-    private final Map<String, Session> sessions = new HashMap<>();
-//    protected ThreadLocal<Session> currentSession = new ThreadLocal<>();
+    protected final Map<String, Session> sessions = new HashMap<>();
 
     /**
      * Creates a new session manager.
-     * @param aServerCore
      */
-    public SessionManager(PlatypusServerCore aServerCore) {
+    public SessionManager() {
         super();
-        serverCore = aServerCore;
+        sessions.put(null, new Session(null));
     }
 
     /**
@@ -46,34 +39,28 @@ public class SessionManager {
      * It is assumed that by the time this method is called, the user already
      * authenticated successfully.</p>
      *
-     * @param aPrincipal who initiated a session.
      * @param sessionId session id; use IDGenerator to generate.
      * @return a new Session instance.
      */
-    public synchronized Session createSession(PlatypusPrincipal aPrincipal, String sessionId) {
+    public synchronized Session createSession(String sessionId) {
         assert sessionId != null;
         assert !sessions.containsKey(sessionId);
-        Session result = new Session(serverCore, sessionId, aPrincipal);
+        Session result = new Session(sessionId);
         sessions.put(sessionId, result);
         return result;
     }
 
-    public synchronized Session getOrCreateSession(PlatypusPrincipal aPrincipal, String sessionId) {
+    public synchronized Session getOrCreateSession(String sessionId) {
         assert sessionId != null;
         if (!sessions.containsKey(sessionId)) {
-            return createSession(aPrincipal, sessionId);
+            return createSession(sessionId);
         } else {
             return sessions.get(sessionId);
         }
     }
 
-    public synchronized Session getSystemSession() {
-        Session result = sessions.get(null);
-        if (result == null) {
-            result = new Session(serverCore, null, new SystemPlatypusPrincipal());
-            sessions.put(null, result);
-        }
-        return result;
+    public Session getSystemSession() {
+        return sessions.get(null);
     }
 
     /**
@@ -113,8 +100,8 @@ public class SessionManager {
      * from modifications made by other threads.</p>
      *
      * @return set of active sessions.
-     */
     public synchronized Set<Entry<String, Session>> entrySet() {
         return sessions.entrySet();
     }
+     */
 }

@@ -5,6 +5,7 @@
  */
 package com.eas.server.websocket;
 
+import com.eas.client.login.PlatypusPrincipal;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
@@ -23,6 +24,7 @@ public class WebSocketServerSession implements HasPublished {
     protected JSObject published;
     protected Session session;
     protected com.eas.server.Session platypusSession;
+    protected PlatypusPrincipal principal;
     protected Object lock;
     protected Object request;
     protected Object response;
@@ -31,16 +33,21 @@ public class WebSocketServerSession implements HasPublished {
     protected JSObject onError;
     protected JSObject onMessage;
 
-    public WebSocketServerSession(Session aSession, com.eas.server.Session aPlatypusSession) {
+    public WebSocketServerSession(Session aSession, com.eas.server.Session aPlatypusSession, PlatypusPrincipal aPlatypusPrincipal) {
         super();
         session = aSession;
         platypusSession = aPlatypusSession;
+        principal = aPlatypusPrincipal;
         request = ScriptUtils.getRequest();
         response = ScriptUtils.getResponse();
     }
 
     public com.eas.server.Session getPlatypusSession() {
         return platypusSession;
+    }
+
+    public PlatypusPrincipal getPrincipal() {
+        return principal;
     }
 
     public Object getLock() {

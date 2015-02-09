@@ -4,6 +4,7 @@
  */
 package com.eas.server.mina.platypus;
 
+import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.platypus.RequestEnvelope;
@@ -38,9 +39,10 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
     public static final int SESSION_TIME_OUT = 60 * 60; // 1 hour
     protected int sessionIdleCheckInterval = IDLE_TIME_EVENT;
     protected int sessionIdleTime = SESSION_TIME_OUT;
-    private final PlatypusServerCore server;
+    private final PlatypusServer server;
 
-    public PlatypusRequestsHandler(PlatypusServerCore aServer) {
+    public PlatypusRequestsHandler(PlatypusServer aServer) {
+        super();
         server = aServer;
     }
 
@@ -113,14 +115,15 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
                     };
                     if (handler instanceof SessionRequestHandler<?, ?>) {
                         if (requestEnv.ticket == null) {
-                            DatabaseAuthorizer.authorize(server, requestEnv.userName, requestEnv.password, (Session session) -> {
-                                requestEnv.ticket = session.getId();
-                                ((SessionRequestHandler<Request, Response>) handler).handle(session, onSuccess, onError);
+                            DatabaseAuthorizer.authorize(server, requestEnv.userName, requestEnv.password, (DatabaseAuthorizer.SessionPrincipal aSessionPrincipal) -> {
+                                requestEnv.ticket = aSessionPrincipal.getSession().getId();
+                                ((SessionRequestHandler<Request, Response>) handler).handle(aSessionPrincipal.getSession(), aSessionPrincipal.getPrincipal(), onSuccess, onError);
                             }, onError);
                         } else {
                             Session session = server.getSessionManager().get(requestEnv.ticket);
-                            if (session != null) {
-                                ((SessionRequestHandler<Request, Response>) handler).handle(session, onSuccess, onError);
+                            PlatypusPrincipal principal = server.getPrincipals().get(requestEnv.ticket);
+                            if (session != null && principal != null) {
+                                ((SessionRequestHandler<Request, Response>) handler).handle(session, principal, onSuccess, onError);
                             } else {
                                 onError.accept(new AccessControlException("Bad session ticket.", new NetPermission("*")));
                             }

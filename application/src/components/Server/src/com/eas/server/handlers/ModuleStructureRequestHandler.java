@@ -11,6 +11,7 @@ import com.eas.client.ModuleStructure;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.ScriptDocument;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
+import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.Session;
@@ -73,8 +74,8 @@ public class ModuleStructureRequestHandler extends SessionRequestHandler<ModuleS
         if (aAppElementFiles != null && aAppElementFiles.hasExtension(PlatypusFiles.JAVASCRIPT_EXTENSION)) {
             ScriptDocument jsDoc = serverCore.getScriptsConfigs().get(aModuleName, aAppElementFiles);
             Set<String> rolesAllowed = jsDoc.getModuleAllowedRoles();
-            if (rolesAllowed != null && !aSession.getPrincipal().hasAnyRole(rolesAllowed)) {
-                throw new AccessControlException(String.format(ACCESS_DENIED_MSG, aModuleName, getRequest().getModuleOrResourceName(), aSession.getPrincipal().getName()), aSession.getPrincipal() instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
+            if (rolesAllowed != null && !PlatypusPrincipal.getInstance().hasAnyRole(rolesAllowed)) {
+                throw new AccessControlException(String.format(ACCESS_DENIED_MSG, aModuleName, getRequest().getModuleOrResourceName(), PlatypusPrincipal.getInstance().getName()), PlatypusPrincipal.getInstance() instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
             }
         }
     }

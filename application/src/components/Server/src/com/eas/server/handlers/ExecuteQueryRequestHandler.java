@@ -6,11 +6,11 @@ package com.eas.server.handlers;
 
 import com.eas.server.SessionRequestHandler;
 import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.exceptions.RowsetException;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.SqlCompiledQuery;
 import com.eas.client.SqlQuery;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
+import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.server.PlatypusServerCore;
@@ -46,8 +46,8 @@ public class ExecuteQueryRequestHandler extends SessionRequestHandler<ExecuteQue
                         throw new AccessControlException(String.format(PUBLIC_ACCESS_DENIED_MSG, getRequest().getQueryName()));//NOI18N
                     }
                     Set<String> rolesAllowed = query.getReadRoles();
-                    if (rolesAllowed != null && !aSession.getPrincipal().hasAnyRole(rolesAllowed)) {
-                        throw new AccessControlException(String.format(ACCESS_DENIED_MSG, query.getEntityId(), aSession.getPrincipal().getName()), aSession.getPrincipal() instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
+                    if (rolesAllowed != null && !PlatypusPrincipal.getInstance().hasAnyRole(rolesAllowed)) {
+                        throw new AccessControlException(String.format(ACCESS_DENIED_MSG, query.getEntityId(), PlatypusPrincipal.getInstance().getName()), PlatypusPrincipal.getInstance() instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
                     }
                     handleQuery(query, (Rowset rowset) -> {
                         if (onSuccess != null) {

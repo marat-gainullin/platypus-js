@@ -4,6 +4,7 @@
  */
 package com.eas.server.handlers;
 
+import com.eas.client.login.PlatypusPrincipal;
 import com.eas.server.SessionRequestHandler;
 import com.eas.client.threetier.requests.CredentialRequest;
 import com.eas.server.PlatypusServerCore;
@@ -23,7 +24,7 @@ public class CredentialRequestHandler extends SessionRequestHandler<CredentialRe
     @Override
     protected void handle2(Session aSession, Consumer<CredentialRequest.Response> onSuccess, Consumer<Exception> onFailure) {
         if (onSuccess != null) {
-            onSuccess.accept(new CredentialRequest.Response(aSession.getPrincipal().getName()));
+            onSuccess.accept(new CredentialRequest.Response(PlatypusPrincipal.getInstance().getName()));
         }
     }
 }

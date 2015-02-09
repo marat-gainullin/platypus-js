@@ -5,6 +5,7 @@
  */
 package com.eas.server.scripts;
 
+import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.SystemPlatypusPrincipal;
 import com.eas.server.Session;
 import java.util.Collection;
@@ -39,7 +40,7 @@ public class ModulesJSFacade extends AbstractJSObject {
     public synchronized void setMember(String name, Object value) {
         value = jdk.nashorn.api.scripting.ScriptUtils.wrap(value);
         if (value instanceof JSObject) {
-            if (session.getPrincipal() instanceof SystemPlatypusPrincipal) {
+            if (PlatypusPrincipal.getInstance() instanceof SystemPlatypusPrincipal) {
                 throw new IllegalStateException(RESIDENT_MODULES_MODIFICATION_MSG);
             } else {
                 session.registerModule(name, (JSObject) value);
@@ -51,7 +52,7 @@ public class ModulesJSFacade extends AbstractJSObject {
 
     @Override
     public synchronized void removeMember(String name) {
-        if (session.getPrincipal() instanceof SystemPlatypusPrincipal) {
+        if (PlatypusPrincipal.getInstance() instanceof SystemPlatypusPrincipal) {
             throw new IllegalStateException(RESIDENT_MODULES_MODIFICATION_MSG);
         }
         session.unregisterModule(name);

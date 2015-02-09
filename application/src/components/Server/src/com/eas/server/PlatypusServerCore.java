@@ -104,7 +104,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
         modules = aModules;
         queries = aQueries;
         basesProxy = aDatabasesClient;
-        sessionManager = new SessionManager(this);
+        sessionManager = new SessionManager();
         defaultAppElement = aDefaultAppElement;
         scriptsConfigs = aSecurityConfigs;
     }
