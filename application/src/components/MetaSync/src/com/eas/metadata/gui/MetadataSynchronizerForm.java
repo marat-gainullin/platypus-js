@@ -288,8 +288,6 @@ public class MetadataSynchronizerForm extends javax.swing.JFrame {
         jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
         jPanel4.setLayout(new java.awt.BorderLayout());
 
-        pnActions.setBorder(null);
-
         buttonGroup1.add(rbSrcDest);
         rbSrcDest.setSelected(true);
         rbSrcDest.setText(bundle.getString("MetadataSynchronizerForm.rbSrcDest.text")); // NOI18N
@@ -328,12 +326,10 @@ public class MetadataSynchronizerForm extends javax.swing.JFrame {
 
         jPanel1.setLayout(new java.awt.GridLayout(1, 1));
 
-        jSplitPane1.setDividerLocation(350);
+        jSplitPane1.setDividerLocation(400);
         jSplitPane1.setOneTouchExpandable(true);
 
         jScrollPane5.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-
-        pnParameters.setBorder(null);
 
         pnSrc.setBorder(javax.swing.BorderFactory.createTitledBorder(bundle.getString("MetadataSynchronizerForm.pnSrc.border.title"))); // NOI18N
 
@@ -450,7 +446,7 @@ public class MetadataSynchronizerForm extends javax.swing.JFrame {
             pnDestLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(fldDestDb, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnDestLayout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
+                .addGap(0, 247, Short.MAX_VALUE)
                 .addComponent(btnDestAdd)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnDestRemove))
@@ -555,7 +551,7 @@ public class MetadataSynchronizerForm extends javax.swing.JFrame {
             .addGroup(pnLogSettingLayout.createSequentialGroup()
                 .addComponent(lbLogLevel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(fldLogLevel, 0, 236, Short.MAX_VALUE))
+                .addComponent(fldLogLevel, 0, 308, Short.MAX_VALUE))
             .addGroup(pnLogSettingLayout.createSequentialGroup()
                 .addGroup(pnLogSettingLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(lbSqlLog)

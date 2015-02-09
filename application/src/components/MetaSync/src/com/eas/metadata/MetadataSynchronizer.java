@@ -1381,6 +1381,8 @@ public class MetadataSynchronizer {
                 mds.setNoDropTables(noDropTables);
                 mds.parseTablesList(tables, ",");
                 mds.run();
+            } catch (IllegalArgumentException ex) {
+                Logger.getLogger(MetadataSynchronizer.class.getName()).log(Level.SEVERE, ex.getMessage());
             } catch (Exception ex) {
                 Logger.getLogger(MetadataSynchronizer.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
