@@ -17,7 +17,7 @@ public class ModelHeaderNode extends HeaderNode<JavaScriptObject> implements Has
 	public ModelHeaderNode() {
 		super();
 		column = new ModelColumn();
-		header = new DraggableHeader<JavaScriptObject>("", null, column);
+		header = new DraggableHeader<JavaScriptObject>("", null, column, this);
 	}
 
 	@Override

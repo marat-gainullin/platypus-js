@@ -9,7 +9,7 @@ public class CheckHeaderNode extends ModelHeaderNode {
 	public CheckHeaderNode() {
 		super();
 		column = new CheckServiceColumn();
-		header = new DraggableHeader<JavaScriptObject>("\\", null, column);
+		header = new DraggableHeader<JavaScriptObject>("\\", null, column, this);
 		setResizable(false);
 	}
 

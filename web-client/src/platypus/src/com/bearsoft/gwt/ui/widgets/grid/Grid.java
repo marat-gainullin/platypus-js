@@ -17,6 +17,7 @@ import com.bearsoft.gwt.ui.widgets.grid.builders.NullHeaderOrFooterBuilder;
 import com.bearsoft.gwt.ui.widgets.grid.builders.ThemedCellTableBuilder;
 import com.bearsoft.gwt.ui.widgets.grid.builders.ThemedHeaderOrFooterBuilder;
 import com.bearsoft.gwt.ui.widgets.grid.header.HasSortList;
+import com.bearsoft.gwt.ui.widgets.grid.header.HeaderNode;
 import com.eas.client.form.published.PublishedColor;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.core.client.GWT;
@@ -370,7 +371,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 
 			@Override
 			public void onDragEnter(DragEnterEvent event) {
-				if (DraggedColumn.instance != null && DraggedColumn.instance.getColumnIndex() != -1) {
+				if (DraggedColumn.instance != null) {
 					if (DraggedColumn.instance.isMove()) {
 						event.preventDefault();
 						event.stopPropagation();
@@ -392,7 +393,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 
 			@Override
 			public void onDrag(DragEvent event) {
-				if (DraggedColumn.instance != null && DraggedColumn.instance.getColumnIndex() != -1 && DraggedColumn.instance.isResize()) {
+				if (DraggedColumn.instance != null && DraggedColumn.instance.isResize()) {
 					event.stopPropagation();
 					Element hostElement = Grid.this.getElement();
 					int clientX = event.getNativeEvent().getClientX();
@@ -418,7 +419,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 
 			@Override
 			public void onDragOver(DragOverEvent event) {
-				if (DraggedColumn.instance != null && DraggedColumn.instance.getColumnIndex() != -1) {
+				if (DraggedColumn.instance != null) {
 					event.preventDefault();
 					event.stopPropagation();
 					if (DraggedColumn.instance.isMove()) {
@@ -438,7 +439,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 
 			@Override
 			public void onDragLeave(DragLeaveEvent event) {
-				if (DraggedColumn.instance != null && DraggedColumn.instance.getColumnIndex() != -1) {
+				if (DraggedColumn.instance != null) {
 					event.stopPropagation();
 					if (DraggedColumn.instance.isMove()) {
 						if (event.getNativeEvent().getEventTarget() == (JavaScriptObject) Grid.this.getElement()) {
@@ -461,43 +462,48 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 
 			@Override
 			public void onDrop(DropEvent event) {
-				// some care...
 				DraggedColumn<?> source = DraggedColumn.instance;
 				DraggedColumn<T> target = targetDraggedColumn;
 				hideColumnDecorations();
 				DraggedColumn.instance = null;
-				if (source != null && source.getColumnIndex() != -1) {
+				if (source != null) {
 					event.preventDefault();
 					event.stopPropagation();
 					if (source.isMove()) {
 						AbstractCellTable<T> sourceSection = (AbstractCellTable<T>) source.getTable();
 						// target table may be any section in our grid
 						if (target != null) {
-							int sourceIndex = source.getColumnIndex();
-							int targetIndex = target.getColumnIndex();
-							GridSection<T> targetSection = (GridSection<T>) target.getTable();
+							Header<?> sourceHeader = source.getHeader();
+							Header<?> targetHeader = target.getHeader();
+							if (sourceHeader instanceof DraggableHeader<?> && targetHeader instanceof DraggableHeader<?>) {
+								DraggableHeader<T> sourceDH = (DraggableHeader<T>) sourceHeader;
+								DraggableHeader<T> targetDH = (DraggableHeader<T>) targetHeader;
+								moveColumnNode(sourceDH.getHeaderNode(), targetDH.getHeaderNode());
+							} else {
+								int sourceIndex = source.getColumnIndex();
+								int targetIndex = target.getColumnIndex();
+								GridSection<T> targetSection = (GridSection<T>) target.getTable();
 
-							boolean isSourceLeft = sourceSection == headerLeft || sourceSection == frozenLeft || sourceSection == scrollableLeft || sourceSection == footerLeft;
-							boolean isTargetLeft = targetSection == headerLeft || targetSection == frozenLeft || targetSection == scrollableLeft || targetSection == footerLeft;
-							sourceSection = isSourceLeft ? headerLeft : headerRight;
-							targetSection = isTargetLeft ? headerLeft : headerRight;
-							int generalSourceIndex = isSourceLeft ? sourceIndex : sourceIndex + frozenColumns;
-							int generalTargetIndex = isTargetLeft ? targetIndex : targetIndex + frozenColumns;
-							Header<?> header = sourceSection.getHeader(sourceIndex);
-							if (header instanceof DraggableHeader) {
-								((DraggableHeader) header).setTable(targetSection);
-							}
-							if (/* isForeignColumn || */generalSourceIndex != generalTargetIndex) {
-								Column<T, ?> column = (Column<T, ?>) source.getColumn();
-								if (!(header instanceof DraggableHeader) || ((DraggableHeader) header).isMoveable()) {
-									moveColumn(generalSourceIndex, generalTargetIndex);
+								boolean isSourceLeft = sourceSection == headerLeft || sourceSection == frozenLeft || sourceSection == scrollableLeft || sourceSection == footerLeft;
+								boolean isTargetLeft = targetSection == headerLeft || targetSection == frozenLeft || targetSection == scrollableLeft || targetSection == footerLeft;
+								sourceSection = isSourceLeft ? headerLeft : headerRight;
+								targetSection = isTargetLeft ? headerLeft : headerRight;
+								int generalSourceIndex = isSourceLeft ? sourceIndex : sourceIndex + frozenColumns;
+								int generalTargetIndex = isTargetLeft ? targetIndex : targetIndex + frozenColumns;
+								Header<?> header = sourceSection.getHeader(sourceIndex);
+								if (header instanceof DraggableHeader) {
+									((DraggableHeader) header).setTable(targetSection);
+								}
+								if (generalSourceIndex != generalTargetIndex) {
+									Column<T, ?> column = (Column<T, ?>) source.getColumn();
+									if (!(header instanceof DraggableHeader) || ((DraggableHeader) header).isMoveable()) {
+										moveColumn(generalSourceIndex, generalTargetIndex);
+									}
 								}
 							}
 						}
 					} else {
-						int sourceIndex = source.getColumnIndex();
-						AbstractCellTable<T> sourceSection = (AbstractCellTable<T>) source.getTable();
-						Header<?> header = sourceSection.getHeader(sourceIndex);
+						Header<?> header = source.getHeader();
 						if (!(header instanceof DraggableHeader) || ((DraggableHeader) header).isResizable()) {
 							int newWidth = Math.max(event.getNativeEvent().getClientX() - source.getCellElement().getAbsoluteLeft(), MINIMUM_COLUMN_WIDTH);
 							// Source and target tables are the same, so we can
@@ -672,8 +678,9 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 			}
 			if (targetSection != null && targetCell != null) {
 				Column<T, ?> col = targetSection.getHeaderBuilder().getColumn(targetCell);
-				if (col != null)
-					return new DraggedColumn<T>(col, targetSection, targetCell, Element.as(aEventTarget));
+				Header<?> header = targetSection.getHeaderBuilder().getHeader(targetCell);
+				if (col != null && header != null)
+					return new DraggedColumn<T>(col, header, targetSection, targetCell, Element.as(aEventTarget));
 				else
 					return null;
 			}
@@ -833,10 +840,10 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 		super.onDetach();
 	}
 
-	protected void onColumnsResize(){
+	protected void onColumnsResize() {
 		// no op here because of natural columns width's
 	}
-	
+
 	@Override
 	public void onResize() {
 		if (isAttached()) {
@@ -953,27 +960,27 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 	}
 
 	public void setupVisibleRanges() {
-			List<T> list = dataProvider != null ? dataProvider.getList() : null;
-			int generalLength = list != null ? list.size() : 0;
-			int lfrozenRows = generalLength >= frozenRows ? frozenRows : generalLength;
-			int scrollableRowCount = generalLength - lfrozenRows;
-			//
-			headerLeft.setVisibleRange(new Range(0, 0));
-			headerRight.setVisibleRange(new Range(0, 0));
-			frozenLeft.setVisibleRange(new Range(0, lfrozenRows));
-			frozenRight.setVisibleRange(new Range(0, lfrozenRows));
-			scrollableLeft.setVisibleRange(new Range(lfrozenRows, scrollableRowCount >= 0 ? scrollableRowCount : 0));
-			scrollableRight.setVisibleRange(new Range(lfrozenRows, scrollableRowCount >= 0 ? scrollableRowCount : 0));
-			footerLeft.setVisibleRange(new Range(0, 0));
-			footerRight.setVisibleRange(new Range(0, 0));
-			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+		List<T> list = dataProvider != null ? dataProvider.getList() : null;
+		int generalLength = list != null ? list.size() : 0;
+		int lfrozenRows = generalLength >= frozenRows ? frozenRows : generalLength;
+		int scrollableRowCount = generalLength - lfrozenRows;
+		//
+		headerLeft.setVisibleRange(new Range(0, 0));
+		headerRight.setVisibleRange(new Range(0, 0));
+		frozenLeft.setVisibleRange(new Range(0, lfrozenRows));
+		frozenRight.setVisibleRange(new Range(0, lfrozenRows));
+		scrollableLeft.setVisibleRange(new Range(lfrozenRows, scrollableRowCount >= 0 ? scrollableRowCount : 0));
+		scrollableRight.setVisibleRange(new Range(lfrozenRows, scrollableRowCount >= 0 ? scrollableRowCount : 0));
+		footerLeft.setVisibleRange(new Range(0, 0));
+		footerRight.setVisibleRange(new Range(0, 0));
+		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
-				@Override
-				public void execute() {
-					onResize();
-				}
+			@Override
+			public void execute() {
+				onResize();
+			}
 
-			});
+		});
 	}
 
 	public void addColumn(Column<T, ?> aColumn, String aWidth, Header<?> aHeader, Header<?> aFooter, boolean hidden) {
@@ -985,10 +992,12 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 	}
 
 	public void addColumn(boolean forceRefreshColumns, int aIndex, Column<T, ?> aColumn, String aWidth, Header<?> aHeader, Header<?> aFooter, boolean hidden) {
-		if (aHeader instanceof DraggableHeader<?>) {
-			DraggableHeader<T> h = (DraggableHeader<T>) aHeader;
-			h.setColumn(aColumn);
-		}
+		/*
+		 * if (aHeader instanceof DraggableHeader<?>) { DraggableHeader<T> h =
+		 * (DraggableHeader<T>) aHeader; h.setColumn(aColumn); } WARNING! Before
+		 * uncomment, answer the question: DraggableHeader can change its
+		 * column?
+		 */
 		if (aIndex < frozenColumns) {
 			if (aHeader instanceof DraggableHeader<?>) {
 				DraggableHeader<T> h = (DraggableHeader<T>) aHeader;
@@ -1034,6 +1043,9 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 		removeColumn(aFromIndex);
 		addColumn(aToIndex, column, width, header, footer, false);
 		headerLeft.getWidthPropagator().changed();
+	}
+	
+	public void moveColumnNode(HeaderNode<T> aSubject, HeaderNode<T> aInsertBefore){		
 	}
 
 	public void hideColumn(Column<T, ?> aColumn) {
@@ -1130,6 +1142,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 
 	public void setColumnWidthFromHeaderDrag(Column<T, ?> aColumn, double aWidth, Style.Unit aUnit) {
 		setColumnWidth(aColumn, aWidth, aUnit);
+		propagateHeightButScrollable();
 	}
 
 	public void setColumnWidth(Column<T, ?> aColumn, double aWidth, Style.Unit aUnit) {

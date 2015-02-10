@@ -1489,6 +1489,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         protected boolean working;
 
         public RowHeaderScroller(JViewport aRowHeader, JViewport aContent) {
+            super();
             rowHeader = aRowHeader;
             content = aContent;
         }

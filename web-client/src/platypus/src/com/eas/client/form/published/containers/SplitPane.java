@@ -199,30 +199,40 @@ public class SplitPane extends SplittedPanel implements HasJsFacade, HasEnabled,
 
 	@Override
 	public void addWest(Widget widget, double size) {
+		widget.getElement().getStyle().clearWidth();
+		widget.getElement().getStyle().clearHeight();
 		super.addWest(widget, size);
 		AddEvent.fire(this, widget);
 	}
 
 	@Override
 	public void addEast(Widget widget, double size) {
+		widget.getElement().getStyle().clearWidth();
+		widget.getElement().getStyle().clearHeight();
 		super.addEast(widget, size);
 		AddEvent.fire(this, widget);
 	}
 
 	@Override
 	public void addNorth(Widget widget, double size) {
+		widget.getElement().getStyle().clearWidth();
+		widget.getElement().getStyle().clearHeight();
 		super.addNorth(widget, size);
 		AddEvent.fire(this, widget);
 	}
 
 	@Override
 	public void addSouth(Widget widget, double size) {
+		widget.getElement().getStyle().clearWidth();
+		widget.getElement().getStyle().clearHeight();
 		super.addSouth(widget, size);
 		AddEvent.fire(this, widget);
 	}
 
 	@Override
 	public void add(Widget widget) {
+		widget.getElement().getStyle().clearWidth();
+		widget.getElement().getStyle().clearHeight();
 		super.add(widget);
 		AddEvent.fire(this, widget);
 	}

@@ -5,6 +5,7 @@
 package com.bearsoft.gwt.ui.widgets.grid;
 
 import com.bearsoft.gwt.ui.dnd.XDataTransfer;
+import com.bearsoft.gwt.ui.widgets.grid.header.HeaderNode;
 import com.eas.client.form.published.PublishedColor;
 import com.eas.client.form.published.PublishedFont;
 import com.google.gwt.cell.client.AbstractCell;
@@ -31,14 +32,15 @@ public class DraggableHeader<T> extends Header<String> implements HasColumn<T> {
 	protected GridSection<T> table;
 	protected Element hostElement;
 	protected Column<T, ?> column;
+	protected HeaderNode<T> headerNode;
 	protected boolean moveable = true;
 	protected boolean resizable = true;
 
-	public DraggableHeader(String aTitle, GridSection<T> aTable, Column<T, ?> aColumn) {
-		this(aTitle, aTable, aColumn, aTable != null ? aTable.getElement() : null);
+	public DraggableHeader(String aTitle, GridSection<T> aTable, Column<T, ?> aColumn, HeaderNode<T> aHeaderNode) {
+		this(aTitle, aTable, aColumn, aTable != null ? aTable.getElement() : null, aHeaderNode);
 	}
 
-	public DraggableHeader(String aTitle, GridSection<T> aTable, Column<T, ?> aColumn, Element aHostElement) {
+	protected DraggableHeader(String aTitle, GridSection<T> aTable, Column<T, ?> aColumn, Element aHostElement, HeaderNode<T> aHeaderNode) {
 		super(new HeaderCell());
 		if (aTitle == null || aColumn == null) {
 			throw new NullPointerException();
@@ -47,15 +49,20 @@ public class DraggableHeader<T> extends Header<String> implements HasColumn<T> {
 		column = aColumn;
 		table = aTable;
 		hostElement = aHostElement;
+		headerNode = aHeaderNode;
 	}
 
 	@Override
 	public Column<T, ?> getColumn() {
 		return column;
 	}
-
+/*
 	public void setColumn(Column<T, ?> aColumn) {
 		column = aColumn;
+	}
+*/
+	public HeaderNode<T> getHeaderNode() {
+		return headerNode;
 	}
 
 	public AbstractCellTable<T> getTable() {
@@ -126,12 +133,12 @@ public class DraggableHeader<T> extends Header<String> implements HasColumn<T> {
 			event.stopPropagation();
 			EventTarget et = event.getEventTarget();
 			if (Element.is(et)) {
-				DraggedColumn<?> col = new DraggedColumn<>(column, table, targetCell, Element.as(et));
+				DraggedColumn<?> col = new DraggedColumn<>(column, this, table, targetCell, Element.as(et));
 				if ((col.isMove() && moveable) || (col.isResize() && resizable)) {
 					event.getDataTransfer().<XDataTransfer> cast().setEffectAllowed("move");
 					DraggedColumn.instance = col;
 					event.getDataTransfer().setData("Text",
-					        "grid-section-" + table.hashCode() + "; column-" + (DraggedColumn.instance.isMove() ? "moved" : "resized") + ": " + table.getColumnIndex(column));
+					        (table != null ? "grid-section-" + table.hashCode() : "not leaf") + "; column-" + (DraggedColumn.instance.isMove() ? "moved" : "resized") + (table != null ? ":"+table.getColumnIndex(column) : ""));
 				} else {
 					event.getDataTransfer().<XDataTransfer> cast().setEffectAllowed("none");
 				}

@@ -553,6 +553,19 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		}
 	}
 
+	@Override
+	public void moveColumnNode(HeaderNode<JavaScriptObject> aSubject, HeaderNode<JavaScriptObject> aInsertBefore) {
+		if (aSubject != null && aInsertBefore != null && aSubject.getParent() == aInsertBefore.getParent()) {
+			List<HeaderNode<JavaScriptObject>> neighbours = aSubject.getParent() != null ? aSubject.getParent().getChildren() : header;
+			boolean removed = neighbours.remove(aSubject);
+			assert removed;
+			int insertAt = neighbours.indexOf(aInsertBefore);
+			neighbours.add(insertAt, aSubject);
+			applyColumns();
+			onResize();
+		}
+	}
+
 	/*
 	 * Indicates that subsequent changes will take no effect in general columns
 	 * collection and header. They will affect only underlying grid sections
@@ -570,6 +583,13 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 	@Override
 	protected void refreshColumns() {
 		// no op since hierarchical header processing
+	}
+
+	@Override
+	public void moveColumn(int aFromIndex, int aToIndex) {
+		if (aFromIndex < frozenColumns && aToIndex < frozenColumns || aFromIndex >= frozenColumns && aToIndex >= frozenColumns) {
+			Column<JavaScriptObject, ?> movedColumn = getColumn(aFromIndex);
+		}
 	}
 
 	protected ModelColumn treeIndicatorColumn;
@@ -619,6 +639,7 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 			aWidth = modelCol.getMaxWidth();
 		super.setColumnWidth(aColumn, aWidth, aUnit);
 		modelCol.setWidth(aWidth);
+		propagateHeightButScrollable();
 	}
 
 	@Override
@@ -668,6 +689,9 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 	}
 
 	public void applyColumns() {
+		for (int i = getDataColumnCount() - 1; i >= 0; i--) {
+			removeColumn(i);
+		}
 		List<HeaderNode<JavaScriptObject>> leaves = new ArrayList<>();
 		HeaderAnalyzer.achieveLeaves(header, leaves);
 		for (HeaderNode<JavaScriptObject> leaf : leaves) {
@@ -1005,14 +1029,14 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		if (isAttached()) {
 			double prevError = 0;
 			double error = distributeColumnsWidths();
-			while(Math.abs(error) > 0.8 && Math.abs(error - prevError) > 2){
+			while (Math.abs(error) > 0.8 && Math.abs(error - prevError) > 2) {
 				prevError = error;
 				error = distributeColumnsWidths();
 			}
 		}
 	}
 
-	protected double distributeColumnsWidths(){
+	protected double distributeColumnsWidths() {
 		List<ModelColumn> availableColumns = new ArrayList<>();
 		double commonWidth = 0;
 		for (int i = 0; i < getDataColumnCount(); i++) {
@@ -1033,7 +1057,7 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		}
 		return widthError;
 	}
-	
+
 	@Override
 	public void onResize() {
 		super.onResize();

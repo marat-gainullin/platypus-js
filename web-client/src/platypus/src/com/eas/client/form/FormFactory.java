@@ -700,8 +700,8 @@ public class FormFactory {
 			widgetName = anElement.getAttribute("name");
 			((HasJsName) aTarget).setJsName(widgetName);
 		}
-		if(anElement.hasAttribute("nullable") && aTarget instanceof ModelDecoratorBox<?>){
-			((ModelDecoratorBox<?>)aTarget).setNullable(Utils.getBooleanAttribute(anElement, "nullable", true));
+		if (anElement.hasAttribute("nullable") && aTarget instanceof ModelDecoratorBox<?>) {
+			((ModelDecoratorBox<?>) aTarget).setNullable(Utils.getBooleanAttribute(anElement, "nullable", true));
 		}
 		/*
 		 * if (anElement.hasAttribute("editable") && aTarget instanceof
@@ -961,7 +961,9 @@ public class FormFactory {
 					readColumnNode(column, childTag);
 					nodes.add(column);
 					List<HeaderNode<JavaScriptObject>> children = readColumns(childTag);
-					column.getChildren().addAll(children);
+					for (int i = 0; i < children.size(); i++) {
+						column.addColumnNode(children.get(i));
+					}
 					break;
 				}
 				case "RadioGridColumn": {
@@ -970,7 +972,9 @@ public class FormFactory {
 					readColumnNode(column, childTag);
 					nodes.add(column);
 					List<HeaderNode<JavaScriptObject>> children = readColumns(childTag);
-					column.getChildren().addAll(children);
+					for (int i = 0; i < children.size(); i++) {
+						column.addColumnNode(children.get(i));
+					}
 					break;
 				}
 				case "ServiceGridColumn": {
@@ -979,7 +983,9 @@ public class FormFactory {
 					readColumnNode(column, childTag);
 					nodes.add(column);
 					List<HeaderNode<JavaScriptObject>> children = readColumns(childTag);
-					column.getChildren().addAll(children);
+					for (int i = 0; i < children.size(); i++) {
+						column.addColumnNode(children.get(i));
+					}
 					break;
 				}
 				case "ModelGridColumn": {
@@ -1007,7 +1013,9 @@ public class FormFactory {
 					}
 					nodes.add(column);
 					List<HeaderNode<JavaScriptObject>> children = readColumns(childTag);
-					column.getChildren().addAll(children);
+					for (int i = 0; i < children.size(); i++) {
+						column.addColumnNode(children.get(i));
+					}
 					break;
 				}
 				}

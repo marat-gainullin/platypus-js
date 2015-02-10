@@ -9,7 +9,7 @@ public class ServiceHeaderNode extends ModelHeaderNode {
 	public ServiceHeaderNode() {
 		super();
 		column = new UsualServiceColumn();
-		header = new DraggableHeader<JavaScriptObject>("\\", null, column);
+		header = new DraggableHeader<JavaScriptObject>("\\", null, column, this);
 		setResizable(false);
 	}
 	
