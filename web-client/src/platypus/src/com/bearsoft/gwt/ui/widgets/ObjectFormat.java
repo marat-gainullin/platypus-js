@@ -116,7 +116,7 @@ public class ObjectFormat {
 	public int getValueType() {
 		return type;
 	}
-	
+
 	public void setValueType(int aType) throws ParseException {
 		type = aType;
 		constructFormat();
@@ -141,26 +141,34 @@ public class ObjectFormat {
 		maskFormat = null;
 		regExpFormat = null;
 		bypassFormat = null;
-		if (pattern != null && !pattern.isEmpty()) {
-			if (type == MASK) {
+		if (type == MASK) {
+			if (pattern != null && !pattern.isEmpty())
 				maskFormat = new MaskFormat(pattern);
-			} else if (type == DATE || type == TIME) {
+		} else if (type == DATE || type == TIME) {
+			if (pattern != null && !pattern.isEmpty())
 				dateFormat = DateTimeFormat.getFormat(pattern);
-			} else if (type == NUMBER) {
+		} else if (type == NUMBER) {
+			if (pattern != null && !pattern.isEmpty())
 				numberFormat = NumberFormat.getFormat(pattern);
-			} else if (type == PERCENT) {
+			else
+				numberFormat = NumberFormat.getDecimalFormat();
+		} else if (type == PERCENT) {
+			if (pattern != null && !pattern.isEmpty())
 				numberFormat = new PercentFormat(pattern);
-			} else if (type == CURRENCY) {
+			else
+				numberFormat = NumberFormat.getPercentFormat();
+		} else if (type == CURRENCY) {
+			if (pattern != null && !pattern.isEmpty())
+				numberFormat = NumberFormat.getCurrencyFormat();
+			else
 				numberFormat = new CurrencyFormat(pattern);
-			} else if (type == REGEXP) {
+		} else if (type == REGEXP) {
+			if (pattern != null && !pattern.isEmpty())
 				regExpFormat = new RegExpFormat(pattern);
-			} else if (type == TEXT) {
-				bypassFormat = new BypassFormat();
-			} else {
-				assert false;
-			}
 		} else if (type == TEXT) {
 			bypassFormat = new BypassFormat();
+		} else {
+			assert false;
 		}
 	}
 
