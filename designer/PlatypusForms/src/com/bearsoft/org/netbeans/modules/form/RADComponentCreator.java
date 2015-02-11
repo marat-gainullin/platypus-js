@@ -1025,8 +1025,8 @@ public class RADComponentCreator {
     }
 
     private static boolean shouldEncloseByScrollPane(Object bean) {
-        return bean instanceof TextArea
-                || bean instanceof HtmlArea || bean instanceof ModelTextArea;
+//        return bean instanceof TextArea || bean instanceof HtmlArea || bean instanceof ModelTextArea;
+        return bean instanceof TextArea || bean instanceof ModelTextArea;
     }
 
     /**
