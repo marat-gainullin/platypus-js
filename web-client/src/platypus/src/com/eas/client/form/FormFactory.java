@@ -665,13 +665,13 @@ public class FormFactory {
 		}
 	}
 
-	protected void readImageParagraph(Element anElement, final UIObject button) throws Exception {
-		if (anElement.hasAttribute("icon") && button instanceof HasImageResource) {
+	protected void readImageParagraph(Element anElement, final UIObject aImageParagraph) throws Exception {
+		if (anElement.hasAttribute("icon") && aImageParagraph instanceof HasImageResource) {
 			String iconImage = anElement.getAttribute("icon");
 			PlatypusImageResource.load(iconImage, new CallbackAdapter<ImageResource, String>() {
 				@Override
 				protected void doWork(ImageResource aResult) throws Exception {
-					((HasImageResource) button).setImageResource(aResult);
+					((HasImageResource) aImageParagraph).setImageResource(aResult);
 				}
 
 				@Override
@@ -680,12 +680,12 @@ public class FormFactory {
 				}
 			});
 		}
-		if (anElement.hasAttribute("text") && button instanceof HasText) {
-			((HasText) button).setText(anElement.getAttribute("text"));
+		if (anElement.hasAttribute("text") && aImageParagraph instanceof HasText) {
+			((HasText) aImageParagraph).setText(anElement.getAttribute("text"));
 		}
-		if (button instanceof HasImageParagraph) {
-			HasImageParagraph hip = (HasImageParagraph) button;
-			hip.setHorizontalAlignment(Utils.getIntegerAttribute(anElement, "horizontalAlignment", button instanceof ImageButton || button instanceof DropDownButton ? HasImageParagraph.CENTER
+		if (aImageParagraph instanceof HasImageParagraph) {
+			HasImageParagraph hip = (HasImageParagraph) aImageParagraph;
+			hip.setHorizontalAlignment(Utils.getIntegerAttribute(anElement, "horizontalAlignment", aImageParagraph instanceof ImageButton || aImageParagraph instanceof DropDownButton ? HasImageParagraph.CENTER
 			        : HasImageParagraph.LEFT));
 			hip.setVerticalAlignment(Utils.getIntegerAttribute(anElement, "verticalAlignment", HasImageParagraph.CENTER));
 			hip.setIconTextGap(Utils.getIntegerAttribute(anElement, "iconTextGap", 4));
@@ -839,7 +839,7 @@ public class FormFactory {
 		if (easFontElement != null) {
 			String name = easFontElement.getAttribute("name");
 			if (name == null || name.isEmpty()) {
-				name = "Monospaced";
+				name = "Arial";
 			}
 			int style = Utils.getIntegerAttribute(easFontElement, "style", 0);
 			int size = Utils.getIntegerAttribute(easFontElement, "size", 12);

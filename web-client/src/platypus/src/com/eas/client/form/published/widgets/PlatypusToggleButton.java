@@ -1,5 +1,6 @@
 package com.eas.client.form.published.widgets;
 
+import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.gwt.ui.widgets.ImageToggleButton;
 import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.events.ActionEvent;
@@ -28,26 +29,29 @@ import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.user.client.ui.RequiresResize;
 
-public class PlatypusToggleButton extends ImageToggleButton implements HasActionHandlers, HasJsFacade, HasPlatypusButtonGroup, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers {
+public class PlatypusToggleButton extends ImageToggleButton implements RequiresResize, HasActionHandlers, HasJsFacade, HasPlatypusButtonGroup, HasComponentPopupMenu, HasEventsExecutor,
+        HasShowHandlers, HasHideHandlers, HasResizeHandlers {
 
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
-	protected String name;	
+	protected String name;
 	protected JavaScriptObject published;
-	
+
 	protected ButtonGroup group;
-	
+
 	public PlatypusToggleButton() {
-		super("", false);
+		this("", false);
 	}
 
 	public PlatypusToggleButton(String aTitle, boolean asHtml) {
-		super(aTitle, asHtml);
+		this(aTitle, asHtml, null);
 	}
 
 	public PlatypusToggleButton(String aTitle, boolean asHtml, ImageResource aImage) {
 		super(aTitle, asHtml, aImage);
+		getElement().<XElement> cast().addResizingTransitionEnd(this);
 	}
 
 	@Override
@@ -57,8 +61,7 @@ public class PlatypusToggleButton extends ImageToggleButton implements HasAction
 
 	@Override
 	public void onResize() {
-		super.onResize();
-		if(isAttached()){
+		if (isAttached()) {
 			ResizeEvent.fire(this, getElement().getOffsetWidth(), getElement().getOffsetHeight());
 		}
 	}
@@ -116,8 +119,7 @@ public class PlatypusToggleButton extends ImageToggleButton implements HasAction
 			}
 		};
 	}
-	
-	
+
 	@Override
 	public EventsExecutor getEventsExecutor() {
 		return eventsExecutor;
@@ -129,9 +131,9 @@ public class PlatypusToggleButton extends ImageToggleButton implements HasAction
 	}
 
 	@Override
-    public PlatypusPopupMenu getPlatypusPopupMenu() {
-		return menu; 
-    }
+	public PlatypusPopupMenu getPlatypusPopupMenu() {
+		return menu;
+	}
 
 	protected HandlerRegistration menuTriggerReg;
 
@@ -143,7 +145,7 @@ public class PlatypusToggleButton extends ImageToggleButton implements HasAction
 			menu = aMenu;
 			if (menu != null) {
 				menuTriggerReg = super.addDomHandler(new ContextMenuHandler() {
-					
+
 					@Override
 					public void onContextMenu(ContextMenuEvent event) {
 						event.preventDefault();
@@ -180,10 +182,10 @@ public class PlatypusToggleButton extends ImageToggleButton implements HasAction
 	public void mutateButtonGroup(ButtonGroup aGroup) {
 		if (group != aGroup) {
 			if (group != null)
-				group.remove((HasPublished)this);
+				group.remove((HasPublished) this);
 			group = aGroup;
 			if (group != null)
-				group.add((HasPublished)this);
+				group.add((HasPublished) this);
 		}
 	}
 
@@ -195,7 +197,7 @@ public class PlatypusToggleButton extends ImageToggleButton implements HasAction
 	public void setPlainValue(boolean aValue) {
 		setValue(aValue);
 	}
-	
+
 	public JavaScriptObject getPublished() {
 		return published;
 	}

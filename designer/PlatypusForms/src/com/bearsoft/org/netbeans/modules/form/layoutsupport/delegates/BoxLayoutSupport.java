@@ -74,9 +74,6 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
     private static final String icon32URL
             = "com/bearsoft/org/netbeans/modules/form/beaninfo/swing/boxLayout32.gif"; // NOI18N
 
-    private int orientation = Orientation.HORIZONTAL;
-    private int hgap;
-    private int vgap;
     private FormProperty<?>[] properties;
 
     /**
@@ -119,8 +116,7 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
      */
     @Override
     public void acceptContainerLayoutChange(PropertyChangeEvent ev)
-            throws PropertyVetoException {   // accept any change, just need to update the BoxLayout instance;
-        // since it has no properties, it must be created again
+            throws PropertyVetoException {
         updateLayoutInstance();
         super.acceptContainerLayoutChange(ev);
     }
@@ -163,7 +159,7 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
                 continue;
             }
             Rectangle b = components[i].getBounds();
-            if (orientation == Orientation.HORIZONTAL) {
+            if (getOrientation() == Orientation.HORIZONTAL) {
                 if (posInCont.x < b.x + b.width / 2) {
                     assistantParams += i;
                     return i;
@@ -223,7 +219,7 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
 
             if ((components.length == 0) || ((components.length == 1) && (components[0] == component))) {
                 Insets ins = containerDelegate.getInsets();
-                rect = (orientation == Orientation.HORIZONTAL)
+                rect = (getOrientation() == Orientation.HORIZONTAL)
                         ? new Rectangle(ins.left, ins.top,
                                 30, containerSize.height)
                         : new Rectangle(ins.left, ins.top,
@@ -234,12 +230,12 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
                     comp = components[components.length - 2];
                 }
                 Rectangle b = comp.getBounds();
-                rect = (orientation == Orientation.HORIZONTAL)
+                rect = (getOrientation() == Orientation.HORIZONTAL)
                         ? new Rectangle(b.x + b.width - 10, b.y, 30, b.height)
                         : new Rectangle(b.x, b.y + b.height - 10, b.width, 20);
             } else {
                 Rectangle b = components[newIndex].getBounds();
-                rect = (orientation == Orientation.HORIZONTAL)
+                rect = (getOrientation() == Orientation.HORIZONTAL)
                         ? new Rectangle(b.x - 10, b.y, 30, b.height)
                         : new Rectangle(b.x, b.y - 10, b.width, 20);
             }
@@ -318,49 +314,15 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
     protected LayoutManager cloneLayoutInstance(Container container,
             Container containerDelegate) {
         int axis = BoxLayout.X_AXIS;
-        if (orientation == Orientation.HORIZONTAL) {
+        if (getOrientation() == Orientation.HORIZONTAL) {
             axis = BoxLayout.X_AXIS;
-        } else if (orientation == Orientation.VERTICAL) {
+        } else if (getOrientation() == Orientation.VERTICAL) {
             axis = BoxLayout.Y_AXIS;
         }
-        return new BoxLayout(containerDelegate, axis, hgap, vgap);
+        BoxLayout layout = (BoxLayout) getRadLayout().getBeanInstance();
+        return new BoxLayout(containerDelegate, axis, layout.getHgap(), layout.getVgap());
     }
 
-    /**
-     * This method is to read the layout manager bean code (i.e. code for
-     * constructor and properties). As the BoxLayout is not a bean, this method
-     * must override AbstractLayoutSupport.
-     *
-     * @param layoutExp CodeExpressin of the layout manager
-     * @param layoutCode CodeGroup to be filled with relevant initialization
-     * code; not needed here because BoxLayout is represented only by a single
-     * constructor code expression and no statements
-     * @Override protected void readInitLayoutCode(CodeExpression layoutExp,
-     * CodeGroup layoutCode) { CodeExpression[] params =
-     * layoutExp.getOrigin().getCreationParameters(); if (params.length == 2) {
-     * FormCodeSupport.readPropertyExpression( params[1], getProperties()[0],
-     * false); updateLayoutInstance(); } }
-     */
-    /**
-     * Creates code structures for a new layout manager (opposite to
-     * readInitLayoutCode). As the BoxLayout is not a bean, this method must
-     * override from AbstractLayoutSupport.
-     *
-     * @param layoutCode CodeGroup to be filled with relevant initialization
-     * code; not needed here because BoxLayout is represented only by a single
-     * constructor code expression and no statements
-     * @return new CodeExpression representing the BoxLayout
-     * @Override protected CodeExpression createInitLayoutCode(CodeGroup
-     * layoutCode) { CodeStructure codeStructure = getCodeStructure();
-     *
-     * CodeExpression[] params = new CodeExpression[2]; params[0] =
-     * getLayoutContext().getContainerDelegateCodeExpression(); params[1] =
-     * codeStructure.createExpression(
-     * FormCodeSupport.createOrigin(getProperties()[0]));
-     *
-     * return codeStructure.createExpression(getBoxLayoutConstructor(), params);
-     * }
-     */
     /**
      * Since BoxLayout is not a bean, we must specify its properties explicitly.
      * This method is called from getPropertySets() implementation to obtain the
@@ -394,13 +356,13 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
 
                     @Override
                     public Integer getValue() {
-                        return orientation;
+                        return getOrientation();
                     }
 
                     @Override
                     public void setValue(Integer value) {
                         Integer oldValue = getValue();
-                        orientation = value;
+                        setOrientation(value);
                         propertyValueChanged(oldValue, value);
                     }
 
@@ -422,14 +384,16 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
 
                     @Override
                     public Integer getValue() throws IllegalAccessException, InvocationTargetException {
-                        return hgap;
+                        BoxLayout layout = (BoxLayout) getRadLayout().getBeanInstance();
+                        return layout.getHgap();
                     }
 
                     @Override
                     public void setValue(Integer aValue) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-                        int oldValue = hgap;
-                        hgap = aValue != null ? aValue : 0;
-                        propertyValueChanged(oldValue, hgap);
+                        BoxLayout layout = (BoxLayout) getRadLayout().getBeanInstance();
+                        int oldValue = layout.getHgap();
+                        layout.setHgap(aValue != null ? aValue : 0);
+                        propertyValueChanged(oldValue, layout.getHgap());
                     }
 
                     @Override
@@ -450,14 +414,16 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
 
                     @Override
                     public Integer getValue() throws IllegalAccessException, InvocationTargetException {
-                        return vgap;
+                        BoxLayout layout = (BoxLayout) getRadLayout().getBeanInstance();
+                        return layout.getVgap();
                     }
 
                     @Override
                     public void setValue(Integer aValue) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-                        int oldValue = vgap;
-                        vgap = aValue != null ? aValue : 0;
-                        propertyValueChanged(oldValue, vgap);
+                        BoxLayout layout = (BoxLayout) getRadLayout().getBeanInstance();
+                        int oldValue = layout.getVgap();
+                        layout.setVgap(aValue != null ? aValue : 0);
+                        propertyValueChanged(oldValue, layout.getVgap());
                     }
 
                     @Override
@@ -473,6 +439,25 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
             };
         }
         return properties;
+    }
+
+    private int getOrientation() {
+        BoxLayout layout = (BoxLayout) getRadLayout().getBeanInstance();
+        int axis = layout.getAxis();
+        if (axis == BoxLayout.Y_AXIS || axis == BoxLayout.PAGE_AXIS) {
+            return Orientation.VERTICAL;
+        } else {
+            return Orientation.HORIZONTAL;
+        }
+    }
+
+    private void setOrientation(int aValue) {
+        BoxLayout layout = (BoxLayout) getRadLayout().getBeanInstance();
+        if (aValue == Orientation.VERTICAL) {
+            layout.setAxis(BoxLayout.Y_AXIS);
+        } else {
+            layout.setAxis(BoxLayout.X_AXIS);
+        }
     }
 
     /**

@@ -30,6 +30,7 @@ import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasEnabled;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 
 public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers, HasAddHandlers,
@@ -204,13 +205,15 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 		if (old != w) {
 			if (old != null)
 				remove(old);
-			Widget centerWidget = super.getCenter();
-			if (centerWidget != null)
-				super.remove(centerWidget);
-			addWest(w, size);
-			if (centerWidget != null)
-				super.add(centerWidget);
-			AddEvent.fire(this, w);
+			if (w != null) {
+				Widget centerWidget = super.getCenter();
+				if (centerWidget != null)
+					super.remove(centerWidget);
+				addWest(w, size);
+				if (centerWidget != null)
+					super.add(centerWidget);
+				AddEvent.fire(this, w);
+			}
 		}
 	}
 
@@ -229,13 +232,15 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 		if (old != w) {
 			if (old != null)
 				remove(old);
-			Widget centerWidget = super.getCenter();
-			if (centerWidget != null)
-				super.remove(centerWidget);
-			addEast(w, size);
-			if (centerWidget != null)
-				super.add(centerWidget);
-			AddEvent.fire(this, w);
+			if (w != null) {
+				Widget centerWidget = super.getCenter();
+				if (centerWidget != null)
+					super.remove(centerWidget);
+				addEast(w, size);
+				if (centerWidget != null)
+					super.add(centerWidget);
+				AddEvent.fire(this, w);
+			}
 		}
 	}
 
@@ -254,13 +259,15 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 		if (old != w) {
 			if (old != null)
 				remove(old);
-			Widget centerWidget = super.getCenter();
-			if (centerWidget != null)
-				super.remove(centerWidget);
-			addNorth(w, size);
-			if (centerWidget != null)
-				super.add(centerWidget);
-			AddEvent.fire(this, w);
+			if (w != null) {
+				Widget centerWidget = super.getCenter();
+				if (centerWidget != null)
+					super.remove(centerWidget);
+				addNorth(w, size);
+				if (centerWidget != null)
+					super.add(centerWidget);
+				AddEvent.fire(this, w);
+			}
 		}
 	}
 
@@ -279,13 +286,15 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 		if (old != w) {
 			if (old != null)
 				remove(old);
-			Widget centerWidget = super.getCenter();
-			if (centerWidget != null)
-				super.remove(centerWidget);
-			addSouth(w, size);
-			if (centerWidget != null)
-				super.add(centerWidget);
-			AddEvent.fire(this, w);
+			if (w != null) {
+				Widget centerWidget = super.getCenter();
+				if (centerWidget != null)
+					super.remove(centerWidget);
+				addSouth(w, size);
+				if (centerWidget != null)
+					super.add(centerWidget);
+				AddEvent.fire(this, w);
+			}
 		}
 	}
 
@@ -298,8 +307,10 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 		if (old != w) {
 			if (old != null)
 				remove(old);
-			super.add(w);
-			AddEvent.fire(this, w);
+			if (w != null) {
+				super.add(w);
+				AddEvent.fire(this, w);
+			}
 		}
 	}
 
@@ -325,22 +336,7 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 				return @com.eas.client.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(comp);
 			},
 			set : function(aChild) {
-				if (aChild != null) {
-				 	aWidget.@com.eas.client.form.published.containers.BorderPane::setLeftComponent(Lcom/google/gwt/user/client/ui/Widget;D)(aChild.unwrap(), toAdd.width);
-				}else
-					published.remove(published.leftComponent);
-			}
-		});
-		Object.defineProperty(published, "topComponent", {
-			get : function() {
-				var comp = aWidget.@com.eas.client.form.published.containers.BorderPane::getTopComponent()();
-				return @com.eas.client.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(comp);
-			},
-			set : function(aChild) {
-				if (aChild != null) {
-				 	aWidget.@com.eas.client.form.published.containers.BorderPane::setTopComponent(Lcom/google/gwt/user/client/ui/Widget;D)(aChild.unwrap(), toAdd.height);
-				}else
-					published.remove(published.topComponent);
+				aWidget.@com.eas.client.form.published.containers.BorderPane::setLeftComponent(Lcom/google/gwt/user/client/ui/Widget;D)(aChild.unwrap(), toAdd.width);
 			}
 		});
 		Object.defineProperty(published, "rightComponent", {
@@ -349,10 +345,16 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 				return @com.eas.client.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(comp);
 			},
 			set : function(aChild) {
-				if (aChild != null) {
-				 	aWidget.@com.eas.client.form.published.containers.BorderPane::setRightComponent(Lcom/google/gwt/user/client/ui/Widget;D)(aChild.unwrap(), toAdd.width);
-				}else
-					published.remove(published.rightComponent);
+				aWidget.@com.eas.client.form.published.containers.BorderPane::setRightComponent(Lcom/google/gwt/user/client/ui/Widget;D)(aChild.unwrap(), toAdd.width);
+			}
+		});
+		Object.defineProperty(published, "topComponent", {
+			get : function() {
+				var comp = aWidget.@com.eas.client.form.published.containers.BorderPane::getTopComponent()();
+				return @com.eas.client.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(comp);
+			},
+			set : function(aChild) {
+				aWidget.@com.eas.client.form.published.containers.BorderPane::setTopComponent(Lcom/google/gwt/user/client/ui/Widget;D)(aChild.unwrap(), toAdd.height);
 			}
 		});
 		Object.defineProperty(published, "bottomComponent", {
@@ -361,10 +363,7 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 				return @com.eas.client.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(comp);
 			},
 			set : function(aChild) {
-				if (aChild != null) {
-				 	aWidget.@com.eas.client.form.published.containers.BorderPane::setBottomComponent(Lcom/google/gwt/user/client/ui/Widget;D)(aChild.unwrap(), toAdd.height);
-				}else
-					published.remove(published.bottomComponent);
+				aWidget.@com.eas.client.form.published.containers.BorderPane::setBottomComponent(Lcom/google/gwt/user/client/ui/Widget;D)(aChild.unwrap(), toAdd.height);
 			}
 		});
 		Object.defineProperty(published, "centerComponent", {
@@ -373,10 +372,7 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 				return @com.eas.client.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(comp);
 			},
 			set : function(aChild) {
-				if (aChild != null) {
-				 	aWidget.@com.eas.client.form.published.containers.BorderPane::setCenterComponent(Lcom/google/gwt/user/client/ui/Widget;)(aChild.unwrap());
-				}else
-					published.remove(published.centerComponent);
+			 	aWidget.@com.eas.client.form.published.containers.BorderPane::setCenterComponent(Lcom/google/gwt/user/client/ui/Widget;)(aChild.unwrap());
 			}
 		});
 		published.add = function(toAdd, region, aSize) {
@@ -386,12 +382,9 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 				if(!region){
 					region = $wnd.P.VerticalPosition.CENTER;
 				}
-				if(published.centerComponent){
-					throw 'No widget can be added after center widget';
-				}
 				switch (region) {
 					case $wnd.P.VerticalPosition.CENTER:
-						aWidget.@com.eas.client.form.published.containers.BorderPane::add(Lcom/google/gwt/user/client/ui/Widget;)(toAdd.unwrap());
+						aWidget.@com.eas.client.form.published.containers.BorderPane::setCenterComponent(Lcom/google/gwt/user/client/ui/Widget;)(toAdd.unwrap());
 						break;  
 					case $wnd.P.VerticalPosition.TOP: 
 						if (!aSize) {
@@ -400,7 +393,7 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 								aSize = 32;
 							}
 						}
-						aWidget.@com.eas.client.form.published.containers.BorderPane::addNorth(Lcom/google/gwt/user/client/ui/Widget;D)(toAdd.unwrap(), aSize);
+						aWidget.@com.eas.client.form.published.containers.BorderPane::setTopComponent(Lcom/google/gwt/user/client/ui/Widget;D)(toAdd.unwrap(), aSize);
 						break;  
 					case $wnd.P.VerticalPosition.BOTTOM: 
 						if (!aSize) {
@@ -409,7 +402,7 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 								aSize = 32;
 							}
 						}
-						aWidget.@com.eas.client.form.published.containers.BorderPane::addSouth(Lcom/google/gwt/user/client/ui/Widget;D)(toAdd.unwrap(), aSize);
+						aWidget.@com.eas.client.form.published.containers.BorderPane::setBottomComponent(Lcom/google/gwt/user/client/ui/Widget;D)(toAdd.unwrap(), aSize);
 						break;  
 					case $wnd.P.HorizontalPosition.LEFT: 
 						if (!aSize) {
@@ -418,7 +411,7 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 								aSize = 32
 							}
 						}
-						aWidget.@com.eas.client.form.published.containers.BorderPane::addWest(Lcom/google/gwt/user/client/ui/Widget;D)(toAdd.unwrap(), aSize);
+						aWidget.@com.eas.client.form.published.containers.BorderPane::setLeftComponent(Lcom/google/gwt/user/client/ui/Widget;D)(toAdd.unwrap(), aSize);
 						break;  
 					case $wnd.P.HorizontalPosition.RIGHT: 
 						if (!aSize) {
@@ -427,7 +420,7 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 								aSize = 32
 							}
 						}
-						aWidget.@com.eas.client.form.published.containers.BorderPane::addEast(Lcom/google/gwt/user/client/ui/Widget;D)(toAdd.unwrap(), aSize);
+						aWidget.@com.eas.client.form.published.containers.BorderPane::setRightComponent(Lcom/google/gwt/user/client/ui/Widget;D)(toAdd.unwrap(), aSize);
 						break;  
 				}
 			}

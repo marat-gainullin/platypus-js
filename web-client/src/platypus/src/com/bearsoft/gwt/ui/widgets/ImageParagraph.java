@@ -1,7 +1,6 @@
 package com.bearsoft.gwt.ui.widgets;
 
 import com.bearsoft.gwt.ui.HasImageParagraph;
-import com.bearsoft.gwt.ui.XElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
@@ -18,11 +17,10 @@ import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.HasHTML;
 import com.google.gwt.user.client.ui.HasText;
-import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 
-public class ImageParagraph extends FocusWidget implements HasText, HasHTML, RequiresResize, HasClickHandlers, HasDoubleClickHandlers, Focusable, HasEnabled, HasAllMouseHandlers, HasAllTouchHandlers,
+public class ImageParagraph extends FocusWidget implements HasText, HasHTML, HasClickHandlers, HasDoubleClickHandlers, Focusable, HasEnabled, HasAllMouseHandlers, HasAllTouchHandlers,
         HasImageParagraph {
 
 	// forms api
@@ -37,10 +35,6 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Req
 	protected Element container;
 	protected Element content;
 	//
-	private int contentPaddingLeft;
-	private int contentPaddingRight;
-	private int contentPaddingTop;
-	private int contentPaddingBottom;
 
 	protected ImageParagraph(Element aContainer, String aTitle, boolean asHtml) {
 		this(aContainer, aTitle, asHtml, null);
@@ -55,12 +49,12 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Req
 		container.getStyle().setPosition(Style.Position.RELATIVE);
 		container.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 		container.getStyle().setCursor(Cursor.DEFAULT);
+		container.getStyle().setPadding(0, Unit.PX);
+		//
 		content = Document.get().createPElement();
 		content.getStyle().setMargin(0, Unit.PX);
-		content.getStyle().setWhiteSpace(Style.WhiteSpace.NOWRAP);
 		container.insertFirst(content);
 		setElement(container);
-		getElement().<XElement> cast().addResizingTransitionEnd(this);
 	}
 
 	@Override
@@ -78,37 +72,41 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Req
 			} else {
 				contentStyle.setPosition(Style.Position.ABSOLUTE);
 			}
-			organizeVerticalAlignment(contentStyle);
-			organizeHorizontalAlignment(contentStyle);
+			organizeHorizontalAlignment();
+			organizeVerticalAlignment();
 		}
 	}
 
-	protected void organizeHorizontalAlignment(Style contentStyle) {
+	protected void organizeHorizontalAlignment() {
+		final Style contentStyle = content.getStyle();
+		contentStyle.clearFloat();
 		switch (horizontalAlignment) {
 		case LEFT:
 		case LEADING:
 			contentStyle.setLeft(0, Unit.PX);
 			contentStyle.clearRight();
 			contentStyle.setTextAlign(Style.TextAlign.LEFT);
+			if (verticalAlignment == CENTER)
+				contentStyle.setFloat(Style.Float.LEFT);
 			break;
 		case RIGHT:
 		case TRAILING:
 			contentStyle.clearLeft();
 			contentStyle.setRight(0, Unit.PX);
 			contentStyle.setTextAlign(Style.TextAlign.RIGHT);
+			if (verticalAlignment == CENTER)
+				contentStyle.setFloat(Style.Float.RIGHT);
 			break;
 		case CENTER:
-			int widgetWidth = getElement().getClientWidth();
-			int pWidth = content.getOffsetWidth();
-			int topValue = (widgetWidth - pWidth) / 2;
-			contentStyle.setLeft(topValue, Style.Unit.PX);
-			contentStyle.clearRight();
-			contentStyle.clearTextAlign();
+			contentStyle.setLeft(0, Style.Unit.PX);
+			contentStyle.setRight(0, Style.Unit.PX);
+			contentStyle.setTextAlign(Style.TextAlign.CENTER);
 			break;
 		}
 	}
 
-	protected void organizeVerticalAlignment(Style contentStyle) {
+	protected void organizeVerticalAlignment() {
+		final Style contentStyle = content.getStyle();
 		switch (verticalAlignment) {
 		case TOP:
 			contentStyle.setTop(0, Style.Unit.PX);
@@ -120,11 +118,9 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Req
 			break;
 		}
 		case CENTER: {
-			int widgetHeight = getElement().getClientHeight();
-			int pHeight = content.getOffsetHeight();
-			int topValue = (widgetHeight - pHeight) / 2;
-			contentStyle.setTop(topValue, Style.Unit.PX);
+			contentStyle.clearTop();
 			contentStyle.clearBottom();
+			contentStyle.setPosition(Style.Position.RELATIVE);
 			break;
 		}
 		}
@@ -141,6 +137,10 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Req
 	protected void organizeImage() {
 		Style contentStyle = content.getStyle();
 		contentStyle.setProperty("background", "");
+		contentStyle.clearPaddingLeft();
+		contentStyle.clearPaddingRight();
+		contentStyle.clearPaddingTop();
+		contentStyle.clearPaddingBottom();
 		if (image != null) {
 			String backgroundPosition;
 			if (horizontalTextPosition == LEFT || horizontalTextPosition == LEADING) {
@@ -152,20 +152,12 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Req
 				contentStyle.setPaddingLeft(iconTextGap + image.getWidth(), Style.Unit.PX);
 				contentStyle.setPaddingRight(0, Style.Unit.PX);
 			} else {
-				int imageWidth = image.getWidth();
-				int contentWidth = content.getOffsetWidth();
-				int imageOverflow = imageWidth - (contentWidth - contentPaddingLeft - contentPaddingRight);
-				if (text == null || text.isEmpty())
-					imageOverflow = imageWidth;
-				if (imageOverflow < 0)
-					imageOverflow = 0;
+				if (text == null || text.isEmpty()) {
+					int imageWidth = image.getWidth();
+					contentStyle.setPaddingLeft(imageWidth / 2, Style.Unit.PX);
+					contentStyle.setPaddingRight(imageWidth / 2, Style.Unit.PX);
+				}
 				backgroundPosition = "center";
-
-				contentPaddingLeft = imageOverflow / 2;
-				contentStyle.setPaddingLeft(contentPaddingLeft, Style.Unit.PX);
-
-				contentPaddingRight = imageOverflow / 2;
-				contentStyle.setPaddingRight(contentPaddingRight, Style.Unit.PX);
 			}
 			backgroundPosition += " ";
 			if (verticalTextPosition == TOP || verticalTextPosition == LEADING) {
@@ -177,20 +169,12 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Req
 				contentStyle.setPaddingTop(iconTextGap + image.getHeight(), Style.Unit.PX);
 				contentStyle.setPaddingBottom(0, Style.Unit.PX);
 			} else {
-				int imageHeight = image.getHeight();
-				int contentHeight = content.getOffsetHeight();
-				int imageOverflow = imageHeight - (contentHeight - contentPaddingTop - contentPaddingBottom);
-				if (text == null || text.isEmpty())
-					imageOverflow = imageHeight;
-				if (imageOverflow < 0)
-					imageOverflow = 0;
+				if (text == null || text.isEmpty()) {
+					int imageHeight = image.getHeight();
+					contentStyle.setPaddingTop(imageHeight / 2, Style.Unit.PX);
+					contentStyle.setPaddingBottom(imageHeight / 2, Style.Unit.PX);
+				}
 				backgroundPosition += "center";
-
-				contentPaddingTop = imageOverflow / 2;
-				contentStyle.setPaddingTop(contentPaddingTop, Style.Unit.PX);
-
-				contentPaddingBottom = imageOverflow / 2;
-				contentStyle.setPaddingBottom(contentPaddingBottom, Style.Unit.PX);
 			}
 			contentStyle.setProperty("background", "url(" + image.getSafeUri().asString() + ")" + " no-repeat " + backgroundPosition);
 		}
@@ -269,7 +253,7 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Req
 	}
 
 	public void setVerticalTextPosition(int aValue) {
-		if (horizontalTextPosition != aValue) {
+		if (verticalTextPosition != aValue) {
 			verticalTextPosition = aValue;
 			organize();
 		}
@@ -278,11 +262,6 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Req
 	@Override
 	public void setImageResource(ImageResource aValue) {
 		image = aValue;
-		organize();
-	}
-
-	@Override
-	public void onResize() {
 		organize();
 	}
 

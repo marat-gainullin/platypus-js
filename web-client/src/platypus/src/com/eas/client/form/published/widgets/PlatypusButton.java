@@ -1,5 +1,6 @@
 package com.eas.client.form.published.widgets;
 
+import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.gwt.ui.widgets.ImageButton;
 import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.events.ActionEvent;
@@ -26,8 +27,10 @@ import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.user.client.ui.RequiresResize;
 
-public class PlatypusButton extends ImageButton implements HasActionHandlers, HasJsFacade, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers {
+public class PlatypusButton extends ImageButton implements RequiresResize, HasActionHandlers, HasJsFacade, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers,
+        HasResizeHandlers {
 
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
@@ -36,6 +39,7 @@ public class PlatypusButton extends ImageButton implements HasActionHandlers, Ha
 
 	public PlatypusButton(String aTitle, boolean asHtml, ImageResource aImage) {
 		super(aTitle, asHtml, aImage);
+		getElement().<XElement> cast().addResizingTransitionEnd(this);
 	}
 
 	public PlatypusButton(String aTitle, boolean asHtml) {
@@ -53,8 +57,7 @@ public class PlatypusButton extends ImageButton implements HasActionHandlers, Ha
 
 	@Override
 	public void onResize() {
-		super.onResize();
-		if(isAttached()){
+		if (isAttached()) {
 			ResizeEvent.fire(this, getElement().getOffsetWidth(), getElement().getOffsetHeight());
 		}
 	}

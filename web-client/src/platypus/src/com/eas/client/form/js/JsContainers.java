@@ -111,20 +111,13 @@ public class JsContainers {
 				if(toAdd && toAdd.unwrap){
 					if(toAdd.parent == published)
 						throw 'A widget already added to this container';
-					aComponent.@com.eas.client.form.published.containers.BoxPane::add(Lcom/google/gwt/user/client/ui/Widget;)(toAdd.unwrap());
-					if (aOrientation == $wnd.P.Orientation.VERTICAL) {
-						var widgetHeight = toAdd.height;
-						aComponent.@com.bearsoft.gwt.ui.containers.BoxPanel::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(toAdd.unwrap(), widgetHeight);
-					} else { 
-						var widgetWidth = toAdd.width;
-						aComponent.@com.bearsoft.gwt.ui.containers.BoxPanel::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(toAdd.unwrap(), widgetWidth);
-					}
+					aComponent.@com.eas.client.form.published.containers.BoxPane::add(Lcom/google/gwt/user/client/ui/Widget;I)(toAdd.unwrap(), published.orientation == $wnd.P.Orientation.VERTICAL ? toAdd.height : toAdd.width);
 				}
 			}
 			
 			Object.defineProperty(published, "orientation", {
 				get : function(){
-					return aOrientation;
+					return aComponent.@com.bearsoft.gwt.ui.containers.BoxPanel::getOrientation()();
 				}
 			});
 			var _hgap = 0;
