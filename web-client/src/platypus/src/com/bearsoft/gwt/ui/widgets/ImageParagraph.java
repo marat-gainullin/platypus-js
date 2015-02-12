@@ -34,6 +34,7 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Has
 	protected ImageResource image;
 	protected Element container;
 	protected Element content;
+	protected Element aligner;
 	//
 
 	protected ImageParagraph(Element aContainer, String aTitle, boolean asHtml) {
@@ -54,6 +55,13 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Has
 		content = Document.get().createPElement();
 		content.getStyle().setMargin(0, Unit.PX);
 		container.insertFirst(content);
+		aligner = Document.get().createDivElement();
+		aligner.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+		aligner.getStyle().setPosition(Style.Position.RELATIVE);
+		aligner.getStyle().setHeight(100, Style.Unit.PCT);
+		aligner.getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
+		aligner.getStyle().setVisibility(Style.Visibility.HIDDEN);
+		container.insertFirst(aligner);
 		setElement(container);
 	}
 
@@ -78,35 +86,38 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Has
 	}
 
 	protected void organizeHorizontalAlignment() {
+		final Style containerStyle = container.getStyle();
 		final Style contentStyle = content.getStyle();
-		contentStyle.clearFloat();
 		switch (horizontalAlignment) {
 		case LEFT:
 		case LEADING:
 			contentStyle.setLeft(0, Unit.PX);
 			contentStyle.clearRight();
 			contentStyle.setTextAlign(Style.TextAlign.LEFT);
-			if (verticalAlignment == CENTER)
-				contentStyle.setFloat(Style.Float.LEFT);
+			containerStyle.setTextAlign(Style.TextAlign.LEFT);
 			break;
 		case RIGHT:
 		case TRAILING:
 			contentStyle.clearLeft();
 			contentStyle.setRight(0, Unit.PX);
 			contentStyle.setTextAlign(Style.TextAlign.RIGHT);
-			if (verticalAlignment == CENTER)
-				contentStyle.setFloat(Style.Float.RIGHT);
+			containerStyle.setTextAlign(Style.TextAlign.RIGHT);
 			break;
 		case CENTER:
-			contentStyle.setLeft(0, Style.Unit.PX);
-			contentStyle.setRight(0, Style.Unit.PX);
+			//contentStyle.setLeft(0, Style.Unit.PX);
+			//contentStyle.setRight(0, Style.Unit.PX);
 			contentStyle.setTextAlign(Style.TextAlign.CENTER);
+			containerStyle.setTextAlign(Style.TextAlign.CENTER);
 			break;
 		}
 	}
 
 	protected void organizeVerticalAlignment() {
 		final Style contentStyle = content.getStyle();
+		final Style alignerStyle = aligner.getStyle();
+		contentStyle.clearDisplay();
+		contentStyle.clearProperty("verticalAlign");
+		alignerStyle.setDisplay(Style.Display.NONE);
 		switch (verticalAlignment) {
 		case TOP:
 			contentStyle.setTop(0, Style.Unit.PX);
@@ -121,6 +132,9 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Has
 			contentStyle.clearTop();
 			contentStyle.clearBottom();
 			contentStyle.setPosition(Style.Position.RELATIVE);
+			contentStyle.setDisplay(Style.Display.INLINE_BLOCK);
+			contentStyle.setVerticalAlign(Style.VerticalAlign.MIDDLE);
+			alignerStyle.setDisplay(Style.Display.INLINE_BLOCK);
 			break;
 		}
 		}
