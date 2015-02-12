@@ -276,7 +276,8 @@ public class FormFactory {
 			Publisher.publish(htmlArea);
 			readGeneralProps(anElement, htmlArea);
 			if (anElement.hasAttribute("text")) {
-				htmlArea.setText(anElement.getAttribute("text"));
+				String text = anElement.getAttribute("text");
+				htmlArea.setValue(text); 
 			}
 			return htmlArea;
 		case "FormattedField": {

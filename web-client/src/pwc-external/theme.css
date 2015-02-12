@@ -700,3 +700,89 @@
 
 .south-east-decor-active{
 }
+
+.editor-bold, .editor-italic, .editor-underline, .editor-subscript, .editor-superscript, .editor-align-left, .editor-align-center, .editor-align-right, .editor-background-color, .editor-foreground-color, .editor-strike-through, .editor-indent-right, .editor-indent-left, .editor-horisontal-rule, .editor-ordered-list, .editor-unordered-list, .editor-insert-image, .editor-create-link, .editor-delete-link, .editor-remove-format  {
+    width: 100%; 
+    height: 100%;
+    background-image: url(editor-bold.gif);
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+}
+
+.editor-container{
+	width: 100%; 
+    height: 100%;
+}
+
+.editor-bold{
+    background-image: url(editor-bold.gif);
+}
+
+.editor-italic{
+    background-image: url(editor-italic.gif);
+}
+
+.editor-underline{
+    background-image: url(editor-underline.gif);
+}
+
+.editor-subscript{
+    background-image: url(editor-subscript.gif);
+}
+
+.editor-superscript{
+    background-image: url(editor-superscript.gif);
+}
+
+.editor-align-left{
+    background-image: url(editor-justify-left.gif);
+}
+
+.editor-align-center{
+    background-image: url(editor-justify-center.gif);
+}
+
+.editor-align-right{
+    background-image: url(editor-justify-right.gif);
+}
+
+.editor-background-color{
+    background-image: url(editor-back-color.gif);
+}
+
+.editor-foreground-color{
+    background-image: url(editor-fore-color.gif);
+}
+
+.editor-strike-through{
+    background-image: url(editor-strike-through.gif);
+} 
+.editor-indent-right{
+    background-image: url(editor-indent.gif);
+}
+.editor-indent-left{
+    background-image: url(editor-outdent.gif);
+}
+.editor-horisontal-rule{
+    background-image: url(editor-hr.gif);
+}
+.editor-ordered-list{
+    background-image: url(editor-ol.gif);
+}
+.editor-unordered-list{
+    background-image: url(editor-ul.gif);
+}
+.editor-insert-image{
+    background-image: url(editor-insert-image.gif);
+}
+.editor-create-link{
+    background-image: url(editor-create-link.gif);
+}
+.editor-delete-link{
+    background-image: url(editor-remove-link.gif);
+}
+.editor-remove-format{
+    background-image: url(editor-remove-format.gif);
+}
+

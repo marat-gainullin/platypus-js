@@ -1,12 +1,16 @@
 package com.eas.client.form;
 
+import java.io.File;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.tools.ant.types.FileList;
+
 import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.rowset.Utils;
+import com.bearsoft.rowset.Utils.JsObject;
 import com.eas.client.form.MarginConstraints.Margin;
 import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.published.HasPublished;
@@ -23,7 +27,9 @@ import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.NodeList;
@@ -32,6 +38,7 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -86,22 +93,6 @@ public class ControlsUtils {
 			return dateFormat;
 	}
 
-	protected static class XFileUploadField extends FileUpload {
-
-		public XFileUploadField() {
-			super();
-		}
-
-		public void scheduleSelect() {
-			getElement().<XElement> cast().click();
-		}
-
-		public native JsArray<JavaScriptObject> getFiles()/*-{
-			var element = this.@com.google.gwt.user.client.ui.Widget::getElement()();
-			return element.files;
-		}-*/;
-	}
-
 	public static void jsSelectFile(final JavaScriptObject aCallback, final String aFileTypes) {
 		if (aCallback != null) {
 			selectFile(new Callback<JavaScriptObject, String>() {
@@ -123,38 +114,54 @@ public class ControlsUtils {
 		}
 	}
 
-	public static void selectFile(final Callback<JavaScriptObject, String> aCallback, String aFileTypes) {
-		final XFileUploadField fu = new XFileUploadField();
-		fu.getElement().getStyle().setDisplay(Style.Display.NONE);
+	public static void selectFile(final Callback<JavaScriptObject, String> aCallback,String aFileTypes) {
+		
+		final TextBox tmpField = new TextBox();
+		tmpField.getElement().setAttribute("type", "file");
+		tmpField.getElement().setAttribute("positon", "absolute");
+		tmpField.getElement().setAttribute("multiple","true");
+		tmpField.setWidth("0px");
+		tmpField.setHeight("0px");
+		RootPanel.get().add(tmpField, -100, -100);
+		
 		if (aFileTypes != null) {
-			fu.getElement().setAttribute("accept", aFileTypes);
+			tmpField.getElement().setAttribute("accept", aFileTypes);
 		}
-		RootPanel.get().add(fu);
-		fu.addChangeHandler(new ChangeHandler() {
+		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 			@Override
-			public void onChange(ChangeEvent event) {
+			public void execute() {
+				tmpField.setFocus(true);
 				if (aCallback != null) {
-					if (fu.getFiles() != null) {
-						for (int i = 0; i < fu.getFiles().length(); i++) {
-							try {
-								aCallback.onSuccess(fu.getFiles().get(i));
-							} catch (Exception ex) {
-								Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
-							}
+					tmpField.addFocusHandler(new FocusHandler() {
+						@Override
+						public void onFocus(FocusEvent event) {
+								try {
+									JsObject jsFu = tmpField.getElement().cast();
+									JavaScriptObject oFiles = jsFu.getJs("files");
+									if (oFiles != null) {
+										JsArray<JavaScriptObject> jsFiles = oFiles.cast(); 
+										for (int i = 0; i < jsFiles.length(); i++) {
+											try {
+												aCallback.onSuccess(jsFiles.get(i));
+											} catch (Exception ex) {
+												Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
+											}
+										}
+									}
+								} catch (Exception ex) {
+									Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
+								}
+							
+							tmpField.removeFromParent();
+							// focusHandler.removeHandler();
 						}
-					}
+					});
 				}
-				fu.removeFromParent();
+				click(tmpField.getElement());
 			}
 		});
-		fu.scheduleSelect();
-		/*
-		 * Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-		 * 
-		 * @Override public void execute() { fu.removeFromParent(); } });
-		 */
 	}
-
+	
 	public static void jsSelectColor(final JavaScriptObject aCallback) {
 		if (aCallback != null) {
 			selectColor(new Callback<String, String>() {
@@ -203,7 +210,6 @@ public class ControlsUtils {
 					}
 				});
 				click(tmpField.getElement());
-
 			}
 		});
 

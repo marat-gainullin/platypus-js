@@ -1,5 +1,6 @@
 package com.eas.client.form.published.widgets;
 
+import com.bearsoft.gwt.ui.CommonResources;
 import com.bearsoft.gwt.ui.XElement;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.EventsExecutor;
@@ -35,6 +36,7 @@ public class PlatypusTextArea extends TextArea implements HasJsFacade, HasEmptyT
 
 	public PlatypusTextArea() {
 		super();
+		this.getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
 		getElement().<XElement>cast().addResizingTransitionEnd(this);
 	}
 
