@@ -158,23 +158,22 @@ public class PlatypusHttpRequestReader implements PlatypusRequestVisitor {
 
     private Parameters decodeQueryParams(String aQueryName, HttpServletRequest aRequest) throws RowsetException, IOException, UnsupportedEncodingException, Exception {
         SqlQuery query = serverCore.getQueries().getQuery(aQueryName, null, null);
-        Parameters params = query.getParameters();
+        Parameters params = query.getParameters().copy();
         DatabaseMdCache mdCache = serverCore.getDatabasesClient().getDbMetadataCache(query.getDatasourceName());
         Converter converter = mdCache != null && mdCache.getConnectionDriver() != null ? mdCache.getConnectionDriver().getConverter() : new RowsetConverter();
         for (int i = 1; i <= params.getParametersCount(); i++) {
             Parameter param = params.get(i);
             String paramValue = aRequest.getParameter(param.getName());
-            if (paramValue != null) {
-                if ("null".equals(paramValue.toLowerCase()) || paramValue.isEmpty()) {
-                    paramValue = null;
-                }
-                Object convertedParamValue;
+            if (paramValue != null && !"null".equals(paramValue.toLowerCase()) && !paramValue.isEmpty()) {
                 if (param.getTypeInfo().getSqlType() == Types.DATE || param.getTypeInfo().getSqlType() == Types.TIMESTAMP || param.getTypeInfo().getSqlType() == Types.TIME) {
-                    convertedParamValue = converter.convert2RowsetCompatible(paramValue != null ? (new SimpleDateFormat(RowsetJsonConstants.DATE_FORMAT)).parse(paramValue) : paramValue, param.getTypeInfo());
+                    param.setValue(new SimpleDateFormat(RowsetJsonConstants.DATE_FORMAT).parse(paramValue));
+                } else if (param.getTypeInfo().getSqlType() == Types.BOOLEAN || param.getTypeInfo().getSqlType() == Types.BIT) {
+                    param.setValue("true".equalsIgnoreCase(paramValue));
                 } else {
-                    convertedParamValue = converter.convert2RowsetCompatible(paramValue, param.getTypeInfo());
+                    param.setValue(converter.convert2RowsetCompatible(paramValue, param.getTypeInfo()));
                 }
-                param.setValue(convertedParamValue);
+            } else {
+                param.setValue(null);
             }
         }
         return params;

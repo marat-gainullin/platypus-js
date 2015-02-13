@@ -155,15 +155,16 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Has
 		contentStyle.clearPaddingRight();
 		contentStyle.clearPaddingTop();
 		contentStyle.clearPaddingBottom();
+		int textGap = text != null && !text.isEmpty() ? iconTextGap : 0;
 		if (image != null) {
 			String backgroundPosition;
 			if (horizontalTextPosition == LEFT || horizontalTextPosition == LEADING) {
 				backgroundPosition = "right";
 				contentStyle.setPaddingLeft(0, Style.Unit.PX);
-				contentStyle.setPaddingRight(iconTextGap + image.getWidth(), Style.Unit.PX);
+				contentStyle.setPaddingRight(textGap + image.getWidth(), Style.Unit.PX);
 			} else if (horizontalTextPosition == RIGHT || horizontalTextPosition == TRAILING) {
 				backgroundPosition = "left";
-				contentStyle.setPaddingLeft(iconTextGap + image.getWidth(), Style.Unit.PX);
+				contentStyle.setPaddingLeft(textGap + image.getWidth(), Style.Unit.PX);
 				contentStyle.setPaddingRight(0, Style.Unit.PX);
 			} else {
 				if (text == null || text.isEmpty()) {
@@ -177,10 +178,10 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Has
 			if (verticalTextPosition == TOP || verticalTextPosition == LEADING) {
 				backgroundPosition += "bottom";
 				contentStyle.setPaddingTop(0, Style.Unit.PX);
-				contentStyle.setPaddingBottom(iconTextGap + image.getHeight(), Style.Unit.PX);
+				contentStyle.setPaddingBottom(textGap + image.getHeight(), Style.Unit.PX);
 			} else if (verticalTextPosition == BOTTOM || verticalTextPosition == TRAILING) {
 				backgroundPosition += "top";
-				contentStyle.setPaddingTop(iconTextGap + image.getHeight(), Style.Unit.PX);
+				contentStyle.setPaddingTop(textGap + image.getHeight(), Style.Unit.PX);
 				contentStyle.setPaddingBottom(0, Style.Unit.PX);
 			} else {
 				if (text == null || text.isEmpty()) {
