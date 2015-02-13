@@ -279,20 +279,24 @@ public class GridSection<T> extends CellTable<T> {
 			for (int i = 0; i < rows.getLength(); i++) {
 				TableRowElement row = rows.getItem(i);
 				NodeList<TableCellElement> cells = row.getCells();
-				if (cells.getLength() > 0) {
+				if (aIndex >= 0 && aIndex < cells.getLength()) {
 					TableCellElement toRerender = cells.getItem(aIndex);
 					if (toRerender != null) {
 						SafeHtmlBuilder sb = new SafeHtmlBuilder();
-						T object = data.get(start + i);
-						Cell.Context cx = new Cell.Context(start + i, aIndex, keys.getKey(object));
-						cell.render(cx, column.getValue(object), sb);
-						// Take into account, that cell builder supports some
-						// maps
-						// to cells' divs
-						// and generates them. So we have to work with first
-						// <div>
-						// in <td>.
-						toRerender.getFirstChildElement().setInnerSafeHtml(sb.toSafeHtml());
+						int dataIdx = start + i;
+						if (dataIdx >= 0 && dataIdx < data.size()) {
+							T object = data.get(dataIdx);
+							Cell.Context cx = new Cell.Context(start + i, aIndex, keys.getKey(object));
+							cell.render(cx, column.getValue(object), sb);
+							// Take into account, that cell builder supports
+							// some
+							// maps
+							// to cells' divs
+							// and generates them. So we have to work with first
+							// <div>
+							// in <td>.
+							toRerender.getFirstChildElement().setInnerSafeHtml(sb.toSafeHtml());
+						}
 					}
 				}
 			}

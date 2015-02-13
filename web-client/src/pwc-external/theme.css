@@ -461,6 +461,7 @@
 }
 
 .grid-column-header{
+    position: relative;
     line-height: 20px;
     overflow: hidden;
     font-weight:bold;
@@ -498,7 +499,6 @@
 }
 
 .grid-header-mover:hover{
-    padding: 10px;
     border-width: 1px;
     border-color: lightgray;
     border-radius: 2px;

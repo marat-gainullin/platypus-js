@@ -49,7 +49,7 @@ public class ExecuteQueryRequestHandler extends SessionRequestHandler<ExecuteQue
                     if (rolesAllowed != null && !PlatypusPrincipal.getInstance().hasAnyRole(rolesAllowed)) {
                         throw new AccessControlException(String.format(ACCESS_DENIED_MSG, query.getEntityId(), PlatypusPrincipal.getInstance().getName()), PlatypusPrincipal.getInstance() instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
                     }
-                    handleQuery(query, (Rowset rowset) -> {
+                    handleQuery(query.copy(), (Rowset rowset) -> {
                         if (onSuccess != null) {
                             onSuccess.accept(new ExecuteQueryRequest.Response(rowset, 0));
                         }

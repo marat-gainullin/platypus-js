@@ -4,10 +4,12 @@
 */
 
 .gridHeaderMover{
+	box-sizing: border-box;
     position: absolute;
+    top: 0px;
     height: 100%;
     left: 0px;
-    right: 4px;
+    right: 0px;
     /* Prevent the text contents of draggable elements from being selectable. */
     -moz-user-select: none;
     -khtml-user-select: none;
@@ -19,9 +21,11 @@
 }
 
 .gridHeaderResizer{
-    position: absolute;
-    height: 100%;
-    width: 4px;
+	box-sizing: border-box;
+	position: absolute;
+    top: 0px;
+	height: 100%;
+    width: 5px;
     right: 0px;
     /* Prevent the text contents of draggable elements from being selectable. */
     -moz-user-select: none;
