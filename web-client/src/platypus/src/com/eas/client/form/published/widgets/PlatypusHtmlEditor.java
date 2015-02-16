@@ -43,6 +43,15 @@ import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.HasBlurHandlers;
 import com.google.gwt.event.dom.client.HasFocusHandlers;
+import com.google.gwt.event.dom.client.HasKeyDownHandlers;
+import com.google.gwt.event.dom.client.HasKeyPressHandlers;
+import com.google.gwt.event.dom.client.HasKeyUpHandlers;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ResizeEvent;
@@ -67,7 +76,7 @@ import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.Widget;
 
 public class PlatypusHtmlEditor extends Composite implements HasJsFacade,HasValueChangeHandlers<String>, HasEmptyText, HasValue<String>, HasComponentPopupMenu, HasEventsExecutor, 
-HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHandlers, HasBlurHandlers, Focusable, HasEnabled{
+HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHandlers, HasBlurHandlers, Focusable, HasEnabled, HasKeyDownHandlers, HasKeyPressHandlers, HasKeyUpHandlers{
 	
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
@@ -408,12 +417,26 @@ HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHan
 			}
 		});
 		
-//		addFocusHandler(new FocusHandler() {
-//			@Override
-//			public void onFocus(com.google.gwt.event.dom.client.FocusEvent event) {
-//				textContainer.setFocus(true);
-//			}
-//		});
+		textContainer.addKeyDownHandler(new KeyDownHandler() {
+			@Override
+			public void onKeyDown(KeyDownEvent event) {
+				KeyDownEvent.fireNativeEvent(event.getNativeEvent(), PlatypusHtmlEditor.this);
+			}
+		});
+		
+		textContainer.addKeyUpHandler(new KeyUpHandler() {
+			@Override
+			public void onKeyUp(KeyUpEvent event) {
+				KeyUpEvent.fireNativeEvent(event.getNativeEvent(), PlatypusHtmlEditor.this);
+			}
+		});
+		
+		textContainer.addKeyPressHandler(new KeyPressHandler() {
+			@Override
+			public void onKeyPress(KeyPressEvent event) {
+				KeyPressEvent.fireNativeEvent(event.getNativeEvent(), PlatypusHtmlEditor.this);
+			}
+		});
 		
 	}
 	
@@ -691,6 +714,21 @@ HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHan
 		}else if(oldValue && !enabled){
 			getElement().<XElement>cast().disabledMask();
 		}
+	}
+
+	@Override
+	public HandlerRegistration addKeyUpHandler(KeyUpHandler handler) {
+		return addHandler(handler, KeyUpEvent.getType());
+	}
+
+	@Override
+	public HandlerRegistration addKeyPressHandler(KeyPressHandler handler) {
+		return addHandler(handler, KeyPressEvent.getType());
+	}
+
+	@Override
+	public HandlerRegistration addKeyDownHandler(KeyDownHandler handler) {
+		return addHandler(handler, KeyDownEvent.getType());
 	}
 
 
