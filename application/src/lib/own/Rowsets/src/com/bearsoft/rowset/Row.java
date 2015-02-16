@@ -235,10 +235,18 @@ public class Row implements HasPublished {
      * @see #originalToCurrent()
      */
     public void currentToOriginal() {
+        currentToOriginal(true);
+    }
+
+    public void currentToOriginal(boolean aCommited) {
         for (int i = 0; i < getColumnCount(); i++) {
-            originalValues.set(i, currentValues.get(i));
+            if (aCommited || !updated.get(i)) {
+                originalValues.set(i, currentValues.get(i));
+            }
         }
-        clearUpdated();
+        if (aCommited) {
+            clearUpdated();
+        }
     }
 
     /**
@@ -461,6 +469,11 @@ public class Row implements HasPublished {
         updated.set(colIndex - 1);
     }
 
+    public void setColumnUpdated(int colIndex, Object aValue) {
+        updated.set(colIndex - 1);
+        currentValues.set(colIndex - 1, aValue);
+    }
+
     /**
      * Returns an updated columns indicies set.
      *
@@ -511,14 +524,43 @@ public class Row implements HasPublished {
      * @return An array of current values of primary-key fields of this row.
      */
     public Object[] getPKValues() {
-        Object[] lcurrentValues = getCurrentValues();
         List<Integer> pkIndicies = fields.getPrimaryKeysIndicies();
         List<Object> pkValues = new ArrayList<>();
         for (Integer pkIdx : pkIndicies) {
-            assert pkIdx >= 1 && pkIdx <= lcurrentValues.length;
-            pkValues.add(lcurrentValues[pkIdx - 1]);
+            assert pkIdx >= 1 && pkIdx <= currentValues.size();
+            pkValues.add(currentValues.get(pkIdx - 1));
         }
         return pkValues.toArray();
+    }
+
+    /**
+     * Returns an array of current values of primary-key fields of this row.
+     *
+     * @param aIndicies An array of column indicies.
+     * @return A list of current values of this row at corresponding indicies.
+     */
+    public List<Object> getCurrentValues(List<Integer> aIndicies) {
+        List<Object> values = new ArrayList<>();
+        for (Integer colIdx : aIndicies) {
+            assert colIdx >= 1 && colIdx <= currentValues.size();
+            values.add(currentValues.get(colIdx - 1));
+        }
+        return values;
+    }
+
+    /**
+     * Returns an array of original values of primary-key fields of this row.
+     *
+     * @param aIndicies An array of column indicies.
+     * @return A list of original values of this row at corresponding indicies.
+     */
+    public List<Object> getOriginalValues(List<Integer> aIndicies) {
+        List<Object> values = new ArrayList<>();
+        for (Integer colIdx : aIndicies) {
+            assert colIdx >= 1 && colIdx <= originalValues.size();
+            values.add(originalValues.get(colIdx - 1));
+        }
+        return values;
     }
 
     /**

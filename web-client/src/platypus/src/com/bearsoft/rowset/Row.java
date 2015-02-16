@@ -257,11 +257,19 @@ public class Row implements HasPropertyListeners {
 	 * @see #originalToCurrent()
 	 */
 	public void currentToOriginal() {
-		for (int i = 0; i < getColumnCount(); i++) {
-			originalValues.set(i, currentValues.get(i));
-		}
-		clearUpdated();
-	}
+        currentToOriginal(true);
+    }
+
+    public void currentToOriginal(boolean aCommited) {
+        for (int i = 0; i < getColumnCount(); i++) {
+            if (aCommited || !isColumnUpdated(i + 1)) {
+                originalValues.set(i, currentValues.get(i));
+            }
+        }
+        if (aCommited) {
+            clearUpdated();
+        }
+    }
 
 	/**
 	 * Cancels current values in this row. After this method has been invoked,
@@ -495,6 +503,11 @@ public class Row implements HasPropertyListeners {
 		updated.add(colIndex);
 	}
 
+    public void setColumnUpdated(int colIndex, Object aValue) {
+        updated.add(colIndex);
+        currentValues.set(colIndex - 1, aValue);
+    }
+
 	/**
 	 * Returns an updated columns indicies set.
 	 * 
@@ -548,6 +561,36 @@ public class Row implements HasPropertyListeners {
 		}
 		return pkValues.toArray();
 	}
+
+    /**
+     * Returns an array of current values of primary-key fields of this row.
+     *
+     * @param aIndicies An array of column indicies.
+     * @return A list of current values of this row at corresponding indicies.
+     */
+    public List<Object> getCurrentValues(List<Integer> aIndicies) {
+        List<Object> values = new ArrayList<>();
+        for (Integer colIdx : aIndicies) {
+            assert colIdx >= 1 && colIdx <= currentValues.size();
+            values.add(currentValues.get(colIdx - 1));
+        }
+        return values;
+    }
+
+    /**
+     * Returns an array of original values of primary-key fields of this row.
+     *
+     * @param aIndicies An array of column indicies.
+     * @return A list of original values of this row at corresponding indicies.
+     */
+    public List<Object> getOriginalValues(List<Integer> aIndicies) {
+        List<Object> values = new ArrayList<>();
+        for (Integer colIdx : aIndicies) {
+            assert colIdx >= 1 && colIdx <= originalValues.size();
+            values.add(originalValues.get(colIdx - 1));
+        }
+        return values;
+    }
 
 	/**
 	 * Returns an internal representation of row's data. It's not recomended to

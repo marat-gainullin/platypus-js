@@ -8,9 +8,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.bearsoft.rowset.beans.HasPropertyListeners;
 import com.bearsoft.rowset.beans.PropertyChangeListener;
@@ -351,30 +355,48 @@ public class Rowset implements HasPropertyListeners{
 					@Override
 					protected void doWork(Rowset aRowset) throws Exception {
 						if (aRowset != null) {
-							if (activeFilter != null) {
-								// No implicit calls to setCurrent and etc.
+	                        List<Row> oldRows = current;
+	                        if (activeFilter != null) {
+	                            // No implicit calls to setCurrent and etc.
+	                            oldRows = activeFilter.getOriginalRows();
 								activeFilter.deactivate();
 								activeFilter = null;
 							}
 							if (fields == null) {
 								setFields(aRowset.getFields());
 							}
-							List<Row> rows = aRowset.getCurrent();
+							List<Row> fetchedRows = aRowset.getCurrent();
 							aRowset.setCurrent(new ArrayList<Row>());
 							aRowset.currentToOriginal();
-							for (int r = 0; r < current.size(); r++) {
-								Row checked = current.get(r);
-								//if (checked.isInserted() || checked.isUpdated() - if uncomment, then same rows will be fetched form a database) {
-								if (checked.isInserted()) {
-									rows.add(checked);
-								}
-							}
-							for (int r = 0; r < rows.size(); r++) {
-								Row row = rows.get(r);
-								row.setLog(log);
-								row.setEntityName(flow.getEntityId());
-							}
-							setCurrent(rows);
+                            // Collect updated old rows and preserve inserted rows
+                            List<Row> oldInsertedRows = new ArrayList<>();
+                            Map<List<Object>, Row> oldUpdatedRows = new HashMap<>();
+                            List<Integer> pkIndicies = fields.getPrimaryKeysIndicies();
+                            for(Row oldRow : oldRows){
+                                if (oldRow.isInserted()) {
+                                    oldInsertedRows.add(oldRow);
+                                } else if (oldRow.isUpdated()) {
+                                    oldUpdatedRows.put(oldRow.getOriginalValues(pkIndicies), oldRow);
+                                }
+                            }
+                            for(Row aFetchedRow : fetchedRows){
+                                Row oldRow = oldUpdatedRows.remove(aFetchedRow.getCurrentValues(pkIndicies));
+                                if (oldRow != null) {
+                                    for(Integer anUpdatedColumn : oldRow.getUpdatedColumns()){
+                                        try {
+                                            Object updatedValue = oldRow.getColumnObject(anUpdatedColumn);
+                                            aFetchedRow.setColumnUpdated(anUpdatedColumn, updatedValue);
+                                        } catch (RowsetException ex) {
+                                            Logger.getLogger(Rowset.class.getName()).log(Level.SEVERE, null, ex);
+                                        }
+                                    }
+                                }
+                                aFetchedRow.setLog(log);
+                                aFetchedRow.setEntityName(flow.getEntityId());
+                            }
+                            fetchedRows.addAll(oldUpdatedRows.values());
+                            fetchedRows.addAll(oldInsertedRows);
+							setCurrent(fetchedRows);
 							currentToOriginal(false);
 							// silent first
 							if (!current.isEmpty()) {
@@ -928,7 +950,7 @@ public class Rowset implements HasPropertyListeners{
 		for (int i = original.size() - 1; i >= 0; i--) {
 			Row row = original.get(i);
 			assert row != null;
-			row.currentToOriginal();
+            row.currentToOriginal(aCommited);
 			if(aCommited)
 				row.clearInserted();
 			if (row.isDeleted()) {// Should never happen. Added for code
