@@ -375,6 +375,8 @@ public class JsWidgets {
 	    			aPublished.parent.unwrap().@com.bearsoft.gwt.ui.containers.BoxPanel::ajustDisplay(Lcom/google/gwt/user/client/ui/Widget;)(aPublished.unwrap());
 		    	else if(aPublished.parent instanceof $wnd.P.ToolBar)
 	    			aPublished.parent.unwrap().@com.bearsoft.gwt.ui.containers.Toolbar::ajustDisplay(Lcom/google/gwt/user/client/ui/Widget;)(aPublished.unwrap());
+		    	else if(aPublished.parent instanceof $wnd.P.AnchorsPane)
+	    			aPublished.parent.unwrap().@com.bearsoft.gwt.ui.containers.AnchorsPanel::ajustDisplay(Lcom/google/gwt/user/client/ui/Widget;)(aPublished.unwrap());
 		    }
  	    });
 	    Object.defineProperty(aPublished, "enabled", {
