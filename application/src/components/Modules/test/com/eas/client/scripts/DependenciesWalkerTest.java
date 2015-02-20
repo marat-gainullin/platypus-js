@@ -4,7 +4,6 @@
  */
 package com.eas.client.scripts;
 
-import java.util.Set;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -15,50 +14,11 @@ import org.junit.Test;
 public class DependenciesWalkerTest {
 
     @Test
-    public void testParseDependencies1() {
-        String va1 = "var moduleName = 'SOME_MODULE_NAME'; P.Modules.get(moduleName);";
-        DependenciesWalker walker = new DependenciesWalker(va1);
-        assertTrue(walker.getDependencies().isEmpty());
-    }
-
-    @Test
-    public void testParseDependencies2() {
-        String SOME_MODULE_ONE = "SOME_MODULE_ONE";
-        String SOME_MODULE_TWO = "SOME_MODULE_TWO";
-        String va1 = "var moduleName = 'SOME_MODULE_NAME'; P.Modules.get(\"" + SOME_MODULE_ONE + "\"); P.Modules.create(\"" + SOME_MODULE_TWO + "\");";
-        DependenciesWalker walker = new DependenciesWalker(va1);
-        walker.walk();
-        Set<String> dependencies = walker.getDependencies();
-        assertEquals(2, dependencies.size());
-        assertTrue(dependencies.contains(SOME_MODULE_ONE));
-        assertTrue(dependencies.contains(SOME_MODULE_TWO));
-    }
-
-    @Test
-    public void testParseDependencies3() {
-        String FORM_ID_HERE = "FORM_ID_HERE";
-        String va1 = "var form = new P.Form(\"" + FORM_ID_HERE + "\");";
-        DependenciesWalker walker = new DependenciesWalker(va1);
-        walker.walk();
-        Set<String> dependencies = walker.getDependencies();
-        assertTrue(dependencies.size() == 1);
-        assertTrue(dependencies.contains(FORM_ID_HERE));
-    }
-
-    @Test
-    public void testParseDependencies4() {
-        String va1 = "var report = new P.Report(\"ANY_REPORT_NAME\"); var module = new P.Module(\"ANY_MODULE_NAME\"); var form = new P.Form(\"123456789123456\");";
-        DependenciesWalker walker = new DependenciesWalker(va1);
-        walker.walk();
-        assertFalse(walker.getDependencies().isEmpty());
-        assertEquals(2, walker.getDependencies().size());
-        assertEquals(1, walker.getServerDependencies().size());
-    }
-
-    @Test
     public void testParseDependencies5() {
-        String va1 = "var report = new P.ServerReport(\"ANY_REPORT_NAME\"); var module = new P.Module(\"ANY_MODULE_NAME\"); var report2 = new P.Report(\"ANY_REPORT_NAME\"); var servModule = new P.ServerModule(\"ANY_MODULE_NAME\");";
-        DependenciesWalker walker = new DependenciesWalker(va1);
+        String va1 = "var report = new P.ServerModule(\"ANY_REPORT_NAME\"); var module = new ANY_MODULE_NAME(); var servModule = new P.ServerModule(\"ANY_MODULE_NAME\");";
+        DependenciesWalker walker = new DependenciesWalker(va1, (String aIfDependency)->{
+            return "ANY_MODULE_NAME".equals(aIfDependency);
+        });
         walker.walk();
         assertFalse(walker.getDependencies().isEmpty());
         assertEquals(1, walker.getDependencies().size());
@@ -67,30 +27,32 @@ public class DependenciesWalkerTest {
 
     @Test
     public void testParseDependencies6() {
-        String va1 = "P.require([\"ANY_REPORT_NAME\", \"ANY_MODULE_NAME\"], function(){var report = new P.ServerReport(\"ANY_REPORT_NAME\"); var module = new P.Module(\"ANY_MODULE1_NAME\"); var report2 = new P.Report(\"ANY_REPORT_NAME\"); var servModule = new P.ServerModule(\"ANY_MODULE_NAME\");});";
-        DependenciesWalker walker = new DependenciesWalker(va1);
+        String va1 = "P.require([\"ANY_REPORT_NAME\", \"ANY_MODULE_NAME\"], function(){var report = new P.ServerModule(\"ANY_REPORT_NAME\"); var module = new ANY_MODULE1_NAME(); var servModule = new P.ServerModule(\"ANY_MODULE_NAME\");});";
+        DependenciesWalker walker = new DependenciesWalker(va1, (aIfDependency)->{
+            return "ANY_MODULE1_NAME".equals(aIfDependency);
+        });
         walker.walk();
         assertFalse(walker.getDependencies().isEmpty());
         assertEquals(1, walker.getDependencies().size());
-        assertTrue(walker.getServerDependencies().isEmpty());
+        assertEquals(2, walker.getServerDependencies().size());
     }
 
     @Test
     public void testParseDependencies7() {
-        String va1 = "P.require([\"ANY_REPORT_NAME\", \"ANY_MODULE_NAME\", \"ANY_MODULE1_NAME\"], function(){var report = new P.ServerReport(\"ANY_REPORT_NAME\"); var module = new P.Module(\"ANY_MODULE1_NAME\"); var report2 = new P.Report(\"ANY_REPORT_NAME\"); var servModule = new P.ServerModule(\"ANY_MODULE_NAME\");});";
+        String va1 = "P.require([\"ANY_REPORT_NAME\", \"ANY_MODULE_NAME\", \"ANY_MODULE1_NAME\"], function(){var report = new P.ServerModule(\"ANY_REPORT_NAME\"); var module = new ANY_MODULE1_NAME(); var servModule = new P.ServerModule(\"ANY_MODULE_NAME\");});";
         DependenciesWalker walker = new DependenciesWalker(va1);
         walker.walk();
         assertTrue(walker.getDependencies().isEmpty());
-        assertTrue(walker.getServerDependencies().isEmpty());
+        assertEquals(2, walker.getServerDependencies().size());
     }
 
     @Test
     public void testParseDependencies8() {
-        String va1 = "P.require(\"ANY_REPORT_NAME\", function(){var report = new P.ServerReport(\"ANY_REPORT_NAME\"); var report2 = new P.Report(\"ANY_REPORT_NAME\")});";
+        String va1 = "P.require(\"ANY_REPORT_NAME\", function(){var m = new ANY_REPORT_NAME(); var report = new P.ServerModule(\"ANY_REPORT_NAME\");});";
         DependenciesWalker walker = new DependenciesWalker(va1);
         walker.walk();
         assertTrue(walker.getDependencies().isEmpty());
-        assertTrue(walker.getServerDependencies().isEmpty());
+        assertFalse(walker.getServerDependencies().isEmpty());
     }
     
     @Test
@@ -109,8 +71,8 @@ public class DependenciesWalkerTest {
         String va1 = "var m = HY.HT.IO.PK.SomeModule;";
         DependenciesWalker walker = new DependenciesWalker(va1);
         walker.walk();
-        assertEquals(1, walker.getDependenceLikeIdentifiers().size());
-        assertEquals("HY", walker.getDependenceLikeIdentifiers().iterator().next());
+        assertEquals(6, walker.getDependenceLikeIdentifiers().size());
+        assertTrue(walker.getDependencies().isEmpty());
         assertTrue(walker.getServerDependencies().isEmpty());
         assertTrue(walker.getQueryDependencies().isEmpty());
     }
@@ -118,10 +80,27 @@ public class DependenciesWalkerTest {
     @Test
     public void testParseDependencies11() {
         String va1 = "var m = new SomeModule();";
-        DependenciesWalker walker = new DependenciesWalker(va1);
+        DependenciesWalker walker = new DependenciesWalker(va1, (String aIfDependence)->{
+            return "SomeModule".equals(aIfDependence);
+        });
         walker.walk();
-        assertEquals(1, walker.getDependenceLikeIdentifiers().size());
-        assertEquals("SomeModule", walker.getDependenceLikeIdentifiers().iterator().next());
+        assertEquals(2, walker.getDependenceLikeIdentifiers().size());
+        assertEquals(1, walker.getDependencies().size());
+        assertEquals("SomeModule", walker.getDependencies().iterator().next());
+        assertTrue(walker.getServerDependencies().isEmpty());
+        assertTrue(walker.getQueryDependencies().isEmpty());
+    }
+    
+    @Test
+    public void testParseDependencies12() {
+        String va1 = "var m = SomeConstructor;";
+        DependenciesWalker walker = new DependenciesWalker(va1, (String aIfDependency)->{
+            return "SomeConstructor".equals(aIfDependency);
+        });
+        walker.walk();
+        assertEquals(2, walker.getDependenceLikeIdentifiers().size());
+        assertEquals(1, walker.getDependencies().size());
+        assertEquals("SomeConstructor", walker.getDependencies().iterator().next());
         assertTrue(walker.getServerDependencies().isEmpty());
         assertTrue(walker.getQueryDependencies().isEmpty());
     }
