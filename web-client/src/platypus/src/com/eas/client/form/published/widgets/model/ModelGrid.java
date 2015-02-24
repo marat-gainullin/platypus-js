@@ -50,8 +50,8 @@ import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasJsName;
 import com.eas.client.form.published.HasOnRender;
 import com.eas.client.form.published.HasPublished;
+import com.eas.client.form.published.PublishedCell;
 import com.eas.client.form.published.PublishedComponent;
-import com.eas.client.form.published.PublishedStyle;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
@@ -1071,23 +1071,15 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		}
 	}
 
-	public PublishedStyle complementPublishedStyle(PublishedStyle aStyle) {
-		PublishedStyle complemented = aStyle;
+	public void complementPublishedStyle(PublishedCell aComplemented) {
 		if (published.isBackgroundSet()) {
-			if (complemented == null)
-				complemented = PublishedStyle.create();
-			complemented.setBackground(published.getBackground());
+			aComplemented.setBackground(published.getBackground());
 		}
 		if (published.isForegroundSet()) {
-			if (complemented == null)
-				complemented = PublishedStyle.create();
-			complemented.setForeground(published.getForeground());
+			aComplemented.setForeground(published.getForeground());
 		}
 		if (published.isFontSet()) {
-			if (complemented == null)
-				complemented = PublishedStyle.create();
-			complemented.setFont(published.getFont());
+			aComplemented.setFont(published.getFont());
 		}
-		return complemented;
 	}
 }

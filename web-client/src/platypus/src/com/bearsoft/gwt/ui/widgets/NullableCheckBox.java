@@ -22,7 +22,7 @@ public class NullableCheckBox extends CheckBox {
 	public NullableCheckBox(Element elem) {
 		super(elem);
 		inputElem = InputElement.as(elem);
-		inputElem.setPropertyBoolean("indeterminate", true);
+		inputElem.setPropertyBoolean("indeterminate", true);		
 		inputElem.getStyle().setVerticalAlign(VerticalAlign.MIDDLE);
 	}
 

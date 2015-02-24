@@ -7,7 +7,8 @@ import com.bearsoft.gwt.ui.widgets.grid.GridColumn;
 import com.bearsoft.rowset.beans.PropertyChangeEvent;
 import com.bearsoft.rowset.beans.PropertyChangeListener;
 import com.bearsoft.rowset.beans.PropertyChangeSupport;
-import com.eas.client.form.published.PublishedStyle;
+import com.eas.client.form.published.PublishedColor;
+import com.eas.client.form.published.PublishedFont;
 import com.google.gwt.user.cellview.client.Header;
 
 public class HeaderNode<T> {
@@ -22,10 +23,12 @@ public class HeaderNode<T> {
 		}
 	};
 
+	protected PublishedColor background;
+	protected PublishedColor foreground;
+	protected PublishedFont font;
 	protected Header<String> header;
 	protected int leavesCount;
 	protected int depthRemainder;
-	protected PublishedStyle style;
 
 	public HeaderNode() {
 		super();
@@ -40,7 +43,34 @@ public class HeaderNode<T> {
 		HeaderNode<T> copied = new HeaderNode<T>();
 		copied.setColumn(column);
 		copied.setHeader(header);
+		copied.setBackground(background);
+		copied.setForeground(foreground);
+		copied.setFont(font);
 		return copied;
+	}
+
+	public PublishedColor getBackground() {
+		return background;
+	}
+
+	public void setBackground(PublishedColor aValue) {
+		this.background = aValue;
+	}
+
+	public PublishedColor getForeground() {
+		return foreground;
+	}
+
+	public void setForeground(PublishedColor aValue) {
+		foreground = aValue;
+	}
+
+	public PublishedFont getFont() {
+		return font;
+	}
+
+	public void setFont(PublishedFont aValue) {
+		font = aValue;
 	}
 
 	public GridColumn<T, ?> getColumn() {
@@ -115,15 +145,7 @@ public class HeaderNode<T> {
 		return leavesCount;
 	}
 
-	public PublishedStyle getStyle() {
-		return style;
-	}
-
-	public void setStyle(PublishedStyle aValue) {
-		style = aValue;
-	}
-
 	public boolean isLeaf() {
-	    return children.isEmpty();
-    }
+		return children.isEmpty();
+	}
 }

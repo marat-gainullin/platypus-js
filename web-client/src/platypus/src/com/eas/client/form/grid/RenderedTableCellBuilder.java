@@ -1,7 +1,7 @@
 package com.eas.client.form.grid;
 
 import com.bearsoft.gwt.ui.widgets.grid.builders.ThemedCellTableBuilder;
-import com.eas.client.form.published.PublishedStyle;
+import com.eas.client.form.published.PublishedCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.dom.builder.shared.TableCellBuilder;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
@@ -20,9 +20,9 @@ public class RenderedTableCellBuilder<T> extends ThemedCellTableBuilder<T> {
 	@Override
 	protected void tdGenerated(TableCellBuilder aTd, Cell.Context aContext) {
 		if (aContext instanceof RenderedCellContext) {
-			PublishedStyle pStyle = ((RenderedCellContext) aContext).getStyle();
-			if (pStyle != null && pStyle.getBackground() != null) {
-				aTd.style().trustedBackgroundColor(pStyle.getBackground().toStyled());
+			PublishedCell pCell = ((RenderedCellContext) aContext).getPublishedCell();
+			if (pCell != null && pCell.getBackground() != null) {
+				aTd.style().trustedBackgroundColor(pCell.getBackground().toStyled());
 			} else {
 				super.tdGenerated(aTd, aContext);
 			}

@@ -18,7 +18,6 @@ import com.eas.client.form.published.PublishedCell;
 import com.eas.client.form.published.PublishedColor;
 import com.eas.client.form.published.PublishedComponent;
 import com.eas.client.form.published.PublishedFont;
-import com.eas.client.form.published.PublishedStyle;
 import com.eas.client.form.published.containers.BorderPane;
 import com.eas.client.form.published.containers.MarginsPane;
 import com.eas.client.form.published.containers.SplitPane;
@@ -259,8 +258,8 @@ public class ControlsUtils {
 		return c != null ? parseColor(c) : null;
 	}
 
-	public static String renderDecorated(SafeHtmlBuilder rendered, String aId, PublishedStyle aStyle, SafeHtmlBuilder sb) {
-		return StyleIconDecorator.decorate(rendered.toSafeHtml(), aId, aStyle, HasVerticalAlignment.ALIGN_MIDDLE, sb);
+	public static String renderDecorated(SafeHtmlBuilder rendered, String aId, PublishedCell aCell, SafeHtmlBuilder sb) {
+		return StyleIconDecorator.decorate(rendered.toSafeHtml(), aId, aCell, HasVerticalAlignment.ALIGN_MIDDLE, sb);
 	}
 
 	public static Runnable createScriptSelector(final JavaScriptObject aThis, final JavaScriptObject selectFunction, final JavaScriptObject aPublishedField) {

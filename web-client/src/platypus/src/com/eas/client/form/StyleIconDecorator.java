@@ -1,7 +1,7 @@
 package com.eas.client.form;
 
 import com.bearsoft.gwt.ui.widgets.grid.cells.RenderedEditorCell;
-import com.eas.client.form.published.PublishedStyle;
+import com.eas.client.form.published.PublishedCell;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.resources.client.ImageResource;
@@ -13,13 +13,13 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment.VerticalAlignmentConst
 
 public class StyleIconDecorator {
 
-	public static String decorate(SafeHtml toDecorate, String aId, PublishedStyle aStyle, VerticalAlignmentConstant valign, SafeHtmlBuilder sb) {
+	public static String decorate(SafeHtml toDecorate, String aId, PublishedCell aCell, VerticalAlignmentConstant valign, SafeHtmlBuilder sb) {
 		SafeStylesBuilder stb = new SafeStylesBuilder();
 		stb.padding(RenderedEditorCell.CELL_PADDING, Style.Unit.PX);
-		if (aStyle != null) {
-			stb.append(SafeStylesUtils.fromTrustedString(aStyle.toStyledWOBackground()));
-			if (aStyle.getIcon() != null) {
-				ImageResource icon = aStyle.getIcon();
+		if (aCell != null) {
+			stb.append(SafeStylesUtils.fromTrustedString(aCell.toStyledWOBackground()));
+			if (aCell.getIcon() != null) {
+				ImageResource icon = aCell.getIcon();
 				stb.paddingLeft(icon.getWidth() + RenderedEditorCell.CELL_PADDING, Style.Unit.PX).backgroundImage(icon.getSafeUri()).trustedNameAndValue("background-position-y", "center");
 			}
 		}

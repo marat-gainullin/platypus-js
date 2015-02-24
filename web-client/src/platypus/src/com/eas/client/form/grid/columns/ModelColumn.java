@@ -20,7 +20,6 @@ import com.eas.client.form.grid.rows.PathComparator;
 import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.PublishedCell;
-import com.eas.client.form.published.PublishedStyle;
 import com.eas.client.form.published.widgets.model.ModelCheck;
 import com.eas.client.form.published.widgets.model.ModelCombo;
 import com.eas.client.form.published.widgets.model.ModelDecoratorBox;
@@ -168,6 +167,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 				} else {
 					grid.hideColumn(this);
 				}
+				grid.onResize();
 			}
 		}
 	}
@@ -275,8 +275,9 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 			public void execute() {
 				if (gridRedrawQueued) {
 					gridRedrawQueued = false;
-					if (grid != null)
+					if (grid != null) {
 						grid.redraw();
+					}
 				}
 			}
 		});
@@ -402,14 +403,13 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 							try {
 								display = ((HasText) editor).getText();
 							} finally {
-								// We have to take care about old value because of edited cell while grid rendering.
+								// We have to take care about old value because
+								// of edited cell while grid rendering.
 								((HasValue<Object>) editor).setValue(oldValue);
 							}
-							PublishedStyle styleToRender = null;
 							SafeHtmlBuilder lsb = new SafeHtmlBuilder();
 							PublishedCell cellToRender = calcContextPublishedCell(ModelColumn.this.getPublished(), onRender, context, ModelColumn.this.getField(), display);
 							if (cellToRender != null) {
-								styleToRender = cellToRender.getStyle();
 								if (cellToRender.getDisplay() != null)
 									display = cellToRender.getDisplay();
 							}
@@ -418,16 +418,14 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 								lsb.append(SafeHtmlUtils.fromTrustedString("&#160;"));
 							else
 								lsb.append(SafeHtmlUtils.fromString(display));
-							styleToRender = grid.complementPublishedStyle(styleToRender);
-							String decorId = ControlsUtils.renderDecorated(lsb, aId, styleToRender, sb);
+							grid.complementPublishedStyle(cellToRender);
+							String decorId = ControlsUtils.renderDecorated(lsb, aId, cellToRender, sb);
 							if (cellToRender != null) {
 								if (context instanceof RenderedCellContext) {
-									((RenderedCellContext) context).setStyle(styleToRender);
+									((RenderedCellContext) context).setPublishedCell(cellToRender);
 								}
-								ModelColumn.bindDisplayCallback(decorId, cellToRender);
-								if (cellToRender.getStyle() != null) {
-									ModelColumn.bindIconCallback(cellToRender.getStyle(), decorId);
-								}
+								ModelColumn.bindDisplayCallback(cellToRender, decorId);
+								ModelColumn.bindIconCallback(cellToRender, decorId);
 							}
 							return true;
 						} else {
@@ -456,7 +454,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 		return null;
 	}
 
-	protected static void bindDisplayCallback(final String aTargetElementId, final PublishedCell aCell) {
+	protected static void bindDisplayCallback(final PublishedCell aCell, final String aTargetElementId) {
 		aCell.setDisplayCallback(new Runnable() {
 			@Override
 			public void run() {
@@ -464,7 +462,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 				if (padded != null) {
 					aCell.styleToElementBackgroundToTd(padded);
 					int paddingLeft = RenderedEditorCell.CELL_PADDING;
-					ImageResource icon = aCell.getStyle().getIcon();
+					ImageResource icon = aCell.getIcon();
 					if (icon != null) {
 						paddingLeft += icon.getWidth();
 					}
@@ -478,14 +476,14 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 		});
 	}
 
-	protected static void bindIconCallback(final PublishedStyle aStyle, final String aTargetElementId) {
-		aStyle.setIconCallback(new Runnable() {
+	protected static void bindIconCallback(final PublishedCell aCell, final String aTargetElementId) {
+		aCell.setIconCallback(new Runnable() {
 
 			@Override
 			public void run() {
 				Element padded = Document.get().getElementById(aTargetElementId);
 				if (padded != null) {
-					int paddingLeft = RenderedEditorCell.CELL_PADDING + (aStyle.getIcon() != null ? aStyle.getIcon().getWidth() : 0);
+					int paddingLeft = RenderedEditorCell.CELL_PADDING + (aCell.getIcon() != null ? aCell.getIcon().getWidth() : 0);
 					padded.getStyle().setPaddingLeft(paddingLeft, Style.Unit.PX);
 				}
 			}

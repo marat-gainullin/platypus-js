@@ -1,21 +1,21 @@
 package com.eas.client.form.grid;
 
-import com.eas.client.form.published.PublishedStyle;
+import com.eas.client.form.published.PublishedCell;
 import com.google.gwt.cell.client.Cell;
 
 public class RenderedCellContext extends Cell.Context {
 
-	protected PublishedStyle style;
+	protected PublishedCell cell;
 
 	public RenderedCellContext(int aIndex, int aColumn, Object aKey) {
 		super(aIndex, aColumn, aKey);
 	}
 
-	public PublishedStyle getStyle() {
-		return style;
+	public PublishedCell getPublishedCell() {
+		return cell;
 	}
 
-	public void setStyle(PublishedStyle aStyle) {
-		style = aStyle;
+	public void setPublishedCell(PublishedCell aCell) {
+		cell = aCell;
 	}
 }

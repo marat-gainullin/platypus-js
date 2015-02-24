@@ -19,15 +19,17 @@ import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.containers.ButtonGroup;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style.VerticalAlign;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
-import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.RequiresResize;
 
@@ -41,7 +43,12 @@ public class PlatypusCheckBox extends CheckBox implements HasActionHandlers, Has
 	protected ButtonGroup group;
 
 	public PlatypusCheckBox() {
-		super();
+		this(DOM.createInputCheck());
+	}
+	
+	protected PlatypusCheckBox(Element aInputElement){
+		super(aInputElement);
+		aInputElement.getStyle().setVerticalAlign(VerticalAlign.MIDDLE);
 		getElement().<XElement>cast().addResizingTransitionEnd(this);
 	}
 

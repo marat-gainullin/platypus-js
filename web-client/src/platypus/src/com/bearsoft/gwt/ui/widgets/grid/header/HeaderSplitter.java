@@ -48,7 +48,6 @@ public class HeaderSplitter<T> {
         for (int i = 0; i < toBeSplitted.size(); i++) {
         	HeaderNode<T> n = toBeSplitted.get(i);
         	HeaderNode<T> nc = n.lightCopy();
-            nc.setStyle(n.getStyle());
             if (n.getChildren().isEmpty()) {
                 leaveIndex++;
                 if (leaveIndex >= minLeave && leaveIndex <= maxLeave) {

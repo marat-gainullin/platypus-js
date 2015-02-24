@@ -120,7 +120,7 @@ public class ThemedHeaderOrFooterBuilder<T> extends AbstractHeaderOrFooterBuilde
 					for (int curColumn = 0; curColumn < columnCount; curColumn++) {
 						Header<?> headerOrFooter = getHeader(curColumn);
 						HeaderNode<T> hn = new HeaderNode<T>();
-						hn.setHeader((Header<String>)headerOrFooter);
+						hn.setHeader((Header<String>) headerOrFooter);
 						headersForest.add(hn);
 					}
 				} else {
@@ -194,21 +194,18 @@ public class ThemedHeaderOrFooterBuilder<T> extends AbstractHeaderOrFooterBuilde
 			if (headerNode.getLeavesCount() > 1)
 				th.colSpan(headerNode.getLeavesCount());
 			th.className(classesBuilder.toString());
-			if (headerNode.getStyle() != null && !headerNode.getStyle().isEmpty()) {
-				StylesBuilder thStyles = th.style();
-				if (headerNode.getStyle().getBackground() != null) {
-					thStyles.trustedBackgroundColor(headerNode.getStyle().getBackground().toStyled());
-				}
-				if (headerNode.getStyle().getForeground() != null) {
-					thStyles.trustedColor(headerNode.getStyle().getForeground().toStyled());
-				}
-				if (headerNode.getStyle().getFont() != null) {
-					thStyles.trustedProperty("font-family", headerNode.getStyle().getFont().getFamily());
-					thStyles.fontSize(headerNode.getStyle().getFont().getSize(), Style.Unit.PX);
-					thStyles.fontStyle(headerNode.getStyle().getFont().isItalic() ? FontStyle.ITALIC : FontStyle.NORMAL);
-					thStyles.fontWeight(headerNode.getStyle().getFont().isBold() ? FontWeight.BOLD : FontWeight.NORMAL);
-				}
-				thStyles.endStyle();
+			StylesBuilder thStyles = th.style();
+			if (headerNode.getBackground() != null) {
+				thStyles.trustedBackgroundColor(headerNode.getBackground().toStyled());
+			}
+			if (headerNode.getForeground() != null) {
+				thStyles.trustedColor(headerNode.getForeground().toStyled());
+			}
+			if (headerNode.getFont() != null) {
+				thStyles.trustedProperty("font-family", headerNode.getFont().getFamily());
+				thStyles.fontSize(headerNode.getFont().getSize(), Style.Unit.PX);
+				thStyles.fontStyle(headerNode.getFont().isItalic() ? FontStyle.ITALIC : FontStyle.NORMAL);
+				thStyles.fontWeight(headerNode.getFont().isBold() ? FontWeight.BOLD : FontWeight.NORMAL);
 			}
 			if (headerOrFooter != null) {
 				appendExtraStyles(headerOrFooter, classesBuilder);
