@@ -101,7 +101,7 @@ public abstract class RADComponent<C> {
     private FormModel formModel;
     private boolean inModel;
     private RADComponentNode componentNode;
-    private String storedName; // component name preserved e.g. for remove undo
+    protected String storedName; // component name preserved e.g. for remove undo
     private boolean valid = true;
     // -----------------------------------------------------------------------------
     // Constructors & Initialization

@@ -4,8 +4,6 @@
  */
 package com.eas.designer.explorer.model.windows;
 
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.SqlQuery;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Relation;

@@ -46,7 +46,19 @@ public class RADColumnView<M extends ModelComponentDecorator> extends RADModelSc
     public RADColumnView() {
         super();
         setInModel(false);
-        setStoredName("view");
+        storedName = "view";
+    }
+
+    @Override
+    public void setStoredName(String name) {
+    }
+
+    @Override
+    public void setName(String aValue) {
+    }
+
+    @Override
+    public void setInModel(boolean in) {
     }
 
     @Override

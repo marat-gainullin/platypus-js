@@ -367,7 +367,7 @@ public class RADComponentCreator {
                 } else {
                     constraints = null;
                 }
-                copiedComp = addVisualComponent2(newVisual, targetComp, 0, constraints, newlyAdded);
+                copiedComp = addVisualComponent2(newVisual, targetComp, targetComp instanceof ComponentContainer ? ((ComponentContainer)targetComp).getSubBeansCount() : 0, constraints, newlyAdded);
                 // might be null if layout support did not accept the component
             } else if (target.targetType == TargetType.OTHER) {
                 if (copiedComp instanceof RADButtonGroup) {
