@@ -35,16 +35,20 @@ import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HasValue;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.user.datepicker.client.DatePicker;
+import com.sun.xml.internal.ws.org.objectweb.asm.Label;
+
 import java.util.Date;
 
 /**
@@ -64,10 +68,10 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 	protected PopupPanel popup = new PopupPanel();
 
 	public DateTimeBox() {
-		this(new DatePicker(), null, DEFAULT_FORMAT);
+		this(new DateTimePicker(), null, DEFAULT_FORMAT);
 	}
 
-	public DateTimeBox(DatePicker picker, Date date, DateBox.Format format) {
+	public DateTimeBox(DateTimePicker picker, Date date, DateBox.Format format) {
 		initWidget(container);
 		container.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 		container.getElement().getStyle().setPosition(Style.Position.RELATIVE);

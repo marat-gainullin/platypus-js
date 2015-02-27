@@ -7,20 +7,23 @@ import com.google.gwt.user.datepicker.client.DatePicker;
 
 public class DecoratedDateBox extends DateBox {
 
-	protected DatePicker picker;
-
+//	protected DatePicker picker;
+	protected DateTimePicker picker;
 	public DecoratedDateBox() {
 		super();
 	}
 
-	public DecoratedDateBox(DatePicker aPicker, Date date, Format format) {
+	public DecoratedDateBox(DateTimePicker aPicker, Date date, Format format) {
 		super(aPicker, date, format);
 		picker = aPicker;
 	}
 
 	@Override
 	public Date getValue() {
-		return picker.getValue();
+		Date date = picker.getElementValue();
+		this.getTextBox().setText(this.getFormat().format(this, date));
+		return date;
+		
 	}
 
 	@Override
@@ -31,5 +34,6 @@ public class DecoratedDateBox extends DateBox {
 	@Override
 	public void showDatePicker() {
 	}
+	
 
 }

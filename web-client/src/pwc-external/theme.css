@@ -701,7 +701,7 @@
 .south-east-decor-active{
 }
 
-.editor-bold, .editor-italic, .editor-underline, .editor-subscript, .editor-superscript, .editor-align-left, .editor-align-center, .editor-align-right, .editor-background-color, .editor-foreground-color, .editor-strike-through, .editor-indent-right, .editor-indent-left, .editor-horisontal-rule, .editor-ordered-list, .editor-unordered-list, .editor-insert-image, .editor-create-link, .editor-delete-link, .editor-remove-format  {
+.editor-bold, .editor-italic, .editor-underline, .editor-subscript, .editor-superscript, .editor-align-left, .editor-align-center, .editor-align-right, .editor-background-color, .editor-foreground-color, .editor-strike-through, .editor-indent-right, .editor-indent-left, .editor-horisontal-rule, .editor-ordered-list, .editor-unordered-list, .editor-insert-image, .editor-create-link, .editor-delete-link, .editor-remove-format, .time-picker-up, .time-picker-down  {
     width: 100%; 
     height: 100%;
     background-image: url(editor-bold.gif);
@@ -784,5 +784,16 @@
 }
 .editor-remove-format{
     background-image: url(editor-remove-format.gif);
+}
+.time-picker-up{
+    background-image: url(time-up.png);
+}
+.time-picker-down{
+    background-image: url(time-down.png);
+}
+
+.time-picker{
+    background: white;
+    transition: height 0.5s;
 }
 
