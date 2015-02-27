@@ -38,6 +38,8 @@ import com.google.gwt.view.client.ProvidesKey;
  */
 public class GridSection<T> extends CellTable<T> {
 
+	protected static final String HIDDEN_COLUMN_WIDTH = "0.00000000000000000001px";
+	
 	protected AbstractCellTable<T>[] columnsPartners;
 	protected WidthCallback widthPropagator;
 	protected ColumnsRemover columnsRemover;
@@ -193,7 +195,7 @@ public class GridSection<T> extends CellTable<T> {
 	public boolean hideColumn(Column<T, ?> aColumn) {
 		if (!isColumnHidden(aColumn)) {
 			hiddenColumns.put(aColumn, getColumnWidth(aColumn));
-			super.setColumnWidth(aColumn, "0px");
+			super.setColumnWidth(aColumn, HIDDEN_COLUMN_WIDTH);
 			return true;
 		} else {
 			return false;
@@ -203,7 +205,7 @@ public class GridSection<T> extends CellTable<T> {
 	@Override
 	public void setColumnWidth(Column<T, ?> aColumn, String width) {
 		if (isColumnHidden(aColumn)) {
-			super.setColumnWidth(aColumn, "0px");
+			super.setColumnWidth(aColumn, HIDDEN_COLUMN_WIDTH);
 		} else {
 			super.setColumnWidth(aColumn, width);
 		}

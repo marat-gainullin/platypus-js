@@ -30,6 +30,7 @@ public class ModelColumn extends TableColumn {
     protected boolean readonly;
     protected boolean sortable = true;
     protected String field;
+    protected String sortField;
     //
     protected JSObject eventsSource;
     protected JSObject onRender;
@@ -107,6 +108,16 @@ public class ModelColumn extends TableColumn {
     public void setField(String aValue) {
         if (field == null ? aValue != null : !field.equals(aValue)) {
             field = aValue;
+        }
+    }
+
+    public String getSortField() {
+        return sortField;
+    }
+
+    public void setSortField(String aValue) {
+        if (sortField == null ? aValue != null : !sortField.equals(aValue)) {
+            sortField = aValue;
         }
     }
 

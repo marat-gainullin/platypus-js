@@ -47,6 +47,7 @@ import com.google.gwt.user.client.ui.HasValue;
 public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements FieldUpdater<JavaScriptObject, Object>, ChangesHost, HasPublished {
 
 	protected String field;
+	protected String sortField;
 	protected ModelDecoratorBox<? extends Object> editor;
 	protected ModelGrid grid;
 	protected double minWidth = 15;
@@ -114,7 +115,18 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 	public void setField(String aValue) {
 		if (field == null ? aValue != null : !field.equals(aValue)) {
 			field = aValue;
-			comparator = new PathComparator(field, true);
+			comparator = new PathComparator(sortField != null && !sortField.isEmpty() ? sortField : field, true);
+		}
+	}
+
+	public String getSortField() {
+		return sortField;
+	}
+
+	public void setSortField(String aValue) {
+		if (sortField == null ? aValue != null : !sortField.equals(aValue)) {
+			sortField = aValue;
+			comparator = new PathComparator(sortField != null && !sortField.isEmpty() ? sortField : field, true);
 		}
 	}
 

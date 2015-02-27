@@ -26,6 +26,7 @@ public class ModelGridColumn extends GridColumnsNode implements HasPublished {
     protected JSObject published;
 
     protected String field;
+    protected String sortField;
 
     @ScriptFunction
     public ModelGridColumn() {
@@ -76,6 +77,20 @@ public class ModelGridColumn extends GridColumnsNode implements HasPublished {
         if (field == null ? aValue != null : !field.equals(aValue)) {
             field = aValue;
             ((ModelColumn) tableColumn).setField(field);
+        }
+    }
+
+    @ScriptFunction
+    @Designable(category = "model")
+    public String getSortField() {
+        return sortField;
+    }
+
+    @ScriptFunction
+    public void setSortField(String aValue) {
+        if (sortField == null ? aValue != null : !sortField.equals(aValue)) {
+            sortField = aValue;
+            ((ModelColumn) tableColumn).setSortField(sortField);
         }
     }
 

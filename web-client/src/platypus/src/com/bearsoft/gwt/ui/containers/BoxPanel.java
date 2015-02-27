@@ -100,24 +100,23 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 
 	protected void formatWidget(Widget child) {
 		boolean visible = !child.getElement().hasAttribute("aria-hidden");
+		CommonResources.INSTANCE.commons().ensureInjected();
+		Style es = child.getElement().getStyle();
 		if (orientation == Orientation.HORIZONTAL) {
-			child.getElement().getStyle().clearTop();
-			child.getElement().getStyle().clearBottom();
-			child.getElement().getStyle().setPosition(Style.Position.RELATIVE);
-			child.getElement().getStyle().setHeight(100, Style.Unit.PCT);
-			CommonResources.INSTANCE.commons().ensureInjected();
-			child.getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
-			child.getElement().getStyle().setDisplay(visible ? Style.Display.INLINE_BLOCK : Style.Display.NONE);
-			child.getElement().getStyle().setFloat(direction == Direction.LTR ? Style.Float.LEFT : Style.Float.RIGHT);
+			es.clearTop();
+			es.clearBottom();
+			es.setPosition(Style.Position.RELATIVE);
+			es.setHeight(100, Style.Unit.PCT);
+			es.setDisplay(visible ? Style.Display.INLINE_BLOCK : Style.Display.NONE);
+			es.setFloat(direction == Direction.LTR ? Style.Float.LEFT : Style.Float.RIGHT);
 		} else {
-			child.getElement().getStyle().setPosition(Style.Position.RELATIVE);
-			child.getElement().getStyle().setDisplay(visible ? Style.Display.BLOCK : Style.Display.NONE);
-			child.getElement().getStyle().setLeft(0, Style.Unit.PX);
-			child.getElement().getStyle().clearRight();
-			child.getElement().getStyle().setWidth(100, Style.Unit.PCT);
-			CommonResources.INSTANCE.commons().ensureInjected();
-			child.getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
+			es.setPosition(Style.Position.RELATIVE);
+			es.setDisplay(visible ? Style.Display.BLOCK : Style.Display.NONE);
+			es.setLeft(0, Style.Unit.PX);
+			es.clearRight();
+			es.setWidth(100, Style.Unit.PCT);
 		}
+		child.getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
 	}
 
 	public void ajustDisplay(Widget child){
@@ -135,7 +134,6 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 	
 	@Override
 	public void add(Widget child) {
-		formatWidget(child);
 		if (orientation == Orientation.HORIZONTAL) {
 			if (getWidgetCount() > 0) {
 				if (direction == Direction.LTR) {
@@ -147,6 +145,7 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 				}
 			}
 			super.add(child, getElement().<Element> cast());
+			formatWidget(child);// Don't move this call fron here because of crazy GWT. It clears position style property!
 			if (isAttached()) {
 				ajustWidth();
 			}
@@ -155,6 +154,7 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 				child.getElement().getStyle().setMarginTop(vgap, Style.Unit.PX);
 			}
 			super.add(child, getElement().<Element> cast());
+			formatWidget(child);// Don't move this call fron here because of crazy GWT. It clears position style property!
 			if (isAttached()) {
 				ajustHeight();
 			}

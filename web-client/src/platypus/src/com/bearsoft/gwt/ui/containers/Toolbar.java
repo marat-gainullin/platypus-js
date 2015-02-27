@@ -41,7 +41,7 @@ public class Toolbar extends SimplePanel implements IndexedPanel, ProvidesResize
         super();
         getElement().addClassName("toolbar");
         chevron.getElement().addClassName("toolbar-chevron");
-        content.setHgap(2);
+        content.setHgap(0);
         content.getElement().addClassName("toolbar-content");
         getElement().getStyle().setPosition(Style.Position.RELATIVE);
         content.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);

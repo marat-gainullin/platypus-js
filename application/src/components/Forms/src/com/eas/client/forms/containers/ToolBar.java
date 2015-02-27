@@ -13,6 +13,7 @@ import com.eas.client.forms.events.ActionEvent;
 import com.eas.client.forms.events.ComponentEvent;
 import com.eas.client.forms.events.MouseEvent;
 import com.eas.client.forms.events.rt.ControlEventsIProxy;
+import com.eas.client.forms.layouts.BoxLayout;
 import com.eas.client.forms.layouts.MarginLayout;
 import com.eas.design.Undesignable;
 import com.eas.script.AlreadyPublishedException;
@@ -51,6 +52,7 @@ public class ToolBar extends JToolBar implements HasPublished, HasContainerEvent
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"floatable"})
     public ToolBar(boolean floatable) {
         super();
+        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         super.setFloatable(floatable);
         super.addContainerListener(invalidatorListener);
     }
@@ -689,7 +691,7 @@ public class ToolBar extends JToolBar implements HasPublished, HasContainerEvent
     public Widget getParentWidget() {
         return Forms.lookupPublishedParent(this);
     }
-    
+
     @Override
     public String toString() {
         return String.format("%s [%s] count:%d", super.getName() != null ? super.getName() : "", getClass().getSimpleName(), getCount());
