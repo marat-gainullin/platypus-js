@@ -58,7 +58,7 @@ public class RADColumnView<M extends ModelComponentDecorator> extends RADModelSc
     }
 
     @Override
-    public void setInModel(boolean in) {
+    public void setInModel(boolean aValue) {
     }
 
     @Override

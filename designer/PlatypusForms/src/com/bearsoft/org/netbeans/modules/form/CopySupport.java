@@ -43,6 +43,7 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
+import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
 import java.awt.datatransfer.*;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -141,7 +142,7 @@ class CopySupport {
         }
 
         if (targetComponent == null) {
-            return targetForm.getModelContainer().getIndexOf(sourceComponent) < 0;
+            return !(sourceComponent instanceof RADModelGridColumn) && targetForm.getModelContainer().getIndexOf(sourceComponent) < 0;
         }
 
         return sourceComponent != targetComponent

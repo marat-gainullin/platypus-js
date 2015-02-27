@@ -103,7 +103,7 @@ public class RADComponentNode extends FormNode implements RADComponentCookie, Fo
         updateName();
     }
 
-    final void updateName() {
+    public final void updateName() {
         String compClassName = component.getBeanClass().getSimpleName();
         setDisplayName(nodeNameFormat.format(new Object[]{getName(), compClassName}));
     }

@@ -8,10 +8,12 @@ import com.bearsoft.gui.grid.header.GridColumnsNode;
 import com.bearsoft.org.netbeans.modules.form.ComponentContainer;
 import com.bearsoft.org.netbeans.modules.form.FormModel;
 import com.bearsoft.org.netbeans.modules.form.RADComponent;
+import static com.bearsoft.org.netbeans.modules.form.RADComponent.COMPONENT_NAME_PROP_NAME;
 import com.bearsoft.org.netbeans.modules.form.RADProperty;
 import com.eas.client.forms.components.model.ModelComponentDecorator;
 import com.eas.client.forms.components.model.ModelFormattedField;
 import com.eas.client.forms.components.model.grid.columns.ModelColumn;
+import java.awt.Component;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -78,6 +80,22 @@ public class RADModelGridColumn extends RADComponent<GridColumnsNode> implements
     }
 
     @Override
+    public void setName(String aValue) {
+        RADModelGrid radGrid = lookupGrid();
+        if (radGrid != null && radGrid.findColumn(aValue) == null) {
+            String oldName = storedName;
+            radGrid.unregister(this);
+            setStoredName(aValue);
+            radGrid.register(this);
+            formModel.fireSyntheticPropertyChanged(this, COMPONENT_NAME_PROP_NAME,
+                    oldName, aValue);
+            if (getNodeReference() != null) {
+                getNodeReference().updateName();
+            }
+        }
+    }
+
+    @Override
     public void setStoredName(String name) {
         super.setStoredName(name);
         if (getBeanInstance() != null) {
@@ -112,6 +130,12 @@ public class RADModelGridColumn extends RADComponent<GridColumnsNode> implements
     @Override
     public void initSubComponents(RADComponent<?>[] initComponents) {
         try {
+            RADModelGrid radGrid = lookupGrid();
+            if (radGrid != null) {
+                columns.forEach((RADModelGridColumn col) -> {
+                    radGrid.unregister(col);
+                });
+            }
             columns.clear();
             getBeanInstance().getChildren().clear();
             for (int i = 0; i < initComponents.length; i++) {
@@ -119,6 +143,9 @@ public class RADModelGridColumn extends RADComponent<GridColumnsNode> implements
                     RADModelGridColumn radColumn = (RADModelGridColumn) initComponents[i];
                     radColumn.setParent(this);
                     columns.add(radColumn);
+                    if (radGrid != null) {
+                        radGrid.register(radColumn);
+                    }
                     getBeanInstance().getChildren().add(radColumn.getBeanInstance());
                     radColumn.getBeanInstance().setParent(getBeanInstance());
                 }
@@ -155,11 +182,15 @@ public class RADModelGridColumn extends RADComponent<GridColumnsNode> implements
                 RADModelGridColumn radColumn = (RADModelGridColumn) comp;
                 // TODO: check self-addition
                 columns.add(radColumn);
+                RADModelGrid radGrid = lookupGrid();
+                if (radGrid != null) {
+                    radGrid.register(radColumn);
+                }
                 if (radColumn.isInModel()) {
                     getBeanInstance().getChildren().add(radColumn.getBeanInstance());
                     radColumn.getBeanInstance().setParent(getBeanInstance());
+                    resetGridColumnsAndHeader();
                 }
-                resetGridColumnsAndHeader();
             } catch (Exception ex) {
                 Exceptions.printStackTrace(ex);
             }
@@ -172,6 +203,10 @@ public class RADModelGridColumn extends RADComponent<GridColumnsNode> implements
             try {
                 RADModelGridColumn radColumn = (RADModelGridColumn) comp;
                 columns.remove(radColumn);
+                RADModelGrid radGrid = lookupGrid();
+                if (radGrid != null) {
+                    radGrid.unregister(radColumn);
+                }
                 getBeanInstance().getChildren().remove(radColumn.getBeanInstance());
                 radColumn.getBeanInstance().setParent(null);
                 resetGridColumnsAndHeader();
