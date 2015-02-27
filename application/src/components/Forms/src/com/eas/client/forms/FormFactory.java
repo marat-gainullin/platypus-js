@@ -993,6 +993,9 @@ public class FormFactory {
         } else if (parent instanceof Menu) {
             ((Menu) parent).add(aTarget);
         } else if (parent instanceof ToolBar) {
+            Dimension prefSize = readPrefSize(anElement);
+            aTarget.setPreferredSize(prefSize);
+            aTarget.setSize(prefSize);
             ((ToolBar) parent).add(aTarget);
         } else if (parent instanceof TabbedPane) {
             if (constraintsElement == null) {// new format
@@ -1187,6 +1190,9 @@ public class FormFactory {
                         readColumnNode(columnn, childTag);
                         if (childTag.hasAttribute("field")) {
                             columnn.setField(childTag.getAttribute("field"));
+                        }
+                        if (childTag.hasAttribute("sortField")) {
+                            columnn.setSortField(childTag.getAttribute("sortField"));
                         }
                         Node _childNode = childTag.getFirstChild();
                         while (_childNode != null) {

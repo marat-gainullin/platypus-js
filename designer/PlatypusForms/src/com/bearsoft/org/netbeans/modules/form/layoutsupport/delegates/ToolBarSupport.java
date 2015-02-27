@@ -43,6 +43,7 @@
  */
 package com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates;
 
+import com.bearsoft.org.netbeans.modules.form.RADComponent;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.*;
 import java.awt.*;
 import javax.swing.*;
@@ -205,13 +206,17 @@ public class ToolBarSupport extends AbstractLayoutSupport {
         }
 
         g.drawRect(rect.x, rect.y, rect.width, rect.height);
-
         return true;
     }
 
     @Override
+    public void addComponents(RADComponent<?>[] newComps, LayoutConstraints<?>[] newConstraints, int index) {
+        // no op here because toolbar layout has no per-component constraints.
+    }
+
+    @Override
     public void removeComponent(int index) {
-        // no op here because toolbar latyout has no per-component constraints.
+        // no op here because toolbar layout has no per-component constraints.
     }
         
 }

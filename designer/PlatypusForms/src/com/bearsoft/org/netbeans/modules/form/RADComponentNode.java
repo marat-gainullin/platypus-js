@@ -64,6 +64,8 @@ import java.text.MessageFormat;
 import java.util.*;
 import javax.swing.Action;
 import org.openide.actions.*;
+import org.openide.awt.AcceleratorBinding;
+import org.openide.filesystems.FileUtil;
 import org.openide.nodes.*;
 import org.openide.util.*;
 import org.openide.util.actions.SystemAction;
@@ -73,14 +75,17 @@ import org.openide.util.datatransfer.PasteType;
 public class RADComponentNode extends FormNode implements RADComponentCookie, FormPropertyCookie {
 
     private static final DefaultRADAction DEFAULT_ACTION = new DefaultRADAction();
-    private final static MessageFormat nodeNameFormat
+    private static final MessageFormat nodeNameFormat
             = new MessageFormat(
                     FormUtils.getBundleString("FMT_ComponentNodeName")); // NOI18N
-    /*
-    private final static MessageFormat nodeNoNameFormat
-            = new MessageFormat(
-                    FormUtils.getBundleString("FMT_UnnamedComponentNodeName")); // NOI18N
-    */
+    private static final CopyAction copyAction = SystemAction.get(CopyAction.class);
+    private static final CutAction cutAction = SystemAction.get(CutAction.class);
+
+    static {
+        AcceleratorBinding.setAccelerator(copyAction, FileUtil.getConfigFile("Actions/Edit/org-openide-actions-CopyAction.instance"));
+        AcceleratorBinding.setAccelerator(cutAction, FileUtil.getConfigFile("Actions/Edit/org-openide-actions-CutAction.instance"));
+    }
+
     private RADComponent<?> component;
     private boolean highlightDisplayName;
     private final Map<Integer, Image> img = new HashMap<>();
@@ -98,7 +103,7 @@ public class RADComponentNode extends FormNode implements RADComponentCookie, Fo
         updateName();
     }
 
-    final void updateName() {
+    public final void updateName() {
         String compClassName = component.getBeanClass().getSimpleName();
         setDisplayName(nodeNameFormat.format(new Object[]{getName(), compClassName}));
     }
@@ -222,9 +227,9 @@ public class RADComponentNode extends FormNode implements RADComponentCookie, Fo
                 addSeparator(lactions);
 
                 if (component != topComp) {
-                    lactions.add(SystemAction.get(CutAction.class));
+                    lactions.add(cutAction);
                 }
-                lactions.add(SystemAction.get(CopyAction.class));
+                lactions.add(copyAction);
                 if (component instanceof ComponentContainer) {
                     lactions.add(SystemAction.get(PasteAction.class));
                 }
@@ -487,7 +492,7 @@ public class RADComponentNode extends FormNode implements RADComponentCookie, Fo
                 keyLayout = ((RADVisualContainer<?>) container).getLayoutSupport().getLayoutDelegate().getRadLayout();
                 keys.add(keyLayout);
             }
-            if (container instanceof RADModelGridColumn && ((RADModelGridColumn)container).getBeanInstance() instanceof ModelGridColumn) {
+            if (container instanceof RADModelGridColumn && ((RADModelGridColumn) container).getBeanInstance() instanceof ModelGridColumn) {
                 RADModelGridColumn col = (RADModelGridColumn) container;
                 keys.add(col.getViewControl());
             }

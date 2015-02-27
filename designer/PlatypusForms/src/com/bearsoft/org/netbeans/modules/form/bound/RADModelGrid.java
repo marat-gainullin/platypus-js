@@ -22,11 +22,14 @@ import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.designer.application.module.EntityJSObject;
 import com.eas.util.StringUtils;
+import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.openide.util.Exceptions;
 
 /**
@@ -35,6 +38,7 @@ import org.openide.util.Exceptions;
  */
 public class RADModelGrid extends RADVisualComponent<ModelGrid> implements ComponentContainer {
 
+    protected Map<String, RADModelGridColumn> deepColumns = new HashMap<>();
     protected List<RADModelGridColumn> columns = new ArrayList<>();
     protected boolean fireRawColumnsChanges = true;
 
@@ -102,6 +106,9 @@ public class RADModelGrid extends RADVisualComponent<ModelGrid> implements Compo
     @Override
     public void initSubComponents(RADComponent<?>[] initComponents) {
         try {
+            columns.forEach((RADModelGridColumn col) -> {
+                unregister(col);
+            });
             columns.clear();
             getBeanInstance().getHeader().clear();
             for (int i = 0; i < initComponents.length; i++) {
@@ -109,6 +116,7 @@ public class RADModelGrid extends RADVisualComponent<ModelGrid> implements Compo
                     RADModelGridColumn radColumn = (RADModelGridColumn) initComponents[i];
                     radColumn.setParent(this);
                     columns.add(radColumn);
+                    register(radColumn);
                 }
             }
             resetBeanColumnsAndHeader();
@@ -140,6 +148,7 @@ public class RADModelGrid extends RADVisualComponent<ModelGrid> implements Compo
             if (comp instanceof RADModelGridColumn) {
                 RADModelGridColumn radColumn = (RADModelGridColumn) comp;
                 columns.add(radColumn);
+                register(radColumn);
             }
             resetBeanColumnsAndHeader();
         } catch (Exception ex) {
@@ -153,6 +162,7 @@ public class RADModelGrid extends RADVisualComponent<ModelGrid> implements Compo
             if (comp instanceof RADModelGridColumn) {
                 RADModelGridColumn radColumn = (RADModelGridColumn) comp;
                 columns.remove(radColumn);
+                unregister(radColumn);
             }
             resetBeanColumnsAndHeader();
         } catch (Exception ex) {
@@ -197,7 +207,7 @@ public class RADModelGrid extends RADVisualComponent<ModelGrid> implements Compo
                         serviceRadColumn.initialize(getFormModel());
                         ServiceGridColumn serviceColumn = new ServiceGridColumn();
                         serviceRadColumn.setBeanInstance(serviceColumn);
-                        serviceRadColumn.setStoredName(getFormModel().findFreeComponentName("colService"));
+                        serviceRadColumn.setStoredName(findFreeColumnName("colService"));
                         getFormModel().addComponent(serviceRadColumn, this, true);
                         for (int i = 1; i <= rowsetColumnsCount; i++) {
                             Field columnField = fields.get(i);
@@ -207,7 +217,7 @@ public class RADModelGrid extends RADVisualComponent<ModelGrid> implements Compo
                             radColumn.setBeanInstance(column);
                             String colBaseName = (columnField.getName() != null && !columnField.getName().isEmpty()) ? columnField.getName() : "Column";
                             colBaseName = "col" + StringUtils.capitalize(colBaseName);
-                            radColumn.setStoredName(getFormModel().findFreeComponentName(colBaseName));
+                            radColumn.setStoredName(findFreeColumnName(colBaseName));
 
                             int lwidth = 50;
                             if (lwidth >= column.getWidth()) {
@@ -262,5 +272,40 @@ public class RADModelGrid extends RADVisualComponent<ModelGrid> implements Compo
                 }
             }
         }
+    }
+
+    public void register(RADModelGridColumn aColumn) {
+        if(isInModel() && deepColumns.containsKey(aColumn.getName())){
+            String newName = findFreeColumnName(aColumn.getName());
+            aColumn.setStoredName(newName);
+        }
+        deepColumns.put(aColumn.getName(), aColumn);
+        aColumn.columns.forEach((RADModelGridColumn col) -> {
+            register(col);
+        });
+    }
+
+    public void unregister(RADModelGridColumn aColumn) {
+        deepColumns.remove(aColumn.getName());
+        aColumn.columns.forEach((RADModelGridColumn col) -> {
+            unregister(col);
+        });
+    }
+
+    public RADModelGridColumn findColumn(String aColumnName) {
+        return deepColumns.get(aColumnName);
+    }
+
+    public String findFreeColumnName(String baseName) {
+        baseName = Introspector.decapitalize(baseName);
+        RADModelGridColumn column = deepColumns.get(baseName);
+        int counter = 0;
+        String generatedName = baseName;
+        while (column != null) {
+            counter++;
+            generatedName = baseName + counter;
+            column = deepColumns.get(generatedName);
+        }
+        return generatedName;
     }
 }

@@ -438,7 +438,7 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
     @Override
     public void componentHidden() {
         super.componentHidden();
-        if (dataObject.getBasesProxy() != null && ModelInspector.getInstance().getViewData().getModelView() == getModelView()) {
+        if (dataObject.getBasesProxy() != null && ModelInspector.getInstance() != null && ModelInspector.getInstance().getViewData() != null && ModelInspector.getInstance().getViewData().getModelView() == getModelView()) {
             ModelInspector.getInstance().setNodesReflector(null);
             ModelInspector.getInstance().setViewData(null);
             WindowManager wm = WindowManager.getDefault();

@@ -98,10 +98,10 @@ public abstract class RADComponent<C> {
     protected Map<String, RADProperty<?>> nameToProperty;
     protected final PropertyChangeListener propertyListener = new PropertyChangesPropagator();
     private ComponentContainer parent;
-    private FormModel formModel;
+    public FormModel formModel;
     private boolean inModel;
     private RADComponentNode componentNode;
-    private String storedName; // component name preserved e.g. for remove undo
+    protected String storedName; // component name preserved e.g. for remove undo
     private boolean valid = true;
     // -----------------------------------------------------------------------------
     // Constructors & Initialization
@@ -217,10 +217,10 @@ public abstract class RADComponent<C> {
         beanInstance = aBeanInstance;
     }
 
-    public void setInModel(boolean in) {
-        if (inModel != in) {
-            inModel = in;
-            if (in) {
+    public void setInModel(boolean aValue) {
+        if (inModel != aValue) {
+            inModel = aValue;
+            if (aValue) {
                 formModel.updateMapping(this, true);
             } else {
                 formModel.updateMapping(this, false);

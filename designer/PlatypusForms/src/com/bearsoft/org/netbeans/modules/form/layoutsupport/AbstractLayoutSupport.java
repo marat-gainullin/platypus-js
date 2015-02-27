@@ -785,9 +785,7 @@ public abstract class AbstractLayoutSupport implements LayoutSupportDelegate {
      * Cloning method - creates a copy of the layout delegate.
      *
      * @param targetContext LayoutSupportContext for the new layout delegate
-     * @param compExpressions array of CodeExpression objects representing the
-     * components for the new layout delegate (corresponding to the current
-     * ones)
+     * @param targetComponents
      * @return cloned layout delegate instance
      */
     @Override

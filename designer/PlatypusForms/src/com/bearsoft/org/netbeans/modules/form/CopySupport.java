@@ -43,6 +43,7 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
+import com.bearsoft.org.netbeans.modules.form.bound.RADModelGridColumn;
 import java.awt.datatransfer.*;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -62,8 +63,8 @@ import org.openide.util.datatransfer.PasteType;
  */
 class CopySupport {
 
-    private static final String flavorMimeType =
-            "application/x-form-radcomponent;class=java.lang.Object"; // NOI18N
+    private static final String flavorMimeType
+            = "application/x-form-radcomponent;class=java.lang.Object"; // NOI18N
     private static DataFlavor copyFlavor;
     private static DataFlavor cutFlavor;
 
@@ -141,7 +142,7 @@ class CopySupport {
         }
 
         if (targetComponent == null) {
-            return targetForm.getModelContainer().getIndexOf(sourceComponent) < 0;
+            return !(sourceComponent instanceof RADModelGridColumn) && targetForm.getModelContainer().getIndexOf(sourceComponent) < 0;
         }
 
         return sourceComponent != targetComponent
@@ -200,14 +201,16 @@ class CopySupport {
                             // only cut to another container
                             && (!cut || canPasteCut(transComp, aFormModel, targetComponent))
                             // must be a valid source/target combination
-                            && (
-                                RADComponentCreator.canAddComponent(transComp.getBeanClass(), targetComponent)
-                                || (!cut && RADComponentCreator.canApplyComponent(transComp.getBeanClass(), targetComponent)))) {   // pasting this meta component is allowed
-                        if (sourceComponents == null) {
-                            sourceComponents = new ArrayList<>();
+                            && (RADComponentCreator.canAddComponent(transComp.getBeanClass(), targetComponent)
+                            || (!cut && RADComponentCreator.canApplyComponent(transComp.getBeanClass(), targetComponent)))) {   // pasting this meta component is allowed
+                        RADComponent<?> copied = getComponentToCopy(transComp, targetComponent, cut);
+                        if (copied != targetComponent) {
+                            if (sourceComponents == null) {
+                                sourceComponents = new ArrayList<>();
+                            }
+                            sourceComponents.add(copied);
+                            canPaste = true;
                         }
-                        sourceComponents.add(getComponentToCopy(transComp, targetComponent, cut));
-                        canPaste = true;
                     }
                 }
             }
@@ -217,8 +220,7 @@ class CopySupport {
             }
 
             if (!canPaste && targetComponent != null
-                    && (!(targetComponent instanceof ComponentContainer)
-                    || RADComponentCreator.isTransparentLayoutComponent(targetComponent))
+//                    && (!(targetComponent instanceof ComponentContainer) || RADComponentCreator.isTransparentLayoutComponent(targetComponent))
                     && targetComponent.getParentComponent() != null) {
                 // allow paste on non-container component - try its parent
                 createPasteTypes(trans, s, aFormModel, targetComponent.getParentComponent());

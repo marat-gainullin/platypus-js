@@ -272,8 +272,8 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 
 	@Override
 	protected void onDetach() {
-		super.onDetach();
 		orphan(chevron);
+		super.onDetach();
 	}
 
 	@Override

@@ -5,7 +5,6 @@
 package com.eas.client.queries;
 
 import com.eas.client.DatabasesClientWithResource;
-import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.settings.DbConnectionSettings;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,7 +30,7 @@ public class BaseModelTest {
         settings.setUser("eas");
         settings.setPassword("eas");
         settings.setMaxStatements(1);
-        return new DatabasesClientWithResource(settings, null);
+        return new DatabasesClientWithResource(settings);
     }
 
     public static Document documentFromStream(InputStream is) throws ParserConfigurationException, SAXException, IOException {

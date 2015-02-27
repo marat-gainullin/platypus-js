@@ -42,12 +42,20 @@
         </folder>
     </folder>
     <folder name="Shortcuts">
+        <file name="C-C.shadow">
+            <attr name="originalFile" stringvalue="Actions/Edit/org-openide-actions-CopyAction.instance"/>
+            <attr name="position" intvalue="50"/>
+        </file>
+        <file name="C-X.shadow">
+            <attr name="originalFile" stringvalue="Actions/Edit/org-openide-actions-CutAction.instance"/>
+            <attr name="position" intvalue="50"/>
+        </file>
         <file name="A-UP.shadow">
-            <attr name="originalFile" stringvalue="Actions/System/org-openide-actions-MoveUpAction.instance"/>
+            <attr name="originalFile" stringvalue="Actions/Edit/System/org-openide-actions-MoveUpAction.instance"/>
             <attr name="position" intvalue="100"/>
         </file>
         <file name="A-DOWN.shadow">
-            <attr name="originalFile" stringvalue="Actions/System/org-openide-actions-MoveDownAction.instance"/>
+            <attr name="originalFile" stringvalue="Actions/Edit/System/org-openide-actions-MoveDownAction.instance"/>
             <attr name="position" intvalue="200"/>
         </file>
         <file name="CS-I.shadow">

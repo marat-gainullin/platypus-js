@@ -53,7 +53,7 @@ import java.beans.PropertyChangeSupport;
  */
 public class AssistantModel {
 
-    private PropertyChangeSupport support;
+    private final PropertyChangeSupport support;
     private String context;
     private String additionalContext;
     private Object[] parameters;

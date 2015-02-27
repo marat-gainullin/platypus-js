@@ -222,17 +222,18 @@ public class FormModel {
     public Collection<RADComponent<?>> getAllComponents() {
         return Collections.unmodifiableCollection(namesToComponents.values());
     }
-/*
-    public List<RADComponent<?>> getNonVisualComponents() {
-        List<RADComponent<?>> list = new ArrayList<>(otherComponents.size());
-        for (RADComponent<?> radComp : otherComponents) {
-            if (!(radComp instanceof RADVisualComponent<?>)) {
-                list.add(radComp);
-            }
-        }
-        return list;
-    }
-*/
+    /*
+     public List<RADComponent<?>> getNonVisualComponents() {
+     List<RADComponent<?>> list = new ArrayList<>(otherComponents.size());
+     for (RADComponent<?> radComp : otherComponents) {
+     if (!(radComp instanceof RADVisualComponent<?>)) {
+     list.add(radComp);
+     }
+     }
+     return list;
+     }
+     */
+
     public List<RADComponent<?>> getVisualComponents() {
         List<RADComponent<?>> list = new ArrayList<>(namesToComponents.size());
         for (Map.Entry<String, RADComponent<?>> e : namesToComponents.entrySet()) {
@@ -404,10 +405,12 @@ public class FormModel {
     }
 
     public void updateMapping(RADComponent<?> radComp, boolean register) {
-        if (register) {
-            namesToComponents.put(radComp.getName(), radComp);
-        } else {
-            namesToComponents.remove(radComp.getName());
+        if (!(radComp instanceof RADModelGridColumn)) {
+            if (register) {
+                namesToComponents.put(radComp.getName(), radComp);
+            } else {
+                namesToComponents.remove(radComp.getName());
+            }
         }
     }
 
@@ -850,8 +853,8 @@ public class FormModel {
     }
 
     /**
-     * Fires an event informing about changing a property of a form. An
-     * undoable edit is created and registered automatically.
+     * Fires an event informing about changing a property of a form. An undoable
+     * edit is created and registered automatically.
      *
      * @param aFormRootNode
      * @param propName name of the changed property.
@@ -876,7 +879,7 @@ public class FormModel {
 
         return ev;
     }
-    
+
     /**
      * Fires an event informing about changing a synthetic property of a
      * component. An undoable edit is created and registered automatically.
@@ -1081,7 +1084,7 @@ public class FormModel {
         public void initSubComponents(RADComponent<?>[] initComponents) {
             otherComponents.clear();
             for (RADComponent<?> initComponent : initComponents) {
-                    add(initComponent);
+                add(initComponent);
             }
         }
 

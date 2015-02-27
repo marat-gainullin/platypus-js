@@ -996,6 +996,9 @@ public class FormFactory {
 					if (childTag.hasAttribute("field")) {
 						column.setField(childTag.getAttribute("field"));
 					}
+					if (childTag.hasAttribute("sortField")) {
+						column.setSortField(childTag.getAttribute("sortField"));
+					}
 					Node _childNode = childTag.getFirstChild();
 					while (_childNode != null) {
 						if (_childNode instanceof Element) {

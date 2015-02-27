@@ -133,16 +133,13 @@ public class VisualReplicator {
         if (radComp != null) {
             Object clone;
             java.util.List<RADProperty<?>> relativeProperties = new ArrayList<>();
-
             try {
                 // clone the whole visual hierarchy recursively 
                 clone = cloneComponent(radComp, relativeProperties);
-
                 // set relative properties additionally
                 if (!relativeProperties.isEmpty()) {
                     copyRelativeProperties(relativeProperties);
                 }
-
                 Map<String, Object> mapToClones = new HashMap<>(getMapToClones());
                 FormModel formModel = formEditor.getFormModel();
                 Set<Entry<String, Object>> entries = mapToClones.entrySet();

@@ -53,7 +53,7 @@ public class Publisher {
 	public native static PublishedComponent publish(PlatypusRadioButton aComponent)/*-{
 		return new $wnd.P.RadioButton(null, null, null, aComponent);
 	}-*/;
-	
+
 	public native static PublishedComponent publish(PlatypusCheckBox aComponent)/*-{
 		return new $wnd.P.CheckBox(null, null, null, aComponent);
 	}-*/;
@@ -69,18 +69,18 @@ public class Publisher {
 	public native static PublishedComponent publish(PlatypusTextField aComponent)/*-{
 		return new $wnd.P.TextField(null, aComponent);
 	}-*/;
-	
+
 	public native static PublishedComponent publish(PlatypusFormattedTextField aComponent)/*-{
 		return new $wnd.P.FormattedField(null, aComponent);
-	}-*/;	
+	}-*/;
 
 	public native static PublishedComponent publish(PlatypusTextArea aComponent)/*-{
 		return new $wnd.P.TextArea(null, aComponent);
 	}-*/;
-	
+
 	public native static PublishedComponent publish(PlatypusHtmlEditor aComponent)/*-{
 		return new $wnd.P.HtmlArea(null, aComponent);
-	}-*/;	
+	}-*/;
 
 	public native static PublishedComponent publish(PlatypusProgressBar aComponent)/*-{
 		return new $wnd.P.ProgressBar(null, null, aComponent);
@@ -97,7 +97,7 @@ public class Publisher {
 	public native static PublishedComponent publish(PlatypusSplitButton aComponent)/*-{
 		return new $wnd.P.DropDownButton(null, null, null, null, aComponent);
 	}-*/;
-	
+
 	public native static PublishedComponent publish(PlatypusLabel aComponent)/*-{
 		return new $wnd.P.Label(null, null, null, aComponent);
 
@@ -118,7 +118,7 @@ public class Publisher {
 	public native static PublishedComponent publishPopup(PlatypusMenu aComponent)/*-{
 		return new $wnd.P.PopupMenu(aComponent);
 	}-*/;
-	
+
 	public native static PublishedComponent publish(PlatypusMenuItemImageText aComponent)/*-{
 		return new $wnd.P.MenuItem(null, null, null, aComponent);
 	}-*/;
@@ -130,36 +130,115 @@ public class Publisher {
 	public native static JavaScriptObject publish(PlatypusMenuItemRadioButton aComponent)/*-{
 		return new $wnd.P.RadioMenuItem(null, null, null, aComponent);
 	}-*/;
-	
+
 	public native static PublishedCell publishCell(Object aData, String aDisplay)/*-{
 		var published = {
 			data : $wnd.P.boxAsJs(aData)
 		};
 		var _display = aDisplay;
-		var _style = new $wnd.P.Style();
+		var _background = null;
+		var _foreground = null;
+		var _font = null;
+		var _align = null;
+		var _icon = null;
+		var _folderIcon = null;
+		var _openFolderIcon = null;
+		var _leafIcon = null;
+		
+		function displayChanged(){
+			if (published.displayCallback != null)
+				published.displayCallback.@java.lang.Runnable::run()();
+		}
+		
+		function iconsChanged(){
+			if (published.iconCallback)
+				published.iconCallback.@java.lang.Runnable::run()();
+		}
+		
 		Object.defineProperty(published, "display", {
-			get: function(){
+			get : function() {
 				return _display;
 			},
-			set: function(aValue){
+			set : function(aValue) {
 				_display = aValue;
-				if(published.displayCallback != null)
-					published.displayCallback.@java.lang.Runnable::run()();
+				displayChanged();
 			}
 		});
-		Object.defineProperty(published, "style", {
-			get: function(){
-				return _style;
+		Object.defineProperty(published, "background", {
+			get : function() {
+				return _background;
 			},
-			set: function(aValue){
-				_style = aValue;
-				if(published.displayCallback != null)
-					published.displayCallback.@java.lang.Runnable::run()();
+			set : function(aValue) {
+				_background = aValue;
+				displayChanged();
+			}
+		});
+		Object.defineProperty(published, "foreground", {
+			get : function() {
+				return _foreground;
+			},
+			set : function(aValue) {
+				_foreground = aValue;
+				displayChanged();
+			}
+		});
+		Object.defineProperty(published, "font", {
+			get : function() {
+				return _font;
+			},
+			set : function(aValue) {
+				_font = aValue;
+				displayChanged();
+			}
+		});
+		Object.defineProperty(published, "align", {
+			get : function() {
+				return _align;
+			},
+			set : function(aValue) {
+				_align = aValue;
+				displayChanged();
+			}
+		});
+		Object.defineProperty(published, "icon", {
+			get : function() {
+				return _icon;
+			},
+			set : function(aValue) {
+				_icon = aValue;
+				iconsChanged();
+			}
+		});
+		Object.defineProperty(published, "folderIcon", {
+			get : function() {
+				return _folderIcon;
+			},
+			set : function(aValue) {
+				_folderIcon = aValue;
+				iconsChanged();
+			}
+		});
+		Object.defineProperty(published, "openFolderIcon", {
+			get : function() {
+				return _openFolderIcon;
+			},
+			set : function(aValue) {
+				_openFolderIcon = aValue;
+				iconsChanged();
+			}
+		});
+		Object.defineProperty(published, "leafIcon", {
+			get : function() {
+				return _leafIcon;
+			},
+			set : function(aValue) {
+				_leafIcon = aValue;
+				iconsChanged();
 			}
 		});
 		return published;
 	}-*/;
-	
+
 	public native static PublishedComponent publish(ModelGrid aComponent)/*-{
 		return new $wnd.P.ModelGrid(aComponent);
 	}-*/;
@@ -231,7 +310,7 @@ public class Publisher {
 	public native static PublishedComponent publish(AnchorsPane aComponent)/*-{
 		return new $wnd.P.AnchorsPane(aComponent);
 	}-*/;
-	
+
 	public native static PublishedComponent publish(DesktopPane aComponent)/*-{
 		return new $wnd.P.DesktopPane(aComponent);
 	}-*/;
@@ -254,8 +333,8 @@ public class Publisher {
 
 	protected static JavaScriptObject checkPublishedComponent(Object aCandidate) {
 		if (aCandidate instanceof HasPublished) {
-			return ((HasPublished)aCandidate).getPublished();
-		}else
+			return ((HasPublished) aCandidate).getPublished();
+		} else
 			return null;
 	}
 

@@ -44,6 +44,7 @@
 package com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates;
 
 import com.bearsoft.org.netbeans.modules.form.FormProperty;
+import com.bearsoft.org.netbeans.modules.form.RADComponent;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.*;
 import com.eas.client.forms.Orientation;
 import com.eas.client.forms.layouts.BoxLayout;
@@ -525,4 +526,15 @@ public class BoxLayoutSupport extends AbstractLayoutSupport {
             return null;
         }
     }
+    
+    @Override
+    public void addComponents(RADComponent<?>[] newComps, LayoutConstraints<?>[] newConstraints, int index) {
+        // no op here because box layout has no per-component constraints.
+    }
+
+    @Override
+    public void removeComponent(int index) {
+        // no op here because box layout has no per-component constraints.
+    }
+        
 }

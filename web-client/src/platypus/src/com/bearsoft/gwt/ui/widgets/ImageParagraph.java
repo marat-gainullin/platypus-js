@@ -54,14 +54,15 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Has
 		//
 		content = Document.get().createPElement();
 		content.getStyle().setMargin(0, Unit.PX);
-		container.insertFirst(content);
 		aligner = Document.get().createDivElement();
 		aligner.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 		aligner.getStyle().setPosition(Style.Position.RELATIVE);
 		aligner.getStyle().setHeight(100, Style.Unit.PCT);
 		aligner.getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
 		aligner.getStyle().setVisibility(Style.Visibility.HIDDEN);
-		container.insertFirst(aligner);
+		//
+		container.insertFirst(content);
+		container.insertAfter(aligner, content);// aligner must go after content because of Gecko's craziness.
 		setElement(container);
 	}
 

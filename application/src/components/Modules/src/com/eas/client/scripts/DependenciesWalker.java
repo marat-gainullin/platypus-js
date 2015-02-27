@@ -22,16 +22,9 @@ import jdk.nashorn.internal.ir.visitor.NodeVisitor;
 public class DependenciesWalker {
 
     public static final String REQUIRE_FUNCTION_NAME = "require";
-    public static final String MODULES = "Modules";
-    public static final String GET = "get";
-    public static final String CREATE = "create";
     public static final String MODEL = "model";
     public static final String LOAD_ENTITY = "loadEntity";
-    public static final String MODULE = "Module";
     public static final String SERVER_MODULE = "ServerModule";
-    public static final String FORM = "Form";
-    public static final String REPORT = "Report";
-    public static final String SERVER_REPORT = "ServerReport";
     private final Set<String> localFunctions = new HashSet<>();
     private final Set<String> dependenceLikeIdentifiers = new HashSet<>();
     private final Set<String> dependencies = new HashSet<>();
@@ -74,6 +67,12 @@ public class DependenciesWalker {
             }
 
             @Override
+            public boolean enterIdentNode(IdentNode identNode) {
+                processIdentNode(identNode);
+                return super.enterIdentNode(identNode);
+            }
+
+            @Override
             public boolean enterLiteralNode(LiteralNode<?> literalNode) {
                 if (literalNode.getType().isString() && !calls.empty()) {
                     String value = literalNode.getString();
@@ -96,26 +95,8 @@ public class DependenciesWalker {
                             }
                         } else if (/*lastCall.isNew() && */atFirstArg) {
                             switch (funcName) {
-                                case FORM:
-                                case MODULE:
-                                    putDependence(value);
-                                    break;
-                                case REPORT:
-                                case SERVER_REPORT:
                                 case SERVER_MODULE:
                                     putServerDependence(value);
-                                    break;
-                                case GET:
-                                case CREATE:
-                                    if (lastAccess.getBase() instanceof AccessNode) {
-                                        AccessNode baseAccess = (AccessNode) lastAccess.getBase();
-                                        if (baseAccess.getProperty() instanceof IdentNode) {
-                                            String baseName = ((IdentNode) baseAccess.getProperty()).getName();
-                                            if (MODULES.equals(baseName) && (GET.equals(funcName) || CREATE.equals(funcName))) {
-                                                putDependence(value);
-                                            }
-                                        }
-                                    }
                                     break;
                                 case LOAD_ENTITY:
                                     if (lastAccess.getBase() instanceof IdentNode) {
@@ -132,14 +113,15 @@ public class DependenciesWalker {
                 return super.enterLiteralNode(literalNode);
             }
 
-            @Override
-            public boolean enterAccessNode(AccessNode accessNode) {
-                if (accessNode.getBase() instanceof IdentNode) {
-                    processIdentNode((IdentNode) accessNode.getBase());
-                }
-                return super.enterAccessNode(accessNode);
-            }
-
+            /*
+             @Override
+             public boolean enterAccessNode(AccessNode accessNode) {
+             if (accessNode.getBase() instanceof IdentNode) {
+             processIdentNode((IdentNode) accessNode.getBase());
+             }
+             return super.enterAccessNode(accessNode);
+             }
+             */
             private void processIdentNode(IdentNode identNode) {
                 String name = identNode.getName();
                 dependenceLikeIdentifiers.add(name);

@@ -1407,7 +1407,7 @@ public class HandleLayer extends JPanel {
             }
         }
         return workingComps.isEmpty() ? null
-                : workingComps.toArray(new RADVisualComponent<?>[workingComps.size()]);
+                : workingComps.toArray(new RADVisualComponent<?>[]{});
     }
 
     boolean endDragging(MouseEvent e) {

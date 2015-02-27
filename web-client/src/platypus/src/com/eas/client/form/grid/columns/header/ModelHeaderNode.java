@@ -146,6 +146,14 @@ public class ModelHeaderNode extends HeaderNode<JavaScriptObject> implements Has
 		return ((ModelColumn) column).isSortable();
 	}
 
+	public String getSortField() {
+		return ((ModelColumn) column).getSortField();
+	}
+
+	public void setSortField(String aValue) {
+		((ModelColumn) column).setSortField(aValue);
+	}
+	
 	public void setSortable(boolean aValue) {
 		((ModelColumn) column).setSortable(aValue);
 	}
@@ -268,7 +276,15 @@ public class ModelHeaderNode extends HeaderNode<JavaScriptObject> implements Has
 				return aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::isSortable()();
 			},
 			set : function(aValue) {
-				aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::setSortable(Z)((false != aValue));
+				aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::setSortable(Z)(!!aValue);
+			}
+		});
+		Object.defineProperty(aPublished, "sortField", {
+			get : function() {
+				return aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::getSortField()();
+			},
+			set : function(aValue) {
+				aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::setSortField(Ljava/lang/String;)(aValue != null ? ''+aValue : '');
 			}
 		});
 		Object.defineProperty(aPublished, "foreground", {

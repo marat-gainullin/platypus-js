@@ -23,6 +23,7 @@ import com.bearsoft.rowset.ordering.Orderer;
 import com.bearsoft.rowset.utils.RowsetUtils;
 import java.beans.*;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -373,28 +374,51 @@ public class Rowset {
             if (rowsetChangeSupport.fireWillRequeryEvent()) {
                 if (onSuccess != null) {
                     rowsetChangeSupport.fireBeforeRequeryEvent();
-                    flow.refresh(aParams, (Rowset aRowset) -> {
-                        if (aRowset != null) {
+                    flow.refresh(aParams, (Rowset fetchedRowset) -> {
+                        if (fetchedRowset != null) {
                             try {
+                                List<Row> oldRows = current;
                                 if (activeFilter != null) {
                                     // No implicit calls to setCurrent and etc.
+                                    oldRows = activeFilter.getOriginalRows();
                                     activeFilter.deactivate();
                                     activeFilter = null;
                                 }
                                 if (fields == null) {
-                                    setFields(aRowset.getFields());
+                                    setFields(fetchedRowset.getFields());
                                 }
-                                List<Row> rows = aRowset.getCurrent();
-                                aRowset.setCurrent(new ArrayList<>());
-                                aRowset.currentToOriginal();
-                                current.stream().filter((checked) -> (checked.isInserted()/* || checked.isUpdated() - if uncomment, then same rows will be fetched form a database*/)).forEach((checked) -> {
-                                            rows.add(checked);
-                                        });
-                                rows.stream().forEach((Row aRow) -> {
-                                    aRow.setLog(log);
-                                    aRow.setEntityName(flow.getEntityId());
+                                List<Row> fetchedRows = fetchedRowset.getCurrent();
+                                fetchedRowset.setCurrent(new ArrayList<>());
+                                fetchedRowset.currentToOriginal();
+                                // Collect updated old rows and preserve inserted rows
+                                List<Row> oldInsertedRows = new ArrayList<>();
+                                Map<List<Object>, Row> oldUpdatedRows = new HashMap<>();
+                                List<Integer> pkIndicies = fields.getPrimaryKeysIndicies();
+                                oldRows.stream().forEach((oldRow) -> {
+                                    if (oldRow.isInserted()) {
+                                        oldInsertedRows.add(oldRow);
+                                    } else if (oldRow.isUpdated()) {
+                                        oldUpdatedRows.put(oldRow.getOriginalValues(pkIndicies), oldRow);
+                                    }
                                 });
-                                setCurrent(rows);
+                                fetchedRows.stream().forEach((Row aFetchedRow) -> {
+                                    Row oldRow = oldUpdatedRows.remove(aFetchedRow.getCurrentValues(pkIndicies));
+                                    if (oldRow != null) {
+                                        oldRow.getUpdatedColumns().stream().forEach((Integer anUpdatedColumn) -> {
+                                            try {
+                                                Object updatedValue = oldRow.getColumnObject(anUpdatedColumn);
+                                                aFetchedRow.setColumnUpdated(anUpdatedColumn, updatedValue);
+                                            } catch (RowsetException ex) {
+                                                Logger.getLogger(Rowset.class.getName()).log(Level.SEVERE, null, ex);
+                                            }
+                                        });
+                                    }
+                                    aFetchedRow.setLog(log);
+                                    aFetchedRow.setEntityName(flow.getEntityId());
+                                });
+                                fetchedRows.addAll(oldUpdatedRows.values());
+                                fetchedRows.addAll(oldInsertedRows);
+                                setCurrent(fetchedRows);
                                 currentToOriginal(false);
                                 // silent first
                                 if (!current.isEmpty()) {
@@ -424,27 +448,50 @@ public class Rowset {
                         }
                     });
                 } else {
-                    Rowset rowset = flow.refresh(aParams, null, null);
-                    if (rowset != null) {
+                    Rowset fetchedRowset = flow.refresh(aParams, null, null);
+                    if (fetchedRowset != null) {
+                        List<Row> oldRows = current;
                         if (activeFilter != null) {
                             // No implicit calls to setCurrent and etc.
+                            oldRows = activeFilter.getOriginalRows();
                             activeFilter.deactivate();
                             activeFilter = null;
                         }
                         if (fields == null) {
-                            setFields(rowset.getFields());
+                            setFields(fetchedRowset.getFields());
                         }
-                        List<Row> rows = rowset.getCurrent();
-                        rowset.setCurrent(new ArrayList<>());
-                        rowset.currentToOriginal();
-                        current.stream().filter((checked) -> (checked.isInserted()/* || checked.isUpdated() - if uncomment, then same rows will be fetched form a database*/)).forEach((checked) -> {
-                                    rows.add(checked);
-                                });
-                        rows.stream().forEach((Row aRow) -> {
-                            aRow.setLog(log);
-                            aRow.setEntityName(flow.getEntityId());
+                        List<Row> fetchedRows = fetchedRowset.getCurrent();
+                        fetchedRowset.setCurrent(new ArrayList<>());
+                        fetchedRowset.currentToOriginal();
+                        // Collect updated old rows and preserve inserted rows
+                        List<Row> oldInsertedRows = new ArrayList<>();
+                        Map<List<Object>, Row> oldUpdatedRows = new HashMap<>();
+                        List<Integer> pkIndicies = fields.getPrimaryKeysIndicies();
+                        oldRows.stream().forEach((oldRow) -> {
+                            if (oldRow.isInserted()) {
+                                oldInsertedRows.add(oldRow);
+                            } else if (oldRow.isUpdated()) {
+                                oldUpdatedRows.put(oldRow.getOriginalValues(pkIndicies), oldRow);
+                            }
                         });
-                        setCurrent(rows);
+                        fetchedRows.stream().forEach((Row aFetchedRow) -> {
+                            Row oldRow = oldUpdatedRows.remove(aFetchedRow.getCurrentValues(pkIndicies));
+                            if (oldRow != null) {
+                                oldRow.getUpdatedColumns().stream().forEach((Integer anUpdatedColumn) -> {
+                                    try {
+                                        Object updatedValue = oldRow.getColumnObject(anUpdatedColumn);
+                                        aFetchedRow.setColumnUpdated(anUpdatedColumn, updatedValue);
+                                    } catch (RowsetException ex) {
+                                        Logger.getLogger(Rowset.class.getName()).log(Level.SEVERE, null, ex);
+                                    }
+                                });
+                            }
+                            aFetchedRow.setLog(log);
+                            aFetchedRow.setEntityName(flow.getEntityId());
+                        });
+                        fetchedRows.addAll(oldUpdatedRows.values());
+                        fetchedRows.addAll(oldInsertedRows);
+                        setCurrent(fetchedRows);
                         currentToOriginal(false);
                         // silent first
                         if (!current.isEmpty()) {
@@ -1066,7 +1113,7 @@ public class Rowset {
         for (int i = original.size() - 1; i >= 0; i--) {
             Row row = original.get(i);
             assert row != null;
-            row.currentToOriginal();
+            row.currentToOriginal(aCommited);
             if (aCommited) {
                 row.clearInserted();
             }
