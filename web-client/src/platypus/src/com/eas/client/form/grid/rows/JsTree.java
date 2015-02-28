@@ -1,5 +1,7 @@
 package com.eas.client.form.grid.rows;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.bearsoft.gwt.ui.widgets.grid.processing.TreeAdapter;
@@ -7,38 +9,85 @@ import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.Utils.JsObject;
 import com.bearsoft.rowset.beans.PropertyChangeEvent;
 import com.bearsoft.rowset.beans.PropertyChangeListener;
-import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.shared.HandlerRegistration;
 
 public class JsTree extends TreeAdapter<JavaScriptObject> implements JsDataContainer {
 
 	protected JavaScriptObject data;
 	protected HandlerRegistration boundToData;
+	protected HandlerRegistration boundToDataElements;
 	protected String parentField;
 	protected String childrenField;
-	protected Runnable onResize;
-	protected Callback<Void, String> onError;
 
-	public JsTree(String aParentField, String aChildrenField, Runnable aOnResize, Callback<Void, String> aOnError) {
+	public JsTree(String aParentField, String aChildrenField) {
 		super();
 		parentField = aParentField;
 		childrenField = aChildrenField;
-		onResize = aOnResize;
-		onError = aOnError;
 	}
 
+	protected boolean changesQueued;
+
+	protected void enqueueChanges() {
+		changesQueued = true;
+		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+			@Override
+			public void execute() {
+				if (changesQueued) {
+					changesQueued = false;
+					if (data != null) {
+						List<JavaScriptObject> items = new JsArrayList(data);
+						for (int i = 0; i < items.size(); i++) {
+							JavaScriptObject item = items.get(i);
+							changed(item);
+						}
+					}
+				}
+			}
+		});
+	}
+
+	protected boolean readdQueued;
+
+	private void enqueueReadd() {
+		readdQueued = true;
+		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+			@Override
+			public void execute() {
+				if (readdQueued) {
+					readdQueued = false;
+					if (boundToDataElements != null) {
+						boundToDataElements.removeHandler();
+						boundToDataElements = null;
+					}
+					if (data != null) {
+						boundToDataElements = Utils.listenElements(data, new PropertyChangeListener() {
+
+							@Override
+							public void propertyChange(PropertyChangeEvent evt) {
+								enqueueChanges();
+							}
+						});
+					}
+					everythingChanged();
+				}
+			}
+		});
+	}
+	
 	protected void bind() {
 		if (data != null) {
 			boundToData = Utils.listen(data, "length", new PropertyChangeListener() {
 				@Override
 				public void propertyChange(PropertyChangeEvent evt) {
-					if (onResize != null)
-						onResize.run();
+					enqueueReadd();
 				}
 			});
-			if (onResize != null)
-				onResize.run();
+			enqueueReadd();
 		}
 	}
 
@@ -47,6 +96,7 @@ public class JsTree extends TreeAdapter<JavaScriptObject> implements JsDataConta
 			boundToData.removeHandler();
 			boundToData = null;
 		}
+		enqueueReadd();
 	}
 
 	@Override
@@ -70,7 +120,19 @@ public class JsTree extends TreeAdapter<JavaScriptObject> implements JsDataConta
 
 	protected List<JavaScriptObject> findChildren(JavaScriptObject aParent) {
 		if (aParent == null) {
-			return data != null ? new JsArrayList(data) : null;
+			if (data != null) {
+				List<JavaScriptObject> items = new JsArrayList(data);
+				List<JavaScriptObject> roots = new ArrayList<>();
+				for (int i = 0; i < items.size(); i++) {
+					JavaScriptObject item = items.get(i);
+					if (item != null && item.<JsObject> cast().getJs(parentField) == null) {
+						roots.add(item);
+					}
+				}
+				return roots;
+			} else {
+				return null;
+			}
 		} else {
 			JavaScriptObject children = aParent.<JsObject> cast().getJs(childrenField);
 			return children != null ? new JsArrayList(children) : null;
@@ -85,7 +147,8 @@ public class JsTree extends TreeAdapter<JavaScriptObject> implements JsDataConta
 
 	@Override
 	public List<JavaScriptObject> getChildrenOf(JavaScriptObject anElement) {
-		return findChildren(anElement);
+		List<JavaScriptObject> found = findChildren(anElement);
+		return found != null ? found : Collections.<JavaScriptObject> emptyList();
 	}
 
 	@Override

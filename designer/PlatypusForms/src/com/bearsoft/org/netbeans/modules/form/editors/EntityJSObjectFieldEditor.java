@@ -82,8 +82,13 @@ public class EntityJSObjectFieldEditor extends PropertyEditorSupport implements 
             dataEntity.getModel().getReferenceRelationsByEntity(dataEntity).forEach((Relation<ApplicationDbEntity> aRelation) -> {
                 if (aRelation instanceof ReferenceRelation<?>) {
                     ReferenceRelation<?> rr = (ReferenceRelation<?>) aRelation;
-                    if (rr.getLeftEntity() == dataEntity && rr.getScalarPropertyName() != null && !rr.getScalarPropertyName().isEmpty()) {
-                        tags.add(prefix + rr.getScalarPropertyName());
+                    if (rr.getLeftEntity() == dataEntity) {
+                        if (rr.getScalarPropertyName() != null && !rr.getScalarPropertyName().isEmpty()) {
+                            tags.add(prefix + rr.getScalarPropertyName());
+                        }
+                        if (rr.getCollectionPropertyName() != null && !rr.getCollectionPropertyName().isEmpty()) {
+                            tags.add(prefix + rr.getCollectionPropertyName());
+                        }
                     }
                 }
             });

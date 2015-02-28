@@ -31,7 +31,6 @@ public class TreeDataProvider<T> extends ListDataProvider<T> implements IndexOfP
 	protected Tree<T> tree;
 	protected Set<T> expanded = new HashSet<>();
 	protected Map<T, Integer> indicies = new HashMap<>();
-	protected ChildrenFetcher<T> childrenFetcher;
 	protected final Set<ExpandedCollapsedHandler<T>> expandCollapseHandlers = new HashSet<>();
 	protected Runnable onResize;
 
@@ -63,28 +62,16 @@ public class TreeDataProvider<T> extends ListDataProvider<T> implements IndexOfP
 	}
 
 	/**
-	 * Front constructor for synchronous front.
-	 * 
-	 * @param aTreedModel
-	 */
-	public TreeDataProvider(Tree<T> aTreedModel, Runnable aOnResize) {
-		this(aTreedModel, aOnResize, null);
-	}
-
-	/**
 	 * Table front constructor. Constructs a lazy tree front (asynchronous
 	 * case).
 	 * 
 	 * @param aTreedModel
 	 *            - Deep treed model, containing data.
-	 * @param aChildrenFetcher
-	 *            - Fetcher object for lazy trees.
 	 */
-	public TreeDataProvider(Tree<T> aTreedModel, Runnable aOnResize, ChildrenFetcher<T> aChildrenFetcher) {
+	public TreeDataProvider(Tree<T> aTreedModel, Runnable aOnResize) {
 		super();
 		onResize = aOnResize;
 		tree = aTreedModel;
-		childrenFetcher = aChildrenFetcher;
 		// Let's fill with roots forest
 		getList().addAll(tree.getChildrenOf(null));
 		tree.addChangesHandler(new Tree.ChangeHandler<T>() {
@@ -114,6 +101,7 @@ public class TreeDataProvider<T> extends ListDataProvider<T> implements IndexOfP
 				}
 			}
 
+			@Override
 			public void changed(T aSubject) {
 				int idx = indexOf(aSubject);
 				if (idx != -1) {
@@ -140,9 +128,9 @@ public class TreeDataProvider<T> extends ListDataProvider<T> implements IndexOfP
 
 	protected void validateFront() {
 		assert tree != null;
-		if (getList().isEmpty()) {
+		List<T> targetList = getList();
+		if (targetList.isEmpty()) {
 			List<T> children = tree.getChildrenOf(null);
-			List<T> targetList = getList();
 			targetList.addAll(children);
 			int i = 0;
 			while (i < targetList.size()) {
@@ -185,11 +173,17 @@ public class TreeDataProvider<T> extends ListDataProvider<T> implements IndexOfP
 		List<T> path = new ArrayList<>();
 		if (anElement != null) {
 			T currentParent = anElement;
+			Set<T> added = new HashSet<>();
 			path.add(currentParent);
+			added.add(currentParent);
 			while (currentParent != null) {
 				currentParent = getParentOf(currentParent);
+				if(added.contains(currentParent)){
+					break;
+				}
 				if (currentParent != null) {
 					path.add(0, currentParent);
+					added.add(currentParent);
 				}
 			}
 		}
@@ -213,23 +207,6 @@ public class TreeDataProvider<T> extends ListDataProvider<T> implements IndexOfP
 				invalidateFront();
 				validateFront();
 				expanded(anElement);
-			} else if (childrenFetcher != null) {// children == null ||
-				                                 // children.isEmpty()
-				final T element2Expand = anElement;
-				expanded.add(element2Expand); // To prevent re-fetching.
-				Runnable completer = new Runnable() {
-
-					@Override
-					public void run() {
-						List<T> fetchedChildren = tree.getChildrenOf(element2Expand);
-						if (!fetchedChildren.isEmpty()) {
-							invalidateFront();
-							validateFront();
-							expanded(anElement);
-						}
-					}
-				};
-				childrenFetcher.fetch(element2Expand, completer);
 			}
 		}
 	}
