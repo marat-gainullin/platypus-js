@@ -56,11 +56,7 @@ public class DraggableHeader<T> extends Header<String> implements HasColumn<T> {
 	public Column<T, ?> getColumn() {
 		return column;
 	}
-/*
-	public void setColumn(Column<T, ?> aColumn) {
-		column = aColumn;
-	}
-*/
+
 	public HeaderNode<T> getHeaderNode() {
 		return headerNode;
 	}
@@ -137,8 +133,10 @@ public class DraggableHeader<T> extends Header<String> implements HasColumn<T> {
 				if ((col.isMove() && moveable) || (col.isResize() && resizable)) {
 					event.getDataTransfer().<XDataTransfer> cast().setEffectAllowed("move");
 					DraggedColumn.instance = col;
-					event.getDataTransfer().setData("Text",
-					        (table != null ? "grid-section-" + table.hashCode() : "not leaf") + "; column-" + (DraggedColumn.instance.isMove() ? "moved" : "resized") + (table != null ? ":"+table.getColumnIndex(column) : ""));
+					event.getDataTransfer().setData(
+					        "Text",
+					        (table != null ? "grid-section-" + table.hashCode() : "not leaf") + "; column-" + (DraggedColumn.instance.isMove() ? "moved" : "resized")
+					                + (table != null ? ":" + table.getColumnIndex(column) : ""));
 				} else {
 					event.getDataTransfer().<XDataTransfer> cast().setEffectAllowed("none");
 				}
@@ -160,7 +158,7 @@ public class DraggableHeader<T> extends Header<String> implements HasColumn<T> {
 		public String gridHeaderMover();
 
 		public String gridHeaderResizer();
-		
+
 	}
 
 	public static GridStyles headerStyles = GridResources.instance.header();
@@ -176,11 +174,10 @@ public class DraggableHeader<T> extends Header<String> implements HasColumn<T> {
 			headerStyles.ensureInjected();// ondragenter=\"event.preventDefault();\"
 			                              // ondragover=\"event.preventDefault();\"
 			                              // ondrop=\"event.preventDefault();\"
-			sb
-				.append(SafeHtmlUtils.fromTrustedString("<div class=\"grid-column-header-content\"; style=\"position:relative;\">"))
-		        .append(value.startsWith("<html>") ? SafeHtmlUtils.fromTrustedString(value.substring(6)) : SafeHtmlUtils.fromString(value)).append(SafeHtmlUtils.fromTrustedString("</div>"))
-		        .append(SafeHtmlUtils.fromTrustedString("<span draggable=\"true\" class=\"" + headerStyles.gridHeaderMover() + " grid-header-mover\"></span>"))
-		        .append(SafeHtmlUtils.fromTrustedString("<span draggable=\"true\" class=\"" + headerStyles.gridHeaderResizer() + " grid-header-resizer\"></span>"));
+			sb.append(SafeHtmlUtils.fromTrustedString("<div class=\"grid-column-header-content\"; style=\"position:relative;\">"))
+			        .append(value.startsWith("<html>") ? SafeHtmlUtils.fromTrustedString(value.substring(6)) : SafeHtmlUtils.fromString(value)).append(SafeHtmlUtils.fromTrustedString("</div>"))
+			        .append(SafeHtmlUtils.fromTrustedString("<span draggable=\"true\" class=\"" + headerStyles.gridHeaderMover() + " grid-header-mover\"></span>"))
+			        .append(SafeHtmlUtils.fromTrustedString("<span draggable=\"true\" class=\"" + headerStyles.gridHeaderResizer() + " grid-header-resizer\"></span>"));
 		}
 
 	}

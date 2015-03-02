@@ -40,7 +40,8 @@ public class TreeExpandableCell<T, C> extends DivDecoratorCell<C> {
 	public static int DEAFAULT_INDENT = 24;
 	private static final Template template = GWT.create(Template.class);
 	protected int indent;
-	protected TreeDataProvider<T> dataProvider;
+	protected TreeDataProvider<T> treeProvider;
+	protected boolean visible = true;
 
 	public TreeExpandableCell(Cell<C> aCell) {
 		this(aCell, null, DEAFAULT_INDENT);
@@ -50,33 +51,37 @@ public class TreeExpandableCell<T, C> extends DivDecoratorCell<C> {
 		this(aCell, null, aIndent);
 	}
 
-	public TreeExpandableCell(Cell<C> aCell, TreeDataProvider<T> aDataProvider, int aIndent) {
+	public TreeExpandableCell(Cell<C> aCell, TreeDataProvider<T> aTreeProvider, int aIndent) {
 		super(aCell);
 		indent = aIndent;
-		dataProvider = aDataProvider;
+		treeProvider = aTreeProvider;
 	}
 
 	public TreeDataProvider<T> getDataProvider() {
-		return dataProvider;
+		return treeProvider;
 	}
 
 	public void setDataProvider(TreeDataProvider<T> aValue) {
-		dataProvider = aValue;
+		treeProvider = aValue;
+	}
+
+	public boolean isVisible() {
+		return visible;
+	}
+
+	public void setVisible(boolean aValue) {
+		visible = aValue;
 	}
 
 	@Override
 	public void render(Context context, C value, SafeHtmlBuilder sb) {
-		if (dataProvider != null) {
+		if (treeProvider != null) {
 			SafeHtmlBuilder cellBuilder = new SafeHtmlBuilder();
 			cell.render(context, value, cellBuilder);
 			int deepness = getDeepness(context);
 			int outerDivPadding = indent * (deepness + 1);
-			SafeStyles styles = new SafeStylesBuilder()
-				.trustedNameAndValue("background-position", indent * deepness, Style.Unit.PX)
-				.paddingLeft(outerDivPadding, Style.Unit.PX)
-				.position(Style.Position.RELATIVE)
-				.height(100, Style.Unit.PCT)
-				.toSafeStyles();
+			SafeStyles styles = new SafeStylesBuilder().trustedNameAndValue("background-position", indent * deepness, Style.Unit.PX).paddingLeft(outerDivPadding, Style.Unit.PX)
+			        .position(Style.Position.RELATIVE).height(100, Style.Unit.PCT).toSafeStyles();
 			sb.append(template.outerDiv(outerDivClasses(context), styles, cellBuilder.toSafeHtml()));
 		} else {
 			cell.render(context, value, sb);
@@ -85,19 +90,23 @@ public class TreeExpandableCell<T, C> extends DivDecoratorCell<C> {
 
 	@Override
 	public Set<String> getConsumedEvents() {
-		if (dataProvider != null) {
-			Set<String> consumed = new HashSet<>();
-			consumed.addAll(cell.getConsumedEvents());
-			consumed.add(BrowserEvents.MOUSEDOWN);
-			return consumed;
+		if (visible) {
+			if (treeProvider != null) {
+				Set<String> consumed = new HashSet<>();
+				consumed.addAll(cell.getConsumedEvents());
+				consumed.add(BrowserEvents.MOUSEDOWN);
+				return consumed;
+			} else {
+				return cell.getConsumedEvents();
+			}
 		} else {
-			return cell.getConsumedEvents();
+			return null;
 		}
 	}
 
 	@Override
 	public void onBrowserEvent(Context context, Element parent, C value, NativeEvent event, ValueUpdater<C> valueUpdater) {
-		if (dataProvider != null) {
+		if (treeProvider != null) {
 			super.onBrowserEvent(context, parent, value, event, valueUpdater);
 		} else {
 			cell.onBrowserEvent(context, parent, value, event, valueUpdater);
@@ -106,7 +115,7 @@ public class TreeExpandableCell<T, C> extends DivDecoratorCell<C> {
 
 	@Override
 	protected Element getCellParent(Element parent) {
-		if (dataProvider != null) {
+		if (treeProvider != null) {
 			return super.getCellParent(parent);
 		} else {
 			return parent;
@@ -124,13 +133,13 @@ public class TreeExpandableCell<T, C> extends DivDecoratorCell<C> {
 	}
 
 	protected boolean isExpanded(Cell.Context aContext) {
-		T element = dataProvider.getList().get(aContext.getIndex());
-		return dataProvider.isExpanded(element);
+		T element = treeProvider.getList().get(aContext.getIndex());
+		return treeProvider.isExpanded(element);
 	}
 
 	protected boolean isExpandable(Cell.Context aContext) {
-		T element = dataProvider.getList().get(aContext.getIndex());
-		return !dataProvider.getTree().isLeaf(element);
+		T element = treeProvider.getList().get(aContext.getIndex());
+		return !treeProvider.getTree().isLeaf(element);
 	}
 
 	/**
@@ -140,23 +149,23 @@ public class TreeExpandableCell<T, C> extends DivDecoratorCell<C> {
 	 *         level (e.g. element is root of a forest).
 	 */
 	protected int getDeepness(Cell.Context aContext) {
-		T element = dataProvider.getList().get(aContext.getIndex());
-		List<T> path = dataProvider.buildPathTo(element);
+		T element = treeProvider.getList().get(aContext.getIndex());
+		List<T> path = treeProvider.buildPathTo(element);
 		return path != null && !path.isEmpty() ? path.size() - 1 : 0;
 	}
 
 	@Override
 	protected void onNonCellBrowserEvent(Cell.Context context, Element parent, C value, NativeEvent event, ValueUpdater<C> valueUpdater) {
-		if (dataProvider != null) {
+		if (treeProvider != null) {
 			if (BrowserEvents.MOUSEDOWN.equals(event.getType())) {
-				T toBeToggled = dataProvider.getList().get(context.getIndex());
-				dataProvider.getList().set(context.getIndex(), toBeToggled);
+				T toBeToggled = treeProvider.getList().get(context.getIndex());
+				treeProvider.getList().set(context.getIndex(), toBeToggled);
 				if (isExpanded(context)) {
-					dataProvider.collapse(toBeToggled);
+					treeProvider.collapse(toBeToggled);
 				} else {
-					dataProvider.expand(toBeToggled);
+					treeProvider.expand(toBeToggled);
 				}
-			}else if (cell.getConsumedEvents().contains(event.getType())) {
+			} else if (cell.getConsumedEvents().contains(event.getType())) {
 				cell.onBrowserEvent(context, getCellParent(parent), value, event, valueUpdater);
 			}
 		}

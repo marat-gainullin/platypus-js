@@ -173,6 +173,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 	public void setVisible(boolean aValue) {
 		if (visible != aValue) {
 			visible = aValue;
+			((TreeExpandableCell<JavaScriptObject, Object>) getCell()).setVisible(aValue);			
 			if (grid != null) {
 				if (visible) {
 					grid.showColumn(this);
@@ -187,6 +188,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 	public void updateVisible(boolean aValue) {
 		if (visible != aValue) {
 			visible = aValue;
+			((TreeExpandableCell<JavaScriptObject, Object>) getCell()).setVisible(aValue);			
 		}
 	}
 

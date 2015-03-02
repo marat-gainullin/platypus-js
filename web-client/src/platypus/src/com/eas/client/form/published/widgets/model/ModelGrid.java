@@ -258,6 +258,21 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		});
 	}
 
+	protected boolean redrawQueued;
+	private void enqueueRedraw() {
+		redrawQueued = true;
+		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+			@Override
+			public void execute() {
+				if (redrawQueued) {
+					redrawQueued = false;
+					redraw();
+				}
+			}
+		});
+	}
+	
 	protected void applyRows() {
 		unbindCursor();
 		if (sortHandlerReg != null)
@@ -673,6 +688,7 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		super.showColumn(aColumn);
 		ModelColumn colFacade = (ModelColumn) aColumn;
 		colFacade.updateVisible(true);
+		enqueueRedraw(); // because of AbstractCellTable.isInteractive crazy updating while rendering instead of updating it while show/hide columns
 	}
 
 	public void hideColumn(Column<JavaScriptObject, ?> aColumn) {
