@@ -701,7 +701,7 @@
 .south-east-decor-active{
 }
 
-.editor-bold, .editor-italic, .editor-underline, .editor-subscript, .editor-superscript, .editor-align-left, .editor-align-center, .editor-align-right, .editor-background-color, .editor-foreground-color, .editor-strike-through, .editor-indent-right, .editor-indent-left, .editor-horisontal-rule, .editor-ordered-list, .editor-unordered-list, .editor-insert-image, .editor-create-link, .editor-delete-link, .editor-remove-format, .time-picker-up, .time-picker-down  {
+.editor-bold, .editor-italic, .editor-underline, .editor-subscript, .editor-superscript, .editor-align-left, .editor-align-center, .editor-align-right, .editor-background-color, .editor-foreground-color, .editor-strike-through, .editor-indent-right, .editor-indent-left, .editor-horisontal-rule, .editor-ordered-list, .editor-unordered-list, .editor-insert-image, .editor-create-link, .editor-delete-link, .editor-remove-format, .time-picker-up, .time-picker-down, .time-picker-button  {
     width: 100%; 
     height: 100%;
     background-image: url(editor-bold.gif);
@@ -795,5 +795,22 @@
 .time-picker{
     background: white;
     transition: height 0.5s;
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+}
+
+.time-picker-button{
+    background-image: url(clock.png);
+    border-top: 1px solid #A2BBDD;
+}
+.time-picker-text{
+    border-width: 1px;
+    border-radius: 2px;
+    font-size: large;
+}
+.date-time-picker{
+    background: white;
+    border: 1px solid #A2BBDD;
+    border-radius: 2px;
 }
 

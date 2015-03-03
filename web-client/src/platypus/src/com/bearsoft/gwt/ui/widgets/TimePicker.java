@@ -88,11 +88,13 @@ public class TimePicker extends Composite {
 		
 		txtHour.getElement().getStyle().setWidth(componentWidth, Style.Unit.PCT);
 		txtHour.getElement().getStyle().setProperty("boxSizing", "border-box");
+		txtHour.setStyleName("time-picker-text");
 		txtMinute.getElement().getStyle().setWidth(componentWidth, Style.Unit.PCT);
 		txtMinute.getElement().getStyle().setProperty("boxSizing", "border-box");
+		txtMinute.setStyleName("time-picker-text");
 		txtSecond.getElement().getStyle().setWidth(componentWidth, Style.Unit.PCT);
 		txtSecond.getElement().getStyle().setProperty("boxSizing", "border-box");
-		
+		txtSecond.setStyleName("time-picker-text");
 		
 		textBlock.add(createSeparator(true));
 		textBlock.add(txtHour);

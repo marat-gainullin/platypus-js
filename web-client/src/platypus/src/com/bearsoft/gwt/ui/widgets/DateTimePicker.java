@@ -24,13 +24,15 @@ public class DateTimePicker extends DatePicker {
 	@Override
 	protected void setup() {
 		FlowPanel widgetContainer = new FlowPanel();
+		widgetContainer.setStyleName("date-time-picker");
+		
 		FlowPanel calendarContainer = new FlowPanel();
 		calendarContainer.getElement().getStyle().setPosition(Position.RELATIVE);
 		initWidget(widgetContainer);
 		
 	    VerticalPanel panel = new VerticalPanel();
 	    setStyleName(panel.getElement(), "gwt-DatePicker");
-	    setStyleName("gwt-DatePicker");
+	    panel.getElement().getStyle().setBorderWidth(0, Style.Unit.PX);
 	    panel.add(this.getMonthSelector());
 		panel.add(this.getView());
 		tmPicker = new TimePicker();
@@ -42,18 +44,15 @@ public class DateTimePicker extends DatePicker {
 		
 		FlowPanel timePickerCaller = new FlowPanel();
 		timePickerCaller.getElement().getStyle().setWidth(100, Style.Unit.PCT);
+		timePickerCaller.getElement().getStyle().setHeight(20, Style.Unit.PX);
+		timePickerCaller.setStyleName("time-picker-button");
+		
 		widgetContainer.add(timePickerCaller);
 		
 		timePickerCaller.addDomHandler(new ClickHandler() {
 			
 			@Override
 			public void onClick(ClickEvent event) {
-//				int count = container.getWidgetCount();
-//				Widget first = container.getWidget(0);
-//				int height = first.getOffsetHeight();
-//				int width = first.getOffsetWidth();
-//				Widget second = container.getWidget(1);
-//				height += second.getOffsetHeight();
 				if(tmPicker.isShowing()){
 					tmPicker.hide();	
 				}else{
@@ -61,7 +60,6 @@ public class DateTimePicker extends DatePicker {
 				}
 			}
 		},ClickEvent.getType());
-//		container.add(new TimePicker());
 	}
 	
 	
