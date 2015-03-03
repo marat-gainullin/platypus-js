@@ -59,23 +59,36 @@ public class ArrayTreedModel extends ArrayModel implements TreedModel<JSObject> 
     @Override
     public List<JSObject> getChildrenOf(JSObject anElement) {
         List<JSObject> children = new ArrayList<>();
-        if (anElement != null) {
-            try {
-                Object oChildren = ModelWidget.getPathData(anElement, childrenField);
-                if (oChildren instanceof JSObject) {
-                    JSObject jsChildren = (JSObject) oChildren;
-                    int length = JSType.toInteger(jsChildren.getMember("length"));
-                    if (length > 0 && length != Integer.MAX_VALUE) {
-                        for (int i = 0; i < length; i++) {
-                            Object oChild = jsChildren.getSlot(i);
-                            if (oChild instanceof JSObject) {
-                                children.add((JSObject) oChild);
+        if (data != null) {
+            if (anElement != null) {
+                try {
+                    Object oChildren = ModelWidget.getPathData(anElement, childrenField);
+                    if (oChildren instanceof JSObject) {
+                        JSObject jsChildren = (JSObject) oChildren;
+                        int length = JSType.toInteger(jsChildren.getMember("length"));
+                        if (length > 0 && length != Integer.MAX_VALUE) {
+                            for (int i = 0; i < length; i++) {
+                                Object oChild = jsChildren.getSlot(i);
+                                if (oChild instanceof JSObject) {
+                                    children.add((JSObject) oChild);
+                                }
                             }
                         }
                     }
+                } catch (Exception ex) {
+                    Logger.getLogger(ArrayTreedModel.class.getName()).log(Level.SEVERE, null, ex);
                 }
-            } catch (Exception ex) {
-                Logger.getLogger(ArrayTreedModel.class.getName()).log(Level.SEVERE, null, ex);
+            } else {
+                int length = JSType.toInteger(data.getMember("length"));
+                for (int i = 0; i < length; i++) {
+                    Object oItem = data.getSlot(i);
+                    if (oItem instanceof JSObject) {
+                        Object oParent = ModelWidget.getPathData((JSObject) oItem, parentField);
+                        if (!(oParent instanceof JSObject)) {
+                            children.add((JSObject) oItem);
+                        }
+                    }
+                }
             }
         }
         return children;
@@ -126,7 +139,7 @@ public class ArrayTreedModel extends ArrayModel implements TreedModel<JSObject> 
             l.elementsDataChanged(ev);
         });
     }
-    
+
     @Override
     public void fireElementsDataChanged() {
         ElementsDataChangedEvent<JSObject> ev = new ElementsDataChangedEvent<>();

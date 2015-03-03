@@ -9,6 +9,7 @@ import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.util.BinaryUtils;
 import com.eas.xml.dom.Source2XmlDom;
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.Driver;
@@ -39,56 +40,45 @@ public class GeneralResourceProvider {
     public static transient final String DB_DRIVER_TAG_NAME = "driver";
     public static transient final String DB_DRIVER_DIALECT_ATTR_NAME = "dialect";
 
-    protected static transient Map<String, String> drivers;
-
-    static {
-        try {
-            drivers = readDrivers();
-        } catch (Exception ex) {
-            Logger.getLogger(GeneralResourceProvider.class.getName()).log(Level.SEVERE, null, ex);
-            System.exit(255);
-        }
-    }
-
-    public static Map<String, String> getDrivers() {
-        return drivers;
-    }
-
     /**
      * Gets information about JDBC drivers supported by Platypus Platform.
      *
      * @return Dictionary where the key is database dialect and value is JDBC
      * driver class name
-     * @throws Exception if something goes wrong
+     * @throws SQLException if something goes wrong
      */
-    public static Map<String, String> readDrivers() throws Exception {
-        Map<String, String> ldrivers = new HashMap<>();
-        try (InputStream is = GeneralResourceProvider.class.getResourceAsStream(DB_DRIVERS_FILE_NAME)) {
-            if (is.available() > 0) {
-                String driversDataString = new String(BinaryUtils.readStream(is, -1), SettingsConstants.COMMON_ENCODING);
-                Document driversDoc = Source2XmlDom.transform(driversDataString);
-                Node jdbcNode = driversDoc.getFirstChild();
-                if (jdbcNode != null && "jdbc".equals(jdbcNode.getNodeName())) { //NOI18N
-                    NodeList driversNodes = jdbcNode.getChildNodes();
-                    ldrivers.clear();
-                    for (int i = 0; i < driversNodes.getLength(); i++) {
-                        Node driverNode = driversNodes.item(i);
-                        if (driverNode instanceof Element && DB_DRIVER_TAG_NAME.equals(driverNode.getNodeName())) {
-                            Element element = (Element) driverNode;
-                            String dialect = element.getAttribute(DB_DRIVER_DIALECT_ATTR_NAME);
-                            String driverClassName = element.getTextContent();
-                            if (dialect != null && !dialect.isEmpty() && driverClassName != null && !driverClassName.isEmpty()) {
-                                ldrivers.put(dialect, driverClassName.replaceAll("[\\s\\r\\n\\t]", "")); //NOI18N
+    private static Map<String, String> readDrivers() throws SQLException {
+        try {
+            Map<String, String> ldrivers = new HashMap<>();
+            try (InputStream is = GeneralResourceProvider.class.getResourceAsStream(DB_DRIVERS_FILE_NAME)) {
+                if (is.available() > 0) {
+                    String driversDataString = new String(BinaryUtils.readStream(is, -1), SettingsConstants.COMMON_ENCODING);
+                    Document driversDoc = Source2XmlDom.transform(driversDataString);
+                    Node jdbcNode = driversDoc.getFirstChild();
+                    if (jdbcNode != null && "jdbc".equals(jdbcNode.getNodeName())) { //NOI18N
+                        NodeList driversNodes = jdbcNode.getChildNodes();
+                        ldrivers.clear();
+                        for (int i = 0; i < driversNodes.getLength(); i++) {
+                            Node driverNode = driversNodes.item(i);
+                            if (driverNode instanceof Element && DB_DRIVER_TAG_NAME.equals(driverNode.getNodeName())) {
+                                Element element = (Element) driverNode;
+                                String dialect = element.getAttribute(DB_DRIVER_DIALECT_ATTR_NAME);
+                                String driverClassName = element.getTextContent();
+                                if (dialect != null && !dialect.isEmpty() && driverClassName != null && !driverClassName.isEmpty()) {
+                                    ldrivers.put(dialect, driverClassName.replaceAll("[\\s\\r\\n\\t]", "")); //NOI18N
+                                }
                             }
                         }
+                    } else {
+                        throw new SQLException("jdbc root node expected, but none found");
                     }
                 } else {
-                    throw new Exception("jdbc root node expected, but none found");
+                    throw new SQLException("jdbc drivers description file is empty");
                 }
-            } else {
-                throw new Exception("jdbc drivers description file is empty");
+                return ldrivers;
             }
-            return ldrivers;
+        } catch (IOException ex) {
+            throw new SQLException(ex);
         }
     }
 
@@ -124,7 +114,16 @@ public class GeneralResourceProvider {
 
     public static GeneralResourceProvider getInstance() throws SQLException {
         if (instance == null) {
-            registerDrivers(drivers.values());
+            return getInstanceSync();
+        } else {
+            return instance;
+        }
+    }
+
+    private static synchronized GeneralResourceProvider getInstanceSync() throws SQLException {
+        if (instance == null) {
+            Map<String, String> ldrivers = readDrivers();
+            registerDrivers(ldrivers.values());
             instance = new GeneralResourceProvider();
         }
         return instance;
