@@ -342,12 +342,10 @@ public class Row implements HasPropertyListeners {
 						for (Runnable fire : oppositeOldScalars) {
 							fire.run();
 						}
-						;
 						Set<Runnable> oppositeNewScalars = gatherOppositeScalarsChangesFirerers();
 						for (Runnable fire : oppositeNewScalars) {
 							fire.run();
 						}
-						;
 						fireChangeOfSelfCollections();
 					}
 				}
@@ -667,7 +665,6 @@ public class Row implements HasPropertyListeners {
 					}
 				}
 			}
-			;
 		}
 		return firerers;
 	}
@@ -677,7 +674,6 @@ public class Row implements HasPropertyListeners {
 		for (Runnable fire : oppositeNewScalars) {
 			fire.run();
 		}
-		;
 	}
 
 	public void fireChangesOfOppositeCollections() {
@@ -687,7 +683,6 @@ public class Row implements HasPropertyListeners {
 				fireChangeOfOppositeCollection(expandingValue, expanding.getOppositeName(), expanding.getJsDef());
 			}
 		}
-		;
 	}
 
 	private void fireChangeOfOppositeCollection(JavaScriptObject oExpanding, String oppositeName, JavaScriptObject def) {
