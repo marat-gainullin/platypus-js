@@ -347,6 +347,36 @@
                 <package>org.jfree.ui</package>
                 <package>org.jinterop.dcom.common</package>
                 <package>org.opengis.filter.temporal</package>
+                <package>org.postgis</package>
+                <package>org.postgis.binary</package>
+                <package>org.postgis.java2d</package>
+                <package>org.postgresql</package>
+                <package>org.postgresql.copy</package>
+                <package>org.postgresql.core</package>
+                <package>org.postgresql.core.types</package>
+                <package>org.postgresql.core.v2</package>
+                <package>org.postgresql.core.v3</package>
+                <package>org.postgresql.ds</package>
+                <package>org.postgresql.ds.common</package>
+                <package>org.postgresql.ds.jdbc23</package>
+                <package>org.postgresql.ds.jdbc4</package>
+                <package>org.postgresql.fastpath</package>
+                <package>org.postgresql.geometric</package>
+                <package>org.postgresql.gss</package>
+                <package>org.postgresql.jdbc2</package>
+                <package>org.postgresql.jdbc2.optional</package>
+                <package>org.postgresql.jdbc3</package>
+                <package>org.postgresql.jdbc3g</package>
+                <package>org.postgresql.jdbc4</package>
+                <package>org.postgresql.jdbc4.array</package>
+                <package>org.postgresql.largeobject</package>
+                <package>org.postgresql.ssl</package>
+                <package>org.postgresql.ssl.jdbc4</package>
+                <package>org.postgresql.translation</package>
+                <package>org.postgresql.util</package>
+                <package>org.postgresql.xa</package>
+                <package>org.postgresql.xa.jdbc3</package>
+                <package>org.postgresql.xa.jdbc4</package>
                 <package>rpc</package>
             </public-packages>
             <class-path-extension>
