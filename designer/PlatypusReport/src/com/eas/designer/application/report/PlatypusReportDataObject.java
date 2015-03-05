@@ -8,7 +8,6 @@ import com.eas.client.cache.PlatypusFiles;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
 import com.eas.designer.application.report.completion.ReportModuleCompletionContext;
-import java.io.File;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.filesystems.MIMEResolver;
@@ -52,16 +51,5 @@ public class PlatypusReportDataObject extends PlatypusModuleDataObject {
     @Override
     public ModuleCompletionContext getCompletionContext() {
         return new ReportModuleCompletionContext(this);
-    }
-    
-    public boolean isTemplateValid() {
-        File templateFile = FileUtil.toFile(getLayoutFile());
-        String path = templateFile.getPath();
-        String fileName = templateFile.getName();
-        path = path.substring(0, path.length() - fileName.length());
-        File fCandidate1 = new File(path + ".~lock." + fileName + "#");// open office
-        File fCandidate2 = new File(path + "~$" + fileName); // microsoft office
-        return !fCandidate1.exists() && !fCandidate2.exists();
-    }
-
+    }    
 }
