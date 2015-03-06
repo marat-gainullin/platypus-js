@@ -43,7 +43,9 @@
  */
 package com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates;
 
+import com.bearsoft.org.netbeans.modules.form.RADComponent;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.AbstractLayoutSupport;
+import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutConstraints;
 import java.awt.Component;
 import java.awt.Container;
 import java.beans.PropertyChangeEvent;
@@ -71,12 +73,6 @@ public class MenuFakeSupport extends AbstractLayoutSupport {
         return false;
     }
 
-    /*
-     @Override
-     protected void readLayoutCode(CodeGroup layoutCode) {
-     }
-     * 
-     */
     @Override
     public void addComponentsToContainer(Container container,
             Container containerDelegate,
@@ -98,4 +94,15 @@ public class MenuFakeSupport extends AbstractLayoutSupport {
             }
         }
     }
+    
+    @Override
+    public void addComponents(RADComponent<?>[] newComps, LayoutConstraints<?>[] newConstraints, int index) {
+        // no op here because menu fake layout has no per-component constraints.
+    }
+
+    @Override
+    public void removeComponent(int index) {
+        // no op here because menu fake layout has no per-component constraints.
+    }
+        
 }
