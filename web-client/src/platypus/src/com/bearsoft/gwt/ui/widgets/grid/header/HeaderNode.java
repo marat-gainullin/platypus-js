@@ -54,7 +54,7 @@ public class HeaderNode<T> {
 	}
 
 	public void setBackground(PublishedColor aValue) {
-		this.background = aValue;
+		background = aValue;
 	}
 
 	public PublishedColor getForeground() {

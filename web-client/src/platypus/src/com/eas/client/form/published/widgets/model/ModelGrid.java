@@ -258,6 +258,21 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		});
 	}
 
+	protected boolean redrawQueued;
+	private void enqueueRedraw() {
+		redrawQueued = true;
+		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+			@Override
+			public void execute() {
+				if (redrawQueued) {
+					redrawQueued = false;
+					redraw();
+				}
+			}
+		});
+	}
+	
 	protected void applyRows() {
 		unbindCursor();
 		if (sortHandlerReg != null)
@@ -265,7 +280,6 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		Runnable onResize = new Runnable() {
 			@Override
 			public void run() {
-				ModelGrid.this.getElement().<XElement> cast().unmask();
 				setupVisibleRanges();
 				if (dataProvider instanceof IndexOfProvider<?>)
 					((IndexOfProvider<?>) dataProvider).rescan();
@@ -296,7 +310,7 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		JavaScriptObject jsData = oData instanceof JavaScriptObject ? (JavaScriptObject) oData : null;
 		if (jsData != null) {
 			if (isTreeConfigured()) {
-				JsArrayTreeDataProvider treeDataProvider = new JsArrayTreeDataProvider(parentField, childrenField, onResize, null);
+				JsArrayTreeDataProvider treeDataProvider = new JsArrayTreeDataProvider(parentField, childrenField, onResize);
 				setDataProvider(treeDataProvider);
 				sortHandler = new TreeMultiSortHandler<>(treeDataProvider, onSort);
 				treeDataProvider.addExpandedCollapsedHandler(new ExpandedCollapsedHandler<JavaScriptObject>() {
@@ -339,6 +353,7 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		if (getDataProvider() instanceof JsDataContainer)
 			((JsDataContainer) getDataProvider()).setData(null);
 		super.setDataProvider(aDataProvider);
+		checkTreeIndicatorColumnDataProvider();
 	}
 
 	public void redraw() {
@@ -603,20 +618,32 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 	public void addColumn(int aIndex, Column<JavaScriptObject, ?> aColumn, String aWidth, Header<?> aHeader, Header<?> aFooter, boolean hidden) {
 		((ModelColumn) aColumn).setGrid(this);
 		super.addColumn(aIndex, aColumn, aWidth, aHeader, aFooter, hidden);
-		if (treeIndicatorColumn == null) {
-			int treeIndicatorIndex = 0;
-			while (treeIndicatorIndex < getDataColumnCount()) {
-				Column<JavaScriptObject, ?> indicatorColumn = getDataColumn(treeIndicatorIndex);
-				if (indicatorColumn instanceof UsualServiceColumn || indicatorColumn instanceof RadioServiceColumn || indicatorColumn instanceof CheckServiceColumn) {
-					treeIndicatorIndex++;
-				} else if (indicatorColumn instanceof ModelColumn) {
-					treeIndicatorColumn = (ModelColumn) indicatorColumn;
-					if (dataProvider instanceof TreeDataProvider<?> && treeIndicatorColumn.getCell() instanceof TreeExpandableCell<?, ?>) {
-						TreeExpandableCell<JavaScriptObject, ?> treeCell = (TreeExpandableCell<JavaScriptObject, ?>) treeIndicatorColumn.getCell();
-						treeCell.setDataProvider((TreeDataProvider<JavaScriptObject>) dataProvider);
+	}
+
+	private void checkTreeIndicatorColumnDataProvider() {
+		if (dataProvider instanceof TreeDataProvider<?>) {
+			if (treeIndicatorColumn == null) {
+				int treeIndicatorIndex = 0;
+				while (treeIndicatorIndex < getDataColumnCount()) {
+					Column<JavaScriptObject, ?> indicatorColumn = getDataColumn(treeIndicatorIndex);
+					if (indicatorColumn instanceof UsualServiceColumn || indicatorColumn instanceof RadioServiceColumn || indicatorColumn instanceof CheckServiceColumn) {
+						treeIndicatorIndex++;
+					} else if (indicatorColumn instanceof ModelColumn) {
+						treeIndicatorColumn = (ModelColumn) indicatorColumn;
+						break;
 					}
 				}
 			}
+			if (treeIndicatorColumn != null && treeIndicatorColumn.getCell() instanceof TreeExpandableCell<?, ?>) {
+				TreeExpandableCell<JavaScriptObject, ?> treeCell = (TreeExpandableCell<JavaScriptObject, ?>) treeIndicatorColumn.getCell();
+				treeCell.setDataProvider((TreeDataProvider<JavaScriptObject>) dataProvider);
+			}
+		}else{
+			if (treeIndicatorColumn != null && treeIndicatorColumn.getCell() instanceof TreeExpandableCell<?, ?>) {
+				TreeExpandableCell<JavaScriptObject, ?> treeCell = (TreeExpandableCell<JavaScriptObject, ?>) treeIndicatorColumn.getCell();
+				treeCell.setDataProvider(null);
+			}
+			treeIndicatorColumn = null;
 		}
 	}
 
@@ -626,9 +653,7 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		ModelColumn mCol = (ModelColumn) toDel;
 		if (mCol == treeIndicatorColumn) {
 			TreeExpandableCell<JavaScriptObject, ?> treeCell = (TreeExpandableCell<JavaScriptObject, ?>) mCol.getCell();
-			if (treeCell.getDataProvider() != null) {
-				treeCell.setDataProvider(null);
-			}
+			treeCell.setDataProvider(null);
 			treeIndicatorColumn = null;
 		}
 		super.removeColumn(aIndex);
@@ -663,6 +688,7 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		super.showColumn(aColumn);
 		ModelColumn colFacade = (ModelColumn) aColumn;
 		colFacade.updateVisible(true);
+		enqueueRedraw(); // because of AbstractCellTable.isInteractive crazy updating while rendering instead of updating it while show/hide columns
 	}
 
 	public void hideColumn(Column<JavaScriptObject, ?> aColumn) {
@@ -711,6 +737,7 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		leftBuilder.setHeaderNodes(leftHeader);
 		List<HeaderNode<JavaScriptObject>> rightHeader = HeaderSplitter.split(header, frozenColumns, getDataColumnCount());
 		rightBuilder.setHeaderNodes(rightHeader);
+		checkTreeIndicatorColumnDataProvider();
 		redrawHeaders();
 	}
 

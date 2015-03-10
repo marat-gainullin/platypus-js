@@ -101,7 +101,6 @@ public class ClientConstants {
     public static final String NO_JAVA_PROPERTY = "No java property: ";
     /*
      * Database dialects are used as keys to select the Playpus driver or JDBC driver.
-     * Also check com/eas/client/settings/DbDrivers.xml file.
      */
     public static final String SERVER_PROPERTY_ORACLE_DIALECT = "Oracle";
     public static final String SERVER_PROPERTY_MSSQL_DIALECT = "MsSql";

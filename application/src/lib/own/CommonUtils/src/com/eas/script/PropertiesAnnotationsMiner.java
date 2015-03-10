@@ -44,5 +44,5 @@ public abstract class PropertiesAnnotationsMiner extends BaseAnnotationsMiner {
         return super.enterBinaryNode(binaryNode);
     }
 
-    protected abstract void commentedProperty(IdentNode aProperty, String aComment);
+    protected abstract void commentedProperty(String aPropertyName, String aComment);
 }

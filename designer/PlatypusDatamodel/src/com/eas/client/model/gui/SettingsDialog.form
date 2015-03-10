@@ -40,10 +40,10 @@
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="1" attributes="0">
-                  <EmptySpace pref="209" max="32767" attributes="0"/>
+                  <EmptySpace pref="146" max="32767" attributes="0"/>
                   <Component id="btnOk" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="btnCancel" min="-2" max="-2" attributes="0"/>
+                  <Component id="btnCancel" min="-2" pref="96" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -68,7 +68,7 @@
               <Connection code="new CancelAction()" type="code"/>
             </Property>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="com/eas/client/dbstructure/messages.properties" key="btnCancel" replaceFormat="DatamodelDesignUtils.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="com/eas/client/model/gui/messages.properties" key="Cancel" replaceFormat="DatamodelDesignUtils.getString(&quot;{key}&quot;)"/>
             </Property>
           </Properties>
         </Component>

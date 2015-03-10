@@ -44,11 +44,8 @@ public class PlatypusReportLayoutView extends TopComponent implements MultiViewE
 
     protected void initEditorView() throws Exception {
         setLayout(new BorderLayout());
-        ReportDesignerPanel panel = new ReportDesignerPanel(dataObject, new Runnable() {
-            @Override
-            public void run() {
-                dataObject.getLookup().lookup(PlatypusReportSupport.class).notifyModified();
-            }
+        ReportDesignerPanel panel = new ReportDesignerPanel(dataObject, () -> {
+            dataObject.getLookup().lookup(PlatypusReportSupport.class).notifyModified();
         });
         add(panel, BorderLayout.CENTER);
     }

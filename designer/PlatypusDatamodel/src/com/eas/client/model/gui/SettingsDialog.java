@@ -96,7 +96,7 @@ public class SettingsDialog extends javax.swing.JDialog {
         bottomPanel.setPreferredSize(new java.awt.Dimension(245, 45));
 
         btnCancel.setAction(new CancelAction());
-        btnCancel.setText(DatamodelDesignUtils.getString("btnCancel")); // NOI18N
+        btnCancel.setText(DatamodelDesignUtils.getString("Cancel")); // NOI18N
 
         btnOk.setText("OK");
         btnOk.setPreferredSize(btnCancel.getPreferredSize());
@@ -106,10 +106,10 @@ public class SettingsDialog extends javax.swing.JDialog {
         bottomPanelLayout.setHorizontalGroup(
             bottomPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, bottomPanelLayout.createSequentialGroup()
-                .addContainerGap(209, Short.MAX_VALUE)
+                .addContainerGap(146, Short.MAX_VALUE)
                 .addComponent(btnOk, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnCancel)
+                .addComponent(btnCancel, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         bottomPanelLayout.setVerticalGroup(

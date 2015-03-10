@@ -37,8 +37,8 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HasValue;
 
-public abstract class ModelDecoratorBox<T> extends DecoratorBox<T> implements HasJsFacade, HasJsValue, HasText, HasCustomEditing, HasBinding, HasOnRender, HasOnSelect, HasComponentPopupMenu, HasEventsExecutor,
-        HasShowHandlers, HasHideHandlers, HasResizeHandlers {
+public abstract class ModelDecoratorBox<T> extends DecoratorBox<T> implements HasJsFacade, HasJsValue, HasText, HasCustomEditing, HasBinding, HasOnRender, HasOnSelect, HasComponentPopupMenu,
+        HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers {
 
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
@@ -60,7 +60,7 @@ public abstract class ModelDecoratorBox<T> extends DecoratorBox<T> implements Ha
 		setSelectButtonVisible(false);
 		setClearButtonVisible(true);
 	}
-	
+
 	@Override
 	public HandlerRegistration addResizeHandler(ResizeHandler handler) {
 		return addHandler(handler, ResizeEvent.getType());
@@ -69,7 +69,7 @@ public abstract class ModelDecoratorBox<T> extends DecoratorBox<T> implements Ha
 	@Override
 	public void onResize() {
 		super.onResize();
-		if(isAttached()){
+		if (isAttached()) {
 			ResizeEvent.fire(this, getElement().getOffsetWidth(), getElement().getOffsetHeight());
 		}
 	}
@@ -208,10 +208,10 @@ public abstract class ModelDecoratorBox<T> extends DecoratorBox<T> implements Ha
 	protected PublishedCell cellToRender;
 
 	public abstract T convert(Object aValue);
-	
+
 	public void setValue(T value, boolean fireEvents) {
 		settingValue = true;
-		try{
+		try {
 			super.setValue(value, fireEvents);
 			try {
 				if (onRender != null && data != null && field != null && !field.isEmpty()) {
@@ -231,7 +231,7 @@ public abstract class ModelDecoratorBox<T> extends DecoratorBox<T> implements Ha
 			} catch (Exception ex) {
 				Logger.getLogger(ModelDecoratorBox.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 			}
-		}finally{
+		} finally {
 			settingValue = false;
 		}
 	}
@@ -250,96 +250,96 @@ public abstract class ModelDecoratorBox<T> extends DecoratorBox<T> implements Ha
 		}
 	}
 
-	
 	protected HandlerRegistration boundToData;
 	protected HandlerRegistration boundToValue;
-    protected boolean settingValueFromJs;
-    protected boolean settingValueToJs;
+	protected boolean settingValueFromJs;
+	protected boolean settingValueToJs;
 
-    protected void bind() {
-        if (data != null && field != null && !field.isEmpty()) {
-            boundToData = Utils.listen(data, field, new PropertyChangeListener() {
+	protected void bind() {
+		if (data != null && field != null && !field.isEmpty()) {
+			boundToData = Utils.listen(data, field, new PropertyChangeListener() {
 				@Override
-                public void propertyChange(PropertyChangeEvent evt) {
-                    if (!settingValueToJs) {
-                        settingValueFromJs = true;
-                        try {
-                            try {
-	                            setJsValue(Utils.getPathData(data, field));
-                            } catch (Exception e) {
-	                            e.printStackTrace();
-                            }
-                        } finally {
-                            settingValueFromJs = false;
-                        }
-                    }
-                }
+				public void propertyChange(PropertyChangeEvent evt) {
+					if (!settingValueToJs) {
+						settingValueFromJs = true;
+						try {
+							try {
+								Object pathData = Utils.getPathData(data, field);
+								setJsValue(pathData);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						} finally {
+							settingValueFromJs = false;
+						}
+					}
+				}
 
-            });
-            Object oData = Utils.getPathData(data, field);
-            try {
-	            setJsValue(oData);
-            } catch (Exception e) {
-	            e.printStackTrace();
-            }
-            ValueChangeHandler<T> valueChangeHandler = new ValueChangeHandler<T>(){
+			});
+			Object oData = Utils.getPathData(data, field);
+			try {
+				setJsValue(oData);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			ValueChangeHandler<T> valueChangeHandler = new ValueChangeHandler<T>() {
 
 				@Override
-                public void onValueChange(ValueChangeEvent<T> event) {
-	                if (!settingValueFromJs) {
-	                    settingValueToJs = true;
-	                    try {
-	                        Utils.setPathData(data, field, Utils.toJs(event.getValue()));
-	                    } finally {
-	                        settingValueToJs = false;
-	                    }
-	                }
-                }
-            	
-            };
-            boundToValue = addValueChangeHandler(valueChangeHandler);
-        }
-    }
+				public void onValueChange(ValueChangeEvent<T> event) {
+					if (!settingValueFromJs) {
+						settingValueToJs = true;
+						try {
+							Utils.setPathData(data, field, Utils.toJs(event.getValue()));
+						} finally {
+							settingValueToJs = false;
+						}
+					}
+				}
 
-    protected void unbind() {
-        if (boundToData != null) {
-        	boundToData.removeHandler();
-            boundToData = null;
-        }
-        if (boundToValue != null) {
-            boundToValue.removeHandler();
-            boundToValue = null;
-        }
-    }
+			};
+			boundToValue = addValueChangeHandler(valueChangeHandler);
+		}
+	}
+
+	protected void unbind() {
+		if (boundToData != null) {
+			boundToData.removeHandler();
+			boundToData = null;
+		}
+		if (boundToValue != null) {
+			boundToValue.removeHandler();
+			boundToValue = null;
+		}
+	}
 
 	@Override
 	public JavaScriptObject getData() {
-	    return data;
-    }
-	
+		return data;
+	}
+
 	@Override
 	public void setData(JavaScriptObject aValue) {
-        if (data != aValue) {
-            unbind();
-            data = aValue;
-            bind();
-        }
-    }
-	
+		if (data != aValue) {
+			unbind();
+			data = aValue;
+			bind();
+		}
+	}
+
 	@Override
 	public String getField() {
-	    return field;
-    }
-	
+		return field;
+	}
+
 	@Override
 	public void setField(String aValue) {
-        if (field == null ? aValue != null : !field.equals(aValue)) {
-            unbind();
-            field = aValue;
-            bind();
-        }
-    }
-	
+		if (field == null ? aValue != null : !field.equals(aValue)) {
+			unbind();
+			field = aValue;
+			bind();
+		}
+	}
+
 	private static native void publish(HasJsFacade aWidget, JavaScriptObject aPublished)/*-{
 		Object.defineProperty(aPublished, "onSelect", {
 			get : function() {

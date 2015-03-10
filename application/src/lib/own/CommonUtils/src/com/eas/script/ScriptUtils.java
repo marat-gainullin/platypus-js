@@ -367,7 +367,7 @@ public class ScriptUtils {
 
     public static Object toJava(Object aValue) {
         if (aValue instanceof ScriptObject) {
-            aValue = jdk.nashorn.api.scripting.ScriptUtils.wrap(aValue);
+            aValue = jdk.nashorn.api.scripting.ScriptUtils.wrap((ScriptObject)aValue);
         }
         if (aValue instanceof JSObject) {
             assert toPrimitiveFunc != null : SCRIPT_NOT_INITIALIZED;

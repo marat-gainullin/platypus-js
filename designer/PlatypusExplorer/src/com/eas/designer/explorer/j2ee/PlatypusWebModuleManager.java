@@ -373,7 +373,7 @@ public class PlatypusWebModuleManager {
 
     private void copyLibJars(FileObject libsDir) throws Exception {
         Set<File> jdbcDriverFiles = new HashSet<>();
-        for (String clazz : GeneralResourceProvider.getDrivers().values()) {
+        for (String clazz : GeneralResourceProvider.driversClasses ) {
             File jdbcDriver = PlatypusPlatform.findThirdpartyJar(clazz);
             if (jdbcDriver != null) {
                 FileObject jdbcDriverFo = FileUtil.toFileObject(jdbcDriver);

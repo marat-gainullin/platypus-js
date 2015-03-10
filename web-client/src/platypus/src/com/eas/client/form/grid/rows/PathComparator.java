@@ -19,6 +19,12 @@ public class PathComparator implements Comparator<JavaScriptObject> {
 	protected native int oCompare(Object o1, Object o2)/*-{
 		var od1 = $wnd.P.boxAsJs(o1);
 		var od2 = $wnd.P.boxAsJs(o2);
+		if(od1 == null && od2 == null)
+			return 0;
+		else if(od1 == null)
+			return 1;
+		else if(od2 == null)
+			return -1;
 		if(od1 == od2)
 			return 0;
 		else if(od1 > od2)

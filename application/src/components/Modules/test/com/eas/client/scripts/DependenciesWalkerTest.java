@@ -71,7 +71,7 @@ public class DependenciesWalkerTest {
         String va1 = "var m = HY.HT.IO.PK.SomeModule;";
         DependenciesWalker walker = new DependenciesWalker(va1);
         walker.walk();
-        assertEquals(6, walker.getDependenceLikeIdentifiers().size());
+        assertEquals(2/*[m HY]*/, walker.getDependenceLikeIdentifiers().size());
         assertTrue(walker.getDependencies().isEmpty());
         assertTrue(walker.getServerDependencies().isEmpty());
         assertTrue(walker.getQueryDependencies().isEmpty());

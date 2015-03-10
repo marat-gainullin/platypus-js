@@ -80,9 +80,9 @@ public class DependenciesWalker {
                     boolean arrayAtFirstArg = lastCall.getArgs().size() >= 1 && lastCall.getArgs().get(0) instanceof LiteralNode.ArrayLiteralNode;
                     boolean atFirstArg = lastCall.getArgs().size() >= 1 && lastCall.getArgs().get(0) == literalNode;
                     Expression fe = lastCall.getFunction();
-                    if (fe instanceof AccessNode && ((AccessNode) fe).getProperty() instanceof IdentNode) {
+                    if (fe instanceof AccessNode) {
                         AccessNode lastAccess = (AccessNode) fe;
-                        String funcName = ((IdentNode) lastAccess.getProperty()).getName();
+                        String funcName = lastAccess.getProperty();
                         if (REQUIRE_FUNCTION_NAME.equals(funcName)) {
                             if (arrayAtFirstArg) {
                                 LiteralNode.ArrayLiteralNode a = (LiteralNode.ArrayLiteralNode) lastCall.getArgs().get(0);
@@ -113,15 +113,6 @@ public class DependenciesWalker {
                 return super.enterLiteralNode(literalNode);
             }
 
-            /*
-             @Override
-             public boolean enterAccessNode(AccessNode accessNode) {
-             if (accessNode.getBase() instanceof IdentNode) {
-             processIdentNode((IdentNode) accessNode.getBase());
-             }
-             return super.enterAccessNode(accessNode);
-             }
-             */
             private void processIdentNode(IdentNode identNode) {
                 String name = identNode.getName();
                 dependenceLikeIdentifiers.add(name);

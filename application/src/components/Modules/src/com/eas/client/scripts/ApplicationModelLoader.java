@@ -23,7 +23,7 @@ import org.w3c.dom.Document;
  */
 public class ApplicationModelLoader {
 
-    public static ApplicationModel<?, ?> load(Document aDoc, Application aApp) {
+    public static ApplicationModel<?, ?> load(Document aDoc, Application<?> aApp) {
         if (aApp.getQueries() instanceof LocalQueriesProxy) {
             LocalQueriesProxy localQueries = (LocalQueriesProxy) aApp.getQueries();
             ApplicationDbModel model = new ApplicationDbModel(localQueries.getCore(), localQueries);
