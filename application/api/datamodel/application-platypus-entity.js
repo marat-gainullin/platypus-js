@@ -260,6 +260,19 @@
          * Finds an object by its key. Key must be a single property.
          * @param key the unique identifier of the row.
          * @return An object or <code>null</code> if nothing is found.
+         * @method findByKey
+         * @memberOf ApplicationPlatypusEntity
+         */
+        P.ApplicationPlatypusEntity.prototype.findByKey = function(key) {
+            var delegate = this.unwrap();
+            var value = delegate.findByKey(P.boxAsJava(key));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Finds an object by its key. Key must be a single property.
+         * @param key the unique identifier of the row.
+         * @return An object or <code>null</code> if nothing is found.
          * @method findById
          * @memberOf ApplicationPlatypusEntity
          */
@@ -292,19 +305,6 @@
         P.ApplicationPlatypusEntity.prototype.requery = function(onSuccess, onFailure) {
             var delegate = this.unwrap();
             var value = delegate.requery(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Finds an object by its key. Key must be a single property.
-         * @param key the unique identifier of the row.
-         * @return An object or <code>null</code> if nothing is found.
-         * @method findByKey
-         * @memberOf ApplicationPlatypusEntity
-         */
-        P.ApplicationPlatypusEntity.prototype.findByKey = function(key) {
-            var delegate = this.unwrap();
-            var value = delegate.findByKey(P.boxAsJava(key));
             return P.boxAsJs(value);
         };
 

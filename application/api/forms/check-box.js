@@ -314,22 +314,6 @@
              */
             P.CheckBox.prototype.onMouseEntered = {};
         }
-        Object.defineProperty(this, "selected", {
-            get: function() {
-                var value = delegate.selected;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.selected = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.CheckBox){
-            /**
-             * @property selected
-             * @memberOf CheckBox
-             * Determines whether this component is selected.*/
-            P.CheckBox.prototype.selected = true;
-        }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
                 var value = delegate.toolTipText;
@@ -347,19 +331,21 @@
              */
             P.CheckBox.prototype.toolTipText = '';
         }
-        Object.defineProperty(this, "element", {
+        Object.defineProperty(this, "selected", {
             get: function() {
-                var value = delegate.element;
+                var value = delegate.selected;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.selected = P.boxAsJava(aValue);
             }
         });
         if(!P.CheckBox){
             /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
+             * @property selected
              * @memberOf CheckBox
-             */
-            P.CheckBox.prototype.element = {};
+             * Determines whether this component is selected.*/
+            P.CheckBox.prototype.selected = true;
         }
         Object.defineProperty(this, "height", {
             get: function() {
@@ -377,6 +363,20 @@
              * @memberOf CheckBox
              */
             P.CheckBox.prototype.height = 0;
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.CheckBox){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf CheckBox
+             */
+            P.CheckBox.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -480,23 +480,6 @@
              */
             P.CheckBox.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.CheckBox){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf CheckBox
-             */
-            P.CheckBox.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -513,6 +496,23 @@
              * @memberOf CheckBox
              */
             P.CheckBox.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.CheckBox){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf CheckBox
+             */
+            P.CheckBox.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

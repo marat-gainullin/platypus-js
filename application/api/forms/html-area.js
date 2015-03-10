@@ -362,20 +362,6 @@
              */
             P.HtmlArea.prototype.toolTipText = '';
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.HtmlArea){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf HtmlArea
-             */
-            P.HtmlArea.prototype.element = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -392,6 +378,20 @@
              * @memberOf HtmlArea
              */
             P.HtmlArea.prototype.height = 0;
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.HtmlArea){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf HtmlArea
+             */
+            P.HtmlArea.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -495,23 +495,6 @@
              */
             P.HtmlArea.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.HtmlArea){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf HtmlArea
-             */
-            P.HtmlArea.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -528,6 +511,23 @@
              * @memberOf HtmlArea
              */
             P.HtmlArea.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.HtmlArea){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf HtmlArea
+             */
+            P.HtmlArea.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

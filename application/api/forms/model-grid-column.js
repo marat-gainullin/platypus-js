@@ -223,6 +223,23 @@
              */
             P.ModelGridColumn.prototype.width = 0;
         }
+        Object.defineProperty(this, "sortField", {
+            get: function() {
+                var value = delegate.sortField;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.sortField = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelGridColumn){
+            /**
+             * Generated property jsDoc.
+             * @property sortField
+             * @memberOf ModelGridColumn
+             */
+            P.ModelGridColumn.prototype.sortField = '';
+        }
         Object.defineProperty(this, "font", {
             get: function() {
                 var value = delegate.font;

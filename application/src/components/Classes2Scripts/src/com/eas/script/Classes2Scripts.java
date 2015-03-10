@@ -343,9 +343,9 @@ public class Classes2Scripts {
             for (String path : depsPaths) {
                 String pathDir = pathRootDir(path);
                 if (!dir.equals(pathDir) && !dir.isEmpty()) {
-                    sb.append(indent).append("printf('").append(dir).append(" API loaded.');\n");
+                    sb.append(indent).append("print('").append(dir).append(" API loaded.');\n");
                     sb.append("} catch (e) {\n");
-                    sb.append(indent).append("printf('").append(dir).append(" API skipped.');\n");
+                    sb.append(indent).append("print('").append(dir).append(" API skipped.');\n");
                     sb.append("}\n");
                     sb.append("\n");
                     sb.append("try {\n");
@@ -353,9 +353,9 @@ public class Classes2Scripts {
                 dir = pathDir;
                 sb.append(indent).append(String.format("load('classpath:%s');\n", FileNameSupport.getFileName(path)));
             }
-            sb.append(indent).append("printf('").append(dir).append(" API loaded.');\n");
+            sb.append(indent).append("print('").append(dir).append(" API loaded.');\n");
             sb.append("} catch (e) {\n");
-            sb.append(indent).append("printf('").append(dir).append(" API skipped.');\n");
+            sb.append(indent).append("print('").append(dir).append(" API skipped.');\n");
             sb.append("}\n");
         }
         return sb.toString();

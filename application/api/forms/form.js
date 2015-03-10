@@ -491,14 +491,13 @@
         };
 
         /**
-         * Shows the form as an internal window in a desktop.
-         * @param desktop the parent desktop object
-         * @method showInternalFrame
+         * Maximizes this form.
+         * @method maximize
          * @memberOf Form
          */
-        P.Form.prototype.showInternalFrame = function(desktop) {
+        P.Form.prototype.maximize = function() {
             var delegate = this.unwrap();
-            var value = delegate.showInternalFrame(P.boxAsJava(desktop));
+            var value = delegate.maximize();
             return P.boxAsJs(value);
         };
 
@@ -514,17 +513,6 @@
         };
 
         /**
-         * Maximizes this form.
-         * @method maximize
-         * @memberOf Form
-         */
-        P.Form.prototype.maximize = function() {
-            var delegate = this.unwrap();
-            var value = delegate.maximize();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Restores this form state.
          * @method restore
          * @memberOf Form
@@ -532,6 +520,18 @@
         P.Form.prototype.restore = function() {
             var delegate = this.unwrap();
             var value = delegate.restore();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Shows the form as an internal window in a desktop.
+         * @param desktop the parent desktop object
+         * @method showInternalFrame
+         * @memberOf Form
+         */
+        P.Form.prototype.showInternalFrame = function(desktop) {
+            var delegate = this.unwrap();
+            var value = delegate.showInternalFrame(P.boxAsJava(desktop));
             return P.boxAsJs(value);
         };
 

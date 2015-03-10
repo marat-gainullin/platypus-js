@@ -276,20 +276,6 @@
              */
             P.DesktopPane.prototype.toolTipText = '';
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.DesktopPane){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf DesktopPane
-             */
-            P.DesktopPane.prototype.element = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -306,6 +292,20 @@
              * @memberOf DesktopPane
              */
             P.DesktopPane.prototype.height = 0;
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.DesktopPane){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf DesktopPane
+             */
+            P.DesktopPane.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -409,23 +409,6 @@
              */
             P.DesktopPane.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.DesktopPane){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf DesktopPane
-             */
-            P.DesktopPane.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -442,6 +425,23 @@
              * @memberOf DesktopPane
              */
             P.DesktopPane.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.DesktopPane){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf DesktopPane
+             */
+            P.DesktopPane.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -674,17 +674,6 @@
         }
     };
         /**
-         * Closes all frames on the pane.
-         * @method closeAll
-         * @memberOf DesktopPane
-         */
-        P.DesktopPane.prototype.closeAll = function() {
-            var delegate = this.unwrap();
-            var value = delegate.closeAll();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf DesktopPane
@@ -692,6 +681,17 @@
         P.DesktopPane.prototype.focus = function() {
             var delegate = this.unwrap();
             var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Closes all frames on the pane.
+         * @method closeAll
+         * @memberOf DesktopPane
+         */
+        P.DesktopPane.prototype.closeAll = function() {
+            var delegate = this.unwrap();
+            var value = delegate.closeAll();
             return P.boxAsJs(value);
         };
 

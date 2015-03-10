@@ -315,23 +315,6 @@
              */
             P.BoxPane.prototype.onMouseEntered = {};
         }
-        Object.defineProperty(this, "toolTipText", {
-            get: function() {
-                var value = delegate.toolTipText;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.toolTipText = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.BoxPane){
-            /**
-             * The tooltip string that has been set with.
-             * @property toolTipText
-             * @memberOf BoxPane
-             */
-            P.BoxPane.prototype.toolTipText = '';
-        }
         Object.defineProperty(this, "hgap", {
             get: function() {
                 var value = delegate.hgap;
@@ -349,19 +332,22 @@
              */
             P.BoxPane.prototype.hgap = 0;
         }
-        Object.defineProperty(this, "element", {
+        Object.defineProperty(this, "toolTipText", {
             get: function() {
-                var value = delegate.element;
+                var value = delegate.toolTipText;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.toolTipText = P.boxAsJava(aValue);
             }
         });
         if(!P.BoxPane){
             /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
+             * The tooltip string that has been set with.
+             * @property toolTipText
              * @memberOf BoxPane
              */
-            P.BoxPane.prototype.element = {};
+            P.BoxPane.prototype.toolTipText = '';
         }
         Object.defineProperty(this, "height", {
             get: function() {
@@ -379,6 +365,20 @@
              * @memberOf BoxPane
              */
             P.BoxPane.prototype.height = 0;
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.BoxPane){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf BoxPane
+             */
+            P.BoxPane.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -496,23 +496,6 @@
              */
             P.BoxPane.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.BoxPane){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf BoxPane
-             */
-            P.BoxPane.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "count", {
             get: function() {
                 var value = delegate.count;
@@ -543,6 +526,23 @@
              * @memberOf BoxPane
              */
             P.BoxPane.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.BoxPane){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf BoxPane
+             */
+            P.BoxPane.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

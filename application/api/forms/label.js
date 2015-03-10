@@ -315,20 +315,6 @@
              */
             P.Label.prototype.toolTipText = '';
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.Label){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf Label
-             */
-            P.Label.prototype.element = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -345,6 +331,20 @@
              * @memberOf Label
              */
             P.Label.prototype.height = 0;
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Label){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf Label
+             */
+            P.Label.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -431,23 +431,6 @@
              */
             P.Label.prototype.onComponentHidden = {};
         }
-        Object.defineProperty(this, "nextFocusableComponent", {
-            get: function() {
-                var value = delegate.nextFocusableComponent;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.nextFocusableComponent = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Label){
-            /**
-             * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
-             * @property nextFocusableComponent
-             * @memberOf Label
-             */
-            P.Label.prototype.nextFocusableComponent = {};
-        }
         Object.defineProperty(this, "iconTextGap", {
             get: function() {
                 var value = delegate.iconTextGap;
@@ -465,22 +448,22 @@
              */
             P.Label.prototype.iconTextGap = 0;
         }
-        Object.defineProperty(this, "onActionPerformed", {
+        Object.defineProperty(this, "nextFocusableComponent", {
             get: function() {
-                var value = delegate.onActionPerformed;
+                var value = delegate.nextFocusableComponent;
                 return P.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
+                delegate.nextFocusableComponent = P.boxAsJava(aValue);
             }
         });
         if(!P.Label){
             /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
+             * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
+             * @property nextFocusableComponent
              * @memberOf Label
              */
-            P.Label.prototype.onActionPerformed = {};
+            P.Label.prototype.nextFocusableComponent = {};
         }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
@@ -498,6 +481,23 @@
              * @memberOf Label
              */
             P.Label.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Label){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf Label
+             */
+            P.Label.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
