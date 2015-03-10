@@ -58,6 +58,7 @@ import javax.swing.table.*;
 import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.internal.runtime.JSType;
+import jdk.nashorn.internal.runtime.ScriptObject;
 
 /**
  *
@@ -1096,7 +1097,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
             if (com.eas.script.ScriptUtils.isInitialized()) {
                 Object modelData = field != null && !field.isEmpty() ? ModelWidget.getPathData(data, field) : data;
                 if (rowsModel != null) {
-                    modelData = jdk.nashorn.api.scripting.ScriptUtils.wrap(modelData);
+                    modelData = modelData instanceof ScriptObject ? jdk.nashorn.api.scripting.ScriptUtils.wrap((ScriptObject)modelData) : modelData;
                     if (modelData instanceof JSObject) {
                         JSObject jsModelData = (JSObject) modelData;
                         unbindCursor();
@@ -1114,7 +1115,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
                         public Object call(Object thiz, Object... args) {
                             Object newModelData = ModelWidget.getPathData(data, field);
                             if (rowsModel != null) {
-                                newModelData = jdk.nashorn.api.scripting.ScriptUtils.wrap(newModelData);
+                                newModelData = newModelData instanceof ScriptObject ? jdk.nashorn.api.scripting.ScriptUtils.wrap((ScriptObject)newModelData) : newModelData;
                                 if (newModelData instanceof JSObject) {
                                     JSObject jsModelData = (JSObject) newModelData;
                                     unbindCursor();

@@ -45,7 +45,7 @@ public class EntityCompletionContext extends CompletionContext {
             return new MetadataCompletionContext(entity.getFields());
         } else if(isPropertyGet(token, CURSOR_ENTITY_PROPERTY_NAME)) {
             return getElementCompletionContext();
-        } else if (token.node instanceof IndexNode && (!((IndexNode)token.node).getIndex().hasType() || !((IndexNode)token.node).getIndex().getType().isString())) { 
+        } else if (token.node instanceof IndexNode && ( ((IndexNode)token.node).getIndex().getType() == null || !((IndexNode)token.node).getIndex().getType().isString())) { 
             return new EntityElementCompletionContext(entity);
         }else if (isPropertyGet(token, PARAMS_SCRIPT_NAME)) {
             return new ParametersCompletionContext(entity.getQuery().getParameters());

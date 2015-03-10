@@ -6,6 +6,7 @@ import com.eas.client.AsyncProcess;
 import com.eas.client.ModuleStructure;
 import com.eas.client.ServerModuleInfo;
 import com.eas.client.cache.PlatypusFiles;
+import com.eas.client.queries.QueriesProxy;
 import com.eas.client.queries.Query;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.client.threetier.http.Cookie;
@@ -53,7 +54,7 @@ import jdk.nashorn.api.scripting.JSObject;
 public class ScriptedResource {
 
     private static final Pattern httpPattern = Pattern.compile("https?://.*");
-    protected static Application<Query> app;
+    protected static Application<?> app;
 
     /**
      * Initializes a static fields.
@@ -61,12 +62,12 @@ public class ScriptedResource {
      * @param aApp
      * @throws Exception If something goes wrong
      */
-    public static void init(Application aApp) throws Exception {
+    public static void init(Application<?> aApp) throws Exception {
         assert app == null : "Platypus application resource may be initialized only once.";
         app = aApp;
     }
 
-    public static Application<Query> getApp() {
+    public static Application<?> getApp() {
         return app;
     }
 
@@ -571,7 +572,7 @@ public class ScriptedResource {
             if (aQueriesNames != null && aQueriesNames.length > 0) {
                 RequireProcess process = new RequireProcess(aQueriesNames.length, onSuccess, onFailure);
                 for (String queryName : aQueriesNames) {
-                    app.getQueries().getQuery(queryName, (Query query) -> {
+                    ((QueriesProxy<Query>)app.getQueries()).getQuery(queryName, (Query query) -> {
                         process.complete(null, null);
                     }, (Exception ex) -> {
                         process.complete(null, ex);

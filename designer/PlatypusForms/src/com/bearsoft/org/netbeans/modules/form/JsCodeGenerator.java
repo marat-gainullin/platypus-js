@@ -100,10 +100,10 @@ public class JsCodeGenerator {
                     BinaryNode a = (BinaryNode) ((ExpressionStatement) st).getExpression();
                     if (a.isAssignment() && a.getAssignmentDest() instanceof AccessNode) {
                         AccessNode pg = (AccessNode) a.getAssignmentDest();
-                        if (handlerName.equals(pg.getProperty().getName())) {
+                        if (handlerName.equals(pg.getProperty())) {
                             if (pg.getBase() instanceof AccessNode) {
                                 AccessNode componentPg = (AccessNode) pg.getBase();
-                                if (componentName.equals(componentPg.getProperty().getName())
+                                if (componentName.equals(componentPg.getProperty())
                                         && componentPg.getBase() instanceof IdentNode
                                         && FORM_OBJECT_NAME.equals(((IdentNode) componentPg.getBase()).getName())) {
                                     if (a.getAssignmentSource() instanceof FunctionNode) {

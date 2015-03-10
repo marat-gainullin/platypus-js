@@ -127,7 +127,7 @@ public class CompletionContext {
     protected static boolean isPropertyGet(CompletionToken token, String propertyName) {
         return (token.node instanceof IdentNode && propertyName.equals(token.name))
                 || (token.node instanceof IndexNode
-                && ((IndexNode) token.node).getIndex().hasType()
+                && ((IndexNode) token.node).getIndex().getType() != null
                 && ((IndexNode) token.node).getIndex().getType().isString()
                 && propertyName.equals(removeQuotes(token.name)));
     }

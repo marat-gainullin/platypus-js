@@ -44,11 +44,7 @@ public class ModuleCompletionContext extends CompletionContext {
     
     public static final String PARAMS_SCRIPT_NAME = "params";// NOI18N
     protected static final String METADATA_SCRIPT_NAME = ApplicationDbModel.DATASOURCE_METADATA_SCRIPT_NAME;
-    protected static final String MODULE_NAME = "Module";// NOI18N
     protected static final String SERVER_MODULE_NAME = "ServerModule";// NOI18N
-    protected static final String FORM_MODULE_NAME = "Form";// NOI18N
-    protected static final String REPORT_MODULE_NAME = "Report";// NOI18N
-    protected static final String SERVER_REPORT_MODULE_NAME = "ServerReport";// NOI18N
     protected static final String MODULES_OBJECT_NAME = "Modules";// NOI18N
     protected static final String SYSTEM_OBJECT_NAME = "P";//NOI18N
     protected static final String LOAD_MODEL_METHOD_NAME = "loadModel";// NOI18N
@@ -228,15 +224,14 @@ public class ModuleCompletionContext extends CompletionContext {
     private String tryGetModuleElementId(Expression assignmentSource) {
         if (assignmentSource instanceof UnaryNode) {
             UnaryNode un = (UnaryNode) assignmentSource;
-            un.toString();
-            if (TokenType.NEW.equals(un.tokenType())) {
-                if (un.rhs() instanceof CallNode) {
-                    CallNode cn = (CallNode) un.rhs();
-                    if (cn.getFunction() instanceof IdentNode) {
-                        IdentNode in = (IdentNode) cn.getFunction();
-                        if (isModuleInitializerName(in.getName()) && cn.getArgs().size() > 0) {
-                            if (cn.getArgs().get(0) instanceof LiteralNode) {
-                                return ((LiteralNode) cn.getArgs().get(0)).getPropertyName();
+            if (un.isTokenType(TokenType.NEW)) {
+                if (un.getExpression() instanceof CallNode) {
+                    CallNode call = (CallNode) un.getExpression();
+                    if (call.getFunction() instanceof IdentNode) {
+                        IdentNode in = (IdentNode) call.getFunction();
+                        if (SERVER_MODULE_NAME.equals(in.getName()) && call.getArgs().size() > 0) {
+                            if (call.getArgs().get(0) instanceof LiteralNode) {
+                                return ((LiteralNode) call.getArgs().get(0)).getPropertyName();
                             }
                         }
                     }
@@ -251,20 +246,12 @@ public class ModuleCompletionContext extends CompletionContext {
             CallNode cn = (CallNode) assignmentSource;
             if (cn.getFunction() instanceof AccessNode) {
                 AccessNode an = (AccessNode) cn.getFunction();
-                return methodName.equals(an.getProperty().getName())
+                return methodName.equals(an.getProperty())
                         && an.getBase() instanceof IdentNode
                         && SYSTEM_OBJECT_NAME.equals(((IdentNode) an.getBase()).getName());
             }
         }
         return false;
-    }
-
-    public static boolean isModuleInitializerName(String name) {
-        return name.equals(MODULE_NAME)
-                || name.equals(SERVER_MODULE_NAME)
-                || name.equals(FORM_MODULE_NAME)
-                || name.equals(REPORT_MODULE_NAME)
-                || name.equals(SERVER_REPORT_MODULE_NAME);
     }
 
     private static Class<?> getEventClass(Class<?> scriptClass, String name) {

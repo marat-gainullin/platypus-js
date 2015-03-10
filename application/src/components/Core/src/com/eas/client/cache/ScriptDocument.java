@@ -10,7 +10,6 @@ import com.eas.script.PropertiesAnnotationsMiner;
 import com.eas.script.ScriptUtils;
 import java.util.*;
 import jdk.nashorn.internal.ir.FunctionNode;
-import jdk.nashorn.internal.ir.IdentNode;
 import jdk.nashorn.internal.runtime.Source;
 
 /**
@@ -109,8 +108,8 @@ public class ScriptDocument {
             }
 
             @Override
-            protected void commentedProperty(IdentNode aProperty, String aComment) {
-                readPropertyRoles(aProperty.getPropertyName(), aComment);
+            protected void commentedProperty(String aPropertyName, String aComment) {
+                readPropertyRoles(aPropertyName, aComment);
             }
 
         });

@@ -40,9 +40,9 @@ public class ModuleInstanceCompletionContext extends CompletionContext {
     @Override
     public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
         ScanJsElementsSupport scanner = new ScanJsElementsSupport(parentContext.getDataObject().getAstRoot(), parentContext.getDataObject().getConstructor());
-        for (JsCompletionItem i : scanner.getCompletionItems(point)) {
-            addItem(resultSet, point.getFilter(), i);
-        }
+        scanner.getCompletionItems(point).stream().forEach((item) -> {
+            addItem(resultSet, point.getFilter(), item);
+        });
 
     }
 
@@ -68,12 +68,12 @@ public class ModuleInstanceCompletionContext extends CompletionContext {
         private void scan(final CompletionPoint point, final Set<String> thisAliases) {
             if (moduleConstructor.getBody() != null) {
 
-                final Map<IdentNode, String> propertiesComments = new HashMap<>();
+                final Map<String, String> propertiesComments = new HashMap<>();
                 astRoot.accept(new PropertiesAnnotationsMiner(moduleConstructor.getSource(), thisAliases) {
 
                     @Override
-                    protected void commentedProperty(IdentNode aProperty, String aComment) {
-                        propertiesComments.put(aProperty, aComment);
+                    protected void commentedProperty(String aPropertyName, String aComment) {
+                        propertiesComments.put(aPropertyName, aComment);
                     }
                     
                     @Override
@@ -97,12 +97,12 @@ public class ModuleInstanceCompletionContext extends CompletionContext {
                                     AccessNode an = (AccessNode) bn.getAssignmentDest();
                                     if (an.getBase() instanceof IdentNode
                                             && thisAliases.contains(((IdentNode) an.getBase()).getName())) {
-                                        propName = an.getProperty().getName();
+                                        propName = an.getProperty();
                                         FunctionNode fn = (FunctionNode) bn.getAssignmentSource();
                                         List<String> params = new ArrayList<>();
-                                        for (IdentNode paramNode : fn.getParameters()) {
+                                        fn.getParameters().stream().forEach((paramNode) -> {
                                             params.add(paramNode.getName());
-                                        }
+                                        });
                                         String jsDoc = propertiesComments.get(an.getProperty());
                                         functionsMap.put(propName,
                                                 new JsFunctionCompletionItem(propName,
