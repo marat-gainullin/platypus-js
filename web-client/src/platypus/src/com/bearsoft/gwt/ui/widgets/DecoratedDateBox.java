@@ -20,10 +20,7 @@ public class DecoratedDateBox extends DateBox {
 
 	@Override
 	public Date getValue() {
-		Date date = picker.getElementValue();
-		this.getTextBox().setText(this.getFormat().format(this, date));
-		return date;
-		
+		return super.getValue();
 	}
 
 	@Override

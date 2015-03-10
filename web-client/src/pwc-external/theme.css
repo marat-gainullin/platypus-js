@@ -797,20 +797,36 @@
     transition: height 0.5s;
     border-top-left-radius: 2px;
     border-top-right-radius: 2px;
+    box-sizing:border-box;
 }
 
 .time-picker-button{
     background-image: url(clock.png);
     border-top: 1px solid #A2BBDD;
 }
+.time-picker-separator{
+    font-size: large;
+    font-weight: bold;
+}
 .time-picker-text{
     border-width: 1px;
-    border-radius: 2px;
+    border-radius: 5px;
     font-size: large;
+    border-style: none;
+    padding:2px;
+    box-sizing:border-box;
 }
+.time-picker-text:hover{
+    border-style: inset;
+    padding: 1px;
+    box-sizing:border-box;
+}
+
+
 .date-time-picker{
     background: white;
     border: 1px solid #A2BBDD;
     border-radius: 2px;
+    box-sizing:border-box;
 }
 

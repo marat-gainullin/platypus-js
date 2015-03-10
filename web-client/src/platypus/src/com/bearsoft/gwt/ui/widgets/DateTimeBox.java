@@ -87,9 +87,9 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 
 					@Override
 					public void execute() {
-						if (popup.isShowing()) {
-							popup.hide();
-						}
+//						if (popup.isShowing()) {
+//							popup.hide();
+//						}
 					}
 
 				});
