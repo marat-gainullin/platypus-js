@@ -1184,7 +1184,7 @@
     });
     Object.defineProperty(Resource, "upload", {
         value: function (aFile, aName, aCompleteCallback, aProgressCallback, aAbortCallback) {
-            printf("upload() is not implemented for J2SE");
+            print("upload() is not implemented for J2SE");
         }
     });
     Object.defineProperty(Resource, "applicationPath", {
