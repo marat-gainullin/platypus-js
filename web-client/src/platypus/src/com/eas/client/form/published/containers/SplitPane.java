@@ -48,7 +48,6 @@ public class SplitPane extends SplittedPanel implements HasJsFacade, HasEnabled,
 	protected boolean oneTouchExpandable;
 	protected int orientation = HORIZONTAL_SPLIT;
 	protected int dividerLocation = 84;
-	protected int dividerSize = 8;
 
 	public SplitPane() {
 		super();
@@ -287,24 +286,6 @@ public class SplitPane extends SplittedPanel implements HasJsFacade, HasEnabled,
 			dividerLocation = aValue;
 			if (firstWidget != null)
 				super.setWidgetSize(firstWidget, aValue);
-		}
-	}
-
-	public int getDividerSize() {
-		return dividerSize;
-	}
-
-	public void setDividerSize(int aValue) {
-		if (dividerSize != aValue) {
-			dividerSize = aValue;
-			for (int i = 0; i < getWidgetCount(); i++) {
-				Widget w = getWidget(i);
-				if (w.getStyleName().contains("gwt-SplitLayoutPanel-HDragger")
-						|| w.getStyleName().contains("gwt-SplitLayoutPanel-VDragger")) {
-					w.getElement().getStyle().setPropertyPx("width", dividerSize);
-				}
-			}
-			forceLayout();
 		}
 	}
 

@@ -21,6 +21,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.JSObject;
@@ -57,7 +58,9 @@ public class ChangeJsonReader implements ChangeVisitor {
                 if (field != null) {
                     if (oValueValue instanceof String && (field.getTypeInfo().getSqlType() == java.sql.Types.DATE || field.getTypeInfo().getSqlType() == java.sql.Types.TIME || field.getTypeInfo().getSqlType() == java.sql.Types.TIMESTAMP)) {
                         try {
-                            oValueValue = (new SimpleDateFormat(RowsetJsonConstants.DATE_FORMAT)).parse((String) oValueValue);
+                            SimpleDateFormat sdf = new SimpleDateFormat(RowsetJsonConstants.DATE_FORMAT);
+                            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+                            oValueValue = sdf.parse((String) oValueValue);
                         } catch (ParseException pex) {
                             if (((String) oValueValue).matches("\\d+")) {
                                 oValueValue = Long.valueOf((String) oValueValue);

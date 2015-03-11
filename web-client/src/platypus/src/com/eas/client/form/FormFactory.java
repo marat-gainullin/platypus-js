@@ -560,10 +560,8 @@ public class FormFactory {
 			readGeneralProps(anElement, split);
 			boolean oneTouchExpandable = Utils.getBooleanAttribute(anElement, "oneTouchExpandable", true);
 			int dividerLocation = Utils.getIntegerAttribute(anElement, "dividerLocation", 0);
-			int dividerSize = Utils.getIntegerAttribute(anElement, "dividerSize", 5);
 			int orientation = Utils.getIntegerAttribute(anElement, "orientation", Orientation.VERTICAL);
 			split.setDividerLocation(dividerLocation);
-			split.setDividerSize(dividerSize);
 			split.setOrientation(orientation);
 			split.setOneTouchExpandable(oneTouchExpandable);
 			if (anElement.hasAttribute("leftComponent")) {

@@ -1156,11 +1156,25 @@ td.datePickerYear {
 }
 */
 .gwt-SplitLayoutPanel-HDragger {
-  background: #d0e4f6 url(images/splitPanelThumb.png) center center no-repeat;
+  background-color: #d2f5d8;
+  cursor: col-resize;
+}
+
+.gwt-SplitLayoutPanel-HDragger:hover {
+  background-image: url(images/splitPanelThumb.png), linear-gradient(to right, #cef4d0,#b2eeaa);
+  background-position: center center;
+  background-repeat: no-repeat;
   cursor: col-resize;
 }
 
 .gwt-SplitLayoutPanel-VDragger {
-  background: #d0e4f6 url(images/splitPanelThumb.png) center center no-repeat;
+  background-color: #d2f5d8;
+  cursor: row-resize;
+}
+
+.gwt-SplitLayoutPanel-VDragger:hover {
+  background-image: url(images/splitPanelThumb.png), linear-gradient(to bottom, #cef4d0,#b2eeaa);
+  background-position: center center;
+  background-repeat: no-repeat;
   cursor: row-resize;
 }
