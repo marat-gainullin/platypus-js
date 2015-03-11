@@ -379,12 +379,20 @@ public class PersistenceManager {
                     widgetElement.setAttribute("prefHeight", jComp.getSize().height + "px");
                 }
                 if (aComp.getBeanInstance() instanceof SplitPane) {
-                    SplitPane split = (SplitPane) aComp.getBeanInstance();
-                    if (split.getLeftComponent() != null) {
-                        widgetElement.setAttribute("leftComponent", split.getLeftComponent().getName());
-                    }
-                    if (split.getRightComponent() != null) {
-                        widgetElement.setAttribute("rightComponent", split.getRightComponent().getName());
+                    RADVisualContainer<?> splitCont = (RADVisualContainer<?>) aComp;
+                    for (RADVisualComponent<?> visComp : splitCont.getSubBeans()) {
+                        SplitPaneSupport.SplitLayoutConstraints constraints = (SplitPaneSupport.SplitLayoutConstraints) splitCont.getLayoutSupport().getConstraints(visComp);
+                        String position = constraints.getConstraintsObject();
+                        switch (position) {
+                            case SplitPane.TOP:
+                            case SplitPane.LEFT:
+                                widgetElement.setAttribute("leftComponent", visComp.getBeanInstance().getName());
+                                break;
+                            case SplitPane.BOTTOM:
+                            case SplitPane.RIGHT:
+                                widgetElement.setAttribute("rightComponent", visComp.getBeanInstance().getName());
+                                break;
+                        }
                     }
                 }
                 if (aComp instanceof RADVisualContainer<?> && aComp.getBeanInstance() instanceof FormUtils.Panel) {
