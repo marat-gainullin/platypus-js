@@ -8,11 +8,13 @@ import com.bearsoft.rowset.Row;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.metadata.Field;
 import com.bearsoft.rowset.metadata.Fields;
+import com.google.gwt.core.client.JsDate;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.json.client.*;
 
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -71,7 +73,7 @@ public class RowsetReader extends FieldsJSONReader {
                             String sVal = jss.stringValue();
                             if(aField.getTypeInfo().getType() == Types.TIMESTAMP || aField.getTypeInfo().getType() == Types.TIME || aField.getTypeInfo().getType() == Types.DATE)
                             {
-                            	return ISO_DATE_FORMAT.parse(sVal);
+                            	return new Date(Math.round(JsDate.create(sVal).getTime()));
                             }else
                             	return sVal;
                         } else {

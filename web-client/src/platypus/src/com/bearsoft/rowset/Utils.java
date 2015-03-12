@@ -25,6 +25,10 @@ public class Utils {
 		protected JsObject() {
 		}
 
+		public static native String formatDateValueWithJSON(double aDateTimeValue)/*-{
+			return JSON.stringify(new Date(aDateTimeValue));
+		}-*/;
+		
 		public final native Object getJava(String aName)/*-{
 			return $wnd.P.boxAsJava(this[aName]);
 		}-*/;

@@ -76,7 +76,6 @@ public class AppClient {
 	public static final String APP_RESOURCE_PREFIX = "/app/";
 	public static final String REPORT_LOCATION_CONTENT_TYPE = "text/platypus-report-location";
 	//
-	private static DateTimeFormat defaultDateFormat = RowsetReader.ISO_DATE_FORMAT;// DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.ISO_8601);
 	private static AppClient appClient;
 	private String apiUrl;
 	private String principal;
@@ -437,7 +436,8 @@ public class AppClient {
 			String sv = "null";
 			if (p.getValue() != null && p.getValue() != RowsetUtils.UNDEFINED_SQL_VALUE) {
 				if (p.getValue() instanceof Date) {
-					sv = defaultDateFormat.format((Date) p.getValue());
+					sv = JsObject.formatDateValueWithJSON(Long.valueOf(((Date) p.getValue()).getTime()).doubleValue());
+					sv = sv.substring(1, sv.length() - 1);
 				} else {
 					sv = p.getValue().toString();
 				}
