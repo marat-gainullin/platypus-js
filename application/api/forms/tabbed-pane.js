@@ -460,20 +460,6 @@
              */
             P.TabbedPane.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "count", {
-            get: function() {
-                var value = delegate.count;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.TabbedPane){
-            /**
-             * Gets the number of components in this panel.
-             * @property count
-             * @memberOf TabbedPane
-             */
-            P.TabbedPane.prototype.count = 0;
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -490,6 +476,20 @@
              * @memberOf TabbedPane
              */
             P.TabbedPane.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "count", {
+            get: function() {
+                var value = delegate.count;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.TabbedPane){
+            /**
+             * Gets the number of components in this panel.
+             * @property count
+             * @memberOf TabbedPane
+             */
+            P.TabbedPane.prototype.count = 0;
         }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {

@@ -44,7 +44,6 @@ try {
     load('classpath:forms/button.js');
     load('classpath:forms/card-pane.js');
     load('classpath:forms/cell-render-event.js');
-    load('classpath:forms/change-event.js');
     load('classpath:forms/check-box.js');
     load('classpath:forms/check-grid-column.js');
     load('classpath:forms/check-menu-item.js');
@@ -58,6 +57,7 @@ try {
     load('classpath:forms/formatted-field.js');
     load('classpath:forms/grid-pane.js');
     load('classpath:forms/html-area.js');
+    load('classpath:forms/item-event.js');
     load('classpath:forms/key-event.js');
     load('classpath:forms/label.js');
     load('classpath:forms/menu-bar.js');

@@ -377,6 +377,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     protected Set<JSObject> processedRows = new HashSet<>();
     protected JSObject data;
     protected String field;
+    protected String cursorField = "cursor";
     protected JSObject boundToData;
     protected JSObject boundToCursor;
     // tree info
@@ -1079,7 +1080,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     protected void bindCursor(JSObject aModelData) {
         if (aModelData != null) {
-            boundToCursor = ScriptUtils.listen(aModelData, "cursor", new AbstractJSObject() {
+            boundToCursor = ScriptUtils.listen(aModelData, cursorField, new AbstractJSObject() {
 
                 @Override
                 public Object call(Object thiz, Object... args) {
@@ -1097,7 +1098,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
             if (com.eas.script.ScriptUtils.isInitialized()) {
                 Object modelData = field != null && !field.isEmpty() ? ModelWidget.getPathData(data, field) : data;
                 if (rowsModel != null) {
-                    modelData = modelData instanceof ScriptObject ? jdk.nashorn.api.scripting.ScriptUtils.wrap((ScriptObject)modelData) : modelData;
+                    modelData = modelData instanceof ScriptObject ? jdk.nashorn.api.scripting.ScriptUtils.wrap((ScriptObject) modelData) : modelData;
                     if (modelData instanceof JSObject) {
                         JSObject jsModelData = (JSObject) modelData;
                         unbindCursor();
@@ -1115,7 +1116,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
                         public Object call(Object thiz, Object... args) {
                             Object newModelData = ModelWidget.getPathData(data, field);
                             if (rowsModel != null) {
-                                newModelData = newModelData instanceof ScriptObject ? jdk.nashorn.api.scripting.ScriptUtils.wrap((ScriptObject)newModelData) : newModelData;
+                                newModelData = newModelData instanceof ScriptObject ? jdk.nashorn.api.scripting.ScriptUtils.wrap((ScriptObject) newModelData) : newModelData;
                                 if (newModelData instanceof JSObject) {
                                     JSObject jsModelData = (JSObject) newModelData;
                                     unbindCursor();
@@ -1167,10 +1168,31 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         return field;
     }
 
+    @ScriptFunction
     public void setField(String aValue) {
         if (field == null ? aValue != null : !field.equals(aValue)) {
             unbind();
             field = aValue;
+            bind();
+        }
+    }
+    
+    public static final String CURSOR_FIELD_JSDOC = ""
+            + "/**\n"
+            + " * Determines wich property of ModelGrid's collection is responsible of \"current\" item. \"Cursor\" by default.\n"
+            + " */";
+
+    @ScriptFunction(jsDoc = CURSOR_FIELD_JSDOC)
+    @Designable(category = "model")
+    public String getCursorField() {
+        return cursorField;
+    }
+
+    @ScriptFunction
+    public void setCursorField(String aValue) {
+        if (aValue != null && !cursorField.equals(aValue)) {
+            unbind();
+            cursorField = aValue;
             bind();
         }
     }
@@ -1445,13 +1467,21 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
                         if (oScrollTo instanceof JSObject && ((JSObject) oScrollTo).isFunction()) {
                             JSObject jsScrollTo = (JSObject) oScrollTo;
                             jsScrollTo.call(modelData, new Object[]{jsNewCursor});
-                        } else if (modelData.hasMember("cursor")) {
-                            modelData.setMember("cursor", jsNewCursor);
+                        } else if (modelData.hasMember(cursorField)) {
+                            modelData.setMember(cursorField, jsNewCursor);
                         }
                     }
                     repaint();
                 } catch (Exception ex) {
                     Logger.getLogger(ModelGrid.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                if (onItemSelected != null) {
+                    try {
+                        JSObject jsItem = elementByViewIndex(rowsSelectionModel.getLeadSelectionIndex());
+                        onItemSelected.call(getPublished(), new Object[]{new com.eas.client.forms.events.ItemEvent(new javax.swing.event.ChangeEvent(ModelGrid.this), jsItem).getPublished()});
+                    } catch (Exception ex) {
+                        Logger.getLogger(ModelGrid.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             }
         }
@@ -1864,7 +1894,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     }
 
     protected JSObject getCurrentRow() {
-        Object oCursor = rowsModel.getData().getMember("cursor");
+        Object oCursor = rowsModel.getData().getMember(cursorField);
         return oCursor instanceof JSObject ? (JSObject) oCursor : null;
     }
 
@@ -2556,6 +2586,25 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     public static void setPublisher(JSObject aPublisher) {
         publisher = aPublisher;
+    }
+
+    protected JSObject onItemSelected;
+
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Event that is fired when selection lead changes in this ModelGrid.\n"
+            + " */")
+    @EventMethod(eventClass = com.eas.client.forms.events.ItemEvent.class)
+    @Undesignable
+    public JSObject getOnItemSelected() {
+        return onItemSelected;
+    }
+
+    @ScriptFunction
+    public void setOnItemSelected(JSObject aValue) {
+        if (onItemSelected != aValue) {
+            onItemSelected = aValue;
+        }
     }
 
     protected ControlEventsIProxy eventsProxy = new ControlEventsIProxy(this);

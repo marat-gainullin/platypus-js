@@ -229,7 +229,7 @@
              */
             P.FormattedField.prototype.onComponentMoved = {};
         }
-        Object.defineProperty(this, "value", {
+        Object.defineProperty(this, "jsValue", {
             get: function() {
                 var value = delegate.jsValue;
                 return P.boxAsJs(value);
@@ -244,7 +244,7 @@
              * @property jsValue
              * @memberOf FormattedField
              */
-            P.FormattedField.prototype.value = {};
+            P.FormattedField.prototype.jsValue = {};
         }
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {

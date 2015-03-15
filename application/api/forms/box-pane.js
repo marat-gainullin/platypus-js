@@ -315,23 +315,6 @@
              */
             P.BoxPane.prototype.onMouseEntered = {};
         }
-        Object.defineProperty(this, "hgap", {
-            get: function() {
-                var value = delegate.hgap;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.hgap = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.BoxPane){
-            /**
-             * Box horizontal gap between components.
-             * @property hgap
-             * @memberOf BoxPane
-             */
-            P.BoxPane.prototype.hgap = 0;
-        }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
                 var value = delegate.toolTipText;
@@ -348,6 +331,23 @@
              * @memberOf BoxPane
              */
             P.BoxPane.prototype.toolTipText = '';
+        }
+        Object.defineProperty(this, "hgap", {
+            get: function() {
+                var value = delegate.hgap;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.hgap = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.BoxPane){
+            /**
+             * Box horizontal gap between components.
+             * @property hgap
+             * @memberOf BoxPane
+             */
+            P.BoxPane.prototype.hgap = 0;
         }
         Object.defineProperty(this, "height", {
             get: function() {
@@ -496,20 +496,6 @@
              */
             P.BoxPane.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "count", {
-            get: function() {
-                var value = delegate.count;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.BoxPane){
-            /**
-             * Gets the number of components in this panel.
-             * @property count
-             * @memberOf BoxPane
-             */
-            P.BoxPane.prototype.count = 0;
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -526,6 +512,20 @@
              * @memberOf BoxPane
              */
             P.BoxPane.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "count", {
+            get: function() {
+                var value = delegate.count;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.BoxPane){
+            /**
+             * Gets the number of components in this panel.
+             * @property count
+             * @memberOf BoxPane
+             */
+            P.BoxPane.prototype.count = 0;
         }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {

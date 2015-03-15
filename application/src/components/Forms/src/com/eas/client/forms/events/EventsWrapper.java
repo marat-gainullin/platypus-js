@@ -38,11 +38,11 @@ public class EventsWrapper {
     public static ContainerEvent wrap(java.awt.event.ContainerEvent aEvent) {
         return new ContainerEvent(aEvent);
     }
-
-    public static ChangeEvent wrap(javax.swing.event.ChangeEvent aEvent) {
-        return new ChangeEvent(aEvent);
+/*
+    public static ItemEvent wrap(javax.swing.event.ChangeEvent aEvent) {
+        return new ItemEvent(aEvent);
     }
-
+*/
     public static WindowEvent wrap(java.awt.event.WindowEvent aEvent) {
         return new WindowEvent(aEvent);
     }

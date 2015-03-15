@@ -85,23 +85,6 @@
              */
             P.ApplicationPlatypusEntity.prototype.activeFilter = {};
         }
-        Object.defineProperty(this, "onDeleted", {
-            get: function() {
-                var value = delegate.onDeleted;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onDeleted = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ApplicationPlatypusEntity){
-            /**
-             * The handler function for the event occured after an entity row has been deleted.
-             * @property onDeleted
-             * @memberOf ApplicationPlatypusEntity
-             */
-            P.ApplicationPlatypusEntity.prototype.onDeleted = {};
-        }
         Object.defineProperty(this, "onScrolled", {
             get: function() {
                 var value = delegate.onScrolled;
@@ -118,6 +101,23 @@
              * @memberOf ApplicationPlatypusEntity
              */
             P.ApplicationPlatypusEntity.prototype.onScrolled = {};
+        }
+        Object.defineProperty(this, "onDeleted", {
+            get: function() {
+                var value = delegate.onDeleted;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onDeleted = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ApplicationPlatypusEntity){
+            /**
+             * The handler function for the event occured after an entity row has been deleted.
+             * @property onDeleted
+             * @memberOf ApplicationPlatypusEntity
+             */
+            P.ApplicationPlatypusEntity.prototype.onDeleted = {};
         }
         Object.defineProperty(this, "cursorPos", {
             get: function() {
@@ -260,12 +260,12 @@
          * Finds an object by its key. Key must be a single property.
          * @param key the unique identifier of the row.
          * @return An object or <code>null</code> if nothing is found.
-         * @method findByKey
+         * @method findById
          * @memberOf ApplicationPlatypusEntity
          */
-        P.ApplicationPlatypusEntity.prototype.findByKey = function(key) {
+        P.ApplicationPlatypusEntity.prototype.findById = function(key) {
             var delegate = this.unwrap();
-            var value = delegate.findByKey(P.boxAsJava(key));
+            var value = delegate.findById(P.boxAsJava(key));
             return P.boxAsJs(value);
         };
 
@@ -273,12 +273,12 @@
          * Finds an object by its key. Key must be a single property.
          * @param key the unique identifier of the row.
          * @return An object or <code>null</code> if nothing is found.
-         * @method findById
+         * @method findByKey
          * @memberOf ApplicationPlatypusEntity
          */
-        P.ApplicationPlatypusEntity.prototype.findById = function(key) {
+        P.ApplicationPlatypusEntity.prototype.findByKey = function(key) {
             var delegate = this.unwrap();
-            var value = delegate.findById(P.boxAsJava(key));
+            var value = delegate.findByKey(P.boxAsJava(key));
             return P.boxAsJs(value);
         };
 
@@ -296,19 +296,6 @@
         };
 
         /**
-         * Requeries the entity's data. Forses the entity to refresh its data, no matter if its parameters has changed or not.
-         * @param onSuccess The callback function for refresh data on success event (optional).
-         * @param onFailure The callback function for refresh data on failure event (optional).
-         * @method requery
-         * @memberOf ApplicationPlatypusEntity
-         */
-        P.ApplicationPlatypusEntity.prototype.requery = function(onSuccess, onFailure) {
-            var delegate = this.unwrap();
-            var value = delegate.requery(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Creates an instance of comparator object using specified constraints objects.
          * @param pairs the sort criteria pairs, in a form of property object (e.g. entity.schema.propName or just a propName in a string form) and the order of sort (ascending - true; descending - false).
          * @return a comparator object to be passed as a parameter to entity's <code>sort</code> method.
@@ -318,6 +305,19 @@
         P.ApplicationPlatypusEntity.prototype.createSorting = function(pairs) {
             var delegate = this.unwrap();
             var value = delegate.createSorting(P.boxAsJava(pairs));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Requeries the entity's data. Forses the entity to refresh its data, no matter if its parameters has changed or not.
+         * @param onSuccess The callback function for refresh data on success event (optional).
+         * @param onFailure The callback function for refresh data on failure event (optional).
+         * @method requery
+         * @memberOf ApplicationPlatypusEntity
+         */
+        P.ApplicationPlatypusEntity.prototype.requery = function(onSuccess, onFailure) {
+            var delegate = this.unwrap();
+            var value = delegate.requery(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
             return P.boxAsJs(value);
         };
 

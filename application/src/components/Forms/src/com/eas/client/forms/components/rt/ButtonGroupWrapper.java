@@ -49,7 +49,7 @@ public class ButtonGroupWrapper extends JComponent {
             AbstractButton ab = (AbstractButton) e.getItem();
             if (ab.isSelected()) {
                 itemListeners.stream().forEach((l) -> {
-                    l.itemStateChanged(null);
+                    l.itemStateChanged(e);
                 });
             }
         }

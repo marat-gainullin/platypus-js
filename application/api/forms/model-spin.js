@@ -609,7 +609,7 @@
              */
             P.ModelSpin.prototype.onSelect = {};
         }
-        Object.defineProperty(this, "value", {
+        Object.defineProperty(this, "jsValue", {
             get: function() {
                 var value = delegate.jsValue;
                 return P.boxAsJs(value);
@@ -624,7 +624,7 @@
              * @property jsValue
              * @memberOf ModelSpin
              */
-            P.ModelSpin.prototype.value = {};
+            P.ModelSpin.prototype.jsValue = {};
         }
         Object.defineProperty(this, "min", {
             get: function() {

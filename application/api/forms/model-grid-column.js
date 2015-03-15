@@ -277,6 +277,17 @@
     };
         /**
          *
+         * @method insertColumnNode
+         * @memberOf ModelGridColumn
+         */
+        P.ModelGridColumn.prototype.insertColumnNode = function(position, node) {
+            var delegate = this.unwrap();
+            var value = delegate.insertColumnNode(P.boxAsJava(position), P.boxAsJava(node));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
          * @method addColumnNode
          * @memberOf ModelGridColumn
          */
@@ -294,17 +305,6 @@
         P.ModelGridColumn.prototype.removeColumnNode = function(node) {
             var delegate = this.unwrap();
             var value = delegate.removeColumnNode(P.boxAsJava(node));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         *
-         * @method insertColumnNode
-         * @memberOf ModelGridColumn
-         */
-        P.ModelGridColumn.prototype.insertColumnNode = function(position, node) {
-            var delegate = this.unwrap();
-            var value = delegate.insertColumnNode(P.boxAsJava(position), P.boxAsJava(node));
             return P.boxAsJs(value);
         };
 

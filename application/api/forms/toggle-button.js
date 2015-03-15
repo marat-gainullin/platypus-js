@@ -220,7 +220,7 @@
              */
             P.ToggleButton.prototype.onComponentMoved = {};
         }
-        Object.defineProperty(this, "value", {
+        Object.defineProperty(this, "jsValue", {
             get: function() {
                 var value = delegate.jsValue;
                 return P.boxAsJs(value);
@@ -235,7 +235,7 @@
              * @property jsValue
              * @memberOf ToggleButton
              */
-            P.ToggleButton.prototype.value = {};
+            P.ToggleButton.prototype.jsValue = {};
         }
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {
@@ -503,23 +503,6 @@
              */
             P.ToggleButton.prototype.onComponentHidden = {};
         }
-        Object.defineProperty(this, "iconTextGap", {
-            get: function() {
-                var value = delegate.iconTextGap;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.iconTextGap = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ToggleButton){
-            /**
-             * The amount of space between the text and the icon displayed in this button.
-             * @property iconTextGap
-             * @memberOf ToggleButton
-             */
-            P.ToggleButton.prototype.iconTextGap = 0;
-        }
         Object.defineProperty(this, "nextFocusableComponent", {
             get: function() {
                 var value = delegate.nextFocusableComponent;
@@ -536,6 +519,23 @@
              * @memberOf ToggleButton
              */
             P.ToggleButton.prototype.nextFocusableComponent = {};
+        }
+        Object.defineProperty(this, "iconTextGap", {
+            get: function() {
+                var value = delegate.iconTextGap;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.iconTextGap = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ToggleButton){
+            /**
+             * The amount of space between the text and the icon displayed in this button.
+             * @property iconTextGap
+             * @memberOf ToggleButton
+             */
+            P.ToggleButton.prototype.iconTextGap = 0;
         }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {

@@ -609,7 +609,7 @@
              */
             P.ModelTextArea.prototype.onSelect = {};
         }
-        Object.defineProperty(this, "value", {
+        Object.defineProperty(this, "jsValue", {
             get: function() {
                 var value = delegate.jsValue;
                 return P.boxAsJs(value);
@@ -624,7 +624,7 @@
              * @property jsValue
              * @memberOf ModelTextArea
              */
-            P.ModelTextArea.prototype.value = {};
+            P.ModelTextArea.prototype.jsValue = {};
         }
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {

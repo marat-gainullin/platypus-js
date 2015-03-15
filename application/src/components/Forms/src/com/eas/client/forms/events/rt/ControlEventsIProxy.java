@@ -99,8 +99,6 @@ public class ControlEventsIProxy implements MouseListener,
             anEvent = EventsWrapper.wrap((java.awt.event.ActionEvent) anEvent);
         } else if (anEvent instanceof java.beans.PropertyChangeEvent) {
             anEvent = EventsWrapper.wrap((java.beans.PropertyChangeEvent) anEvent);
-        } else if (anEvent instanceof javax.swing.event.ChangeEvent) {
-            anEvent = EventsWrapper.wrap((javax.swing.event.ChangeEvent) anEvent);
         }
         return anEvent;
     }

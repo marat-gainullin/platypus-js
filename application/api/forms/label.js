@@ -431,23 +431,6 @@
              */
             P.Label.prototype.onComponentHidden = {};
         }
-        Object.defineProperty(this, "iconTextGap", {
-            get: function() {
-                var value = delegate.iconTextGap;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.iconTextGap = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Label){
-            /**
-             * The amount of space between the text and the icon displayed in this label.
-             * @property iconTextGap
-             * @memberOf Label
-             */
-            P.Label.prototype.iconTextGap = 0;
-        }
         Object.defineProperty(this, "nextFocusableComponent", {
             get: function() {
                 var value = delegate.nextFocusableComponent;
@@ -464,6 +447,23 @@
              * @memberOf Label
              */
             P.Label.prototype.nextFocusableComponent = {};
+        }
+        Object.defineProperty(this, "iconTextGap", {
+            get: function() {
+                var value = delegate.iconTextGap;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.iconTextGap = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Label){
+            /**
+             * The amount of space between the text and the icon displayed in this label.
+             * @property iconTextGap
+             * @memberOf Label
+             */
+            P.Label.prototype.iconTextGap = 0;
         }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
@@ -584,20 +584,6 @@
              */
             P.Label.prototype.onMouseWheelMoved = {};
         }
-        Object.defineProperty(this, "component", {
-            get: function() {
-                var value = delegate.component;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.Label){
-            /**
-             * Native API. Returns low level swing component. Applicable only in J2SE swing client.
-             * @property component
-             * @memberOf Label
-             */
-            P.Label.prototype.component = {};
-        }
         Object.defineProperty(this, "horizontalAlignment", {
             get: function() {
                 var value = delegate.horizontalAlignment;
@@ -614,6 +600,20 @@
              * @memberOf Label
              */
             P.Label.prototype.horizontalAlignment = 0;
+        }
+        Object.defineProperty(this, "component", {
+            get: function() {
+                var value = delegate.component;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Label){
+            /**
+             * Native API. Returns low level swing component. Applicable only in J2SE swing client.
+             * @property component
+             * @memberOf Label
+             */
+            P.Label.prototype.component = {};
         }
         Object.defineProperty(this, "onFocusGained", {
             get: function() {

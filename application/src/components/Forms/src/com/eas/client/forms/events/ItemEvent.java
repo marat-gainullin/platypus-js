@@ -5,16 +5,25 @@
 package com.eas.client.forms.events;
 
 import com.eas.script.NoPublisherException;
+import com.eas.script.ScriptFunction;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
  * @author mg
  */
-public class ChangeEvent extends Event<javax.swing.event.ChangeEvent> {
+public class ItemEvent extends Event<javax.swing.event.ChangeEvent> {
 
-    public ChangeEvent(javax.swing.event.ChangeEvent aDelegate) {
+    protected JSObject item;
+    
+    public ItemEvent(javax.swing.event.ChangeEvent aDelegate, JSObject aItem) {
         super(aDelegate);
+        item = aItem;
+    }
+
+    @ScriptFunction
+    public JSObject getItem() {
+        return item;
     }
 
     @Override

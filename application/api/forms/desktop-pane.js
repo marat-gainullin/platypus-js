@@ -674,17 +674,6 @@
         }
     };
         /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf DesktopPane
-         */
-        P.DesktopPane.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Closes all frames on the pane.
          * @method closeAll
          * @memberOf DesktopPane
@@ -692,6 +681,17 @@
         P.DesktopPane.prototype.closeAll = function() {
             var delegate = this.unwrap();
             var value = delegate.closeAll();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Tries to acquire focus for this component.
+         * @method focus
+         * @memberOf DesktopPane
+         */
+        P.DesktopPane.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
             return P.boxAsJs(value);
         };
 
