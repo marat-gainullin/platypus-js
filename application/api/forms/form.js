@@ -457,6 +457,17 @@
         };
 
         /**
+         * Shows the form as an ordinary window.
+         * @method show
+         * @memberOf Form
+         */
+        P.Form.prototype.show = function() {
+            var delegate = this.unwrap();
+            var value = delegate.show();
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Moves form to the front position.
          * @method toFront
          * @memberOf Form
@@ -480,24 +491,13 @@
         };
 
         /**
-         * Shows the form as an ordinary window.
-         * @method show
+         * Maximizes this form.
+         * @method maximize
          * @memberOf Form
          */
-        P.Form.prototype.show = function() {
+        P.Form.prototype.maximize = function() {
             var delegate = this.unwrap();
-            var value = delegate.show();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Restores this form state.
-         * @method restore
-         * @memberOf Form
-         */
-        P.Form.prototype.restore = function() {
-            var delegate = this.unwrap();
-            var value = delegate.restore();
+            var value = delegate.maximize();
             return P.boxAsJs(value);
         };
 
@@ -513,13 +513,13 @@
         };
 
         /**
-         * Maximizes this form.
-         * @method maximize
+         * Restores this form state.
+         * @method restore
          * @memberOf Form
          */
-        P.Form.prototype.maximize = function() {
+        P.Form.prototype.restore = function() {
             var delegate = this.unwrap();
-            var value = delegate.maximize();
+            var value = delegate.restore();
             return P.boxAsJs(value);
         };
 

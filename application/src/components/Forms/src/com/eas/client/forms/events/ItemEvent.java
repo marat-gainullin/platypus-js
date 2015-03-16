@@ -16,8 +16,8 @@ public class ItemEvent extends Event<javax.swing.event.ChangeEvent> {
 
     protected JSObject item;
     
-    public ItemEvent(javax.swing.event.ChangeEvent aDelegate, JSObject aItem) {
-        super(aDelegate);
+    public ItemEvent(Object aSource, JSObject aItem) {
+        super(new javax.swing.event.ChangeEvent(aSource));
         item = aItem;
     }
 

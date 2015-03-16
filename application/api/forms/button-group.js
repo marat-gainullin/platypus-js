@@ -5,7 +5,7 @@
     });
     
     /**
-     * Creates a multiple-exclusion scope for a set of buttons.
+     * Creates a multiple-exclusion scope for a set of radio or toggle buttons or for a menu item with radio button.
      * Creating a set of buttons with the same <code>ButtonGroup</code> object means that turning "on" one of those buttons turns off all other buttons in the group.
      * @constructor ButtonGroup ButtonGroup
      */
@@ -443,6 +443,20 @@
              */
             P.ButtonGroup.prototype.nextFocusableComponent = {};
         }
+        Object.defineProperty(this, "count", {
+            get: function() {
+                var value = delegate.count;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ButtonGroup){
+            /**
+             * Gets the number of components in this panel.
+             * @property count
+             * @memberOf ButtonGroup
+             */
+            P.ButtonGroup.prototype.count = 0;
+        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -459,20 +473,6 @@
              * @memberOf ButtonGroup
              */
             P.ButtonGroup.prototype.onKeyReleased = {};
-        }
-        Object.defineProperty(this, "count", {
-            get: function() {
-                var value = delegate.count;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ButtonGroup){
-            /**
-             * Gets the number of components in this panel.
-             * @property count
-             * @memberOf ButtonGroup
-             */
-            P.ButtonGroup.prototype.count = 0;
         }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {

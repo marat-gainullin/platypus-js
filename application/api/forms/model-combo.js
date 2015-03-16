@@ -660,7 +660,7 @@
              */
             P.ModelCombo.prototype.onSelect = {};
         }
-        Object.defineProperty(this, "jsValue", {
+        Object.defineProperty(this, "value", {
             get: function() {
                 var value = delegate.jsValue;
                 return P.boxAsJs(value);
@@ -675,7 +675,7 @@
              * @property jsValue
              * @memberOf ModelCombo
              */
-            P.ModelCombo.prototype.jsValue = {};
+            P.ModelCombo.prototype.value = {};
         }
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {

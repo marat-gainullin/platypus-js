@@ -183,7 +183,7 @@ public class ControlEventsIProxy implements MouseListener,
             }
             reflectionInvokeARListener("addActionListener", ActionListener.class);
             reflectionInvokeARListener("addChangeListener", ChangeListener.class);
-            reflectionInvokeARListener("addItemListener", ItemListener.class);
+            reflectionInvokeARListener("addItemListener", ItemListener.class);            
         }
     }
 

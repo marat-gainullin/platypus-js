@@ -127,20 +127,6 @@
              */
             P.Color.prototype.LIGHT_GRAY = {};
         }
-        Object.defineProperty(this, "MAGENTA", {
-            get: function() {
-                var value = delegate.MAGENTA;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.Color){
-            /**
-             * Generated property jsDoc.
-             * @property MAGENTA
-             * @memberOf Color
-             */
-            P.Color.prototype.MAGENTA = {};
-        }
         Object.defineProperty(this, "BLACK", {
             get: function() {
                 var value = delegate.BLACK;
@@ -154,6 +140,20 @@
              * @memberOf Color
              */
             P.Color.prototype.BLACK = {};
+        }
+        Object.defineProperty(this, "MAGENTA", {
+            get: function() {
+                var value = delegate.MAGENTA;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Color){
+            /**
+             * Generated property jsDoc.
+             * @property MAGENTA
+             * @memberOf Color
+             */
+            P.Color.prototype.MAGENTA = {};
         }
         Object.defineProperty(this, "YELLOW", {
             get: function() {

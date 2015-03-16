@@ -295,9 +295,14 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         return rowset.getCurrentRow();
     }
 
+    @ScriptFunction
+    public void setCursor(Row aRow) throws Exception {
+        scrollTo(aRow);
+    }
+
     private static final String CURSOR_POS_JSDOC = ""
             + "/**\n"
-            + "* Current position of cursor (1-based). There are two special values: 0 - before first; length + 1 - after last;\n"
+            + "* Current position of cursor (1 - based). There are two special values: 0 - before first; length + 1 - after last;\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CURSOR_POS_JSDOC)

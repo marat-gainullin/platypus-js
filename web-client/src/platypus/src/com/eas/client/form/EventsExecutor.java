@@ -11,8 +11,12 @@ import com.eas.client.form.events.ActionEvent;
 import com.eas.client.form.events.ActionHandler;
 import com.eas.client.form.events.AddEvent;
 import com.eas.client.form.events.AddHandler;
+import com.eas.client.form.events.CollapsedHandler;
+import com.eas.client.form.events.ExpandedHandler;
 import com.eas.client.form.events.HasActionHandlers;
 import com.eas.client.form.events.HasAddHandlers;
+import com.eas.client.form.events.HasCollapsedHandlers;
+import com.eas.client.form.events.HasExpandedHandlers;
 import com.eas.client.form.events.HasHideHandlers;
 import com.eas.client.form.events.HasRemoveHandlers;
 import com.eas.client.form.events.HasShowHandlers;
@@ -24,6 +28,7 @@ import com.eas.client.form.events.ShowEvent;
 import com.eas.client.form.events.ShowHandler;
 import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.published.HasPublished;
+import com.eas.client.form.published.widgets.model.ModelGrid;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
@@ -99,7 +104,6 @@ public class EventsExecutor {
 	private JavaScriptObject keyTyped;
 	private JavaScriptObject keyPressed;
 	private JavaScriptObject keyReleased;
-	// TODO: Add event for tabs, radio group and cards selection.
 	private JavaScriptObject itemSelected;
 	private JavaScriptObject valueChanged;
 
@@ -720,8 +724,8 @@ public class EventsExecutor {
 					public void onSelection(SelectionEvent<Object> event) {
 						JavaScriptObject published = ((HasPublished) event.getSource()).getPublished();
 						Object oItem = event.getSelectedItem();
-						if(oItem instanceof HasPublished)
-							oItem = ((HasPublished)oItem).getPublished();
+						if (oItem instanceof HasPublished)
+							oItem = ((HasPublished) oItem).getPublished();
 						executeEvent(itemSelected, JsEvents.publishItemEvent(published, oItem instanceof JavaScriptObject ? (JavaScriptObject) oItem : null));
 					}
 

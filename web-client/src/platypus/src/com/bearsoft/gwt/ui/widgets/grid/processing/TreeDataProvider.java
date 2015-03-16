@@ -4,6 +4,10 @@
  */
 package com.bearsoft.gwt.ui.widgets.grid.processing;
 
+import com.eas.client.form.events.CollapsedHandler;
+import com.eas.client.form.events.ExpandedHandler;
+import com.eas.client.form.events.HasCollapsedHandlers;
+import com.eas.client.form.events.HasExpandedHandlers;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.view.client.ListDataProvider;
 import java.util.ArrayList;
@@ -19,28 +23,35 @@ import java.util.Set;
  * @author mg
  * @param <T>
  */
-public class TreeDataProvider<T> extends ListDataProvider<T> implements IndexOfProvider<T> {
-
-	public interface ExpandedCollapsedHandler<T> {
-
-		public void expanded(T anElement);
-
-		public void collapsed(T anElement);
-	}
+public class TreeDataProvider<T> extends ListDataProvider<T> implements IndexOfProvider<T>, HasExpandedHandlers<T>, HasCollapsedHandlers<T> {
 
 	protected Tree<T> tree;
 	protected Set<T> expanded = new HashSet<>();
 	protected Map<T, Integer> indicies = new HashMap<>();
-	protected final Set<ExpandedCollapsedHandler<T>> expandCollapseHandlers = new HashSet<>();
+	protected final Set<ExpandedHandler<T>> expandedHandlers = new HashSet<>();
+	protected final Set<CollapsedHandler<T>> collapsedHandlers = new HashSet<>();
 	protected Runnable onResize;
 
-	public HandlerRegistration addExpandedCollapsedHandler(final ExpandedCollapsedHandler<T> aHandler) {
-		expandCollapseHandlers.add(aHandler);
+	@Override
+	public HandlerRegistration addExpandedHandler(final ExpandedHandler<T> aHandler) {
+		expandedHandlers.add(aHandler);
 		return new HandlerRegistration() {
 
 			@Override
 			public void removeHandler() {
-				expandCollapseHandlers.remove(aHandler);
+				expandedHandlers.remove(aHandler);
+			}
+		};
+	}
+
+	@Override
+	public HandlerRegistration addCollapsedHandler(final CollapsedHandler<T> aHandler) {
+		collapsedHandlers.add(aHandler);
+		return new HandlerRegistration() {
+
+			@Override
+			public void removeHandler() {
+				collapsedHandlers.remove(aHandler);
 			}
 		};
 	}
@@ -48,16 +59,16 @@ public class TreeDataProvider<T> extends ListDataProvider<T> implements IndexOfP
 	protected void expanded(T aElement) {
 		if (onResize != null)
 			onResize.run();
-		for (ExpandedCollapsedHandler<?> handler : expandCollapseHandlers.toArray(new ExpandedCollapsedHandler<?>[] {})) {
-			((ExpandedCollapsedHandler<T>) handler).expanded(aElement);
+		for (ExpandedHandler<?> handler : expandedHandlers.toArray(new ExpandedHandler<?>[] {})) {
+			((ExpandedHandler<T>) handler).expanded(aElement);
 		}
 	}
 
 	protected void collapsed(T aElement) {
 		if (onResize != null)
 			onResize.run();
-		for (ExpandedCollapsedHandler<?> handler : expandCollapseHandlers.toArray(new ExpandedCollapsedHandler<?>[] {})) {
-			((ExpandedCollapsedHandler<T>) handler).collapsed(aElement);
+		for (CollapsedHandler<?> handler : collapsedHandlers.toArray(new CollapsedHandler<?>[] {})) {
+			((CollapsedHandler<T>) handler).collapsed(aElement);
 		}
 	}
 

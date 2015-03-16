@@ -395,21 +395,6 @@
              */
             P.BorderPane.prototype.opaque = true;
         }
-        Object.defineProperty(this, "topComponent", {
-            get: function() {
-                var value = delegate.topComponent;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.BorderPane){
-            /**
-             * The component added using HorizontalPosition.TOP constraint.
-             * If no component at the container on this constraint then set to <code>null</code>.
-             * @property topComponent
-             * @memberOf BorderPane
-             */
-            P.BorderPane.prototype.topComponent = {};
-        }
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
@@ -426,6 +411,21 @@
              * @memberOf BorderPane
              */
             P.BorderPane.prototype.visible = true;
+        }
+        Object.defineProperty(this, "topComponent", {
+            get: function() {
+                var value = delegate.topComponent;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.BorderPane){
+            /**
+             * The component added using HorizontalPosition.TOP constraint.
+             * If no component at the container on this constraint then set to <code>null</code>.
+             * @property topComponent
+             * @memberOf BorderPane
+             */
+            P.BorderPane.prototype.topComponent = {};
         }
         Object.defineProperty(this, "bottomComponent", {
             get: function() {
@@ -479,6 +479,20 @@
              */
             P.BorderPane.prototype.nextFocusableComponent = {};
         }
+        Object.defineProperty(this, "count", {
+            get: function() {
+                var value = delegate.count;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.BorderPane){
+            /**
+             * Gets the number of components in this panel.
+             * @property count
+             * @memberOf BorderPane
+             */
+            P.BorderPane.prototype.count = 0;
+        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -495,20 +509,6 @@
              * @memberOf BorderPane
              */
             P.BorderPane.prototype.onKeyReleased = {};
-        }
-        Object.defineProperty(this, "count", {
-            get: function() {
-                var value = delegate.count;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.BorderPane){
-            /**
-             * Gets the number of components in this panel.
-             * @property count
-             * @memberOf BorderPane
-             */
-            P.BorderPane.prototype.count = 0;
         }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
@@ -561,23 +561,6 @@
              */
             P.BorderPane.prototype.onKeyTyped = {};
         }
-        Object.defineProperty(this, "onMouseWheelMoved", {
-            get: function() {
-                var value = delegate.onMouseWheelMoved;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMouseWheelMoved = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.BorderPane){
-            /**
-             * Mouse wheel moved event handler function.
-             * @property onMouseWheelMoved
-             * @memberOf BorderPane
-             */
-            P.BorderPane.prototype.onMouseWheelMoved = {};
-        }
         Object.defineProperty(this, "rightComponent", {
             get: function() {
                 var value = delegate.rightComponent;
@@ -595,6 +578,23 @@
              * @memberOf BorderPane
              */
             P.BorderPane.prototype.rightComponent = {};
+        }
+        Object.defineProperty(this, "onMouseWheelMoved", {
+            get: function() {
+                var value = delegate.onMouseWheelMoved;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseWheelMoved = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.BorderPane){
+            /**
+             * Mouse wheel moved event handler function.
+             * @property onMouseWheelMoved
+             * @memberOf BorderPane
+             */
+            P.BorderPane.prototype.onMouseWheelMoved = {};
         }
         Object.defineProperty(this, "onComponentRemoved", {
             get: function() {

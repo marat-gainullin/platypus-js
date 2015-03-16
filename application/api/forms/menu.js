@@ -463,6 +463,20 @@
              */
             P.Menu.prototype.nextFocusableComponent = {};
         }
+        Object.defineProperty(this, "count", {
+            get: function() {
+                var value = delegate.count;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Menu){
+            /**
+             * The count of the menu items.
+             * @property count
+             * @memberOf Menu
+             */
+            P.Menu.prototype.count = 0;
+        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -479,20 +493,6 @@
              * @memberOf Menu
              */
             P.Menu.prototype.onKeyReleased = {};
-        }
-        Object.defineProperty(this, "count", {
-            get: function() {
-                var value = delegate.count;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.Menu){
-            /**
-             * The count of the menu items.
-             * @property count
-             * @memberOf Menu
-             */
-            P.Menu.prototype.count = 0;
         }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {

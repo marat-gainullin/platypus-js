@@ -12,12 +12,17 @@ public class UsualServiceColumn extends ModelColumn {
 		designedWidth = 22;
 		minWidth = designedWidth;
 		maxWidth = designedWidth;
-		((TreeExpandableCell<JavaScriptObject, Object>)getCell()).setCell(new RowMarkerCell(){
+		((TreeExpandableCell<JavaScriptObject, Object>) getCell()).setCell(new RowMarkerCell() {
+			@Override
+			public String getCursorProperty() {
+				return ((ModelGrid) grid).getCursorProperty();
+			}
 
 			@Override
-            public JavaScriptObject getRowsData() {
-	            return ((ModelGrid)grid).getData();
-            }});
+			public JavaScriptObject getRowsData() {
+				return ((ModelGrid) grid).getData();
+			}
+		});
 	}
 
 	@Override

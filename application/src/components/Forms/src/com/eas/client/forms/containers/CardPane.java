@@ -52,7 +52,7 @@ public class CardPane extends JPanel implements HasPublished, HasContainerEvents
         try {
             Object oItem = e.getItem();
             JSObject jsItem = oItem instanceof HasPublished ? ((HasPublished)oItem).getPublished() : null;
-            onItemSelected.call(getPublished(), new Object[]{new ItemEvent(new javax.swing.event.ChangeEvent(CardPane.this), jsItem).getPublished()});
+            onItemSelected.call(getPublished(), new Object[]{new ItemEvent(CardPane.this, jsItem).getPublished()});
         } catch (Exception ex) {
             Logger.getLogger(CardPane.class.getName()).log(Level.SEVERE, null, ex);
         }

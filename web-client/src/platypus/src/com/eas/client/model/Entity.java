@@ -380,6 +380,9 @@ public class Entity implements RowsetListener, HasPublished{
 			get : function(){
 				var nRow = rowset.@com.bearsoft.rowset.Rowset::getCurrentRow()();
 			    return nRow != null ? @com.bearsoft.rowset.Row::publishFacade(Lcom/bearsoft/rowset/Row;Lcom/google/gwt/core/client/JavaScriptObject;)(nRow, null) : null;
+			},
+			set : function(aValue){
+				published.scrollTo(aValue);
 			}
 		});	
 		var nEntityTitle = aEntity.@com.eas.client.model.Entity::getTitle()();

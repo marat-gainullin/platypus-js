@@ -660,7 +660,7 @@
              */
             P.ModelFormattedField.prototype.onSelect = {};
         }
-        Object.defineProperty(this, "jsValue", {
+        Object.defineProperty(this, "value", {
             get: function() {
                 var value = delegate.jsValue;
                 return P.boxAsJs(value);
@@ -675,7 +675,7 @@
              * @property jsValue
              * @memberOf ModelFormattedField
              */
-            P.ModelFormattedField.prototype.jsValue = {};
+            P.ModelFormattedField.prototype.value = {};
         }
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {

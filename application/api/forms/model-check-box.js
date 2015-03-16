@@ -280,7 +280,7 @@
              */
             P.ModelCheckBox.prototype.onSelect = {};
         }
-        Object.defineProperty(this, "jsValue", {
+        Object.defineProperty(this, "value", {
             get: function() {
                 var value = delegate.jsValue;
                 return P.boxAsJs(value);
@@ -295,7 +295,7 @@
              * @property jsValue
              * @memberOf ModelCheckBox
              */
-            P.ModelCheckBox.prototype.jsValue = {};
+            P.ModelCheckBox.prototype.value = {};
         }
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {

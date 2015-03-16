@@ -61,7 +61,7 @@ public class TabbedPane extends JTabbedPane implements HasPublished, HasContaine
             try {
                 JComponent oItem = TabbedPane.this.getSelectedComponent();
                 JSObject jsItem = oItem instanceof HasPublished ? ((HasPublished)oItem).getPublished() : null;
-                onItemSelected.call(getPublished(), new Object[]{new ItemEvent(e, jsItem).getPublished()});
+                onItemSelected.call(getPublished(), new Object[]{new ItemEvent(e.getSource(), jsItem).getPublished()});
             } catch (Exception ex) {
                 Logger.getLogger(TabbedPane.class.getName()).log(Level.SEVERE, null, ex);
             }

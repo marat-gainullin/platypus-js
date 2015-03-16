@@ -8,6 +8,7 @@ import com.bearsoft.gui.grid.events.data.ElementsAddedEvent;
 import com.bearsoft.gui.grid.events.data.ElementsDataChangedEvent;
 import com.bearsoft.gui.grid.events.data.ElementsRemovedEvent;
 import com.bearsoft.gui.grid.events.data.TreedModelListener;
+import com.eas.util.ListenerRegistration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,12 +22,14 @@ import javax.swing.table.TableModel;
 
 /**
  * This class in the table front to a treed data.
+ *
  * @author mg
  * @param <T>
  */
 public class TableFront2TreedModel<T> implements TableModel {
 
     protected Set<TableModelListener> listeners = new HashSet<>();
+    protected Set<CollapseExpandListener<T>> collapseExpandListeners = new HashSet<>();
     protected TreedModel<T> treedModel;
     protected Set<T> expanded = new HashSet<>();
     protected List<T> front;
@@ -136,6 +139,7 @@ public class TableFront2TreedModel<T> implements TableModel {
 
     /**
      * Table front constructor. Constructs a lazy tree front.
+     *
      * @param aTreedModel - Deep treed model, containing data.
      */
     public TableFront2TreedModel(TreedModel<T> aTreedModel) {
@@ -254,8 +258,10 @@ public class TableFront2TreedModel<T> implements TableModel {
 
     /**
      * Builds path to specified element if the element belongs to the model.
+     *
      * @param anElement Element to build path to.
-     * @return ArrayList&lt;T&gt; of elements comprising the path, excluding root null element.
+     * @return ArrayList&lt;T&gt; of elements comprising the path, excluding
+     * root null element.
      */
     public List<T> buildPathTo(T anElement) {
         List<T> path = new ArrayList<>();
@@ -279,9 +285,11 @@ public class TableFront2TreedModel<T> implements TableModel {
 
     /**
      * Converts element of the model to it's position in front.
+     *
      * @param anElement Element of the model to return index of.
-     * @return Index of model's element. It returns -1 if element is not in expanded space,
-     * including case of an element doesn't belong to the model at all.
+     * @return Index of model's element. It returns -1 if element is not in
+     * expanded space, including case of an element doesn't belong to the model
+     * at all.
      */
     public int getIndexOf(T anElement) {
         validateFront();
@@ -324,6 +332,29 @@ public class TableFront2TreedModel<T> implements TableModel {
         }
     }
 
+    public ListenerRegistration addCollapseExpandListener(CollapseExpandListener l) {
+        collapseExpandListeners.add(l);
+        return () -> {
+            collapseExpandListeners.remove(l);
+        };
+    }
+
+    public void removeCollapseExpandListener(CollapseExpandListener l) {
+        collapseExpandListeners.remove(l);
+    }
+
+    protected void fireCollapsed(T aItem) {
+        for (CollapseExpandListener l : collapseExpandListeners.toArray(new CollapseExpandListener[]{})) {
+            l.collapsed(aItem);
+        }
+    }
+
+    protected void fireExpanded(T aItem) {
+        for (CollapseExpandListener l : collapseExpandListeners.toArray(new CollapseExpandListener[]{})) {
+            l.expanded(aItem);
+        }
+    }
+
     public boolean isExpanded(T anElement) {
         return expanded.contains(anElement);
     }
@@ -337,20 +368,22 @@ public class TableFront2TreedModel<T> implements TableModel {
                 int firstRow = getIndexOf(children.get(0));
                 int lastRow = getIndexOf(children.get(children.size() - 1));
                 fireRowsInserted(firstRow, lastRow);
-            } else {// children.isEmpty()
-                // TODO: fire an event about empty folder expansion attempt
             }
+            fireExpanded(anElement);
         }
     }
 
     public void collapse(T anElement) {
         List<T> children = treedModel.getChildrenOf(anElement);
-        if (expanded.contains(anElement) && !children.isEmpty()) {
-            int firstRow = getIndexOf(children.get(0));
-            int lastRow = getIndexOf(children.get(children.size() - 1));
-            invalidateFront();
-            expanded.remove(anElement);
-            fireRowsDeleted(firstRow, lastRow);
+        if (expanded.contains(anElement)) {
+            if (!children.isEmpty()) {
+                int firstRow = getIndexOf(children.get(0));
+                int lastRow = getIndexOf(children.get(children.size() - 1));
+                invalidateFront();
+                expanded.remove(anElement);
+                fireRowsDeleted(firstRow, lastRow);
+            }
+            fireCollapsed(anElement);
         }
     }
 

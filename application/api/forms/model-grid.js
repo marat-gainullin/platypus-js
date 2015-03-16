@@ -374,6 +374,23 @@
              */
             P.ModelGrid.prototype.onMouseWheelMoved = {};
         }
+        Object.defineProperty(this, "cursorProperty", {
+            get: function() {
+                var value = delegate.cursorProperty;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.cursorProperty = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * Determines wich property of ModelGrid's collection is responsible of "current" item. Its default value is "cursor".
+             * @property cursorProperty
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.cursorProperty = '';
+        }
         Object.defineProperty(this, "field", {
             get: function() {
                 var value = delegate.field;
@@ -507,23 +524,6 @@
              */
             P.ModelGrid.prototype.onFocusLost = {};
         }
-        Object.defineProperty(this, "deletable", {
-            get: function() {
-                var value = delegate.deletable;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.deletable = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelGrid){
-            /**
-             * Determines if grid allows to delete rows.
-             * @property deletable
-             * @memberOf ModelGrid
-             */
-            P.ModelGrid.prototype.deletable = true;
-        }
         Object.defineProperty(this, "onMousePressed", {
             get: function() {
                 var value = delegate.onMousePressed;
@@ -540,6 +540,23 @@
              * @memberOf ModelGrid
              */
             P.ModelGrid.prototype.onMousePressed = {};
+        }
+        Object.defineProperty(this, "deletable", {
+            get: function() {
+                var value = delegate.deletable;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.deletable = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * Determines if grid allows to delete rows.
+             * @property deletable
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.deletable = true;
         }
         Object.defineProperty(this, "error", {
             get: function() {
@@ -575,23 +592,6 @@
              * @memberOf ModelGrid
              */
             P.ModelGrid.prototype.enabled = true;
-        }
-        Object.defineProperty(this, "cursorField", {
-            get: function() {
-                var value = delegate.cursorField;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.cursorField = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelGrid){
-            /**
-             * Generated property jsDoc.
-             * @property cursorField
-             * @memberOf ModelGrid
-             */
-            P.ModelGrid.prototype.cursorField = '';
         }
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {
@@ -794,23 +794,6 @@
              */
             P.ModelGrid.prototype.onFocusGained = {};
         }
-        Object.defineProperty(this, "rowsHeight", {
-            get: function() {
-                var value = delegate.rowsHeight;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.rowsHeight = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelGrid){
-            /**
-             * The height of grid's rows.
-             * @property rowsHeight
-             * @memberOf ModelGrid
-             */
-            P.ModelGrid.prototype.rowsHeight = 0;
-        }
         Object.defineProperty(this, "onMouseClicked", {
             get: function() {
                 var value = delegate.onMouseClicked;
@@ -827,6 +810,23 @@
              * @memberOf ModelGrid
              */
             P.ModelGrid.prototype.onMouseClicked = {};
+        }
+        Object.defineProperty(this, "rowsHeight", {
+            get: function() {
+                var value = delegate.rowsHeight;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.rowsHeight = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * The height of grid's rows.
+             * @property rowsHeight
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.rowsHeight = 0;
         }
         Object.defineProperty(this, "onMouseExited", {
             get: function() {
@@ -961,6 +961,17 @@
         };
 
         /**
+         * Tries to acquire focus for this component.
+         * @method focus
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Selects the specified element.
          * @param instance Entity's instance to be selected.
          * @method select
@@ -984,13 +995,38 @@
         };
 
         /**
-         * Tries to acquire focus for this component.
-         * @method focus
+         * Makes specified instance visible.
+         * @param instance Entity's instance to make visible.
+         * @param need2select true to select the instance (optional).
+         * @method makeVisible
          * @memberOf ModelGrid
          */
-        P.ModelGrid.prototype.focus = function() {
+        P.ModelGrid.prototype.makeVisible = function(instance, need2select) {
             var delegate = this.unwrap();
-            var value = delegate.focus();
+            var value = delegate.makeVisible(P.boxAsJava(instance), P.boxAsJava(need2select));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Unselects the specified element.
+         * @param instance Entity's instance to be unselected
+         * @method unselect
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.unselect = function(instance) {
+            var delegate = this.unwrap();
+            var value = delegate.unselect(P.boxAsJava(instance));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Redraw the component.
+         * @method redraw
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.redraw = function() {
+            var delegate = this.unwrap();
+            var value = delegate.redraw();
             return P.boxAsJs(value);
         };
 
@@ -1007,17 +1043,6 @@
 
         /**
          *
-         * @method try2CancelAnyEditing
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.try2CancelAnyEditing = function() {
-            var delegate = this.unwrap();
-            var value = delegate.try2CancelAnyEditing();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         *
          * @method try2StopAnyEditing
          * @memberOf ModelGrid
          */
@@ -1029,24 +1054,12 @@
 
         /**
          *
-         * @method insertColumnNode
+         * @method try2CancelAnyEditing
          * @memberOf ModelGrid
          */
-        P.ModelGrid.prototype.insertColumnNode = function(arg0, arg1) {
+        P.ModelGrid.prototype.try2CancelAnyEditing = function() {
             var delegate = this.unwrap();
-            var value = delegate.insertColumnNode(P.boxAsJava(arg0), P.boxAsJava(arg1));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Unselects the specified element.
-         * @param instance Entity's instance to be unselected
-         * @method unselect
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.unselect = function(instance) {
-            var delegate = this.unwrap();
-            var value = delegate.unselect(P.boxAsJava(instance));
+            var value = delegate.try2CancelAnyEditing();
             return P.boxAsJs(value);
         };
 
@@ -1073,26 +1086,13 @@
         };
 
         /**
-         * Makes specified instance visible.
-         * @param instance Entity's instance to make visible.
-         * @param need2select true to select the instance (optional).
-         * @method makeVisible
+         *
+         * @method insertColumnNode
          * @memberOf ModelGrid
          */
-        P.ModelGrid.prototype.makeVisible = function(instance, need2select) {
+        P.ModelGrid.prototype.insertColumnNode = function(arg0, arg1) {
             var delegate = this.unwrap();
-            var value = delegate.makeVisible(P.boxAsJava(instance), P.boxAsJava(need2select));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Redraw the component.
-         * @method redraw
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.redraw = function() {
-            var delegate = this.unwrap();
-            var value = delegate.redraw();
+            var value = delegate.insertColumnNode(P.boxAsJava(arg0), P.boxAsJava(arg1));
             return P.boxAsJs(value);
         };
 
