@@ -205,8 +205,8 @@ public class Entity implements RowsetListener, HasPublished{
                 }
                 var res = Array.prototype.push.apply(published, arguments);
                 eventedRows.forEach(function (aEventedRow) {
-                    aEventedRow.@com.bearsoft.rowset.Row::fireChangesOfOppositeCollections();
-                    aEventedRow.@com.bearsoft.rowset.Row::fireChangesOfOppositeScalars();
+                    aEventedRow.@com.bearsoft.rowset.Row::fireChangesOfOppositeCollections()();
+                    aEventedRow.@com.bearsoft.rowset.Row::fireChangesOfOppositeScalars()();
                 });
                 return res;
             }
@@ -272,8 +272,8 @@ public class Entity implements RowsetListener, HasPublished{
                 }
                 var res = Array.prototype.splice.apply(published, arguments);
                 eventedRows.forEach(function (aEventedRow) {
-                    aEventedRow.@com.bearsoft.rowset.Row::fireChangesOfOppositeCollections();
-                    aEventedRow.@com.bearsoft.rowset.Row::fireChangesOfOppositeScalars();
+                    aEventedRow.@com.bearsoft.rowset.Row::fireChangesOfOppositeCollections()();
+                    aEventedRow.@com.bearsoft.rowset.Row::fireChangesOfOppositeScalars()();
                 });
                 return res;
             }
@@ -290,8 +290,8 @@ public class Entity implements RowsetListener, HasPublished{
                 }
                 var res = Array.prototype.unshift.apply(published, arguments);
                 eventedRows.forEach(function (aEventedRow) {
-                    aEventedRow.@com.bearsoft.rowset.Row::fireChangesOfOppositeCollections();
-                    aEventedRow.@com.bearsoft.rowset.Row::fireChangesOfOppositeScalars();
+                    aEventedRow.@com.bearsoft.rowset.Row::fireChangesOfOppositeCollections()();
+                    aEventedRow.@com.bearsoft.rowset.Row::fireChangesOfOppositeScalars()();
                 });
                 return res;
             }
