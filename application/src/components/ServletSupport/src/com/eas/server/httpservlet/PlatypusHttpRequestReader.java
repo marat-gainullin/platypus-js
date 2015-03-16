@@ -37,6 +37,7 @@ import java.sql.Types;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
@@ -166,7 +167,9 @@ public class PlatypusHttpRequestReader implements PlatypusRequestVisitor {
             String paramValue = aRequest.getParameter(param.getName());
             if (paramValue != null && !"null".equals(paramValue.toLowerCase()) && !paramValue.isEmpty()) {
                 if (param.getTypeInfo().getSqlType() == Types.DATE || param.getTypeInfo().getSqlType() == Types.TIMESTAMP || param.getTypeInfo().getSqlType() == Types.TIME) {
-                    param.setValue(new SimpleDateFormat(RowsetJsonConstants.DATE_FORMAT).parse(paramValue));
+                    SimpleDateFormat sdf = new SimpleDateFormat(RowsetJsonConstants.DATE_FORMAT);
+                    sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    param.setValue(sdf.parse(paramValue));
                 } else if (param.getTypeInfo().getSqlType() == Types.BOOLEAN || param.getTypeInfo().getSqlType() == Types.BIT) {
                     param.setValue("true".equalsIgnoreCase(paramValue));
                 } else {

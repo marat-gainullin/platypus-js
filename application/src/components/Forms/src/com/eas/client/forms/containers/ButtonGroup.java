@@ -11,7 +11,7 @@ import com.eas.client.forms.components.rt.HasGroup;
 import com.eas.client.forms.HasJsName;
 import com.eas.client.forms.Widget;
 import com.eas.client.forms.events.ActionEvent;
-import com.eas.client.forms.events.ChangeEvent;
+import com.eas.client.forms.events.ItemEvent;
 import com.eas.client.forms.events.ComponentEvent;
 import com.eas.client.forms.events.MouseEvent;
 import com.eas.client.forms.components.rt.ButtonGroupWrapper;
@@ -31,7 +31,6 @@ import java.awt.event.ContainerAdapter;
 import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
 import java.awt.event.FocusEvent;
-import java.awt.event.ItemEvent;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,15 +50,17 @@ public class ButtonGroup extends ButtonGroupWrapper implements HasPublished, Has
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
-            + " * Creates a multiple-exclusion scope for a set of buttons.\n"
+            + " * Creates a multiple-exclusion scope for a set of radio or toggle buttons or for a menu item with radio button.\n"
             + "  * Creating a set of buttons with the same <code>ButtonGroup</code> object means that turning \"on\" one of those buttons turns off all other buttons in the group.\n"
             + " */";
 
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {})
     public ButtonGroup() {
         super();
-        super.addItemListener((ItemEvent e) -> {
-            fireItemSelected();
+        super.addItemListener((java.awt.event.ItemEvent e) -> {
+            Object oItem = e.getItem();
+            JSObject jsItem = oItem instanceof HasPublished ? ((HasPublished) oItem).getPublished() : null;
+            fireItemSelected(jsItem);
         });
     }
 
@@ -294,7 +295,7 @@ public class ButtonGroup extends ButtonGroupWrapper implements HasPublished, Has
             + "/**\n"
             + " * Event that is fired when one of the components is selected in this group.\n"
             + " */")
-    @EventMethod(eventClass = ChangeEvent.class)
+    @EventMethod(eventClass = ItemEvent.class)
     public JSObject getOnItemSelected() {
         return onItemSelected;
     }
@@ -420,13 +421,13 @@ public class ButtonGroup extends ButtonGroupWrapper implements HasPublished, Has
     @Override
     public void clearSelection() {
         super.clearSelection();
-        fireItemSelected();
+        fireItemSelected((JSObject) null);
     }
 
-    private void fireItemSelected() {
+    private void fireItemSelected(JSObject aNewSelectionItem) {
         if (onItemSelected != null) {
             try {
-                onItemSelected.call(getPublished(), new Object[]{new ChangeEvent(new javax.swing.event.ChangeEvent(this)).getPublished()});
+                onItemSelected.call(getPublished(), new Object[]{new ItemEvent(this, aNewSelectionItem).getPublished()});
             } catch (Exception ex) {
                 Logger.getLogger(CardPane.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -721,7 +722,7 @@ public class ButtonGroup extends ButtonGroupWrapper implements HasPublished, Has
     public void setOnComponentRemoved(JSObject aValue) {
         eventsProxy.getHandlers().put(ControlEventsIProxy.componentRemoved, aValue);
     }
-    
+
     // published parent
     @ScriptFunction(name = "parent", jsDoc = PARENT_JSDOC)
     @Override

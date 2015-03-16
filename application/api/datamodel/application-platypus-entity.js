@@ -26,6 +26,9 @@
             get: function() {
                 var value = delegate.cursor;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.cursor = P.boxAsJava(aValue);
             }
         });
         if(!P.ApplicationPlatypusEntity){

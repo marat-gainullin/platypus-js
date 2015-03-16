@@ -279,7 +279,12 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 	@Override
 	public void onResize() {
 		tabs.onResize();
-		updateScrolls();
+		Scheduler.get().scheduleDeferred(new ScheduledCommand(){
+			@Override
+			public void execute() {
+				updateScrolls();
+			}
+		});
 	}
 
 	protected int calcNewScrollRightPosition() {

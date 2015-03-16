@@ -10,7 +10,7 @@ import com.eas.client.forms.HasContainerEvents;
 import com.eas.client.forms.HasJsName;
 import com.eas.client.forms.Widget;
 import com.eas.client.forms.events.ActionEvent;
-import com.eas.client.forms.events.ChangeEvent;
+import com.eas.client.forms.events.ItemEvent;
 import com.eas.client.forms.events.ComponentEvent;
 import com.eas.client.forms.events.MouseEvent;
 import com.eas.client.forms.events.rt.ControlEventsIProxy;
@@ -59,7 +59,9 @@ public class TabbedPane extends JTabbedPane implements HasPublished, HasContaine
     protected ChangeListener tabsChangeListener = (javax.swing.event.ChangeEvent e) -> {
         if (onItemSelected != null) {
             try {
-                onItemSelected.call(getPublished(), new Object[]{new ChangeEvent(e).getPublished()});
+                JComponent oItem = TabbedPane.this.getSelectedComponent();
+                JSObject jsItem = oItem instanceof HasPublished ? ((HasPublished)oItem).getPublished() : null;
+                onItemSelected.call(getPublished(), new Object[]{new ItemEvent(e.getSource(), jsItem).getPublished()});
             } catch (Exception ex) {
                 Logger.getLogger(TabbedPane.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -304,7 +306,7 @@ public class TabbedPane extends JTabbedPane implements HasPublished, HasContaine
             + "/**\n"
             + " * Event that is fired when one of the components is selected in this tabbed pane.\n"
             + " */")
-    @EventMethod(eventClass = ChangeEvent.class)
+    @EventMethod(eventClass = ItemEvent.class)
     @Undesignable
     public JSObject getOnItemSelected() {
         return onItemSelected;

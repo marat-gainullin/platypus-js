@@ -5,7 +5,7 @@
     });
     
     /**
-     * Creates a multiple-exclusion scope for a set of buttons.
+     * Creates a multiple-exclusion scope for a set of radio or toggle buttons or for a menu item with radio button.
      * Creating a set of buttons with the same <code>ButtonGroup</code> object means that turning "on" one of those buttons turns off all other buttons in the group.
      * @constructor ButtonGroup ButtonGroup
      */

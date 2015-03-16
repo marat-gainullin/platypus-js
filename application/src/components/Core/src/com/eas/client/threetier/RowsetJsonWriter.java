@@ -8,6 +8,7 @@ import com.bearsoft.rowset.metadata.Fields;
 import com.eas.util.JSONUtils;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 
 /**
  *
@@ -62,7 +63,9 @@ public class RowsetJsonWriter {
                 case Types.TIME:
                 case Types.DATE:
                 case Types.TIMESTAMP:
-                    sValue = JSONUtils.s((new SimpleDateFormat(RowsetJsonConstants.DATE_FORMAT)).format(aValue)).toString();
+                    SimpleDateFormat sdf = new SimpleDateFormat(RowsetJsonConstants.DATE_FORMAT);
+                    sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    sValue = JSONUtils.s(sdf.format(aValue)).toString();
                     break;
                 case Types.CHAR:
                 case Types.NCHAR:

@@ -19,6 +19,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -28,13 +29,15 @@ import org.junit.Test;
  */
 public class PlatypusRequestHttpReaderTest {
 
-    protected static final String WRITTEN_CHANGES = "[{\"kind\":\"insert\", \"entity\":\"testEntity\", \"data\":{\"data\\\"\\\"1\":56, \"data2\":\"data2Value\", \"da\\\"ta3\":true, \"data4\":false, \"data5\":\"1346067735514\"}},{\"kind\":\"update\", \"entity\":\"testEntity\", \"data\":{\"data\\\"\\\"1\":56, \"data2\":\"data2Value\", \"da\\\"ta3\":true, \"data4\":false, \"data5\":\"2012-08-27T15:42:15.514Z\"}, \"keys\":{\"key1\":78.9000015258789, \"key2\":\"key2Value\"}},{\"kind\":\"delete\", \"entity\":\"testEntity\", \"keys\":{\"key1\":78.9000015258789, \"key2\":\"key2Value\"}},{\"kind\":\"command\", \"entity\":\"testEntity\", \"parameters\":{\"key1\":78.9000015258789, \"key2\":\"key2Value\"}}]";
+    protected static final String WRITTEN_CHANGES = "[{\"kind\":\"insert\", \"entity\":\"testEntity\", \"data\":{\"data\\\"\\\"1\":56, \"data2\":\"data2Value\", \"da\\\"ta3\":true, \"data4\":false, \"data5\":\"1346067735514\"}},{\"kind\":\"update\", \"entity\":\"testEntity\", \"data\":{\"data\\\"\\\"1\":56, \"data2\":\"data2Value\", \"da\\\"ta3\":true, \"data4\":false, \"data5\":\"2012-08-27T11:42:15.514Z\"}, \"keys\":{\"key1\":78.9000015258789, \"key2\":\"key2Value\"}},{\"kind\":\"delete\", \"entity\":\"testEntity\", \"keys\":{\"key1\":78.9000015258789, \"key2\":\"key2Value\"}},{\"kind\":\"command\", \"entity\":\"testEntity\", \"parameters\":{\"key1\":78.9000015258789, \"key2\":\"key2Value\"}}]";
 
     @Test
     public void timeStampReadTest() throws ParseException {
         System.out.println("timeStampRedTest with millis");
-        Date dt = new SimpleDateFormat(RowsetJsonConstants.DATE_FORMAT).parse("2012-03-05T23:45:02.305Z");
-        assertEquals(1330976702305L, dt.getTime());
+        SimpleDateFormat sdf = new SimpleDateFormat(RowsetJsonConstants.DATE_FORMAT);
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        Date dt = sdf.parse("2012-03-05T23:45:02.305Z");
+        assertEquals(1330991102305L, dt.getTime());
     }
 
     @Test
@@ -135,6 +138,10 @@ public class PlatypusRequestHttpReaderTest {
         assertEquals(v1.type.getSqlType(), v2.type.getSqlType());
         assertEquals(v1.type.getSqlTypeName(), v2.type.getSqlTypeName());
         assertEquals(v1.type.getJavaClassName(), v2.type.getJavaClassName());
+        if(v1.value != null && !v1.value.equals(v2.value)){
+            int h = 0;
+            h++;
+        }
         assertEquals(v1.value, v2.value);
     }
 }

@@ -47,9 +47,7 @@ import com.bearsoft.org.netbeans.modules.form.FormProperty;
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.*;
 import java.awt.*;
 import java.beans.*;
-import java.lang.reflect.Method;
 import javax.swing.JSplitPane;
-import org.openide.ErrorManager;
 
 /**
  * Dedicated layout support class for JSplitPane.
@@ -57,12 +55,7 @@ import org.openide.ErrorManager;
  * @author Tomas Pavek
  */
 public class SplitPaneSupport extends AbstractLayoutSupport {
-/*
-    private static Method setLeftComponentMethod;
-    private static Method setRightComponentMethod;
-    private static Method setTopComponentMethod;
-    private static Method setBottomComponentMethod;
-*/
+
     /**
      * Gets the supported layout manager class - JSplitPane.
      *
@@ -212,20 +205,17 @@ public class SplitPaneSupport extends AbstractLayoutSupport {
             Container containerDelegate,
             Component[] components,
             int index) {
-        if (!(container instanceof JSplitPane)) {
-            return;
-        }
+        if (container instanceof JSplitPane) {
+            for (int i = 0; i < components.length; i++) {
+                JSplitPane splitPane = (JSplitPane) container;
 
-        for (int i = 0; i < components.length; i++) {
-            JSplitPane splitPane = (JSplitPane) container;
-
-            int descPos = convertPosition(getConstraints(i + index));
-            if (descPos == 0) {
-                splitPane.setLeftComponent(components[i]);
-            } else if (descPos == 1) {
-                splitPane.setRightComponent(components[i]);
+                int descPos = convertPosition(getConstraints(i + index));
+                if (descPos == 0) {
+                    splitPane.setLeftComponent(components[i]);
+                } else if (descPos == 1) {
+                    splitPane.setRightComponent(components[i]);
+                }
             }
-
         }
     }
 
@@ -247,29 +237,6 @@ public class SplitPaneSupport extends AbstractLayoutSupport {
         }
         return super.removeComponentFromContainer(container, containerDelegate, component);
     }
-
-    /**
-     * Removes all components from given real container.
-     *
-     * @param container instance of a real container to be cleared
-     * @param containerDelegate effective container delegate of the container
-     * (e.g. like content pane of JFrame)
-     * @return whether it was possible to clear the container (some containers
-     * may not support this)
-     */
-    /*
-    @Override
-    public boolean clearContainer(Container container,
-            Container containerDelegate) {
-        // don't remove components which are a default part of JSplitPane
-        JSplitPane splitPane = (JSplitPane) container;
-        // left/top component has already been set -> remove it
-        removeComponentFromContainer(container, containerDelegate, splitPane.getLeftComponent());
-        // right/bottom component has already been set -> remove it
-        removeComponentFromContainer(container, containerDelegate, splitPane.getRightComponent());
-        return true;
-    }
-    */
 
     @Override
     protected LayoutConstraints<?> createDefaultConstraints() {
@@ -315,45 +282,6 @@ public class SplitPaneSupport extends AbstractLayoutSupport {
             return orientation == JSplitPane.HORIZONTAL_SPLIT
                     ? JSplitPane.RIGHT : JSplitPane.BOTTOM;
         }
-    }
-/*
-    // --------
-    private static Method getSetLeftComponentMethod() {
-        if (setLeftComponentMethod == null) {
-            setLeftComponentMethod = getAddMethod("setLeftComponent"); // NOI18N
-        }
-        return setLeftComponentMethod;
-    }
-
-    private static Method getSetRightComponentMethod() {
-        if (setRightComponentMethod == null) {
-            setRightComponentMethod = getAddMethod("setRightComponent"); // NOI18N
-        }
-        return setRightComponentMethod;
-    }
-
-    private static Method getSetTopComponentMethod() {
-        if (setTopComponentMethod == null) {
-            setTopComponentMethod = getAddMethod("setTopComponent"); // NOI18N
-        }
-        return setTopComponentMethod;
-    }
-
-    private static Method getSetBottomComponentMethod() {
-        if (setBottomComponentMethod == null) {
-            setBottomComponentMethod = getAddMethod("setBottomComponent"); // NOI18N
-        }
-        return setBottomComponentMethod;
-    }
-*/
-    private static Method getAddMethod(String name) {
-        try {
-            return JSplitPane.class.getMethod(name,
-                    new Class<?>[]{Component.class});
-        } catch (NoSuchMethodException ex) { // should not happen
-            ErrorManager.getDefault().notify(ex);
-        }
-        return null;
     }
 
     // -----------

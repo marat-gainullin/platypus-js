@@ -33,9 +33,10 @@ public class CursorPropertySelectionReflector implements SelectionChangeEvent.Ha
 	}
 
 	public static native void scrollTo(JavaScriptObject aThis, JavaScriptObject aTarget)/*-{
-		if (aThis.scrollTo)
-			aThis.scrollTo(aTarget);
-		else if (typeof aThis.cursor != 'undefined')
+//		if (aThis.scrollTo)
+//			aThis.scrollTo(aTarget);
+//		else
+		if (typeof aThis.cursor != 'undefined')
 			aThis.cursor = aTarget;
 	}-*/;
 }

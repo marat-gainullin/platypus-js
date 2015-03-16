@@ -14,6 +14,8 @@ public abstract class RowMarkerCell extends AbstractCell<Object> {
 		super();
 	}
 
+	public abstract String getCursorProperty();
+	
 	public abstract JavaScriptObject getRowsData();
 	
 	@Override
@@ -24,7 +26,7 @@ public abstract class RowMarkerCell extends AbstractCell<Object> {
 		StringBuilder rightClasses = new StringBuilder();
 		rightClasses.append(RowMarkerResources.INSTANCE.style().rowMarkerRight());
 		JavaScriptObject rows = getRowsData();
-		boolean currentRow = rows != null && rows.<JsObject>cast().getJs("cursor") == value;
+		boolean currentRow = rows != null && rows.<JsObject>cast().getJs(getCursorProperty()) == value;
 		if (currentRow)
 			rightClasses.append(" ").append(RowMarkerResources.INSTANCE.style().rowMarkerCurrent());
 		/*

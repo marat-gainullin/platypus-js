@@ -32,8 +32,7 @@ public class JsEvents {
 					return aSource;
 				}
 			});
-		};
-		
+		};		
 		$wnd.P.CursorPositionWillChangeEvent = function(aSource, aOldIndex, aNewIndex){
 			Object.defineProperty(this, "source", {
 				get : function(){
@@ -286,6 +285,19 @@ public class JsEvents {
 				}
 			});
 		};
+		$wnd.P.ItemEvent = function(aSource, aItem){
+			Object.defineProperty(this, "source", {
+				get : function(){
+					return aSource;
+				}
+			});
+			Object.defineProperty(this, "item", {
+				get : function(){
+					return aItem;
+				}
+			});
+		};
+		
 		$wnd.P.ComponentEvent = function(aEvent){
 			Object.defineProperty(this, "source", {
 				get : function() {
@@ -323,6 +335,10 @@ public class JsEvents {
 		return new $wnd.P.PublishedSourcedEvent(aSource);
 	}-*/;	
 	
+	public native static JavaScriptObject publishItemEvent(JavaScriptObject aSource, JavaScriptObject aItem)/*-{
+		return new $wnd.P.ItemEvent(aSource, aItem);
+	}-*/;	
+
 	public native static JavaScriptObject publishCursorPositionWillChangeEvent(JavaScriptObject aSource, int aOldIndex, int aNewIndex)/*-{
 		return new $wnd.P.CursorPositionWillChangeEvent(aSource, aOldIndex, aNewIndex);
 	}-*/;	

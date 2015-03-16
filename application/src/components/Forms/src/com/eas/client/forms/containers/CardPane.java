@@ -10,7 +10,7 @@ import com.eas.client.forms.HasContainerEvents;
 import com.eas.client.forms.HasJsName;
 import com.eas.client.forms.Widget;
 import com.eas.client.forms.events.ActionEvent;
-import com.eas.client.forms.events.ChangeEvent;
+import com.eas.client.forms.events.ItemEvent;
 import com.eas.client.forms.events.ComponentEvent;
 import com.eas.client.forms.events.MouseEvent;
 import com.eas.client.forms.events.rt.ControlEventsIProxy;
@@ -30,7 +30,6 @@ import java.awt.event.ContainerAdapter;
 import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
 import java.awt.event.FocusEvent;
-import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -49,9 +48,11 @@ import jdk.nashorn.api.scripting.JSObject;
 public class CardPane extends JPanel implements HasPublished, HasContainerEvents, HasChildren, HasPublishedInvalidatableCollection, HasJsName, Widget {
 
     protected JSObject onItemSelected;
-    protected ItemListener cardsChangeListener = (ItemEvent e) -> {
+    protected ItemListener cardsChangeListener = (java.awt.event.ItemEvent e) -> {
         try {
-            onItemSelected.call(getPublished(), new Object[]{new ChangeEvent(new javax.swing.event.ChangeEvent(CardPane.this)).getPublished()});
+            Object oItem = e.getItem();
+            JSObject jsItem = oItem instanceof HasPublished ? ((HasPublished)oItem).getPublished() : null;
+            onItemSelected.call(getPublished(), new Object[]{new ItemEvent(CardPane.this, jsItem).getPublished()});
         } catch (Exception ex) {
             Logger.getLogger(CardPane.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -311,7 +312,7 @@ public class CardPane extends JPanel implements HasPublished, HasContainerEvents
             + "/**\n"
             + " * Event that is fired when one of the components is selected in this card pane.\n"
             + " */")
-    @EventMethod(eventClass = ChangeEvent.class)
+    @EventMethod(eventClass = ItemEvent.class)
     public JSObject getOnItemSelected() {
         return onItemSelected;
     }

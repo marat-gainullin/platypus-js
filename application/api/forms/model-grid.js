@@ -374,10 +374,30 @@
              */
             P.ModelGrid.prototype.onMouseWheelMoved = {};
         }
+        Object.defineProperty(this, "cursorProperty", {
+            get: function() {
+                var value = delegate.cursorProperty;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.cursorProperty = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * Determines wich property of ModelGrid's collection is responsible of "current" item. Its default value is "cursor".
+             * @property cursorProperty
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.cursorProperty = '';
+        }
         Object.defineProperty(this, "field", {
             get: function() {
                 var value = delegate.field;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.field = P.boxAsJava(aValue);
             }
         });
         if(!P.ModelGrid){
@@ -725,6 +745,23 @@
              * @memberOf ModelGrid
              */
             P.ModelGrid.prototype.parentField = '';
+        }
+        Object.defineProperty(this, "onItemSelected", {
+            get: function() {
+                var value = delegate.onItemSelected;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onItemSelected = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * Event that is fired when selection lead changes in this ModelGrid.
+             * @property onItemSelected
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.onItemSelected = {};
         }
         Object.defineProperty(this, "component", {
             get: function() {

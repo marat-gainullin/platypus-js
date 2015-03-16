@@ -62,10 +62,10 @@ public class CardLayout extends java.awt.CardLayout {
     @Override
     public void show(Container parent, String name) {
         super.show(parent, name);
-        fireStateChanged();
+        fireStateChanged(getComponent(name));
     }
 
-    protected void fireStateChanged() {
+    protected void fireStateChanged(Component aItem) {
         
         ItemEvent e = new ItemEvent(new ItemSelectable() {
 
@@ -83,7 +83,7 @@ public class CardLayout extends java.awt.CardLayout {
             public void removeItemListener(ItemListener l) {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
-        }, 0, null, 0);
+        }, 0, aItem, 0);
         changeListeners.stream().forEach((l) -> {
             l.itemStateChanged(e);
         });

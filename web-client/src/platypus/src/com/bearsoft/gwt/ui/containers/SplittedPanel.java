@@ -7,7 +7,6 @@ package com.bearsoft.gwt.ui.containers;
 
 import com.bearsoft.gwt.ui.XElement;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -22,6 +21,11 @@ public class SplittedPanel extends SplitLayoutPanel {
 		getElement().<XElement>cast().addResizingTransitionEnd(this);
 	}
 
+	public SplittedPanel(int aSplitterSize) {
+		super(aSplitterSize);
+		getElement().<XElement>cast().addResizingTransitionEnd(this);
+	}
+	
 	@Override
 	public void insert(Widget child, Direction direction, double size, Widget before) {
 		super.insert(child, direction, size, before);
@@ -36,8 +40,7 @@ public class SplittedPanel extends SplitLayoutPanel {
 	@Override
 	protected void onAttach() {
 		super.onAttach();
-		forceLayout();// GWT animations are deprecated because of browser's
-		// transitions
+		forceLayout();// GWT animations are deprecated because of CSS3 transitions
 	}
 
 }

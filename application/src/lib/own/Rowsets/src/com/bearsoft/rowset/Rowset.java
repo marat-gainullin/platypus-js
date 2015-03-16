@@ -861,12 +861,12 @@ public class Rowset {
         if (toInsert.getColumnCount() != fields.getFieldsCount()) {
             throw new RowsetException("Bad column count. While inserting, columns count in a row must same with fields count in rowset fields.");
         }
-        toInsert.setLog(log);
-        toInsert.setEntityName(flow != null ? flow.getEntityId() : "");
         if (rowsetChangeSupport.fireWillInsertEvent(toInsert, aAjusting)) {
             insertingRow = toInsert;
             try {
                 initColumns(insertingRow, initingValues);
+                toInsert.setLog(log);
+                toInsert.setEntityName(flow != null ? flow.getEntityId() : "");
                 insertingRow.setInserted();
                 // work on current rows vector, probably filtered
                 current.add(insertAt - 1, insertingRow);

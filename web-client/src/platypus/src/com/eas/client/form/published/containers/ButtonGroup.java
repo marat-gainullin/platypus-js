@@ -29,7 +29,7 @@ public class ButtonGroup extends RadioGroup implements HasJsFacade, HasAddHandle
 
 	protected String name;
 	protected JavaScriptObject published;
-	protected JavaScriptObject itemSelected;
+	protected JavaScriptObject onItemSelected;
 
 	public ButtonGroup() {
 		super();
@@ -37,11 +37,10 @@ public class ButtonGroup extends RadioGroup implements HasJsFacade, HasAddHandle
 
 			@Override
 			public void onSelection(SelectionEvent<UIObject> event) {
-				if (itemSelected != null) {
+				if (onItemSelected != null) {
 					try {
-						JavaScriptObject jso = published;
-						String n = name;
-						Utils.executeScriptEventVoid(published, itemSelected, JsEvents.publishSourcedEvent(published));
+						JavaScriptObject jsItem = event.getSelectedItem() instanceof HasPublished ? ((HasPublished)event.getSelectedItem()).getPublished() : null; 
+						Utils.executeScriptEventVoid(published, onItemSelected, JsEvents.publishItemEvent(published, jsItem));
 					} catch (Exception e) {
 						Logger.getLogger(EventsExecutor.class.getName()).log(Level.SEVERE, null, e);
 					}
@@ -52,11 +51,11 @@ public class ButtonGroup extends RadioGroup implements HasJsFacade, HasAddHandle
 	}
 
 	public JavaScriptObject getItemSelected() {
-		return itemSelected;
+		return onItemSelected;
 	}
 
 	public void setItemSelected(JavaScriptObject aValue) {
-		itemSelected = aValue;
+		onItemSelected = aValue;
 	}
 
 	@Override

@@ -2,6 +2,8 @@ package com.eas.client.form.published.widgets.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.gwt.ui.widgets.grid.Grid;
@@ -15,7 +17,6 @@ import com.bearsoft.gwt.ui.widgets.grid.header.HeaderSplitter;
 import com.bearsoft.gwt.ui.widgets.grid.processing.IndexOfProvider;
 import com.bearsoft.gwt.ui.widgets.grid.processing.ListMultiSortHandler;
 import com.bearsoft.gwt.ui.widgets.grid.processing.TreeDataProvider;
-import com.bearsoft.gwt.ui.widgets.grid.processing.TreeDataProvider.ExpandedCollapsedHandler;
 import com.bearsoft.gwt.ui.widgets.grid.processing.TreeMultiSortHandler;
 import com.bearsoft.rowset.Utils;
 import com.bearsoft.rowset.Utils.JsObject;
@@ -24,6 +25,8 @@ import com.bearsoft.rowset.beans.PropertyChangeListener;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.JavaScriptObjectKeyProvider;
+import com.eas.client.form.events.CollapsedHandler;
+import com.eas.client.form.events.ExpandedHandler;
 import com.eas.client.form.events.HasHideHandlers;
 import com.eas.client.form.events.HasShowHandlers;
 import com.eas.client.form.events.HideEvent;
@@ -43,6 +46,7 @@ import com.eas.client.form.grid.rows.JsDataContainer;
 import com.eas.client.form.grid.selection.CheckBoxesEventTranslator;
 import com.eas.client.form.grid.selection.HasSelectionLead;
 import com.eas.client.form.grid.selection.MultiJavaScriptObjectSelectionModel;
+import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.published.HasBinding;
 import com.eas.client.form.published.HasComponentPopupMenu;
 import com.eas.client.form.published.HasEventsExecutor;
@@ -68,8 +72,11 @@ import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
+import com.google.gwt.event.logical.shared.HasSelectionHandlers;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
@@ -78,6 +85,7 @@ import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SetSelectionModel;
 
@@ -88,7 +96,7 @@ import com.google.gwt.view.client.SetSelectionModel;
  * 
  */
 public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, HasOnRender, HasComponentPopupMenu, HasEventsExecutor, HasEnabled, HasShowHandlers, HasHideHandlers, HasResizeHandlers,
-        HasBinding {
+        HasBinding, HasSelectionHandlers<JavaScriptObject> {
 
 	protected boolean enabled = true;
 	protected EventsExecutor eventsExecutor;
@@ -102,7 +110,10 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 	protected String field;
 	protected HandlerRegistration boundToData;
 	protected HandlerRegistration boundToCursor;
+	protected String cursorProperty = "cursor";
 	protected JavaScriptObject onRender;
+	protected JavaScriptObject onExpand;
+	protected JavaScriptObject onCollapse;
 	protected PublishedComponent published;
 	protected FindWindow finder;
 	protected String groupName = "group-name-" + Document.get().createUniqueId();
@@ -111,6 +122,7 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 	protected ListHandler<JavaScriptObject> sortHandler;
 	protected HandlerRegistration sortHandlerReg;
 	protected HandlerRegistration positionSelectionHandler;
+	protected HandlerRegistration onSelectEventSelectionHandler;
 	protected boolean editable;
 	protected boolean deletable;
 	protected boolean insertable;
@@ -259,6 +271,7 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 	}
 
 	protected boolean redrawQueued;
+
 	private void enqueueRedraw() {
 		redrawQueued = true;
 		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
@@ -272,7 +285,7 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 			}
 		});
 	}
-	
+
 	protected void applyRows() {
 		unbindCursor();
 		if (sortHandlerReg != null)
@@ -313,15 +326,33 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 				JsArrayTreeDataProvider treeDataProvider = new JsArrayTreeDataProvider(parentField, childrenField, onResize);
 				setDataProvider(treeDataProvider);
 				sortHandler = new TreeMultiSortHandler<>(treeDataProvider, onSort);
-				treeDataProvider.addExpandedCollapsedHandler(new ExpandedCollapsedHandler<JavaScriptObject>() {
+				treeDataProvider.addExpandedHandler(new ExpandedHandler<JavaScriptObject>() {
 					@Override
 					public void expanded(JavaScriptObject anElement) {
 						ColumnSortEvent.fire(ModelGrid.this, sortList);
+						if (onExpand != null) {
+							JavaScriptObject jsEvent = JsEvents.publishItemEvent(ModelGrid.this.published, anElement);
+							try {
+								Utils.executeScriptEventVoid(ModelGrid.this.published, onExpand, jsEvent);
+							} catch (Exception e) {
+								Logger.getLogger(EventsExecutor.class.getName()).log(Level.SEVERE, null, e);
+							}
+						}
 					}
 
+				});
+				treeDataProvider.addCollapsedHandler(new CollapsedHandler<JavaScriptObject>() {
 					@Override
 					public void collapsed(JavaScriptObject anElement) {
 						ColumnSortEvent.fire(ModelGrid.this, sortList);
+						if (onCollapse != null) {
+							JavaScriptObject jsEvent = JsEvents.publishItemEvent(ModelGrid.this.published, anElement);
+							try {
+								Utils.executeScriptEventVoid(ModelGrid.this.published, onCollapse, jsEvent);
+							} catch (Exception e) {
+								Logger.getLogger(EventsExecutor.class.getName()).log(Level.SEVERE, null, e);
+							}
+						}
 					}
 
 				});
@@ -335,7 +366,7 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 			}
 			sortHandlerReg = addColumnSortHandler(sortHandler);
 			((JsDataContainer) getDataProvider()).setData(jsData);
-			boundToCursor = Utils.listen(jsData, "cursor", new PropertyChangeListener() {
+			boundToCursor = Utils.listen(jsData, cursorProperty, new PropertyChangeListener() {
 
 				@Override
 				public void propertyChange(PropertyChangeEvent evt) {
@@ -479,6 +510,10 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 	@Override
 	public HandlerRegistration addShowHandler(ShowHandler handler) {
 		return addHandler(handler, ShowEvent.getType());
+	}
+
+	public HandlerRegistration addSelectionHandler(SelectionHandler<JavaScriptObject> handler) {
+		return addHandler(handler, SelectionEvent.getType());
 	}
 
 	@Override
@@ -638,7 +673,7 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 				TreeExpandableCell<JavaScriptObject, ?> treeCell = (TreeExpandableCell<JavaScriptObject, ?>) treeIndicatorColumn.getCell();
 				treeCell.setDataProvider((TreeDataProvider<JavaScriptObject>) dataProvider);
 			}
-		}else{
+		} else {
 			if (treeIndicatorColumn != null && treeIndicatorColumn.getCell() instanceof TreeExpandableCell<?, ?>) {
 				TreeExpandableCell<JavaScriptObject, ?> treeCell = (TreeExpandableCell<JavaScriptObject, ?>) treeIndicatorColumn.getCell();
 				treeCell.setDataProvider(null);
@@ -688,7 +723,9 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		super.showColumn(aColumn);
 		ModelColumn colFacade = (ModelColumn) aColumn;
 		colFacade.updateVisible(true);
-		enqueueRedraw(); // because of AbstractCellTable.isInteractive crazy updating while rendering instead of updating it while show/hide columns
+		enqueueRedraw(); // because of AbstractCellTable.isInteractive crazy
+		                 // updating while rendering instead of updating it
+		                 // while show/hide columns
 	}
 
 	public void hideColumn(Column<JavaScriptObject, ?> aColumn) {
@@ -742,11 +779,13 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 	}
 
 	@Override
-	public void setSelectionModel(SelectionModel<JavaScriptObject> aValue) {
+	public void setSelectionModel(final SelectionModel<JavaScriptObject> aValue) {
 		SelectionModel<? super JavaScriptObject> oldValue = getSelectionModel();
 		if (aValue != oldValue) {
 			if (positionSelectionHandler != null)
 				positionSelectionHandler.removeHandler();
+			if (onSelectEventSelectionHandler != null)
+				onSelectEventSelectionHandler.removeHandler();
 			CellPreviewEvent.Handler<JavaScriptObject> eventsManager = GridSelectionEventManager.<JavaScriptObject> create(new CheckBoxesEventTranslator<JavaScriptObject>());
 			headerLeft.setSelectionModel(aValue, eventsManager);
 			headerRight.setSelectionModel(aValue, eventsManager);
@@ -756,8 +795,22 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 			scrollableRight.setSelectionModel(aValue, eventsManager);
 			if (aValue != null) {
 				Object oData = field != null && !field.isEmpty() ? Utils.getPathData(data, field) : data;
-				if (oData instanceof JavaScriptObject)
+				if (oData instanceof JavaScriptObject) {
 					positionSelectionHandler = aValue.addSelectionChangeHandler(new CursorPropertySelectionReflector((JavaScriptObject) oData, aValue));
+					onSelectEventSelectionHandler = aValue.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+						@Override
+						public void onSelectionChange(SelectionChangeEvent event) {
+							if (aValue instanceof HasSelectionLead<?>) {
+								try {
+									JavaScriptObject lead = ((HasSelectionLead<JavaScriptObject>) aValue).getLead();
+									SelectionEvent.fire(ModelGrid.this, lead);
+								} catch (Exception e) {
+									Logger.getLogger(CursorPropertySelectionReflector.class.getName()).log(Level.SEVERE, e.getMessage());
+								}
+							}
+						}
+					});
+				}
 			}
 		}
 	}
@@ -883,6 +936,14 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 				aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::setOddRowsColor(Lcom/eas/client/form/published/PublishedColor;)(aValue);
 			}
 		});
+		Object.defineProperty(aPublished, "cursorProperty", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::getCursorProperty()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::setCursorProperty(Ljava/lang/String;)(aValue ? '' + aValue : null);
+			}
+		});
 
 		Object.defineProperty(aPublished, "onRender", {
 			get : function() {
@@ -890,6 +951,22 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 			},
 			set : function(aValue) {
 				aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::setOnRender(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+			}
+		});
+		Object.defineProperty(aPublished, "onExpand", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::getOnExpand()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::setOnExpand(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+			}
+		});
+		Object.defineProperty(aPublished, "onCollapse", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::getOnCollapse()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::setOnCollapse(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 			}
 		});
 		Object.defineProperty(aPublished, "selected", {
@@ -950,6 +1027,34 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 
 	public void setOnRender(JavaScriptObject aValue) {
 		onRender = aValue;
+	}
+
+	public JavaScriptObject getOnExpand() {
+		return onExpand;
+	}
+
+	public void setOnExpand(JavaScriptObject aValue) {
+		onExpand = aValue;
+	}
+
+	public JavaScriptObject getOnCollapse() {
+		return onCollapse;
+	}
+
+	public void setOnCollapse(JavaScriptObject aValue) {
+		onCollapse = aValue;
+	}
+
+	public String getCursorProperty() {
+		return cursorProperty;
+	}
+
+	public void setCursorProperty(String aValue) {
+		if (aValue != null && !cursorProperty.equals(aValue)) {
+			unbind();
+			cursorProperty = aValue;
+			bind();
+		}
 	}
 
 	public void selectElement(JavaScriptObject aElement) {
