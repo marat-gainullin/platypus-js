@@ -2,6 +2,8 @@ package com.eas.client.form.published.widgets.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.gwt.ui.widgets.grid.Grid;
@@ -68,8 +70,11 @@ import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
+import com.google.gwt.event.logical.shared.HasSelectionHandlers;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
@@ -78,6 +83,7 @@ import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SetSelectionModel;
 
@@ -88,7 +94,7 @@ import com.google.gwt.view.client.SetSelectionModel;
  * 
  */
 public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, HasOnRender, HasComponentPopupMenu, HasEventsExecutor, HasEnabled, HasShowHandlers, HasHideHandlers, HasResizeHandlers,
-        HasBinding {
+        HasBinding, HasSelectionHandlers<JavaScriptObject> {
 
 	protected boolean enabled = true;
 	protected EventsExecutor eventsExecutor;
@@ -111,6 +117,7 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 	protected ListHandler<JavaScriptObject> sortHandler;
 	protected HandlerRegistration sortHandlerReg;
 	protected HandlerRegistration positionSelectionHandler;
+	protected HandlerRegistration onSelectEventSelectionHandler;
 	protected boolean editable;
 	protected boolean deletable;
 	protected boolean insertable;
@@ -259,6 +266,7 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 	}
 
 	protected boolean redrawQueued;
+
 	private void enqueueRedraw() {
 		redrawQueued = true;
 		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
@@ -272,7 +280,7 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 			}
 		});
 	}
-	
+
 	protected void applyRows() {
 		unbindCursor();
 		if (sortHandlerReg != null)
@@ -481,6 +489,10 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		return addHandler(handler, ShowEvent.getType());
 	}
 
+	public HandlerRegistration addSelectionHandler(SelectionHandler<JavaScriptObject> handler) {
+		return addHandler(handler, SelectionEvent.getType());
+	}
+
 	@Override
 	public void setVisible(boolean visible) {
 		boolean oldValue = isVisible();
@@ -638,7 +650,7 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 				TreeExpandableCell<JavaScriptObject, ?> treeCell = (TreeExpandableCell<JavaScriptObject, ?>) treeIndicatorColumn.getCell();
 				treeCell.setDataProvider((TreeDataProvider<JavaScriptObject>) dataProvider);
 			}
-		}else{
+		} else {
 			if (treeIndicatorColumn != null && treeIndicatorColumn.getCell() instanceof TreeExpandableCell<?, ?>) {
 				TreeExpandableCell<JavaScriptObject, ?> treeCell = (TreeExpandableCell<JavaScriptObject, ?>) treeIndicatorColumn.getCell();
 				treeCell.setDataProvider(null);
@@ -688,7 +700,9 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		super.showColumn(aColumn);
 		ModelColumn colFacade = (ModelColumn) aColumn;
 		colFacade.updateVisible(true);
-		enqueueRedraw(); // because of AbstractCellTable.isInteractive crazy updating while rendering instead of updating it while show/hide columns
+		enqueueRedraw(); // because of AbstractCellTable.isInteractive crazy
+						 // updating while rendering instead of updating it
+						 // while show/hide columns
 	}
 
 	public void hideColumn(Column<JavaScriptObject, ?> aColumn) {
@@ -742,11 +756,13 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 	}
 
 	@Override
-	public void setSelectionModel(SelectionModel<JavaScriptObject> aValue) {
+	public void setSelectionModel(final SelectionModel<JavaScriptObject> aValue) {
 		SelectionModel<? super JavaScriptObject> oldValue = getSelectionModel();
 		if (aValue != oldValue) {
 			if (positionSelectionHandler != null)
 				positionSelectionHandler.removeHandler();
+			if (onSelectEventSelectionHandler != null)
+				onSelectEventSelectionHandler.removeHandler();
 			CellPreviewEvent.Handler<JavaScriptObject> eventsManager = GridSelectionEventManager.<JavaScriptObject> create(new CheckBoxesEventTranslator<JavaScriptObject>());
 			headerLeft.setSelectionModel(aValue, eventsManager);
 			headerRight.setSelectionModel(aValue, eventsManager);
@@ -756,8 +772,22 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 			scrollableRight.setSelectionModel(aValue, eventsManager);
 			if (aValue != null) {
 				Object oData = field != null && !field.isEmpty() ? Utils.getPathData(data, field) : data;
-				if (oData instanceof JavaScriptObject)
+				if (oData instanceof JavaScriptObject){
 					positionSelectionHandler = aValue.addSelectionChangeHandler(new CursorPropertySelectionReflector((JavaScriptObject) oData, aValue));
+					onSelectEventSelectionHandler = aValue.addSelectionChangeHandler(new SelectionChangeEvent.Handler(){
+						@Override
+						public void onSelectionChange(SelectionChangeEvent event) {
+							if (aValue instanceof HasSelectionLead<?>) {
+								try {
+									JavaScriptObject lead = ((HasSelectionLead<JavaScriptObject>) aValue).getLead();
+									SelectionEvent.fire(ModelGrid.this, lead);
+								} catch (Exception e) {
+									Logger.getLogger(CursorPropertySelectionReflector.class.getName()).log(Level.SEVERE, e.getMessage());
+								}
+							}
+						}
+					});
+				}
 			}
 		}
 	}

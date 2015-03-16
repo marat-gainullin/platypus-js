@@ -146,7 +146,7 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 			StyledListBox<JavaScriptObject> box = (StyledListBox<JavaScriptObject>) decorated;
 			box.setSelectedIndex(-1);
 			box.clear();
-			box.addItem("...", keyForNullValue, null, "");
+			box.addItem(calcLabel(null), keyForNullValue, null, "");
 			box.setSelectedIndex(0);
 			injected = null;
 			boolean valueMet = false;
@@ -179,7 +179,7 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 	}
 
 	public String calcLabel(JavaScriptObject aValue) {
-		String label = aValue != null ? new StringValueConverter().convert(Utils.getPathData(aValue, displayField)) : "";
+		String label = aValue != null ? new StringValueConverter().convert(Utils.getPathData(aValue, displayField)) : "...";
 		PublishedCell cell = ControlsUtils.calcValuedPublishedCell(published, onRender, aValue, label != null ? label : "", null);
 		if (cell != null && cell.getDisplay() != null && !cell.getDisplay().isEmpty()) {
 			label = cell.getDisplay();

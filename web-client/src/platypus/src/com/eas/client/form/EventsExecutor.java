@@ -201,7 +201,7 @@ public class EventsExecutor {
 	public JavaScriptObject getKeyReleased() {
 		return keyReleased;
 	}
-	
+
 	public JavaScriptObject getValueChanged() {
 		return valueChanged;
 	}
@@ -238,7 +238,7 @@ public class EventsExecutor {
 
 	public void setActionPerformed(JavaScriptObject aValue) {
 		if (actionPerformed != aValue) {
-			if (actionPerformedReg != null){
+			if (actionPerformedReg != null) {
 				actionPerformedReg.removeHandler();
 				actionPerformedReg = null;
 			}
@@ -719,16 +719,19 @@ public class EventsExecutor {
 					@Override
 					public void onSelection(SelectionEvent<Object> event) {
 						JavaScriptObject published = ((HasPublished) event.getSource()).getPublished();
-						executeEvent(itemSelected, JsEvents.publishSourcedEvent(published));
+						Object oItem = event.getSelectedItem();
+						if(oItem instanceof HasPublished)
+							oItem = ((HasPublished)oItem).getPublished();
+						executeEvent(itemSelected, JsEvents.publishItemEvent(published, oItem instanceof JavaScriptObject ? (JavaScriptObject) oItem : null));
 					}
 
 				});
 			}
 		}
 	}
-	
+
 	protected HandlerRegistration valueChangedReg;
-	
+
 	public void setValueChanged(JavaScriptObject aValue) {
 		if (valueChanged != aValue) {
 			if (valueChangedReg != null) {
@@ -738,14 +741,14 @@ public class EventsExecutor {
 			valueChanged = aValue;
 			if (component instanceof HasValueChangeHandlers<?>) {
 				valueChangedReg = ((HasValueChangeHandlers<Object>) component).addValueChangeHandler(new ValueChangeHandler<Object>() {
-					
+
 					@Override
 					public void onValueChange(ValueChangeEvent<Object> event) {
 						JavaScriptObject published = ((HasPublished) event.getSource()).getPublished();
 						executeEvent(valueChanged, JsEvents.publishSourcedEvent(published));
 					}
 				});
-				
+
 			}
 		}
 	}
