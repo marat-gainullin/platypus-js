@@ -5,18 +5,18 @@ try {
     load('classpath:common-utils/color.js');
     load('classpath:common-utils/cursor.js');
     load('classpath:common-utils/font.js');
-    printf('common-utils API loaded.');
+    print('common-utils API loaded.');
 } catch (e) {
-    printf('common-utils API skipped.');
+    print('common-utils API skipped.');
 }
 
 try {
     load('classpath:core/platypus-principal.js');
     load('classpath:core/published-sourced-event.js');
     load('classpath:core/report.js');
-    printf('core API loaded.');
+    print('core API loaded.');
 } catch (e) {
-    printf('core API skipped.');
+    print('core API skipped.');
 }
 
 try {
@@ -29,9 +29,9 @@ try {
     load('classpath:datamodel/entity-instance-change-event.js');
     load('classpath:datamodel/entity-instance-delete-event.js');
     load('classpath:datamodel/entity-instance-insert-event.js');
-    printf('datamodel API loaded.');
+    print('datamodel API loaded.');
 } catch (e) {
-    printf('datamodel API skipped.');
+    print('datamodel API skipped.');
 }
 
 try {
@@ -90,23 +90,23 @@ try {
     load('classpath:forms/tool-bar.js');
     load('classpath:forms/value-change-event.js');
     load('classpath:forms/window-event.js');
-    printf('forms API loaded.');
+    print('forms API loaded.');
 } catch (e) {
-    printf('forms API skipped.');
+    print('forms API skipped.');
 }
 
 try {
     load('classpath:grid/cell-data.js');
-    printf('grid API loaded.');
+    print('grid API loaded.');
 } catch (e) {
-    printf('grid API skipped.');
+    print('grid API skipped.');
 }
 
 try {
     load('classpath:reports/report-template.js');
-    printf('reports API loaded.');
+    print('reports API loaded.');
 } catch (e) {
-    printf('reports API skipped.');
+    print('reports API skipped.');
 }
 
 try {
@@ -118,7 +118,7 @@ try {
     load('classpath:rowsets/insert.js');
     load('classpath:rowsets/parameter.js');
     load('classpath:rowsets/update.js');
-    printf('rowsets API loaded.');
+    print('rowsets API loaded.');
 } catch (e) {
-    printf('rowsets API skipped.');
+    print('rowsets API skipped.');
 }

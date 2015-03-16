@@ -5,9 +5,9 @@ try {
     load('classpath:core/platypus-principal.js');
     load('classpath:core/published-sourced-event.js');
     load('classpath:core/report.js');
-    printf('core API loaded.');
+    print('core API loaded.');
 } catch (e) {
-    printf('core API skipped.');
+    print('core API skipped.');
 }
 
 try {
@@ -20,16 +20,16 @@ try {
     load('classpath:datamodel/entity-instance-change-event.js');
     load('classpath:datamodel/entity-instance-delete-event.js');
     load('classpath:datamodel/entity-instance-insert-event.js');
-    printf('datamodel API loaded.');
+    print('datamodel API loaded.');
 } catch (e) {
-    printf('datamodel API skipped.');
+    print('datamodel API skipped.');
 }
 
 try {
     load('classpath:reports/report-template.js');
-    printf('reports API loaded.');
+    print('reports API loaded.');
 } catch (e) {
-    printf('reports API skipped.');
+    print('reports API skipped.');
 }
 
 try {
@@ -41,29 +41,29 @@ try {
     load('classpath:rowsets/insert.js');
     load('classpath:rowsets/parameter.js');
     load('classpath:rowsets/update.js');
-    printf('rowsets API loaded.');
+    print('rowsets API loaded.');
 } catch (e) {
-    printf('rowsets API skipped.');
+    print('rowsets API skipped.');
 }
 
 try {
     load('classpath:http-context.js');
-    printf('http-context API loaded.');
+    print('http-context API loaded.');
 } catch (e) {
-    printf('http-context API skipped.');
+    print('http-context API skipped.');
 }
 
 try {
     load('classpath:server/session.js');
-    printf('server API loaded.');
+    print('server API loaded.');
 } catch (e) {
-    printf('server API skipped.');
+    print('server API skipped.');
 }
 
 try {
     load('classpath:servlet-support/web-socket-client-session.js');
     load('classpath:servlet-support/web-socket-server-session.js');
-    printf('servlet-support API loaded.');
+    print('servlet-support API loaded.');
 } catch (e) {
-    printf('servlet-support API skipped.');
+    print('servlet-support API skipped.');
 }

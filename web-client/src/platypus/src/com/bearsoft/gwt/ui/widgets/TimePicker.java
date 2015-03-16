@@ -23,11 +23,16 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
+import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HasText;
+import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -36,7 +41,7 @@ import com.google.gwt.user.datepicker.client.CalendarUtil;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.user.datepicker.client.DatePicker;
 
-public class TimePicker extends Composite {
+public class TimePicker extends Composite implements  HasValue<Date>, HasValueChangeHandlers<Date> {
 
 	protected FlowPanel timePickerContainer = new FlowPanel();
 	protected FlowPanel widgetContainer = new FlowPanel();
@@ -63,18 +68,12 @@ public class TimePicker extends Composite {
 	private int componentHeight = 20;
 	private boolean isShowing = false;
 	FlowPanel dateBlock;
-	private DatePicker datePicker;
-	private Date currentDate;
+	private Date currentDate; //для хранения и отображения текущей даты
 	
 	protected static TimePickerConstants constants = GWT.create(TimePickerConstants.class);
 	
 	public TimePicker(){
-		this(null);
-	}
-	
-	public TimePicker(DatePicker dtPicker){
 		super();
-		datePicker = dtPicker;
 		timePickerContainer.getElement().getStyle().setPosition(Position.ABSOLUTE);
 		timePickerContainer.getElement().getStyle().setHeight(0, Style.Unit.PX);
 		timePickerContainer.getElement().getStyle().setProperty("width", "auto");
@@ -162,7 +161,7 @@ public class TimePicker extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				hour = updateUpValue(txtHour,hour,maxHourVal);
-				datePicker.setValue(new Date());
+				ValueChangeEvent.fire(TimePicker.this, getValue());
 			}
 		}, ClickEvent.getType());
 		
@@ -170,6 +169,7 @@ public class TimePicker extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				minute = updateUpValue(txtMinute,minute,maxMinuteVal);
+				ValueChangeEvent.fire(TimePicker.this, getValue());
 			}
 		}, ClickEvent.getType());
 
@@ -177,6 +177,7 @@ public class TimePicker extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				second = updateUpValue(txtSecond,second,maxSecondVal);
+				ValueChangeEvent.fire(TimePicker.this, getValue());
 			}
 		}, ClickEvent.getType());
 		
@@ -184,6 +185,7 @@ public class TimePicker extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				hour = updateDownValue(txtHour,hour,maxHourVal);
+				ValueChangeEvent.fire(TimePicker.this, getValue());
 			}
 		}, ClickEvent.getType());
 		
@@ -191,6 +193,7 @@ public class TimePicker extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				minute = updateDownValue(txtMinute,minute,maxMinuteVal);
+				ValueChangeEvent.fire(TimePicker.this, getValue());
 			}
 		}, ClickEvent.getType());
 
@@ -198,6 +201,7 @@ public class TimePicker extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				second = updateDownValue(txtSecond,second,maxSecondVal);
+				ValueChangeEvent.fire(TimePicker.this, getValue());
 			}
 		}, ClickEvent.getType());
 		
@@ -205,18 +209,21 @@ public class TimePicker extends Composite {
 			@Override
 			public void onValueChange(ValueChangeEvent<Integer> event) {
 				hour = updateValue(txtHour, hour, maxHourVal);
+				ValueChangeEvent.fire(TimePicker.this, getValue());
 			}
 		});
 		txtMinute.addValueChangeHandler(new ValueChangeHandler<Integer>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<Integer> event) {
 				minute = updateValue(txtMinute, minute, maxMinuteVal);
+				ValueChangeEvent.fire(TimePicker.this, getValue());
 			}
 		});
 		txtSecond.addValueChangeHandler(new ValueChangeHandler<Integer>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<Integer> event) {
 				second = updateValue(txtSecond, second, maxSecondVal);
+				ValueChangeEvent.fire(TimePicker.this, getValue());
 			}
 		});
 		
@@ -225,10 +232,12 @@ public class TimePicker extends Composite {
 			public void onKeyDown(KeyDownEvent event) {
 				if (event.isUpArrow()){
 					hour = updateUpValue(txtHour,hour,maxHourVal);
+					ValueChangeEvent.fire(TimePicker.this, getValue());
 					return;
 				}
 				if (event.isDownArrow()){
 					hour = updateDownValue(txtHour,hour,maxHourVal);
+					ValueChangeEvent.fire(TimePicker.this, getValue());
 					return;
 				}
 			}
@@ -239,10 +248,12 @@ public class TimePicker extends Composite {
 			public void onKeyDown(KeyDownEvent event) {
 				if (event.isUpArrow()){
 					minute = updateUpValue(txtMinute,minute,maxMinuteVal);
+					ValueChangeEvent.fire(TimePicker.this, getValue());
 					return;
 				}
 				if (event.isDownArrow()){
 					minute = updateDownValue(txtMinute,minute,maxMinuteVal);
+					ValueChangeEvent.fire(TimePicker.this, getValue());
 					return;
 				}
 			}
@@ -253,10 +264,12 @@ public class TimePicker extends Composite {
 			public void onKeyDown(KeyDownEvent event) {
 				if (event.isUpArrow()){
 					second = updateUpValue(txtSecond,second,maxSecondVal);
+					ValueChangeEvent.fire(TimePicker.this, getValue());
 					return;
 				}
 				if (event.isDownArrow()){
 					second = updateDownValue(txtSecond,second,maxSecondVal);
+					ValueChangeEvent.fire(TimePicker.this, getValue());
 					return;
 				}
 			}
@@ -271,32 +284,19 @@ public class TimePicker extends Composite {
 	private void showDate(){
 		DateTimeFormat fmt = DateTimeFormat.getFormat("dd:MM:yyyy");
 		if (currentDate == null){
-			txtHour.setText(""); 
-			txtMinute.setText("");
-			txtSecond.setText("");
-			hour = minute = second = 0;
 			dateBlock.getElement().setInnerText(constants.date());
 		}else{
-			txtHour.setValue(currentDate.getHours());
-			txtMinute.setValue(currentDate.getMinutes());
-			txtSecond.setValue(currentDate.getSeconds());
 			dateBlock.getElement().setInnerText(constants.date() + fmt.format(currentDate));
 		}
-		
-		
+		txtHour.setValue(hour);
+		txtMinute.setValue(minute);
+		txtSecond.setValue(second);
 	}
 	
 	public void show(){
 		showDate();
 		setHeight(100,Style.Unit.PCT);
 		isShowing = true;
-		
-//		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-//			@Override
-//			public void execute() {
-//				txtHour.setFocus(true);
-//			}
-//		});
 	}
 	
 	public void hide(){
@@ -308,21 +308,12 @@ public class TimePicker extends Composite {
 		return isShowing;
 	}
 	
-	public void setValue(Date aDate){
-		currentDate = aDate;
-		hour = currentDate.getHours();
-		minute = currentDate.getMinutes();
-		second = currentDate.getSeconds();
-	}
-	
 	public Date getValue(){
-		if (txtHour.getValue()==null | txtMinute.getValue()==null | txtSecond.getValue()==null){
+		if (this.currentDate==null){
 			return null;
+		}else{
+			return new Date(hour*60*60*1000 + minute*60*1000 + second*1000);
 		}
-		currentDate.setHours(txtHour.getValue());
-		currentDate.setMinutes(txtMinute.getValue());
-		currentDate.setSeconds(txtSecond.getValue());
-		return CalendarUtil.copyDate(currentDate);
 	}
 
 	private int updateValue(IntegerBox aInput, int aVal, int maxVal){
@@ -347,7 +338,6 @@ public class TimePicker extends Composite {
 		if (aVal>maxVal){
 			aVal=0;
 		}
-		
 		aInput.setValue(aVal);
 		return aVal;
 	}
@@ -390,6 +380,37 @@ public class TimePicker extends Composite {
 			separator.getElement().getStyle().setVisibility(Visibility.HIDDEN);
 		}
 		return separator;
+	}
+
+	@Override
+	public HandlerRegistration addValueChangeHandler(
+			ValueChangeHandler<Date> handler) {
+		 return addHandler(handler, ValueChangeEvent.getType());
+	}
+	
+	public void setValue(Date aDate){
+		setValue(aDate,false);
+	}
+	
+	@Override
+	public void setValue(Date value, boolean fireEvents) {
+		this.currentDate = value;
+		if (value ==null){
+			hour = 0;
+			minute = 0;
+			second = 0;
+			return;
+		}else{
+			hour = value.getHours();
+			minute = value.getMinutes();
+			second = value.getSeconds();
+		}
+			txtHour.setValue(hour);
+			txtMinute.setValue(minute);
+			txtSecond.setValue(second);
+			if (fireEvents){
+				ValueChangeEvent.fire(TimePicker.this, getValue());
+			}
 	}
 
 }

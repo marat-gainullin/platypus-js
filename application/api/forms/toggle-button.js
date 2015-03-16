@@ -336,23 +336,6 @@
              */
             P.ToggleButton.prototype.onMouseEntered = {};
         }
-        Object.defineProperty(this, "selected", {
-            get: function() {
-                var value = delegate.selected;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.selected = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ToggleButton){
-            /**
-             * The state of the button.
-             * @property selected
-             * @memberOf ToggleButton
-             */
-            P.ToggleButton.prototype.selected = true;
-        }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
                 var value = delegate.toolTipText;
@@ -370,19 +353,22 @@
              */
             P.ToggleButton.prototype.toolTipText = '';
         }
-        Object.defineProperty(this, "element", {
+        Object.defineProperty(this, "selected", {
             get: function() {
-                var value = delegate.element;
+                var value = delegate.selected;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.selected = P.boxAsJava(aValue);
             }
         });
         if(!P.ToggleButton){
             /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
+             * The state of the button.
+             * @property selected
              * @memberOf ToggleButton
              */
-            P.ToggleButton.prototype.element = {};
+            P.ToggleButton.prototype.selected = true;
         }
         Object.defineProperty(this, "height", {
             get: function() {
@@ -400,6 +386,20 @@
              * @memberOf ToggleButton
              */
             P.ToggleButton.prototype.height = 0;
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ToggleButton){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf ToggleButton
+             */
+            P.ToggleButton.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -503,23 +503,6 @@
              */
             P.ToggleButton.prototype.onComponentHidden = {};
         }
-        Object.defineProperty(this, "nextFocusableComponent", {
-            get: function() {
-                var value = delegate.nextFocusableComponent;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.nextFocusableComponent = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ToggleButton){
-            /**
-             * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
-             * @property nextFocusableComponent
-             * @memberOf ToggleButton
-             */
-            P.ToggleButton.prototype.nextFocusableComponent = {};
-        }
         Object.defineProperty(this, "iconTextGap", {
             get: function() {
                 var value = delegate.iconTextGap;
@@ -537,22 +520,22 @@
              */
             P.ToggleButton.prototype.iconTextGap = 0;
         }
-        Object.defineProperty(this, "onActionPerformed", {
+        Object.defineProperty(this, "nextFocusableComponent", {
             get: function() {
-                var value = delegate.onActionPerformed;
+                var value = delegate.nextFocusableComponent;
                 return P.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
+                delegate.nextFocusableComponent = P.boxAsJava(aValue);
             }
         });
         if(!P.ToggleButton){
             /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
+             * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
+             * @property nextFocusableComponent
              * @memberOf ToggleButton
              */
-            P.ToggleButton.prototype.onActionPerformed = {};
+            P.ToggleButton.prototype.nextFocusableComponent = {};
         }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
@@ -570,6 +553,23 @@
              * @memberOf ToggleButton
              */
             P.ToggleButton.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ToggleButton){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf ToggleButton
+             */
+            P.ToggleButton.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
