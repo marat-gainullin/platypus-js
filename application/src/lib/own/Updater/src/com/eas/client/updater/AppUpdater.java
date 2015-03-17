@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JOptionPane;
 import org.w3c.dom.Document;
 
 /**
@@ -21,10 +20,40 @@ public class AppUpdater {
     private String fNameConfig = "";
     private String configUrl = "";
     private String appFilesUrl = "";
-    private String runAppParams = null;
+    private String runAppParams;
     private String fileTmpUpdate = "";
     private String startDir = "";
-    private UpdProgress updVis;
+    private ProgressView progressView;
+
+    /**
+     *
+     * @param fNameCfg
+     * @param cfgUrl
+     * @param appFlsUrl public AppUpdater(String fNameCfg, String cfgUrl, String
+     * appFlsUrl) { fNameConfig = FileUpdater.fixFileSeparatorChar(fNameCfg);
+     * configUrl = cfgUrl; appFilesUrl = appFlsUrl; fileTmpUpdate = ""; startDir
+     * = ""; }
+     */
+    /**
+     *
+     * @param fNameCfg
+     * @param cfgUrl
+     * @param appFlsUrl
+     * @param homeDir
+     * @param tmpFileName
+     */
+    public AppUpdater(String fNameCfg, String cfgUrl, String appFlsUrl, String homeDir, String tmpFileName) {
+        fNameConfig = FileUpdater.fixFileSeparatorChar(fNameCfg);
+        configUrl = cfgUrl;
+        appFilesUrl = appFlsUrl;
+        fileTmpUpdate = tmpFileName;
+        startDir = homeDir;
+    }
+
+    public AppUpdater(String fNameCfg, String cfgUrl, String appFlsUrl, String homeDir, String tmpFileName, ProgressView aPView) {
+        this(fNameCfg, cfgUrl, appFlsUrl, homeDir, tmpFileName);
+        progressView = aPView;
+    }
 
     /**
      * @return The fnameconfig.
@@ -62,56 +91,17 @@ public class AppUpdater {
     }
 
     /**
-     * @param appFilesUrl The application files url to set.
+     * @param aValue The application files url to set.
      */
-    public void setAppFilesUrl(String appFilesUrl) {
-        this.appFilesUrl = appFilesUrl;
-    }
-
-    /**
-     *
-     * @param fNameCfg
-     * @param cfgUrl
-     * @param appFlsUrl
-     */
-    public AppUpdater(String fNameCfg, String cfgUrl, String appFlsUrl) {
-        fNameConfig = FileUpdater.fixFileSeparatorChar(fNameCfg);
-        configUrl = cfgUrl;
-        appFilesUrl = appFlsUrl;
-        fileTmpUpdate = "";
-        startDir = "";
-    }
-
-    /**
-     *
-     * @param fNameCfg
-     * @param cfgUrl
-     * @param appFlsUrl
-     * @param homeDir
-     * @param tmpFileName
-     */
-    public AppUpdater(String fNameCfg, String cfgUrl, String appFlsUrl, String homeDir, String tmpFileName) {
-        fNameConfig = FileUpdater.fixFileSeparatorChar(fNameCfg);
-        configUrl = cfgUrl;
-        appFilesUrl = appFlsUrl;
-        fileTmpUpdate = tmpFileName;
-        startDir = homeDir;
-    }
-
-    /**
-     *
-     */
-    public AppUpdater() {
-        fNameConfig = "";
-        configUrl = "";
-        appFilesUrl = "";
+    public void setAppFilesUrl(String aValue) {
+        appFilesUrl = aValue;
     }
 
     /**
      *
      * @return
      */
-    public int checkNewVersion() {
+    public byte checkNewVersion() {
         if ((!"".equals(fNameConfig)) && (!"".equals(configUrl))) {
             try {
                 File f = new File(fNameConfig);
@@ -123,8 +113,7 @@ public class AppUpdater {
                     if (in != null) {// Successfull version file download.
                         Document docto = XMLVersion.getDocumentFile(fNameConfig);
                         Document docfrom = XMLVersion.getDocumentStream(in);
-                        int idx = XMLVersion.compareDocumentsNodeEx(docto, docfrom);
-                        return idx;
+                        return XMLVersion.compareDocumentsNodeEx(docto, docfrom);
                     } else {// download failed
                         Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.SEVERE, String.format(Updater.res.getString("fileNotLoad"), configUrl));
                         return UpdaterConstants.ERROR;
@@ -145,7 +134,7 @@ public class AppUpdater {
     /**
      *
      */
-    public void doUpdateEx() {
+    public void update() {
         if ((!"".equals(fNameConfig)) && (!"".equals(configUrl)) && (!"".equals(appFilesUrl))) {
             try {
                 Document docto = XMLVersion.getDocumentFile(fNameConfig);
@@ -157,20 +146,21 @@ public class AppUpdater {
                     Document docfrom = XMLVersion.getDocumentStream(in);
                     Version vTo = XMLVersion.getDocVersion(docto);
                     Version vFrom = XMLVersion.getDocVersion(docfrom);
-                    if ((updVis != null) && (vTo != null) && (vFrom != null)) {
-                        updVis.getVersion().setText(String.format(Updater.res.getString("captionDetail"), vTo.toString(), vFrom.toString()));
-                        updVis.run();
+                    if ((progressView != null) && (vTo != null) && (vFrom != null)) {
+                        byte vDifference = vFrom.compareTo(vTo);
+                        progressView.getVersion().setText(String.format(Updater.res.getString("captionDetail"), vTo.toString(), vFrom.toString()));
+                        progressView.setVisible(true);
+                        FileUpdater fu = new FileUpdater(appFilesUrl, startDir, vDifference == UpdaterConstants.MINOR_NOT_EQUALS);
+                        if (progressView != null) {
+                            fu.setUpdVis(progressView);
+                        }
+                        if (fu.update(fileTmpUpdate)) {
+                            df.saveDocument(docfrom, fNameConfig);
+                        }
+                        progressView.dispose();
                     } else {
                         Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.WARNING, "One of version object is null!!!");
                     }
-                    FileUpdater fu = new FileUpdater(appFilesUrl, startDir);
-                    if (updVis != null) {
-                        fu.setUpdVis(updVis);
-                    }
-                    if (fu.update(fileTmpUpdate)) {
-                        df.saveDocument(docfrom, fNameConfig);
-                    }
-                    updVis.dispose();
                 } else {
                     Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.SEVERE, String.format(Updater.res.getString("fileNotLoad"), configUrl));
                 }
@@ -225,14 +215,8 @@ public class AppUpdater {
     /**
      * @return the updvis
      */
-    public UpdProgress getUpdVis() {
-        return updVis;
+    public ProgressView getProgressView() {
+        return progressView;
     }
 
-    /**
-     * @param aValue the updvis to set
-     */
-    public void setUpdVis(UpdProgress aValue) {
-        updVis = aValue;
-    }
 }

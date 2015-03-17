@@ -59,16 +59,16 @@ public class XMLVersion {
      * @param from document with files release on server
      * @return NodeList list of different nodes
      */
-    public static int compareDocumentsNodeEx(Document to, Document from) {
+    public static byte compareDocumentsNodeEx(Document to, Document from) {
         try {
             if ((to == null) || (from == null)) {
                 Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.ALL, Updater.res.getString("nullNode"));
-                return UpdaterConstants.FATAL_NOT_EQUALS;
+                return UpdaterConstants.MAJOR_NOT_EQUALS;
             }
             Node node = from.getFirstChild();
             if (!UpdaterConstants.ROOT_NAME.equalsIgnoreCase(node.getNodeName())) {
                 Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.ALL, Updater.res.getString("xmlDocError"));
-                return UpdaterConstants.FATAL_NOT_EQUALS;
+                return UpdaterConstants.MAJOR_NOT_EQUALS;
             }
             Node nd;
             NodeList toNds;
@@ -82,13 +82,13 @@ public class XMLVersion {
             nName = nd.getNodeName();
             toNds = to.getElementsByTagName(nName);
             if (toNds.getLength() <= 0) {
-                return UpdaterConstants.FATAL_NOT_EQUALS;
+                return UpdaterConstants.MAJOR_NOT_EQUALS;
             }
             toNd = toNds.item(0);
             return compareNodesByVersion(toNd, nd);
         } catch (Exception e) {
             Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.ALL, e.getLocalizedMessage(), e);
-            return UpdaterConstants.FATAL_NOT_EQUALS;
+            return UpdaterConstants.MAJOR_NOT_EQUALS;
         }
     }
 
@@ -116,16 +116,16 @@ public class XMLVersion {
      * @param from node with files release on server
      * @return int value 
      */
-    public static int compareNodesByVersion(Node to, Node from) {
+    public static byte compareNodesByVersion(Node to, Node from) {
         try {
             if ((to == null) || (from == null)) {
-                return UpdaterConstants.FATAL_NOT_EQUALS;
+                return UpdaterConstants.MAJOR_NOT_EQUALS;
             }
             Version verTo = getNodeVersion(to);
             return getNodeVersion(from).compareTo(verTo);
         } catch (Exception e) {
             Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.ALL, e.getStackTrace()[0].toString());
-            return UpdaterConstants.FATAL_NOT_EQUALS;
+            return UpdaterConstants.MAJOR_NOT_EQUALS;
         }
     }
 

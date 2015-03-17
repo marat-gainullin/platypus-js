@@ -25,20 +25,10 @@ public class FileUpdater {
     private final String PWC_DIRECTORY = "bin/pwc/";
     private String hostToFiles = "";
     private String curDir = "";
-    private UpdProgress updVis = null;
+    private ProgressView progressView;
+    private boolean replaceMode;
 
     /**
-     * Creator
-     *
-     * @param host
-     */
-    public FileUpdater(String host) {
-        hostToFiles = host;
-        curDir = "";
-    }
-
-    /**
-     * Creator
      *
      * @param host
      * @param path
@@ -48,6 +38,11 @@ public class FileUpdater {
         curDir = path;
     }
 
+    public FileUpdater(String host, String path, boolean aReplaceMode) {
+        this(host, path);
+        replaceMode = aReplaceMode;
+    }
+    
     /**
      * Fixes the file sperator char for the target platform using the following
      * replacement.
@@ -87,15 +82,15 @@ public class FileUpdater {
                     String curFName;
                     Enumeration entries = zf.entries();
                     int cnt = 0;
-                    if (updVis != null) {
-                        updVis.getProgress().setValue(0);
-                        updVis.getProgress().setMinimum(0);
+                    if (progressView != null) {
+                        progressView.getProgress().setValue(0);
+                        progressView.getProgress().setMinimum(0);
                         Enumeration entr = zf.entries();
                         while (entr.hasMoreElements()) {
                             cnt++;
                             entr.nextElement();
                         }
-                        updVis.getProgress().setMaximum(cnt);
+                        progressView.getProgress().setMaximum(cnt);
                     }
                     cnt = 0;
                     String pwcDirName = fixFileSeparatorChar(curDir + PWC_DIRECTORY);
@@ -119,7 +114,7 @@ public class FileUpdater {
                                     Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.WARNING, String.format(Updater.res.getString("couldNotCreateFile"), ff.getName()));
                                 }
                             } else {
-                                if (curFName.contains(UpdaterConstants.UPDATER_FIND_LABEL)) {
+                                if (replaceMode || curFName.contains(UpdaterConstants.UPDATER_FIND_LABEL)) {
                                     ff.createNewFile();
                                 }
                                 if (ff.exists()) {
@@ -137,8 +132,8 @@ public class FileUpdater {
                             }
                         }
                         cnt++;
-                        if (updVis != null) {
-                            updVis.getProgress().setValue(cnt);
+                        if (progressView != null) {
+                            progressView.getProgress().setValue(cnt);
                         }
                     }
                 }
@@ -154,8 +149,8 @@ public class FileUpdater {
             if (f.exists()) {
                 f.delete();
             }
-            if (updVis != null) {
-                updVis.getProgress().setValue(0);
+            if (progressView != null) {
+                progressView.getProgress().setValue(0);
             }
         }
     }
@@ -182,21 +177,21 @@ public class FileUpdater {
             if (aPakageLocalFileName == null || aPakageLocalFileName.isEmpty()) {
                 aPakageLocalFileName = UpdaterConstants.TMP_FILE;
             }
-            if (updVis != null) {
-                updVis.getProgress().setString(Updater.res.getString("operationDownload"));
-                updVis.getStep().setText("1/2");
+            if (progressView != null) {
+                progressView.getProgress().setString(Updater.res.getString("operationDownload"));
+                progressView.getStep().setText("1/2");
             }
             DownloadFile df = new DownloadFile(hostToFiles, aPakageLocalFileName);
-            if (updVis != null) {
-                df.setUpdVis(updVis);
+            if (progressView != null) {
+                df.setUpdVis(progressView);
             }
             df.setShowReplaceDlg(false);
             df.setShowProgress(true);
             boolean res = df.downloadFileHttpLink();
             if (res) {
-                if (updVis != null) {
-                    updVis.getProgress().setString(Updater.res.getString("operationUnZip"));
-                    updVis.getStep().setText("2/2");
+                if (progressView != null) {
+                    progressView.getProgress().setString(Updater.res.getString("operationUnZip"));
+                    progressView.getStep().setText("2/2");
                 }
                 return unPackZip(aPakageLocalFileName);
             } else {
@@ -240,14 +235,14 @@ public class FileUpdater {
     /**
      * @return the updvis
      */
-    public UpdProgress getUpdVis() {
-        return updVis;
+    public ProgressView getUpdVis() {
+        return progressView;
     }
 
     /**
      * @param updVis the updvis to set
      */
-    public void setUpdVis(UpdProgress updVis) {
-        this.updVis = updVis;
+    public void setUpdVis(ProgressView updVis) {
+        this.progressView = updVis;
     }
 }

@@ -21,7 +21,6 @@ import javax.swing.UnsupportedLookAndFeelException;
 public class Updater {
 
     public static final ResourceBundle res = ResourceBundle.getBundle(Updater.class.getPackage().getName() + ".updatermessages");
-    public static UpdProgress upd = null;
     private static String cFUrl = "http://olympic.altsoft.biz/platypus/client/updates/update.xml";
     private static String cFName = "version.xml";
     private static String dsUrl = "http://olympic.altsoft.biz/platypus/client/updates/application.zip";
@@ -41,7 +40,6 @@ public class Updater {
             if (args.length < 13) {
                 System.out.println(UpdaterConstants.ERROR_RUN_COMMAND_FORMAT);
             }
-
             String userHome = System.getProperty("user.home");
             String pathHome = FileUpdater.fixFileSeparatorChar(userHome + "/.platypus/logs/Updater_log.log");
             File logPath = new File(FileUpdater.fixFileSeparatorChar(userHome + "/.platypus/logs"));
@@ -55,47 +53,45 @@ public class Updater {
             } catch (IllegalArgumentException e) {
                 log.log(Level.SEVERE, e.getLocalizedMessage(), e);
             }
-            AppUpdater au = new AppUpdater(cFName, cFUrl, dsUrl, curPath, tmpFile);
             if (!"".equals(command)) {
                 switch (command) {
                     case UpdaterConstants.COMMAND_CHECK_NEW_VERSION: {
-                        int versionEqual = au.checkNewVersion();
-                        byte status = UpdaterConstants.NOT_NEED_UPDATE;
-                        switch (versionEqual) {
-                            case UpdaterConstants.FATAL_NOT_EQUALS: {//Need update from distributive
+                        AppUpdater updater = new AppUpdater(cFName, cFUrl, dsUrl, curPath, tmpFile);
+                        byte checkedStatus = updater.checkNewVersion();
+                        byte neededAction = UpdaterConstants.NOT_NEED_UPDATE;
+                        switch (checkedStatus) {
+                            case UpdaterConstants.MAJOR_NOT_EQUALS: {//Need update from distributive
+                                neededAction = UpdaterConstants.NEED_UPGRADE;
                                 if (!isSilent) {
                                     JOptionPane.showMessageDialog(null, Updater.res.getString("mesDownloadNew"), Updater.res.getString("mesCaption"), JOptionPane.INFORMATION_MESSAGE);
                                 }
-                                status = UpdaterConstants.NEED_UPGRADE;
                                 break;
                             }
-                            case UpdaterConstants.NOT_EQUALS: {// Do you want to automaticaly update?
+                            case UpdaterConstants.MINOR_NOT_EQUALS:
+                            case UpdaterConstants.BUILD_NOT_EQUALS: {// Do you want to automaticaly update?
+                                neededAction = UpdaterConstants.NEED_UPDATE;
                                 if (!isSilent) {
                                     int selection = JOptionPane.showConfirmDialog(null, Updater.res.getString("confirmUpdate"), Updater.res.getString("confirmCaption"), JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-                                    if (selection == JOptionPane.YES_OPTION) {
-                                        status = UpdaterConstants.NEED_UPDATE;
-                                    } else {
-                                        status = UpdaterConstants.NOT_NEED_UPDATE;
+                                    if (selection != JOptionPane.YES_OPTION) {
+                                        neededAction = UpdaterConstants.NOT_NEED_UPDATE;
                                     }
-                                } else {
-                                    status = UpdaterConstants.NEED_UPDATE;
                                 }
                                 break;
                             }
                             case UpdaterConstants.EQUALS: { //Update not need!
-                                status = UpdaterConstants.NOT_NEED_UPDATE;
+                                neededAction = UpdaterConstants.NOT_NEED_UPDATE;
                                 break;
                             }
                         }
-
-                        System.exit(status);
+                        System.exit(neededAction);
                     }
                     case UpdaterConstants.COMMAND_DO_UPDATE: {
-                        upd = new UpdProgress();
-                        upd.setTitle(res.getString("title"));
-                        upd.getCaption().setText(res.getString("caption"));
-                        au.setUpdVis(upd);
-                        au.doUpdateEx();
+                        ProgressView progressView = new ProgressView();
+                        progressView.setTitle(res.getString("title"));
+                        progressView.getCaption().setText(res.getString("caption"));
+                        AppUpdater updater = new AppUpdater(cFName, cFUrl, dsUrl, curPath, tmpFile, progressView);
+                        updater.update();
+                        break;
                     }
                 }
             } else {

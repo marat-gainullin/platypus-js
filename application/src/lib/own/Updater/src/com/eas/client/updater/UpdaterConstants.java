@@ -27,8 +27,9 @@ public class UpdaterConstants {
     public static final String COMMENT = "comment";
     public static final String NEWS = "what_new";
     public static final int EQUALS = 0;
-    public static final int NOT_EQUALS = 2;
-    public static final int FATAL_NOT_EQUALS = 4;
+    public static final int BUILD_NOT_EQUALS = 2;
+    public static final int MINOR_NOT_EQUALS = 3;
+    public static final int MAJOR_NOT_EQUALS = 4;
     
     public static final byte NOT_NEED_UPDATE = 11;
     public static final byte NEED_UPGRADE = 12;

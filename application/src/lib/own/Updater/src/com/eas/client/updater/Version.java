@@ -46,18 +46,18 @@ public class Version {
      * @param obj
      * @return
      */
-    public int compareTo(Version obj) {
+    public byte compareTo(Version obj) {
         if (obj == null) {
-            return UpdaterConstants.FATAL_NOT_EQUALS;
+            return UpdaterConstants.MAJOR_NOT_EQUALS;
         } else {
             if (this.major > obj.getMajor()) {
-                return UpdaterConstants.FATAL_NOT_EQUALS;
+                return UpdaterConstants.MAJOR_NOT_EQUALS;
             } else {
                 if (this.minor > obj.getMinor()) {
-                    return UpdaterConstants.NOT_EQUALS;
+                    return UpdaterConstants.MINOR_NOT_EQUALS;
                 } else {
                     if (this.build > obj.getBuild()) {
-                        return UpdaterConstants.NOT_EQUALS;
+                        return UpdaterConstants.BUILD_NOT_EQUALS;
                     } else {
                         return UpdaterConstants.EQUALS;
                     }
