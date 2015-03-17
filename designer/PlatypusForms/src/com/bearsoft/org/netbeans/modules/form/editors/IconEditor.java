@@ -277,16 +277,21 @@ public class IconEditor extends PropertyEditorSupport implements ExPropertyEdito
     private static final Pattern pattern = Pattern.compile("https?://.*");
 
     public static NbImageIcon iconFromResourceName(PlatypusFormDataObject dataObject, String resName) throws Exception {
-        Matcher htppMatcher = pattern.matcher(resName);
-        if (htppMatcher.matches()) {
-            return new NbImageIcon(dataObject, new URL(resName), TYPE_URL, resName);
-        } else {
-            FileObject fo = dataObject.getProject().getSrcRoot().getFileObject(resName);
-            if (fo != null) {
-                return new NbImageIcon(dataObject, fo.toURL(), TYPE_FILE, resName);
+        if (resName != null && !resName.isEmpty()) {
+            Matcher htppMatcher = pattern.matcher(resName);
+            if (htppMatcher.matches()) {
+                return new NbImageIcon(dataObject, new URL(resName), TYPE_URL, resName);
+            } else {
+                FileObject fo = dataObject.getProject().getSrcRoot().getFileObject(resName);
+                if (fo != null) {
+                    return new NbImageIcon(dataObject, fo.toURL(), TYPE_FILE, resName);
+                }else{
+                    return null;
+                }
             }
+        } else {
+            return null;
         }
-        return null;
     }
 
     public static class NbImageIcon extends ImageIcon {
