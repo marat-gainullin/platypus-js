@@ -7,6 +7,8 @@ package com.bearsoft.gwt.ui.widgets;
 
 import com.bearsoft.gwt.ui.CommonResources;
 import com.bearsoft.gwt.ui.XElement;
+import com.bearsoft.rowset.Utils;
+import com.eas.client.form.published.widgets.PlatypusHtmlEditor;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -25,6 +27,7 @@ import com.google.gwt.event.dom.client.HasFocusHandlers;
 import com.google.gwt.event.dom.client.HasKeyDownHandlers;
 import com.google.gwt.event.dom.client.HasKeyPressHandlers;
 import com.google.gwt.event.dom.client.HasKeyUpHandlers;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
@@ -35,16 +38,22 @@ import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HasValue;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.datepicker.client.CalendarUtil;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.user.datepicker.client.DatePicker;
+import com.sun.xml.internal.ws.org.objectweb.asm.Label;
+
 import java.util.Date;
 
 /**
@@ -59,38 +68,112 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 	protected FlowPanel container = new FlowPanel();
 	protected SimplePanel fieldWrapper = new SimplePanel();
 	protected DateBox field;
+	
 	protected SimplePanel right = new SimplePanel();
-	//
+	
 	protected PopupPanel popup = new PopupPanel();
-
+	private TextBox box;
+	private DateTimePicker picker; //combines date and time picker
+	
+	private Date value;
+	protected boolean settingValueFromJs;
+	protected boolean settingValueToJs;
+	
 	public DateTimeBox() {
-		this(new DatePicker(), null, DEFAULT_FORMAT);
+		this(new DateTimePicker(), null, DEFAULT_FORMAT);
 	}
 
-	public DateTimeBox(DatePicker picker, Date date, DateBox.Format format) {
+	public DateTimeBox(DateTimePicker aPicker, Date date, DateBox.Format format) {
 		initWidget(container);
+		picker = aPicker;
 		container.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 		container.getElement().getStyle().setPosition(Style.Position.RELATIVE);
 		container.getElement().addClassName("date-time-field");
 		field = new DecoratedDateBox(picker, date, format);
 		field.setFireNullValues(true);
-		field.addValueChangeHandler(new ValueChangeHandler<Date>() {
-
+		
+		box = field.getTextBox();
+		box.addBlurHandler(new BlurHandler() {
 			@Override
-			public void onValueChange(ValueChangeEvent<Date> event) {
-				ValueChangeEvent.fire(DateTimeBox.this, getValue());
-				Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
-					@Override
-					public void execute() {
-						if (popup.isShowing()) {
-							popup.hide();
-						}
-					}
-
-				});
+			public void onBlur(BlurEvent event) {
+				//Нужно получить значение и заменить его
+				//событие бросать только если значение изменилось
+				//после изменения даты - надо новую дату закидывать в TimePicker 
+				 Date newValue = getValue();
+				if (value == null ? newValue != null : !value.equals(newValue)){
+					value = newValue;
+					updateTimeValue(value,true);
+					ValueChangeEvent.fire(DateTimeBox.this, newValue);
+				}
 			}
 		});
+		
+	    box.addKeyDownHandler(new KeyDownHandler() {
+			@Override
+			public void onKeyDown(KeyDownEvent event) {
+				switch (event.getNativeKeyCode()) {
+		        case KeyCodes.KEY_ENTER:
+		        case KeyCodes.KEY_TAB:
+		        	Date newValue = field.getValue();
+					if (value == null ? newValue != null : !value.equals(newValue)){
+						value = newValue;
+						updateTimeValue(value,true);
+						ValueChangeEvent.fire(DateTimeBox.this, newValue);
+					}
+		          break;
+		      }
+			}
+		});
+	    
+		field.getDatePicker().addValueChangeHandler(
+				new ValueChangeHandler<Date>() {
+					@Override
+					public void onValueChange(ValueChangeEvent<Date> event) {
+						if (!settingValueFromJs) {
+							settingValueToJs = true;
+							Date datePart = event.getValue();
+							Date timePart = picker.getTimePicker().getValue();
+							Date newValue;
+							if (timePart==null){
+								newValue = new Date(datePart.getTime());	
+							}else{
+								newValue = new Date(datePart.getTime() + timePart.getTime());
+							}
+							
+							if (value == null ? newValue != null : !value.equals(newValue)) {
+								value = newValue;
+								field.setValue(value, true);
+								updateTimeValue(value, true);
+								picker.getTimePicker().setValue(value);
+								ValueChangeEvent.fire(DateTimeBox.this,newValue);
+							}
+							
+							settingValueToJs = false;
+						}
+					}
+				});
+	    
+	    picker.getTimePicker().addValueChangeHandler(new ValueChangeHandler<Date>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<Date> event) {
+				if (!settingValueFromJs) {
+					settingValueToJs = true;
+					Date timePart = picker.getTimePicker().getValue();
+					Date datePart = field.getValue();
+					
+					if (timePart==null){
+						return;
+					}
+					
+					CalendarUtil.resetTime(datePart);
+					value = new Date(datePart.getTime() + timePart.getTime());
+					field.setValue(value, true);
+					ValueChangeEvent.fire(DateTimeBox.this, value);
+					settingValueToJs = false;
+				}	
+			}
+	    });
+		
 		fieldWrapper.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 		fieldWrapper.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
 		fieldWrapper.getElement().getStyle().setTop(0, Style.Unit.PX);
@@ -125,7 +208,6 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 
 		popup.setStyleName("dateBoxPopup");
 		popup.setAutoHideEnabled(true);
-		popup.addAutoHidePartner(field.getElement());
 		container.add(fieldWrapper);
 		container.add(right);
 		right.addDomHandler(new ClickHandler() {
@@ -185,6 +267,16 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 		}
 	}
 
+	
+	private void updateTimeValue(Date aValue, boolean fireEvents){
+		
+		if (!settingValueToJs) {
+			settingValueFromJs = true;
+			picker.getTimePicker().setValue(aValue,fireEvents);
+			settingValueFromJs = false;
+		}
+	}
+	
 	@Override
 	public HandlerRegistration addKeyDownHandler(KeyDownHandler handler) {
 		return super.addHandler(handler, KeyDownEvent.getType());
@@ -235,7 +327,8 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 
 	@Override
 	public Date getValue() {
-		return field.getValue();
+//		return field.getValue();
+		return value;
 	}
 
 	@Override
@@ -245,7 +338,14 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 
 	@Override
 	public void setValue(Date aValue, boolean fireEvents) {
+		this.value = aValue;
+		
 		field.setValue(aValue, fireEvents);
+		updateTimeValue(aValue, fireEvents);
+		
+		if (fireEvents){
+			ValueChangeEvent.fire(DateTimeBox.this, value);
+		}
 	}
 
 	public String getText() {

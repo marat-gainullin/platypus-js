@@ -442,7 +442,7 @@ HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHan
 	
 	private void placeWidgetToMenu(Widget aWidget,ButtonGroup aBtnGroup,String divStyleName){
 		aWidget.getElement().getStyle().setWidth(elementWidth, Style.Unit.PX);
-		aWidget.getElement().getStyle().setWidth(elementHeight, Style.Unit.PX);
+		aWidget.getElement().getStyle().setHeight(elementHeight, Style.Unit.PX);
 		addDivToElement(aWidget.getElement(),divStyleName);
 		if (aBtnGroup!=null){
 			if(aWidget instanceof HasValue){
