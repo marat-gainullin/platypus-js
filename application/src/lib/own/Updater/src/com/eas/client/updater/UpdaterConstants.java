@@ -48,7 +48,7 @@ public class UpdaterConstants {
     public static final int BUFFER_SIZE = 64*1024;
     
     public static final String ERROR_RUN_COMMAND_FORMAT =  
-        "Using \"Updater\":java -jar Updater <command> -laf <value> -curl <value> -uurl <value> -cname <value>\n"
+        "Using \"Updater\":java -jar Updater.jar <command> -laf <value> -curl <value> -uurl <value> -cname <value>\n"
         + "                                  -uname <value> -path <value> -wrun <value>\n"
         + "Parametrs:\n"
         + "         <command>        [newversion, update] What Updater will do now." 

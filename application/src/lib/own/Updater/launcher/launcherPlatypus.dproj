@@ -89,7 +89,7 @@
         <DCC_ExeOutput>C:\workspace\platypus js\application\updates</DCC_ExeOutput>
         <Debugger_CWD>C:\workspace\platypus js\application\updates</Debugger_CWD>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <Debugger_RunParams>update</Debugger_RunParams>
+        <Debugger_RunParams>newversion -silent true</Debugger_RunParams>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
         <Debugger_CWD>C:\workspace\platypus js\application\updates</Debugger_CWD>
@@ -161,21 +161,13 @@
                 <Platform value="Win64">True</Platform>
             </Platforms>
             <Deployment>
-                <DeployFile LocalName="launcherPlatypus.exe" Configuration="Release" Class="ProjectOutput">
+                <DeployFile LocalName="launcherPlatypus.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32"/>
-                </DeployFile>
-                <DeployFile LocalName="launcherPlatypus.rsm" Configuration="Debug" Class="DebugSymbols">
-                    <Platform Name="Win32">
-                        <RemoteName>launcherPlatypus.rsm</RemoteName>
-                    </Platform>
                 </DeployFile>
                 <DeployFile LocalName="launcherPlatypus.rsm" Configuration="Release" Class="DebugSymbols">
                     <Platform Name="Win32">
                         <RemoteName>launcherPlatypus.rsm</RemoteName>
                     </Platform>
-                </DeployFile>
-                <DeployFile LocalName="launcherPlatypus.exe" Configuration="Debug" Class="ProjectOutput">
-                    <Platform Name="Win32"/>
                 </DeployFile>
                 <DeployFile LocalName="launcherPlatypus.rsm" Configuration="Debug" Class="DebugSymbols">
                     <Platform Name="Win64">

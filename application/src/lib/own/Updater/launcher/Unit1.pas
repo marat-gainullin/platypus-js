@@ -60,16 +60,16 @@ begin
   with runParams do
   begin
     if aElevate then
-      lpVerb := PWideChar('runas')
+      lpVerb := 'runas'
     else
-      lpVerb := PWideChar('');
+      lpVerb := '';
     cbSize := SizeOf(TShellExecuteInfo);
     Wnd := Form1.Handle;
     lpDirectory := nil;
     lpFile := PWideChar(aFile);
     lpParameters := PWideChar(aParametrs);
     nShow := aWinShow;
-    fMask := SEE_MASK_NOCLOSEPROCESS;
+    fMask := SEE_MASK_NOCLOSEPROCESS or SEE_MASK_NOASYNC;
   end;
   if ShellExecuteEx(@runParams) then
   begin
@@ -122,21 +122,6 @@ begin
   end;
 end;
 
-function replaceUpdaterFile(): boolean;
-var
-  newFile, oldFile: String;
-begin
-  Result := false;
-  newFile := currentDirectory + '../lib/own/Updater-new.jar';
-  oldFile := currentDirectory + '../lib/own/Updater.jar';
-  if FileExists(newFile) then
-  begin
-    if (DeleteFile(oldFile)) then
-      if RenameFile(newFile, oldFile) then
-        Result := true;
-  end;
-end;
-
 procedure TForm1.FormActivate(Sender: TObject);
 var
   i: integer;
@@ -178,21 +163,15 @@ begin
   begin
     if command = UPDATE_PARAM then
     begin
-      if runApp('javaw.exe', generateRunParams('update' + ' ' + SILENT + ' ' +
-        isSilent), SHOW_APPLICATION, getNeedUAC, true) <> ERROR_RESULT then
-      begin
-        replaceUpdaterFile();
-      end;
-    end;
-    if command = CHECK_VERSION then
+      runApp('javaw.exe', generateRunParams('update' + ' ' + SILENT + ' ' +
+        isSilent), SHOW_APPLICATION, getNeedUAC, true);
+    end else if command = CHECK_VERSION then
     begin
         statusCode := runApp('javaw.exe', generateRunParams('newversion' + ' ' + SILENT + ' '
           + isSilent), SHOW_APPLICATION, false, true);
           Halt(statusCode);
     end;
-  end
-  else
-  begin
+  end else begin
     if runApp('javaw.exe', generateRunParams('newversion'), SHOW_APPLICATION,
       false, true) = NEED_UPDATE_RESULT then
     begin
@@ -200,11 +179,8 @@ begin
         getNeedUAC, true)
     end;
   end;
-//  ErrorAddr := 0;
-//  ExitCode := statusCode;
   Close;
   Exit;
-//  Halt(statusCode);
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);

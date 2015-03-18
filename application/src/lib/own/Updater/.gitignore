@@ -1,6 +1,2 @@
 bin
 lib
-*.dcu
-*.ddp
-*.exe
-*.identcache

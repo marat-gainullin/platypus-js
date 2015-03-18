@@ -95,7 +95,7 @@ public class Updater {
                     }
                 }
             } else {
-                System.out.println("Enter command! Command could not be empty. \n" + UpdaterConstants.ERROR_RUN_COMMAND_FORMAT);
+                System.out.println(UpdaterConstants.ERROR_RUN_COMMAND_FORMAT);
             }
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getLocalizedMessage(), ex);
