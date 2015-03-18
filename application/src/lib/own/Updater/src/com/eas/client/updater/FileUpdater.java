@@ -100,7 +100,7 @@ public class FileUpdater {
                         curFName = fixFileSeparatorChar(curFName);
                         if (!entry.isDirectory()) {
                             File ff = new File(curFName);
-                            if ((ff.exists()) && (!ff.canWrite())) {
+                            if (ff.exists() && !ff.canWrite()) {
                                 res = false;
                                 cnt++;
                                 Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.WARNING, String.format(Updater.res.getString("couldNotCreateFile"), ff.getName()));
