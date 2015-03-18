@@ -48,44 +48,68 @@ begin
     Result := true;
 end;
 
-function runApp(const aFile, aParametrs: string; aWinShow: integer;
+function runApp(const aFile, aParameters: string; aWinShow: integer;
   aElevate: boolean = false; aNeedWait: boolean = false): byte;
 var
   runParams: TShellExecuteInfo;
+  processInfo: TProcessInformation;
+  startInfo: TStartupInfo;
   extCode: Cardinal;
+  lastErrorMsg: String;
+  buffer     : array[1..MAX_PATH] of WideChar;
+  bufSize:Integer;
+  sysFolder: String;
+  javaPath: String;
+  javaParams: String;
 begin
-  extCode := ERROR_RESULT;
-  Result := extCode;
-  ZeroMemory(@runParams, SizeOf(TShellExecuteInfo));
-  with runParams do
+  if aNeedWait then
   begin
-    if aElevate then
-      lpVerb := 'runas'
-    else
-      lpVerb := '';
-    cbSize := SizeOf(TShellExecuteInfo);
-    Wnd := Form1.Handle;
-    lpDirectory := nil;
-    lpFile := PWideChar(aFile);
-    lpParameters := PWideChar(aParametrs);
-    nShow := aWinShow;
-    fMask := SEE_MASK_NOCLOSEPROCESS or SEE_MASK_NOASYNC;
-  end;
-  if ShellExecuteEx(@runParams) then
-  begin
-    if runParams.hProcess <> 0 then
+    ZeroMemory(@startInfo, SizeOf(TStartupInfo));
+    startInfo.cb := SizeOf(TStartupInfo);
+    ZeroMemory(@processInfo, SizeOf(TProcessInformation));
+    bufSize := GetSystemDirectory(PWideChar(@buffer), MAX_PATH);
+    SetString(sysFolder, PWideChar(@buffer), bufSize);
+    javaPath := sysFolder + '\' + aFile;
+    javaParams := aParameters;
+    if CreateProcess(PWideChar(javaPath), PWideChar(javaParams), nil, nil, false, 0, nil,
+      nil, startInfo, processInfo) then
     begin
-      try
-        if aNeedWait then
-        begin
-          WaitForSingleObject(runParams.hProcess, INFINITE);
-          GetExitCodeProcess(runParams.hProcess, extCode);
-        end;
-      finally
-        CloseHandle(runParams.hProcess);
-      end;
+      WaitForSingleObject(processInfo.hProcess, INFINITE);
+      GetExitCodeProcess(processInfo.hProcess, extCode);
+      CloseHandle(processInfo.hProcess);
+      Result := extCode;
+    end
+    else
+    begin
+      lastErrorMsg := SysErrorMessage(GetLastError());
+      Result := ERROR_RESULT;
     end;
-    Result := extCode;
+  end
+  else
+  begin
+    ZeroMemory(@runParams, SizeOf(TShellExecuteInfo));
+    with runParams do
+    begin
+      if aElevate then
+        lpVerb := 'runas'
+      else
+        lpVerb := '';
+      cbSize := SizeOf(TShellExecuteInfo);
+      Wnd := Form1.Handle;
+      lpDirectory := nil;
+      lpFile := PWideChar(aFile);
+      lpParameters := PWideChar(aParameters);
+      nShow := aWinShow;
+      fMask := SEE_MASK_NOASYNC;
+    end;
+    if ShellExecuteEx(@runParams) then
+    begin
+      Result := 0;
+    end
+    else
+    begin
+      Result := ERROR_RESULT;
+    end;
   end;
 end;
 
@@ -112,14 +136,13 @@ begin
       'UpdateArchiveName', '../app.zip');
     PLATYPUS_HOME := currentDirectory + settingsFile.ReadString('Update',
       'HomeDirectory', '../');
-
-    Result := '-cp "' + MAIN_CP + '";"' + EXT_CLASSES + '" "' + MAIN_CN + '" ' +
-      typeRun + ' -laf "' + LAF_CN + '" -curl "' + URL_CONFIG + '" -uurl "' +
-      URL_UPDATE + '" -cname "' + CONFIG_NAME + '" -uname "' + TMP_UPDATE_NAME +
-      '" -path "' + PLATYPUS_HOME + '"';
   finally
     settingsFile.Destroy;
   end;
+  Result := ' -cp "' + MAIN_CP + ';' + EXT_CLASSES + '" ' + MAIN_CN + ' ' +
+    typeRun + ' -laf ' + LAF_CN + ' -curl "' + URL_CONFIG + '" -uurl "' +
+    URL_UPDATE + '" -cname "' + CONFIG_NAME + '" -uname "' + TMP_UPDATE_NAME +
+    '" -path "' + PLATYPUS_HOME + '"';
 end;
 
 procedure TForm1.FormActivate(Sender: TObject);
@@ -164,14 +187,18 @@ begin
     if command = UPDATE_PARAM then
     begin
       runApp('javaw.exe', generateRunParams('update' + ' ' + SILENT + ' ' +
-        isSilent), SHOW_APPLICATION, getNeedUAC, true);
-    end else if command = CHECK_VERSION then
+        isSilent), SHOW_APPLICATION, getNeedUAC, false);
+    end
+    else if command = CHECK_VERSION then
     begin
-        statusCode := runApp('javaw.exe', generateRunParams('newversion' + ' ' + SILENT + ' '
-          + isSilent), SHOW_APPLICATION, false, true);
-          Halt(statusCode);
+      statusCode := runApp('javaw.exe',
+        generateRunParams('newversion' + ' ' + SILENT + ' ' + isSilent),
+        SHOW_APPLICATION, false, true);
+      Halt(statusCode);
     end;
-  end else begin
+  end
+  else
+  begin
     if runApp('javaw.exe', generateRunParams('newversion'), SHOW_APPLICATION,
       false, true) = NEED_UPDATE_RESULT then
     begin

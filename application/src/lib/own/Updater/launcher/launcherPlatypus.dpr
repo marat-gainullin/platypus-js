@@ -2,7 +2,7 @@ program launcherPlatypus;
 
 uses
   Forms,
-  Unit1 in 'Unit1.pas' {Form1};
+  Unit1 in 'Unit1.pas';
 
 begin
   Application.Initialize();
