@@ -1,5 +1,4 @@
 #!/bin/bash
-echo "hello there"
 IS_SILENT="false"
 while [ 1 ]; do
 	if [ "$1" = "-silent" ] ; then
@@ -57,9 +56,9 @@ else
      $JRE_PATH -cp "$UPDATER_PATH":"$EXT_CLASSES" $MAIN_CLASS newversion -laf $LAF_CLASS -curl $URL_CONFIG -uurl $URL_UPDATE -cname "$CONFIG_NAME" -uname "$TMP_UPDATE_NAME" -silent $IS_SILENT -path "$PLATYPUS_HOME/" 
     if [ $? -eq 10 ]; then 
         $JRE_PATH -cp "$UPDATER_PATH":"$EXT_CLASSES" $MAIN_CLASS update -laf $LAF_CLASS -curl $URL_CONFIG -uurl $URL_UPDATE -cname "$CONFIG_NAME" -uname "$TMP_UPDATE_NAME" -silent $IS_SILENT -path "${PLATYPUS_HOME}/"
-       if [ -f "${PLATYPUS_HOME}/lib/own/Updater-new.jar" ]; then
-           rm "${PLATYPUS_HOME}/lib/own/Updater.jar" 
-           mv -f "${PLATYPUS_HOME}/lib/own/Updater-new.jar" "${PLATYPUS_HOME}/lib/own/Updater.jar";
-       fi
+#       if [ -f "${PLATYPUS_HOME}/lib/own/Updater-new.jar" ]; then
+#           rm "${PLATYPUS_HOME}/lib/own/Updater.jar" 
+#           mv -f "${PLATYPUS_HOME}/lib/own/Updater-new.jar" "${PLATYPUS_HOME}/lib/own/Updater.jar";
+#       fi
     fi
 fi	

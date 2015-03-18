@@ -23,26 +23,27 @@ import java.util.zip.ZipFile;
 public class FileUpdater {
 
     private final String PWC_DIRECTORY = "bin/pwc/";
-    private String hostToFiles = "";
+    private String urlToFiles = "";
     private String curDir = "";
     private ProgressView progressView;
     private boolean replaceMode;
 
     /**
      *
-     * @param host
-     * @param path
+     * @param aUrlToFiles
+     * @param aLocalPath
      */
-    public FileUpdater(String host, String path) {
-        hostToFiles = host;
-        curDir = path;
+    public FileUpdater(String aUrlToFiles, String aLocalPath) {
+        super();
+        urlToFiles = aUrlToFiles;
+        curDir = aLocalPath;
     }
 
     public FileUpdater(String host, String path, boolean aReplaceMode) {
         this(host, path);
         replaceMode = aReplaceMode;
     }
-    
+
     /**
      * Fixes the file sperator char for the target platform using the following
      * replacement.
@@ -114,6 +115,15 @@ public class FileUpdater {
                                     Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.WARNING, String.format(Updater.res.getString("couldNotCreateFile"), ff.getName()));
                                 }
                             } else {
+                                if (curFName.contains(UpdaterConstants.UPDATER_FIND_LABEL) && curFName.endsWith(".jar")) {
+                                    String updaterJarPath = ff.getPath();
+                                    File toBeDeleted = new File(updaterJarPath + ".old");
+                                    toBeDeleted.delete();
+                                    File aff = new File(ff.getAbsolutePath());
+                                    ff.renameTo(toBeDeleted);
+                                    ff.deleteOnExit();
+                                    ff = aff;
+                                }
                                 if (replaceMode || curFName.contains(UpdaterConstants.UPDATER_FIND_LABEL)) {
                                     ff.createNewFile();
                                 }
@@ -168,8 +178,7 @@ public class FileUpdater {
 
     /**
      *
-     * @param aPakageLocalFileName File name to download zip file with update
-     * files to.
+     * @param aPakageLocalFileName A file name to download zip to.
      * @return
      */
     public boolean update(String aPakageLocalFileName) {
@@ -181,7 +190,7 @@ public class FileUpdater {
                 progressView.getProgress().setString(Updater.res.getString("operationDownload"));
                 progressView.getStep().setText("1/2");
             }
-            DownloadFile df = new DownloadFile(hostToFiles, aPakageLocalFileName);
+            DownloadFile df = new DownloadFile(urlToFiles, aPakageLocalFileName);
             if (progressView != null) {
                 df.setUpdVis(progressView);
             }
@@ -195,7 +204,7 @@ public class FileUpdater {
                 }
                 return unPackZip(aPakageLocalFileName);
             } else {
-                Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.WARNING, String.format(Updater.res.getString("fileNotLoad"), hostToFiles));
+                Logger.getLogger(UpdaterConstants.LOGGER_NAME).log(Level.WARNING, String.format(Updater.res.getString("fileNotLoad"), urlToFiles));
                 return res;
             }
         } catch (Exception e) {
@@ -207,15 +216,15 @@ public class FileUpdater {
     /**
      * @return the hosttofiles
      */
-    public String getFtpHostToFiles() {
-        return hostToFiles;
+    public String getUrlToFiles() {
+        return urlToFiles;
     }
 
     /**
-     * @param hostToFiles the hosttofiles to set
+     * @param aValue the hosttofiles to set
      */
-    public void setFtpHostToFiles(String hostToFiles) {
-        this.hostToFiles = hostToFiles;
+    public void setUrlToFiles(String aValue) {
+        urlToFiles = aValue;
     }
 
     /**
@@ -226,23 +235,16 @@ public class FileUpdater {
     }
 
     /**
-     * @param curDir the curdir to set
+     * @param aValue the curdir to set
      */
-    public void setCurDir(String curDir) {
-        this.curDir = curDir;
+    public void setCurDir(String aValue) {
+        curDir = aValue;
     }
 
     /**
-     * @return the updvis
+     * @param aValue the updvis to set
      */
-    public ProgressView getUpdVis() {
-        return progressView;
-    }
-
-    /**
-     * @param updVis the updvis to set
-     */
-    public void setUpdVis(ProgressView updVis) {
-        this.progressView = updVis;
+    public void setProgressView(ProgressView aValue) {
+        progressView = aValue;
     }
 }

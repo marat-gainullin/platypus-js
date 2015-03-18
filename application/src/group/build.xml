@@ -274,9 +274,11 @@
 	                            <!--
                                     Copy Updater.jar if need.
                                 /-->
+	                            <!--
 	<target name="copyupdater" depends="setversion">
 	    <copy file="../../lib/own/Updater.jar" tofile="../../lib/own/Updater-new.jar"/>
     </target> 
+                                /-->
 	
 	  						    <!--
                                     Make full update file.
@@ -310,7 +312,7 @@
 				<include name="lib/own/Grid.jar"/>
 				<include name="lib/own/IconLib.jar"/>
 				<include name="lib/own/Rowsets.jar"/>
-				<include name="lib/own/Updater-new.jar"/>
+				<!--<include name="lib/own/Updater-new.jar"/>/-->
 				<include name="lib/own/ScalablePane.jar"/>
 				<include name="lib/thirdparty/JCalendar.jar"/>
 				<include name="lib/thirdparty/chart/*.jar"/>
@@ -349,10 +351,11 @@
         </zip>
     </target>
 
+<!--
     <target name="deleteupdater" depends="zipsrc, thinclientzip">
 	    <delete file="../../lib/own/Updater-new.jar"/>
     </target>
-    
+/-->    
 	<target name="buildupdates" depends="deleteupdater"> 
     </target>
 </project>

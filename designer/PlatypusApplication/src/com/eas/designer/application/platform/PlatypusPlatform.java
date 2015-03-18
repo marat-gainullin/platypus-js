@@ -70,7 +70,6 @@ public class PlatypusPlatform {
     private static final int NEW_VERSION_CODE = 10;
     private static final int UPGRADE_VERSION_CODE = 12;
     private static final int NOT_NEED_UPDATE = 11;
-    private static String UPDATER_EXECUTABLE;
     private static Notification notification;
     private static String URL_PLATYPUS_HOME = "http://platypus-platform.org/download.html";
 
@@ -95,9 +94,8 @@ public class PlatypusPlatform {
                 executableName = LINUX_UPDATE_EXECUTABLE;
             }
 
-            UPDATER_EXECUTABLE = platformPath + File.separator + UPDATES_DIRECTORY_NAME + File.separator + executableName;
+            String UPDATER_EXECUTABLE = platformPath + File.separator + UPDATES_DIRECTORY_NAME + File.separator + executableName;
             String[] command = createUpdaterCommand(UPDATER_EXECUTABLE, new String[]{"newversion", "-silent", "true"});
-
             try {
                 Process updaterProcess = Runtime.getRuntime().exec(command);
                 int updateStatus = updaterProcess.waitFor();
@@ -106,17 +104,14 @@ public class PlatypusPlatform {
                 switch (updateStatus) {
                     case NEW_VERSION_CODE: {
                         detailsText = res.getString("confirmUpdate");
-                        updateAction = new ActionListener() {
-                            @Override
-                            public void actionPerformed(ActionEvent e) {
-                                String[] command = createUpdaterCommand(UPDATER_EXECUTABLE, new String[]{"update", "-silent", "false"});
-                                try {
-                                    Process updaterProcess = Runtime.getRuntime().exec(command);
-                                    notification.clear();
-                                } catch (IOException ex) {
-                                    Logger.getLogger(PlatypusPlatform.class.getName())
-                                            .log(Level.SEVERE, null, ex); // NOI18N
-                                }
+                        updateAction = (ActionEvent e) -> {
+                            String[] command1 = createUpdaterCommand(UPDATER_EXECUTABLE, new String[]{"update", "-silent", "false"});
+                            try {
+                                Process updaterProcess1 = Runtime.getRuntime().exec(command1);
+                                notification.clear();
+                            }catch (IOException ex) {
+                                Logger.getLogger(PlatypusPlatform.class.getName())
+                                        .log(Level.SEVERE, null, ex); // NOI18N
                             }
                         };
 
