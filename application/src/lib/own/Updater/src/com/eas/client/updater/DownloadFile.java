@@ -36,7 +36,7 @@ public class DownloadFile {
     private String link = "";
     private int contSize = 0;
     private boolean showProgress = true;
-    private UpdProgress updVis;
+    private ProgressView updVis;
 
     public DownloadFile(String aSourceUrl, String aDestFileName) {
         link = aSourceUrl;
@@ -277,14 +277,14 @@ public class DownloadFile {
     /**
      * @return the updvis
      */
-    public UpdProgress getUpdVis() {
+    public ProgressView getUpdVis() {
         return updVis;
     }
 
     /**
      * @param updVis the updvis to set
      */
-    public void setUpdVis(UpdProgress updVis) {
+    public void setUpdVis(ProgressView updVis) {
         this.updVis = updVis;
     }
 }

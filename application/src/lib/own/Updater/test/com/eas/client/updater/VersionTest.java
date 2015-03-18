@@ -12,8 +12,8 @@ import static org.junit.Assert.*;
  * @author AB
  */
 public class VersionTest {
-        
-    private Version ver=new Version("1.2.4");
+
+    private final Version ver = new Version("1.2.4");
 
     /**
      * Test of toString method, of class Version.
@@ -23,7 +23,7 @@ public class VersionTest {
         System.out.println("Version convert to string");
         String result = ver.toString();
         assertEquals("1.2.4", result);
-        
+
     }
 
     /**
@@ -32,17 +32,22 @@ public class VersionTest {
     @Test
     public void testCompareTo() {
         System.out.println("Compare to version object");
-        Version obj = new Version("1.2.5");
+
+        Version obj = new Version("1.2.4");
         int result = obj.compareTo(ver);
-        assertEquals(UpdaterConstants.NOT_EQUALS, result);
-        
-        obj = new Version("1.2.4");
-         result = obj.compareTo(ver);
         assertEquals(UpdaterConstants.EQUALS, result);
-        
-        obj = new Version("2.2.5");
+
+        obj = new Version("1.2.5");
         result = obj.compareTo(ver);
-        assertEquals(UpdaterConstants.FATAL_NOT_EQUALS, result);
+        assertEquals(UpdaterConstants.BUILD_NOT_EQUALS, result);
+
+        obj = new Version("1.3.5");
+        result = obj.compareTo(ver);
+        assertEquals(UpdaterConstants.MINOR_NOT_EQUALS, result);
+
+        obj = new Version("2.3.5");
+        result = obj.compareTo(ver);
+        assertEquals(UpdaterConstants.MAJOR_NOT_EQUALS, result);
     }
 
 }

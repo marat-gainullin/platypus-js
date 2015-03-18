@@ -1,5 +1,5 @@
 /*
- * UpdProgress.java
+ * ProgressView.java
  *
  * Created on 26.08.2011, 15:21:16
  */
@@ -9,11 +9,13 @@ package com.eas.client.updater;
  *
  * @author AB
  */
-public class UpdProgress extends javax.swing.JDialog {
+public class ProgressView extends javax.swing.JDialog {
 
     /** Creates new form UpdProgress */
-    public UpdProgress() {
+    public ProgressView() {
         initComponents();
+        setResizable(false);
+        setLocationRelativeTo(null);
     }
 
     /** This method is called from within the constructor to
@@ -80,14 +82,6 @@ public class UpdProgress extends javax.swing.JDialog {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
-     */
-    public void run() {
-        //new UpdProgress();
-        setResizable(false);
-        setVisible(true);
-        setLocationRelativeTo(null);
-    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLCaption;
     private javax.swing.JLabel jLStep;

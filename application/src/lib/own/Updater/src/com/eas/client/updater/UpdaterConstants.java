@@ -27,8 +27,9 @@ public class UpdaterConstants {
     public static final String COMMENT = "comment";
     public static final String NEWS = "what_new";
     public static final int EQUALS = 0;
-    public static final int NOT_EQUALS = 2;
-    public static final int FATAL_NOT_EQUALS = 4;
+    public static final int BUILD_NOT_EQUALS = 2;
+    public static final int MINOR_NOT_EQUALS = 3;
+    public static final int MAJOR_NOT_EQUALS = 4;
     
     public static final byte NOT_NEED_UPDATE = 11;
     public static final byte NEED_UPGRADE = 12;
@@ -47,7 +48,7 @@ public class UpdaterConstants {
     public static final int BUFFER_SIZE = 64*1024;
     
     public static final String ERROR_RUN_COMMAND_FORMAT =  
-        "Using \"Updater\":java -jar Updater <command> -laf <value> -curl <value> -uurl <value> -cname <value>\n"
+        "Using \"Updater\":java -jar Updater.jar <command> -laf <value> -curl <value> -uurl <value> -cname <value>\n"
         + "                                  -uname <value> -path <value> -wrun <value>\n"
         + "Parametrs:\n"
         + "         <command>        [newversion, update] What Updater will do now." 

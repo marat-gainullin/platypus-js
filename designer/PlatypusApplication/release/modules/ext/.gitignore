@@ -31,5 +31,6 @@
 !poi*.jar
 !geoapi*.jar
 !postgresql*.jar
+!postgis*.jar
 !geoapi-pending*.jar
 !vecmath*.jar

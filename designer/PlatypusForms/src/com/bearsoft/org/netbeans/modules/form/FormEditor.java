@@ -222,83 +222,82 @@ public class FormEditor {
      * @param operation operation being performed.
      */
     public void reportErrors(FormOperation operation) {
-        if (!anyPersistenceError()) {
-            return; // no errors or warnings logged
-        }
-        final ErrorManager errorManager = ErrorManager.getDefault();
+        if (anyPersistenceError()) {
+            final ErrorManager errorManager = ErrorManager.getDefault();
 
-        boolean checkLoadingErrors = operation == FormOperation.LOADING && formLoaded;
-        boolean anyNonFatalLoadingError = false; // was there a real error?
+            boolean checkLoadingErrors = operation == FormOperation.LOADING && formLoaded;
+            boolean anyNonFatalLoadingError = false; // was there a real error?
 
-        StringBuilder userErrorMsgs = new StringBuilder();
+            StringBuilder userErrorMsgs = new StringBuilder();
 
-        for (Throwable t : persistenceErrors) {
-            if (t instanceof PersistenceException) {
-                Throwable th = ((PersistenceException) t).getCause();
-                if (th != null) {
-                    t = th;
+            for (Throwable t : persistenceErrors) {
+                if (t instanceof PersistenceException) {
+                    Throwable th = ((PersistenceException) t).getCause();
+                    if (th != null) {
+                        t = th;
+                    }
                 }
-            }
 
-            if (checkLoadingErrors && !anyNonFatalLoadingError) {
+                if (checkLoadingErrors && !anyNonFatalLoadingError) {
                 // was there a real loading error (not just warnings) causing
-                // some data not loaded?
-                ErrorManager.Annotation[] annotations
-                        = errorManager.findAnnotations(t);
-                int severity = 0;
-                if ((annotations != null) && (annotations.length != 0)) {
-                    for (int i = 0; i < annotations.length; i++) {
-                        int s = annotations[i].getSeverity();
-                        if (s == ErrorManager.UNKNOWN) {
-                            s = ErrorManager.EXCEPTION;
+                    // some data not loaded?
+                    ErrorManager.Annotation[] annotations
+                            = errorManager.findAnnotations(t);
+                    int severity = 0;
+                    if ((annotations != null) && (annotations.length != 0)) {
+                        for (int i = 0; i < annotations.length; i++) {
+                            int s = annotations[i].getSeverity();
+                            if (s == ErrorManager.UNKNOWN) {
+                                s = ErrorManager.EXCEPTION;
+                            }
+                            if (s > severity) {
+                                severity = s;
+                            }
                         }
-                        if (s > severity) {
-                            severity = s;
-                        }
+                    } else {
+                        severity = ErrorManager.EXCEPTION;
                     }
-                } else {
-                    severity = ErrorManager.EXCEPTION;
-                }
 
-                if (severity > ErrorManager.WARNING) {
-                    anyNonFatalLoadingError = true;
+                    if (severity > ErrorManager.WARNING) {
+                        anyNonFatalLoadingError = true;
+                    }
                 }
+                errorManager.notify(ErrorManager.INFORMATIONAL, t);
             }
-            errorManager.notify(ErrorManager.INFORMATIONAL, t);
-        }
 
-        if (checkLoadingErrors && anyNonFatalLoadingError) {
+            if (checkLoadingErrors && anyNonFatalLoadingError) {
             // the form was loaded with some non-fatal errors - some data
-            // was not loaded - show a warning about possible data loss
-            final String wholeMsg = userErrorMsgs.append(
-                    FormUtils.getBundleString("MSG_FormLoadedWithErrors")).toString();  // NOI18N
+                // was not loaded - show a warning about possible data loss
+                final String wholeMsg = userErrorMsgs.append(
+                        FormUtils.getBundleString("MSG_FormLoadedWithErrors")).toString();  // NOI18N
 
-            java.awt.EventQueue.invokeLater(() -> {
+                java.awt.EventQueue.invokeLater(() -> {
                 // for some reason this would be displayed before the
-                // ErrorManager if not invoked later
-                if (isFormLoaded()) {// issue #164444
-                    JButton viewOnly = new JButton(FormUtils.getBundleString("CTL_ViewOnly"));		// NOI18N
-                    JButton allowEditing = new JButton(FormUtils.getBundleString("CTL_AllowEditing"));	// NOI18N
+                    // ErrorManager if not invoked later
+                    if (isFormLoaded()) {// issue #164444
+                        JButton viewOnly = new JButton(FormUtils.getBundleString("CTL_ViewOnly"));		// NOI18N
+                        JButton allowEditing = new JButton(FormUtils.getBundleString("CTL_AllowEditing"));	// NOI18N
 
-                    Object ret = DialogDisplayer.getDefault().notify(new NotifyDescriptor(
-                            wholeMsg,
-                            FormUtils.getBundleString("CTL_FormLoadedWithErrors"), // NOI18N
-                            NotifyDescriptor.DEFAULT_OPTION,
-                            NotifyDescriptor.WARNING_MESSAGE,
-                            new Object[]{viewOnly, allowEditing, NotifyDescriptor.CANCEL_OPTION},
-                            viewOnly));
+                        Object ret = DialogDisplayer.getDefault().notify(new NotifyDescriptor(
+                                wholeMsg,
+                                FormUtils.getBundleString("CTL_FormLoadedWithErrors"), // NOI18N
+                                NotifyDescriptor.DEFAULT_OPTION,
+                                NotifyDescriptor.WARNING_MESSAGE,
+                                new Object[]{viewOnly, allowEditing, NotifyDescriptor.CANCEL_OPTION},
+                                viewOnly));
 
-                    if (ret == viewOnly) {
-                        setFormReadOnly();
-                    } else if (ret == allowEditing) {
-                        destroyInvalidComponents();
-                    } else { // close form
-                        closeForm();
+                        if (ret == viewOnly) {
+                            setFormReadOnly();
+                        } else if (ret == allowEditing) {
+                            destroyInvalidComponents();
+                        } else { // close form
+                            closeForm();
+                        }
                     }
-                }
-            });
+                });
+            }
+            resetPersistenceErrorLog();
         }
-        resetPersistenceErrorLog();
     }
 
     /**
