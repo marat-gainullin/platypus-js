@@ -152,7 +152,7 @@ public class AppUpdater {
                         progressView.setVisible(true);
                         FileUpdater fu = new FileUpdater(appFilesUrl, startDir, vDifference == UpdaterConstants.MINOR_NOT_EQUALS);
                         if (progressView != null) {
-                            fu.setUpdVis(progressView);
+                            fu.setProgressView(progressView);
                         }
                         if (fu.update(fileTmpUpdate)) {
                             df.saveDocument(docfrom, fNameConfig);
