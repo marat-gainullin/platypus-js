@@ -297,6 +297,7 @@
                                 <!--
                                     Make lite update file.
                                 /-->
+<!--
     <target name="thinclientzip" depends="copyupdater">
         <zip destfile="../../updates/thinclient.zip">
             <fileset dir="../../" >
@@ -312,7 +313,7 @@
 				<include name="lib/own/Grid.jar"/>
 				<include name="lib/own/IconLib.jar"/>
 				<include name="lib/own/Rowsets.jar"/>
-				<!--<include name="lib/own/Updater-new.jar"/>/-->
+				<include name="lib/own/Updater-new.jar"/>
 				<include name="lib/own/ScalablePane.jar"/>
 				<include name="lib/thirdparty/JCalendar.jar"/>
 				<include name="lib/thirdparty/chart/*.jar"/>
@@ -350,7 +351,7 @@
 				</fileset>
         </zip>
     </target>
-
+-->
 <!--
     <target name="deleteupdater" depends="zipsrc, thinclientzip">
 	    <delete file="../../lib/own/Updater-new.jar"/>
