@@ -41,10 +41,10 @@ public class Updater {
                 System.out.println(UpdaterConstants.ERROR_RUN_COMMAND_FORMAT);
             }
             String userHome = System.getProperty("user.home");
-            String pathHome = FileUpdater.fixFileSeparatorChar(userHome + "/.platypus/logs/Updater_log.log");
-            File logPath = new File(FileUpdater.fixFileSeparatorChar(userHome + "/.platypus/logs"));
-            logPath.mkdirs();
-            FileHandler h = new FileHandler(pathHome);
+            String updaterLogPath = FileUpdater.fixFileSeparatorChar(userHome + "/.platypus/logs/Updater_log.log");
+            File platypusLogsPath = new File(FileUpdater.fixFileSeparatorChar(userHome + "/.platypus/logs"));
+            platypusLogsPath.mkdirs();
+            FileHandler h = new FileHandler(updaterLogPath);
             h.setFormatter(new SimpleFormatter());
             log.addHandler(h);
             log.setLevel(Level.ALL);

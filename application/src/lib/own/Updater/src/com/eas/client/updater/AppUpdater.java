@@ -144,15 +144,15 @@ public class AppUpdater {
                 InputStream in = df.getStreamVersionInfo();
                 if (in != null) {// Successfull version file download.
                     Document docfrom = XMLVersion.getDocumentStream(in);
-                    Version vTo = XMLVersion.getDocVersion(docto);
-                    Version vFrom = XMLVersion.getDocVersion(docfrom);
-                    if ((progressView != null) && (vTo != null) && (vFrom != null)) {
-                        byte vDifference = vFrom.compareTo(vTo);
-                        progressView.getVersion().setText(String.format(Updater.res.getString("captionDetail"), vTo.toString(), vFrom.toString()));
+                    Version vLocal = XMLVersion.getDocVersion(docto);
+                    Version vRemote = XMLVersion.getDocVersion(docfrom);
+                    if (progressView != null && vLocal != null && vRemote != null) {
+                        byte vDifference = vRemote.compareTo(vLocal);
+                        progressView.getVersion().setText(String.format(Updater.res.getString("captionDetail"), vLocal.toString(), vRemote.toString()));
                         progressView.setVisible(true);
                         FileUpdater fu = new FileUpdater(appFilesUrl, startDir, vDifference == UpdaterConstants.MINOR_NOT_EQUALS);
                         if (progressView != null) {
-                            fu.setUpdVis(progressView);
+                            fu.setProgressView(progressView);
                         }
                         if (fu.update(fileTmpUpdate)) {
                             df.saveDocument(docfrom, fNameConfig);
