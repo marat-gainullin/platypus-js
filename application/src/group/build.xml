@@ -283,7 +283,8 @@
 	  						    <!--
                                     Make full update file.
                                 /-->
-	<target name="zipsrc" depends="copyupdater">
+	<!--<target name="zipsrc" depends="copyupdater">-->
+	<target name="zipsrc">
 	    <zip destfile="../../updates/application.zip">
             <fileset dir="../../" >
                 <include name="bin/**"/>
@@ -356,7 +357,8 @@
     <target name="deleteupdater" depends="zipsrc, thinclientzip">
 	    <delete file="../../lib/own/Updater-new.jar"/>
     </target>
-/-->    
 	<target name="buildupdates" depends="deleteupdater"> 
+/-->    
+	<target name="buildupdates"> 
     </target>
 </project>
