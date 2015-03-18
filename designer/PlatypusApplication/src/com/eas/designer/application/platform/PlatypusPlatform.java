@@ -119,16 +119,13 @@ public class PlatypusPlatform {
                     }
                     case UPGRADE_VERSION_CODE: {
                         detailsText = res.getString("mesDownloadNew");
-                        updateAction = new ActionListener() {
-                            @Override
-                            public void actionPerformed(ActionEvent e) {
-                                try {
-                                    HtmlBrowser.URLDisplayer.getDefault().showURL(new URL(URL_PLATYPUS_HOME));
-                                     notification.clear();
-                                } catch (Exception ex) {
-                                    Logger.getLogger(PlatypusPlatform.class.getName())
-                                            .log(Level.SEVERE, null, ex); // NOI18N
-                                }
+                        updateAction = (ActionEvent e) -> {
+                            try {
+                                HtmlBrowser.URLDisplayer.getDefault().showURL(new URL(URL_PLATYPUS_HOME));
+                                notification.clear();
+                            } catch (Exception ex) {
+                                Logger.getLogger(PlatypusPlatform.class.getName())
+                                        .log(Level.SEVERE, null, ex); // NOI18N
                             }
                         };
                         break;
