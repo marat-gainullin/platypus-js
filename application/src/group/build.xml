@@ -357,7 +357,8 @@
     <target name="deleteupdater" depends="zipsrc, thinclientzip">
 	    <delete file="../../lib/own/Updater-new.jar"/>
     </target>
-/-->    
 	<target name="buildupdates" depends="deleteupdater"> 
+/-->    
+	<target name="buildupdates"> 
     </target>
 </project>
