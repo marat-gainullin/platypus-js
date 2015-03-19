@@ -85,6 +85,7 @@
         <DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
+        <DCC_DebugInformation>2</DCC_DebugInformation>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <DCC_ExeOutput>C:\workspace\platypus js\application\updates</DCC_ExeOutput>
         <Debugger_CWD>C:\workspace\platypus js\application\updates</Debugger_CWD>
@@ -92,8 +93,11 @@
         <Debugger_RunParams>newversion -silent true</Debugger_RunParams>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
+        <DCC_ExeOutput>C:\workspace\platypus js\application\updates\</DCC_ExeOutput>
+        <DCC_RunTimeTypeInfo>true</DCC_RunTimeTypeInfo>
+        <DCC_DebugInformation>2</DCC_DebugInformation>
         <Debugger_CWD>C:\workspace\platypus js\application\updates</Debugger_CWD>
-        <Debugger_RunParams>update</Debugger_RunParams>
+        <Debugger_RunParams>newversion -silent true</Debugger_RunParams>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
     </PropertyGroup>
@@ -455,6 +459,7 @@
                 <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Win64" Name="$(PROJECTNAME)"/>
             </Deployment>
+            <ModelSupport>False</ModelSupport>
         </BorlandProject>
         <ProjectFileVersion>12</ProjectFileVersion>
     </ProjectExtensions>
