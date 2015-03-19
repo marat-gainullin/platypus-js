@@ -266,9 +266,18 @@
                                 /-->
 	<target description="Create update file" name="setversion">
 	    <buildnumber file="build.num"/>
+	    <loadfile srcfile="../../updates/version.xml" property="versionFile"/>
+            <propertyregex property="number" input="${versionFile}"
+                   regex="&lt;Version version=&quot;\d+\.\d+\.(\d+)&quot;/&gt;"
+                   select="\1"
+		   global="true"/> 
+	    <var name="val" value="${number}"/>
+	    <var name="op" value="+"/>
+	    <var name="increment" value="1"/> 
+  	    <math result="result" operand1="${val}" operation="${op}" operand2="${increment}" datatype="int"/>
             <replaceregexp file="../../updates/version.xml"
-                   match="&lt;Version version=&quot;(\d+\.\d+\.)\d+&quot;/&gt;"
-                   replace="&lt;Version version=&quot;\1${build.number}&quot;/&gt;"
+                   match="&lt;Version version=&quot;(\d+\.\d+\.)(\d+)&quot;/&gt;"
+                   replace="&lt;Version version=&quot;\1${result}&quot;/&gt;"
                    byline="true"/> 
 	</target>
 	                            <!--
