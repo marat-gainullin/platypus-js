@@ -5,7 +5,6 @@
 package com.eas.designer.application.platform;
 
 import com.eas.designer.application.utils.DatabaseServerType;
-import com.eas.designer.application.utils.LifecycleSupport;
 import com.eas.util.FileUtils;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -40,7 +39,6 @@ import org.openide.awt.NotificationDisplayer;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.util.ImageUtilities;
-import org.openide.util.NbBundle;
 import org.openide.util.Utilities;
 
 /**
