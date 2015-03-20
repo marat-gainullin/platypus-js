@@ -264,7 +264,7 @@
 	                           <!--
                                     Version section depends="jar"
                                 /-->
-	<target description="Create update file" name="setversion">
+	<target description="Create update file" name="markversion">
 	    <property name="versionXMLPath" value="../../updates/version.xml"/>
 	    <loadfile property="versionFile" srcFile="${versionXMLPath}"/>
 	    <macrodef name="incrementBuildNumber">
@@ -284,20 +284,8 @@
                    replace="&lt;Version version=&quot;\1${buildNumber}&quot;/&gt;"
                    byline="true"/> 
 	</target>
-	                            <!--
-                                    Copy Updater.jar if need.
-                                /-->
-	                            <!--
-	<target name="copyupdater" depends="setversion">
-	    <copy file="../../lib/own/Updater.jar" tofile="../../lib/own/Updater-new.jar"/>
-    </target> 
-                                /-->
-	
-	  						    <!--
-                                    Make full update file.
-                                /-->
-	<!--<target name="zipsrc" depends="copyupdater">-->
-	<target name="zipsrc">
+
+	<target name="packupdates">
 	    <zip destfile="../../updates/application.zip">
             <fileset dir="../../" >
                 <include name="bin/**"/>
@@ -311,67 +299,6 @@
                                 <!--
                                     Make lite update file.
                                 /-->
-<!--
-    <target name="thinclientzip" depends="copyupdater">
-        <zip destfile="../../updates/thinclient.zip">
-            <fileset dir="../../" >
-                <include name="api/**"/>
-                <include name="bin/Application.jar"/>
-				<include name="bin/Core.jar"/>
-				<include name="bin/Datamodel.jar"/>
-				<include name="bin/Forms.jar"/>
-				<include name="bin/Modules.jar"/>
-				<include name="bin/Reports.jar"/>
-				<include name="lib/own/BinaryTags.jar"/>
-				<include name="lib/own/CommonUtils.jar"/>
-				<include name="lib/own/Grid.jar"/>
-				<include name="lib/own/IconLib.jar"/>
-				<include name="lib/own/Rowsets.jar"/>
-				<include name="lib/own/Updater-new.jar"/>
-				<include name="lib/own/ScalablePane.jar"/>
-				<include name="lib/thirdparty/JCalendar.jar"/>
-				<include name="lib/thirdparty/chart/*.jar"/>
-				<include name="lib/thirdparty/j-interop/*.jar"/>
-				<include name="lib/thirdparty/jxls/*.jar"/>
-				<include name="lib/thirdparty/laf/*.jar"/>
-				<include name="lib/thirdparty/misc/jh.jar"/>
-				
-				<include name="lib/thirdparty/geotools/geoapi-2.3-M1.jar"/>
-				<include name="lib/thirdparty/geotools/geoapi-pending-2.3-M1.jar"/>
-				<include name="lib/thirdparty/geotools/gt-api-10.3.jar"/>
-				<include name="lib/thirdparty/geotools/gt-coverage-10.3.jar"/>
-				<include name="lib/thirdparty/geotools/gt-cql-10.3.jar"/>
-				<include name="lib/thirdparty/geotools/gt-data-10.3.jar"/>
-				<include name="lib/thirdparty/geotools/gt-epsg-wkt-10.3.jar"/>
-				<include name="lib/thirdparty/geotools/gt-main-10.3.jar"/>
-				<include name="lib/thirdparty/geotools/gt-metadata-10.3.jar"/>
-				<include name="lib/thirdparty/geotools/gt-referencing-10.3.jar"/>
-				<include name="lib/thirdparty/geotools/gt-render-10.3.jar"/>
-				<include name="lib/thirdparty/geotools/gt-wms-10.3.jar"/>
-				<include name="lib/thirdparty/geotools/jai_core-1.1.3.jar"/>
-				<include name="lib/thirdparty/geotools/jsr-275-1.0-beta-2.jar"/>
-				<include name="lib/thirdparty/geotools/jts-1.13.jar"/>
-				<include name="lib/thirdparty/geotools/vecmath-1.3.2.jar"/>
-                
-				<include name="lib/thirdparty/commons/commons-beanutils-1.8.2.jar"/>
-				<include name="lib/thirdparty/commons/commons-collections-3.2.1.jar"/>
-				<include name="lib/thirdparty/commons/commons-digester-2.0.jar"/>
-				<include name="lib/thirdparty/commons/commons-jexl-2.1.1.jar"/>
-				<include name="lib/thirdparty/commons/commons-logging-1.1.1.jar"/>
-				<include name="lib/thirdparty/commons/poi-3.9-20121203.jar"/>
-				<include name="lib/thirdparty/commons/poi-ooxml-3.9-20121203.jar"/>
-				<include name="lib/thirdparty/commons/poi-ooxml-schemas-3.9-20121203.jar"/>
-				<include name="lib/thirdparty/commons/xmlbeans-2.4.0.jar"/>
-				</fileset>
-        </zip>
-    </target>
--->
-<!--
-    <target name="deleteupdater" depends="zipsrc, thinclientzip">
-	    <delete file="../../lib/own/Updater-new.jar"/>
-    </target>
-	<target name="buildupdates" depends="deleteupdater"> 
-/-->    
-	<target name="buildupdates"> 
+	<target name="buildupdates" depends="markversion,packupdates"> 
     </target>
 </project>
