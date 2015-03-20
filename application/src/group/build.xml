@@ -272,7 +272,7 @@
                    select="\1"
 		   global="true"/> 
             <echo>NUMBER ${number}</echo>
-	    <var name="val" value="${number}"/>
+	    <var name="val" value="1"/>
 	    <var name="op" value="+"/>
 	    <var name="increment" value="1"/> 
   	    <math result="result" operand1="${val}" operation="${op}" operand2="${increment}" datatype="int"/>
