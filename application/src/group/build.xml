@@ -265,10 +265,23 @@
                                     Version section depends="jar"
                                 /-->
 	<target description="Create update file" name="setversion">
-	    <buildnumber file="build.num"/>
-            <replaceregexp file="../../updates/version.xml"
+	    <property name="versionXMLPath" value="../../updates/version.xml"/>
+	    <loadfile property="versionFile" srcFile="${versionXMLPath}"/>
+	    <macrodef name="incrementBuildNumber">
+		<sequential>
+			<script language="javascript">
+			  var versionXMLContent = project.getProperty("versionFile");
+			  var re = /\d+\.\d+\.(\d+)/;
+			  var buildNumber = +re.exec(versionXMLContent)[1];
+			  buildNumber++;
+			  project.setProperty("buildNumber",buildNumber);
+			</script>
+		</sequential>
+	    </macrodef>
+  	    <incrementBuildNumber/>
+            <replaceregexp file="${versionXMLPath}"
                    match="&lt;Version version=&quot;(\d+\.\d+\.)\d+&quot;/&gt;"
-                   replace="&lt;Version version=&quot;\1${build.number}&quot;/&gt;"
+                   replace="&lt;Version version=&quot;\1${buildNumber}&quot;/&gt;"
                    byline="true"/> 
 	</target>
 	                            <!--
