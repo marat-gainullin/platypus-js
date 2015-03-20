@@ -175,11 +175,10 @@ begin
   end
   else
   begin
-    if runApp('javaw.exe', generateRunParams('newversion -silent true'), SHOW_APPLICATION,
+    if runApp('javaw.exe', generateRunParams('newversion'), SHOW_APPLICATION,
       false, true) = NEED_UPDATE_RESULT then
     begin
-      runApp('javaw.exe', generateRunParams('update' + ' ' + SILENT + ' ' +
-        isSilent), SHOW_APPLICATION, getNeedUAC, false);
+      runApp('javaw.exe', generateRunParams('update'), SHOW_APPLICATION, getNeedUAC(), false);
     end;
   end;
 end;
