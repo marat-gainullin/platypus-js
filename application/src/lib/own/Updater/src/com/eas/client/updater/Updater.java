@@ -34,24 +34,24 @@ public class Updater {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        Logger log = Logger.getLogger(UpdaterConstants.LOGGER_NAME);
+        Logger main_log = Logger.getLogger(UpdaterConstants.LOGGER_NAME);
         UIManager.put("swing.boldMetal", Boolean.FALSE);
         try {
             if (args.length < 13) {
                 System.out.println(UpdaterConstants.ERROR_RUN_COMMAND_FORMAT);
             }
             String userHome = System.getProperty("user.home");
-            String updaterLogPath = FileUpdater.fixFileSeparatorChar(userHome + "/.platypus/logs/Updater_log.log");
+            String updaterLogPath = FileUpdater.fixFileSeparatorChar(userHome + "/.platypus/logs/Updater.log");
             File platypusLogsPath = new File(FileUpdater.fixFileSeparatorChar(userHome + "/.platypus/logs"));
             platypusLogsPath.mkdirs();
             FileHandler h = new FileHandler(updaterLogPath);
             h.setFormatter(new SimpleFormatter());
-            log.addHandler(h);
-            log.setLevel(Level.ALL);
+            main_log.addHandler(h);
+            main_log.setLevel(Level.ALL);
             try {
                 parseArgs(args);
             } catch (IllegalArgumentException e) {
-                log.log(Level.SEVERE, e.getLocalizedMessage(), e);
+                main_log.log(Level.SEVERE, e.getLocalizedMessage(), e);
             }
             if (!"".equals(command)) {
                 switch (command) {
@@ -98,7 +98,7 @@ public class Updater {
                 System.out.println(UpdaterConstants.ERROR_RUN_COMMAND_FORMAT);
             }
         } catch (Exception ex) {
-            log.log(Level.SEVERE, ex.getLocalizedMessage(), ex);
+            main_log.log(Level.SEVERE, ex.getLocalizedMessage(), ex);
         }
     }
 
@@ -170,25 +170,7 @@ public class Updater {
                 } else {
                     throw new IllegalArgumentException("Program silent mode: -silent <true | false>");
                 }
-            } //            else if ((UpdaterConstants.CMD_SWITCHS_PREFIX + UpdaterConstants.CMD_RUN_COMMAND).equalsIgnoreCase(args[i])) {
-            //                if (i < args.length - 2) {
-            //                    whatRun = args[i + 1];
-            //                    if ((whatRun.indexOf("cscript") >= 0) || (whatRun.indexOf("wscript") >= 0)) {
-            //                        whatRun += " \"" + args[i + 2] + "\"";
-            //                    } else {
-            //                        whatRun += " " + args[i + 2];
-            //                    }
-            //                    i += 3;
-            //                } else {
-            //                    if (i < args.length - 1) {
-            //                        whatRun = args[i + 1];
-            //                        i += 2;
-            //                    } else {
-            //                        throw new IllegalArgumentException("Command to run: -wrun <value>(if you want to run *.js or *.vbs script use \n"
-            //                                + " -wrun cscript(wscript) \"<value>\")");
-            //                    }
-            //                }
-            //            } 
+            }
             else {
                 i++;
             }

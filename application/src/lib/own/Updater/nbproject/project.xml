@@ -7,7 +7,7 @@
             <minimum-ant-version>1.6.5</minimum-ant-version>
             <source-roots>
                 <root id="src.dir"/>
-                <root id="src.launcher.dir" name="Обновление с UAC"/>
+                <root id="src.launcher.dir" name="Win UAC"/>
             </source-roots>
             <test-roots>
                 <root id="test.src.dir"/>
