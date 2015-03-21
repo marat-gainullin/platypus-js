@@ -277,6 +277,95 @@ public class TimePicker extends Composite implements  HasValue<Date>, HasValueCh
 		
 	}
 	
+	public void setAbsolute(){
+		timePickerContainer.getElement().getStyle().setPosition(Position.ABSOLUTE);
+		timePickerContainer.getElement().getStyle().setHeight(0, Style.Unit.PX);
+		timePickerContainer.getElement().getStyle().setProperty("width", "auto");
+		timePickerContainer.getElement().getStyle().setBottom(0, Style.Unit.PCT);
+		timePickerContainer.getElement().getStyle().setOverflow(Overflow.HIDDEN);
+		setStyleName(timePickerContainer.getElement(), "time-picker");
+		
+		verticalAlign.getElement().getStyle().setHeight(100, Style.Unit.PCT);
+		verticalAlign.getElement().getStyle().setWidth(0, Style.Unit.PCT);
+		
+		widgetContainer.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
+		verticalAlign.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
+		dateBlock = new FlowPanel();
+		dateBlock.getElement().setInnerText(constants.date());
+		dateBlock.getElement().getStyle().setTextAlign(TextAlign.CENTER);
+		dateBlock.getElement().getStyle().setMarginBottom(10, Style.Unit.PCT);
+		showDate();
+		
+		widgetContainer.add(dateBlock);
+		
+		FlowPanel upperBtnBlock = new FlowPanel();
+		upperBtnBlock.add(createSeparator(true,separatorSmallWidth));
+		setWidget(upperBtnBlock, btnUpHour, "time-picker-up");
+		upperBtnBlock.add(createSeparator(true,separatorWidth));
+		setWidget(upperBtnBlock, btnUpMinute, "time-picker-up");
+		upperBtnBlock.add(createSeparator(true,separatorWidth));
+		setWidget(upperBtnBlock, btnUpSecond, "time-picker-up");
+		upperBtnBlock.add(createSeparator(true,separatorSmallWidth));
+		
+		widgetContainer.add(upperBtnBlock);
+		
+		FlowPanel textBlock = new FlowPanel();
+		
+		txtHour.getElement().getStyle().setWidth(componentWidth, Style.Unit.PCT);
+//		txtHour.getElement().getStyle().setProperty("boxSizing", "border-box");
+		txtHour.getElement().getStyle().setTextAlign(TextAlign.CENTER);
+		txtHour.setStyleName("time-picker-text");
+		txtMinute.getElement().getStyle().setWidth(componentWidth, Style.Unit.PCT);
+//		txtMinute.getElement().getStyle().setProperty("boxSizing", "border-box");
+		txtMinute.getElement().getStyle().setTextAlign(TextAlign.CENTER);
+		txtMinute.setStyleName("time-picker-text");
+		txtSecond.getElement().getStyle().setTextAlign(TextAlign.CENTER);
+		txtSecond.getElement().getStyle().setWidth(componentWidth, Style.Unit.PCT);
+//		txtSecond.getElement().getStyle().setProperty("boxSizing", "border-box");
+		
+		txtSecond.setStyleName("time-picker-text");
+		
+		textBlock.add(createSeparator(true,separatorSmallWidth));
+		textBlock.add(txtHour);
+		textBlock.add(createSeparator(false, separatorWidth));
+		textBlock.add(txtMinute);
+		textBlock.add(createSeparator(false, separatorWidth));
+		textBlock.add(txtSecond);
+		textBlock.add(createSeparator(true,separatorSmallWidth));
+		
+		textBlock.getElement().getStyle().setDisplay(Style.Display.BLOCK );
+		widgetContainer.add(textBlock);
+		
+		FlowPanel lowerBtnBlock = new FlowPanel();
+		lowerBtnBlock.add(createSeparator(true,separatorSmallWidth));
+		setWidget(lowerBtnBlock, btnDownHour, "time-picker-down");
+		lowerBtnBlock.add(createSeparator(true,separatorWidth));
+		setWidget(lowerBtnBlock, btnDownMinute, "time-picker-down");
+		lowerBtnBlock.add(createSeparator(true,separatorWidth));
+		setWidget(lowerBtnBlock, btnDownSecond, "time-picker-down");
+		lowerBtnBlock.add(createSeparator(true,separatorSmallWidth));
+		
+		widgetContainer.add(lowerBtnBlock);
+		widgetContainer.getElement().getStyle().setVerticalAlign(VerticalAlign.MIDDLE);
+		verticalAlign.getElement().getStyle().setVerticalAlign(VerticalAlign.MIDDLE);
+		
+		FlowPanel hCenter = new FlowPanel();
+		
+		hCenter.add(widgetContainer);
+		hCenter.add(verticalAlign);
+		hCenter.getElement().getStyle().setHeight(100, Style.Unit.PCT);
+		hCenter.getElement().getStyle().setDisplay(Display.BLOCK);
+		hCenter.getElement().getStyle().setProperty("marginLeft", "auto");
+		hCenter.getElement().getStyle().setProperty("marginRight", "auto");
+		
+		timePickerContainer.add(hCenter);
+		initWidget(timePickerContainer);
+	}
+	
+	public void setRelative(){
+		
+	}
+	
 	private void setHeight(int aHeight, Unit aUnit){
 		timePickerContainer.getElement().getStyle().setHeight(aHeight, aUnit);
 	}
