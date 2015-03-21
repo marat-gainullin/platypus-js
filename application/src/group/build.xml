@@ -290,9 +290,7 @@
             <fileset dir="../../" >
                 <include name="bin/**"/>
                 <include name="api/**"/>
-				<exclude name="bin/DatamodelDesigner.jar"/>
 				<include name="lib/**/*.jar"/>
-				<exclude name="lib/own/Updater.jar"/>
 			</fileset>
         </zip>
     </target>
