@@ -50,7 +50,7 @@ public class UpdaterConstants {
     public static final String ERROR_RUN_COMMAND_FORMAT =  
         "Using \"Updater\":java -jar Updater.jar <command> -laf <value> -curl <value> -uurl <value> -cname <value>\n"
         + "                                  -uname <value> -path <value> -wrun <value>\n"
-        + "Parametrs:\n"
+        + "Parameters:\n"
         + "         <command>        [newversion, update] What Updater will do now." 
         + "         -laf <value>     UIManager class path.\n" 
         + "         -curl <value>    URL to compare files version.\n"

@@ -119,10 +119,8 @@ public class FileUpdater {
                                     String updaterJarPath = ff.getPath();
                                     File toBeDeleted = new File(updaterJarPath + ".old");
                                     toBeDeleted.delete();
-                                    File aff = new File(ff.getAbsolutePath());
                                     ff.renameTo(toBeDeleted);
-                                    ff.deleteOnExit();
-                                    ff = aff;
+                                    toBeDeleted.deleteOnExit();
                                 }
                                 if (replaceMode || curFName.contains(UpdaterConstants.UPDATER_FIND_LABEL)) {
                                     ff.createNewFile();

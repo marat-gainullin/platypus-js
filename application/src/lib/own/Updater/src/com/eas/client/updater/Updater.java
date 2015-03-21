@@ -37,7 +37,7 @@ public class Updater {
         Logger main_log = Logger.getLogger(UpdaterConstants.LOGGER_NAME);
         UIManager.put("swing.boldMetal", Boolean.FALSE);
         try {
-            if (args.length < 13) {
+            if (args.length < 11) {
                 System.out.println(UpdaterConstants.ERROR_RUN_COMMAND_FORMAT);
             }
             String userHome = System.getProperty("user.home");
