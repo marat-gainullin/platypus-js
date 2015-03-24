@@ -33,7 +33,7 @@ public class FormCompletionContext extends CompletionContext {
     @Override
     public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
         super.applyCompletionItems(point, offset, resultSet);
-        addItem(resultSet, point.getFilter(), new BeanCompletionItem(getPlaypusContainerClass(getFormModel().getTopRADComponent()), Form.VIEW_SCRIPT_NAME, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset())); //NOI18N
+        //addItem(resultSet, point.getFilter(), new BeanCompletionItem(getPlaypusContainerClass(getFormModel().getTopRADComponent()), Form.VIEW_SCRIPT_NAME, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset())); //NOI18N
         fillComponents(point, resultSet);
     }
 
@@ -43,6 +43,7 @@ public class FormCompletionContext extends CompletionContext {
         if (completionContext != null) {
             return completionContext;
         }
+        /*
         if (Form.VIEW_SCRIPT_NAME.equals(token.name)) {
             Class<?> conainerClass = getPlaypusContainerClass(getFormModel().getTopRADComponent());
             if (conainerClass != null) {
@@ -51,6 +52,7 @@ public class FormCompletionContext extends CompletionContext {
                 return null;
             }
         }
+                */
         RADComponent<?> comp = getComponentByName(token.name);
         if (comp != null) {
             if (ModelGrid.class.isAssignableFrom(comp.getBeanClass())) {
@@ -84,10 +86,12 @@ public class FormCompletionContext extends CompletionContext {
                 // <comp>
                 if (point.getFilter() == null || point.getFilter().isEmpty() || comp.getName().toLowerCase().startsWith(point.getFilter().toLowerCase())) {
                     String compName = comp.getName();
+                    /*
                     if (Form.VIEW_SCRIPT_NAME.equals(compName)) {
                         continue;
                     }
-                    addItem(resultSet, point.getFilter(), new BeanCompletionItem(comp.getBeanClass(), compName, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
+                    */
+                    addItem(resultSet, point.getFilter(), new BeanCompletionItem(FormUtils.Panel.class.isAssignableFrom(comp.getBeanClass()) ? getPlaypusContainerClass(comp) : comp.getBeanClass(), compName, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
                 }
             }
         }
