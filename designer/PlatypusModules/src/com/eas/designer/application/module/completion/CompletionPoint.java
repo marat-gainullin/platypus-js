@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import javax.swing.text.BadLocationException;
+import jdk.nashorn.internal.ir.AccessNode;
 import jdk.nashorn.internal.ir.ExpressionStatement;
 import jdk.nashorn.internal.ir.FunctionNode;
 import jdk.nashorn.internal.ir.IdentNode;
@@ -18,6 +19,7 @@ import jdk.nashorn.internal.ir.IndexNode;
 import jdk.nashorn.internal.ir.LexicalContext;
 import jdk.nashorn.internal.ir.LiteralNode;
 import jdk.nashorn.internal.ir.Node;
+import jdk.nashorn.internal.ir.PropertyNode;
 import jdk.nashorn.internal.ir.visitor.NodeVisitor;
 import jdk.nashorn.internal.parser.Token;
 import org.netbeans.modules.editor.NbEditorDocument;
@@ -110,6 +112,18 @@ public class CompletionPoint {
             }
 
             @Override
+            public boolean enterAccessNode(AccessNode accessNode) {
+                if (!lc.expressionsNodes.isEmpty()
+                        && ScriptUtils.isInNode(lc.expressionsNodes.peekLast(), accessNode)
+                        && ScriptUtils.isInNode(lc.expressionsNodes.peekLast(), offset)) {
+                    ctx.add(new CompletionToken(accessNode.getProperty(), accessNode));
+                } else if (lc.expressionsNodes.isEmpty() && ScriptUtils.isInNode(accessNode, offset)) {
+                    ctx.add(new CompletionToken(accessNode.getProperty(), accessNode));
+                }
+                return super.enterAccessNode(accessNode);
+            }
+
+            @Override
             public boolean enterIdentNode(IdentNode identNode) {
                 if (!lc.expressionsNodes.isEmpty()
                         && ScriptUtils.isInNode(lc.expressionsNodes.peekLast(), identNode)
@@ -146,8 +160,9 @@ public class CompletionPoint {
     private static List<CompletionToken> getOffsetTokens(List<CompletionToken> contextTokens, int offset) {
         final List<CompletionToken> tokens = new ArrayList<>();
         for (CompletionToken token : contextTokens) {
-            Long originalToken = token.node.getToken();
-            if (Token.descPosition(originalToken) + Token.descLength(originalToken) < offset) {
+            //Long originalToken = token.node.getToken();
+            //if (Token.descPosition(originalToken) + Token.descLength(originalToken) < offset) {
+            if (token.node.getFinish() < offset) {
                 tokens.add(token);
             } else {
                 break;
