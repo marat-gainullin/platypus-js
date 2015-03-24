@@ -13,6 +13,7 @@ import java.util.MissingResourceException;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.netbeans.modules.j2ee.deployment.devmodules.api.Deployment;
 import org.netbeans.spi.project.ActionProvider;
 import org.netbeans.spi.project.ui.support.DefaultProjectOperations;
 import org.openide.DialogDescriptor;
@@ -139,10 +140,11 @@ public class PlatypusProjectActions implements ActionProvider {
         PlatypusWebModuleManager pwmm = project.getLookup().lookup(PlatypusWebModuleManager.class);
         assert pwmm != null;
         try {
+            pwmm.undeploy();
             project.getOutputWindowIO().getOut().println(NbBundle.getMessage(PlatypusProjectActions.class, "MSG_Cleaning_Web_Dir")); // NOI18N
             pwmm.clearWebDir();
             project.getOutputWindowIO().getOut().println(NbBundle.getMessage(PlatypusProjectActions.class, "MSG_Cleaning_Web_Dir_Complete")); // NOI18N
-        } catch (MissingResourceException | IOException ex) {
+        } catch (MissingResourceException | IOException | Deployment.DeploymentException ex) {
             Logger.getLogger(PlatypusProjectActions.class.getName()).log(Level.WARNING, "Error clearning web directory", ex);
             project.getOutputWindowIO().getErr().println(ex.getMessage());
         }

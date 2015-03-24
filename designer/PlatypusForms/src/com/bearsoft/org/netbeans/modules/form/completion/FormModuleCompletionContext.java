@@ -40,7 +40,6 @@ public class FormModuleCompletionContext extends ModuleCompletionContext {
     @Override
     public void applyCompletionItems(CompletionPoint point, int offset, CompletionResultSet resultSet) throws Exception {
         super.applyCompletionItems(point, offset, resultSet);
-
     }
 
     protected FormModel getFormModel() {

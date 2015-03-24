@@ -91,7 +91,7 @@ public class PlatypusWebModuleManager {
     public void undeploy() throws Deployment.DeploymentException {
         PlatypusWebModule webModule = project.getLookup().lookup(PlatypusWebModule.class);
         assert webModule != null : "J2eeModuleProvider instance should be in the project's lookup.";
-        Deployment.getDefault().undeploy(webModule, true, (String message) -> {
+        Deployment.getDefault().undeploy(webModule, false, (String message) -> {
             if (message != null) {
                 if (message.contains("FAIL")) {
                     project.getOutputWindowIO().getErr().println(message);
