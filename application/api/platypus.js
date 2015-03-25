@@ -4,6 +4,7 @@
     var global = this;
     var oldP = global.P;
     global.P = {};
+    
     /*
      global.P = this; // global scope of api - for legacy applications
      global.P.restore = function() {
@@ -743,7 +744,7 @@
                 Object.defineProperty(target, n, valueAccessorDesc);
             })();
         }
-        // ORM mutable scalar and readonly collection properties
+        // ORM mutable scalar and collection properties
         var define = function (aOrmDefs) {
             for each (var defsEntry in aOrmDefs.entrySet()) {
                 var def = EngineUtilsClass.unwrap(defsEntry.getValue().getJsDef());
