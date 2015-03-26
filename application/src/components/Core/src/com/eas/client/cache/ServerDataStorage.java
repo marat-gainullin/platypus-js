@@ -5,8 +5,8 @@
  */
 package com.eas.client.cache;
 
-import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.metadata.Parameters;
+import com.eas.client.changes.Change;
+import com.eas.client.metadata.Parameters;
 import java.util.List;
 import java.util.function.Consumer;
 

@@ -4,7 +4,10 @@
  */
 package com.eas.client.model.store;
 
-import com.bearsoft.rowset.metadata.*;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.ForeignKeySpec;
+import com.eas.client.metadata.Parameter;
+import com.eas.client.metadata.PrimaryKeySpec;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.eas.client.model.Relation;

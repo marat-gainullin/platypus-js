@@ -26,6 +26,7 @@
      */
     function Orderer(aKeysNames) {
         var keyNames = aKeysNames.sort();
+        keyNames.forEach(function(aKeyName){});
         function calcKey(anObject) {
             var key = '';
             keyNames.forEach(function (aKeyName) {
@@ -36,6 +37,10 @@
             });
         }
 
+        this.inKeys = function(aKeyName){
+            return keyNames.indexOf(aKeyName) !== -1;
+        };
+        
         var map = {};
         this.add = function (anObject) {
             var key = calcKey(anObject);

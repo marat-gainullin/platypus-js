@@ -8,7 +8,7 @@ package com.eas.client;
 import com.eas.client.cache.ActualCacheEntry;
 import com.eas.client.threetier.PlatypusConnection;
 import com.eas.client.threetier.requests.CreateServerModuleRequest;
-import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
+import com.eas.client.threetier.requests.RPCRequest;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -93,14 +93,14 @@ public class ServerModulesProxy {
     }
 
     public Object executeServerModuleMethod(String aModuleName, String aMethodName, Consumer<Object> onSuccess, Consumer<Exception> onFailure, Object... aArguments) throws Exception {
-        final ExecuteServerModuleMethodRequest request = new ExecuteServerModuleMethodRequest(aModuleName, aMethodName, aArguments);
+        final RPCRequest request = new RPCRequest(aModuleName, aMethodName, aArguments);
         if (onSuccess != null) {
-            conn.<ExecuteServerModuleMethodRequest.Response>enqueueRequest(request, (ExecuteServerModuleMethodRequest.Response aResponse) -> {
+            conn.<RPCRequest.Response>enqueueRequest(request, (RPCRequest.Response aResponse) -> {
                 onSuccess.accept(aResponse.getResult());
             }, onFailure);
             return null;
         } else {
-            ExecuteServerModuleMethodRequest.Response response = conn.executeRequest(request);
+            RPCRequest.Response response = conn.executeRequest(request);
             return response.getResult();
         }
     }

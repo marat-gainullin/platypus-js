@@ -1,19 +1,20 @@
 package com.eas.client;
 
-import com.bearsoft.rowset.Converter;
-import com.bearsoft.rowset.Row;
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.dataflow.FlowProvider;
-import com.bearsoft.rowset.exceptions.ResourceUnavalableException;
-import com.bearsoft.rowset.jdbc.JdbcReader;
-import com.bearsoft.rowset.jdbc.StatementsGenerator;
-import com.bearsoft.rowset.jdbc.StatementsGenerator.StatementsLogEntry;
-import com.bearsoft.rowset.metadata.*;
+import com.eas.client.changes.Change;
+import com.eas.client.dataflow.Converter;
+import com.eas.client.dataflow.FlowProvider;
+import com.eas.client.dataflow.JdbcFlowProvider;
+import com.eas.client.dataflow.StatementsGenerator;
 import com.eas.client.login.PlatypusPrincipal;
+import com.eas.client.metadata.DataTypeInfo;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.Parameter;
+import com.eas.client.metadata.Parameters;
 import com.eas.client.queries.ContextHost;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.resourcepool.GeneralResourceProvider;
+import com.eas.client.resourcepool.ResourceUnavalableException;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.concurrent.CallableConsumer;
 import com.eas.concurrent.DeamonThreadFactory;
@@ -156,7 +157,7 @@ public class DatabasesClient {
      * @return FlowProvider created.
      * @throws Exception
      */
-    public FlowProvider createFlowProvider(String aDatasourceName, String aEntityName, String aSqlClause, Fields aExpectedFields) throws Exception {
+    public PlatypusJdbcFlowProvider createFlowProvider(String aDatasourceName, String aEntityName, String aSqlClause, Fields aExpectedFields) throws Exception {
         return new PlatypusJdbcFlowProvider(this, aDatasourceName, aEntityName, obtainDataSource(aDatasourceName), (Runnable aTask) -> {
             startJdbcTask(aTask);
         }, getDbMetadataCache(aDatasourceName), aSqlClause, aExpectedFields, contextHost);
@@ -298,7 +299,6 @@ public class DatabasesClient {
     public int executeUpdate(SqlCompiledQuery aQuery, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
         Callable<Integer> doWork = () -> {
             int rowsAffected = 0;
-            Converter converter = getDbMetadataCache(aQuery.getDatabaseId()).getConnectionDriver().getConverter();
             DataSource dataSource = obtainDataSource(aQuery.getDatabaseId());
             if (dataSource != null) {
                 try (Connection connection = dataSource.getConnection(); PreparedStatement stmt = connection.prepareStatement(aQuery.getSqlClause())) {
@@ -306,7 +306,7 @@ public class DatabasesClient {
                     Parameters params = aQuery.getParameters();
                     for (int i = 1; i <= params.getParametersCount(); i++) {
                         Parameter param = params.get(i);
-                        converter.convert2JdbcAndAssign(param.getValue(), param.getTypeInfo(), connection, i, stmt);
+                        Converter.convertAndAssign(param.getValue(), param.getTypeInfo(), connection, i, stmt);
                     }
                     try {
                         rowsAffected += stmt.executeUpdate();
@@ -567,20 +567,19 @@ public class DatabasesClient {
             if (driver == null) {
                 throw new IllegalStateException(String.format(UNSUPPORTED_DATASOURCE_IN_COMMIT, aDatasourceName));
             }
-            Converter converter = driver.getConverter();
             assert aLog != null;
             DataSource dataSource = obtainDataSource(aDatasourceName);
             Connection connection = dataSource.getConnection();
             try {
                 connection.setAutoCommit(false);
-                List<StatementsLogEntry> statements = new ArrayList<>();
+                List<StatementsGenerator.StatementsLogEntry> statements = new ArrayList<>();
                 // This structure helps us to avoid actuality check for queries while
                 // processing each statement in transaction. Thus, we can avoid speed degradation.
                 // It doesn't break security, because such "unactual" lookup takes place ONLY
                 // while transaction processing.
                 final Map<String, SqlQuery> entityQueries = new HashMap<>();
                 for (Change change : aLog) {
-                    StatementsGenerator generator = new StatementsGenerator(converter, (String aEntityName, String aFieldName) -> {
+                    StatementsGenerator generator = new StatementsGenerator((String aEntityName, String aFieldName) -> {
                         if (aEntityName != null) {
                             SqlQuery query;
                             if (queries != null) {
@@ -651,11 +650,11 @@ public class DatabasesClient {
     protected static final String UNKNOWN_DATASOURCE_IN_COMMIT = "Unknown datasource: %s. Can't commit to it.";
     protected static final String UNSUPPORTED_DATASOURCE_IN_COMMIT = "Unsupported datasource: %s. Can't commit to it.";
 
-    public Rowset getDbTypesInfo(String aDatasourceId) throws Exception {
-        Logger.getLogger(DatabasesClient.class.getName()).fine(String.format(TYPES_INFO_TRACE_MSG, aDatasourceId));
+    public Rowset getDbTypesInfo(String aDatasourceName) throws Exception {
+        Logger.getLogger(DatabasesClient.class.getName()).fine(String.format(TYPES_INFO_TRACE_MSG, aDatasourceName));
         Rowset lrowSet = new Rowset();
-        JdbcReader rsReader = new JdbcReader(getDbMetadataCache(aDatasourceId).getConnectionDriver().getConverter());
-        DataSource dataSource = obtainDataSource(aDatasourceId);
+        JdbcReader rsReader = new JdbcReader(getDbMetadataCache(aDatasourceName).getConnectionDriver().getConverter());
+        DataSource dataSource = obtainDataSource(aDatasourceName);
         if (dataSource != null) {
             try (Connection lconn = dataSource.getConnection()) {
                 DatabaseMetaData dbmd = lconn.getMetaData();
@@ -733,12 +732,12 @@ public class DatabasesClient {
         }
     }
 
-    private int riddleStatements(List<StatementsLogEntry> aStatements, Connection aConnection) throws Exception {
+    private int riddleStatements(List<StatementsGenerator.StatementsLogEntry> aStatements, Connection aConnection) throws Exception {
         int rowsAffected = 0;
         if (!aStatements.isEmpty()) {
-            List<StatementsLogEntry> errorStatements = new ArrayList<>();
+            List<StatementsGenerator.StatementsLogEntry> errorStatements = new ArrayList<>();
             List<String> errors = new ArrayList<>();
-            for (StatementsLogEntry entry : aStatements) {
+            for (StatementsGenerator.StatementsLogEntry entry : aStatements) {
                 try {
                     rowsAffected += entry.apply(aConnection);
                 } catch (Exception ex) {

@@ -9,20 +9,18 @@
  */
 package com.eas.client;
 
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.compacts.CompactClob;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.PrimaryKeySpec;
-import com.bearsoft.rowset.utils.RowsetUtils;
-import com.eas.client.queries.Query;
+import com.eas.client.dataflow.Converter;
+import com.eas.client.metadata.DataTypeInfo;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.PrimaryKeySpec;
 import com.eas.client.sqldrivers.*;
+import com.eas.util.IDGenerator;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URL;
 import java.sql.*;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -118,12 +116,51 @@ public class SQLUtils {
         return null;
     }
 
-    public static Fields cloneRowSetParameters(Fields parameters) {
-        return parameters.copy();
-    }
-
     public static Object generatePkValueByType(int aType) {
-        return RowsetUtils.generatePkValueByType(aType);
+        switch (aType) {
+            case java.sql.Types.TINYINT:
+            case java.sql.Types.SMALLINT:
+            case java.sql.Types.INTEGER:
+            case java.sql.Types.BIGINT:
+            case java.sql.Types.FLOAT:
+            case java.sql.Types.REAL:
+            case java.sql.Types.DOUBLE:
+            case java.sql.Types.NUMERIC:
+            case java.sql.Types.DECIMAL:
+                return IDGenerator.genID();
+            case java.sql.Types.CHAR:
+            case java.sql.Types.VARCHAR:
+            case java.sql.Types.LONGVARCHAR:
+            case java.sql.Types.NCHAR:
+            case java.sql.Types.NVARCHAR:
+            case java.sql.Types.LONGNVARCHAR:
+                return String.valueOf(IDGenerator.genID());
+            case java.sql.Types.DATE:
+            case java.sql.Types.TIME:
+            case java.sql.Types.TIMESTAMP:
+                return new Date(IDGenerator.genID());
+            case java.sql.Types.BIT:
+            case java.sql.Types.BINARY:
+            case java.sql.Types.VARBINARY:
+            case java.sql.Types.LONGVARBINARY:
+            case java.sql.Types.NULL:
+            case java.sql.Types.OTHER:
+            case java.sql.Types.JAVA_OBJECT:
+            case java.sql.Types.DISTINCT:
+            case java.sql.Types.STRUCT:
+            case java.sql.Types.ARRAY:
+            case java.sql.Types.BLOB:
+            case java.sql.Types.CLOB:
+            case java.sql.Types.REF:
+            case java.sql.Types.DATALINK:
+            case java.sql.Types.ROWID:
+            case java.sql.Types.SQLXML:
+            case java.sql.Types.BOOLEAN:
+            case java.sql.Types.NCLOB:
+                break;
+        }
+        assert false;
+        return null;
     }
 
     public static Object generateBooleanValue4Type(int colType, Boolean aValue) {
@@ -204,8 +241,6 @@ public class SQLUtils {
                 }
             } else if (aObj instanceof Clob) {
                 return clob2String((Clob) aObj);
-            } else if (aObj instanceof CompactClob) {
-                return ((CompactClob) aObj).getData();
             } else {
                 return aObj.toString();
             }
@@ -322,26 +357,6 @@ public class SQLUtils {
         return DbLocalizations.getString("FOREIGN_KEY");
     }
 
-    public static int getPkFieldIndex(Query aQuery, Rowset aRowset) {
-        if (aQuery != null && aRowset != null) {
-            int pkIndex = 0;
-            List<Field> pks = aRowset.getFields().getPrimaryKeys();
-            if (pks != null && pks.size() == 1) {
-                Field fPk = pks.get(0);
-                pkIndex = aRowset.getFields().find(fPk.getName());
-            }
-            if (pkIndex == 0) {
-                pks = aQuery.getFields().getPrimaryKeys();
-                if (pks != null && pks.size() == 1) {
-                    Field fPk = pks.get(0);
-                    pkIndex = aQuery.getFields().find(fPk.getName());
-                }
-            }
-            return pkIndex;
-        }
-        return 0; // fields indices begin with 1. so, 0 is good inoperable value
-    }
-
     public static boolean isKeysCompatible(Field aField1, Field aField2) {
         if (aField1 != null && aField2 != null) {
             PrimaryKeySpec[] lKeys = new PrimaryKeySpec[2];
@@ -432,12 +447,39 @@ public class SQLUtils {
     }
 
     public static String makeTableNameMetadataQuery(String aTableName) {
-        return RowsetUtils.makeQueryMetadataQuery(makeQueryByTableName(aTableName));
+        return makeQueryMetadataQuery(makeQueryByTableName(aTableName));
+    }
+    
+    public static final String SQL_FALSE_CONDITION = " where 1=0";
+    public static final String SQL_2_METADTA_TAIL = "t01010101" + SQL_FALSE_CONDITION;
+    public static final String SQL_2_METADTA = "select * from ( %s ) " + SQL_2_METADTA_TAIL;
+    
+    public static String makeQueryMetadataQuery(String sql) {
+        if (sql != null && !sql.isEmpty()) {
+            if (!sql.endsWith(SQL_2_METADTA_TAIL)) {
+                String lsql = sql.toLowerCase().replaceAll("[\n\r]", "");
+                if (lsql.matches(".+\\bwhere\\b.+")
+                        // complex queries
+                        || lsql.matches(".+\\border\\b.+")
+                        || lsql.matches(".+\\bgroup\\b.+")
+                        || lsql.matches(".+\\bconnect\\b.+")) {
+                    return String.format(SQL_2_METADTA, sql);
+                } else // simple queries
+                {
+                    return sql + SQL_FALSE_CONDITION;
+                }
+            } else {// bypass
+                return sql;
+            }
+        }
+        return "";
     }
 
+    /*
     public static Object cloneFieldValue(Object aValue) {
         return RowsetUtils.cloneFieldValue(aValue);
     }
+    */
 
     public static Long extractLongFromJDBCObject(Object aValue) {
         Long lRetValue = null;
@@ -505,15 +547,11 @@ public class SQLUtils {
         return lRetValue;
     }
 
-    public static BigDecimal number2BigDecimal(Number aNumber) {
-        return RowsetUtils.number2BigDecimal(aNumber);
-    }
-
     public static boolean smartEquals(Object aNewValue, Object aOldValue) {
         if (aNewValue != null) {
             if (aNewValue instanceof Number && aOldValue instanceof Number) {
-                BigDecimal bd1 = SQLUtils.number2BigDecimal((Number) aNewValue);
-                BigDecimal bd2 = SQLUtils.number2BigDecimal((Number) aOldValue);
+                BigDecimal bd1 = Converter.number2BigDecimal((Number) aNewValue);
+                BigDecimal bd2 = Converter.number2BigDecimal((Number) aOldValue);
                 return bd1.equals(bd2);
             } else {
                 return aNewValue.equals(aOldValue);
@@ -760,16 +798,14 @@ public class SQLUtils {
         return false;
     }
 
+    /*
     public static boolean isTypeCompatible2JavaClass(int jdbcType, Class<?> aClass) {
         return RowsetUtils.isTypeCompatible2JavaClass(jdbcType, aClass);
     }
-
-    public static String getTypeName(int type) {
-        return RowsetUtils.getTypeName(type);
-    }
+    */
 
     public static String getLocalizedTypeName(int type) {
-        return getLocalizedTypeName(getTypeName(type));
+        return getLocalizedTypeName(DataTypeInfo.getTypeName(type));
     }
 
     public static String getLocalizedTypeName(String aTypeName) {
@@ -892,7 +928,7 @@ public class SQLUtils {
                     result = Boolean.parseBoolean(paramValText);
                     break;
                 case java.sql.Types.CLOB:
-                    result = new CompactClob(paramValText);
+                    result = paramValText;
                     break;
                 case java.sql.Types.BOOLEAN:
                     result = Boolean.parseBoolean(paramValText);
@@ -962,7 +998,7 @@ public class SQLUtils {
                     result = paramValText;
                     break;
                 default:
-                    throw new SQLException("Unsupported java.sql.Types: " + getTypeName(sqlType));
+                    throw new SQLException("Unsupported java.sql.Types: " + DataTypeInfo.getTypeName(sqlType));
             }
         } catch (NumberFormatException ex) {
             throw new SQLException("Bad number representation: " + paramValText, ex);

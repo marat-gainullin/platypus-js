@@ -4,15 +4,14 @@
  */
 package com.eas.client.threetier;
 
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.dataflow.FlowProvider;
-import com.bearsoft.rowset.exceptions.FlowProviderFailedException;
-import com.bearsoft.rowset.exceptions.RowsetException;
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.Parameters;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.Parameters;
 import com.eas.client.AppConnection;
+import com.eas.client.dataflow.FlowProvider;
+import com.eas.client.dataflow.FlowProviderFailedException;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import java.util.function.Consumer;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -37,12 +36,12 @@ public class PlatypusFlowProvider implements FlowProvider {
     }
 
     @Override
-    public Rowset nextPage(Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws RowsetException {
-        throw new RowsetException("Method \"nextPage()\" is not supported in three-tier mode.");
+    public JSObject nextPage(Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws FlowProviderFailedException {
+        throw new FlowProviderFailedException("Method \"nextPage()\" is not supported in three-tier mode.");
     }
 
     @Override
-    public Rowset refresh(Parameters aParams, Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws RowsetException {
+    public JSObject refresh(Parameters aParams, Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws FlowProviderFailedException {
         ExecuteQueryRequest request = new ExecuteQueryRequest(entityName, aParams, expectedFields);
         if (onSuccess != null) {
             try {
@@ -52,7 +51,6 @@ public class PlatypusFlowProvider implements FlowProvider {
                             onFailure.accept(new FlowProviderFailedException(ROWSET_MISSING_IN_RESPONSE));
                         }
                     } else {
-                        aResponse.getRowset().setFlowProvider(this);
                         onSuccess.accept(aResponse.getRowset());
                     }
                 }, (Exception aException) -> {
@@ -62,7 +60,7 @@ public class PlatypusFlowProvider implements FlowProvider {
                 });
                 return null;
             } catch (Exception ex) {
-                throw new RowsetException(ex);
+                throw new FlowProviderFailedException(ex);
             }
         } else {
             try {
@@ -70,10 +68,9 @@ public class PlatypusFlowProvider implements FlowProvider {
                 if (response.getRowset() == null) {
                     throw new FlowProviderFailedException(ROWSET_MISSING_IN_RESPONSE);
                 }
-                response.getRowset().setFlowProvider(this);
                 return response.getRowset();
             } catch (Exception ex) {
-                throw new RowsetException(ex);
+                throw new FlowProviderFailedException(ex);
             }
         }
     }

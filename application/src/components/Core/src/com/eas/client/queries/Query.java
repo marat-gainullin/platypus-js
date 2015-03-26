@@ -9,15 +9,15 @@
  */
 package com.eas.client.queries;
 
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.metadata.DataTypeInfo;
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.Parameter;
-import com.bearsoft.rowset.metadata.Parameters;
+import com.eas.client.metadata.DataTypeInfo;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.Parameter;
+import com.eas.client.metadata.Parameters;
 import java.beans.PropertyChangeSupport;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * Abstract platypus query with parameters.
@@ -265,7 +265,7 @@ public abstract class Query {
         parametersBinds = aValue;
     }
 
-    public abstract Rowset execute(Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception;
+    public abstract JSObject execute(Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception;
 
     /**
      * @return The application element identifier;

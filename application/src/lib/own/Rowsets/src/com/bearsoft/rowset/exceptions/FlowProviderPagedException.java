@@ -4,6 +4,8 @@
  */
 package com.bearsoft.rowset.exceptions;
 
+import com.eas.client.dataflow.FlowProviderFailedException;
+
 /**
  * Exception class intended to indicate an erronous call to method refresh of
  * the FlowProvider interface, when flow provider is paged.

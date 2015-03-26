@@ -4,15 +4,13 @@
  */
 package com.eas.client.sqldrivers;
 
-import com.bearsoft.rowset.Converter;
-import com.bearsoft.rowset.metadata.DataTypeInfo;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.ForeignKeySpec;
-import com.bearsoft.rowset.metadata.PrimaryKeySpec;
 import com.eas.client.ClientConstants;
+import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
-import com.eas.client.sqldrivers.converters.Db2Converter;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.ForeignKeySpec;
+import com.eas.client.metadata.PrimaryKeySpec;
 import com.eas.client.sqldrivers.resolvers.Db2TypesResolver;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
 import com.eas.util.StringUtils;
@@ -36,7 +34,6 @@ public class Db2SqlDriver extends SqlDriver {
     protected static final String SET_SCHEMA_CLAUSE = "SET SCHEMA %s";
     protected static final String GET_SCHEMA_CLAUSE = "VALUES CURRENT SCHEMA";
     protected static final String CREATE_SCHEMA_CLAUSE = "CREATE SCHEMA %s";
-    protected static final Converter converter = new Db2Converter();
     protected static final Db2TypesResolver resolver = new Db2TypesResolver();
     /**
      * Listing of SQLSTATE values
@@ -435,11 +432,6 @@ public class Db2SqlDriver extends SqlDriver {
     @Override
     public Integer getJdbcTypeByRDBMSTypename(String aLowLevelTypeName) {
         return resolver.getJdbcTypeByRDBMSTypename(aLowLevelTypeName);
-    }
-
-    @Override
-    public Converter getConverter() {
-        return converter;
     }
 
     @Override

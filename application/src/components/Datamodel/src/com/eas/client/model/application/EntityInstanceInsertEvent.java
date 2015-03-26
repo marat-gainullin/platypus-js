@@ -5,7 +5,6 @@
  */
 package com.eas.client.model.application;
 
-import com.bearsoft.rowset.Row;
 import com.eas.client.events.PublishedSourcedEvent;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
@@ -19,9 +18,9 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class EntityInstanceInsertEvent extends PublishedSourcedEvent {
 
-    protected Row inserted;
+    protected JSObject inserted;
 
-    public EntityInstanceInsertEvent(HasPublished source, Row inserted) {
+    public EntityInstanceInsertEvent(HasPublished source, JSObject inserted) {
         super(source);
         this.inserted = inserted;
     }
@@ -32,7 +31,7 @@ public class EntityInstanceInsertEvent extends PublishedSourcedEvent {
             + "*/";
 
     @ScriptFunction(jsDoc = INSERTED_JSDOC)
-    public Row getInserted() {
+    public JSObject getInserted() {
         return inserted;
     }
 
@@ -42,7 +41,7 @@ public class EntityInstanceInsertEvent extends PublishedSourcedEvent {
             + "*/";
 
     @ScriptFunction(jsDoc = OBJECT_JSDOC)
-    public Row getObject() {
+    public JSObject getObject() {
         return inserted;
     }
 

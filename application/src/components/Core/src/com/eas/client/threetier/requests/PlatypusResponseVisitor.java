@@ -18,7 +18,7 @@ public interface PlatypusResponseVisitor {
 
     public void visit(LogoutRequest.Response rsp) throws Exception;
 
-    public void visit(ExecuteServerModuleMethodRequest.Response rsp) throws Exception;
+    public void visit(RPCRequest.Response rsp) throws Exception;
 
     public void visit(DisposeServerModuleRequest.Response rsp) throws Exception;
 

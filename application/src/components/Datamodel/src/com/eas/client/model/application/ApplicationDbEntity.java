@@ -4,16 +4,14 @@
  */
 package com.eas.client.model.application;
 
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.changes.Command;
-import com.bearsoft.rowset.metadata.Parameter;
-import com.bearsoft.rowset.metadata.Parameters;
-import com.bearsoft.rowset.ordering.Locator;
 import com.eas.client.DatabaseMdCache;
 import com.eas.client.SQLUtils;
 import com.eas.client.SqlCompiledQuery;
 import com.eas.client.SqlQuery;
+import com.eas.client.changes.Change;
+import com.eas.client.changes.Command;
+import com.eas.client.metadata.Parameter;
+import com.eas.client.metadata.Parameters;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;

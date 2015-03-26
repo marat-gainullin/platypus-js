@@ -9,8 +9,6 @@
  */
 package com.eas.client.metadata;
 
-import com.bearsoft.rowset.metadata.ForeignKeySpec;
-import com.bearsoft.rowset.metadata.PrimaryKeySpec;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;

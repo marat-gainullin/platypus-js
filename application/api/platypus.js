@@ -1,10 +1,12 @@
 (function () {
     load("classpath:internals.js");
+    load("classpath:managed.js");
+    load("classpath:orderer.js");
     //this === global;
     var global = this;
     var oldP = global.P;
     global.P = {};
-    
+
     /*
      global.P = this; // global scope of api - for legacy applications
      global.P.restore = function() {
@@ -949,7 +951,7 @@
 
         Object.defineProperty(target, "createFilter", {
             value: function (aConstraints) {
-				var constraints = Array.isArray(aConstraints) ? aConstraints : [aConstraints];
+                var constraints = Array.isArray(aConstraints) ? aConstraints : [aConstraints];
                 var nEntity = this.unwrap();
                 return boxAsJs(nEntity.createFilter(constraints));
             }
@@ -957,7 +959,7 @@
 
         Object.defineProperty(target, "createSorting", {
             value: function (aCriteria) {
-				var criteria = Array.isArray(aCriteria) ? aCriteria : [aCriteria];
+                var criteria = Array.isArray(aCriteria) ? aCriteria : [aCriteria];
                 var nEntity = this.unwrap();
                 return boxAsJs(nEntity.createSorting(criteria));
             }
@@ -1027,7 +1029,53 @@
                 aTarget = new modelCTor(model);
             }
             function publishEntity(nEntity) {
-                var published = EngineUtilsClass.unwrap(nEntity.getPublished());
+                var entityCTor;
+                if (model instanceof TwoTierModelClass) {
+                    entityCTor = P.ApplicationDbEntity;
+                } else if (model instanceof ThreeTierModelClass) {
+                    entityCTor = P.ApplicationPlatypusEntity;
+                } else {
+                    throw "Can't determine model's type.";
+                }
+                var orderers = [];
+                var published = [];
+                P.manageArray(published, function (added, deleted) {
+                    added.forEach(function (aAdded) {
+                        orderers.forEach(function (aOrderer) {
+                            aOrderer.add(aAdded);
+                        });
+                        // aAdded.initPrimaryKeys();
+                        P.manageObject(aAdded, function (aChange) {
+                            // changeLog.add();
+                            orderers.forEach(function (aOrderer) {
+                                if (aOrderer.inKeys(aChange.propertyName)) {
+                                    aOrderer.delete(aChange.source);
+                                    aOrderer.add(aChange.source);
+                                }
+                            });
+                            //aAdded.firePropertyChange();
+                            //aAdded.fireSelfScalarChange();// Expanding change
+                            //aAdded.fireOldScalarOppositeCollectionChange();
+                            //aAdded.fireNewScalarOppositeCollectionChange();
+                            //if (field.isPk()) {
+                            //    aAdded.fireOppositeOldScalarsChanges();
+                            //    aAdded.fireOppositeNewScalarsChanges();
+                            //    aAdded.fireChangeOfSelfCollections();
+                            //}
+                        });
+                        //aAdded.fireChangesOfOppositeCollections();
+                        //aAdded.fireChangesOfOppositeScalars();
+                    });
+                    deleted.forEach(function (aDeleted) {
+                        orderers.forEach(function (aOrderer) {
+                            aOrderer.delete(aDeleted);
+                        });
+                        //aDeleted.fireChangesOfOppositeCollections();
+                        //aDeleted.fireChangesOfOppositeScalars();
+                        P.unmanageObject(aDeleted);
+                    });
+                });
+                entityCTor.call(published, nEntity);
                 var pSchema = {};
                 Object.defineProperty(published, "schema", {
                     value: pSchema
@@ -1056,10 +1104,10 @@
                         var nParameter = ncParameters[p];
                         var pDesc = {
                             get: function () {
-                                return boxAsJs(nParameter.jsValue/*because of UNDEFINED_SQL_VALUE*/);
+                                return nParameter.jsValue;
                             },
                             set: function (aValue) {
-                                nParameter.jsValue/*because of UNDEFINED_SQL_VALUE*/ = boxAsJava(aValue);
+                                nParameter.jsValue = aValue;
                             }
                         };
                         Object.defineProperty(pParams, nParameter.name, pDesc);

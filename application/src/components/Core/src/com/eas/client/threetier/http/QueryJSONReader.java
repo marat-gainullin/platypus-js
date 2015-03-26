@@ -5,9 +5,9 @@
  */
 package com.eas.client.threetier.http;
 
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.Parameter;
-import com.bearsoft.rowset.metadata.Parameters;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.Parameter;
+import com.eas.client.metadata.Parameters;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.threetier.PlatypusClient;
 import jdk.nashorn.api.scripting.JSObject;

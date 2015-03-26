@@ -4,10 +4,9 @@
  */
 package com.eas.client.threetier.http;
 
-import com.bearsoft.rowset.RowsetConverter;
-import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.metadata.Parameter;
-import com.bearsoft.rowset.metadata.Parameters;
+import com.eas.client.changes.Change;
+import com.eas.client.metadata.Parameter;
+import com.eas.client.metadata.Parameters;
 import com.eas.client.login.Credentials;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.settings.SettingsConstants;
@@ -219,7 +218,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
             ((ErrorResponse) response).setNotLoggedIn(true);
         } else {
             if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_NOT_MODIFIED) {
-                PlatypusHttpResponseReader reader = new PlatypusHttpResponseReader(aRequest, conn, new RowsetConverter(), pConn);
+                PlatypusHttpResponseReader reader = new PlatypusHttpResponseReader(aRequest, conn, pConn);
                 if (reader.checkIfSecirutyForm()) {
                     redirectLocation = PlatypusHttpConstants.SECURITY_REDIRECT_LOCATION;
                     authScheme = PlatypusHttpConstants.FORM_AUTH_NAME;
@@ -354,7 +353,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
     }
 
     @Override
-    public void visit(ExecuteServerModuleMethodRequest rq) throws Exception {
+    public void visit(RPCRequest rq) throws Exception {
         method = PlatypusHttpConstants.HTTP_METHOD_GET;
         params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.TYPE, "" + rq.getType()));
         params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.MODULE_NAME, rq.getModuleName()));

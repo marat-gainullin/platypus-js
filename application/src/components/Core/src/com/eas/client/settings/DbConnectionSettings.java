@@ -8,7 +8,7 @@
  */
 package com.eas.client.settings;
 
-import com.bearsoft.rowset.resourcepool.BearResourcePool;
+import com.eas.client.resourcepool.BearResourcePool;
 import java.util.Properties;
 
 /**

@@ -4,8 +4,11 @@
  */
 package com.eas.client;
 
-import com.bearsoft.rowset.metadata.*;
 import com.eas.client.cache.PlatypusIndexer;
+import com.eas.client.metadata.DataTypeInfo;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.Parameter;
 import com.eas.client.model.QueryDocument;
 import com.eas.client.model.QueryDocument.StoredFieldMetadata;
 import com.eas.client.model.query.QueryModel;

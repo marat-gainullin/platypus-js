@@ -4,12 +4,13 @@
  */
 package com.bearsoft.rowset.dataflow;
 
+import com.eas.client.dataflow.JdbcFlowProvider;
 import java.util.Set;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameter;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.RowsetConverter;
+import com.eas.client.dataflow.RowsetConverter;
 import com.bearsoft.rowset.metadata.DataTypeInfo;
 import java.util.HashSet;
 import java.util.Properties;

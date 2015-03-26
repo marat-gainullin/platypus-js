@@ -4,22 +4,19 @@
  */
 package com.eas.client.threetier.platypus;
 
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Parameter;
-import com.bearsoft.rowset.serial.BinaryRowsetWriter;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Parameter;
 import com.eas.client.ServerModuleInfo;
-import com.bearsoft.rowset.RowsetContainer;
+import com.eas.client.metadata.BinaryFields;
 import com.eas.client.report.Report;
-import com.eas.client.threetier.PlatypusRowsetWriter;
 import com.eas.client.threetier.Response;
-import com.eas.client.threetier.RowsetJsonWriter;
 import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.client.threetier.requests.CommitRequest;
 import com.eas.client.threetier.requests.CreateServerModuleRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
 import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
-import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
+import com.eas.client.threetier.requests.RPCRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.PlatypusResponseVisitor;
@@ -112,11 +109,7 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
         ProtoWriter writer = new ProtoWriter(out);
         writer.put(RequestsTags.TAG_UPDATE_COUNT, rsp.getUpdateCount());
         if (rsp.getRowset() != null) {
-            ByteArrayOutputStream rowsetStream = new ByteArrayOutputStream();
-            BinaryRowsetWriter rsWriter = new PlatypusRowsetWriter();
-            rsWriter.write(rsp.getRowset(), rowsetStream);
-            writer.put(RequestsTags.TAG_ROWSET);
-            writer.put(CoreTags.TAG_STREAM, rowsetStream);
+            writer.put(RequestsTags.TAG_ROWSET, ScriptUtils.toJson(rsp.getRowset()));
         }
     }
 
@@ -125,23 +118,18 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     }
 
     @Override
-    public void visit(ExecuteServerModuleMethodRequest.Response rsp) throws Exception {
+    public void visit(RPCRequest.Response rsp) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
         if (rsp.getResult() instanceof JSObject) {
             JSObject jsResult = (JSObject) rsp.getResult();
             JSObject p = ScriptUtils.lookupInGlobal("P");
             if (p != null) {
                 Object reportClass = p.getMember("Report");
-                Object dbEntityClass = p.getMember("ApplicationDbEntity");
                 if (jsResult.isInstanceOf(reportClass)) {
                     Report report = (Report) ((JSObject) jsResult.getMember("unwrap")).call(null, new Object[]{});
                     writer.put(RequestsTags.TAG_FILE_NAME, report.getName());
                     writer.put(RequestsTags.TAG_FORMAT, report.getFormat());
                     writer.put(RequestsTags.TAG_RESULT_VALUE, report.getReport());
-                } else if (jsResult.isInstanceOf(dbEntityClass)) {
-                    RowsetContainer entity = (RowsetContainer) ((JSObject) jsResult.getMember("unwrap")).call(null, new Object[]{});
-                    RowsetJsonWriter rowsetWriter = new RowsetJsonWriter(entity.getRowset());
-                    writer.put(RequestsTags.TAG_RESULT_VALUE, rowsetWriter.write()); 
                 } else {
                     writer.put(RequestsTags.TAG_RESULT_VALUE, ScriptUtils.toJson(rsp.getResult()));
                 }
@@ -190,8 +178,7 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
             writer.put(RequestsTags.TAG_TIMESTAMP, rsp.getTimeStamp());
             writer.put(RequestsTags.TAG_QUERY_ID, rsp.getAppQuery().getEntityId());
             ByteArrayOutputStream fieldsStream = new ByteArrayOutputStream();
-            PlatypusRowsetWriter rsWriter = new PlatypusRowsetWriter();
-            rsWriter.writeFields(rsp.getAppQuery().getFields(), fieldsStream);
+            BinaryFields.write(rsp.getAppQuery().getFields(), fieldsStream);
             writer.put(RequestsTags.TAG_DML, rsp.getAppQuery().isManual() ? 1 : 0);
             if (rsp.getAppQuery().getTitle() != null) {
                 writer.put(RequestsTags.TAG_TITLE, rsp.getAppQuery().getTitle());

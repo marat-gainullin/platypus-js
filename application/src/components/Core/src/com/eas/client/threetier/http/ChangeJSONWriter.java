@@ -5,12 +5,12 @@
  */
 package com.eas.client.threetier.http;
 
-import com.bearsoft.rowset.changes.ChangeValue;
-import com.bearsoft.rowset.changes.ChangeVisitor;
-import com.bearsoft.rowset.changes.Command;
-import com.bearsoft.rowset.changes.Delete;
-import com.bearsoft.rowset.changes.Insert;
-import com.bearsoft.rowset.changes.Update;
+import com.eas.client.changes.ChangeValue;
+import com.eas.client.changes.ChangeVisitor;
+import com.eas.client.changes.Command;
+import com.eas.client.changes.Delete;
+import com.eas.client.changes.Insert;
+import com.eas.client.changes.Update;
 import com.eas.util.JSONUtils;
 import com.eas.util.StringUtils;
 import java.util.ArrayList;

@@ -1,5 +1,6 @@
 package com.bearsoft.rowset;
 
+import com.eas.client.dataflow.RowsetConverter;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.changes.ChangeValue;
 import com.bearsoft.rowset.changes.Insert;

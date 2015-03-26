@@ -9,17 +9,13 @@
  */
 package com.eas.client;
 
-import com.bearsoft.rowset.Row;
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.exceptions.InvalidColIndexException;
-import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.ForeignKeySpec;
-import com.bearsoft.rowset.metadata.PrimaryKeySpec;
 import com.eas.client.metadata.DbTableIndexes;
 import com.eas.client.metadata.DbTableKeys;
 import com.eas.client.cache.FreqCache;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.ForeignKeySpec;
+import com.eas.client.metadata.PrimaryKeySpec;
 import com.eas.client.sqldrivers.SqlDriver;
 import java.sql.ResultSetMetaData;
 import java.util.HashMap;

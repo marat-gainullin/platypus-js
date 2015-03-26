@@ -4,11 +4,10 @@
  */
 package com.eas.client.sqldrivers.resolvers;
 
-import com.bearsoft.rowset.metadata.DataTypeInfo;
-import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.SQLUtils;
 import java.sql.Types;
-import java.util.ArrayList;
+import com.eas.client.metadata.DataTypeInfo;
+import com.eas.client.metadata.Field;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;

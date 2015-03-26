@@ -5,8 +5,8 @@
  */
 package com.eas.client.model.application;
 
-import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.events.PublishedSourcedEvent;
+import com.eas.client.metadata.Field;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;

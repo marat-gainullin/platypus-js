@@ -4,16 +4,15 @@
  */
 package com.eas.client.queries;
 
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.changes.ChangeValue;
-import com.bearsoft.rowset.changes.Command;
-import com.bearsoft.rowset.dataflow.FlowProvider;
-import com.bearsoft.rowset.exceptions.InvalidFieldsExceptionException;
-import com.bearsoft.rowset.metadata.Parameter;
+import com.eas.client.changes.ChangeValue;
+import com.eas.client.changes.Command;
+import com.eas.client.dataflow.FlowProvider;
+import com.eas.client.metadata.Parameter;
 import com.eas.client.threetier.PlatypusClient;
 import com.eas.client.threetier.PlatypusFlowProvider;
 import java.util.Map;
 import java.util.function.Consumer;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * Query of data for three-tier application. Uses three-tier Flow provider for retriving data and 
@@ -39,16 +38,9 @@ public class PlatypusQuery extends Query {
     }
 
     @Override
-    public Rowset execute(Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        Rowset rowset = new Rowset(createFlow());
-        rowset.refresh(params, onSuccess, onFailure);
-        //lightMergeFields(rs.getFields(), fields);
-        return rowset;
-    }
-    
-    public Rowset prepareRowset() throws InvalidFieldsExceptionException{
-        Rowset rowset = new Rowset(createFlow());
-        rowset.setFields(fields);
+    public JSObject execute(Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        FlowProvider flow = createFlow();
+        JSObject rowset = flow.refresh(params, onSuccess, onFailure);
         return rowset;
     }
     

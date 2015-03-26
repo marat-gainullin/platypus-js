@@ -4,17 +4,17 @@
  */
 package com.eas.client.model.application;
 
-import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SqlCompiledQuery;
 import com.eas.client.SqlQuery;
 import com.eas.client.StoredQueryFactory;
+import com.eas.client.changes.Change;
 import com.eas.client.model.Model;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import com.eas.util.IDGenerator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

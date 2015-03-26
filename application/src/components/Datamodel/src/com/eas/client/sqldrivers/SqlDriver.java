@@ -9,13 +9,12 @@
  */
 package com.eas.client.sqldrivers;
 
-import com.bearsoft.rowset.Converter;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.ForeignKeySpec;
-import com.bearsoft.rowset.metadata.PrimaryKeySpec;
 import com.eas.client.ClientConstants;
 import com.eas.client.SQLUtils;
 import com.eas.client.metadata.DbTableIndexSpec;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.ForeignKeySpec;
+import com.eas.client.metadata.PrimaryKeySpec;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
 import java.io.IOException;
@@ -101,15 +100,6 @@ public abstract class SqlDriver {
      * @return true if constraints is deferrable
      */
     public abstract boolean isConstraintsDeferrable();
-
-    /**
-     * *
-     * Gets converter to convert some value of any compatible class to value of
-     * predefined class, according to sql type.
-     *
-     * @return converter instance
-     */
-    public abstract Converter getConverter();
 
     /**
      * *

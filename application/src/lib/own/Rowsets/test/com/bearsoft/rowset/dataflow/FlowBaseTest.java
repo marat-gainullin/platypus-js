@@ -4,11 +4,12 @@
  */
 package com.bearsoft.rowset.dataflow;
 
+import com.eas.client.dataflow.JdbcFlowProvider;
 import com.bearsoft.rowset.Converter;
-import com.bearsoft.rowset.resourcepool.BearCallableStatement;
-import com.bearsoft.rowset.resourcepool.BearDatabaseConnection;
-import com.bearsoft.rowset.resourcepool.BearPreparedStatement;
-import com.bearsoft.rowset.resourcepool.BearResourcePool;
+import com.eas.client.resourcepool.BearCallableStatement;
+import com.eas.client.resourcepool.BearDatabaseConnection;
+import com.eas.client.resourcepool.BearPreparedStatement;
+import com.eas.client.resourcepool.BearResourcePool;
 import java.io.PrintWriter;
 import java.sql.*;
 import java.util.Properties;

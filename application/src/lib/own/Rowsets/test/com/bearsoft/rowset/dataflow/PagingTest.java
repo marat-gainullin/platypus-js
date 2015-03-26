@@ -4,9 +4,10 @@
  */
 package com.bearsoft.rowset.dataflow;
 
+import com.eas.client.dataflow.JdbcFlowProvider;
 import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.RowsetConverter;
-import com.bearsoft.rowset.exceptions.FlowProviderNotPagedException;
+import com.eas.client.dataflow.RowsetConverter;
+import com.eas.client.dataflow.FlowProviderNotPagedException;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
 import java.util.Properties;

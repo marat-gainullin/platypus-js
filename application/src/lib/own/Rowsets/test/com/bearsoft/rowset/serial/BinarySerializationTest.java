@@ -4,6 +4,8 @@
  */
 package com.bearsoft.rowset.serial;
 
+import com.eas.client.metadata.BinaryRowsetReader;
+import com.eas.client.metadata.BinaryRowsetWriter;
 import com.bearsoft.rowset.Rowset;
 import com.bearsoft.rowset.RowsetBaseTest;
 import com.bearsoft.rowset.exceptions.RowsetException;

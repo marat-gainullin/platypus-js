@@ -5,8 +5,6 @@
  */
 package com.eas.client.resourcepool;
 
-import com.bearsoft.rowset.resourcepool.BearResourcePool;
-import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.settings.DbConnectionSettings;
 import java.sql.SQLException;
 import java.util.ArrayList;

@@ -4,8 +4,8 @@
  */
 package com.eas.client.model.application;
 
-import com.bearsoft.rowset.changes.Change;
 import com.eas.client.cache.ServerDataStorage;
+import com.eas.client.changes.Change;
 import com.eas.client.model.Model;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.PlatypusQuery;

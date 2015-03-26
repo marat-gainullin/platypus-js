@@ -4,11 +4,11 @@
  */
 package com.eas.client.model;
 
-import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.eas.client.AppElementFiles;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SqlQuery;
 import com.eas.client.cache.PlatypusFiles;
+import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.model.query.QueryModel;
 import com.eas.client.model.store.XmlDom2QueryModel;
 import com.eas.client.queries.QueriesProxy;
