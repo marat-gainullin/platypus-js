@@ -15,6 +15,9 @@
             Object.defineProperty(this, 'size', {get: function () {
                     return container.size();
                 }});
+            this.forEach = function(aCallback){
+                container.forEach(aCallback);
+            };
         };
     }
 
@@ -26,7 +29,8 @@
      */
     function Orderer(aKeysNames) {
         var keyNames = aKeysNames.sort();
-        keyNames.forEach(function(aKeyName){});
+        keyNames.forEach(function (aKeyName) {
+        });
         function calcKey(anObject) {
             var key = '';
             keyNames.forEach(function (aKeyName) {
@@ -37,10 +41,10 @@
             });
         }
 
-        this.inKeys = function(aKeyName){
+        this.inKeys = function (aKeyName) {
             return keyNames.indexOf(aKeyName) !== -1;
         };
-        
+
         var map = {};
         this.add = function (anObject) {
             var key = calcKey(anObject);
@@ -61,6 +65,19 @@
                 }
             }
         };
+        this.find = function (aCriteria) {
+            var key = calcKey(aCriteria);
+            var subset = map[key];
+            if (!subset) {
+                return [];
+            } else {
+                var found = [];
+                subset.forEach(function (item) {
+                    found.push(item);
+                });
+                return found;
+            }
+        };
     }
-    Object.defineProperty(this.P, 'Orderer', {value:Orderer});
+    Object.defineProperty(this.P, 'Orderer', {value: Orderer});
 })();

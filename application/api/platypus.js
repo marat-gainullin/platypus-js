@@ -1037,18 +1037,20 @@
                 } else {
                     throw "Can't determine model's type.";
                 }
-                var orderers = [];
+                var orderers = {};
                 var published = [];
                 P.manageArray(published, {
                     spliced: function (added, deleted) {
                         added.forEach(function (aAdded) {
-                            orderers.forEach(function (aOrderer) {
+                            Object.keys(orderers).forEach(function (aOrdererKey) {
+                                var aOrderer = orderers[aOrdererKey];
                                 aOrderer.add(aAdded);
                             });
                             // aAdded.initPrimaryKeys();
                             P.manageObject(aAdded, function (aChange) {
                                 // changeLog.add();
-                                orderers.forEach(function (aOrderer) {
+                                Object.keys(orderers).forEach(function (aOrdererKey) {
+                                    var aOrderer = orderers[aOrdererKey];
                                     if (aOrderer.inKeys(aChange.propertyName)) {
                                         aOrderer.delete(aChange.source);
                                         aOrderer.add(aChange.source);
@@ -1068,7 +1070,8 @@
                             //aAdded.fireChangesOfOppositeScalars();
                         });
                         deleted.forEach(function (aDeleted) {
-                            orderers.forEach(function (aOrderer) {
+                            Object.keys(orderers).forEach(function (aOrdererKey) {
+                                var aOrderer = orderers[aOrdererKey];
                                 aOrderer.delete(aDeleted);
                             });
                             //aDeleted.fireChangesOfOppositeCollections();
@@ -1084,18 +1087,23 @@
                 Object.defineProperty(published, "schema", {
                     value: pSchema
                 });
+                var pkFieldName = '';
                 var nFields = nEntity.getFields().toCollection();
                 for (var n = 0; n < nFields.size(); n++) {
                     (function () {
                         var nField = nFields[n];
+                        if (nField.isPk())
+                            pkFieldName = nField.name;
                         // schema
                         var schemaDesc = {
                             value: nField.getPublished()
                         };
-                        if (!pSchema[nField.name])
+                        if (!pSchema[nField.name]){
                             Object.defineProperty(pSchema, nField.name, schemaDesc);
-                        else
-                            throw "Duplicated field name found: " + nField.name + " in entity " + nEntity.name + (nEntity.title ? " [" + nEntity.title + "]" : "");
+                        } else {
+                            var eTitle = nEntity.title ? " [" + nEntity.title + "]" : "";
+                            throw "Duplicated field name found: " + nField.name + " in entity " + nEntity.name + eTitle;
+                        }
                         Object.defineProperty(pSchema, n, schemaDesc);
                     })();
                 }
@@ -1118,11 +1126,37 @@
                         Object.defineProperty(pParams, p, pDesc);
                     })();
                 }
-                Object.defineProperty(published, "params", {value: pParams});
+                Object.defineProperty(published, 'params', {value: pParams});
                 // entity.params.schema.p1 syntax
                 var pParamsSchema = EngineUtilsClass.unwrap(nParameters.getPublished());
                 if (!pParams.schema)
-                    Object.defineProperty(pParams, "schema", {value: pParamsSchema});
+                    Object.defineProperty(pParams, 'schema', {value: pParamsSchema});
+                Object.defineProperty(published, 'find', {value: function (aCriteria) {
+                        var keys = Object.keys(aCriteria);
+                        keys = keys.sort();
+                        var ordererKey = keys.join(' | ');
+                        var orderer = orderers[ordererKey];
+                        if (!orderer) {
+                            orderer = new P.Orderer(keys);
+                            orderers[ordererKey] = orderer;
+                        }
+                        var found = orderer.find(aCriteria);
+                        return P.manageArray(found, {
+                            spliced: function () {
+                            },
+                            changed: function () {
+                            }});
+                    }});
+                Object.defineProperty(published, 'findByKey', {value: function (aKeyValue) {
+                        var criteria = {};
+                        criteria[pkFieldName] = aKeyValue;
+                        var found = published.find(criteria);
+                        return found.length > 0 ? found[0] : null;
+                    }});
+                Object.defineProperty(published, 'findById', {value: function (aKeyValue) {
+                        P.Logger.warning('findById() is deprecated. Use findByKey() instead.');
+                        return published.findByKey(aKeyValue);
+                    }});
                 return published;
             }
             var entities = model.entities();

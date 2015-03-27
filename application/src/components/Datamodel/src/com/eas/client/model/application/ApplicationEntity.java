@@ -54,9 +54,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     protected JSObject onRequeried;
     //
     protected JSObject published;
-    protected Rowset rowset;
     protected ListenerRegistration cursorListener;
-    protected Locator locator;
     protected boolean valid;
     protected Future<Void> pending;
     //
@@ -243,55 +241,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         }
         return null;
     }
-    private static final String SCROLL_TO_JSDOC = ""
-            + "/**\n"
-            + "* Sets the array cursor to the specified object.\n"
-            + "* @param object the object to position the entity cursor on.\n"
-            + "* @return <code>true</code> if the cursor changed successfully and <code>false</code> otherwise.\n"
-            + "*/";
-
-    @ScriptFunction(jsDoc = SCROLL_TO_JSDOC, params = {"row"})
-    public boolean scrollTo(Row aRow) throws Exception {
-        if (aRow != null) {
-            int idx = locator.indexOf(aRow);
-            if (idx != -1) {
-                return rowset.setCursorPos(idx + 1);
-            }
-        }
-        return false;
-    }
-
-    private static final String CURSOR_JSDOC = ""
-            + "/**\n"
-            + "* Gets the row at cursor position.\n"
-            + "* @return the row object or <code>null</code> if cursor is before first or after last position.\n"
-            + "*/";
-
-    @ScriptFunction(jsDoc = CURSOR_JSDOC)
-    public Row getCursor() throws Exception {
-        return rowset.getCurrentRow();
-    }
-
-    @ScriptFunction
-    public void setCursor(Row aRow) throws Exception {
-        scrollTo(aRow);
-    }
-
-    private static final String CURSOR_POS_JSDOC = ""
-            + "/**\n"
-            + "* Current position of cursor (1 - based). There are two special values: 0 - before first; length + 1 - after last;\n"
-            + "*/";
-
-    @ScriptFunction(jsDoc = CURSOR_POS_JSDOC)
-    public int getCursorPos() {
-        return rowset.getCursorPos();
-    }
-
-    @ScriptFunction
-    public void setCursorPos(int aValue) {
-        rowset.setCursorPos(aValue);
-    }
-
+    
     public void execute() throws Exception {
         execute(null, null);
     }
@@ -336,18 +286,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         } : null);
     }
 
-    // modify interface
-    private static final String REMOVE_ALL_JSDOC = ""
-            + "/**\n"
-            + "* Deletes all rows in the rowset.\n"
-            + "*/";
-
-    @ScriptFunction(jsDoc = REMOVE_ALL_JSDOC)
-    public boolean removeAll() throws Exception {
-        rowset.deleteAll();
-        return rowset.isEmpty();
-    }
-
     private static final String REMOVE_JSDOC = ""
             + "/**\n"
             + " * Deletes a object by cursor position or by object itself.\n"
@@ -362,26 +300,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
             return deleteRow((Row) aCursorPosOrInstance);
         } else if (aCursorPosOrInstance instanceof Number) {
             return deleteRow(((Number) aCursorPosOrInstance).intValue());
-        } else {
-            return false;
-        }
-    }
-
-    public boolean deleteRow(int aCursorIndex) throws Exception {
-        if (aCursorIndex >= 1 && aCursorIndex <= rowset.size()) {
-            rowset.deleteAt(aCursorIndex);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public boolean deleteRow(Row aRow) throws Exception {
-        if (aRow != null) {
-            int oldSize = rowset.size();
-            rowset.delete(Collections.singleton(aRow));
-            int newSize = rowset.size();
-            return oldSize > newSize;
         } else {
             return false;
         }
