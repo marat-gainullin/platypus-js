@@ -4,17 +4,7 @@
  */
 package com.eas.client.forms.components.model.grid.models;
 
-import com.bearsoft.rowset.Row;
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.events.RowsetAdapter;
-import com.bearsoft.rowset.events.RowsetDeleteEvent;
-import com.bearsoft.rowset.events.RowsetFilterEvent;
-import com.bearsoft.rowset.events.RowsetInsertEvent;
-import com.bearsoft.rowset.events.RowsetNextPageEvent;
-import com.bearsoft.rowset.events.RowsetRequeryEvent;
-import com.bearsoft.rowset.events.RowsetRollbackEvent;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -22,22 +12,17 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class TreedRowsRowsetListener extends RowsetAdapter {
+public class TreedRowsRowsetListener {
 
     protected ArrayTreedModel model;
-    protected Rowset rowset;
     protected List<JSObject> oldRows = new ArrayList<>();
 
-    public TreedRowsRowsetListener(ArrayTreedModel aModel, Rowset aRowset) {
+    public TreedRowsRowsetListener(ArrayTreedModel aModel) {
         super();
         model = aModel;
-        rowset = aRowset;
     }
 
-    public Rowset getRowset() {
-        return rowset;
-    }
-
+    /*
     @Override
     public void rowDeleted(RowsetDeleteEvent event) {
         if (!event.isAjusting()) {
@@ -89,4 +74,5 @@ public class TreedRowsRowsetListener extends RowsetAdapter {
     private List<JSObject> toJs(List<Row> current) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+    */
 }

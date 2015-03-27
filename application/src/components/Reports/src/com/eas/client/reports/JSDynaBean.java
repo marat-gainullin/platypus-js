@@ -5,8 +5,8 @@
  */
 package com.eas.client.reports;
 
-import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.script.ScriptUtils;
+import com.eas.util.IDGenerator;
 import java.lang.reflect.Array;
 import java.util.Date;
 import java.util.List;

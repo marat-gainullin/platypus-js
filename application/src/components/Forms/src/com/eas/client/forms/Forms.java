@@ -5,13 +5,13 @@
  */
 package com.eas.client.forms;
 
-import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.eas.client.forms.components.model.ModelCheckBox;
 import com.eas.client.forms.components.model.ModelDate;
 import com.eas.client.forms.components.model.ModelFormattedField;
 import com.eas.client.forms.components.model.ModelSpin;
 import com.eas.client.forms.components.model.ModelTextArea;
 import com.eas.client.forms.components.model.ModelWidget;
+import com.eas.client.metadata.DataTypeInfo;
 import com.eas.script.HasPublished;
 import java.util.ResourceBundle;
 import javax.swing.JComponent;

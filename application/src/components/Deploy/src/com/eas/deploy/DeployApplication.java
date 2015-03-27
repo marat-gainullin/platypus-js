@@ -4,8 +4,8 @@
  */
 package com.eas.deploy;
 
-import com.bearsoft.rowset.resourcepool.BearResourcePool;
 import com.eas.client.DatabasesClient;
+import com.eas.client.resourcepool.BearResourcePool;
 import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.settings.DbConnectionSettings;
 import java.io.File;

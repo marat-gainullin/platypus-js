@@ -4,17 +4,15 @@
  */
 package com.eas.server.httpservlet.serial;
 
-import com.bearsoft.rowset.Converter;
-import com.bearsoft.rowset.RowsetConverter;
-import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.changes.ChangeValue;
-import com.bearsoft.rowset.changes.ChangeVisitor;
-import com.bearsoft.rowset.changes.Command;
-import com.bearsoft.rowset.changes.Delete;
-import com.bearsoft.rowset.changes.EntitiesHost;
-import com.bearsoft.rowset.changes.Insert;
-import com.bearsoft.rowset.changes.Update;
-import com.bearsoft.rowset.metadata.Field;
+import com.eas.client.changes.Change;
+import com.eas.client.changes.ChangeValue;
+import com.eas.client.changes.ChangeVisitor;
+import com.eas.client.changes.Command;
+import com.eas.client.changes.Delete;
+import com.eas.client.changes.EntitiesHost;
+import com.eas.client.changes.Insert;
+import com.eas.client.changes.Update;
+import com.eas.client.metadata.Field;
 import com.eas.client.threetier.RowsetJsonConstants;
 import com.eas.script.ScriptUtils;
 import java.text.ParseException;
@@ -36,7 +34,6 @@ public class ChangeJsonReader implements ChangeVisitor {
     private static final String CHANGE_DATA_NAME = "data";
     private static final String CHANGE_KEYS_NAME = "keys";
     private static final String CHANGE_PARAMETERS_NAME = "parameters";
-    protected static Converter converter = new RowsetConverter();
     protected JSObject sChange;
     protected String entityName;
     protected EntitiesHost fieldsResolver;
@@ -69,7 +66,7 @@ public class ChangeJsonReader implements ChangeVisitor {
                             }
                         }
                     }
-                    Object convertedValueValue = converter.convert2RowsetCompatible(oValueValue, field.getTypeInfo());
+                    Object convertedValueValue = ScriptUtils.toJava(oValueValue);
                     data.add(new ChangeValue(sValueName, convertedValueValue, field.getTypeInfo()));
                 } else {
                     Logger.getLogger(ChangeJsonReader.class.getName()).log(Level.WARNING, String.format("Couldn't resolve entity property name: %s.%s", entityName, sValueName));

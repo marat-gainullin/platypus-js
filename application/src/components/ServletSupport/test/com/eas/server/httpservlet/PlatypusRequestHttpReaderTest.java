@@ -4,14 +4,14 @@
  */
 package com.eas.server.httpservlet;
 
-import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.changes.ChangeValue;
-import com.bearsoft.rowset.changes.Command;
-import com.bearsoft.rowset.changes.Delete;
-import com.bearsoft.rowset.changes.Insert;
-import com.bearsoft.rowset.changes.Update;
-import com.bearsoft.rowset.metadata.DataTypeInfo;
-import com.bearsoft.rowset.metadata.Field;
+import com.eas.client.changes.Change;
+import com.eas.client.changes.ChangeValue;
+import com.eas.client.changes.Command;
+import com.eas.client.changes.Delete;
+import com.eas.client.changes.Insert;
+import com.eas.client.changes.Update;
+import com.eas.client.metadata.DataTypeInfo;
+import com.eas.client.metadata.Field;
 import com.eas.client.threetier.RowsetJsonConstants;
 import com.eas.script.ScriptUtils;
 import com.eas.server.httpservlet.serial.ChangeJsonReader;

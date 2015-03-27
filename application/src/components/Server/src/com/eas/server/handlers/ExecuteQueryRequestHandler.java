@@ -5,12 +5,11 @@
 package com.eas.server.handlers;
 
 import com.eas.server.SessionRequestHandler;
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.SqlCompiledQuery;
 import com.eas.client.SqlQuery;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
+import com.eas.client.metadata.Parameters;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.server.PlatypusServerCore;
@@ -19,6 +18,7 @@ import java.security.AccessControlException;
 import java.util.Set;
 import java.util.function.Consumer;
 import javax.security.auth.AuthPermission;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -49,7 +49,7 @@ public class ExecuteQueryRequestHandler extends SessionRequestHandler<ExecuteQue
                     if (rolesAllowed != null && !PlatypusPrincipal.getInstance().hasAnyRole(rolesAllowed)) {
                         throw new AccessControlException(String.format(ACCESS_DENIED_MSG, query.getEntityId(), PlatypusPrincipal.getInstance().getName()), PlatypusPrincipal.getInstance() instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
                     }
-                    handleQuery(query.copy(), (Rowset rowset) -> {
+                    handleQuery(query.copy(), (JSObject rowset) -> {
                         if (onSuccess != null) {
                             onSuccess.accept(new ExecuteQueryRequest.Response(rowset, 0));
                         }
@@ -67,7 +67,7 @@ public class ExecuteQueryRequestHandler extends SessionRequestHandler<ExecuteQue
         }
     }
 
-    public void handleQuery(SqlQuery aQuery, Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception  {
+    public void handleQuery(SqlQuery aQuery, Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception  {
         Parameters queryParams = aQuery.getParameters();
         assert queryParams.getParametersCount() == getRequest().getParams().getParametersCount();
         for (int i = 1; i <= queryParams.getParametersCount(); i++) {

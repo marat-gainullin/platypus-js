@@ -4,11 +4,11 @@
  */
 package com.eas.server;
 
-import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.DatabasesClient;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.MD5Generator;
 import com.eas.client.login.PlatypusPrincipal;
+import com.eas.util.IDGenerator;
 import java.security.AccessControlException;
 import java.util.function.Consumer;
 import javax.security.auth.AuthPermission;

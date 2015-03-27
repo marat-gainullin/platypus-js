@@ -4,15 +4,12 @@
  */
 package com.eas.client.queries;
 
-import com.bearsoft.rowset.Row;
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.dataflow.FlowProvider;
-import com.bearsoft.rowset.exceptions.RowsetException;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.Parameter;
-import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.DatabasesClient;
+import com.eas.client.PlatypusJdbcFlowProvider;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.Parameter;
+import com.eas.client.metadata.Parameters;
 import com.eas.client.model.RowsetMissingException;
 import com.eas.script.ScriptUtils;
 import java.util.ArrayList;
@@ -31,15 +28,15 @@ import jdk.nashorn.internal.runtime.Undefined;
  * @see FlowProvider
  * @author mg
  */
-public class ScriptedFlowProvider implements FlowProvider {
+public class ScriptedFlowProvider extends PlatypusJdbcFlowProvider {
 
     protected int pageSize = NO_PAGING_PAGE_SIZE;
     protected DatabasesClient client;
     protected JSObject source;
     protected Fields expectedFields;
 
-    public ScriptedFlowProvider(DatabasesClient aClient, Fields aExpectedFields, JSObject aSource) {
-        super();
+    public ScriptedFlowProvider(DatabasesClient aClient, Fields aExpectedFields, JSObject aSource) throws Exception {
+        super(aClient, "-no-name-", null, null, null, null, null, null, null);
         client = aClient;
         expectedFields = aExpectedFields;
         source = aSource;
@@ -49,7 +46,7 @@ public class ScriptedFlowProvider implements FlowProvider {
     public String getEntityId() {
         return (String) ((JSObject) source.getMember("constructor")).getMember("name");
     }
-
+/*
     private void readRowset(Object oRowset, Rowset aRowset) throws RowsetMissingException, RowsetException {
         if (oRowset instanceof JSObject) {
             JSObject sRowset = (JSObject) oRowset;
@@ -78,7 +75,7 @@ public class ScriptedFlowProvider implements FlowProvider {
             }
         }
     }
-
+*/
     private class ExecutionChecker {
 
         boolean isExecutionNeeded;
@@ -93,7 +90,7 @@ public class ScriptedFlowProvider implements FlowProvider {
     }
 
     @Override
-    public Rowset refresh(final Parameters aParameters, Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public JSObject refresh(final Parameters aParameters, Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (source.hasMember("fetch")) {
             Object oFetch = source.getMember("fetch");
             if (oFetch instanceof JSObject) {
@@ -176,8 +173,7 @@ public class ScriptedFlowProvider implements FlowProvider {
     }
 
     @Override
-    public Rowset nextPage(Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception {
-
+    public JSObject nextPage(Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (source.hasMember("nextPage")) {
             Object oNextPage = source.getMember("nextPage");
             if (oNextPage instanceof JSObject) {

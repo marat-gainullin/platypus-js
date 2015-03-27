@@ -6,12 +6,6 @@
 package com.eas.client.queries;
 
 import com.eas.client.StoredQueryFactory;
-import com.bearsoft.rowset.metadata.DataTypeInfo;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.ForeignKeySpec;
-import com.bearsoft.rowset.metadata.Parameter;
-import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.AppElementFiles;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SqlQuery;
@@ -19,6 +13,12 @@ import com.eas.client.cache.ActualCacheEntry;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusIndexer;
+import com.eas.client.metadata.DataTypeInfo;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.ForeignKeySpec;
+import com.eas.client.metadata.Parameter;
+import com.eas.client.metadata.Parameters;
 import com.eas.client.scripts.ScriptedResource;
 import com.eas.script.ScriptUtils;
 import java.util.Date;

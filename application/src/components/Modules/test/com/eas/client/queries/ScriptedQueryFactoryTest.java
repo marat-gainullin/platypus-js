@@ -4,11 +4,11 @@
  */
 package com.eas.client.queries;
 
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.SqlQuery;
 import com.eas.client.cache.ApplicationSourceIndexer;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
 import com.eas.script.JsDoc;
 import org.junit.*;
 import static org.junit.Assert.*;

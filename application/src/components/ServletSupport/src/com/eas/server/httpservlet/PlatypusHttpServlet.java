@@ -1,6 +1,5 @@
 package com.eas.server.httpservlet;
 
-import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.ClientConstants;
 import com.eas.client.DatabasesClient;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
@@ -14,6 +13,7 @@ import com.eas.script.ScriptUtils;
 import com.eas.server.*;
 import com.eas.server.handlers.CommonRequestHandler;
 import com.eas.server.SessionRequestHandler;
+import com.eas.util.IDGenerator;
 import java.io.*;
 import java.security.AccessControlException;
 import java.util.Map;

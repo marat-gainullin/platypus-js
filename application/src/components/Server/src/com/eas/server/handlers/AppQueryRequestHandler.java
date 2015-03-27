@@ -4,12 +4,12 @@
  */
 package com.eas.server.handlers;
 
-import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.server.SessionRequestHandler;
 import com.eas.client.AppElementFiles;
 import com.eas.client.SqlQuery;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
+import com.eas.client.metadata.Parameter;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.threetier.requests.AppQueryRequest;

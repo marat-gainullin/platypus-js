@@ -5,10 +5,11 @@
 package com.eas.server.handlers;
 
 import com.eas.server.SessionRequestHandler;
-import com.bearsoft.rowset.changes.*;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SqlCompiledQuery;
 import com.eas.client.SqlQuery;
+import com.eas.client.changes.Change;
+import com.eas.client.changes.Command;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.queries.LocalQueriesProxy;

@@ -4,7 +4,6 @@
  */
 package com.eas.client.forms.components.model;
 
-import com.bearsoft.rowset.RowsetConverter;
 import com.eas.client.forms.ModelCellEditingListener;
 import com.eas.client.forms.Forms;
 import com.eas.client.forms.HasComponentEvents;
@@ -82,7 +81,6 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
 
     public static final int EXTRA_BUTTON_WIDTH = 18;
 
-    protected static RowsetConverter converter = new RowsetConverter();
     protected JTextField prefSizeCalculator = new JTextField();// DON't move to design!!!
     protected JLabel iconLabel = new JLabel(" ");
     protected JToolBar extraTools = new JToolBar();

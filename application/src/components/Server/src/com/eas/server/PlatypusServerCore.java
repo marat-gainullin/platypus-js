@@ -28,7 +28,7 @@ import com.eas.client.scripts.ScriptedResource;
 import com.eas.script.JsDoc;
 import com.eas.script.ScriptUtils;
 import com.eas.server.handlers.CreateServerModuleRequestHandler;
-import com.eas.server.handlers.ExecuteServerModuleMethodRequestHandler;
+import com.eas.server.handlers.RPCRequestHandler;
 import java.io.File;
 import java.net.URI;
 import java.security.AccessControlException;
@@ -192,13 +192,13 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                 JSObject moduleInstance = sessionManager.getSystemSession().getModule(aModuleName);
                                 if (moduleInstance == null) {
                                     if (aSession.containsModule(aModuleName)) {
-                                        waitFor = ExecuteServerModuleMethodRequestHandler.SESSION_WAIT_OPTION;
+                                        waitFor = RPCRequestHandler.SESSION_WAIT_OPTION;
                                         moduleInstance = aSession.getModule(aModuleName);
                                     } else {
                                         if (config.hasModuleAnnotation(JsDoc.Tag.PUBLIC_TAG)) {
                                             if (config.hasModuleAnnotation(JsDoc.Tag.STATELESS_TAG)) {
                                                 moduleInstance = (JSObject) constr.newObject(new Object[]{});
-                                                waitFor = ExecuteServerModuleMethodRequestHandler.SELF_WAIT_OPTION;
+                                                waitFor = RPCRequestHandler.SELF_WAIT_OPTION;
                                                 Logger.getLogger(CreateServerModuleRequestHandler.class.getName()).log(Level.FINE, "Created server module {0} from script {1}", new Object[]{aModuleName, files.findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION).getPath()});
                                             } else {
                                                 throw new IllegalArgumentException(String.format("@stateless annotation is needed for module ( %s ), to be created dynamically in user's session context.", aModuleName));
@@ -208,23 +208,23 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                         }
                                     }
                                 } else {
-                                    waitFor = ExecuteServerModuleMethodRequestHandler.SERVER_WAIT_OPTION;
+                                    waitFor = RPCRequestHandler.SERVER_WAIT_OPTION;
                                 }
                                 if (config.hasModuleAnnotation(JsDoc.Tag.WAIT_TAG)) {
                                     JsDoc.Tag waitTag = config.getModuleAnnotation(JsDoc.Tag.WAIT_TAG);
-                                    String waitOption = waitTag.getParams() != null && !waitTag.getParams().isEmpty() ? waitTag.getParams().get(0) : ExecuteServerModuleMethodRequestHandler.SELF_WAIT_OPTION;
+                                    String waitOption = waitTag.getParams() != null && !waitTag.getParams().isEmpty() ? waitTag.getParams().get(0) : RPCRequestHandler.SELF_WAIT_OPTION;
                                     switch (waitOption.toLowerCase()) {
-                                        case ExecuteServerModuleMethodRequestHandler.SELF_WAIT_OPTION:
-                                        case ExecuteServerModuleMethodRequestHandler.SESSION_WAIT_OPTION:
-                                        case ExecuteServerModuleMethodRequestHandler.SERVER_WAIT_OPTION:
+                                        case RPCRequestHandler.SELF_WAIT_OPTION:
+                                        case RPCRequestHandler.SESSION_WAIT_OPTION:
+                                        case RPCRequestHandler.SERVER_WAIT_OPTION:
                                             waitFor = waitOption.toLowerCase();
                                             break;
                                         default:
-                                            Logger.getLogger(ExecuteServerModuleMethodRequestHandler.class.getName()).log(Level.WARNING, "Unknown {0} option {1} in module {2}. Falling back to default parallelism.", new String[]{JsDoc.Tag.WAIT_TAG, waitOption, aModuleName});
+                                            Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, "Unknown {0} option {1} in module {2}. Falling back to default parallelism.", new String[]{JsDoc.Tag.WAIT_TAG, waitOption, aModuleName});
                                     }
                                 }
                                 if (moduleInstance != null) {
-                                    Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.FINE, ExecuteServerModuleMethodRequestHandler.EXECUTING_METHOD_TRACE_MSG, new Object[]{aMethodName, aModuleName});
+                                    Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.FINE, RPCRequestHandler.EXECUTING_METHOD_TRACE_MSG, new Object[]{aMethodName, aModuleName});
                                     Object oFun = moduleInstance.getMember(aMethodName);
                                     if (oFun instanceof JSObject && ((JSObject) oFun).isFunction()) {
                                         List<Object> args = new ArrayList<>(Arrays.asList(aArguments));
@@ -235,7 +235,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                                     Object returned = largs.length > 0 ? largs[0] : null;
                                                     onSuccess.accept(ScriptUtils.toJava(returned));
                                                 } else {
-                                                    Logger.getLogger(ExecuteServerModuleMethodRequestHandler.class.getName()).log(Level.WARNING, ExecuteServerModuleMethodRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
+                                                    Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
                                                 }
                                                 return null;
                                             }
@@ -252,7 +252,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                                         onFailure.accept(new Exception(String.valueOf(reason)));
                                                     }
                                                 } else {
-                                                    Logger.getLogger(ExecuteServerModuleMethodRequestHandler.class.getName()).log(Level.WARNING, ExecuteServerModuleMethodRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
+                                                    Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
                                                 }
                                                 return null;
                                             }
@@ -260,13 +260,13 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                         });
                                         final Object leveledLock;
                                         switch (waitFor) {
-                                            case ExecuteServerModuleMethodRequestHandler.SELF_WAIT_OPTION:
+                                            case RPCRequestHandler.SELF_WAIT_OPTION:
                                                 leveledLock = jdk.nashorn.api.scripting.ScriptUtils.unwrap(moduleInstance);
                                                 break;
-                                            case ExecuteServerModuleMethodRequestHandler.SESSION_WAIT_OPTION:
+                                            case RPCRequestHandler.SESSION_WAIT_OPTION:
                                                 leveledLock = aSession;
                                                 break;
-                                            case ExecuteServerModuleMethodRequestHandler.SERVER_WAIT_OPTION:
+                                            case RPCRequestHandler.SERVER_WAIT_OPTION:
                                                 leveledLock = sessionManager.getSystemSession();
                                                 break;
                                             default:
@@ -294,13 +294,13 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                             ScriptUtils.initAsyncs(null);
                                         }
                                     } else {
-                                        onFailure.accept(new Exception(String.format(ExecuteServerModuleMethodRequestHandler.METHOD_MISSING_MSG, aMethodName, aModuleName)));
+                                        onFailure.accept(new Exception(String.format(RPCRequestHandler.METHOD_MISSING_MSG, aMethodName, aModuleName)));
                                     }
                                 } else {
-                                    onFailure.accept(new Exception(String.format(ExecuteServerModuleMethodRequestHandler.MODULE_MISSING_MSG, aModuleName)));
+                                    onFailure.accept(new Exception(String.format(RPCRequestHandler.MODULE_MISSING_MSG, aModuleName)));
                                 }
                             } else {
-                                onFailure.accept(new IllegalArgumentException(String.format(ExecuteServerModuleMethodRequestHandler.MODULE_MISSING_OR_NOT_A_MODULE, aModuleName)));
+                                onFailure.accept(new IllegalArgumentException(String.format(RPCRequestHandler.MODULE_MISSING_OR_NOT_A_MODULE, aModuleName)));
                             }
                         } catch (Exception ex) {
                             onFailure.accept(ex);

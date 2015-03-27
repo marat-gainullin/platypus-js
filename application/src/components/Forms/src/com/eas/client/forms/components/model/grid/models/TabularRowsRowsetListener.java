@@ -4,21 +4,11 @@
  */
 package com.eas.client.forms.components.model.grid.models;
 
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.events.RowsetAdapter;
-import com.bearsoft.rowset.events.RowsetDeleteEvent;
-import com.bearsoft.rowset.events.RowsetFilterEvent;
-import com.bearsoft.rowset.events.RowsetInsertEvent;
-import com.bearsoft.rowset.events.RowsetNextPageEvent;
-import com.bearsoft.rowset.events.RowsetRequeryEvent;
-import com.bearsoft.rowset.events.RowsetRollbackEvent;
-import com.bearsoft.rowset.events.RowsetSortEvent;
-
 /**
  *
  * @author mg
  */
-public class TabularRowsRowsetListener extends RowsetAdapter {
+public class TabularRowsRowsetListener {
 
     protected ArrayTableModel model;
 
@@ -26,7 +16,7 @@ public class TabularRowsRowsetListener extends RowsetAdapter {
         super();
         model = aModel;
     }
-
+/*
     @Override
     public void rowInserted(RowsetInsertEvent event) {
         Rowset rowset = event.getRowset();
@@ -67,4 +57,5 @@ public class TabularRowsRowsetListener extends RowsetAdapter {
     public void rowsetSorted(RowsetSortEvent event) {
         model.fireElementsChanged();
     }
+    */
 }

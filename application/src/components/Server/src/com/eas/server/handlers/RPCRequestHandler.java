@@ -5,7 +5,7 @@
 package com.eas.server.handlers;
 
 import com.eas.server.SessionRequestHandler;
-import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
+import com.eas.client.threetier.requests.RPCRequest;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.Session;
 import java.util.function.Consumer;
@@ -14,7 +14,7 @@ import java.util.function.Consumer;
  *
  * @author pk
  */
-public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandler<ExecuteServerModuleMethodRequest, ExecuteServerModuleMethodRequest.Response> {
+public class RPCRequestHandler extends SessionRequestHandler<RPCRequest, RPCRequest.Response> {
 
     public static final String EXECUTING_METHOD_TRACE_MSG = "Executing method {0} of module {1}";
     public static final String MODEL_SAVE_ERROR_MSG = "While attempting to save model of unactual server module %s";
@@ -26,14 +26,14 @@ public class ExecuteServerModuleMethodRequestHandler extends SessionRequestHandl
      * @param aServerCore
      * @param aRequest
      */
-    public ExecuteServerModuleMethodRequestHandler(PlatypusServerCore aServerCore, ExecuteServerModuleMethodRequest aRequest) {
+    public RPCRequestHandler(PlatypusServerCore aServerCore, RPCRequest aRequest) {
         super(aServerCore, aRequest);
     }
 
     @Override
-    protected void handle2(Session aSession, Consumer<ExecuteServerModuleMethodRequest.Response> onSuccess, Consumer<Exception> onFailure) {
+    protected void handle2(Session aSession, Consumer<RPCRequest.Response> onSuccess, Consumer<Exception> onFailure) {
         serverCore.executeMethod(getRequest().getModuleName(), getRequest().getMethodName(), getRequest().getArguments(), aSession, (Object result) -> {
-            onSuccess.accept(new ExecuteServerModuleMethodRequest.Response(result));
+            onSuccess.accept(new RPCRequest.Response(result));
         }, onFailure, null);
     }
 
