@@ -1039,41 +1039,45 @@
                 }
                 var orderers = [];
                 var published = [];
-                P.manageArray(published, function (added, deleted) {
-                    added.forEach(function (aAdded) {
-                        orderers.forEach(function (aOrderer) {
-                            aOrderer.add(aAdded);
-                        });
-                        // aAdded.initPrimaryKeys();
-                        P.manageObject(aAdded, function (aChange) {
-                            // changeLog.add();
+                P.manageArray(published, {
+                    spliced: function (added, deleted) {
+                        added.forEach(function (aAdded) {
                             orderers.forEach(function (aOrderer) {
-                                if (aOrderer.inKeys(aChange.propertyName)) {
-                                    aOrderer.delete(aChange.source);
-                                    aOrderer.add(aChange.source);
-                                }
+                                aOrderer.add(aAdded);
                             });
-                            //aAdded.firePropertyChange();
-                            //aAdded.fireSelfScalarChange();// Expanding change
-                            //aAdded.fireOldScalarOppositeCollectionChange();
-                            //aAdded.fireNewScalarOppositeCollectionChange();
-                            //if (field.isPk()) {
-                            //    aAdded.fireOppositeOldScalarsChanges();
-                            //    aAdded.fireOppositeNewScalarsChanges();
-                            //    aAdded.fireChangeOfSelfCollections();
-                            //}
+                            // aAdded.initPrimaryKeys();
+                            P.manageObject(aAdded, function (aChange) {
+                                // changeLog.add();
+                                orderers.forEach(function (aOrderer) {
+                                    if (aOrderer.inKeys(aChange.propertyName)) {
+                                        aOrderer.delete(aChange.source);
+                                        aOrderer.add(aChange.source);
+                                    }
+                                });
+                                //aAdded.firePropertyChange();
+                                //aAdded.fireSelfScalarChange();// Expanding change
+                                //aAdded.fireOldScalarOppositeCollectionChange();
+                                //aAdded.fireNewScalarOppositeCollectionChange();
+                                //if (field.isPk()) {
+                                //    aAdded.fireOppositeOldScalarsChanges();
+                                //    aAdded.fireOppositeNewScalarsChanges();
+                                //    aAdded.fireChangeOfSelfCollections();
+                                //}
+                            });
+                            //aAdded.fireChangesOfOppositeCollections();
+                            //aAdded.fireChangesOfOppositeScalars();
                         });
-                        //aAdded.fireChangesOfOppositeCollections();
-                        //aAdded.fireChangesOfOppositeScalars();
-                    });
-                    deleted.forEach(function (aDeleted) {
-                        orderers.forEach(function (aOrderer) {
-                            aOrderer.delete(aDeleted);
+                        deleted.forEach(function (aDeleted) {
+                            orderers.forEach(function (aOrderer) {
+                                aOrderer.delete(aDeleted);
+                            });
+                            //aDeleted.fireChangesOfOppositeCollections();
+                            //aDeleted.fireChangesOfOppositeScalars();
+                            P.unmanageObject(aDeleted);
                         });
-                        //aDeleted.fireChangesOfOppositeCollections();
-                        //aDeleted.fireChangesOfOppositeScalars();
-                        P.unmanageObject(aDeleted);
-                    });
+                    },
+                    scrolled: function (aSubject, oldCursor, newCursor) {
+                    }
                 });
                 entityCTor.call(published, nEntity);
                 var pSchema = {};

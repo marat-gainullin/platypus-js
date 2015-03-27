@@ -61,31 +61,7 @@ public class JdbcReader {
         try {
             if (aResultSet != null) {
                 ResultSetMetaData lowLevelJdbcFields = aResultSet.getMetaData();
-                Fields jdbcFields = new Fields();
-                for (int i = 1; i <= lowLevelJdbcFields.getColumnCount(); i++) {
-                    Field field = new Field();
-                    String columnLabel = lowLevelJdbcFields.getColumnLabel(i);// Column label in jdbc is the name of platypus property
-                    String columnName = lowLevelJdbcFields.getColumnName(i);
-                    field.setName(columnLabel != null && !columnLabel.isEmpty() ? columnLabel : columnName);
-                    field.setOriginalName(columnName);
-
-                    field.setNullable(lowLevelJdbcFields.isNullable(i) == ResultSetMetaData.columnNullable);
-
-                    DataTypeInfo typeInfo = new DataTypeInfo();
-                    typeInfo.setSqlType(lowLevelJdbcFields.getColumnType(i));
-                    typeInfo.setSqlTypeName(lowLevelJdbcFields.getColumnTypeName(i));
-                    typeInfo.setJavaClassName(lowLevelJdbcFields.getColumnClassName(i));
-                    field.setTypeInfo(typeInfo);
-
-                    field.setSize(lowLevelJdbcFields.getColumnDisplaySize(i));
-                    field.setPrecision(lowLevelJdbcFields.getPrecision(i));
-                    field.setScale(lowLevelJdbcFields.getScale(i));
-                    field.setSigned(lowLevelJdbcFields.isSigned(i));
-
-                    field.setTableName(lowLevelJdbcFields.getTableName(i));
-                    field.setSchemaName(lowLevelJdbcFields.getSchemaName(i));
-                    jdbcFields.add(field);
-                }
+                Fields jdbcFields = readFields(lowLevelJdbcFields);
                 return readRows(expectedFields != null && !expectedFields.isEmpty() ? expectedFields : jdbcFields, jdbcFields, aResultSet, aPageSize);
             } else {
                 throw new SQLException(RESULTSET_MISSING_EXCEPTION_MSG);
@@ -97,6 +73,35 @@ public class JdbcReader {
                 throw new SQLException(ex);
             }
         }
+    }
+
+    public static Fields readFields(ResultSetMetaData lowLevelJdbcFields) throws SQLException {
+        Fields jdbcFields = new Fields();
+        for (int i = 1; i <= lowLevelJdbcFields.getColumnCount(); i++) {
+            Field field = new Field();
+            String columnLabel = lowLevelJdbcFields.getColumnLabel(i);// Column label in jdbc is the name of platypus property
+            String columnName = lowLevelJdbcFields.getColumnName(i);
+            field.setName(columnLabel != null && !columnLabel.isEmpty() ? columnLabel : columnName);
+            field.setOriginalName(columnName);
+            
+            field.setNullable(lowLevelJdbcFields.isNullable(i) == ResultSetMetaData.columnNullable);
+            
+            DataTypeInfo typeInfo = new DataTypeInfo();
+            typeInfo.setSqlType(lowLevelJdbcFields.getColumnType(i));
+            typeInfo.setSqlTypeName(lowLevelJdbcFields.getColumnTypeName(i));
+            typeInfo.setJavaClassName(lowLevelJdbcFields.getColumnClassName(i));
+            field.setTypeInfo(typeInfo);
+            
+            field.setSize(lowLevelJdbcFields.getColumnDisplaySize(i));
+            field.setPrecision(lowLevelJdbcFields.getPrecision(i));
+            field.setScale(lowLevelJdbcFields.getScale(i));
+            field.setSigned(lowLevelJdbcFields.isSigned(i));
+            
+            field.setTableName(lowLevelJdbcFields.getTableName(i));
+            field.setSchemaName(lowLevelJdbcFields.getSchemaName(i));
+            jdbcFields.add(field);
+        }
+        return jdbcFields;
     }
 
     /**

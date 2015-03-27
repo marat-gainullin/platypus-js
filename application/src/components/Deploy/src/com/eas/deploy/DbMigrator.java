@@ -5,13 +5,11 @@
 package com.eas.deploy;
 
 import com.eas.client.cache.AppElementFilesException;
-import com.bearsoft.rowset.Row;
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.changes.Change;
 import com.eas.client.ClientConstants;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SqlQuery;
 import com.eas.client.cache.PlatypusFiles;
+import com.eas.client.changes.Change;
 import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.metadata.MetadataSynchronizer;

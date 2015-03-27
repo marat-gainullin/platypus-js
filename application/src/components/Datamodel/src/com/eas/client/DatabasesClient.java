@@ -1,9 +1,8 @@
 package com.eas.client;
 
 import com.eas.client.changes.Change;
+import com.eas.client.dataflow.ColumnsIndicies;
 import com.eas.client.dataflow.Converter;
-import com.eas.client.dataflow.FlowProvider;
-import com.eas.client.dataflow.JdbcFlowProvider;
 import com.eas.client.dataflow.StatementsGenerator;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.metadata.DataTypeInfo;
@@ -184,23 +183,23 @@ public class DatabasesClient {
         q.putParameter(USERNAME_PARAMETER_NAME, DataTypeInfo.VARCHAR, aUserName.toUpperCase());
         aClient.initUsersSpace(q.getDatasourceName());
         SqlCompiledQuery compiled = q.compile();
-        CallableConsumer<Map<String, String>, Rowset> doWork = (Rowset rs) -> {
+        CallableConsumer<Map<String, String>, ResultSet> doWork = (ResultSet r) -> {
             Map<String, String> properties = new HashMap<>();
-            if (!rs.isEmpty()) {
-                Row r = rs.getRow(1);
+            ColumnsIndicies idxs = new ColumnsIndicies(r.getMetaData());
+            if (r.next()) {
                 properties.put(ClientConstants.F_USR_NAME, aUserName);
-                properties.put(ClientConstants.F_USR_CONTEXT, (String)r.getColumnObject(rs.getFields().find(ClientConstants.F_USR_CONTEXT)));
-                properties.put(ClientConstants.F_USR_EMAIL, (String)r.getColumnObject(rs.getFields().find(ClientConstants.F_USR_EMAIL)));
-                properties.put(ClientConstants.F_USR_PHONE, (String)r.getColumnObject(rs.getFields().find(ClientConstants.F_USR_PHONE)));
-                properties.put(ClientConstants.F_USR_FORM, (String)r.getColumnObject(rs.getFields().find(ClientConstants.F_USR_FORM)));
-                properties.put(ClientConstants.F_USR_PASSWD, (String)r.getColumnObject(rs.getFields().find(ClientConstants.F_USR_PASSWD)));
+                properties.put(ClientConstants.F_USR_CONTEXT, r.getString(idxs.find(ClientConstants.F_USR_CONTEXT)));
+                properties.put(ClientConstants.F_USR_EMAIL, r.getString(idxs.find(ClientConstants.F_USR_EMAIL)));
+                properties.put(ClientConstants.F_USR_PHONE, r.getString(idxs.find(ClientConstants.F_USR_PHONE)));
+                properties.put(ClientConstants.F_USR_FORM, r.getString(idxs.find(ClientConstants.F_USR_FORM)));
+                properties.put(ClientConstants.F_USR_PASSWD, r.getString(idxs.find(ClientConstants.F_USR_PASSWD)));
             }
             return properties;
         };
         if (onSuccess != null) {
-            compiled.executeQuery((Rowset rs) -> {
+            compiled.<Map<String, String>>executeQuery(doWork, (Map<String, String> props) -> {
                 try {
-                    onSuccess.accept(doWork.call(rs));
+                    onSuccess.accept(props);
                 } catch (Exception ex) {
                     if (onFailure != null) {
                         onFailure.accept(ex);
@@ -209,8 +208,7 @@ public class DatabasesClient {
             }, onFailure);
             return null;
         } else {
-            final Rowset rs = compiled.executeQuery(null, null);
-            return doWork.call(rs);
+            return compiled.<Map<String, String>>executeQuery(doWork, null, null);
         }
     }
 
@@ -650,6 +648,7 @@ public class DatabasesClient {
     protected static final String UNKNOWN_DATASOURCE_IN_COMMIT = "Unknown datasource: %s. Can't commit to it.";
     protected static final String UNSUPPORTED_DATASOURCE_IN_COMMIT = "Unsupported datasource: %s. Can't commit to it.";
 
+    /*
     public Rowset getDbTypesInfo(String aDatasourceName) throws Exception {
         Logger.getLogger(DatabasesClient.class.getName()).fine(String.format(TYPES_INFO_TRACE_MSG, aDatasourceName));
         Rowset lrowSet = new Rowset();
@@ -667,6 +666,7 @@ public class DatabasesClient {
         }
         return lrowSet;
     }
+    */
 
     public void dbTableChanged(String aDatasourceName, String aSchema, String aTable) throws Exception {
         DatabaseMdCache cache = getDbMetadataCache(aDatasourceName);
@@ -704,11 +704,12 @@ public class DatabasesClient {
     }
 
     protected static Set<String> getUserRoles(DatabasesClient aClient, String aUserName, Consumer<Set<String>> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        CallableConsumer<Set<String>, Rowset> doWork = (Rowset rs) -> {
+        CallableConsumer<Set<String>, ResultSet> doWork = (ResultSet rs) -> {
             Set<String> roles = new HashSet<>();
-            int roleNameColumnIndex = rs.getFields().find(ClientConstants.F_GROUP_NAME);
-            for (int i = 1; i <= rs.size(); i++) {
-                roles.add((String) rs.getRow(i).getColumnObject(roleNameColumnIndex));
+            ColumnsIndicies idxs = new ColumnsIndicies(rs.getMetaData());
+            int roleNameColumnIndex = idxs.find(ClientConstants.F_GROUP_NAME);
+            while (rs.next()) {
+                roles.add(rs.getString(roleNameColumnIndex));
             }
             return roles;
         };
@@ -716,9 +717,9 @@ public class DatabasesClient {
         q.putParameter(USERNAME_PARAMETER_NAME, DataTypeInfo.VARCHAR, aUserName.toUpperCase());
         SqlCompiledQuery compiled = q.compile();
         if (onSuccess != null) {
-            compiled.executeQuery((Rowset rs) -> {
+            compiled.<Set<String>>executeQuery(doWork, (Set<String> aRoles) -> {
                 try {
-                    onSuccess.accept(doWork.call(rs));
+                    onSuccess.accept(aRoles);
                 } catch (Exception ex) {
                     if (onFailure != null) {
                         onFailure.accept(ex);
@@ -727,8 +728,7 @@ public class DatabasesClient {
             }, onFailure);
             return null;
         } else {
-            Rowset rs = compiled.executeQuery(null, null);
-            return doWork.call(rs);
+            return compiled.<Set<String>>executeQuery(doWork, null, null);
         }
     }
 
