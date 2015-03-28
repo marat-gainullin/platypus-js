@@ -1,26 +1,4 @@
 (function () {
-    var setConstructor = null;
-    if (typeof Set !== 'undefined') {
-        setConstructor = Set;
-    } else {
-        var LinkedHashSetClass = Java.type('java.util.LinkedHashSet');
-        setConstructor = function () {
-            var container = new LinkedHashSetClass();
-            this.add = function (aValue) {
-                container.add(aValue);
-            };
-            this.delete = function (aValue) {
-                container.remove(aValue);
-            };
-            Object.defineProperty(this, 'size', {get: function () {
-                    return container.size();
-                }});
-            this.forEach = function(aCallback){
-                container.forEach(aCallback);
-            };
-        };
-    }
-
     /**
      * Orderer constructor
      * @constructor
@@ -50,7 +28,7 @@
             var key = calcKey(anObject);
             var subset = map[key];
             if (!subset) {
-                subset = new setConstructor();
+                subset = new Set();
                 map[key] = subset;
             }
             subset.add(anObject);

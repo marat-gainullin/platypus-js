@@ -1,4 +1,23 @@
 (function () {
+    if (typeof Set === 'undefined') {
+        var LinkedHashSetClass = Java.type('java.util.LinkedHashSet');
+        Set = function () {
+            var container = new LinkedHashSetClass();
+            this.add = function (aValue) {
+                container.add(aValue);
+            };
+            this.delete = function (aValue) {
+                container.remove(aValue);
+            };
+            Object.defineProperty(this, 'size', {get: function () {
+                    return container.size();
+                }});
+            this.forEach = function (aCallback) {
+                container.forEach(aCallback);
+            };
+        };
+    }
+
     load("classpath:internals.js");
     load("classpath:managed.js");
     load("classpath:orderer.js");
@@ -704,6 +723,47 @@
         return target;
     });
 
+    var addListenerName = '-platypus-listener-add-func';
+    var removeListenerName = '-platypus-listener-remove-func';
+    var fireChangeName = '-platypus-change-fire-func';
+    function listenable(aTarget) {
+        var listeners = new Set();
+        Object.defineProperty(aTarget, addListenerName, {value: function (aListener) {
+                listeners.add(aListener);
+            }});
+        Object.defineProperty(aTarget, removeListenerName, {value: function (aListener) {
+                listeners.delete(aListener);
+            }});
+        Object.defineProperty(aTarget, fireChangeName, {value: function (aChange) {
+                Object.freeze(aChange);
+                listeners.forEach(function (aListener) {
+                    aListener(aChange);
+                });
+            }});
+        return function () {
+            unlistenable(aTarget);
+        };
+    }
+
+    function unlistenable(aTarget) {
+        delete aTarget[addListenerName];
+        delete aTarget[removeListenerName];
+    }
+
+    function listen(aTarget, aListener) {
+        aTarget[addListenerName](aListener);
+        return function () {
+            aTarget[removeListenerName](aListener);
+        };
+    }
+
+    function unlisten(aTarget, aListener) {
+        aTarget[removeListenerName](aListener);
+    }
+    
+    function fire(aTarget, aChange){
+        aTarget[fireChangeName](aChange);
+    }
     /**
      * @static
      * @param {type} aName
@@ -756,7 +816,7 @@
                                         aOrderer.add(aChange.source);
                                     }
                                 });
-                                //aAdded.firePropertyChange();
+                                fire(aAdded, aChange);
                                 //aAdded.fireSelfScalarChange();// Expanding change
                                 //aAdded.fireOldScalarOppositeCollectionChange();
                                 //aAdded.fireNewScalarOppositeCollectionChange();
@@ -766,6 +826,7 @@
                                 //    aAdded.fireChangeOfSelfCollections();
                                 //}
                             });
+                            listenable(aAdded);
                             var instanceCTor = EngineUtilsClass.unwrap(nnFields.getInstanceConstructor());
                             // ORM mutable scalar and collection properties
                             var define = function (aOrmDefs) {
@@ -786,6 +847,7 @@
                             });
                             //aDeleted.fireChangesOfOppositeCollections();
                             //aDeleted.fireChangesOfOppositeScalars();
+                            unlistenable(aDeleted);
                             P.unmanageObject(aDeleted);
                         });
                     },
@@ -808,7 +870,7 @@
                         var schemaDesc = {
                             value: nField.getPublished()
                         };
-                        if (!pSchema[nField.name]){
+                        if (!pSchema[nField.name]) {
                             Object.defineProperty(pSchema, nField.name, schemaDesc);
                         } else {
                             var eTitle = nEntity.title ? " [" + nEntity.title + "]" : "";
