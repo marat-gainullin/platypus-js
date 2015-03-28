@@ -79,8 +79,8 @@
     ScriptUtils.setScalarDefFunc(
             function (targetPublishedEntity, targetFieldName, sourceFieldName) {
                 var _self = this;
-                _self.enumerable = true;
-                _self.configurable = false;
+                _self.enumerable = false;
+                _self.configurable = true;
                 _self.get = function () {
                     var criterion = {};
                     criterion[targetFieldName] = this[sourceFieldName];
@@ -94,7 +94,7 @@
     ScriptUtils.setCollectionDefFunc(
             function (sourcePublishedEntity, targetFieldName, sourceFieldName) {
                 var _self = this;
-                _self.enumerable = true;
+                _self.enumerable = false;
                 _self.configurable = true;
                 _self.get = function () {
                     var criterion = {};
