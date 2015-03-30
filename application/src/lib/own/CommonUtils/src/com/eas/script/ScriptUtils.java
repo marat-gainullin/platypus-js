@@ -549,6 +549,11 @@ public class ScriptUtils {
         return (JSObject) oResult;
     }
 
+    public static void unlisten(JSObject aCookie){
+        JSObject unlisten = (JSObject) aCookie.getMember("unlisten");
+        unlisten.call(null, new Object[]{});
+    }
+    
     public static JSObject listenElements(JSObject aTarget, JSObject aCallback) {
         assert listenElementsFunc != null : SCRIPT_NOT_INITIALIZED;
         Object oResult = listenElementsFunc.call(null, new Object[]{aTarget, aCallback});

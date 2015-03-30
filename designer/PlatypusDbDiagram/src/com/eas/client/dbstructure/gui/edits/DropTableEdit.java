@@ -4,8 +4,6 @@
  */
 package com.eas.client.dbstructure.gui.edits;
 
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.eas.client.DatabasesClient;
 import com.eas.client.dbstructure.DbStructureUtils;
 import com.eas.client.dbstructure.SqlActionsController;
@@ -14,6 +12,8 @@ import com.eas.client.dbstructure.SqlActionsController.DefineTableAction;
 import com.eas.client.dbstructure.SqlActionsController.DropConstraintAction;
 import com.eas.client.dbstructure.SqlActionsController.DropTableAction;
 import com.eas.client.dbstructure.exceptions.DbActionException;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.ForeignKeySpec;
 import com.eas.client.model.Relation;
 import com.eas.client.model.dbscheme.FieldsEntity;
 import java.util.ArrayList;

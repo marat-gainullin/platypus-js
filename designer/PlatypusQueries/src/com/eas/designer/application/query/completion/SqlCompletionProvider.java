@@ -4,14 +4,14 @@
  */
 package com.eas.designer.application.query.completion;
 
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.Parameter;
-import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.ClientConstants;
 import com.eas.client.DatabaseMdCache;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SqlQuery;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.Parameter;
+import com.eas.client.metadata.Parameters;
 import com.eas.designer.application.indexer.AppElementInfo;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.query.PlatypusQueryDataObject;

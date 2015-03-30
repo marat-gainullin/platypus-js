@@ -21,6 +21,7 @@ import com.eas.design.Undesignable;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
 import com.eas.script.ScriptFunction;
+import com.eas.script.ScriptUtils;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -701,8 +702,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
 
     protected void unbind() {
         if (boundToData != null) {
-            JSObject unlisten = (JSObject) boundToData.getMember("unlisten");
-            unlisten.call(null, new Object[]{});
+            ScriptUtils.unlisten(boundToData);
             boundToData = null;
         }
         if (boundToValue != null) {

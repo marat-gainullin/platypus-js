@@ -4,8 +4,6 @@
  */
 package com.eas.designer.application.query.result;
 
-import com.bearsoft.rowset.metadata.Parameter;
-import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.forms.Forms;
 import com.eas.client.forms.HasJsValue;
 import com.eas.client.forms.components.model.ModelCheckBox;
@@ -13,6 +11,8 @@ import com.eas.client.forms.components.model.ModelDate;
 import com.eas.client.forms.components.model.ModelSpin;
 import com.eas.client.forms.components.model.ModelWidget;
 import com.eas.client.forms.components.rt.HasEditable;
+import com.eas.client.metadata.Parameter;
+import com.eas.client.metadata.Parameters;
 import java.awt.Component;
 import java.util.ArrayList;
 import java.util.EventObject;

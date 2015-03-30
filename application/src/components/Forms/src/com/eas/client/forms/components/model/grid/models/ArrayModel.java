@@ -6,6 +6,7 @@ package com.eas.client.forms.components.model.grid.models;
 
 import com.eas.client.forms.components.model.ModelWidget;
 import com.eas.client.forms.components.model.grid.columns.ModelColumn;
+import com.eas.script.ScriptUtils;
 import java.awt.EventQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,8 +40,7 @@ public abstract class ArrayModel {
 
     protected void enqueueElementsChanged() {
         if (boundToDataElements != null) {
-            JSObject unlisten = (JSObject) boundToDataElements.getMember("unlisten");
-            unlisten.call(null, new Object[]{});
+            ScriptUtils.unlisten(boundToDataElements);
             boundToDataElements = null;
         }
         elementsChangedEnqueued = true;
@@ -91,13 +91,11 @@ public abstract class ArrayModel {
 
     protected void unbind() {
         if (boundToData != null) {
-            JSObject unlisten = (JSObject) boundToData.getMember("unlisten");
-            unlisten.call(null, new Object[]{});
+            ScriptUtils.unlisten(boundToData);
             boundToData = null;
         }
         if (boundToDataElements != null) {
-            JSObject unlisten = (JSObject) boundToDataElements.getMember("unlisten");
-            unlisten.call(null, new Object[]{});
+            ScriptUtils.unlisten(boundToDataElements);
             boundToDataElements = null;
         }
     }

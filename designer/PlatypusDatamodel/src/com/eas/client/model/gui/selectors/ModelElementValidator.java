@@ -5,7 +5,7 @@
 
 package com.eas.client.model.gui.selectors;
 
-import com.eas.client.model.ModelElementRef;
+import com.eas.client.model.gui.ModelElementRef;
 
 /**
  *

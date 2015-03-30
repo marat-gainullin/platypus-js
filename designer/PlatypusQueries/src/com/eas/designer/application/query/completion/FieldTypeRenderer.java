@@ -4,10 +4,10 @@
  */
 package com.eas.designer.application.query.completion;
 
-import com.bearsoft.rowset.metadata.DataTypeInfo;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.SQLUtils;
+import com.eas.client.metadata.DataTypeInfo;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
 import com.eas.client.model.QueryDocument.StoredFieldMetadata;
 import com.eas.client.model.gui.view.FieldsTypeIconsCache;
 import com.eas.designer.application.query.PlatypusQueryDataObject;

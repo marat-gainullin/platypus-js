@@ -20,8 +20,6 @@ import com.eas.script.HasPublished;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
 import com.eas.util.ListenerRegistration;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -30,8 +28,8 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.internal.runtime.JSType;
 
 /**
  *
@@ -57,8 +55,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     protected ListenerRegistration cursorListener;
     protected boolean valid;
     protected Future<Void> pending;
-    //
-    protected Map<List<Integer>, Orderer> userOrderers = new HashMap<>();
 
     public ApplicationEntity() {
         super();
@@ -145,103 +141,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         }
     }
 
-    private Orderer checkUserOrderer(List<Integer> aConstraints) throws IllegalStateException {
-        Orderer orderer = userOrderers.get(aConstraints);
-        if (orderer == null) {
-            orderer = rowset.createOrderer(aConstraints);
-            userOrderers.put(aConstraints, orderer);
-        }
-        return orderer;
-    }
-
-    // Find and positioning interface
-    private static final String FIND_JSDOC = ""
-            + "/**\n"
-            + " * Finds rows using field - value pairs.\n"
-            + " * @param pairs the search conditions pairs, if a form of key-values pairs, where the key is the property object (e.g. entity.schema.propName or just a prop name in a string form) and the value for this property.\n"
-            + " * @return the rows object's array accordind to the search condition or empty array if nothing is found.\n"
-            + " */";
-
-    @ScriptFunction(jsDoc = FIND_JSDOC, params = {"criteria"})
-    public JSObject find(JSObject aCriteria) throws Exception {
-        if (aCriteria != null) {
-            Fields fields = rowset.getFields();
-            Converter converter = rowset.getConverter();
-            List<Integer> constraints = new ArrayList<>();
-            List<Object> keyValues = new ArrayList<>();
-            Set<String> jsKeys = aCriteria.keySet();
-            for (String key : jsKeys) {
-                int fieldIndex = fields.find(key);
-                if (fieldIndex != -1) {
-                    Field field = fields.get(key);
-                    constraints.add(fieldIndex);
-                    Object jsValue = aCriteria.getMember(key);
-                    Object javaValue = ScriptUtils.toJava(jsValue);
-                    Object convertedValue = converter.convert2RowsetCompatible(javaValue, field.getTypeInfo());
-                    keyValues.add(convertedValue);
-                }
-            }
-            if (!constraints.isEmpty()) {
-                if (constraints.size() == keyValues.size()) {
-                    Orderer loc = checkUserOrderer(constraints);
-                    Subset res = loc.get(keyValues);
-                    if (res != null) {
-                        if (res.getPublished() == null) {
-                            JSObject jsRes = ScriptUtils.makeArray();
-                            JSObject jsPush = (JSObject) jsRes.getMember("push");
-                            List<Object> pushArgs = new ArrayList<>();
-                            res.stream().forEach((Row r) -> {
-                                JSObject jsRow = r.getPublished();
-                                pushArgs.add(jdk.nashorn.api.scripting.ScriptUtils.unwrap(jsRow));
-                            });
-                            jsPush.call(jsRes, pushArgs.toArray());
-                            res.setPublished(jsRes);
-                        }
-                        return res.getPublished();
-                    }
-                } else {
-                    Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, BAD_FIND_AGRUMENTS_MSG);
-                }
-            }
-        } else {
-            Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, BAD_FIND_AGRUMENTS_MSG);
-        }
-        return ScriptUtils.makeArray();
-    }
-
-    @ScriptFunction(jsDoc = FIND_BY_KEY_JSDOC, params = {"key"})
-    public Row findById(Object aValue) throws Exception {
-        Logger.getLogger(ApplicationEntity.class.getName()).log(Level.WARNING, "Deprecated \"findById\" call detected. Please, use findByKey instead.");
-        return findByKey(aValue);
-    }
-    
-    private static final String FIND_BY_KEY_JSDOC = ""
-            + "/**\n"
-            + " * Finds an object by its key. Key must be a single property.\n"
-            + " * @param key the unique identifier of the row.\n"
-            + " * @return An object or <code>null</code> if nothing is found.\n"
-            + " */";
-
-    @ScriptFunction(jsDoc = FIND_BY_KEY_JSDOC, params = {"key"})
-    public Row findByKey(Object aValue) throws Exception {
-        Fields fields = rowset.getFields();
-        List<Integer> pks = fields.getPrimaryKeysIndicies();
-        if (pks.size() == 1) {
-            List<Object> keyValues = new ArrayList<>();
-            keyValues.add(ScriptUtils.toJava(aValue));
-            Orderer loc = checkUserOrderer(pks);
-            Collection<Row> res = loc.get(keyValues);
-            if (res != null && !res.isEmpty()) {
-                return res.iterator().next();
-            } else {
-                return null;
-            }
-        } else {
-            Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, String.format(BAD_PRIMARY_KEYS_MSG, pks.size()));
-        }
-        return null;
-    }
-    
     public void execute() throws Exception {
         execute(null, null);
     }
@@ -286,25 +185,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         } : null);
     }
 
-    private static final String REMOVE_JSDOC = ""
-            + "/**\n"
-            + " * Deletes a object by cursor position or by object itself.\n"
-            + " * @param aCursorPosOrInstance Object position in terms of cursor API (1-based)"
-            + "| object instance itself. Note! If no cursor position or instance is passed,"
-            + "then object at current cursor position will be deleted.\n"
-            + " */";
-
-    @ScriptFunction(jsDoc = REMOVE_JSDOC, params = {"aCursorPosOrInstance"})
-    public boolean remove(Object aCursorPosOrInstance) throws Exception {
-        if (aCursorPosOrInstance instanceof Row) {
-            return deleteRow((Row) aCursorPosOrInstance);
-        } else if (aCursorPosOrInstance instanceof Number) {
-            return deleteRow(((Number) aCursorPosOrInstance).intValue());
-        } else {
-            return false;
-        }
-    }
-
     private static final String INSTANCE_CONSTRUCTOR_JSDOC = ""
             + "/**\n"
             + "* Experimental. The constructor funciton for the entity's data array elements.\n"
@@ -312,12 +192,12 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
 
     @ScriptFunction(jsDoc = INSTANCE_CONSTRUCTOR_JSDOC)
     public JSObject getElementClass() {
-        return rowset.getFields().getInstanceConstructor();
+        return getFields().getInstanceConstructor();
     }
 
     @ScriptFunction
     public void setElementClass(JSObject aValue) {
-        rowset.getFields().setInstanceConstructor(aValue);
+        getFields().setInstanceConstructor(aValue);
     }
 
     private static final String ON_DELETED_JSDOC = ""
@@ -371,12 +251,12 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         onScrolled = aValue;
         changeSupport.firePropertyChange("onScrolled", oldValue, aValue);
     }
-    
+
     public void putOrmScalarDefinition(String aName, Fields.OrmDef aDefinition) {
         if (aName != null && !aName.isEmpty() && aDefinition != null) {
-            Map<String, Fields.OrmDef> defs = rowset.getFields().getOrmScalarDefinitions();
+            Map<String, Fields.OrmDef> defs = getFields().getOrmScalarDefinitions();
             if (!defs.containsKey(aName)) {
-                rowset.getFields().putOrmScalarDefinition(aName, aDefinition);
+                getFields().putOrmScalarDefinition(aName, aDefinition);
             } else {
                 Logger.getLogger(ApplicationEntity.class.getName()).log(Level.FINE, String.format("ORM property %s redefinition attempt on entity %s %s.", aName, name != null && !name.isEmpty() ? name : "", title != null && !title.isEmpty() ? "[" + title + "]" : ""));
             }
@@ -384,14 +264,14 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     }
 
     public Map<String, Fields.OrmDef> getOrmScalarDefinitions() {
-        return rowset.getFields().getOrmScalarDefinitions();
+        return getFields().getOrmScalarDefinitions();
     }
 
     public void putOrmCollectionDefinition(String aName, Fields.OrmDef aDefinition) {
         if (aName != null && !aName.isEmpty() && aDefinition != null) {
-            Map<String, Fields.OrmDef> defs = rowset.getFields().getOrmCollectionsDefinitions();
+            Map<String, Fields.OrmDef> defs = getFields().getOrmCollectionsDefinitions();
             if (!defs.containsKey(aName)) {
-                rowset.getFields().putOrmCollectionDefinition(aName, aDefinition);
+                getFields().putOrmCollectionDefinition(aName, aDefinition);
             } else {
                 Logger.getLogger(ApplicationEntity.class.getName()).log(Level.FINE, String.format("ORM property %s redefinition attempt on entity %s %s.", aName, name != null && !name.isEmpty() ? name : "", title != null && !title.isEmpty() ? "[" + title + "]" : ""));
             }
@@ -399,7 +279,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     }
 
     public Map<String, Fields.OrmDef> getOrmCollectionsDefinitions() {
-        return rowset.getFields().getOrmCollectionsDefinitions();
+        return getFields().getOrmCollectionsDefinitions();
     }
 
     @Override
@@ -437,15 +317,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         changeSupport.firePropertyChange("onRequeried", oldValue, aValue);
     }
 
-    private void silentFirst() {
-        rowset.removeRowsetListener(this);
-        try {
-            rowset.setCursorPos(1);
-        } finally {
-            rowset.addRowsetListener(this);
-        }
-    }
-
     public abstract void enqueueUpdate() throws Exception;
 
     protected void internalExecute(final Consumer<Void> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception {
@@ -454,10 +325,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         }
         bindQueryParameters();
         if (isValid()) {
-            // Since we have no onRequeried event, we have to filter manually here.
-            assert rowset != null;
-            assert pending == null;
-            silentFirst();
             if (aOnSuccess != null) {
                 aOnSuccess.accept(null);
             }
@@ -466,9 +333,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
             // or we are forced to refresh the data via requery() call.
             silentUnpend();
             refreshRowset(aOnSuccess, aOnFailure);
-            assert rowset != null;
             assert pending != null || (aOnSuccess == null && model.process == null);
-            // filtering will be done while processing onRequeried event in ApplicationEntity code
         }
     }
 
@@ -505,10 +370,41 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         }
     }
 
-    protected abstract void prepareRowsetByQuery() throws Exception;
-
-    protected abstract void refreshRowset(final Consumer<Void> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception;
-
+    protected static final String PENDING_ASSUMPTION_FAILED_MSG = "pending assigned to null without pending.cancel() call.";
+    
+    protected void refreshRowset(final Consumer<Void> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception {
+        if (model.process != null || aOnSuccess != null) {
+            Future<Void> f = new RowsetRefreshTask(aOnFailure);
+            query.execute((JSObject aRowset) -> {
+                if (!f.isCancelled()) {
+                    // Apply aRowse as a snapshot. Be aware of change log!
+                    assert pending == f : PENDING_ASSUMPTION_FAILED_MSG;
+                    valid = true;
+                    pending = null;
+                    model.terminateProcess((E)ApplicationEntity.this, null);
+                    if (aOnSuccess != null) {
+                        aOnSuccess.accept(null);
+                    }
+                }
+            }, (Exception ex) -> {
+                Logger.getLogger(ApplicationPlatypusEntity.class.getName()).log(Level.SEVERE, ex.getMessage());
+                if (!f.isCancelled()) {
+                    assert pending == f : PENDING_ASSUMPTION_FAILED_MSG;
+                    valid = true;
+                    pending = null;
+                    model.terminateProcess((E)ApplicationEntity.this, ex);
+                    if (aOnFailure != null) {
+                        aOnFailure.accept(ex);
+                    }
+                }
+            });
+            pending = f;
+        } else {
+            JSObject jsRowset = query.execute(null, null);
+            // Apply aRowse as a snapshot. Be aware of change log!
+        }
+    }
+    
     protected boolean isQueriable() throws Exception {
         return queryName != null || (tableName != null && !tableName.isEmpty());
     }
@@ -535,14 +431,10 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
                             // There might be entities - parameters values sources, with no
                             // data in theirs rowsets, so we can't bind query parameters to proper values. In the
                             // such case we initialize parameters values with RowsetUtils.UNDEFINED_SQL_VALUE
-                            Rowset leftRowset = leftEntity.getRowset();
-                            if (leftRowset != null && !leftRowset.isEmpty() && leftRowset.getCurrentRow() != null) {
-                                try {
-                                    pValue = leftRowset.getCurrentRow().getColumnObject(leftRowset.getFields().find(relation.getLeftField().getName()));
-                                } catch (InvalidColIndexException ex) {
-                                    pValue = null;
-                                    Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, "while assigning parameter:" + relation.getRightParameter() + " in entity: " + getTitle() + " [" + String.valueOf(getEntityId()) + "]", ex);
-                                }
+                            JSObject leftRowset = leftEntity.getPublished();
+                            if (leftRowset != null && leftRowset.getMember(CURSOR_PROP_NAME) instanceof JSObject) {
+                                JSObject jsCursor = (JSObject) leftRowset.getMember(CURSOR_PROP_NAME);
+                                pValue = ScriptUtils.toJava(jsCursor.getMember(relation.getLeftField().getName()));
                             } else {
                                 pValue = null;
                             }
@@ -602,115 +494,127 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         }
         return res;
     }
+    /*
+     @Override
+     public void rowsetScrolled(RowsetScrollEvent aEvent) {
+     resignOnCursor();
+     if (aEvent.getNewRowIndex() >= 0 && aEvent.getNewRowIndex() <= rowset.size() + 1) {
+     try {
+     // call script method
+     executeScriptEvent(onScrolled, new CursorPositionChangedEvent(this, aEvent.getOldRowIndex(), aEvent.getNewRowIndex()));
+     internalExecuteChildren(false);
+     } catch (Exception ex) {
+     Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
+     }
+     }
+     }
 
-    @Override
-    public void rowsetScrolled(RowsetScrollEvent aEvent) {
-        resignOnCursor();
-        if (aEvent.getNewRowIndex() >= 0 && aEvent.getNewRowIndex() <= rowset.size() + 1) {
-            try {
-                // call script method
-                executeScriptEvent(onScrolled, new CursorPositionChangedEvent(this, aEvent.getOldRowIndex(), aEvent.getNewRowIndex()));
-                internalExecuteChildren(false);
-            } catch (Exception ex) {
-                Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-    }
+     @Override
+     public void rowInserted(final RowsetInsertEvent event) {
+     resignOnCursor();
+     try {
+     // call script method
+     executeScriptEvent(onInserted, new EntityInstanceInsertEvent(this, event.getRow()));
+     internalExecuteChildren(false);
+     } catch (Exception ex) {
+     Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
+     }
+     }
 
-    @Override
-    public void rowInserted(final RowsetInsertEvent event) {
-        resignOnCursor();
-        try {
-            // call script method
-            executeScriptEvent(onInserted, new EntityInstanceInsertEvent(this, event.getRow()));
-            internalExecuteChildren(false);
-        } catch (Exception ex) {
-            Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
+     @Override
+     public void rowDeleted(final RowsetDeleteEvent event) {
+     resignOnCursor();
+     try {
+     // call script method
+     executeScriptEvent(onDeleted, new EntityInstanceDeleteEvent(this, event.getRow()));
+     internalExecuteChildren(false);
+     } catch (Exception ex) {
+     Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
+     }
+     }
 
-    @Override
-    public void rowDeleted(final RowsetDeleteEvent event) {
-        resignOnCursor();
-        try {
-            // call script method
-            executeScriptEvent(onDeleted, new EntityInstanceDeleteEvent(this, event.getRow()));
-            internalExecuteChildren(false);
-        } catch (Exception ex) {
-            Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
+     @Override
+     public void rowsetSorted(RowsetSortEvent event) {
+     try {
+     resignOnCursor();
+     // call script method
+     executeScriptEvent(onFiltered, new PublishedSourcedEvent(this));
+     internalExecuteChildren(false);
+     } catch (Exception ex) {
+     Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
+     }
+     }
 
-    @Override
-    public void rowsetSorted(RowsetSortEvent event) {
-        try {
-            resignOnCursor();
-            // call script method
-            executeScriptEvent(onFiltered, new PublishedSourcedEvent(this));
-            internalExecuteChildren(false);
-        } catch (Exception ex) {
-            Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
+     @Override
+     public void beforeRequery(RowsetRequeryEvent rre) {
+     }
 
-    @Override
-    public void beforeRequery(RowsetRequeryEvent rre) {
-    }
+     @Override
+     public void rowsetRequeried(RowsetRequeryEvent event) {
+     resignOnCursor();
+     try {
+     // call script method
+     executeScriptEvent(onRequeried, new PublishedSourcedEvent(this));
+     internalExecuteChildren(false);
+     } catch (Exception ex) {
+     Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
+     }
+     }
 
-    @Override
-    public void rowsetRequeried(RowsetRequeryEvent event) {
-        resignOnCursor();
-        try {
-            // call script method
-            executeScriptEvent(onRequeried, new PublishedSourcedEvent(this));
-            internalExecuteChildren(false);
-        } catch (Exception ex) {
-            Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
+     @Override
+     public void rowsetNextPageFetched(RowsetNextPageEvent event) {
+     resignOnCursor();
+     try {
+     // call script method
+     executeScriptEvent(onRequeried, new PublishedSourcedEvent(this));
+     internalExecuteChildren(false);
+     } catch (Exception ex) {
+     Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
+     }
+     }
 
-    @Override
-    public void rowsetNextPageFetched(RowsetNextPageEvent event) {
-        resignOnCursor();
-        try {
-            // call script method
-            executeScriptEvent(onRequeried, new PublishedSourcedEvent(this));
-            internalExecuteChildren(false);
-        } catch (Exception ex) {
-            Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    @Override
-    public void rowsetRolledback(RowsetRollbackEvent event) {
-        resignOnCursor();
-        try {
-            internalExecuteChildren(false);
-        } catch (Exception ex) {
-            Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
+     @Override
+     public void rowsetRolledback(RowsetRollbackEvent event) {
+     resignOnCursor();
+     try {
+     internalExecuteChildren(false);
+     } catch (Exception ex) {
+     Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
+     }
+     }
+     */
 
     protected void resignOnCursor() {
         if (cursorListener != null) {
             cursorListener.remove();
             cursorListener = null;
         }
-        Row cursor = rowset.getCurrentRow();
-        if (cursor != null) {
-            final PropertyChangeListener cursorPropsListener = (PropertyChangeEvent evt) -> {
-                try {
-                    internalExecuteChildren(false);
-                } catch (Exception ex) {
-                    Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
+        if (published != null && published.getMember(CURSOR_PROP_NAME) instanceof JSObject) {
+            JSObject jsCursor = (JSObject) published.getMember(CURSOR_PROP_NAME);
+            JSObject jsReg = ScriptUtils.listen(jsCursor, "", new AbstractJSObject() {
+
+                @Override
+                public boolean isFunction() {
+                    return true;
                 }
-            };
-            cursor.addPropertyChangeListener(cursorPropsListener);
+
+                @Override
+                public Object call(Object thiz, Object... args) {
+                    try {
+                        internalExecuteChildren(false);
+                    } catch (Exception ex) {
+                        Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    return null;
+                }
+
+            });
             cursorListener = () -> {
-                cursor.removePropertyChangeListener(cursorPropsListener);
+                ScriptUtils.unlisten(jsReg);
             };
         }
     }
+    protected static final String CURSOR_PROP_NAME = "cursor";
 
     @Override
     protected void assign(E appTarget) throws Exception {

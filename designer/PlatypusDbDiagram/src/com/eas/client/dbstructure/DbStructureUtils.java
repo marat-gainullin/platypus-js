@@ -4,13 +4,13 @@
  */
 package com.eas.client.dbstructure;
 
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.metadata.ForeignKeySpec;
-import com.bearsoft.rowset.metadata.ForeignKeySpec.ForeignKeyRule;
-import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.SqlCompiledQuery;
+import com.eas.client.metadata.ForeignKeySpec;
+import com.eas.client.metadata.ForeignKeySpec.ForeignKeyRule;
 import com.eas.client.model.Relation;
 import com.eas.client.model.dbscheme.FieldsEntity;
+import com.eas.util.IDGenerator;
+import java.sql.ResultSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -48,17 +48,19 @@ public class DbStructureUtils {
                     fullTableName = schemaName + "." + fullTableName;
                 }
                 SqlCompiledQuery query = new SqlCompiledQuery(tableEntity.getModel().getBasesProxy(), tableEntity.getTableDatasourceName(), "select count(*) cnt from " + fullTableName + " where " + aFieldName + " is not null");
-                Rowset rs = query.executeQuery(null, null);
-                if (rs != null) {
-                    if (!rs.isEmpty()) {
-                        Object cnt = rs.getRow(1).getColumnObject(1);
+                Integer count = query.executeQuery((ResultSet r) -> {
+                    if (r.next()) {
+                        Object cnt = r.getObject(1);
                         if (cnt instanceof Number) {
                             return ((Number) cnt).intValue();
                         } else {
                             return 0;
                         }
+                    } else {
+                        return 0;
                     }
-                }
+                }, null, null);
+                return count != null ? count : 0;
             } catch (Exception ex) {
                 Logger.getLogger(DbStructureUtils.class.getName()).log(Level.SEVERE, null, ex);
             }

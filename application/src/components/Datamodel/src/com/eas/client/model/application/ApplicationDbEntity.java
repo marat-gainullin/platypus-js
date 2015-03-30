@@ -6,21 +6,15 @@ package com.eas.client.model.application;
 
 import com.eas.client.DatabaseMdCache;
 import com.eas.client.SQLUtils;
-import com.eas.client.SqlCompiledQuery;
 import com.eas.client.SqlQuery;
 import com.eas.client.changes.Change;
 import com.eas.client.changes.Command;
-import com.eas.client.metadata.Parameter;
-import com.eas.client.metadata.Parameters;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
-import java.sql.ParameterMetaData;
 import java.util.List;
-import java.util.concurrent.Future;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.naming.NamingException;
@@ -93,57 +87,6 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
     }
 
     @Override
-    protected void refreshRowset(final Consumer<Void> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception {
-        SqlCompiledQuery compiled = query.compile();
-        Parameters rowsetParams = compiled.getParameters();
-        if (rowsetParams != null) {
-            if (model.process != null || aOnSuccess != null) {
-                Future<Void> f = new RowsetRefreshTask(aOnFailure);
-                rowset.refresh(rowsetParams, (Rowset aRowset) -> {
-                    if (!f.isCancelled()) {
-                        valid = true;
-                        pending = null;
-                        pullOutParameters(rowsetParams);
-                        model.terminateProcess(ApplicationDbEntity.this, null);
-                        if (aOnSuccess != null) {
-                            aOnSuccess.accept(null);
-                        }
-                    }
-                }, (Exception ex) -> {
-                    Logger.getLogger(ApplicationDbEntity.class.getName()).log(Level.SEVERE, null, ex);
-                    if (!f.isCancelled()) {
-                        valid = true;
-                        pending = null;
-                        model.terminateProcess(ApplicationDbEntity.this, ex);
-                        if (aOnFailure != null) {
-                            aOnFailure.accept(ex);
-                        }
-                    }
-                });
-                pending = f;
-            } else {
-                rowset.refresh(rowsetParams, null, null);
-                pullOutParameters(rowsetParams);
-            }
-        }
-    }
-
-    private void pullOutParameters(Parameters rowsetParams) {
-        if (query.isProcedure()) {
-            for (int i = 1; i <= rowsetParams.getParametersCount(); i++) {
-                Parameter param = rowsetParams.get(i);
-                if (param.getMode() == ParameterMetaData.parameterModeOut
-                        || param.getMode() == ParameterMetaData.parameterModeInOut) {
-                    Parameter innerParam = query.getParameters().get(param.getName());
-                    if (innerParam != null) {
-                        innerParam.setValue(param.getValue());
-                    }
-                }
-            }
-        }
-    }
-
-    @Override
     public void validateQuery() throws Exception {
         if (query == null) {
             if (queryName != null) {
@@ -154,6 +97,13 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
             } else if (tableName != null) {
                 try {
                     query = SQLUtils.validateTableSqlQuery(getTableDatasourceName(), getTableName(), getTableSchemaName(), model.getBasesProxy());
+                    // such resolving is needed here because table queries are not processed by StoredQueryFactory
+                    DatabaseMdCache mdCache = model.getBasesProxy().getDbMetadataCache(query.getDatasourceName());
+                    SqlDriver driver = mdCache.getConnectionDriver();
+                    TypesResolver resolver = driver.getTypesResolver();
+                    query.getFields().toCollection().stream().forEach((field) -> {
+                        resolver.resolve2Application(field);
+                    });
                 } catch (Exception ex) {
                     query = null;
                     if (ex instanceof NamingException) {
@@ -165,35 +115,6 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
             } else {
                 assert false : "Entity must have queryName or tableName to validate it's query";
             }
-            prepareRowsetByQuery();
-        }
-    }
-
-    @Override
-    public void prepareRowsetByQuery() throws Exception {
-        Rowset oldRowset = rowset;
-        if (rowset != null) {
-            rowset.removeRowsetListener(this);
-            rowset.setLog(null);
-            rowset = null;
-            locator = null;
-        }
-        if (query != null) {
-            SqlCompiledQuery compiled = query.compile();
-            rowset = compiled.prepareRowset();
-            if (tableName != null && !tableName.isEmpty()) {// such resolving is needed here because table queries are not processed by StoredQueryFactory
-                DatabaseMdCache mdCache = model.getBasesProxy().getDbMetadataCache(query.getDatasourceName());
-                SqlDriver driver = mdCache.getConnectionDriver();
-                TypesResolver resolver = driver.getTypesResolver();
-                rowset.getFields().toCollection().stream().forEach((field) -> {
-                    resolver.resolve2Application(field);
-                });
-            }
-            rowset.setLog(getChangeLog());
-            rowset.addRowsetListener(this);
-            locator = new Locator();
-            locator.setRowset(rowset);
-            changeSupport.firePropertyChange("rowset", oldRowset, rowset);
         }
     }
 
@@ -203,7 +124,7 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = (JSObject)publisher.call(null, new Object[]{this});
+            published = (JSObject) publisher.call(null, new Object[]{this});
         }
         return published;
     }

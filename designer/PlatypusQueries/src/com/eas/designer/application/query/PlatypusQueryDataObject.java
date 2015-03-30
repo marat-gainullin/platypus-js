@@ -4,12 +4,6 @@
  */
 package com.eas.designer.application.query;
 
-import com.bearsoft.rowset.Row;
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.utils.CollectionListener;
-import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.ClientConstants;
 import com.eas.client.DatabaseMdCache;
 import com.eas.client.DatabasesClient;
@@ -18,6 +12,9 @@ import com.eas.client.SqlQuery;
 import com.eas.client.StoredQueryFactory;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusFilesSupport;
+import com.eas.client.dataflow.ColumnsIndicies;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
 import com.eas.client.model.ModelEditingListener;
 import com.eas.client.model.QueryDocument;
 import com.eas.client.model.QueryDocument.StoredFieldMetadata;
@@ -42,6 +39,8 @@ import com.eas.designer.datamodel.nodes.ModelNode;
 import com.eas.designer.explorer.PlatypusDataObject;
 import com.eas.designer.explorer.files.wizard.NewApplicationElementWizardIterator;
 import com.eas.script.JsDoc;
+import com.eas.util.CollectionListener;
+import com.eas.util.IDGenerator;
 import com.eas.util.ListenerRegistration;
 import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
@@ -51,6 +50,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringReader;
+import java.sql.ResultSet;
 import java.util.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -64,7 +64,6 @@ import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import org.netbeans.modules.editor.NbEditorDocument;
-import org.netbeans.spi.project.ui.support.ProjectChooser;
 import org.openide.ErrorManager;
 import org.openide.awt.StatusDisplayer;
 import org.openide.awt.UndoRedo;
@@ -264,15 +263,15 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         model.addEditingListener(modelChangesObserver);
         model.getParametersEntity().getChangeSupport().addPropertyChangeListener(modelChangesObserver);
         model.getParametersEntity().getFields().getCollectionSupport().addListener(modelChangesObserver);
-        for (Field param : model.getParametersEntity().getFields().toCollection()) {
+        model.getParametersEntity().getFields().toCollection().stream().forEach((param) -> {
             param.getChangeSupport().addPropertyChangeListener(modelChangesObserver);
-        }
-        for (QueryEntity entity : model.getEntities().values()) {
+        });
+        model.getEntities().values().stream().forEach((entity) -> {
             entity.getChangeSupport().addPropertyChangeListener(modelChangesObserver);
-        }
-        for (Relation<QueryEntity> rel : model.getRelations()) {
+        });
+        model.getRelations().stream().forEach((rel) -> {
             rel.getChangeSupport().addPropertyChangeListener(modelChangesObserver);
-        }
+        });
 
         datasourceName = model.getDatasourceName();
         publicQuery = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.PUBLIC_TAG) != null;
@@ -583,9 +582,9 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         statement = null;
         commitedStatement = null;
         if (model != null) {
-            for (Field param : model.getParametersEntity().getFields().toCollection()) {
+            model.getParametersEntity().getFields().toCollection().stream().forEach((param) -> {
                 param.getChangeSupport().removePropertyChangeListener(modelChangesObserver);
-            }
+            });
         }
         model = null;
         modelModified = false;
@@ -712,38 +711,40 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
             SqlDriver driver = mdCache.getConnectionDriver();
             String sql4Schemas = driver.getSql4SchemasEnumeration();
             SqlCompiledQuery schemasQuery = new SqlCompiledQuery(basesProxy, datasourceName, sql4Schemas);
-            Rowset schemasRowset = schemasQuery.executeQuery(null, null);
-            int schemaColIndex = schemasRowset.getFields().find(ClientConstants.JDBCCOLS_TABLE_SCHEM);
-            for (Row r : schemasRowset.getCurrent()) {
-                String schemaName = (String)r.getColumnObject(schemaColIndex);
-                schemas.add(schemaName);
-            }
+            schemasQuery.executeQuery((ResultSet r) -> {
+                ColumnsIndicies idxs = new ColumnsIndicies(r.getMetaData());
+                int schemaColIndex = idxs.find(ClientConstants.JDBCCOLS_TABLE_SCHEM);
+                while (r.next()) {
+                    String schemaName = r.getString(schemaColIndex);
+                    schemas.add(schemaName);
+                }
+                return null;
+            }, null, null);
         }
         return schemas;
     }
 
-    public Map<String, Fields> achieveTables(String aSchema) throws Exception {
-        Map<String, Fields> tables = new HashMap<>();
+    public Map<String, Fields> achieveTables(final String aSchema) throws Exception {
+        final Map<String, Fields> tables = new HashMap<>();
         DatabasesClient basesProxy = getBasesProxy();
         if (basesProxy != null) {
             DatabaseMdCache mdCache = basesProxy.getDbMetadataCache(datasourceName);
-            if (aSchema != null && aSchema.equalsIgnoreCase(mdCache.getConnectionSchema())) {
-                aSchema = null;
-            }
-            if (aSchema != null) {
-                mdCache.fillTablesCacheBySchema(aSchema, true);
+            final String schema = aSchema != null && aSchema.equalsIgnoreCase(mdCache.getConnectionSchema()) ? null : aSchema;
+            if (schema != null) {
+                mdCache.fillTablesCacheBySchema(schema, true);
             }
             SqlDriver driver = mdCache.getConnectionDriver();
-            String sql4Tables = driver.getSql4TablesEnumeration(aSchema != null ? aSchema : mdCache.getConnectionSchema());
+            String sql4Tables = driver.getSql4TablesEnumeration(schema != null ? schema : mdCache.getConnectionSchema());
             SqlCompiledQuery tablesQuery = new SqlCompiledQuery(basesProxy, datasourceName, sql4Tables);
-            Rowset tablesRowset = tablesQuery.executeQuery(null, null);
-            //int schemaColIndex = tablesRowset.getFields().find(ClientConstants.JDBCCOLS_TABLE_SCHEM);
-            int tableColIndex = tablesRowset.getFields().find(ClientConstants.JDBCCOLS_TABLE_NAME);
-            for (Row r : tablesRowset.getCurrent()) {
-                String cachedTableName = (aSchema != null ? aSchema + "." : "") + (String)r.getColumnObject(tableColIndex);
-                Fields fields = mdCache.getTableMetadata(cachedTableName);
-                tables.put(cachedTableName/*.toLowerCase()*/, fields);
-            }
+            tablesQuery.executeQuery((ResultSet r)->{
+                ColumnsIndicies idxs = new ColumnsIndicies(r.getMetaData());
+                int tableColIndex = idxs.find(ClientConstants.JDBCCOLS_TABLE_NAME);
+                while (r.next()) {
+                    String cachedTableName = (schema != null ? schema + "." : "") + r.getString(tableColIndex);
+                    Fields fields = mdCache.getTableMetadata(cachedTableName);
+                    tables.put(cachedTableName/*.toLowerCase()*/, fields);
+                }
+                return null;}, null, null);
         }
         return tables;
     }

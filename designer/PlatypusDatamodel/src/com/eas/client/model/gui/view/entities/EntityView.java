@@ -9,11 +9,10 @@
  */
 package com.eas.client.model.gui.view.entities;
 
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.Parameter;
-import com.bearsoft.rowset.metadata.Parameters;
-import com.bearsoft.rowset.utils.CollectionListener;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.Parameter;
+import com.eas.client.metadata.Parameters;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Relation;
 import com.eas.client.model.dbscheme.FieldsEntity;
@@ -32,6 +31,7 @@ import com.eas.client.model.gui.view.IconsListCellRenderer;
 import com.eas.client.model.query.QueryEntity;
 import com.eas.client.model.query.QueryParametersEntity;
 import com.eas.gui.ScriptColor;
+import com.eas.util.CollectionListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Point2D;

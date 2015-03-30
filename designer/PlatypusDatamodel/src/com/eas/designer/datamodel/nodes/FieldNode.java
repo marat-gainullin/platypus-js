@@ -4,10 +4,10 @@
  */
 package com.eas.designer.datamodel.nodes;
 
-import com.bearsoft.rowset.metadata.DataTypeInfo;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.SQLUtils;
+import com.eas.client.metadata.DataTypeInfo;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Parameter;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Relation;
 import com.eas.client.model.application.ReferenceRelation;

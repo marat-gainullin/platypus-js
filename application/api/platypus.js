@@ -760,8 +760,8 @@
     function unlisten(aTarget, aListener) {
         aTarget[removeListenerName](aListener);
     }
-    
-    function fire(aTarget, aChange){
+
+    function fire(aTarget, aChange) {
         aTarget[fireChangeName](aChange);
     }
     /**
@@ -924,6 +924,21 @@
                 Object.defineProperty(published, 'findById', {value: function (aKeyValue) {
                         P.Logger.warning('findById() is deprecated. Use findByKey() instead.');
                         return published.findByKey(aKeyValue);
+                    }});
+                var toBeDeletedMark = '-platypus-to-be-deleted-mark';
+                Object.defineProperty(published, 'remove', {value: function (toBeDeleted) {
+                        toBeDeleted = toBeDeleted.forEach ? toBeDeleted : [toBeDeleted];
+                        toBeDeleted.forEach(function (anInstance) {
+                            anInstance[toBeDeletedMark] = true;
+                        });
+                        for (var d = published.length - 1; d >= 0; d--) {
+                            if (d[toBeDeletedMark]) {
+                                published.splice(d, 1);
+                            }
+                        }
+                        toBeDeleted.forEach(function (anInstance) {
+                            delete anInstance[toBeDeletedMark];
+                        });
                     }});
                 return published;
             }

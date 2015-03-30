@@ -134,13 +134,6 @@
         </antcall>
         <antcall target="-maybe-call-dep">
             <param name="call.built.properties" value="${built-jar.properties}"/>
-            <param location="${project.Rowsets}" name="call.subproject"/>
-            <param location="${project.Rowsets}/build.xml" name="call.script"/>
-            <param name="call.target" value="jar"/>
-            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
-        </antcall>
-        <antcall target="-maybe-call-dep">
-            <param name="call.built.properties" value="${built-jar.properties}"/>
             <param location="${project.Routing}" name="call.subproject"/>
             <param location="${project.Routing}/build.xml" name="call.script"/>
             <param name="call.target" value="jar"/>
@@ -243,7 +236,6 @@
         <subant buildpath="${project.Updater}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.OpcDa}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.BinaryTags}" antfile="build.xml" target="test"/>
-        <subant buildpath="${project.Rowsets}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.Core}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.Datamodel}" antfile="build.xml" target="test"/>
         <subant buildpath="${project.Modules}" antfile="build.xml" target="test"/>

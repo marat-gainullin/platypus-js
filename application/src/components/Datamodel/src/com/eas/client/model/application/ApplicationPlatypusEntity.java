@@ -10,10 +10,6 @@ import com.eas.client.queries.PlatypusQuery;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.util.List;
-import java.util.concurrent.Future;
-import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -56,39 +52,6 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
     }
 
     @Override
-    protected void refreshRowset(final Consumer<Void> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception {
-        if (model.process != null || aOnSuccess != null) {
-            Future<Void> f = new RowsetRefreshTask(aOnFailure);
-            rowset.refresh(query.getParameters(), (Rowset aRowset) -> {
-                if (!f.isCancelled()) {
-                    assert pending == f : PENDING_ASSUMPTION_FAILED_MSG;
-                    valid = true;
-                    pending = null;
-                    model.terminateProcess(ApplicationPlatypusEntity.this, null);
-                    if (aOnSuccess != null) {
-                        aOnSuccess.accept(null);
-                    }
-                }
-            }, (Exception ex) -> {
-                Logger.getLogger(ApplicationPlatypusEntity.class.getName()).log(Level.SEVERE, ex.getMessage());
-                if (!f.isCancelled()) {
-                    assert pending == f : PENDING_ASSUMPTION_FAILED_MSG;
-                    valid = true;
-                    pending = null;
-                    model.terminateProcess(ApplicationPlatypusEntity.this, ex);
-                    if (aOnFailure != null) {
-                        aOnFailure.accept(ex);
-                    }
-                }
-            });
-            pending = f;
-        } else {
-            rowset.refresh(query.getParameters(), null, null);
-        }
-    }
-    protected static final String PENDING_ASSUMPTION_FAILED_MSG = "pending assigned to null without pending.cancel() call.";
-
-    @Override
     public void validateQuery() throws Exception {
         if (query == null) {
             if (queryName != null) {
@@ -99,25 +62,6 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
             } else {
                 throw new IllegalStateException("Only managed queries are allowed in three-tier mode!");
             }
-            prepareRowsetByQuery();
-        }
-    }
-
-    @Override
-    protected void prepareRowsetByQuery() throws Exception {
-        Rowset oldRowset = rowset;
-        if (rowset != null) {
-            rowset.removeRowsetListener(this);
-            rowset.setLog(null);
-            rowset = null;
-        }
-        if (query != null) {
-            rowset = query.prepareRowset();
-            rowset.setLog(getChangeLog());
-            rowset.addRowsetListener(this);
-            locator = new Locator();
-            locator.setRowset(rowset);
-            changeSupport.firePropertyChange("rowset", oldRowset, rowset);
         }
     }
 
@@ -137,5 +81,4 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
     public static void setPublisher(JSObject aPublisher) {
         publisher = aPublisher;
     }
-
 }

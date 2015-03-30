@@ -4,8 +4,8 @@
  */
 package com.eas.designer.application.query.nodes;
 
-import com.bearsoft.rowset.metadata.DataTypeInfo;
-import com.bearsoft.rowset.metadata.Field;
+import com.eas.client.metadata.DataTypeInfo;
+import com.eas.client.metadata.Field;
 import com.eas.client.model.QueryDocument;
 import com.eas.client.model.gui.view.FieldsTypeIconsCache;
 import com.eas.client.model.query.QueryModel;

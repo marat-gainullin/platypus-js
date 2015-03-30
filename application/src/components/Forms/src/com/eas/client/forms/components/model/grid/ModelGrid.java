@@ -1077,8 +1077,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     protected void unbindCursor() {
         if (boundToCursor != null) {
-            JSObject unlisten = (JSObject) boundToCursor.getMember("unlisten");
-            unlisten.call(null, new Object[]{});
+            ScriptUtils.unlisten(boundToCursor);
             boundToCursor = null;
         }
     }
@@ -1145,8 +1144,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     protected void unbind() {
         if (boundToData != null) {
-            JSObject unlisten = (JSObject) boundToData.getMember("unlisten");
-            unlisten.call(null, new Object[]{});
+            ScriptUtils.unlisten(boundToData);
             boundToData = null;
         }
         rowsModel.setData(null);

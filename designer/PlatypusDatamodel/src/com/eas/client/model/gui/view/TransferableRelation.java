@@ -4,8 +4,7 @@
  */
 package com.eas.client.model.gui.view;
 
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.utils.RowsetUtils;
+import com.eas.client.metadata.Field;
 import com.eas.client.model.Entity;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -71,6 +70,6 @@ public class TransferableRelation<E extends Entity<?, ?, E>> implements Transfer
         if (field != null) {
             return field.getTypeInfo().getSqlType();
         }
-        return RowsetUtils.INOPERABLE_TYPE_MARKER;
+        return 0;
     }
 }

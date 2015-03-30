@@ -4,8 +4,8 @@
  */
 package com.eas.designer.application.module.completion;
 
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
 import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 

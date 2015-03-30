@@ -4,7 +4,7 @@
  */
 package com.eas.designer.application.dbdiagram.nodes;
 
-import com.bearsoft.rowset.metadata.Field;
+import com.eas.client.metadata.Field;
 import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.client.model.gui.view.FieldsListModel;
 import com.eas.client.model.gui.view.FieldsParametersListCellRenderer;

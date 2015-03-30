@@ -4,7 +4,7 @@
  */
 package com.eas.designer.datamodel.nodes;
 
-import com.bearsoft.rowset.metadata.Parameter;
+import com.eas.client.metadata.Parameter;
 import com.eas.client.model.gui.edits.fields.ChangeFieldEdit;
 import com.eas.client.model.query.QueryParametersEntity;
 import java.beans.PropertyEditor;

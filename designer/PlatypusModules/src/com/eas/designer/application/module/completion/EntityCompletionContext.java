@@ -4,8 +4,8 @@
  */
 package com.eas.designer.application.module.completion;
 
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.Parameters;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.Parameters;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationEntity;
 import static com.eas.designer.application.module.completion.CompletionContext.addItem;

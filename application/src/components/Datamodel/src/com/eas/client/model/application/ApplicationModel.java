@@ -16,7 +16,6 @@ import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
-import java.io.*;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -367,10 +366,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
     public void revert() {
         entities.values().stream().forEach((E aEntity) -> {
             try {
-                Rowset rowset = aEntity.getRowset();
-                if (rowset != null) {
-                    rowset.rolledback();
-                }
+                // Apply snapshot
             } catch (Exception ex) {
                 Logger.getLogger(ApplicationDbModel.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -382,10 +378,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
     public void commited() {
         entities.values().stream().forEach((E aEntity) -> {
             try {
-                Rowset rowset = aEntity.getRowset();
-                if (rowset != null) {
-                    rowset.commited();
-                }
+                // Update snapshot
             } catch (Exception ex) {
                 Logger.getLogger(ApplicationDbModel.class.getName()).log(Level.SEVERE, null, ex);
             }

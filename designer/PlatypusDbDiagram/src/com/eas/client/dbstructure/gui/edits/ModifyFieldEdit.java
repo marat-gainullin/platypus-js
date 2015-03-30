@@ -4,13 +4,13 @@
  */
 package com.eas.client.dbstructure.gui.edits;
 
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.dbstructure.SqlActionsController;
 import com.eas.client.dbstructure.SqlActionsController.DescribeFieldAction;
 import com.eas.client.dbstructure.SqlActionsController.ModifyFieldAction;
 import com.eas.client.dbstructure.SqlActionsController.RenameFieldAction;
 import com.eas.client.dbstructure.exceptions.DbActionException;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
 
 /**
  *

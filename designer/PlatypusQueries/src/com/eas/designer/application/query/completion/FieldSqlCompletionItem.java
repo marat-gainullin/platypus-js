@@ -4,8 +4,8 @@
  */
 package com.eas.designer.application.query.completion;
 
-import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.SQLUtils;
+import com.eas.client.metadata.Field;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import org.openide.util.ImageUtilities;

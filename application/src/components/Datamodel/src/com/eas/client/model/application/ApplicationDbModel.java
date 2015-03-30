@@ -137,7 +137,6 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Sq
         StoredQueryFactory factory = new StoredQueryFactory(basesProxy, null, null, true);
         factory.putTableFieldsMetadata(query);// only select will be filled with output columns
         modelEntity.setQuery(query);
-        modelEntity.prepareRowsetByQuery();
         // .schema collection will be empty if query is not a select
         return modelEntity;
     }

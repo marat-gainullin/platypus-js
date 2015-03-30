@@ -2,15 +2,14 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.eas.client.dbstructure.gui.edits;
 
-import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.eas.client.DatabasesClient;
 import com.eas.client.dbstructure.SqlActionsController;
 import com.eas.client.dbstructure.SqlActionsController.CreateConstraintAction;
 import com.eas.client.dbstructure.SqlActionsController.DropConstraintAction;
 import com.eas.client.dbstructure.exceptions.DbActionException;
+import com.eas.client.metadata.ForeignKeySpec;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,13 +17,12 @@ import java.util.logging.Logger;
  *
  * @author mg
  */
-public class RecreateFkEdit extends DbStructureEdit{
+public class RecreateFkEdit extends DbStructureEdit {
 
     protected ForeignKeySpec oldFkSpec = null;
     protected ForeignKeySpec newFkSpec = null;
 
-    public RecreateFkEdit(SqlActionsController aSqlController, ForeignKeySpec aOldFkSpec, ForeignKeySpec aNewFkSpec)
-    {
+    public RecreateFkEdit(SqlActionsController aSqlController, ForeignKeySpec aOldFkSpec, ForeignKeySpec aNewFkSpec) {
         super(aSqlController);
         oldFkSpec = aOldFkSpec;
         newFkSpec = aNewFkSpec;

@@ -4,10 +4,10 @@
  */
 package com.eas.client.model.gui.view;
 
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.Parameter;
-import com.bearsoft.rowset.utils.CollectionListener;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.Parameter;
+import com.eas.util.CollectionListener;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;

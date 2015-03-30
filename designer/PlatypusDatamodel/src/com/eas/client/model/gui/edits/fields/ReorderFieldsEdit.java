@@ -4,7 +4,7 @@
  */
 package com.eas.client.model.gui.edits.fields;
 
-import com.bearsoft.rowset.metadata.Fields;
+import com.eas.client.metadata.Fields;
 import com.eas.client.model.Entity;
 
 /**

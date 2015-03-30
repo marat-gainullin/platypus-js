@@ -4,22 +4,12 @@
  */
 package com.eas.designer.application.query.result;
 
-import com.bearsoft.rowset.RowsetConverter;
-import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.events.RowsetAdapter;
-import com.bearsoft.rowset.events.RowsetInsertEvent;
-import com.bearsoft.rowset.exceptions.RowsetException;
-import com.bearsoft.rowset.metadata.DataTypeInfo;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.Parameter;
-import com.bearsoft.rowset.metadata.Parameters;
-import com.bearsoft.rowset.utils.IDGenerator;
-import com.bearsoft.rowset.utils.RowsetUtils;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SQLUtils;
+import com.eas.client.SQLUtils.TypesGroup;
 import com.eas.client.SqlQuery;
 import com.eas.client.StoredQueryFactory;
+import com.eas.client.changes.Change;
 import com.eas.client.forms.components.model.ModelCheckBox;
 import com.eas.client.forms.components.model.ModelDate;
 import com.eas.client.forms.components.model.ModelFormattedField;
@@ -28,6 +18,11 @@ import com.eas.client.forms.components.model.grid.ModelGrid;
 import com.eas.client.forms.components.model.grid.columns.ModelColumn;
 import com.eas.client.forms.components.model.grid.header.ModelGridColumn;
 import com.eas.client.forms.components.model.grid.header.ServiceGridColumn;
+import com.eas.client.metadata.DataTypeInfo;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.Parameter;
+import com.eas.client.metadata.Parameters;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.queries.LocalQueriesProxy;
@@ -35,7 +30,7 @@ import com.eas.client.queries.ScriptedQueryFactory;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.query.PlatypusQueryDataObject;
 import com.eas.designer.application.query.editing.SqlTextEditsComplementor;
-import com.eas.designer.application.query.result.jsobjects.StandalonePublishedRowset;
+import com.eas.util.IDGenerator;
 import java.awt.Color;
 import java.awt.Dialog;
 import java.awt.EventQueue;
@@ -56,6 +51,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import jdk.nashorn.internal.runtime.JSType;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.NamedParameter;
 import net.sf.jsqlparser.parser.CCJSqlParserManager;
@@ -94,7 +90,6 @@ public class QueryResultsView extends javax.swing.JPanel {
     private int pageSize;
     private String datasourceName;
     private String queryName;
-    private final RowsetConverter converter = new RowsetConverter();
 
     public QueryResultsView(DatabasesClient aBasesProxy, String aDatasourceName, String aSchemaName, String aTableName) throws Exception {
         this(aBasesProxy, aDatasourceName, String.format(SQLUtils.TABLE_NAME_2_SQL, getTableName(aSchemaName, aTableName)));
@@ -215,7 +210,6 @@ public class QueryResultsView extends javax.swing.JPanel {
             hintCommitQueryButton(NbBundle.getMessage(QueryResultsView.class, "HINT_Uncommitable"));
         }
         enableRefreshQueryButton(true);
-        dataEntity.prepareRowsetByQuery();
     }
 
     public String getQueryText() {
@@ -251,8 +245,8 @@ public class QueryResultsView extends javax.swing.JPanel {
     }
 
     private void showQueryResultsMessage() throws Exception {
-        String message = String.format(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.resultMessage"), dataEntity.getRowset().size());
-        List<Field> pks = dataEntity.getRowset().getFields().getPrimaryKeys();
+        String message = String.format(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.resultMessage"), JSType.toInteger(dataEntity.getPublished().getMember("length")));
+        List<Field> pks = dataEntity.getFields().getPrimaryKeys();
         if (pks == null || pks.isEmpty()) {
             message += "\n " + String.format(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.noKeysMessage"), dataEntity.getEntityId());
         }
@@ -466,7 +460,7 @@ public class QueryResultsView extends javax.swing.JPanel {
     private void nextPageButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nextPageButtonActionPerformed
         if (model != null && dataEntity != null) {
             try {
-                dataEntity.getRowset().nextPage(null, null);
+                //dataEntity.getRowset().nextPage(null, null);
                 grid.redraw();
             } catch (Exception ex) {
                 Exceptions.printStackTrace(ex);
@@ -687,90 +681,92 @@ public class QueryResultsView extends javax.swing.JPanel {
         }
         grid.setAutoRefreshHeader(true);
         grid.insertColumnNode(0, new ServiceGridColumn());
-        List<Field> pks = dataEntity.getRowset().getFields().getPrimaryKeys();
+        List<Field> pks = dataEntity.getFields().getPrimaryKeys();
         grid.setEditable(pks != null && !pks.isEmpty());
         grid.setDeletable(pks != null && !pks.isEmpty());
-        grid.setData(new StandalonePublishedRowset(dataEntity.getRowset()));
+        grid.setData(dataEntity.getPublished());
         deleteButton.setEnabled(pks != null && !pks.isEmpty());
         showInfo(String.format(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.noKeysMessage"), dataEntity.getEntityId()));
-        dataEntity.getRowset().addRowsetListener(new RowsetAdapter() {
-            @Override
-            public boolean willInsertRow(RowsetInsertEvent event) {
-                try {
-                    int modified = 0;
-                    Fields fields = event.getRow().getFields();
-                    List<Field> pks = fields.getPrimaryKeys();
-                    for (int i = 1; i <= fields.getFieldsCount(); i++) {
-                        Field field = fields.get(i);
-                        if (!field.isNullable()) {
-                            Object oValue;
-                            if (field.isFk() || pks.isEmpty()) {// ask a user about a fk-field value and all other fields if primary keys are absent
-                                String sValue = askFieldValue(field);
-                                if (sValue == null) {
-                                    return false;
-                                } else {
-                                    oValue = sValue;
-                                }
-                            } else {
-                                oValue = generateFieldValue(field);
-                            }
-                            oValue = event.getRowset().getConverter().convert2RowsetCompatible(oValue, field.getTypeInfo());
-                            event.getRow().setColumnObject(i, oValue);
-                            modified++;
-                        }
-                    }
-                    if (modified == 0 && !fields.isEmpty()) {// ask a user about all fields
-                        for (int i = 1; i <= fields.getFieldsCount(); i++) {
-                            Field field = fields.get(i);
-                            Object oValue;
-                            String sValue = askFieldValue(field);
-                            if (sValue == null) {
-                                return false;
-                            } else {
-                                oValue = sValue;
-                            }
-                            oValue = event.getRowset().getConverter().convert2RowsetCompatible(oValue, field.getTypeInfo());
-                            event.getRow().setColumnObject(i, oValue);
-                        }
-                    }
-                } catch (RowsetException ex) {
-                    ErrorManager.getDefault().notify(ex);
-                    return false;
-                }
-                return true;
-            }
+        /*
+         dataEntity.getRowset().addRowsetListener(new RowsetAdapter() {
+         @Override
+         public boolean willInsertRow(RowsetInsertEvent event) {
+         try {
+         int modified = 0;
+         Fields fields = event.getRow().getFields();
+         List<Field> pks = fields.getPrimaryKeys();
+         for (int i = 1; i <= fields.getFieldsCount(); i++) {
+         Field field = fields.get(i);
+         if (!field.isNullable()) {
+         Object oValue;
+         if (field.isFk() || pks.isEmpty()) {// ask a user about a fk-field value and all other fields if primary keys are absent
+         String sValue = askFieldValue(field);
+         if (sValue == null) {
+         return false;
+         } else {
+         oValue = sValue;
+         }
+         } else {
+         oValue = generateFieldValue(field);
+         }
+         oValue = event.getRowset().getConverter().convert2RowsetCompatible(oValue, field.getTypeInfo());
+         event.getRow().setColumnObject(i, oValue);
+         modified++;
+         }
+         }
+         if (modified == 0 && !fields.isEmpty()) {// ask a user about all fields
+         for (int i = 1; i <= fields.getFieldsCount(); i++) {
+         Field field = fields.get(i);
+         Object oValue;
+         String sValue = askFieldValue(field);
+         if (sValue == null) {
+         return false;
+         } else {
+         oValue = sValue;
+         }
+         oValue = event.getRowset().getConverter().convert2RowsetCompatible(oValue, field.getTypeInfo());
+         event.getRow().setColumnObject(i, oValue);
+         }
+         }
+         } catch (RowsetException ex) {
+         ErrorManager.getDefault().notify(ex);
+         return false;
+         }
+         return true;
+         }
 
-            private Object generateFieldValue(Field field) {
-                Object oValue = RowsetUtils.generatePkValueByType(field.getTypeInfo().getSqlType());
-                if (!field.isPk()) {// constant value for primary keys are harmful, because of uniqueness
-                    if (oValue instanceof String) {
-                        oValue = "\n";
-                    } else if (oValue instanceof Date) {
-                        oValue = new Date(0);
-                    } else if (oValue instanceof Number) {
-                        oValue = 0;
-                    }
-                }
-                return oValue;
-            }
+         private Object generateFieldValue(Field field) {
+         Object oValue = RowsetUtils.generatePkValueByType(field.getTypeInfo().getSqlType());
+         if (!field.isPk()) {// constant value for primary keys are harmful, because of uniqueness
+         if (oValue instanceof String) {
+         oValue = "\n";
+         } else if (oValue instanceof Date) {
+         oValue = new Date(0);
+         } else if (oValue instanceof Number) {
+         oValue = 0;
+         }
+         }
+         return oValue;
+         }
 
-            private String askFieldValue(Field field) {
-                NotifyDescriptor.InputLine input = new NotifyDescriptor.InputLine(
-                        field.isFk()
-                                ? NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_ForeignKeyValue")
-                                : NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_FieldValue"),
-                        field.isFk()
-                                ? String.format(NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_CantDetermineRequiredForeignKeyValue"), field.getTableName(), field.getName())
-                                : String.format(NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_CantDetermineRequiredValue"), field.getTableName(), field.getName()));
-                Object oAnswer = DialogDisplayer.getDefault().notify(input);
-                String sAnswer = input.getInputText();
-                if (oAnswer == NotifyDescriptor.OK_OPTION) {
-                    return sAnswer;
-                } else {
-                    return null;
-                }
-            }
-        });
+         private String askFieldValue(Field field) {
+         NotifyDescriptor.InputLine input = new NotifyDescriptor.InputLine(
+         field.isFk()
+         ? NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_ForeignKeyValue")
+         : NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_FieldValue"),
+         field.isFk()
+         ? String.format(NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_CantDetermineRequiredForeignKeyValue"), field.getTableName(), field.getName())
+         : String.format(NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_CantDetermineRequiredValue"), field.getTableName(), field.getName()));
+         Object oAnswer = DialogDisplayer.getDefault().notify(input);
+         String sAnswer = input.getInputText();
+         if (oAnswer == NotifyDescriptor.OK_OPTION) {
+         return sAnswer;
+         } else {
+         return null;
+         }
+         }
+         });
+         */
     }
 
     public Parameters getParameters() {
@@ -838,8 +834,12 @@ public class QueryResultsView extends javax.swing.JPanel {
                     if (lValue != -1) {
                         parameter.setValue(new Date(lValue));
                     }
+                } else if (SQLUtils.getTypeGroup(sqlType) == TypesGroup.LOGICAL) {
+                    paramNode.getBoolean(VALUE_PREF_KEY, false);
+                } else if (SQLUtils.getTypeGroup(sqlType) == TypesGroup.NUMBERS) {
+                    paramNode.getDouble(VALUE_PREF_KEY, 0d);
                 } else {
-                    Object val = converter.convert2RowsetCompatible(paramNode.get(VALUE_PREF_KEY, ""), parameter.getTypeInfo()); //NOI18N
+                    Object val = paramNode.get(VALUE_PREF_KEY, ""); //NOI18N
                     if (val != null) {
                         ((Parameter) parameter).setValue(val);
                     }
@@ -857,15 +857,19 @@ public class QueryResultsView extends javax.swing.JPanel {
             try {
                 Parameter parameter = (Parameter) pField;
                 Preferences paramNode = paramsPreferences.node(parameter.getName());
-                if (parameter.getValue() instanceof Date) {
-                    paramNode.putLong(VALUE_PREF_KEY, ((Date) parameter.getValue()).getTime());
-                } else {
-                    String strVal = (String) converter.convert2RowsetCompatible(parameter.getValue(), DataTypeInfo.VARCHAR);
-                    if (strVal != null) {
-                        paramNode.put(VALUE_PREF_KEY, strVal);
+                if (parameter.getValue() != null) {
+                    if (parameter.getValue() instanceof Date) {
+                        paramNode.putLong(VALUE_PREF_KEY, ((Date) parameter.getValue()).getTime());
+                    } else if (SQLUtils.getTypeGroup(parameter.getTypeInfo().getSqlType()) == TypesGroup.NUMBERS) {
+                        paramNode.putDouble(VALUE_PREF_KEY, ((Number) parameter.getValue()).doubleValue());
+                    } else if (SQLUtils.getTypeGroup(parameter.getTypeInfo().getSqlType()) == TypesGroup.LOGICAL) {
+                        paramNode.putBoolean(VALUE_PREF_KEY, (Boolean) parameter.getValue());
                     } else {
-                        paramNode.remove(VALUE_PREF_KEY);
+                        String sVal = SQLUtils.sqlObject2stringRepresentation(parameter.getTypeInfo().getSqlType(), parameter.getValue());
+                        paramNode.put(VALUE_PREF_KEY, sVal);
                     }
+                } else {
+                    paramNode.remove(VALUE_PREF_KEY);
                 }
             } catch (Exception ex) {
                 //no-op

@@ -4,12 +4,12 @@
  */
 package com.eas.client.dbstructure.gui;
 
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.eas.client.dbstructure.DbStructureUtils;
 import com.eas.client.dbstructure.SqlActionsController;
 import com.eas.client.dbstructure.gui.edits.CreateFkEdit;
 import com.eas.client.dbstructure.gui.edits.DbStructureUndoableEditSupport;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.ForeignKeySpec;
 import com.eas.client.model.Relation;
 import com.eas.client.model.dbscheme.DbSchemeModel;
 import com.eas.client.model.dbscheme.FieldsEntity;

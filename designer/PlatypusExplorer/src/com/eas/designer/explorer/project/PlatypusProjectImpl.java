@@ -4,7 +4,6 @@
  */
 package com.eas.designer.explorer.project;
 
-import com.bearsoft.rowset.resourcepool.BearResourcePool;
 import com.eas.client.AppElementFiles;
 import com.eas.client.DatabaseMdCache;
 import com.eas.client.DatabasesClient;
@@ -12,6 +11,7 @@ import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusIndexer;
 import com.eas.client.queries.LocalQueriesProxy;
+import com.eas.client.resourcepool.BearResourcePool;
 import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.settings.SettingsConstants;
