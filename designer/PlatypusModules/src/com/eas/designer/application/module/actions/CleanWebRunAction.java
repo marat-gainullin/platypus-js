@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
+import org.netbeans.modules.j2ee.deployment.devmodules.api.Deployment;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
@@ -40,10 +41,11 @@ public final class CleanWebRunAction extends RunAction {
             PlatypusWebModuleManager pwmm = project.getLookup().lookup(PlatypusWebModuleManager.class);
             assert pwmm != null;
             try {
+                pwmm.undeploy();
                 project.getOutputWindowIO().getOut().println(NbBundle.getMessage(PlatypusProjectActions.class, "MSG_Cleaning_Web_Dir")); // NOI18N
                 pwmm.clearWebDir();
                 project.getOutputWindowIO().getOut().println(NbBundle.getMessage(PlatypusProjectActions.class, "MSG_Cleaning_Web_Dir_Complete")); // NOI18N
-            } catch (IOException ex) {
+            } catch (IOException | Deployment.DeploymentException ex) {
                 Logger.getLogger(PlatypusProjectActions.class.getName()).log(Level.SEVERE, "Error cleaning web directory", ex);
                 project.getOutputWindowIO().getErr().println(ex.getMessage());
             }

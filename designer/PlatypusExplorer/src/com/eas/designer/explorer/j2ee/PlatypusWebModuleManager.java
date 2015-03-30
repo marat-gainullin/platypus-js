@@ -157,17 +157,17 @@ public class PlatypusWebModuleManager {
                 if (webInfDir != null && webInfDir.isFolder()) {
                     FileObject libsDir = webInfDir.getFileObject(PlatypusWebModule.LIB_DIRECTORY_NAME);
                     if (libsDir != null && libsDir.isFolder()) {
-                        FileUtils.clearDirectory(FileUtil.toFile(libsDir));
+                        FileUtils.clearDirectory(FileUtil.toFile(libsDir));// servlet files
                     }
                     FileObject classesDir = webInfDir.getFileObject(PlatypusWebModule.CLASSES_DIRECTORY_NAME);
                     if (classesDir != null && classesDir.isFolder()) {
-                        FileUtils.clearDirectory(FileUtil.toFile(classesDir));
+                        FileUtils.clearDirectory(FileUtil.toFile(classesDir));// api js files
                     }
                 }
             }
             FileObject pwcDir = webContentDir.getFileObject(PLATYPUS_WEB_CLIENT_DIR_NAME);
             if (pwcDir != null && pwcDir.isFolder()) {
-                FileUtils.clearDirectory(FileUtil.toFile(pwcDir));
+                FileUtils.clearDirectory(FileUtil.toFile(pwcDir));// browser client
             }
         }
     }
