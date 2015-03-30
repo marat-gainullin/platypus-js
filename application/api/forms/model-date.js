@@ -878,6 +878,43 @@
              */
             P.ModelDate.prototype.onKeyPressed = {};
         }
+        
+        Object.defineProperty(this, "datePicker", {
+            get: function() {
+                var value = delegate.datePicker;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.datePicker = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelDate){
+            /**
+             * Determines whether this component shows date dialog. Applicable only in HTML5 client.
+             * @property showDateDialog
+             * @memberOf ModelDate
+             */
+            P.ModelDate.prototype.datePicker = true;
+        }
+        
+        Object.defineProperty(this, "timePicker", {
+            get: function() {
+                var value = delegate.timePicker;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.timePicker = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelDate){
+            /**
+             * Determines whether this component shows time dialog. Applicable only in HTML5 client.
+             * @property showTimeDialog
+             * @memberOf ModelDate
+             */
+            P.ModelDate.prototype.timePicker = true;
+        }
+        
     };
         /**
          * Tries to acquire focus for this component.
