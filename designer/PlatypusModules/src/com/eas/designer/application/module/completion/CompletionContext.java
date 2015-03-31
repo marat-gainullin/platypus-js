@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import jdk.nashorn.internal.ir.AccessNode;
 import jdk.nashorn.internal.ir.IdentNode;
 import jdk.nashorn.internal.ir.IndexNode;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
@@ -125,7 +126,7 @@ public class CompletionContext {
     }
 
     protected static boolean isPropertyGet(CompletionToken token, String propertyName) {
-        return (token.node instanceof IdentNode && propertyName.equals(token.name))
+        return (token.node instanceof AccessNode && propertyName.equals(token.name))
                 || (token.node instanceof IndexNode
                 && ((IndexNode) token.node).getIndex().getType() != null
                 && ((IndexNode) token.node).getIndex().getType().isString()

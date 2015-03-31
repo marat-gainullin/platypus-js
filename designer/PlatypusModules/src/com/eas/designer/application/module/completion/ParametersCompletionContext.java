@@ -7,9 +7,9 @@ package com.eas.designer.application.module.completion;
 import com.bearsoft.rowset.metadata.Fields;
 import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.model.application.ApplicationEntity;
-import static com.eas.designer.application.module.completion.CompletionContext.addItem;
+import com.eas.designer.application.module.completion.CompletionContext;
 import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
-import static com.eas.designer.application.module.completion.ModuleCompletionContext.METADATA_SCRIPT_NAME;
+import com.eas.designer.application.module.completion.ModuleCompletionContext;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 
 /**
@@ -31,12 +31,12 @@ public class ParametersCompletionContext extends CompletionContext {
             fillJavaCompletionItems(point, resultSet);
         }
         EntityElementCompletionContext.fillFieldsValues(parameters, point, resultSet);
-        addItem(resultSet, point.getFilter(), new BeanCompletionItem(Parameters.class, METADATA_SCRIPT_NAME, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
+        addItem(resultSet, point.getFilter(), new BeanCompletionItem(Parameters.class, ModuleCompletionContext.METADATA_SCRIPT_NAME, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
     }
 
     @Override
     public CompletionContext getChildContext(CompletionToken token, int offset) throws Exception {
-        if (isPropertyGet(token, METADATA_SCRIPT_NAME)) {
+        if (isPropertyGet(token, ModuleCompletionContext.METADATA_SCRIPT_NAME)) {
             return new MetadataCompletionContext(parameters);
         } else {
             return null;
