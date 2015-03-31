@@ -5,14 +5,13 @@
  */
 package com.bearsoft.gwt.ui.widgets;
 
+import java.util.Date;
+
 import com.bearsoft.gwt.ui.CommonResources;
 import com.bearsoft.gwt.ui.XElement;
-import com.bearsoft.rowset.Utils;
-import com.eas.client.form.published.widgets.PlatypusHtmlEditor;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.editor.client.IsEditor;
 import com.google.gwt.editor.client.LeafValueEditor;
 import com.google.gwt.event.dom.client.BlurEvent;
@@ -38,23 +37,17 @@ import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HasValue;
-import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.datepicker.client.CalendarUtil;
 import com.google.gwt.user.datepicker.client.DateBox;
-import com.google.gwt.user.datepicker.client.DatePicker;
-import com.sun.xml.internal.ws.org.objectweb.asm.Label;
-
-import java.util.Date;
 
 /**
  * 
@@ -78,6 +71,9 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 	private Date value;
 	protected boolean settingValueFromJs;
 	protected boolean settingValueToJs;
+	
+	protected boolean isDateShow = true;
+	protected boolean isTimeShow = true;
 	
 	public DateTimeBox() {
 		this(new DateTimePicker(), null, DEFAULT_FORMAT);
@@ -160,11 +156,9 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 					settingValueToJs = true;
 					Date timePart = picker.getTimePicker().getValue();
 					Date datePart = field.getValue();
-					
 					if (timePart==null){
 						return;
 					}
-					
 					CalendarUtil.resetTime(datePart);
 					value = new Date(datePart.getTime() + timePart.getTime());
 					field.setValue(value, true);
@@ -265,6 +259,7 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 				}
 			});
 		}
+		changeViewPresentation();
 	}
 
 	
@@ -275,6 +270,55 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 			picker.getTimePicker().setValue(aValue,fireEvents);
 			settingValueFromJs = false;
 		}
+	}
+	
+	public boolean isDateVisible(){
+		return isDateShow;
+	}
+	
+	public void setDateVisible(boolean value){
+		isDateShow = value;
+		changeViewPresentation();
+	}
+	
+	public boolean isTimeVisible(){
+		return isTimeShow;
+	}
+	
+	public void setTimeVisible(boolean value){
+		isTimeShow = value;
+		changeViewPresentation();
+	}
+	
+	private void changeViewPresentation(){
+		
+		if (isDateShow==true && isTimeShow == true){
+			right.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+			picker.setDateAndTimeView();
+			organizeFieldWrapperRight();
+			right.getElement().removeClassName("time-picker-select");
+			right.getElement().addClassName("date-time-select");
+			return;
+		}else if (isDateShow==true){
+			right.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+			picker.setDateView();
+			organizeFieldWrapperRight();
+			right.getElement().removeClassName("time-picker-select");
+			right.getElement().addClassName("date-time-select");
+			return;
+		}else if (isTimeShow==true){
+			right.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+			picker.setTimeView();
+			right.getElement().removeClassName("date-time-select");
+			right.getElement().addClassName("time-picker-select");
+			organizeFieldWrapperRight();
+			return;
+		}else{
+			right.getElement().getStyle().setDisplay(Display.NONE);
+			organizeFieldWrapperRight();
+			return;
+		}
+		
 	}
 	
 	@Override
