@@ -21,7 +21,6 @@ public class ModelDate extends ModelDecoratorBox<Date> implements HasEmptyText, 
 
 	protected String emptyText;
 	protected String format;
-
 	public ModelDate() {
 		super(new DateTimeBox());
 	}
@@ -91,13 +90,33 @@ public class ModelDate extends ModelDecoratorBox<Date> implements HasEmptyText, 
 	public String getEmptyText() {
 		return emptyText;
 	}
-
+	
 	@Override
 	public void setEmptyText(String aValue) {
 		emptyText = aValue;
 		ControlsUtils.applyEmptyText(getElement(), emptyText);
 	}
 
+	public boolean isDateShown(){
+		DateTimeBox box = (DateTimeBox) decorated;
+		return box.isDateVisible();
+	}
+	
+	public void setDateShown(boolean value){
+		DateTimeBox box = (DateTimeBox) decorated;
+		box.setDateVisible(value);
+	}
+	
+	public boolean isTimeShown(){
+		DateTimeBox box = (DateTimeBox) decorated;
+		return box.isTimeVisible();
+	}
+	
+	public void setTimeShown(boolean value){
+		DateTimeBox box = (DateTimeBox) decorated;
+		box.setTimeVisible(value);
+	}
+	
 	public void setPublished(JavaScriptObject aValue) {
 		super.setPublished(aValue);
 		if (published != null) {
@@ -135,6 +154,23 @@ public class ModelDate extends ModelDecoratorBox<Date> implements HasEmptyText, 
 				aWidget.@com.eas.client.form.published.widgets.model.ModelDate::setFormat(Ljava/lang/String;)('' + aValue);
 			}
 		});
+		Object.defineProperty(aPublished, "datePicker", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelDate::isDateShown()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.widgets.model.ModelDate::setDateShown(Z)(aValue);
+			}
+		});
+		Object.defineProperty(aPublished, "timePicker", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelDate::isTimeShown()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.widgets.model.ModelDate::setTimeShown(Z)(aValue);
+			}
+		});
+		
 	}-*/;
 
 	@Override

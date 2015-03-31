@@ -2,21 +2,10 @@ package com.bearsoft.gwt.ui.widgets;
 
 import java.util.Date;
 
-import com.google.gwt.event.dom.client.BlurEvent;
-import com.google.gwt.event.dom.client.BlurHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.datepicker.client.CalendarUtil;
 import com.google.gwt.user.datepicker.client.DateBox;
 
 public class DecoratedDateBox extends DateBox {
 
-//	protected DatePicker picker;
 	protected DateTimePicker picker;
 	public DecoratedDateBox() {
 		super();
@@ -41,5 +30,4 @@ public class DecoratedDateBox extends DateBox {
 	public void showDatePicker() {
 	}
 	
-
 }
