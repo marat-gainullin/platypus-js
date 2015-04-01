@@ -9,7 +9,9 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.swing.text.BadLocationException;
 import jdk.nashorn.internal.ir.AccessNode;
 import jdk.nashorn.internal.ir.ExpressionStatement;
@@ -70,10 +72,10 @@ public class CompletionPoint {
                 String docStr = doc.getText(0, doc.getLength());
                 cp.astRoot = ScriptUtils.parseJs(
                         afterDotCaretPosintion
-                        ? sanitizeDot(docStr, caretOffset - 1) : docStr);
+                                ? sanitizeDot(docStr, caretOffset - 1) : docStr);
                 List<CompletionToken> ctxTokens = getContextTokens(cp.astRoot, afterDotCaretPosintion ? caretOffset - 1 : caretOffset);
                 List<CompletionToken> offsetTokens = getOffsetTokens(ctxTokens, caretOffset);
-                cp.completionTokens = offsetTokens;
+                cp.completionTokens = filterIndexIdentNodes(offsetTokens);
             }
             cp.caretBeginWordOffset = getStartWordOffset(doc, caretOffset);
             cp.caretEndWordOffset = getEndWordOffset(doc, caretOffset);
@@ -140,7 +142,7 @@ public class CompletionPoint {
                 if (!lc.expressionsNodes.isEmpty()
                         && ScriptUtils.isInNode(lc.expressionsNodes.peekLast(), indexNode)
                         && ScriptUtils.isInNode(lc.expressionsNodes.peekLast(), offset)) {
-                    System.out.println(indexNode.getIndex());
+                    //System.out.println(indexNode.getIndex());
                     if (indexNode.getIndex() instanceof LiteralNode) {
                         LiteralNode ln = (LiteralNode) indexNode.getIndex();
                         ctx.add(new CompletionToken(ln.getString(), indexNode));
@@ -160,8 +162,6 @@ public class CompletionPoint {
     private static List<CompletionToken> getOffsetTokens(List<CompletionToken> contextTokens, int offset) {
         final List<CompletionToken> tokens = new ArrayList<>();
         for (CompletionToken token : contextTokens) {
-            //Long originalToken = token.node.getToken();
-            //if (Token.descPosition(originalToken) + Token.descLength(originalToken) < offset) {
             if (token.node.getFinish() < offset) {
                 tokens.add(token);
             } else {
@@ -169,6 +169,23 @@ public class CompletionPoint {
             }
         }
         return tokens;
+    }
+
+    private static List<CompletionToken> filterIndexIdentNodes(List<CompletionToken> tokens) {
+        final List<CompletionToken> filtered = new ArrayList<>();
+        Set<Node> met = new HashSet<>();
+        tokens.forEach((CompletionToken aToken) -> {
+            if (aToken.node instanceof IndexNode
+                    && ((IndexNode) aToken.node).getIndex() instanceof IdentNode) {
+                met.add(((IndexNode) aToken.node).getIndex());
+            }
+        });
+        tokens.forEach((CompletionToken aToken) -> {
+            if (!met.contains(aToken.node)) {
+                filtered.add(aToken);
+            }
+        });
+        return filtered;
     }
 
     private static String sanitizeDot(String str, int position) {
@@ -195,8 +212,7 @@ public class CompletionPoint {
     }
 
     /**
-     * Represents an element in a completion chain.
-     * TODO Should be removed?
+     * Represents an element in a completion chain. TODO Should be removed?
      */
     public static class CompletionToken implements Comparable<CompletionToken> {
 

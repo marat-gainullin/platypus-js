@@ -7,14 +7,12 @@ package com.bearsoft.org.netbeans.modules.form.completion;
 import com.bearsoft.gui.grid.header.GridColumnsNode;
 import com.eas.client.forms.components.model.grid.ModelGrid;
 import com.eas.client.forms.components.model.grid.columns.ModelColumn;
+import com.eas.concurrent.CallableConsumer;
 import com.eas.designer.application.module.completion.BeanCompletionItem;
 import com.eas.designer.application.module.completion.CompletionContext;
 import com.eas.designer.application.module.completion.CompletionPoint;
 import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
-import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
-import javax.swing.table.TableColumn;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 
 /**
@@ -38,23 +36,39 @@ public class ModelGridCompletionContext extends CompletionContext {
 
     @Override
     public CompletionContext getChildContext(CompletionToken token, int offset) throws Exception {
-        Enumeration<TableColumn> tCols = grid.getColumnModel().getColumns();
-        while (tCols.hasMoreElements()) {
-            ModelColumn col = (ModelColumn) tCols.nextElement();
-            if (col.getName() != null && !col.getName().isEmpty() && col.getName().equals(token.name)) {
-                return new CompletionContext(ModelColumn.class);
-            }
-        }
-        return null;
+        return walkColumns(grid.getHeader(), (GridColumnsNode node) -> {
+            ModelColumn mCol = (ModelColumn) node.getTableColumn();
+            if (mCol.getName() != null && !mCol.getName().isEmpty() && mCol.getName().equals(token.name)) {
+                return new CompletionContext(node.getClass());
+            }else
+                return null;
+        });
     }
 
-    protected void fillColumns(List<> aNodes, CompletionResultSet resultSet, CompletionPoint point) {
-        for (int i = 0; i < grid.getHeader().size(); i++) {
-            GridColumnsNode node = grid.getHeader().get(i);
+    protected CompletionContext walkColumns(List<GridColumnsNode> aNodes, CallableConsumer<CompletionContext, GridColumnsNode> aWorker) throws Exception {
+        CompletionContext ctx = null;
+        for (int i = 0; i < aNodes.size(); i++) {
+            GridColumnsNode node = aNodes.get(i);
+            ctx = aWorker.call(node);
+            if (ctx != null) {
+                break;
+            } else {
+                ctx = walkColumns(node.getChildren(), aWorker);
+                if (ctx != null) {
+                    break;
+                }
+            }
+        }
+        return ctx;
+    }
+
+    protected void fillColumns(CompletionResultSet resultSet, CompletionPoint point) throws Exception {
+        walkColumns(grid.getHeader(), (GridColumnsNode node) -> {
             ModelColumn mCol = (ModelColumn) node.getTableColumn();
             if (mCol.getName() != null && !mCol.getName().isEmpty()) {
                 addItem(resultSet, point.getFilter(), new BeanCompletionItem(node.getClass(), mCol.getName(), null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
             }
-        }
+            return null;
+        });
     }
 }
