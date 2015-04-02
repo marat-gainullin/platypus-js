@@ -187,18 +187,26 @@
     background-position: center;
 }
 
+.decorator-select:hover{
+    opacity: 1;
+}
+
 .decorator-select{
     width: 20px; 
-    right: 0px;
+    opacity: 0.5;
     background-image: url(decorator-select.png);
     background-repeat: no-repeat;
     background-position: center;
     cursor: pointer;
 }
 
+.decorator-clear:hover{
+    opacity: 1;
+}
+
 .decorator-clear{
     width: 20px; 
-    right: 20px;
+    opacity: 0.5;
     background-image: url(decorator-clear.png);
     background-repeat: no-repeat;
     background-position: center;
@@ -249,8 +257,13 @@
     background: transparent;
 }
 
+.combo-field-custom-dropdown:hover{
+    opacity: 1;
+}
+
 .combo-field-custom-dropdown{
-	background: url('dropdown-arrow.png') no-repeat;  /*Adds background-image*/
+    opacity: 0.5;
+    background: url('dropdown-arrow.png') no-repeat;  /*Adds background-image*/
     background-position: right;  /*Position of the background-image*/
 }
 
@@ -268,8 +281,13 @@
     padding-top: 2px;
 }
 
+.date-time-select:hover{
+    opacity: 1;
+}
+
 .date-time-select{
     width: 20px; 
+    opacity: 0.5;
     background-image: url(date-time-select.png);
     background-repeat: no-repeat;
     background-position: center;

@@ -397,7 +397,8 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 			if (popup != null) {
 				boolean wasModal = popup.isModal();
 				popup.close();// popup became null and view has been detached
-				if (wasModal && aCallback != null)
+				// someone can discard the window closing, check !isOpened()
+				if (!isOpened() && wasModal && aCallback != null)
 					aCallback.<JsObject>cast().call(published, Utils.toJs(aSelected));
 			} else {
 				if (view.isAttached()) {
