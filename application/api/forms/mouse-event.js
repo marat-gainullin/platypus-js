@@ -3,7 +3,7 @@
     javaClass.setPublisher(function(aDelegate) {
         return new P.MouseEvent(aDelegate);
     });
-    
+     
     /**
      * Generated constructor.
      * @constructor MouseEvent MouseEvent
