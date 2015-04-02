@@ -43,16 +43,6 @@ public class FormCompletionContext extends CompletionContext {
         if (completionContext != null) {
             return completionContext;
         }
-        /*
-        if (Form.VIEW_SCRIPT_NAME.equals(token.name)) {
-            Class<?> conainerClass = getPlaypusContainerClass(getFormModel().getTopRADComponent());
-            if (conainerClass != null) {
-                return new CompletionContext(conainerClass);
-            } else {
-                return null;
-            }
-        }
-                */
         RADComponent<?> comp = getComponentByName(token.name);
         if (comp != null) {
             if (ModelGrid.class.isAssignableFrom(comp.getBeanClass())) {

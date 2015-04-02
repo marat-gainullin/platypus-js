@@ -42,7 +42,7 @@ public class FormModuleCompletionContext extends ModuleCompletionContext {
         super.applyCompletionItems(point, offset, resultSet);
     }
 
-    protected FormModel getFormModel() {
+    protected synchronized FormModel getFormModel() {
         PlatypusFormDataObject formDataObject = (PlatypusFormDataObject) getDataObject();
         PlatypusFormSupport support = formDataObject.getLookup().lookup(PlatypusFormSupport.class);
         try {

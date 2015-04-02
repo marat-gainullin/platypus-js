@@ -248,6 +248,7 @@
                 <package>com.eas.client.sqldrivers.converters</package>
                 <package>com.eas.client.sqldrivers.resolvers</package>
                 <package>com.eas.client.utils.scalableui</package>
+                <package>com.eas.concurrent</package>
                 <package>com.eas.deploy</package>
                 <package>com.eas.design</package>
                 <package>com.eas.designer.application</package>

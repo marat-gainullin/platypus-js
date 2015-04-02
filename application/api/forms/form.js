@@ -276,23 +276,6 @@
              */
             P.Form.prototype.resizable = true;
         }
-        Object.defineProperty(this, "formKey", {
-            get: function() {
-                var value = delegate.formKey;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.formKey = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Form){
-            /**
-             * The form key. Used to identify a form instance. Initialy set to the form's application element name.
-             * @property formKey
-             * @memberOf Form
-             */
-            P.Form.prototype.formKey = '';
-        }
         Object.defineProperty(this, "onWindowRestored", {
             get: function() {
                 var value = delegate.onWindowRestored;
@@ -309,6 +292,23 @@
              * @memberOf Form
              */
             P.Form.prototype.onWindowRestored = {};
+        }
+        Object.defineProperty(this, "formKey", {
+            get: function() {
+                var value = delegate.formKey;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.formKey = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Form){
+            /**
+             * The form key. Used to identify a form instance. Initialy set to the form's application element name.
+             * @property formKey
+             * @memberOf Form
+             */
+            P.Form.prototype.formKey = '';
         }
         Object.defineProperty(this, "maximized", {
             get: function() {
@@ -491,13 +491,14 @@
         };
 
         /**
-         * Maximizes this form.
-         * @method maximize
+         * Shows the form as an internal window in a desktop.
+         * @param desktop the parent desktop object
+         * @method showInternalFrame
          * @memberOf Form
          */
-        P.Form.prototype.maximize = function() {
+        P.Form.prototype.showInternalFrame = function(desktop) {
             var delegate = this.unwrap();
-            var value = delegate.maximize();
+            var value = delegate.showInternalFrame(P.boxAsJava(desktop));
             return P.boxAsJs(value);
         };
 
@@ -513,6 +514,17 @@
         };
 
         /**
+         * Maximizes this form.
+         * @method maximize
+         * @memberOf Form
+         */
+        P.Form.prototype.maximize = function() {
+            var delegate = this.unwrap();
+            var value = delegate.maximize();
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Restores this form state.
          * @method restore
          * @memberOf Form
@@ -520,18 +532,6 @@
         P.Form.prototype.restore = function() {
             var delegate = this.unwrap();
             var value = delegate.restore();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Shows the form as an internal window in a desktop.
-         * @param desktop the parent desktop object
-         * @method showInternalFrame
-         * @memberOf Form
-         */
-        P.Form.prototype.showInternalFrame = function(desktop) {
-            var delegate = this.unwrap();
-            var value = delegate.showInternalFrame(P.boxAsJava(desktop));
             return P.boxAsJs(value);
         };
 

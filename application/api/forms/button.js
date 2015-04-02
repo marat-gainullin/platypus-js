@@ -334,20 +334,6 @@
              */
             P.Button.prototype.height = 0;
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.Button){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf Button
-             */
-            P.Button.prototype.element = {};
-        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -364,6 +350,20 @@
              * @memberOf Button
              */
             P.Button.prototype.onComponentShown = {};
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Button){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf Button
+             */
+            P.Button.prototype.element = {};
         }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
@@ -433,23 +433,6 @@
              */
             P.Button.prototype.onComponentHidden = {};
         }
-        Object.defineProperty(this, "iconTextGap", {
-            get: function() {
-                var value = delegate.iconTextGap;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.iconTextGap = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Button){
-            /**
-             * The amount of space between the text and the icon displayed in this button.
-             * @property iconTextGap
-             * @memberOf Button
-             */
-            P.Button.prototype.iconTextGap = 0;
-        }
         Object.defineProperty(this, "nextFocusableComponent", {
             get: function() {
                 var value = delegate.nextFocusableComponent;
@@ -467,22 +450,22 @@
              */
             P.Button.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
+        Object.defineProperty(this, "iconTextGap", {
             get: function() {
-                var value = delegate.onKeyReleased;
+                var value = delegate.iconTextGap;
                 return P.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
+                delegate.iconTextGap = P.boxAsJava(aValue);
             }
         });
         if(!P.Button){
             /**
-             * Key released event handler function.
-             * @property onKeyReleased
+             * The amount of space between the text and the icon displayed in this button.
+             * @property iconTextGap
              * @memberOf Button
              */
-            P.Button.prototype.onKeyReleased = {};
+            P.Button.prototype.iconTextGap = 0;
         }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
@@ -500,6 +483,23 @@
              * @memberOf Button
              */
             P.Button.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Button){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf Button
+             */
+            P.Button.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

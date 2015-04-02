@@ -48,6 +48,32 @@ public class ModelGridColumn extends GridColumnsNode implements HasPublished {
         return copied;
     }
     
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Returns script handler, used for calculate cell's data, display value and style attributes.\n"
+            + " */")
+    public JSObject getOnRender() {
+        return ((ModelColumn)getTableColumn()).getOnRender();
+    }
+
+    @ScriptFunction
+    public void setOnRender(JSObject aValue) {
+        ((ModelColumn)getTableColumn()).setOnRender(aValue);
+    }
+
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Returns script handler, used for select a value of the cell.\n"
+            + " */")
+    public JSObject getOnSelect() {
+        return ((ModelColumn)getTableColumn()).getOnSelect();
+    }
+
+    @ScriptFunction
+    public void setOnSelect(JSObject aValue) throws Exception {
+        ((ModelColumn)getTableColumn()).setOnSelect(aValue);
+    }
+    
     @ScriptFunction(params = {"node"})
     @Override
     public void removeColumnNode(GridColumnsNode aNode) {

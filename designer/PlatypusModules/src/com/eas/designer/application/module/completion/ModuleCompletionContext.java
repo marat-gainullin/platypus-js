@@ -38,10 +38,11 @@ import org.openide.loaders.DataObjectNotFoundException;
 
 /**
  * This class represents a JavaScript module completion context.
+ *
  * @author vv
  */
 public class ModuleCompletionContext extends CompletionContext {
-    
+
     public static final String PARAMS_SCRIPT_NAME = "params";// NOI18N
     protected static final String METADATA_SCRIPT_NAME = ApplicationDbModel.DATASOURCE_METADATA_SCRIPT_NAME;
     protected static final String SERVER_MODULE_NAME = "ServerModule";// NOI18N
@@ -143,12 +144,13 @@ public class ModuleCompletionContext extends CompletionContext {
                             && TokenType.ASSIGN.equals(binaryNode.tokenType())) {
                         if (binaryNode.getAssignmentDest() instanceof AccessNode) {
                             List<CompletionToken> tokens = CompletionPoint.getContextTokens(parentModuleContext.dataObject.getAstRoot(), binaryNode.getAssignmentDest().getFinish());
-                            if (tokens != null && tokens.size() > 1) {
+                            if (tokens != null && tokens.size() > 2) {
                                 try {
                                     CompletionContext systemCompletionContext = slc.systemCompletionContexts.get(tokens.get(0).name);
-                                    CompletionContext propsCtx = ModuleCompletionProvider.getCompletionContext(systemCompletionContext, tokens.subList(1, tokens.size() - 1), 0);
+                                    CompletionToken handlerToken = tokens.get(tokens.size() - 2);
+                                    CompletionContext propsCtx = ModuleCompletionProvider.getCompletionContext(systemCompletionContext, tokens.subList(1, tokens.size() - 2), 0);
                                     if (propsCtx != null && propsCtx.getScriptClass() != null) {
-                                        Class<?> eventClass = getEventClass(propsCtx.getScriptClass(), tokens.get(tokens.size() - 1).name);
+                                        Class<?> eventClass = getEventClass(propsCtx.getScriptClass(), handlerToken.name);
                                         if (eventClass != null) {
                                             lc.completionContext = new CompletionContext(eventClass);
                                             return false;

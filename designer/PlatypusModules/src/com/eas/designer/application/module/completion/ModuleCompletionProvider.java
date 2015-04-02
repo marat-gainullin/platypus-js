@@ -45,7 +45,7 @@ public class ModuleCompletionProvider implements CompletionProvider {
                         fillCompletionPoint(dataObject, completionPoint, resultSet, caretOffset);
                     }
                 } catch (Exception ex) {
-                    resultSet.addItem(new JsCompletionItem(ex.getMessage(), null, -1, -1));
+                    resultSet.addItem(new JsCompletionItem(ex.getMessage() != null ? ex.getMessage() : ex.getClass().getName(), null, -1, -1));
                 }
                 resultSet.finish();
             }

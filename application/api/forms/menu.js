@@ -347,20 +347,6 @@
              */
             P.Menu.prototype.height = 0;
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.Menu){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf Menu
-             */
-            P.Menu.prototype.element = {};
-        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -377,6 +363,20 @@
              * @memberOf Menu
              */
             P.Menu.prototype.onComponentShown = {};
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Menu){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf Menu
+             */
+            P.Menu.prototype.element = {};
         }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
@@ -463,19 +463,22 @@
              */
             P.Menu.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "count", {
+        Object.defineProperty(this, "onActionPerformed", {
             get: function() {
-                var value = delegate.count;
+                var value = delegate.onActionPerformed;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
             }
         });
         if(!P.Menu){
             /**
-             * The count of the menu items.
-             * @property count
+             * Main action performed event handler function.
+             * @property onActionPerformed
              * @memberOf Menu
              */
-            P.Menu.prototype.count = 0;
+            P.Menu.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
@@ -494,22 +497,19 @@
              */
             P.Menu.prototype.onKeyReleased = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
+        Object.defineProperty(this, "count", {
             get: function() {
-                var value = delegate.onActionPerformed;
+                var value = delegate.count;
                 return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
             }
         });
         if(!P.Menu){
             /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
+             * The count of the menu items.
+             * @property count
              * @memberOf Menu
              */
-            P.Menu.prototype.onActionPerformed = {};
+            P.Menu.prototype.count = 0;
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
