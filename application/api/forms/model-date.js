@@ -257,20 +257,6 @@
              */
             P.ModelDate.prototype.height = 0;
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.element = {};
-        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -287,6 +273,20 @@
              * @memberOf ModelDate
              */
             P.ModelDate.prototype.onComponentShown = {};
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelDate){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf ModelDate
+             */
+            P.ModelDate.prototype.element = {};
         }
         Object.defineProperty(this, "visible", {
             get: function() {
@@ -322,6 +322,23 @@
              */
             P.ModelDate.prototype.onComponentHidden = {};
         }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelDate){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf ModelDate
+             */
+            P.ModelDate.prototype.onActionPerformed = {};
+        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -339,22 +356,22 @@
              */
             P.ModelDate.prototype.onKeyReleased = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
+        Object.defineProperty(this, "datePicker", {
             get: function() {
-                var value = delegate.onActionPerformed;
+                var value = delegate.datePicker;
                 return P.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
+                delegate.datePicker = P.boxAsJava(aValue);
             }
         });
         if(!P.ModelDate){
             /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
+             * Generated property jsDoc.
+             * @property datePicker
              * @memberOf ModelDate
              */
-            P.ModelDate.prototype.onActionPerformed = {};
+            P.ModelDate.prototype.datePicker = true;
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -406,6 +423,23 @@
              * @memberOf ModelDate
              */
             P.ModelDate.prototype.onMouseWheelMoved = {};
+        }
+        Object.defineProperty(this, "timePicker", {
+            get: function() {
+                var value = delegate.timePicker;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.timePicker = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelDate){
+            /**
+             * Generated property jsDoc.
+             * @property timePicker
+             * @memberOf ModelDate
+             */
+            P.ModelDate.prototype.timePicker = true;
         }
         Object.defineProperty(this, "field", {
             get: function() {
@@ -878,43 +912,6 @@
              */
             P.ModelDate.prototype.onKeyPressed = {};
         }
-        
-        Object.defineProperty(this, "datePicker", {
-            get: function() {
-                var value = delegate.datePicker;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.datePicker = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * Determines whether this component shows date dialog. Applicable only in HTML5 client.
-             * @property showDateDialog
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.datePicker = true;
-        }
-        
-        Object.defineProperty(this, "timePicker", {
-            get: function() {
-                var value = delegate.timePicker;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.timePicker = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelDate){
-            /**
-             * Determines whether this component shows time dialog. Applicable only in HTML5 client.
-             * @property showTimeDialog
-             * @memberOf ModelDate
-             */
-            P.ModelDate.prototype.timePicker = true;
-        }
-        
     };
         /**
          * Tries to acquire focus for this component.

@@ -330,20 +330,6 @@
              */
             P.CardPane.prototype.height = 0;
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.CardPane){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf CardPane
-             */
-            P.CardPane.prototype.element = {};
-        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -360,6 +346,20 @@
              * @memberOf CardPane
              */
             P.CardPane.prototype.onComponentShown = {};
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.CardPane){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf CardPane
+             */
+            P.CardPane.prototype.element = {};
         }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
@@ -446,19 +446,22 @@
              */
             P.CardPane.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "count", {
+        Object.defineProperty(this, "onActionPerformed", {
             get: function() {
-                var value = delegate.count;
+                var value = delegate.onActionPerformed;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
             }
         });
         if(!P.CardPane){
             /**
-             * Gets the number of components in this panel.
-             * @property count
+             * Main action performed event handler function.
+             * @property onActionPerformed
              * @memberOf CardPane
              */
-            P.CardPane.prototype.count = 0;
+            P.CardPane.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
@@ -477,22 +480,19 @@
              */
             P.CardPane.prototype.onKeyReleased = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
+        Object.defineProperty(this, "count", {
             get: function() {
-                var value = delegate.onActionPerformed;
+                var value = delegate.count;
                 return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
             }
         });
         if(!P.CardPane){
             /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
+             * Gets the number of components in this panel.
+             * @property count
              * @memberOf CardPane
              */
-            P.CardPane.prototype.onActionPerformed = {};
+            P.CardPane.prototype.count = 0;
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

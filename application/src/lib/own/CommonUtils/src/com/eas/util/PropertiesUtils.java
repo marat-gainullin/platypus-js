@@ -32,7 +32,7 @@ public class PropertiesUtils {
             capitalizedPropName = methodName.substring(2);
             assert !capitalizedPropName.isEmpty();
         }
-        if (capitalizedPropName.toUpperCase().equals(capitalizedPropName)) {
+        if (capitalizedPropName.length() > 1 && capitalizedPropName.toUpperCase().equals(capitalizedPropName)) {
             return capitalizedPropName;
         } else {
             return capitalizedPropName.substring(0, 1).toLowerCase() + capitalizedPropName.substring(1);

@@ -332,20 +332,6 @@
              */
             P.Label.prototype.height = 0;
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.Label){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf Label
-             */
-            P.Label.prototype.element = {};
-        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -362,6 +348,20 @@
              * @memberOf Label
              */
             P.Label.prototype.onComponentShown = {};
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Label){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf Label
+             */
+            P.Label.prototype.element = {};
         }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
@@ -431,23 +431,6 @@
              */
             P.Label.prototype.onComponentHidden = {};
         }
-        Object.defineProperty(this, "iconTextGap", {
-            get: function() {
-                var value = delegate.iconTextGap;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.iconTextGap = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Label){
-            /**
-             * The amount of space between the text and the icon displayed in this label.
-             * @property iconTextGap
-             * @memberOf Label
-             */
-            P.Label.prototype.iconTextGap = 0;
-        }
         Object.defineProperty(this, "nextFocusableComponent", {
             get: function() {
                 var value = delegate.nextFocusableComponent;
@@ -465,22 +448,22 @@
              */
             P.Label.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
+        Object.defineProperty(this, "iconTextGap", {
             get: function() {
-                var value = delegate.onKeyReleased;
+                var value = delegate.iconTextGap;
                 return P.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
+                delegate.iconTextGap = P.boxAsJava(aValue);
             }
         });
         if(!P.Label){
             /**
-             * Key released event handler function.
-             * @property onKeyReleased
+             * The amount of space between the text and the icon displayed in this label.
+             * @property iconTextGap
              * @memberOf Label
              */
-            P.Label.prototype.onKeyReleased = {};
+            P.Label.prototype.iconTextGap = 0;
         }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
@@ -498,6 +481,23 @@
              * @memberOf Label
              */
             P.Label.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Label){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf Label
+             */
+            P.Label.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

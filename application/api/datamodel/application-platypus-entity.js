@@ -133,7 +133,7 @@
         });
         if(!P.ApplicationPlatypusEntity){
             /**
-             * Current position of cursor (1-based). There are two special values: 0 - before first; length + 1 - after last;
+             * Current position of cursor (1 - based). There are two special values: 0 - before first; length + 1 - after last;
              * @property cursorPos
              * @memberOf ApplicationPlatypusEntity
              */
@@ -263,19 +263,6 @@
          * Finds an object by its key. Key must be a single property.
          * @param key the unique identifier of the row.
          * @return An object or <code>null</code> if nothing is found.
-         * @method findByKey
-         * @memberOf ApplicationPlatypusEntity
-         */
-        P.ApplicationPlatypusEntity.prototype.findByKey = function(key) {
-            var delegate = this.unwrap();
-            var value = delegate.findByKey(P.boxAsJava(key));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Finds an object by its key. Key must be a single property.
-         * @param key the unique identifier of the row.
-         * @return An object or <code>null</code> if nothing is found.
          * @method findById
          * @memberOf ApplicationPlatypusEntity
          */
@@ -308,6 +295,19 @@
         P.ApplicationPlatypusEntity.prototype.requery = function(onSuccess, onFailure) {
             var delegate = this.unwrap();
             var value = delegate.requery(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Finds an object by its key. Key must be a single property.
+         * @param key the unique identifier of the row.
+         * @return An object or <code>null</code> if nothing is found.
+         * @method findByKey
+         * @memberOf ApplicationPlatypusEntity
+         */
+        P.ApplicationPlatypusEntity.prototype.findByKey = function(key) {
+            var delegate = this.unwrap();
+            var value = delegate.findByKey(P.boxAsJava(key));
             return P.boxAsJs(value);
         };
 

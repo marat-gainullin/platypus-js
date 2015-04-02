@@ -16,6 +16,7 @@ import java.util.List;
 public class CompletionUtils {
 
     private static final String JSDOC_PREFIX = "/**"; //NOI18N
+    private static final String JSDOC_SUFFIX = "*/"; //NOI18N
 
     /**
      * Splits a JsDoc comment to a bunch of strings and removes the artifacts
@@ -31,9 +32,9 @@ public class CompletionUtils {
             for (String line : Arrays.asList(jsDoc.split("\n"))) { //NOI18N
                 String trimmedLine = line.trim();
                 // ignore end of block comment: "*/"
-                if (!trimmedLine.equals(JSDOC_PREFIX)) {
-                    if (trimmedLine.startsWith(JSDOC_PREFIX)) {
-                        comments.add(trimmedLine.substring(JSDOC_PREFIX.length()).trim());
+                if (!trimmedLine.equals(JSDOC_PREFIX) && !trimmedLine.equals(JSDOC_SUFFIX)) {
+                    if (trimmedLine.startsWith("*")) {
+                        comments.add(trimmedLine.substring(1).trim());
                     }else{
                         comments.add(trimmedLine);
                     }

@@ -141,6 +141,23 @@
              */
             P.ModelGridColumn.prototype.title = '';
         }
+        Object.defineProperty(this, "onSelect", {
+            get: function() {
+                var value = delegate.onSelect;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onSelect = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelGridColumn){
+            /**
+             * Returns script handler, used for select a value of the cell.
+             * @property onSelect
+             * @memberOf ModelGridColumn
+             */
+            P.ModelGridColumn.prototype.onSelect = {};
+        }
         Object.defineProperty(this, "movable", {
             get: function() {
                 var value = delegate.movable;
@@ -191,6 +208,23 @@
              * @memberOf ModelGridColumn
              */
             P.ModelGridColumn.prototype.readonly = true;
+        }
+        Object.defineProperty(this, "onRender", {
+            get: function() {
+                var value = delegate.onRender;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onRender = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelGridColumn){
+            /**
+             * Returns script handler, used for calculate cell's data, display value and style attributes.
+             * @property onRender
+             * @memberOf ModelGridColumn
+             */
+            P.ModelGridColumn.prototype.onRender = {};
         }
         Object.defineProperty(this, "background", {
             get: function() {
