@@ -395,6 +395,14 @@ public class FormFactory {
 					Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
+			if (anElement.hasAttribute("datePicker")) {
+				boolean selected = Utils.getBooleanAttribute(anElement, "datePicker", Boolean.FALSE);
+				modelDate.setDateShown(selected);
+			}
+			if (anElement.hasAttribute("timePicker")) {
+				boolean selected = Utils.getBooleanAttribute(anElement, "timePicker", Boolean.FALSE);
+				modelDate.setTimeShown(selected);
+			}
 			return modelDate;
 		case "ModelFormattedField":
 			ModelFormattedField modelFormattedField = new ModelFormattedField();

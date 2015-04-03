@@ -281,11 +281,11 @@
     padding-top: 2px;
 }
 
-.date-time-select:hover{
+.date-select:hover, .time-select:hover{
     opacity: 1;
 }
 
-.date-time-select{
+.date-select, .time-select{
     width: 20px; 
     opacity: 0.5;
     background-image: url(date-time-select.png);
@@ -293,6 +293,11 @@
     background-position: center;
     cursor: pointer;
 }
+
+.time-select{
+    background-image: url(clock.png);
+}
+
 
 .spin-left{
     width: 20px; 
@@ -845,7 +850,6 @@
     padding: 1px;
     box-sizing:border-box;
 }
-
 
 .date-time-picker{
     background: white;

@@ -190,7 +190,7 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 		field.getElement().getStyle().setPadding(0, Style.Unit.PX);
 		fieldWrapper.setWidget(field);
 
-		right.getElement().addClassName("date-time-select");
+		right.getElement().addClassName("date-select");
 		right.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 		right.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
 		right.getElement().getStyle().setTop(0, Style.Unit.PX);
@@ -296,21 +296,21 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 			right.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 			picker.setDateAndTimeView();
 			organizeFieldWrapperRight();
-			right.getElement().removeClassName("time-picker-select");
-			right.getElement().addClassName("date-time-select");
+			right.getElement().removeClassName("time-select");
+			right.getElement().addClassName("date-select");
 			return;
 		}else if (isDateShow==true){
 			right.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 			picker.setDateView();
 			organizeFieldWrapperRight();
-			right.getElement().removeClassName("time-picker-select");
-			right.getElement().addClassName("date-time-select");
+			right.getElement().removeClassName("time-select");
+			right.getElement().addClassName("date-select");
 			return;
 		}else if (isTimeShow==true){
 			right.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 			picker.setTimeView();
-			right.getElement().removeClassName("date-time-select");
-			right.getElement().addClassName("time-picker-select");
+			right.getElement().removeClassName("date-select");
+			right.getElement().addClassName("time-select");
 			organizeFieldWrapperRight();
 			return;
 		}else{
