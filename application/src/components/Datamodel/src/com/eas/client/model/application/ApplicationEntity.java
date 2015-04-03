@@ -297,7 +297,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
      * @throws java.lang.Exception
      * @return
      */
-    protected abstract List<Change> getChangeLog() throws Exception;
+    public abstract List<Change> getChangeLog() throws Exception;
 
     private static final String ON_REQUIRED_JSDOC = ""
             + "/**\n"

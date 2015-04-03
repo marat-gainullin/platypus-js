@@ -80,7 +80,7 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
     }
 
     @Override
-    protected List<Change> getChangeLog() throws Exception {
+    public List<Change> getChangeLog() throws Exception {
         validateQuery();
         String datasourceName = tableName != null && !tableName.isEmpty() ? tableDatasourceName : query != null ? query.getDatasourceName() : null;
         return model.getChangeLog(datasourceName);

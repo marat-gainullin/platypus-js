@@ -47,7 +47,7 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
     }
 
     @Override
-    protected List<Change> getChangeLog() throws Exception {
+    public List<Change> getChangeLog() throws Exception {
         return model.getChangeLog();
     }
 

@@ -764,6 +764,110 @@
     function fire(aTarget, aChange) {
         aTarget[fireChangeName](aChange);
     }
+
+    function fireSelfScalarsOppositeCollectionsChanges(aSubject, aChange, nnFields) {
+        var ormDefs = nnFields.getOrmScalarExpandings().get(aChange.propertyName);
+        if (ormDefs) {
+            var expandingsOldValues = aChange.beforeState.selfScalarsOldValues;
+            ormDefs.forEach(function (ormDef) {
+                if (ormDef.getName()) {
+                    var expandingOldValue = expandingsOldValues[ormDef.getName()];
+                    var expandingNewValue = aSubject[ormDef.getName()];
+                    fire(aSubject, {source: aChange.source, propertyName: ormDef.getName(), oldValue: expandingOldValue, newValue: expandingNewValue});
+                    if (ormDef.getOppositeName()) {
+                        if (expandingOldValue) {
+                            fire(expandingOldValue, {source: expandingOldValue, propertyName: ormDef.getOppositeName()});
+                        }
+                        if (expandingNewValue) {
+                            fire(expandingNewValue, {source: expandingNewValue, propertyName: ormDef.getOppositeName()});
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    function prepareSelfScalarsChanges(aSubject, aChange, nnFields) {
+        var ormDefs = nnFields.getOrmScalarExpandings().get(aChange.propertyName);
+        var oldScalarValues = [];
+        if (ormDefs) {
+            ormDefs.forEach(function (ormDef) {
+                if (ormDef && ormDef.getName()) {
+                    oldScalarValues[ormDef.getName()] = aSubject[ormDef.getName()];
+                }
+            });
+        }
+        return oldScalarValues;
+    }
+
+    function fireOppositeScalarsSelfCollectionsChanges(aSubject, aChange, nnFields) {
+        var oppositeScalarsFirerers = aChange.beforeState.oppositeScalarsFirerers;
+        if (oppositeScalarsFirerers) {
+            oppositeScalarsFirerers.forEach(function (aFirerer) {
+                aFirerer();
+            });
+        }
+        var collectionsDefs = nnFields.getOrmCollectionsDefinitions().entrySet();
+        if (collectionsDefs) {
+            collectionsDefs.forEach(function (aEntry) {
+                var collectionName = aEntry.getKey();
+                var ormDef = aEntry.getValue();
+                var collection = aSubject[collectionName];
+                collection.forEach(function (item) {
+                    fire({source: item, propertyName: ormDef.getOppositeName()});
+                });
+            });
+            collectionsDefs.forEach(function (aEntry) {
+                var collectionName = aEntry.getKey();
+                fire(aSubject, {source: aSubject, propertyName: collectionName});
+            });
+        }
+    }
+
+    function prepareOppositeScalarsChanges(aSubject, aChange, nnFields) {
+        var firerers = [];
+        var collectionsDefs = nnFields.getOrmCollectionsDefinitions().entrySet();
+        collectionsDefs.forEach(function (aEntry) {
+            var collectionName = aEntry.getKey();
+            var ormDef = aEntry.getValue();
+            var collection = aSubject[collectionName];
+            collection.forEach(function (item) {
+                if (ormDef.getOppositeName()) {
+                    firerers.push(function () {
+                        fire({source: item, propertyName: ormDef.getOppositeName()});
+                    });
+                }
+            });
+        });
+        return firerers;
+    }
+
+    function generateChangeLogKeys(fields, propName, aSubject, oldValue) {
+        if (fields) {
+            var keys = [];
+            for (var i = 1; i <= fields.getFieldsCount(); i++) {
+                var field = fields.get(i);
+                if (field.isPk()) {
+                    var fieldName = field.getName();
+                    var value = aSubject[fieldName];
+                    // Some tricky processing of primary keys modification case ...
+                    if (fieldName == propName) {
+                        value = oldValue;
+                    }
+                    keys.push(new ChangeValueClass(fieldName, value, field.getTypeInfo()));
+                }
+            }
+            return Java.to(keys);
+        } else {
+            return null;
+        }
+    }
+
+    var InsertClass = Java.type('com.eas.client.changes.Insert');
+    var DeleteClass = Java.type('com.eas.client.changes.Delete');
+    var UpdateClass = Java.type('com.eas.client.changes.Update');
+    var ValueClass = Java.type('com.eas.client.changes.ChangeValue');
+    
     /**
      * @static
      * @param {type} aName
@@ -797,18 +901,56 @@
                 } else {
                     throw "Can't determine model's type.";
                 }
+                var justInserted = null;
+                var justInsertedChange = null;
                 var orderers = {};
                 var published = [];
                 P.manageArray(published, {
                     spliced: function (added, deleted) {
                         added.forEach(function (aAdded) {
+                            justInserted = aAdded;
+                            justInsertedChange = new InsertChange();
+                            var insertedValues = [];
+                            for (var n = 0; n < nnFields.size(); n++) {
+                                var nField = nnFields[n];
+                                var v = aAdded[nField.name];
+                                var cv = new ValueClass(nField.name, v, nField.getTypeInfo());
+                                insertedValues.push(cv);
+                            }
+                            justInsertedChange.data = Java.to(insertedValues);
+                            nEntity.getChangeLog().add(justInsertedChange);
                             Object.keys(orderers).forEach(function (aOrdererKey) {
                                 var aOrderer = orderers[aOrdererKey];
                                 aOrderer.add(aAdded);
                             });
+                            function tryToComplementInsert(aSubject, aChange){
+                                var complemented = false;
+                                if (aAdded === justInserted && !pSchema[aChange.propertyName].nullable) {
+                                    var met = false;
+                                    for(var d = 0; d < justInsertedChange.data.length; d++){
+                                        var iv = justInsertedChange.data[d];
+                                        if(iv.name == aChange.propertyName){
+                                            met = true;
+                                            break;
+                                        }
+                                    }
+                                    if(!met){
+                                        var idata = Java.from(justInsertedChange.data);
+                                        idata.push(new ValueClass(aChange.propertyName, , ));
+                                        justInsertedChange.data = Java.to(idata);
+                                        complemented = true;
+                                    }
+                                }
+                                return complemented;
+                            }
                             // aAdded.initPrimaryKeys();
                             P.manageObject(aAdded, function (aChange) {
-                                // changeLog.add();
+                                if(!tryToComplementInsert(aAdded, aChange)){
+                                    var updateChange = new UpdateClass();
+                                    updateChange.keys = generateChangeLogKeys(nEntity.getFileds(), aChange.propertyName, aAdded, aChange.oldValue);
+                                    updateChange.data = Java.to([new ValuleClass(aChange.propertyName, aChange.newValue, ))]);
+                                    nEntity.getChangeLog().add(updateChange);
+                                }
                                 Object.keys(orderers).forEach(function (aOrdererKey) {
                                     var aOrderer = orderers[aOrdererKey];
                                     if (aOrderer.inKeys(aChange.propertyName)) {
@@ -817,14 +959,15 @@
                                     }
                                 });
                                 fire(aAdded, aChange);
-                                //aAdded.fireSelfScalarChange();// Expanding change
-                                //aAdded.fireOldScalarOppositeCollectionChange();
-                                //aAdded.fireNewScalarOppositeCollectionChange();
-                                //if (field.isPk()) {
-                                //    aAdded.fireOppositeOldScalarsChanges();
-                                //    aAdded.fireOppositeNewScalarsChanges();
-                                //    aAdded.fireChangeOfSelfCollections();
-                                //}
+                                fireSelfScalarsOppositeCollectionsChanges(aAdded, aChange, nEntity.getFields());// Expanding change
+                                var field = pSchema[aChange.propertyName];
+                                if (field && field.pk) {
+                                    fireOppositeScalarsSelfCollectionsChanges(aAdded, aChange, nEntity.getFields());
+                                }
+                            }, function (aChange) {
+                                var oldScalars = prepareSelfScalarsChanges(aAdded, aChange, nEntity.getFields());
+                                var oppositeScalarsFirerers = prepareOppositeScalarsChanges(aAdded, aChange, nEntity.getFields());
+                                return {selfScalarsOldValues: oldScalars, oppositeScalarsFirerers: oppositeScalarsFirerers};
                             });
                             listenable(aAdded);
                             var instanceCTor = EngineUtilsClass.unwrap(nnFields.getInstanceConstructor());
@@ -841,6 +984,13 @@
                             //aAdded.fireChangesOfOppositeScalars();
                         });
                         deleted.forEach(function (aDeleted) {
+                            if (aDeleted === justInserted) {
+                                justInserted = null;
+                                justInsertedChange = null;
+                            }
+                            var deleteChange = new DeleteClass();
+                            deleteChange.keys = generateChangeLogKeys(nEntity.getFields(), null, aDeleted, null);
+                            nEntity.getChangeLog().add(deleteChange);
                             Object.keys(orderers).forEach(function (aOrdererKey) {
                                 var aOrderer = orderers[aOrdererKey];
                                 aOrderer.delete(aDeleted);

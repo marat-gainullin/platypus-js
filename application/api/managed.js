@@ -8,7 +8,7 @@
      * @param aOnChange a callback called on every change of properties.
      * @returns anObject by pass for convinence.
      */
-    function manageObject(anObject, aOnChange) {
+    function manageObject(anObject, aOnChange, aOnBeforeChange) {
         if (!anObject[releaseName]) {
             var container = {};
             for (var p in anObject) {
@@ -23,8 +23,11 @@
                         },
                         set: function (aValue) {
                             var _oldValue = container[_p];
+                            var _beforeState = null;
+                            if(aOnBeforeChange)
+                                _beforeState = aOnBeforeChange({source: anObject, propertyName: _p, oldValue: _oldValue, newValue: aValue});
                             container[_p] = aValue;
-                            aOnChange({source: anObject, propertyName: _p, oldValue: _oldValue, newValue: aValue});
+                            aOnChange({source: anObject, propertyName: _p, oldValue: _oldValue, newValue: aValue, beforeState: _beforeState});
                         }
                     });
                 })();

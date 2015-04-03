@@ -71,7 +71,7 @@ public class Fields implements HasPublished {
     protected JSObject instanceConstructor;
     protected Map<String, OrmDef> ormScalarDefinitions = new HashMap<>();
     protected Map<String, OrmDef> ormCollectionsDefinitions = new HashMap<>();
-    protected Map<String, OrmDef> ormScalarExpandings = new HashMap<>();
+    protected Map<String, Set<OrmDef>> ormScalarExpandings = new HashMap<>();
     protected JSObject published;
 
     /**
@@ -117,7 +117,12 @@ public class Fields implements HasPublished {
         if (aName != null && !aName.isEmpty() && aDefinition != null) {
             if (!ormScalarDefinitions.containsKey(aName)) {
                 ormScalarDefinitions.put(aName, aDefinition);
-                ormScalarExpandings.put(aDefinition.getBaseName(), aDefinition);
+                Set<OrmDef> expandings = ormScalarExpandings.get(aDefinition.getBaseName());
+                if(expandings == null){
+                    expandings = new HashSet<>();
+                    ormScalarExpandings.put(aDefinition.getBaseName(), expandings);
+                }
+                expandings.add(aDefinition);
             }
         }
     }
@@ -126,7 +131,7 @@ public class Fields implements HasPublished {
         return Collections.unmodifiableMap(ormScalarDefinitions);
     }
 
-    public Map<String, OrmDef> getOrmScalarExpandings() {
+    public Map<String, Set<OrmDef>> getOrmScalarExpandings() {
         return Collections.unmodifiableMap(ormScalarExpandings);
     }
 
