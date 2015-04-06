@@ -46,7 +46,7 @@ public class DatabasesClient {
     private static final String SELECT_BY_FIELD_QUERY = "select * from %s where Upper(%s) = :%s";
     private static final String USER_QUERY_TEXT = String.format(SELECT_BY_FIELD_QUERY, ClientConstants.T_MTD_USERS, ClientConstants.F_USR_NAME, USERNAME_PARAMETER_NAME);
     private static final String USER_GROUPS_QUERY_TEXT = String.format(SELECT_BY_FIELD_QUERY, ClientConstants.T_MTD_GROUPS, ClientConstants.F_USR_NAME, USERNAME_PARAMETER_NAME);
-    public static final String TYPES_INFO_TRACE_MSG = "Getting types info. DbId %s";
+    public static final String TYPES_INFO_TRACE_MSG = "Getting types info. DatasourceName %s";
     public static final String USER_MISSING_MSG = "No user found (%s)";
     // metadata
     protected Map<String, DatabaseMdCache> mdCaches = new HashMap<>();

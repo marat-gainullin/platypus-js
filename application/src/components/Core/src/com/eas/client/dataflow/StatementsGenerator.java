@@ -134,7 +134,7 @@ public class StatementsGenerator implements ChangeVisitor {
                         chunk = new InsertChunk();
                         inserts.put(field.getTableName(), chunk);
                         chunk.insert = new StatementsLogEntry();
-                    // Adding here is strongly needed. Because of order in wich other and this statememts are added
+                        // Adding here is strongly needed. Because of order in wich other and this statememts are added
                         // to the log and therefore applied into a database during a transaction.
                         logEntries.add(chunk.insert);
                         chunk.dataColumnsNames = new StringBuilder();

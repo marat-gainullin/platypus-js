@@ -25,9 +25,9 @@
                             var _oldValue = container[_p];
                             var _beforeState = null;
                             if(aOnBeforeChange)
-                                _beforeState = aOnBeforeChange({source: anObject, propertyName: _p, oldValue: _oldValue, newValue: aValue});
+                                _beforeState = aOnBeforeChange(anObject, {source: anObject, propertyName: _p, oldValue: _oldValue, newValue: aValue});
                             container[_p] = aValue;
-                            aOnChange({source: anObject, propertyName: _p, oldValue: _oldValue, newValue: aValue, beforeState: _beforeState});
+                            aOnChange(anObject, {source: anObject, propertyName: _p, oldValue: _oldValue, newValue: aValue, beforeState: _beforeState});
                         }
                     });
                 })();

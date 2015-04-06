@@ -15,7 +15,7 @@ import com.eas.client.metadata.Parameter;
 import com.eas.client.metadata.Parameters;
 import java.beans.PropertyChangeSupport;
 import java.util.*;
-import java.util.Map.Entry;
+import java.util.Map;
 import java.util.function.Consumer;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -87,25 +87,25 @@ public abstract class Query {
             parametersBinds.clear();
             Map<String, Map<String, String>> lparametersBinds = aSource.getParametersBinds();
             if (lparametersBinds != null) {
-                Set<Entry<String, Map<String, String>>> lentries = lparametersBinds.entrySet();
+                Set<Map.Entry<String, Map<String, String>>> lentries = lparametersBinds.entrySet();
                 if (lentries != null) {
-                    Iterator<Entry<String, Map<String, String>>> entIt = lentries.iterator();
+                    Iterator<Map.Entry<String, Map<String, String>>> entIt = lentries.iterator();
                     if (entIt != null) {
                         while (entIt.hasNext()) {
-                            Entry<String, Map<String, String>> lent = entIt.next();
+                            Map.Entry<String, Map<String, String>> lent = entIt.next();
                             if (lent != null) {
                                 String parName = lent.getKey();
                                 if (parName != null && !parName.isEmpty()) {
                                     Map<String, String> lParValue = lent.getValue();
                                     if (lParValue != null) {
-                                        Set<Entry<String, String>> lpEntries = lParValue.entrySet();
+                                        Set<Map.Entry<String, String>> lpEntries = lParValue.entrySet();
                                         if (lpEntries != null) {
-                                            Iterator<Entry<String, String>> lpEntIt = lpEntries.iterator();
+                                            Iterator<Map.Entry<String, String>> lpEntIt = lpEntries.iterator();
                                             if (lpEntIt != null) {
                                                 Map<String, String> lparamBinds = new HashMap<>();
                                                 parametersBinds.put(new String(parName.toCharArray()), lparamBinds);
                                                 while (lpEntIt.hasNext()) {
-                                                    Entry<String, String> lpEnt = lpEntIt.next();
+                                                    Map.Entry<String, String> lpEnt = lpEntIt.next();
                                                     String dsName = lpEnt.getKey();
                                                     String dsParName = lpEnt.getValue();
                                                     if (dsName != null && !dsName.isEmpty()

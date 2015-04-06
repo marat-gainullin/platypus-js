@@ -51,6 +51,8 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     protected JSObject onDeleted;
     protected JSObject onRequeried;
     //
+    protected JSObject snapshotConsumer;
+    //
     protected JSObject published;
     protected ListenerRegistration cursorListener;
     protected boolean valid;
@@ -145,7 +147,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         execute(null, null);
     }
 
-    public void execute(Consumer<Void> aOnSuccess) throws Exception {
+    public void execute(JSObject aOnSuccess) throws Exception {
         execute(aOnSuccess, null);
     }
     private static final String EXECUTE_JSDOC = ""
@@ -156,8 +158,12 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
             + "*/";
 
     @ScriptFunction(jsDoc = EXECUTE_JSDOC, params = {"onSuccess", "onFailure"})
-    public void execute(final Consumer<Void> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception {
-        internalExecute(aOnSuccess, aOnFailure);
+    public void execute(final JSObject aOnSuccess, final JSObject aOnFailure) throws Exception {
+        internalExecute(aOnSuccess != null ? (JSObject v) -> {
+            aOnSuccess.call(null, new Object[]{v});
+        } : null, aOnFailure != null ? (Exception ex) -> {
+            aOnFailure.call(null, new Object[]{ex.getMessage()});
+        } : null);
     }
 
     // Requery interface
@@ -171,15 +177,41 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     private static final String REQUERY_JSDOC = ""
             + "/**\n"
             + "* Requeries the entity's data. Forses the entity to refresh its data, no matter if its parameters has changed or not.\n"
-            + "* @param onSuccess The callback function for refresh data on success event (optional).\n"
-            + "* @param onFailure The callback function for refresh data on failure event (optional).\n"
+            + "* @param onSuccess The callback function for refreshed data on success event (optional).\n"
+            + "* @param onFailure The callback function for refreshed data on failure event (optional).\n"
             + "*/";
 
     @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccess", "onFailure"})
     public void requery(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
         invalidate();
-        internalExecute(aOnSuccess != null ? (Void v) -> {
-            aOnSuccess.call(null, new Object[]{});
+        internalExecute(aOnSuccess != null ? (JSObject v) -> {
+            aOnSuccess.call(null, new Object[]{v});
+        } : null, aOnFailure != null ? (Exception ex) -> {
+            aOnFailure.call(null, new Object[]{ex.getMessage()});
+        } : null);
+    }
+
+    private static final String QUERY_JSDOC = ""
+            + "/**\n"
+            + "* Queries the entity's data. Data will be fresh copy. A call to query() will be independent from other calls.\n"
+            + "* Subsequent calls will not cancel requests made within previous calls.\n"
+            + "* @param params The params object with parameters' values of query. These values will not be written to entity's parameters.\n"
+            + "* @param onSuccess The callback function for fresh data on success event (optional).\n"
+            + "* @param onFailure The callback function for fresh data on failure event (optional).\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = QUERY_JSDOC, params = {"onSuccess", "onFailure"})
+    public JSObject query(JSObject aJsParams, JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
+        Query copied = query.copy();
+        aJsParams.keySet().forEach((String pName)->{
+            Parameter p = copied.getParameters().get(pName);
+            if(p != null){
+                Object jsValue = aJsParams.getMember(pName);
+                p.setValue(ScriptUtils.toJava(jsValue));
+            }
+        });
+        return copied.execute(aOnSuccess != null ? (JSObject v) -> {
+            aOnSuccess.call(null, new Object[]{v});
         } : null, aOnFailure != null ? (Exception ex) -> {
             aOnFailure.call(null, new Object[]{ex.getMessage()});
         } : null);
@@ -317,9 +349,17 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         changeSupport.firePropertyChange("onRequeried", oldValue, aValue);
     }
 
+    public JSObject getSnapshotConsumer() {
+        return snapshotConsumer;
+    }
+
+    public void setSnapshotConsumer(JSObject aValue) {
+        snapshotConsumer = aValue;
+    }
+
     public abstract void enqueueUpdate() throws Exception;
 
-    protected void internalExecute(final Consumer<Void> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception {
+    protected void internalExecute(final Consumer<JSObject> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception {
         if (query == null) {
             throw new IllegalStateException("Query must present. Query name: " + queryName + "; tableName: " + getTableNameForDescription());
         }
@@ -332,7 +372,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
             // Requery if query parameters values have been changed while bindQueryParameters() call
             // or we are forced to refresh the data via requery() call.
             silentUnpend();
-            refreshRowset(aOnSuccess, aOnFailure);
+            JSObject jsRowset = refreshRowset(aOnSuccess, aOnFailure);
             assert pending != null || (aOnSuccess == null && model.process == null);
         }
     }
@@ -372,18 +412,19 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
 
     protected static final String PENDING_ASSUMPTION_FAILED_MSG = "pending assigned to null without pending.cancel() call.";
     
-    protected void refreshRowset(final Consumer<Void> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception {
+    protected JSObject refreshRowset(final Consumer<JSObject> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception {
         if (model.process != null || aOnSuccess != null) {
             Future<Void> f = new RowsetRefreshTask(aOnFailure);
             query.execute((JSObject aRowset) -> {
                 if (!f.isCancelled()) {
-                    // Apply aRowse as a snapshot. Be aware of change log!
+                    // Apply aRowset as a snapshot. Be aware of change log!
+                    snapshotConsumer.call(null, new Object[]{aRowset});
                     assert pending == f : PENDING_ASSUMPTION_FAILED_MSG;
                     valid = true;
                     pending = null;
                     model.terminateProcess((E)ApplicationEntity.this, null);
                     if (aOnSuccess != null) {
-                        aOnSuccess.accept(null);
+                        aOnSuccess.accept(aRowset);
                     }
                 }
             }, (Exception ex) -> {
@@ -399,9 +440,11 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
                 }
             });
             pending = f;
+            return null;
         } else {
             JSObject jsRowset = query.execute(null, null);
-            // Apply aRowse as a snapshot. Be aware of change log!
+            snapshotConsumer.call(null, new Object[]{jsRowset});
+            return jsRowset;
         }
     }
     

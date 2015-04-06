@@ -116,53 +116,6 @@ public class SQLUtils {
         return null;
     }
 
-    public static Object generatePkValueByType(int aType) {
-        switch (aType) {
-            case java.sql.Types.TINYINT:
-            case java.sql.Types.SMALLINT:
-            case java.sql.Types.INTEGER:
-            case java.sql.Types.BIGINT:
-            case java.sql.Types.FLOAT:
-            case java.sql.Types.REAL:
-            case java.sql.Types.DOUBLE:
-            case java.sql.Types.NUMERIC:
-            case java.sql.Types.DECIMAL:
-                return IDGenerator.genID();
-            case java.sql.Types.CHAR:
-            case java.sql.Types.VARCHAR:
-            case java.sql.Types.LONGVARCHAR:
-            case java.sql.Types.NCHAR:
-            case java.sql.Types.NVARCHAR:
-            case java.sql.Types.LONGNVARCHAR:
-                return String.valueOf(IDGenerator.genID());
-            case java.sql.Types.DATE:
-            case java.sql.Types.TIME:
-            case java.sql.Types.TIMESTAMP:
-                return new Date(IDGenerator.genID());
-            case java.sql.Types.BIT:
-            case java.sql.Types.BINARY:
-            case java.sql.Types.VARBINARY:
-            case java.sql.Types.LONGVARBINARY:
-            case java.sql.Types.NULL:
-            case java.sql.Types.OTHER:
-            case java.sql.Types.JAVA_OBJECT:
-            case java.sql.Types.DISTINCT:
-            case java.sql.Types.STRUCT:
-            case java.sql.Types.ARRAY:
-            case java.sql.Types.BLOB:
-            case java.sql.Types.CLOB:
-            case java.sql.Types.REF:
-            case java.sql.Types.DATALINK:
-            case java.sql.Types.ROWID:
-            case java.sql.Types.SQLXML:
-            case java.sql.Types.BOOLEAN:
-            case java.sql.Types.NCLOB:
-                break;
-        }
-        assert false;
-        return null;
-    }
-
     public static Object generateBooleanValue4Type(int colType, Boolean aValue) {
         switch (colType) {
             case java.sql.Types.TINYINT:

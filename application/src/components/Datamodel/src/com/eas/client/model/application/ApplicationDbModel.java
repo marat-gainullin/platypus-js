@@ -121,24 +121,24 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Sq
             + "/**\n"
             + "* Creates new entity of model, based on passed sql query. This method works only in two tier components of a system.\n"
             + "* @param sqlText SQL text for the new entity.\n"
-            + "* @param dbId the concrete database ID (optional).\n"
+            + "* @param datasourceName the concrete database ID (optional).\n"
             + "* @return an entity instance.\n"
             + "*/";
 
     @ScriptFunction(jsDoc = CREATE_ENTITY_JSDOC, params = {"sqlText", "datasourceName"})
     public synchronized ApplicationDbEntity createEntity(String aSqlText, String aDatasourceName) throws Exception {
         if (basesProxy == null) {
-            throw new NullPointerException("Null basesProxy detected while creating a query");
+            throw new NullPointerException("null basesProxy detected while creating a query");
         }
-        ApplicationDbEntity modelEntity = newGenericEntity();
-        modelEntity.setName(USER_DATASOURCE_NAME);
+        ApplicationDbEntity created = newGenericEntity();
+        created.setName(USER_DATASOURCE_NAME);
         SqlQuery query = new SqlQuery(basesProxy, aDatasourceName, aSqlText);
         query.setEntityId(String.valueOf(IDGenerator.genID()));
         StoredQueryFactory factory = new StoredQueryFactory(basesProxy, null, null, true);
         factory.putTableFieldsMetadata(query);// only select will be filled with output columns
-        modelEntity.setQuery(query);
+        created.setQuery(query);
         // .schema collection will be empty if query is not a select
-        return modelEntity;
+        return created;
     }
 
     public void executeSql(String aSql) throws Exception {
