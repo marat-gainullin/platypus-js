@@ -41,41 +41,36 @@ public class BinaryChanges {
         @Override
         public void visit(Insert aChange) throws Exception {
             List<ProtoNode> dataNodes = node.getChildren(ChangesTags.CHANGE_VALUE_TAG);
-            aChange.data = new ChangeValue[dataNodes.size()];
-            for (int i = 0; i < dataNodes.size(); i++) {
-                aChange.data[i] = readValue(dataNodes.get(i));
+            for (ProtoNode dataNode : dataNodes) {
+                aChange.getData().add(readValue(dataNode));
             }
         }
 
         @Override
         public void visit(Update aChange) throws Exception {
             List<ProtoNode> dataNodes = node.getChildren(ChangesTags.CHANGE_VALUE_TAG);
-            aChange.data = new ChangeValue[dataNodes.size()];
-            for (int i = 0; i < dataNodes.size(); i++) {
-                aChange.data[i] = readValue(dataNodes.get(i));
+            for (ProtoNode dataNode : dataNodes) {
+                aChange.getData().add(readValue(dataNode));
             }
             List<ProtoNode> keysNodes = node.getChildren(ChangesTags.CHANGE_KEY_TAG);
-            aChange.keys = new ChangeValue[keysNodes.size()];
-            for (int i = 0; i < keysNodes.size(); i++) {
-                aChange.keys[i] = readValue(keysNodes.get(i));
+            for (ProtoNode keysNode : keysNodes) {
+                aChange.getKeys().add(readValue(keysNode));
             }
         }
 
         @Override
         public void visit(Delete aChange) throws Exception {
             List<ProtoNode> keysNodes = node.getChildren(ChangesTags.CHANGE_KEY_TAG);
-            aChange.keys = new ChangeValue[keysNodes.size()];
-            for (int i = 0; i < keysNodes.size(); i++) {
-                aChange.keys[i] = readValue(keysNodes.get(i));
+            for (ProtoNode keysNode : keysNodes) {
+                aChange.getKeys().add(readValue(keysNode));
             }
         }
 
         @Override
         public void visit(Command aChange) throws Exception {
             List<ProtoNode> keysNodes = node.getChildren(ChangesTags.CHANGE_PARAMETER_TAG);
-            aChange.parameters = new ChangeValue[keysNodes.size()];
             for (int i = 0; i < keysNodes.size(); i++) {
-                aChange.parameters[i] = readValue(keysNodes.get(i));
+                aChange.getParameters().add(readValue(keysNodes.get(i)));
             }
         }
     }
@@ -145,7 +140,7 @@ public class BinaryChanges {
         public void visit(Insert aChange) throws Exception {
             writer.put(ChangesTags.CHANGE_TYPE_TAG, ChangesTags.CHANGE_TYPE_INSERT);
             writer.put(ChangesTags.CHANGE_ENTITY_TAG, aChange.entityName);
-            for (ChangeValue value : aChange.data) {
+            for (ChangeValue value : aChange.getData()) {
                 writer.put(ChangesTags.CHANGE_VALUE_TAG);
                 writer.put(CoreTags.TAG_STREAM, writeValue(value));
             }
@@ -156,11 +151,11 @@ public class BinaryChanges {
         public void visit(Update aChange) throws Exception {
             writer.put(ChangesTags.CHANGE_TYPE_TAG, ChangesTags.CHANGE_TYPE_UPDATE);
             writer.put(ChangesTags.CHANGE_ENTITY_TAG, aChange.entityName);
-            for (ChangeValue value : aChange.data) {
+            for (ChangeValue value : aChange.getData()) {
                 writer.put(ChangesTags.CHANGE_VALUE_TAG);
                 writer.put(CoreTags.TAG_STREAM, writeValue(value));
             }
-            for (ChangeValue value : aChange.keys) {
+            for (ChangeValue value : aChange.getKeys()) {
                 writer.put(ChangesTags.CHANGE_KEY_TAG);
                 writer.put(CoreTags.TAG_STREAM, writeValue(value));
             }
@@ -171,7 +166,7 @@ public class BinaryChanges {
         public void visit(Delete aChange) throws Exception {
             writer.put(ChangesTags.CHANGE_TYPE_TAG, ChangesTags.CHANGE_TYPE_DELETE);
             writer.put(ChangesTags.CHANGE_ENTITY_TAG, aChange.entityName);
-            for (ChangeValue value : aChange.keys) {
+            for (ChangeValue value : aChange.getKeys()) {
                 writer.put(ChangesTags.CHANGE_KEY_TAG);
                 writer.put(CoreTags.TAG_STREAM, writeValue(value));
             }
@@ -182,7 +177,7 @@ public class BinaryChanges {
         public void visit(Command aChange) throws Exception {
             writer.put(ChangesTags.CHANGE_TYPE_TAG, ChangesTags.CHANGE_TYPE_COMMAND);
             writer.put(ChangesTags.CHANGE_ENTITY_TAG, aChange.entityName);
-            for (ChangeValue value : aChange.parameters) {
+            for (ChangeValue value : aChange.getParameters()) {
                 writer.put(ChangesTags.CHANGE_PARAMETER_TAG);
                 writer.put(CoreTags.TAG_STREAM, writeValue(value));
             }

@@ -91,55 +91,6 @@
                     this[sourceFieldName] = aValue ? aValue[targetFieldName] : null;
                 };
             });
-    ScriptUtils.setCollectionDefFunc(
-            function (sourcePublishedEntity, targetFieldName, sourceFieldName) {
-                var _self = this;
-                _self.enumerable = false;
-                _self.configurable = true;
-                _self.get = function () {
-                    var criterion = {};
-                    var targetKey = this[targetFieldName];
-                    criterion[sourceFieldName] = targetKey;
-                    var res = sourcePublishedEntity.find(criterion);
-                    res.push = function () {
-                        for (var a = 0; a < arguments.length; a++) {
-                            var instance = arguments[a];
-                            instance[sourceFieldName] = targetKey;
-                        }
-                        return Array.prototype.push.apply(res, arguments);
-                    };
-                    res.unshift = function () {
-                        for (var a = 0; a < arguments.length; a++) {
-                            var instance = arguments[a];
-                            instance[sourceFieldName] = targetKey;
-                        }
-                        return Array.prototype.unshift.apply(res, arguments);
-                    };
-                    res.splice = function () {
-                        for (var a = 2; a < arguments.length; a++) {
-                            var _instance = arguments[a];
-                            _instance[sourceFieldName] = targetKey;
-                        }
-                        var deleted = Array.prototype.splice.apply(res, arguments);
-                        for (var d = 0; d < deleted.length; d++) {
-                            var instance = deleted[d];
-                            instance[sourceFieldName] = null;
-                        }
-                        return deleted;
-                    };
-                    res.pop = function () {
-                        var deleted = Array.prototype.pop.apply(res, arguments);
-                        deleted[sourceFieldName] = null;
-                        return deleted;
-                    };
-                    res.shift = function () {
-                        var deleted = Array.prototype.shift.apply(res, arguments);
-                        deleted[sourceFieldName] = null;
-                        return deleted;
-                    };
-                    return res;
-                };
-            });
     ScriptUtils.setIsArrayFunc(function (aInstance) {
         return aInstance instanceof Array;
     });

@@ -163,10 +163,9 @@ public class SqlCompiledQuery {
     public Command prepareCommand() {
         Command command = new Command(entityName);
         command.command = sqlClause;
-        command.parameters = new ChangeValue[parameters.getParametersCount()];
-        for (int i = 0; i < command.parameters.length; i++) {
+        for (int i = 0; i < parameters.getParametersCount(); i++) {
             Parameter param = parameters.get(i + 1);
-            command.parameters[i] = new ChangeValue(param.getName(), param.getValue(), param.getTypeInfo());
+            command.getParameters().add(new ChangeValue(param.getName(), param.getValue(), param.getTypeInfo()));
         }
         return command;
     }

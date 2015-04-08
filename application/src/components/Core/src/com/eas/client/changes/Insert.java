@@ -6,6 +6,8 @@ package com.eas.client.changes;
 
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import java.util.ArrayList;
+import java.util.List;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -15,7 +17,7 @@ import jdk.nashorn.api.scripting.JSObject;
 public class Insert extends Change {
     
     private static JSObject publisher;
-    public ChangeValue[] data;
+    private final List<ChangeValue> data = new ArrayList<>();
 
     public Insert(String aEntityName) {
         super(aEntityName);
@@ -27,7 +29,7 @@ public class Insert extends Change {
     }
 
     @ScriptFunction(jsDoc = "Data that will be inserted.")
-    public ChangeValue[] getData() {
+    public List<ChangeValue> getData() {
         return data;
     }
     

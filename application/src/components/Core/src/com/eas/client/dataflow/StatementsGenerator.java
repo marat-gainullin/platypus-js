@@ -126,7 +126,7 @@ public class StatementsGenerator implements ChangeVisitor {
     public void visit(Insert aChange) throws Exception {
         if (!aChange.consumed) {
             Map<String, InsertChunk> inserts = new HashMap<>();
-            for (ChangeValue data : aChange.data) {
+            for (ChangeValue data : aChange.getData()) {
                 Field field = entitiesHost.resolveField(aChange.entityName, data.name);
                 if (field != null) {
                     InsertChunk chunk = inserts.get(field.getTableName());
@@ -205,7 +205,7 @@ public class StatementsGenerator implements ChangeVisitor {
         if (!aChange.consumed) {
             Map<String, UpdateChunk> updates = new HashMap<>();
             // data
-            for (ChangeValue data : aChange.data) {
+            for (ChangeValue data : aChange.getData()) {
                 Field field = entitiesHost.resolveField(aChange.entityName, data.name);
                 if (field != null) {
                     UpdateChunk chunk = updates.get(field.getTableName());
@@ -227,7 +227,7 @@ public class StatementsGenerator implements ChangeVisitor {
                 }
             }
             // keys
-            for (ChangeValue key : aChange.keys) {
+            for (ChangeValue key : aChange.getKeys()) {
                 Field field = entitiesHost.resolveField(aChange.entityName, key.name);
                 if (field != null) {
                     UpdateChunk chunk = updates.get(field.getTableName());
@@ -259,7 +259,7 @@ public class StatementsGenerator implements ChangeVisitor {
     public void visit(Delete aChange) throws Exception {
         if (!aChange.consumed) {
             Map<String, StatementsLogEntry> deletes = new HashMap<>();
-            for (ChangeValue key : aChange.keys) {
+            for (ChangeValue key : aChange.getKeys()) {
                 Field field = entitiesHost.resolveField(aChange.entityName, key.name);
                 if (field != null) {
                     StatementsLogEntry delete = deletes.get(field.getTableName());
@@ -287,7 +287,7 @@ public class StatementsGenerator implements ChangeVisitor {
         if (!aChange.consumed) {
             StatementsLogEntry logEntry = new StatementsLogEntry();
             logEntry.clause = aChange.command;
-            logEntry.parameters.addAll(Arrays.asList(aChange.parameters));
+            logEntry.parameters.addAll(aChange.getParameters());
             logEntries.add(logEntry);
         }
     }

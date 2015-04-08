@@ -6,6 +6,8 @@ package com.eas.client.changes;
 
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import java.util.ArrayList;
+import java.util.List;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -15,7 +17,7 @@ import jdk.nashorn.api.scripting.JSObject;
 public class Delete extends Change {
     
     private static JSObject publisher;
-    public ChangeValue[] keys;
+    private final List<ChangeValue> keys = new ArrayList<>();
 
     public Delete(String aEntityName) {
         super(aEntityName);
@@ -27,7 +29,7 @@ public class Delete extends Change {
     }
 
     @ScriptFunction(jsDoc = "Keys values used for identification of deleted data.")
-    public ChangeValue[] getKeys() {
+    public List<ChangeValue> getKeys() {
         return keys;
     }
     

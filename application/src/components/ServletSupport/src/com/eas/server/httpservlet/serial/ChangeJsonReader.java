@@ -45,7 +45,7 @@ public class ChangeJsonReader implements ChangeVisitor {
         fieldsResolver = aFieldsResolver;
     }
 
-    protected ChangeValue[] parseObjectProperties(Object oData) throws Exception {
+    protected List<ChangeValue> parseObjectProperties(Object oData) throws Exception {
         List<ChangeValue> data = new ArrayList<>();
         if (oData instanceof JSObject) {
             JSObject sValue = (JSObject) oData;
@@ -73,33 +73,33 @@ public class ChangeJsonReader implements ChangeVisitor {
                 }
             }
         }
-        return data.toArray(new ChangeValue[]{});
+        return data;
     }
 
     @Override
     public void visit(Insert aChange) throws Exception {
         Object oData = sChange.getMember(CHANGE_DATA_NAME);
-        aChange.data = parseObjectProperties(oData);
+        aChange.getData().addAll(parseObjectProperties(oData));
     }
 
     @Override
     public void visit(Update aChange) throws Exception {
         Object oData = sChange.getMember(CHANGE_DATA_NAME);
-        aChange.data = parseObjectProperties(oData);
+        aChange.getData().addAll(parseObjectProperties(oData));
         Object oKeys = sChange.getMember(CHANGE_KEYS_NAME);
-        aChange.keys = parseObjectProperties(oKeys);
+        aChange.getKeys().addAll(parseObjectProperties(oKeys));
     }
 
     @Override
     public void visit(Delete aChange) throws Exception {
         Object oKeys = sChange.getMember(CHANGE_KEYS_NAME);
-        aChange.keys = parseObjectProperties(oKeys);
+        aChange.getKeys().addAll(parseObjectProperties(oKeys));
     }
 
     @Override
     public void visit(Command aChange) throws Exception {
         Object parameters = sChange.getMember(CHANGE_PARAMETERS_NAME);
-        aChange.parameters = parseObjectProperties(parameters);
+        aChange.getParameters().addAll(parseObjectProperties(parameters));
     }
 
     public static List<Change> parse(String aJsonText, EntitiesHost aFieldsResolver) throws Exception {

@@ -6,6 +6,8 @@ package com.eas.client.changes;
 
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import java.util.ArrayList;
+import java.util.List;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -16,7 +18,7 @@ public class Command extends Change {
     
     private static JSObject publisher;
     public String command;// transient property
-    public ChangeValue[] parameters;
+    private List<ChangeValue> parameters = new ArrayList<>();
 
     public Command(String aEntityId) {
         super(aEntityId);
@@ -33,7 +35,7 @@ public class Command extends Change {
     }
 
     @ScriptFunction(jsDoc = "Parameters of command.")
-    public ChangeValue[] getParameters() {
+    public List<ChangeValue> getParameters() {
         return parameters;
     }
     

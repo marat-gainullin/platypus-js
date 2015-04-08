@@ -179,5 +179,4 @@
     Object.defineProperty(this.P, 'manageObject', {value: manageObject});
     Object.defineProperty(this.P, 'unmanageObject', {value: unmanageObject});
     Object.defineProperty(this.P, 'manageArray', {value: manageArray});
-    Object.defineProperty(this.P, 'copyArray', {value: copyArray});
 })();

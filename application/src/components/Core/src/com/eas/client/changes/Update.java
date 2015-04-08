@@ -6,6 +6,8 @@ package com.eas.client.changes;
 
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import java.util.ArrayList;
+import java.util.List;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -15,8 +17,8 @@ import jdk.nashorn.api.scripting.JSObject;
 public class Update extends Change {
     
     private static JSObject publisher;
-    public ChangeValue[] keys;
-    public ChangeValue[] data;
+    private final List<ChangeValue> keys = new ArrayList<>();
+    private List<ChangeValue> data = new ArrayList<>();
 
     public Update(String aEntityName) {
         super(aEntityName);
@@ -28,12 +30,12 @@ public class Update extends Change {
     }
 
     @ScriptFunction(jsDoc = "Keys used for indentifying data changes within a target datasource")
-    public ChangeValue[] getKeys() {
+    public List<ChangeValue> getKeys() {
         return keys;
     }
 
     @ScriptFunction(jsDoc = "Data to be applied within a target datasource")
-    public ChangeValue[] getData() {
+    public List<ChangeValue> getData() {
         return data;
     }
     

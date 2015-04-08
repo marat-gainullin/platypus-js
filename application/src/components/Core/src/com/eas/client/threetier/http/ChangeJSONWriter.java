@@ -42,7 +42,7 @@ public class ChangeJSONWriter implements ChangeVisitor {
     @Override
     public void visit(Insert aChange) throws Exception {
         List<String> data = new ArrayList<>();
-        for (ChangeValue data1 : aChange.data) {
+        for (ChangeValue data1 : aChange.getData()) {
             data.add(data1.name);
             data.add(valueToString(data1.value));
         }
@@ -56,12 +56,12 @@ public class ChangeJSONWriter implements ChangeVisitor {
     @Override
     public void visit(Update aChange) throws Exception {
         List<String> data = new ArrayList<>();
-        for (ChangeValue datum : aChange.data) {
+        for (ChangeValue datum : aChange.getData()) {
             data.add(datum.name);
             data.add(valueToString(datum.value));
         }
         List<String> keys = new ArrayList<>();
-        for (ChangeValue key : aChange.keys) {
+        for (ChangeValue key : aChange.getKeys()) {
             keys.add(key.name);
             keys.add(valueToString(key.value));
         }
@@ -76,7 +76,7 @@ public class ChangeJSONWriter implements ChangeVisitor {
     @Override
     public void visit(Delete aChange) throws Exception {
         List<String> keys = new ArrayList<>();
-        for (ChangeValue key : aChange.keys) {
+        for (ChangeValue key : aChange.getKeys()) {
             keys.add(key.name);
             keys.add(valueToString(key.value));
         }
@@ -90,7 +90,7 @@ public class ChangeJSONWriter implements ChangeVisitor {
     @Override
     public void visit(Command aChange) throws Exception {
         List<String> params = new ArrayList<>();
-        for (ChangeValue parameter : aChange.parameters) {
+        for (ChangeValue parameter : aChange.getParameters()) {
             params.add(parameter.name);
             params.add(valueToString(parameter.value));
         }
