@@ -46,9 +46,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     public static final String BAD_PRIMARY_KEYS_MSG = "Bad primary keys detected. Required one and only one primary key field, but %d found.";
     public static final String CANT_CONVERT_TO_MSG = "Can't convert to %s, substituting with null.";
     // for runtime
-    protected JSObject onScrolled;
-    protected JSObject onInserted;
-    protected JSObject onDeleted;
     protected JSObject onRequeried;
     //
     protected JSObject snapshotConsumer;
@@ -203,9 +200,9 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     @ScriptFunction(jsDoc = QUERY_JSDOC, params = {"onSuccess", "onFailure"})
     public JSObject query(JSObject aJsParams, JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
         Query copied = query.copy();
-        aJsParams.keySet().forEach((String pName)->{
+        aJsParams.keySet().forEach((String pName) -> {
             Parameter p = copied.getParameters().get(pName);
-            if(p != null){
+            if (p != null) {
                 Object jsValue = aJsParams.getMember(pName);
                 p.setValue(ScriptUtils.toJava(jsValue));
             }
@@ -230,58 +227,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     @ScriptFunction
     public void setElementClass(JSObject aValue) {
         getFields().setInstanceConstructor(aValue);
-    }
-
-    private static final String ON_DELETED_JSDOC = ""
-            + "/**\n"
-            + "* The handler function for the event occured after an entity row has been deleted.\n"
-            + "*/";
-
-    @ScriptFunction(jsDoc = ON_DELETED_JSDOC)
-    @EventMethod(eventClass = EntityInstanceDeleteEvent.class)
-    public JSObject getOnDeleted() {
-        return onDeleted;
-    }
-
-    @ScriptFunction
-    public void setOnDeleted(JSObject aValue) {
-        JSObject oldValue = onDeleted;
-        onDeleted = aValue;
-        changeSupport.firePropertyChange("onDeleted", oldValue, aValue);
-    }
-    private static final String ON_INSERTED_JSDOC = ""
-            + "/**\n"
-            + "* The handler function for the event occured after an entity row has been inserted.\n"
-            + "*/";
-
-    @ScriptFunction(jsDoc = ON_INSERTED_JSDOC)
-    @EventMethod(eventClass = EntityInstanceInsertEvent.class)
-    public JSObject getOnInserted() {
-        return onInserted;
-    }
-
-    @ScriptFunction
-    public void setOnInserted(JSObject aValue) {
-        JSObject oldValue = onInserted;
-        onInserted = aValue;
-        changeSupport.firePropertyChange("onInserted", oldValue, aValue);
-    }
-    private static final String ON_SCROLLED_JSDOC = ""
-            + "/**\n"
-            + "* The handler function for the event occured after the cursor position changed.\n"
-            + "*/";
-
-    @ScriptFunction(jsDoc = ON_SCROLLED_JSDOC)
-    @EventMethod(eventClass = CursorPositionChangedEvent.class)
-    public JSObject getOnScrolled() {
-        return onScrolled;
-    }
-
-    @ScriptFunction
-    public void setOnScrolled(JSObject aValue) {
-        JSObject oldValue = onScrolled;
-        onScrolled = aValue;
-        changeSupport.firePropertyChange("onScrolled", oldValue, aValue);
     }
 
     public void putOrmScalarDefinition(String aName, Fields.OrmDef aDefinition) {
@@ -411,7 +356,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     }
 
     protected static final String PENDING_ASSUMPTION_FAILED_MSG = "pending assigned to null without pending.cancel() call.";
-    
+
     protected JSObject refreshRowset(final Consumer<JSObject> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception {
         if (model.process != null || aOnSuccess != null) {
             Future<Void> f = new RowsetRefreshTask(aOnFailure);
@@ -422,7 +367,14 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
                     assert pending == f : PENDING_ASSUMPTION_FAILED_MSG;
                     valid = true;
                     pending = null;
-                    model.terminateProcess((E)ApplicationEntity.this, null);
+                    model.terminateProcess((E) ApplicationEntity.this, null);
+                    if (onRequeried != null) {
+                        try {
+                            onRequeried.call(published, new Object[]{});
+                        } catch (Exception ex) {
+                            Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
                     if (aOnSuccess != null) {
                         aOnSuccess.accept(aRowset);
                     }
@@ -433,7 +385,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
                     assert pending == f : PENDING_ASSUMPTION_FAILED_MSG;
                     valid = true;
                     pending = null;
-                    model.terminateProcess((E)ApplicationEntity.this, ex);
+                    model.terminateProcess((E) ApplicationEntity.this, ex);
                     if (aOnFailure != null) {
                         aOnFailure.accept(ex);
                     }
@@ -444,10 +396,17 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         } else {
             JSObject jsRowset = query.execute(null, null);
             snapshotConsumer.call(null, new Object[]{jsRowset});
+            if (onRequeried != null) {
+                try {
+                    onRequeried.call(published, new Object[]{});
+                } catch (Exception ex) {
+                    Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
             return jsRowset;
         }
     }
-    
+
     protected boolean isQueriable() throws Exception {
         return queryName != null || (tableName != null && !tableName.isEmpty());
     }
@@ -662,9 +621,6 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     @Override
     protected void assign(E appTarget) throws Exception {
         super.assign(appTarget);
-        appTarget.setOnDeleted(onDeleted);
-        appTarget.setOnInserted(onInserted);
-        appTarget.setOnScrolled(onScrolled);
         appTarget.setOnRequeried(onRequeried);
     }
 

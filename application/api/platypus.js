@@ -762,7 +762,11 @@
     }
 
     function fire(aTarget, aChange) {
-        aTarget[fireChangeName](aChange);
+        try {
+            aTarget[fireChangeName](aChange);
+        } catch (e) {
+            Logger.severe(e);
+        }
     }
 
     function fireSelfScalarsOppositeCollectionsChanges(aSubject, aChange, nnFields) {
@@ -849,7 +853,7 @@
         });
     }
 
-    function fireOppositeCollectionsChanges(aSubject, nnFields){
+    function fireOppositeCollectionsChanges(aSubject, nnFields) {
         var scalarsDefs = nnFields.getOrmScalarDefinitions().entrySet();
         scalarsDefs.forEach(function (aEntry) {
             var scalarName = aEntry.getKey();
@@ -860,7 +864,7 @@
             }
         });
     }
-    
+
     function generateChangeLogKeys(keys, fields, propName, aSubject, oldValue) {
         if (fields) {
             for (var i = 1; i <= fields.getFieldsCount(); i++) {
@@ -879,31 +883,31 @@
     }
 
     ScriptUtilsClass.setCollectionDefFunc(
-        function (sourcePublishedEntity, targetFieldName, sourceFieldName) {
-            var _self = this;
-            _self.enumerable = false;
-            _self.configurable = true;
-            _self.get = function () {
-                var criterion = {};
-                var targetKey = this[targetFieldName];
-                criterion[sourceFieldName] = targetKey;
-                var found = sourcePublishedEntity.find(criterion);
-                P.manageArray(found, {
-                    spliced: function (added, deleted) {
-                        added.forEach(function(item){
-                            item[sourceFieldName] = targetKey;
-                        });
-                        deleted.forEach(function(item){
-                            item[sourceFieldName] = null;
-                        });
-                    },
-                    scrolled: function (aSubject, oldCursor, newCursor) {
-                    }
-                });
-                return found;
-            };
-        });
-            
+            function (sourcePublishedEntity, targetFieldName, sourceFieldName) {
+                var _self = this;
+                _self.enumerable = false;
+                _self.configurable = true;
+                _self.get = function () {
+                    var criterion = {};
+                    var targetKey = this[targetFieldName];
+                    criterion[sourceFieldName] = targetKey;
+                    var found = sourcePublishedEntity.find(criterion);
+                    P.manageArray(found, {
+                        spliced: function (added, deleted) {
+                            added.forEach(function (item) {
+                                item[sourceFieldName] = targetKey;
+                            });
+                            deleted.forEach(function (item) {
+                                item[sourceFieldName] = null;
+                            });
+                        },
+                        scrolled: function (aSubject, oldCursor, newCursor) {
+                        }
+                    });
+                    return found;
+                };
+            });
+
     var InsertClass = Java.type('com.eas.client.changes.Insert');
     var DeleteClass = Java.type('com.eas.client.changes.Delete');
     var UpdateClass = Java.type('com.eas.client.changes.Update');
@@ -1005,6 +1009,9 @@
                     define(nnFields.getOrmCollectionsDefinitions());
                 }
 
+                var _onInserted = null;
+                var _onDeleted = null;
+                var _onScrolled = null;
                 P.manageArray(published, {
                     spliced: function (added, deleted) {
                         added.forEach(function (aAdded) {
@@ -1050,8 +1057,30 @@
                             unlistenable(aDeleted);
                             P.unmanageObject(aDeleted);
                         });
+                        if (_onInserted) {
+                            try {
+                                _onInserted({source: published, items: added});
+                            } catch (e) {
+                                Logger.severe(e);
+                            }
+                        }
+                        if (_onDeleted) {
+                            try {
+                                _onDeleted({source: published, items: deleted});
+                            } catch (e) {
+                                Logger.severe(e);
+                            }
+                        }
                     },
                     scrolled: function (aSubject, oldCursor, newCursor) {
+                        if (_onScrolled) {
+                            try {
+                                _onScrolled({source: published, propertyName: 'cursor', oldValue: oldCursor, newValue: newCursor});
+                            } catch (e) {
+                                Logger.severe(e);
+                            }
+                        }
+                        fire(published, {source: published, propertyName: 'cursor', oldValue: oldCursor, newValue: newCursor});
                     }
                 });
                 entityCTor.call(published, nEntity);
@@ -1142,6 +1171,30 @@
                             delete anInstance[toBeDeletedMark];
                         });
                     }});
+                Object.defineProperty(published, 'onScrolled', {
+                    get: function () {
+                        return _onScrolled;
+                    },
+                    set: function (aValue) {
+                        _onScrolled = aValue;
+                    }
+                });
+                Object.defineProperty(published, 'onInserted', {
+                    get: function () {
+                        return _onInserted;
+                    },
+                    set: function (aValue) {
+                        _onInserted = aValue;
+                    }
+                });
+                Object.defineProperty(published, 'onDeleted', {
+                    get: function () {
+                        return _onDeleted;
+                    },
+                    set: function (aValue) {
+                        _onDeleted = aValue;
+                    }
+                });
                 nEntity.setSnapshotConsumer(function (aSnapshot) {
                     Array.prototype.splice.call(published, 0, published.length);
                     if (nEntity.getElementClass()) {
