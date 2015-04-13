@@ -2895,4 +2895,14 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     public Widget getParentWidget() {
         return Forms.lookupPublishedParent(this);
     }
+    
+    private static final String UNSORT = ""
+            + "/**\n"
+            + " * Clears sort on all columns, works only in HTML5"
+            + " */";
+
+    @ScriptFunction(jsDoc = UNSORT)
+    public void unsort() {
+        
+    }
 }

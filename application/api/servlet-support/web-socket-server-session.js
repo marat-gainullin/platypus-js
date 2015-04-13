@@ -56,20 +56,6 @@
              */
             P.WebSocketServerSession.prototype.onerror = {};
         }
-        Object.defineProperty(this, "query", {
-            get: function() {
-                var value = delegate.query;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.WebSocketServerSession){
-            /**
-             * Generated property jsDoc.
-             * @property query
-             * @memberOf WebSocketServerSession
-             */
-            P.WebSocketServerSession.prototype.query = '';
-        }
         Object.defineProperty(this, "onclose", {
             get: function() {
                 var value = delegate.onclose;
@@ -86,6 +72,20 @@
              * @memberOf WebSocketServerSession
              */
             P.WebSocketServerSession.prototype.onclose = {};
+        }
+        Object.defineProperty(this, "query", {
+            get: function() {
+                var value = delegate.query;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.WebSocketServerSession){
+            /**
+             * Generated property jsDoc.
+             * @property query
+             * @memberOf WebSocketServerSession
+             */
+            P.WebSocketServerSession.prototype.query = '';
         }
         Object.defineProperty(this, "protocolVersion", {
             get: function() {
@@ -132,23 +132,23 @@
     };
         /**
          *
-         * @method close
-         * @memberOf WebSocketServerSession
-         */
-        P.WebSocketServerSession.prototype.close = function(arg0, arg1) {
-            var delegate = this.unwrap();
-            var value = delegate.close(P.boxAsJava(arg0), P.boxAsJava(arg1));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         *
          * @method send
          * @memberOf WebSocketServerSession
          */
         P.WebSocketServerSession.prototype.send = function(data) {
             var delegate = this.unwrap();
             var value = delegate.send(P.boxAsJava(data));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
+         * @method close
+         * @memberOf WebSocketServerSession
+         */
+        P.WebSocketServerSession.prototype.close = function(arg0, arg1) {
+            var delegate = this.unwrap();
+            var value = delegate.close(P.boxAsJava(arg0), P.boxAsJava(arg1));
             return P.boxAsJs(value);
         };
 

@@ -64,20 +64,6 @@
              */
             P.KeyEvent.prototype.shiftDown = true;
         }
-        Object.defineProperty(this, "char", {
-            get: function() {
-                var value = delegate.char;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.KeyEvent){
-            /**
-             * Char associated with this event.
-             * @property char
-             * @memberOf KeyEvent
-             */
-            P.KeyEvent.prototype.char = '';
-        }
         Object.defineProperty(this, "metaDown", {
             get: function() {
                 var value = delegate.metaDown;
@@ -91,6 +77,20 @@
              * @memberOf KeyEvent
              */
             P.KeyEvent.prototype.metaDown = true;
+        }
+        Object.defineProperty(this, "char", {
+            get: function() {
+                var value = delegate.char;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.KeyEvent){
+            /**
+             * Char associated with this event.
+             * @property char
+             * @memberOf KeyEvent
+             */
+            P.KeyEvent.prototype.char = '';
         }
         Object.defineProperty(this, "source", {
             get: function() {

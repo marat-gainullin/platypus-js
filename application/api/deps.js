@@ -35,6 +35,13 @@ try {
 }
 
 try {
+    load('classpath:db-controls/cell-render-event.js');
+    print('db-controls API loaded.');
+} catch (e) {
+    print('db-controls API skipped.');
+}
+
+try {
     load('classpath:forms/action-event.js');
     load('classpath:forms/anchors-pane.js');
     load('classpath:forms/anchors.js');

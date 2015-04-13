@@ -330,6 +330,20 @@
              */
             P.CardPane.prototype.height = 0;
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.CardPane){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf CardPane
+             */
+            P.CardPane.prototype.element = {};
+        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -346,20 +360,6 @@
              * @memberOf CardPane
              */
             P.CardPane.prototype.onComponentShown = {};
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.CardPane){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf CardPane
-             */
-            P.CardPane.prototype.element = {};
         }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
@@ -446,6 +446,20 @@
              */
             P.CardPane.prototype.nextFocusableComponent = {};
         }
+        Object.defineProperty(this, "count", {
+            get: function() {
+                var value = delegate.count;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.CardPane){
+            /**
+             * Gets the number of components in this panel.
+             * @property count
+             * @memberOf CardPane
+             */
+            P.CardPane.prototype.count = 0;
+        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -479,20 +493,6 @@
              * @memberOf CardPane
              */
             P.CardPane.prototype.onKeyReleased = {};
-        }
-        Object.defineProperty(this, "count", {
-            get: function() {
-                var value = delegate.count;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.CardPane){
-            /**
-             * Gets the number of components in this panel.
-             * @property count
-             * @memberOf CardPane
-             */
-            P.CardPane.prototype.count = 0;
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -678,20 +678,6 @@
              */
             P.CardPane.prototype.onMouseExited = {};
         }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.CardPane){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf CardPane
-             */
-            P.CardPane.prototype.name = '';
-        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -708,6 +694,20 @@
              * @memberOf CardPane
              */
             P.CardPane.prototype.width = 0;
+        }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.CardPane){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf CardPane
+             */
+            P.CardPane.prototype.name = '';
         }
         Object.defineProperty(this, "font", {
             get: function() {
@@ -749,42 +749,6 @@
         });
     };
         /**
-         * Appends the component to this container with the specified name.
-         * @param component the component to add.
-         * @param cardName the name of the card.
-         * @method add
-         * @memberOf CardPane
-         */
-        P.CardPane.prototype.add = function(component, cardName) {
-            var delegate = this.unwrap();
-            var value = delegate.add(P.boxAsJava(component), P.boxAsJava(cardName));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Removes the specified component from this container.
-         * @param component the component to remove
-         * @method remove
-         * @memberOf CardPane
-         */
-        P.CardPane.prototype.remove = function(component) {
-            var delegate = this.unwrap();
-            var value = delegate.remove(P.boxAsJava(component));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Removes all the components from this container.
-         * @method clear
-         * @memberOf CardPane
-         */
-        P.CardPane.prototype.clear = function() {
-            var delegate = this.unwrap();
-            var value = delegate.clear();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Flips to the component that was added to this layout with the specified name.
          * @param name the card name
          * @method show
@@ -817,6 +781,42 @@
         P.CardPane.prototype.child = function(cardName) {
             var delegate = this.unwrap();
             var value = delegate.child(P.boxAsJava(cardName));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Appends the component to this container with the specified name.
+         * @param component the component to add.
+         * @param cardName the name of the card.
+         * @method add
+         * @memberOf CardPane
+         */
+        P.CardPane.prototype.add = function(component, cardName) {
+            var delegate = this.unwrap();
+            var value = delegate.add(P.boxAsJava(component), P.boxAsJava(cardName));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Removes the specified component from this container.
+         * @param component the component to remove
+         * @method remove
+         * @memberOf CardPane
+         */
+        P.CardPane.prototype.remove = function(component) {
+            var delegate = this.unwrap();
+            var value = delegate.remove(P.boxAsJava(component));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Removes all the components from this container.
+         * @method clear
+         * @memberOf CardPane
+         */
+        P.CardPane.prototype.clear = function() {
+            var delegate = this.unwrap();
+            var value = delegate.clear();
             return P.boxAsJs(value);
         };
 

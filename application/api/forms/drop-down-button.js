@@ -283,23 +283,6 @@
              */
             P.DropDownButton.prototype.text = '';
         }
-        Object.defineProperty(this, "onMouseEntered", {
-            get: function() {
-                var value = delegate.onMouseEntered;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMouseEntered = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.DropDownButton){
-            /**
-             * Mouse entered over the component event handler function.
-             * @property onMouseEntered
-             * @memberOf DropDownButton
-             */
-            P.DropDownButton.prototype.onMouseEntered = {};
-        }
         Object.defineProperty(this, "dropDownMenu", {
             get: function() {
                 var value = delegate.dropDownMenu;
@@ -316,6 +299,23 @@
              * @memberOf DropDownButton
              */
             P.DropDownButton.prototype.dropDownMenu = {};
+        }
+        Object.defineProperty(this, "onMouseEntered", {
+            get: function() {
+                var value = delegate.onMouseEntered;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseEntered = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.DropDownButton){
+            /**
+             * Mouse entered over the component event handler function.
+             * @property onMouseEntered
+             * @memberOf DropDownButton
+             */
+            P.DropDownButton.prototype.onMouseEntered = {};
         }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
@@ -351,6 +351,20 @@
              */
             P.DropDownButton.prototype.height = 0;
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.DropDownButton){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf DropDownButton
+             */
+            P.DropDownButton.prototype.element = {};
+        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -367,20 +381,6 @@
              * @memberOf DropDownButton
              */
             P.DropDownButton.prototype.onComponentShown = {};
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.DropDownButton){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf DropDownButton
-             */
-            P.DropDownButton.prototype.element = {};
         }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
@@ -450,23 +450,6 @@
              */
             P.DropDownButton.prototype.onComponentHidden = {};
         }
-        Object.defineProperty(this, "nextFocusableComponent", {
-            get: function() {
-                var value = delegate.nextFocusableComponent;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.nextFocusableComponent = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.DropDownButton){
-            /**
-             * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
-             * @property nextFocusableComponent
-             * @memberOf DropDownButton
-             */
-            P.DropDownButton.prototype.nextFocusableComponent = {};
-        }
         Object.defineProperty(this, "iconTextGap", {
             get: function() {
                 var value = delegate.iconTextGap;
@@ -483,6 +466,23 @@
              * @memberOf DropDownButton
              */
             P.DropDownButton.prototype.iconTextGap = 0;
+        }
+        Object.defineProperty(this, "nextFocusableComponent", {
+            get: function() {
+                var value = delegate.nextFocusableComponent;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.nextFocusableComponent = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.DropDownButton){
+            /**
+             * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
+             * @property nextFocusableComponent
+             * @memberOf DropDownButton
+             */
+            P.DropDownButton.prototype.nextFocusableComponent = {};
         }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
@@ -702,20 +702,6 @@
              */
             P.DropDownButton.prototype.onMouseExited = {};
         }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.DropDownButton){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf DropDownButton
-             */
-            P.DropDownButton.prototype.name = '';
-        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -732,6 +718,20 @@
              * @memberOf DropDownButton
              */
             P.DropDownButton.prototype.width = 0;
+        }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.DropDownButton){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf DropDownButton
+             */
+            P.DropDownButton.prototype.name = '';
         }
         Object.defineProperty(this, "font", {
             get: function() {

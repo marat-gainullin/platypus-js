@@ -396,6 +396,20 @@
              */
             P.FormattedField.prototype.height = 0;
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.FormattedField){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.element = {};
+        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -412,20 +426,6 @@
              * @memberOf FormattedField
              */
             P.FormattedField.prototype.onComponentShown = {};
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.FormattedField){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf FormattedField
-             */
-            P.FormattedField.prototype.element = {};
         }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
@@ -730,20 +730,6 @@
              */
             P.FormattedField.prototype.onMouseExited = {};
         }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.FormattedField){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf FormattedField
-             */
-            P.FormattedField.prototype.name = '';
-        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -760,6 +746,20 @@
              * @memberOf FormattedField
              */
             P.FormattedField.prototype.width = 0;
+        }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.FormattedField){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.name = '';
         }
         Object.defineProperty(this, "font", {
             get: function() {
