@@ -304,4 +304,31 @@ public class ModelGridColumn extends GridColumnsNode implements HasPublished {
     public static void setPublisher(JSObject aPublisher) {
         publisher = aPublisher;
     }
+    private static final String SORT = ""
+            + "/**\n"
+            + " * Column sort, works only in HTML5"
+            + " */";
+
+    @ScriptFunction(jsDoc = SORT)
+    public void sort() {
+
+    }
+    private static final String SORT_DESC = ""
+            + "/**\n"
+            + " * Descending column sort, works only in HTML5"
+            + " */";
+
+    @ScriptFunction(jsDoc = SORT_DESC)
+    public void sortDesc() {
+
+    }
+    private static final String UNSORT = ""
+            + "/**\n"
+            + " * Clears sort column, works only in HTML5"
+            + " */";
+
+    @ScriptFunction(jsDoc = UNSORT)
+    public void unsort() {
+
+    }
 }

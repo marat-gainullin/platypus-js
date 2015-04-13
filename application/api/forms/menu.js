@@ -347,6 +347,20 @@
              */
             P.Menu.prototype.height = 0;
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Menu){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf Menu
+             */
+            P.Menu.prototype.element = {};
+        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -363,20 +377,6 @@
              * @memberOf Menu
              */
             P.Menu.prototype.onComponentShown = {};
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.Menu){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf Menu
-             */
-            P.Menu.prototype.element = {};
         }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
@@ -463,6 +463,20 @@
              */
             P.Menu.prototype.nextFocusableComponent = {};
         }
+        Object.defineProperty(this, "count", {
+            get: function() {
+                var value = delegate.count;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Menu){
+            /**
+             * The count of the menu items.
+             * @property count
+             * @memberOf Menu
+             */
+            P.Menu.prototype.count = 0;
+        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -496,20 +510,6 @@
              * @memberOf Menu
              */
             P.Menu.prototype.onKeyReleased = {};
-        }
-        Object.defineProperty(this, "count", {
-            get: function() {
-                var value = delegate.count;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.Menu){
-            /**
-             * The count of the menu items.
-             * @property count
-             * @memberOf Menu
-             */
-            P.Menu.prototype.count = 0;
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -678,20 +678,6 @@
              */
             P.Menu.prototype.onMouseExited = {};
         }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.Menu){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf Menu
-             */
-            P.Menu.prototype.name = '';
-        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -708,6 +694,20 @@
              * @memberOf Menu
              */
             P.Menu.prototype.width = 0;
+        }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Menu){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf Menu
+             */
+            P.Menu.prototype.name = '';
         }
         Object.defineProperty(this, "font", {
             get: function() {
@@ -749,6 +749,30 @@
         });
     };
         /**
+         * Tries to acquire focus for this component.
+         * @method focus
+         * @memberOf Menu
+         */
+        P.Menu.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Gets the container's n-th component.
+         * @param index the component's index in the container
+         * @return the child component
+         * @method child
+         * @memberOf Menu
+         */
+        P.Menu.prototype.child = function(index) {
+            var delegate = this.unwrap();
+            var value = delegate.child(P.boxAsJava(index));
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Adds an item to the menu.
          * @param component the component to add
          * @method add
@@ -780,30 +804,6 @@
         P.Menu.prototype.clear = function() {
             var delegate = this.unwrap();
             var value = delegate.clear();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf Menu
-         */
-        P.Menu.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Gets the container's n-th component.
-         * @param index the component's index in the container
-         * @return the child component
-         * @method child
-         * @memberOf Menu
-         */
-        P.Menu.prototype.child = function(index) {
-            var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(index));
             return P.boxAsJs(value);
         };
 

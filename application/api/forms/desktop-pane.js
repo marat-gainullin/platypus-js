@@ -293,6 +293,20 @@
              */
             P.DesktopPane.prototype.height = 0;
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.DesktopPane){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf DesktopPane
+             */
+            P.DesktopPane.prototype.element = {};
+        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -309,20 +323,6 @@
              * @memberOf DesktopPane
              */
             P.DesktopPane.prototype.onComponentShown = {};
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.DesktopPane){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf DesktopPane
-             */
-            P.DesktopPane.prototype.element = {};
         }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
@@ -593,20 +593,6 @@
              */
             P.DesktopPane.prototype.onMouseExited = {};
         }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.DesktopPane){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf DesktopPane
-             */
-            P.DesktopPane.prototype.name = '';
-        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -623,6 +609,20 @@
              * @memberOf DesktopPane
              */
             P.DesktopPane.prototype.width = 0;
+        }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.DesktopPane){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf DesktopPane
+             */
+            P.DesktopPane.prototype.name = '';
         }
         Object.defineProperty(this, "forms", {
             get: function() {
@@ -674,13 +674,13 @@
         }
     };
         /**
-         * Closes all frames on the pane.
-         * @method closeAll
+         * Tries to acquire focus for this component.
+         * @method focus
          * @memberOf DesktopPane
          */
-        P.DesktopPane.prototype.closeAll = function() {
+        P.DesktopPane.prototype.focus = function() {
             var delegate = this.unwrap();
-            var value = delegate.closeAll();
+            var value = delegate.focus();
             return P.boxAsJs(value);
         };
 
@@ -718,13 +718,13 @@
         };
 
         /**
-         * Tries to acquire focus for this component.
-         * @method focus
+         * Closes all frames on the pane.
+         * @method closeAll
          * @memberOf DesktopPane
          */
-        P.DesktopPane.prototype.focus = function() {
+        P.DesktopPane.prototype.closeAll = function() {
             var delegate = this.unwrap();
-            var value = delegate.focus();
+            var value = delegate.closeAll();
             return P.boxAsJs(value);
         };
 

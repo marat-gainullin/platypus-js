@@ -274,6 +274,20 @@
              */
             P.ModelFormattedField.prototype.height = 0;
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelFormattedField){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf ModelFormattedField
+             */
+            P.ModelFormattedField.prototype.element = {};
+        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -290,20 +304,6 @@
              * @memberOf ModelFormattedField
              */
             P.ModelFormattedField.prototype.onComponentShown = {};
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ModelFormattedField){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf ModelFormattedField
-             */
-            P.ModelFormattedField.prototype.element = {};
         }
         Object.defineProperty(this, "visible", {
             get: function() {

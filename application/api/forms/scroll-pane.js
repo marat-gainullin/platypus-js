@@ -376,6 +376,20 @@
              */
             P.ScrollPane.prototype.height = 0;
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ScrollPane){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf ScrollPane
+             */
+            P.ScrollPane.prototype.element = {};
+        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -392,20 +406,6 @@
              * @memberOf ScrollPane
              */
             P.ScrollPane.prototype.onComponentShown = {};
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ScrollPane){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf ScrollPane
-             */
-            P.ScrollPane.prototype.element = {};
         }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
@@ -492,6 +492,20 @@
              */
             P.ScrollPane.prototype.nextFocusableComponent = {};
         }
+        Object.defineProperty(this, "count", {
+            get: function() {
+                var value = delegate.count;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ScrollPane){
+            /**
+             * Gets the number of components in this panel.
+             * @property count
+             * @memberOf ScrollPane
+             */
+            P.ScrollPane.prototype.count = 0;
+        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -525,20 +539,6 @@
              * @memberOf ScrollPane
              */
             P.ScrollPane.prototype.onKeyReleased = {};
-        }
-        Object.defineProperty(this, "count", {
-            get: function() {
-                var value = delegate.count;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ScrollPane){
-            /**
-             * Gets the number of components in this panel.
-             * @property count
-             * @memberOf ScrollPane
-             */
-            P.ScrollPane.prototype.count = 0;
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -707,20 +707,6 @@
              */
             P.ScrollPane.prototype.onMouseExited = {};
         }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ScrollPane){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf ScrollPane
-             */
-            P.ScrollPane.prototype.name = '';
-        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -737,6 +723,20 @@
              * @memberOf ScrollPane
              */
             P.ScrollPane.prototype.width = 0;
+        }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ScrollPane){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf ScrollPane
+             */
+            P.ScrollPane.prototype.name = '';
         }
         Object.defineProperty(this, "font", {
             get: function() {
@@ -778,6 +778,28 @@
         });
     };
         /**
+         * Tries to acquire focus for this component.
+         * @method focus
+         * @memberOf ScrollPane
+         */
+        P.ScrollPane.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Returns child component by index. For the ScrollPane allways returns view component
+         * @method child
+         * @memberOf ScrollPane
+         * @param index Index of compoentnt to return. Ignored. */
+        P.ScrollPane.prototype.child = function(index) {
+            var delegate = this.unwrap();
+            var value = delegate.child(P.boxAsJava(index));
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Sets the specified component as the scroll's view, replacing old view component.
          * @param component the component to add
          * @method add
@@ -798,28 +820,6 @@
         P.ScrollPane.prototype.remove = function(component) {
             var delegate = this.unwrap();
             var value = delegate.remove(P.boxAsJava(component));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf ScrollPane
-         */
-        P.ScrollPane.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Returns child component by index. For the ScrollPane allways returns view component
-         * @method child
-         * @memberOf ScrollPane
-         * @param index Index of compoentnt to return. Ignored. */
-        P.ScrollPane.prototype.child = function(index) {
-            var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(index));
             return P.boxAsJs(value);
         };
 

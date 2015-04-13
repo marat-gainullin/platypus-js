@@ -516,4 +516,15 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 			published = aValue;
 		}
 	}
+	
+	public void sort(){
+		grid.addSort(this, true);
+	}
+	public void sortDesc(){
+		grid.addSort(this, false);
+	}
+	public void unsort(){
+		grid.unsortColumn(this);
+	}
+	
 }

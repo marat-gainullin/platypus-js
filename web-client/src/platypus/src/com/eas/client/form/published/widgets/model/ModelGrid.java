@@ -1019,6 +1019,27 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 				aWidget.@com.eas.client.form.published.HasBinding::setField(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
 			}
 		});
+		Object.defineProperty(aPublished, "parentField", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::getParentField();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::setParentField(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
+			}
+		});
+		Object.defineProperty(aPublished, "childrenField", {
+			get : function() {
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::getChildrenField();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::setChildrenField(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
+			}
+		});
+		
+		aPublished.unsort = function() {
+			aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::unsort()();
+		};
+		
 	}-*/;
 
 	public JavaScriptObject getOnRender() {

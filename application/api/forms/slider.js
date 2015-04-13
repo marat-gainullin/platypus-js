@@ -349,6 +349,20 @@
              */
             P.Slider.prototype.height = 0;
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Slider){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf Slider
+             */
+            P.Slider.prototype.element = {};
+        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -365,20 +379,6 @@
              * @memberOf Slider
              */
             P.Slider.prototype.onComponentShown = {};
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.Slider){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf Slider
-             */
-            P.Slider.prototype.element = {};
         }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
@@ -649,20 +649,6 @@
              */
             P.Slider.prototype.onMouseExited = {};
         }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.Slider){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf Slider
-             */
-            P.Slider.prototype.name = '';
-        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -679,6 +665,20 @@
              * @memberOf Slider
              */
             P.Slider.prototype.width = 0;
+        }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Slider){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf Slider
+             */
+            P.Slider.prototype.name = '';
         }
         Object.defineProperty(this, "maximum", {
             get: function() {

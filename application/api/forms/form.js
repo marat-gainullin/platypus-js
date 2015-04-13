@@ -276,23 +276,6 @@
              */
             P.Form.prototype.resizable = true;
         }
-        Object.defineProperty(this, "onWindowRestored", {
-            get: function() {
-                var value = delegate.onWindowRestored;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onWindowRestored = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Form){
-            /**
-             * The handler function for the form's <i>after restore</i> event.
-             * @property onWindowRestored
-             * @memberOf Form
-             */
-            P.Form.prototype.onWindowRestored = {};
-        }
         Object.defineProperty(this, "formKey", {
             get: function() {
                 var value = delegate.formKey;
@@ -309,6 +292,23 @@
              * @memberOf Form
              */
             P.Form.prototype.formKey = '';
+        }
+        Object.defineProperty(this, "onWindowRestored", {
+            get: function() {
+                var value = delegate.onWindowRestored;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onWindowRestored = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Form){
+            /**
+             * The handler function for the form's <i>after restore</i> event.
+             * @property onWindowRestored
+             * @memberOf Form
+             */
+            P.Form.prototype.onWindowRestored = {};
         }
         Object.defineProperty(this, "maximized", {
             get: function() {
@@ -445,18 +445,6 @@
         }
     };
         /**
-         * Closes this form.
-         * @param obj an object to be passed as a result of a selection into <code>showModal</code> callback handler function.
-         * @method close
-         * @memberOf Form
-         */
-        P.Form.prototype.close = function(obj) {
-            var delegate = this.unwrap();
-            var value = delegate.close(P.boxAsJava(obj));
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Shows the form as an ordinary window.
          * @method show
          * @memberOf Form
@@ -475,6 +463,39 @@
         P.Form.prototype.toFront = function() {
             var delegate = this.unwrap();
             var value = delegate.toFront();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Restores this form state.
+         * @method restore
+         * @memberOf Form
+         */
+        P.Form.prototype.restore = function() {
+            var delegate = this.unwrap();
+            var value = delegate.restore();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Minimizes this form.
+         * @method minimize
+         * @memberOf Form
+         */
+        P.Form.prototype.minimize = function() {
+            var delegate = this.unwrap();
+            var value = delegate.minimize();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Maximizes this form.
+         * @method maximize
+         * @memberOf Form
+         */
+        P.Form.prototype.maximize = function() {
+            var delegate = this.unwrap();
+            var value = delegate.maximize();
             return P.boxAsJs(value);
         };
 
@@ -503,35 +524,14 @@
         };
 
         /**
-         * Minimizes this form.
-         * @method minimize
+         * Closes this form.
+         * @param obj an object to be passed as a result of a selection into <code>showModal</code> callback handler function.
+         * @method close
          * @memberOf Form
          */
-        P.Form.prototype.minimize = function() {
+        P.Form.prototype.close = function(obj) {
             var delegate = this.unwrap();
-            var value = delegate.minimize();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Maximizes this form.
-         * @method maximize
-         * @memberOf Form
-         */
-        P.Form.prototype.maximize = function() {
-            var delegate = this.unwrap();
-            var value = delegate.maximize();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Restores this form state.
-         * @method restore
-         * @memberOf Form
-         */
-        P.Form.prototype.restore = function() {
-            var delegate = this.unwrap();
-            var value = delegate.restore();
+            var value = delegate.close(P.boxAsJava(obj));
             return P.boxAsJs(value);
         };
 

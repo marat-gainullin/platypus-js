@@ -294,6 +294,20 @@
              */
             P.MenuSeparator.prototype.height = 0;
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.element = {};
+        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -310,20 +324,6 @@
              * @memberOf MenuSeparator
              */
             P.MenuSeparator.prototype.onComponentShown = {};
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.MenuSeparator){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf MenuSeparator
-             */
-            P.MenuSeparator.prototype.element = {};
         }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
@@ -594,20 +594,6 @@
              */
             P.MenuSeparator.prototype.onMouseExited = {};
         }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.MenuSeparator){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf MenuSeparator
-             */
-            P.MenuSeparator.prototype.name = '';
-        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -624,6 +610,20 @@
              * @memberOf MenuSeparator
              */
             P.MenuSeparator.prototype.width = 0;
+        }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.name = '';
         }
         Object.defineProperty(this, "font", {
             get: function() {

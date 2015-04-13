@@ -362,6 +362,20 @@
              */
             P.TextArea.prototype.height = 0;
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.TextArea){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf TextArea
+             */
+            P.TextArea.prototype.element = {};
+        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -378,20 +392,6 @@
              * @memberOf TextArea
              */
             P.TextArea.prototype.onComponentShown = {};
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.TextArea){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf TextArea
-             */
-            P.TextArea.prototype.element = {};
         }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
@@ -662,20 +662,6 @@
              */
             P.TextArea.prototype.onMouseExited = {};
         }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.TextArea){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf TextArea
-             */
-            P.TextArea.prototype.name = '';
-        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -692,6 +678,20 @@
              * @memberOf TextArea
              */
             P.TextArea.prototype.width = 0;
+        }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.TextArea){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf TextArea
+             */
+            P.TextArea.prototype.name = '';
         }
         Object.defineProperty(this, "font", {
             get: function() {

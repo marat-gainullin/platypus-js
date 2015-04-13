@@ -38,6 +38,17 @@
         }
     };
         /**
+         * Cancels applied filter.
+         * @method cancel
+         * @memberOf Filter
+         */
+        P.Filter.prototype.cancel = function() {
+            var delegate = this.unwrap();
+            var value = delegate.cancel();
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Applies the filter with values passed in. Values correspond to key fields in createFilter() call.
          * @param values Values for keys in createFilter() call.
          * @method apply
@@ -46,17 +57,6 @@
         P.Filter.prototype.apply = function(values) {
             var delegate = this.unwrap();
             var value = delegate.apply(P.boxAsJava(values));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Cancels applied filter.
-         * @method cancel
-         * @memberOf Filter
-         */
-        P.Filter.prototype.cancel = function() {
-            var delegate = this.unwrap();
-            var value = delegate.cancel();
             return P.boxAsJs(value);
         };
 

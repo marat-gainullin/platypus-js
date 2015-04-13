@@ -326,6 +326,20 @@
              */
             P.AnchorsPane.prototype.height = 0;
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.AnchorsPane){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf AnchorsPane
+             */
+            P.AnchorsPane.prototype.element = {};
+        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -342,20 +356,6 @@
              * @memberOf AnchorsPane
              */
             P.AnchorsPane.prototype.onComponentShown = {};
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.AnchorsPane){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf AnchorsPane
-             */
-            P.AnchorsPane.prototype.element = {};
         }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
@@ -442,6 +442,20 @@
              */
             P.AnchorsPane.prototype.nextFocusableComponent = {};
         }
+        Object.defineProperty(this, "count", {
+            get: function() {
+                var value = delegate.count;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.AnchorsPane){
+            /**
+             * Gets the number of components in this panel.
+             * @property count
+             * @memberOf AnchorsPane
+             */
+            P.AnchorsPane.prototype.count = 0;
+        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -475,20 +489,6 @@
              * @memberOf AnchorsPane
              */
             P.AnchorsPane.prototype.onKeyReleased = {};
-        }
-        Object.defineProperty(this, "count", {
-            get: function() {
-                var value = delegate.count;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.AnchorsPane){
-            /**
-             * Gets the number of components in this panel.
-             * @property count
-             * @memberOf AnchorsPane
-             */
-            P.AnchorsPane.prototype.count = 0;
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -657,20 +657,6 @@
              */
             P.AnchorsPane.prototype.onMouseExited = {};
         }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.AnchorsPane){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf AnchorsPane
-             */
-            P.AnchorsPane.prototype.name = '';
-        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -687,6 +673,20 @@
              * @memberOf AnchorsPane
              */
             P.AnchorsPane.prototype.width = 0;
+        }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.AnchorsPane){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf AnchorsPane
+             */
+            P.AnchorsPane.prototype.name = '';
         }
         Object.defineProperty(this, "font", {
             get: function() {
@@ -728,42 +728,6 @@
         });
     };
         /**
-         * Appends the specified component to the container with specified placement.
-         * @param component the component to add.
-         * @param anchors the anchors object for the component, can contain the following properties: left, width, right, top, height, bottom.
-         * @method add
-         * @memberOf AnchorsPane
-         */
-        P.AnchorsPane.prototype.add = function(component, anchors) {
-            var delegate = this.unwrap();
-            var value = delegate.add(P.boxAsJava(component), P.boxAsJava(anchors));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Removes the specified component from this container.
-         * @param component the component to remove
-         * @method remove
-         * @memberOf AnchorsPane
-         */
-        P.AnchorsPane.prototype.remove = function(component) {
-            var delegate = this.unwrap();
-            var value = delegate.remove(P.boxAsJava(component));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Removes all the components from this container.
-         * @method clear
-         * @memberOf AnchorsPane
-         */
-        P.AnchorsPane.prototype.clear = function() {
-            var delegate = this.unwrap();
-            var value = delegate.clear();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Brings the specified component to back on this panel.
          * @param component the component.
          * @param count steps to move the component (optional).
@@ -797,6 +761,42 @@
         P.AnchorsPane.prototype.focus = function() {
             var delegate = this.unwrap();
             var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Appends the specified component to the container with specified placement.
+         * @param component the component to add.
+         * @param anchors the anchors object for the component, can contain the following properties: left, width, right, top, height, bottom.
+         * @method add
+         * @memberOf AnchorsPane
+         */
+        P.AnchorsPane.prototype.add = function(component, anchors) {
+            var delegate = this.unwrap();
+            var value = delegate.add(P.boxAsJava(component), P.boxAsJava(anchors));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Removes the specified component from this container.
+         * @param component the component to remove
+         * @method remove
+         * @memberOf AnchorsPane
+         */
+        P.AnchorsPane.prototype.remove = function(component) {
+            var delegate = this.unwrap();
+            var value = delegate.remove(P.boxAsJava(component));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Removes all the components from this container.
+         * @method clear
+         * @memberOf AnchorsPane
+         */
+        P.AnchorsPane.prototype.clear = function() {
+            var delegate = this.unwrap();
+            var value = delegate.clear();
             return P.boxAsJs(value);
         };
 
