@@ -332,23 +332,6 @@
              */
             P.RadioButton.prototype.onMouseEntered = {};
         }
-        Object.defineProperty(this, "toolTipText", {
-            get: function() {
-                var value = delegate.toolTipText;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.toolTipText = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.RadioButton){
-            /**
-             * The tooltip string that has been set with.
-             * @property toolTipText
-             * @memberOf RadioButton
-             */
-            P.RadioButton.prototype.toolTipText = '';
-        }
         Object.defineProperty(this, "selected", {
             get: function() {
                 var value = delegate.selected;
@@ -366,6 +349,37 @@
              */
             P.RadioButton.prototype.selected = true;
         }
+        Object.defineProperty(this, "toolTipText", {
+            get: function() {
+                var value = delegate.toolTipText;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.toolTipText = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.RadioButton){
+            /**
+             * The tooltip string that has been set with.
+             * @property toolTipText
+             * @memberOf RadioButton
+             */
+            P.RadioButton.prototype.toolTipText = '';
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.RadioButton){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf RadioButton
+             */
+            P.RadioButton.prototype.element = {};
+        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -382,20 +396,6 @@
              * @memberOf RadioButton
              */
             P.RadioButton.prototype.height = 0;
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.RadioButton){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf RadioButton
-             */
-            P.RadioButton.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
