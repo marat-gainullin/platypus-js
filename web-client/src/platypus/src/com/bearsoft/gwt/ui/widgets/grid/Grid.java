@@ -1292,40 +1292,46 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 	}
 	
 	public void addSort(ModelColumn aColumn, boolean isAscending) {
-		boolean contains = false;
-		int containsAt = -1;
-		for (int i = 0; i < sortList.size(); i++) {
-			if (sortList.get(i).getColumn() == aColumn) {
-				contains = true;
-				containsAt = i;
-				break;
+		if (aColumn.isSortable()) {
+			boolean contains = false;
+			int containsAt = -1;
+			for (int i = 0; i < sortList.size(); i++) {
+				if (sortList.get(i).getColumn() == aColumn) {
+					contains = true;
+					containsAt = i;
+					break;
+				}
 			}
-		}
-		if (contains) {
-			boolean wasAscending = sortList.get(containsAt).isAscending();
-			if (wasAscending==isAscending) {
-				return; 
+			if (contains) {
+				boolean wasAscending = sortList.get(containsAt).isAscending();
+				if (wasAscending == isAscending) {
+					return;
+				}
+
 			}
+			sortList.insert(sortList.size(), new ColumnSortList.ColumnSortInfo(
+					aColumn, isAscending));
+			ColumnSortEvent.fire(Grid.this, sortList);
+			redrawHeaders();
 		}
-		sortList.insert(sortList.size(), new ColumnSortList.ColumnSortInfo(aColumn, isAscending));
-		ColumnSortEvent.fire(Grid.this, sortList);
-		redrawHeaders();
 	}
 	
 	public void unsortColumn(ModelColumn aColumn) {
-		boolean contains = false;
-		int containsAt = -1;
-		for (int i = 0; i < sortList.size(); i++) {
-			if (sortList.get(i).getColumn() == aColumn) {
-				contains = true;
-				containsAt = i;
-				break;
+		if (aColumn.isSortable()) {
+			boolean contains = false;
+			int containsAt = -1;
+			for (int i = 0; i < sortList.size(); i++) {
+				if (sortList.get(i).getColumn() == aColumn) {
+					contains = true;
+					containsAt = i;
+					break;
+				}
 			}
-		}
-		if (contains) {
-			sortList.remove(sortList.get(containsAt));
-			ColumnSortEvent.fire(Grid.this, sortList);
-			redrawHeaders();
+			if (contains) {
+				sortList.remove(sortList.get(containsAt));
+				ColumnSortEvent.fire(Grid.this, sortList);
+				redrawHeaders();
+			}
 		}
 	}
 }
