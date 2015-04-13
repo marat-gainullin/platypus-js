@@ -331,6 +331,20 @@
              */
             P.GridPane.prototype.toolTipText = '';
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.GridPane){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf GridPane
+             */
+            P.GridPane.prototype.element = {};
+        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -347,20 +361,6 @@
              * @memberOf GridPane
              */
             P.GridPane.prototype.height = 0;
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.GridPane){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf GridPane
-             */
-            P.GridPane.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -764,17 +764,6 @@
         });
     };
         /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf GridPane
-         */
-        P.GridPane.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Gets the component with the specified row and column.
          * @param row the row of the component
          * @param column the column of the component
@@ -784,6 +773,17 @@
         P.GridPane.prototype.child = function(row, column) {
             var delegate = this.unwrap();
             var value = delegate.child(P.boxAsJava(row), P.boxAsJava(column));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Tries to acquire focus for this component.
+         * @method focus
+         * @memberOf GridPane
+         */
+        P.GridPane.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
             return P.boxAsJs(value);
         };
 

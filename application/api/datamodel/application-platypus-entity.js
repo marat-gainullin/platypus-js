@@ -212,6 +212,30 @@
         };
 
         /**
+         * Deprecated. Please, use findByKey() instead.
+         * @method findById
+         * @memberOf ApplicationPlatypusEntity
+         */
+        P.ApplicationPlatypusEntity.prototype.findById = function(key) {
+            var delegate = this.unwrap();
+            var value = delegate.findById(P.boxAsJava(key));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Finds an object by its key. Key must be a single property.
+         * @param key the unique identifier of the row.
+         * @return An object or <code>null</code> if nothing is found.
+         * @method findByKey
+         * @memberOf ApplicationPlatypusEntity
+         */
+        P.ApplicationPlatypusEntity.prototype.findByKey = function(key) {
+            var delegate = this.unwrap();
+            var value = delegate.findByKey(P.boxAsJava(key));
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Sets the array cursor to the specified object.
          * @param object the object to position the entity cursor on.
          * @return <code>true</code> if the cursor changed successfully and <code>false</code> otherwise.
@@ -234,30 +258,6 @@
         P.ApplicationPlatypusEntity.prototype.createSorting = function(pairs) {
             var delegate = this.unwrap();
             var value = delegate.createSorting(P.boxAsJava(pairs));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Deprecated. Please, use findByKey() instead.
-         * @method findById
-         * @memberOf ApplicationPlatypusEntity
-         */
-        P.ApplicationPlatypusEntity.prototype.findById = function(key) {
-            var delegate = this.unwrap();
-            var value = delegate.findById(P.boxAsJava(key));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Finds an object by its key. Key must be a single property.
-         * @param key the unique identifier of the row.
-         * @return An object or <code>null</code> if nothing is found.
-         * @method findByKey
-         * @memberOf ApplicationPlatypusEntity
-         */
-        P.ApplicationPlatypusEntity.prototype.findByKey = function(key) {
-            var delegate = this.unwrap();
-            var value = delegate.findByKey(P.boxAsJava(key));
             return P.boxAsJs(value);
         };
 

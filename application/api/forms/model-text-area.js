@@ -223,6 +223,20 @@
              */
             P.ModelTextArea.prototype.toolTipText = '';
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelTextArea){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf ModelTextArea
+             */
+            P.ModelTextArea.prototype.element = {};
+        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -239,20 +253,6 @@
              * @memberOf ModelTextArea
              */
             P.ModelTextArea.prototype.height = 0;
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ModelTextArea){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf ModelTextArea
-             */
-            P.ModelTextArea.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {

@@ -207,6 +207,20 @@
              */
             P.ModelGrid.prototype.toolTipText = '';
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.element = {};
+        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -223,20 +237,6 @@
              * @memberOf ModelGrid
              */
             P.ModelGrid.prototype.height = 0;
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ModelGrid){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf ModelGrid
-             */
-            P.ModelGrid.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -524,23 +524,6 @@
              */
             P.ModelGrid.prototype.onFocusLost = {};
         }
-        Object.defineProperty(this, "deletable", {
-            get: function() {
-                var value = delegate.deletable;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.deletable = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelGrid){
-            /**
-             * Determines if grid allows to delete rows.
-             * @property deletable
-             * @memberOf ModelGrid
-             */
-            P.ModelGrid.prototype.deletable = true;
-        }
         Object.defineProperty(this, "onMousePressed", {
             get: function() {
                 var value = delegate.onMousePressed;
@@ -557,6 +540,23 @@
              * @memberOf ModelGrid
              */
             P.ModelGrid.prototype.onMousePressed = {};
+        }
+        Object.defineProperty(this, "deletable", {
+            get: function() {
+                var value = delegate.deletable;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.deletable = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * Determines if grid allows to delete rows.
+             * @property deletable
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.deletable = true;
         }
         Object.defineProperty(this, "error", {
             get: function() {
@@ -794,23 +794,6 @@
              */
             P.ModelGrid.prototype.onFocusGained = {};
         }
-        Object.defineProperty(this, "rowsHeight", {
-            get: function() {
-                var value = delegate.rowsHeight;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.rowsHeight = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelGrid){
-            /**
-             * The height of grid's rows.
-             * @property rowsHeight
-             * @memberOf ModelGrid
-             */
-            P.ModelGrid.prototype.rowsHeight = 0;
-        }
         Object.defineProperty(this, "onMouseClicked", {
             get: function() {
                 var value = delegate.onMouseClicked;
@@ -827,6 +810,23 @@
              * @memberOf ModelGrid
              */
             P.ModelGrid.prototype.onMouseClicked = {};
+        }
+        Object.defineProperty(this, "rowsHeight", {
+            get: function() {
+                var value = delegate.rowsHeight;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.rowsHeight = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * The height of grid's rows.
+             * @property rowsHeight
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.rowsHeight = 0;
         }
         Object.defineProperty(this, "onMouseExited", {
             get: function() {
@@ -961,17 +961,6 @@
         };
 
         /**
-         * Clears current selection.
-         * @method clearSelection
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.clearSelection = function() {
-            var delegate = this.unwrap();
-            var value = delegate.clearSelection();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Selects the specified element.
          * @param instance Entity's instance to be selected.
          * @method select
@@ -984,13 +973,13 @@
         };
 
         /**
-         * Tries to acquire focus for this component.
-         * @method focus
+         * Clears current selection.
+         * @method clearSelection
          * @memberOf ModelGrid
          */
-        P.ModelGrid.prototype.focus = function() {
+        P.ModelGrid.prototype.clearSelection = function() {
             var delegate = this.unwrap();
-            var value = delegate.focus();
+            var value = delegate.clearSelection();
             return P.boxAsJs(value);
         };
 
@@ -1008,34 +997,24 @@
         };
 
         /**
-         *
-         * @method try2StopAnyEditing
+         * Tries to acquire focus for this component.
+         * @method focus
          * @memberOf ModelGrid
          */
-        P.ModelGrid.prototype.try2StopAnyEditing = function() {
+        P.ModelGrid.prototype.focus = function() {
             var delegate = this.unwrap();
-            var value = delegate.try2StopAnyEditing();
+            var value = delegate.focus();
             return P.boxAsJs(value);
         };
 
         /**
-         *
-         * @method try2CancelAnyEditing
+         * Redraw the component.
+         * @method redraw
          * @memberOf ModelGrid
          */
-        P.ModelGrid.prototype.try2CancelAnyEditing = function() {
+        P.ModelGrid.prototype.redraw = function() {
             var delegate = this.unwrap();
-            var value = delegate.try2CancelAnyEditing();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * @method unsort
-         * @memberOf ModelGrid
-         * Clears sort on all columns, works only in HTML5 */
-        P.ModelGrid.prototype.unsort = function() {
-            var delegate = this.unwrap();
-            var value = delegate.unsort();
+            var value = delegate.redraw();
             return P.boxAsJs(value);
         };
 
@@ -1084,13 +1063,34 @@
         };
 
         /**
-         * Redraw the component.
-         * @method redraw
+         *
+         * @method try2StopAnyEditing
          * @memberOf ModelGrid
          */
-        P.ModelGrid.prototype.redraw = function() {
+        P.ModelGrid.prototype.try2StopAnyEditing = function() {
             var delegate = this.unwrap();
-            var value = delegate.redraw();
+            var value = delegate.try2StopAnyEditing();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
+         * @method try2CancelAnyEditing
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.try2CancelAnyEditing = function() {
+            var delegate = this.unwrap();
+            var value = delegate.try2CancelAnyEditing();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * @method unsort
+         * @memberOf ModelGrid
+         * Clears sort on all columns, works only in HTML5 */
+        P.ModelGrid.prototype.unsort = function() {
+            var delegate = this.unwrap();
+            var value = delegate.unsort();
             return P.boxAsJs(value);
         };
 
