@@ -82,7 +82,7 @@ public class ExplicitValueBox<T> extends ValueBox<T> {
 
 	@Override
 	public String getText() {
-		return renderer.render(value);
+		return super.getText();//renderer.render(value);
 	}
 
 	@Override
