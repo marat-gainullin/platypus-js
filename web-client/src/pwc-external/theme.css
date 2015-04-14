@@ -207,7 +207,7 @@
 .decorator-clear{
     width: 20px; 
     opacity: 0.5;
-    background-image: url(decorator-clear.png);
+    background-image: url(decorator-clear.svg);
     background-repeat: no-repeat;
     background-position: center;
     cursor: pointer;
