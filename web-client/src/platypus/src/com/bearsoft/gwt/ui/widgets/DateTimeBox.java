@@ -89,12 +89,10 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 		field.setFireNullValues(true);
 		
 		box = field.getTextBox();
+		box.getElement().getStyle().setOutlineStyle(Style.OutlineStyle.NONE);
 		box.addBlurHandler(new BlurHandler() {
 			@Override
 			public void onBlur(BlurEvent event) {
-				//Нужно получить значение и заменить его
-				//событие бросать только если значение изменилось
-				//после изменения даты - надо новую дату закидывать в TimePicker 
 				 Date newValue = getValue();
 				if (value == null ? newValue != null : !value.equals(newValue)){
 					value = newValue;

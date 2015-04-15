@@ -46,6 +46,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public abstract class DecoratorBox<T> extends Composite implements RequiresResize, HasValue<T>, HasValueChangeHandlers<T>, Focusable, HasEnabled, HasAllKeyHandlers, HasFocusHandlers, HasBlurHandlers {
 
+	private static final String DECORATOR_FOCUSED_CLASS_NAME = "decorator-focused";
 	protected FlowPanel container = new FlowPanel();
 	protected HasValue<T> decorated;
 	protected boolean enabled = true;
@@ -104,6 +105,7 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 			@Override
 			public void onClick(ClickEvent event) {
 				clearValue();
+				setFocus(true);
 			}
 		}, ClickEvent.getType());
 		organizeButtonsContent();
@@ -151,11 +153,7 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 	public void setNullable(boolean aValue) {
 		if(nullable != aValue){
 			nullable = aValue;
-			if(nullable){
-				container.add(clearButton);
-			}else{
-				container.remove(clearButton);
-			}
+			setClearButtonVisible(nullable);
 		}
     }
 	
@@ -232,6 +230,7 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 					style.setTop(0, Style.Unit.PX);
 					style.setHeight(100, Style.Unit.PCT);
 					style.setWidth(100, Style.Unit.PCT);
+					style.setOutlineStyle(Style.OutlineStyle.NONE);
 					contentWrapper.setWidget((Widget) decorated);
 				}
 				if (decorated instanceof HasKeyDownHandlers) {
@@ -266,6 +265,7 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 
 						@Override
 						public void onFocus(FocusEvent event) {
+							DecoratorBox.this.getElement().addClassName(DECORATOR_FOCUSED_CLASS_NAME);
 							FocusEvent.fireNativeEvent(event.getNativeEvent(), DecoratorBox.this);
 						}
 
@@ -276,6 +276,7 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 
 						@Override
 						public void onBlur(BlurEvent event) {
+							DecoratorBox.this.getElement().removeClassName(DECORATOR_FOCUSED_CLASS_NAME);
 							BlurEvent.fireNativeEvent(event.getNativeEvent(), DecoratorBox.this);
 						}
 

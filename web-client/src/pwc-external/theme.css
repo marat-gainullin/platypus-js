@@ -222,6 +222,11 @@
     border-radius: 2px;
 }
 
+.decorator-focused{
+    border: solid 1px gray;
+    border-radius: 2px;
+}
+
 .gwt-MenuItem{
     padding-top: 0px;
     padding-bottom: 0px;
