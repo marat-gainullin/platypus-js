@@ -73,9 +73,13 @@ public class CompletionPoint {
                 cp.astRoot = ScriptUtils.parseJs(
                         afterDotCaretPosintion
                                 ? sanitizeDot(docStr, caretOffset - 1) : docStr);
-                List<CompletionToken> ctxTokens = getContextTokens(cp.astRoot, afterDotCaretPosintion ? caretOffset - 1 : caretOffset);
-                List<CompletionToken> offsetTokens = getOffsetTokens(ctxTokens, caretOffset);
-                cp.completionTokens = filterIndexIdentNodes(offsetTokens);
+                if (cp.astRoot != null) {
+                    List<CompletionToken> ctxTokens = getContextTokens(cp.astRoot, afterDotCaretPosintion ? caretOffset - 1 : caretOffset);
+                    List<CompletionToken> offsetTokens = getOffsetTokens(ctxTokens, caretOffset);
+                    cp.completionTokens = filterIndexIdentNodes(offsetTokens);
+                } else {
+                    cp.completionTokens = Collections.emptyList();
+                }
             }
             cp.caretBeginWordOffset = getStartWordOffset(doc, caretOffset);
             cp.caretEndWordOffset = getEndWordOffset(doc, caretOffset);
