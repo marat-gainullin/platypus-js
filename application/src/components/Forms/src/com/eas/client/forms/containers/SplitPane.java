@@ -59,7 +59,7 @@ public class SplitPane extends JSplitPane implements HasPublished, HasContainerE
         super(aOrientation == Orientation.VERTICAL ? JSplitPane.VERTICAL_SPLIT : JSplitPane.HORIZONTAL_SPLIT);
         super.setOneTouchExpandable(true);
         super.addContainerListener(invalidatorListener);
-        super.setDividerSize(3);
+        //super.setDividerSize(3);
     }
 
     @ScriptFunction(jsDoc = JS_NAME_DOC)
