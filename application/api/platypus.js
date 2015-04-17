@@ -902,6 +902,7 @@
                             });
                         },
                         scrolled: function (aSubject, oldCursor, newCursor) {
+                            fire(found, {source: found, propertyName: 'cursor', oldValue: oldCursor, newValue: newCursor});
                         }
                     });
                     return found;

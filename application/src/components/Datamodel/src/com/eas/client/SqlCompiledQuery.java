@@ -160,6 +160,13 @@ public class SqlCompiledQuery {
         }
     }
 
+    public FlowProvider getFlowProvider() throws Exception {
+        PlatypusJdbcFlowProvider flow = basesProxy.createFlowProvider(datasourceName, entityName, sqlClause, expectedFields);
+        flow.setPageSize(pageSize);
+        flow.setProcedure(procedure);
+        return flow;
+    }
+
     public Command prepareCommand() {
         Command command = new Command(entityName);
         command.command = sqlClause;
@@ -195,19 +202,19 @@ public class SqlCompiledQuery {
     /**
      * @return the databaseId
      */
-    public String getDatabaseId() {
+    public String getDatasourceName() {
         return datasourceName;
     }
 
-    public void setDatabaseId(String aValue) throws Exception {
+    public void setDatasourceName(String aValue) throws Exception {
         datasourceName = aValue;
     }
 
-    public String getEntityId() {
+    public String getEntityName() {
         return entityName;
     }
 
-    public void setEntityId(String aEntityId) throws Exception {
-        entityName = aEntityId;
+    public void setEntityName(String aValue) throws Exception {
+        entityName = aValue;
     }
 }

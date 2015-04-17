@@ -15,7 +15,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public interface FlowProvider {
+public interface FlowProvider extends AutoCloseable{
 
     public static final int NO_PAGING_PAGE_SIZE = -1;
 
@@ -26,7 +26,7 @@ public interface FlowProvider {
      * @return Back-end entity identifier. It might be a database table, or ORM
      * entity
      */
-    public String getEntityId();
+    public String getEntityName();
 
     /**
      * Queries some source for data, according to the supplied parameters
@@ -78,4 +78,5 @@ public interface FlowProvider {
     public boolean isProcedure();
 
     public void setProcedure(boolean aProcedure);
+    
 }

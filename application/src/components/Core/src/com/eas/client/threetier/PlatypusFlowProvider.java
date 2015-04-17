@@ -41,6 +41,11 @@ public class PlatypusFlowProvider implements FlowProvider {
     }
 
     @Override
+    public void close() throws Exception {
+        // no op in three-tier mode
+    }
+
+    @Override
     public JSObject refresh(Parameters aParams, Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws FlowProviderFailedException {
         ExecuteQueryRequest request = new ExecuteQueryRequest(entityName, aParams, expectedFields);
         if (onSuccess != null) {
@@ -86,7 +91,7 @@ public class PlatypusFlowProvider implements FlowProvider {
     }
 
     @Override
-    public String getEntityId() {
+    public String getEntityName() {
         return entityName;
     }
 

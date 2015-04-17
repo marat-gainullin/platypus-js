@@ -133,21 +133,27 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
         }
     }
 
-    private void endPaging() throws SQLException {
+    private void endPaging() throws Exception {
         assert isPaged();
-        assert lowLevelResults != null;
-        lowLevelResults.close();
-        // See refresh method, hacky statement closing.
-        if (lowLevelStatement != null) {
-            lowLevelStatement.close();
+        close();
+    }
+
+    @Override
+    public void close() throws Exception {
+        if (lowLevelResults != null) {
+            lowLevelResults.close();
+            // See refresh method, hacky statement closing.
+            if (lowLevelStatement != null) {
+                lowLevelStatement.close();
+            }
+            // See refresh method, hacky connection closing.
+            if (lowLevelConnection != null) {
+                lowLevelConnection.close();
+            }
+            lowLevelResults = null;
+            lowLevelStatement = null;
+            lowLevelConnection = null;
         }
-        // See refresh method, hacky connection closing.
-        if (lowLevelConnection != null) {
-            lowLevelConnection.close();
-        }
-        lowLevelResults = null;
-        lowLevelStatement = null;
-        lowLevelConnection = null;
     }
 
     /**

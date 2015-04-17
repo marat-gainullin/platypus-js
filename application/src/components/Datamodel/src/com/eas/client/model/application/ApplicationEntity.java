@@ -363,7 +363,9 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
             query.execute((JSObject aRowset) -> {
                 if (!f.isCancelled()) {
                     // Apply aRowset as a snapshot. Be aware of change log!
-                    snapshotConsumer.call(null, new Object[]{aRowset});
+                    if (snapshotConsumer != null) {// snapshotConsumer is null in designer
+                        snapshotConsumer.call(null, new Object[]{aRowset});
+                    }
                     assert pending == f : PENDING_ASSUMPTION_FAILED_MSG;
                     valid = true;
                     pending = null;
@@ -395,7 +397,9 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
             return null;
         } else {
             JSObject jsRowset = query.execute(null, null);
-            snapshotConsumer.call(null, new Object[]{jsRowset});
+            if (snapshotConsumer != null) {// snapshotConsumer is null in designer
+                snapshotConsumer.call(null, new Object[]{jsRowset});
+            }
             if (onRequeried != null) {
                 try {
                     onRequeried.call(published, new Object[]{});

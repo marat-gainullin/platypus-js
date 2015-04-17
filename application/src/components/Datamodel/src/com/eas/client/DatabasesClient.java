@@ -297,7 +297,7 @@ public class DatabasesClient {
     public int executeUpdate(SqlCompiledQuery aQuery, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
         Callable<Integer> doWork = () -> {
             int rowsAffected = 0;
-            DataSource dataSource = obtainDataSource(aQuery.getDatabaseId());
+            DataSource dataSource = obtainDataSource(aQuery.getDatasourceName());
             if (dataSource != null) {
                 try (Connection connection = dataSource.getConnection(); PreparedStatement stmt = connection.prepareStatement(aQuery.getSqlClause())) {
                     connection.setAutoCommit(false);

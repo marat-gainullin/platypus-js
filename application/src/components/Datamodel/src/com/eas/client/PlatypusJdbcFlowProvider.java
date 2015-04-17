@@ -36,7 +36,7 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
     }
 
     @Override
-    public String getEntityId() {
+    public String getEntityName() {
         return entityName;
     }
 
