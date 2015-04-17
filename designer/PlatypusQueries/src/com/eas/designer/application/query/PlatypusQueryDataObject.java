@@ -795,7 +795,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
             try {
                 StoredQueryFactory factory = new ScriptedQueryFactory(basesProxy, getProject().getQueries(), getProject().getIndexer(), true);
                 SqlQuery outQuery = new SqlQuery(basesProxy, datasourceName, s);
-                outQuery.setEntityId(String.valueOf(IDGenerator.genID()));
+                outQuery.setEntityName(String.valueOf(IDGenerator.genID()));
                 factory.putTableFieldsMetadata(outQuery);
                 outputFields = outQuery.getFields();
             } catch (Exception ex) {

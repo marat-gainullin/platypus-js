@@ -205,7 +205,7 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
             if (!dom.containsChild(RequestsTags.TAG_FIELDS)) {
                 throw new ProtoReaderException("Query fields are not specified");
             }
-            appQuery.setEntityId(dom.getChild(RequestsTags.TAG_QUERY_ID).getString());
+            appQuery.setEntityName(dom.getChild(RequestsTags.TAG_QUERY_ID).getString());
             if (dom.containsChild(RequestsTags.TAG_DML)) {
                 appQuery.setManual(dom.getChild(RequestsTags.TAG_DML).getInt() == 1);
             }

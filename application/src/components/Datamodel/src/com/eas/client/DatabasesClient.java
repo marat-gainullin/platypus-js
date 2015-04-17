@@ -592,7 +592,7 @@ public class DatabasesClient {
                                 query = null;
                             }
                             Fields fields;
-                            if (query != null && query.getEntityId() != null) {
+                            if (query != null && query.getEntityName() != null) {
                                 fields = query.getFields();
                             } else {// It seems, that aEntityId is a table name...
                                 fields = mdCaches.get(aDatasourceName).getTableMetadata(aEntityName);

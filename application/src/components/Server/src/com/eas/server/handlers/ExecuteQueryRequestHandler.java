@@ -39,7 +39,7 @@ public class ExecuteQueryRequestHandler extends SessionRequestHandler<ExecuteQue
         try {
             ((LocalQueriesProxy) getServerCore().getQueries()).getQuery(getRequest().getQueryName(), (SqlQuery query) -> {
                 try {
-                    if (query == null || query.getEntityId() == null) {
+                    if (query == null || query.getEntityName() == null) {
                         throw new Exception(String.format(MISSING_QUERY_MSG, getRequest().getQueryName()));
                     }
                     if (!query.isPublicAccess()) {
@@ -47,7 +47,7 @@ public class ExecuteQueryRequestHandler extends SessionRequestHandler<ExecuteQue
                     }
                     Set<String> rolesAllowed = query.getReadRoles();
                     if (rolesAllowed != null && !PlatypusPrincipal.getInstance().hasAnyRole(rolesAllowed)) {
-                        throw new AccessControlException(String.format(ACCESS_DENIED_MSG, query.getEntityId(), PlatypusPrincipal.getInstance().getName()), PlatypusPrincipal.getInstance() instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
+                        throw new AccessControlException(String.format(ACCESS_DENIED_MSG, query.getEntityName(), PlatypusPrincipal.getInstance().getName()), PlatypusPrincipal.getInstance() instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
                     }
                     handleQuery(query.copy(), (JSObject rowset) -> {
                         if (onSuccess != null) {

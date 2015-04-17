@@ -4,8 +4,6 @@
  */
 package com.eas.client.queries;
 
-import com.eas.client.DatabasesClientWithResource;
-import com.eas.client.SqlQuery;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;

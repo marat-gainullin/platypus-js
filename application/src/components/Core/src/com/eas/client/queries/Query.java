@@ -55,7 +55,7 @@ public abstract class Query {
         if (aSource != null) {
             procedure = aSource.isProcedure();
             manual = aSource.isManual();
-            entityName = aSource.getEntityId();
+            entityName = aSource.getEntityName();
             String aTitle = aSource.getTitle();
             if (aTitle != null) {
                 title = new String(aTitle.toCharArray());
@@ -270,14 +270,14 @@ public abstract class Query {
     /**
      * @return The application element identifier;
      */
-    public String getEntityId() {
+    public String getEntityName() {
         return entityName;
     }
 
     /**
      * @param aValue the entityName to set
      */
-    public void setEntityId(String aValue) {
+    public void setEntityName(String aValue) {
         entityName = aValue;
     }
 }

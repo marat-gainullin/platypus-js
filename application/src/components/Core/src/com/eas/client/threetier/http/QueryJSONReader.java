@@ -9,7 +9,6 @@ import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.metadata.Parameters;
 import com.eas.client.queries.PlatypusQuery;
-import com.eas.client.threetier.PlatypusClient;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.internal.runtime.JSType;
 
@@ -32,7 +31,7 @@ public class QueryJSONReader {
         boolean manual = JSType.toBoolean(o.getMember(MANUAL_PROP_NAME));
         query.setManual(manual);
         String entityName = JSType.toString(o.getMember(APP_ELEMENT_PROP_NAME));
-        query.setEntityId(entityName);
+        query.setEntityName(entityName);
         // parameters
         JSObject jsParameters = (JSObject) o.getMember(PARAMETERS_PROP_NAME);
         assert jsParameters != null && jsParameters.isArray();

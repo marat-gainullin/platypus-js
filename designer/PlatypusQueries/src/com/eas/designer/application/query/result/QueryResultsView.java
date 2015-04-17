@@ -5,10 +5,8 @@
 package com.eas.designer.application.query.result;
 
 import com.eas.client.DatabasesClient;
-import com.eas.client.PlatypusJdbcFlowProvider;
 import com.eas.client.SQLUtils;
 import com.eas.client.SQLUtils.TypesGroup;
-import com.eas.client.SqlCompiledQuery;
 import com.eas.client.SqlQuery;
 import com.eas.client.StoredQueryFactory;
 import com.eas.client.changes.Change;
@@ -59,7 +57,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.internal.runtime.JSType;
 import net.sf.jsqlparser.JSQLParserException;
@@ -90,6 +87,7 @@ public class QueryResultsView extends javax.swing.JPanel {
     private FlowProvider flow;
     private List<Change> changeLog;
     private Insert lastInsert;
+    private JSObject lastInserted;
     private static int queryIndex;
     private static CCJSqlParserManager parserManager = new CCJSqlParserManager();
     private static final String DEFAULT_TEXT_COLOR_KEY = "textText"; //NOI18N
@@ -248,7 +246,7 @@ public class QueryResultsView extends javax.swing.JPanel {
         String message = String.format(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.resultMessage"), JSType.toInteger(grid.getData().getMember("length")));
         List<Field> pks = query.getFields().getPrimaryKeys();
         if (pks == null || pks.isEmpty()) {
-            message += "\n " + String.format(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.noKeysMessage"), query.getEntityId());
+            message += "\n " + String.format(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.noKeysMessage"), query.getEntityName());
         }
         showInfo(message);
     }
@@ -445,11 +443,13 @@ public class QueryResultsView extends javax.swing.JPanel {
                 Field field = fields.get(i);
                 String fieldName = field.getName();
                 Object value = aSubject.getMember(fieldName);
-                if (value == null && field.isPk()) {
+                if (JSType.nullOrUndefined(value) && field.isPk()) {
                     value = field.getTypeInfo().generateValue();
                     aSubject.setMember(fieldName, value);
                 }
-                aData.add(new ChangeValue(fieldName, value, field.getTypeInfo()));
+                if (!JSType.nullOrUndefined(value)) {
+                    aData.add(new ChangeValue(fieldName, value, field.getTypeInfo()));
+                }
             }
         }
     }
@@ -467,7 +467,7 @@ public class QueryResultsView extends javax.swing.JPanel {
 
                         @Override
                         public Object call(Object thiz, Object... args) {
-                            Object res = super.call(thiz, args);
+                            Object res = super.call(thiz instanceof JSObjectFacade ? ((JSObjectFacade) thiz).getDelegate() : thiz, args);
                             if (res instanceof JSObject) {
                                 JSObject jsDeleted = (JSObject) res;
                                 int deletedLength = JSType.toInteger(jsDeleted.getMember("length"));
@@ -498,14 +498,40 @@ public class QueryResultsView extends javax.swing.JPanel {
                 return new JSObjectFacade((JSObject) super.getSlot(index)) {
 
                     @Override
+                    public boolean equals(Object obj) {
+                        if (obj instanceof JSObjectFacade) {
+                            obj = ((JSObjectFacade) obj).getDelegate();
+                        }
+                        return getDelegate().equals(obj);
+                    }
+
+                    @Override
+                    public int hashCode() {
+                        return getDelegate().hashCode();
+                    }
+
+                    @Override
                     public void setMember(String name, Object value) {
                         Field field = query.getFields().get(name);
                         if (field != null) {
                             Object oldValue = super.getMember(name);
                             super.setMember(name, value);
+                            boolean complemented = false;
                             if (!field.isNullable() && lastInsert != null && lastInserted == getDelegate()) {
-                                
-                            } else {
+                                boolean met = false;
+                                for (int d = 0; d < lastInsert.getData().size(); d++) {
+                                    ChangeValue chv = lastInsert.getData().get(d);
+                                    if (chv.getName().equalsIgnoreCase(name)) {
+                                        met = true;
+                                        break;
+                                    }
+                                }
+                                if (!met) {
+                                    lastInsert.getData().add(new ChangeValue(name, value, field.getTypeInfo()));
+                                    complemented = true;
+                                }
+                            }
+                            if (!complemented) {
                                 Update update = new Update("");
                                 generateChangeLogKeys(update.getKeys(), this, name, oldValue);
                                 update.getData().add(new ChangeValue(name, value, field.getTypeInfo()));
@@ -526,7 +552,7 @@ public class QueryResultsView extends javax.swing.JPanel {
             if (query != null && !changeLog.isEmpty()) {
                 commitButton.setEnabled(false);
                 final String entityName = IDGenerator.genID().toString();
-                query.setEntityId(entityName);
+                query.setEntityName(entityName);
                 changeLog.forEach((Change aChange) -> {
                     aChange.entityName = entityName;
                 });
@@ -788,7 +814,7 @@ public class QueryResultsView extends javax.swing.JPanel {
         grid.setData(processed);
         deleteButton.setEnabled(pks != null && !pks.isEmpty());
         if (!deleteButton.isEnabled()) {
-            showInfo(String.format(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.noKeysMessage"), query.getEntityId()));
+            showInfo(String.format(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.noKeysMessage"), query.getEntityName()));
         }
         /*
          dataEntity.getRowset().addRowsetListener(new RowsetAdapter() {

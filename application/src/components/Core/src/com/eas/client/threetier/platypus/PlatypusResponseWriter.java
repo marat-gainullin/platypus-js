@@ -176,7 +176,7 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
         ProtoWriter writer = new ProtoWriter(out);
         if (rsp.getAppQuery() != null) {
             writer.put(RequestsTags.TAG_TIMESTAMP, rsp.getTimeStamp());
-            writer.put(RequestsTags.TAG_QUERY_ID, rsp.getAppQuery().getEntityId());
+            writer.put(RequestsTags.TAG_QUERY_ID, rsp.getAppQuery().getEntityName());
             ByteArrayOutputStream fieldsStream = new ByteArrayOutputStream();
             BinaryFields.write(rsp.getAppQuery().getFields(), fieldsStream);
             writer.put(RequestsTags.TAG_DML, rsp.getAppQuery().isManual() ? 1 : 0);

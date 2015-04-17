@@ -37,7 +37,7 @@ public class ScriptedFlowProvider extends PlatypusJdbcFlowProvider {
     }
 
     @Override
-    public String getEntityId() {
+    public String getEntityName() {
         return (String) ((JSObject) source.getMember("constructor")).getMember("name");
     }
 

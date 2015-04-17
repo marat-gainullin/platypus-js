@@ -30,7 +30,7 @@ public class QueryJsonWriter extends FieldsJsonWriter{
         StringBuilder sb = JSONUtils.o(
                 TITLE_PROP_NAME, JSONUtils.s(query.getTitle()).toString(),
                 MANUAL_PROP_NAME, String.valueOf(query.isManual()),
-                APP_ELEMENT_PROP_NAME, JSONUtils.s(query.getEntityId()).toString(),
+                APP_ELEMENT_PROP_NAME, JSONUtils.s(query.getEntityName()).toString(),
                 PARAMETERS_PROP_NAME, fields2a(query.getParameters()).toString(),
                 FIELDS_PROP_NAME, fields2a(query.getFields()).toString()
                 );

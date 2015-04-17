@@ -82,7 +82,7 @@ public class QueryDocument {
         model = aModel;
         additionalFieldsMetadata = aAdditionalFieldsMetadata;
         query.setDatasourceName(model.getDatasourceName());
-        assert query.getEntityId() != null : "SqlQuery should be constructured with non-null entity id!";
+        assert query.getEntityName() != null : "SqlQuery should be constructured with non-null entity id!";
     }
 
     public List<StoredFieldMetadata> getAdditionalFieldsMetadata() {
@@ -116,7 +116,7 @@ public class QueryDocument {
         List<QueryDocument.StoredFieldMetadata> additionalFields = parseFieldsHintsTag(outDoc.getDocumentElement());
         //
         SqlQuery query = new SqlQuery(aBasesProxy);
-        query.setEntityId(aName);
+        query.setEntityName(aName);
         query.setSqlText(sqlContent);
         query.setFullSqlText(dialectContent);
         return new QueryDocument(query, model, additionalFields);

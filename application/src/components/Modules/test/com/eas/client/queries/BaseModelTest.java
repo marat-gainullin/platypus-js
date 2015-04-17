@@ -4,7 +4,6 @@
  */
 package com.eas.client.queries;
 
-import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.settings.DbConnectionSettings;
 import java.io.IOException;
 import java.io.InputStream;

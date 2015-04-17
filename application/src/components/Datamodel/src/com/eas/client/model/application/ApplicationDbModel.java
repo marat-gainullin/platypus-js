@@ -133,7 +133,7 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Sq
         ApplicationDbEntity created = newGenericEntity();
         created.setName(USER_DATASOURCE_NAME);
         SqlQuery query = new SqlQuery(basesProxy, aDatasourceName, aSqlText);
-        query.setEntityId(String.valueOf(IDGenerator.genID()));
+        query.setEntityName(String.valueOf(IDGenerator.genID()));
         StoredQueryFactory factory = new StoredQueryFactory(basesProxy, null, null, true);
         factory.putTableFieldsMetadata(query);// only select will be filled with output columns
         created.setQuery(query);

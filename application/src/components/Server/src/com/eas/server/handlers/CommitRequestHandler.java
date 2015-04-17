@@ -80,10 +80,10 @@ public class CommitRequestHandler extends SessionRequestHandler<CommitRequest, C
                     if (aChange instanceof Command) {
                         ((Command) aChange).command = entity.getSqlClause();
                     }
-                    List<Change> targetChangeLog = changeLogs.get(entity.getDatabaseId());
+                    List<Change> targetChangeLog = changeLogs.get(entity.getDatasourceName());
                     if (targetChangeLog == null) {
                         targetChangeLog = new ArrayList<>();
-                        changeLogs.put(entity.getDatabaseId(), targetChangeLog);
+                        changeLogs.put(entity.getDatasourceName(), targetChangeLog);
                     }
                     targetChangeLog.add(aChange);
                 } catch (Exception ex) {
