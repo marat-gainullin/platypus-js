@@ -330,20 +330,6 @@
              */
             P.ProgressBar.prototype.toolTipText = '';
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ProgressBar){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf ProgressBar
-             */
-            P.ProgressBar.prototype.element = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -360,6 +346,20 @@
              * @memberOf ProgressBar
              */
             P.ProgressBar.prototype.height = 0;
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ProgressBar){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf ProgressBar
+             */
+            P.ProgressBar.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -463,23 +463,6 @@
              */
             P.ProgressBar.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ProgressBar){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf ProgressBar
-             */
-            P.ProgressBar.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -496,6 +479,23 @@
              * @memberOf ProgressBar
              */
             P.ProgressBar.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ProgressBar){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf ProgressBar
+             */
+            P.ProgressBar.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -647,6 +647,20 @@
              */
             P.ProgressBar.prototype.onMouseExited = {};
         }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ProgressBar){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf ProgressBar
+             */
+            P.ProgressBar.prototype.name = '';
+        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -663,20 +677,6 @@
              * @memberOf ProgressBar
              */
             P.ProgressBar.prototype.width = 0;
-        }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ProgressBar){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf ProgressBar
-             */
-            P.ProgressBar.prototype.name = '';
         }
         Object.defineProperty(this, "maximum", {
             get: function() {

@@ -93,6 +93,7 @@
         <Debugger_RunParams>newversion -silent true</Debugger_RunParams>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
+        <Debugger_RunParams>update -silent true</Debugger_RunParams>
         <DCC_ExeOutput>C:\workspace\platypus js\application\updates\</DCC_ExeOutput>
         <DCC_RunTimeTypeInfo>true</DCC_RunTimeTypeInfo>
         <DCC_DebugInformation>2</DCC_DebugInformation>

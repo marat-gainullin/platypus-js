@@ -313,20 +313,6 @@
              */
             P.FlowPane.prototype.toolTipText = '';
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.FlowPane){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf FlowPane
-             */
-            P.FlowPane.prototype.element = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -343,6 +329,20 @@
              * @memberOf FlowPane
              */
             P.FlowPane.prototype.height = 0;
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.FlowPane){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf FlowPane
+             */
+            P.FlowPane.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -446,6 +446,23 @@
              */
             P.FlowPane.prototype.nextFocusableComponent = {};
         }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.FlowPane){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf FlowPane
+             */
+            P.FlowPane.prototype.onKeyReleased = {};
+        }
         Object.defineProperty(this, "count", {
             get: function() {
                 var value = delegate.count;
@@ -476,23 +493,6 @@
              * @memberOf FlowPane
              */
             P.FlowPane.prototype.onActionPerformed = {};
-        }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.FlowPane){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf FlowPane
-             */
-            P.FlowPane.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -661,6 +661,20 @@
              */
             P.FlowPane.prototype.onMouseExited = {};
         }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.FlowPane){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf FlowPane
+             */
+            P.FlowPane.prototype.name = '';
+        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -677,20 +691,6 @@
              * @memberOf FlowPane
              */
             P.FlowPane.prototype.width = 0;
-        }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.FlowPane){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf FlowPane
-             */
-            P.FlowPane.prototype.name = '';
         }
         Object.defineProperty(this, "font", {
             get: function() {
@@ -732,30 +732,6 @@
         });
     };
         /**
-         * Gets the container's n-th component.
-         * @param index the component's index in the container
-         * @return the child component
-         * @method child
-         * @memberOf FlowPane
-         */
-        P.FlowPane.prototype.child = function(index) {
-            var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(index));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf FlowPane
-         */
-        P.FlowPane.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Appends the specified component to the end of this container.
          * @param component the component to add
          * @method add
@@ -787,6 +763,30 @@
         P.FlowPane.prototype.clear = function() {
             var delegate = this.unwrap();
             var value = delegate.clear();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Tries to acquire focus for this component.
+         * @method focus
+         * @memberOf FlowPane
+         */
+        P.FlowPane.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Gets the container's n-th component.
+         * @param index the component's index in the container
+         * @return the child component
+         * @method child
+         * @memberOf FlowPane
+         */
+        P.FlowPane.prototype.child = function(index) {
+            var delegate = this.unwrap();
+            var value = delegate.child(P.boxAsJava(index));
             return P.boxAsJs(value);
         };
 

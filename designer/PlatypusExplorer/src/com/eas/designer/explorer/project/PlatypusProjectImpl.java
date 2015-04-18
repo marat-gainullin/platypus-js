@@ -43,6 +43,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import javax.swing.JEditorPane;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
@@ -96,13 +97,22 @@ public class PlatypusProjectImpl implements PlatypusProject {
             return Charset.forName(PlatypusFiles.DEFAULT_ENCODING);
         }
     }
+    protected static ScriptEngine jsEngine;
+    static {
+        try {
+            jsEngine = new ScriptEngineManager().getEngineByName("nashorn");
+            jsEngine.eval("load('classpath:com/eas/designer/explorer/designer-js.js')");
+        } catch (ScriptException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+    }
+    
     protected Lookup pLookup;
     protected ProjectState state;
     protected final FileObject projectDir;
     protected ScriptedDatabasesClient basesProxy;
     protected PlatypusIndexer indexer;
     protected LocalQueriesProxy queries;
-    protected ScriptEngine jsEngine;
     protected RequestProcessor.Task connecting2Db;
     protected PlatypusProjectInformation info;
     protected PlatypusProjectSettingsImpl settings;
@@ -185,8 +195,6 @@ public class PlatypusProjectImpl implements PlatypusProject {
 
         };
         basesProxy.setQueries(queries);
-        jsEngine = new ScriptEngineManager().getEngineByName("nashorn");
-        jsEngine.eval("load('classpath:com/eas/designer/explorer/designer-js.js')");
     }
 
     protected JSObject createLocalEngineModule(String aModuleName) throws Exception {
