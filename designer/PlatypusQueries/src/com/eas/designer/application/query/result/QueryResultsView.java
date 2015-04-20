@@ -34,6 +34,7 @@ import com.eas.client.scripts.JSObjectFacade;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.query.PlatypusQueryDataObject;
 import com.eas.designer.application.query.editing.SqlTextEditsComplementor;
+import com.eas.script.ScriptUtils;
 import com.eas.util.IDGenerator;
 import java.awt.Color;
 import java.awt.Dialog;
@@ -57,6 +58,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.internal.runtime.JSType;
 import net.sf.jsqlparser.JSQLParserException;
@@ -443,7 +445,7 @@ public class QueryResultsView extends javax.swing.JPanel {
                 Field field = fields.get(i);
                 String fieldName = field.getName();
                 Object value = aSubject.getMember(fieldName);
-                if (JSType.nullOrUndefined(value) && field.isPk()) {
+                if (JSType.nullOrUndefined(value) && (field.isPk() || !field.isNullable())) {
                     value = field.getTypeInfo().generateValue();
                     aSubject.setMember(fieldName, value);
                 }
@@ -455,8 +457,6 @@ public class QueryResultsView extends javax.swing.JPanel {
     }
 
     protected JSObject processData(JSObject aSubject) {
-        int length = JSType.toInteger(aSubject.getMember("length"));
-        aSubject.setMember(CURSOR_PROP_NAME, length > 0 ? aSubject.getSlot(0) : null);
         JSObject processed = new JSObjectFacade(aSubject) {
 
             @Override
@@ -495,7 +495,8 @@ public class QueryResultsView extends javax.swing.JPanel {
 
             @Override
             public Object getSlot(int index) {
-                return new JSObjectFacade((JSObject) super.getSlot(index)) {
+                Object slot = super.getSlot(index);
+                return JSType.nullOrUndefined(slot) || slot instanceof JSObjectFacade ? slot : new JSObjectFacade((JSObject) slot) {
 
                     @Override
                     public boolean equals(Object obj) {
@@ -544,6 +545,21 @@ public class QueryResultsView extends javax.swing.JPanel {
             }
 
         };
+        int length = JSType.toInteger(processed.getMember("length"));
+        processed.setMember(CURSOR_PROP_NAME, length > 0 ? processed.getSlot(0) : null);
+        processed.setMember("elementClass", new AbstractJSObject() {
+
+            @Override
+            public boolean isFunction() {
+                return true;
+            }
+
+            @Override
+            public Object newObject(Object... args) {
+                return new JSObjectFacade(ScriptUtils.makeObj());
+            }
+
+        });
         return processed;
     }
 

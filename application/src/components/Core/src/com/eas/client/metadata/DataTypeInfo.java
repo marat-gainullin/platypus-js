@@ -285,6 +285,8 @@ public class DataTypeInfo {
             case java.sql.Types.TIMESTAMP:
                 return new Date(IDGenerator.genID());
             case java.sql.Types.BIT:
+            case java.sql.Types.BOOLEAN:
+                return false;
             case java.sql.Types.BINARY:
             case java.sql.Types.VARBINARY:
             case java.sql.Types.LONGVARBINARY:
@@ -300,7 +302,6 @@ public class DataTypeInfo {
             case java.sql.Types.DATALINK:
             case java.sql.Types.ROWID:
             case java.sql.Types.SQLXML:
-            case java.sql.Types.BOOLEAN:
             case java.sql.Types.NCLOB:
                 break;
         }
