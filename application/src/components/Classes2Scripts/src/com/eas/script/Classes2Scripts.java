@@ -52,7 +52,7 @@ public class Classes2Scripts {
     private static final String CONSTRUCTOR_TEMPLATE = getStringResource("constructorTemplate.js");//NOI18N
     private static final String DEPS_FILE_NAME = "deps.js";//NOI18N
     private static final Set<String> preservedFilesNames = new HashSet<>(Arrays.asList(new String[]{
-        "platypus.js", "internals.js", "http-context.js", "server-deps.js"
+        "platypus.js", "internals.js", "http-context.js", "server-deps.js", "managed.js", "orderer.js"
     }));
 
     private static final int DEFAULT_IDENTATION_WIDTH = 4;

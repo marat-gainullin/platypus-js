@@ -115,18 +115,3 @@ try {
 } catch (e) {
     print('reports API skipped.');
 }
-
-try {
-    load('classpath:server/session.js');
-    print('server API loaded.');
-} catch (e) {
-    print('server API skipped.');
-}
-
-try {
-    load('classpath:servlet-support/web-socket-client-session.js');
-    load('classpath:servlet-support/web-socket-server-session.js');
-    print('servlet-support API loaded.');
-} catch (e) {
-    print('servlet-support API skipped.');
-}

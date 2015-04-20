@@ -56,6 +56,20 @@
              */
             P.WebSocketServerSession.prototype.onerror = {};
         }
+        Object.defineProperty(this, "query", {
+            get: function() {
+                var value = delegate.query;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.WebSocketServerSession){
+            /**
+             * Generated property jsDoc.
+             * @property query
+             * @memberOf WebSocketServerSession
+             */
+            P.WebSocketServerSession.prototype.query = '';
+        }
         Object.defineProperty(this, "onclose", {
             get: function() {
                 var value = delegate.onclose;
@@ -72,20 +86,6 @@
              * @memberOf WebSocketServerSession
              */
             P.WebSocketServerSession.prototype.onclose = {};
-        }
-        Object.defineProperty(this, "query", {
-            get: function() {
-                var value = delegate.query;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.WebSocketServerSession){
-            /**
-             * Generated property jsDoc.
-             * @property query
-             * @memberOf WebSocketServerSession
-             */
-            P.WebSocketServerSession.prototype.query = '';
         }
         Object.defineProperty(this, "protocolVersion", {
             get: function() {

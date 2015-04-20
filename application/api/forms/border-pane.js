@@ -493,23 +493,6 @@
              */
             P.BorderPane.prototype.count = 0;
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.BorderPane){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf BorderPane
-             */
-            P.BorderPane.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -526,6 +509,23 @@
              * @memberOf BorderPane
              */
             P.BorderPane.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.BorderPane){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf BorderPane
+             */
+            P.BorderPane.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
