@@ -1206,7 +1206,7 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 			}
 		}
 		double widthError = 0;
-		double delta = (scrollableLeftContainer.getElement().getOffsetWidth() + scrollableRightContainer.getElement().getOffsetWidth()) - commonWidth;
+		double delta = (scrollableLeftContainer.getElement().getOffsetWidth() + scrollableRightContainer.getElement().getOffsetWidth()) - 1 - commonWidth;
 		for (ModelColumn mCol : availableColumns) {
 			double coef = mCol.getWidth() / commonWidth;
 			double newWidth = mCol.getWidth() + delta * coef;
