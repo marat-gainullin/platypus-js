@@ -178,23 +178,6 @@
              */
             P.SplitPane.prototype.onComponentMoved = {};
         }
-        Object.defineProperty(this, "dividerLocation", {
-            get: function() {
-                var value = delegate.dividerLocation;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.dividerLocation = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.SplitPane){
-            /**
-             * The split pane divider's location in pixels.
-             * @property dividerLocation
-             * @memberOf SplitPane
-             */
-            P.SplitPane.prototype.dividerLocation = 0;
-        }
         Object.defineProperty(this, "onComponentAdded", {
             get: function() {
                 var value = delegate.onComponentAdded;
@@ -211,6 +194,23 @@
              * @memberOf SplitPane
              */
             P.SplitPane.prototype.onComponentAdded = {};
+        }
+        Object.defineProperty(this, "dividerLocation", {
+            get: function() {
+                var value = delegate.dividerLocation;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.dividerLocation = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.SplitPane){
+            /**
+             * The split pane divider's location in pixels.
+             * @property dividerLocation
+             * @memberOf SplitPane
+             */
+            P.SplitPane.prototype.dividerLocation = 0;
         }
         Object.defineProperty(this, "secondComponent", {
             get: function() {
@@ -362,20 +362,6 @@
              */
             P.SplitPane.prototype.toolTipText = '';
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.SplitPane){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf SplitPane
-             */
-            P.SplitPane.prototype.element = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -392,6 +378,20 @@
              * @memberOf SplitPane
              */
             P.SplitPane.prototype.height = 0;
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.SplitPane){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf SplitPane
+             */
+            P.SplitPane.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -512,6 +512,23 @@
              */
             P.SplitPane.prototype.nextFocusableComponent = {};
         }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.SplitPane){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf SplitPane
+             */
+            P.SplitPane.prototype.onKeyReleased = {};
+        }
         Object.defineProperty(this, "count", {
             get: function() {
                 var value = delegate.count;
@@ -542,23 +559,6 @@
              * @memberOf SplitPane
              */
             P.SplitPane.prototype.onActionPerformed = {};
-        }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.SplitPane){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf SplitPane
-             */
-            P.SplitPane.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -727,22 +727,19 @@
              */
             P.SplitPane.prototype.onMouseExited = {};
         }
-        Object.defineProperty(this, "oneTouchExpandable", {
+        Object.defineProperty(this, "name", {
             get: function() {
-                var value = delegate.oneTouchExpandable;
+                var value = delegate.name;
                 return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.oneTouchExpandable = P.boxAsJava(aValue);
             }
         });
         if(!P.SplitPane){
             /**
-             * <code>true</code> if the pane is one touch expandable.
-             * @property oneTouchExpandable
+             * Gets name of this component.
+             * @property name
              * @memberOf SplitPane
              */
-            P.SplitPane.prototype.oneTouchExpandable = true;
+            P.SplitPane.prototype.name = '';
         }
         Object.defineProperty(this, "width", {
             get: function() {
@@ -761,19 +758,22 @@
              */
             P.SplitPane.prototype.width = 0;
         }
-        Object.defineProperty(this, "name", {
+        Object.defineProperty(this, "oneTouchExpandable", {
             get: function() {
-                var value = delegate.name;
+                var value = delegate.oneTouchExpandable;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.oneTouchExpandable = P.boxAsJava(aValue);
             }
         });
         if(!P.SplitPane){
             /**
-             * Gets name of this component.
-             * @property name
+             * <code>true</code> if the pane is one touch expandable.
+             * @property oneTouchExpandable
              * @memberOf SplitPane
              */
-            P.SplitPane.prototype.name = '';
+            P.SplitPane.prototype.oneTouchExpandable = true;
         }
         Object.defineProperty(this, "font", {
             get: function() {
@@ -815,15 +815,14 @@
         });
     };
         /**
-         * Gets the container's n-th component.
-         * @param index the component's index in the container
-         * @return the child component
-         * @method child
+         * Appends the specified component to the end of this container.
+         * @param component the component to add.
+         * @method add
          * @memberOf SplitPane
          */
-        P.SplitPane.prototype.child = function(index) {
+        P.SplitPane.prototype.add = function(component) {
             var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(index));
+            var value = delegate.add(P.boxAsJava(component));
             return P.boxAsJs(value);
         };
 
@@ -839,14 +838,15 @@
         };
 
         /**
-         * Appends the specified component to the end of this container.
-         * @param component the component to add.
-         * @method add
+         * Gets the container's n-th component.
+         * @param index the component's index in the container
+         * @return the child component
+         * @method child
          * @memberOf SplitPane
          */
-        P.SplitPane.prototype.add = function(component) {
+        P.SplitPane.prototype.child = function(index) {
             var delegate = this.unwrap();
-            var value = delegate.add(P.boxAsJava(component));
+            var value = delegate.child(P.boxAsJava(index));
             return P.boxAsJs(value);
         };
 

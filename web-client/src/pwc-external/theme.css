@@ -207,7 +207,7 @@
 .decorator-clear{
     width: 20px; 
     opacity: 0.5;
-    background-image: url(decorator-clear.png);
+    background-image: url(decorator-clear.svg);
     background-repeat: no-repeat;
     background-position: center;
     cursor: pointer;
@@ -219,6 +219,11 @@
 
 .decorator{
     border: solid 1px lightgray;
+    border-radius: 2px;
+}
+
+.decorator-focused{
+    border: solid 1px gray;
     border-radius: 2px;
 }
 

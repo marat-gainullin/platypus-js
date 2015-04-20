@@ -24,14 +24,18 @@
         delegate.setPublished(this);
     };
         /**
-         * Reverts model data changes.
-         * After this method call, no data changes are avaliable for <code>model.save()</code> method.
-         * @method revert
+         * Saves model data changes.
+         * If model can't apply the changed data, than exception is thrown. In this case, application can call model.save() another time to save the changes.
+         * If an application needs to abort further attempts and discard model data changes, use <code>model.revert()</code>.
+         * Note, that a <code>model.save()</code> call on unchanged model nevertheless leads to a commit.
+         * @param onSuccess The function to be invoked after the data changes saved (optional).
+         * @param onFailure The function to be invoked when exception raised while commit process (optional).
+         * @method save
          * @memberOf ApplicationPlatypusModel
          */
-        P.ApplicationPlatypusModel.prototype.revert = function() {
+        P.ApplicationPlatypusModel.prototype.save = function(onSuccess, onFailure) {
             var delegate = this.unwrap();
-            var value = delegate.revert();
+            var value = delegate.save(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
             return P.boxAsJs(value);
         };
 
@@ -49,31 +53,14 @@
         };
 
         /**
-         * Saves model data changes.
-         * If model can't apply the changed data, than exception is thrown. In this case, application can call model.save() another time to save the changes.
-         * If an application needs to abort further attempts and discard model data changes, use <code>model.revert()</code>.
-         * Note, that a <code>model.save()</code> call on unchanged model nevertheless leads to a commit.
-         * @param onSuccess The function to be invoked after the data changes saved (optional).
-         * @param onFailure The function to be invoked when exception raised while commit process (optional).
-         * @method save
+         * Reverts model data changes.
+         * After this method call, no data changes are avaliable for <code>model.save()</code> method.
+         * @method revert
          * @memberOf ApplicationPlatypusModel
          */
-        P.ApplicationPlatypusModel.prototype.save = function(onSuccess, onFailure) {
+        P.ApplicationPlatypusModel.prototype.revert = function() {
             var delegate = this.unwrap();
-            var value = delegate.save(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Creates new entity of model, based on application query.
-         * @param queryId the query application element ID.
-         * @return a new entity.
-         * @method loadEntity
-         * @memberOf ApplicationPlatypusModel
-         */
-        P.ApplicationPlatypusModel.prototype.loadEntity = function(queryId) {
-            var delegate = this.unwrap();
-            var value = delegate.loadEntity(P.boxAsJava(queryId));
+            var value = delegate.revert();
             return P.boxAsJs(value);
         };
 
@@ -87,6 +74,19 @@
         P.ApplicationPlatypusModel.prototype.execute = function(onSuccess, onFailure) {
             var delegate = this.unwrap();
             var value = delegate.execute(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Creates new entity of model, based on application query.
+         * @param queryId the query application element ID.
+         * @return a new entity.
+         * @method loadEntity
+         * @memberOf ApplicationPlatypusModel
+         */
+        P.ApplicationPlatypusModel.prototype.loadEntity = function(queryId) {
+            var delegate = this.unwrap();
+            var value = delegate.loadEntity(P.boxAsJava(queryId));
             return P.boxAsJs(value);
         };
 

@@ -175,23 +175,6 @@
              */
             P.ModelGridColumn.prototype.movable = true;
         }
-        Object.defineProperty(this, "readonly", {
-            get: function() {
-                var value = delegate.readonly;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.readonly = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property readonly
-             * @memberOf ModelGridColumn
-             */
-            P.ModelGridColumn.prototype.readonly = true;
-        }
         Object.defineProperty(this, "field", {
             get: function() {
                 var value = delegate.field;
@@ -208,6 +191,23 @@
              * @memberOf ModelGridColumn
              */
             P.ModelGridColumn.prototype.field = '';
+        }
+        Object.defineProperty(this, "readonly", {
+            get: function() {
+                var value = delegate.readonly;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.readonly = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelGridColumn){
+            /**
+             * Generated property jsDoc.
+             * @property readonly
+             * @memberOf ModelGridColumn
+             */
+            P.ModelGridColumn.prototype.readonly = true;
         }
         Object.defineProperty(this, "onRender", {
             get: function() {
@@ -310,24 +310,22 @@
         }
     };
         /**
-         *
-         * @method addColumnNode
+         * @method sort
          * @memberOf ModelGridColumn
-         */
-        P.ModelGridColumn.prototype.addColumnNode = function(node) {
+         * Column sort, works only in HTML5 */
+        P.ModelGridColumn.prototype.sort = function() {
             var delegate = this.unwrap();
-            var value = delegate.addColumnNode(P.boxAsJava(node));
+            var value = delegate.sort();
             return P.boxAsJs(value);
         };
 
         /**
-         *
-         * @method removeColumnNode
+         * @method sortDesc
          * @memberOf ModelGridColumn
-         */
-        P.ModelGridColumn.prototype.removeColumnNode = function(node) {
+         * Descending column sort, works only in HTML5 */
+        P.ModelGridColumn.prototype.sortDesc = function() {
             var delegate = this.unwrap();
-            var value = delegate.removeColumnNode(P.boxAsJava(node));
+            var value = delegate.sortDesc();
             return P.boxAsJs(value);
         };
 
@@ -343,6 +341,17 @@
         };
 
         /**
+         *
+         * @method addColumnNode
+         * @memberOf ModelGridColumn
+         */
+        P.ModelGridColumn.prototype.addColumnNode = function(node) {
+            var delegate = this.unwrap();
+            var value = delegate.addColumnNode(P.boxAsJava(node));
+            return P.boxAsJs(value);
+        };
+
+        /**
          * @method unsort
          * @memberOf ModelGridColumn
          * Clears sort column, works only in HTML5 */
@@ -353,22 +362,13 @@
         };
 
         /**
-         * @method sortDesc
+         *
+         * @method removeColumnNode
          * @memberOf ModelGridColumn
-         * Descending column sort, works only in HTML5 */
-        P.ModelGridColumn.prototype.sortDesc = function() {
+         */
+        P.ModelGridColumn.prototype.removeColumnNode = function(node) {
             var delegate = this.unwrap();
-            var value = delegate.sortDesc();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * @method sort
-         * @memberOf ModelGridColumn
-         * Column sort, works only in HTML5 */
-        P.ModelGridColumn.prototype.sort = function() {
-            var delegate = this.unwrap();
-            var value = delegate.sort();
+            var value = delegate.removeColumnNode(P.boxAsJava(node));
             return P.boxAsJs(value);
         };
 

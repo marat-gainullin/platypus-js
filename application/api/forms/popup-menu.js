@@ -309,20 +309,6 @@
              */
             P.PopupMenu.prototype.toolTipText = '';
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.PopupMenu){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf PopupMenu
-             */
-            P.PopupMenu.prototype.element = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -339,6 +325,20 @@
              * @memberOf PopupMenu
              */
             P.PopupMenu.prototype.height = 0;
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.PopupMenu){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf PopupMenu
+             */
+            P.PopupMenu.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -442,6 +442,23 @@
              */
             P.PopupMenu.prototype.nextFocusableComponent = {};
         }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.PopupMenu){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf PopupMenu
+             */
+            P.PopupMenu.prototype.onKeyReleased = {};
+        }
         Object.defineProperty(this, "count", {
             get: function() {
                 var value = delegate.count;
@@ -472,23 +489,6 @@
              * @memberOf PopupMenu
              */
             P.PopupMenu.prototype.onActionPerformed = {};
-        }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.PopupMenu){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf PopupMenu
-             */
-            P.PopupMenu.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -657,6 +657,20 @@
              */
             P.PopupMenu.prototype.onMouseExited = {};
         }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.PopupMenu){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf PopupMenu
+             */
+            P.PopupMenu.prototype.name = '';
+        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -673,20 +687,6 @@
              * @memberOf PopupMenu
              */
             P.PopupMenu.prototype.width = 0;
-        }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.PopupMenu){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf PopupMenu
-             */
-            P.PopupMenu.prototype.name = '';
         }
         Object.defineProperty(this, "font", {
             get: function() {
@@ -728,30 +728,6 @@
         });
     };
         /**
-         * Gets the container's n-th component.
-         * @param index the component's index in the container
-         * @return the child component
-         * @method child
-         * @memberOf PopupMenu
-         */
-        P.PopupMenu.prototype.child = function(index) {
-            var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(index));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf PopupMenu
-         */
-        P.PopupMenu.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Adds the item to the menu.
          * @param menu the menu component to add.
          * @method add
@@ -783,6 +759,30 @@
         P.PopupMenu.prototype.clear = function() {
             var delegate = this.unwrap();
             var value = delegate.clear();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Tries to acquire focus for this component.
+         * @method focus
+         * @memberOf PopupMenu
+         */
+        P.PopupMenu.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Gets the container's n-th component.
+         * @param index the component's index in the container
+         * @return the child component
+         * @method child
+         * @memberOf PopupMenu
+         */
+        P.PopupMenu.prototype.child = function(index) {
+            var delegate = this.unwrap();
+            var value = delegate.child(P.boxAsJava(index));
             return P.boxAsJs(value);
         };
 
