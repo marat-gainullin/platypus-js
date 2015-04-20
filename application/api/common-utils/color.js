@@ -29,20 +29,6 @@
         if(P.Color.superclass)
             P.Color.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        Object.defineProperty(this, "WHITE", {
-            get: function() {
-                var value = delegate.WHITE;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.Color){
-            /**
-             * Generated property jsDoc.
-             * @property WHITE
-             * @memberOf Color
-             */
-            P.Color.prototype.WHITE = {};
-        }
         Object.defineProperty(this, "GRAY", {
             get: function() {
                 var value = delegate.GRAY;
@@ -56,6 +42,20 @@
              * @memberOf Color
              */
             P.Color.prototype.GRAY = {};
+        }
+        Object.defineProperty(this, "WHITE", {
+            get: function() {
+                var value = delegate.WHITE;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Color){
+            /**
+             * Generated property jsDoc.
+             * @property WHITE
+             * @memberOf Color
+             */
+            P.Color.prototype.WHITE = {};
         }
         Object.defineProperty(this, "BLUE", {
             get: function() {
@@ -169,20 +169,6 @@
              */
             P.Color.prototype.YELLOW = {};
         }
-        Object.defineProperty(this, "DARK_GRAY", {
-            get: function() {
-                var value = delegate.DARK_GRAY;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.Color){
-            /**
-             * Generated property jsDoc.
-             * @property DARK_GRAY
-             * @memberOf Color
-             */
-            P.Color.prototype.DARK_GRAY = {};
-        }
         Object.defineProperty(this, "CYAN", {
             get: function() {
                 var value = delegate.CYAN;
@@ -196,6 +182,20 @@
              * @memberOf Color
              */
             P.Color.prototype.CYAN = {};
+        }
+        Object.defineProperty(this, "DARK_GRAY", {
+            get: function() {
+                var value = delegate.DARK_GRAY;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Color){
+            /**
+             * Generated property jsDoc.
+             * @property DARK_GRAY
+             * @memberOf Color
+             */
+            P.Color.prototype.DARK_GRAY = {};
         }
         Object.defineProperty(this, "ORANGE", {
             get: function() {

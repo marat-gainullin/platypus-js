@@ -326,7 +326,7 @@
              * @property value
              * @memberOf PasswordField
              */
-            P.PasswordField.prototype.value = {};
+            P.PasswordField.prototype.value = '';
         }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
@@ -345,20 +345,6 @@
              */
             P.PasswordField.prototype.toolTipText = '';
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.PasswordField){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf PasswordField
-             */
-            P.PasswordField.prototype.element = {};
-        }
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -375,6 +361,20 @@
              * @memberOf PasswordField
              */
             P.PasswordField.prototype.height = 0;
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.PasswordField){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf PasswordField
+             */
+            P.PasswordField.prototype.element = {};
         }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
@@ -478,23 +478,6 @@
              */
             P.PasswordField.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.PasswordField){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf PasswordField
-             */
-            P.PasswordField.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -511,6 +494,23 @@
              * @memberOf PasswordField
              */
             P.PasswordField.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.PasswordField){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf PasswordField
+             */
+            P.PasswordField.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -662,6 +662,20 @@
              */
             P.PasswordField.prototype.onMouseExited = {};
         }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.PasswordField){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf PasswordField
+             */
+            P.PasswordField.prototype.name = '';
+        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -678,20 +692,6 @@
              * @memberOf PasswordField
              */
             P.PasswordField.prototype.width = 0;
-        }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.PasswordField){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf PasswordField
-             */
-            P.PasswordField.prototype.name = '';
         }
         Object.defineProperty(this, "font", {
             get: function() {
