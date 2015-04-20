@@ -199,82 +199,6 @@
         };
 
         /**
-         * Creates an instace of filter object to filter rowset data in-place using specified constraints objects.
-         * @param fields The filter conditions fields in following form: entity.schema.propName or just a propName in a string form.
-         * @return a comparator object.
-         * @method createFilter
-         * @memberOf ApplicationDbEntity
-         */
-        P.ApplicationDbEntity.prototype.createFilter = function(fields) {
-            var delegate = this.unwrap();
-            var value = delegate.createFilter(P.boxAsJava(fields));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Requeries the entity's data. Forses the entity to refresh its data, no matter if its parameters has changed or not.
-         * @param onSuccess The callback function for refresh data on success event (optional).
-         * @param onFailure The callback function for refresh data on failure event (optional).
-         * @method requery
-         * @memberOf ApplicationDbEntity
-         */
-        P.ApplicationDbEntity.prototype.requery = function(onSuccess, onFailure) {
-            var delegate = this.unwrap();
-            var value = delegate.requery(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Deprecated. Please, use findByKey() instead.
-         * @method findById
-         * @memberOf ApplicationDbEntity
-         */
-        P.ApplicationDbEntity.prototype.findById = function(key) {
-            var delegate = this.unwrap();
-            var value = delegate.findById(P.boxAsJava(key));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Finds an object by its key. Key must be a single property.
-         * @param key the unique identifier of the row.
-         * @return An object or <code>null</code> if nothing is found.
-         * @method findByKey
-         * @memberOf ApplicationDbEntity
-         */
-        P.ApplicationDbEntity.prototype.findByKey = function(key) {
-            var delegate = this.unwrap();
-            var value = delegate.findByKey(P.boxAsJava(key));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Sets the array cursor to the specified object.
-         * @param object the object to position the entity cursor on.
-         * @return <code>true</code> if the cursor changed successfully and <code>false</code> otherwise.
-         * @method scrollTo
-         * @memberOf ApplicationDbEntity
-         */
-        P.ApplicationDbEntity.prototype.scrollTo = function(row) {
-            var delegate = this.unwrap();
-            var value = delegate.scrollTo(P.boxAsJava(row));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Creates an instance of comparator object using specified constraints objects.
-         * @param pairs the sort criteria pairs, in a form of property object (e.g. entity.schema.propName or just a propName in a string form) and the order of sort (ascending - true; descending - false).
-         * @return a comparator object to be passed as a parameter to entity's <code>sort</code> method.
-         * @method createSorting
-         * @memberOf ApplicationDbEntity
-         */
-        P.ApplicationDbEntity.prototype.createSorting = function(pairs) {
-            var delegate = this.unwrap();
-            var value = delegate.createSorting(P.boxAsJava(pairs));
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Deletes a object by cursor position or by object itself.
          * @param aCursorPosOrInstance Object position in terms of cursor API (1-based)| object instance itself. Note! If no cursor position or instance is passed,then object at current cursor position will be deleted.
          * @method remove
@@ -332,6 +256,82 @@
         P.ApplicationDbEntity.prototype.sort = function(comparator) {
             var delegate = this.unwrap();
             var value = delegate.sort(P.boxAsJava(comparator));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Creates an instace of filter object to filter rowset data in-place using specified constraints objects.
+         * @param fields The filter conditions fields in following form: entity.schema.propName or just a propName in a string form.
+         * @return a comparator object.
+         * @method createFilter
+         * @memberOf ApplicationDbEntity
+         */
+        P.ApplicationDbEntity.prototype.createFilter = function(fields) {
+            var delegate = this.unwrap();
+            var value = delegate.createFilter(P.boxAsJava(fields));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Creates an instance of comparator object using specified constraints objects.
+         * @param pairs the sort criteria pairs, in a form of property object (e.g. entity.schema.propName or just a propName in a string form) and the order of sort (ascending - true; descending - false).
+         * @return a comparator object to be passed as a parameter to entity's <code>sort</code> method.
+         * @method createSorting
+         * @memberOf ApplicationDbEntity
+         */
+        P.ApplicationDbEntity.prototype.createSorting = function(pairs) {
+            var delegate = this.unwrap();
+            var value = delegate.createSorting(P.boxAsJava(pairs));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Sets the array cursor to the specified object.
+         * @param object the object to position the entity cursor on.
+         * @return <code>true</code> if the cursor changed successfully and <code>false</code> otherwise.
+         * @method scrollTo
+         * @memberOf ApplicationDbEntity
+         */
+        P.ApplicationDbEntity.prototype.scrollTo = function(row) {
+            var delegate = this.unwrap();
+            var value = delegate.scrollTo(P.boxAsJava(row));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Requeries the entity's data. Forses the entity to refresh its data, no matter if its parameters has changed or not.
+         * @param onSuccess The callback function for refresh data on success event (optional).
+         * @param onFailure The callback function for refresh data on failure event (optional).
+         * @method requery
+         * @memberOf ApplicationDbEntity
+         */
+        P.ApplicationDbEntity.prototype.requery = function(onSuccess, onFailure) {
+            var delegate = this.unwrap();
+            var value = delegate.requery(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Deprecated. Please, use findByKey() instead.
+         * @method findById
+         * @memberOf ApplicationDbEntity
+         */
+        P.ApplicationDbEntity.prototype.findById = function(key) {
+            var delegate = this.unwrap();
+            var value = delegate.findById(P.boxAsJava(key));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Finds an object by its key. Key must be a single property.
+         * @param key the unique identifier of the row.
+         * @return An object or <code>null</code> if nothing is found.
+         * @method findByKey
+         * @memberOf ApplicationDbEntity
+         */
+        P.ApplicationDbEntity.prototype.findByKey = function(key) {
+            var delegate = this.unwrap();
+            var value = delegate.findByKey(P.boxAsJava(key));
             return P.boxAsJs(value);
         };
 
