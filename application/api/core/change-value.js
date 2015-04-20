@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.bearsoft.rowset.changes.ChangeValue");
+    var javaClass = Java.type("com.eas.client.changes.ChangeValue");
     javaClass.setPublisher(function(aDelegate) {
         return new P.ChangeValue(aDelegate);
     });

@@ -1,14 +1,14 @@
 (function() {
-    var javaClass = Java.type("com.bearsoft.rowset.changes.Update");
+    var javaClass = Java.type("com.eas.client.changes.Delete");
     javaClass.setPublisher(function(aDelegate) {
-        return new P.Update(aDelegate);
+        return new P.Delete(aDelegate);
     });
     
     /**
      * Generated constructor.
-     * @constructor Update Update
+     * @constructor Delete Delete
      */
-    P.Update = function () {
+    P.Delete = function () {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -19,36 +19,22 @@
                 return delegate;
             }
         });
-        if(P.Update.superclass)
-            P.Update.superclass.constructor.apply(this, arguments);
+        if(P.Delete.superclass)
+            P.Delete.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        Object.defineProperty(this, "data", {
-            get: function() {
-                var value = delegate.data;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.Update){
-            /**
-             * Data to be applied within a target datasource
-             * @property data
-             * @memberOf Update
-             */
-            P.Update.prototype.data = [];
-        }
         Object.defineProperty(this, "keys", {
             get: function() {
                 var value = delegate.keys;
                 return P.boxAsJs(value);
             }
         });
-        if(!P.Update){
+        if(!P.Delete){
             /**
-             * Keys used for indentifying data changes within a target datasource
+             * Keys values used for identification of deleted data.
              * @property keys
-             * @memberOf Update
+             * @memberOf Delete
              */
-            P.Update.prototype.keys = [];
+            P.Delete.prototype.keys = {};
         }
         Object.defineProperty(this, "type", {
             get: function() {
@@ -56,13 +42,13 @@
                 return P.boxAsJs(value);
             }
         });
-        if(!P.Update){
+        if(!P.Delete){
             /**
              * Indicates the change's type (Insert, Update, Delete or Command).
              * @property type
-             * @memberOf Update
+             * @memberOf Delete
              */
-            P.Update.prototype.type = '';
+            P.Delete.prototype.type = '';
         }
         Object.defineProperty(this, "entity", {
             get: function() {
@@ -70,13 +56,13 @@
                 return P.boxAsJs(value);
             }
         });
-        if(!P.Update){
+        if(!P.Delete){
             /**
              * Indicates the change's destination entity.
              * @property entity
-             * @memberOf Update
+             * @memberOf Delete
              */
-            P.Update.prototype.entity = '';
+            P.Delete.prototype.entity = '';
         }
     };
 })();

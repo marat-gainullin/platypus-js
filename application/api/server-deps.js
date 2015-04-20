@@ -1,10 +1,26 @@
 /**
- * Contains the basic dependencies.
+ * Contains the basic dependencies loading.
  */
 try {
+    load('classpath:common-utils/color.js');
+    load('classpath:common-utils/cursor.js');
+    load('classpath:common-utils/font.js');
+    print('common-utils API loaded.');
+} catch (e) {
+    print('common-utils API skipped.');
+}
+
+try {
+    load('classpath:core/change-value.js');
+    load('classpath:core/command.js');
+    load('classpath:core/delete.js');
+    load('classpath:core/field.js');
+    load('classpath:core/insert.js');
+    load('classpath:core/parameter.js');
     load('classpath:core/platypus-principal.js');
     load('classpath:core/published-sourced-event.js');
     load('classpath:core/report.js');
+    load('classpath:core/update.js');
     print('core API loaded.');
 } catch (e) {
     print('core API skipped.');
@@ -30,27 +46,6 @@ try {
     print('reports API loaded.');
 } catch (e) {
     print('reports API skipped.');
-}
-
-try {
-    load('classpath:rowsets/change-value.js');
-    load('classpath:rowsets/command.js');
-    load('classpath:rowsets/delete.js');
-    load('classpath:rowsets/field.js');
-    load('classpath:rowsets/filter.js');
-    load('classpath:rowsets/insert.js');
-    load('classpath:rowsets/parameter.js');
-    load('classpath:rowsets/update.js');
-    print('rowsets API loaded.');
-} catch (e) {
-    print('rowsets API skipped.');
-}
-
-try {
-    load('classpath:http-context.js');
-    print('http-context API loaded.');
-} catch (e) {
-    print('http-context API skipped.');
 }
 
 try {

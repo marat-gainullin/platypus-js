@@ -74,20 +74,6 @@
              */
             P.WebSocket.prototype.onopen = {};
         }
-        Object.defineProperty(this, "query", {
-            get: function() {
-                var value = delegate.query;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.WebSocket){
-            /**
-             * Generated property jsDoc.
-             * @property query
-             * @memberOf WebSocket
-             */
-            P.WebSocket.prototype.query = '';
-        }
         Object.defineProperty(this, "onclose", {
             get: function() {
                 var value = delegate.onclose;
@@ -104,6 +90,20 @@
              * @memberOf WebSocket
              */
             P.WebSocket.prototype.onclose = {};
+        }
+        Object.defineProperty(this, "query", {
+            get: function() {
+                var value = delegate.query;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.WebSocket){
+            /**
+             * Generated property jsDoc.
+             * @property query
+             * @memberOf WebSocket
+             */
+            P.WebSocket.prototype.query = '';
         }
         Object.defineProperty(this, "protocolVersion", {
             get: function() {

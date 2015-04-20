@@ -164,7 +164,7 @@
         });
         return aTarget;
     }
-
+/*
     function copyArray(aTarget) {
         var snapshot = [];
         aTarget.forEach(function (aItem) {
@@ -176,6 +176,7 @@
         });
         return snapshot;
     }
+    */
     Object.defineProperty(this.P, 'manageObject', {value: manageObject});
     Object.defineProperty(this.P, 'unmanageObject', {value: unmanageObject});
     Object.defineProperty(this.P, 'manageArray', {value: manageArray});

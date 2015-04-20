@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.bearsoft.rowset.changes.Command");
+    var javaClass = Java.type("com.eas.client.changes.Command");
     javaClass.setPublisher(function(aDelegate) {
         return new P.Command(aDelegate);
     });
@@ -48,7 +48,7 @@
              * @property parameters
              * @memberOf Command
              */
-            P.Command.prototype.parameters = [];
+            P.Command.prototype.parameters = {};
         }
         Object.defineProperty(this, "command", {
             get: function() {

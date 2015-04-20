@@ -18,9 +18,6 @@
         };
     }
 
-    load("classpath:internals.js");
-    load("classpath:managed.js");
-    load("classpath:orderer.js");
     //this === global;
     var global = this;
     var oldP = global.P;
@@ -32,6 +29,9 @@
      throw "Legacy api can't restore the global namespace.";
      };
      */
+    load("classpath:internals.js");
+    load("classpath:managed.js");
+    load("classpath:orderer.js");
 
     // core imports
     var EngineUtilsClass = Java.type("jdk.nashorn.api.scripting.ScriptUtils");
@@ -41,8 +41,8 @@
     var FileClass = Java.type("java.io.File");
     var JavaDateClass = Java.type("java.util.Date");
     var LoggerClass = Java.type("java.util.logging.Logger");
-    var FieldsClass = Java.type("com.bearsoft.rowset.metadata.Fields");
-    var IDGeneratorClass = Java.type("com.bearsoft.rowset.utils.IDGenerator");
+    var FieldsClass = Java.type("com.eas.client.metadata.Fields");
+    var IDGeneratorClass = Java.type("com.eas.util.IDGenerator");
     var ScriptTimerTaskClass = Java.type("com.eas.client.scripts.ScriptTimerTask");
     var ScriptedResourceClass = Java.type("com.eas.client.scripts.ScriptedResource");
     var PlatypusPrincipalClass = Java.type("com.eas.client.login.PlatypusPrincipal");

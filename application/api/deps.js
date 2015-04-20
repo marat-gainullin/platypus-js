@@ -11,9 +11,16 @@ try {
 }
 
 try {
+    load('classpath:core/change-value.js');
+    load('classpath:core/command.js');
+    load('classpath:core/delete.js');
+    load('classpath:core/field.js');
+    load('classpath:core/insert.js');
+    load('classpath:core/parameter.js');
     load('classpath:core/platypus-principal.js');
     load('classpath:core/published-sourced-event.js');
     load('classpath:core/report.js');
+    load('classpath:core/update.js');
     print('core API loaded.');
 } catch (e) {
     print('core API skipped.');
@@ -110,15 +117,16 @@ try {
 }
 
 try {
-    load('classpath:rowsets/change-value.js');
-    load('classpath:rowsets/command.js');
-    load('classpath:rowsets/delete.js');
-    load('classpath:rowsets/field.js');
-    load('classpath:rowsets/filter.js');
-    load('classpath:rowsets/insert.js');
-    load('classpath:rowsets/parameter.js');
-    load('classpath:rowsets/update.js');
-    print('rowsets API loaded.');
+    load('classpath:server/session.js');
+    print('server API loaded.');
 } catch (e) {
-    print('rowsets API skipped.');
+    print('server API skipped.');
+}
+
+try {
+    load('classpath:servlet-support/web-socket-client-session.js');
+    load('classpath:servlet-support/web-socket-server-session.js');
+    print('servlet-support API loaded.');
+} catch (e) {
+    print('servlet-support API skipped.');
 }

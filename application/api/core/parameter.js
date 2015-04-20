@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.bearsoft.rowset.metadata.Parameter");
+    var javaClass = Java.type("com.eas.client.metadata.Parameter");
     javaClass.setPublisher(function(aDelegate) {
         return new P.Parameter(aDelegate);
     });
@@ -104,23 +104,6 @@
              */
             P.Parameter.prototype.precision = 0;
         }
-        Object.defineProperty(this, "description", {
-            get: function() {
-                var value = delegate.description;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.description = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Parameter){
-            /**
-             * The description of the field.
-             * @property description
-             * @memberOf Parameter
-             */
-            P.Parameter.prototype.description = '';
-        }
         Object.defineProperty(this, "scale", {
             get: function() {
                 var value = delegate.scale;
@@ -137,6 +120,23 @@
              * @memberOf Parameter
              */
             P.Parameter.prototype.scale = 0;
+        }
+        Object.defineProperty(this, "description", {
+            get: function() {
+                var value = delegate.description;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.description = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Parameter){
+            /**
+             * The description of the field.
+             * @property description
+             * @memberOf Parameter
+             */
+            P.Parameter.prototype.description = '';
         }
         Object.defineProperty(this, "signed", {
             get: function() {

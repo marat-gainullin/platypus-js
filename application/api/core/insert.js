@@ -1,5 +1,5 @@
 (function() {
-    var javaClass = Java.type("com.bearsoft.rowset.changes.Insert");
+    var javaClass = Java.type("com.eas.client.changes.Insert");
     javaClass.setPublisher(function(aDelegate) {
         return new P.Insert(aDelegate);
     });
@@ -34,7 +34,7 @@
              * @property data
              * @memberOf Insert
              */
-            P.Insert.prototype.data = [];
+            P.Insert.prototype.data = {};
         }
         Object.defineProperty(this, "type", {
             get: function() {
