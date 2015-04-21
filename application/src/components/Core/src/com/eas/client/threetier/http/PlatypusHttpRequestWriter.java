@@ -37,7 +37,7 @@ import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import jdk.nashorn.internal.runtime.Undefined;
+import jdk.nashorn.internal.runtime.JSType;
 
 /**
  *
@@ -72,7 +72,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
     }
 
     private String valueToString(Object aValue) {
-        if (aValue != null && !(aValue instanceof Undefined)) {
+        if (!JSType.nullOrUndefined(aValue)) {
             if (aValue instanceof Date) {
                 SimpleDateFormat sdf = new SimpleDateFormat(PlatypusHttpConstants.HTTP_DATE_FORMAT, Locale.US);
                 return sdf.format((Date) aValue);

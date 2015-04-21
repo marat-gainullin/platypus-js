@@ -70,7 +70,7 @@ import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.internal.runtime.Undefined;
+import jdk.nashorn.internal.runtime.JSType;
 
 /**
  *
@@ -675,7 +675,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
                         settingValueFromJs = true;
                         try {
                             Object newValue = ModelWidget.getPathData(data, field);
-                            setJsValue(newValue instanceof Undefined ? null : newValue);
+                            setJsValue(JSType.nullOrUndefined(newValue) ? null : newValue);
                         } finally {
                             settingValueFromJs = false;
                         }

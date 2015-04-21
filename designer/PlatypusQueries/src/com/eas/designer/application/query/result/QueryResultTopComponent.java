@@ -98,7 +98,7 @@ public final class QueryResultTopComponent extends TopComponent {
         // TODO read your settings according to their version
     }
 
-    public void addResultsView(QueryResultsView aView) {
+    public void addResultsView(QueryResultsView aView) throws Exception {
         tabPane.add(aView);
         tabPane.setSelectedComponent(aView);
         aView.runQuery();

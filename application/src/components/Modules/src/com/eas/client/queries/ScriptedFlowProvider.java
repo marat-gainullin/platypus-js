@@ -15,7 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.internal.runtime.Undefined;
+import jdk.nashorn.internal.runtime.JSType;
 
 /**
  * Specific <code>FlowProvider</code> implementation, that allows js modules to
@@ -112,14 +112,14 @@ public class ScriptedFlowProvider extends PlatypusJdbcFlowProvider {
                                 }
                             }
                         }));
-                        if (oRowset != null && !(oRowset instanceof Undefined)) {
+                        if (!JSType.nullOrUndefined(oRowset)) {
                             onSuccess.accept((JSObject) oRowset);
                             exChecker.setExecutionNeeded(false);
                         }
                         return null;
                     } else {
                         Object oRowset = jsFetch.call(source, ScriptUtils.toJs(new Object[]{jsParams}));
-                        if (oRowset != null && !(oRowset instanceof Undefined)) {
+                        if (!JSType.nullOrUndefined(oRowset)) {
                             return (JSObject) oRowset;
                         } else {
                             return null;
@@ -185,7 +185,7 @@ public class ScriptedFlowProvider extends PlatypusJdbcFlowProvider {
                                 }
                             }
                         }));
-                        if (oRowset != null && !(oRowset instanceof Undefined)) {
+                        if (!JSType.nullOrUndefined(oRowset)) {
                             onSuccess.accept((JSObject) oRowset);
                             exChecker.setExecutionNeeded(false);
                         } else {
@@ -193,7 +193,7 @@ public class ScriptedFlowProvider extends PlatypusJdbcFlowProvider {
                         }
                     } else {
                         Object oRowset = jsNextPage.call(source, ScriptUtils.toJs(new Object[]{}));
-                        if (oRowset != null && !(oRowset instanceof Undefined)) {
+                        if (!JSType.nullOrUndefined(oRowset)) {
                             return (JSObject) oRowset;
                         } else {
                             return null;

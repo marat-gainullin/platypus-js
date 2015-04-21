@@ -413,5 +413,5 @@ public class Converter {
             }
         }
     }
-    protected static final String FALLED_TO_NULL_MSG = "Some value falled to null while tranferring to a database. May be it''s class in unsupported: {0}";
+    protected static final String FALLED_TO_NULL_MSG = "Some value falled to null while tranferring to a database. May be it''s class is unsupported: {0}";
 }

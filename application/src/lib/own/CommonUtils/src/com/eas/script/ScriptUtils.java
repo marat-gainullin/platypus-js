@@ -499,7 +499,7 @@ public class ScriptUtils {
 
     public static String toJson(Object aObj) {
         assert writeJsonFunc != null : SCRIPT_NOT_INITIALIZED;
-        if (aObj instanceof Undefined) {//nashorn JSON parser could not work with undefind.
+        if (aObj instanceof Undefined) {//nashorn JSON parser could not work with undefined.
             aObj = null;
         }
         if (aObj instanceof JSObject || aObj instanceof CharSequence

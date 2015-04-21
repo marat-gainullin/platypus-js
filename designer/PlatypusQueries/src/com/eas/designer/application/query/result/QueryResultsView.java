@@ -6,7 +6,6 @@ package com.eas.designer.application.query.result;
 
 import com.eas.client.DatabasesClient;
 import com.eas.client.SQLUtils;
-import com.eas.client.SQLUtils.TypesGroup;
 import com.eas.client.SqlQuery;
 import com.eas.client.StoredQueryFactory;
 import com.eas.client.changes.Change;
@@ -15,6 +14,7 @@ import com.eas.client.changes.Delete;
 import com.eas.client.changes.Insert;
 import com.eas.client.changes.Update;
 import com.eas.client.dataflow.FlowProvider;
+import com.eas.client.dataflow.FlowProviderNotPagedException;
 import com.eas.client.forms.components.model.ModelCheckBox;
 import com.eas.client.forms.components.model.ModelDate;
 import com.eas.client.forms.components.model.ModelFormattedField;
@@ -51,6 +51,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
@@ -116,8 +117,6 @@ public class QueryResultsView extends javax.swing.JPanel {
             }
         }
         setName(aQueryDataObject.getName());
-        resetMessage();
-        setupButtons();
         queryName = IndexerQuery.file2AppElementId(aQueryDataObject.getPrimaryFile());
         if (queryName != null && !queryName.isEmpty()) {
             loadParametersValues();
@@ -133,10 +132,6 @@ public class QueryResultsView extends javax.swing.JPanel {
         queryText = aQueryText;
         parseParameters();
         setName(getGeneratedTitle());
-        resetMessage();
-        runButton.setEnabled(false);
-        refreshButton.setEnabled(false);
-        commitButton.setEnabled(false);
     }
 
     protected static String extractText(PlatypusQueryDataObject aQueryDataObject) throws Exception {
@@ -144,13 +139,6 @@ public class QueryResultsView extends javax.swing.JPanel {
         String storedDialectQueryText = aQueryDataObject.getSqlFullTextDocument().getText(0, aQueryDataObject.getSqlFullTextDocument().getLength());
         StoredQueryFactory factory = new ScriptedQueryFactory(aQueryDataObject.getBasesProxy(), aQueryDataObject.getProject().getQueries(), aQueryDataObject.getProject().getIndexer());
         return factory.compileSubqueries(storedDialectQueryText != null && !storedDialectQueryText.isEmpty() ? storedDialectQueryText : storedQueryText, aQueryDataObject.getModel());
-    }
-
-    private void setupButtons() {
-        runButton.setEnabled(false);
-        refreshButton.setEnabled(false);
-        commitButton.setEnabled(false);
-        nextPageButton.setEnabled(false);
     }
 
     public void setPageSize(int aValue) {
@@ -174,19 +162,7 @@ public class QueryResultsView extends javax.swing.JPanel {
      * delete, update or stored procedure call
      * @throws Exception
      */
-    private boolean initModel() throws Exception {
-        setupDataEntityBySql();
-        // enable dataworks
-        if (query.isCommand()) {
-            int rowsAffected = basesProxy.executeUpdate(query.compile(), null, null);
-            showInfo(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.affectedRowsMessage", rowsAffected));
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    private void setupDataEntityBySql() throws Exception {
+    private void initModel() throws Exception {
         query = new SqlQuery(basesProxy, queryText);
         query.setDatasourceName(datasourceName);
         query.setPageSize(pageSize);
@@ -198,18 +174,20 @@ public class QueryResultsView extends javax.swing.JPanel {
             query.setCommand(!factory.putTableFieldsMetadata(query));
             flow = query.compile().getFlowProvider();
             changeLog = new ArrayList<>();
-            enableCommitQueryButton(!query.isCommand());
-            enableNextPageButton(!query.isCommand());
-            enableAddButton(!query.isCommand());
-            hintCommitQueryButton(NbBundle.getMessage(QueryResultsView.class, "HINT_Commit"));
+            commitButton.setEnabled(!query.isCommand());
+            nextPageButton.setEnabled(!query.isCommand());
+            addButton.setEnabled(!query.isCommand());
+            deleteButton.setEnabled(!query.isCommand());
+            commitButton.setToolTipText(NbBundle.getMessage(QueryResultsView.class, "HINT_Commit"));
         } catch (Exception ex) {
             query.setFields(null);// We have to accept database's fields here.
-            enableCommitQueryButton(false);
-            enableNextPageButton(false);
-            enableAddButton(false);
-            hintCommitQueryButton(NbBundle.getMessage(QueryResultsView.class, "HINT_Uncommitable"));
+            commitButton.setEnabled(false);
+            nextPageButton.setEnabled(false);
+            addButton.setEnabled(false);
+            deleteButton.setEnabled(false);
+            commitButton.setToolTipText(NbBundle.getMessage(QueryResultsView.class, "HINT_Uncommitable"));
         }
-        enableRefreshQueryButton(true);
+        refreshButton.setEnabled(true);
     }
 
     public String getQueryText() {
@@ -245,12 +223,14 @@ public class QueryResultsView extends javax.swing.JPanel {
     }
 
     private void showQueryResultsMessage() throws Exception {
-        String message = String.format(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.resultMessage"), JSType.toInteger(grid.getData().getMember("length")));
-        List<Field> pks = query.getFields().getPrimaryKeys();
-        if (pks == null || pks.isEmpty()) {
-            message += "\n " + String.format(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.noKeysMessage"), query.getEntityName());
+        if (query.getFields() != null && grid.getData() != null) {
+            String message = String.format(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.resultMessage"), JSType.toInteger(grid.getData().getMember("length")));
+            List<Field> pks = query.getFields().getPrimaryKeys();
+            if (pks == null || pks.isEmpty()) {
+                message += "\n " + String.format(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.noKeysMessage"), query.getEntityName());
+            }
+            showInfo(message);
         }
-        showInfo(message);
     }
 
     public void logParameters() throws Exception {
@@ -394,8 +374,45 @@ public class QueryResultsView extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_runButtonActionPerformed
 
+    private Runnable disableButtons() {
+        boolean rEnabled = refreshButton.isEnabled();
+        boolean nEnabled = nextPageButton.isEnabled();
+        boolean aEnabled = addButton.isEnabled();
+        boolean dEnabled = deleteButton.isEnabled();
+        boolean cEnabled = commitButton.isEnabled();
+        boolean rrEnabled = runButton.isEnabled();
+        refreshButton.setEnabled(false);
+        nextPageButton.setEnabled(false);
+        addButton.setEnabled(false);
+        deleteButton.setEnabled(false);
+        commitButton.setEnabled(false);
+        runButton.setEnabled(false);
+        boolean gInsertable = grid != null ? grid.isInsertable() : false;
+        boolean gEditable = grid != null ? grid.isEditable() : false;
+        boolean gDeletable = grid != null ? grid.isDeletable() : false;
+        if (grid != null) {
+            grid.setInsertable(false);
+            grid.setEditable(false);
+            grid.setDeletable(false);
+        }
+        return () -> {
+            refreshButton.setEnabled(rEnabled);
+            nextPageButton.setEnabled(nEnabled);
+            addButton.setEnabled(aEnabled);
+            deleteButton.setEnabled(dEnabled);
+            commitButton.setEnabled(cEnabled);
+            runButton.setEnabled(rrEnabled);
+            if (grid != null) {
+                grid.setInsertable(gInsertable);
+                grid.setEditable(gEditable);
+                grid.setDeletable(gDeletable);
+            }
+        };
+    }
+
     private void refreshButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshButtonActionPerformed
         if (query != null) {
+            final Runnable reEnableButtons = disableButtons();
             RequestProcessor.getDefault().execute(() -> {
                 final ProgressHandle ph = ProgressHandleFactory.createHandle(getName());
                 ph.start();
@@ -403,20 +420,33 @@ public class QueryResultsView extends javax.swing.JPanel {
                     if (query.isCommand()) {
                         int rowsAffected = basesProxy.executeUpdate(query.compile(), null, null);
                         showInfo(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.affectedRowsMessage", rowsAffected));
+                        EventQueue.invokeLater(() -> {
+                            reEnableButtons.run();
+                            gridPanel.revalidate();
+                            gridPanel.repaint();
+                        });
                     } else {
-                        JSObject fetched = flow.refresh(query.compile().getParameters(), null, null);
                         changeLog = new ArrayList<>();
-                        JSObject processed = processData(fetched);
-                        grid.setData(processed);
+                        if (flow != null) {
+                            JSObject fetched = flow.refresh(query.compile().getParameters(), null, null);
+                            JSObject processed = processData(fetched);
+                            grid.setData(processed);
+                        }
                         showQueryResultsMessage();
+                        EventQueue.invokeLater(() -> {
+                            reEnableButtons.run();
+                            nextPageButton.setEnabled(true);
+                            gridPanel.revalidate();
+                            gridPanel.repaint();
+                        });
                     }
                 } catch (Exception ex) {
                     showWarning(ex.getMessage() != null ? ex.getMessage() : ex.toString()); //NO1I18N
+                    runButton.setEnabled(true);
                 } finally {
                     ph.finish();
                 }
             });
-
         }
     }//GEN-LAST:event_refreshButtonActionPerformed
 
@@ -445,7 +475,7 @@ public class QueryResultsView extends javax.swing.JPanel {
                 Field field = fields.get(i);
                 String fieldName = field.getName();
                 Object value = aSubject.getMember(fieldName);
-                if (JSType.nullOrUndefined(value) && (field.isPk() || !field.isNullable())) {
+                if (JSType.nullOrUndefined(value) && field.isPk() && !field.isFk()) {
                     value = field.getTypeInfo().generateValue();
                     aSubject.setMember(fieldName, value);
                 }
@@ -454,6 +484,57 @@ public class QueryResultsView extends javax.swing.JPanel {
                 }
             }
         }
+    }
+
+    protected class JSWrapper extends JSObjectFacade {
+
+        public JSWrapper(JSObject aDelegate) {
+            super(aDelegate);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof JSObjectFacade) {
+                obj = ((JSObjectFacade) obj).getDelegate();
+            }
+            return getDelegate().equals(obj);
+        }
+
+        @Override
+        public int hashCode() {
+            return getDelegate().hashCode();
+        }
+
+        @Override
+        public void setMember(String name, Object value) {
+            Field field = query.getFields().get(name);
+            if (field != null) {
+                Object oldValue = super.getMember(name);
+                super.setMember(name, value);
+                boolean complemented = false;
+                if (!field.isNullable() && lastInsert != null && lastInserted.equals(this)) {
+                    boolean met = false;
+                    for (int d = 0; d < lastInsert.getData().size(); d++) {
+                        ChangeValue chv = lastInsert.getData().get(d);
+                        if (chv.getName().equalsIgnoreCase(name)) {
+                            met = true;
+                            break;
+                        }
+                    }
+                    if (!met) {
+                        lastInsert.getData().add(new ChangeValue(name, value, field.getTypeInfo()));
+                        complemented = true;
+                    }
+                }
+                if (!complemented) {
+                    Update update = new Update("");
+                    generateChangeLogKeys(update.getKeys(), getDelegate(), name, oldValue);
+                    update.getData().add(new ChangeValue(name, value, field.getTypeInfo()));
+                    changeLog.add(update);
+                }
+            }
+        }
+
     }
 
     protected JSObject processData(JSObject aSubject) {
@@ -480,9 +561,14 @@ public class QueryResultsView extends javax.swing.JPanel {
                             }
                             for (int i = 2; i < args.length; i++) {
                                 Insert insert = new Insert("");
-                                generateChangeLogData(insert.getData(), (JSObject) args[i]);
+                                JSObject jsSubject = (JSObject) args[i];
+                                if (jsSubject instanceof JSWrapper) {
+                                    jsSubject = ((JSWrapper) jsSubject).getDelegate();
+                                }
+                                generateChangeLogData(insert.getData(), jsSubject);
                                 changeLog.add(insert);
                                 lastInsert = insert;
+                                lastInserted = (JSObject) args[i];
                             }
                             return res;
                         }
@@ -496,52 +582,7 @@ public class QueryResultsView extends javax.swing.JPanel {
             @Override
             public Object getSlot(int index) {
                 Object slot = super.getSlot(index);
-                return JSType.nullOrUndefined(slot) || slot instanceof JSObjectFacade ? slot : new JSObjectFacade((JSObject) slot) {
-
-                    @Override
-                    public boolean equals(Object obj) {
-                        if (obj instanceof JSObjectFacade) {
-                            obj = ((JSObjectFacade) obj).getDelegate();
-                        }
-                        return getDelegate().equals(obj);
-                    }
-
-                    @Override
-                    public int hashCode() {
-                        return getDelegate().hashCode();
-                    }
-
-                    @Override
-                    public void setMember(String name, Object value) {
-                        Field field = query.getFields().get(name);
-                        if (field != null) {
-                            Object oldValue = super.getMember(name);
-                            super.setMember(name, value);
-                            boolean complemented = false;
-                            if (!field.isNullable() && lastInsert != null && lastInserted == getDelegate()) {
-                                boolean met = false;
-                                for (int d = 0; d < lastInsert.getData().size(); d++) {
-                                    ChangeValue chv = lastInsert.getData().get(d);
-                                    if (chv.getName().equalsIgnoreCase(name)) {
-                                        met = true;
-                                        break;
-                                    }
-                                }
-                                if (!met) {
-                                    lastInsert.getData().add(new ChangeValue(name, value, field.getTypeInfo()));
-                                    complemented = true;
-                                }
-                            }
-                            if (!complemented) {
-                                Update update = new Update("");
-                                generateChangeLogKeys(update.getKeys(), this, name, oldValue);
-                                update.getData().add(new ChangeValue(name, value, field.getTypeInfo()));
-                                changeLog.add(update);
-                            }
-                        }
-                    }
-
-                };
+                return JSType.nullOrUndefined(slot) || slot instanceof JSObjectFacade ? slot : new JSWrapper((JSObject) slot);
             }
 
         };
@@ -556,7 +597,7 @@ public class QueryResultsView extends javax.swing.JPanel {
 
             @Override
             public Object newObject(Object... args) {
-                return new JSObjectFacade(ScriptUtils.makeObj());
+                return new JSWrapper(ScriptUtils.makeObj());
             }
 
         });
@@ -566,7 +607,7 @@ public class QueryResultsView extends javax.swing.JPanel {
     private void commitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_commitButtonActionPerformed
         try {
             if (query != null && !changeLog.isEmpty()) {
-                commitButton.setEnabled(false);
+                final Runnable reEnableButtons = disableButtons();
                 final String entityName = IDGenerator.genID().toString();
                 query.setEntityName(entityName);
                 changeLog.forEach((Change aChange) -> {
@@ -577,18 +618,21 @@ public class QueryResultsView extends javax.swing.JPanel {
                     final ProgressHandle ph = ProgressHandleFactory.createHandle(getName());
                     ph.start();
                     try {
-                        int affected = basesProxy.commit(Collections.singletonMap(query.getDatasourceName(), changeLog), null, null);
-                        showWarning(NbBundle.getMessage(QueryResultsView.class, "DataSaved"));
+                        int rowsAffected = basesProxy.commit(Collections.singletonMap(query.getDatasourceName(), changeLog), null, null);
+                        showInfo(NbBundle.getMessage(QueryResultsView.class, "DataSaved") + ". " + NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.affectedRowsMessage", rowsAffected));
                     } catch (Exception ex) {
                         showInfo(ex.getMessage()); //NO1I18N
                     } finally {
                         ph.finish();
                         EventQueue.invokeLater(() -> {
                             ((LocalQueriesProxy) basesProxy.getQueries()).clearCachedQuery(entityName);
-                            commitButton.setEnabled(true);
+                            changeLog = new ArrayList<>();
+                            reEnableButtons.run();
                         });
                     }
                 });
+            } else {
+                resetMessage();
             }
         } catch (Exception ex) {
             logger.log(Level.SEVERE, null, ex);
@@ -597,14 +641,33 @@ public class QueryResultsView extends javax.swing.JPanel {
 
     private void nextPageButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nextPageButtonActionPerformed
         if (flow != null) {
-            try {
-                JSObject fetched = flow.nextPage(null, null);
-                JSObject processed = processData(fetched);
-                grid.setData(processed);
-                showQueryResultsMessage();
-            } catch (Exception ex) {
-                Exceptions.printStackTrace(ex);
-            }
+            final Runnable reEnableButtons = disableButtons();
+            RequestProcessor.getDefault().execute(() -> {
+                try {
+                    JSObject fetched = flow.nextPage(null, null);
+                    int length = JSType.toInteger(fetched.getMember("length"));
+                    if (length > 0) {
+                        JSObject processed = processData(fetched);
+                        grid.setData(processed);
+                        showQueryResultsMessage();
+                    }
+                    EventQueue.invokeLater(() -> {
+                        reEnableButtons.run();
+                        gridPanel.revalidate();
+                        gridPanel.repaint();
+                    });
+                } catch (Exception ex) {
+                    EventQueue.invokeLater(() -> {
+                        reEnableButtons.run();
+                        nextPageButton.setEnabled(false);
+                        gridPanel.revalidate();
+                        gridPanel.repaint();
+                    });
+                    if (!(ex instanceof FlowProviderNotPagedException)) {
+                        Exceptions.printStackTrace(ex);
+                    }
+                }
+            });
         }
     }//GEN-LAST:event_nextPageButtonActionPerformed
     protected static final String CURSOR_PROP_NAME = "cursor";
@@ -631,7 +694,7 @@ public class QueryResultsView extends javax.swing.JPanel {
     private javax.swing.Box.Filler verticalFiller;
     // End of variables declaration//GEN-END:variables
 
-    public void runQuery() {
+    public void runQuery() throws Exception {
         assert parameters != null : "Parameters must be initialized."; //NOI18N
         if (!parameters.isEmpty()) {
             showQuerySetupDialog();
@@ -658,83 +721,15 @@ public class QueryResultsView extends javax.swing.JPanel {
                     saveParametersValues();
                 }
                 requestExecuteQuery();
-            } else {
-                enableRunQueryButton(true);
             }
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
         }
     }
 
-    private void requestExecuteQuery() {
-        RequestProcessor.getDefault().execute(() -> {
-            execute();
-        });
-    }
-
-    private void execute() {
-        enableRunQueryButton(false);
-        final ProgressHandle ph = ProgressHandleFactory.createHandle(getName());
-        ph.start();
+    private void requestExecuteQuery() throws Exception {
         resetMessage();
-        try {
-            if (refresh()) {
-                showQueryResultsMessage();
-                gridPanel.revalidate();
-                gridPanel.repaint();
-            }
-        } catch (Throwable ex) {
-            showWarning(ex.getMessage());
-            enableCommitQueryButton(false);
-            enableNextPageButton(false);
-            enableDeleteButton(false);
-            enableAddButton(false);
-        } finally {
-            enableRunQueryButton(true);
-            ph.finish();
-        }
-    }
-
-    private void enableRunQueryButton(final boolean enable) {
-        SwingUtilities.invokeLater(() -> {
-            runButton.setEnabled(enable);
-        });
-    }
-
-    private void enableRefreshQueryButton(final boolean enable) {
-        SwingUtilities.invokeLater(() -> {
-            refreshButton.setEnabled(enable);
-        });
-    }
-
-    private void enableCommitQueryButton(final boolean enable) {
-        SwingUtilities.invokeLater(() -> {
-            commitButton.setEnabled(enable);
-        });
-    }
-
-    private void hintCommitQueryButton(final String aHintText) {
-        SwingUtilities.invokeLater(() -> {
-            commitButton.setToolTipText(aHintText);
-        });
-    }
-
-    private void enableNextPageButton(final boolean enable) {
-        SwingUtilities.invokeLater(() -> {
-            nextPageButton.setEnabled(enable);
-        });
-    }
-
-    private void enableAddButton(final boolean enable) {
-        SwingUtilities.invokeLater(() -> {
-            addButton.setEnabled(enable);
-        });
-    }
-
-    private void enableDeleteButton(final boolean enable) {
-        SwingUtilities.invokeLater(() -> {
-            deleteButton.setEnabled(enable);
-        });
+        refresh();
     }
 
     /**
@@ -743,175 +738,93 @@ public class QueryResultsView extends javax.swing.JPanel {
      * been executed
      * @throws Exception
      */
-    private boolean refresh() throws Exception {
-        if (initModel()) {
+    private void refresh() throws Exception {
+        initModel();
+        gridPanel.removeAll();
+        if (!query.isCommand()) {
             initModelGrid();
-            return true;
-        } else {
-            return false;
         }
+        refreshButtonActionPerformed(null);
     }
 
     private void initModelGrid() throws Exception {
-        gridPanel.removeAll();
         grid = new ModelGrid();
         grid.setAutoRefreshHeader(false);
         gridPanel.add(grid);
         Fields fields = query.getFields();
-        for (int i = 1; i <= fields.getFieldsCount(); i++) {
-            Field columnField = fields.get(i);
-            ModelGridColumn columnNode = new ModelGridColumn();
-            grid.addColumnNode(columnNode);
-            ModelColumn column = (ModelColumn) columnNode.getTableColumn();
-            int lwidth = 80;
-            if (lwidth >= columnNode.getWidth()) {
-                columnNode.setWidth(lwidth);
-            }
-            String description = columnField.getDescription();
-            if (description != null && !description.isEmpty()) {
-                columnNode.setTitle(description);
-            } else {
-                columnNode.setTitle(columnField.getName());
-            }
-            columnNode.setField(columnField.getName());
-            switch (columnField.getTypeInfo().getSqlType()) {
-                // Numbers
-                case java.sql.Types.NUMERIC:
-                case java.sql.Types.BIGINT:
-                case java.sql.Types.DECIMAL:
-                case java.sql.Types.DOUBLE:
-                case java.sql.Types.FLOAT:
-                case java.sql.Types.INTEGER:
-                case java.sql.Types.REAL:
-                case java.sql.Types.TINYINT:
-                case java.sql.Types.SMALLINT: {
-                    ModelSpin editor = new ModelSpin();
-                    editor.setMin(-Double.MAX_VALUE);
-                    editor.setMax(Double.MAX_VALUE);
-                    ModelSpin view = new ModelSpin();
-                    view.setMin(-Double.MAX_VALUE);
-                    view.setMax(Double.MAX_VALUE);
-                    column.setEditor(editor);
-                    column.setView(view);
-                    break;
+        if (fields != null) {
+            for (int i = 1; i <= fields.getFieldsCount(); i++) {
+                Field columnField = fields.get(i);
+                ModelGridColumn columnNode = new ModelGridColumn();
+                grid.addColumnNode(columnNode);
+                ModelColumn column = (ModelColumn) columnNode.getTableColumn();
+                int lwidth = 80;
+                if (lwidth >= columnNode.getWidth()) {
+                    columnNode.setWidth(lwidth);
                 }
-                // Logical
-                case java.sql.Types.BOOLEAN:
-                case java.sql.Types.BIT:
-                    column.setEditor(new ModelCheckBox());
-                    column.setView(new ModelCheckBox());
-                    break;
-                // Date and time
-                case java.sql.Types.DATE:
-                case java.sql.Types.TIME:
-                case java.sql.Types.TIMESTAMP: {
-                    ModelDate editor = new ModelDate();
-                    editor.setDateFormat("dd.MM.yyyy HH:mm:ss.SSS");
-                    ModelDate view = new ModelDate();
-                    view.setDateFormat("dd.MM.yyyy HH:mm:ss.SSS");
-                    column.setEditor(editor);
-                    column.setView(view);
-                    break;
+                String description = columnField.getDescription();
+                if (description != null && !description.isEmpty()) {
+                    columnNode.setTitle(description);
+                } else {
+                    columnNode.setTitle(columnField.getName());
                 }
-                default:
-                    column.setEditor(new ModelFormattedField());
-                    column.setView(new ModelFormattedField());
-                    break;
+                columnNode.setField(columnField.getName());
+                switch (columnField.getTypeInfo().getSqlType()) {
+                    // Numbers
+                    case java.sql.Types.NUMERIC:
+                    case java.sql.Types.BIGINT:
+                    case java.sql.Types.DECIMAL:
+                    case java.sql.Types.DOUBLE:
+                    case java.sql.Types.FLOAT:
+                    case java.sql.Types.INTEGER:
+                    case java.sql.Types.REAL:
+                    case java.sql.Types.TINYINT:
+                    case java.sql.Types.SMALLINT: {
+                        ModelSpin editor = new ModelSpin();
+                        editor.setMin(-Double.MAX_VALUE);
+                        editor.setMax(Double.MAX_VALUE);
+                        ModelSpin view = new ModelSpin();
+                        view.setMin(-Double.MAX_VALUE);
+                        view.setMax(Double.MAX_VALUE);
+                        column.setEditor(editor);
+                        column.setView(view);
+                        break;
+                    }
+                    // Logical
+                    case java.sql.Types.BOOLEAN:
+                    case java.sql.Types.BIT:
+                        column.setEditor(new ModelCheckBox());
+                        column.setView(new ModelCheckBox());
+                        break;
+                    // Date and time
+                    case java.sql.Types.DATE:
+                    case java.sql.Types.TIME:
+                    case java.sql.Types.TIMESTAMP: {
+                        ModelDate editor = new ModelDate();
+                        editor.setDateFormat("dd.MM.yyyy HH:mm:ss.SSS");
+                        ModelDate view = new ModelDate();
+                        view.setDateFormat("dd.MM.yyyy HH:mm:ss.SSS");
+                        column.setEditor(editor);
+                        column.setView(view);
+                        break;
+                    }
+                    default:
+                        column.setEditor(new ModelFormattedField());
+                        column.setView(new ModelFormattedField());
+                        break;
+                }
+                column.getEditor().setNullable(columnField.isNullable());
             }
-            column.getEditor().setNullable(columnField.isNullable());
+            List<Field> pks = query.getFields().getPrimaryKeys();
+            grid.setEditable(pks != null && !pks.isEmpty());
+            grid.setDeletable(pks != null && !pks.isEmpty());
+            deleteButton.setEnabled(pks != null && !pks.isEmpty());
+            if (!deleteButton.isEnabled()) {
+                showInfo(String.format(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.noKeysMessage"), query.getEntityName()));
+            }
         }
         grid.setAutoRefreshHeader(true);
         grid.insertColumnNode(0, new ServiceGridColumn());
-        List<Field> pks = query.getFields().getPrimaryKeys();
-        grid.setEditable(pks != null && !pks.isEmpty());
-        grid.setDeletable(pks != null && !pks.isEmpty());
-        JSObject fetched = flow.refresh(query.compile().getParameters(), null, null);
-        JSObject processed = processData(fetched);
-        grid.setData(processed);
-        deleteButton.setEnabled(pks != null && !pks.isEmpty());
-        if (!deleteButton.isEnabled()) {
-            showInfo(String.format(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.noKeysMessage"), query.getEntityName()));
-        }
-        /*
-         dataEntity.getRowset().addRowsetListener(new RowsetAdapter() {
-         @Override
-         public boolean willInsertRow(RowsetInsertEvent event) {
-         try {
-         int modified = 0;
-         Fields fields = event.getRow().getFields();
-         List<Field> pks = fields.getPrimaryKeys();
-         for (int i = 1; i <= fields.getFieldsCount(); i++) {
-         Field field = fields.get(i);
-         if (!field.isNullable()) {
-         Object oValue;
-         if (field.isFk() || pks.isEmpty()) {// ask a user about a fk-field value and all other fields if primary keys are absent
-         String sValue = askFieldValue(field);
-         if (sValue == null) {
-         return false;
-         } else {
-         oValue = sValue;
-         }
-         } else {
-         oValue = generateFieldValue(field);
-         }
-         oValue = event.getRowset().getConverter().convert2RowsetCompatible(oValue, field.getTypeInfo());
-         event.getRow().setColumnObject(i, oValue);
-         modified++;
-         }
-         }
-         if (modified == 0 && !fields.isEmpty()) {// ask a user about all fields
-         for (int i = 1; i <= fields.getFieldsCount(); i++) {
-         Field field = fields.get(i);
-         Object oValue;
-         String sValue = askFieldValue(field);
-         if (sValue == null) {
-         return false;
-         } else {
-         oValue = sValue;
-         }
-         oValue = event.getRowset().getConverter().convert2RowsetCompatible(oValue, field.getTypeInfo());
-         event.getRow().setColumnObject(i, oValue);
-         }
-         }
-         } catch (RowsetException ex) {
-         ErrorManager.getDefault().notify(ex);
-         return false;
-         }
-         return true;
-         }
-
-         private Object generateFieldValue(Field field) {
-         Object oValue = RowsetUtils.generatePkValueByType(field.getTypeInfo().getSqlType());
-         if (!field.isPk()) {// constant value for primary keys are harmful, because of uniqueness
-         if (oValue instanceof String) {
-         oValue = "\n";
-         } else if (oValue instanceof Date) {
-         oValue = new Date(0);
-         } else if (oValue instanceof Number) {
-         oValue = 0;
-         }
-         }
-         return oValue;
-         }
-
-         private String askFieldValue(Field field) {
-         NotifyDescriptor.InputLine input = new NotifyDescriptor.InputLine(
-         field.isFk()
-         ? NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_ForeignKeyValue")
-         : NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_FieldValue"),
-         field.isFk()
-         ? String.format(NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_CantDetermineRequiredForeignKeyValue"), field.getTableName(), field.getName())
-         : String.format(NbBundle.getMessage(QueryResultsView.class, "QueryResultsView.LBL_CantDetermineRequiredValue"), field.getTableName(), field.getName()));
-         Object oAnswer = DialogDisplayer.getDefault().notify(input);
-         String sAnswer = input.getInputText();
-         if (oAnswer == NotifyDescriptor.OK_OPTION) {
-         return sAnswer;
-         } else {
-         return null;
-         }
-         }
-         });
-         */
     }
 
     public Parameters getParameters() {
@@ -979,9 +892,9 @@ public class QueryResultsView extends javax.swing.JPanel {
                     if (lValue != -1) {
                         parameter.setValue(new Date(lValue));
                     }
-                } else if (SQLUtils.getTypeGroup(sqlType) == TypesGroup.LOGICAL) {
+                } else if (SQLUtils.getTypeGroup(sqlType) == SQLUtils.TypesGroup.LOGICAL) {
                     paramNode.getBoolean(VALUE_PREF_KEY, false);
-                } else if (SQLUtils.getTypeGroup(sqlType) == TypesGroup.NUMBERS) {
+                } else if (SQLUtils.getTypeGroup(sqlType) == SQLUtils.TypesGroup.NUMBERS) {
                     paramNode.getDouble(VALUE_PREF_KEY, 0d);
                 } else {
                     Object val = paramNode.get(VALUE_PREF_KEY, ""); //NOI18N
@@ -1005,9 +918,9 @@ public class QueryResultsView extends javax.swing.JPanel {
                 if (parameter.getValue() != null) {
                     if (parameter.getValue() instanceof Date) {
                         paramNode.putLong(VALUE_PREF_KEY, ((Date) parameter.getValue()).getTime());
-                    } else if (SQLUtils.getTypeGroup(parameter.getTypeInfo().getSqlType()) == TypesGroup.NUMBERS) {
+                    } else if (SQLUtils.getTypeGroup(parameter.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.NUMBERS) {
                         paramNode.putDouble(VALUE_PREF_KEY, ((Number) parameter.getValue()).doubleValue());
-                    } else if (SQLUtils.getTypeGroup(parameter.getTypeInfo().getSqlType()) == TypesGroup.LOGICAL) {
+                    } else if (SQLUtils.getTypeGroup(parameter.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.LOGICAL) {
                         paramNode.putBoolean(VALUE_PREF_KEY, (Boolean) parameter.getValue());
                     } else {
                         String sVal = SQLUtils.sqlObject2stringRepresentation(parameter.getTypeInfo().getSqlType(), parameter.getValue());
@@ -1023,8 +936,10 @@ public class QueryResultsView extends javax.swing.JPanel {
     }
 
     public void close() throws Exception {
-        flow.close();
-        flow = null;
+        if (flow != null) {
+            flow.close();
+            flow = null;
+        }
     }
 
     public static class PageSizeItem {

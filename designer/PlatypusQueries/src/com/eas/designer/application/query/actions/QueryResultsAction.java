@@ -50,7 +50,7 @@ public final class QueryResultsAction implements ActionListener {
         }
     }
 
-    public static void openQueryResultsView(QueryResultsView view) {
+    public static void openQueryResultsView(QueryResultsView view) throws Exception {
         QueryResultTopComponent window = (QueryResultTopComponent) WindowManager.getDefault().findTopComponent(QUERY_RESULT_TOPCOMPONENT_PREFFERED_ID);
         window.openAtTabPosition(0);
         window.addResultsView(view);
