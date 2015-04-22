@@ -397,6 +397,10 @@ public class FormFactory {
                 ToggleButton toggle = new ToggleButton();
                 readGeneralProps(anElement, toggle);
                 readButton(anElement, toggle);
+                if (anElement.hasAttribute("selected")) {
+                    boolean selected = XmlDomUtils.readBooleanAttribute(anElement, "selected", Boolean.FALSE);
+                    toggle.setSelected(selected);
+                }
                 return toggle;
             case "DesktopPane":
             case "DesktopDesignInfo":

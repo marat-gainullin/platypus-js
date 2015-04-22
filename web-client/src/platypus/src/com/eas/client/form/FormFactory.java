@@ -353,6 +353,10 @@ public class FormFactory {
 			Publisher.publish(toggle);
 			readGeneralProps(anElement, toggle);
 			readImageParagraph(anElement, toggle);
+			if (anElement.hasAttribute("selected")) {
+				boolean selected = Utils.getBooleanAttribute(anElement, "selected", Boolean.FALSE);
+				toggle.setValue(selected);
+			}
 			return toggle;
 		case "DesktopPane":
 			DesktopPane desktop = new DesktopPane();
