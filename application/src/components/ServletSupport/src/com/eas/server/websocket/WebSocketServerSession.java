@@ -11,6 +11,9 @@ import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.websocket.CloseReason;
 import javax.websocket.Session;
 import jdk.nashorn.api.scripting.JSObject;
@@ -81,7 +84,13 @@ public class WebSocketServerSession implements HasPublished {
 
     @ScriptFunction(params = "data")
     public void send(String aData) {
-        session.getAsyncRemote().sendText(aData);
+        if (aData != null) {
+            try {
+                session.getBasicRemote().sendText(aData);
+            } catch (IOException ex) {
+                Logger.getLogger(WebSocketServerSession.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
 
     @ScriptFunction
