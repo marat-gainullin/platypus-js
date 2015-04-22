@@ -32,7 +32,7 @@
                     });
                 })();
             }
-            Object.defineProperety(anObject, releaseName, {
+            Object.defineProperty(anObject, releaseName, {
                 configurable: true,
                 value: function () {
                     delete anObject[releaseName];

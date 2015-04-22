@@ -17,6 +17,7 @@
                     key += ' | ';
                 key += datum instanceof Date ? JSON.stringify(datum) : '' + datum;
             });
+            return key;
         }
 
         this.inKeys = function (aKeyName) {

@@ -83,20 +83,20 @@ public class JdbcReader {
             String columnName = lowLevelJdbcFields.getColumnName(i);
             field.setName(columnLabel != null && !columnLabel.isEmpty() ? columnLabel : columnName);
             field.setOriginalName(columnName);
-            
+
             field.setNullable(lowLevelJdbcFields.isNullable(i) == ResultSetMetaData.columnNullable);
-            
+
             DataTypeInfo typeInfo = new DataTypeInfo();
             typeInfo.setSqlType(lowLevelJdbcFields.getColumnType(i));
             typeInfo.setSqlTypeName(lowLevelJdbcFields.getColumnTypeName(i));
             typeInfo.setJavaClassName(lowLevelJdbcFields.getColumnClassName(i));
             field.setTypeInfo(typeInfo);
-            
+
             field.setSize(lowLevelJdbcFields.getColumnDisplaySize(i));
             field.setPrecision(lowLevelJdbcFields.getPrecision(i));
             field.setScale(lowLevelJdbcFields.getScale(i));
             field.setSigned(lowLevelJdbcFields.isSigned(i));
-            
+
             field.setTableName(lowLevelJdbcFields.getTableName(i));
             field.setSchemaName(lowLevelJdbcFields.getSchemaName(i));
             jdbcFields.add(field);
@@ -153,12 +153,16 @@ public class JdbcReader {
             JSObject row = ScriptUtils.makeObj();
             for (int i = 1; i <= aJdbcFields.getFieldsCount(); i++) {
                 Field jdbcField = aJdbcFields.get(i);
-                if (aExpectedFields.find(jdbcField.getName()) == 0) {
-                    throw new SQLException(String.format("Field with name \"%s\" not found in output fields.", jdbcField.getName()));
+                Field expectedField = aExpectedFields.get(jdbcField.getName());
+                if (expectedField != null) {
+                    Object appObject = Converter.get(aResultSet, i, expectedField.getTypeInfo());
+                    appObject = ScriptUtils.toJs(appObject);
+                    row.setMember(expectedField.getName(), appObject);
+                } else {
+                    Object appObject = Converter.get(aResultSet, i, jdbcField.getTypeInfo());
+                    appObject = ScriptUtils.toJs(appObject);
+                    row.setMember(jdbcField.getName(), appObject);
                 }
-                Object appObject = Converter.get(aResultSet, i, jdbcField.getTypeInfo());
-                appObject = ScriptUtils.toJs(appObject);
-                row.setMember(jdbcField.getName(), appObject);
             }
             return row;
         }
