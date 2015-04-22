@@ -21,6 +21,8 @@
 
         function Request(aHttpRequest) {
 
+            var self = this;
+            
             /**
              * The name of the protection authentication scheme.
              */
@@ -50,36 +52,42 @@
                     return aHttpRequest.getContentType();
                 }});
 
+            var _body = null;
             /**
              * The request body.
              */
             Object.defineProperty(this, 'body', {get: function () {
-                    var encoding = aHttpRequest.getCharacterEncoding();
-                    if (!encoding || encoding.isEmpty()) {
-                        P.Logger.warning("Missing character encoding. Falling back to utf-8.");
-                        encoding = "utf-8";
-                    }
-                    if (CharsetClass.isSupported(encoding)) {
-                        var is = aHttpRequest.getInputStream();
-                        try {
-                            return ('' + new JavaString(BinaryUtils.readStream(is, -1), encoding));
-                        } finally {
-                            is.close();
-                        }
+                    if (_body) {
+                        return _body;
                     } else {
-                        throw "Character encoding " + encoding + " is not supported.";
+                        var encoding = aHttpRequest.getCharacterEncoding();
+                        if (!encoding || encoding.isEmpty()) {
+                            P.Logger.warning("Missing character encoding. Falling back to utf-8.");
+                            encoding = "utf-8";
+                        }
+                        if (CharsetClass.isSupported(encoding)) {
+                            _body = ('' + new JavaString(self.bodyBuffer, encoding));
+                        } else {
+                            throw "Character encoding " + encoding + " is not supported.";
+                        }
                     }
                 }});
 
+            var _bodyBuffer = null;
             /**
              * The request body as a binary array.
              */
             Object.defineProperty(this, 'bodyBuffer', {get: function () {
-                    var is = aHttpRequest.getInputStream();
-                    try {
-                        return BinaryUtils.readStream(is, -1);
-                    } finally {
-                        is.close();
+                    if (_bodyBuffer) {
+                        return _bodyBuffer;
+                    } else {
+                        var is = aHttpRequest.getInputStream();
+                        try {
+                            _bodyBuffer = BinaryUtils.readStream(is, -1);
+                        } finally {
+                            is.close();
+                        }
+                        return _bodyBuffer;
                     }
                 }});
 
@@ -420,8 +428,8 @@
                 aHttpResponse.reset();
             };
 
-            var body;
-            var bodyBuffer;
+            var _body;
+            var _bodyBuffer;
 
             /**
              * The text body sent in this response. The body must be set after content type.
@@ -429,10 +437,10 @@
              */
             Object.defineProperty(this, "body", {
                 get: function () {
-                    return body;
+                    return _body;
                 },
                 set: function (aValue) {
-                    body = aValue;
+                    _body = aValue;
                     var encoding = aHttpResponse.getCharacterEncoding();
                     if (!encoding || encoding.isEmpty()) {
                         P.Logger.warning("Missing character encoding. Falling back to utf-8.");
@@ -453,17 +461,17 @@
              */
             Object.defineProperty(this, "bodyBuffer", {
                 get: function () {
-                    return bodyBuffer;
+                    return _bodyBuffer;
                 },
                 set: function (aValue) {
                     if (aValue instanceof ByteArray) {
-                        bodyBuffer = aValue;
-                        aHttpResponse.setContentLength(bodyBuffer.length);
+                        _bodyBuffer = aValue;
+                        aHttpResponse.setContentLength(_bodyBuffer.length);
                         aHttpResponse.resetBuffer();
-                        if (bodyBuffer) {
+                        if (_bodyBuffer) {
                             var os = aHttpResponse.getOutputStream();
                             try {
-                                os.write(bodyBuffer);
+                                os.write(_bodyBuffer);
                                 os.flush();
                             } finally {
                                 os.close();
