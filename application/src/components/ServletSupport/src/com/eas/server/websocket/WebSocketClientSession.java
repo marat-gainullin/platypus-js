@@ -12,7 +12,10 @@ import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptObj;
 import com.eas.script.ScriptUtils;
+import java.io.IOException;
 import java.net.URI;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.websocket.CloseReason;
 import javax.websocket.ContainerProvider;
 import javax.websocket.Session;
@@ -40,7 +43,7 @@ public class WebSocketClientSession implements HasPublished {
         super();
         lock = ScriptUtils.getLock();
         if (lock == null) {
-            throw new IllegalStateException("Web socket contructor must be called in valid context (Platypus Async IO attributes must present).");
+            throw new IllegalStateException("Web socket constructor must be called in valid context (Platypus Async IO attributes must present).");
         }
         request = ScriptUtils.getRequest();
         reqponse = ScriptUtils.getResponse();
@@ -87,7 +90,11 @@ public class WebSocketClientSession implements HasPublished {
 
     @ScriptFunction(params = "data")
     public void send(String aData) {
-        webSocketSession.getAsyncRemote().sendText(aData);
+        try {
+            webSocketSession.getBasicRemote().sendText(aData);
+        } catch (IOException ex) {
+            Logger.getLogger(WebSocketClientSession.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @ScriptFunction
