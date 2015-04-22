@@ -67,6 +67,7 @@
                         }
                         if (CharsetClass.isSupported(encoding)) {
                             _body = ('' + new JavaString(self.bodyBuffer, encoding));
+                            return _body;
                         } else {
                             throw "Character encoding " + encoding + " is not supported.";
                         }
