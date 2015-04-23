@@ -490,7 +490,7 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
             projectPrivateProperties.remove(J2EE_SERVER_ID_KEY);
         }
         projectPrivatePropertiesIsDirty = true;
-        changeSupport.firePropertyChange(J2EE_SERVER_ID_KEY, aValue, oldValue);
+        changeSupport.firePropertyChange(J2EE_SERVER_ID_KEY, oldValue, aValue);
     }
 
     /**
