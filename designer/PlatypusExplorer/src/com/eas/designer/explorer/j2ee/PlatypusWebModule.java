@@ -27,6 +27,7 @@ import org.netbeans.modules.j2ee.metadata.model.api.MetadataModel;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
+import org.openide.util.Exceptions;
 
 /**
  * Platypus web application.
@@ -50,7 +51,7 @@ public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleI
         super();
         project = aProject;
         project.getSettings().getChangeSupport().addPropertyChangeListener(PlatypusProjectSettingsImpl.J2EE_SERVER_ID_KEY, (PropertyChangeEvent evt) -> {
-            fireServerChange((String)evt.getOldValue(), (String)evt.getNewValue());
+            fireServerChange(getServerByServerInstanceId((String)evt.getOldValue()), getServerByServerInstanceId((String)evt.getNewValue()));
         });
     }
 
@@ -80,18 +81,17 @@ public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleI
     @Override
     public String getServerID() {
         String inst = getServerInstanceID();
-        String id;
-        if (inst != null) {
-            try {
-                id = Deployment.getDefault().getServerInstance(inst).getServerID();
-                return id;
-            } catch (InstanceRemovedException ex) {
-                return null;
-            }
-        }
-        return null;
+        return getServerByServerInstanceId(inst);
     }
 
+    protected String getServerByServerInstanceId(String aServerInstanceId){
+        try {
+            return aServerInstanceId != null ? Deployment.getDefault().getServerInstance(aServerInstanceId).getServerID() : null;
+        } catch (InstanceRemovedException ex) {
+            return null;
+        }
+    }
+    
     @Override
     public J2eeModule.Type getModuleType() {
         return J2eeModule.Type.WAR;
