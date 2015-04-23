@@ -73,12 +73,12 @@ public class TomcatWebAppManager implements WebAppManager {
     @Override
     public void configure() {
         try {
-            FileObject contexFileObject = getWebMobdule().getMetaInfDir().getFileObject(CONTEXT_FILE_NAME);
-            if (contexFileObject == null) {
-                contexFileObject = getWebMobdule().getMetaInfDir().createData(CONTEXT_FILE_NAME);
+            FileObject contextFileObject = getWebMobdule().getMetaInfDir().getFileObject(CONTEXT_FILE_NAME);
+            if (contextFileObject == null) {
+                contextFileObject = getWebMobdule().getMetaInfDir().createData(CONTEXT_FILE_NAME);
             }
             Context ctx = getContext();
-            FileUtils.writeString(FileUtil.toFile(contexFileObject), XmlDom2String.transform(ctx.toDocument()), PlatypusUtils.COMMON_ENCODING_NAME);
+            FileUtils.writeString(FileUtil.toFile(contextFileObject), XmlDom2String.transform(ctx.toDocument()), PlatypusUtils.COMMON_ENCODING_NAME);
             Logger.getLogger(getClass().getName()).log(Level.INFO, "Starting configuring an application for Tomcat.");
         } catch (IOException ex) {
             ErrorManager.getDefault().notify(ex);

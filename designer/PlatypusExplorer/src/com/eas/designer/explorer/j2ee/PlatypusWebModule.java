@@ -5,6 +5,8 @@
 package com.eas.designer.explorer.j2ee;
 
 import com.eas.designer.explorer.project.PlatypusProjectImpl;
+import com.eas.designer.explorer.project.PlatypusProjectSettingsImpl;
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
@@ -47,6 +49,9 @@ public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleI
     public PlatypusWebModule(PlatypusProjectImpl aProject) {
         super();
         project = aProject;
+        project.getSettings().getChangeSupport().addPropertyChangeListener(PlatypusProjectSettingsImpl.J2EE_SERVER_ID_KEY, (PropertyChangeEvent evt) -> {
+            fireServerChange((String)evt.getOldValue(), (String)evt.getNewValue());
+        });
     }
 
     @Override
