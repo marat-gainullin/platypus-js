@@ -77,8 +77,8 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
                             aRequest.accept(factory);
                             rsp = factory.getResponse();
                         }
-                        PlatypusResponseReader requestReader = new PlatypusResponseReader(data);
-                        rsp.accept(requestReader);
+                        PlatypusResponseReader responseReader = new PlatypusResponseReader(data);
+                        rsp.accept(responseReader);
                         return rsp;
                     } else {
                         throw new NullPointerException("Response data must present");

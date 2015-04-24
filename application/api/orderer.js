@@ -40,7 +40,7 @@
             if (subset) {
                 subset.delete(anObject);
                 if (subset.size === 0) {
-                    map[key] = undefined;
+                    delete map[key];
                 }
             }
         };

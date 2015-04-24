@@ -43,7 +43,7 @@ public class ScriptedFlowProvider extends PlatypusJdbcFlowProvider {
 
     private class ExecutionChecker {
 
-        boolean isExecutionNeeded;
+        boolean isExecutionNeeded = true;
 
         public boolean isExecutionNeeded() {
             return isExecutionNeeded;
@@ -76,7 +76,7 @@ public class ScriptedFlowProvider extends PlatypusJdbcFlowProvider {
                                 public Object call(final Object thiz, final Object... args) {
                                     if (exChecker.isExecutionNeeded()) {
                                         try {
-                                            JSObject jsRowset = args.length > 0 ? (JSObject) args[0] : null;
+                                            JSObject jsRowset = args.length > 0 ? (JSObject) ScriptUtils.toJava(args[0]) : null;
                                             try {
                                                 onSuccess.accept(jsRowset);
                                             } catch (Exception ex) {
@@ -113,14 +113,14 @@ public class ScriptedFlowProvider extends PlatypusJdbcFlowProvider {
                             }
                         }));
                         if (!JSType.nullOrUndefined(oRowset)) {
-                            onSuccess.accept((JSObject) oRowset);
+                            onSuccess.accept((JSObject) ScriptUtils.toJava(oRowset));
                             exChecker.setExecutionNeeded(false);
                         }
                         return null;
                     } else {
                         Object oRowset = jsFetch.call(source, ScriptUtils.toJs(new Object[]{jsParams}));
                         if (!JSType.nullOrUndefined(oRowset)) {
-                            return (JSObject) oRowset;
+                            return (JSObject) ScriptUtils.toJava(oRowset);
                         } else {
                             return null;
                         }
@@ -147,7 +147,7 @@ public class ScriptedFlowProvider extends PlatypusJdbcFlowProvider {
                                 public Object call(final Object thiz, final Object... args) {
                                     if (exChecker.isExecutionNeeded()) {
                                         try {
-                                            Object oRowset = args.length > 0 ? args[0] : null;
+                                            Object oRowset = args.length > 0 ? ScriptUtils.toJava(args[0]) : null;
                                             JSObject jsRowset = (JSObject) oRowset;
                                             try {
                                                 onSuccess.accept(jsRowset);
@@ -186,7 +186,7 @@ public class ScriptedFlowProvider extends PlatypusJdbcFlowProvider {
                             }
                         }));
                         if (!JSType.nullOrUndefined(oRowset)) {
-                            onSuccess.accept((JSObject) oRowset);
+                            onSuccess.accept((JSObject) ScriptUtils.toJava(oRowset));
                             exChecker.setExecutionNeeded(false);
                         } else {
                             return null;
@@ -194,7 +194,7 @@ public class ScriptedFlowProvider extends PlatypusJdbcFlowProvider {
                     } else {
                         Object oRowset = jsNextPage.call(source, ScriptUtils.toJs(new Object[]{}));
                         if (!JSType.nullOrUndefined(oRowset)) {
-                            return (JSObject) oRowset;
+                            return (JSObject) ScriptUtils.toJava(oRowset);
                         } else {
                             return null;
                         }

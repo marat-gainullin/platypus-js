@@ -15,6 +15,8 @@ import java.sql.*;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jdk.nashorn.api.scripting.JSObject;
+import com.eas.script.ScriptUtils;
 
 /**
  * Converter has to convert some value of any compatible class to value of
@@ -68,16 +70,16 @@ public class Converter {
                 // clobs
                 case Types.CLOB:
                     value = aRs instanceof ResultSet ? ((ResultSet) aRs).getClob(aColIndex) : ((CallableStatement) aRs).getClob(aColIndex);
-                    if(value != null){
-                        try(Reader reader = ((Clob)value).getCharacterStream()) {
+                    if (value != null) {
+                        try (Reader reader = ((Clob) value).getCharacterStream()) {
                             value = StringUtils.readReader(reader, -1);
                         }
                     }
                     break;
                 case Types.NCLOB:
                     value = aRs instanceof ResultSet ? ((ResultSet) aRs).getNClob(aColIndex) : ((CallableStatement) aRs).getNClob(aColIndex);
-                    if(value != null){
-                        try(Reader reader = ((NClob)value).getCharacterStream()) {
+                    if (value != null) {
+                        try (Reader reader = ((NClob) value).getCharacterStream()) {
                             value = StringUtils.readReader(reader, -1);
                         }
                     }
@@ -155,6 +157,9 @@ public class Converter {
 
     public static void convertAndAssign(Object aValue, DataTypeInfo aTypeInfo, Connection aConn, int aParameterIndex, PreparedStatement aStmt) throws SQLException {
         if (aValue != null) {
+            if (aValue instanceof JSObject) {
+                aValue = ScriptUtils.toJava(aValue);
+            }
             switch (aTypeInfo.getSqlType()) {
                 // Some strange types. No one knows how to work with them.
                 case Types.JAVA_OBJECT:

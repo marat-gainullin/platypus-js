@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import jdk.nashorn.internal.runtime.JSType;
 
 /**
  *
@@ -129,7 +130,7 @@ public class PlatypusRequestWriter implements PlatypusRequestVisitor {
         writer.put(RequestsTags.TAG_MODULE_NAME, rq.getModuleName());
         writer.put(RequestsTags.TAG_METHOD_NAME, rq.getMethodName());
         for (Object arg : rq.getArguments()) {
-            writer.put(RequestsTags.TAG_ARGUMENT_VALUE, ScriptUtils.toJson(arg));
+            writer.put(RequestsTags.TAG_ARGUMENT_VALUE, ScriptUtils.toJson(JSType.nullOrUndefined(arg) ? null : arg));
         }
         writer.flush();
     }
