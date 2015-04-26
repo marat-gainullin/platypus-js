@@ -161,9 +161,10 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
     }
 
     /**
-     * Executes a script module according to all rules defimed within Platypus.js
-     * Such as @wait, @stateless and @rezident annotations, async-io convensions etc.
-     * 
+     * Executes a script module according to all rules defimed within
+     * Platypus.js Such as @wait, @stateless and @rezident annotations, async-io
+     * convensions etc.
+     *
      * @param aModuleName
      * @param aMethodName
      * @param aArguments
@@ -232,6 +233,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                             @Override
                                             public Object call(final Object thiz, final Object... largs) {
                                                 if (!args.isEmpty()) {
+                                                    args.clear();
                                                     Object returned = largs.length > 0 ? largs[0] : null;
                                                     onSuccess.accept(ScriptUtils.toJava(returned));
                                                 } else {
@@ -245,6 +247,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                             @Override
                                             public Object call(final Object thiz, final Object... largs) {
                                                 if (!args.isEmpty()) {
+                                                    args.clear();
                                                     Object reason = largs.length > 0 ? ScriptUtils.toJava(largs[0]) : null;
                                                     if (reason instanceof Exception) {
                                                         onFailure.accept((Exception) reason);
@@ -274,8 +277,9 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                         }
                                         ScriptUtils.initAsyncs(0);
                                         try {
-                                            if(onLockSelected != null)
+                                            if (onLockSelected != null) {
                                                 onLockSelected.accept(leveledLock);
+                                            }
                                             synchronized (leveledLock) {
                                                 ScriptUtils.setLock(leveledLock);// provide lock to callback threads
                                                 try {
@@ -283,8 +287,12 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                                     Object result = ((JSObject) oFun).call(moduleInstance, args.toArray());
                                                     int asyncs = ScriptUtils.getAsyncsCount();
                                                     if (!(result instanceof Undefined) || asyncs == 0) {
-                                                        onSuccess.accept(ScriptUtils.toJava(result));
-                                                        args.clear();
+                                                        if (!args.isEmpty()) {
+                                                            args.clear();
+                                                            onSuccess.accept(ScriptUtils.toJava(result));
+                                                        }
+                                                    } else {
+                                                        Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
                                                     }
                                                 } finally {
                                                     ScriptUtils.setLock(null);
@@ -312,7 +320,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
             }
         }
     }
-    
+
     public int startResidents(Set<String> aRezidents) throws Exception {
         PlatypusPrincipal oldPrincipal = PlatypusPrincipal.getInstance();
         Object oldSession = ScriptUtils.getSession();

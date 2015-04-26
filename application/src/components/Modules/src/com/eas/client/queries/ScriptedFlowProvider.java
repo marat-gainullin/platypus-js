@@ -5,6 +5,7 @@
 package com.eas.client.queries;
 
 import com.eas.client.DatabasesClient;
+import com.eas.client.DummyDataSource;
 import com.eas.client.PlatypusJdbcFlowProvider;
 import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.Parameter;
@@ -29,7 +30,7 @@ public class ScriptedFlowProvider extends PlatypusJdbcFlowProvider {
     protected JSObject source;
 
     public ScriptedFlowProvider(DatabasesClient aClient, Fields aExpectedFields, JSObject aSource) throws Exception {
-        super(aClient, "-no-name-", null, null, null, null, null, null, null);
+        super(aClient, "-no-name-", null, new DummyDataSource(), null, null, ScriptedQuery.JAVASCRIPT_QUERY_CONTENTS, null, null);
         pageSize = NO_PAGING_PAGE_SIZE;
         client = aClient;
         expectedFields = aExpectedFields;
