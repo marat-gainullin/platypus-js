@@ -8,6 +8,7 @@ import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ReferenceRelation;
+import com.eas.client.model.Relation;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
