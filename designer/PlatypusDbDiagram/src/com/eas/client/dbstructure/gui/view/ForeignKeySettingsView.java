@@ -11,8 +11,8 @@
 
 package com.eas.client.dbstructure.gui.view;
 
-import com.bearsoft.rowset.metadata.ForeignKeySpec.ForeignKeyRule;
 import com.eas.client.dbstructure.DbStructureUtils;
+import com.eas.client.metadata.ForeignKeySpec;
 import java.awt.Component;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
@@ -30,15 +30,15 @@ public class ForeignKeySettingsView extends javax.swing.JPanel {
     /** Creates new form ForeigKeySettingsView */
     public ForeignKeySettingsView() {
         initComponents();
-        ForeignKeyRule[] modelData = new ForeignKeyRule[] {ForeignKeyRule.CASCADE, ForeignKeyRule.SETNULL, ForeignKeyRule.SETDEFAULT, ForeignKeyRule.NOACTION};
-        ComboBoxModel<ForeignKeyRule> cbUModel = new DefaultComboBoxModel<>(modelData);
-        ComboBoxModel<ForeignKeyRule> cbDModel = new DefaultComboBoxModel<>(modelData);
+        ForeignKeySpec.ForeignKeyRule[] modelData = new ForeignKeySpec.ForeignKeyRule[] {ForeignKeySpec.ForeignKeyRule.CASCADE, ForeignKeySpec.ForeignKeyRule.SETNULL, ForeignKeySpec.ForeignKeyRule.SETDEFAULT, ForeignKeySpec.ForeignKeyRule.NOACTION};
+        ComboBoxModel<ForeignKeySpec.ForeignKeyRule> cbUModel = new DefaultComboBoxModel<>(modelData);
+        ComboBoxModel<ForeignKeySpec.ForeignKeyRule> cbDModel = new DefaultComboBoxModel<>(modelData);
         ListCellRenderer<Object> ruleRenderer = new DefaultListCellRenderer(){
             @Override
             public Component getListCellRendererComponent(JList<? extends Object> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 if(value != null)
                 {
-                    ForeignKeyRule option = (ForeignKeyRule)value;
+                    ForeignKeySpec.ForeignKeyRule option = (ForeignKeySpec.ForeignKeyRule)value;
                     switch(option)
                     {
                         case CASCADE:
@@ -69,12 +69,12 @@ public class ForeignKeySettingsView extends javax.swing.JPanel {
         txtName.setText(aName);
     }
 
-    public void setUpdateRule(ForeignKeyRule aRule)
+    public void setUpdateRule(ForeignKeySpec.ForeignKeyRule aRule)
     {
         comboUpdateRule.setSelectedItem(aRule);
     }
 
-    public void setDeleteRule(ForeignKeyRule aRule)
+    public void setDeleteRule(ForeignKeySpec.ForeignKeyRule aRule)
     {
         comboDeleteRule.setSelectedItem(aRule);
     }
@@ -89,14 +89,14 @@ public class ForeignKeySettingsView extends javax.swing.JPanel {
         return txtName.getText();
     }
 
-    public ForeignKeyRule getUpdateRule()
+    public ForeignKeySpec.ForeignKeyRule getUpdateRule()
     {
-        return (ForeignKeyRule)comboUpdateRule.getSelectedItem();
+        return (ForeignKeySpec.ForeignKeyRule)comboUpdateRule.getSelectedItem();
     }
 
-    public ForeignKeyRule getDeleteRule()
+    public ForeignKeySpec.ForeignKeyRule getDeleteRule()
     {
-        return (ForeignKeyRule)comboDeleteRule.getSelectedItem();
+        return (ForeignKeySpec.ForeignKeyRule)comboDeleteRule.getSelectedItem();
     }
 
     public boolean isDeferred()
@@ -115,9 +115,9 @@ public class ForeignKeySettingsView extends javax.swing.JPanel {
         lblName = new javax.swing.JLabel();
         txtName = new javax.swing.JTextField();
         lblUpdateRule = new javax.swing.JLabel();
-        comboUpdateRule = new javax.swing.JComboBox<ForeignKeyRule>();
+        comboUpdateRule = new javax.swing.JComboBox<ForeignKeySpec.ForeignKeyRule>();
         lblDeleteRule = new javax.swing.JLabel();
-        comboDeleteRule = new javax.swing.JComboBox<ForeignKeyRule>();
+        comboDeleteRule = new javax.swing.JComboBox<ForeignKeySpec.ForeignKeyRule>();
         chkDeferred = new javax.swing.JCheckBox();
 
         lblName.setLabelFor(txtName);
@@ -171,8 +171,8 @@ public class ForeignKeySettingsView extends javax.swing.JPanel {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkDeferred;
-    private javax.swing.JComboBox<ForeignKeyRule> comboDeleteRule;
-    private javax.swing.JComboBox<ForeignKeyRule> comboUpdateRule;
+    private javax.swing.JComboBox<ForeignKeySpec.ForeignKeyRule> comboDeleteRule;
+    private javax.swing.JComboBox<ForeignKeySpec.ForeignKeyRule> comboUpdateRule;
     private javax.swing.JLabel lblDeleteRule;
     private javax.swing.JLabel lblName;
     private javax.swing.JLabel lblUpdateRule;

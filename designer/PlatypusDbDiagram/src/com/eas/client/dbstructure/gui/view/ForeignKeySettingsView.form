@@ -81,7 +81,7 @@
     </Component>
     <Component class="javax.swing.JComboBox" name="comboUpdateRule">
       <AuxValues>
-        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;ForeignKeyRule&gt;"/>
+        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;ForeignKeySpec.ForeignKeyRule&gt;"/>
       </AuxValues>
     </Component>
     <Component class="javax.swing.JLabel" name="lblDeleteRule">
@@ -93,7 +93,7 @@
     </Component>
     <Component class="javax.swing.JComboBox" name="comboDeleteRule">
       <AuxValues>
-        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;ForeignKeyRule&gt;"/>
+        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;ForeignKeySpec.ForeignKeyRule&gt;"/>
       </AuxValues>
     </Component>
     <Component class="javax.swing.JCheckBox" name="chkDeferred">

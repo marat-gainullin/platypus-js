@@ -4,7 +4,6 @@
  */
 package com.eas.client.resourcepool;
 
-import com.bearsoft.rowset.exceptions.ResourceUnavalableException;
 import com.eas.client.settings.DbConnectionSettings;
 import java.sql.Connection;
 import java.sql.Driver;

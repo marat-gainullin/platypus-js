@@ -5,9 +5,9 @@
  */
 package com.eas.client.threetier.http;
 
-import com.bearsoft.rowset.metadata.DataTypeInfo;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
+import com.eas.client.metadata.DataTypeInfo;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.internal.runtime.JSType;
 

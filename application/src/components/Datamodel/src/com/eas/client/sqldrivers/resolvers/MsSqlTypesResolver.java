@@ -4,8 +4,8 @@
  */
 package com.eas.client.sqldrivers.resolvers;
 
-import com.bearsoft.rowset.metadata.DataTypeInfo;
-import com.bearsoft.rowset.metadata.Field;
+import com.eas.client.metadata.DataTypeInfo;
+import com.eas.client.metadata.Field;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.HashSet;

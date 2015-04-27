@@ -13,8 +13,8 @@ import java.util.Map;
 import java.util.Set;
 import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.internal.runtime.JSType;
 import jdk.nashorn.internal.runtime.ScriptObject;
-import jdk.nashorn.internal.runtime.Undefined;
 
 /**
  *
@@ -44,7 +44,7 @@ public class ModulesJSFacade extends AbstractJSObject {
             } else {
                 session.registerModule(name, (JSObject) value);
             }
-        } else if (value == null || value instanceof Undefined) {
+        } else if (JSType.nullOrUndefined(value)) {
             session.unregisterModule(name);
         }
     }

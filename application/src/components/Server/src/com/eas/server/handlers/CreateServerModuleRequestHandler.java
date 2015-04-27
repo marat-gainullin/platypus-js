@@ -90,15 +90,19 @@ public class CreateServerModuleRequestHandler extends SessionRequestHandler<Crea
                             onFailure.accept(new IllegalArgumentException(String.format("No module: %s, or it is not a module", moduleName)));
                         }
                     } catch (AccessControlException ex) {
-                        CreateServerModuleRequest.Response response = new CreateServerModuleRequest.Response(new ServerModuleInfo(moduleName, Collections.emptySet(), false));
-                        if (clientModuleTime == null) {
-                            // If a client has no the resource, let's give it a chance to update the resource, when it will be permitted
-                            response.setTimeStamp(new Date(0));
+                        if (ex.getPermission() instanceof AuthPermission) {
+                            onFailure.accept(ex);
                         } else {
-                            // Let's override client's resource timestamp to guarantee, that permitted == false will be accepted
-                            response.setTimeStamp(new Date(clientModuleTime.getTime() + 1000));
+                            CreateServerModuleRequest.Response response = new CreateServerModuleRequest.Response(new ServerModuleInfo(moduleName, Collections.emptySet(), false));
+                            if (clientModuleTime == null) {
+                                // If a client has no the resource, let's give it a chance to update the resource, when it will be permitted
+                                response.setTimeStamp(new Date(0));
+                            } else {
+                                // Let's override client's resource timestamp to guarantee, that permitted == false will be accepted
+                                response.setTimeStamp(new Date(clientModuleTime.getTime() + 1000));
+                            }
+                            onSuccess.accept(response);
                         }
-                        onSuccess.accept(response);
                     } catch (Exception ex) {
                         onFailure.accept(ex);
                     }
@@ -127,7 +131,11 @@ public class CreateServerModuleRequestHandler extends SessionRequestHandler<Crea
                             principal != null ? principal.getName() : null), principal instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
                 }
             } catch (Exception ex) {
-                throw new AccessControlException(ex.getMessage());
+                if (ex instanceof AccessControlException) {
+                    throw ex;
+                } else {
+                    throw new AccessControlException(ex.getMessage());
+                }
             }
         }
     }

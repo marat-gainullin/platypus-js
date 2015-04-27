@@ -1,8 +1,8 @@
 package com.eas.client.model.gui.view;
 
-import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.SQLUtils;
 import com.eas.client.StoredQueryFactory;
+import com.eas.client.metadata.Field;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Relation;
 import com.eas.client.model.gui.DatamodelDesignUtils;

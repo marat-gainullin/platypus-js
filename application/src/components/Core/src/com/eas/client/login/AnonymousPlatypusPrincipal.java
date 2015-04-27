@@ -4,7 +4,7 @@
  */
 package com.eas.client.login;
 
-import com.bearsoft.rowset.utils.IDGenerator;
+import com.eas.util.IDGenerator;
 import java.util.Collections;
 import jdk.nashorn.api.scripting.JSObject;
 

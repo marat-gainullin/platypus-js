@@ -203,18 +203,11 @@
                 <package>com.bearsoft.routing</package>
                 <package>com.bearsoft.routing.graph</package>
                 <package>com.bearsoft.routing.gui</package>
-                <package>com.bearsoft.rowset</package>
-                <package>com.bearsoft.rowset.changes</package>
-                <package>com.bearsoft.rowset.compacts</package>
-                <package>com.bearsoft.rowset.dataflow</package>
-                <package>com.bearsoft.rowset.events</package>
-                <package>com.bearsoft.rowset.exceptions</package>
-                <package>com.bearsoft.rowset.metadata</package>
-                <package>com.bearsoft.rowset.resourcepool</package>
-                <package>com.bearsoft.rowset.utils</package>
                 <package>com.eas.client</package>
                 <package>com.eas.client.application</package>
                 <package>com.eas.client.cache</package>
+                <package>com.eas.client.changes</package>
+                <package>com.eas.client.dataflow</package>
                 <package>com.eas.client.events</package>
                 <package>com.eas.client.exceptions</package>
                 <package>com.eas.client.forms</package>
@@ -249,7 +242,6 @@
                 <package>com.eas.client.sqldrivers.resolvers</package>
                 <package>com.eas.client.utils.scalableui</package>
                 <package>com.eas.concurrent</package>
-                <package>com.eas.deploy</package>
                 <package>com.eas.design</package>
                 <package>com.eas.designer.application</package>
                 <package>com.eas.designer.application.indexer</package>
@@ -417,10 +409,6 @@
                 <binary-origin>release/modules/ext/ojdbc6.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/Rowsets.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/Rowsets.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
                 <runtime-relative-path>ext/h2-1.3.167.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/h2-1.3.167.jar</binary-origin>
             </class-path-extension>
@@ -439,10 +427,6 @@
             <class-path-extension>
                 <runtime-relative-path>ext/postgresql-9.3-1102.jdbc41.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/postgresql-9.3-1102.jdbc41.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/Deploy.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/Deploy.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/CommonUtils.jar</runtime-relative-path>

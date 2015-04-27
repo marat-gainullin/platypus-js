@@ -4,11 +4,11 @@
  */
 package com.eas.client.threetier.requests;
 
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.Parameters;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.Parameters;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Requests;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -58,26 +58,26 @@ public class ExecuteQueryRequest extends Request {
 
     public static class Response extends com.eas.client.threetier.Response {
 
-        private Rowset rowset;
+        private JSObject rowset;
         private Fields expectedFields;
         private int updateCount;
 
-        public Response(Rowset aRowset, int aUpdateCount) {
+        public Response(JSObject aRowset, int aUpdateCount) {
             super();
             rowset = aRowset;
             updateCount = aUpdateCount;
         }
 
-        public Response(Rowset aRowset, int aUpdateCount, Fields aExpectedFields) {
+        public Response(JSObject aRowset, int aUpdateCount, Fields aExpectedFields) {
             this(aRowset, aUpdateCount);
             expectedFields = aExpectedFields;
         }
 
-        public Rowset getRowset() {
+        public JSObject getRowset() {
             return rowset;
         }
 
-        public void setRowset(Rowset aValue) {
+        public void setRowset(JSObject aValue) {
             rowset = aValue;
         }
 

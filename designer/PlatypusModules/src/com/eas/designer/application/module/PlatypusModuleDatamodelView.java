@@ -4,8 +4,8 @@
  */
 package com.eas.designer.application.module;
 
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Parameter;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Parameter;
 import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;

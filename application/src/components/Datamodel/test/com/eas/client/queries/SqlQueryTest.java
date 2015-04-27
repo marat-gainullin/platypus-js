@@ -4,10 +4,10 @@
  */
 package com.eas.client.queries;
 
-import com.bearsoft.rowset.metadata.DataTypeInfo;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SqlCompiledQuery;
 import com.eas.client.SqlQuery;
+import com.eas.client.metadata.DataTypeInfo;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.*;

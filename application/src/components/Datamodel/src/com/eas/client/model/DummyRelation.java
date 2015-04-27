@@ -4,14 +4,14 @@
  */
 package com.eas.client.model;
 
-import com.bearsoft.rowset.metadata.Field;
+import com.eas.client.metadata.Field;
+
 
 /**
  * Used to form a graph to control cycles into.
  *
  * @author mg
  * @param <RE>
- * @param <V>
  */
 public class DummyRelation<RE extends Entity<?, ?, RE>> extends Relation<RE> {
 

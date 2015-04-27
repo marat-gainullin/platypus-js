@@ -1,5 +1,6 @@
 package com.bearsoft.rowset;
 
+import com.eas.client.dataflow.RowsetConverter;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.changes.ChangeValue;
 import com.bearsoft.rowset.changes.Insert;
@@ -400,9 +401,9 @@ public class Row implements HasPublished {
             List<ChangeValue> keys = new ArrayList<>();
             for (int i = 1; i <= fields.getFieldsCount(); i++) {
                 Field field = fields.get(i);
-                // Some tricky processing of primary keys modification case ...
                 if (field.isPk()) {
                     Object value = aRow.currentValues.get(i - 1);
+                    // Some tricky processing of primary keys modification case ...
                     if (i == colIndex) {
                         value = oldValue;
                     }
@@ -613,7 +614,7 @@ public class Row implements HasPublished {
     }
 
     protected void fireChangeOfSelfCollections() {
-        fields.getOrmCollectionsDefinitions().keySet().stream().forEach((selfCollectionName) -> {
+        fields.getOrmCollectionsDefinitions().keySet().forEach((selfCollectionName) -> {
             propertyChangeSupport.firePropertyChange(selfCollectionName, null, new Object());
         });
     }

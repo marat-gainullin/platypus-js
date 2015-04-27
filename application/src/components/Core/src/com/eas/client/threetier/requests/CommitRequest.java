@@ -4,7 +4,7 @@
  */
 package com.eas.client.threetier.requests;
 
-import com.bearsoft.rowset.changes.Change;
+import com.eas.client.changes.Change;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Requests;
 import java.util.Collections;

@@ -4,25 +4,19 @@
  */
 package com.eas.client.queries;
 
-import com.bearsoft.rowset.Row;
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.dataflow.FlowProvider;
-import com.bearsoft.rowset.exceptions.RowsetException;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.Parameter;
-import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.DatabasesClient;
-import com.eas.client.model.RowsetMissingException;
+import com.eas.client.DummyDataSource;
+import com.eas.client.PlatypusJdbcFlowProvider;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.Parameter;
+import com.eas.client.metadata.Parameters;
 import com.eas.script.ScriptUtils;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.internal.runtime.Undefined;
+import jdk.nashorn.internal.runtime.JSType;
 
 /**
  * Specific <code>FlowProvider</code> implementation, that allows js modules to
@@ -31,57 +25,26 @@ import jdk.nashorn.internal.runtime.Undefined;
  * @see FlowProvider
  * @author mg
  */
-public class ScriptedFlowProvider implements FlowProvider {
+public class ScriptedFlowProvider extends PlatypusJdbcFlowProvider {
 
-    protected int pageSize = NO_PAGING_PAGE_SIZE;
-    protected DatabasesClient client;
     protected JSObject source;
-    protected Fields expectedFields;
 
-    public ScriptedFlowProvider(DatabasesClient aClient, Fields aExpectedFields, JSObject aSource) {
-        super();
+    public ScriptedFlowProvider(DatabasesClient aClient, Fields aExpectedFields, JSObject aSource) throws Exception {
+        super(aClient, "-no-name-", null, new DummyDataSource(), null, null, ScriptedQuery.JAVASCRIPT_QUERY_CONTENTS, null, null);
+        pageSize = NO_PAGING_PAGE_SIZE;
         client = aClient;
         expectedFields = aExpectedFields;
         source = aSource;
     }
 
     @Override
-    public String getEntityId() {
+    public String getEntityName() {
         return (String) ((JSObject) source.getMember("constructor")).getMember("name");
-    }
-
-    private void readRowset(Object oRowset, Rowset aRowset) throws RowsetMissingException, RowsetException {
-        if (oRowset instanceof JSObject) {
-            JSObject sRowset = (JSObject) oRowset;
-            Object oLength = sRowset.getMember("length");
-            if (oLength instanceof Number) {
-                List<Row> rows = new ArrayList<>();
-                int length = ((Number) oLength).intValue();
-                for (int i = 0; i < length; i++) {
-                    Object oRow = sRowset.getSlot(i);
-                    if (oRow instanceof JSObject) {
-                        JSObject sRow = (JSObject) oRow;
-                        Row row = new Row(getEntityId(), expectedFields);
-                        for (Field field : expectedFields.toCollection()) {
-                            if (sRow.hasMember(field.getName())) {
-                                Object javaValue = ScriptUtils.toJava(sRow.getMember(field.getName()));
-                                row.setColumnObject(expectedFields.find(field.getName()), javaValue);
-                            } else {
-                                Logger.getLogger(ScriptedFlowProvider.class.getName()).log(Level.WARNING, "{0} property was not found while reading script data from {1}", new Object[]{field.getName(), getEntityId()});
-                            }
-                        }
-                        rows.add(row);
-                    }
-                }
-                aRowset.setCurrent(rows);
-                aRowset.currentToOriginal();
-            }
-        }
     }
 
     private class ExecutionChecker {
 
-        boolean isExecutionNeeded;
+        boolean isExecutionNeeded = true;
 
         public boolean isExecutionNeeded() {
             return isExecutionNeeded;
@@ -93,7 +56,7 @@ public class ScriptedFlowProvider implements FlowProvider {
     }
 
     @Override
-    public Rowset refresh(final Parameters aParameters, Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public JSObject refresh(final Parameters aParameters, Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (source.hasMember("fetch")) {
             Object oFetch = source.getMember("fetch");
             if (oFetch instanceof JSObject) {
@@ -114,11 +77,9 @@ public class ScriptedFlowProvider implements FlowProvider {
                                 public Object call(final Object thiz, final Object... args) {
                                     if (exChecker.isExecutionNeeded()) {
                                         try {
-                                            Object ojsRowset = args.length > 0 ? ScriptUtils.toJava(args[0]) : null;
-                                            Rowset rowset = new Rowset(expectedFields);
-                                            readRowset(ojsRowset, rowset);
+                                            JSObject jsRowset = args.length > 0 ? (JSObject) ScriptUtils.toJava(args[0]) : null;
                                             try {
-                                                onSuccess.accept(rowset);
+                                                onSuccess.accept(jsRowset);
                                             } catch (Exception ex) {
                                                 Logger.getLogger(ScriptedFlowProvider.class.getName()).log(Level.SEVERE, null, ex);
                                             }
@@ -152,21 +113,17 @@ public class ScriptedFlowProvider implements FlowProvider {
                                 }
                             }
                         }));
-                        if (oRowset != null && !(oRowset instanceof Undefined)) {
-                            Rowset rowset = new Rowset(expectedFields);
-                            readRowset((JSObject) oRowset, rowset);
-                            onSuccess.accept(rowset);
+                        if (!JSType.nullOrUndefined(oRowset)) {
+                            onSuccess.accept((JSObject) ScriptUtils.toJava(oRowset));
                             exChecker.setExecutionNeeded(false);
                         }
                         return null;
                     } else {
                         Object oRowset = jsFetch.call(source, ScriptUtils.toJs(new Object[]{jsParams}));
-                        if (oRowset == null || oRowset instanceof Undefined) {
-                            return null;
+                        if (!JSType.nullOrUndefined(oRowset)) {
+                            return (JSObject) ScriptUtils.toJava(oRowset);
                         } else {
-                            Rowset rowset = new Rowset(expectedFields);
-                            readRowset((JSObject) oRowset, rowset);
-                            return rowset;
+                            return null;
                         }
                     }
                 }
@@ -176,8 +133,7 @@ public class ScriptedFlowProvider implements FlowProvider {
     }
 
     @Override
-    public Rowset nextPage(Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception {
-
+    public JSObject nextPage(Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (source.hasMember("nextPage")) {
             Object oNextPage = source.getMember("nextPage");
             if (oNextPage instanceof JSObject) {
@@ -192,15 +148,14 @@ public class ScriptedFlowProvider implements FlowProvider {
                                 public Object call(final Object thiz, final Object... args) {
                                     if (exChecker.isExecutionNeeded()) {
                                         try {
-                                            Object pjsRowset = args.length > 0 ? args[0] : null;
-                                            Rowset rowset = new Rowset(expectedFields);
-                                            readRowset(pjsRowset, rowset);
+                                            Object oRowset = args.length > 0 ? ScriptUtils.toJava(args[0]) : null;
+                                            JSObject jsRowset = (JSObject) oRowset;
                                             try {
-                                                onSuccess.accept(rowset);
+                                                onSuccess.accept(jsRowset);
                                             } catch (Exception ex) {
                                                 Logger.getLogger(ScriptedFlowProvider.class.getName()).log(Level.SEVERE, null, ex);
                                             }
-                                        } catch (RowsetMissingException | RowsetException ex) {
+                                        } catch (Exception ex) {
                                             if (onFailure != null) {
                                                 onFailure.accept(ex);
                                             }
@@ -231,21 +186,18 @@ public class ScriptedFlowProvider implements FlowProvider {
                                 }
                             }
                         }));
-                        if (oRowset != null && !(oRowset instanceof Undefined)) {
-                            Rowset rowset = new Rowset(expectedFields);
-                            readRowset((JSObject) oRowset, rowset);
-                            onSuccess.accept(rowset);
+                        if (!JSType.nullOrUndefined(oRowset)) {
+                            onSuccess.accept((JSObject) ScriptUtils.toJava(oRowset));
                             exChecker.setExecutionNeeded(false);
+                        } else {
+                            return null;
                         }
-                        return null;
                     } else {
                         Object oRowset = jsNextPage.call(source, ScriptUtils.toJs(new Object[]{}));
-                        if (oRowset == null || oRowset instanceof Undefined) {
-                            return null;
+                        if (!JSType.nullOrUndefined(oRowset)) {
+                            return (JSObject) ScriptUtils.toJava(oRowset);
                         } else {
-                            Rowset rowset = new Rowset(expectedFields);
-                            readRowset((JSObject) oRowset, rowset);
-                            return rowset;
+                            return null;
                         }
                     }
                 }

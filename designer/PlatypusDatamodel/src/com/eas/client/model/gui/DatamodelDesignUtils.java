@@ -6,7 +6,7 @@ package com.eas.client.model.gui;
 
 import com.bearsoft.routing.Connector;
 import com.bearsoft.routing.QuadTree;
-import com.bearsoft.rowset.metadata.Field;
+import com.eas.client.metadata.Field;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Relation;
 import com.eas.client.model.application.ReferenceRelation;

@@ -5,7 +5,6 @@
  */
 package com.eas.client.model.application;
 
-import com.bearsoft.rowset.Row;
 import com.eas.client.events.PublishedSourcedEvent;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
@@ -19,9 +18,9 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class EntityInstanceDeleteEvent extends PublishedSourcedEvent {
 
-    protected Row deleted;
+    protected JSObject deleted;
 
-    public EntityInstanceDeleteEvent(HasPublished aSource, Row aDeleted) {
+    public EntityInstanceDeleteEvent(HasPublished aSource, JSObject aDeleted) {
         super(aSource);
         deleted = aDeleted;
     }
@@ -32,7 +31,7 @@ public class EntityInstanceDeleteEvent extends PublishedSourcedEvent {
             + "*/";
 
     @ScriptFunction(jsDoc = DELETED_JSDOC)
-    public Row getDeleted() {
+    public JSObject getDeleted() {
         return deleted;
     }
 

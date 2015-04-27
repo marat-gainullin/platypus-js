@@ -283,23 +283,6 @@
              */
             P.DropDownButton.prototype.text = '';
         }
-        Object.defineProperty(this, "onMouseEntered", {
-            get: function() {
-                var value = delegate.onMouseEntered;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMouseEntered = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.DropDownButton){
-            /**
-             * Mouse entered over the component event handler function.
-             * @property onMouseEntered
-             * @memberOf DropDownButton
-             */
-            P.DropDownButton.prototype.onMouseEntered = {};
-        }
         Object.defineProperty(this, "dropDownMenu", {
             get: function() {
                 var value = delegate.dropDownMenu;
@@ -316,6 +299,23 @@
              * @memberOf DropDownButton
              */
             P.DropDownButton.prototype.dropDownMenu = {};
+        }
+        Object.defineProperty(this, "onMouseEntered", {
+            get: function() {
+                var value = delegate.onMouseEntered;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseEntered = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.DropDownButton){
+            /**
+             * Mouse entered over the component event handler function.
+             * @property onMouseEntered
+             * @memberOf DropDownButton
+             */
+            P.DropDownButton.prototype.onMouseEntered = {};
         }
         Object.defineProperty(this, "toolTipText", {
             get: function() {

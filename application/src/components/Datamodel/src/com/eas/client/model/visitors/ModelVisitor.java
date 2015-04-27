@@ -4,7 +4,7 @@
  */
 package com.eas.client.model.visitors;
 
-import com.bearsoft.rowset.metadata.Field;
+import com.eas.client.metadata.Field;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.eas.client.model.Relation;

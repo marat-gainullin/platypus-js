@@ -4,8 +4,8 @@
  */
 package com.eas.designer.application.module.completion;
 
-import com.bearsoft.rowset.metadata.Parameters;
-import com.eas.client.SqlQuery;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.Parameters;
 import com.eas.client.model.application.ApplicationEntity;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 

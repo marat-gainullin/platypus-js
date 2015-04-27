@@ -9,15 +9,15 @@
  */
 package com.eas.client.queries;
 
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.metadata.DataTypeInfo;
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.Parameter;
-import com.bearsoft.rowset.metadata.Parameters;
+import com.eas.client.metadata.DataTypeInfo;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.Parameter;
+import com.eas.client.metadata.Parameters;
 import java.beans.PropertyChangeSupport;
 import java.util.*;
-import java.util.Map.Entry;
+import java.util.Map;
 import java.util.function.Consumer;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * Abstract platypus query with parameters.
@@ -55,7 +55,7 @@ public abstract class Query {
         if (aSource != null) {
             procedure = aSource.isProcedure();
             manual = aSource.isManual();
-            entityName = aSource.getEntityId();
+            entityName = aSource.getEntityName();
             String aTitle = aSource.getTitle();
             if (aTitle != null) {
                 title = new String(aTitle.toCharArray());
@@ -87,25 +87,25 @@ public abstract class Query {
             parametersBinds.clear();
             Map<String, Map<String, String>> lparametersBinds = aSource.getParametersBinds();
             if (lparametersBinds != null) {
-                Set<Entry<String, Map<String, String>>> lentries = lparametersBinds.entrySet();
+                Set<Map.Entry<String, Map<String, String>>> lentries = lparametersBinds.entrySet();
                 if (lentries != null) {
-                    Iterator<Entry<String, Map<String, String>>> entIt = lentries.iterator();
+                    Iterator<Map.Entry<String, Map<String, String>>> entIt = lentries.iterator();
                     if (entIt != null) {
                         while (entIt.hasNext()) {
-                            Entry<String, Map<String, String>> lent = entIt.next();
+                            Map.Entry<String, Map<String, String>> lent = entIt.next();
                             if (lent != null) {
                                 String parName = lent.getKey();
                                 if (parName != null && !parName.isEmpty()) {
                                     Map<String, String> lParValue = lent.getValue();
                                     if (lParValue != null) {
-                                        Set<Entry<String, String>> lpEntries = lParValue.entrySet();
+                                        Set<Map.Entry<String, String>> lpEntries = lParValue.entrySet();
                                         if (lpEntries != null) {
-                                            Iterator<Entry<String, String>> lpEntIt = lpEntries.iterator();
+                                            Iterator<Map.Entry<String, String>> lpEntIt = lpEntries.iterator();
                                             if (lpEntIt != null) {
                                                 Map<String, String> lparamBinds = new HashMap<>();
                                                 parametersBinds.put(new String(parName.toCharArray()), lparamBinds);
                                                 while (lpEntIt.hasNext()) {
-                                                    Entry<String, String> lpEnt = lpEntIt.next();
+                                                    Map.Entry<String, String> lpEnt = lpEntIt.next();
                                                     String dsName = lpEnt.getKey();
                                                     String dsParName = lpEnt.getValue();
                                                     if (dsName != null && !dsName.isEmpty()
@@ -265,19 +265,19 @@ public abstract class Query {
         parametersBinds = aValue;
     }
 
-    public abstract Rowset execute(Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception;
+    public abstract JSObject execute(Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception;
 
     /**
      * @return The application element identifier;
      */
-    public String getEntityId() {
+    public String getEntityName() {
         return entityName;
     }
 
     /**
      * @param aValue the entityName to set
      */
-    public void setEntityId(String aValue) {
+    public void setEntityName(String aValue) {
         entityName = aValue;
     }
 }

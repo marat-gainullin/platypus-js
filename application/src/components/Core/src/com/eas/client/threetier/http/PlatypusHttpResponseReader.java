@@ -5,11 +5,6 @@
  */
 package com.eas.client.threetier.http;
 
-import com.bearsoft.rowset.Converter;
-import com.bearsoft.rowset.Row;
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.ServerModuleInfo;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.report.Report;
@@ -21,7 +16,7 @@ import com.eas.client.threetier.requests.CreateServerModuleRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
 import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
-import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
+import com.eas.client.threetier.requests.RPCRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.PlatypusResponseVisitor;
@@ -58,15 +53,13 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
     protected PlatypusHttpConnection pConn;
     protected HttpURLConnection conn;
     protected int responseCode;
-    protected Converter converter;
     protected Request request;
     private byte[] bodyContent;
 
-    public PlatypusHttpResponseReader(Request aRequest, HttpURLConnection aConn, Converter aConverter, PlatypusHttpConnection aPConn) throws IOException {
+    public PlatypusHttpResponseReader(Request aRequest, HttpURLConnection aConn, PlatypusHttpConnection aPConn) throws IOException {
         super();
         request = aRequest;
         conn = aConn;
-        converter = aConverter;
         responseCode = conn.getResponseCode();
         pConn = aPConn;
     }
@@ -128,25 +121,7 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
     public void visit(ExecuteQueryRequest.Response rsp) throws Exception {
         Object oData = ScriptUtils.parseDates(extractJSON());
         if (oData instanceof JSObject && ((JSObject) oData).isArray()) {
-            Rowset rowset = new Rowset(rsp.getExpectedFields());
-            rowset.setConverter(converter);
-            Fields fields = rowset.getFields();
-            JSObject jsData = (JSObject) oData;
-            int length = ((Number) jsData.getMember(LENGTH_PROP_NAME)).intValue();
-            for (int i = 0; i < length; i++) {
-                JSObject oRow = (JSObject) jsData.getSlot(i);
-                Row row = new Row("", fields);
-                rowset.insert(row, false);
-                for (String pName : oRow.keySet()) {
-                    Field field = fields.get(pName);
-                    if (field != null) {
-                        Object oValue = ScriptUtils.toJava(oRow.getMember(pName));
-                        row.setColumnObject(fields.find(pName), converter.convert2RowsetCompatible(oValue, field.getTypeInfo()));
-                    }
-                }
-            }
-            rowset.currentToOriginal();
-            rsp.setRowset(rowset);
+            rsp.setRowset((JSObject) oData);
         } else {
             int updated = JSType.toInteger(oData);
             rsp.setUpdateCount(updated);
@@ -159,7 +134,7 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
     }
 
     @Override
-    public void visit(ExecuteServerModuleMethodRequest.Response rsp) throws Exception {
+    public void visit(RPCRequest.Response rsp) throws Exception {
         if (conn.getContentType() != null && conn.getContentType().toLowerCase().startsWith(REPORT_LOCATION_CONTENT_TYPE)) {
             String reportLocation = extractText();
             URL currentUrl = conn.getURL();

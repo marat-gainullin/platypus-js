@@ -12,9 +12,7 @@ import com.eas.client.settings.DbConnectionSettings;
 import com.eas.script.ScriptUtils;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.TimeZone;
 import jdk.nashorn.api.scripting.JSObject;
 import net.sf.jxls.transformer.XLSTransformer;
 import org.apache.commons.beanutils.BasicDynaBean;
@@ -57,7 +55,7 @@ public class ExelTemplateTest {
         settings.setUser("eas");
         settings.setPassword("eas");
         settings.setMaxStatements(1);
-        return new DatabasesClientWithResource(settings, null);
+        return new DatabasesClientWithResource(settings);
     }
 
     /**

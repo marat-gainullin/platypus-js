@@ -4,12 +4,12 @@
  */
 package com.eas.designer.datamodel.nodes;
 
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.utils.CollectionListener;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
 import com.eas.client.model.Entity;
 import com.eas.client.queries.Query;
 import com.eas.designer.datamodel.nodes.EntityNodeChildren.EntityFieldKey;
+import com.eas.util.CollectionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;

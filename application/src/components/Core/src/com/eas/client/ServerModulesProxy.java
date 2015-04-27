@@ -8,7 +8,7 @@ package com.eas.client;
 import com.eas.client.cache.ActualCacheEntry;
 import com.eas.client.threetier.PlatypusConnection;
 import com.eas.client.threetier.requests.CreateServerModuleRequest;
-import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
+import com.eas.client.threetier.requests.RPCRequest;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,12 +27,14 @@ public class ServerModulesProxy {
     public ServerModulesProxy(PlatypusConnection aConn) {
         super();
         conn = aConn;
+        /* If uncomment, concurrency problems will occur while dependencies resolving process.
         conn.setOnLogin(() -> {
             entries.clear();
         });
         conn.setOnLogout(() -> {
             entries.clear();
         });
+                */
     }
 
     public ServerModuleInfo getCachedStructure(String aName) throws Exception {
@@ -61,7 +63,9 @@ public class ServerModulesProxy {
                     assert entry != null : NEITHER_SM_INFO;
                     onSuccess.accept(entry.getValue());
                 }
-            }, onFailure);
+            }, (Exception ex) -> {
+                onFailure.accept(ex);
+            });
             return null;
         } else {
             CreateServerModuleRequest.Response response = conn.executeRequest(request);
@@ -93,14 +97,14 @@ public class ServerModulesProxy {
     }
 
     public Object executeServerModuleMethod(String aModuleName, String aMethodName, Consumer<Object> onSuccess, Consumer<Exception> onFailure, Object... aArguments) throws Exception {
-        final ExecuteServerModuleMethodRequest request = new ExecuteServerModuleMethodRequest(aModuleName, aMethodName, aArguments);
+        final RPCRequest request = new RPCRequest(aModuleName, aMethodName, aArguments);
         if (onSuccess != null) {
-            conn.<ExecuteServerModuleMethodRequest.Response>enqueueRequest(request, (ExecuteServerModuleMethodRequest.Response aResponse) -> {
+            conn.<RPCRequest.Response>enqueueRequest(request, (RPCRequest.Response aResponse) -> {
                 onSuccess.accept(aResponse.getResult());
             }, onFailure);
             return null;
         } else {
-            ExecuteServerModuleMethodRequest.Response response = conn.executeRequest(request);
+            RPCRequest.Response response = conn.executeRequest(request);
             return response.getResult();
         }
     }

@@ -4,13 +4,11 @@
  */
 package com.eas.client.threetier.platypus;
 
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.serial.BinaryRowsetReader;
+import com.eas.client.metadata.Fields;
 import com.eas.client.ServerModuleInfo;
+import com.eas.client.metadata.BinaryFields;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.report.Report;
-import com.eas.client.threetier.PlatypusRowsetReader;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.AppQueryRequest;
@@ -19,7 +17,7 @@ import com.eas.client.threetier.requests.CreateServerModuleRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
 import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
-import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
+import com.eas.client.threetier.requests.RPCRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.PlatypusResponseVisitor;
@@ -38,6 +36,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -78,8 +77,8 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
                             aRequest.accept(factory);
                             rsp = factory.getResponse();
                         }
-                        PlatypusResponseReader requestReader = new PlatypusResponseReader(data);
-                        rsp.accept(requestReader);
+                        PlatypusResponseReader responseReader = new PlatypusResponseReader(data);
+                        rsp.accept(responseReader);
                         return rsp;
                     } else {
                         throw new NullPointerException("Response data must present");
@@ -123,10 +122,8 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
         do {
             switch (reader.getNextTag()) {
                 case RequestsTags.TAG_ROWSET:
-                    BinaryRowsetReader rsReader = new PlatypusRowsetReader(rsp.getExpectedFields());
-                    Rowset rowset = rsReader.read(reader.getSubStream());
-                    rowset.setCursorPos(0);
-                    rsp.setRowset(rowset);
+                    String rowset = reader.getString();
+                    rsp.setRowset((JSObject)ScriptUtils.parseDates(ScriptUtils.parseJson(rowset)));
                     break;
                 case RequestsTags.TAG_UPDATE_COUNT:
                     rsp.setUpdateCount(reader.getInt());
@@ -141,7 +138,7 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
     }
 
     @Override
-    public void visit(ExecuteServerModuleMethodRequest.Response rsp) throws Exception {
+    public void visit(RPCRequest.Response rsp) throws Exception {
         final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
         Object result = null;
         if (input.containsChild(RequestsTags.TAG_FORMAT) && input.containsChild(RequestsTags.TAG_FILE_NAME)) {
@@ -208,7 +205,7 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
             if (!dom.containsChild(RequestsTags.TAG_FIELDS)) {
                 throw new ProtoReaderException("Query fields are not specified");
             }
-            appQuery.setEntityId(dom.getChild(RequestsTags.TAG_QUERY_ID).getString());
+            appQuery.setEntityName(dom.getChild(RequestsTags.TAG_QUERY_ID).getString());
             if (dom.containsChild(RequestsTags.TAG_DML)) {
                 appQuery.setManual(dom.getChild(RequestsTags.TAG_DML).getInt() == 1);
             }
@@ -217,8 +214,7 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
                 appQuery.setTitle(titleNode.getString());
             }
 
-            BinaryRowsetReader rsReader = new BinaryRowsetReader();
-            Fields fields = rsReader.parseFieldsNode(dom.getChild(RequestsTags.TAG_FIELDS));
+            Fields fields = BinaryFields.read(dom.getChild(RequestsTags.TAG_FIELDS));
             appQuery.setFields(fields);
             List<ProtoNode> paramsNodes = dom.getChildren(RequestsTags.TAG_QUERY_SQL_PARAMETER);
             for (ProtoNode node : paramsNodes) {

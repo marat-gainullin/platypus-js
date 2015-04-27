@@ -4,15 +4,13 @@
  */
 package com.eas.client.sqldrivers;
 
-import com.bearsoft.rowset.Converter;
-import com.bearsoft.rowset.RowsetConverter;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.ForeignKeySpec;
-import com.bearsoft.rowset.metadata.PrimaryKeySpec;
 import com.eas.client.ClientConstants;
 import com.eas.client.SQLUtils;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.ForeignKeySpec;
+import com.eas.client.metadata.PrimaryKeySpec;
 import com.eas.client.sqldrivers.resolvers.MySqlTypesResolver;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
 import java.sql.Connection;
@@ -34,7 +32,6 @@ public class MySqlSqlDriver extends SqlDriver {
 
     protected static final int[] mySqlErrorCodes = {};
     protected static final String[] platypusErrorMessages = {};
-    protected Converter converter = new RowsetConverter();
     protected MySqlTypesResolver resolver = new MySqlTypesResolver();
     protected static final String SET_SCHEMA_CLAUSE = "USE %s";
     protected static final String GET_SCHEMA_CLAUSE = "SELECT DATABASE()";
@@ -289,11 +286,6 @@ public class MySqlSqlDriver extends SqlDriver {
 
     public MySqlSqlDriver() {
         super();
-    }
-
-    @Override
-    public Converter getConverter() {
-        return converter;
     }
 
     @Override

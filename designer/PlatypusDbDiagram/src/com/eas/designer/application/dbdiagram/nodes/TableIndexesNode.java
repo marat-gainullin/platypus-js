@@ -4,19 +4,19 @@
  */
 package com.eas.designer.application.dbdiagram.nodes;
 
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.dbstructure.DbStructureUtils;
 import com.eas.client.dbstructure.IconCache;
 import com.eas.client.dbstructure.SqlActionsController;
 import com.eas.client.dbstructure.gui.edits.CreateIndexEdit;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
+import com.eas.client.metadata.Field;
 import com.eas.client.model.Entity;
 import com.eas.client.model.ModelEditingListener;
 import com.eas.client.model.Relation;
 import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.designer.datamodel.ModelUndoProvider;
+import com.eas.util.IDGenerator;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.io.IOException;

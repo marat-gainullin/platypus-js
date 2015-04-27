@@ -18,15 +18,12 @@
         <copy file="${rt_dir}/Datamodel.jar" todir="${dest_dir}" overwrite="true" />
         <copy file="${rt_dir}/Reports.jar" todir="${dest_dir}" overwrite="true" />
         <copy file="${rt_dir}/Modules.jar" todir="${dest_dir}" overwrite="true" />
-        <copy file="${rt_dir}/Deploy.jar" todir="${dest_dir}" overwrite="true" />
-        <copy file="${rt_dir}/MetaSync.jar" todir="${dest_dir}" overwrite="true" />
         <copy file="${rt_dir}/Server.jar" todir="${dest_dir}" overwrite="true" />
         <copy file="${rt_dir}/ServletSupport.jar" todir="${dest_dir}" overwrite="true" />
         
         <copy file="${lib_own}/CommonUtils.jar" todir="${dest_dir}" overwrite="true" />
         <copy file="${lib_own}/Grid.jar" todir="${dest_dir}" overwrite="true" />
         <copy file="${lib_own}/BinaryTags.jar" todir="${dest_dir}" overwrite="true" />
-        <copy file="${lib_own}/Rowsets.jar" todir="${dest_dir}" overwrite="true" />
         <copy file="${lib_own}/ScalablePane.jar" todir="${dest_dir}" overwrite="true" />
         <copy file="${lib_own}/Routing.jar" todir="${dest_dir}" overwrite="true" />
         

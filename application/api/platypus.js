@@ -1,19 +1,39 @@
 (function () {
-    load("classpath:internals.js");
+    if (typeof Set === 'undefined') {
+        var LinkedHashSetClass = Java.type('java.util.LinkedHashSet');
+        Set = function () {
+            var container = new LinkedHashSetClass();
+            this.add = function (aValue) {
+                container.add(aValue);
+            };
+            this.delete = function (aValue) {
+                container.remove(aValue);
+            };
+            Object.defineProperty(this, 'size', {get: function () {
+                    return container.size();
+                }});
+            this.forEach = function (aCallback) {
+                container.forEach(aCallback);
+            };
+        };
+    }
+
     //this === global;
     var global = this;
     var oldP = global.P;
     global.P = {};
+
     /*
      global.P = this; // global scope of api - for legacy applications
      global.P.restore = function() {
      throw "Legacy api can't restore the global namespace.";
      };
      */
+    load("classpath:internals.js");
+    load("classpath:managed.js");
+    load("classpath:orderer.js");
 
     // core imports
-    var ExecutorsClass = Java.type("java.util.concurrent.Executors");
-    var LockClass = Java.type("java.util.concurrent.locks.ReentrantLock");
     var EngineUtilsClass = Java.type("jdk.nashorn.api.scripting.ScriptUtils");
     var JavaArrayClass = Java.type("java.lang.Object[]");
     var JavaStringArrayClass = Java.type("java.lang.String[]");
@@ -21,12 +41,8 @@
     var FileClass = Java.type("java.io.File");
     var JavaDateClass = Java.type("java.util.Date");
     var LoggerClass = Java.type("java.util.logging.Logger");
-    var RowClass = Java.type("com.bearsoft.rowset.Row");
-    var FieldsClass = Java.type("com.bearsoft.rowset.metadata.Fields");
-    var IDGeneratorClass = Java.type("com.bearsoft.rowset.utils.IDGenerator");
-    var PropertyChangeSupportClass = Java.type("java.beans.PropertyChangeSupport");
-    var RowsetJsAdapterClass = Java.type("com.bearsoft.rowset.events.RowsetJsAdapter");
-    var RowsComparatorClass = Java.type("com.bearsoft.rowset.sorting.RowsComparator");
+    var FieldsClass = Java.type("com.eas.client.metadata.Fields");
+    var IDGeneratorClass = Java.type("com.eas.util.IDGenerator");
     var ScriptTimerTaskClass = Java.type("com.eas.client.scripts.ScriptTimerTask");
     var ScriptedResourceClass = Java.type("com.eas.client.scripts.ScriptedResource");
     var PlatypusPrincipalClass = Java.type("com.eas.client.login.PlatypusPrincipal");
@@ -151,7 +167,6 @@
         load("classpath:deps.js");
         // gui imports
         var KeyEventClass = Java.type("java.awt.event.KeyEvent");
-        var SwingUtilitiesClass = Java.type("javax.swing.SwingUtilities");
         var FileChooserClass = Java.type("javax.swing.JFileChooser");
         var FileFilter = Java.type("javax.swing.filechooser.FileNameExtensionFilter");
         var ColorChooserClass = Java.type("javax.swing.JColorChooser");
@@ -592,7 +607,7 @@
         function loadForm(aName, aModel, aTarget) {
             var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
             var formDocument = ScriptedResourceClass.getApp().getForms().get(aName, files);
-            var formFactory = FormLoaderClass.load(formDocument, ScriptedResourceClass.getApp(), aModel);
+            var formFactory = FormLoaderClass.load(formDocument, ScriptedResourceClass.getApp(), arguments.length > 1 ? aModel : null);
             var form = formFactory.form;
             if (aTarget) {
                 P.Form.call(aTarget, null, aName, form);
@@ -659,38 +674,6 @@
     }
     Object.defineProperty(P, "extend", {value: extend});
 
-    var cached = {};
-    function getModule(aName) {
-        if (!cached[aName]) {
-            var c = global[aName];
-            if (c) {
-                cached[aName] = new c();
-            } else {
-                P.require(aName);
-                c = global[aName];
-                if (c) {
-                    cached[aName] = new c();
-                } else {
-                    throw 'No function: ' + aName + ' found while Modules.get(...).';
-                }
-            }
-        }
-        return cached[aName];
-    }
-    function createModule(aName) {
-        var c = global[aName];
-        if (c) {
-            return new c();
-        } else {
-            P.require(aName);
-            c = global[aName];
-            if (c) {
-                return new c();
-            } else {
-                throw 'No function: ' + aName + ' found while Modules.create(...).';
-            }
-        }
-    }
     Object.defineProperty(P, "modules", {
         get: function () {
             if (serverCoreClass) {
@@ -721,262 +704,12 @@
         }
     });
 
-    function publishRow(aDelegate, aTarget) {
-        var nnFields = aDelegate.getFields();
-        var instanceCTor = EngineUtilsClass.unwrap(nnFields.getInstanceConstructor());
-        var target = arguments.length > 1 ? aTarget : (!!instanceCTor ? new instanceCTor() : {});
-        var nFields = nnFields.toCollection();
-        // plain mutable properties
-        for (var n = 0; n < nFields.size(); n++) {
-            (function () {
-                var colIndex = n + 1;
-                var nField = nFields[n];
-                var valueAccessorDesc = {
-                    get: function () {
-                        return boxAsJs(aDelegate.getColumnObject(colIndex));
-                    },
-                    set: function (aValue) {
-                        aDelegate.setColumnObject(colIndex, boxAsJava(aValue));
-                    }
-                };
-                Object.defineProperty(target, nField.name, {get: valueAccessorDesc.get, set: valueAccessorDesc.set, enumerable: true});
-                Object.defineProperty(target, n, valueAccessorDesc);
-            })();
-        }
-        // ORM mutable scalar and readonly collection properties
-        var define = function (aOrmDefs) {
-            for each (var defsEntry in aOrmDefs.entrySet()) {
-                var def = EngineUtilsClass.unwrap(defsEntry.getValue().getJsDef());
-                Object.defineProperty(target, defsEntry.getKey(), def);
-            }
-        };
-        define(nnFields.getOrmScalarDefinitions());
-        define(nnFields.getOrmCollectionsDefinitions());
-        Object.defineProperty(target, "unwrap", {
-            value: function () {
-                return aDelegate;
-            }});
-        return target;
-        // WARNING!!! Don't define target.length, because of possible conflict with subject area data properties.
-    }
-
-    function BoundArray() {
-        function copyProps(aObject) {
-            var shadow = {};
-            for (var pn in aObject) {
-                var pName = pn + '';
-                shadow[pName] = aObject[pName];
-            }
-            return shadow;
-        }
-        function applyProps(aShadow, aTarget) {
-            for (var pn in aShadow) {
-                var pName = pn + '';
-                aTarget[pName] = aShadow[pName];
-            }
-        }
-        if (BoundArray.superclass)
-            BoundArray.superclass.constructor.apply(this, arguments);
-        var target = this;
-        var rowset = this.unwrap().getRowset();
-        var adapter = new RowsetJsAdapterClass();
-        rowset.addRowsetListener(adapter);
-        adapter.rowsetFiltered = function () {
-            var eventedRows = [];
-            Array.prototype.splice.call(target, 0, target.length);
-            var rows = rowset.getCurrent();
-            for each (var nRow in rows) {
-                Array.prototype.push.call(target, EngineUtilsClass.unwrap(nRow.getPublished()));
-                eventedRows.push(nRow);
-            }
-            eventedRows.forEach(function (aEventedRow) {
-                aEventedRow.fireChangesOfOppositeCollections();
-                aEventedRow.fireChangesOfOppositeScalars();
-            });
-        };
-        adapter.rowsetRequeried = function (event) {
-            adapter.rowsetFiltered(null);
-        };
-        adapter.rowsetNextPageFetched = function (event) {
-            adapter.rowsetFiltered(null);
-        };
-        adapter.rowsetSaved = function (event) {
-            // ignore
-        };
-        adapter.rowsetRolledback = function (event) {
-            adapter.rowsetFiltered(null);
-        };
-        adapter.rowsetScrolled = function (event) {
-            // ignore
-        };
-        adapter.rowsetSorted = function (event) {
-            adapter.rowsetFiltered(null);
-        };
-        Object.defineProperty(target, "fill", {
-            value: function () {
-                throw '\'fill\' is unsupported in BoundArray because of it\'s distinct values requirement';
-            }
-        });
-        Object.defineProperty(target, "pop", {
-            value: function () {
-                if (!rowset.empty) {
-                    var deletedRow = rowset.getRow(rowset.size());
-                    rowset.deleteAt(rowset.size());
-                    var res = Array.prototype.pop.call(target);
-                    deletedRow.fireChangesOfOppositeCollections();
-                    deletedRow.fireChangesOfOppositeScalars();
-                    return res;
-                }
-            }
-        });
-        Object.defineProperty(target, "push", {
-            value: function () {
-                var eventedRows = [];
-                var entityName = rowset.getFlowProvider().getEntityId();
-                var nFields = rowset.getFields();
-                for (var a = 0; a < arguments.length; a++) {
-                    var shadow = copyProps(arguments[a]);// to avoid re initing by injected structure without values
-                    var insertedRow = new RowClass(entityName, nFields);
-                    insertedRow.setPublished(publishRow(insertedRow, arguments[a]));
-                    rowset.insertAt(insertedRow, a < arguments.length - 1, rowset.size() + 1, null);
-                    applyProps(shadow, arguments[a]);
-                    eventedRows.push(insertedRow);
-                }
-                var res = Array.prototype.push.apply(target, arguments);
-                eventedRows.forEach(function (aEventedRow) {
-                    aEventedRow.fireChangesOfOppositeCollections();
-                    aEventedRow.fireChangesOfOppositeScalars();
-                });
-                return res;
-            }
-        });
-        Object.defineProperty(target, "reverse", {
-            value: function () {
-                rowset.reverse();
-            }
-        });
-        Object.defineProperty(target, "shift", {
-            value: function () {
-                if (!rowset.empty) {
-                    var deletedRow = rowset.getRow(1);
-                    rowset.deleteAt(1);
-                    var res = Array.prototype.shift.call(target);
-                    deletedRow.fireChangesOfOppositeCollections();
-                    deletedRow.fireChangesOfOppositeScalars();
-                    return res;
-                }
-            }
-        });
-        var defaultCompareFunction = function (o1, o2) {
-            var s1 = (o1 + '');
-            var s2 = (o2 + '');
-            return s1 > s2 ? 1 : s1 < s2 ? -1 : 0;
-        };
-        Object.defineProperty(target, "sort", {
-            value: function () {
-                if (arguments.length > 0 && arguments[0] instanceof RowsComparatorClass) {
-                    rowset.sort(arguments[0]);
-                } else {
-                    var compareFunc = defaultCompareFunction;
-                    if (arguments.length > 0 && typeof arguments[0] === 'function') {
-                        compareFunc = arguments[0];
-                    }
-                    Array.prototype.sort.call(target, compareFunc);
-                }
-                return target;
-            }
-        });
-        Object.defineProperty(target, "splice", {
-            value: function () {
-                var eventedRows = [];
-                if (arguments.length > 0) {
-                    var beginToDeleteAt = arguments[0];
-                    var howManyToDelete = Number.MAX_VALUE;
-                    if (arguments.length > 1) {
-                        howManyToDelete = arguments[1];
-                    }
-                    var needToAdd = arguments.length > 2;
-                    var deleted = 0;
-                    while (!rowset.empty && deleted++ < howManyToDelete) {
-                        var deletedRow = rowset.getRow(beginToDeleteAt + 1);
-                        rowset.deleteAt(beginToDeleteAt + 1, needToAdd);
-                        eventedRows.push(deletedRow);
-                    }
-                    var insertAt = beginToDeleteAt;
-                    var entityName = rowset.getFlowProvider().getEntityId();
-                    var nFields = rowset.getFields();
-                    for (var a = 2; a < arguments.length; a++) {
-                        var shadow = copyProps(arguments[a]);// to avoid re initing by injected structure without values
-                        var insertedRow = new RowClass(entityName, nFields);
-                        insertedRow.setPublished(publishRow(insertedRow, arguments[a]));
-                        rowset.insertAt(insertedRow, a < arguments.length - 1, insertAt + 1, null);
-                        applyProps(shadow, arguments[a]);
-                        eventedRows.push(insertedRow);
-                        insertAt++;
-                    }
-                }
-                var res = Array.prototype.splice.apply(target, arguments);
-                eventedRows.forEach(function (aEventedRow) {
-                    aEventedRow.fireChangesOfOppositeCollections();
-                    aEventedRow.fireChangesOfOppositeScalars();
-                });
-                return res;
-            }
-        });
-
-        Object.defineProperty(target, "unshift", {
-            value: function () {
-                var eventedRows = [];
-                var entityName = rowset.getFlowProvider().getEntityId();
-                var nFields = rowset.getFields();
-                for (var a = 0; a < arguments.length; a++) {
-                    var shadow = copyProps(arguments[a]);// to avoid re initing by injected structure without values
-                    var insertedRow = new RowClass(entityName, nFields);
-                    insertedRow.setPublished(publishRow(insertedRow, arguments[a]));
-                    rowset.insertAt(insertedRow, a < arguments.length - 1, a + 1, null);
-                    applyProps(shadow, arguments[a]);
-                    eventedRows.push(insertedRow);
-                }
-                var res = Array.prototype.unshift.apply(target, arguments);
-                eventedRows.forEach(function (aEventedRow) {
-                    aEventedRow.fireChangesOfOppositeCollections();
-                    aEventedRow.fireChangesOfOppositeScalars();
-                });
-                return res;
-            }
-        });
-
-        Object.defineProperty(target, "createFilter", {
-            value: function (aConstraints) {
-				var constraints = Array.isArray(aConstraints) ? aConstraints : [aConstraints];
-                var nEntity = this.unwrap();
-                return boxAsJs(nEntity.createFilter(constraints));
-            }
-        });
-
-        Object.defineProperty(target, "createSorting", {
-            value: function (aCriteria) {
-				var criteria = Array.isArray(aCriteria) ? aCriteria : [aCriteria];
-                var nEntity = this.unwrap();
-                return boxAsJs(nEntity.createSorting(criteria));
-            }
-        });
-
-        Object.defineProperty(target, "find", {
-            value: function (aCriteria) {
-                var nEntity = this.unwrap();
-                return EngineUtilsClass.unwrap(nEntity.find(aCriteria));
-            }
-        });
-    }
-
-    RowClass.setPublisher(publishRow);
     FieldsClass.setPublisher(function (aDelegate) {
         var target = {};
-        var nFields = aDelegate.toCollection();
-        for (var n = 0; n < nFields.size(); n++) {
+        var nnFields = aDelegate.toCollection();
+        for (var n = 0; n < nnFields.size(); n++) {
             (function () {
-                var nField = nFields[n];
+                var nField = nnFields[n];
                 var pField = EngineUtilsClass.unwrap(nField.getPublished());
                 Object.defineProperty(target, nField.name, {
                     value: pField
@@ -989,17 +722,199 @@
         return target;
     });
 
-    extend(BoundArray, Array);
-    extend(P.ApplicationDbEntity, BoundArray);
-    extend(P.ApplicationPlatypusEntity, BoundArray);
+    var addListenerName = '-platypus-listener-add-func';
+    var removeListenerName = '-platypus-listener-remove-func';
+    var fireChangeName = '-platypus-change-fire-func';
+    function listenable(aTarget) {
+        var listeners = new Set();
+        Object.defineProperty(aTarget, addListenerName, {value: function (aListener) {
+                listeners.add(aListener);
+            }});
+        Object.defineProperty(aTarget, removeListenerName, {value: function (aListener) {
+                listeners.delete(aListener);
+            }});
+        Object.defineProperty(aTarget, fireChangeName, {value: function (aChange) {
+                Object.freeze(aChange);
+                listeners.forEach(function (aListener) {
+                    aListener(aChange);
+                });
+            }});
+        return function () {
+            unlistenable(aTarget);
+        };
+    }
 
-    P.Filter.prototype.apply = function () {
-        var varargs = new JavaArrayClass(arguments.length);
-        for (var v = 0; v < arguments.length; v++)
-            varargs[v] = boxAsJava(arguments[v]);
-        var nFilter = this.unwrap();
-        nFilter.apply(varargs);
-    };
+    function unlistenable(aTarget) {
+        delete aTarget[addListenerName];
+        delete aTarget[removeListenerName];
+    }
+
+    function listen(aTarget, aListener) {
+        aTarget[addListenerName](aListener);
+        return function () {
+            aTarget[removeListenerName](aListener);
+        };
+    }
+
+    function unlisten(aTarget, aListener) {
+        aTarget[removeListenerName](aListener);
+    }
+
+    function fire(aTarget, aChange) {
+        try {
+            aTarget[fireChangeName](aChange);
+        } catch (e) {
+            Logger.severe(e);
+        }
+    }
+
+    function fireSelfScalarsOppositeCollectionsChanges(aSubject, aChange, nFields) {
+        var ormDefs = nFields.getOrmScalarExpandings().get(aChange.propertyName);
+        if (ormDefs) {
+            var expandingsOldValues = aChange.beforeState.selfScalarsOldValues;
+            ormDefs.forEach(function (ormDef) {
+                if (ormDef.getName()) {
+                    var expandingOldValue = expandingsOldValues[ormDef.getName()];
+                    var expandingNewValue = aSubject[ormDef.getName()];
+                    fire(aSubject, {source: aChange.source, propertyName: ormDef.getName(), oldValue: expandingOldValue, newValue: expandingNewValue});
+                    if (ormDef.getOppositeName()) {
+                        if (expandingOldValue) {
+                            fire(expandingOldValue, {source: expandingOldValue, propertyName: ormDef.getOppositeName()});
+                        }
+                        if (expandingNewValue) {
+                            fire(expandingNewValue, {source: expandingNewValue, propertyName: ormDef.getOppositeName()});
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    function prepareSelfScalarsChanges(aSubject, aChange, nFields) {
+        var ormDefs = nFields.getOrmScalarExpandings().get(aChange.propertyName);
+        var oldScalarValues = [];
+        if (ormDefs) {
+            ormDefs.forEach(function (ormDef) {
+                if (ormDef && ormDef.getName()) {
+                    oldScalarValues[ormDef.getName()] = aSubject[ormDef.getName()];
+                }
+            });
+        }
+        return oldScalarValues;
+    }
+
+    function fireOppositeScalarsSelfCollectionsChanges(aSubject, aChange, nFields) {
+        var oppositeScalarsFirerers = aChange.beforeState.oppositeScalarsFirerers;
+        if (oppositeScalarsFirerers) {
+            oppositeScalarsFirerers.forEach(function (aFirerer) {
+                aFirerer();
+            });
+        }
+        var collectionsDefs = nFields.getOrmCollectionsDefinitions().entrySet();
+        if (collectionsDefs) {
+            collectionsDefs.forEach(function (aEntry) {
+                var collectionName = aEntry.getKey();
+                var ormDef = aEntry.getValue();
+                var collection = aSubject[collectionName];
+                collection.forEach(function (item) {
+                    fire(item, {source: item, propertyName: ormDef.getOppositeName()});
+                });
+            });
+            collectionsDefs.forEach(function (aEntry) {
+                var collectionName = aEntry.getKey();
+                fire(aSubject, {source: aSubject, propertyName: collectionName});
+            });
+        }
+    }
+
+    function prepareOppositeScalarsChanges(aSubject, nFields) {
+        var firerers = [];
+        var collectionsDefs = nFields.getOrmCollectionsDefinitions().entrySet();
+        collectionsDefs.forEach(function (aEntry) {
+            var collectionName = aEntry.getKey();
+            var ormDef = aEntry.getValue();
+            var collection = aSubject[collectionName];
+            collection.forEach(function (item) {
+                if (ormDef.getOppositeName()) {
+                    firerers.push(function () {
+                        fire(item, {source: item, propertyName: ormDef.getOppositeName()});
+                    });
+                }
+            });
+        });
+        return firerers;
+    }
+
+    function fireOppositeScalarsChanges(aSubject, nFields) {
+        var collected = prepareOppositeScalarsChanges(aSubject, nFields);
+        collected.forEach(function (aFirerer) {
+            aFirerer();
+        });
+    }
+
+    function fireOppositeCollectionsChanges(aSubject, nFields) {
+        var scalarsDefs = nFields.getOrmScalarDefinitions().entrySet();
+        scalarsDefs.forEach(function (aEntry) {
+            var scalarName = aEntry.getKey();
+            if (scalarName) {
+                var ormDef = aEntry.getValue();
+                var scalar = aSubject[scalarName];
+                if (scalar && ormDef.getOppositeName()) {
+                    fire(scalar, {source: scalar, propertyName: ormDef.getOppositeName()});
+                }
+            }
+        });
+    }
+
+    function generateChangeLogKeys(keys, fields, propName, aSubject, oldValue) {
+        if (fields) {
+            for (var i = 1; i <= fields.getFieldsCount(); i++) {
+                var field = fields.get(i);
+                if (field.isPk()) {
+                    var fieldName = field.getName();
+                    var value = aSubject[fieldName];
+                    // Some tricky processing of primary keys modification case ...
+                    if (fieldName == propName) {
+                        value = oldValue;
+                    }
+                    keys.add(new ValueClass(fieldName, value, field.getTypeInfo()));
+                }
+            }
+        }
+    }
+
+    ScriptUtilsClass.setCollectionDefFunc(
+            function (sourcePublishedEntity, targetFieldName, sourceFieldName) {
+                var _self = this;
+                _self.enumerable = false;
+                _self.configurable = true;
+                _self.get = function () {
+                    var criterion = {};
+                    var targetKey = this[targetFieldName];
+                    criterion[sourceFieldName] = targetKey;
+                    var found = sourcePublishedEntity.find(criterion);
+                    P.manageArray(found, {
+                        spliced: function (added, deleted) {
+                            added.forEach(function (item) {
+                                item[sourceFieldName] = targetKey;
+                            });
+                            deleted.forEach(function (item) {
+                                item[sourceFieldName] = null;
+                            });
+                        },
+                        scrolled: function (aSubject, oldCursor, newCursor) {
+                            fire(found, {source: found, propertyName: 'cursor', oldValue: oldCursor, newValue: newCursor});
+                        }
+                    });
+                    listenable(found);
+                    return found;
+                };
+            });
+
+    var InsertClass = Java.type('com.eas.client.changes.Insert');
+    var DeleteClass = Java.type('com.eas.client.changes.Delete');
+    var UpdateClass = Java.type('com.eas.client.changes.Update');
+    var ValueClass = Java.type('com.eas.client.changes.ChangeValue');
 
     /**
      * @static
@@ -1026,23 +941,189 @@
                 aTarget = new modelCTor(model);
             }
             function publishEntity(nEntity) {
-                var published = EngineUtilsClass.unwrap(nEntity.getPublished());
+                var entityCTor;
+                if (model instanceof TwoTierModelClass) {
+                    entityCTor = P.ApplicationDbEntity;
+                } else if (model instanceof ThreeTierModelClass) {
+                    entityCTor = P.ApplicationPlatypusEntity;
+                } else {
+                    throw "Can't determine model's type.";
+                }
+                var justInserted = null;
+                var justInsertedChange = null;
+                var orderers = {};
+                var published = [];
+
+                function managedOnChange(aSubject, aChange) {
+                    if (!tryToComplementInsert(aSubject, aChange)) {
+                        var updateChange = new UpdateClass(nEntity.getQueryName());
+                        generateChangeLogKeys(updateChange.keys, nFields, aChange.propertyName, aSubject, aChange.oldValue);
+                        updateChange.data.add(new ValueClass(aChange.propertyName, aChange.newValue, noFields[aChange.propertyName].getTypeInfo()));
+                        nEntity.getChangeLog().add(updateChange);
+                    }
+                    Object.keys(orderers).forEach(function (aOrdererKey) {
+                        var aOrderer = orderers[aOrdererKey];
+                        if (aOrderer.inKeys(aChange.propertyName)) {
+                            aOrderer.add(aChange.source);
+                        }
+                    });
+                    fire(aSubject, aChange);
+                    fireSelfScalarsOppositeCollectionsChanges(aSubject, aChange, nFields);// Expanding change
+                    var field = noFields[aChange.propertyName];
+                    if (field && field.pk) {
+                        fireOppositeScalarsSelfCollectionsChanges(aSubject, aChange, nFields);
+                    }
+                }
+                function managedBeforeChange(aSubject, aChange) {
+                    var oldScalars = prepareSelfScalarsChanges(aSubject, aChange, nFields);
+                    var oppositeScalarsFirerers = prepareOppositeScalarsChanges(aSubject, nFields);
+                    Object.keys(orderers).forEach(function (aOrdererKey) {
+                        var aOrderer = orderers[aOrdererKey];
+                        if (aOrderer.inKeys(aChange.propertyName)) {
+                            aOrderer.delete(aChange.source);
+                        }
+                    });
+                    return {selfScalarsOldValues: oldScalars, oppositeScalarsFirerers: oppositeScalarsFirerers};
+                }
+                function tryToComplementInsert(aSubject, aChange) {
+                    var complemented = false;
+                    if (aSubject === justInserted && !noFields[aChange.propertyName].nullable) {
+                        var met = false;
+                        for (var d = 0; d < justInsertedChange.data.length; d++) {
+                            var iv = justInsertedChange.data[d];
+                            if (iv.name == aChange.propertyName) {
+                                met = true;
+                                break;
+                            }
+                        }
+                        if (!met) {
+                            justInsertedChange.getData().add(new ValueClass(aChange.propertyName, aChange.newValue, noFields[aChange.propertyName].getTypeInfo()));
+                            complemented = true;
+                        }
+                    }
+                    return complemented;
+                }
+                function acceptInstance(aSubject) {
+                    P.manageObject(aSubject, managedOnChange, managedBeforeChange);
+                    listenable(aSubject);
+                    // ORM mutable scalar and collection properties
+                    var define = function (aOrmDefs) {
+                        for each (var defsEntry in aOrmDefs.entrySet()) {
+                            var def = EngineUtilsClass.unwrap(defsEntry.getValue().getJsDef());
+                            Object.defineProperty(aSubject, defsEntry.getKey(), def);
+                        }
+                    };
+                    define(nFields.getOrmScalarDefinitions());
+                    define(nFields.getOrmCollectionsDefinitions());
+                }
+
+                var _onInserted = null;
+                var _onDeleted = null;
+                var _onScrolled = null;
+                P.manageArray(published, {
+                    spliced: function (added, deleted) {
+                        added.forEach(function (aAdded) {
+                            justInserted = aAdded;
+                            justInsertedChange = new InsertClass(nEntity.getQueryName());
+                            for (var nf = 0; nf < nnFields.size(); nf++) {
+                                var nField = nnFields[nf];
+                                if (!aAdded[nField.name] && nField.pk) {
+                                    aAdded[nField.name] = nField.getTypeInfo().generateValue();
+                                }
+                            }
+                            for (var na in aAdded) {
+                                var nField = noFields[na];
+                                if (nField) {
+                                    var v = aAdded[na];
+                                    var cv = new ValueClass(nField.name, v, nField.getTypeInfo());
+                                    justInsertedChange.data.add(cv);
+                                }
+                            }
+                            nEntity.getChangeLog().add(justInsertedChange);
+                            for (var aOrdererKey in orderers) {
+                                var aOrderer = orderers[aOrdererKey];
+                                aOrderer.add(aAdded);
+                            }
+                            acceptInstance(aAdded);
+                            fireOppositeScalarsChanges(aAdded, nFields);
+                            fireOppositeCollectionsChanges(aAdded, nFields);
+                        });
+                        deleted.forEach(function (aDeleted) {
+                            if (aDeleted === justInserted) {
+                                justInserted = null;
+                                justInsertedChange = null;
+                            }
+                            var deleteChange = new DeleteClass(nEntity.getQueryName());
+                            generateChangeLogKeys(deleteChange.keys, nFields, null, aDeleted, null);
+                            nEntity.getChangeLog().add(deleteChange);
+                            for (var aOrdererKey in orderers) {
+                                var aOrderer = orderers[aOrdererKey];
+                                aOrderer.delete(aDeleted);
+                            }
+                            fireOppositeScalarsChanges(aDeleted, nFields);
+                            fireOppositeCollectionsChanges(aDeleted, nFields);
+                            unlistenable(aDeleted);
+                            P.unmanageObject(aDeleted);
+                        });
+                        if (_onInserted) {
+                            try {
+                                _onInserted({source: published, items: added});
+                            } catch (e) {
+                                Logger.severe(e);
+                            }
+                        }
+                        if (_onDeleted) {
+                            try {
+                                _onDeleted({source: published, items: deleted});
+                            } catch (e) {
+                                Logger.severe(e);
+                            }
+                        }
+                    },
+                    scrolled: function (aSubject, oldCursor, newCursor) {
+                        if (_onScrolled) {
+                            try {
+                                _onScrolled({source: published, propertyName: 'cursor', oldValue: oldCursor, newValue: newCursor});
+                            } catch (e) {
+                                Logger.severe(e);
+                            }
+                        }
+                        fire(published, {source: published, propertyName: 'cursor', oldValue: oldCursor, newValue: newCursor});
+                    }
+                });
+                entityCTor.call(published, nEntity);
+                for (var protoEntryName in entityCTor.prototype) {
+                    if (!published[protoEntryName]) {
+                        var protoEntry = entityCTor.prototype[protoEntryName];
+                        if (protoEntry instanceof Function) {
+                            Object.defineProperty(published, protoEntryName, {value: protoEntry});
+                        }
+                    }
+                }
                 var pSchema = {};
                 Object.defineProperty(published, "schema", {
                     value: pSchema
                 });
-                var nFields = nEntity.getFields().toCollection();
-                for (var n = 0; n < nFields.size(); n++) {
+                var pkFieldName = '';
+                var nFields = nEntity.getFields();
+                var nnFields = nFields.toCollection();
+                var noFields = {};
+                // schema
+                for (var n = 0; n < nnFields.size(); n++) {
                     (function () {
-                        var nField = nFields[n];
-                        // schema
+                        var nField = nnFields[n];
+                        noFields[nField.name] = nField;
+                        if (nField.isPk())
+                            pkFieldName = nField.name;
                         var schemaDesc = {
                             value: nField.getPublished()
                         };
-                        if (!pSchema[nField.name])
+                        if (!pSchema[nField.name]) {
                             Object.defineProperty(pSchema, nField.name, schemaDesc);
-                        else
-                            throw "Duplicated field name found: " + nField.name + " in entity " + nEntity.name + (nEntity.title ? " [" + nEntity.title + "]" : "");
+                        } else {
+                            var eTitle = nEntity.title ? " [" + nEntity.title + "]" : "";
+                            throw "Duplicated field name found: " + nField.name + " in entity " + nEntity.name + eTitle;
+                        }
                         Object.defineProperty(pSchema, n, schemaDesc);
                     })();
                 }
@@ -1055,21 +1136,109 @@
                         var nParameter = ncParameters[p];
                         var pDesc = {
                             get: function () {
-                                return boxAsJs(nParameter.jsValue/*because of UNDEFINED_SQL_VALUE*/);
+                                return nParameter.jsValue;
                             },
                             set: function (aValue) {
-                                nParameter.jsValue/*because of UNDEFINED_SQL_VALUE*/ = boxAsJava(aValue);
+                                nParameter.jsValue = aValue;
                             }
                         };
                         Object.defineProperty(pParams, nParameter.name, pDesc);
                         Object.defineProperty(pParams, p, pDesc);
                     })();
                 }
-                Object.defineProperty(published, "params", {value: pParams});
+                Object.defineProperty(published, 'params', {value: pParams});
                 // entity.params.schema.p1 syntax
                 var pParamsSchema = EngineUtilsClass.unwrap(nParameters.getPublished());
                 if (!pParams.schema)
-                    Object.defineProperty(pParams, "schema", {value: pParamsSchema});
+                    Object.defineProperty(pParams, 'schema', {value: pParamsSchema});
+                Object.defineProperty(published, 'find', {value: function (aCriteria) {
+                        var keys = Object.keys(aCriteria);
+                        keys = keys.sort();
+                        var ordererKey = keys.join(' | ');
+                        var orderer = orderers[ordererKey];
+                        if (!orderer) {
+                            orderer = new P.Orderer(keys);
+                            published.forEach(function (item) {
+                                orderer.add(item);
+                            });
+                            orderers[ordererKey] = orderer;
+                        }
+                        var found = orderer.find(aCriteria);
+                        return found;
+                    }});
+                Object.defineProperty(published, 'findByKey', {value: function (aKeyValue) {
+                        var criteria = {};
+                        criteria[pkFieldName] = aKeyValue;
+                        var found = published.find(criteria);
+                        return found.length > 0 ? found[0] : null;
+                    }});
+                Object.defineProperty(published, 'findById', {value: function (aKeyValue) {
+                        P.Logger.warning('findById() is deprecated. Use findByKey() instead.');
+                        return published.findByKey(aKeyValue);
+                    }});
+                var toBeDeletedMark = '-platypus-to-be-deleted-mark';
+                Object.defineProperty(published, 'remove', {value: function (toBeDeleted) {
+                        toBeDeleted = toBeDeleted.forEach ? toBeDeleted : [toBeDeleted];
+                        toBeDeleted.forEach(function (anInstance) {
+                            anInstance[toBeDeletedMark] = true;
+                        });
+                        for (var d = published.length - 1; d >= 0; d--) {
+                            if (published[d][toBeDeletedMark]) {
+                                published.splice(d, 1);
+                            }
+                        }
+                        toBeDeleted.forEach(function (anInstance) {
+                            delete anInstance[toBeDeletedMark];
+                        });
+                    }});
+                Object.defineProperty(published, 'onScrolled', {
+                    get: function () {
+                        return _onScrolled;
+                    },
+                    set: function (aValue) {
+                        _onScrolled = aValue;
+                    }
+                });
+                Object.defineProperty(published, 'onInserted', {
+                    get: function () {
+                        return _onInserted;
+                    },
+                    set: function (aValue) {
+                        _onInserted = aValue;
+                    }
+                });
+                Object.defineProperty(published, 'onDeleted', {
+                    get: function () {
+                        return _onDeleted;
+                    },
+                    set: function (aValue) {
+                        _onDeleted = aValue;
+                    }
+                });
+                nEntity.setSnapshotConsumer(function (aSnapshot) {
+                    Array.prototype.splice.call(published, 0, published.length);
+                    if (nEntity.getElementClass()) {
+                        var instanceCtor = EngineUtilsClass.unwrap(nEntity.getElementClass());
+                        for (var s = 0; s < aSnapshot.length; s++) {
+                            var snapshotInstance = aSnapshot[s];
+                            var accepted = new instanceCtor();
+                            for (var sp in snapshotInstance) {
+                                accepted[sp] = snapshotInstance[sp];
+                            }
+                            Array.prototype.push.call(published, accepted);
+                            acceptInstance(accepted);
+                        }
+                    } else {
+                        for (var s = 0; s < aSnapshot.length; s++) {
+                            var snapshotInstance = aSnapshot[s];
+                            Array.prototype.push.call(published, snapshotInstance);
+                            acceptInstance(snapshotInstance);
+                        }
+                    }
+                    orderers = {};
+                    published.cursor = published.length > 0 ? published[0] : null;
+                });
+                listenable(published);
                 return published;
             }
             var entities = model.entities();
@@ -1128,7 +1297,7 @@
      * @param {String} aModuleName Name of server module (session stateless or statefull or rezident).
      */
     function ServerModule(aModuleName) {
-        if (aModuleName != null && aModuleName != "") {
+        if (aModuleName) {
             var app = ScriptedResourceClass.getApp();
             if (app) {
                 var proxy = app.getServerModules();
@@ -1142,12 +1311,15 @@
                                 var onSuccess = null;
                                 var onFailure = null;
                                 var argsLength = arguments.length;
-                                if (arguments.length > 1 && typeof arguments[arguments.length - 1] === "function" && typeof arguments[arguments.length - 2] === "function") {
-                                    onSuccess = arguments[arguments.length - 2];
-                                    onFailure = arguments[arguments.length - 1];
+                                while(argsLength > 0 && !arguments[argsLength - 1]){
+                                    argsLength--;
+                                }
+                                if (argsLength > 1 && typeof arguments[argsLength - 1] === "function" && typeof arguments[argsLength - 2] === "function") {
+                                    onSuccess = arguments[argsLength - 2];
+                                    onFailure = arguments[argsLength - 1];
                                     argsLength -= 2;
-                                } else if (arguments.length > 0 && typeof arguments[arguments.length - 1] === "function") {
-                                    onSuccess = arguments[arguments.length - 1];
+                                } else if (argsLength > 0 && typeof arguments[argsLength - 1] === "function") {
+                                    onSuccess = arguments[argsLength - 1];
                                     argsLength -= 1;
                                 }
                                 var params = new JavaArrayClass(argsLength);
@@ -1163,10 +1335,10 @@
                             };
                         });
                     } else {
-                        throw "Access denied for module " + aModuleName + ". May be denied public access.";
+                        throw 'Access denied for module "' + aModuleName + '". May be denied public access.';
                     }
                 } else {
-                    throw "This architecture does not support server modules.";
+                    throw 'This architecture does not support server modules.';
                 }
             }
         } else {

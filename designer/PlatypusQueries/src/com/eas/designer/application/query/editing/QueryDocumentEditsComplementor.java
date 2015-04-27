@@ -4,9 +4,9 @@
  */
 package com.eas.designer.application.query.editing;
 
-import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.ClientConstants;
 import com.eas.client.cache.PlatypusFilesSupport;
+import com.eas.client.metadata.Parameter;
 import com.eas.client.model.Relation;
 import com.eas.client.model.gui.edits.AccessibleCompoundEdit;
 import com.eas.client.model.gui.edits.DeleteEntityEdit;

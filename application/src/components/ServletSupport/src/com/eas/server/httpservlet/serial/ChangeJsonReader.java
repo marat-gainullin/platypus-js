@@ -4,17 +4,15 @@
  */
 package com.eas.server.httpservlet.serial;
 
-import com.bearsoft.rowset.Converter;
-import com.bearsoft.rowset.RowsetConverter;
-import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.changes.ChangeValue;
-import com.bearsoft.rowset.changes.ChangeVisitor;
-import com.bearsoft.rowset.changes.Command;
-import com.bearsoft.rowset.changes.Delete;
-import com.bearsoft.rowset.changes.EntitiesHost;
-import com.bearsoft.rowset.changes.Insert;
-import com.bearsoft.rowset.changes.Update;
-import com.bearsoft.rowset.metadata.Field;
+import com.eas.client.changes.Change;
+import com.eas.client.changes.ChangeValue;
+import com.eas.client.changes.ChangeVisitor;
+import com.eas.client.changes.Command;
+import com.eas.client.changes.Delete;
+import com.eas.client.changes.EntitiesHost;
+import com.eas.client.changes.Insert;
+import com.eas.client.changes.Update;
+import com.eas.client.metadata.Field;
 import com.eas.client.threetier.RowsetJsonConstants;
 import com.eas.script.ScriptUtils;
 import java.text.ParseException;
@@ -36,7 +34,6 @@ public class ChangeJsonReader implements ChangeVisitor {
     private static final String CHANGE_DATA_NAME = "data";
     private static final String CHANGE_KEYS_NAME = "keys";
     private static final String CHANGE_PARAMETERS_NAME = "parameters";
-    protected static Converter converter = new RowsetConverter();
     protected JSObject sChange;
     protected String entityName;
     protected EntitiesHost fieldsResolver;
@@ -48,7 +45,7 @@ public class ChangeJsonReader implements ChangeVisitor {
         fieldsResolver = aFieldsResolver;
     }
 
-    protected ChangeValue[] parseObjectProperties(Object oData) throws Exception {
+    protected List<ChangeValue> parseObjectProperties(Object oData) throws Exception {
         List<ChangeValue> data = new ArrayList<>();
         if (oData instanceof JSObject) {
             JSObject sValue = (JSObject) oData;
@@ -69,40 +66,40 @@ public class ChangeJsonReader implements ChangeVisitor {
                             }
                         }
                     }
-                    Object convertedValueValue = converter.convert2RowsetCompatible(oValueValue, field.getTypeInfo());
+                    Object convertedValueValue = ScriptUtils.toJava(oValueValue);
                     data.add(new ChangeValue(sValueName, convertedValueValue, field.getTypeInfo()));
                 } else {
                     Logger.getLogger(ChangeJsonReader.class.getName()).log(Level.WARNING, String.format("Couldn't resolve entity property name: %s.%s", entityName, sValueName));
                 }
             }
         }
-        return data.toArray(new ChangeValue[]{});
+        return data;
     }
 
     @Override
     public void visit(Insert aChange) throws Exception {
         Object oData = sChange.getMember(CHANGE_DATA_NAME);
-        aChange.data = parseObjectProperties(oData);
+        aChange.getData().addAll(parseObjectProperties(oData));
     }
 
     @Override
     public void visit(Update aChange) throws Exception {
         Object oData = sChange.getMember(CHANGE_DATA_NAME);
-        aChange.data = parseObjectProperties(oData);
+        aChange.getData().addAll(parseObjectProperties(oData));
         Object oKeys = sChange.getMember(CHANGE_KEYS_NAME);
-        aChange.keys = parseObjectProperties(oKeys);
+        aChange.getKeys().addAll(parseObjectProperties(oKeys));
     }
 
     @Override
     public void visit(Delete aChange) throws Exception {
         Object oKeys = sChange.getMember(CHANGE_KEYS_NAME);
-        aChange.keys = parseObjectProperties(oKeys);
+        aChange.getKeys().addAll(parseObjectProperties(oKeys));
     }
 
     @Override
     public void visit(Command aChange) throws Exception {
         Object parameters = sChange.getMember(CHANGE_PARAMETERS_NAME);
-        aChange.parameters = parseObjectProperties(parameters);
+        aChange.getParameters().addAll(parseObjectProperties(parameters));
     }
 
     public static List<Change> parse(String aJsonText, EntitiesHost aFieldsResolver) throws Exception {

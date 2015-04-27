@@ -4,7 +4,7 @@
  */
 package com.eas.designer.application.query.editing;
 
-import com.bearsoft.rowset.metadata.Parameter;
+import com.eas.client.metadata.Parameter;
 import com.eas.designer.application.query.editing.riddle.RiddleTask;
 import java.util.HashSet;
 import java.util.Set;

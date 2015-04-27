@@ -4,13 +4,13 @@
  */
 package com.eas.client.dbstructure;
 
-import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SqlCompiledQuery;
+import com.eas.client.changes.Change;
 import com.eas.client.metadata.DbTableIndexSpec;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.ForeignKeySpec;
 import com.eas.client.model.dbscheme.DbSchemeModel;
 import com.eas.client.sqldrivers.SqlDriver;
 import java.util.ArrayList;

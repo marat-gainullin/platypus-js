@@ -1,13 +1,11 @@
 package com.eas.client.sqldrivers;
 
-import com.bearsoft.rowset.Converter;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.ForeignKeySpec;
-import com.bearsoft.rowset.metadata.PrimaryKeySpec;
 import com.eas.client.ClientConstants;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
-import com.eas.client.sqldrivers.converters.H2Converter;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.ForeignKeySpec;
+import com.eas.client.metadata.PrimaryKeySpec;
 import com.eas.client.sqldrivers.resolvers.H2TypesResolver;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
 import java.sql.Connection;
@@ -27,7 +25,6 @@ public class H2SqlDriver extends SqlDriver {
     private final TwinString[] charsForWrap = {new TwinString("\"", "\""), new TwinString("`", "`")};
     private final char[] restrictedChars = {' ', ',', '\'', '"'};
 
-    protected Converter converter = new H2Converter();
     protected TypesResolver resolver = new H2TypesResolver();
     protected static final int[] h2ErrorCodes = {};
     protected static final String[] platypusErrorMessages = {};
@@ -228,14 +225,6 @@ public class H2SqlDriver extends SqlDriver {
     @Override
     public boolean isConstraintsDeferrable() {
         return false;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    @Override
-    public Converter getConverter() {
-        return converter;
     }
 
     /**

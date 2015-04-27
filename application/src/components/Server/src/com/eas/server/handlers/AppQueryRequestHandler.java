@@ -4,12 +4,12 @@
  */
 package com.eas.server.handlers;
 
-import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.server.SessionRequestHandler;
 import com.eas.client.AppElementFiles;
 import com.eas.client.SqlQuery;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
+import com.eas.client.metadata.Parameter;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.threetier.requests.AppQueryRequest;
@@ -43,7 +43,7 @@ public class AppQueryRequestHandler extends SessionRequestHandler<AppQueryReques
         try {
             ((LocalQueriesProxy) getServerCore().getQueries()).getQuery(getRequest().getQueryName(), (SqlQuery query) -> {
                 try {
-                    if (query == null || query.getEntityId() == null) {
+                    if (query == null || query.getEntityName() == null) {
                         throw new FileNotFoundException(String.format(MISSING_QUERY_MSG, getRequest().getQueryName()));
                     }
                     if (!query.isPublicAccess()) {
@@ -51,9 +51,9 @@ public class AppQueryRequestHandler extends SessionRequestHandler<AppQueryReques
                     }
                     Set<String> rolesAllowed = query.getReadRoles();
                     if (rolesAllowed != null && !PlatypusPrincipal.getInstance().hasAnyRole(rolesAllowed)) {
-                        throw new AccessControlException(String.format(ACCESS_DENIED_MSG, query.getEntityId(), PlatypusPrincipal.getInstance().getName()), PlatypusPrincipal.getInstance() instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
+                        throw new AccessControlException(String.format(ACCESS_DENIED_MSG, query.getEntityName(), PlatypusPrincipal.getInstance().getName()), PlatypusPrincipal.getInstance() instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
                     }
-                    assert query.getEntityId().equals(getRequest().getQueryName());
+                    assert query.getEntityName().equals(getRequest().getQueryName());
                     /**
                      * this code is moved to stored query factory in order to
                      * code abstraction SqlDriver driver =
@@ -70,7 +70,7 @@ public class AppQueryRequestHandler extends SessionRequestHandler<AppQueryReques
                         Date clientQueryTime = getRequest().getTimeStamp();
                         if (clientQueryTime == null || serverQueryTime.after(clientQueryTime)) {
                             PlatypusQuery pQuery = new PlatypusQuery(null);
-                            pQuery.setEntityId(query.getEntityId());
+                            pQuery.setEntityName(query.getEntityName());
                             pQuery.setFields(query.getFields());
                             pQuery.setManual(query.isManual());
                             pQuery.setTitle(query.getTitle());

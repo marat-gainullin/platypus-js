@@ -5,8 +5,8 @@
 
 package com.eas.client.model.query;
 
-import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.SqlQuery;
+import com.eas.client.metadata.Fields;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.model.visitors.QueryModelVisitor;
 

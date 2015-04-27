@@ -4,7 +4,6 @@
  */
 package com.eas.designer.explorer.project;
 
-import com.bearsoft.rowset.resourcepool.BearResourcePool;
 import com.eas.client.AppElementFiles;
 import com.eas.client.DatabaseMdCache;
 import com.eas.client.DatabasesClient;
@@ -12,6 +11,7 @@ import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusIndexer;
 import com.eas.client.queries.LocalQueriesProxy;
+import com.eas.client.resourcepool.BearResourcePool;
 import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.settings.SettingsConstants;
@@ -97,15 +97,14 @@ public class PlatypusProjectImpl implements PlatypusProject {
             return Charset.forName(PlatypusFiles.DEFAULT_ENCODING);
         }
     }
-    protected static ScriptEngine jsEngine;
+    protected static final ScriptEngine jsEngine = new ScriptEngineManager().getEngineByName("nashorn");
     static {
         try {
-            jsEngine = new ScriptEngineManager().getEngineByName("nashorn");
             jsEngine.eval("load('classpath:com/eas/designer/explorer/designer-js.js')");
         } catch (ScriptException ex) {
             Exceptions.printStackTrace(ex);
         }
-    }
+    }    
     
     protected Lookup pLookup;
     protected ProjectState state;

@@ -4,7 +4,7 @@
  */
 package com.eas.designer.datamodel.nodes;
 
-import com.bearsoft.rowset.metadata.Field;
+import com.eas.client.metadata.Field;
 import com.eas.client.model.Model;
 import javax.swing.undo.UndoableEdit;
 import org.openide.util.Exceptions;

@@ -4,8 +4,8 @@
  */
 package com.eas.client.model.gui.view;
 
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Parameter;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Parameter;
 import com.eas.client.model.Entity;
 import com.eas.client.model.gui.view.entities.EntityView;
 

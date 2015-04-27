@@ -5,8 +5,8 @@
 
 package com.eas.client;
 
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
 import java.sql.SQLException;
 import static org.junit.Assert.*;
 import org.junit.*;

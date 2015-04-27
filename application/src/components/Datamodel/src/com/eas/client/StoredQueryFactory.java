@@ -4,8 +4,11 @@
  */
 package com.eas.client;
 
-import com.bearsoft.rowset.metadata.*;
 import com.eas.client.cache.PlatypusIndexer;
+import com.eas.client.metadata.DataTypeInfo;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.Parameter;
 import com.eas.client.model.QueryDocument;
 import com.eas.client.model.QueryDocument.StoredFieldMetadata;
 import com.eas.client.model.query.QueryModel;
@@ -36,7 +39,7 @@ public class StoredQueryFactory {
 
     private Fields processSubQuery(SqlQuery aQuery, SubSelect aSubSelect) throws Exception {
         SqlQuery subQuery = new SqlQuery(aQuery.getBasesProxy(), aQuery.getDatasourceName(), "");
-        subQuery.setEntityId(aSubSelect.getAliasName());
+        subQuery.setEntityName(aSubSelect.getAliasName());
         resolveOutputFieldsFromTables(subQuery, aSubSelect.getSelectBody());
         Fields subFields = subQuery.getFields();
         return subFields;
@@ -383,7 +386,7 @@ public class StoredQueryFactory {
                     field = new Field(col.getAlias() != null ? col.getAlias().getName()
                             : (col.getExpression() instanceof Column ? ((Column) col.getExpression()).getColumnName() : ""));
 
-                    field.setTableName(aQuery.getEntityId());
+                    field.setTableName(aQuery.getEntityName());
                     /**
                      * There is an unsolved problem about type of the
                      * expression. This might be solved using manually setted up

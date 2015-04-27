@@ -1,19 +1,19 @@
 package com.eas.client;
 
-import com.bearsoft.rowset.Converter;
-import com.bearsoft.rowset.Row;
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.dataflow.FlowProvider;
-import com.bearsoft.rowset.exceptions.ResourceUnavalableException;
-import com.bearsoft.rowset.jdbc.JdbcReader;
-import com.bearsoft.rowset.jdbc.StatementsGenerator;
-import com.bearsoft.rowset.jdbc.StatementsGenerator.StatementsLogEntry;
-import com.bearsoft.rowset.metadata.*;
+import com.eas.client.changes.Change;
+import com.eas.client.dataflow.ColumnsIndicies;
+import com.eas.client.dataflow.Converter;
+import com.eas.client.dataflow.StatementsGenerator;
 import com.eas.client.login.PlatypusPrincipal;
+import com.eas.client.metadata.DataTypeInfo;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.Parameter;
+import com.eas.client.metadata.Parameters;
 import com.eas.client.queries.ContextHost;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.resourcepool.GeneralResourceProvider;
+import com.eas.client.resourcepool.ResourceUnavalableException;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.concurrent.CallableConsumer;
 import com.eas.concurrent.DeamonThreadFactory;
@@ -46,7 +46,7 @@ public class DatabasesClient {
     private static final String SELECT_BY_FIELD_QUERY = "select * from %s where Upper(%s) = :%s";
     private static final String USER_QUERY_TEXT = String.format(SELECT_BY_FIELD_QUERY, ClientConstants.T_MTD_USERS, ClientConstants.F_USR_NAME, USERNAME_PARAMETER_NAME);
     private static final String USER_GROUPS_QUERY_TEXT = String.format(SELECT_BY_FIELD_QUERY, ClientConstants.T_MTD_GROUPS, ClientConstants.F_USR_NAME, USERNAME_PARAMETER_NAME);
-    public static final String TYPES_INFO_TRACE_MSG = "Getting types info. DbId %s";
+    public static final String TYPES_INFO_TRACE_MSG = "Getting types info. DatasourceName %s";
     public static final String USER_MISSING_MSG = "No user found (%s)";
     // metadata
     protected Map<String, DatabaseMdCache> mdCaches = new HashMap<>();
@@ -156,7 +156,7 @@ public class DatabasesClient {
      * @return FlowProvider created.
      * @throws Exception
      */
-    public FlowProvider createFlowProvider(String aDatasourceName, String aEntityName, String aSqlClause, Fields aExpectedFields) throws Exception {
+    public PlatypusJdbcFlowProvider createFlowProvider(String aDatasourceName, String aEntityName, String aSqlClause, Fields aExpectedFields) throws Exception {
         return new PlatypusJdbcFlowProvider(this, aDatasourceName, aEntityName, obtainDataSource(aDatasourceName), (Runnable aTask) -> {
             startJdbcTask(aTask);
         }, getDbMetadataCache(aDatasourceName), aSqlClause, aExpectedFields, contextHost);
@@ -183,23 +183,23 @@ public class DatabasesClient {
         q.putParameter(USERNAME_PARAMETER_NAME, DataTypeInfo.VARCHAR, aUserName.toUpperCase());
         aClient.initUsersSpace(q.getDatasourceName());
         SqlCompiledQuery compiled = q.compile();
-        CallableConsumer<Map<String, String>, Rowset> doWork = (Rowset rs) -> {
+        CallableConsumer<Map<String, String>, ResultSet> doWork = (ResultSet r) -> {
             Map<String, String> properties = new HashMap<>();
-            if (!rs.isEmpty()) {
-                Row r = rs.getRow(1);
+            ColumnsIndicies idxs = new ColumnsIndicies(r.getMetaData());
+            if (r.next()) {
                 properties.put(ClientConstants.F_USR_NAME, aUserName);
-                properties.put(ClientConstants.F_USR_CONTEXT, (String)r.getColumnObject(rs.getFields().find(ClientConstants.F_USR_CONTEXT)));
-                properties.put(ClientConstants.F_USR_EMAIL, (String)r.getColumnObject(rs.getFields().find(ClientConstants.F_USR_EMAIL)));
-                properties.put(ClientConstants.F_USR_PHONE, (String)r.getColumnObject(rs.getFields().find(ClientConstants.F_USR_PHONE)));
-                properties.put(ClientConstants.F_USR_FORM, (String)r.getColumnObject(rs.getFields().find(ClientConstants.F_USR_FORM)));
-                properties.put(ClientConstants.F_USR_PASSWD, (String)r.getColumnObject(rs.getFields().find(ClientConstants.F_USR_PASSWD)));
+                properties.put(ClientConstants.F_USR_CONTEXT, r.getString(idxs.find(ClientConstants.F_USR_CONTEXT)));
+                properties.put(ClientConstants.F_USR_EMAIL, r.getString(idxs.find(ClientConstants.F_USR_EMAIL)));
+                properties.put(ClientConstants.F_USR_PHONE, r.getString(idxs.find(ClientConstants.F_USR_PHONE)));
+                properties.put(ClientConstants.F_USR_FORM, r.getString(idxs.find(ClientConstants.F_USR_FORM)));
+                properties.put(ClientConstants.F_USR_PASSWD, r.getString(idxs.find(ClientConstants.F_USR_PASSWD)));
             }
             return properties;
         };
         if (onSuccess != null) {
-            compiled.executeQuery((Rowset rs) -> {
+            compiled.<Map<String, String>>executeQuery(doWork, (Map<String, String> props) -> {
                 try {
-                    onSuccess.accept(doWork.call(rs));
+                    onSuccess.accept(props);
                 } catch (Exception ex) {
                     if (onFailure != null) {
                         onFailure.accept(ex);
@@ -208,8 +208,7 @@ public class DatabasesClient {
             }, onFailure);
             return null;
         } else {
-            final Rowset rs = compiled.executeQuery(null, null);
-            return doWork.call(rs);
+            return compiled.<Map<String, String>>executeQuery(doWork, null, null);
         }
     }
 
@@ -298,15 +297,14 @@ public class DatabasesClient {
     public int executeUpdate(SqlCompiledQuery aQuery, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
         Callable<Integer> doWork = () -> {
             int rowsAffected = 0;
-            Converter converter = getDbMetadataCache(aQuery.getDatabaseId()).getConnectionDriver().getConverter();
-            DataSource dataSource = obtainDataSource(aQuery.getDatabaseId());
+            DataSource dataSource = obtainDataSource(aQuery.getDatasourceName());
             if (dataSource != null) {
                 try (Connection connection = dataSource.getConnection(); PreparedStatement stmt = connection.prepareStatement(aQuery.getSqlClause())) {
                     connection.setAutoCommit(false);
                     Parameters params = aQuery.getParameters();
                     for (int i = 1; i <= params.getParametersCount(); i++) {
                         Parameter param = params.get(i);
-                        converter.convert2JdbcAndAssign(param.getValue(), param.getTypeInfo(), connection, i, stmt);
+                        Converter.convertAndAssign(param.getValue(), param.getTypeInfo(), connection, i, stmt);
                     }
                     try {
                         rowsAffected += stmt.executeUpdate();
@@ -567,20 +565,19 @@ public class DatabasesClient {
             if (driver == null) {
                 throw new IllegalStateException(String.format(UNSUPPORTED_DATASOURCE_IN_COMMIT, aDatasourceName));
             }
-            Converter converter = driver.getConverter();
             assert aLog != null;
             DataSource dataSource = obtainDataSource(aDatasourceName);
             Connection connection = dataSource.getConnection();
             try {
                 connection.setAutoCommit(false);
-                List<StatementsLogEntry> statements = new ArrayList<>();
+                List<StatementsGenerator.StatementsLogEntry> statements = new ArrayList<>();
                 // This structure helps us to avoid actuality check for queries while
                 // processing each statement in transaction. Thus, we can avoid speed degradation.
                 // It doesn't break security, because such "unactual" lookup takes place ONLY
                 // while transaction processing.
                 final Map<String, SqlQuery> entityQueries = new HashMap<>();
                 for (Change change : aLog) {
-                    StatementsGenerator generator = new StatementsGenerator(converter, (String aEntityName, String aFieldName) -> {
+                    StatementsGenerator generator = new StatementsGenerator((String aEntityName, String aFieldName) -> {
                         if (aEntityName != null) {
                             SqlQuery query;
                             if (queries != null) {
@@ -595,7 +592,7 @@ public class DatabasesClient {
                                 query = null;
                             }
                             Fields fields;
-                            if (query != null && query.getEntityId() != null) {
+                            if (query != null && query.getEntityName() != null) {
                                 fields = query.getFields();
                             } else {// It seems, that aEntityId is a table name...
                                 fields = mdCaches.get(aDatasourceName).getTableMetadata(aEntityName);
@@ -651,11 +648,12 @@ public class DatabasesClient {
     protected static final String UNKNOWN_DATASOURCE_IN_COMMIT = "Unknown datasource: %s. Can't commit to it.";
     protected static final String UNSUPPORTED_DATASOURCE_IN_COMMIT = "Unsupported datasource: %s. Can't commit to it.";
 
-    public Rowset getDbTypesInfo(String aDatasourceId) throws Exception {
-        Logger.getLogger(DatabasesClient.class.getName()).fine(String.format(TYPES_INFO_TRACE_MSG, aDatasourceId));
+    /*
+    public Rowset getDbTypesInfo(String aDatasourceName) throws Exception {
+        Logger.getLogger(DatabasesClient.class.getName()).fine(String.format(TYPES_INFO_TRACE_MSG, aDatasourceName));
         Rowset lrowSet = new Rowset();
-        JdbcReader rsReader = new JdbcReader(getDbMetadataCache(aDatasourceId).getConnectionDriver().getConverter());
-        DataSource dataSource = obtainDataSource(aDatasourceId);
+        JdbcReader rsReader = new JdbcReader(getDbMetadataCache(aDatasourceName).getConnectionDriver().getConverter());
+        DataSource dataSource = obtainDataSource(aDatasourceName);
         if (dataSource != null) {
             try (Connection lconn = dataSource.getConnection()) {
                 DatabaseMetaData dbmd = lconn.getMetaData();
@@ -668,6 +666,7 @@ public class DatabasesClient {
         }
         return lrowSet;
     }
+    */
 
     public void dbTableChanged(String aDatasourceName, String aSchema, String aTable) throws Exception {
         DatabaseMdCache cache = getDbMetadataCache(aDatasourceName);
@@ -705,11 +704,12 @@ public class DatabasesClient {
     }
 
     protected static Set<String> getUserRoles(DatabasesClient aClient, String aUserName, Consumer<Set<String>> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        CallableConsumer<Set<String>, Rowset> doWork = (Rowset rs) -> {
+        CallableConsumer<Set<String>, ResultSet> doWork = (ResultSet rs) -> {
             Set<String> roles = new HashSet<>();
-            int roleNameColumnIndex = rs.getFields().find(ClientConstants.F_GROUP_NAME);
-            for (int i = 1; i <= rs.size(); i++) {
-                roles.add((String) rs.getRow(i).getColumnObject(roleNameColumnIndex));
+            ColumnsIndicies idxs = new ColumnsIndicies(rs.getMetaData());
+            int roleNameColumnIndex = idxs.find(ClientConstants.F_GROUP_NAME);
+            while (rs.next()) {
+                roles.add(rs.getString(roleNameColumnIndex));
             }
             return roles;
         };
@@ -717,9 +717,9 @@ public class DatabasesClient {
         q.putParameter(USERNAME_PARAMETER_NAME, DataTypeInfo.VARCHAR, aUserName.toUpperCase());
         SqlCompiledQuery compiled = q.compile();
         if (onSuccess != null) {
-            compiled.executeQuery((Rowset rs) -> {
+            compiled.<Set<String>>executeQuery(doWork, (Set<String> aRoles) -> {
                 try {
-                    onSuccess.accept(doWork.call(rs));
+                    onSuccess.accept(aRoles);
                 } catch (Exception ex) {
                     if (onFailure != null) {
                         onFailure.accept(ex);
@@ -728,17 +728,16 @@ public class DatabasesClient {
             }, onFailure);
             return null;
         } else {
-            Rowset rs = compiled.executeQuery(null, null);
-            return doWork.call(rs);
+            return compiled.<Set<String>>executeQuery(doWork, null, null);
         }
     }
 
-    private int riddleStatements(List<StatementsLogEntry> aStatements, Connection aConnection) throws Exception {
+    private int riddleStatements(List<StatementsGenerator.StatementsLogEntry> aStatements, Connection aConnection) throws Exception {
         int rowsAffected = 0;
         if (!aStatements.isEmpty()) {
-            List<StatementsLogEntry> errorStatements = new ArrayList<>();
+            List<StatementsGenerator.StatementsLogEntry> errorStatements = new ArrayList<>();
             List<String> errors = new ArrayList<>();
-            for (StatementsLogEntry entry : aStatements) {
+            for (StatementsGenerator.StatementsLogEntry entry : aStatements) {
                 try {
                     rowsAffected += entry.apply(aConnection);
                 } catch (Exception ex) {

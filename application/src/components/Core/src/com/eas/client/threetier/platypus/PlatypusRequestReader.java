@@ -4,19 +4,16 @@
  */
 package com.eas.client.threetier.platypus;
 
-import com.bearsoft.rowset.changes.serial.ChangesReader;
-import com.bearsoft.rowset.exceptions.RowsetException;
-import com.bearsoft.rowset.metadata.Parameter;
-import com.bearsoft.rowset.metadata.Parameters;
-import com.bearsoft.rowset.serial.CustomSerializer;
-import com.eas.client.threetier.PlatypusRowsetReader;
+import com.eas.client.changes.BinaryChanges;
+import com.eas.client.metadata.Parameter;
+import com.eas.client.metadata.Parameters;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.client.threetier.requests.CommitRequest;
 import com.eas.client.threetier.requests.CreateServerModuleRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
-import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
+import com.eas.client.threetier.requests.RPCRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.PlatypusRequestVisitor;
@@ -137,7 +134,7 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
         do {
             switch (reader.getNextTag()) {
                 case RequestsTags.TAG_CHANGES:
-                    rq.setChanges(ChangesReader.read(reader.getSubStreamData(), customReadersContainer));
+                    rq.setChanges(BinaryChanges.read(reader.getSubStreamData()));
                     break;
             }
         } while (reader.getCurrentTag() != CoreTags.TAG_EOF);
@@ -153,7 +150,7 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
     }
 
     @Override
-    public void visit(ExecuteServerModuleMethodRequest rq) throws Exception {
+    public void visit(RPCRequest rq) throws Exception {
         final ProtoNode input = ProtoDOMBuilder.buildDOM(bytes);
         final Iterator<ProtoNode> it = input.iterator();
         final List<Object> args = new ArrayList<>();
@@ -174,8 +171,6 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
         }
         rq.setArguments(args.toArray());
     }
-
-    private static final PlatypusRowsetReader customReadersContainer = new PlatypusRowsetReader(null);
 
     public static Parameter readParameter(ProtoNode node) throws ProtoReaderException {
         Parameter param = new Parameter();
@@ -214,16 +209,7 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
         value = null;
         if (node.containsChild(RequestsTags.TAG_SQL_PARAMETER_VALUE)) {
             ProtoNode valueNode = node.getChild(RequestsTags.TAG_SQL_PARAMETER_VALUE);
-            CustomSerializer serializer = customReadersContainer.getSerializer(param.getTypeInfo());
-            if (serializer != null) {
-                try {
-                    value = serializer.deserialize(valueNode.getData(), valueNode.getOffset(), valueNode.getSize(), param.getTypeInfo());
-                } catch (RowsetException ex) {
-                    throw new ProtoReaderException(ex);
-                }
-            } else {
-                value = valueNode.getJDBCCompatible(paramType);
-            }
+            value = valueNode.getJDBCCompatible(paramType);
         }
         param.setName(paramName);
         param.setValue(value);

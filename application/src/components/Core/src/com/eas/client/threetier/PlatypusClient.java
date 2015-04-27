@@ -4,7 +4,7 @@
  */
 package com.eas.client.threetier;
 
-import com.bearsoft.rowset.changes.Change;
+import com.eas.client.changes.Change;
 import com.eas.client.Application;
 import com.eas.client.ModulesProxy;
 import com.eas.client.RemoteModulesProxy;

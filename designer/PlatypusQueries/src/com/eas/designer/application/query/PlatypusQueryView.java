@@ -5,8 +5,8 @@
  */
 package com.eas.designer.application.query;
 
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Parameter;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Parameter;
 import com.eas.client.model.Relation;
 import com.eas.client.model.gui.view.model.SelectedField;
 import com.eas.client.model.gui.view.AddQueryAction;

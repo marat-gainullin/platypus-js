@@ -44,7 +44,7 @@ public class RemoteQueriesProxy implements QueriesProxy<PlatypusQuery> {
                     assert aResponse.getAppQuery() instanceof PlatypusQuery;
                     PlatypusQuery query = (PlatypusQuery) aResponse.getAppQuery();
                     query.setServerProxy(core);
-                    assert aName.equals(query.getEntityId());
+                    assert aName.equals(query.getEntityName());
                     entries.put(aName, new ActualCacheEntry<>(query, aResponse.getTimeStamp()));
                     onSuccess.accept(query);
                 } else {
@@ -59,7 +59,7 @@ public class RemoteQueriesProxy implements QueriesProxy<PlatypusQuery> {
                 assert response.getAppQuery() instanceof PlatypusQuery;
                 PlatypusQuery query = (PlatypusQuery) response.getAppQuery();
                 query.setServerProxy(core);
-                assert aName.equals(query.getEntityId());
+                assert aName.equals(query.getEntityName());
                 entries.put(aName, new ActualCacheEntry<>(query, response.getTimeStamp()));
                 return query;
             } else {

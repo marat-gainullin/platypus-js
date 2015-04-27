@@ -4,7 +4,7 @@
  */
 package com.eas.designer.application.query.nodes;
 
-import com.bearsoft.rowset.metadata.Parameter;
+import com.eas.client.metadata.Parameter;
 import com.eas.client.model.query.QueryModel;
 import com.eas.designer.datamodel.nodes.QueryParameterNode;
 import javax.swing.undo.UndoableEdit;
