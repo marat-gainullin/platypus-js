@@ -11,11 +11,13 @@ import com.eas.client.changes.Command;
 import com.eas.client.changes.Delete;
 import com.eas.client.changes.Insert;
 import com.eas.client.changes.Update;
+import com.eas.script.ScriptUtils;
 import com.eas.util.JSONUtils;
 import com.eas.util.StringUtils;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -103,6 +105,9 @@ public class ChangeJSONWriter implements ChangeVisitor {
 
     private static String valueToString(Object aValue) throws Exception {
         if (aValue != null) {
+            if (aValue instanceof JSObject) {
+                aValue = ScriptUtils.toJava(aValue);
+            }
             if (aValue instanceof Boolean) {
                 return aValue.toString();
             } else if (aValue instanceof Number) {

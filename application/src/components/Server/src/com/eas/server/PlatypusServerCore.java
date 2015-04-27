@@ -197,12 +197,13 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                         moduleInstance = aSession.getModule(aModuleName);
                                     } else {
                                         if (config.hasModuleAnnotation(JsDoc.Tag.PUBLIC_TAG)) {
+                                            moduleInstance = (JSObject) constr.newObject(new Object[]{});
                                             if (config.hasModuleAnnotation(JsDoc.Tag.STATELESS_TAG)) {
-                                                moduleInstance = (JSObject) constr.newObject(new Object[]{});
                                                 waitFor = RPCRequestHandler.SELF_WAIT_OPTION;
                                                 Logger.getLogger(CreateServerModuleRequestHandler.class.getName()).log(Level.FINE, "Created server module {0} from script {1}", new Object[]{aModuleName, files.findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION).getPath()});
                                             } else {
-                                                throw new IllegalArgumentException(String.format("@stateless annotation is needed for module ( %s ), to be created dynamically in user's session context.", aModuleName));
+                                                waitFor = RPCRequestHandler.SESSION_WAIT_OPTION;
+                                                aSession.registerModule(moduleInstance); //throw new IllegalArgumentException(String.format("@stateless annotation is needed for module \"%s\", to be created dynamically in user's session context.", aModuleName));
                                             }
                                         } else {
                                             throw new AccessControlException(String.format("Public access to module %s is denied.", aModuleName));//NOI18N

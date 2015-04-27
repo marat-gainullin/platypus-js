@@ -27,12 +27,14 @@ public class ServerModulesProxy {
     public ServerModulesProxy(PlatypusConnection aConn) {
         super();
         conn = aConn;
+        /* If uncomment, concurrency problems will occur while dependencies resolving process.
         conn.setOnLogin(() -> {
             entries.clear();
         });
         conn.setOnLogout(() -> {
             entries.clear();
         });
+                */
     }
 
     public ServerModuleInfo getCachedStructure(String aName) throws Exception {
@@ -61,7 +63,9 @@ public class ServerModulesProxy {
                     assert entry != null : NEITHER_SM_INFO;
                     onSuccess.accept(entry.getValue());
                 }
-            }, onFailure);
+            }, (Exception ex) -> {
+                onFailure.accept(ex);
+            });
             return null;
         } else {
             CreateServerModuleRequest.Response response = conn.executeRequest(request);

@@ -27,6 +27,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -118,30 +120,48 @@ public class DatabaseMdCache {
             SqlDriver driver = getConnectionDriver();
             String queryText = driver.getSql4TablesEnumeration(schema4Sql);
             SqlCompiledQuery query = new SqlCompiledQuery(client, datasourceName, queryText);
-            query.executeQuery((ResultSet r) -> {
+            query.<Map<String, String>>executeQuery((ResultSet r) -> {
                 ColumnsIndicies idxs = new ColumnsIndicies(r.getMetaData());
                 int colIndex = idxs.find(ClientConstants.JDBCCOLS_TABLE_NAME);
                 int colRemarks = idxs.find(ClientConstants.JDBCCOLS_REMARKS);
                 assert colIndex > 0;
                 assert colRemarks > 0;
-                tablesFields.clear();
                 Map<String, String> tablesNames = new HashMap<>();
                 while (r.next()) {
                     String lTableName = r.getString(colIndex);
                     String lRemarks = r.getString(colRemarks);
                     tablesNames.put(lTableName, lRemarks);
-                    if (tablesNames.size() >= 100) {
-                        Map<String, Fields> md = tablesFields.query(aSchema, tablesNames.keySet(), aFullMetadata);
-                        tablesFields.fill(aSchema, md, tablesNames);
-                        tablesNames.clear();
+                }
+                return tablesNames;
+            }, (Map<String, String> aTablesNames) -> {
+                try {
+                    tablesFields.clear();
+                    Map<String, String> tablesNames = new HashMap<>();
+                    aTablesNames.entrySet().forEach((Map.Entry<String, String> aTableName) -> {
+                        tablesNames.put(aTableName.getKey(), aTableName.getValue());
+                        if (tablesNames.size() >= 100) {
+                            try {
+                                Map<String, Fields> md = tablesFields.query(aSchema, tablesNames.keySet(), aFullMetadata);
+                                tablesFields.fill(aSchema, md, tablesNames);
+                                tablesNames.clear();
+                            } catch (Exception ex) {
+                                Logger.getLogger(DatabaseMdCache.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+                    });
+                    if (!tablesNames.isEmpty()) {
+                        try {
+                            Map<String, Fields> md = tablesFields.query(aSchema, tablesNames.keySet(), aFullMetadata);
+                            tablesFields.fill(aSchema, md, tablesNames);
+                            tablesNames.clear();
+                        } catch (Exception ex) {
+                            Logger.getLogger(DatabaseMdCache.class.getName()).log(Level.SEVERE, null, ex);
+                        }
                     }
+                } catch (Exception ex) {
+                    Logger.getLogger(DatabaseMdCache.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                if (!tablesNames.isEmpty()) {
-                    Map<String, Fields> md = tablesFields.query(aSchema, tablesNames.keySet(), aFullMetadata);
-                    tablesFields.fill(aSchema, md, tablesNames);
-                }
-                return null;
-            }, null, null);
+            }, null);
         }
     }
 

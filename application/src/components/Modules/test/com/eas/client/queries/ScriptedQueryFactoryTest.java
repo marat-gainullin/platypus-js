@@ -4,9 +4,12 @@
  */
 package com.eas.client.queries;
 
+import com.eas.client.DatabasesClientWithResource;
+import com.eas.client.SqlQuery;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
+import com.eas.client.settings.DbConnectionSettings;
 import com.eas.script.JsDoc;
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -26,7 +29,7 @@ public class ScriptedQueryFactoryTest {
     @BeforeClass
     public static void setUpClass() throws Exception {
         indexer = new ApplicationSourceIndexer("c:/projects/platypus-tests");
-        resource = BaseModelTest.initDevelopTestClient();
+        resource = new DatabasesClientWithResource(new DbConnectionSettings("jdbc:oracle:thin:@asvr/adb", "eas", "eas", "eas", 1));
     }
 
     @AfterClass

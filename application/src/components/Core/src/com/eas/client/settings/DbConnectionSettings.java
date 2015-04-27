@@ -32,6 +32,20 @@ public class DbConnectionSettings extends ConnectionSettings {
         this(anUrl, anUser, aPassword, null, null);
     }
 
+    public DbConnectionSettings(String anUrl, String anUser, String aPassword, String aSchema) throws Exception {
+        this(anUrl, anUser, aPassword, aSchema, null);
+    }
+
+    public DbConnectionSettings(String anUrl, String anUser, String aPassword, String aSchema, int aMaxConnections) throws Exception {
+        this(anUrl, anUser, aPassword, aSchema);
+        maxConnections = aMaxConnections;
+    }
+
+    public DbConnectionSettings(String anUrl, String anUser, String aPassword, String aSchema, int aMaxConnections, int aMaxStatements) throws Exception {
+        this(anUrl, anUser, aPassword, aSchema, aMaxConnections);
+        maxStatements = aMaxStatements;
+    }
+    
     public DbConnectionSettings(String anUrl, String anUser, String aPassword, String aSchema, Properties aProperties) throws Exception {
         this();
         url = anUrl;

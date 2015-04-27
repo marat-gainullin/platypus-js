@@ -1297,7 +1297,7 @@
      * @param {String} aModuleName Name of server module (session stateless or statefull or rezident).
      */
     function ServerModule(aModuleName) {
-        if (aModuleName != null && aModuleName != "") {
+        if (aModuleName) {
             var app = ScriptedResourceClass.getApp();
             if (app) {
                 var proxy = app.getServerModules();
@@ -1335,10 +1335,10 @@
                             };
                         });
                     } else {
-                        throw "Access denied for module " + aModuleName + ". May be denied public access.";
+                        throw 'Access denied for module "' + aModuleName + '". May be denied public access.';
                     }
                 } else {
-                    throw "This architecture does not support server modules.";
+                    throw 'This architecture does not support server modules.';
                 }
             }
         } else {
