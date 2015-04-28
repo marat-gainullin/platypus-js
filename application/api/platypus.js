@@ -674,18 +674,6 @@
     }
     Object.defineProperty(P, "extend", {value: extend});
 
-    Object.defineProperty(P, "modules", {
-        get: function () {
-            if (serverCoreClass) {
-                var core = serverCoreClass.getInstance();
-                var systemSession = core.getSessionManager().getSystemSession();
-                return systemSession.getModules();
-            } else {
-                return cached;
-            }
-        }
-    });
-
     Object.defineProperty(P, "session", {
         get: function () {
             if (serverCoreClass) {
@@ -866,10 +854,10 @@
         });
     }
 
-    function generateChangeLogKeys(keys, fields, propName, aSubject, oldValue) {
-        if (fields) {
-            for (var i = 1; i <= fields.getFieldsCount(); i++) {
-                var field = fields.get(i);
+    function generateChangeLogKeys(keys, nFields, propName, aSubject, oldValue) {
+        if (nFields) {
+            for (var i = 1; i <= nFields.getFieldsCount(); i++) {
+                var field = nFields.get(i);
                 if (field.isPk()) {
                     var fieldName = field.getName();
                     var value = aSubject[fieldName];
@@ -1009,8 +997,8 @@
                     // ORM mutable scalar and collection properties
                     var define = function (aOrmDefs) {
                         for each (var defsEntry in aOrmDefs.entrySet()) {
-                            var def = EngineUtilsClass.unwrap(defsEntry.getValue().getJsDef());
-                            Object.defineProperty(aSubject, defsEntry.getKey(), def);
+                            var jsDef = EngineUtilsClass.unwrap(defsEntry.getValue().getJsDef());
+                            Object.defineProperty(aSubject, defsEntry.getKey(), jsDef);
                         }
                     };
                     define(nFields.getOrmScalarDefinitions());

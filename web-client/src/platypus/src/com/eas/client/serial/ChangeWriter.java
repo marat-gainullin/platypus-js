@@ -35,18 +35,18 @@ public class ChangeWriter implements ChangeVisitor {
 	private static final String CHANGE_PARAMETERS_NAME = "parameters";
 
 	private static JSONValue adoptValue(Change.Value aValue) throws Exception {
-		if (aValue != null && aValue.value != null) {
-			if (aValue.value instanceof Boolean) {
-				return JSONBoolean.getInstance((Boolean) aValue.value);
-			} else if (aValue.value instanceof Number) {
-				return new JSONNumber(((Number) aValue.value).doubleValue());
-			} else if (aValue.value instanceof String) {
-				return new JSONString((String) aValue.value);
-			} else if (aValue.value instanceof Date) {
-				double millis = ((Date) aValue.value).getTime();
+		if (aValue != null && aValue.getValue() != null) {
+			if (aValue.getValue() instanceof Boolean) {
+				return JSONBoolean.getInstance((Boolean) aValue.getValue());
+			} else if (aValue.getValue() instanceof Number) {
+				return new JSONNumber(((Number) aValue.getValue()).doubleValue());
+			} else if (aValue.getValue() instanceof String) {
+				return new JSONString((String) aValue.getValue());
+			} else if (aValue.getValue() instanceof Date) {
+				double millis = ((Date) aValue.getValue()).getTime();
 				return new JSONObject(JsDate.create(millis));
 			} else {
-				throw new Exception("Value with name: " + aValue.name + " is of unsupported class: " + aValue.value.getClass().getSimpleName());
+				throw new Exception("Value with name: " + aValue.getName() + " is of unsupported class: " + aValue.getValue().getClass().getSimpleName());
 			}
 		} else {
 			return JSONNull.getInstance();
@@ -75,7 +75,7 @@ public class ChangeWriter implements ChangeVisitor {
 		List<Change.Value> chData = aChange.getData();
 		for (int i = 0; i < chData.size(); i++) {
 			Change.Value v = chData.get(i);
-			data.put(v.name, adoptValue(v));
+			data.put(v.getName(), adoptValue(v));
 		}
 	}
 
@@ -89,7 +89,7 @@ public class ChangeWriter implements ChangeVisitor {
 		List<Change.Value> chData = aChange.getData();
 		for (int i = 0; i < chData.size(); i++) {
 			Change.Value v = chData.get(i);
-			data.put(v.name, adoptValue(v));
+			data.put(v.getName(), adoptValue(v));
 		}
 
 		JSONObject keys = new JSONObject();
@@ -97,7 +97,7 @@ public class ChangeWriter implements ChangeVisitor {
 		List<Change.Value> chKeys = aChange.getKeys();
 		for (int i = 0; i < chKeys.size(); i++) {
 			Change.Value v = chKeys.get(i);
-			keys.put(v.name, adoptValue(v));
+			keys.put(v.getName(), adoptValue(v));
 		}
 	}
 
@@ -112,7 +112,7 @@ public class ChangeWriter implements ChangeVisitor {
 		List<Change.Value> chKeys = aChange.getKeys();
 		for (int i = 0; i < chKeys.size(); i++) {
 			Change.Value v = chKeys.get(i);
-			keys.put(v.name, adoptValue(v));
+			keys.put(v.getName(), adoptValue(v));
 		}
 	}
 
@@ -126,7 +126,7 @@ public class ChangeWriter implements ChangeVisitor {
 		List<Change.Value> chParameters = aChange.getParameters();
 		for (int i = 0; i < chParameters.size(); i++) {
 			Change.Value v = chParameters.get(i);
-			parameters.put(v.name, adoptValue(v));
+			parameters.put(v.getName(), adoptValue(v));
 		}
 	}
 }

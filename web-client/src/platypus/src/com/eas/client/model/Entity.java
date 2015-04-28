@@ -1,6 +1,7 @@
 package com.eas.client.model;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -12,6 +13,7 @@ import com.eas.client.IDGenerator;
 import com.eas.client.Utils;
 import com.eas.client.Utils.JsObject;
 import com.eas.client.application.Application;
+import com.eas.client.changes.Change;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
@@ -307,6 +309,10 @@ public class Entity implements HasPublished {
 
 	public void enqueueUpdate() throws Exception {
 		model.getChangeLog().add(query.prepareCommand());
+	}
+	
+	public List<Change> getChangeLog(){
+		return model.getChangeLog();
 	}
 
 	public void execute(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {

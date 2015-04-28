@@ -7,8 +7,8 @@ public class Insert extends Change {
 
 	private final List<Value> data = new ArrayList<>();
 
-	public Insert(String aEntityId) {
-		super(aEntityId);
+	public Insert(String aEntityName) {
+		super(aEntityName);
 	}
 
 	public List<Value> getData() {

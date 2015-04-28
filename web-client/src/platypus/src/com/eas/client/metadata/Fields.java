@@ -56,7 +56,7 @@ public class Fields {
     protected JavaScriptObject instanceConstructor;
     protected Map<String, OrmDef> ormScalarDefinitions = new HashMap<>();
     protected Map<String, OrmDef> ormCollectionsDefinitions = new HashMap<>();
-    protected Map<String, OrmDef> ormScalarExpandings = new HashMap<>();
+    protected Map<String, Set<OrmDef>> ormScalarExpandings = new HashMap<>();
     
 	/**
 	 * The default constructor.
@@ -104,7 +104,12 @@ public class Fields {
         if (aName != null && !aName.isEmpty() && aDefinition != null) {
             if (!ormScalarDefinitions.containsKey(aName)) {
                 ormScalarDefinitions.put(aName, aDefinition);
-                ormScalarExpandings.put(aDefinition.getBaseName(), aDefinition);
+                Set<OrmDef> expandings = ormScalarExpandings.get(aDefinition.getBaseName());
+                if(expandings == null){
+                    expandings = new HashSet<>();
+                    ormScalarExpandings.put(aDefinition.getBaseName(), expandings);
+                }
+                expandings.add(aDefinition);
             }
         }
     }
@@ -113,7 +118,7 @@ public class Fields {
         return Collections.unmodifiableMap(ormScalarDefinitions);
     }
 
-    public Map<String, OrmDef> getOrmScalarExpandings() {
+    public Map<String, Set<OrmDef>> getOrmScalarExpandings() {
         return Collections.unmodifiableMap(ormScalarExpandings);
     }
 
@@ -503,7 +508,7 @@ public class Fields {
 	 * 
 	 * @return Fields vector as an abstract collection.
 	 */
-	public Collection<Field> toCollection() {
+	public List<Field> toCollection() {
 		return fields;
 	}
 
@@ -532,13 +537,11 @@ public class Fields {
 				var fieldsCount = aFields.@com.eas.client.metadata.Fields::getFieldsCount()();				
 				for(var i = 0; i < fieldsCount; i++){
 					(function(){
-						var nField = aFields.@com.eas.client.metadata.Fields::get(I)(i+1);
+						var nField = aFields.@com.eas.client.metadata.Fields::get(I)(i + 1);
 						var nFieldName = nField.@com.eas.client.metadata.Field::getName()();
 						var pField = @com.eas.client.metadata.Field::publishFacade(Lcom/eas/client/metadata/Field;)(nField);
 						if(!published[nFieldName])
 							Object.defineProperty(published, nFieldName, { get : function(){ return pField; }});
-						else
-                            throw "Duplicated field name found: " + nFieldName + " in entity " + aEntityDesc;
 						Object.defineProperty(published, i+"", { get : function(){ return pField; }});
 					})();
 				}

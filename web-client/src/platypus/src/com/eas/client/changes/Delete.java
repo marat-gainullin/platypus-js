@@ -7,8 +7,8 @@ public class Delete extends Change {
 
 	private final List<Value> keys = new ArrayList<>();
 
-	public Delete(String aEntityId) {
-		super(aEntityId);
+	public Delete(String aEntityName) {
+		super(aEntityName);
 	}
 
 	public List<Value> getKeys() {

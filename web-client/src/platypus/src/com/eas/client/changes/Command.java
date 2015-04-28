@@ -12,8 +12,8 @@ public class Command extends Change {
 	public String command;// transient property
     private final List<Value> parameters = new ArrayList<>();
 
-	public Command(String aEntityId) {
-		super(aEntityId);
+	public Command(String aEntityName) {
+		super(aEntityName);
 	}
 
     public List<Value> getParameters() {

@@ -8,14 +8,26 @@ public abstract class Change {
 
 	public static class Value {
 
-		public String name;
-		public Object value;
-		public DataTypeInfo type;
+		private String name;
+		private Object value;
+		private DataTypeInfo type;
 
 		public Value(String aName, Object aValue, DataTypeInfo aType) {
 			name = aName;
 			value = aValue;
 			type = aType;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public Object getValue() {
+			return value;
+		}
+
+		public DataTypeInfo getType() {
+			return type;
 		}
 	}
 

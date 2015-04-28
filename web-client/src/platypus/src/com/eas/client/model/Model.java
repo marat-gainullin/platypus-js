@@ -305,36 +305,43 @@ public class Model implements HasPublished {
 
 	protected native JavaScriptObject publishEntity(Entity nEntity)/*-{
 	    function fireSelfScalarsOppositeCollectionsChanges(aSubject, aChange, nFields) {
-	        var ormDefs = nFields.getOrmScalarExpandings().get(aChange.propertyName);
+	        var ormDefs = nFields.@com.eas.client.metadata.Fields::getOrmScalarExpandings()().@java.util.Map::get(Ljava/lang/String;)(aChange.propertyName);
 	        if (ormDefs) {
 	            var expandingsOldValues = aChange.beforeState.selfScalarsOldValues;
-	            ormDefs.forEach(function (ormDef) {
-	                if (ormDef.getName()) {
-	                    var expandingOldValue = expandingsOldValues[ormDef.getName()];
-	                    var expandingNewValue = aSubject[ormDef.getName()];
-	                    fire(aSubject, {source: aChange.source, propertyName: ormDef.getName(), oldValue: expandingOldValue, newValue: expandingNewValue});
-	                    if (ormDef.getOppositeName()) {
+	            var ormDefsIt = ormDefs.@java.util.Set::iterator()();
+	            while(ormDefsIt.@java.util.Iterator::hasNext()()){
+	            	var ormDef = ormDefsIt.@java.util.Iterator::next()();
+	            	var ormDefName = ormDef.@com.eas.client.metadata.Fields.OrmDef::getName()(); 
+	                if (ormDefName) {
+	                	var ormDefOppositeName = ormDef.@com.eas.client.metadata.Fields.OrmDef::getOppositeName()();
+	                    var expandingOldValue = expandingsOldValues[ormDefName];
+	                    var expandingNewValue = aSubject[ormDefName];
+	                    @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aSubject, {source: aChange.source, propertyName: ormDefName, oldValue: expandingOldValue, newValue: expandingNewValue});
+	                    if (ormDefOppositeName) {
 	                        if (expandingOldValue) {
-	                            fire(expandingOldValue, {source: expandingOldValue, propertyName: ormDef.getOppositeName()});
+	                            @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(expandingOldValue, {source: expandingOldValue, propertyName: ormDefOppositeName});
 	                        }
 	                        if (expandingNewValue) {
-	                            fire(expandingNewValue, {source: expandingNewValue, propertyName: ormDef.getOppositeName()});
+	                            @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(expandingNewValue, {source: expandingNewValue, propertyName: ormDefOppositeName});
 	                        }
 	                    }
 	                }
-	            });
+	            };
 	        }
 	    }
 	
 	    function prepareSelfScalarsChanges(aSubject, aChange, nFields) {
-	        var ormDefs = nFields.getOrmScalarExpandings().get(aChange.propertyName);
+	        var ormDefs = nFields.@com.eas.client.metadata.Fields::getOrmScalarExpandings()().@java.util.Map::get(Ljava/lang/String;)(aChange.propertyName);
 	        var oldScalarValues = [];
 	        if (ormDefs) {
-	            ormDefs.forEach(function (ormDef) {
-	                if (ormDef && ormDef.getName()) {
-	                    oldScalarValues[ormDef.getName()] = aSubject[ormDef.getName()];
+	            var ormDefsIt = ormDefs.@java.util.Set::iterator()();
+	            while(ormDefsIt.@java.util.Iterator::hasNext()()){
+	            	var ormDef = ormDefsIt.@java.util.Iterator::next()();
+	            	var ormDefName = ormDef.@com.eas.client.metadata.Fields.OrmDef::getName()(); 
+	                if (ormDef && ormDefName) {
+	                    oldScalarValues[ormDefName] = aSubject[ormDefName];
 	                }
-	            });
+	            };
 	        }
 	        return oldScalarValues;
 	    }
@@ -346,38 +353,45 @@ public class Model implements HasPublished {
 	                aFirerer();
 	            });
 	        }
-	        var collectionsDefs = nFields.getOrmCollectionsDefinitions().entrySet();
+	        var collectionsDefs = nFields.@com.eas.client.metadata.Fields::getOrmCollectionsDefinitions()().@java.util.Map::entrySet()();
 	        if (collectionsDefs) {
-	            collectionsDefs.forEach(function (aEntry) {
-	                var collectionName = aEntry.getKey();
-	                var ormDef = aEntry.getValue();
+	        	var collectionsDefsIt = collectionsDefs.@java.util.Set::iterator()();
+	        	while(collectionsDefsIt.@java.util.Iterator::hasNext()()){
+	        		var aEntry = collectionsDefsIt.@java.util.Iterator::next()(); 
+	                var collectionName = aEntry.@java.util.Map.Entry::getKey()();
+	                var ormDef = aEntry.@java.util.Map.Entry::getValue()();
 	                var collection = aSubject[collectionName];
 	                collection.forEach(function (item) {
-	                    fire(item, {source: item, propertyName: ormDef.getOppositeName()});
+	                    @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(item, {source: item, propertyName: ormDef.@com.eas.client.metadata.Fields.OrmDef::getOppositeName()()});
 	                });
-	            });
-	            collectionsDefs.forEach(function (aEntry) {
-	                var collectionName = aEntry.getKey();
-	                fire(aSubject, {source: aSubject, propertyName: collectionName});
-	            });
+	            };
+	            collectionsDefsIt = collectionsDefs.@java.util.Set::iterator()();
+	            while(collectionsDefsIt.@java.util.Iterator::hasNext()()) {
+	            	aEntry = collectionsDefsIt.@java.util.Iterator::next()();
+	                var collectionName = aEntry.@java.util.Map.Entry::getKey()();
+	                @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aSubject, {source: aSubject, propertyName: collectionName});
+	            };
 	        }
 	    }
 	
 	    function prepareOppositeScalarsChanges(aSubject, nFields) {
 	        var firerers = [];
-	        var collectionsDefs = nFields.getOrmCollectionsDefinitions().entrySet();
-	        collectionsDefs.forEach(function (aEntry) {
-	            var collectionName = aEntry.getKey();
-	            var ormDef = aEntry.getValue();
+	        var collectionsDefs = nFields.@com.eas.client.metadata.Fields::getOrmCollectionsDefinitions()().@java.util.Map::entrySet()();
+        	var collectionsDefsIt = collectionsDefs.@java.util.Set::iterator()();
+        	while(collectionsDefsIt.@java.util.Iterator::hasNext()()){
+        		var aEntry = collectionsDefsIt.@java.util.Iterator::next()(); 
+	            var collectionName = aEntry.@java.util.Map.Entry::getKey()();
+	            var ormDef = aEntry.@java.util.Map.Entry::getValue()();
 	            var collection = aSubject[collectionName];
 	            collection.forEach(function (item) {
-	                if (ormDef.getOppositeName()) {
+	               	var ormDefOppositeName = ormDef.@com.eas.client.metadata.Fields.OrmDef::getOppositeName()();
+	                if (ormDefOppositeName) {
 	                    firerers.push(function () {
-	                        fire(item, {source: item, propertyName: ormDef.getOppositeName()});
+	                        @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(item, {source: item, propertyName: ormDefOppositeName});
 	                    });
 	                }
 	            });
-	        });
+	        };
 	        return firerers;
 	    }
 	
@@ -389,31 +403,34 @@ public class Model implements HasPublished {
 	    }
 	
 	    function fireOppositeCollectionsChanges(aSubject, nFields) {
-	        var scalarsDefs = nFields.getOrmScalarDefinitions().entrySet();
-	        scalarsDefs.forEach(function (aEntry) {
-	            var scalarName = aEntry.getKey();
+	        var scalarsDefs = nFields.@com.eas.client.metadata.Fields::getOrmScalarDefinitions()().@java.util.Map::entrySet()();
+        	var scalarsDefsIt = scalarsDefs.@java.util.Set::iterator()();
+        	while(scalarsDefsIt.@java.util.Iterator::hasNext()()){
+        		var aEntry = scalarsDefsIt.@java.util.Iterator::next()(); 
+	            var scalarName = aEntry.@java.util.Map.Entry::getKey()();
 	            if (scalarName) {
-	                var ormDef = aEntry.getValue();
+	                var ormDef = aEntry.@java.util.Map.Entry::getValue()();
 	                var scalar = aSubject[scalarName];
-	                if (scalar && ormDef.getOppositeName()) {
-	                    fire(scalar, {source: scalar, propertyName: ormDef.getOppositeName()});
+	               	var ormDefOppositeName = ormDef.@com.eas.client.metadata.Fields.OrmDef::getOppositeName()();
+	                if (scalar && ormDefOppositeName) {
+	                    @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(scalar, {source: scalar, propertyName: ormDefOppositeName});
 	                }
 	            }
-	        });
+	        };
 	    }
 	
-	    function generateChangeLogKeys(keys, fields, propName, aSubject, oldValue) {
-	        if (fields) {
-	            for (var i = 1; i <= fields.getFieldsCount(); i++) {
-	                var field = fields.get(i);
-	                if (field.isPk()) {
-	                    var fieldName = field.getName();
+	    function generateChangeLogKeys(nKeys, nFields, propName, aSubject, oldValue) {
+	        if (nFields) {
+	            for (var i = 1; i <= nFields.@com.eas.client.metadata.Fields::getFieldsCount()(); i++) {
+	                var nField = nFields.@com.eas.client.metadata.Fields::get(I)(i);
+	                if (nField.@com.eas.client.metadata.Field::isPk()()) {
+	                    var fieldName = nField.@com.eas.client.metadata.Field::getName()();
 	                    var value = aSubject[fieldName];
 	                    // Some tricky processing of primary keys modification case ...
 	                    if (fieldName == propName) {
 	                        value = oldValue;
 	                    }
-	                    keys.add(new ValueClass(fieldName, value, field.getTypeInfo()));
+	                    nKeys.add(@com.eas.client.changes.Change.Value::new(Ljava/lang/String;Ljava/lang/Object;Lcom/eas/client/metadata/DataTypeInfo;)(fieldName, value, nField.@com.eas.client.metadata.Field::getTypeInfo()()));
 	                }
 	            }
 	        }
@@ -425,11 +442,12 @@ public class Model implements HasPublished {
         var published = [];
 
         function managedOnChange(aSubject, aChange) {
+            var nField = noFields[aChange.propertyName];
             if (!tryToComplementInsert(aSubject, aChange)) {
-                var updateChange = new UpdateClass(nEntity.getQueryName());
-                generateChangeLogKeys(updateChange.keys, nFields, aChange.propertyName, aSubject, aChange.oldValue);
-                updateChange.data.add(new ValueClass(aChange.propertyName, aChange.newValue, noFields[aChange.propertyName].getTypeInfo()));
-                nEntity.getChangeLog().add(updateChange);
+                var updateChange = new @com.eas.client.changes.Update::new(Ljava/lang/String;)(nEntity.@com.eas.client.model.Entity::getQueryName()());
+                generateChangeLogKeys(updateChange.@com.eas.client.changes.Update::getKeys()(), nFields, aChange.propertyName, aSubject, aChange.oldValue);
+                updateChange.@com.eas.client.changes.Update::getData()().@java.util.List::add(Lcom/eas/client/changes/Change/Value;)(@com.eas.client.changes.Change.Value::new(Ljava/lang/String;Ljava/lang/Object;Lcom/eas/client/metadata/DataTypeInfo;)(aChange.propertyName, aChange.newValue, nField.@com.eas.client.metadata.Field::getTypeInfo()()));
+                nEntity.@com.eas.client.model.Entity::getChangeLog()().@java.util.List::add(Lcom/eas/client/changes/Update;)(updateChange);
             }
             Object.keys(orderers).forEach(function (aOrdererKey) {
                 var aOrderer = orderers[aOrdererKey];
@@ -437,10 +455,9 @@ public class Model implements HasPublished {
                     aOrderer.add(aChange.source);
                 }
             });
-            fire(aSubject, aChange);
+            @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aSubject, aChange);
             fireSelfScalarsOppositeCollectionsChanges(aSubject, aChange, nFields);// Expanding change
-            var field = noFields[aChange.propertyName];
-            if (field && field.pk) {
+            if (nField && nField.@com.eas.client.metadata.Field::isPk()()) {
                 fireOppositeScalarsSelfCollectionsChanges(aSubject, aChange, nFields);
             }
         }
@@ -457,17 +474,19 @@ public class Model implements HasPublished {
         }
         function tryToComplementInsert(aSubject, aChange) {
             var complemented = false;
-            if (aSubject === justInserted && !noFields[aChange.propertyName].nullable) {
+            var nField = noFields[aChange.propertyName];
+            if (aSubject === justInserted && !nField.@com.eas.client.metadata.Field::isNullable()()) {
                 var met = false;
-                for (var d = 0; d < justInsertedChange.data.length; d++) {
-                    var iv = justInsertedChange.data[d];
-                    if (iv.name == aChange.propertyName) {
+                var iData = justInsertedChange.@com.eas.client.changes.Insert::getData()();
+                for (var d = 0; d < iData.@java.util.List::size()(); d++) {
+                    var iv = iData.@java.util.List::get(I)(d);
+                    if (iv.@com.eas.client.changes.Change.Value::getName()() == aChange.propertyName) {
                         met = true;
                         break;
                     }
                 }
                 if (!met) {
-                    justInsertedChange.getData().add(new ValueClass(aChange.propertyName, aChange.newValue, noFields[aChange.propertyName].getTypeInfo()));
+                    iData.@java.util.List::add(Lcom/eas/client/changes/Change/Value;)(@com.eas.client.changes.Change.Value::new(Ljava/lang/String;Ljava/lang/Object;Lcom/eas/client/metadata/DataTypeInfo;)(aChange.propertyName, aChange.newValue, nField.@com.eas.client.metadata.Field::getTypeInfo()()));
                     complemented = true;
                 }
             }
@@ -475,16 +494,19 @@ public class Model implements HasPublished {
         }
         function acceptInstance(aSubject) {
             P.manageObject(aSubject, managedOnChange, managedBeforeChange);
-            listenable(aSubject);
+            @com.eas.client.Utils::listenable(Lcom/google/gwt/core/client/JavaScriptObject;)(aSubject);
             // ORM mutable scalar and collection properties
             var define = function (aOrmDefs) {
-                for each (var defsEntry in aOrmDefs.entrySet()) {
-                    var def = defsEntry.getValue().getJsDef();
-                    Object.defineProperty(aSubject, defsEntry.getKey(), def);
+            	var aOrmDefsIt = aOrmDefs.@java.util.Map::entrySet()().@java.util.Set::iterator()();
+                while(aOrmDefsIt.@java.util.Iterator::hasNext()()) {
+                	var defsEntry = aOrmDefsIt.@java.util.Iterator::next()();
+                    var ormDef = defsEntry.@java.util.Map.Entry::getValue()();
+                    var jsDef = ormDef.@com.eas.client.metadata.Fields.OrmDef::getJsDef()();
+                    Object.defineProperty(aSubject, defsEntry.@java.util.Map.Entry::getKey()(), jsDef);
                 }
             };
-            define(nFields.getOrmScalarDefinitions());
-            define(nFields.getOrmCollectionsDefinitions());
+            define(nFields.@com.eas.client.metadata.Fields::getOrmScalarDefinitions()());
+            define(nFields.@com.eas.client.metadata.Fields::getOrmCollectionsDefinitions()());
         }
 
         var _onInserted = null;
@@ -494,22 +516,23 @@ public class Model implements HasPublished {
             spliced: function (added, deleted) {
                 added.forEach(function (aAdded) {
                     justInserted = aAdded;
-                    justInsertedChange = new InsertClass(nEntity.getQueryName());
-                    for (var nf = 0; nf < nnFields.size(); nf++) {
-                        var nField = nnFields[nf];
-                        if (!aAdded[nField.name] && nField.pk) {
-                            aAdded[nField.name] = nField.getTypeInfo().generateValue();
+                    justInsertedChange = @com.eas.client.changes.Insert::new(nEntity.@com.eas.client.model.Entity::getQueryName()());
+                    for (var nf = 0; nf < nnFields.@java.util.List::size()(); nf++) {
+                        var nField = nnFields.@java.util.List::get(I)(nf);
+                        if (!aAdded[nField.name] && nField.@com.eas.client.metadata.Field::isPk()()) {
+                        	var nTypeInfo = nField.@com.eas.client.metadata.Field::getTypeInfo()();
+                            aAdded[nField.name] = $wnd.P.boxAsJs(nTypeInfo.@com.eas.client.metadata.DataTypeInfo::generateValue()());
                         }
                     }
                     for (var na in aAdded) {
                         var nField = noFields[na];
                         if (nField) {
                             var v = aAdded[na];
-                            var cv = new ValueClass(nField.name, v, nField.getTypeInfo());
-                            justInsertedChange.data.add(cv);
+                            var cv = @com.eas.client.changes.Change.Value::new(Ljava/lang/String;Ljava/lang/Object;Lcom/eas/client/metadata/DataTypeInfo;)(nField.@com.eas.client.metadata.Field::getName()(), v, nField.@com.eas.client.metadata.Field::getTypeInfo()());
+                            justInsertedChange.@com.eas.client.changes.Insert::getData()().@java.util.List::add(Lcom/eas/client/changes/Change/Value;)(cv);
                         }
                     }
-                    nEntity.getChangeLog().add(justInsertedChange);
+                    nEntity.@com.eas.client.model.Entity::getChangeLog()().@java.util.List::add(Lcom/eas/client/changes/Insert;)(justInsertedChange);
                     for (var aOrdererKey in orderers) {
                         var aOrderer = orderers[aOrdererKey];
                         aOrderer.add(aAdded);
@@ -523,16 +546,16 @@ public class Model implements HasPublished {
                         justInserted = null;
                         justInsertedChange = null;
                     }
-                    var deleteChange = new DeleteClass(nEntity.getQueryName());
-                    generateChangeLogKeys(deleteChange.keys, nFields, null, aDeleted, null);
-                    nEntity.getChangeLog().add(deleteChange);
+                    var deleteChange = @com.eas.client.changes.Delete::new(Ljava/lang/String;)(nEntity.@com.eas.client.model.Entity::getQueryName()());
+                    generateChangeLogKeys(deleteChange.@com.eas.client.changes.Delete::getKeys()(), nFields, null, aDeleted, null);
+                    nEntity.@com.eas.client.model.Entity::getChangeLog()().@java.util.List::add(Lcom/eas/client/changes/Delete;)(deleteChange);
                     for (var aOrdererKey in orderers) {
                         var aOrderer = orderers[aOrdererKey];
                         aOrderer.delete(aDeleted);
                     }
                     fireOppositeScalarsChanges(aDeleted, nFields);
                     fireOppositeCollectionsChanges(aDeleted, nFields);
-                    unlistenable(aDeleted);
+                    @com.eas.client.Utils::unlistenable(Lcom/google/gwt/core/client/JavaScriptObject;)(aDeleted);
                     P.unmanageObject(aDeleted);
                 });
                 if (_onInserted) {
@@ -558,7 +581,7 @@ public class Model implements HasPublished {
                         Logger.severe(e);
                     }
                 }
-                fire(published, {source: published, propertyName: 'cursor', oldValue: oldCursor, newValue: newCursor});
+                @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(published, {source: published, propertyName: 'cursor', oldValue: oldCursor, newValue: newCursor});
             }
         });
         var pSchema = {};
@@ -566,50 +589,51 @@ public class Model implements HasPublished {
             value: pSchema
         });
         var pkFieldName = '';
-        var nFields = nEntity.getFields();
-        var nnFields = nFields.toCollection();
+        var nFields = nEntity.@com.eas.client.model.Entity::getFields()();
+        var nnFields = nFields.@com.eas.client.metadata.Fields::toCollection()();
         var noFields = {};
         // schema
-        for (var n = 0; n < nnFields.size(); n++) {
+        for (var n = 0; n < nnFields.@java.util.List::size()(); n++) {
             (function () {
-                var nField = nnFields[n];
-                noFields[nField.name] = nField;
-                if (nField.isPk())
-                    pkFieldName = nField.name;
+                var nField = nnFields.@java.util.List::get(n);
+                var nFieldName = nField.@com.eas.client.metadata.Field::getName()();
+                noFields[nFieldName] = nField;
+                if (nField.@com.eas.client.metadata.Field::isPk()())
+                    pkFieldName = nFieldName;
                 var schemaDesc = {
-                    value: nField.getPublished()
+                    value: nField.@com.eas.client.metadata.Field::getPublished()()
                 };
-                if (!pSchema[nField.name]) {
-                    Object.defineProperty(pSchema, nField.name, schemaDesc);
-                } else {
-                    var eTitle = nEntity.title ? " [" + nEntity.title + "]" : "";
-                    throw "Duplicated field name found: " + nField.name + " in entity " + nEntity.name + eTitle;
+                if (!pSchema[nFieldName]) {
+                    Object.defineProperty(pSchema, nFieldName, schemaDesc);
+                } else {                	
+                    var eTitle = nEntity.@com.eas.client.model.Entity::getTitle()() ? " [" + nEntity.@com.eas.client.model.Entity::getTitle()() + "]" : "";
+                    throw "Duplicated field name found: " + nFieldName + " in entity " + nEntity.name + eTitle;
                 }
                 Object.defineProperty(pSchema, n, schemaDesc);
             })();
         }
         // entity.params.p1 syntax
-        var nParameters = nEntity.getQuery().getParameters();
-        var ncParameters = nParameters.toCollection();
+        var nParameters = nEntity.@com.eas.client.model.Entity::getQuery()().@com.eas.client.queries.Query::getParameters()();
+        var ncParameters = nParameters.@com.eas.client.metadata.Parameters::toCollection()();
         var pParams = {};
-        for (var p = 0; p < ncParameters.size(); p++) {
+        for (var p = 0; p < ncParameters.@java.util.List::size()(); p++) {
             (function () {
-                var nParameter = ncParameters[p];
+                var nParameter = ncParameters.@java.util.List::get(I)(p);
                 var pDesc = {
                     get: function () {
-                        return nParameter.jsValue;
+                        return $wnd.P.boxAsJs(nParameter.@com.eas.client.metadata.Parameter::getJsValue()());
                     },
                     set: function (aValue) {
-                        nParameter.jsValue = aValue;
+                        nParameter.@com.eas.client.metadata.Parameter::setJsValue(Ljava/lang/Object;)($wnd.P.boxAsJava(aValue));
                     }
                 };
-                Object.defineProperty(pParams, nParameter.name, pDesc);
+                Object.defineProperty(pParams, nParameter.@com.eas.client.metadata.Parameter::getName()(), pDesc);
                 Object.defineProperty(pParams, p, pDesc);
             })();
         }
         Object.defineProperty(published, 'params', {value: pParams});
         // entity.params.schema.p1 syntax
-        var pParamsSchema = nParameters.getPublished();
+        var pParamsSchema = @com.eas.client.metadata.Parameters::publishFacade(Lcom/eas/client/metadata/Fields)(nParameters);
         if (!pParams.schema)
             Object.defineProperty(pParams, 'schema', {value: pParamsSchema});
         Object.defineProperty(published, 'find', {value: function (aCriteria) {
@@ -678,8 +702,8 @@ public class Model implements HasPublished {
         });
         nEntity.setSnapshotConsumer(function (aSnapshot) {
             Array.prototype.splice.call(published, 0, published.length);
-            if (nEntity.getElementClass()) {
-                var instanceCtor = nEntity.getElementClass();
+            var instanceCtor = nEntity.@com.eas.client.model.Entity::getElementClass()();
+            if (instanceCtor) {
                 for (var s = 0; s < aSnapshot.length; s++) {
                     var snapshotInstance = aSnapshot[s];
                     var accepted = new instanceCtor();
@@ -699,7 +723,7 @@ public class Model implements HasPublished {
             orderers = {};
             published.cursor = published.length > 0 ? published[0] : null;
         });
-        listenable(published);
+        @com.eas.client.Utils::listenable(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
         return published;
 	}-*/; 
 	
