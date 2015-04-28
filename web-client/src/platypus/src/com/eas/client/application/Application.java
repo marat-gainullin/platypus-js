@@ -13,16 +13,17 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bearsoft.rowset.CallbackAdapter;
-import com.bearsoft.rowset.Utils;
+import com.eas.client.CallbackAdapter;
 import com.eas.client.GroupingHandlerRegistration;
 import com.eas.client.PlatypusLogFormatter;
+import com.eas.client.Utils;
 import com.eas.client.form.js.JsContainers;
 import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.js.JsMenus;
 import com.eas.client.form.js.JsModelWidgets;
 import com.eas.client.form.js.JsWidgets;
-import com.eas.client.model.js.JsModel;
+import com.eas.client.model.js.JsManaged;
+import com.eas.client.model.js.JsOrderer;
 import com.eas.client.queries.Query;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
@@ -137,7 +138,7 @@ public class Application {
 	    }
 		
 		function invokeLater(aTarget) {
-			@com.bearsoft.rowset.Utils::invokeLater(Lcom/google/gwt/core/client/JavaScriptObject;)(aTarget);
+			@com.eas.client.Utils::invokeLater(Lcom/google/gwt/core/client/JavaScriptObject;)(aTarget);
 		}
 		
         Object.defineProperty($wnd.P, "invokeLater", {get: function () {
@@ -147,7 +148,7 @@ public class Application {
 		function invokeDelayed(aTimeout, aTarget) {
 		    if (arguments.length < 2)
 		        throw "invokeDelayed needs 2 arguments - timeout, callback.";
-			@com.bearsoft.rowset.Utils::invokeScheduled(ILcom/google/gwt/core/client/JavaScriptObject;)(+aTimeout, aTarget);
+			@com.eas.client.Utils::invokeScheduled(ILcom/google/gwt/core/client/JavaScriptObject;)(+aTimeout, aTarget);
 		}
 		
         Object.defineProperty($wnd.P, "invokeDelayed", {get: function () {
@@ -216,9 +217,9 @@ public class Application {
 		$wnd.P.boxAsJs = function(aValue) {
 			if(aValue == null)
 				return null;
-			else if(@com.bearsoft.rowset.Utils::isNumber(Ljava/lang/Object;)(aValue))
+			else if(@com.eas.client.Utils::isNumber(Ljava/lang/Object;)(aValue))
 				return aValue.@java.lang.Number::doubleValue()();
-			else if(@com.bearsoft.rowset.Utils::isBoolean(Ljava/lang/Object;)(aValue))
+			else if(@com.eas.client.Utils::isBoolean(Ljava/lang/Object;)(aValue))
 				return aValue.@java.lang.Boolean::booleanValue()();
 			else // dates, strings, complex java objects handled in Utils.toJs()
 				return aValue;
@@ -587,7 +588,7 @@ public class Application {
 				aTarget = {};
 			var appElementDoc = aClient.@com.eas.client.application.AppClient::getModelDocument(Ljava/lang/String;)(appElementName);
 			var nativeModel = @com.eas.client.model.store.XmlDom2Model::transform(Lcom/google/gwt/xml/client/Document;Lcom/google/gwt/core/client/JavaScriptObject;)(appElementDoc, aTarget);
-			nativeModel.@com.eas.client.model.Model::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(aTarget);
+			nativeModel.@com.eas.client.model.Model::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(aTarget);			
 			return aTarget;
 		};
 		$wnd.P.loadForm = function(appElementName, aModel, aTarget) {
@@ -851,7 +852,7 @@ public class Application {
 		};
 		$wnd.P.IDGenerator = {
 			genID : function(){
-				return @com.bearsoft.rowset.utils.IDGenerator::genId()();
+				return @com.eas.client.IDGenerator::genId()();
 			}
 		};
 		$wnd.P.MD5Generator = {
@@ -866,7 +867,7 @@ public class Application {
 		};
 		$wnd.P.ID = {
 			generate : function(){
-				return @com.bearsoft.rowset.utils.IDGenerator::genId()();
+				return @com.eas.client.IDGenerator::genId()();
 			}
 		};
 		$wnd.P.Logger = new (function(){
@@ -923,19 +924,14 @@ public class Application {
 			}
 		}
 		publish(client);
-		JsModel.init();
+		JsManaged.init();
+		JsOrderer.init();
 		JsWidgets.init();
 		JsMenus.init();
 		JsContainers.init();
 		JsModelWidgets.init();
 		JsEvents.init();
 		loader = new Loader(client);
-		/*
-		Set<Element> indicators = extractPlatypusProgressIndicators();
-		for (Element el : indicators) {
-			el.<XElement> cast().loadMask();
-		}
-		*/
 		loaderHandlerRegistration.add(loader.addHandler(new LoggingLoadHandler()));
 		client.requestLoggedInUser(new CallbackAdapter<String, String>() {
 

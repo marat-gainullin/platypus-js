@@ -2,7 +2,7 @@ package com.eas.client.form.grid.rows;
 
 import java.util.Comparator;
 
-import com.bearsoft.rowset.Utils;
+import com.eas.client.Utils;
 import com.google.gwt.core.client.JavaScriptObject;
 
 public class PathComparator implements Comparator<JavaScriptObject> {

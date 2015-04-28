@@ -4,7 +4,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.bearsoft.gwt.ui.RadioGroup;
-import com.bearsoft.rowset.Utils;
+import com.eas.client.Utils;
 import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.events.AddEvent;
 import com.eas.client.form.events.AddHandler;

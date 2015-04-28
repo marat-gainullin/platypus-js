@@ -7,12 +7,12 @@ package com.eas.client.serial;
 import java.util.Date;
 import java.util.List;
 
-import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.changes.ChangeVisitor;
-import com.bearsoft.rowset.changes.Command;
-import com.bearsoft.rowset.changes.Delete;
-import com.bearsoft.rowset.changes.Insert;
-import com.bearsoft.rowset.changes.Update;
+import com.eas.client.changes.Change;
+import com.eas.client.changes.ChangeVisitor;
+import com.eas.client.changes.Command;
+import com.eas.client.changes.Delete;
+import com.eas.client.changes.Insert;
+import com.eas.client.changes.Update;
 import com.google.gwt.core.client.JsDate;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONBoolean;
@@ -46,7 +46,7 @@ public class ChangeWriter implements ChangeVisitor {
 				double millis = ((Date) aValue.value).getTime();
 				return new JSONObject(JsDate.create(millis));
 			} else {
-				throw new Exception("Value with name: "+ aValue.name + " is of unsupported class: " + aValue.value.getClass().getSimpleName());
+				throw new Exception("Value with name: " + aValue.name + " is of unsupported class: " + aValue.value.getClass().getSimpleName());
 			}
 		} else {
 			return JSONNull.getInstance();
@@ -69,11 +69,13 @@ public class ChangeWriter implements ChangeVisitor {
 	public void visit(Insert aChange) throws Exception {
 		jsoned = new JSONObject();
 		jsoned.put(CHANGE_KIND_NAME, new JSONString("insert"));
-		jsoned.put(CHANGE_ENTITY_NAME, new JSONString(aChange.entityId));
+		jsoned.put(CHANGE_ENTITY_NAME, new JSONString(aChange.getEntityName()));
 		JSONObject data = new JSONObject();
 		jsoned.put(CHANGE_DATA_NAME, data);
-		for (int i = 0; i < aChange.data.length; i++) {
-			data.put(aChange.data[i].name, adoptValue(aChange.data[i]));
+		List<Change.Value> chData = aChange.getData();
+		for (int i = 0; i < chData.size(); i++) {
+			Change.Value v = chData.get(i);
+			data.put(v.name, adoptValue(v));
 		}
 	}
 
@@ -81,16 +83,21 @@ public class ChangeWriter implements ChangeVisitor {
 	public void visit(Update aChange) throws Exception {
 		jsoned = new JSONObject();
 		jsoned.put(CHANGE_KIND_NAME, new JSONString("update"));
-		jsoned.put(CHANGE_ENTITY_NAME, new JSONString(aChange.entityId));
+		jsoned.put(CHANGE_ENTITY_NAME, new JSONString(aChange.getEntityName()));
 		JSONObject data = new JSONObject();
 		jsoned.put(CHANGE_DATA_NAME, data);
-		for (int i = 0; i < aChange.data.length; i++) {
-			data.put(aChange.data[i].name, adoptValue(aChange.data[i]));
+		List<Change.Value> chData = aChange.getData();
+		for (int i = 0; i < chData.size(); i++) {
+			Change.Value v = chData.get(i);
+			data.put(v.name, adoptValue(v));
 		}
+
 		JSONObject keys = new JSONObject();
 		jsoned.put(CHANGE_KEYS_NAME, keys);
-		for (int i = 0; i < aChange.keys.length; i++) {
-			keys.put(aChange.keys[i].name, adoptValue(aChange.keys[i]));
+		List<Change.Value> chKeys = aChange.getKeys();
+		for (int i = 0; i < chKeys.size(); i++) {
+			Change.Value v = chKeys.get(i);
+			keys.put(v.name, adoptValue(v));
 		}
 	}
 
@@ -98,11 +105,14 @@ public class ChangeWriter implements ChangeVisitor {
 	public void visit(Delete aChange) throws Exception {
 		jsoned = new JSONObject();
 		jsoned.put(CHANGE_KIND_NAME, new JSONString("delete"));
-		jsoned.put(CHANGE_ENTITY_NAME, new JSONString(aChange.entityId));
+		jsoned.put(CHANGE_ENTITY_NAME, new JSONString(aChange.getEntityName()));
 		JSONObject keys = new JSONObject();
 		jsoned.put(CHANGE_KEYS_NAME, keys);
-		for (int i = 0; i < aChange.keys.length; i++) {
-			keys.put(aChange.keys[i].name, adoptValue(aChange.keys[i]));
+
+		List<Change.Value> chKeys = aChange.getKeys();
+		for (int i = 0; i < chKeys.size(); i++) {
+			Change.Value v = chKeys.get(i);
+			keys.put(v.name, adoptValue(v));
 		}
 	}
 
@@ -110,11 +120,13 @@ public class ChangeWriter implements ChangeVisitor {
 	public void visit(Command aChange) throws Exception {
 		jsoned = new JSONObject();
 		jsoned.put(CHANGE_KIND_NAME, new JSONString("command"));
-		jsoned.put(CHANGE_ENTITY_NAME, new JSONString(aChange.entityId));
+		jsoned.put(CHANGE_ENTITY_NAME, new JSONString(aChange.getEntityName()));
 		JSONObject parameters = new JSONObject();
 		jsoned.put(CHANGE_PARAMETERS_NAME, parameters);
-		for (int i = 0; i < aChange.parameters.length; i++) {
-			parameters.put(aChange.parameters[i].name, adoptValue(aChange.parameters[i]));
+		List<Change.Value> chParameters = aChange.getParameters();
+		for (int i = 0; i < chParameters.size(); i++) {
+			Change.Value v = chParameters.get(i);
+			parameters.put(v.name, adoptValue(v));
 		}
 	}
 }

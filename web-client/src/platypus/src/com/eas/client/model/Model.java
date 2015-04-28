@@ -12,17 +12,14 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bearsoft.rowset.CallbackAdapter;
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.Utils;
-import com.bearsoft.rowset.Utils.JsObject;
-import com.bearsoft.rowset.beans.PropertyChangeSupport;
-import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
+import com.eas.client.CallbackAdapter;
+import com.eas.client.Utils;
+import com.eas.client.Utils.JsObject;
 import com.eas.client.application.AppClient;
+import com.eas.client.changes.Change;
 import com.eas.client.form.published.HasPublished;
-import com.eas.client.model.js.JsModel;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
@@ -37,7 +34,6 @@ public class Model implements HasPublished {
 	protected Set<Relation> relations = new HashSet<Relation>();
 	protected Set<ReferenceRelation> referenceRelations = new HashSet<ReferenceRelation>();
 	protected Map<String, Entity> entities = new HashMap<String, Entity>();
-	protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
 	protected List<Change> changeLog = new ArrayList<Change>();
 	//
 	protected RequeryProcess process;
@@ -46,9 +42,9 @@ public class Model implements HasPublished {
 	public static class RequeryProcess {
 		public Collection<Entity> entities;
 		public Map<Entity, String> errors = new HashMap<Entity, String>();
-		public Callback<Rowset, String> callback;
+		public Callback<JavaScriptObject, String> callback;
 
-		public RequeryProcess(Collection<Entity> aEntities, Callback<Rowset, String> aCallback) {
+		public RequeryProcess(Collection<Entity> aEntities, Callback<JavaScriptObject, String> aCallback) {
 			super();
 			entities = aEntities;
 			callback = aCallback;
@@ -213,10 +209,6 @@ public class Model implements HasPublished {
 		client = aClient;
 	}
 
-	public PropertyChangeSupport getChangeSupport() {
-		return changeSupport;
-	}
-
 	public AppClient getClient() {
 		return client;
 	}
@@ -271,19 +263,21 @@ public class Model implements HasPublished {
 	private void publish() {
 		try {
 			publishTopLevelFacade(jsPublished, this);
-			publishRowsets();
+			publishEntities();
 		} catch (Exception ex) {
 			Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
 
-	private void publishRowsets() throws Exception {
+	private void publishEntities() throws Exception {
 		assert jsPublished != null : "JavaScript facade object has to be already installed while publishing rowsets facades.";
 		validateQueries();
+		//
 		for (Entity entity : entities.values()) {
-			JavaScriptObject publishedEntity = JsModel.publish(entity);
 			if (entity.getName() != null && !entity.getName().isEmpty()) {
-				jsPublished.<JsObject> cast().inject(entity.getName(), publishedEntity);
+				JavaScriptObject publishedEntity = publishEntity(entity);
+				entity.setPublished(publishedEntity);
+				jsPublished.<JsObject> cast().inject(entity.getName(), publishedEntity, true, false);
 			}
 		}
 		//
@@ -307,9 +301,408 @@ public class Model implements HasPublished {
                                 aRelation.getLeftField().getName())));
             }
 		}
-		// ////////////////
 	}
 
+	protected native JavaScriptObject publishEntity(Entity nEntity)/*-{
+	    function fireSelfScalarsOppositeCollectionsChanges(aSubject, aChange, nFields) {
+	        var ormDefs = nFields.getOrmScalarExpandings().get(aChange.propertyName);
+	        if (ormDefs) {
+	            var expandingsOldValues = aChange.beforeState.selfScalarsOldValues;
+	            ormDefs.forEach(function (ormDef) {
+	                if (ormDef.getName()) {
+	                    var expandingOldValue = expandingsOldValues[ormDef.getName()];
+	                    var expandingNewValue = aSubject[ormDef.getName()];
+	                    fire(aSubject, {source: aChange.source, propertyName: ormDef.getName(), oldValue: expandingOldValue, newValue: expandingNewValue});
+	                    if (ormDef.getOppositeName()) {
+	                        if (expandingOldValue) {
+	                            fire(expandingOldValue, {source: expandingOldValue, propertyName: ormDef.getOppositeName()});
+	                        }
+	                        if (expandingNewValue) {
+	                            fire(expandingNewValue, {source: expandingNewValue, propertyName: ormDef.getOppositeName()});
+	                        }
+	                    }
+	                }
+	            });
+	        }
+	    }
+	
+	    function prepareSelfScalarsChanges(aSubject, aChange, nFields) {
+	        var ormDefs = nFields.getOrmScalarExpandings().get(aChange.propertyName);
+	        var oldScalarValues = [];
+	        if (ormDefs) {
+	            ormDefs.forEach(function (ormDef) {
+	                if (ormDef && ormDef.getName()) {
+	                    oldScalarValues[ormDef.getName()] = aSubject[ormDef.getName()];
+	                }
+	            });
+	        }
+	        return oldScalarValues;
+	    }
+	
+	    function fireOppositeScalarsSelfCollectionsChanges(aSubject, aChange, nFields) {
+	        var oppositeScalarsFirerers = aChange.beforeState.oppositeScalarsFirerers;
+	        if (oppositeScalarsFirerers) {
+	            oppositeScalarsFirerers.forEach(function (aFirerer) {
+	                aFirerer();
+	            });
+	        }
+	        var collectionsDefs = nFields.getOrmCollectionsDefinitions().entrySet();
+	        if (collectionsDefs) {
+	            collectionsDefs.forEach(function (aEntry) {
+	                var collectionName = aEntry.getKey();
+	                var ormDef = aEntry.getValue();
+	                var collection = aSubject[collectionName];
+	                collection.forEach(function (item) {
+	                    fire(item, {source: item, propertyName: ormDef.getOppositeName()});
+	                });
+	            });
+	            collectionsDefs.forEach(function (aEntry) {
+	                var collectionName = aEntry.getKey();
+	                fire(aSubject, {source: aSubject, propertyName: collectionName});
+	            });
+	        }
+	    }
+	
+	    function prepareOppositeScalarsChanges(aSubject, nFields) {
+	        var firerers = [];
+	        var collectionsDefs = nFields.getOrmCollectionsDefinitions().entrySet();
+	        collectionsDefs.forEach(function (aEntry) {
+	            var collectionName = aEntry.getKey();
+	            var ormDef = aEntry.getValue();
+	            var collection = aSubject[collectionName];
+	            collection.forEach(function (item) {
+	                if (ormDef.getOppositeName()) {
+	                    firerers.push(function () {
+	                        fire(item, {source: item, propertyName: ormDef.getOppositeName()});
+	                    });
+	                }
+	            });
+	        });
+	        return firerers;
+	    }
+	
+	    function fireOppositeScalarsChanges(aSubject, nFields) {
+	        var collected = prepareOppositeScalarsChanges(aSubject, nFields);
+	        collected.forEach(function (aFirerer) {
+	            aFirerer();
+	        });
+	    }
+	
+	    function fireOppositeCollectionsChanges(aSubject, nFields) {
+	        var scalarsDefs = nFields.getOrmScalarDefinitions().entrySet();
+	        scalarsDefs.forEach(function (aEntry) {
+	            var scalarName = aEntry.getKey();
+	            if (scalarName) {
+	                var ormDef = aEntry.getValue();
+	                var scalar = aSubject[scalarName];
+	                if (scalar && ormDef.getOppositeName()) {
+	                    fire(scalar, {source: scalar, propertyName: ormDef.getOppositeName()});
+	                }
+	            }
+	        });
+	    }
+	
+	    function generateChangeLogKeys(keys, fields, propName, aSubject, oldValue) {
+	        if (fields) {
+	            for (var i = 1; i <= fields.getFieldsCount(); i++) {
+	                var field = fields.get(i);
+	                if (field.isPk()) {
+	                    var fieldName = field.getName();
+	                    var value = aSubject[fieldName];
+	                    // Some tricky processing of primary keys modification case ...
+	                    if (fieldName == propName) {
+	                        value = oldValue;
+	                    }
+	                    keys.add(new ValueClass(fieldName, value, field.getTypeInfo()));
+	                }
+	            }
+	        }
+	    }
+
+        var justInserted = null;
+        var justInsertedChange = null;
+        var orderers = {};
+        var published = [];
+
+        function managedOnChange(aSubject, aChange) {
+            if (!tryToComplementInsert(aSubject, aChange)) {
+                var updateChange = new UpdateClass(nEntity.getQueryName());
+                generateChangeLogKeys(updateChange.keys, nFields, aChange.propertyName, aSubject, aChange.oldValue);
+                updateChange.data.add(new ValueClass(aChange.propertyName, aChange.newValue, noFields[aChange.propertyName].getTypeInfo()));
+                nEntity.getChangeLog().add(updateChange);
+            }
+            Object.keys(orderers).forEach(function (aOrdererKey) {
+                var aOrderer = orderers[aOrdererKey];
+                if (aOrderer.inKeys(aChange.propertyName)) {
+                    aOrderer.add(aChange.source);
+                }
+            });
+            fire(aSubject, aChange);
+            fireSelfScalarsOppositeCollectionsChanges(aSubject, aChange, nFields);// Expanding change
+            var field = noFields[aChange.propertyName];
+            if (field && field.pk) {
+                fireOppositeScalarsSelfCollectionsChanges(aSubject, aChange, nFields);
+            }
+        }
+        function managedBeforeChange(aSubject, aChange) {
+            var oldScalars = prepareSelfScalarsChanges(aSubject, aChange, nFields);
+            var oppositeScalarsFirerers = prepareOppositeScalarsChanges(aSubject, nFields);
+            Object.keys(orderers).forEach(function (aOrdererKey) {
+                var aOrderer = orderers[aOrdererKey];
+                if (aOrderer.inKeys(aChange.propertyName)) {
+                    aOrderer.delete(aChange.source);
+                }
+            });
+            return {selfScalarsOldValues: oldScalars, oppositeScalarsFirerers: oppositeScalarsFirerers};
+        }
+        function tryToComplementInsert(aSubject, aChange) {
+            var complemented = false;
+            if (aSubject === justInserted && !noFields[aChange.propertyName].nullable) {
+                var met = false;
+                for (var d = 0; d < justInsertedChange.data.length; d++) {
+                    var iv = justInsertedChange.data[d];
+                    if (iv.name == aChange.propertyName) {
+                        met = true;
+                        break;
+                    }
+                }
+                if (!met) {
+                    justInsertedChange.getData().add(new ValueClass(aChange.propertyName, aChange.newValue, noFields[aChange.propertyName].getTypeInfo()));
+                    complemented = true;
+                }
+            }
+            return complemented;
+        }
+        function acceptInstance(aSubject) {
+            P.manageObject(aSubject, managedOnChange, managedBeforeChange);
+            listenable(aSubject);
+            // ORM mutable scalar and collection properties
+            var define = function (aOrmDefs) {
+                for each (var defsEntry in aOrmDefs.entrySet()) {
+                    var def = defsEntry.getValue().getJsDef();
+                    Object.defineProperty(aSubject, defsEntry.getKey(), def);
+                }
+            };
+            define(nFields.getOrmScalarDefinitions());
+            define(nFields.getOrmCollectionsDefinitions());
+        }
+
+        var _onInserted = null;
+        var _onDeleted = null;
+        var _onScrolled = null;
+        P.manageArray(published, {
+            spliced: function (added, deleted) {
+                added.forEach(function (aAdded) {
+                    justInserted = aAdded;
+                    justInsertedChange = new InsertClass(nEntity.getQueryName());
+                    for (var nf = 0; nf < nnFields.size(); nf++) {
+                        var nField = nnFields[nf];
+                        if (!aAdded[nField.name] && nField.pk) {
+                            aAdded[nField.name] = nField.getTypeInfo().generateValue();
+                        }
+                    }
+                    for (var na in aAdded) {
+                        var nField = noFields[na];
+                        if (nField) {
+                            var v = aAdded[na];
+                            var cv = new ValueClass(nField.name, v, nField.getTypeInfo());
+                            justInsertedChange.data.add(cv);
+                        }
+                    }
+                    nEntity.getChangeLog().add(justInsertedChange);
+                    for (var aOrdererKey in orderers) {
+                        var aOrderer = orderers[aOrdererKey];
+                        aOrderer.add(aAdded);
+                    }
+                    acceptInstance(aAdded);
+                    fireOppositeScalarsChanges(aAdded, nFields);
+                    fireOppositeCollectionsChanges(aAdded, nFields);
+                });
+                deleted.forEach(function (aDeleted) {
+                    if (aDeleted === justInserted) {
+                        justInserted = null;
+                        justInsertedChange = null;
+                    }
+                    var deleteChange = new DeleteClass(nEntity.getQueryName());
+                    generateChangeLogKeys(deleteChange.keys, nFields, null, aDeleted, null);
+                    nEntity.getChangeLog().add(deleteChange);
+                    for (var aOrdererKey in orderers) {
+                        var aOrderer = orderers[aOrdererKey];
+                        aOrderer.delete(aDeleted);
+                    }
+                    fireOppositeScalarsChanges(aDeleted, nFields);
+                    fireOppositeCollectionsChanges(aDeleted, nFields);
+                    unlistenable(aDeleted);
+                    P.unmanageObject(aDeleted);
+                });
+                if (_onInserted) {
+                    try {
+                        _onInserted({source: published, items: added});
+                    } catch (e) {
+                        Logger.severe(e);
+                    }
+                }
+                if (_onDeleted) {
+                    try {
+                        _onDeleted({source: published, items: deleted});
+                    } catch (e) {
+                        Logger.severe(e);
+                    }
+                }
+            },
+            scrolled: function (aSubject, oldCursor, newCursor) {
+                if (_onScrolled) {
+                    try {
+                        _onScrolled({source: published, propertyName: 'cursor', oldValue: oldCursor, newValue: newCursor});
+                    } catch (e) {
+                        Logger.severe(e);
+                    }
+                }
+                fire(published, {source: published, propertyName: 'cursor', oldValue: oldCursor, newValue: newCursor});
+            }
+        });
+        var pSchema = {};
+        Object.defineProperty(published, "schema", {
+            value: pSchema
+        });
+        var pkFieldName = '';
+        var nFields = nEntity.getFields();
+        var nnFields = nFields.toCollection();
+        var noFields = {};
+        // schema
+        for (var n = 0; n < nnFields.size(); n++) {
+            (function () {
+                var nField = nnFields[n];
+                noFields[nField.name] = nField;
+                if (nField.isPk())
+                    pkFieldName = nField.name;
+                var schemaDesc = {
+                    value: nField.getPublished()
+                };
+                if (!pSchema[nField.name]) {
+                    Object.defineProperty(pSchema, nField.name, schemaDesc);
+                } else {
+                    var eTitle = nEntity.title ? " [" + nEntity.title + "]" : "";
+                    throw "Duplicated field name found: " + nField.name + " in entity " + nEntity.name + eTitle;
+                }
+                Object.defineProperty(pSchema, n, schemaDesc);
+            })();
+        }
+        // entity.params.p1 syntax
+        var nParameters = nEntity.getQuery().getParameters();
+        var ncParameters = nParameters.toCollection();
+        var pParams = {};
+        for (var p = 0; p < ncParameters.size(); p++) {
+            (function () {
+                var nParameter = ncParameters[p];
+                var pDesc = {
+                    get: function () {
+                        return nParameter.jsValue;
+                    },
+                    set: function (aValue) {
+                        nParameter.jsValue = aValue;
+                    }
+                };
+                Object.defineProperty(pParams, nParameter.name, pDesc);
+                Object.defineProperty(pParams, p, pDesc);
+            })();
+        }
+        Object.defineProperty(published, 'params', {value: pParams});
+        // entity.params.schema.p1 syntax
+        var pParamsSchema = nParameters.getPublished();
+        if (!pParams.schema)
+            Object.defineProperty(pParams, 'schema', {value: pParamsSchema});
+        Object.defineProperty(published, 'find', {value: function (aCriteria) {
+                var keys = Object.keys(aCriteria);
+                keys = keys.sort();
+                var ordererKey = keys.join(' | ');
+                var orderer = orderers[ordererKey];
+                if (!orderer) {
+                    orderer = new P.Orderer(keys);
+                    published.forEach(function (item) {
+                        orderer.add(item);
+                    });
+                    orderers[ordererKey] = orderer;
+                }
+                var found = orderer.find(aCriteria);
+                return found;
+            }});
+        Object.defineProperty(published, 'findByKey', {value: function (aKeyValue) {
+                var criteria = {};
+                criteria[pkFieldName] = aKeyValue;
+                var found = published.find(criteria);
+                return found.length > 0 ? found[0] : null;
+            }});
+        Object.defineProperty(published, 'findById', {value: function (aKeyValue) {
+                P.Logger.warning('findById() is deprecated. Use findByKey() instead.');
+                return published.findByKey(aKeyValue);
+            }});
+        var toBeDeletedMark = '-platypus-to-be-deleted-mark';
+        Object.defineProperty(published, 'remove', {value: function (toBeDeleted) {
+                toBeDeleted = toBeDeleted.forEach ? toBeDeleted : [toBeDeleted];
+                toBeDeleted.forEach(function (anInstance) {
+                    anInstance[toBeDeletedMark] = true;
+                });
+                for (var d = published.length - 1; d >= 0; d--) {
+                    if (published[d][toBeDeletedMark]) {
+                        published.splice(d, 1);
+                    }
+                }
+                toBeDeleted.forEach(function (anInstance) {
+                    delete anInstance[toBeDeletedMark];
+                });
+            }});
+        Object.defineProperty(published, 'onScrolled', {
+            get: function () {
+                return _onScrolled;
+            },
+            set: function (aValue) {
+                _onScrolled = aValue;
+            }
+        });
+        Object.defineProperty(published, 'onInserted', {
+            get: function () {
+                return _onInserted;
+            },
+            set: function (aValue) {
+                _onInserted = aValue;
+            }
+        });
+        Object.defineProperty(published, 'onDeleted', {
+            get: function () {
+                return _onDeleted;
+            },
+            set: function (aValue) {
+                _onDeleted = aValue;
+            }
+        });
+        nEntity.setSnapshotConsumer(function (aSnapshot) {
+            Array.prototype.splice.call(published, 0, published.length);
+            if (nEntity.getElementClass()) {
+                var instanceCtor = nEntity.getElementClass();
+                for (var s = 0; s < aSnapshot.length; s++) {
+                    var snapshotInstance = aSnapshot[s];
+                    var accepted = new instanceCtor();
+                    for (var sp in snapshotInstance) {
+                        accepted[sp] = snapshotInstance[sp];
+                    }
+                    Array.prototype.push.call(published, accepted);
+                    acceptInstance(accepted);
+                }
+            } else {
+                for (var s = 0; s < aSnapshot.length; s++) {
+                    var snapshotInstance = aSnapshot[s];
+                    Array.prototype.push.call(published, snapshotInstance);
+                    acceptInstance(snapshotInstance);
+                }
+            }
+            orderers = {};
+            published.cursor = published.length > 0 ? published[0] : null;
+        });
+        listenable(published);
+        return published;
+	}-*/; 
+	
 	private static DefinitionsContainer ormPropertiesDefiner = DefinitionsContainer.init();
 
 	private static final class DefinitionsContainer extends JavaScriptObject {
@@ -321,8 +714,8 @@ public class Model implements HasPublished {
 			return {
 				scalarDef : function(targetEntity, targetFieldName, sourceFieldName) {
 					var _self = this;
-					_self.enumerable = true;
-					_self.configurable = false;
+					_self.enumerable = false;
+					_self.configurable = true;
 					_self.get = function() {
 						var criterion = {};
 						criterion[targetFieldName] = this[sourceFieldName];
@@ -335,7 +728,7 @@ public class Model implements HasPublished {
 				},
 				collectionDef : function(sourceEntity, targetFieldName, sourceFieldName) {
 					var _self = this;
-					_self.enumerable = true;
+					_self.enumerable = false;
 					_self.configurable = true;
 					_self.get = function() {
 						var criterion = {};
@@ -564,7 +957,7 @@ public class Model implements HasPublished {
 		return false;
 	}
 
-	public List<com.bearsoft.rowset.changes.Change> getChangeLog() {
+	public List<com.eas.client.changes.Change> getChangeLog() {
 		return changeLog;
 	}
 
@@ -623,31 +1016,17 @@ public class Model implements HasPublished {
 		});
 	}
 
-	public void commited() throws Exception {
+	public void revert() throws Exception {
 		changeLog.clear();
-		for (Entity aEntity : entities.values()) {
-			try {
-				Rowset rowset = aEntity.getRowset();
-				if (rowset != null) {
-					rowset.commited();
-				}
-			} catch (Exception ex) {
-				Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
-			}
+		for(Entity e : entities.values()){
+			// Apply snapshot last revertable snapshot
 		}
 	}
 
-	public void revert() throws Exception {
+	public void commited() throws Exception {
 		changeLog.clear();
-		for (Entity aEntity : entities.values()) {
-			try {
-				Rowset rowset = aEntity.getRowset();
-				if (rowset != null) {
-					rowset.rolledback();
-				}
-			} catch (Exception ex) {
-				Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
-			}
+		for(Entity e : entities.values()){
+            // Update/Take a snapshot for revert
 		}
 	}
 
@@ -656,9 +1035,9 @@ public class Model implements HasPublished {
 	}
 
 	public void requery(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
-		requery(new CallbackAdapter<Rowset, String>() {
+		requery(new CallbackAdapter<JavaScriptObject, String>() {
 			@Override
-			protected void doWork(Rowset aRowset) throws Exception {
+			protected void doWork(JavaScriptObject aRowset) throws Exception {
 				if (onSuccess != null)
 					Utils.invokeJsFunction(onSuccess);
 			}
@@ -676,7 +1055,7 @@ public class Model implements HasPublished {
 		});
 	}
 
-	public void requery(Callback<Rowset, String> aCallback) throws Exception {
+	public void requery(Callback<JavaScriptObject, String> aCallback) throws Exception {
 		changeLog.clear();
 		if (process != null) {
 			process.cancel();
@@ -693,9 +1072,9 @@ public class Model implements HasPublished {
 	}
 
 	public void execute(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
-		execute(new CallbackAdapter<Rowset, String>() {
+		execute(new CallbackAdapter<JavaScriptObject, String>() {
 			@Override
-			protected void doWork(Rowset aRowset) throws Exception {
+			protected void doWork(JavaScriptObject aRowset) throws Exception {
 				if (onSuccess != null)
 					Utils.invokeJsFunction(onSuccess);
 			}
@@ -713,7 +1092,7 @@ public class Model implements HasPublished {
 		});
 	}
 
-	public void execute(Callback<Rowset, String> aCallback) throws Exception {
+	public void execute(Callback<JavaScriptObject, String> aCallback) throws Exception {
 		if (process != null) {
 			process.cancel();
 		}
@@ -745,6 +1124,6 @@ public class Model implements HasPublished {
 		entity.validateQuery();
 		// addEntity(entity); To avoid memory leaks you should not add the
 		// entity to the model!
-		return JsModel.publish(entity);
+		return publishEntity(entity);
 	}
 }

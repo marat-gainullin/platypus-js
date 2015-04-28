@@ -436,7 +436,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
                         if (relation.isLeftField()) {
                             // There might be entities - parameters values sources, with no
                             // data in theirs rowsets, so we can't bind query parameters to proper values. In the
-                            // such case we initialize parameters values with RowsetUtils.UNDEFINED_SQL_VALUE
+                            // such case we initialize parameters values with null
                             JSObject leftRowset = leftEntity.getPublished();
                             if (leftRowset != null && leftRowset.getMember(CURSOR_PROP_NAME) instanceof JSObject) {
                                 JSObject jsCursor = (JSObject) leftRowset.getMember(CURSOR_PROP_NAME);

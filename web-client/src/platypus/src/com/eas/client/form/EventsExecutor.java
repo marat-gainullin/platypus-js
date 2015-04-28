@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 import com.bearsoft.gwt.ui.containers.window.events.HasMoveHandlers;
 import com.bearsoft.gwt.ui.containers.window.events.MoveEvent;
 import com.bearsoft.gwt.ui.containers.window.events.MoveHandler;
-import com.bearsoft.rowset.Utils;
+import com.eas.client.Utils;
 import com.eas.client.form.events.ActionEvent;
 import com.eas.client.form.events.ActionHandler;
 import com.eas.client.form.events.AddEvent;

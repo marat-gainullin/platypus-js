@@ -18,10 +18,8 @@ import com.bearsoft.gwt.ui.widgets.grid.processing.IndexOfProvider;
 import com.bearsoft.gwt.ui.widgets.grid.processing.ListMultiSortHandler;
 import com.bearsoft.gwt.ui.widgets.grid.processing.TreeDataProvider;
 import com.bearsoft.gwt.ui.widgets.grid.processing.TreeMultiSortHandler;
-import com.bearsoft.rowset.Utils;
-import com.bearsoft.rowset.Utils.JsObject;
-import com.bearsoft.rowset.beans.PropertyChangeEvent;
-import com.bearsoft.rowset.beans.PropertyChangeListener;
+import com.eas.client.Utils;
+import com.eas.client.Utils.JsObject;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.JavaScriptObjectKeyProvider;
@@ -366,10 +364,10 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 			}
 			sortHandlerReg = addColumnSortHandler(sortHandler);
 			((JsDataContainer) getDataProvider()).setData(jsData);
-			boundToCursor = Utils.listen(jsData, cursorProperty, new PropertyChangeListener() {
+			boundToCursor = Utils.listenPath(jsData, cursorProperty, new Utils.OnChangeHandler() {
 
 				@Override
-				public void propertyChange(PropertyChangeEvent evt) {
+				public void onChange(JavaScriptObject anEvent) {
 					enqueueServiceColumnsRedraw();
 				}
 
@@ -401,13 +399,13 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 			applyRows();
 			setSelectionModel(new MultiJavaScriptObjectSelectionModel(this));
 			if (field != null && !field.isEmpty()) {
-				boundToData = Utils.listen(data, field, new PropertyChangeListener() {
+				boundToData = Utils.listenPath(data, field, new Utils.OnChangeHandler() {
+					
 					@Override
-					public void propertyChange(PropertyChangeEvent evt) {
+					public void onChange(JavaScriptObject anEvent) {
 						applyRows();
 						setSelectionModel(new MultiJavaScriptObjectSelectionModel(ModelGrid.this));
 					}
-
 				});
 			}
 		} else {
@@ -1035,11 +1033,11 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 				aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::setChildrenField(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
 			}
 		});
-		
+
 		aPublished.unsort = function() {
 			aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::unsort()();
 		};
-		
+
 	}-*/;
 
 	public JavaScriptObject getOnRender() {

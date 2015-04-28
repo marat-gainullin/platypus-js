@@ -15,24 +15,21 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bearsoft.rowset.CallbackAdapter;
-import com.bearsoft.rowset.Cancellable;
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.Utils;
-import com.bearsoft.rowset.Utils.JsObject;
-import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.Parameter;
-import com.bearsoft.rowset.metadata.Parameters;
-import com.bearsoft.rowset.utils.IDGenerator;
-import com.bearsoft.rowset.utils.RowsetUtils;
+import com.eas.client.CallbackAdapter;
+import com.eas.client.Cancellable;
+import com.eas.client.IDGenerator;
 import com.eas.client.PlatypusHttpRequestParams;
 import com.eas.client.Requests;
+import com.eas.client.Utils;
+import com.eas.client.Utils.JsObject;
+import com.eas.client.changes.Change;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.Parameter;
+import com.eas.client.metadata.Parameters;
 import com.eas.client.published.PublishedFile;
 import com.eas.client.queries.Query;
 import com.eas.client.serial.ChangeWriter;
 import com.eas.client.serial.QueryJSONReader;
-import com.eas.client.serial.RowsetReader;
 import com.eas.client.xhr.FormData;
 import com.eas.client.xhr.ProgressEvent;
 import com.eas.client.xhr.ProgressHandler;
@@ -48,7 +45,6 @@ import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
-import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
@@ -434,7 +430,7 @@ public class AppClient {
 			Parameter p = parameters.get(i + 1);// parameters and fields are
 			                                    // 1-based
 			String sv = "null";
-			if (p.getValue() != null && p.getValue() != RowsetUtils.UNDEFINED_SQL_VALUE) {
+			if (p.getValue() != null) {
 				if (p.getValue() instanceof Date) {
 					sv = JsObject.formatDateValueWithJSON(Long.valueOf(((Date) p.getValue()).getTime()).doubleValue());
 					sv = sv.substring(1, sv.length() - 1);
@@ -919,27 +915,15 @@ public class AppClient {
 		});
 	}
 
-	public Cancellable requestData(String aQueryName, Parameters aParams, final Fields aExpectedFields, final Callback<Rowset, String> aCallback) throws Exception {
+	public Cancellable requestData(String aQueryName, Parameters aParams, final Fields aExpectedFields, final Callback<JavaScriptObject, String> aCallback) throws Exception {
 		String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqExecuteQuery)), param(PlatypusHttpRequestParams.QUERY_ID, aQueryName), params(aParams));
 		return startApiRequest(null, query, "", RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
 			@Override
 			public void doWork(XMLHttpRequest aResponse) throws Exception {
-				// Some post processing
-				Rowset rowset = readRowset(aResponse);
-				//
+				JavaScriptObject parsed = Utils.JsObject.parseJSON(aResponse.getResponseText());
 				if (aCallback != null)
-					aCallback.onSuccess(rowset);
-			}
-
-			private Rowset readRowset(XMLHttpRequest aResponse) throws Exception {
-				try {
-					return RowsetReader.read(JSONParser.parseStrict(aResponse.getResponseText()), aExpectedFields);
-				} catch (Exception ex) {
-					String respText = aResponse.getResponseText();
-					Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, "Rowset response parse error: " + respText + "\n; Status:" + aResponse.getStatus());
-					throw ex;
-				}
+					aCallback.onSuccess(parsed);
 			}
 
 			@Override

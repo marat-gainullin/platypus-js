@@ -3,7 +3,7 @@ package com.eas.client.form.published.widgets.model;
 import java.util.Date;
 
 import com.bearsoft.gwt.ui.widgets.DateTimeBox;
-import com.bearsoft.rowset.Utils;
+import com.eas.client.Utils;
 import com.eas.client.converters.DateValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.events.ActionEvent;

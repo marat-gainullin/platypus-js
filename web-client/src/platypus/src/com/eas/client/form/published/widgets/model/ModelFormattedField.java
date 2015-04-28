@@ -4,7 +4,7 @@ import java.text.ParseException;
 
 import com.bearsoft.gwt.ui.widgets.FormattedObjectBox;
 import com.bearsoft.gwt.ui.widgets.ObjectFormat;
-import com.bearsoft.rowset.Utils;
+import com.eas.client.Utils;
 import com.eas.client.converters.DateValueConverter;
 import com.eas.client.converters.DoubleValueConverter;
 import com.eas.client.converters.StringValueConverter;

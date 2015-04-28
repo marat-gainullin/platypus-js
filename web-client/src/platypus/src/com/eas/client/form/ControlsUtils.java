@@ -9,8 +9,8 @@ import java.util.logging.Logger;
 import org.apache.tools.ant.types.FileList;
 
 import com.bearsoft.gwt.ui.XElement;
-import com.bearsoft.rowset.Utils;
-import com.bearsoft.rowset.Utils.JsObject;
+import com.eas.client.Utils;
+import com.eas.client.Utils.JsObject;
 import com.eas.client.form.MarginConstraints.Margin;
 import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.published.HasPublished;

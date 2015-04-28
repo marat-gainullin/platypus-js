@@ -16,17 +16,18 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.changes.Command;
-import com.bearsoft.rowset.dataflow.FlowProvider;
-import com.bearsoft.rowset.exceptions.InvalidFieldsExceptionException;
-import com.bearsoft.rowset.metadata.DataTypeInfo;
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.Parameter;
-import com.bearsoft.rowset.metadata.Parameters;
+import com.eas.client.Cancellable;
 import com.eas.client.application.AppClient;
 import com.eas.client.application.WebFlowProvider;
+import com.eas.client.changes.Change;
+import com.eas.client.changes.Command;
+import com.eas.client.dataflow.FlowProvider;
+import com.eas.client.metadata.DataTypeInfo;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.Parameter;
+import com.eas.client.metadata.Parameters;
+import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.JavaScriptObject;
 
 /**
  * Abstract platypus query with parameters.
@@ -131,46 +132,20 @@ public class Query {
         entityName = aValue;
     }
 
-    public Rowset prepareRowset() throws InvalidFieldsExceptionException{
-    	Rowset rowset = new Rowset(createFlow());
-        rowset.setFields(fields);
-        return rowset;
+    public Cancellable execute(Callback<JavaScriptObject, String> aCallback) throws Exception {
+        FlowProvider flow = createFlow();
+        return flow.refresh(params, aCallback);
     }
     
-    public Change prepareCommand() throws Exception {
-		Command command = new Command(entityName);
-		command.parameters = new Change.Value[params.getParametersCount()];
-		for (int i = 0; i < command.parameters.length; i++) {
-			Parameter p = params.get(i + 1);
-			command.parameters[i] = new Change.Value(p.getName(), p.getValue(), p.getTypeInfo());
-		}
-		return command;
-    }
-
-    /**
-     * Merges some minimum of information on fields, because server is
-     * responsible on full resolving, like comments, primary and foreign keys
-     * and correct types, including geometries. This method does last time
-     * tricks, such as primary keys on key-less (synthetic, view and so on)
-     * rowsets. May be this method will do something else in future.
-     *
-     * @param destFields Fields to be merged with etalon fields.
-     * @param sourceFields Etalon fields, likely a query fields, got from
-     * server.
-     */
-    /*
-    protected void lightMergeFields(Fields destFields, Fields sourceFields) {
-        for (int i = 1; i <= sourceFields.getFieldsCount(); i++) {
-            Field srcField = sourceFields.get(i);
-            Field rowsetField = destFields.get(srcField.getName());
-            if (rowsetField != null) {
-                rowsetField.setPk(srcField.isPk());
-                // Further tricks...
-            }
+    public Command prepareCommand(){
+        Command command = new Command(entityName);
+        for (int i = 0; i < params.getParametersCount(); i++) {
+            Parameter p = params.get(i + 1);
+            command.getParameters().add(new Change.Value(p.getName(), p.getValue(), p.getTypeInfo()));
         }
+        return command;
     }
-    */
-
+    
     private FlowProvider createFlow() {
     	assert client != null : "A client must be specified";
         return new WebFlowProvider(client, entityName, fields);
