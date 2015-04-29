@@ -687,13 +687,21 @@ public class Application {
 					onSuccess = arguments[arguments.length - 2];
 					onFailure = arguments[arguments.length - 1];
 					argsLength -= 2;
+				}else if(arguments.length > 1 && typeof arguments[arguments.length - 1] == "undefined" && typeof arguments[arguments.length - 2] == "function"){
+					onSuccess = arguments[arguments.length - 2];
+					argsLength -= 2;
 				}else if(arguments.length > 0 && typeof arguments[arguments.length - 1] == "function"){
 					onSuccess = arguments[arguments.length - 1];
 					argsLength -= 1;
 				}
 				var params = [];
 				for (var j = 0; j < argsLength; j++) {
-					params[j] = JSON.stringify(arguments[j]);
+					var to = typeof arguments[j];
+					if(to !== 'undefined' && to !== 'function'){ 
+						params[j] = JSON.stringify(arguments[j]);
+					}else{
+						break;
+					}
 				}
 				var nativeClient = @com.eas.client.application.AppClient::getInstance()();
 				if(onSuccess) {

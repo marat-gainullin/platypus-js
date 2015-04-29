@@ -1,5 +1,6 @@
 package com.eas.client.metadata;
 
+import com.eas.client.Utils;
 import com.google.gwt.core.client.JavaScriptObject;
 
 import java.util.*;
@@ -122,6 +123,15 @@ public class Fields {
         return Collections.unmodifiableMap(ormScalarExpandings);
     }
 
+    public void forEachOrmScalarExpandings(String anExpandingsName, Utils.JsObject aProcesssor){
+    	Set<OrmDef> expandings = ormScalarExpandings.get(anExpandingsName);
+    	if(expandings != null){
+    		for(OrmDef def : expandings){
+    			aProcesssor.call(null, def);
+    		}
+    	}
+    }
+    
     public void putOrmCollectionDefinition(String aName, OrmDef aDefinition) {
         if (aName != null && !aName.isEmpty() && aDefinition != null) {
             if (!ormCollectionsDefinitions.containsKey(aName)) {
@@ -522,7 +532,7 @@ public class Fields {
 		return jsPublished;
 	}
 	
-	public static native JavaScriptObject publishFacade(Fields aFields, String aEntityDesc) throws Exception/*-{
+	public static native JavaScriptObject publishFacade(Fields aFields) throws Exception/*-{
 		if(aFields != null){
 			var published = aFields.@com.eas.client.metadata.Fields::getPublished()();
 			if(published == null){

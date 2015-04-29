@@ -22,13 +22,11 @@ import com.eas.client.PlatypusHttpRequestParams;
 import com.eas.client.Requests;
 import com.eas.client.Utils;
 import com.eas.client.Utils.JsObject;
-import com.eas.client.changes.Change;
 import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.metadata.Parameters;
 import com.eas.client.published.PublishedFile;
 import com.eas.client.queries.Query;
-import com.eas.client.serial.ChangeWriter;
 import com.eas.client.serial.QueryJSONReader;
 import com.eas.client.xhr.FormData;
 import com.eas.client.xhr.ProgressEvent;
@@ -45,9 +43,6 @@ import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.SafeUri;
@@ -627,9 +622,9 @@ public class AppClient {
 		// No-op here. Some implementation is in the tests.
 	}
 
-	public Cancellable requestCommit(final List<Change> changeLog, final Callback<Void, String> aCallback) throws Exception {
+	public Cancellable requestCommit(final JavaScriptObject changeLog, final Callback<Void, String> aCallback) throws Exception {
 		String query = param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqCommit));
-		return startApiRequest(null, query, ChangeWriter.writeLog(changeLog), RequestBuilder.POST, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
+		return startApiRequest(null, query, Utils.JsObject.writeJSON(changeLog), RequestBuilder.POST, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
 			@Override
 			public void doWork(XMLHttpRequest aResponse) throws Exception {
@@ -697,27 +692,28 @@ public class AppClient {
 				public void doWork(XMLHttpRequest aResponse) throws Exception {
 					// Some post processing
 					String text = aResponse.getResponseText();
-					JSONValue doc = text != null && !text.isEmpty() ? JSONParser.parseStrict(text) : null;
+					JavaScriptObject _doc = text != null && !text.isEmpty() ? Utils.JsObject.parseJSON(text) : null;
+					Utils.JsObject doc = _doc.cast();
 					//
 					Set<String> structure = new HashSet<String>();
 					Set<String> clientDependencies = new HashSet<String>();
 					Set<String> queryDependencies = new HashSet<String>();
 					Set<String> serverModuleDependencies = new HashSet<String>();
-					JSONArray jsStructure = doc.isObject().get("structure").isArray();
-					JSONArray jsClientDependencies = doc.isObject().get("clientDependencies").isArray();
-					JSONArray jsQueryDependencies = doc.isObject().get("queryDependencies").isArray();
-					JSONArray jsServerDependencies = doc.isObject().get("serverDependencies").isArray();
-					for (int i = 0; i < jsStructure.size(); i++) {
-						structure.add(jsStructure.get(i).isString().stringValue());
+					Utils.JsObject jsStructure = doc.getJs("structure").cast();
+					Utils.JsObject jsClientDependencies = doc.getJs("clientDependencies").cast();
+					Utils.JsObject jsQueryDependencies = doc.getJs("queryDependencies").cast();
+					Utils.JsObject jsServerDependencies = doc.getJs("serverDependencies").cast();
+					for (int i = 0; i < jsStructure.length(); i++) {
+						structure.add(jsStructure.getStringSlot(i));
 					}
-					for (int i = 0; i < jsClientDependencies.size(); i++) {
-						clientDependencies.add(jsClientDependencies.get(i).isString().stringValue());
+					for (int i = 0; i < jsClientDependencies.length(); i++) {
+						clientDependencies.add(jsClientDependencies.getStringSlot(i));
 					}
-					for (int i = 0; i < jsQueryDependencies.size(); i++) {
-						queryDependencies.add(jsQueryDependencies.get(i).isString().stringValue());
+					for (int i = 0; i < jsQueryDependencies.length(); i++) {
+						queryDependencies.add(jsQueryDependencies.getStringSlot(i));
 					}
-					for (int i = 0; i < jsServerDependencies.size(); i++) {
-						serverModuleDependencies.add(jsServerDependencies.get(i).isString().stringValue());
+					for (int i = 0; i < jsServerDependencies.length(); i++) {
+						serverModuleDependencies.add(jsServerDependencies.getStringSlot(i));
 					}
 					ModuleStructure moduleStructure = new ModuleStructure(structure, clientDependencies, serverModuleDependencies, queryDependencies);
 					modulesStructures.put(aModuleName, moduleStructure);
@@ -903,7 +899,7 @@ public class AppClient {
 			}
 
 			private Query readQuery(XMLHttpRequest aResponse) throws Exception {
-				return QueryJSONReader.read(JSONParser.parseStrict(aResponse.getResponseText()));
+				return QueryJSONReader.read(Utils.JsObject.parseJSON(aResponse.getResponseText()));
 			}
 
 			@Override

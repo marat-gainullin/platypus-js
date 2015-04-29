@@ -197,7 +197,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
             + "* @param onFailure The callback function for fresh data on failure event (optional).\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = QUERY_JSDOC, params = {"onSuccess", "onFailure"})
+    @ScriptFunction(jsDoc = QUERY_JSDOC, params = {"params", "onSuccess", "onFailure"})
     public JSObject query(JSObject aJsParams, JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
         Query copied = query.copy();
         aJsParams.keySet().forEach((String pName) -> {

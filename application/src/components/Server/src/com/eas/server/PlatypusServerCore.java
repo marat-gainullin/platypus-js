@@ -291,9 +291,9 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                                         if (!args.isEmpty()) {
                                                             args.clear();
                                                             onSuccess.accept(ScriptUtils.toJava(result));
+                                                        } else {
+                                                            Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
                                                         }
-                                                    } else {
-                                                        Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
                                                     }
                                                 } finally {
                                                     ScriptUtils.setLock(null);

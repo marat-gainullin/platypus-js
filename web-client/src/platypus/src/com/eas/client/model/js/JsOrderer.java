@@ -33,11 +33,11 @@ public class JsOrderer {
 			        }
 			        subset.add(anObject);
 			    };
-			    this.delete = function (anObject) {
+			    this['delete'] = function (anObject) {
 			        var key = calcKey(anObject);
 			        var subset = map[key];
 			        if (subset) {
-			            subset.delete(anObject);
+			            subset['delete'](anObject);
 			            if (subset.size === 0) {
 			                delete map[key];
 			            }

@@ -137,14 +137,16 @@ public class Query {
         return flow.refresh(params, aCallback);
     }
     
-    public Command prepareCommand(){
-        Command command = new Command(entityName);
-        for (int i = 0; i < params.getParametersCount(); i++) {
-            Parameter p = params.get(i + 1);
-            command.getParameters().add(new Change.Value(p.getName(), p.getValue(), p.getTypeInfo()));
+    public native JavaScriptObject prepareCommand()/*-{
+        var command = {kind: 'command', entity: this.@com.eas.client.queries.Query::getEntityName()(), parameters: {}};
+        var nParameters = this.@com.eas.client.queries.Query::getParameters()();
+        var pCount = nParameters.@com.eas.client.metadata.Parameters::getParametersCount()();
+        for (var i = 0; i < pCount; i++) {
+            var nParameter = nParameters.@com.eas.client.metadata.Parameters::get(I)(i + 1);
+            command.parameters[p.@com.eas.client.metadata.Parameter::getName()()] = $wnd.P.boxAsJs(p.@com.eas.client.metadata.Parameter::getJsValue()());
         }
         return command;
-    }
+    }-*/;
     
     private FlowProvider createFlow() {
     	assert client != null : "A client must be specified";

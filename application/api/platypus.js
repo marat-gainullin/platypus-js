@@ -992,6 +992,10 @@
                     return complemented;
                 }
                 function acceptInstance(aSubject) {
+                    Object.keys(noFields).forEach(function(aFieldName){
+                        if(typeof aSubject[aFieldName] === 'undefined')
+                            aSubject[aFieldName] = null;
+                    });
                     P.manageObject(aSubject, managedOnChange, managedBeforeChange);
                     listenable(aSubject);
                     // ORM mutable scalar and collection properties

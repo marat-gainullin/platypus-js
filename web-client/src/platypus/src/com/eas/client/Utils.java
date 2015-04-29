@@ -116,6 +116,10 @@ public class Utils {
 			return Object.keys(this);
 		}-*/;
 
+		public final native String getStringSlot(int i)/*-{
+			return this[i];
+		}-*/;
+
 		public final native JavaScriptObject getSlot(int i)/*-{
 			return this[i];
 		}-*/;
@@ -152,6 +156,10 @@ public class Utils {
 		public static native JavaScriptObject parseJSON(String aText)/*-{
 			return JSON.parse(aText);
 		}-*/;
+
+		public static native String writeJSON(JavaScriptObject changeLog)/*-{
+			return JSON.stringify(changeLog);
+		}-*/;
 	}
 
 	private static final String addListenerName = "-platypus-listener-add-func";
@@ -159,23 +167,29 @@ public class Utils {
 	private static final String fireChangeName = "-platypus-change-fire-func";
 
 	public static native JavaScriptObject listenable(JavaScriptObject aTarget)/*-{
-        var listeners = new Set();
-        Object.defineProperty(aTarget, addListenerName, {value: function (aListener) {
-                listeners.add(aListener);
-            }});
-        Object.defineProperty(aTarget, removeListenerName, {value: function (aListener) {
-                listeners.delete(aListener);
-            }});
-        Object.defineProperty(aTarget, fireChangeName, {value: function (aChange) {
-                Object.freeze(aChange);
-                listeners.forEach(function (aListener) {
-                    aListener(aChange);
-                });
-            }});
-        return function () {
-            unlistenable(aTarget);
-        };
-    }-*/;
+		var listeners = new Set();
+		Object.defineProperty(aTarget, @com.eas.client.Utils::addListenerName, {
+			value : function(aListener) {
+				listeners.add(aListener);
+			}
+		});
+		Object.defineProperty(aTarget, @com.eas.client.Utils::removeListenerName, {
+			value : function(aListener) {
+				listeners['delete'](aListener);
+			}
+		});
+		Object.defineProperty(aTarget, @com.eas.client.Utils::fireChangeName, {
+			value : function(aChange) {
+				Object.freeze(aChange);
+				listeners.forEach(function(aListener) {
+					aListener(aChange);
+				});
+			}
+		});
+		return function() {
+			unlistenable(aTarget);
+		};
+	}-*/;
 
 	public static native void unlistenable(JavaScriptObject aTarget)/*-{
 		delete aTarget[@com.eas.client.Utils::addListenerName];

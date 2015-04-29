@@ -18,7 +18,7 @@ public class IDGenerator {
     public final static Long rndIDPart = 100L;
     private static double lastValue = 0;
 
-    public static synchronized double genId() {
+    public static double genId() {
         double newValue = genIDImpl();
         while (lastValue >= newValue) {
             newValue = lastValue + 1;
