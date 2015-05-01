@@ -992,8 +992,8 @@
                     return complemented;
                 }
                 function acceptInstance(aSubject) {
-                    Object.keys(noFields).forEach(function(aFieldName){
-                        if(typeof aSubject[aFieldName] === 'undefined')
+                    Object.keys(noFields).forEach(function (aFieldName) {
+                        if (typeof aSubject[aFieldName] === 'undefined')
                             aSubject[aFieldName] = null;
                     });
                     P.manageObject(aSubject, managedOnChange, managedBeforeChange);
@@ -1303,7 +1303,7 @@
                                 var onSuccess = null;
                                 var onFailure = null;
                                 var argsLength = arguments.length;
-                                while(argsLength > 0 && !arguments[argsLength - 1]){
+                                while (argsLength > 0 && !arguments[argsLength - 1]) {
                                     argsLength--;
                                 }
                                 if (argsLength > 1 && typeof arguments[argsLength - 1] === "function" && typeof arguments[argsLength - 2] === "function") {
@@ -1464,6 +1464,25 @@
         value: writeString
     });
 })();
+
+function require(deps) {
+    if (!Array.isArray(deps))
+        deps = [deps];
+    for (var d = deps.length - 1; d >= 0; d--) {
+        var sName = deps[d];
+        if (sName.indexOf('./') === 0 || sName.indexOf('../') === 0) {
+            var error = new Error('path test error');
+            var stack = error.stack.split('\n');
+            var sourceCall = stack[2];
+            var stackFrameParsed = /\((.+):\d+\)/.exec(sourceCall);
+            var calledFromFile = stackFrameParsed[1];
+            load(calledFromFile + '/../' + sName + '.js');
+        }else{
+            load('classpath:' + sName + '.js');
+        }
+    }
+}
+
 if (!P) {
     /** 
      * Platypus library namespace global variable.

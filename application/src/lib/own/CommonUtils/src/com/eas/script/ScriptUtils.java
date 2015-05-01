@@ -13,10 +13,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.script.CompiledScript;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.api.scripting.NashornScriptEngine;
 import jdk.nashorn.api.scripting.URLReader;
 import jdk.nashorn.internal.ir.FunctionNode;
 import jdk.nashorn.internal.ir.IdentNode;
@@ -273,11 +275,11 @@ public class ScriptUtils {
     }
 
     public static Object exec(URL aSource) throws ScriptException {
-        return engine.eval(new URLReader(aSource), engine.getContext());
+        return engine.eval("load('" + aSource.toString() + "')");
     }
 
     public static Object exec(String aSource) throws ScriptException {
-        return engine.eval(aSource, engine.getContext());
+        return engine.eval(aSource);
     }
 
     public static JSObject getToPrimitiveFunc() {
@@ -367,7 +369,7 @@ public class ScriptUtils {
 
     public static Object toJava(Object aValue) {
         if (aValue instanceof ScriptObject) {
-            aValue = jdk.nashorn.api.scripting.ScriptUtils.wrap((ScriptObject)aValue);
+            aValue = jdk.nashorn.api.scripting.ScriptUtils.wrap((ScriptObject) aValue);
         }
         if (aValue instanceof JSObject) {
             assert toPrimitiveFunc != null : SCRIPT_NOT_INITIALIZED;
@@ -549,11 +551,11 @@ public class ScriptUtils {
         return (JSObject) oResult;
     }
 
-    public static void unlisten(JSObject aCookie){
+    public static void unlisten(JSObject aCookie) {
         JSObject unlisten = (JSObject) aCookie.getMember("unlisten");
         unlisten.call(null, new Object[]{});
     }
-    
+
     public static JSObject listenElements(JSObject aTarget, JSObject aCallback) {
         assert listenElementsFunc != null : SCRIPT_NOT_INITIALIZED;
         Object oResult = listenElementsFunc.call(null, new Object[]{aTarget, aCallback});
