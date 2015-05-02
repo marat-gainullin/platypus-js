@@ -1346,6 +1346,11 @@
             return boxAsJs(ScriptedResourceClass.load(boxAsJava(aResName), boxAsJava(onSuccess), boxAsJava(onFailure)));
         }
     });
+    Object.defineProperty(Resource, "loadText", {
+        value: function (aResName, onSuccess, onFailure) {
+            return boxAsJs(ScriptedResourceClass.load(boxAsJava(aResName), boxAsJava(onSuccess), boxAsJava(onFailure)));
+        }
+    });
     Object.defineProperty(Resource, "upload", {
         value: function (aFile, aName, aCompleteCallback, aProgressCallback, aAbortCallback) {
             print("upload() is not implemented for J2SE");

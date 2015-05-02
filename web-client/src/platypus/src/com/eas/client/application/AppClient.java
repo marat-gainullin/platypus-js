@@ -107,17 +107,17 @@ public class AppClient {
 
 	public static String remoteApiUri() {
 		NodeList<com.google.gwt.dom.client.Element> metas = com.google.gwt.dom.client.Document.get().getHead().getElementsByTagName("meta");
-		for(int i=0;i<metas.getLength();i++){
+		for (int i = 0; i < metas.getLength(); i++) {
 			com.google.gwt.dom.client.Element meta = metas.getItem(i);
-			if("platypus-server".equalsIgnoreCase(meta.getAttribute("name"))){
-				return meta.getAttribute("content");				
+			if ("platypus-server".equalsIgnoreCase(meta.getAttribute("name"))) {
+				return meta.getAttribute("content");
 			}
 		}
 		return relativeUri();
 	}
-	
+
 	public static String relativeUri() {
-		String pageUrl = GWT.getHostPageBaseURL();		
+		String pageUrl = GWT.getHostPageBaseURL();
 		pageUrl = pageUrl.substring(0, pageUrl.length() - 1);
 		return pageUrl;
 	}
@@ -158,18 +158,34 @@ public class AppClient {
 	}
 
 	public static Object jsLoad(String aResourceName, final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
+		return _jsLoad(aResourceName, true, onSuccess, onFailure);
+	}
+
+	public static Object jsLoadText(String aResourceName, final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
+		return _jsLoad(aResourceName, false, onSuccess, onFailure);
+	}
+
+	public static Object _jsLoad(String aResourceName, boolean aBinary, final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
 		SafeUri uri = AppClient.getInstance().getResourceUri(aResourceName);
 		if (onSuccess != null) {
-			AppClient.getInstance().startRequest(uri, ResponseType.Default, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
+			AppClient.getInstance().startRequest(uri, aBinary ? ResponseType.ArrayBuffer : ResponseType.Default, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
 				@Override
 				protected void doWork(XMLHttpRequest aResult) throws Exception {
 					if (aResult.getStatus() == Response.SC_OK) {
-						if (onSuccess != null)
+						String responseType = aResult.getResponseType();
+						if (ResponseType.ArrayBuffer.getResponseTypeString().equalsIgnoreCase(responseType)) {
+							Utils.JsObject buffer = (Utils.JsObject)Utils.toJs(aResult.getResponseArrayBuffer());
+							int length = buffer.getInteger("byteLength");
+							buffer.setInteger("length", length);
+							Utils.executeScriptEventVoid(onSuccess, onSuccess, buffer);
+						} else {
 							Utils.executeScriptEventVoid(onSuccess, onSuccess, Utils.toJs(aResult.getResponseText()));
+						}
 					} else {
-						if (onFailure != null)
+						if (onFailure != null) {
 							Utils.executeScriptEventVoid(onFailure, onFailure, Utils.toJs(aResult.getStatusText()));
+						}
 					}
 				}
 
@@ -190,7 +206,15 @@ public class AppClient {
 			XMLHttpRequest2 executed = AppClient.getInstance().syncRequest(uri.asString(), ResponseType.Default);
 			if (executed != null) {
 				if (executed.getStatus() == Response.SC_OK) {
-					return Utils.toJs(executed.getResponseText());
+					String responseType = executed.getResponseType();
+					if (ResponseType.ArrayBuffer.getResponseTypeString().equalsIgnoreCase(responseType)) {
+						Utils.JsObject buffer = (Utils.JsObject) executed.getResponseArrayBuffer();
+						int length = buffer.getInteger("byteLength");
+						buffer.setInteger("length", length);
+						return buffer;
+					} else {
+						return Utils.toJs(executed.getResponseText());
+					}
 				} else {
 					throw new Exception(executed.getStatusText());
 				}
@@ -212,12 +236,12 @@ public class AppClient {
 							if (aProgresssCallback != null) {
 								Utils.executeScriptEventVoid(aProgresssCallback, aProgresssCallback, aResult);
 							}
-							
-								if (aResult.isComplete() && aResult.getRequest() != null ) {
-									completed = true;
-									if (aCompleteCallback != null) {
-										Utils.executeScriptEventVoid(aCompleteCallback, aCompleteCallback, aResult.getRequest().getResponseText());
-									}
+
+							if (aResult.isComplete() && aResult.getRequest() != null) {
+								completed = true;
+								if (aCompleteCallback != null) {
+									Utils.executeScriptEventVoid(aCompleteCallback, aCompleteCallback, aResult.getRequest().getResponseText());
+								}
 							}
 						}
 					} catch (Exception ex) {

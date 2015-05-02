@@ -41,6 +41,10 @@ public class Utils {
 			return +this[aName];
 		}-*/;
 
+		public final native void setInteger(String aName, int aValue)/*-{
+			this[aName] = aValue;
+		}-*/;
+
 		public final native double getDouble(String aName)/*-{
 			return +this[aName];
 		}-*/;

@@ -179,7 +179,15 @@ public class Application {
 		}});
 		Object.defineProperty(Resource, "load", {get : function(){
 	        return function(aResName, onSuccess, onFailure){
-            	return $wnd.P.boxAsJs(@com.eas.client.application.AppClient::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aResName, onSuccess, onFailure));
+            	var loaded = $wnd.P.boxAsJs(@com.eas.client.application.AppClient::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aResName, onSuccess, onFailure));
+            	if(loaded)
+            		loaded.length = loaded.byteLength; 
+            	return loaded;
+	        };
+		}});
+		Object.defineProperty(Resource, "loadText", {get : function(){
+	        return function(aResName, onSuccess, onFailure){
+            	return $wnd.P.boxAsJs(@com.eas.client.application.AppClient::jsLoadText(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aResName, onSuccess, onFailure));
 	        };
 		}});
 		
