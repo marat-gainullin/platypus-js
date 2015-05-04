@@ -24,6 +24,19 @@
         delegate.setPublished(this);
     };
         /**
+         * Requeries the model data. Forces the model data refresh, no matter if its parameters has changed or not.
+         * @param onSuccess The handler function for refresh data on success event (optional).
+         * @param onFailure The handler function for refresh data on failure event (optional).
+         * @method requery
+         * @memberOf ApplicationDbModel
+         */
+        P.ApplicationDbModel.prototype.requery = function(onSuccess, onFailure) {
+            var delegate = this.unwrap();
+            var value = delegate.requery(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Creates new entity of model, based on passed sql query. This method works only in two tier components of a system.
          * @param sqlText SQL text for the new entity.
          * @param datasourceName the concrete database ID (optional).
@@ -34,22 +47,6 @@
         P.ApplicationDbModel.prototype.createEntity = function(sqlText, datasourceName) {
             var delegate = this.unwrap();
             var value = delegate.createEntity(P.boxAsJava(sqlText), P.boxAsJava(datasourceName));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Executes a SQL query against specific datasource. This method works only in two tier components of a system.
-         * @param sqlText SQL text for the new entity.
-         * @param datasourceName. The specific databsource name (optional).
-         * @param onSuccess Success callback. Have a number argument, indicating updated rows count (optional).
-         * @param onFailure Failure callback. Have a string argument, indicating an error occured (optional).
-         * @return an entity instance.
-         * @method executeSql
-         * @memberOf ApplicationDbModel
-         */
-        P.ApplicationDbModel.prototype.executeSql = function(sqlText, datasourceName, arg2, arg3) {
-            var delegate = this.unwrap();
-            var value = delegate.executeSql(P.boxAsJava(sqlText), P.boxAsJava(datasourceName), P.boxAsJava(arg2), P.boxAsJava(arg3));
             return P.boxAsJs(value);
         };
 
@@ -66,15 +63,18 @@
         };
 
         /**
-         * Requeries the model data. Forces the model data refresh, no matter if its parameters has changed or not.
-         * @param onSuccess The handler function for refresh data on success event (optional).
-         * @param onFailure The handler function for refresh data on failure event (optional).
-         * @method requery
+         * Executes a SQL query against specific datasource. This method works only in two tier components of a system.
+         * @param sqlText SQL text for the new entity.
+         * @param datasourceName. The specific databsource name (optional).
+         * @param onSuccess Success callback. Have a number argument, indicating updated rows count (optional).
+         * @param onFailure Failure callback. Have a string argument, indicating an error occured (optional).
+         * @return an entity instance.
+         * @method executeSql
          * @memberOf ApplicationDbModel
          */
-        P.ApplicationDbModel.prototype.requery = function(onSuccess, onFailure) {
+        P.ApplicationDbModel.prototype.executeSql = function(sqlText, datasourceName, arg2, arg3) {
             var delegate = this.unwrap();
-            var value = delegate.requery(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
+            var value = delegate.executeSql(P.boxAsJava(sqlText), P.boxAsJava(datasourceName), P.boxAsJava(arg2), P.boxAsJava(arg3));
             return P.boxAsJs(value);
         };
 

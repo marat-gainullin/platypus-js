@@ -1,11 +1,15 @@
 package com.eas.script;
 
 import com.eas.concurrent.DeamonThreadFactory;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -13,10 +17,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.script.CompiledScript;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.api.scripting.NashornScriptEngine;
 import jdk.nashorn.api.scripting.URLReader;
 import jdk.nashorn.internal.ir.FunctionNode;
 import jdk.nashorn.internal.ir.IdentNode;
@@ -62,6 +68,26 @@ public class ScriptUtils {
     protected static JSObject listenFunc;
     protected static JSObject listenElementsFunc;
     protected static ScriptEngine engine;
+
+    protected static class Executed {
+
+        protected long timeStamp;
+        protected Object scriptResult;
+
+        public Executed(long aTimeStamp, Object aScriptResult) {
+            timeStamp = aTimeStamp;
+            scriptResult = aScriptResult;
+        }
+
+        public long getTimeStamp() {
+            return timeStamp;
+        }
+
+        public Object getScriptResult() {
+            return scriptResult;
+        }
+    }
+    protected static Map<URL, Executed> executed = new HashMap<>();
     // Thread locals
     protected static ThreadLocal<Object> lock = new ThreadLocal<>();
     protected static ThreadLocal<Object> request = new ThreadLocal<>();
@@ -272,12 +298,20 @@ public class ScriptUtils {
         return p.parse();
     }
 
-    public static Object exec(URL aSource) throws ScriptException {
-        return engine.eval(new URLReader(aSource), engine.getContext());
+    public static Object exec(URL aSourcePlace) throws ScriptException, URISyntaxException {
+        Executed eEntry = executed.get(aSourcePlace);
+        long lastModified = Paths.get(aSourcePlace.toURI()).toFile().lastModified();
+        if (eEntry == null || lastModified > eEntry.getTimeStamp()) {
+            Object scriptRes = engine.eval("load('" + aSourcePlace.toString() + "')");
+            executed.put(aSourcePlace, new Executed(lastModified, scriptRes));
+            return scriptRes;
+        } else {
+            return eEntry.getScriptResult();
+        }
     }
 
     public static Object exec(String aSource) throws ScriptException {
-        return engine.eval(aSource, engine.getContext());
+        return engine.eval(aSource);
     }
 
     public static JSObject getToPrimitiveFunc() {
@@ -367,7 +401,7 @@ public class ScriptUtils {
 
     public static Object toJava(Object aValue) {
         if (aValue instanceof ScriptObject) {
-            aValue = jdk.nashorn.api.scripting.ScriptUtils.wrap((ScriptObject)aValue);
+            aValue = jdk.nashorn.api.scripting.ScriptUtils.wrap((ScriptObject) aValue);
         }
         if (aValue instanceof JSObject) {
             assert toPrimitiveFunc != null : SCRIPT_NOT_INITIALIZED;
@@ -549,11 +583,11 @@ public class ScriptUtils {
         return (JSObject) oResult;
     }
 
-    public static void unlisten(JSObject aCookie){
+    public static void unlisten(JSObject aCookie) {
         JSObject unlisten = (JSObject) aCookie.getMember("unlisten");
         unlisten.call(null, new Object[]{});
     }
-    
+
     public static JSObject listenElements(JSObject aTarget, JSObject aCallback) {
         assert listenElementsFunc != null : SCRIPT_NOT_INITIALIZED;
         Object oResult = listenElementsFunc.call(null, new Object[]{aTarget, aCallback});

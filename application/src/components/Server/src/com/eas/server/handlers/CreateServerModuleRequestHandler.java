@@ -45,7 +45,7 @@ public class CreateServerModuleRequestHandler extends SessionRequestHandler<Crea
         } else {
             Date clientModuleTime = getRequest().getTimeStamp();
             try {
-                ScriptedResource._require(new String[]{moduleName}, new ConcurrentSkipListSet<>(), (Void v) -> {
+                ScriptedResource._require(new String[]{moduleName}, null, new ConcurrentSkipListSet<>(), (Void v) -> {
                     try {
                         AppElementFiles files = serverCore.getIndexer().nameToFiles(moduleName);
                         JSObject jsConstr = ScriptUtils.lookupInGlobal(moduleName);

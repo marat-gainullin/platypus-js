@@ -326,20 +326,6 @@
              */
             P.MenuBar.prototype.height = 0;
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.MenuBar){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf MenuBar
-             */
-            P.MenuBar.prototype.element = {};
-        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -356,6 +342,20 @@
              * @memberOf MenuBar
              */
             P.MenuBar.prototype.onComponentShown = {};
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.MenuBar){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf MenuBar
+             */
+            P.MenuBar.prototype.element = {};
         }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
@@ -442,6 +442,23 @@
              */
             P.MenuBar.prototype.nextFocusableComponent = {};
         }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.MenuBar){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf MenuBar
+             */
+            P.MenuBar.prototype.onActionPerformed = {};
+        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -472,23 +489,6 @@
              * @memberOf MenuBar
              */
             P.MenuBar.prototype.count = 0;
-        }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.MenuBar){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf MenuBar
-             */
-            P.MenuBar.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -763,17 +763,6 @@
         };
 
         /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf MenuBar
-         */
-        P.MenuBar.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Gets the container's n-th component.
          * @param index the component's index in the container
          * @return the child component
@@ -783,6 +772,17 @@
         P.MenuBar.prototype.child = function(index) {
             var delegate = this.unwrap();
             var value = delegate.child(P.boxAsJava(index));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Tries to acquire focus for this component.
+         * @method focus
+         * @memberOf MenuBar
+         */
+        P.MenuBar.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
             return P.boxAsJs(value);
         };
 

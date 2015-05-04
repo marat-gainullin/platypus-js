@@ -342,6 +342,17 @@
 
         /**
          *
+         * @method removeColumnNode
+         * @memberOf ModelGridColumn
+         */
+        P.ModelGridColumn.prototype.removeColumnNode = function(node) {
+            var delegate = this.unwrap();
+            var value = delegate.removeColumnNode(P.boxAsJava(node));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
          * @method addColumnNode
          * @memberOf ModelGridColumn
          */
@@ -358,17 +369,6 @@
         P.ModelGridColumn.prototype.unsort = function() {
             var delegate = this.unwrap();
             var value = delegate.unsort();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         *
-         * @method removeColumnNode
-         * @memberOf ModelGridColumn
-         */
-        P.ModelGridColumn.prototype.removeColumnNode = function(node) {
-            var delegate = this.unwrap();
-            var value = delegate.removeColumnNode(P.boxAsJava(node));
             return P.boxAsJs(value);
         };
 
