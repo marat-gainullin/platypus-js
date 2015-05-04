@@ -90,9 +90,9 @@
          * @method query
          * @memberOf ApplicationPlatypusEntity
          */
-        P.ApplicationPlatypusEntity.prototype.query = function(onSuccess, onFailure, arg2) {
+        P.ApplicationPlatypusEntity.prototype.query = function(params, onSuccess, onFailure) {
             var delegate = this.unwrap();
-            var value = delegate.query(P.boxAsJava(onSuccess), P.boxAsJava(onFailure), P.boxAsJava(arg2));
+            var value = delegate.query(P.boxAsJava(params), P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
             return P.boxAsJs(value);
         };
 

@@ -330,20 +330,6 @@
              */
             P.BorderPane.prototype.height = 0;
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.BorderPane){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf BorderPane
-             */
-            P.BorderPane.prototype.element = {};
-        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -360,6 +346,20 @@
              * @memberOf BorderPane
              */
             P.BorderPane.prototype.onComponentShown = {};
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.BorderPane){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf BorderPane
+             */
+            P.BorderPane.prototype.element = {};
         }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
@@ -378,6 +378,21 @@
              */
             P.BorderPane.prototype.onMouseMoved = {};
         }
+        Object.defineProperty(this, "topComponent", {
+            get: function() {
+                var value = delegate.topComponent;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.BorderPane){
+            /**
+             * The component added using HorizontalPosition.TOP constraint.
+             * If no component at the container on this constraint then set to <code>null</code>.
+             * @property topComponent
+             * @memberOf BorderPane
+             */
+            P.BorderPane.prototype.topComponent = {};
+        }
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
@@ -394,21 +409,6 @@
              * @memberOf BorderPane
              */
             P.BorderPane.prototype.opaque = true;
-        }
-        Object.defineProperty(this, "topComponent", {
-            get: function() {
-                var value = delegate.topComponent;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.BorderPane){
-            /**
-             * The component added using HorizontalPosition.TOP constraint.
-             * If no component at the container on this constraint then set to <code>null</code>.
-             * @property topComponent
-             * @memberOf BorderPane
-             */
-            P.BorderPane.prototype.topComponent = {};
         }
         Object.defineProperty(this, "visible", {
             get: function() {
@@ -479,6 +479,23 @@
              */
             P.BorderPane.prototype.nextFocusableComponent = {};
         }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.BorderPane){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf BorderPane
+             */
+            P.BorderPane.prototype.onActionPerformed = {};
+        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -509,23 +526,6 @@
              * @memberOf BorderPane
              */
             P.BorderPane.prototype.count = 0;
-        }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.BorderPane){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf BorderPane
-             */
-            P.BorderPane.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

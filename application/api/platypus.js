@@ -29,10 +29,6 @@
      throw "Legacy api can't restore the global namespace.";
      };
      */
-    load("classpath:internals.js");
-    load("classpath:managed.js");
-    load("classpath:orderer.js");
-
     // core imports
     var EngineUtilsClass = Java.type("jdk.nashorn.api.scripting.ScriptUtils");
     var JavaArrayClass = Java.type("java.lang.Object[]");
@@ -59,7 +55,23 @@
     Object.defineProperty(P, "J2SE", {value: "Java SE environment"});
     Object.defineProperty(P, "agent", {value: P.J2SE});
 
-    var toPrimitive = ScriptUtilsClass.getToPrimitiveFunc();
+    function toPrimitive(aValue) {
+        if (aValue && aValue.constructor) {
+            var cName = aValue.constructor.name;
+            if (cName === 'Date') {
+                var converted = new JavaDateClass(aValue.getTime());
+                return converted;
+            } else if (cName === 'String') {
+                return aValue + '';
+            } else if (cName === 'Number') {
+                return aValue * 1;
+            } else if (cName === 'Boolean') {
+                return !!aValue;
+            }
+        }
+        return aValue;
+    }
+    ScriptUtilsClass.setToPrimitiveFunc(toPrimitive);
 
     /**
      * @private
@@ -182,7 +194,13 @@
         }
     }
     Object.defineProperty(P, "require", {value: require});
-    
+
+    P.require([
+        'internals.js'
+                , 'managed.js'
+                , 'orderer.js'
+    ]);
+
     var serverCoreClass;
     try {
         serverCoreClass = Java.type('com.eas.server.PlatypusServerCore');
@@ -195,11 +213,10 @@
         Object.defineProperty(P, "invokeLater", {get: function () {
                 return invokeLater;
             }});
-        load("classpath:server-deps.js");
+        P.require('server-deps.js');
     } catch (e) {
         serverCoreClass = null;
         // in client
-        load("classpath:deps.js");
         // gui imports
         var KeyEventClass = Java.type("java.awt.event.KeyEvent");
         var FileChooserClass = Java.type("javax.swing.JFileChooser");

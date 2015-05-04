@@ -502,17 +502,6 @@
         };
 
         /**
-         * Restores this form state.
-         * @method restore
-         * @memberOf Form
-         */
-        P.Form.prototype.restore = function() {
-            var delegate = this.unwrap();
-            var value = delegate.restore();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Maximizes this form.
          * @method maximize
          * @memberOf Form
@@ -520,6 +509,17 @@
         P.Form.prototype.maximize = function() {
             var delegate = this.unwrap();
             var value = delegate.maximize();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Restores this form state.
+         * @method restore
+         * @memberOf Form
+         */
+        P.Form.prototype.restore = function() {
+            var delegate = this.unwrap();
+            var value = delegate.restore();
             return P.boxAsJs(value);
         };
 

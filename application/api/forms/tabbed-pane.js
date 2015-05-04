@@ -327,20 +327,6 @@
              */
             P.TabbedPane.prototype.height = 0;
         }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.TabbedPane){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf TabbedPane
-             */
-            P.TabbedPane.prototype.element = {};
-        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -357,6 +343,20 @@
              * @memberOf TabbedPane
              */
             P.TabbedPane.prototype.onComponentShown = {};
+        }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.TabbedPane){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf TabbedPane
+             */
+            P.TabbedPane.prototype.element = {};
         }
         Object.defineProperty(this, "selectedComponent", {
             get: function() {
@@ -460,6 +460,23 @@
              */
             P.TabbedPane.prototype.nextFocusableComponent = {};
         }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.TabbedPane){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf TabbedPane
+             */
+            P.TabbedPane.prototype.onActionPerformed = {};
+        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -490,23 +507,6 @@
              * @memberOf TabbedPane
              */
             P.TabbedPane.prototype.count = 0;
-        }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.TabbedPane){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf TabbedPane
-             */
-            P.TabbedPane.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -817,17 +817,6 @@
         };
 
         /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf TabbedPane
-         */
-        P.TabbedPane.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Gets the container's n-th component.
          * @param index the component's index in the container
          * @return the child component
@@ -837,6 +826,17 @@
         P.TabbedPane.prototype.child = function(index) {
             var delegate = this.unwrap();
             var value = delegate.child(P.boxAsJava(index));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Tries to acquire focus for this component.
+         * @method focus
+         * @memberOf TabbedPane
+         */
+        P.TabbedPane.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
             return P.boxAsJs(value);
         };
 
