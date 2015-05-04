@@ -2,9 +2,7 @@
  * Contains the basic dependencies loading.
  */
 try {
-    load('classpath:common-utils/color.js');
-    load('classpath:common-utils/cursor.js');
-    load('classpath:common-utils/font.js');
+    P.require('common-utils/index.js');
     print('common-utils API loaded.');
 } catch (e) {
     print('common-utils API skipped.');

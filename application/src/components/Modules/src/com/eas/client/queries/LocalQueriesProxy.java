@@ -187,7 +187,7 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
     }
 
     protected JSObject createModule(String aModuleName) throws Exception {
-        ScriptedResource.require(new String[]{aModuleName});
+        ScriptedResource.require(new String[]{aModuleName}, null);
         return ScriptUtils.createModule(aModuleName);
     }
 

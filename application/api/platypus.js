@@ -148,6 +148,41 @@
             return invokeDelayed;
         }});
 
+    /**
+     * @static
+     * @param {type} deps
+     * @param {type} aOnSuccess
+     * @param {type} aOnFailure
+     * @returns {undefined}
+     */
+    function require(deps, aOnSuccess, aOnFailure) {
+        if (!Array.isArray(deps))
+            deps = [deps];
+        var strArray = new JavaStringArrayClass(deps.length);
+        for (var i = 0; i < deps.length; i++)
+            strArray[i] = deps[i] ? deps[i] + '' : null;
+        //////////////////
+        var calledFromFile = null;
+        var error = new Error('path test error');
+        if (error.stack) {
+            var stack = error.stack.split('\n');
+            if (stack.length > 1) {
+                var sourceCall = stack[2];
+                var stackFrameParsed = /\((.+):\d+\)/.exec(sourceCall);
+                if (stackFrameParsed && stackFrameParsed.length > 1) {
+                    calledFromFile = stackFrameParsed[1];
+                }
+            }
+        }
+        //////////////////
+        if (aOnSuccess) {
+            ScriptedResourceClass.require(strArray, calledFromFile, P.boxAsJava(aOnSuccess), P.boxAsJava(aOnFailure));
+        } else {
+            ScriptedResourceClass.require(strArray, calledFromFile);
+        }
+    }
+    Object.defineProperty(P, "require", {value: require});
+    
     var serverCoreClass;
     try {
         serverCoreClass = Java.type('com.eas.server.PlatypusServerCore');
@@ -635,26 +670,6 @@
         Object.defineProperty(P, "loadForm", {value: loadForm});
     }
 
-    /**
-     * @static
-     * @param {type} deps
-     * @param {type} aOnSuccess
-     * @param {type} aOnFailure
-     * @returns {undefined}
-     */
-    function require(deps, aOnSuccess, aOnFailure) {
-        if (!Array.isArray(deps))
-            deps = [deps];
-        var strArray = new JavaStringArrayClass(deps.length);
-        for (var i = 0; i < deps.length; i++)
-            strArray[i] = deps[i] ? deps[i] + '' : null;
-        if (aOnSuccess) {
-            ScriptedResourceClass.require(strArray, P.boxAsJava(aOnSuccess), P.boxAsJava(aOnFailure));
-        } else {
-            ScriptedResourceClass.require(strArray);
-        }
-    }
-    Object.defineProperty(P, "require", {value: require});
     function extend(Child, Parent) {
         var prevChildProto = {};
         for (var m in Child.prototype) {
@@ -1464,24 +1479,6 @@
         value: writeString
     });
 })();
-
-function require(deps) {
-    if (!Array.isArray(deps))
-        deps = [deps];
-    for (var d = deps.length - 1; d >= 0; d--) {
-        var sName = deps[d];
-        if (sName.indexOf('./') === 0 || sName.indexOf('../') === 0) {
-            var error = new Error('path test error');
-            var stack = error.stack.split('\n');
-            var sourceCall = stack[2];
-            var stackFrameParsed = /\((.+):\d+\)/.exec(sourceCall);
-            var calledFromFile = stackFrameParsed[1];
-            load(calledFromFile + '/../' + sName + '.js');
-        }else{
-            load('classpath:' + sName + '.js');
-        }
-    }
-}
 
 if (!P) {
     /** 

@@ -1,11 +1,15 @@
 package com.eas.script;
 
 import com.eas.concurrent.DeamonThreadFactory;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -64,6 +68,26 @@ public class ScriptUtils {
     protected static JSObject listenFunc;
     protected static JSObject listenElementsFunc;
     protected static ScriptEngine engine;
+
+    protected static class Executed {
+
+        protected long timeStamp;
+        protected Object scriptResult;
+
+        public Executed(long aTimeStamp, Object aScriptResult) {
+            timeStamp = aTimeStamp;
+            scriptResult = aScriptResult;
+        }
+
+        public long getTimeStamp() {
+            return timeStamp;
+        }
+
+        public Object getScriptResult() {
+            return scriptResult;
+        }
+    }
+    protected static Map<URL, Executed> executed = new HashMap<>();
     // Thread locals
     protected static ThreadLocal<Object> lock = new ThreadLocal<>();
     protected static ThreadLocal<Object> request = new ThreadLocal<>();
@@ -274,8 +298,16 @@ public class ScriptUtils {
         return p.parse();
     }
 
-    public static Object exec(URL aSource) throws ScriptException {
-        return engine.eval("load('" + aSource.toString() + "')");
+    public static Object exec(URL aSourcePlace) throws ScriptException, URISyntaxException {
+        Executed eEntry = executed.get(aSourcePlace);
+        long lastModified = Paths.get(aSourcePlace.toURI()).toFile().lastModified();
+        if (eEntry == null || lastModified > eEntry.getTimeStamp()) {
+            Object scriptRes = engine.eval("load('" + aSourcePlace.toString() + "')");
+            executed.put(aSourcePlace, new Executed(lastModified, scriptRes));
+            return scriptRes;
+        } else {
+            return eEntry.getScriptResult();
+        }
     }
 
     public static Object exec(String aSource) throws ScriptException {

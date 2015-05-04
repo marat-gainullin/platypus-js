@@ -180,7 +180,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                 onFailure.accept(new Exception("Module's method name is missing."));
             } else {
                 try {
-                    ScriptedResource._require(new String[]{aModuleName}, new ConcurrentSkipListSet<>(), (Void v) -> {
+                    ScriptedResource._require(new String[]{aModuleName}, null, new ConcurrentSkipListSet<>(), (Void v) -> {
                         try {
                             AppElementFiles files = indexer.nameToFiles(aModuleName);
                             JSObject constr = ScriptUtils.lookupInGlobal(aModuleName);
@@ -354,7 +354,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
      * @throws java.lang.Exception
      */
     protected boolean startResidentModule(String aModuleName) throws Exception {
-        ScriptedResource.require(new String[]{aModuleName});
+        ScriptedResource.require(new String[]{aModuleName}, null);
         Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.INFO, "Starting resident module \"{0}\"", aModuleName);
         try {
             JSObject jsConstr = ScriptUtils.lookupInGlobal(aModuleName);

@@ -210,7 +210,6 @@ public class PlatypusClientApplication {
             if (config.url != null) {
                 checkUserHome();
                 config.datasourcesArgs.registerDatasources();
-                ScriptUtils.init();
                 ScriptUtils.initServices(config.threadsArgs.getMaxServicesTreads());
                 ScriptUtils.setGlobalQueue((Runnable aTask) -> {
                     EventQueue.invokeLater(aTask);
@@ -282,7 +281,8 @@ public class PlatypusClientApplication {
                     throw new Exception("Unknown protocol in url: " + config.url);
                 }
                 ScriptedResource.init(app);
-                ScriptedResource._require(new String[]{""}, new ConcurrentSkipListSet<>(), (Void v) -> {
+                ScriptUtils.init();
+                ScriptedResource._require(new String[]{""}, null, new ConcurrentSkipListSet<>(), (Void v) -> {
 //                    JSObject p = ScriptUtils.lookupInGlobal("P");
 //                    if (p != null) {
 //                        Object ready = p.getMember("ready");
