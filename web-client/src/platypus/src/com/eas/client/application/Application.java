@@ -27,6 +27,9 @@ import com.eas.client.model.js.JsOrderer;
 import com.eas.client.queries.Query;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
+import com.google.gwt.dom.client.AnchorElement;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.logging.client.LogConfiguration;
 
 /**
@@ -72,34 +75,26 @@ public class Application {
 	public static Query putAppQuery(Query aQuery) {
 		return appQueries.put(aQuery.getEntityName(), aQuery);
 	}
-	
+
 	public static native JavaScriptObject createReport(String reportLocation)/*-{
 		return new $wnd.P.Report(reportLocation);
 	}-*/;
 
 	/*
-	protected static class ExecuteApplicationCallback extends RunnableAdapter {
+	 * protected static class ExecuteApplicationCallback extends RunnableAdapter
+	 * {
+	 * 
+	 * protected String startForm; protected Set<Element> indicators;
+	 * 
+	 * public ExecuteApplicationCallback(String aStartForm, Set<Element>
+	 * aIndicators) { super(); startForm = aStartForm; indicators = aIndicators;
+	 * }
+	 * 
+	 * @Override protected void doWork() throws Exception { for (Element el :
+	 * indicators) { el.<XElement> cast().unmask(); }
+	 * loaderHandlerRegistration.removeHandler(); onReady(); } }
+	 */
 
-		protected String startForm;
-		protected Set<Element> indicators;
-
-		public ExecuteApplicationCallback(String aStartForm, Set<Element> aIndicators) {
-			super();
-			startForm = aStartForm;
-			indicators = aIndicators;
-		}
-
-		@Override
-		protected void doWork() throws Exception {
-			for (Element el : indicators) {
-				el.<XElement> cast().unmask();
-			}
-			loaderHandlerRegistration.removeHandler();
-			onReady();
-		}		
-	}
-	*/
-	
 	/**
 	 * This method is publicONLY because of tests!
 	 * 
@@ -957,67 +952,96 @@ public class Application {
 			}
 
 			@Override
-			public void onFailure(String reason) {	
+			public void onFailure(String reason) {
 				Logger.getLogger(Application.class.getName()).log(Level.SEVERE, reason);
 			}
 		});
 	}
 
 	/*
-	private static Set<Element> extractPlatypusProgressIndicators() {
-		Set<Element> platypusIndicators = new HashSet<Element>();
-		XElement xBody = Utils.doc.getBody().cast();
-		String platypusIndicatorClass = "platypus-indicator";
-		if (xBody.getClassName() != null && xBody.hasClassName(platypusIndicatorClass)) {
-			platypusIndicators.add(xBody);
-		}
-
-		List<Element> divs2 = xBody.select(platypusIndicatorClass);
-		if (divs2 != null) {
-			for (int i = 0; i < divs2.size(); i++) {
-				Element div = divs2.get(i);
-				platypusIndicators.add(div);
-			}
-		}
-		return platypusIndicators;
-	}
-	*/
+	 * private static Set<Element> extractPlatypusProgressIndicators() {
+	 * Set<Element> platypusIndicators = new HashSet<Element>(); XElement xBody
+	 * = Utils.doc.getBody().cast(); String platypusIndicatorClass =
+	 * "platypus-indicator"; if (xBody.getClassName() != null &&
+	 * xBody.hasClassName(platypusIndicatorClass)) {
+	 * platypusIndicators.add(xBody); }
+	 * 
+	 * List<Element> divs2 = xBody.select(platypusIndicatorClass); if (divs2 !=
+	 * null) { for (int i = 0; i < divs2.size(); i++) { Element div =
+	 * divs2.get(i); platypusIndicators.add(div); } } return platypusIndicators;
+	 * }
+	 */
 
 	protected static native void onReady()/*-{
 		if ($wnd.P.ready)
 			$wnd.P.ready();
 	}-*/;
 
+	private static String toAppModuleId(String aRelative, String aStartPoint) {
+		Element div = Document.get().createDivElement();
+		div.setInnerHTML("<a href=\"" + aStartPoint + "/" + aRelative + "\">o</a>");
+		String absolute = div.getFirstChildElement().<AnchorElement> cast().getHref();
+		String hostContextPrefix = AppClient.relativeUri() + AppClient.APP_RESOURCE_PREFIX;
+		String appModuleId = absolute.substring(hostContextPrefix.length());
+		return appModuleId;
+	}
+
 	public static void require(final JavaScriptObject aDeps, final JavaScriptObject aOnSuccess, final JavaScriptObject aOnFailure) {
+		String calledFromDir = null;
+		try {
+			throw new Exception("test");
+		} catch (Exception ex) {
+			String calledFromFile = null;
+			StackTraceElement[] stackFrames = ex.getStackTrace();
+			for(StackTraceElement frame : stackFrames){
+				Logger.getLogger(Application.class.getName()).log(Level.SEVERE, frame.getFileName());
+			}
+			for (int frameIdx = 0; frameIdx < stackFrames.length; frameIdx++) {
+				String fileName = stackFrames[frameIdx].getFileName();
+				if (fileName != null && fileName.toLowerCase().startsWith("http")) {
+					calledFromFile = fileName;
+					break;
+				}
+			}
+			if (calledFromFile != null) {
+				int lastSlashIndex = calledFromFile.lastIndexOf('/');
+				calledFromDir = calledFromFile.substring(0, lastSlashIndex);
+			}
+		}
 		final Set<String> deps = new HashSet<String>();
 		JsArrayString depsValues = aDeps.<JsArrayString> cast();
 		for (int i = 0; i < depsValues.length(); i++) {
 			String dep = depsValues.get(i);
-			deps.add(dep);
+			if (calledFromDir != null && dep.startsWith("./") || dep.startsWith("../")) {
+				String normalized = toAppModuleId(dep, calledFromDir);
+				deps.add(normalized);
+			} else {
+				deps.add(dep);
+			}
 		}
 		try {
 			loader.load(deps, new CallbackAdapter<Void, String>() {
-				
+
 				@Override
 				public void onFailure(String reason) {
-					if (aOnFailure != null){
+					if (aOnFailure != null) {
 						try {
-	                        Utils.executeScriptEventString(aOnFailure, aOnFailure, reason);
-                        } catch (Exception ex) {
-    						Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-					}else{
+							Utils.executeScriptEventString(aOnFailure, aOnFailure, reason);
+						} catch (Exception ex) {
+							Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
+						}
+					} else {
 						Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require failed and callback is missing. Required modules are: " + aDeps.toString());
 					}
 				}
-				
+
 				@Override
-                protected void doWork(Void aResult) throws Exception {
+				protected void doWork(Void aResult) throws Exception {
 					if (aOnSuccess != null)
 						Utils.invokeJsFunction(aOnSuccess);
 					else
 						Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require succeded, but callback is missing. Required modules are: " + aDeps.toString());
-                }
+				}
 			});
 		} catch (Exception ex) {
 			Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);

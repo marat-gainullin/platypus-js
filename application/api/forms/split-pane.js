@@ -178,23 +178,6 @@
              */
             P.SplitPane.prototype.onComponentMoved = {};
         }
-        Object.defineProperty(this, "onComponentAdded", {
-            get: function() {
-                var value = delegate.onComponentAdded;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onComponentAdded = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.SplitPane){
-            /**
-             * Component added event hanler function.
-             * @property onComponentAdded
-             * @memberOf SplitPane
-             */
-            P.SplitPane.prototype.onComponentAdded = {};
-        }
         Object.defineProperty(this, "dividerLocation", {
             get: function() {
                 var value = delegate.dividerLocation;
@@ -211,6 +194,23 @@
              * @memberOf SplitPane
              */
             P.SplitPane.prototype.dividerLocation = 0;
+        }
+        Object.defineProperty(this, "onComponentAdded", {
+            get: function() {
+                var value = delegate.onComponentAdded;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onComponentAdded = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.SplitPane){
+            /**
+             * Component added event hanler function.
+             * @property onComponentAdded
+             * @memberOf SplitPane
+             */
+            P.SplitPane.prototype.onComponentAdded = {};
         }
         Object.defineProperty(this, "secondComponent", {
             get: function() {
@@ -379,6 +379,20 @@
              */
             P.SplitPane.prototype.height = 0;
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.SplitPane){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf SplitPane
+             */
+            P.SplitPane.prototype.element = {};
+        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -395,20 +409,6 @@
              * @memberOf SplitPane
              */
             P.SplitPane.prototype.onComponentShown = {};
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.SplitPane){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf SplitPane
-             */
-            P.SplitPane.prototype.element = {};
         }
         Object.defineProperty(this, "orientation", {
             get: function() {
@@ -512,6 +512,20 @@
              */
             P.SplitPane.prototype.nextFocusableComponent = {};
         }
+        Object.defineProperty(this, "count", {
+            get: function() {
+                var value = delegate.count;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.SplitPane){
+            /**
+             * Gets the number of components in this panel.
+             * @property count
+             * @memberOf SplitPane
+             */
+            P.SplitPane.prototype.count = 0;
+        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -545,20 +559,6 @@
              * @memberOf SplitPane
              */
             P.SplitPane.prototype.onKeyReleased = {};
-        }
-        Object.defineProperty(this, "count", {
-            get: function() {
-                var value = delegate.count;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.SplitPane){
-            /**
-             * Gets the number of components in this panel.
-             * @property count
-             * @memberOf SplitPane
-             */
-            P.SplitPane.prototype.count = 0;
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -827,6 +827,17 @@
         };
 
         /**
+         * Tries to acquire focus for this component.
+         * @method focus
+         * @memberOf SplitPane
+         */
+        P.SplitPane.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Gets the container's n-th component.
          * @param index the component's index in the container
          * @return the child component
@@ -836,17 +847,6 @@
         P.SplitPane.prototype.child = function(index) {
             var delegate = this.unwrap();
             var value = delegate.child(P.boxAsJava(index));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf SplitPane
-         */
-        P.SplitPane.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
             return P.boxAsJs(value);
         };
 

@@ -364,6 +364,20 @@
              */
             P.CheckBox.prototype.height = 0;
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.CheckBox){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf CheckBox
+             */
+            P.CheckBox.prototype.element = {};
+        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -380,20 +394,6 @@
              * @memberOf CheckBox
              */
             P.CheckBox.prototype.onComponentShown = {};
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.CheckBox){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf CheckBox
-             */
-            P.CheckBox.prototype.element = {};
         }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {

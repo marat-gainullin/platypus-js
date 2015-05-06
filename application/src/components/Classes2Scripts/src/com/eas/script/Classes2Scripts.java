@@ -51,9 +51,8 @@ public class Classes2Scripts {
 
     private static final String JAVA_CLASS_FILE_EXT = ".class";//NOI18N
     private static final String CONSTRUCTOR_TEMPLATE = getStringResource("constructorTemplate.js");//NOI18N
-    private static final String DEPS_FILE_NAME = "deps.js";//NOI18N
     private static final Set<String> preservedFilesNames = new HashSet<>(Arrays.asList(new String[]{
-        "platypus.js", "internals.js", "http-context.js", "server-deps.js", "managed.js", "orderer.js"
+        "platypus.js", "internals.js", "http-context.js", "managed.js", "orderer.js"
     }));
 
     private static final int DEFAULT_IDENTATION_WIDTH = 4;
@@ -208,7 +207,7 @@ public class Classes2Scripts {
                     processJar(classPath);
                 }
             }
-            createDepsFile();
+            //createDepsFile();
         } catch (IOException | ClassNotFoundException ex) {
             Logger.getLogger(Classes2Scripts.class.getName()).log(Level.SEVERE, "Conversion error.", ex);
         }
@@ -353,11 +352,7 @@ public class Classes2Scripts {
         return js;
     }
 
-    private void createDepsFile() throws IOException {
-        File deps = new File(destDirectory, DEPS_FILE_NAME);
-        FileUtils.writeString(deps, getDepsJsContent(), SettingsConstants.COMMON_ENCODING);
-    }
-
+    /*
     private String getDepsJsContent() {
         StringBuilder sb = new StringBuilder(DEPS_HEADER);
         if (!depsPaths.isEmpty()) {
@@ -384,7 +379,7 @@ public class Classes2Scripts {
         }
         return sb.toString();
     }
-
+*/
     private static String pathRootDir(String path) {
         String[] pathElements = path.split("/");
         if (pathElements.length > 0) {

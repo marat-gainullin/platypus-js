@@ -55,7 +55,6 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
     protected static PlatypusServerCore instance;
 
     public static PlatypusServerCore getInstance(String aApplicationUrl, String aDefaultDatasourceName, String aStartAppElementName, int aMaximumJdbcThreads, int aMaximumServicesThreads) throws Exception {
-        ScriptUtils.init();
         if (instance == null) {
             ScriptedDatabasesClient basesProxy;
             if (aApplicationUrl.toLowerCase().startsWith("file")) {
@@ -72,6 +71,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                     instance = new PlatypusServerCore(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), aStartAppElementName), queries, basesProxy, lsecurityConfigs, aStartAppElementName);
                     basesProxy.setContextHost(instance);
                     ScriptedResource.init(instance);
+                    ScriptUtils.init();
                     instance.startResidents(tasksScanner.getResidents());
                 } else {
                     throw new IllegalArgumentException("applicationUrl: " + aApplicationUrl + " doesn't point to existent directory.");

@@ -344,7 +344,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
     }
 
     protected void rolledback(Exception ex) {
-        Logger.getLogger(ApplicationModel.class.getName()).log(Level.SEVERE, null, ex);
+        Logger.getLogger(ApplicationModel.class.getName()).log(Level.SEVERE, ex.toString());
     }
 
     public void save(JSObject aOnSuccess) throws Exception {

@@ -93,20 +93,6 @@
              */
             P.MouseEvent.prototype.clickCount = 0;
         }
-        Object.defineProperty(this, "metaDown", {
-            get: function() {
-                var value = delegate.metaDown;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.MouseEvent){
-            /**
-             * Meta key is down on this event.
-             * @property metaDown
-             * @memberOf MouseEvent
-             */
-            P.MouseEvent.prototype.metaDown = true;
-        }
         Object.defineProperty(this, "x", {
             get: function() {
                 var value = delegate.x;
@@ -120,6 +106,20 @@
              * @memberOf MouseEvent
              */
             P.MouseEvent.prototype.x = 0;
+        }
+        Object.defineProperty(this, "metaDown", {
+            get: function() {
+                var value = delegate.metaDown;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.MouseEvent){
+            /**
+             * Meta key is down on this event.
+             * @property metaDown
+             * @memberOf MouseEvent
+             */
+            P.MouseEvent.prototype.metaDown = true;
         }
         Object.defineProperty(this, "y", {
             get: function() {

@@ -379,6 +379,20 @@
              */
             P.HtmlArea.prototype.height = 0;
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.HtmlArea){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf HtmlArea
+             */
+            P.HtmlArea.prototype.element = {};
+        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -395,20 +409,6 @@
              * @memberOf HtmlArea
              */
             P.HtmlArea.prototype.onComponentShown = {};
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.HtmlArea){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf HtmlArea
-             */
-            P.HtmlArea.prototype.element = {};
         }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {

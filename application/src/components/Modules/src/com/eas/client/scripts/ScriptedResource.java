@@ -25,6 +25,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.channels.SocketChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -216,7 +217,7 @@ public class ScriptedResource {
     }
 
     protected static Path absoluteApiPath() throws URISyntaxException {
-        URL platypusURL = ClassLoader.getSystemResource("platypus.js");
+        URL platypusURL = Thread.currentThread().getContextClassLoader().getResource("platypus.js");
         Path apiPath = Paths.get(platypusURL.toURI());
         apiPath = apiPath.getParent();
         return apiPath;
@@ -490,7 +491,7 @@ public class ScriptedResource {
     }
 
     public static void require(String[] aScriptsNames, String aCalledFromFile, JSObject onSuccess, JSObject onFailure) throws Exception {
-        _require(aScriptsNames, new URL(aCalledFromFile).toURI(), new ConcurrentSkipListSet<>(), (Void v) -> {
+        _require(aScriptsNames, aCalledFromFile != null ? new URL(aCalledFromFile).toURI() : null, new ConcurrentSkipListSet<>(), (Void v) -> {
             if (onSuccess != null) {
                 onSuccess.call(null, new Object[]{});
             }
@@ -592,7 +593,7 @@ public class ScriptedResource {
     }
 
     public static void require(String[] aScriptsNames, String aCalledFromFile) throws Exception {
-        _require(aScriptsNames, new URL(aCalledFromFile).toURI(), new ConcurrentSkipListSet<>());
+        _require(aScriptsNames, aCalledFromFile != null ? new URL(aCalledFromFile).toURI() : null, new ConcurrentSkipListSet<>());
     }
 
     public static void _require(String[] aScriptsNames, URI aCalledFromFile, Set<String> required) throws Exception {

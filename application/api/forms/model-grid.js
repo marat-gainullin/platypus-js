@@ -224,6 +224,20 @@
              */
             P.ModelGrid.prototype.height = 0;
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.element = {};
+        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -240,20 +254,6 @@
              * @memberOf ModelGrid
              */
             P.ModelGrid.prototype.onComponentShown = {};
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ModelGrid){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf ModelGrid
-             */
-            P.ModelGrid.prototype.element = {};
         }
         Object.defineProperty(this, "visible", {
             get: function() {
@@ -862,23 +862,6 @@
              */
             P.ModelGrid.prototype.width = 0;
         }
-        Object.defineProperty(this, "showHorizontalLines", {
-            get: function() {
-                var value = delegate.showHorizontalLines;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.showHorizontalLines = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelGrid){
-            /**
-             * Determines if grid shows horizontal lines.
-             * @property showHorizontalLines
-             * @memberOf ModelGrid
-             */
-            P.ModelGrid.prototype.showHorizontalLines = true;
-        }
         Object.defineProperty(this, "gridColor", {
             get: function() {
                 var value = delegate.gridColor;
@@ -895,6 +878,23 @@
              * @memberOf ModelGrid
              */
             P.ModelGrid.prototype.gridColor = {};
+        }
+        Object.defineProperty(this, "showHorizontalLines", {
+            get: function() {
+                var value = delegate.showHorizontalLines;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.showHorizontalLines = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * Determines if grid shows horizontal lines.
+             * @property showHorizontalLines
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.showHorizontalLines = true;
         }
         Object.defineProperty(this, "showOddRowsInOtherColor", {
             get: function() {
@@ -961,6 +961,17 @@
         };
 
         /**
+         * Tries to acquire focus for this component.
+         * @method focus
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Selects the specified element.
          * @param instance Entity's instance to be selected.
          * @method select
@@ -984,13 +995,27 @@
         };
 
         /**
-         * Tries to acquire focus for this component.
-         * @method focus
+         * Makes specified instance visible.
+         * @param instance Entity's instance to make visible.
+         * @param need2select true to select the instance (optional).
+         * @method makeVisible
          * @memberOf ModelGrid
          */
-        P.ModelGrid.prototype.focus = function() {
+        P.ModelGrid.prototype.makeVisible = function(instance, need2select) {
             var delegate = this.unwrap();
-            var value = delegate.focus();
+            var value = delegate.makeVisible(P.boxAsJava(instance), P.boxAsJava(need2select));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Unselects the specified element.
+         * @param instance Entity's instance to be unselected
+         * @method unselect
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.unselect = function(instance) {
+            var delegate = this.unwrap();
+            var value = delegate.unselect(P.boxAsJava(instance));
             return P.boxAsJs(value);
         };
 
@@ -1006,70 +1031,12 @@
         };
 
         /**
-         *
-         * @method insertColumnNode
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.insertColumnNode = function(arg0, arg1) {
-            var delegate = this.unwrap();
-            var value = delegate.insertColumnNode(P.boxAsJava(arg0), P.boxAsJava(arg1));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         *
-         * @method removeColumnNode
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.removeColumnNode = function(arg0) {
-            var delegate = this.unwrap();
-            var value = delegate.removeColumnNode(P.boxAsJava(arg0));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         *
-         * @method addColumnNode
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.addColumnNode = function(arg0) {
-            var delegate = this.unwrap();
-            var value = delegate.addColumnNode(P.boxAsJava(arg0));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Makes specified instance visible.
-         * @param instance Entity's instance to make visible.
-         * @param need2select true to select the instance (optional).
-         * @method makeVisible
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.makeVisible = function(instance, need2select) {
-            var delegate = this.unwrap();
-            var value = delegate.makeVisible(P.boxAsJava(instance), P.boxAsJava(need2select));
-            return P.boxAsJs(value);
-        };
-
-        /**
          * @method unsort
          * @memberOf ModelGrid
          * Clears sort on all columns, works only in HTML5 */
         P.ModelGrid.prototype.unsort = function() {
             var delegate = this.unwrap();
             var value = delegate.unsort();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Unselects the specified element.
-         * @param instance Entity's instance to be unselected
-         * @method unselect
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.unselect = function(instance) {
-            var delegate = this.unwrap();
-            var value = delegate.unselect(P.boxAsJava(instance));
             return P.boxAsJs(value);
         };
 
@@ -1103,6 +1070,39 @@
         P.ModelGrid.prototype.try2CancelAnyEditing = function() {
             var delegate = this.unwrap();
             var value = delegate.try2CancelAnyEditing();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
+         * @method addColumnNode
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.addColumnNode = function(arg0) {
+            var delegate = this.unwrap();
+            var value = delegate.addColumnNode(P.boxAsJava(arg0));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
+         * @method removeColumnNode
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.removeColumnNode = function(arg0) {
+            var delegate = this.unwrap();
+            var value = delegate.removeColumnNode(P.boxAsJava(arg0));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
+         * @method insertColumnNode
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.insertColumnNode = function(arg0, arg1) {
+            var delegate = this.unwrap();
+            var value = delegate.insertColumnNode(P.boxAsJava(arg0), P.boxAsJava(arg1));
             return P.boxAsJs(value);
         };
 

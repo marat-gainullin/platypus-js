@@ -315,23 +315,6 @@
              */
             P.BoxPane.prototype.onMouseEntered = {};
         }
-        Object.defineProperty(this, "toolTipText", {
-            get: function() {
-                var value = delegate.toolTipText;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.toolTipText = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.BoxPane){
-            /**
-             * The tooltip string that has been set with.
-             * @property toolTipText
-             * @memberOf BoxPane
-             */
-            P.BoxPane.prototype.toolTipText = '';
-        }
         Object.defineProperty(this, "hgap", {
             get: function() {
                 var value = delegate.hgap;
@@ -348,6 +331,23 @@
              * @memberOf BoxPane
              */
             P.BoxPane.prototype.hgap = 0;
+        }
+        Object.defineProperty(this, "toolTipText", {
+            get: function() {
+                var value = delegate.toolTipText;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.toolTipText = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.BoxPane){
+            /**
+             * The tooltip string that has been set with.
+             * @property toolTipText
+             * @memberOf BoxPane
+             */
+            P.BoxPane.prototype.toolTipText = '';
         }
         Object.defineProperty(this, "height", {
             get: function() {
@@ -366,6 +366,20 @@
              */
             P.BoxPane.prototype.height = 0;
         }
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.BoxPane){
+            /**
+             * Native API. Returns low level html element. Applicable only in HTML5 client.
+             * @property element
+             * @memberOf BoxPane
+             */
+            P.BoxPane.prototype.element = {};
+        }
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -382,20 +396,6 @@
              * @memberOf BoxPane
              */
             P.BoxPane.prototype.onComponentShown = {};
-        }
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.BoxPane){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf BoxPane
-             */
-            P.BoxPane.prototype.element = {};
         }
         Object.defineProperty(this, "orientation", {
             get: function() {
@@ -496,6 +496,20 @@
              */
             P.BoxPane.prototype.nextFocusableComponent = {};
         }
+        Object.defineProperty(this, "count", {
+            get: function() {
+                var value = delegate.count;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.BoxPane){
+            /**
+             * Gets the number of components in this panel.
+             * @property count
+             * @memberOf BoxPane
+             */
+            P.BoxPane.prototype.count = 0;
+        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -529,20 +543,6 @@
              * @memberOf BoxPane
              */
             P.BoxPane.prototype.onKeyReleased = {};
-        }
-        Object.defineProperty(this, "count", {
-            get: function() {
-                var value = delegate.count;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.BoxPane){
-            /**
-             * Gets the number of components in this panel.
-             * @property count
-             * @memberOf BoxPane
-             */
-            P.BoxPane.prototype.count = 0;
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

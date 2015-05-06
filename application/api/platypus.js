@@ -195,11 +195,7 @@
     }
     Object.defineProperty(P, "require", {value: require});
 
-    P.require([
-        'internals.js'
-                , 'managed.js'
-                , 'orderer.js'
-    ]);
+    P.require('internals.js');
 
     var serverCoreClass;
     try {
@@ -213,7 +209,16 @@
         Object.defineProperty(P, "invokeLater", {get: function () {
                 return invokeLater;
             }});
-        P.require('server-deps.js');
+        P.require([
+            'core/index.js'
+                    , 'server/index.js']);
+        try {
+            Java.type('com.eas.server.httpservlet.PlatypusHttpServlet');
+            // EE server
+            P.require(['servlet-support/index.js']);
+        } catch (se) {
+            // TSA server
+        }
     } catch (e) {
         serverCoreClass = null;
         // in client
@@ -239,6 +244,7 @@
                 return invokeLater;
             }});
         //
+        P.require('common-utils/color.js');
         Object.defineProperty(P.Color, "black", {value: new P.Color(0, 0, 0)});
         Object.defineProperty(P.Color, "BLACK", {value: new P.Color(0, 0, 0)});
         Object.defineProperty(P.Color, "blue", {value: new P.Color(0, 0, 0xff)});
@@ -267,6 +273,7 @@
         Object.defineProperty(P.Color, "YELLOW", {value: new P.Color(0xFF, 0xff, 0)});
         P.Colors = P.Color;
 
+        P.require('common-utils/cursor.js');
         Object.defineProperty(P.Cursor, "CROSSHAIR", {value: new P.Cursor(1)});
         Object.defineProperty(P.Cursor, "DEFAULT", {value: new P.Cursor(0)});
         Object.defineProperty(P.Cursor, "AUTO", {value: new P.Cursor(0)});
@@ -449,6 +456,7 @@
             value: selectColor
         });
 
+        P.require('forms/form.js');
         Object.defineProperty(P.Form, "shown", {
             get: function () {
                 var nativeArray = FormClass.getShownForms();
@@ -657,6 +665,7 @@
          * @returns {P.loadForm.publishTo}
          */
         function loadForm(aName, aModel, aTarget) {
+            P.require(['forms/index.js', 'grid/index.js']);
             var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
             var formDocument = ScriptedResourceClass.getApp().getForms().get(aName, files);
             var formFactory = FormLoaderClass.load(formDocument, ScriptedResourceClass.getApp(), arguments.length > 1 ? aModel : null);
@@ -943,6 +952,11 @@
      * @returns {P.loadModel.publishTo}
      */
     function loadModel(aName, aTarget) {
+        P.require(['core/index.js'
+                    , 'datamodel/index.js'
+                    , 'managed.js'
+                    , 'orderer.js'
+        ]);
         var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
         if (files) {
             var modelDocument = ScriptedResourceClass.getApp().getModels().get(aName, files);
@@ -1301,6 +1315,7 @@
      * @returns {P.loadTemplate.publishTo}
      */
     function loadTemplate(aName, aData, aTarget) {
+        P.require(['core/index.js', 'reports/index.js']);
         var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
         if (files) {
             var reportConfig = ScriptedResourceClass.getApp().getReports().get(aName, files);

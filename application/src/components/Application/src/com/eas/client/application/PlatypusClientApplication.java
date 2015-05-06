@@ -33,7 +33,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.logging.*;
 import javax.swing.UIManager;
-import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -250,7 +249,7 @@ public class PlatypusClientApplication {
 
                             @Override
                             public ServerModulesProxy getServerModules() {
-                                throw new UnsupportedOperationException("Not supported in two-tier architecture.");
+                                throw new UnsupportedOperationException("Application.getServerModules() is not supported in two-tier architecture.");
                             }
 
                             @Override

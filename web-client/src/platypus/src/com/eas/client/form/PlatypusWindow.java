@@ -409,11 +409,6 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	}
 
 	protected native static void publishFormFacade(JavaScriptObject aPublished, Widget aView, PlatypusWindow aForm)/*-{
-        Object.defineProperty(aPublished, "view", {
-	        get : function() {
-	        	return aView.@com.eas.client.form.published.HasPublished::getPublished()();
-	        } 
-        });
         Object.defineProperty(aPublished, "formKey", {
 	        get:function() {
 	        	return aForm.@com.eas.client.form.PlatypusWindow::getFormKey()();
