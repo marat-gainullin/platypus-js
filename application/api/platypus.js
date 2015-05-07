@@ -930,6 +930,7 @@
                             deleted.forEach(function (item) {
                                 item[sourceFieldName] = null;
                             });
+                            fire(found, {source: found, propertyName: 'length'});
                         },
                         scrolled: function (aSubject, oldCursor, newCursor) {
                             fire(found, {source: found, propertyName: 'cursor', oldValue: oldCursor, newValue: newCursor});
@@ -1103,20 +1104,21 @@
                             unlistenable(aDeleted);
                             P.unmanageObject(aDeleted);
                         });
-                        if (_onInserted) {
+                        if (_onInserted && added.length > 0) {
                             try {
                                 _onInserted({source: published, items: added});
                             } catch (e) {
                                 Logger.severe(e);
                             }
                         }
-                        if (_onDeleted) {
+                        if (_onDeleted && deleted.length > 0) {
                             try {
                                 _onDeleted({source: published, items: deleted});
                             } catch (e) {
                                 Logger.severe(e);
                             }
                         }
+                        fire(published, {source: published, propertyName: 'length'});
                     },
                     scrolled: function (aSubject, oldCursor, newCursor) {
                         if (_onScrolled) {
@@ -1253,28 +1255,44 @@
                         _onDeleted = aValue;
                     }
                 });
-                nEntity.setSnapshotConsumer(function (aSnapshot) {
-                    Array.prototype.splice.call(published, 0, published.length);
-                    if (nEntity.getElementClass()) {
-                        var instanceCtor = EngineUtilsClass.unwrap(nEntity.getElementClass());
-                        for (var s = 0; s < aSnapshot.length; s++) {
-                            var snapshotInstance = aSnapshot[s];
-                            var accepted = new instanceCtor();
-                            for (var sp in snapshotInstance) {
-                                accepted[sp] = snapshotInstance[sp];
-                            }
-                            Array.prototype.push.call(published, accepted);
-                            acceptInstance(accepted);
+                nEntity.setSnapshotConsumer(function (aSnapshot, aFreshData) {
+                    if (aFreshData) {
+                        Array.prototype.splice.call(published, 0, published.length);
+                    }
+                    for (var s = 0; s < aSnapshot.length; s++) {
+                        var snapshotInstance = aSnapshot[s];
+                        var accepted;
+                        if (nEntity.getElementClass()) {
+                            var instanceCtor = EngineUtilsClass.unwrap(nEntity.getElementClass());
+                            accepted = new instanceCtor();
+                        } else {
+                            accepted = {};
                         }
-                    } else {
-                        for (var s = 0; s < aSnapshot.length; s++) {
-                            var snapshotInstance = aSnapshot[s];
-                            Array.prototype.push.call(published, snapshotInstance);
-                            acceptInstance(snapshotInstance);
+                        for (var sp in snapshotInstance) {
+                            accepted[sp] = snapshotInstance[sp];
                         }
+                        Array.prototype.push.call(published, accepted);
+                        acceptInstance(accepted);
                     }
                     orderers = {};
                     published.cursor = published.length > 0 ? published[0] : null;
+                    fire(published, {source: published, propertyName: 'length'});
+                });
+                nEntity.setSnapshotProducer(function () {
+                    var snapshot = [];
+                    var snapshotFields = Object.keys(noFields);
+                    published.forEach(function (aItem) {
+                        var cloned = {};
+                        snapshotFields.forEach(function (aFieldName) {
+                            var typeOfField = typeof aItem[aFieldName];
+                            if (typeOfField === 'undefined' || typeOfField === 'function')
+                                cloned[aFieldName] = null;
+                            else
+                                cloned[aFieldName] = aItem[aFieldName];
+                        });
+                        snapshot.push(cloned);
+                    });
+                    return snapshot;
                 });
                 listenable(published);
                 return published;

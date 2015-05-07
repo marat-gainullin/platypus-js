@@ -34,6 +34,8 @@ public class Entity implements HasPublished {
 	// runtime
 	protected JavaScriptObject onRequeried;
 	protected JavaScriptObject snapshotConsumer;
+	protected JavaScriptObject snapshotProducer;
+	protected JavaScriptObject lastSnapshot = JavaScriptObject.createArray();
 	protected JavaScriptObject jsPublished;
 	protected HandlerRegistration cursorListener;
 	protected Cancellable pending;
@@ -124,14 +126,23 @@ public class Entity implements HasPublished {
 				nEntity.@com.eas.client.model.Entity::execute(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
 			}
 		});
-		Object.defineProperty(aTarget, 'query', {
-			value : function(params, onSuccess, onFailure) {
-				nEntity.@com.eas.client.model.Entity::query(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(params, onSuccess, onFailure);
-			}
-		});
+		Object
+				.defineProperty(
+						aTarget,
+						'query',
+						{
+							value : function(params, onSuccess, onFailure) {
+								nEntity.@com.eas.client.model.Entity::query(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(params, onSuccess, onFailure);
+							}
+						});
 		Object.defineProperty(aTarget, 'requery', {
 			value : function(onSuccess, onFailure) {
 				nEntity.@com.eas.client.model.Entity::refresh(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
+			}
+		});
+		Object.defineProperty(aTarget, 'append', {
+			value : function(aData) {
+				nEntity.@com.eas.client.model.Entity::append(Lcom/google/gwt/core/client/JavaScriptObject;)(aData);
 			}
 		});
 	}-*/;
@@ -256,6 +267,32 @@ public class Entity implements HasPublished {
 		snapshotConsumer = aValue;
 	}
 
+	public JavaScriptObject getSnapshotProducer() {
+		return snapshotProducer;
+	}
+
+	public void setSnapshotProducer(JavaScriptObject aValue) {
+		snapshotProducer = aValue;
+	}
+
+	public void takeSnapshot() {
+		if (snapshotProducer != null) {
+			lastSnapshot = (JavaScriptObject) snapshotProducer.<Utils.JsObject> cast().call(null, null);
+		}
+	}
+
+	public void applyLastSnapshot() {
+		applySnapshot(lastSnapshot);
+	}
+
+	public void applySnapshot(JavaScriptObject aValue) {
+		lastSnapshot = aValue;
+		// Apply aRowset as a snapshot. Be aware of change log!
+		if (snapshotConsumer != null) {// snapshotConsumer is null in designer
+			snapshotConsumer.<Utils.JsObject> cast().call(null, aValue, true);
+		}
+	}
+
 	private static class CancellableContainer {
 		public Cancellable future;
 	}
@@ -269,17 +306,17 @@ public class Entity implements HasPublished {
 				public void doWork(JavaScriptObject aResult) throws Exception {
 					if (pending == f.future) {
 						// Apply aRowset as a snapshot. Be aware of change log!
-						snapshotConsumer.<JsObject> cast().call(null, aResult);
+						applySnapshot(aResult);
 						valid = true;
 						pending = null;
 						model.terminateProcess(Entity.this, null);
-	                    if (onRequeried != null) {
-	                        try {
-	                            onRequeried.<Utils.JsObject>cast().call(jsPublished, new Object[]{});
-	                        } catch (Exception ex) {
-	                            Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
-	                        }
-	                    }
+						if (onRequeried != null) {
+							try {
+								onRequeried.<Utils.JsObject> cast().call(jsPublished, new Object[] {});
+							} catch (Exception ex) {
+								Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
+							}
+						}
 						if (aCallback != null) {
 							aCallback.onSuccess(aResult);
 						}
@@ -356,7 +393,7 @@ public class Entity implements HasPublished {
 				String key = keys.get(i);
 				Object pValue = params.getJava(key);
 				Parameter p = copied.getParameters().get(key);
-				if(p != null){
+				if (p != null) {
 					p.setValue(Utils.toJava(pValue));
 				}
 			}
@@ -383,6 +420,12 @@ public class Entity implements HasPublished {
 		if (model != null) {
 			invalidate();
 			internalExecute(aCallback);
+		}
+	}
+
+	public void append(JavaScriptObject aData) throws Exception {
+		if (snapshotConsumer != null) {
+			snapshotConsumer.<Utils.JsObject> cast().call(null, aData, false);
 		}
 	}
 
@@ -509,7 +552,8 @@ public class Entity implements HasPublished {
 							// sources, with no
 							// data in theirs rowsets, so we can't bind query
 							// parameters to proper values. In the
-							// such case we initialize parameters values with null
+							// such case we initialize parameters values with
+							// null
 							JavaScriptObject leftRowset = leftEntity.getPublished();
 							if (leftRowset != null && leftRowset.<JsObject> cast().getJs("cursor") != null) {
 								JavaScriptObject jsCursor = leftRowset.<JsObject> cast().getJs("cursor");

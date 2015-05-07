@@ -48,7 +48,9 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     // for runtime
     protected JSObject onRequeried;
     //
+    protected JSObject lastSnapshot = ScriptUtils.makeArray();
     protected JSObject snapshotConsumer;
+    protected JSObject snapshotProducer;
     //
     protected JSObject published;
     protected ListenerRegistration cursorListener;
@@ -214,6 +216,19 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         } : null);
     }
 
+    private static final String APPEND_JSDOC = ""
+            + "/**\n"
+            + "* Append data to the entity's data. Appended data will be managed by ORM."
+            + "* @param data The plain js objects array to be appended.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = APPEND_JSDOC, params = {"data"})
+    public void append(JSObject aData) {
+        if (snapshotConsumer != null) {
+            snapshotConsumer.call(null, new Object[]{aData, false});
+        }
+    }
+
     private static final String INSTANCE_CONSTRUCTOR_JSDOC = ""
             + "/**\n"
             + "* Experimental. The constructor funciton for the entity's data array elements.\n"
@@ -302,6 +317,14 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         snapshotConsumer = aValue;
     }
 
+    public JSObject getSnapshotProducer() {
+        return snapshotProducer;
+    }
+
+    public void setSnapshotProducer(JSObject aValue) {
+        snapshotProducer = aValue;
+    }
+
     public abstract void enqueueUpdate() throws Exception;
 
     protected void internalExecute(final Consumer<JSObject> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception {
@@ -362,21 +385,12 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
             Future<Void> f = new RowsetRefreshTask(aOnFailure);
             query.execute((JSObject aRowset) -> {
                 if (!f.isCancelled()) {
-                    // Apply aRowset as a snapshot. Be aware of change log!
-                    if (snapshotConsumer != null) {// snapshotConsumer is null in designer
-                        snapshotConsumer.call(null, new Object[]{aRowset});
-                    }
+                    applySnapshot(aRowset);
                     assert pending == f : PENDING_ASSUMPTION_FAILED_MSG;
                     valid = true;
                     pending = null;
                     model.terminateProcess((E) ApplicationEntity.this, null);
-                    if (onRequeried != null) {
-                        try {
-                            onRequeried.call(published, new Object[]{});
-                        } catch (Exception ex) {
-                            Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
+                    fireRequeried();
                     if (aOnSuccess != null) {
                         aOnSuccess.accept(aRowset);
                     }
@@ -397,17 +411,37 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
             return null;
         } else {
             JSObject jsRowset = query.execute(null, null);
-            if (snapshotConsumer != null) {// snapshotConsumer is null in designer
-                snapshotConsumer.call(null, new Object[]{jsRowset});
-            }
-            if (onRequeried != null) {
-                try {
-                    onRequeried.call(published, new Object[]{});
-                } catch (Exception ex) {
-                    Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
+            applySnapshot(jsRowset);
+            fireRequeried();
             return jsRowset;
+        }
+    }
+
+    public void takeSnapshot() {
+        if(snapshotProducer != null){
+            lastSnapshot = (JSObject)snapshotProducer.call(null, new Object[]{});
+        }
+    }
+
+    public void applyLastSnapshot() {
+        applySnapshot(lastSnapshot);
+    }
+
+    public void applySnapshot(JSObject aValue) {
+        lastSnapshot = aValue;
+        // Apply aRowset as a snapshot. Be aware of change log!
+        if (snapshotConsumer != null) {// snapshotConsumer is null in designer
+            snapshotConsumer.call(null, new Object[]{aValue, true});
+        }
+    }
+
+    protected void fireRequeried() {
+        if (onRequeried != null) {
+            try {
+                onRequeried.call(published, new Object[]{});
+            } catch (Exception ex) {
+                Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 

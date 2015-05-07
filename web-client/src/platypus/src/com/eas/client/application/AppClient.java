@@ -941,7 +941,7 @@ public class AppClient {
 
 			@Override
 			public void doWork(XMLHttpRequest aResponse) throws Exception {
-				JavaScriptObject parsed = Utils.JsObject.parseJSON(aResponse.getResponseText());
+				JavaScriptObject parsed = Utils.JsObject.parseJSONDateReviver(aResponse.getResponseText());
 				if (aCallback != null)
 					aCallback.onSuccess(parsed);
 			}

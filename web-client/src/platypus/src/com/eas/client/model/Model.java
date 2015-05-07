@@ -570,20 +570,21 @@ public class Model implements HasPublished {
                     @com.eas.client.Utils::unlistenable(Lcom/google/gwt/core/client/JavaScriptObject;)(aDeleted);
                     $wnd.P.unmanageObject(aDeleted);
                 });
-                if (_onInserted) {
+                if (_onInserted && added.length > 0) {
                     try {
                         _onInserted({source: published, items: added});
                     } catch (e) {
                         Logger.severe(e);
                     }
                 }
-                if (_onDeleted) {
+                if (_onDeleted && deleted.length > 0) {
                     try {
                         _onDeleted({source: published, items: deleted});
                     } catch (e) {
                         Logger.severe(e);
                     }
                 }
+            	@com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(published, {source: published, propertyName: 'length'});
             },
             scrolled: function (aSubject, oldCursor, newCursor) {
                 if (_onScrolled) {
@@ -714,28 +715,44 @@ public class Model implements HasPublished {
                 _onDeleted = aValue;
             }
         });
-        nEntity.@com.eas.client.model.Entity::setSnapshotConsumer(Lcom/google/gwt/core/client/JavaScriptObject;)(function (aSnapshot) {
-            Array.prototype.splice.call(published, 0, published.length);
+        nEntity.@com.eas.client.model.Entity::setSnapshotConsumer(Lcom/google/gwt/core/client/JavaScriptObject;)(function (aSnapshot, aFreshData) {
+            if(aFreshData){
+            	Array.prototype.splice.call(published, 0, published.length);
+            }
             var instanceCtor = nEntity.@com.eas.client.model.Entity::getElementClass()();
-            if (instanceCtor) {
-                for (var s = 0; s < aSnapshot.length; s++) {
-                    var snapshotInstance = aSnapshot[s];
-                    var accepted = new instanceCtor();
-                    for (var sp in snapshotInstance) {
-                        accepted[sp] = snapshotInstance[sp];
-                    }
-                    Array.prototype.push.call(published, accepted);
-                    acceptInstance(accepted);
+            for (var s = 0; s < aSnapshot.length; s++) {
+                var snapshotInstance = aSnapshot[s];
+                var accepted;
+	            if (instanceCtor) {
+                    accepted = new instanceCtor();
+	            } else {
+	            	accepted = {};
+	            }
+                for (var sp in snapshotInstance) {
+                    accepted[sp] = snapshotInstance[sp];
                 }
-            } else {
-                for (var s = 0; s < aSnapshot.length; s++) {
-                    var snapshotInstance = aSnapshot[s];
-                    Array.prototype.push.call(published, snapshotInstance);
-                    acceptInstance(snapshotInstance);
-                }
+                Array.prototype.push.call(published, accepted);
+                acceptInstance(accepted);
             }
             orderers = {};
             published.cursor = published.length > 0 ? published[0] : null;
+            @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(published, {source: published, propertyName: 'length'});
+        });
+        nEntity.@com.eas.client.model.Entity::setSnapshotProducer(Lcom/google/gwt/core/client/JavaScriptObject;)(function(){
+            var snapshot = [];
+            var snapshotFields = Object.keys(noFields);
+            published.forEach(function (aItem) {
+                var cloned = {};
+                snapshotFields.forEach(function (aFieldName) {
+                    var typeOfField = typeof aItem[aFieldName];
+                    if (typeOfField === 'undefined' || typeOfField === 'function')
+                        cloned[aFieldName] = null;
+                    else
+                        cloned[aFieldName] = aItem[aFieldName];
+                });
+                snapshot.push(cloned);
+            });
+            return snapshot;
         });
         @com.eas.client.Utils::listenable(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
         return published;
@@ -772,44 +789,23 @@ public class Model implements HasPublished {
 						var criterion = {};
                     	var targetKey = this[targetFieldName];
 						criterion[sourceFieldName] = targetKey;
-						var res = sourceEntity.find(criterion);
-	                    res.push = function () {
-	                        for (var a = 0; a < arguments.length; a++) {
-	                            var instance = arguments[a];
-	                            instance[sourceFieldName] = targetKey;
+						var found = sourceEntity.find(criterion);
+	                    $wnd.P.manageArray(found, {
+	                        spliced: function (added, deleted) {
+	                            added.forEach(function (item) {
+	                                item[sourceFieldName] = targetKey;
+	                            });
+	                            deleted.forEach(function (item) {
+	                                item[sourceFieldName] = null;
+	                            });
+	                            @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(found, {source: found, propertyName: 'length'});
+	                        },
+	                        scrolled: function (aSubject, oldCursor, newCursor) {
+	                            @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(found, {source: found, propertyName: 'cursor', oldValue: oldCursor, newValue: newCursor});
 	                        }
-	                        return Array.prototype.push.apply(res, arguments);
-	                    };
-	                    res.unshift = function () {
-	                        for (var a = 0; a < arguments.length; a++) {
-	                            var instance = arguments[a];
-	                            instance[sourceFieldName] = targetKey;
-	                        }
-	                        return Array.prototype.unshift.apply(res, arguments);
-	                    };
-	                    res.splice = function () {
-	                        for (var a = 2; a < arguments.length; a++) {
-	                            var _instance = arguments[a];
-	                            _instance[sourceFieldName] = targetKey;
-	                        }
-	                        var deleted = Array.prototype.splice.apply(res, arguments);
-	                        for (var d = 0; d < deleted.length; d++) {
-	                            var instance = deleted[d];
-	                            instance[sourceFieldName] = null;
-	                        }
-	                        return deleted;
-	                    };
-	                    res.pop = function () {
-	                        var deleted = Array.prototype.pop.apply(res, arguments);
-	                        deleted[sourceFieldName] = null;
-	                        return deleted;
-	                    };
-	                    res.shift = function () {
-	                        var deleted = Array.prototype.shift.apply(res, arguments);
-	                        deleted[sourceFieldName] = null;
-	                        return deleted;
-	                    };
-	                    return res;
+	                    });
+	                    @com.eas.client.Utils::listenable(Lcom/google/gwt/core/client/JavaScriptObject;)(found);
+	                    return found;
 					};
 				}
 			}
@@ -1045,14 +1041,14 @@ public class Model implements HasPublished {
 	public void revert() throws Exception {
 		changeLog.splice(0, changeLog.length());
 		for(Entity e : entities.values()){
-			// Apply snapshot last revertable snapshot
+            e.applyLastSnapshot();
 		}
 	}
 
 	public void commited() throws Exception {
 		changeLog.splice(0, changeLog.length());
 		for(Entity e : entities.values()){
-            // Update/Take a snapshot for revert
+            e.takeSnapshot();
 		}
 	}
 

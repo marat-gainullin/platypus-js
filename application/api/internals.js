@@ -20,22 +20,20 @@
             function (str) {
                 return JSON.parse(str);
             });
-
-    var parseDates = function (aObject) {
-        if (typeof aObject === 'string' || aObject && aObject.constructor && aObject.constructor.name === 'String') {
-            var strValue = '' + aObject;
-            if (/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/.test(strValue)) {
-                return new Date(strValue);
-            }
-        } else if (typeof aObject === 'object') {
-            for (var prop in aObject) {
-                aObject[prop] = parseDates(aObject[prop]);
-            }
-        }
-        return aObject;
-    };
-
-    ScriptUtils.setParseDatesFunc(parseDates);
+    ScriptUtils.setParseJsonWithDatesFunc(
+            function (str) {
+                return JSON.parse(str, function (k, v) {
+                    if (!k) {
+                        return v;
+                    } else {
+                        if (typeof v === 'string' && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/.test(v)) {
+                            return new Date(v);
+                        } else {
+                            return v;
+                        }
+                    }
+                });
+            });
 
     ScriptUtils.setWriteJsonFunc(
             function (aObj) {
@@ -84,7 +82,7 @@
         return [];
     });
 
-    function listenElements(aData, aPropListener){
+    function listenElements(aData, aPropListener) {
         function subscribe(aData, aListener) {
             if (aData.unwrap) {
                 var target = aData.unwrap();
@@ -99,9 +97,9 @@
             return null;
         }
         var subscribed = [];
-        for(var i = 0; i < aData.length; i++){
+        for (var i = 0; i < aData.length; i++) {
             var remover = subscribe(aData[i], aPropListener);
-            if(remover){
+            if (remover) {
                 subscribed.push(remover);
             }
         }

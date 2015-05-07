@@ -364,7 +364,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
     @ScriptFunction(jsDoc = REVERT_JSDOC)
     public void revert() {
         entities.values().stream().forEach((E aEntity) -> {
-            // Apply snapshot last revertable snapshot
+            aEntity.applyLastSnapshot();
         });
     }
 
@@ -372,7 +372,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
 
     public void commited() {
         entities.values().stream().forEach((E aEntity) -> {
-            // Update/Take a snapshot for revert
+            aEntity.takeSnapshot();
         });
     }
 

@@ -668,18 +668,6 @@ public class Application {
 			};
 		}
 		$wnd.P.Report = Report;
-		function parseDates(aObject) {
-	        if (typeof aObject === 'string' || aObject && aObject.constructor && aObject.constructor.name === 'String') {
-	            if(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/.test(aObject)){
-	                return new Date(aObject);
-	            }
-	        } else if (typeof aObject === 'object' || aObject && aObject.constructor && aObject.constructor.name === 'Object') {
-	            for (var prop in aObject) {
-	                aObject[prop] = parseDates(aObject[prop]);
-	            }
-	        }
-	        return aObject;
-	    }
 		
 		function generateFunction(aModuleName, aFunctionName) {
 			return function() {
@@ -713,11 +701,11 @@ public class Application {
 							if(typeof aResult === 'object' && aResult instanceof Report)
 								onSuccess(aResult);
 							else
-								onSuccess(parseDates(JSON.parse(aResult)));
+								onSuccess(JSON.parse(aResult, @com.eas.client.Utils.JsObject::dateReviver()()));
 						}, onFailure);
 				} else {
 					var result = nativeClient.@com.eas.client.application.AppClient::requestServerMethodExecution(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aFunctionName, params, null, null)
-					return typeof result === 'object' && result instanceof Report ? result : parseDates(JSON.parse(result)); 
+					return typeof result === 'object' && result instanceof Report ? result : JSON.parse(result, @com.eas.client.Utils.JsObject::dateReviver()()); 
 				}
 			};
 		}
@@ -986,6 +974,19 @@ public class Application {
 		return appModuleId;
 	}
 
+	private static String extractFileName(StackTraceElement aFrame) {
+		String fileName = aFrame.getFileName();
+		if (fileName != null) {
+			int atIndex = fileName.indexOf("@");
+			if (atIndex != -1) {
+				fileName = fileName.substring(0, atIndex);
+			}
+			return fileName;
+		} else {
+			return null;
+		}
+	}
+
 	public static void require(final JavaScriptObject aDeps, final JavaScriptObject aOnSuccess, final JavaScriptObject aOnFailure) {
 		String calledFromDir = null;
 		try {
@@ -993,14 +994,14 @@ public class Application {
 		} catch (Exception ex) {
 			String calledFromFile = null;
 			StackTraceElement[] stackFrames = ex.getStackTrace();
-			for(StackTraceElement frame : stackFrames){
-				Logger.getLogger(Application.class.getName()).log(Level.SEVERE, frame.getFileName());
-			}
-			for (int frameIdx = 0; frameIdx < stackFrames.length; frameIdx++) {
-				String fileName = stackFrames[frameIdx].getFileName();
-				if (fileName != null && fileName.toLowerCase().startsWith("http")) {
-					calledFromFile = fileName;
-					break;
+			String firstFileName = extractFileName(stackFrames[0]);
+			if (firstFileName != null) {
+				for (int frameIdx = 1; frameIdx < stackFrames.length; frameIdx++) {
+					String fileName = extractFileName(stackFrames[frameIdx]);
+					if (fileName != null && !fileName.equals(firstFileName)) {
+						calledFromFile = fileName;
+						break;
+					}
 				}
 			}
 			if (calledFromFile != null) {

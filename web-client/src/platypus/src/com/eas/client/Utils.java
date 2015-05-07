@@ -152,13 +152,35 @@ public class Utils {
 			return this.call(aThis, $wnd.P.boxAsJs(aArg));
 		}-*/;
 
+		public final native Object call(JavaScriptObject aThis, Object aArg, boolean aFlag)/*-{
+			return this.call(aThis, $wnd.P.boxAsJs(aArg), aFlag);
+		}-*/;
+
 		public final native JavaScriptObject newObject()/*-{
 			var constr = this;
 			return new constr();
 		}-*/;
 
+		public static native JavaScriptObject dateReviver()/*-{
+			return function(k, v){
+				if(!k){
+					return v;
+				}else{
+					if(typeof v === 'string' && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/.test(v)){
+	                	return new Date(v);
+					}else{
+						return v;
+					}
+				}
+			};
+		}-*/;
+		
 		public static native JavaScriptObject parseJSON(String aText)/*-{
 			return JSON.parse(aText);
+		}-*/;
+		
+		public static native JavaScriptObject parseJSONDateReviver(String aText)/*-{
+			return JSON.parse(aText, @com.eas.client.Utils.JsObject::dateReviver()());
 		}-*/;
 
 		public static native String writeJSON(JavaScriptObject changeLog)/*-{
@@ -185,7 +207,11 @@ public class Utils {
 		Object.defineProperty(aTarget, @com.eas.client.Utils::fireChangeName, {
 			value : function(aChange) {
 				Object.freeze(aChange);
+				var _listeners = [];
 				listeners.forEach(function(aListener) {
+					_listeners.push(aListener);
+				});
+				_listeners.forEach(function(aListener) {
 					aListener(aChange);
 				});
 			}

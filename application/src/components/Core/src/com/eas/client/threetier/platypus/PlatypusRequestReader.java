@@ -164,7 +164,7 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
                     rq.setMethodName(node.getString());
                     break;
                 case RequestsTags.TAG_ARGUMENT_VALUE: {
-                    args.add(ScriptUtils.parseDates(ScriptUtils.parseJson(node.getString())));
+                    args.add(ScriptUtils.parseJsonWithDates(node.getString()));
                     break;
                 }
             }

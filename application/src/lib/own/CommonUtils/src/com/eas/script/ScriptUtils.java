@@ -17,13 +17,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.script.CompiledScript;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.api.scripting.NashornScriptEngine;
-import jdk.nashorn.api.scripting.URLReader;
 import jdk.nashorn.internal.ir.FunctionNode;
 import jdk.nashorn.internal.ir.IdentNode;
 import jdk.nashorn.internal.ir.LexicalContext;
@@ -57,7 +54,7 @@ public class ScriptUtils {
     protected static JSObject putInGlobalFunc;
     protected static JSObject toDateFunc;
     protected static JSObject parseJsonFunc;
-    protected static JSObject parseDatesFunc;
+    protected static JSObject parseJsonWithDatesFunc;
     protected static JSObject writeJsonFunc;
     protected static JSObject extendFunc;
     protected static JSObject scalarDefFunc;
@@ -349,9 +346,9 @@ public class ScriptUtils {
         parseJsonFunc = aValue;
     }
 
-    public static void setParseDatesFunc(JSObject aValue) {
-        assert parseDatesFunc == null;
-        parseDatesFunc = aValue;
+    public static void setParseJsonWithDatesFunc(JSObject aValue) {
+        assert parseJsonWithDatesFunc == null;
+        parseJsonWithDatesFunc = aValue;
     }
 
     public static void setWriteJsonFunc(JSObject aValue) {
@@ -524,9 +521,9 @@ public class ScriptUtils {
         return parseJsonFunc.call(null, new Object[]{json});
     }
 
-    public static Object parseDates(Object aObject) {
-        assert parseDatesFunc != null : SCRIPT_NOT_INITIALIZED;
-        return parseDatesFunc.call(null, new Object[]{aObject});
+    public static Object parseJsonWithDates(String json) {
+        assert parseJsonWithDatesFunc != null : SCRIPT_NOT_INITIALIZED;
+        return parseJsonWithDatesFunc.call(null, new Object[]{json});
     }
 
     protected static final String SCRIPT_NOT_INITIALIZED = "Platypus script functions are not initialized.";
