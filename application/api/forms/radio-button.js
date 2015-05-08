@@ -700,6 +700,20 @@
              */
             P.RadioButton.prototype.onMouseExited = {};
         }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.RadioButton){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf RadioButton
+             */
+            P.RadioButton.prototype.name = '';
+        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -716,20 +730,6 @@
              * @memberOf RadioButton
              */
             P.RadioButton.prototype.width = 0;
-        }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.RadioButton){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf RadioButton
-             */
-            P.RadioButton.prototype.name = '';
         }
         Object.defineProperty(this, "font", {
             get: function() {

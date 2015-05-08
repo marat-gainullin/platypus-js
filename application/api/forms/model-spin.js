@@ -609,23 +609,6 @@
              */
             P.ModelSpin.prototype.onSelect = {};
         }
-        Object.defineProperty(this, "value", {
-            get: function() {
-                var value = delegate.jsValue;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.jsValue = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelSpin){
-            /**
-             * Widget's value.
-             * @property jsValue
-             * @memberOf ModelSpin
-             */
-            P.ModelSpin.prototype.value = {};
-        }
         Object.defineProperty(this, "min", {
             get: function() {
                 var value = delegate.min;
@@ -642,6 +625,23 @@
              * @memberOf ModelSpin
              */
             P.ModelSpin.prototype.min = 0;
+        }
+        Object.defineProperty(this, "value", {
+            get: function() {
+                var value = delegate.jsValue;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.jsValue = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelSpin){
+            /**
+             * Widget's value.
+             * @property jsValue
+             * @memberOf ModelSpin
+             */
+            P.ModelSpin.prototype.value = {};
         }
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {

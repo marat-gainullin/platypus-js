@@ -23,14 +23,10 @@
     ScriptUtils.setParseJsonWithDatesFunc(
             function (str) {
                 return JSON.parse(str, function (k, v) {
-                    if (!k) {
-                        return v;
+                    if (typeof v === 'string' && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/.test(v)) {
+                        return new Date(v);
                     } else {
-                        if (typeof v === 'string' && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/.test(v)) {
-                            return new Date(v);
-                        } else {
-                            return v;
-                        }
+                        return v;
                     }
                 });
             });

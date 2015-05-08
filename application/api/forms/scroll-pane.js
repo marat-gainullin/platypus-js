@@ -707,6 +707,20 @@
              */
             P.ScrollPane.prototype.onMouseExited = {};
         }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ScrollPane){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf ScrollPane
+             */
+            P.ScrollPane.prototype.name = '';
+        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -723,20 +737,6 @@
              * @memberOf ScrollPane
              */
             P.ScrollPane.prototype.width = 0;
-        }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ScrollPane){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf ScrollPane
-             */
-            P.ScrollPane.prototype.name = '';
         }
         Object.defineProperty(this, "font", {
             get: function() {
@@ -778,28 +778,6 @@
         });
     };
         /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf ScrollPane
-         */
-        P.ScrollPane.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Returns child component by index. For the ScrollPane allways returns view component
-         * @method child
-         * @memberOf ScrollPane
-         * @param index Index of compoentnt to return. Ignored. */
-        P.ScrollPane.prototype.child = function(index) {
-            var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(index));
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Sets the specified component as the scroll's view, replacing old view component.
          * @param component the component to add
          * @method add
@@ -820,6 +798,28 @@
         P.ScrollPane.prototype.remove = function(component) {
             var delegate = this.unwrap();
             var value = delegate.remove(P.boxAsJava(component));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Tries to acquire focus for this component.
+         * @method focus
+         * @memberOf ScrollPane
+         */
+        P.ScrollPane.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Returns child component by index. For the ScrollPane allways returns view component
+         * @method child
+         * @memberOf ScrollPane
+         * @param index Index of compoentnt to return. Ignored. */
+        P.ScrollPane.prototype.child = function(index) {
+            var delegate = this.unwrap();
+            var value = delegate.child(P.boxAsJava(index));
             return P.boxAsJs(value);
         };
 

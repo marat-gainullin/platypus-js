@@ -242,23 +242,6 @@
              */
             P.Parameter.prototype.value = {};
         }
-        Object.defineProperty(this, "readonly", {
-            get: function() {
-                var value = delegate.readonly;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.readonly = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Parameter){
-            /**
-             * Determines if this field is readonly.
-             * @property readonly
-             * @memberOf Parameter
-             */
-            P.Parameter.prototype.readonly = true;
-        }
         Object.defineProperty(this, "size", {
             get: function() {
                 var value = delegate.size;
@@ -275,6 +258,23 @@
              * @memberOf Parameter
              */
             P.Parameter.prototype.size = 0;
+        }
+        Object.defineProperty(this, "readonly", {
+            get: function() {
+                var value = delegate.readonly;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.readonly = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Parameter){
+            /**
+             * Determines if this field is readonly.
+             * @property readonly
+             * @memberOf Parameter
+             */
+            P.Parameter.prototype.readonly = true;
         }
         Object.defineProperty(this, "name", {
             get: function() {

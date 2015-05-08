@@ -74,6 +74,20 @@
              */
             P.WebSocket.prototype.onopen = {};
         }
+        Object.defineProperty(this, "query", {
+            get: function() {
+                var value = delegate.query;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.WebSocket){
+            /**
+             * Generated property jsDoc.
+             * @property query
+             * @memberOf WebSocket
+             */
+            P.WebSocket.prototype.query = '';
+        }
         Object.defineProperty(this, "onclose", {
             get: function() {
                 var value = delegate.onclose;
@@ -90,20 +104,6 @@
              * @memberOf WebSocket
              */
             P.WebSocket.prototype.onclose = {};
-        }
-        Object.defineProperty(this, "query", {
-            get: function() {
-                var value = delegate.query;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.WebSocket){
-            /**
-             * Generated property jsDoc.
-             * @property query
-             * @memberOf WebSocket
-             */
-            P.WebSocket.prototype.query = '';
         }
         Object.defineProperty(this, "protocolVersion", {
             get: function() {
@@ -150,23 +150,23 @@
     };
         /**
          *
-         * @method send
-         * @memberOf WebSocket
-         */
-        P.WebSocket.prototype.send = function(data) {
-            var delegate = this.unwrap();
-            var value = delegate.send(P.boxAsJava(data));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         *
          * @method close
          * @memberOf WebSocket
          */
         P.WebSocket.prototype.close = function(arg0, arg1) {
             var delegate = this.unwrap();
             var value = delegate.close(P.boxAsJava(arg0), P.boxAsJava(arg1));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
+         * @method send
+         * @memberOf WebSocket
+         */
+        P.WebSocket.prototype.send = function(data) {
+            var delegate = this.unwrap();
+            var value = delegate.send(P.boxAsJava(data));
             return P.boxAsJs(value);
         };
 

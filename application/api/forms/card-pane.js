@@ -678,6 +678,20 @@
              */
             P.CardPane.prototype.onMouseExited = {};
         }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.CardPane){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf CardPane
+             */
+            P.CardPane.prototype.name = '';
+        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -694,20 +708,6 @@
              * @memberOf CardPane
              */
             P.CardPane.prototype.width = 0;
-        }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.CardPane){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf CardPane
-             */
-            P.CardPane.prototype.name = '';
         }
         Object.defineProperty(this, "font", {
             get: function() {
@@ -749,42 +749,6 @@
         });
     };
         /**
-         * Flips to the component that was added to this layout with the specified name.
-         * @param name the card name
-         * @method show
-         * @memberOf CardPane
-         */
-        P.CardPane.prototype.show = function(name) {
-            var delegate = this.unwrap();
-            var value = delegate.show(P.boxAsJava(name));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf CardPane
-         */
-        P.CardPane.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Gets child component, associated with the specified card.
-         * @param cardName Name of the card.
-         * @return the child component.
-         * @method child
-         * @memberOf CardPane
-         */
-        P.CardPane.prototype.child = function(cardName) {
-            var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(cardName));
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Appends the component to this container with the specified name.
          * @param component the component to add.
          * @param cardName the name of the card.
@@ -817,6 +781,42 @@
         P.CardPane.prototype.clear = function() {
             var delegate = this.unwrap();
             var value = delegate.clear();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Flips to the component that was added to this layout with the specified name.
+         * @param name the card name
+         * @method show
+         * @memberOf CardPane
+         */
+        P.CardPane.prototype.show = function(name) {
+            var delegate = this.unwrap();
+            var value = delegate.show(P.boxAsJava(name));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Tries to acquire focus for this component.
+         * @method focus
+         * @memberOf CardPane
+         */
+        P.CardPane.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Gets child component, associated with the specified card.
+         * @param cardName Name of the card.
+         * @return the child component.
+         * @method child
+         * @memberOf CardPane
+         */
+        P.CardPane.prototype.child = function(cardName) {
+            var delegate = this.unwrap();
+            var value = delegate.child(P.boxAsJava(cardName));
             return P.boxAsJs(value);
         };
 

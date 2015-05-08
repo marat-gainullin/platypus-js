@@ -685,6 +685,20 @@
              */
             P.Button.prototype.onMouseExited = {};
         }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Button){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf Button
+             */
+            P.Button.prototype.name = '';
+        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -701,20 +715,6 @@
              * @memberOf Button
              */
             P.Button.prototype.width = 0;
-        }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.Button){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf Button
-             */
-            P.Button.prototype.name = '';
         }
         Object.defineProperty(this, "font", {
             get: function() {

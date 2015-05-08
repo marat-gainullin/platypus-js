@@ -163,7 +163,7 @@ public class Utils {
 
 		public static native JavaScriptObject dateReviver()/*-{
 			return function(k, v){
-				if(!!k && typeof v === 'string' && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/.test(v)){
+				if(typeof v === 'string' && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/.test(v)){
                 	return new Date(v);
 				}else{
 					return v;
