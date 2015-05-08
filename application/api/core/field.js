@@ -191,23 +191,6 @@
              */
             P.Field.prototype.originalName = '';
         }
-        Object.defineProperty(this, "size", {
-            get: function() {
-                var value = delegate.size;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.size = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Field){
-            /**
-             * The size of the field.
-             * @property size
-             * @memberOf Field
-             */
-            P.Field.prototype.size = 0;
-        }
         Object.defineProperty(this, "readonly", {
             get: function() {
                 var value = delegate.readonly;
@@ -224,6 +207,23 @@
              * @memberOf Field
              */
             P.Field.prototype.readonly = true;
+        }
+        Object.defineProperty(this, "size", {
+            get: function() {
+                var value = delegate.size;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.size = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Field){
+            /**
+             * The size of the field.
+             * @property size
+             * @memberOf Field
+             */
+            P.Field.prototype.size = 0;
         }
         Object.defineProperty(this, "name", {
             get: function() {

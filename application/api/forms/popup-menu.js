@@ -657,20 +657,6 @@
              */
             P.PopupMenu.prototype.onMouseExited = {};
         }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.PopupMenu){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf PopupMenu
-             */
-            P.PopupMenu.prototype.name = '';
-        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -687,6 +673,20 @@
              * @memberOf PopupMenu
              */
             P.PopupMenu.prototype.width = 0;
+        }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.PopupMenu){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf PopupMenu
+             */
+            P.PopupMenu.prototype.name = '';
         }
         Object.defineProperty(this, "font", {
             get: function() {
@@ -728,6 +728,30 @@
         });
     };
         /**
+         * Tries to acquire focus for this component.
+         * @method focus
+         * @memberOf PopupMenu
+         */
+        P.PopupMenu.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Gets the container's n-th component.
+         * @param index the component's index in the container
+         * @return the child component
+         * @method child
+         * @memberOf PopupMenu
+         */
+        P.PopupMenu.prototype.child = function(index) {
+            var delegate = this.unwrap();
+            var value = delegate.child(P.boxAsJava(index));
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Adds the item to the menu.
          * @param menu the menu component to add.
          * @method add
@@ -759,30 +783,6 @@
         P.PopupMenu.prototype.clear = function() {
             var delegate = this.unwrap();
             var value = delegate.clear();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf PopupMenu
-         */
-        P.PopupMenu.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Gets the container's n-th component.
-         * @param index the component's index in the container
-         * @return the child component
-         * @method child
-         * @memberOf PopupMenu
-         */
-        P.PopupMenu.prototype.child = function(index) {
-            var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(index));
             return P.boxAsJs(value);
         };
 

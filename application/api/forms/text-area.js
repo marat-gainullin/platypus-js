@@ -662,20 +662,6 @@
              */
             P.TextArea.prototype.onMouseExited = {};
         }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.TextArea){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf TextArea
-             */
-            P.TextArea.prototype.name = '';
-        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -692,6 +678,20 @@
              * @memberOf TextArea
              */
             P.TextArea.prototype.width = 0;
+        }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.TextArea){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf TextArea
+             */
+            P.TextArea.prototype.name = '';
         }
         Object.defineProperty(this, "font", {
             get: function() {

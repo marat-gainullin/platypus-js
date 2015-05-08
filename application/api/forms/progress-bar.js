@@ -647,20 +647,6 @@
              */
             P.ProgressBar.prototype.onMouseExited = {};
         }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ProgressBar){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf ProgressBar
-             */
-            P.ProgressBar.prototype.name = '';
-        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -677,6 +663,20 @@
              * @memberOf ProgressBar
              */
             P.ProgressBar.prototype.width = 0;
+        }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ProgressBar){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf ProgressBar
+             */
+            P.ProgressBar.prototype.name = '';
         }
         Object.defineProperty(this, "maximum", {
             get: function() {
