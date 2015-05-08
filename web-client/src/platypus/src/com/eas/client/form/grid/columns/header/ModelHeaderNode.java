@@ -190,6 +190,17 @@ public class ModelHeaderNode extends HeaderNode<JavaScriptObject> implements Has
 		}
 	}
 
+	public void sort(){
+		((ModelColumn) column).sort();
+	}
+	public void sortDesc(){
+		((ModelColumn) column).sortDesc();
+	}
+	public void unsort(){
+		((ModelColumn) column).unsort();
+	}
+	
+	
 	private static native void publish(ModelHeaderNode aColumn, JavaScriptObject aPublished)/*-{
 		Object.defineProperty(aPublished, "field", {
 			get : function() {
@@ -327,5 +338,15 @@ public class ModelHeaderNode extends HeaderNode<JavaScriptObject> implements Has
 				aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::setOnSelect(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 			}
 		});
+		aPublished.sort = function() {
+				aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::sort()();
+		};
+		aPublished.sortDesc = function() {
+				aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::sortDesc()();
+		};
+		aPublished.unsort = function() {
+				aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::unsort()();
+		};
+		
 	}-*/;
 }

@@ -73,18 +73,65 @@ import java.util.*;
  */
 public class LayoutSupportRegistry {
 
-    private static Map<Class<?>, Class<?>> containerToLayoutDelegate;
-    private static Map<Class<?>, Class<?>> layoutToLayoutDelegate;
+    private static final Map<Class<?>, Class<?>> containerToLayoutDelegate = new HashMap<>();
+    private static final Map<Class<?>, Class<?>> layoutToLayoutDelegate = new HashMap<>();
     public static final String DEFAULT_SUPPORT = "<default>"; // NOI18N
+
+    static {
+        // fill in default containers
+        containerToLayoutDelegate.put(
+                ScrollPane.class, // NOI18N
+                ScrollPaneSupport.class); // NOI18N
+        containerToLayoutDelegate.put(
+                SplitPane.class, // NOI18N
+                SplitPaneSupport.class); // NOI18N
+        containerToLayoutDelegate.put(
+                TabbedPane.class, // NOI18N
+                TabbedPaneSupport.class); // NOI18N
+        containerToLayoutDelegate.put(
+                ToolBar.class, // NOI18N
+                ToolBarSupport.class); // NOI18N
+        containerToLayoutDelegate.put(
+                MenuBar.class, // NOI18N
+                MenuFakeSupport.class); // NOI18N
+        containerToLayoutDelegate.put(
+                Menu.class, // NOI18N
+                MenuFakeSupport.class); // NOI18N
+        containerToLayoutDelegate.put(
+                PopupMenu.class, // NOI18N
+                MenuFakeSupport.class); // NOI18N
+    }
+
+    static {
+        // fill in default layouts
+        layoutToLayoutDelegate.put(
+                java.awt.BorderLayout.class, // NOI18N
+                BorderLayoutSupport.class); // NOI18N
+        layoutToLayoutDelegate.put(
+                java.awt.FlowLayout.class, // NOI18N
+                FlowLayoutSupport.class); // NOI18N
+        layoutToLayoutDelegate.put(
+                BoxLayout.class, // NOI18N
+                BoxLayoutSupport.class); // NOI18N
+        layoutToLayoutDelegate.put(
+                java.awt.GridLayout.class, // NOI18N
+                GridLayoutSupport.class); // NOI18N
+        layoutToLayoutDelegate.put(
+                CardLayout.class, // NOI18N
+                CardLayoutSupport.class); // NOI18N
+        layoutToLayoutDelegate.put(
+                MarginLayout.class, // NOI18N
+                MarginLayoutSupport.class); // NOI18N
+    }
 
     // --------------
     // get methods
     public static Class<?> getSupportClassForContainer(Class<?> containerClass) {
-        return getContainersMap().get(containerClass);
+        return containerToLayoutDelegate.get(containerClass);
     }
 
     public Class<?> getSupportClassForLayout(Class<?> layoutClass) {
-        return getLayoutsMap().get(layoutClass);
+        return layoutToLayoutDelegate.get(layoutClass);
     }
 
     // ------------
@@ -104,63 +151,7 @@ public class LayoutSupportRegistry {
             throws ClassNotFoundException,
             InstantiationException,
             IllegalAccessException {
-        Class<?> supportClass = getLayoutsMap().get(layoutClass);
+        Class<?> supportClass = layoutToLayoutDelegate.get(layoutClass);
         return (LayoutSupportDelegate) supportClass.newInstance();
-    }
-
-    private static Map<Class<?>, Class<?>> getContainersMap() {
-        if (containerToLayoutDelegate == null) {
-            containerToLayoutDelegate = new HashMap<>();
-            // fill in default containers
-            containerToLayoutDelegate.put(
-                    ScrollPane.class, // NOI18N
-                    ScrollPaneSupport.class); // NOI18N
-            containerToLayoutDelegate.put(
-                    SplitPane.class, // NOI18N
-                    SplitPaneSupport.class); // NOI18N
-            containerToLayoutDelegate.put(
-                    TabbedPane.class, // NOI18N
-                    TabbedPaneSupport.class); // NOI18N
-            containerToLayoutDelegate.put(
-                    ToolBar.class, // NOI18N
-                    ToolBarSupport.class); // NOI18N
-            containerToLayoutDelegate.put(
-                    MenuBar.class, // NOI18N
-                    MenuFakeSupport.class); // NOI18N
-            containerToLayoutDelegate.put(
-                    Menu.class, // NOI18N
-                    MenuFakeSupport.class); // NOI18N
-            containerToLayoutDelegate.put(
-                    PopupMenu.class, // NOI18N
-                    MenuFakeSupport.class); // NOI18N
-        }
-        return containerToLayoutDelegate;
-    }
-
-    private static Map<Class<?>, Class<?>> getLayoutsMap() {
-        if (layoutToLayoutDelegate == null) {
-            layoutToLayoutDelegate = new HashMap<>();
-            // fill in default layouts
-            layoutToLayoutDelegate.put(
-                    java.awt.BorderLayout.class, // NOI18N
-                    BorderLayoutSupport.class); // NOI18N
-            layoutToLayoutDelegate.put(
-                    java.awt.FlowLayout.class, // NOI18N
-                    FlowLayoutSupport.class); // NOI18N
-            layoutToLayoutDelegate.put(
-                    BoxLayout.class, // NOI18N
-                    BoxLayoutSupport.class); // NOI18N
-            layoutToLayoutDelegate.put(
-                    java.awt.GridLayout.class, // NOI18N
-                    GridLayoutSupport.class); // NOI18N
-            layoutToLayoutDelegate.put(
-                    CardLayout.class, // NOI18N
-                    CardLayoutSupport.class); // NOI18N
-            layoutToLayoutDelegate.put(
-                    MarginLayout.class, // NOI18N
-                    MarginLayoutSupport.class); // NOI18N
-
-        }
-        return layoutToLayoutDelegate;
     }
 }

@@ -7,7 +7,6 @@ package com.eas.client;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.bearsoft.rowset.CallbackAdapter;
 
 /**
  * 

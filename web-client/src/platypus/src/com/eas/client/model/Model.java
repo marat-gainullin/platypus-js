@@ -12,17 +12,13 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bearsoft.rowset.CallbackAdapter;
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.Utils;
-import com.bearsoft.rowset.Utils.JsObject;
-import com.bearsoft.rowset.beans.PropertyChangeSupport;
-import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
+import com.eas.client.CallbackAdapter;
+import com.eas.client.Utils;
+import com.eas.client.Utils.JsObject;
 import com.eas.client.application.AppClient;
 import com.eas.client.form.published.HasPublished;
-import com.eas.client.model.js.JsModel;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
@@ -37,8 +33,7 @@ public class Model implements HasPublished {
 	protected Set<Relation> relations = new HashSet<Relation>();
 	protected Set<ReferenceRelation> referenceRelations = new HashSet<ReferenceRelation>();
 	protected Map<String, Entity> entities = new HashMap<String, Entity>();
-	protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
-	protected List<Change> changeLog = new ArrayList<Change>();
+	protected JsObject changeLog = JavaScriptObject.createArray().cast();
 	//
 	protected RequeryProcess process;
 	protected JavaScriptObject jsPublished;
@@ -46,9 +41,9 @@ public class Model implements HasPublished {
 	public static class RequeryProcess {
 		public Collection<Entity> entities;
 		public Map<Entity, String> errors = new HashMap<Entity, String>();
-		public Callback<Rowset, String> callback;
+		public Callback<JavaScriptObject, String> callback;
 
-		public RequeryProcess(Collection<Entity> aEntities, Callback<Rowset, String> aCallback) {
+		public RequeryProcess(Collection<Entity> aEntities, Callback<JavaScriptObject, String> aCallback) {
 			super();
 			entities = aEntities;
 			callback = aCallback;
@@ -213,10 +208,6 @@ public class Model implements HasPublished {
 		client = aClient;
 	}
 
-	public PropertyChangeSupport getChangeSupport() {
-		return changeSupport;
-	}
-
 	public AppClient getClient() {
 		return client;
 	}
@@ -271,19 +262,21 @@ public class Model implements HasPublished {
 	private void publish() {
 		try {
 			publishTopLevelFacade(jsPublished, this);
-			publishRowsets();
+			publishEntities();
 		} catch (Exception ex) {
 			Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
 
-	private void publishRowsets() throws Exception {
+	private void publishEntities() throws Exception {
 		assert jsPublished != null : "JavaScript facade object has to be already installed while publishing rowsets facades.";
 		validateQueries();
+		//
 		for (Entity entity : entities.values()) {
-			JavaScriptObject publishedEntity = JsModel.publish(entity);
 			if (entity.getName() != null && !entity.getName().isEmpty()) {
-				jsPublished.<JsObject> cast().inject(entity.getName(), publishedEntity);
+				JavaScriptObject publishedEntity = publishEntity(entity);
+				entity.setPublished(publishedEntity);
+				jsPublished.<JsObject> cast().inject(entity.getName(), publishedEntity, true, false);
 			}
 		}
 		//
@@ -307,9 +300,468 @@ public class Model implements HasPublished {
                                 aRelation.getLeftField().getName())));
             }
 		}
-		// ////////////////
 	}
 
+	protected native JavaScriptObject publishEntity(Entity nEntity)/*-{
+		function Insert(aEntityName){
+			this.kind = 'insert';
+			this.entity = aEntityName;
+			this.data = {};
+		}
+		function Delete(aEntityName){
+			this.kind = 'delete';
+			this.entity = aEntityName;
+			this.keys = {};
+		}
+		function Update(aEntityName){
+			this.kind = 'update';
+			this.entity = aEntityName;
+			this.keys = {};
+			this.data = {};
+		}
+		
+	    function fireSelfScalarsOppositeCollectionsChanges(aSubject, aChange, nFields) {
+            var expandingsOldValues = aChange.beforeState.selfScalarsOldValues;
+	        var ormDefs = nFields.@com.eas.client.metadata.Fields::forEachOrmScalarExpandings(Ljava/lang/String;Lcom/eas/client/Utils$JsObject;)(aChange.propertyName, function(ormDef){
+            	var ormDefName = ormDef.@com.eas.client.metadata.Fields.OrmDef::getName()(); 
+                if (ormDefName) {
+                	var ormDefOppositeName = ormDef.@com.eas.client.metadata.Fields.OrmDef::getOppositeName()();
+                    var expandingOldValue = expandingsOldValues[ormDefName];
+                    var expandingNewValue = aSubject[ormDefName];
+                    @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aSubject, {source: aChange.source, propertyName: ormDefName, oldValue: expandingOldValue, newValue: expandingNewValue});
+                    if (ormDefOppositeName) {
+                        if (expandingOldValue) {
+                            @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(expandingOldValue, {source: expandingOldValue, propertyName: ormDefOppositeName});
+                        }
+                        if (expandingNewValue) {
+                            @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(expandingNewValue, {source: expandingNewValue, propertyName: ormDefOppositeName});
+                        }
+                    }
+                }
+	        });
+	    }
+	
+	    function prepareSelfScalarsChanges(aSubject, aChange, nFields) {
+	        var oldScalarValues = [];
+	    	nFields.@com.eas.client.metadata.Fields::forEachOrmScalarExpandings(Ljava/lang/String;Lcom/eas/client/Utils$JsObject;)(aChange.propertyName, function(ormDef){
+            	var ormDefName = ormDef.@com.eas.client.metadata.Fields.OrmDef::getName()(); 
+                if (ormDef && ormDefName) {
+                    oldScalarValues[ormDefName] = aSubject[ormDefName];
+                }
+	    	});
+	        return oldScalarValues;
+	    }
+	
+	    function fireOppositeScalarsSelfCollectionsChanges(aSubject, aChange, nFields) {
+	        var oppositeScalarsFirerers = aChange.beforeState.oppositeScalarsFirerers;
+	        if (oppositeScalarsFirerers) {
+	            oppositeScalarsFirerers.forEach(function (aFirerer) {
+	                aFirerer();
+	            });
+	        }
+	        var collectionsDefs = nFields.@com.eas.client.metadata.Fields::getOrmCollectionsDefinitions()().@java.util.Map::entrySet()();
+	        if (collectionsDefs) {
+	        	var collectionsDefsIt = collectionsDefs.@java.util.Set::iterator()();
+	        	while(collectionsDefsIt.@java.util.Iterator::hasNext()()){
+	        		var aEntry = collectionsDefsIt.@java.util.Iterator::next()(); 
+	                var collectionName = aEntry.@java.util.Map.Entry::getKey()();
+	                var ormDef = aEntry.@java.util.Map.Entry::getValue()();
+	                var collection = aSubject[collectionName];
+	                collection.forEach(function (item) {
+	                    @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(item, {source: item, propertyName: ormDef.@com.eas.client.metadata.Fields.OrmDef::getOppositeName()()});
+	                });
+	            };
+	            collectionsDefsIt = collectionsDefs.@java.util.Set::iterator()();
+	            while(collectionsDefsIt.@java.util.Iterator::hasNext()()) {
+	            	aEntry = collectionsDefsIt.@java.util.Iterator::next()();
+	                var collectionName = aEntry.@java.util.Map.Entry::getKey()();
+	                @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aSubject, {source: aSubject, propertyName: collectionName});
+	            };
+	        }
+	    }
+	
+	    function prepareOppositeScalarsChanges(aSubject, nFields) {
+	        var firerers = [];
+	        var collectionsDefs = nFields.@com.eas.client.metadata.Fields::getOrmCollectionsDefinitions()().@java.util.Map::entrySet()();
+        	var collectionsDefsIt = collectionsDefs.@java.util.Set::iterator()();
+        	while(collectionsDefsIt.@java.util.Iterator::hasNext()()){
+        		var aEntry = collectionsDefsIt.@java.util.Iterator::next()(); 
+	            var collectionName = aEntry.@java.util.Map.Entry::getKey()();
+	            var ormDef = aEntry.@java.util.Map.Entry::getValue()();
+	            var collection = aSubject[collectionName];
+	            collection.forEach(function (item) {
+	               	var ormDefOppositeName = ormDef.@com.eas.client.metadata.Fields.OrmDef::getOppositeName()();
+	                if (ormDefOppositeName) {
+	                    firerers.push(function () {
+	                        @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(item, {source: item, propertyName: ormDefOppositeName});
+	                    });
+	                }
+	            });
+	        };
+	        return firerers;
+	    }
+	
+	    function fireOppositeScalarsChanges(aSubject, nFields) {
+	        var collected = prepareOppositeScalarsChanges(aSubject, nFields);
+	        collected.forEach(function (aFirerer) {
+	            aFirerer();
+	        });
+	    }
+	
+	    function fireOppositeCollectionsChanges(aSubject, nFields) {
+	        var scalarsDefs = nFields.@com.eas.client.metadata.Fields::getOrmScalarDefinitions()().@java.util.Map::entrySet()();
+        	var scalarsDefsIt = scalarsDefs.@java.util.Set::iterator()();
+        	while(scalarsDefsIt.@java.util.Iterator::hasNext()()){
+        		var aEntry = scalarsDefsIt.@java.util.Iterator::next()(); 
+	            var scalarName = aEntry.@java.util.Map.Entry::getKey()();
+	            if (scalarName) {
+	                var ormDef = aEntry.@java.util.Map.Entry::getValue()();
+	                var scalar = aSubject[scalarName];
+	               	var ormDefOppositeName = ormDef.@com.eas.client.metadata.Fields.OrmDef::getOppositeName()();
+	                if (scalar && ormDefOppositeName) {
+	                    @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(scalar, {source: scalar, propertyName: ormDefOppositeName});
+	                }
+	            }
+	        };
+	    }
+	
+	    function generateChangeLogKeys(nKeys, nFields, propName, aSubject, oldValue) {
+	        if (nFields) {
+	            for (var i = 1; i <= nFields.@com.eas.client.metadata.Fields::getFieldsCount()(); i++) {
+	                var nField = nFields.@com.eas.client.metadata.Fields::get(I)(i);
+	                if (nField.@com.eas.client.metadata.Field::isPk()()) {
+	                    var fieldName = nField.@com.eas.client.metadata.Field::getName()();
+	                    var value = aSubject[fieldName];
+	                    // Some tricky processing of primary keys modification case ...
+	                    if (fieldName == propName) {
+	                        value = oldValue;
+	                    }
+	                    nKeys[fieldName] = value;
+	                }
+	            }
+	        }
+	    }
+
+        var justInserted = null;
+        var justInsertedChange = null;
+        var orderers = {};
+        var published = [];
+
+		var changeLog = nEntity.@com.eas.client.model.Entity::getChangeLog()();
+		
+        function managedOnChange(aSubject, aChange) {
+            var nField = noFields[aChange.propertyName];
+            if (!tryToComplementInsert(aSubject, aChange)) {
+                var updateChange = new Update(nEntity.@com.eas.client.model.Entity::getQueryName()());
+                generateChangeLogKeys(updateChange.keys, nFields, aChange.propertyName, aSubject, aChange.oldValue);
+                updateChange.data[aChange.propertyName] = aChange.newValue;
+                changeLog.push(updateChange);
+            }
+            Object.keys(orderers).forEach(function (aOrdererKey) {
+                var aOrderer = orderers[aOrdererKey];
+                if (aOrderer.inKeys(aChange.propertyName)) {
+                    aOrderer.add(aChange.source);
+                }
+            });
+            @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aSubject, aChange);
+            fireSelfScalarsOppositeCollectionsChanges(aSubject, aChange, nFields);// Expanding change
+            if (nField && nField.@com.eas.client.metadata.Field::isPk()()) {
+                fireOppositeScalarsSelfCollectionsChanges(aSubject, aChange, nFields);
+            }
+        }
+        function managedBeforeChange(aSubject, aChange) {
+            var oldScalars = prepareSelfScalarsChanges(aSubject, aChange, nFields);
+            var oppositeScalarsFirerers = prepareOppositeScalarsChanges(aSubject, nFields);
+            Object.keys(orderers).forEach(function (aOrdererKey) {
+                var aOrderer = orderers[aOrdererKey];
+                if (aOrderer.inKeys(aChange.propertyName)) {
+                    aOrderer['delete'](aChange.source);
+                }
+            });
+            return {selfScalarsOldValues: oldScalars, oppositeScalarsFirerers: oppositeScalarsFirerers};
+        }
+        function tryToComplementInsert(aSubject, aChange) {
+            var complemented = false;
+            var nField = noFields[aChange.propertyName];
+            if (aSubject === justInserted && !nField.@com.eas.client.metadata.Field::isNullable()()) {
+                var met = false;
+                var iData = justInsertedChange.data;
+                for (var d in iData) {
+                    var iv = iData[d];
+                    if (d == aChange.propertyName) {
+                        met = true;
+                        break;
+                    }
+                }
+                if (!met) {
+                    iData[aChange.propertyName] = aChange.newValue;
+                    complemented = true;
+                }
+            }
+            return complemented;
+        }
+        function acceptInstance(aSubject) {
+            Object.keys(noFields).forEach(function(aFieldName){
+                if(typeof aSubject[aFieldName] === 'undefined')
+                    aSubject[aFieldName] = null;
+            });
+            $wnd.P.manageObject(aSubject, managedOnChange, managedBeforeChange);
+            @com.eas.client.Utils::listenable(Lcom/google/gwt/core/client/JavaScriptObject;)(aSubject);
+            // ORM mutable scalar and collection properties
+            var define = function (aOrmDefs) {
+            	var aOrmDefsIt = aOrmDefs.@java.util.Map::entrySet()().@java.util.Set::iterator()();
+                while(aOrmDefsIt.@java.util.Iterator::hasNext()()) {
+                	var defsEntry = aOrmDefsIt.@java.util.Iterator::next()();
+                    var ormDef = defsEntry.@java.util.Map.Entry::getValue()();
+                    var jsDef = ormDef.@com.eas.client.metadata.Fields.OrmDef::getJsDef()();
+                    Object.defineProperty(aSubject, defsEntry.@java.util.Map.Entry::getKey()(), jsDef);
+                }
+            };
+            define(nFields.@com.eas.client.metadata.Fields::getOrmScalarDefinitions()());
+            define(nFields.@com.eas.client.metadata.Fields::getOrmCollectionsDefinitions()());
+        }
+
+        var _onInserted = null;
+        var _onDeleted = null;
+        var _onScrolled = null;
+        $wnd.P.manageArray(published, {
+            spliced: function (added, deleted) {
+                added.forEach(function (aAdded) {
+                    justInserted = aAdded;
+                    justInsertedChange = new Insert(nEntity.@com.eas.client.model.Entity::getQueryName()());
+                    for (var nf = 0; nf < nnFields.@java.util.List::size()(); nf++) {
+                        var nField = nnFields.@java.util.List::get(I)(nf);
+                        var nFieldName = nField.@com.eas.client.metadata.Field::getName()();
+                        if (!aAdded[nFieldName] && nField.@com.eas.client.metadata.Field::isPk()()) {
+                        	var nTypeInfo = nField.@com.eas.client.metadata.Field::getTypeInfo()();
+                            aAdded[nFieldName] = $wnd.P.boxAsJs(nTypeInfo.@com.eas.client.metadata.DataTypeInfo::generateValue()());
+                        }
+                    }
+                    for (var na in aAdded) {
+                        var nField = noFields[na];
+                        if (nField) {
+                            var v = aAdded[na];
+                            justInsertedChange.data[na] = v;
+                        }
+                    }
+                    changeLog.push(justInsertedChange);
+                    for (var aOrdererKey in orderers) {
+                        var aOrderer = orderers[aOrdererKey];
+                        aOrderer.add(aAdded);
+                    }
+                    acceptInstance(aAdded);
+                    fireOppositeScalarsChanges(aAdded, nFields);
+                    fireOppositeCollectionsChanges(aAdded, nFields);
+                });
+                deleted.forEach(function (aDeleted) {
+                    if (aDeleted === justInserted) {
+                        justInserted = null;
+                        justInsertedChange = null;
+                    }
+                    var deleteChange = new Delete(nEntity.@com.eas.client.model.Entity::getQueryName()());
+                    generateChangeLogKeys(deleteChange.keys, nFields, null, aDeleted, null);
+                    changeLog.push(deleteChange);
+                    for (var aOrdererKey in orderers) {
+                        var aOrderer = orderers[aOrdererKey];
+                        aOrderer['delete'](aDeleted);
+                    }
+                    fireOppositeScalarsChanges(aDeleted, nFields);
+                    fireOppositeCollectionsChanges(aDeleted, nFields);
+                    @com.eas.client.Utils::unlistenable(Lcom/google/gwt/core/client/JavaScriptObject;)(aDeleted);
+                    $wnd.P.unmanageObject(aDeleted);
+                });
+                if (_onInserted && added.length > 0) {
+                    try {
+                        _onInserted({source: published, items: added});
+                    } catch (e) {
+                        Logger.severe(e);
+                    }
+                }
+                if (_onDeleted && deleted.length > 0) {
+                    try {
+                        _onDeleted({source: published, items: deleted});
+                    } catch (e) {
+                        Logger.severe(e);
+                    }
+                }
+            	@com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(published, {source: published, propertyName: 'length'});
+            },
+            scrolled: function (aSubject, oldCursor, newCursor) {
+                if (_onScrolled) {
+                    try {
+                        _onScrolled({source: published, propertyName: 'cursor', oldValue: oldCursor, newValue: newCursor});
+                    } catch (e) {
+                        Logger.severe(e);
+                    }
+                }
+                @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(published, {source: published, propertyName: 'cursor', oldValue: oldCursor, newValue: newCursor});
+            }
+        });
+        var pSchema = {};
+        Object.defineProperty(published, "schema", {
+            value: pSchema
+        });
+        var pkFieldName = '';
+        var nFields = nEntity.@com.eas.client.model.Entity::getFields()();
+        var nnFields = nFields.@com.eas.client.metadata.Fields::toCollection()();
+        var noFields = {};
+        // schema
+        for (var n = 0; n < nnFields.@java.util.List::size()(); n++) {
+            (function () {
+                var nField = nnFields.@java.util.List::get(I)(n);
+                var nFieldName = nField.@com.eas.client.metadata.Field::getName()();
+                noFields[nFieldName] = nField;
+                if (nField.@com.eas.client.metadata.Field::isPk()())
+                    pkFieldName = nFieldName;
+                    
+				var pField = @com.eas.client.metadata.Field::publishFacade(Lcom/eas/client/metadata/Field;)(nField);
+                var schemaDesc = {
+                    value: pField
+                };
+                if (!pSchema[nFieldName]) {
+                    Object.defineProperty(pSchema, nFieldName, schemaDesc);
+                } else {                	
+                    var eTitle = nEntity.@com.eas.client.model.Entity::getTitle()() ? " [" + nEntity.@com.eas.client.model.Entity::getTitle()() + "]" : "";
+                    throw "Duplicated field name found: " + nFieldName + " in entity " + nEntity.@com.eas.client.model.Entity::getName()() + eTitle;
+                }
+                Object.defineProperty(pSchema, n, schemaDesc);
+            })();
+        }
+        // entity.params.p1 syntax
+        var nParameters = nEntity.@com.eas.client.model.Entity::getQuery()().@com.eas.client.queries.Query::getParameters()();
+        var ncParameters = nParameters.@com.eas.client.metadata.Parameters::toCollection()();
+        var pParams = {};
+        for (var p = 0; p < ncParameters.@java.util.List::size()(); p++) {
+            (function () {
+                var nParameter = ncParameters.@java.util.List::get(I)(p);
+                var pDesc = {
+                    get: function () {
+                        return $wnd.P.boxAsJs(nParameter.@com.eas.client.metadata.Parameter::getJsValue()());
+                    },
+                    set: function (aValue) {
+                        nParameter.@com.eas.client.metadata.Parameter::setJsValue(Ljava/lang/Object;)($wnd.P.boxAsJava(aValue));
+                    }
+                };
+                Object.defineProperty(pParams, nParameter.@com.eas.client.metadata.Parameter::getName()(), pDesc);
+                Object.defineProperty(pParams, p, pDesc);
+            })();
+        }
+        Object.defineProperty(published, 'params', {value: pParams});
+        // entity.params.schema.p1 syntax
+        var pParamsSchema = @com.eas.client.metadata.Fields::publishFacade(Lcom/eas/client/metadata/Fields;)(nParameters);
+        if (!pParams.schema)
+            Object.defineProperty(pParams, 'schema', {value: pParamsSchema});
+        Object.defineProperty(published, 'find', {value: function (aCriteria) {
+                var keys = Object.keys(aCriteria);
+                keys = keys.sort();
+                var ordererKey = keys.join(' | ');
+                var orderer = orderers[ordererKey];
+                if (!orderer) {
+                    orderer = new $wnd.P.Orderer(keys);
+                    published.forEach(function (item) {
+                        orderer.add(item);
+                    });
+                    orderers[ordererKey] = orderer;
+                }
+                var found = orderer.find(aCriteria);
+                return found;
+            }});
+        Object.defineProperty(published, 'findByKey', {value: function (aKeyValue) {
+                var criteria = {};
+                criteria[pkFieldName] = aKeyValue;
+                var found = published.find(criteria);
+                return found.length > 0 ? found[0] : null;
+            }});
+        Object.defineProperty(published, 'findById', {value: function (aKeyValue) {
+                $wnd.P.Logger.warning('findById() is deprecated. Use findByKey() instead.');
+                return published.findByKey(aKeyValue);
+            }});
+        var toBeDeletedMark = '-platypus-to-be-deleted-mark';
+        Object.defineProperty(published, 'remove', {value: function (toBeDeleted) {
+                toBeDeleted = toBeDeleted.forEach ? toBeDeleted : [toBeDeleted];
+                toBeDeleted.forEach(function (anInstance) {
+                    anInstance[toBeDeletedMark] = true;
+                });
+                for (var d = published.length - 1; d >= 0; d--) {
+                    if (published[d][toBeDeletedMark]) {
+                        published.splice(d, 1);
+                    }
+                }
+                toBeDeleted.forEach(function (anInstance) {
+                    delete anInstance[toBeDeletedMark];
+                });
+            }});
+        Object.defineProperty(published, 'onScrolled', {
+            get: function () {
+                return _onScrolled;
+            },
+            set: function (aValue) {
+                _onScrolled = aValue;
+            }
+        });
+        Object.defineProperty(published, 'onInserted', {
+            get: function () {
+                return _onInserted;
+            },
+            set: function (aValue) {
+                _onInserted = aValue;
+            }
+        });
+        Object.defineProperty(published, 'onDeleted', {
+            get: function () {
+                return _onDeleted;
+            },
+            set: function (aValue) {
+                _onDeleted = aValue;
+            }
+        });
+        nEntity.@com.eas.client.model.Entity::setSnapshotConsumer(Lcom/google/gwt/core/client/JavaScriptObject;)(function (aSnapshot, aFreshData) {
+            if(aFreshData){
+            	Array.prototype.splice.call(published, 0, published.length);
+            }
+            var instanceCtor = nEntity.@com.eas.client.model.Entity::getElementClass()();
+            for (var s = 0; s < aSnapshot.length; s++) {
+                var snapshotInstance = aSnapshot[s];
+                var accepted;
+	            if (instanceCtor) {
+                    accepted = new instanceCtor();
+	            } else {
+	            	accepted = {};
+	            }
+                for (var sp in snapshotInstance) {
+                    accepted[sp] = snapshotInstance[sp];
+                }
+                Array.prototype.push.call(published, accepted);
+                acceptInstance(accepted);
+            }
+            orderers = {};
+            published.cursor = published.length > 0 ? published[0] : null;
+            @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(published, {source: published, propertyName: 'length'});
+            published.forEach(function(aItem){
+	            fireOppositeScalarsChanges(aItem, nFields);
+	            fireOppositeCollectionsChanges(aItem, nFields);
+            });
+        });
+        nEntity.@com.eas.client.model.Entity::setSnapshotProducer(Lcom/google/gwt/core/client/JavaScriptObject;)(function(){
+            var snapshot = [];
+            var snapshotFields = Object.keys(noFields);
+            published.forEach(function (aItem) {
+                var cloned = {};
+                snapshotFields.forEach(function (aFieldName) {
+                    var typeOfField = typeof aItem[aFieldName];
+                    if (typeOfField === 'undefined' || typeOfField === 'function')
+                        cloned[aFieldName] = null;
+                    else
+                        cloned[aFieldName] = aItem[aFieldName];
+                });
+                snapshot.push(cloned);
+            });
+            return snapshot;
+        });
+        @com.eas.client.Utils::listenable(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+        return published;
+	}-*/; 
+	
 	private static DefinitionsContainer ormPropertiesDefiner = DefinitionsContainer.init();
 
 	private static final class DefinitionsContainer extends JavaScriptObject {
@@ -321,8 +773,8 @@ public class Model implements HasPublished {
 			return {
 				scalarDef : function(targetEntity, targetFieldName, sourceFieldName) {
 					var _self = this;
-					_self.enumerable = true;
-					_self.configurable = false;
+					_self.enumerable = false;
+					_self.configurable = true;
 					_self.get = function() {
 						var criterion = {};
 						criterion[targetFieldName] = this[sourceFieldName];
@@ -335,50 +787,29 @@ public class Model implements HasPublished {
 				},
 				collectionDef : function(sourceEntity, targetFieldName, sourceFieldName) {
 					var _self = this;
-					_self.enumerable = true;
+					_self.enumerable = false;
 					_self.configurable = true;
 					_self.get = function() {
 						var criterion = {};
                     	var targetKey = this[targetFieldName];
 						criterion[sourceFieldName] = targetKey;
-						var res = sourceEntity.find(criterion);
-	                    res.push = function () {
-	                        for (var a = 0; a < arguments.length; a++) {
-	                            var instance = arguments[a];
-	                            instance[sourceFieldName] = targetKey;
+						var found = sourceEntity.find(criterion);
+	                    $wnd.P.manageArray(found, {
+	                        spliced: function (added, deleted) {
+	                            added.forEach(function (item) {
+	                                item[sourceFieldName] = targetKey;
+	                            });
+	                            deleted.forEach(function (item) {
+	                                item[sourceFieldName] = null;
+	                            });
+	                            @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(found, {source: found, propertyName: 'length'});
+	                        },
+	                        scrolled: function (aSubject, oldCursor, newCursor) {
+	                            @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(found, {source: found, propertyName: 'cursor', oldValue: oldCursor, newValue: newCursor});
 	                        }
-	                        return Array.prototype.push.apply(res, arguments);
-	                    };
-	                    res.unshift = function () {
-	                        for (var a = 0; a < arguments.length; a++) {
-	                            var instance = arguments[a];
-	                            instance[sourceFieldName] = targetKey;
-	                        }
-	                        return Array.prototype.unshift.apply(res, arguments);
-	                    };
-	                    res.splice = function () {
-	                        for (var a = 2; a < arguments.length; a++) {
-	                            var _instance = arguments[a];
-	                            _instance[sourceFieldName] = targetKey;
-	                        }
-	                        var deleted = Array.prototype.splice.apply(res, arguments);
-	                        for (var d = 0; d < deleted.length; d++) {
-	                            var instance = deleted[d];
-	                            instance[sourceFieldName] = null;
-	                        }
-	                        return deleted;
-	                    };
-	                    res.pop = function () {
-	                        var deleted = Array.prototype.pop.apply(res, arguments);
-	                        deleted[sourceFieldName] = null;
-	                        return deleted;
-	                    };
-	                    res.shift = function () {
-	                        var deleted = Array.prototype.shift.apply(res, arguments);
-	                        deleted[sourceFieldName] = null;
-	                        return deleted;
-	                    };
-	                    return res;
+	                    });
+	                    @com.eas.client.Utils::listenable(Lcom/google/gwt/core/client/JavaScriptObject;)(found);
+	                    return found;
 					};
 				}
 			}
@@ -507,11 +938,25 @@ public class Model implements HasPublished {
 			for (Entity entity : toExecute) {
 				entity.invalidate();
 			}
-			;
 		}
 		for (Entity entity : toExecute) {
 			if (!entity.getQuery().isManual()) {
-				entity.internalExecute(null);
+                if (process == null) {
+                    entity.internalExecute(new CallbackAdapter<JavaScriptObject, String>() {
+            			@Override
+            			protected void doWork(JavaScriptObject result) throws Exception {
+            				// no op
+            			}
+
+            			@Override
+            			public void onFailure(String reason) {
+                            Logger.getLogger(Model.class.getName()).log(Level.WARNING, reason);
+            			}
+
+                    });
+                } else {
+    				entity.internalExecute(null);
+                }
 			}
 		}
 	}
@@ -564,7 +1009,7 @@ public class Model implements HasPublished {
 		return false;
 	}
 
-	public List<com.bearsoft.rowset.changes.Change> getChangeLog() {
+	public JavaScriptObject getChangeLog() {
 		return changeLog;
 	}
 
@@ -573,19 +1018,7 @@ public class Model implements HasPublished {
 	}
 
 	public boolean isModified() throws Exception {
-		/*
-		if (entities != null) {
-			for (Entity ent : entities.values()) {
-				if (ent != null && ent.getRowset() != null) {
-					if (ent.getRowset().isModified()) {
-						return true;
-					}
-				}
-			}
-		}
-		return false;
-		*/
-		return !changeLog.isEmpty();
+		return changeLog.length() > 0;
 	}
 
 	public void save(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) {
@@ -623,31 +1056,17 @@ public class Model implements HasPublished {
 		});
 	}
 
-	public void commited() throws Exception {
-		changeLog.clear();
-		for (Entity aEntity : entities.values()) {
-			try {
-				Rowset rowset = aEntity.getRowset();
-				if (rowset != null) {
-					rowset.commited();
-				}
-			} catch (Exception ex) {
-				Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
-			}
+	public void revert() throws Exception {
+		changeLog.splice(0, changeLog.length());
+		for(Entity e : entities.values()){
+            e.applyLastSnapshot();
 		}
 	}
 
-	public void revert() throws Exception {
-		changeLog.clear();
-		for (Entity aEntity : entities.values()) {
-			try {
-				Rowset rowset = aEntity.getRowset();
-				if (rowset != null) {
-					rowset.rolledback();
-				}
-			} catch (Exception ex) {
-				Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
-			}
+	public void commited() throws Exception {
+		changeLog.splice(0, changeLog.length());
+		for(Entity e : entities.values()){
+            e.takeSnapshot();
 		}
 	}
 
@@ -656,9 +1075,9 @@ public class Model implements HasPublished {
 	}
 
 	public void requery(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
-		requery(new CallbackAdapter<Rowset, String>() {
+		requery(new CallbackAdapter<JavaScriptObject, String>() {
 			@Override
-			protected void doWork(Rowset aRowset) throws Exception {
+			protected void doWork(JavaScriptObject aRowset) throws Exception {
 				if (onSuccess != null)
 					Utils.invokeJsFunction(onSuccess);
 			}
@@ -676,8 +1095,8 @@ public class Model implements HasPublished {
 		});
 	}
 
-	public void requery(Callback<Rowset, String> aCallback) throws Exception {
-		changeLog.clear();
+	public void requery(Callback<JavaScriptObject, String> aCallback) throws Exception {
+		changeLog.splice(0, changeLog.length());
 		if (process != null) {
 			process.cancel();
 		}
@@ -693,9 +1112,9 @@ public class Model implements HasPublished {
 	}
 
 	public void execute(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
-		execute(new CallbackAdapter<Rowset, String>() {
+		execute(new CallbackAdapter<JavaScriptObject, String>() {
 			@Override
-			protected void doWork(Rowset aRowset) throws Exception {
+			protected void doWork(JavaScriptObject aRowset) throws Exception {
 				if (onSuccess != null)
 					Utils.invokeJsFunction(onSuccess);
 			}
@@ -713,7 +1132,7 @@ public class Model implements HasPublished {
 		});
 	}
 
-	public void execute(Callback<Rowset, String> aCallback) throws Exception {
+	public void execute(Callback<JavaScriptObject, String> aCallback) throws Exception {
 		if (process != null) {
 			process.cancel();
 		}
@@ -745,6 +1164,6 @@ public class Model implements HasPublished {
 		entity.validateQuery();
 		// addEntity(entity); To avoid memory leaks you should not add the
 		// entity to the model!
-		return JsModel.publish(entity);
+		return publishEntity(entity);
 	}
 }

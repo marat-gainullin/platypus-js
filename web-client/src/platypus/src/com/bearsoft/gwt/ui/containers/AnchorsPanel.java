@@ -37,6 +37,8 @@ public class AnchorsPanel extends LayoutPanel {
 	@Override
 	public void insert(Widget aChild, int beforeIndex) {
 		super.insert(aChild, beforeIndex);
+		Element wce = getWidgetContainerElement(aChild);
+		wce.getStyle().clearOverflow();
 		aChild.getElement().getStyle().clearRight();
 		aChild.getElement().getStyle().clearBottom();
 		aChild.getElement().getStyle().setWidth(100, Style.Unit.PCT);

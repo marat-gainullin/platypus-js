@@ -397,6 +397,10 @@ public class FormFactory {
                 ToggleButton toggle = new ToggleButton();
                 readGeneralProps(anElement, toggle);
                 readButton(anElement, toggle);
+                if (anElement.hasAttribute("selected")) {
+                    boolean selected = XmlDomUtils.readBooleanAttribute(anElement, "selected", Boolean.FALSE);
+                    toggle.setSelected(selected);
+                }
                 return toggle;
             case "DesktopPane":
             case "DesktopDesignInfo":
@@ -450,6 +454,14 @@ public class FormFactory {
                     } catch (Exception ex) {
                         Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
                     }
+                }
+                if (anElement.hasAttribute("dateField")) {
+                    boolean selected = XmlDomUtils.readBooleanAttribute(anElement, "dateField", Boolean.FALSE);
+                    modelDate.setDatePicker(selected);
+                }
+                if (anElement.hasAttribute("timeField")) {
+                    boolean selected = XmlDomUtils.readBooleanAttribute(anElement, "timeField", Boolean.FALSE);
+                    modelDate.setTimePicker(selected);
                 }
                 return modelDate;
             case "ModelFormattedField":

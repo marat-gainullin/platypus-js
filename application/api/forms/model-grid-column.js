@@ -141,6 +141,23 @@
              */
             P.ModelGridColumn.prototype.title = '';
         }
+        Object.defineProperty(this, "onSelect", {
+            get: function() {
+                var value = delegate.onSelect;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onSelect = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelGridColumn){
+            /**
+             * Returns script handler, used for select a value of the cell.
+             * @property onSelect
+             * @memberOf ModelGridColumn
+             */
+            P.ModelGridColumn.prototype.onSelect = {};
+        }
         Object.defineProperty(this, "movable", {
             get: function() {
                 var value = delegate.movable;
@@ -191,6 +208,23 @@
              * @memberOf ModelGridColumn
              */
             P.ModelGridColumn.prototype.readonly = true;
+        }
+        Object.defineProperty(this, "onRender", {
+            get: function() {
+                var value = delegate.onRender;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onRender = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelGridColumn){
+            /**
+             * Returns script handler, used for calculate cell's data, display value and style attributes.
+             * @property onRender
+             * @memberOf ModelGridColumn
+             */
+            P.ModelGridColumn.prototype.onRender = {};
         }
         Object.defineProperty(this, "background", {
             get: function() {
@@ -275,6 +309,36 @@
             P.ModelGridColumn.prototype.maxWidth = 0;
         }
     };
+        /**
+         * @method sort
+         * @memberOf ModelGridColumn
+         * Column sort, works only in HTML5 */
+        P.ModelGridColumn.prototype.sort = function() {
+            var delegate = this.unwrap();
+            var value = delegate.sort();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * @method unsort
+         * @memberOf ModelGridColumn
+         * Clears sort column, works only in HTML5 */
+        P.ModelGridColumn.prototype.unsort = function() {
+            var delegate = this.unwrap();
+            var value = delegate.unsort();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * @method sortDesc
+         * @memberOf ModelGridColumn
+         * Descending column sort, works only in HTML5 */
+        P.ModelGridColumn.prototype.sortDesc = function() {
+            var delegate = this.unwrap();
+            var value = delegate.sortDesc();
+            return P.boxAsJs(value);
+        };
+
         /**
          *
          * @method addColumnNode

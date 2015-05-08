@@ -78,6 +78,11 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
         String contentText = extractText();
         return ScriptUtils.parseJson(contentText);
     }
+    
+    protected Object extractJSONWithDates() throws IOException {
+        String contentText = extractText();
+        return ScriptUtils.parseJsonWithDates(contentText);
+    }
 
     protected String extractText() throws IOException {
         try (InputStream in = conn.getInputStream()) {
@@ -119,7 +124,7 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
 
     @Override
     public void visit(ExecuteQueryRequest.Response rsp) throws Exception {
-        Object oData = ScriptUtils.parseDates(extractJSON());
+        Object oData = extractJSONWithDates();
         if (oData instanceof JSObject && ((JSObject) oData).isArray()) {
             rsp.setRowset((JSObject) oData);
         } else {
@@ -158,7 +163,7 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
             }
             pConn.acceptCookies(reportConn);
         } else {
-            Object oData = ScriptUtils.parseDates(extractJSON());
+            Object oData = extractJSONWithDates();
             rsp.setResult(oData);
         }
     }

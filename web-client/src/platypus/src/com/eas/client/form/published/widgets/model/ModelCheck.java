@@ -1,7 +1,7 @@
 package com.eas.client.form.published.widgets.model;
 
 import com.bearsoft.gwt.ui.widgets.NullableCheckBox;
-import com.bearsoft.rowset.Utils;
+import com.eas.client.Utils;
 import com.eas.client.converters.BooleanValueConverter;
 import com.eas.client.form.events.ActionEvent;
 import com.eas.client.form.events.ActionHandler;

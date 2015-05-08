@@ -134,7 +134,14 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
         }
         for (E entity : toExecute) {
             if (!entity.getQuery().isManual()) {
-                entity.internalExecute(null, null);
+                if (process == null) {
+                    entity.internalExecute((JSObject aData) -> {
+                    }, (Exception ex) -> {
+                        Logger.getLogger(ApplicationModel.class.getName()).log(Level.WARNING, ex.getMessage());
+                    });
+                } else {
+                    entity.internalExecute(null, null);
+                }
             }
         }
     }
@@ -189,17 +196,17 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
                 aRelation.getLeftEntity().putOrmScalarDefinition(
                         scalarPropertyName,
                         new Fields.OrmDef(aRelation.getLeftField().getName(), scalarPropertyName, collectionPropertyName, ScriptUtils.scalarPropertyDefinition(
-                                (JSObject) aRelation.getRightEntity().getPublished(),
-                                aRelation.getRightField().getName(),
-                                aRelation.getLeftField().getName())));
+                                        (JSObject) aRelation.getRightEntity().getPublished(),
+                                        aRelation.getRightField().getName(),
+                                        aRelation.getLeftField().getName())));
             }
             if (collectionPropertyName != null && !collectionPropertyName.isEmpty()) {
                 aRelation.getRightEntity().putOrmCollectionDefinition(
                         collectionPropertyName,
                         new Fields.OrmDef(collectionPropertyName, scalarPropertyName, ScriptUtils.collectionPropertyDefinition(
-                                (JSObject) aRelation.getLeftEntity().getPublished(),
-                                aRelation.getRightField().getName(),
-                                aRelation.getLeftField().getName())));
+                                        (JSObject) aRelation.getLeftEntity().getPublished(),
+                                        aRelation.getRightField().getName(),
+                                        aRelation.getLeftField().getName())));
             }
         });
     }
@@ -293,22 +300,21 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
     }
 
     public abstract boolean isModified() throws Exception;
-        
-    /*
-    public boolean isModified() throws Exception {
-        if (entities != null) {
-            for (E ent : entities.values()) {
-                if (ent != null && ent.getRowset() != null) {
-                    if (ent.getRowset().isModified()) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-    */
 
+    /*
+     public boolean isModified() throws Exception {
+     if (entities != null) {
+     for (E ent : entities.values()) {
+     if (ent != null && ent.getRowset() != null) {
+     if (ent.getRowset().isModified()) {
+     return true;
+     }
+     }
+     }
+     }
+     return false;
+     }
+     */
     protected static final String SAVE_JSDOC = ""
             + "/**\n"
             + "* Saves model data changes.\n"
@@ -345,7 +351,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
     }
 
     protected void rolledback(Exception ex) {
-        Logger.getLogger(ApplicationModel.class.getName()).log(Level.SEVERE, null, ex);
+        Logger.getLogger(ApplicationModel.class.getName()).log(Level.SEVERE, ex.toString());
     }
 
     public void save(JSObject aOnSuccess) throws Exception {
@@ -365,11 +371,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
     @ScriptFunction(jsDoc = REVERT_JSDOC)
     public void revert() {
         entities.values().stream().forEach((E aEntity) -> {
-            try {
-                // Apply snapshot
-            } catch (Exception ex) {
-                Logger.getLogger(ApplicationDbModel.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            aEntity.applyLastSnapshot();
         });
     }
 
@@ -377,11 +379,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
 
     public void commited() {
         entities.values().stream().forEach((E aEntity) -> {
-            try {
-                // Update snapshot
-            } catch (Exception ex) {
-                Logger.getLogger(ApplicationDbModel.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            aEntity.takeSnapshot();
         });
     }
 

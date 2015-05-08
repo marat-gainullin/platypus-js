@@ -1,7 +1,7 @@
 package com.eas.client.form.published.widgets.model;
 
 import com.bearsoft.gwt.ui.widgets.NullableTextArea;
-import com.bearsoft.rowset.Utils;
+import com.eas.client.Utils;
 import com.eas.client.converters.StringValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.published.HasEmptyText;

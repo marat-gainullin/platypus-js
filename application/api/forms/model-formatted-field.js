@@ -356,23 +356,6 @@
              */
             P.ModelFormattedField.prototype.format = '';
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelFormattedField){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf ModelFormattedField
-             */
-            P.ModelFormattedField.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -389,6 +372,23 @@
              * @memberOf ModelFormattedField
              */
             P.ModelFormattedField.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelFormattedField){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf ModelFormattedField
+             */
+            P.ModelFormattedField.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

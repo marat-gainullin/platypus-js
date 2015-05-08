@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bearsoft.rowset.CallbackAdapter;
-import com.bearsoft.rowset.Utils;
+import com.eas.client.CallbackAdapter;
+import com.eas.client.Utils;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Style;

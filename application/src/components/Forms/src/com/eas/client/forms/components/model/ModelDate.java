@@ -32,7 +32,8 @@ public class ModelDate extends ModelComponentDecorator<VDateTimeField, Date> imp
             + "/**\n"
             + " * A model component that shows a date. \n"
             + " */";
-
+    private boolean isDateView = true;
+    private boolean isTimeView = true;
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC)
     public ModelDate() {
         super();
@@ -119,6 +120,26 @@ public class ModelDate extends ModelComponentDecorator<VDateTimeField, Date> imp
         decorated.setText(aValue);
     }
 
+    @ScriptFunction
+    public boolean getDatePicker() {
+        return isDateView;
+    }
+
+    @ScriptFunction
+    public void setDatePicker(boolean aValue) {
+        this.isDateView = aValue;
+    }
+    
+    @ScriptFunction
+    public boolean getTimePicker() {
+        return isTimeView;
+    }
+
+    @ScriptFunction
+    public void setTimePicker(boolean aValue) {
+        this.isTimeView = aValue;
+    }
+    
     @Override
     protected void setupCellRenderer(JTable table, int row, int column, boolean isSelected) {
         removeAll();

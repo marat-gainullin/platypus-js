@@ -48,7 +48,7 @@ public class EntityCompletionContext extends CompletionContext {
         } else if (token.node instanceof IndexNode && ( ((IndexNode)token.node).getIndex().getType() == null || !((IndexNode)token.node).getIndex().getType().isString())) { 
             return new EntityElementCompletionContext(entity);
         }else if (isPropertyGet(token, PARAMS_SCRIPT_NAME)) {
-            return new ParametersCompletionContext(entity.getQuery().getParameters());
+            return new ParametersCompletionContext(entity.getQuery());
         } else {
             return null;
         }

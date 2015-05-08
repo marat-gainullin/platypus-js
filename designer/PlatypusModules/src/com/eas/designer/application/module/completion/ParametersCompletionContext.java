@@ -4,25 +4,22 @@
  */
 package com.eas.designer.application.module.completion;
 
-import com.eas.client.metadata.Fields;
-import com.eas.client.metadata.Parameters;
-import com.eas.client.model.application.ApplicationEntity;
-import static com.eas.designer.application.module.completion.CompletionContext.addItem;
-import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
-import static com.eas.designer.application.module.completion.ModuleCompletionContext.METADATA_SCRIPT_NAME;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
+import com.eas.client.SqlQuery;
+import com.eas.client.metadata.Parameters;
 
 /**
  * This class represents a data model or entity parameters completion context.
+ *
  * @author vv
  */
 public class ParametersCompletionContext extends CompletionContext {
 
-    Fields parameters;
+    SqlQuery query;
 
-    public ParametersCompletionContext(Fields aParameters) {
-        super(ApplicationEntity.class);
-        parameters = aParameters;
+    public ParametersCompletionContext(SqlQuery aQuery) {
+        super(null);
+        query = aQuery;
     }
 
     @Override
@@ -30,14 +27,18 @@ public class ParametersCompletionContext extends CompletionContext {
         if (getScriptClass() != null) {
             fillJavaCompletionItems(point, resultSet);
         }
-        EntityElementCompletionContext.fillFieldsValues(parameters, point, resultSet);
-        addItem(resultSet, point.getFilter(), new BeanCompletionItem(Parameters.class, METADATA_SCRIPT_NAME, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
+        if (query != null) {
+            EntityElementCompletionContext.fillFieldsValues(query.getParameters(), point, resultSet);
+        } else {
+            addItem(resultSet, point.getFilter(), new BeanCompletionItem(Object.class, "model is not connected", null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
+        }
+        addItem(resultSet, point.getFilter(), new BeanCompletionItem(Parameters.class, ModuleCompletionContext.METADATA_SCRIPT_NAME, null, point.getCaretBeginWordOffset(), point.getCaretEndWordOffset()));
     }
 
     @Override
-    public CompletionContext getChildContext(CompletionToken token, int offset) throws Exception {
-        if (isPropertyGet(token, METADATA_SCRIPT_NAME)) {
-            return new MetadataCompletionContext(parameters);
+    public CompletionContext getChildContext(CompletionPoint.CompletionToken token, int offset) throws Exception {
+        if (query != null && isPropertyGet(token, ModuleCompletionContext.METADATA_SCRIPT_NAME)) {
+            return new MetadataCompletionContext(query.getParameters());
         } else {
             return null;
         }

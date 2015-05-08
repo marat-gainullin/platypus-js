@@ -10,8 +10,8 @@ import com.bearsoft.gwt.ui.widgets.grid.cells.CellHasReadonly;
 import com.bearsoft.gwt.ui.widgets.grid.cells.CellRenderer;
 import com.bearsoft.gwt.ui.widgets.grid.cells.RenderedEditorCell;
 import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
-import com.bearsoft.rowset.Utils;
-import com.bearsoft.rowset.Utils.JsObject;
+import com.eas.client.Utils;
+import com.eas.client.Utils.JsObject;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.Publisher;
 import com.eas.client.form.grid.RenderedCellContext;
@@ -516,4 +516,15 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 			published = aValue;
 		}
 	}
+	
+	public void sort(){
+		grid.addSort(this, true);
+	}
+	public void sortDesc(){
+		grid.addSort(this, false);
+	}
+	public void unsort(){
+		grid.unsortColumn(this);
+	}
+	
 }

@@ -4,7 +4,6 @@
  */
 package com.eas.server.httpservlet;
 
-import com.eas.client.DatabaseMdCache;
 import com.eas.client.SQLUtils;
 import com.eas.client.SQLUtils.TypesGroup;
 import com.eas.client.SqlQuery;
@@ -119,13 +118,13 @@ public class PlatypusHttpRequestReader implements PlatypusRequestVisitor {
         rq.setMethodName(methodName);
         String param = httpRequest.getParameter(PlatypusHttpRequestParams.PARAMETER);
         if (param != null) {
-            rq.setArguments(new Object[]{ScriptUtils.parseDates(tryParseJson(param))});
+            rq.setArguments(new Object[]{tryParseJsonWithDates(param)});
         } else {
             String[] params = httpRequest.getParameterValues(PlatypusHttpRequestParams.PARAMETER + ARGUMENTS_ARRAY_PARAM_SUFFIX);
             if (params != null) {
                 List<Object> argsList = new ArrayList<>();
                 for (String arg : params) {
-                    argsList.add(ScriptUtils.parseDates(tryParseJson(arg)));
+                    argsList.add(tryParseJsonWithDates(arg));
                 }
                 rq.setArguments(argsList.toArray());
             } else {
@@ -193,6 +192,14 @@ public class PlatypusHttpRequestReader implements PlatypusRequestVisitor {
     private static Object tryParseJson(String aText) {
         try {
             return ScriptUtils.parseJson(aText);
+        } catch (Exception ex) {
+            return aText;
+        }
+    }
+    
+    private static Object tryParseJsonWithDates(String aText) {
+        try {
+            return ScriptUtils.parseJsonWithDates(aText);
         } catch (Exception ex) {
             return aText;
         }

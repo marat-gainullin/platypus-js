@@ -18,6 +18,7 @@ import com.bearsoft.gwt.ui.widgets.grid.builders.ThemedCellTableBuilder;
 import com.bearsoft.gwt.ui.widgets.grid.builders.ThemedHeaderOrFooterBuilder;
 import com.bearsoft.gwt.ui.widgets.grid.header.HasSortList;
 import com.bearsoft.gwt.ui.widgets.grid.header.HeaderNode;
+import com.eas.client.form.grid.columns.ModelColumn;
 import com.eas.client.form.published.PublishedColor;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.core.client.GWT;
@@ -1282,5 +1283,55 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 			}
 		}
 		targetSection.focusCell(aRow, aCol);
+	}
+	
+	public void unsort(){
+		sortList.clear();
+		ColumnSortEvent.fire(Grid.this, sortList);
+		redrawHeaders();
+	}
+	
+	public void addSort(ModelColumn aColumn, boolean isAscending) {
+		if (aColumn.isSortable()) {
+			boolean contains = false;
+			int containsAt = -1;
+			for (int i = 0; i < sortList.size(); i++) {
+				if (sortList.get(i).getColumn() == aColumn) {
+					contains = true;
+					containsAt = i;
+					break;
+				}
+			}
+			if (contains) {
+				boolean wasAscending = sortList.get(containsAt).isAscending();
+				if (wasAscending == isAscending) {
+					return;
+				}
+
+			}
+			sortList.insert(sortList.size(), new ColumnSortList.ColumnSortInfo(
+					aColumn, isAscending));
+			ColumnSortEvent.fire(Grid.this, sortList);
+			redrawHeaders();
+		}
+	}
+	
+	public void unsortColumn(ModelColumn aColumn) {
+		if (aColumn.isSortable()) {
+			boolean contains = false;
+			int containsAt = -1;
+			for (int i = 0; i < sortList.size(); i++) {
+				if (sortList.get(i).getColumn() == aColumn) {
+					contains = true;
+					containsAt = i;
+					break;
+				}
+			}
+			if (contains) {
+				sortList.remove(sortList.get(containsAt));
+				ColumnSortEvent.fire(Grid.this, sortList);
+				redrawHeaders();
+			}
+		}
 	}
 }

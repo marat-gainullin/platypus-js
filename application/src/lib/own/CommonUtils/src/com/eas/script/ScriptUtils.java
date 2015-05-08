@@ -1,11 +1,15 @@
 package com.eas.script;
 
 import com.eas.concurrent.DeamonThreadFactory;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -17,7 +21,6 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.api.scripting.URLReader;
 import jdk.nashorn.internal.ir.FunctionNode;
 import jdk.nashorn.internal.ir.IdentNode;
 import jdk.nashorn.internal.ir.LexicalContext;
@@ -51,7 +54,7 @@ public class ScriptUtils {
     protected static JSObject putInGlobalFunc;
     protected static JSObject toDateFunc;
     protected static JSObject parseJsonFunc;
-    protected static JSObject parseDatesFunc;
+    protected static JSObject parseJsonWithDatesFunc;
     protected static JSObject writeJsonFunc;
     protected static JSObject extendFunc;
     protected static JSObject scalarDefFunc;
@@ -62,6 +65,26 @@ public class ScriptUtils {
     protected static JSObject listenFunc;
     protected static JSObject listenElementsFunc;
     protected static ScriptEngine engine;
+
+    protected static class Executed {
+
+        protected long timeStamp;
+        protected Object scriptResult;
+
+        public Executed(long aTimeStamp, Object aScriptResult) {
+            timeStamp = aTimeStamp;
+            scriptResult = aScriptResult;
+        }
+
+        public long getTimeStamp() {
+            return timeStamp;
+        }
+
+        public Object getScriptResult() {
+            return scriptResult;
+        }
+    }
+    protected static Map<URL, Executed> executed = new HashMap<>();
     // Thread locals
     protected static ThreadLocal<Object> lock = new ThreadLocal<>();
     protected static ThreadLocal<Object> request = new ThreadLocal<>();
@@ -272,12 +295,20 @@ public class ScriptUtils {
         return p.parse();
     }
 
-    public static Object exec(URL aSource) throws ScriptException {
-        return engine.eval(new URLReader(aSource), engine.getContext());
+    public static Object exec(URL aSourcePlace) throws ScriptException, URISyntaxException {
+        Executed eEntry = executed.get(aSourcePlace);
+        long lastModified = Paths.get(aSourcePlace.toURI()).toFile().lastModified();
+        if (eEntry == null || lastModified > eEntry.getTimeStamp()) {
+            Object scriptRes = engine.eval("load('" + aSourcePlace.toString() + "')");
+            executed.put(aSourcePlace, new Executed(lastModified, scriptRes));
+            return scriptRes;
+        } else {
+            return eEntry.getScriptResult();
+        }
     }
 
     public static Object exec(String aSource) throws ScriptException {
-        return engine.eval(aSource, engine.getContext());
+        return engine.eval(aSource);
     }
 
     public static JSObject getToPrimitiveFunc() {
@@ -315,9 +346,9 @@ public class ScriptUtils {
         parseJsonFunc = aValue;
     }
 
-    public static void setParseDatesFunc(JSObject aValue) {
-        assert parseDatesFunc == null;
-        parseDatesFunc = aValue;
+    public static void setParseJsonWithDatesFunc(JSObject aValue) {
+        assert parseJsonWithDatesFunc == null;
+        parseJsonWithDatesFunc = aValue;
     }
 
     public static void setWriteJsonFunc(JSObject aValue) {
@@ -367,7 +398,7 @@ public class ScriptUtils {
 
     public static Object toJava(Object aValue) {
         if (aValue instanceof ScriptObject) {
-            aValue = jdk.nashorn.api.scripting.ScriptUtils.wrap((ScriptObject)aValue);
+            aValue = jdk.nashorn.api.scripting.ScriptUtils.wrap((ScriptObject) aValue);
         }
         if (aValue instanceof JSObject) {
             assert toPrimitiveFunc != null : SCRIPT_NOT_INITIALIZED;
@@ -490,9 +521,9 @@ public class ScriptUtils {
         return parseJsonFunc.call(null, new Object[]{json});
     }
 
-    public static Object parseDates(Object aObject) {
-        assert parseDatesFunc != null : SCRIPT_NOT_INITIALIZED;
-        return parseDatesFunc.call(null, new Object[]{aObject});
+    public static Object parseJsonWithDates(String json) {
+        assert parseJsonWithDatesFunc != null : SCRIPT_NOT_INITIALIZED;
+        return parseJsonWithDatesFunc.call(null, new Object[]{json});
     }
 
     protected static final String SCRIPT_NOT_INITIALIZED = "Platypus script functions are not initialized.";
@@ -549,11 +580,11 @@ public class ScriptUtils {
         return (JSObject) oResult;
     }
 
-    public static void unlisten(JSObject aCookie){
+    public static void unlisten(JSObject aCookie) {
         JSObject unlisten = (JSObject) aCookie.getMember("unlisten");
         unlisten.call(null, new Object[]{});
     }
-    
+
     public static JSObject listenElements(JSObject aTarget, JSObject aCallback) {
         assert listenElementsFunc != null : SCRIPT_NOT_INITIALIZED;
         Object oResult = listenElementsFunc.call(null, new Object[]{aTarget, aCallback});

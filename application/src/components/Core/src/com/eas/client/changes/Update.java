@@ -18,7 +18,7 @@ public class Update extends Change {
     
     private static JSObject publisher;
     private final List<ChangeValue> keys = new ArrayList<>();
-    private List<ChangeValue> data = new ArrayList<>();
+    private final List<ChangeValue> data = new ArrayList<>();
 
     public Update(String aEntityName) {
         super(aEntityName);

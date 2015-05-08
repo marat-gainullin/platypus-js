@@ -1486,13 +1486,6 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
                     JSObject modelData = oModelData instanceof JSObject ? (JSObject) oModelData : null;
                     if (modelData != null) {
                         JSObject jsNewCursor = elementByViewIndex(rowsSelectionModel.getLeadSelectionIndex());
-                        /*
-                        Object oScrollTo = modelData.getMember("scrollTo");
-                        if (oScrollTo instanceof JSObject && ((JSObject) oScrollTo).isFunction()) {
-                            JSObject jsScrollTo = (JSObject) oScrollTo;
-                            jsScrollTo.call(modelData, new Object[]{jsNewCursor});
-                        } else 
-                        */
                         if (modelData.hasMember(cursorProperty)) {
                             modelData.setMember(cursorProperty, jsNewCursor);
                         }
@@ -2892,5 +2885,15 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     @Override
     public Widget getParentWidget() {
         return Forms.lookupPublishedParent(this);
+    }
+    
+    private static final String UNSORT = ""
+            + "/**\n"
+            + " * Clears sort on all columns, works only in HTML5"
+            + " */";
+
+    @ScriptFunction(jsDoc = UNSORT)
+    public void unsort() {
+        
     }
 }

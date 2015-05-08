@@ -55,7 +55,6 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
     protected static PlatypusServerCore instance;
 
     public static PlatypusServerCore getInstance(String aApplicationUrl, String aDefaultDatasourceName, String aStartAppElementName, int aMaximumJdbcThreads, int aMaximumServicesThreads) throws Exception {
-        ScriptUtils.init();
         if (instance == null) {
             ScriptedDatabasesClient basesProxy;
             if (aApplicationUrl.toLowerCase().startsWith("file")) {
@@ -72,6 +71,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                     instance = new PlatypusServerCore(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), aStartAppElementName), queries, basesProxy, lsecurityConfigs, aStartAppElementName);
                     basesProxy.setContextHost(instance);
                     ScriptedResource.init(instance);
+                    ScriptUtils.init();
                     instance.startResidents(tasksScanner.getResidents());
                 } else {
                     throw new IllegalArgumentException("applicationUrl: " + aApplicationUrl + " doesn't point to existent directory.");
@@ -180,7 +180,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                 onFailure.accept(new Exception("Module's method name is missing."));
             } else {
                 try {
-                    ScriptedResource._require(new String[]{aModuleName}, new ConcurrentSkipListSet<>(), (Void v) -> {
+                    ScriptedResource._require(new String[]{aModuleName}, null, new ConcurrentSkipListSet<>(), (Void v) -> {
                         try {
                             AppElementFiles files = indexer.nameToFiles(aModuleName);
                             JSObject constr = ScriptUtils.lookupInGlobal(aModuleName);
@@ -291,9 +291,9 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                                         if (!args.isEmpty()) {
                                                             args.clear();
                                                             onSuccess.accept(ScriptUtils.toJava(result));
+                                                        } else {
+                                                            Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
                                                         }
-                                                    } else {
-                                                        Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
                                                     }
                                                 } finally {
                                                     ScriptUtils.setLock(null);
@@ -354,7 +354,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
      * @throws java.lang.Exception
      */
     protected boolean startResidentModule(String aModuleName) throws Exception {
-        ScriptedResource.require(new String[]{aModuleName});
+        ScriptedResource.require(new String[]{aModuleName}, null);
         Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.INFO, "Starting resident module \"{0}\"", aModuleName);
         try {
             JSObject jsConstr = ScriptUtils.lookupInGlobal(aModuleName);

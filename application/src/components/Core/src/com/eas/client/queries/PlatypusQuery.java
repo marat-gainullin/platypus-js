@@ -54,27 +54,6 @@ public class PlatypusQuery extends Query {
     }
 
     /**
-     * Merges some minimum of information on fields, because server is responsible on full resolving,
-     * like comments, primary and foreign keys and correct types, including geometries.
-     * This method does last time tricks, such as primary keys on key-less (synthetic, view and so on) rowsets.
-     * May be this method will do something else in future.
-     * @param destFields Fields to be merged with etalon fields.
-     * @param sourceFields Etalon fields, likely a query fields, got from server.
-     */
-    /*
-    protected void lightMergeFields(Fields destFields, Fields sourceFields) {
-        for (int i = 1; i <= sourceFields.getFieldsCount(); i++) {
-            Field srcField = sourceFields.get(i);
-            Field rowsetField = destFields.get(srcField.getName());
-            if (rowsetField != null) {
-                rowsetField.setPk(srcField.isPk());
-                // Further tricks...
-            }
-        }
-    }
-    */ 
-
-    /**
      * 
      * @return 
      */

@@ -5,6 +5,8 @@
 package com.eas.designer.explorer.j2ee;
 
 import com.eas.designer.explorer.project.PlatypusProjectImpl;
+import com.eas.designer.explorer.project.PlatypusProjectSettingsImpl;
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
@@ -25,6 +27,7 @@ import org.netbeans.modules.j2ee.metadata.model.api.MetadataModel;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
+import org.openide.util.Exceptions;
 
 /**
  * Platypus web application.
@@ -47,6 +50,9 @@ public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleI
     public PlatypusWebModule(PlatypusProjectImpl aProject) {
         super();
         project = aProject;
+        project.getSettings().getChangeSupport().addPropertyChangeListener(PlatypusProjectSettingsImpl.J2EE_SERVER_ID_KEY, (PropertyChangeEvent evt) -> {
+            fireServerChange(getServerByServerInstanceId((String)evt.getOldValue()), getServerByServerInstanceId((String)evt.getNewValue()));
+        });
     }
 
     @Override
@@ -75,18 +81,17 @@ public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleI
     @Override
     public String getServerID() {
         String inst = getServerInstanceID();
-        String id;
-        if (inst != null) {
-            try {
-                id = Deployment.getDefault().getServerInstance(inst).getServerID();
-                return id;
-            } catch (InstanceRemovedException ex) {
-                return null;
-            }
-        }
-        return null;
+        return getServerByServerInstanceId(inst);
     }
 
+    protected String getServerByServerInstanceId(String aServerInstanceId){
+        try {
+            return aServerInstanceId != null ? Deployment.getDefault().getServerInstance(aServerInstanceId).getServerID() : null;
+        } catch (InstanceRemovedException ex) {
+            return null;
+        }
+    }
+    
     @Override
     public J2eeModule.Type getModuleType() {
         return J2eeModule.Type.WAR;

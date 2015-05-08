@@ -29,10 +29,6 @@
      throw "Legacy api can't restore the global namespace.";
      };
      */
-    load("classpath:internals.js");
-    load("classpath:managed.js");
-    load("classpath:orderer.js");
-
     // core imports
     var EngineUtilsClass = Java.type("jdk.nashorn.api.scripting.ScriptUtils");
     var JavaArrayClass = Java.type("java.lang.Object[]");
@@ -59,7 +55,23 @@
     Object.defineProperty(P, "J2SE", {value: "Java SE environment"});
     Object.defineProperty(P, "agent", {value: P.J2SE});
 
-    var toPrimitive = ScriptUtilsClass.getToPrimitiveFunc();
+    function toPrimitive(aValue) {
+        if (aValue && aValue.constructor) {
+            var cName = aValue.constructor.name;
+            if (cName === 'Date') {
+                var converted = new JavaDateClass(aValue.getTime());
+                return converted;
+            } else if (cName === 'String') {
+                return aValue + '';
+            } else if (cName === 'Number') {
+                return aValue * 1;
+            } else if (cName === 'Boolean') {
+                return !!aValue;
+            }
+        }
+        return aValue;
+    }
+    ScriptUtilsClass.setToPrimitiveFunc(toPrimitive);
 
     /**
      * @private
@@ -148,6 +160,43 @@
             return invokeDelayed;
         }});
 
+    /**
+     * @static
+     * @param {type} deps
+     * @param {type} aOnSuccess
+     * @param {type} aOnFailure
+     * @returns {undefined}
+     */
+    function require(deps, aOnSuccess, aOnFailure) {
+        if (!Array.isArray(deps))
+            deps = [deps];
+        var strArray = new JavaStringArrayClass(deps.length);
+        for (var i = 0; i < deps.length; i++)
+            strArray[i] = deps[i] ? deps[i] + '' : null;
+        //////////////////
+        var calledFromFile = null;
+        var error = new Error('path test error');
+        if (error.stack) {
+            var stack = error.stack.split('\n');
+            if (stack.length > 1) {
+                var sourceCall = stack[2];
+                var stackFrameParsed = /\((.+):\d+\)/.exec(sourceCall);
+                if (stackFrameParsed && stackFrameParsed.length > 1) {
+                    calledFromFile = stackFrameParsed[1];
+                }
+            }
+        }
+        //////////////////
+        if (aOnSuccess) {
+            ScriptedResourceClass.require(strArray, calledFromFile, P.boxAsJava(aOnSuccess), P.boxAsJava(aOnFailure));
+        } else {
+            ScriptedResourceClass.require(strArray, calledFromFile);
+        }
+    }
+    Object.defineProperty(P, "require", {value: require});
+
+    P.require('internals.js');
+
     var serverCoreClass;
     try {
         serverCoreClass = Java.type('com.eas.server.PlatypusServerCore');
@@ -160,11 +209,19 @@
         Object.defineProperty(P, "invokeLater", {get: function () {
                 return invokeLater;
             }});
-        load("classpath:server-deps.js");
+        P.require([
+            'core/index.js'
+                    , 'server/index.js']);
+        try {
+            Java.type('com.eas.server.httpservlet.PlatypusHttpServlet');
+            // EE server
+            P.require(['servlet-support/index.js']);
+        } catch (se) {
+            // TSA server
+        }
     } catch (e) {
         serverCoreClass = null;
         // in client
-        load("classpath:deps.js");
         // gui imports
         var KeyEventClass = Java.type("java.awt.event.KeyEvent");
         var FileChooserClass = Java.type("javax.swing.JFileChooser");
@@ -187,6 +244,7 @@
                 return invokeLater;
             }});
         //
+        P.require('common-utils/color.js');
         Object.defineProperty(P.Color, "black", {value: new P.Color(0, 0, 0)});
         Object.defineProperty(P.Color, "BLACK", {value: new P.Color(0, 0, 0)});
         Object.defineProperty(P.Color, "blue", {value: new P.Color(0, 0, 0xff)});
@@ -215,6 +273,7 @@
         Object.defineProperty(P.Color, "YELLOW", {value: new P.Color(0xFF, 0xff, 0)});
         P.Colors = P.Color;
 
+        P.require('common-utils/cursor.js');
         Object.defineProperty(P.Cursor, "CROSSHAIR", {value: new P.Cursor(1)});
         Object.defineProperty(P.Cursor, "DEFAULT", {value: new P.Cursor(0)});
         Object.defineProperty(P.Cursor, "AUTO", {value: new P.Cursor(0)});
@@ -397,6 +456,7 @@
             value: selectColor
         });
 
+        P.require('forms/form.js');
         Object.defineProperty(P.Form, "shown", {
             get: function () {
                 var nativeArray = FormClass.getShownForms();
@@ -605,6 +665,7 @@
          * @returns {P.loadForm.publishTo}
          */
         function loadForm(aName, aModel, aTarget) {
+            P.require(['forms/index.js', 'grid/index.js']);
             var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
             var formDocument = ScriptedResourceClass.getApp().getForms().get(aName, files);
             var formFactory = FormLoaderClass.load(formDocument, ScriptedResourceClass.getApp(), arguments.length > 1 ? aModel : null);
@@ -635,26 +696,6 @@
         Object.defineProperty(P, "loadForm", {value: loadForm});
     }
 
-    /**
-     * @static
-     * @param {type} deps
-     * @param {type} aOnSuccess
-     * @param {type} aOnFailure
-     * @returns {undefined}
-     */
-    function require(deps, aOnSuccess, aOnFailure) {
-        if (!Array.isArray(deps))
-            deps = [deps];
-        var strArray = new JavaStringArrayClass(deps.length);
-        for (var i = 0; i < deps.length; i++)
-            strArray[i] = deps[i] ? deps[i] + '' : null;
-        if (aOnSuccess) {
-            ScriptedResourceClass.require(strArray, P.boxAsJava(aOnSuccess), P.boxAsJava(aOnFailure));
-        } else {
-            ScriptedResourceClass.require(strArray);
-        }
-    }
-    Object.defineProperty(P, "require", {value: require});
     function extend(Child, Parent) {
         var prevChildProto = {};
         for (var m in Child.prototype) {
@@ -673,18 +714,6 @@
         Child.superclass = Parent.prototype;
     }
     Object.defineProperty(P, "extend", {value: extend});
-
-    Object.defineProperty(P, "modules", {
-        get: function () {
-            if (serverCoreClass) {
-                var core = serverCoreClass.getInstance();
-                var systemSession = core.getSessionManager().getSystemSession();
-                return systemSession.getModules();
-            } else {
-                return cached;
-            }
-        }
-    });
 
     Object.defineProperty(P, "session", {
         get: function () {
@@ -735,7 +764,11 @@
             }});
         Object.defineProperty(aTarget, fireChangeName, {value: function (aChange) {
                 Object.freeze(aChange);
-                listeners.forEach(function (aListener) {
+                var _listeners = [];
+                listeners.forEach(function(aListener) {
+                    _listeners.push(aListener);
+                });
+                _listeners.forEach(function (aListener) {
                     aListener(aChange);
                 });
             }});
@@ -768,6 +801,74 @@
         }
     }
 
+    function listenElements(aData, aPropListener) {
+        function subscribe(aData, aListener) {
+            return listen(aData, aListener);
+        }
+        var subscribed = [];
+        for (var i = 0; i < aData.length; i++) {
+            var remover = subscribe(aData[i], aPropListener);
+            if (remover) {
+                subscribed.push(remover);
+            }
+        }
+        return {
+            unlisten: function () {
+                subscribed.forEach(function (aEntry) {
+                    aEntry();
+                });
+            }
+        };
+    }
+    ScriptUtilsClass.setListenElementsFunc(listenElements);
+
+    function listenInstance(aTarget, aPath, aPropListener) {
+        function subscribe(aData, aListener, aPropName) {
+            return listen(aData, function(aChange){
+                if(!aPropName || aChange.propertyName == aPropName){
+                    aListener(aChange);
+                }
+            });
+        }
+        var subscribed = [];
+        function listenPath() {
+            subscribed = [];
+            var data = aTarget;
+            var path = aPath.split(".");
+            for (var i = 0; i < path.length; i++) {
+                var propName = path[i];
+                var listener = i === path.length - 1 ? aPropListener : function (aChange) {
+                    subscribed.forEach(function (aEntry) {
+                        aEntry();
+                    });
+                    listenPath();
+                    aPropListener(aChange);
+                };
+                var cookie = subscribe(data, listener, propName);
+                if (cookie) {
+                    subscribed.push(cookie);
+                    if (data[propName])
+                        data = data[propName];
+                    else
+                        break;
+                } else {
+                    break;
+                }
+            }
+        }
+        if (aTarget) {
+            listenPath();
+        }
+        return {
+            unlisten: function () {
+                subscribed.forEach(function (aEntry) {
+                    aEntry();
+                });
+            }
+        };
+    }
+    ScriptUtilsClass.setListenFunc(listenInstance);
+    
     function fireSelfScalarsOppositeCollectionsChanges(aSubject, aChange, nFields) {
         var ormDefs = nFields.getOrmScalarExpandings().get(aChange.propertyName);
         if (ormDefs) {
@@ -866,10 +967,10 @@
         });
     }
 
-    function generateChangeLogKeys(keys, fields, propName, aSubject, oldValue) {
-        if (fields) {
-            for (var i = 1; i <= fields.getFieldsCount(); i++) {
-                var field = fields.get(i);
+    function generateChangeLogKeys(keys, nFields, propName, aSubject, oldValue) {
+        if (nFields) {
+            for (var i = 1; i <= nFields.getFieldsCount(); i++) {
+                var field = nFields.get(i);
                 if (field.isPk()) {
                     var fieldName = field.getName();
                     var value = aSubject[fieldName];
@@ -901,6 +1002,7 @@
                             deleted.forEach(function (item) {
                                 item[sourceFieldName] = null;
                             });
+                            fire(found, {source: found, propertyName: 'length'});
                         },
                         scrolled: function (aSubject, oldCursor, newCursor) {
                             fire(found, {source: found, propertyName: 'cursor', oldValue: oldCursor, newValue: newCursor});
@@ -923,6 +1025,11 @@
      * @returns {P.loadModel.publishTo}
      */
     function loadModel(aName, aTarget) {
+        P.require(['core/index.js'
+                    , 'datamodel/index.js'
+                    , 'managed.js'
+                    , 'orderer.js'
+        ]);
         var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
         if (files) {
             var modelDocument = ScriptedResourceClass.getApp().getModels().get(aName, files);
@@ -1004,13 +1111,17 @@
                     return complemented;
                 }
                 function acceptInstance(aSubject) {
+                    Object.keys(noFields).forEach(function (aFieldName) {
+                        if (typeof aSubject[aFieldName] === 'undefined')
+                            aSubject[aFieldName] = null;
+                    });
                     P.manageObject(aSubject, managedOnChange, managedBeforeChange);
                     listenable(aSubject);
                     // ORM mutable scalar and collection properties
                     var define = function (aOrmDefs) {
                         for each (var defsEntry in aOrmDefs.entrySet()) {
-                            var def = EngineUtilsClass.unwrap(defsEntry.getValue().getJsDef());
-                            Object.defineProperty(aSubject, defsEntry.getKey(), def);
+                            var jsDef = EngineUtilsClass.unwrap(defsEntry.getValue().getJsDef());
+                            Object.defineProperty(aSubject, defsEntry.getKey(), jsDef);
                         }
                     };
                     define(nFields.getOrmScalarDefinitions());
@@ -1065,20 +1176,21 @@
                             unlistenable(aDeleted);
                             P.unmanageObject(aDeleted);
                         });
-                        if (_onInserted) {
+                        if (_onInserted && added.length > 0) {
                             try {
                                 _onInserted({source: published, items: added});
                             } catch (e) {
                                 Logger.severe(e);
                             }
                         }
-                        if (_onDeleted) {
+                        if (_onDeleted && deleted.length > 0) {
                             try {
                                 _onDeleted({source: published, items: deleted});
                             } catch (e) {
                                 Logger.severe(e);
                             }
                         }
+                        fire(published, {source: published, propertyName: 'length'});
                     },
                     scrolled: function (aSubject, oldCursor, newCursor) {
                         if (_onScrolled) {
@@ -1091,15 +1203,6 @@
                         fire(published, {source: published, propertyName: 'cursor', oldValue: oldCursor, newValue: newCursor});
                     }
                 });
-                entityCTor.call(published, nEntity);
-                for (var protoEntryName in entityCTor.prototype) {
-                    if (!published[protoEntryName]) {
-                        var protoEntry = entityCTor.prototype[protoEntryName];
-                        if (protoEntry instanceof Function) {
-                            Object.defineProperty(published, protoEntryName, {value: protoEntry});
-                        }
-                    }
-                }
                 var pSchema = {};
                 Object.defineProperty(published, "schema", {
                     value: pSchema
@@ -1215,30 +1318,59 @@
                         _onDeleted = aValue;
                     }
                 });
-                nEntity.setSnapshotConsumer(function (aSnapshot) {
-                    Array.prototype.splice.call(published, 0, published.length);
-                    if (nEntity.getElementClass()) {
-                        var instanceCtor = EngineUtilsClass.unwrap(nEntity.getElementClass());
-                        for (var s = 0; s < aSnapshot.length; s++) {
-                            var snapshotInstance = aSnapshot[s];
-                            var accepted = new instanceCtor();
-                            for (var sp in snapshotInstance) {
-                                accepted[sp] = snapshotInstance[sp];
-                            }
-                            Array.prototype.push.call(published, accepted);
-                            acceptInstance(accepted);
+                nEntity.setSnapshotConsumer(function (aSnapshot, aFreshData) {
+                    if (aFreshData) {
+                        Array.prototype.splice.call(published, 0, published.length);
+                    }
+                    for (var s = 0; s < aSnapshot.length; s++) {
+                        var snapshotInstance = aSnapshot[s];
+                        var accepted;
+                        if (nEntity.getElementClass()) {
+                            var instanceCtor = EngineUtilsClass.unwrap(nEntity.getElementClass());
+                            accepted = new instanceCtor();
+                        } else {
+                            accepted = {};
                         }
-                    } else {
-                        for (var s = 0; s < aSnapshot.length; s++) {
-                            var snapshotInstance = aSnapshot[s];
-                            Array.prototype.push.call(published, snapshotInstance);
-                            acceptInstance(snapshotInstance);
+                        for (var sp in snapshotInstance) {
+                            accepted[sp] = snapshotInstance[sp];
                         }
+                        Array.prototype.push.call(published, accepted);
+                        acceptInstance(accepted);
                     }
                     orderers = {};
                     published.cursor = published.length > 0 ? published[0] : null;
+                    fire(published, {source: published, propertyName: 'length'});
+                    published.forEach(function(aItem){
+                        fireOppositeScalarsChanges(aItem, nFields);
+                        fireOppositeCollectionsChanges(aItem, nFields);
+                    });
+                });
+                nEntity.setSnapshotProducer(function () {
+                    var snapshot = [];
+                    var snapshotFields = Object.keys(noFields);
+                    published.forEach(function (aItem) {
+                        var cloned = {};
+                        snapshotFields.forEach(function (aFieldName) {
+                            var typeOfField = typeof aItem[aFieldName];
+                            if (typeOfField === 'undefined' || typeOfField === 'function')
+                                cloned[aFieldName] = null;
+                            else
+                                cloned[aFieldName] = aItem[aFieldName];
+                        });
+                        snapshot.push(cloned);
+                    });
+                    return snapshot;
                 });
                 listenable(published);
+                entityCTor.call(published, nEntity);
+                for (var protoEntryName in entityCTor.prototype) {
+                    if (!published[protoEntryName]) {
+                        var protoEntry = entityCTor.prototype[protoEntryName];
+                        if (protoEntry instanceof Function) {
+                            Object.defineProperty(published, protoEntryName, {value: protoEntry});
+                        }
+                    }
+                }
                 return published;
             }
             var entities = model.entities();
@@ -1277,6 +1409,7 @@
      * @returns {P.loadTemplate.publishTo}
      */
     function loadTemplate(aName, aData, aTarget) {
+        P.require(['core/index.js', 'reports/index.js']);
         var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
         if (files) {
             var reportConfig = ScriptedResourceClass.getApp().getReports().get(aName, files);
@@ -1311,7 +1444,7 @@
                                 var onSuccess = null;
                                 var onFailure = null;
                                 var argsLength = arguments.length;
-                                while(argsLength > 0 && !arguments[argsLength - 1]){
+                                while (argsLength > 0 && !arguments[argsLength - 1]) {
                                     argsLength--;
                                 }
                                 if (argsLength > 1 && typeof arguments[argsLength - 1] === "function" && typeof arguments[argsLength - 2] === "function") {
@@ -1350,6 +1483,11 @@
 
     var Resource = {};
     Object.defineProperty(Resource, "load", {
+        value: function (aResName, onSuccess, onFailure) {
+            return boxAsJs(ScriptedResourceClass.load(boxAsJava(aResName), boxAsJava(onSuccess), boxAsJava(onFailure)));
+        }
+    });
+    Object.defineProperty(Resource, "loadText", {
         value: function (aResName, onSuccess, onFailure) {
             return boxAsJs(ScriptedResourceClass.load(boxAsJava(aResName), boxAsJava(onSuccess), boxAsJava(onFailure)));
         }
@@ -1472,6 +1610,7 @@
         value: writeString
     });
 })();
+
 if (!P) {
     /** 
      * Platypus library namespace global variable.

@@ -5,7 +5,7 @@ import java.util.logging.Logger;
 
 import com.bearsoft.gwt.ui.CommonResources;
 import com.bearsoft.gwt.ui.XElement;
-import com.bearsoft.rowset.Cancellable;
+import com.eas.client.Cancellable;
 import com.eas.client.application.AppClient;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.EventsExecutor;

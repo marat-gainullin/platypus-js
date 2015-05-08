@@ -2,8 +2,8 @@ package com.bearsoft.gwt.ui.widgets;
 
 import java.text.ParseException;
 
-import com.bearsoft.rowset.Utils;
-import com.bearsoft.rowset.Utils.JsObject;
+import com.eas.client.Utils;
+import com.eas.client.Utils.JsObject;
 import com.eas.client.converters.StringValueConverter;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Document;

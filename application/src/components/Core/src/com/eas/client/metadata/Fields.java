@@ -18,7 +18,7 @@ import java.util.*;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
- * This class is intended to hold rowset's fields information. Supports clone,
+ * This class is intended to hold fields information. Supports clone,
  * copy operations. Supports factory method for new fields creation. Supports
  * field search, operations with primary and foreign keys.
  */

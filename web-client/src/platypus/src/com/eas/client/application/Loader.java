@@ -12,8 +12,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bearsoft.rowset.CallbackAdapter;
-import com.bearsoft.rowset.Cancellable;
+import com.eas.client.CallbackAdapter;
+import com.eas.client.Cancellable;
 import com.eas.client.CumulativeCallbackAdapter;
 import com.eas.client.queries.Query;
 import com.eas.client.xhr.UrlQueryProcessor;

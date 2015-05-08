@@ -18,10 +18,10 @@ public class Command extends Change {
     
     private static JSObject publisher;
     public String command;// transient property
-    private List<ChangeValue> parameters = new ArrayList<>();
+    private final List<ChangeValue> parameters = new ArrayList<>();
 
-    public Command(String aEntityId) {
-        super(aEntityId);
+    public Command(String aEntityName) {
+        super(aEntityName);
     }
 
     @Override

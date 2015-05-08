@@ -18,9 +18,9 @@ import com.bearsoft.gwt.ui.widgets.DropDownButton;
 import com.bearsoft.gwt.ui.widgets.ImageButton;
 import com.bearsoft.gwt.ui.widgets.ObjectFormat;
 import com.bearsoft.gwt.ui.widgets.grid.header.HeaderNode;
-import com.bearsoft.rowset.CallbackAdapter;
-import com.bearsoft.rowset.Utils;
-import com.bearsoft.rowset.Utils.JsObject;
+import com.eas.client.CallbackAdapter;
+import com.eas.client.Utils;
+import com.eas.client.Utils.JsObject;
 import com.eas.client.application.PlatypusImageResource;
 import com.eas.client.form.grid.columns.ModelColumn;
 import com.eas.client.form.grid.columns.header.CheckHeaderNode;
@@ -353,6 +353,10 @@ public class FormFactory {
 			Publisher.publish(toggle);
 			readGeneralProps(anElement, toggle);
 			readImageParagraph(anElement, toggle);
+			if (anElement.hasAttribute("selected")) {
+				boolean selected = Utils.getBooleanAttribute(anElement, "selected", Boolean.FALSE);
+				toggle.setValue(selected);
+			}
 			return toggle;
 		case "DesktopPane":
 			DesktopPane desktop = new DesktopPane();
@@ -394,6 +398,14 @@ public class FormFactory {
 				} catch (Exception ex) {
 					Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
 				}
+			}
+			if (anElement.hasAttribute("datePicker")) {
+				boolean selected = Utils.getBooleanAttribute(anElement, "datePicker", Boolean.FALSE);
+				modelDate.setDateShown(selected);
+			}
+			if (anElement.hasAttribute("timePicker")) {
+				boolean selected = Utils.getBooleanAttribute(anElement, "timePicker", Boolean.FALSE);
+				modelDate.setTimeShown(selected);
 			}
 			return modelDate;
 		case "ModelFormattedField":

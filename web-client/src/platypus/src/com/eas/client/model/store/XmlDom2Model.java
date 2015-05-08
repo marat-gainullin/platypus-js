@@ -14,12 +14,12 @@ import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bearsoft.rowset.Utils;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.ForeignKeySpec;
-import com.bearsoft.rowset.metadata.Parameter;
-import com.bearsoft.rowset.metadata.PrimaryKeySpec;
+import com.eas.client.Utils;
 import com.eas.client.application.AppClient;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.ForeignKeySpec;
+import com.eas.client.metadata.Parameter;
+import com.eas.client.metadata.PrimaryKeySpec;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.eas.client.model.ModelVisitor;

@@ -187,19 +187,27 @@
     background-position: center;
 }
 
+.decorator-select:hover{
+    opacity: 1;
+}
+
 .decorator-select{
     width: 20px; 
-    right: 0px;
+    opacity: 0.5;
     background-image: url(decorator-select.png);
     background-repeat: no-repeat;
     background-position: center;
     cursor: pointer;
 }
 
+.decorator-clear:hover{
+    opacity: 1;
+}
+
 .decorator-clear{
     width: 20px; 
-    right: 20px;
-    background-image: url(decorator-clear.png);
+    opacity: 0.5;
+    background-image: url(decorator-clear.svg);
     background-repeat: no-repeat;
     background-position: center;
     cursor: pointer;
@@ -211,6 +219,11 @@
 
 .decorator{
     border: solid 1px lightgray;
+    border-radius: 2px;
+}
+
+.decorator-focused{
+    border: solid 1px gray;
     border-radius: 2px;
 }
 
@@ -249,8 +262,13 @@
     background: transparent;
 }
 
+.combo-field-custom-dropdown:hover{
+    opacity: 1;
+}
+
 .combo-field-custom-dropdown{
-	background: url('dropdown-arrow.png') no-repeat;  /*Adds background-image*/
+    opacity: 0.5;
+    background: url('dropdown-arrow.png') no-repeat;  /*Adds background-image*/
     background-position: right;  /*Position of the background-image*/
 }
 
@@ -268,13 +286,23 @@
     padding-top: 2px;
 }
 
-.date-time-select{
+.date-select:hover, .time-select:hover{
+    opacity: 1;
+}
+
+.date-select, .time-select{
     width: 20px; 
+    opacity: 0.5;
     background-image: url(date-time-select.png);
     background-repeat: no-repeat;
     background-position: center;
     cursor: pointer;
 }
+
+.time-select{
+    background-image: url(clock.png);
+}
+
 
 .spin-left{
     width: 20px; 
@@ -827,7 +855,6 @@
     padding: 1px;
     box-sizing:border-box;
 }
-
 
 .date-time-picker{
     background: white;

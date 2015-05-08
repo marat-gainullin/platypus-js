@@ -4,14 +4,11 @@
  */
 package com.eas.client.serial;
 
-import com.eas.client.serial.FieldsJSONReader;
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.Parameters;
+import com.eas.client.Utils.JsObject;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.Parameters;
 import com.eas.client.queries.Query;
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONBoolean;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.core.client.JavaScriptObject;
 
 /**
  * 
@@ -25,29 +22,25 @@ public class QueryJSONReader {
 	private static final String PARAMETERS_PROP_NAME = "parameters";
 	private static final String FIELDS_PROP_NAME = "fields";
 
-	public static Query read(JSONValue aValue) throws Exception {
-		JSONObject o = aValue.isObject();
+	public static Query read(JavaScriptObject aValue) throws Exception {
+		JsObject o = aValue.cast();
 		assert o != null;
 		Query query = new Query();
-		query.setTitle(o.get(TITLE_PROP_NAME).isString().stringValue());
-		JSONValue vManual = o.get(MANUAL_PROP_NAME);
-		if (vManual != null) {
-			JSONBoolean bManual = vManual.isBoolean();
-			if (bManual != null) {
-				query.setManual(bManual.booleanValue());
-			}
+		query.setTitle(o.getString(TITLE_PROP_NAME));
+		if(o.has(MANUAL_PROP_NAME)){
+			query.setManual(o.getBoolean(MANUAL_PROP_NAME));
 		}
-		query.setEntityName(o.get(APP_ELEMENT_PROP_NAME).isString().stringValue());
+		query.setEntityName(o.getString(APP_ELEMENT_PROP_NAME));
 		// parameters
-		assert o.containsKey(PARAMETERS_PROP_NAME);
-		JSONArray pa = o.get(PARAMETERS_PROP_NAME).isArray();
+		assert o.has(PARAMETERS_PROP_NAME);
+		JavaScriptObject pa = o.getJs(PARAMETERS_PROP_NAME);
 		assert pa != null;
 		Parameters params = new Parameters();
 		FieldsJSONReader.readFields(pa, params);
 		query.setParameters(params);
 		// fields
-		assert o.containsKey(FIELDS_PROP_NAME);
-		JSONArray fa = o.get(FIELDS_PROP_NAME).isArray();
+		assert o.has(FIELDS_PROP_NAME);
+		JavaScriptObject fa = o.getJs(FIELDS_PROP_NAME);
 		assert fa != null;
 		Fields fields = new Fields();
 		FieldsJSONReader.readFields(fa, fields);
