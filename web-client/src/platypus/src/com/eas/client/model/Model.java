@@ -737,6 +737,10 @@ public class Model implements HasPublished {
             orderers = {};
             published.cursor = published.length > 0 ? published[0] : null;
             @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(published, {source: published, propertyName: 'length'});
+            published.forEach(function(aItem){
+	            fireOppositeScalarsChanges(aItem, nFields);
+	            fireOppositeCollectionsChanges(aItem, nFields);
+            });
         });
         nEntity.@com.eas.client.model.Entity::setSnapshotProducer(Lcom/google/gwt/core/client/JavaScriptObject;)(function(){
             var snapshot = [];

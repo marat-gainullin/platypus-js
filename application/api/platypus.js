@@ -764,7 +764,11 @@
             }});
         Object.defineProperty(aTarget, fireChangeName, {value: function (aChange) {
                 Object.freeze(aChange);
-                listeners.forEach(function (aListener) {
+                var _listeners = [];
+                listeners.forEach(function(aListener) {
+                    _listeners.push(aListener);
+                });
+                _listeners.forEach(function (aListener) {
                     aListener(aChange);
                 });
             }});
@@ -797,6 +801,74 @@
         }
     }
 
+    function listenElements(aData, aPropListener) {
+        function subscribe(aData, aListener) {
+            return listen(aData, aListener);
+        }
+        var subscribed = [];
+        for (var i = 0; i < aData.length; i++) {
+            var remover = subscribe(aData[i], aPropListener);
+            if (remover) {
+                subscribed.push(remover);
+            }
+        }
+        return {
+            unlisten: function () {
+                subscribed.forEach(function (aEntry) {
+                    aEntry();
+                });
+            }
+        };
+    }
+    ScriptUtilsClass.setListenElementsFunc(listenElements);
+
+    function listenInstance(aTarget, aPath, aPropListener) {
+        function subscribe(aData, aListener, aPropName) {
+            return listen(aData, function(aChange){
+                if(aChange.propertyName == aPropName){
+                    aListener(aChange);
+                }
+            });
+        }
+        var subscribed = [];
+        function listenPath() {
+            subscribed = [];
+            var data = aTarget;
+            var path = aPath.split(".");
+            for (var i = 0; i < path.length; i++) {
+                var propName = path[i];
+                var listener = i === path.length - 1 ? aPropListener : function (aChange) {
+                    subscribed.forEach(function (aEntry) {
+                        aEntry();
+                    });
+                    listenPath();
+                    aPropListener(aChange);
+                };
+                var cookie = subscribe(data, listener, propName);
+                if (cookie) {
+                    subscribed.push(cookie);
+                    if (data[propName])
+                        data = data[propName];
+                    else
+                        break;
+                } else {
+                    break;
+                }
+            }
+        }
+        if (aTarget) {
+            listenPath();
+        }
+        return {
+            unlisten: function () {
+                subscribed.forEach(function (aEntry) {
+                    aEntry();
+                });
+            }
+        };
+    }
+    ScriptUtilsClass.setListenFunc(listenInstance);
+    
     function fireSelfScalarsOppositeCollectionsChanges(aSubject, aChange, nFields) {
         var ormDefs = nFields.getOrmScalarExpandings().get(aChange.propertyName);
         if (ormDefs) {
@@ -1277,6 +1349,10 @@
                     orderers = {};
                     published.cursor = published.length > 0 ? published[0] : null;
                     fire(published, {source: published, propertyName: 'length'});
+                    published.forEach(function(aItem){
+                        fireOppositeScalarsChanges(aItem, nFields);
+                        fireOppositeCollectionsChanges(aItem, nFields);
+                    });
                 });
                 nEntity.setSnapshotProducer(function () {
                     var snapshot = [];
