@@ -825,7 +825,7 @@
     function listenInstance(aTarget, aPath, aPropListener) {
         function subscribe(aData, aListener, aPropName) {
             return listen(aData, function(aChange){
-                if(aChange.propertyName == aPropName){
+                if(!aPropName || aChange.propertyName == aPropName){
                     aListener(aChange);
                 }
             });
@@ -1203,15 +1203,6 @@
                         fire(published, {source: published, propertyName: 'cursor', oldValue: oldCursor, newValue: newCursor});
                     }
                 });
-                entityCTor.call(published, nEntity);
-                for (var protoEntryName in entityCTor.prototype) {
-                    if (!published[protoEntryName]) {
-                        var protoEntry = entityCTor.prototype[protoEntryName];
-                        if (protoEntry instanceof Function) {
-                            Object.defineProperty(published, protoEntryName, {value: protoEntry});
-                        }
-                    }
-                }
                 var pSchema = {};
                 Object.defineProperty(published, "schema", {
                     value: pSchema
@@ -1371,6 +1362,15 @@
                     return snapshot;
                 });
                 listenable(published);
+                entityCTor.call(published, nEntity);
+                for (var protoEntryName in entityCTor.prototype) {
+                    if (!published[protoEntryName]) {
+                        var protoEntry = entityCTor.prototype[protoEntryName];
+                        if (protoEntry instanceof Function) {
+                            Object.defineProperty(published, protoEntryName, {value: protoEntry});
+                        }
+                    }
+                }
                 return published;
             }
             var entities = model.entities();

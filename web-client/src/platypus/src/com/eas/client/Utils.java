@@ -621,7 +621,7 @@ public class Utils {
 	private static native JavaScriptObject observePath(JavaScriptObject aTarget, String aPath, JavaScriptObject aPropListener)/*-{
 	    function subscribe(aData, aListener, aPropName) {
         	var nHandler = @com.eas.client.Utils::listen(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aData, function(aChange){
-        		if(aChange.propertyName == aPropName){
+        		if(!aPropName || aChange.propertyName == aPropName){
         			aListener(aChange);
         		}
         	});

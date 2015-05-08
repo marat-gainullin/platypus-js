@@ -938,11 +938,25 @@ public class Model implements HasPublished {
 			for (Entity entity : toExecute) {
 				entity.invalidate();
 			}
-			;
 		}
 		for (Entity entity : toExecute) {
 			if (!entity.getQuery().isManual()) {
-				entity.internalExecute(null);
+                if (process == null) {
+                    entity.internalExecute(new CallbackAdapter<JavaScriptObject, String>() {
+            			@Override
+            			protected void doWork(JavaScriptObject result) throws Exception {
+            				// no op
+            			}
+
+            			@Override
+            			public void onFailure(String reason) {
+                            Logger.getLogger(Model.class.getName()).log(Level.WARNING, reason);
+            			}
+
+                    });
+                } else {
+    				entity.internalExecute(null);
+                }
 			}
 		}
 	}
