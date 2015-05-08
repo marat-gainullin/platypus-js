@@ -294,7 +294,7 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 				setupVisibleRanges();
 				if (dataProvider instanceof IndexOfProvider<?>)
 					((IndexOfProvider<?>) dataProvider).rescan();
-				sortHandler.setList(dataProvider.getList());
+				sortHandler.setList(dataProvider != null ? dataProvider.getList() : new ArrayList<JavaScriptObject>());
 				if (sortList.size() > 0) {
 					sortList.clear();
 					redrawHeaders();
