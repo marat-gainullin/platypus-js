@@ -465,23 +465,6 @@
              */
             P.Slider.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Slider){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf Slider
-             */
-            P.Slider.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -498,6 +481,23 @@
              * @memberOf Slider
              */
             P.Slider.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Slider){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf Slider
+             */
+            P.Slider.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -649,20 +649,6 @@
              */
             P.Slider.prototype.onMouseExited = {};
         }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.Slider){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf Slider
-             */
-            P.Slider.prototype.name = '';
-        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -679,6 +665,20 @@
              * @memberOf Slider
              */
             P.Slider.prototype.width = 0;
+        }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Slider){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf Slider
+             */
+            P.Slider.prototype.name = '';
         }
         Object.defineProperty(this, "maximum", {
             get: function() {

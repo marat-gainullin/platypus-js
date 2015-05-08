@@ -496,23 +496,6 @@
              */
             P.BoxPane.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.BoxPane){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf BoxPane
-             */
-            P.BoxPane.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "count", {
             get: function() {
                 var value = delegate.count;
@@ -543,6 +526,23 @@
              * @memberOf BoxPane
              */
             P.BoxPane.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.BoxPane){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf BoxPane
+             */
+            P.BoxPane.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -711,20 +711,6 @@
              */
             P.BoxPane.prototype.onMouseExited = {};
         }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.BoxPane){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf BoxPane
-             */
-            P.BoxPane.prototype.name = '';
-        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -741,6 +727,20 @@
              * @memberOf BoxPane
              */
             P.BoxPane.prototype.width = 0;
+        }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.BoxPane){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf BoxPane
+             */
+            P.BoxPane.prototype.name = '';
         }
         Object.defineProperty(this, "font", {
             get: function() {
@@ -782,6 +782,17 @@
         });
     };
         /**
+         * Tries to acquire focus for this component.
+         * @method focus
+         * @memberOf BoxPane
+         */
+        P.BoxPane.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Appends the specified component to the end of this container.
          * @param component the component to add
          * @method add
@@ -813,17 +824,6 @@
         P.BoxPane.prototype.clear = function() {
             var delegate = this.unwrap();
             var value = delegate.clear();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf BoxPane
-         */
-        P.BoxPane.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
             return P.boxAsJs(value);
         };
 

@@ -178,23 +178,6 @@
              */
             P.SplitPane.prototype.onComponentMoved = {};
         }
-        Object.defineProperty(this, "onComponentAdded", {
-            get: function() {
-                var value = delegate.onComponentAdded;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onComponentAdded = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.SplitPane){
-            /**
-             * Component added event hanler function.
-             * @property onComponentAdded
-             * @memberOf SplitPane
-             */
-            P.SplitPane.prototype.onComponentAdded = {};
-        }
         Object.defineProperty(this, "dividerLocation", {
             get: function() {
                 var value = delegate.dividerLocation;
@@ -211,6 +194,23 @@
              * @memberOf SplitPane
              */
             P.SplitPane.prototype.dividerLocation = 0;
+        }
+        Object.defineProperty(this, "onComponentAdded", {
+            get: function() {
+                var value = delegate.onComponentAdded;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onComponentAdded = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.SplitPane){
+            /**
+             * Component added event hanler function.
+             * @property onComponentAdded
+             * @memberOf SplitPane
+             */
+            P.SplitPane.prototype.onComponentAdded = {};
         }
         Object.defineProperty(this, "secondComponent", {
             get: function() {
@@ -512,23 +512,6 @@
              */
             P.SplitPane.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.SplitPane){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf SplitPane
-             */
-            P.SplitPane.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "count", {
             get: function() {
                 var value = delegate.count;
@@ -559,6 +542,23 @@
              * @memberOf SplitPane
              */
             P.SplitPane.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.SplitPane){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf SplitPane
+             */
+            P.SplitPane.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -727,20 +727,6 @@
              */
             P.SplitPane.prototype.onMouseExited = {};
         }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.SplitPane){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf SplitPane
-             */
-            P.SplitPane.prototype.name = '';
-        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -774,6 +760,20 @@
              * @memberOf SplitPane
              */
             P.SplitPane.prototype.oneTouchExpandable = true;
+        }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.SplitPane){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf SplitPane
+             */
+            P.SplitPane.prototype.name = '';
         }
         Object.defineProperty(this, "font", {
             get: function() {
@@ -815,18 +815,6 @@
         });
     };
         /**
-         * Appends the specified component to the end of this container.
-         * @param component the component to add.
-         * @method add
-         * @memberOf SplitPane
-         */
-        P.SplitPane.prototype.add = function(component) {
-            var delegate = this.unwrap();
-            var value = delegate.add(P.boxAsJava(component));
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf SplitPane
@@ -847,6 +835,18 @@
         P.SplitPane.prototype.child = function(index) {
             var delegate = this.unwrap();
             var value = delegate.child(P.boxAsJava(index));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Appends the specified component to the end of this container.
+         * @param component the component to add.
+         * @method add
+         * @memberOf SplitPane
+         */
+        P.SplitPane.prototype.add = function(component) {
+            var delegate = this.unwrap();
+            var value = delegate.add(P.boxAsJava(component));
             return P.boxAsJs(value);
         };
 

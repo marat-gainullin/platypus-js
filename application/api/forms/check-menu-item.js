@@ -459,23 +459,6 @@
              */
             P.CheckMenuItem.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.CheckMenuItem){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf CheckMenuItem
-             */
-            P.CheckMenuItem.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -492,6 +475,23 @@
              * @memberOf CheckMenuItem
              */
             P.CheckMenuItem.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.CheckMenuItem){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf CheckMenuItem
+             */
+            P.CheckMenuItem.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -643,20 +643,6 @@
              */
             P.CheckMenuItem.prototype.onMouseExited = {};
         }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.CheckMenuItem){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf CheckMenuItem
-             */
-            P.CheckMenuItem.prototype.name = '';
-        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -673,6 +659,20 @@
              * @memberOf CheckMenuItem
              */
             P.CheckMenuItem.prototype.width = 0;
+        }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.CheckMenuItem){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf CheckMenuItem
+             */
+            P.CheckMenuItem.prototype.name = '';
         }
         Object.defineProperty(this, "font", {
             get: function() {

@@ -450,23 +450,6 @@
              */
             P.DropDownButton.prototype.onComponentHidden = {};
         }
-        Object.defineProperty(this, "nextFocusableComponent", {
-            get: function() {
-                var value = delegate.nextFocusableComponent;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.nextFocusableComponent = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.DropDownButton){
-            /**
-             * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
-             * @property nextFocusableComponent
-             * @memberOf DropDownButton
-             */
-            P.DropDownButton.prototype.nextFocusableComponent = {};
-        }
         Object.defineProperty(this, "iconTextGap", {
             get: function() {
                 var value = delegate.iconTextGap;
@@ -484,22 +467,22 @@
              */
             P.DropDownButton.prototype.iconTextGap = 0;
         }
-        Object.defineProperty(this, "onKeyReleased", {
+        Object.defineProperty(this, "nextFocusableComponent", {
             get: function() {
-                var value = delegate.onKeyReleased;
+                var value = delegate.nextFocusableComponent;
                 return P.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
+                delegate.nextFocusableComponent = P.boxAsJava(aValue);
             }
         });
         if(!P.DropDownButton){
             /**
-             * Key released event handler function.
-             * @property onKeyReleased
+             * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
+             * @property nextFocusableComponent
              * @memberOf DropDownButton
              */
-            P.DropDownButton.prototype.onKeyReleased = {};
+            P.DropDownButton.prototype.nextFocusableComponent = {};
         }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
@@ -517,6 +500,23 @@
              * @memberOf DropDownButton
              */
             P.DropDownButton.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.DropDownButton){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf DropDownButton
+             */
+            P.DropDownButton.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -702,20 +702,6 @@
              */
             P.DropDownButton.prototype.onMouseExited = {};
         }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.DropDownButton){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf DropDownButton
-             */
-            P.DropDownButton.prototype.name = '';
-        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -732,6 +718,20 @@
              * @memberOf DropDownButton
              */
             P.DropDownButton.prototype.width = 0;
+        }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.DropDownButton){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf DropDownButton
+             */
+            P.DropDownButton.prototype.name = '';
         }
         Object.defineProperty(this, "font", {
             get: function() {

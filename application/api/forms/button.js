@@ -433,23 +433,6 @@
              */
             P.Button.prototype.onComponentHidden = {};
         }
-        Object.defineProperty(this, "nextFocusableComponent", {
-            get: function() {
-                var value = delegate.nextFocusableComponent;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.nextFocusableComponent = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Button){
-            /**
-             * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
-             * @property nextFocusableComponent
-             * @memberOf Button
-             */
-            P.Button.prototype.nextFocusableComponent = {};
-        }
         Object.defineProperty(this, "iconTextGap", {
             get: function() {
                 var value = delegate.iconTextGap;
@@ -467,22 +450,22 @@
              */
             P.Button.prototype.iconTextGap = 0;
         }
-        Object.defineProperty(this, "onKeyReleased", {
+        Object.defineProperty(this, "nextFocusableComponent", {
             get: function() {
-                var value = delegate.onKeyReleased;
+                var value = delegate.nextFocusableComponent;
                 return P.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
+                delegate.nextFocusableComponent = P.boxAsJava(aValue);
             }
         });
         if(!P.Button){
             /**
-             * Key released event handler function.
-             * @property onKeyReleased
+             * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
+             * @property nextFocusableComponent
              * @memberOf Button
              */
-            P.Button.prototype.onKeyReleased = {};
+            P.Button.prototype.nextFocusableComponent = {};
         }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
@@ -500,6 +483,23 @@
              * @memberOf Button
              */
             P.Button.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Button){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf Button
+             */
+            P.Button.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -685,20 +685,6 @@
              */
             P.Button.prototype.onMouseExited = {};
         }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.Button){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf Button
-             */
-            P.Button.prototype.name = '';
-        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -715,6 +701,20 @@
              * @memberOf Button
              */
             P.Button.prototype.width = 0;
+        }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Button){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf Button
+             */
+            P.Button.prototype.name = '';
         }
         Object.defineProperty(this, "font", {
             get: function() {

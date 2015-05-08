@@ -59,7 +59,11 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Sq
         aEntity.setModel(this);
         super.addEntity(aEntity);
     }
-
+     private static final String MODIFIED_JSDOC = ""
+            + "/**\n"
+            + "* Flagis set to true if model has been modified"
+            + "*/";
+    @ScriptFunction(jsDoc = MODIFIED_JSDOC)
     @Override
     public boolean isModified() throws Exception {
         return changeLogs.values().stream().anyMatch((List<Change> aLog) -> {

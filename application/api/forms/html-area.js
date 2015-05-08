@@ -495,23 +495,6 @@
              */
             P.HtmlArea.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.HtmlArea){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf HtmlArea
-             */
-            P.HtmlArea.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -528,6 +511,23 @@
              * @memberOf HtmlArea
              */
             P.HtmlArea.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.HtmlArea){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf HtmlArea
+             */
+            P.HtmlArea.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -679,20 +679,6 @@
              */
             P.HtmlArea.prototype.onMouseExited = {};
         }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.HtmlArea){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf HtmlArea
-             */
-            P.HtmlArea.prototype.name = '';
-        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -709,6 +695,20 @@
              * @memberOf HtmlArea
              */
             P.HtmlArea.prototype.width = 0;
+        }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.HtmlArea){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf HtmlArea
+             */
+            P.HtmlArea.prototype.name = '';
         }
         Object.defineProperty(this, "font", {
             get: function() {
