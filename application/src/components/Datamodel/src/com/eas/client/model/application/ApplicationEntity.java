@@ -280,25 +280,27 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
             throw new AlreadyPublishedException();
         }
         published = aValue;
-        ScriptUtils.listen(published, "cursor", new AbstractJSObject() {
+        if (com.eas.script.ScriptUtils.isInitialized()) {
+            ScriptUtils.listen(published, "cursor", new AbstractJSObject() {
 
-            @Override
-            public boolean isFunction() {
-                return true;
-            }
-
-            @Override
-            public Object call(Object thiz, Object... args) {
-                try {
-                    resignOnCursor();
-                    internalExecuteChildren(false);
-                } catch (Exception ex) {
-                    Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
+                @Override
+                public boolean isFunction() {
+                    return true;
                 }
-                return null;
-            }
 
-        });
+                @Override
+                public Object call(Object thiz, Object... args) {
+                    try {
+                        resignOnCursor();
+                        internalExecuteChildren(false);
+                    } catch (Exception ex) {
+                        Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    return null;
+                }
+
+            });
+        }
     }
 
     /**
