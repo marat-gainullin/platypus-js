@@ -759,7 +759,7 @@ public class AppClient {
 
 				@Override
 				public String asString() {
-					return relativeUri() + APP_RESOURCE_PREFIX + aResourceName + Loader.URL_QUERY_PROCESSOR.process("");
+					return appendCacheBustParameter(relativeUri() + APP_RESOURCE_PREFIX + aResourceName, "?");
 				}
 
 			};
@@ -955,5 +955,10 @@ public class AppClient {
 				}
 			}
 		});
+	}
+	
+	public static String appendCacheBustParameter(String str, String parameterDelimiter) {
+		return Application.isEnabledCacheBust() ? 
+				str + "?" + PlatypusHttpRequestParams.CACHE_BUSTER + "=" + IDGenerator.genId() : str;
 	}
 }

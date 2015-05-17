@@ -14,13 +14,16 @@ import java.util.logging.Logger;
 
 import com.bearsoft.rowset.CallbackAdapter;
 import com.bearsoft.rowset.Cancellable;
+import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.CumulativeCallbackAdapter;
+import com.eas.client.PlatypusHttpRequestParams;
 import com.eas.client.queries.Query;
 import com.eas.client.xhr.UrlQueryProcessor;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.ScriptInjector;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.xhr.client.XMLHttpRequest;
 import com.google.gwt.xml.client.Document;
 
@@ -167,7 +170,7 @@ public class Loader {
 						assert !aStructure.getStructure().isEmpty() : "Module ["+moduleName+"] structure should contain at least one element.";
 						for (String part : aStructure.getStructure()) {
 							if (part.toLowerCase().endsWith(".js")) {
-								String jsURL = AppClient.relativeUri() + AppClient.APP_RESOURCE_PREFIX + part + URL_QUERY_PROCESSOR.process("");
+								String jsURL = AppClient.appendCacheBustParameter(AppClient.relativeUri() + AppClient.APP_RESOURCE_PREFIX + part, "?");
 								ScriptInjector.fromUrl(jsURL).setCallback(new Callback<Void, Exception>() {
 
 									@Override

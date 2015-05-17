@@ -72,6 +72,10 @@ public class Application {
 		return appQueries.put(aQuery.getEntityName(), aQuery);
 	}
 	
+	public static native boolean isEnabledCacheBust() /*-{
+		return !!$wnd.P.cacheBust;
+	}-*/;
+	
 	public static native JavaScriptObject createReport(String reportLocation)/*-{
 		return new $wnd.P.Report(reportLocation);
 	}-*/;
