@@ -6,7 +6,6 @@
 package com.eas.client.report;
 
 
-import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.ClientConstants;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.settings.SettingsConstants;
@@ -14,6 +13,7 @@ import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import com.eas.util.IDGenerator;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.FileOutputStream;

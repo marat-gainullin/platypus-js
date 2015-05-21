@@ -1,10 +1,9 @@
 package com.eas.client;
 
-import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.dataflow.FlowProvider;
-import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusIndexer;
+import com.eas.client.changes.Change;
+import com.eas.client.metadata.Fields;
 import com.eas.client.queries.ScriptedQuery;
 import com.eas.client.queries.ScriptedFlowProvider;
 import com.eas.client.scripts.ScriptedResource;
@@ -62,7 +61,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
     }
 
     protected JSObject createModule(String aModuleName) throws Exception {
-        ScriptedResource.require(new String[]{aModuleName});
+        ScriptedResource.require(new String[]{aModuleName}, null);
         return ScriptUtils.createModule(aModuleName);
     }
 
@@ -91,7 +90,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
     }
 
     @Override
-    public FlowProvider createFlowProvider(String aDatasourceName, final String aEntityName, String aSqlClause, final Fields aExpectedFields) throws Exception {
+    public PlatypusJdbcFlowProvider createFlowProvider(String aDatasourceName, final String aEntityName, String aSqlClause, final Fields aExpectedFields) throws Exception {
         if (ScriptedQuery.JAVASCRIPT_QUERY_CONTENTS.equals(aSqlClause)) {
             JSObject dataFeeder = createModule(aDatasourceName);
             if (dataFeeder != null) {

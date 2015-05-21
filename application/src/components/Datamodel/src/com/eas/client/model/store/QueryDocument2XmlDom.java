@@ -4,8 +4,8 @@
  */
 package com.eas.client.model.store;
 
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
 import com.eas.client.model.QueryDocument;
 import java.util.List;
 import javax.xml.parsers.DocumentBuilder;

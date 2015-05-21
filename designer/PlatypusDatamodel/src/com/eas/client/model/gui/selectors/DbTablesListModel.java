@@ -4,24 +4,23 @@
  */
 package com.eas.client.model.gui.selectors;
 
-import com.bearsoft.rowset.Row;
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.exceptions.InvalidColIndexException;
-import com.bearsoft.rowset.metadata.Fields;
 import com.eas.client.ClientConstants;
 import com.eas.client.DatabaseMdCache;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SqlCompiledQuery;
+import com.eas.client.dataflow.ColumnsIndicies;
 import com.eas.client.sqldrivers.SqlDriver;
+import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ListModel;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
-import org.openide.util.Exceptions;
 
 /**
  *
@@ -29,10 +28,8 @@ import org.openide.util.Exceptions;
  */
 public class DbTablesListModel implements ListModel<String> {
 
-    protected Rowset tablesRowset;
+    protected List<String> tables;
     protected Set<ListDataListener> listeners = new HashSet<>();
-    protected int schemaColIndex = -1;
-    protected int tableColIndex = -1;
     protected String datasourceName;
     protected DatabasesClient basesProxy;
     protected String schema;
@@ -45,19 +42,30 @@ public class DbTablesListModel implements ListModel<String> {
             basesProxy = aBasesProxy;
             mdCache = basesProxy.getDbMetadataCache(datasourceName);
             schema = mdCache.getConnectionSchema();
-            setTablesRowset(createRowset());
+            setTablesRowset(fetchTables());
         } catch (Exception ex) {
             Logger.getLogger(DbTablesListModel.class.getName()).log(Level.WARNING, null, ex);
         }
     }
 
-    protected final Rowset createRowset() {
+    protected final List<String> fetchTables() {
         if (schema != null && !schema.isEmpty()) {
             try {
                 SqlDriver driver = mdCache.getConnectionDriver();
                 String sql4Tables = driver.getSql4TablesEnumeration(schema);
                 SqlCompiledQuery query = new SqlCompiledQuery(basesProxy, datasourceName, sql4Tables);
-                return query.executeQuery(null, null);
+                return query.executeQuery((ResultSet r) -> {
+                    List<String> _tables = new ArrayList<>();
+                    ColumnsIndicies idxs = new ColumnsIndicies(r.getMetaData());
+                    int schemaColIndex = idxs.find(ClientConstants.JDBCCOLS_TABLE_SCHEM);
+                    int tableColIndex = idxs.find(ClientConstants.JDBCCOLS_TABLE_NAME);
+                    while (r.next()) {
+                        String schemaName = r.getString(schemaColIndex);
+                        String tableName = r.getString(tableColIndex);
+                        _tables.add(schemaName != null && !schemaName.isEmpty() ? schemaName + "." + tableName : tableName);
+                    }
+                    return _tables;
+                }, null, null);
             } catch (Exception ex) {
                 Logger.getLogger(DbTablesListModel.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -65,17 +73,8 @@ public class DbTablesListModel implements ListModel<String> {
         return null;
     }
 
-    protected final void setTablesRowset(Rowset aTablesRowset) {
-        tablesRowset = aTablesRowset;
-        if (tablesRowset != null) {
-            try {
-                Fields fields = tablesRowset.getFields();
-                schemaColIndex = fields.find(ClientConstants.JDBCCOLS_TABLE_SCHEM);
-                tableColIndex = fields.find(ClientConstants.JDBCCOLS_TABLE_NAME);
-            } catch (Exception ex) {
-                Logger.getLogger(DbTablesListModel.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
+    protected final void setTablesRowset(List<String> aTablesRowset) {
+        tables = aTablesRowset;
     }
 
     public DatabaseMdCache getMdCache() {
@@ -85,7 +84,7 @@ public class DbTablesListModel implements ListModel<String> {
     public void setSchema(String aSchema) throws Exception {
         if (schema == null ? aSchema != null : !schema.equals(aSchema)) {
             schema = aSchema;
-            setTablesRowset(createRowset());
+            setTablesRowset(fetchTables());
         }
         fireDataChanged();
     }
@@ -96,9 +95,8 @@ public class DbTablesListModel implements ListModel<String> {
 
     @Override
     public int getSize() {
-        if (schemaColIndex != -1 && tableColIndex != -1
-                && tablesRowset != null) {
-            return tablesRowset.size();
+        if (tables != null) {
+            return tables.size();
         } else {
             return 0;
         }
@@ -107,15 +105,7 @@ public class DbTablesListModel implements ListModel<String> {
     @Override
     public String getElementAt(int index) {
         if (index >= 0 && index < getSize()) {
-            try {
-                Row r = tablesRowset.getRow(index + 1);
-                String schemaName = (String) r.getColumnObject(schemaColIndex);
-                String tableName = (String) r.getColumnObject(tableColIndex);
-                return schemaName + "." + tableName;
-            } catch (InvalidColIndexException ex) {
-                Exceptions.printStackTrace(ex);
-                return null;
-            }
+            return tables.get(index);
         } else {
             return null;
         }
@@ -140,31 +130,22 @@ public class DbTablesListModel implements ListModel<String> {
             }
         }
     }
-
+/*
     public int findTable(String aScheme, String aTable) {
         String pattern = "";
         if (aScheme != null && !aScheme.isEmpty()) {
             pattern = aScheme + ".";
         }
         pattern += aTable;
-        if (tablesRowset != null && pattern != null && !pattern.isEmpty()) {
+        if (tables != null && pattern != null && !pattern.isEmpty()) {
             int i = -1;
-            try {
-                for (Row r : tablesRowset.getCurrent()) {
-                    i++;
-                    String schemaName = (String) r.getColumnObject(schemaColIndex);
-                    String tableName = (String) r.getColumnObject(tableColIndex);
-                    if (schemaName != null && !schemaName.isEmpty()) {
-                        tableName = schemaName + "." + tableName;
-                    }
-                    if (pattern.toLowerCase().equalsIgnoreCase(tableName.toLowerCase())) {
-                        return i;
-                    }
+            for (String r : tables) {
+                if (pattern.toLowerCase().equalsIgnoreCase(r)) {
+                    return i;
                 }
-            } catch (InvalidColIndexException ex) {
-                Logger.getLogger(DbTablesListModel.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         return -1;
     }
+    */
 }

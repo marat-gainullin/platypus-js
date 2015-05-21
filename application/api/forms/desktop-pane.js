@@ -593,6 +593,20 @@
              */
             P.DesktopPane.prototype.onMouseExited = {};
         }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.DesktopPane){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf DesktopPane
+             */
+            P.DesktopPane.prototype.name = '';
+        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -609,20 +623,6 @@
              * @memberOf DesktopPane
              */
             P.DesktopPane.prototype.width = 0;
-        }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.DesktopPane){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf DesktopPane
-             */
-            P.DesktopPane.prototype.name = '';
         }
         Object.defineProperty(this, "forms", {
             get: function() {
@@ -685,6 +685,28 @@
         };
 
         /**
+         * Closes all frames on the pane.
+         * @method closeAll
+         * @memberOf DesktopPane
+         */
+        P.DesktopPane.prototype.closeAll = function() {
+            var delegate = this.unwrap();
+            var value = delegate.closeAll();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Minimizes all frames on the pane.
+         * @method minimizeAll
+         * @memberOf DesktopPane
+         */
+        P.DesktopPane.prototype.minimizeAll = function() {
+            var delegate = this.unwrap();
+            var value = delegate.minimizeAll();
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Restores frames original state and location.
          * @method restoreAll
          * @memberOf DesktopPane
@@ -703,28 +725,6 @@
         P.DesktopPane.prototype.maximizeAll = function() {
             var delegate = this.unwrap();
             var value = delegate.maximizeAll();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Minimizes all frames on the pane.
-         * @method minimizeAll
-         * @memberOf DesktopPane
-         */
-        P.DesktopPane.prototype.minimizeAll = function() {
-            var delegate = this.unwrap();
-            var value = delegate.minimizeAll();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Closes all frames on the pane.
-         * @method closeAll
-         * @memberOf DesktopPane
-         */
-        P.DesktopPane.prototype.closeAll = function() {
-            var delegate = this.unwrap();
-            var value = delegate.closeAll();
             return P.boxAsJs(value);
         };
 

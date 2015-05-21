@@ -584,6 +584,20 @@
              */
             P.Label.prototype.onMouseWheelMoved = {};
         }
+        Object.defineProperty(this, "component", {
+            get: function() {
+                var value = delegate.component;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Label){
+            /**
+             * Native API. Returns low level swing component. Applicable only in J2SE swing client.
+             * @property component
+             * @memberOf Label
+             */
+            P.Label.prototype.component = {};
+        }
         Object.defineProperty(this, "horizontalAlignment", {
             get: function() {
                 var value = delegate.horizontalAlignment;
@@ -600,20 +614,6 @@
              * @memberOf Label
              */
             P.Label.prototype.horizontalAlignment = 0;
-        }
-        Object.defineProperty(this, "component", {
-            get: function() {
-                var value = delegate.component;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.Label){
-            /**
-             * Native API. Returns low level swing component. Applicable only in J2SE swing client.
-             * @property component
-             * @memberOf Label
-             */
-            P.Label.prototype.component = {};
         }
         Object.defineProperty(this, "onFocusGained", {
             get: function() {
@@ -700,6 +700,20 @@
              */
             P.Label.prototype.onMouseExited = {};
         }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Label){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf Label
+             */
+            P.Label.prototype.name = '';
+        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -716,20 +730,6 @@
              * @memberOf Label
              */
             P.Label.prototype.width = 0;
-        }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.Label){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf Label
-             */
-            P.Label.prototype.name = '';
         }
         Object.defineProperty(this, "verticalAlignment", {
             get: function() {

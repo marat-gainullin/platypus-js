@@ -4,7 +4,7 @@
  */
 package com.eas.designer.datamodel.nodes;
 
-import com.bearsoft.rowset.metadata.Field;
+import com.eas.client.metadata.Field;
 import com.eas.client.model.Entity;
 import com.eas.client.model.gui.DatamodelDesignUtils;
 import com.eas.client.model.gui.edits.fields.ReorderFieldsEdit;

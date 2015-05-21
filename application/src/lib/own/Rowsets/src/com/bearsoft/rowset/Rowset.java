@@ -4,13 +4,15 @@
  */
 package com.bearsoft.rowset;
 
+import com.eas.client.dataflow.RowsetConverter;
+import com.eas.client.dataflow.FlowProviderFailedException;
 import com.bearsoft.rowset.changes.Change;
 import com.bearsoft.rowset.changes.ChangeValue;
 import com.bearsoft.rowset.changes.Delete;
 import com.bearsoft.rowset.changes.Insert;
-import com.bearsoft.rowset.dataflow.DatabaseFlowProvider;
-import com.bearsoft.rowset.dataflow.FlowProvider;
-import com.bearsoft.rowset.dataflow.JdbcFlowProvider;
+import com.eas.client.dataflow.DatabaseFlowProvider;
+import com.eas.client.dataflow.FlowProvider;
+import com.eas.client.dataflow.JdbcFlowProvider;
 import com.bearsoft.rowset.events.RowsetChangeSupport;
 import com.bearsoft.rowset.events.RowsetListener;
 import com.bearsoft.rowset.exceptions.*;

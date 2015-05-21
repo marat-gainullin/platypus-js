@@ -4,9 +4,9 @@
  */
 package com.bearsoft.rowset.metadata;
 
-import com.bearsoft.rowset.serial.BinaryRowsetReader;
+import com.eas.client.metadata.BinaryRowsetReader;
 import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.serial.BinaryRowsetWriter;
+import com.eas.client.metadata.BinaryRowsetWriter;
 import java.sql.SQLException;
 import org.junit.After;
 import org.junit.AfterClass;

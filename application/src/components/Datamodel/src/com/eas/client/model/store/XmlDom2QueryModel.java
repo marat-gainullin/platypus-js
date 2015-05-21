@@ -4,11 +4,11 @@
  */
 package com.eas.client.model.store;
 
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.Parameter;
-import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SqlQuery;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.Parameter;
+import com.eas.client.metadata.Parameters;
 import com.eas.client.model.Relation;
 import com.eas.client.model.query.QueryEntity;
 import com.eas.client.model.query.QueryModel;

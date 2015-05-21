@@ -1,6 +1,5 @@
 package com.eas.client.forms;
 
-import com.bearsoft.rowset.utils.IDGenerator;
 import com.eas.client.events.PublishedSourcedEvent;
 import com.eas.client.forms.components.DesktopPane;
 import com.eas.client.forms.containers.AnchorsPane;
@@ -12,6 +11,7 @@ import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptObj;
+import com.eas.util.IDGenerator;
 import com.eas.util.exceptions.ClosedManageException;
 import java.awt.*;
 import java.awt.Dialog.ModalityType;

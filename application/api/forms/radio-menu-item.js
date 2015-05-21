@@ -295,23 +295,6 @@
              */
             P.RadioMenuItem.prototype.onMouseEntered = {};
         }
-        Object.defineProperty(this, "selected", {
-            get: function() {
-                var value = delegate.selected;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.selected = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.RadioMenuItem){
-            /**
-             * <code>true</code> if the menu item is selected.
-             * @property selected
-             * @memberOf RadioMenuItem
-             */
-            P.RadioMenuItem.prototype.selected = true;
-        }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
                 var value = delegate.toolTipText;
@@ -328,6 +311,23 @@
              * @memberOf RadioMenuItem
              */
             P.RadioMenuItem.prototype.toolTipText = '';
+        }
+        Object.defineProperty(this, "selected", {
+            get: function() {
+                var value = delegate.selected;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.selected = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.RadioMenuItem){
+            /**
+             * <code>true</code> if the menu item is selected.
+             * @property selected
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.selected = true;
         }
         Object.defineProperty(this, "height", {
             get: function() {
@@ -663,6 +663,20 @@
              */
             P.RadioMenuItem.prototype.onMouseExited = {};
         }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.RadioMenuItem){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf RadioMenuItem
+             */
+            P.RadioMenuItem.prototype.name = '';
+        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -679,20 +693,6 @@
              * @memberOf RadioMenuItem
              */
             P.RadioMenuItem.prototype.width = 0;
-        }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.RadioMenuItem){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf RadioMenuItem
-             */
-            P.RadioMenuItem.prototype.name = '';
         }
         Object.defineProperty(this, "font", {
             get: function() {

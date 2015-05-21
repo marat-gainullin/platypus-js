@@ -763,6 +763,20 @@
              */
             P.ModelCheckBox.prototype.onMouseExited = {};
         }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelCheckBox){
+            /**
+             * Generated property jsDoc.
+             * @property name
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.name = '';
+        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -779,20 +793,6 @@
              * @memberOf ModelCheckBox
              */
             P.ModelCheckBox.prototype.width = 0;
-        }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ModelCheckBox){
-            /**
-             * Generated property jsDoc.
-             * @property name
-             * @memberOf ModelCheckBox
-             */
-            P.ModelCheckBox.prototype.name = '';
         }
         Object.defineProperty(this, "font", {
             get: function() {

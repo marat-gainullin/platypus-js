@@ -4,11 +4,12 @@
  */
 package com.eas.designer.datamodel.nodes;
 
-import com.bearsoft.rowset.utils.RowsetUtils;
 import com.eas.client.SQLUtils;
 import com.eas.client.model.Model;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.openide.ErrorManager;
 
 /**
@@ -17,13 +18,54 @@ import org.openide.ErrorManager;
  */
 public class CommonTypesEditor extends SelectIntEditor {
 
+    private static final Map<Integer, String> typesNames = new HashMap<>();
+
+    static {
+        typesNames.put(java.sql.Types.ARRAY, "ARRAY");
+        typesNames.put(java.sql.Types.BIGINT, "BIGINT");
+        typesNames.put(java.sql.Types.BINARY, "BINARY");
+        typesNames.put(java.sql.Types.BIT, "BIT");
+        typesNames.put(java.sql.Types.BLOB, "BLOB");
+        typesNames.put(java.sql.Types.BOOLEAN, "BOOLEAN");
+        typesNames.put(java.sql.Types.CHAR, "CHAR");
+        typesNames.put(java.sql.Types.CLOB, "CLOB");
+        typesNames.put(java.sql.Types.DATALINK, "DATALINK");
+        typesNames.put(java.sql.Types.DATE, "DATE");
+        typesNames.put(java.sql.Types.DECIMAL, "DECIMAL");
+        typesNames.put(java.sql.Types.DISTINCT, "DISTINCT");
+        typesNames.put(java.sql.Types.DOUBLE, "DOUBLE");
+        typesNames.put(java.sql.Types.FLOAT, "FLOAT");
+        typesNames.put(java.sql.Types.INTEGER, "INTEGER");
+        typesNames.put(java.sql.Types.JAVA_OBJECT, "JAVA_OBJECT");
+        typesNames.put(java.sql.Types.LONGNVARCHAR, "LONGNVARCHAR");
+        typesNames.put(java.sql.Types.LONGVARBINARY, "LONGVARBINARY");
+        typesNames.put(java.sql.Types.LONGVARCHAR, "LONGVARCHAR");
+        typesNames.put(java.sql.Types.NCHAR, "NCHAR");
+        typesNames.put(java.sql.Types.NCLOB, "NCLOB");
+        typesNames.put(java.sql.Types.NULL, "NULL");
+        typesNames.put(java.sql.Types.NUMERIC, "NUMERIC");
+        typesNames.put(java.sql.Types.NVARCHAR, "NVARCHAR");
+        typesNames.put(java.sql.Types.OTHER, "OTHER");
+        typesNames.put(java.sql.Types.REAL, "REAL");
+        typesNames.put(java.sql.Types.REF, "REF");
+        typesNames.put(java.sql.Types.ROWID, "ROWID");
+        typesNames.put(java.sql.Types.SMALLINT, "SMALLINT");
+        typesNames.put(java.sql.Types.SQLXML, "SQLXML");
+        typesNames.put(java.sql.Types.STRUCT, "STRUCT");
+        typesNames.put(java.sql.Types.TIME, "TIME");
+        typesNames.put(java.sql.Types.TIMESTAMP, "TIMESTAMP");
+        typesNames.put(java.sql.Types.TINYINT, "TINYINT");
+        typesNames.put(java.sql.Types.VARBINARY, "VARBINARY");
+        typesNames.put(java.sql.Types.VARCHAR, "VARCHAR");
+    }
+
     private CommonTypesEditor(String[] aKeys, int[] aValues) {
         super(aKeys, aValues);
     }
 
     public static synchronized CommonTypesEditor getNewInstanceFor(Model model) {
         List<Integer> typeIndexesList = new ArrayList<>();
-        for (Integer e : RowsetUtils.typesNames.keySet()) {
+        for (Integer e : typesNames.keySet()) {
             try {
                 if (model.isTypeSupported(e)) {
                     typeIndexesList.add(e);

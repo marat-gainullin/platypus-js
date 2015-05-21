@@ -2,7 +2,7 @@ package com.eas.client.form.published.widgets;
 
 import com.bearsoft.gwt.ui.XElement;
 import com.bearsoft.gwt.ui.widgets.FormattedObjectBox;
-import com.bearsoft.rowset.Utils;
+import com.eas.client.Utils;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.events.ActionEvent;

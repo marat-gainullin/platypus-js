@@ -5,10 +5,10 @@
  */
 package com.eas.client;
 
-import com.bearsoft.rowset.resourcepool.BearResourcePool;
-import com.bearsoft.rowset.utils.IDGenerator;
+import com.eas.client.resourcepool.BearResourcePool;
 import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.settings.DbConnectionSettings;
+import com.eas.util.IDGenerator;
 
 /**
  *

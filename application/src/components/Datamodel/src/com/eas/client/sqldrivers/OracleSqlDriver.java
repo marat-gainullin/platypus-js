@@ -9,16 +9,14 @@
  */
 package com.eas.client.sqldrivers;
 
-import com.bearsoft.rowset.Converter;
-import com.bearsoft.rowset.metadata.DataTypeInfo;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.ForeignKeySpec;
-import com.bearsoft.rowset.metadata.PrimaryKeySpec;
 import com.eas.client.ClientConstants;
 import com.eas.client.SQLUtils;
+import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
-import com.eas.client.sqldrivers.converters.OracleConverter;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.ForeignKeySpec;
+import com.eas.client.metadata.PrimaryKeySpec;
 import com.eas.client.sqldrivers.resolvers.OracleTypesResolver;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
 import com.eas.util.StringUtils;
@@ -39,7 +37,6 @@ public class OracleSqlDriver extends SqlDriver {
     private final TwinString[] charsForWrap = {new TwinString("\"", "\"")};
     private final char[] restrictedChars = {' ', ',', '\'', '"'};
 
-    protected static final Converter converter = new OracleConverter();
     protected static final OracleTypesResolver resolver = new OracleTypesResolver();
     protected static final String SET_SCHEMA_CLAUSE = "alter session set current_schema = %s";
     protected static final String GET_SCHEMA_CLAUSE = "SELECT sys_context('USERENV', 'CURRENT_SCHEMA') FROM DUAL";
@@ -414,11 +411,6 @@ public class OracleSqlDriver extends SqlDriver {
     @Override
     public Integer getJdbcTypeByRDBMSTypename(String aLowLevelTypeName) {
         return resolver.getJdbcTypeByRDBMSTypename(aLowLevelTypeName);
-    }
-
-    @Override
-    public Converter getConverter() {
-        return converter;
     }
 
     @Override

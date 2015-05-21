@@ -5,7 +5,7 @@
 
 package com.eas.client.model;
 
-import com.bearsoft.rowset.metadata.Field;
+import com.eas.client.metadata.Field;
 
 /**
  *

@@ -314,22 +314,6 @@
              */
             P.CheckBox.prototype.onMouseEntered = {};
         }
-        Object.defineProperty(this, "selected", {
-            get: function() {
-                var value = delegate.selected;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.selected = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.CheckBox){
-            /**
-             * @property selected
-             * @memberOf CheckBox
-             * Determines whether this component is selected.*/
-            P.CheckBox.prototype.selected = true;
-        }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
                 var value = delegate.toolTipText;
@@ -346,6 +330,22 @@
              * @memberOf CheckBox
              */
             P.CheckBox.prototype.toolTipText = '';
+        }
+        Object.defineProperty(this, "selected", {
+            get: function() {
+                var value = delegate.selected;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.selected = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.CheckBox){
+            /**
+             * @property selected
+             * @memberOf CheckBox
+             * Determines whether this component is selected.*/
+            P.CheckBox.prototype.selected = true;
         }
         Object.defineProperty(this, "height", {
             get: function() {
@@ -664,6 +664,20 @@
              */
             P.CheckBox.prototype.onMouseExited = {};
         }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.CheckBox){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf CheckBox
+             */
+            P.CheckBox.prototype.name = '';
+        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -680,20 +694,6 @@
              * @memberOf CheckBox
              */
             P.CheckBox.prototype.width = 0;
-        }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.CheckBox){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf CheckBox
-             */
-            P.CheckBox.prototype.name = '';
         }
         Object.defineProperty(this, "font", {
             get: function() {

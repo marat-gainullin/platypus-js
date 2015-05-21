@@ -4,8 +4,6 @@
  */
 package com.eas.client.resourcepool;
 
-import com.bearsoft.rowset.resourcepool.BearDatabaseConnection;
-import com.bearsoft.rowset.resourcepool.BearResourcePool;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;

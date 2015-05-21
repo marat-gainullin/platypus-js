@@ -4,9 +4,6 @@
  */
 package com.eas.designer.application.dbdiagram.nodes;
 
-import com.bearsoft.rowset.metadata.DataTypeInfo;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.ForeignKeySpec;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SQLUtils;
 import com.eas.client.dbstructure.DbStructureUtils;
@@ -15,6 +12,9 @@ import com.eas.client.dbstructure.gui.edits.CreateFkEdit;
 import com.eas.client.dbstructure.gui.edits.DropFkEdit;
 import com.eas.client.dbstructure.gui.edits.ModifyFieldEdit;
 import com.eas.client.dbstructure.gui.edits.NotSavableDbStructureCompoundEdit;
+import com.eas.client.metadata.DataTypeInfo;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.ForeignKeySpec;
 import com.eas.client.model.Relation;
 import com.eas.client.model.dbscheme.DbSchemeModel;
 import com.eas.client.model.dbscheme.FieldsEntity;

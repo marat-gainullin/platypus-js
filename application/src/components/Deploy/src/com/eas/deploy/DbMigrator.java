@@ -5,13 +5,15 @@
 package com.eas.deploy;
 
 import com.eas.client.cache.AppElementFilesException;
-import com.bearsoft.rowset.Row;
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.changes.Change;
 import com.eas.client.ClientConstants;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SqlQuery;
 import com.eas.client.cache.PlatypusFiles;
+import com.eas.client.changes.Change;
+import com.eas.client.changes.ChangeValue;
+import com.eas.client.changes.Update;
+import com.eas.client.dataflow.ColumnsIndicies;
+import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.metadata.MetadataSynchronizer;
@@ -21,6 +23,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -221,37 +224,33 @@ public class DbMigrator {
         try {
             assert client != null;
             SqlQuery versionQuery = new SqlQuery(client, GET_CURRENT_DB_VERSION_SQL);
-            Rowset rs = versionQuery.compile().executeQuery(null, null);
-            if (rs.size() != 1) {
-                throw new AppElementFilesException(ILLEGAL_VERSIONS_RECORDS_NUMBER_MSG);
-            }
-            rs.setCursorPos(1);
-            Object oVersionNumber = rs.getCurrentRow().getColumnObject(rs.getFields().find(ClientConstants.F_VERSION_VALUE));
-            if (oVersionNumber instanceof Number) {
-                return ((Number) oVersionNumber).intValue();
-            }
+            return versionQuery.compile().executeQuery((ResultSet r) -> {
+                ColumnsIndicies idxs = new ColumnsIndicies(r.getMetaData());
+                if (r.next()) {
+                    Object oVersionNumber = r.getObject(idxs.find(ClientConstants.F_VERSION_VALUE));
+                    if (oVersionNumber instanceof Number) {
+                        return ((Number) oVersionNumber).intValue();
+                    } else {
+                        return 0;
+                    }
+                } else {
+                    throw new AppElementFilesException(ILLEGAL_VERSIONS_RECORDS_NUMBER_MSG);
+                }
+            }, null, null);
         } catch (Exception ex) {
             Logger.getLogger(DbMigrator.class.getName()).log(Level.SEVERE, null, ex);
         }
         return 0;
     }
 
-    public void setCurrentDbVersion(int aVersion) {
+    public void setCurrentDbVersion(int aNewValue) {
         try {
             assert client != null;
-            SqlQuery versionQuery = new SqlQuery(client, GET_CURRENT_DB_VERSION_SQL);
-            versionQuery.setEntityId(ClientConstants.T_MTD_VERSION);
-            Rowset rs = versionQuery.compile().executeQuery(null, null);
-            if (rs.size() != 1) {
-                throw new AppElementFilesException(ILLEGAL_VERSIONS_RECORDS_NUMBER_MSG);
-            }
-            List<Change> log = new ArrayList<>();
-            rs.getFields().get(ClientConstants.F_VERSION_VALUE).setPk(true);
-            Row r = rs.getRow(1);
-            r.setLog(log);
-            r.setEntityName(ClientConstants.T_MTD_VERSION);
-            r.setColumnObject(rs.getFields().find(ClientConstants.F_VERSION_VALUE), aVersion);
-            client.commit(Collections.singletonMap((String) null, log), null, null);
+            int oldValue = getCurrentDbVersion();
+            Update update = new Update(ClientConstants.T_MTD_VERSION);
+            update.keys = new ChangeValue[]{new ChangeValue(ClientConstants.F_VERSION_VALUE, oldValue, DataTypeInfo.NUMERIC)};
+            update.data = new ChangeValue[]{new ChangeValue(ClientConstants.F_VERSION_VALUE, aNewValue, DataTypeInfo.NUMERIC)};
+            client.commit(Collections.singletonMap((String) null, Collections.singletonList(update)), null, null);
         } catch (Exception ex) {
             Logger.getLogger(DbMigrator.class.getName()).log(Level.SEVERE, null, ex);
         }

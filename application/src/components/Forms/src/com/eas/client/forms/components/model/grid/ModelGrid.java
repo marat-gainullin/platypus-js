@@ -1077,8 +1077,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     protected void unbindCursor() {
         if (boundToCursor != null) {
-            JSObject unlisten = (JSObject) boundToCursor.getMember("unlisten");
-            unlisten.call(null, new Object[]{});
+            ScriptUtils.unlisten(boundToCursor);
             boundToCursor = null;
         }
     }
@@ -1145,8 +1144,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     protected void unbind() {
         if (boundToData != null) {
-            JSObject unlisten = (JSObject) boundToData.getMember("unlisten");
-            unlisten.call(null, new Object[]{});
+            ScriptUtils.unlisten(boundToData);
             boundToData = null;
         }
         rowsModel.setData(null);
@@ -1488,13 +1486,6 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
                     JSObject modelData = oModelData instanceof JSObject ? (JSObject) oModelData : null;
                     if (modelData != null) {
                         JSObject jsNewCursor = elementByViewIndex(rowsSelectionModel.getLeadSelectionIndex());
-                        /*
-                        Object oScrollTo = modelData.getMember("scrollTo");
-                        if (oScrollTo instanceof JSObject && ((JSObject) oScrollTo).isFunction()) {
-                            JSObject jsScrollTo = (JSObject) oScrollTo;
-                            jsScrollTo.call(modelData, new Object[]{jsNewCursor});
-                        } else 
-                        */
                         if (modelData.hasMember(cursorProperty)) {
                             modelData.setMember(cursorProperty, jsNewCursor);
                         }

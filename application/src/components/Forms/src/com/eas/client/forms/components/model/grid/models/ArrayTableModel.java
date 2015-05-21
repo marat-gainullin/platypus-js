@@ -8,6 +8,7 @@ import com.eas.client.forms.components.model.grid.columns.ModelColumn;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -15,7 +16,6 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.internal.runtime.JSType;
-import jdk.nashorn.internal.runtime.Undefined;
 
 /**
  * Table model, getting and setting data to an arbitrary rowset. Gets data from
@@ -69,7 +69,10 @@ public class ArrayTableModel extends ArrayModel implements TableModel {
         if (columnIndex >= 0 && columnIndex < columns.getColumnCount()) {
             Object oElement = data.getSlot(rowIndex);
             if (oElement instanceof JSObject) {
-                setValue((JSObject) oElement, columnIndex, aValue);
+                Object oldValue = getValue((JSObject) oElement, columnIndex);
+                if (!Objects.equals(oldValue, aValue)) {
+                    setValue((JSObject) oElement, columnIndex, aValue);
+                }
             }
         }
     }
@@ -165,10 +168,14 @@ public class ArrayTableModel extends ArrayModel implements TableModel {
         Integer idx = locator.get(anElement);
         return idx != null ? idx : -1;
     }
-    
+
     public JSObject indexToElement(int aIdx) {
-        Object element = data.getSlot(aIdx);
-        return element instanceof Undefined ? null : (JSObject)element;
+        if (data != null) {
+            Object element = data.getSlot(aIdx);
+            return JSType.nullOrUndefined(element) ? null : (JSObject) element;
+        } else {
+            return null;
+        }
     }
-    
+
 }

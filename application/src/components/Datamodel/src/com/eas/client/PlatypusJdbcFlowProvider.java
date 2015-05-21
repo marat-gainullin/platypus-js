@@ -4,14 +4,14 @@
  */
 package com.eas.client;
 
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.dataflow.JdbcFlowProvider;
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.Parameters;
+import com.eas.client.dataflow.JdbcFlowProvider;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.Parameters;
 import com.eas.client.queries.ContextHost;
 import java.sql.Connection;
 import java.util.function.Consumer;
 import javax.sql.DataSource;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * This flow provider implements transaction capability for standard JdbcFlowProvider.
@@ -28,7 +28,7 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
     protected ContextHost contextHost;
 
     public PlatypusJdbcFlowProvider(DatabasesClient aClient, String aDataSourceName, String aEntityName, DataSource aDataSource, Consumer<Runnable> aDataPuller, DatabaseMdCache aCache, String aClause, Fields aExpectedFields, ContextHost aContextHost) throws Exception {
-        super(aDataSourceName, aDataSource, aDataPuller, aCache.getConnectionDriver().getConverter(), aClause, aExpectedFields);
+        super(aDataSourceName, aDataSource, aDataPuller, aClause, aExpectedFields);
         entityName = aEntityName;
         client = aClient;
         cache = aCache;
@@ -36,12 +36,12 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
     }
 
     @Override
-    public String getEntityId() {
+    public String getEntityName() {
         return entityName;
     }
 
     @Override
-    public Rowset refresh(Parameters aParams, Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public JSObject refresh(Parameters aParams, Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception {
         return super.refresh(aParams, onSuccess, onFailure);
     }
 

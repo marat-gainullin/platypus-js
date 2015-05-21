@@ -26,8 +26,8 @@ import com.bearsoft.gwt.ui.containers.window.events.MoveEvent;
 import com.bearsoft.gwt.ui.containers.window.events.MoveHandler;
 import com.bearsoft.gwt.ui.containers.window.events.RestoreEvent;
 import com.bearsoft.gwt.ui.containers.window.events.RestoreHandler;
-import com.bearsoft.rowset.Utils;
-import com.bearsoft.rowset.Utils.JsObject;
+import com.eas.client.Utils;
+import com.eas.client.Utils.JsObject;
 import com.eas.client.application.AppClient;
 import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.published.HasJsName;
@@ -409,11 +409,6 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	}
 
 	protected native static void publishFormFacade(JavaScriptObject aPublished, Widget aView, PlatypusWindow aForm)/*-{
-        Object.defineProperty(aPublished, "view", {
-	        get : function() {
-	        	return aView.@com.eas.client.form.published.HasPublished::getPublished()();
-	        } 
-        });
         Object.defineProperty(aPublished, "formKey", {
 	        get:function() {
 	        	return aForm.@com.eas.client.form.PlatypusWindow::getFormKey()();

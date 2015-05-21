@@ -4,7 +4,7 @@
  */
 package com.eas.client.dbstructure.gui.edits;
 
-import com.bearsoft.rowset.metadata.ForeignKeySpec.ForeignKeyRule;
+import com.eas.client.metadata.ForeignKeySpec;
 import com.eas.client.model.Relation;
 import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.client.model.gui.edits.DatamodelEdit;
@@ -16,12 +16,12 @@ import com.eas.client.model.gui.edits.DatamodelEdit;
 public class ChangeRelationTagsEdit extends DatamodelEdit {
 
     protected Relation<FieldsEntity> relation;
-    protected ForeignKeyRule bUpdateRule;
-    protected ForeignKeyRule bDeleteRule;
+    protected ForeignKeySpec.ForeignKeyRule bUpdateRule;
+    protected ForeignKeySpec.ForeignKeyRule bDeleteRule;
     protected String bCName;
     protected boolean bDeferrable;
-    protected ForeignKeyRule aUpdateRule;
-    protected ForeignKeyRule aDeleteRule;
+    protected ForeignKeySpec.ForeignKeyRule aUpdateRule;
+    protected ForeignKeySpec.ForeignKeyRule aDeleteRule;
     protected String aCName;
     protected boolean aDeferrable;
 

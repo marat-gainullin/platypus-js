@@ -4,7 +4,7 @@
  */
 package com.eas.client.sqldrivers.converters;
 
-import com.bearsoft.rowset.metadata.DataTypeInfo;
+import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.sqldrivers.resolvers.Db2TypesResolver;
 
 /**

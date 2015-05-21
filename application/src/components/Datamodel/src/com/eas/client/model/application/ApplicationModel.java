@@ -4,13 +4,10 @@
  */
 package com.eas.client.model.application;
 
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.compacts.CompactBlob;
-import com.bearsoft.rowset.compacts.CompactClob;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.Parameter;
-import com.bearsoft.rowset.metadata.Parameters;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.Parameter;
+import com.eas.client.metadata.Parameters;
 import com.eas.client.model.Model;
 import com.eas.client.model.Relation;
 import com.eas.client.queries.QueriesProxy;
@@ -19,7 +16,6 @@ import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptUtils;
-import java.io.*;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -138,7 +134,14 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
         }
         for (E entity : toExecute) {
             if (!entity.getQuery().isManual()) {
-                entity.internalExecute(null, null);
+                if (process == null) {
+                    entity.internalExecute((JSObject aData) -> {
+                    }, (Exception ex) -> {
+                        Logger.getLogger(ApplicationModel.class.getName()).log(Level.WARNING, ex.getMessage());
+                    });
+                } else {
+                    entity.internalExecute(null, null);
+                }
             }
         }
     }
@@ -193,17 +196,17 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
                 aRelation.getLeftEntity().putOrmScalarDefinition(
                         scalarPropertyName,
                         new Fields.OrmDef(aRelation.getLeftField().getName(), scalarPropertyName, collectionPropertyName, ScriptUtils.scalarPropertyDefinition(
-                                (JSObject) aRelation.getRightEntity().getPublished(),
-                                aRelation.getRightField().getName(),
-                                aRelation.getLeftField().getName())));
+                                        (JSObject) aRelation.getRightEntity().getPublished(),
+                                        aRelation.getRightField().getName(),
+                                        aRelation.getLeftField().getName())));
             }
             if (collectionPropertyName != null && !collectionPropertyName.isEmpty()) {
                 aRelation.getRightEntity().putOrmCollectionDefinition(
                         collectionPropertyName,
                         new Fields.OrmDef(collectionPropertyName, scalarPropertyName, ScriptUtils.collectionPropertyDefinition(
-                                (JSObject) aRelation.getLeftEntity().getPublished(),
-                                aRelation.getRightField().getName(),
-                                aRelation.getLeftField().getName())));
+                                        (JSObject) aRelation.getLeftEntity().getPublished(),
+                                        aRelation.getRightField().getName(),
+                                        aRelation.getLeftField().getName())));
             }
         });
     }
@@ -297,22 +300,21 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
     }
 
     public abstract boolean isModified() throws Exception;
-        
-    /*
-    public boolean isModified() throws Exception {
-        if (entities != null) {
-            for (E ent : entities.values()) {
-                if (ent != null && ent.getRowset() != null) {
-                    if (ent.getRowset().isModified()) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-    */
 
+    /*
+     public boolean isModified() throws Exception {
+     if (entities != null) {
+     for (E ent : entities.values()) {
+     if (ent != null && ent.getRowset() != null) {
+     if (ent.getRowset().isModified()) {
+     return true;
+     }
+     }
+     }
+     }
+     return false;
+     }
+     */
     protected static final String SAVE_JSDOC = ""
             + "/**\n"
             + "* Saves model data changes.\n"
@@ -349,7 +351,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
     }
 
     protected void rolledback(Exception ex) {
-        Logger.getLogger(ApplicationModel.class.getName()).log(Level.SEVERE, null, ex);
+        Logger.getLogger(ApplicationModel.class.getName()).log(Level.SEVERE, ex.toString());
     }
 
     public void save(JSObject aOnSuccess) throws Exception {
@@ -369,14 +371,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
     @ScriptFunction(jsDoc = REVERT_JSDOC)
     public void revert() {
         entities.values().stream().forEach((E aEntity) -> {
-            try {
-                Rowset rowset = aEntity.getRowset();
-                if (rowset != null) {
-                    rowset.rolledback();
-                }
-            } catch (Exception ex) {
-                Logger.getLogger(ApplicationDbModel.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            aEntity.applyLastSnapshot();
         });
     }
 
@@ -384,14 +379,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
 
     public void commited() {
         entities.values().stream().forEach((E aEntity) -> {
-            try {
-                Rowset rowset = aEntity.getRowset();
-                if (rowset != null) {
-                    rowset.commited();
-                }
-            } catch (Exception ex) {
-                Logger.getLogger(ApplicationDbModel.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            aEntity.takeSnapshot();
         });
     }
 
@@ -536,128 +524,5 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
             }
         });
         return res;
-    }
-
-    public CompactBlob loadBlobFromFile(File aFile) throws IOException {
-        if (aFile != null && !aFile.isDirectory()) {
-            return _loadBlobFromFile(aFile.toString());
-        }
-        return null;
-    }
-
-    public CompactBlob loadBlobFromFile(String aFilePath) throws IOException {
-        return _loadBlobFromFile(aFilePath);
-    }
-
-    public static CompactBlob _loadBlobFromFile(String aFilePath) throws IOException {
-        if (aFilePath != null && !aFilePath.isEmpty()) {
-            File f = new File(aFilePath);
-            if (f.canRead() && f.isFile()) {
-                try (FileInputStream fs = new FileInputStream(f)) {
-                    byte[] data = new byte[(int) f.length()];
-                    fs.read(data, 0, data.length);
-                    return new CompactBlob(data);
-                }
-            }
-        }
-        return null;
-    }
-
-    public CompactClob loadClobFromFile(File aFile, String charsetName) throws IOException {
-        if (aFile != null && !aFile.isDirectory()) {
-            return _loadClobFromFile(aFile.toString(), charsetName);
-        }
-        return null;
-    }
-
-    public CompactClob loadClobFromFile(String aFilePath, String charsetName) throws IOException {
-        return _loadClobFromFile(aFilePath, charsetName);
-    }
-
-    public static CompactClob _loadClobFromFile(String aFilePath, String aCharsetName) throws IOException {
-        if (aFilePath != null && !aFilePath.isEmpty()) {
-            File f = new File(aFilePath);
-            if (f.canRead() && f.isFile()) {
-                try (InputStream fs = new FileInputStream(f)) {
-                    byte[] data = new byte[(int) f.length()];
-                    fs.read(data, 0, data.length);
-                    return new CompactClob(new String(data, aCharsetName));
-                }
-            }
-        }
-        return null;
-    }
-
-    public void saveBlobToFile(File aFile, Object oLob) throws IOException {
-        if (aFile != null && !aFile.isDirectory()) {
-            _saveBlobToFile(aFile.toString(), oLob);
-        }
-    }
-
-    public void saveBlobToFile(String aFilePath, Object oLob) throws IOException {
-        _saveBlobToFile(aFilePath, oLob);
-    }
-
-    public static void _saveBlobToFile(String aFilePath, Object oLob) throws IOException {
-        if (aFilePath != null && !aFilePath.isEmpty() && oLob instanceof CompactBlob) {
-            CompactBlob b = (CompactBlob) oLob;
-            File f = new File(aFilePath);
-            if (!f.isDirectory()) {
-                if (!f.exists()) {
-                    f.createNewFile();
-                } else {
-                    f.delete();
-                    f.createNewFile();
-                }
-                if (f.canWrite()) {
-                    try (FileOutputStream fs = new FileOutputStream(f)) {
-                        byte[] data = b.getData();
-                        fs.write(data, 0, data.length);
-                    }
-                }
-            }
-        } else {
-            throw new IOException("not a blob value");
-        }
-    }
-
-    public void saveClobToFile(File aFile, Object oLob, String charsetName) throws IOException {
-        if (aFile != null && !aFile.isDirectory()) {
-            _saveClobToFile(aFile.toString(), oLob, charsetName);
-        }
-    }
-
-    public void saveClobToFile(String aFilePath, Object oLob, String charsetName) throws IOException {
-        _saveClobToFile(aFilePath, oLob, charsetName);
-    }
-
-    public static void _saveClobToFile(String aFilePath, Object oLob, String charsetName) throws IOException {
-        if (aFilePath != null && !aFilePath.isEmpty() && oLob instanceof CompactClob) {
-            CompactClob c = (CompactClob) oLob;
-            File f = new File(aFilePath);
-            if (!f.isDirectory()) {
-                if (!f.exists()) {
-                    f.createNewFile();
-                } else {
-                    f.delete();
-                    f.createNewFile();
-                }
-
-                if (f.canWrite()) {
-                    try (OutputStream fs = new FileOutputStream(f)) {
-                        byte[] data;
-                        String sData = c.getData();
-                        if (sData != null && !sData.isEmpty()) {
-                            data = sData.getBytes(charsetName);
-                        } else {
-                            data = new byte[0];
-                        }
-                        fs.write(data, 0, data.length);
-                    }
-                }
-            }
-        } else {
-            throw new IOException("not a clob value");
-        }
     }
 }

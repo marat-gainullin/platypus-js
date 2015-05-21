@@ -1,6 +1,6 @@
 package com.eas.client.xhr.impl;
 
-import com.bearsoft.rowset.utils.IDGenerator;
+import com.eas.client.IDGenerator;
 import com.eas.client.PlatypusHttpRequestParams;
 import com.eas.client.xhr.UrlQueryProcessor;
 

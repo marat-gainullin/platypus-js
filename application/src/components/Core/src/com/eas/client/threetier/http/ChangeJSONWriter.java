@@ -5,17 +5,19 @@
  */
 package com.eas.client.threetier.http;
 
-import com.bearsoft.rowset.changes.ChangeValue;
-import com.bearsoft.rowset.changes.ChangeVisitor;
-import com.bearsoft.rowset.changes.Command;
-import com.bearsoft.rowset.changes.Delete;
-import com.bearsoft.rowset.changes.Insert;
-import com.bearsoft.rowset.changes.Update;
+import com.eas.client.changes.ChangeValue;
+import com.eas.client.changes.ChangeVisitor;
+import com.eas.client.changes.Command;
+import com.eas.client.changes.Delete;
+import com.eas.client.changes.Insert;
+import com.eas.client.changes.Update;
+import com.eas.script.ScriptUtils;
 import com.eas.util.JSONUtils;
 import com.eas.util.StringUtils;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -42,7 +44,7 @@ public class ChangeJSONWriter implements ChangeVisitor {
     @Override
     public void visit(Insert aChange) throws Exception {
         List<String> data = new ArrayList<>();
-        for (ChangeValue data1 : aChange.data) {
+        for (ChangeValue data1 : aChange.getData()) {
             data.add(data1.name);
             data.add(valueToString(data1.value));
         }
@@ -56,12 +58,12 @@ public class ChangeJSONWriter implements ChangeVisitor {
     @Override
     public void visit(Update aChange) throws Exception {
         List<String> data = new ArrayList<>();
-        for (ChangeValue datum : aChange.data) {
+        for (ChangeValue datum : aChange.getData()) {
             data.add(datum.name);
             data.add(valueToString(datum.value));
         }
         List<String> keys = new ArrayList<>();
-        for (ChangeValue key : aChange.keys) {
+        for (ChangeValue key : aChange.getKeys()) {
             keys.add(key.name);
             keys.add(valueToString(key.value));
         }
@@ -76,7 +78,7 @@ public class ChangeJSONWriter implements ChangeVisitor {
     @Override
     public void visit(Delete aChange) throws Exception {
         List<String> keys = new ArrayList<>();
-        for (ChangeValue key : aChange.keys) {
+        for (ChangeValue key : aChange.getKeys()) {
             keys.add(key.name);
             keys.add(valueToString(key.value));
         }
@@ -90,7 +92,7 @@ public class ChangeJSONWriter implements ChangeVisitor {
     @Override
     public void visit(Command aChange) throws Exception {
         List<String> params = new ArrayList<>();
-        for (ChangeValue parameter : aChange.parameters) {
+        for (ChangeValue parameter : aChange.getParameters()) {
             params.add(parameter.name);
             params.add(valueToString(parameter.value));
         }
@@ -103,6 +105,9 @@ public class ChangeJSONWriter implements ChangeVisitor {
 
     private static String valueToString(Object aValue) throws Exception {
         if (aValue != null) {
+            if (aValue instanceof JSObject) {
+                aValue = ScriptUtils.toJava(aValue);
+            }
             if (aValue instanceof Boolean) {
                 return aValue.toString();
             } else if (aValue instanceof Number) {

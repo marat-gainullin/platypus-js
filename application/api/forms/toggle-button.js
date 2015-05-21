@@ -336,23 +336,6 @@
              */
             P.ToggleButton.prototype.onMouseEntered = {};
         }
-        Object.defineProperty(this, "selected", {
-            get: function() {
-                var value = delegate.selected;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.selected = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ToggleButton){
-            /**
-             * The state of the button.
-             * @property selected
-             * @memberOf ToggleButton
-             */
-            P.ToggleButton.prototype.selected = true;
-        }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
                 var value = delegate.toolTipText;
@@ -369,6 +352,23 @@
              * @memberOf ToggleButton
              */
             P.ToggleButton.prototype.toolTipText = '';
+        }
+        Object.defineProperty(this, "selected", {
+            get: function() {
+                var value = delegate.selected;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.selected = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ToggleButton){
+            /**
+             * The state of the button.
+             * @property selected
+             * @memberOf ToggleButton
+             */
+            P.ToggleButton.prototype.selected = true;
         }
         Object.defineProperty(this, "height", {
             get: function() {
@@ -755,6 +755,20 @@
              */
             P.ToggleButton.prototype.onMouseExited = {};
         }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ToggleButton){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf ToggleButton
+             */
+            P.ToggleButton.prototype.name = '';
+        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -771,20 +785,6 @@
              * @memberOf ToggleButton
              */
             P.ToggleButton.prototype.width = 0;
-        }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ToggleButton){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf ToggleButton
-             */
-            P.ToggleButton.prototype.name = '';
         }
         Object.defineProperty(this, "font", {
             get: function() {

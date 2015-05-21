@@ -5,10 +5,8 @@ import java.util.Collections;
 import java.util.List;
 
 import com.bearsoft.gwt.ui.widgets.grid.processing.TreeAdapter;
-import com.bearsoft.rowset.Utils;
-import com.bearsoft.rowset.Utils.JsObject;
-import com.bearsoft.rowset.beans.PropertyChangeEvent;
-import com.bearsoft.rowset.beans.PropertyChangeListener;
+import com.eas.client.Utils;
+import com.eas.client.Utils.JsObject;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -65,10 +63,10 @@ public class JsTree extends TreeAdapter<JavaScriptObject> implements JsDataConta
 						boundToDataElements = null;
 					}
 					if (data != null) {
-						boundToDataElements = Utils.listenElements(data, new PropertyChangeListener() {
-
+						boundToDataElements = Utils.listenElements(data, new Utils.OnChangeHandler() {
+							
 							@Override
-							public void propertyChange(PropertyChangeEvent evt) {
+							public void onChange(JavaScriptObject anEvent) {
 								enqueueChanges();
 							}
 						});
@@ -81,9 +79,10 @@ public class JsTree extends TreeAdapter<JavaScriptObject> implements JsDataConta
 	
 	protected void bind() {
 		if (data != null) {
-			boundToData = Utils.listen(data, "length", new PropertyChangeListener() {
+			boundToData = Utils.listenPath(data, "length", new Utils.OnChangeHandler() {
+				
 				@Override
-				public void propertyChange(PropertyChangeEvent evt) {
+				public void onChange(JavaScriptObject anEvent) {
 					enqueueReadd();
 				}
 			});

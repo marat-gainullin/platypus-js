@@ -4,12 +4,11 @@
  */
 package com.eas.client.serial;
 
-import com.bearsoft.rowset.metadata.DataTypeInfo;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONValue;
+import com.eas.client.Utils.JsObject;
+import com.eas.client.metadata.DataTypeInfo;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
+import com.google.gwt.core.client.JavaScriptObject;
 
 /**
  *
@@ -27,31 +26,33 @@ public class FieldsJSONReader {
     private static final String TYPE_ID_PROP_NAME = "typeid";
     private static final String TYPE_NAME_PROP_NAME = "typename";
     
-    public static void readFields(JSONArray pa, Fields aFields) {
-        for (int i = 0; i < pa.size(); i++) {
-            JSONValue pv = pa.get(i);
+    public static void readFields(JavaScriptObject opa, Fields aFields) {
+    	JsObject pa = opa.cast(); 
+        for (int i = 0; i < pa.length(); i++) {
+            JavaScriptObject pv = pa.getSlot(i);
             assert pv != null;
-            JSONObject po = pv.isObject();
+            JsObject po = pv.cast();
             assert po != null;
-            assert po.containsKey(NAME_PROP_NAME);
-            assert po.containsKey(DESCRIPTION_PROP_NAME);
-            assert po.containsKey(SIZE_PROP_NAME);
-            assert po.containsKey(TYPE_PROP_NAME);
-            assert po.containsKey(PK_PROP_NAME);
-            assert po.containsKey(NULLABLE_PROP_NAME);
-            String name = po.get(NAME_PROP_NAME).isString().stringValue();
-            String desc = po.get(DESCRIPTION_PROP_NAME).isString().stringValue();
-            int size = (int) po.get(SIZE_PROP_NAME).isNumber().doubleValue();
-            JSONObject to = po.get(TYPE_PROP_NAME).isObject();
-            assert to != null;
-            assert to.containsKey(TYPE_ID_PROP_NAME);
-            assert to.containsKey(TYPE_NAME_PROP_NAME);
+            assert po.has(NAME_PROP_NAME);
+            assert po.has(DESCRIPTION_PROP_NAME);
+            assert po.has(SIZE_PROP_NAME);
+            assert po.has(TYPE_PROP_NAME);
+            assert po.has(PK_PROP_NAME);
+            assert po.has(NULLABLE_PROP_NAME);
+            String name = po.getString(NAME_PROP_NAME);
+            String desc = po.getString(DESCRIPTION_PROP_NAME);
+            int size = po.getInteger(SIZE_PROP_NAME);
+            JavaScriptObject _to = po.getJs(TYPE_PROP_NAME);
+            assert _to != null;
+            JsObject to = _to.cast();
+            assert to.has(TYPE_ID_PROP_NAME);
+            assert to.has(TYPE_NAME_PROP_NAME);
 
             DataTypeInfo typeInfo = new DataTypeInfo(
-                    (int) to.get(TYPE_ID_PROP_NAME).isNumber().doubleValue(),
-                    to.get(TYPE_NAME_PROP_NAME).isString().stringValue());
-            boolean pk = po.get(PK_PROP_NAME).isBoolean().booleanValue();
-            boolean nullable = po.get(NULLABLE_PROP_NAME).isBoolean().booleanValue();
+                    to.getInteger(TYPE_ID_PROP_NAME),
+                    to.getString(TYPE_NAME_PROP_NAME));
+            boolean pk = po.getBoolean(PK_PROP_NAME);
+            boolean nullable = po.getBoolean(NULLABLE_PROP_NAME);
             Field f = aFields.createNewField(name);
             f.setDescription(desc);
             f.setSize(size);

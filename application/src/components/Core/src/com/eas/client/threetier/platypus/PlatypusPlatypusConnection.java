@@ -4,10 +4,10 @@
  */
 package com.eas.client.threetier.platypus;
 
-import com.bearsoft.rowset.resourcepool.BearResourcePool;
-import com.bearsoft.rowset.resourcepool.ResourcePool;
 import com.eas.client.login.Credentials;
 import com.eas.client.login.PlatypusPrincipal;
+import com.eas.client.resourcepool.BearResourcePool;
+import com.eas.client.resourcepool.ResourcePool;
 import com.eas.client.threetier.PlatypusConnection;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;

@@ -4,10 +4,8 @@
 
 <module>
     <inherits name="com.google.gwt.xml.XML"/>
-    <inherits name="com.google.gwt.json.JSON"/>
     <inherits name="com.google.gwt.user.User"/>
     <inherits name="com.bearsoft.gwt.ui.UI" />
-    <inherits name="com.bearsoft.rowset.Rowset" />
     
     <!-- Default noop implementation of url processing for xhr requests -->
 	<replace-with class="com.eas.client.xhr.impl.NoopUrlQueryProcessor">

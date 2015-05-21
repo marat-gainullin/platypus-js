@@ -4,6 +4,5 @@
 
 <module>
     <inherits name="com.eas.client.Client"/>
-    <inherits name="com.bearsoft.rowset.Rowset"/>
     <source path=""/>
 </module>

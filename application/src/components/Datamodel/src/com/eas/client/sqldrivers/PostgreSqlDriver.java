@@ -4,15 +4,13 @@
  */
 package com.eas.client.sqldrivers;
 
-import com.bearsoft.rowset.Converter;
-import com.bearsoft.rowset.metadata.DataTypeInfo;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.ForeignKeySpec;
-import com.bearsoft.rowset.metadata.PrimaryKeySpec;
 import com.eas.client.ClientConstants;
+import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
-import com.eas.client.sqldrivers.converters.PostgreConverter;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.ForeignKeySpec;
+import com.eas.client.metadata.PrimaryKeySpec;
 import com.eas.client.sqldrivers.resolvers.PostgreTypesResolver;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
 import com.eas.util.StringUtils;
@@ -32,7 +30,6 @@ public class PostgreSqlDriver extends SqlDriver {
     private final TwinString[] charsForWrap = {new TwinString("\"", "\"")};
     private final char[] restrictedChars = {' ', ',', '\'', '"'};
 
-    protected static final Converter converter = new PostgreConverter();
     protected static final PostgreTypesResolver resolver = new PostgreTypesResolver();
     protected static final String SET_SCHEMA_CLAUSE = "set search_path = %s,public";
     protected static final String GET_SCHEMA_CLAUSE = "select current_schema()";
@@ -202,11 +199,6 @@ public class PostgreSqlDriver extends SqlDriver {
             + "select m2.* from children c, mtd_entities m2 where c.mdent_id = m2.mdent_parent_id "
             + ") "
             + "select * from children ";
-
-    @Override
-    public Converter getConverter() {
-        return converter;
-    }
 
     @Override
     public TypesResolver getTypesResolver() {

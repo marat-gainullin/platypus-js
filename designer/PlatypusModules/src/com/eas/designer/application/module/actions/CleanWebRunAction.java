@@ -46,7 +46,7 @@ public final class CleanWebRunAction extends RunAction {
                 pwmm.clearWebDir();
                 project.getOutputWindowIO().getOut().println(NbBundle.getMessage(PlatypusProjectActions.class, "MSG_Cleaning_Web_Dir_Complete")); // NOI18N
             } catch (IOException | Deployment.DeploymentException ex) {
-                Logger.getLogger(PlatypusProjectActions.class.getName()).log(Level.SEVERE, "Error cleaning web directory", ex);
+                Logger.getLogger(PlatypusProjectActions.class.getName()).log(Level.WARNING, "Error cleaning web directory", ex);
                 project.getOutputWindowIO().getErr().println(ex.getMessage());
             }
         }

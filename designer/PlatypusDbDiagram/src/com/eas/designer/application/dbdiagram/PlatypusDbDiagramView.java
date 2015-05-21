@@ -4,7 +4,6 @@
  */
 package com.eas.designer.application.dbdiagram;
 
-import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.dbstructure.gui.DbSchemeEditorView;
 import com.eas.client.model.Relation;
 import com.eas.client.model.dbscheme.FieldsEntity;
@@ -12,6 +11,7 @@ import com.eas.client.model.gui.view.model.SelectedField;
 import com.eas.client.model.gui.view.ModelSelectionListener;
 import com.eas.client.model.gui.view.entities.EntityView;
 import com.eas.client.dbstructure.gui.view.DbSchemeModelView;
+import com.eas.client.metadata.Field;
 import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.datamodel.nodes.EntityNode;
 import com.eas.designer.datamodel.nodes.FieldNode;

@@ -649,6 +649,20 @@
              */
             P.Slider.prototype.onMouseExited = {};
         }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.Slider){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf Slider
+             */
+            P.Slider.prototype.name = '';
+        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -665,20 +679,6 @@
              * @memberOf Slider
              */
             P.Slider.prototype.width = 0;
-        }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.Slider){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf Slider
-             */
-            P.Slider.prototype.name = '';
         }
         Object.defineProperty(this, "maximum", {
             get: function() {

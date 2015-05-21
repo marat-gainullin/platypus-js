@@ -4,7 +4,7 @@
  */
 package com.eas.designer.application.query.completion;
 
-import com.bearsoft.rowset.metadata.Fields;
+import com.eas.client.metadata.Fields;
 import com.eas.client.model.gui.IconCache;
 import com.eas.designer.application.query.PlatypusQueryDataObject;
 import com.eas.designer.application.query.editing.QueryDocumentEditsComplementor;

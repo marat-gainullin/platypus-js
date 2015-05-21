@@ -5,14 +5,10 @@
  */
 package com.eas.server.httpservlet;
 
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.utils.IDGenerator;
-import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.queries.Query;
 import com.eas.client.report.Report;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.client.threetier.RowsetJsonConstants;
-import com.eas.client.threetier.RowsetJsonWriter;
 import com.eas.client.threetier.http.PlatypusHttpConstants;
 import com.eas.client.threetier.http.PlatypusHttpResponseReader;
 import com.eas.client.threetier.requests.AppQueryRequest;
@@ -22,13 +18,14 @@ import com.eas.client.threetier.requests.CredentialRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
 import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
-import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
+import com.eas.client.threetier.requests.RPCRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.PlatypusResponseVisitor;
 import com.eas.client.threetier.requests.ResourceRequest;
 import com.eas.script.ScriptUtils;
 import com.eas.server.httpservlet.serial.query.QueryJsonWriter;
+import com.eas.util.IDGenerator;
 import com.eas.util.JSONUtils;
 import com.eas.util.StringUtils;
 import java.io.File;
@@ -87,7 +84,7 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
         makeResponseNotCacheable(servletResponse);
         ExecuteQueryRequest.Response resp = (ExecuteQueryRequest.Response) rsp;
         if (resp.getRowset() != null) {
-            writeResponse(resp.getRowset(), servletResponse);
+            writeJsonResponse(ScriptUtils.toJson(resp.getRowset()), servletResponse);
         } else {
             writeJsonResponse(resp.getUpdateCount() + "", servletResponse);
         }
@@ -99,8 +96,8 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
     }
 
     @Override
-    public void visit(ExecuteServerModuleMethodRequest.Response resp) throws Exception {
-        final Object result = ((ExecuteServerModuleMethodRequest.Response) resp).getResult();
+    public void visit(RPCRequest.Response resp) throws Exception {
+        final Object result = ((RPCRequest.Response) resp).getResult();
         makeResponseNotCacheable(servletResponse);
 //        if (result instanceof Rowset) {
 //           
@@ -134,9 +131,6 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
                     }
                     reportLocation = new URI(null, null, reportLocation, null).toASCIIString();
                     writeResponse(reportLocation, servletResponse, PlatypusHttpResponseReader.REPORT_LOCATION_CONTENT_TYPE);
-                } else if (jsResult.isInstanceOf(dbEntityClass)) {
-                    ApplicationDbEntity entity = (ApplicationDbEntity) ((JSObject) jsResult.getMember("unwrap")).call(null, new Object[]{});
-                    writeResponse(entity.getRowset(), servletResponse);
                 } else {
                     writeJsonResponse(ScriptUtils.toJson(result), servletResponse);
                 }
@@ -216,12 +210,6 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
                 .append(isPermitted)
                 .append("}")
                 .toString();
-    }
-
-    private static void writeResponse(Rowset aRowset, HttpServletResponse aResponse) throws Exception {
-        RowsetJsonWriter writer = new RowsetJsonWriter(aRowset);
-        String json = writer.write();
-        writeJsonResponse(json, aResponse);
     }
 
     private static void writeResponse(Query query, HttpServletResponse aHttpResponse) throws Exception {

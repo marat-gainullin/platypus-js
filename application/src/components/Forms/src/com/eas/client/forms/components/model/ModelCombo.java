@@ -12,6 +12,7 @@ import com.eas.design.Undesignable;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import com.eas.script.ScriptUtils;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.EventQueue;
@@ -114,8 +115,7 @@ public class ModelCombo extends ModelComponentDecorator<VComboBox<JSObject>, Obj
 
     protected void unbindList(){
         if(boundToList != null){
-            JSObject unlisten = (JSObject) boundToList.getMember("unlisten");
-            unlisten.call(null, new Object[]{});
+            ScriptUtils.unlisten(boundToList);
             boundToList = null;
         }
     }

@@ -4,7 +4,7 @@
  */
 package com.eas.client.model.gui.selectors;
 
-import com.bearsoft.rowset.metadata.Fields;
+import com.eas.client.metadata.Fields;
 import com.eas.client.model.gui.IconCache;
 import java.awt.Component;
 import java.util.logging.Level;

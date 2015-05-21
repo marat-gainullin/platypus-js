@@ -4,8 +4,8 @@
  */
 package com.eas.designer.application.module.completion;
 
-import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.SQLUtils;
+import com.eas.client.metadata.Field;
 import com.eas.client.model.gui.view.FieldsTypeIconsCache;
 import java.awt.Image;
 import javax.swing.Icon;

@@ -4,6 +4,9 @@
  */
 package com.eas.util;
 
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringWriter;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -127,4 +130,33 @@ public class StringUtils {
     public static String capitalize(String aValue) {
         return aValue.length() > 0 ? aValue.substring(0, 1).toUpperCase() + aValue.substring(1) : aValue;
     }
+    
+    /**
+     * Reads string data from an abstract reader up to the length or up to the end of the reader.
+     * @param aReader Reader to read from.
+     * @param length Length of segment to be read. It length == -1, than reading is performed until the end of Reader.
+     * @return String, containing data read from Reader.
+     * @throws IOException
+     */
+    public static String readReader(Reader aReader, int length) throws IOException {
+        char[] buffer = new char[32];
+        StringWriter res = new StringWriter();
+        int read = 0;
+        int written = 0;
+        while ((read = aReader.read(buffer)) != -1) {
+            if (length < 0 || written + read <= length) {
+                res.write(buffer, 0, read);
+                written += read;
+            } else {
+                res.write(buffer, 0, read - (written + read - length));
+                written += length - (written + read);
+                break;
+            }
+        }
+        res.flush();
+        String str = res.toString();
+        assert length < 0 || str.length() == length;
+        return str;
+    }
+
 }

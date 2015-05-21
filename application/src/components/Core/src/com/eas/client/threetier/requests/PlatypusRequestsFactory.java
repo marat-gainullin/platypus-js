@@ -36,7 +36,7 @@ public class PlatypusRequestsFactory {
             case Requests.rqDisposeServerModule:
                 return new DisposeServerModuleRequest();
             case Requests.rqExecuteServerModuleMethod:
-                return new ExecuteServerModuleMethodRequest();
+                return new RPCRequest();
             // User sessions requests
             case Requests.rqLogout:
                 return new LogoutRequest();

@@ -4,7 +4,7 @@
  */
 package com.eas.client.model.store;
 
-import com.bearsoft.rowset.metadata.Parameters;
+import com.eas.client.metadata.Parameters;
 import com.eas.client.model.query.QueryEntity;
 import com.eas.client.model.query.QueryModel;
 import com.eas.client.model.query.QueryParametersEntity;

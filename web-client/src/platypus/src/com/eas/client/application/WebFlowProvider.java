@@ -7,13 +7,13 @@ package com.eas.client.application;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.bearsoft.rowset.Cancellable;
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.dataflow.FlowProvider;
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.Parameters;
+import com.eas.client.Cancellable;
+import com.eas.client.changes.Change;
+import com.eas.client.dataflow.FlowProvider;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.Parameters;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.JavaScriptObject;
 
 /**
  * 
@@ -34,7 +34,7 @@ public class WebFlowProvider implements FlowProvider {
 	}
 
 	@Override
-	public String getEntityId() {
+	public String getEntityName() {
 		return entityId;
 	}
 
@@ -44,7 +44,7 @@ public class WebFlowProvider implements FlowProvider {
 	}
 
 	@Override
-	public Cancellable refresh(Parameters aParams, Callback<Rowset, String> aCallback) throws Exception {
+	public Cancellable refresh(Parameters aParams, Callback<JavaScriptObject, String> aCallback) throws Exception {
 		return client.requestData(entityId, aParams, expectedFields, aCallback);
 	}
 

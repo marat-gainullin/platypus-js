@@ -5,8 +5,8 @@
 package com.eas.client.model.gui.view.model;
 
 import com.bearsoft.routing.Connector;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.TableRef;
 import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationDbEntity;

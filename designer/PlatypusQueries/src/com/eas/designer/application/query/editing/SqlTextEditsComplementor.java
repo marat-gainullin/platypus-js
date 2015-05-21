@@ -4,9 +4,9 @@
  */
 package com.eas.designer.application.query.editing;
 
-import com.bearsoft.rowset.metadata.DataTypeInfo;
-import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.ClientConstants;
+import com.eas.client.metadata.DataTypeInfo;
+import com.eas.client.metadata.Field;
 import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.client.model.gui.edits.DeleteEntityEdit;
 import com.eas.client.model.gui.edits.DeleteRelationEdit;

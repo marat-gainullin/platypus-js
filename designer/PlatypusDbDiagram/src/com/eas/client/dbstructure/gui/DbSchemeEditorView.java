@@ -10,7 +10,6 @@
  */
 package com.eas.client.dbstructure.gui;
 
-import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.dbstructure.DbStructureUtils;
 import com.eas.client.dbstructure.SqlActionsController;
 import com.eas.client.model.ModelEditingValidator;
@@ -22,8 +21,7 @@ import com.eas.client.model.gui.selectors.TablesSelectorCallback;
 import com.eas.client.model.gui.view.ModelSelectionListener;
 import com.eas.client.model.gui.view.entities.EntityView;
 import com.eas.client.dbstructure.gui.view.DbSchemeModelView;
-import com.eas.client.dbstructure.gui.view.DbSchemeModelView.AddTableFieldAction;
-import com.eas.client.dbstructure.gui.view.DbSchemeModelView.RelationPropertiesAction;
+import com.eas.client.metadata.Field;
 import com.eas.client.model.gui.view.model.ModelView;
 import com.eas.client.utils.scalableui.JScalableScrollPane;
 import com.eas.client.model.gui.DatamodelDesignUtils;
@@ -265,7 +263,7 @@ public class DbSchemeEditorView extends JPanel implements ContainerListener {
         modelView.addModelSelectionListener(entitySelectionListener);
         setupToolbars();
 
-        RelationPropertiesAction relPropsAction = (RelationPropertiesAction) modelView.getActionMap().get(RelationPropertiesAction.class.getSimpleName());
+        DbSchemeModelView.RelationPropertiesAction relPropsAction = (DbSchemeModelView.RelationPropertiesAction) modelView.getActionMap().get(DbSchemeModelView.RelationPropertiesAction.class.getSimpleName());
         mnuRelationProps.setAction(relPropsAction);
 
         dbSchemeScroll = new JScalableScrollPane();

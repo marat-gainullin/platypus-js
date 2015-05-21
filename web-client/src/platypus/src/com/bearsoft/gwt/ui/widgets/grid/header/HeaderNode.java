@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.bearsoft.gwt.ui.widgets.grid.GridColumn;
-import com.bearsoft.rowset.beans.PropertyChangeEvent;
-import com.bearsoft.rowset.beans.PropertyChangeListener;
-import com.bearsoft.rowset.beans.PropertyChangeSupport;
 import com.eas.client.form.published.PublishedColor;
 import com.eas.client.form.published.PublishedFont;
 import com.google.gwt.user.cellview.client.Header;
@@ -16,12 +13,6 @@ public class HeaderNode<T> {
 	protected GridColumn<T, ?> column;
 	protected HeaderNode<T> parent;
 	protected List<HeaderNode<T>> children = new ArrayList<>();
-	protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
-	protected PropertyChangeListener childrenListener = new PropertyChangeListener() {
-		public void propertyChange(PropertyChangeEvent evt) {
-			changeSupport.firePropertyChange(evt.getPropertyName(), null, children);
-		}
-	};
 
 	protected PublishedColor background;
 	protected PublishedColor foreground;
@@ -101,15 +92,9 @@ public class HeaderNode<T> {
 		header = aHeader;
 	}
 
-	public PropertyChangeSupport getChangeSupport() {
-		return changeSupport;
-	}
-
 	public void removeColumnNode(HeaderNode<T> aNode) {
 		if (children != null) {
 			children.remove(aNode);
-			aNode.getChangeSupport().removePropertyChangeListener("children", childrenListener);
-			changeSupport.firePropertyChange("children", null, children);
 		}
 	}
 
@@ -120,8 +105,6 @@ public class HeaderNode<T> {
 		if (!children.contains(aNode)) {
 			children.add(aNode);
 			aNode.setParent(this);
-			aNode.getChangeSupport().addPropertyChangeListener("children", childrenListener);
-			changeSupport.firePropertyChange("children", null, children);
 		}
 	}
 
@@ -132,8 +115,6 @@ public class HeaderNode<T> {
 		if (!children.contains(aNode) && atIndex >= 0 && atIndex <= children.size()) {
 			children.add(atIndex, aNode);
 			aNode.setParent(this);
-			aNode.getChangeSupport().addPropertyChangeListener("children", childrenListener);
-			changeSupport.firePropertyChange("children", null, children);
 		}
 	}
 

@@ -1,7 +1,7 @@
 package com.eas.client.form.grid.cells.rowmarker;
 
 import com.bearsoft.gwt.ui.widgets.grid.cells.RenderedEditorCell;
-import com.bearsoft.rowset.Utils.JsObject;
+import com.eas.client.Utils.JsObject;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Style;

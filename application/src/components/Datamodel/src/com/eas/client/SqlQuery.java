@@ -4,19 +4,19 @@
  */
 package com.eas.client;
 
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.dataflow.FlowProvider;
-import com.bearsoft.rowset.metadata.DataTypeInfo;
-import com.bearsoft.rowset.metadata.Parameter;
-import com.bearsoft.rowset.metadata.Parameters;
-import com.bearsoft.rowset.utils.RowsetUtils;
+import com.eas.client.dataflow.FlowProvider;
 import com.eas.client.exceptions.UnboundSqlParameterException;
+import com.eas.client.metadata.DataTypeInfo;
+import com.eas.client.metadata.Parameter;
+import com.eas.client.metadata.Parameters;
 import com.eas.client.queries.Query;
+import java.sql.ParameterMetaData;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * A Sql query with name-bound parameters.
@@ -279,7 +279,7 @@ public class SqlQuery extends Query {
             }
         }
         SqlCompiledQuery compiled = new SqlCompiledQuery(basesProxy, datasourceName, compiledSb.toString(), ps, fields);
-        compiled.setEntityId(entityName);
+        compiled.setEntityName(entityName);
         compiled.setProcedure(procedure);
         compiled.setPageSize(pageSize);
         return compiled;
@@ -322,21 +322,28 @@ public class SqlQuery extends Query {
             ps.add(nulledUndefined);
         }
         String sqlCompiledText = m.replaceAll("?");
-        sqlCompiledText = RowsetUtils.makeQueryMetadataQuery(sqlCompiledText);
+        sqlCompiledText = SQLUtils.makeQueryMetadataQuery(sqlCompiledText);
         SqlCompiledQuery compiled = new SqlCompiledQuery(basesProxy, datasourceName, sqlCompiledText, ps);
         compiled.setPageSize(pageSize);
         return compiled;
     }
 
     @Override
-    public Rowset execute(Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        return compile().executeQuery(onSuccess, onFailure);
+    public JSObject execute(Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        SqlCompiledQuery compiled = compile();
+        JSObject jsData = compiled.executeQuery(onSuccess, onFailure);
+        if (isProcedure()) {
+            for (int i = 1; i <= compiled.getParameters().getParametersCount(); i++) {
+                Parameter param = compiled.getParameters().get(i);
+                if (param.getMode() == ParameterMetaData.parameterModeOut
+                        || param.getMode() == ParameterMetaData.parameterModeInOut) {
+                    Parameter innerParam = params.get(param.getName());
+                    if (innerParam != null) {
+                        innerParam.setValue(param.getValue());
+                    }
+                }
+            }
+        }
+        return jsData;
     }
-
-    /*
-     @Override
-     public void enqueueUpdate() throws Exception {
-     compile().enqueueUpdate();
-     }
-     */
 }

@@ -6,10 +6,8 @@ import java.util.logging.Logger;
 
 import com.bearsoft.gwt.ui.CommonResources;
 import com.bearsoft.gwt.ui.widgets.StyledListBox;
-import com.bearsoft.rowset.Utils;
-import com.bearsoft.rowset.beans.PropertyChangeEvent;
-import com.bearsoft.rowset.beans.PropertyChangeListener;
-import com.bearsoft.rowset.utils.IDGenerator;
+import com.eas.client.IDGenerator;
+import com.eas.client.Utils;
 import com.eas.client.converters.StringValueConverter;
 import com.eas.client.form.ControlsUtils;
 import com.eas.client.form.JavaScriptObjectKeyProvider;
@@ -337,10 +335,10 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 						boundToListElements = null;
 					}
 					if (displayList != null) {
-						boundToListElements = Utils.listenElements(displayList, new PropertyChangeListener() {
-
+						boundToListElements = Utils.listenElements(displayList, new Utils.OnChangeHandler() {
+							
 							@Override
-							public void propertyChange(PropertyChangeEvent evt) {
+							public void onChange(JavaScriptObject anEvent) {
 								enqueueListChanges();
 							}
 						});
@@ -353,9 +351,10 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 
 	protected void bindList() {
 		if (displayList != null) {
-			boundToList = Utils.listen(displayList, "length", new PropertyChangeListener() {
+			boundToList = Utils.listenPath(displayList, "length", new Utils.OnChangeHandler() {
+				
 				@Override
-				public void propertyChange(PropertyChangeEvent evt) {
+				public void onChange(JavaScriptObject anEvent) {
 					enqueueListReadd();
 				}
 			});

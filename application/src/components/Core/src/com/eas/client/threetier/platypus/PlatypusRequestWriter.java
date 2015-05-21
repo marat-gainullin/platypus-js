@@ -4,19 +4,16 @@
  */
 package com.eas.client.threetier.platypus;
 
-import com.bearsoft.rowset.changes.serial.ChangesWriter;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Parameter;
-import com.bearsoft.rowset.serial.CustomSerializer;
-import com.bearsoft.rowset.utils.RowsetUtils;
-import com.eas.client.threetier.PlatypusRowsetWriter;
+import com.eas.client.changes.BinaryChanges;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Parameter;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.client.threetier.requests.CommitRequest;
 import com.eas.client.threetier.requests.CreateServerModuleRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
-import com.eas.client.threetier.requests.ExecuteServerModuleMethodRequest;
+import com.eas.client.threetier.requests.RPCRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.PlatypusRequestVisitor;
@@ -30,6 +27,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import jdk.nashorn.internal.runtime.JSType;
 
 /**
  *
@@ -115,7 +113,7 @@ public class PlatypusRequestWriter implements PlatypusRequestVisitor {
     public void visit(CommitRequest rq) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
         writer.put(RequestsTags.TAG_CHANGES);
-        writer.put(CoreTags.TAG_STREAM, ChangesWriter.write(rq.getChanges(), customWritersContainer));
+        writer.put(CoreTags.TAG_STREAM, BinaryChanges.write(rq.getChanges()));
         writer.flush();
     }
 
@@ -127,17 +125,15 @@ public class PlatypusRequestWriter implements PlatypusRequestVisitor {
     }
 
     @Override
-    public void visit(ExecuteServerModuleMethodRequest rq) throws Exception {
+    public void visit(RPCRequest rq) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
         writer.put(RequestsTags.TAG_MODULE_NAME, rq.getModuleName());
         writer.put(RequestsTags.TAG_METHOD_NAME, rq.getMethodName());
         for (Object arg : rq.getArguments()) {
-            writer.put(RequestsTags.TAG_ARGUMENT_VALUE, ScriptUtils.toJson(arg));
+            writer.put(RequestsTags.TAG_ARGUMENT_VALUE, ScriptUtils.toJson(JSType.nullOrUndefined(arg) ? null : arg));
         }
         writer.flush();
     }
-
-    private static final PlatypusRowsetWriter customWritersContainer = new PlatypusRowsetWriter();
 
     public static byte[] writeParameter(Parameter aParam) throws IOException {
         try {
@@ -152,16 +148,8 @@ public class PlatypusRequestWriter implements PlatypusRequestVisitor {
                 writer.put(RequestsTags.TAG_SQL_PARAMETER_DESCRIPTION, aParam.getDescription());
             }
             Object paramValue = aParam.getValue();
-            if (paramValue == RowsetUtils.UNDEFINED_SQL_VALUE) {
-                paramValue = null;
-            }
             if (paramValue != null) {
-                CustomSerializer serializer = customWritersContainer.getSerializer(aParam.getTypeInfo());
-                if (serializer != null) {
-                    writer.put(RequestsTags.TAG_SQL_PARAMETER_VALUE, serializer.serialize(paramValue, aParam.getTypeInfo()));
-                } else {
-                    writer.putJDBCCompatible(RequestsTags.TAG_SQL_PARAMETER_VALUE, aParam.getTypeInfo().getSqlType(), paramValue);
-                }
+                writer.putJDBCCompatible(RequestsTags.TAG_SQL_PARAMETER_VALUE, aParam.getTypeInfo().getSqlType(), paramValue);
             }
             writer.flush();
             return outStream.toByteArray();

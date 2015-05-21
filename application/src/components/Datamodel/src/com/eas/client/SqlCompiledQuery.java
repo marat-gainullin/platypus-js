@@ -4,15 +4,16 @@
  */
 package com.eas.client;
 
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.changes.ChangeValue;
-import com.bearsoft.rowset.changes.Command;
-import com.bearsoft.rowset.dataflow.FlowProvider;
-import com.bearsoft.rowset.exceptions.RowsetException;
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.Parameter;
-import com.bearsoft.rowset.metadata.Parameters;
+import com.eas.client.changes.ChangeValue;
+import com.eas.client.changes.Command;
+import com.eas.client.dataflow.FlowProvider;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.Parameter;
+import com.eas.client.metadata.Parameters;
+import com.eas.concurrent.CallableConsumer;
+import java.sql.ResultSet;
 import java.util.function.Consumer;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * A compiled SQL query.
@@ -46,7 +47,6 @@ public class SqlCompiledQuery {
         sqlClause = aSqlClause;
         parameters = new Parameters();
         basesProxy = aClient;
-        createFlow();
     }
 
     /**
@@ -64,7 +64,6 @@ public class SqlCompiledQuery {
         sqlClause = aSqlClause;
         parameters = aParams;
         basesProxy = aClient;
-        createFlow();
     }
 
     SqlCompiledQuery(DatabasesClient aClient, String aDatasourceName, String aSqlClause, Parameters aParams) throws Exception {
@@ -73,7 +72,6 @@ public class SqlCompiledQuery {
         parameters = aParams;
         datasourceName = aDatasourceName;
         basesProxy = aClient;
-        createFlow();
     }
 
     public SqlCompiledQuery(DatabasesClient aClient, String aDatasourceName, String aSqlClause, Parameters aParams, Fields aExpectedFields) throws Exception {
@@ -83,7 +81,6 @@ public class SqlCompiledQuery {
         datasourceName = aDatasourceName;
         expectedFields = aExpectedFields;
         basesProxy = aClient;
-        createFlow();
     }
 
     public SqlCompiledQuery(DatabasesClient aClient, String aDatasourceName, String aEntityName, String aSqlClause, Parameters aParams, Fields aExpectedFields) throws Exception {
@@ -94,7 +91,6 @@ public class SqlCompiledQuery {
         entityName = aEntityName;
         expectedFields = aExpectedFields;
         basesProxy = aClient;
-        createFlow();
     }
 
     /**
@@ -111,7 +107,6 @@ public class SqlCompiledQuery {
         sqlClause = aSqlClause;
         parameters = new Parameters();
         basesProxy = aClient;
-        createFlow();
     }
 
     public boolean isProcedure() {
@@ -132,18 +127,6 @@ public class SqlCompiledQuery {
 
     public void setPageSize(int aPageSize) throws Exception {
         pageSize = aPageSize;
-        createFlow();
-    }
-
-    private FlowProvider createFlow() throws Exception {
-        if (basesProxy != null) {
-            FlowProvider flow = basesProxy.createFlowProvider(datasourceName, entityName, sqlClause, expectedFields);
-            flow.setPageSize(pageSize);
-            flow.setProcedure(procedure);
-            return flow;
-        } else {
-            return null;
-        }
     }
 
     /**
@@ -152,32 +135,44 @@ public class SqlCompiledQuery {
      * @param onSuccess
      * @param onFailure
      * @return Rowset insatance, representing query results.
-     * @throws RowsetException
+     * @throws Exception
      * @see Rowset
      */
-    public Rowset executeQuery(Consumer<Rowset> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        Rowset rs = new Rowset(createFlow());
-        rs.refresh(parameters, onSuccess, onFailure);
-        /*
-         if(expectedFields != rs.getFields())
-         refineFields(rs);
-         */
-        return rs;
+    public <T> T executeQuery(CallableConsumer<T, ResultSet> aResultSetProcessor, Consumer<T> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        if (basesProxy != null) {
+            PlatypusJdbcFlowProvider flow = basesProxy.createFlowProvider(datasourceName, entityName, sqlClause, expectedFields);
+            flow.setPageSize(pageSize);
+            flow.setProcedure(procedure);
+            return flow.<T>select(parameters, aResultSetProcessor, onSuccess, onFailure);
+        } else {
+            return null;
+        }
     }
 
-    public Rowset prepareRowset() throws Exception {
-        Rowset rowset = new Rowset(createFlow());
-        rowset.setFields(expectedFields);
-        return rowset;
+    public JSObject executeQuery(Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        if (basesProxy != null) {
+            PlatypusJdbcFlowProvider flow = basesProxy.createFlowProvider(datasourceName, entityName, sqlClause, expectedFields);
+            flow.setPageSize(pageSize);
+            flow.setProcedure(procedure);
+            return flow.refresh(parameters, onSuccess, onFailure);
+        } else {
+            return null;
+        }
+    }
+
+    public FlowProvider getFlowProvider() throws Exception {
+        PlatypusJdbcFlowProvider flow = basesProxy.createFlowProvider(datasourceName, entityName, sqlClause, expectedFields);
+        flow.setPageSize(pageSize);
+        flow.setProcedure(procedure);
+        return flow;
     }
 
     public Command prepareCommand() {
         Command command = new Command(entityName);
         command.command = sqlClause;
-        command.parameters = new ChangeValue[parameters.getParametersCount()];
-        for (int i = 0; i < command.parameters.length; i++) {
+        for (int i = 0; i < parameters.getParametersCount(); i++) {
             Parameter param = parameters.get(i + 1);
-            command.parameters[i] = new ChangeValue(param.getName(), param.getValue(), param.getTypeInfo());
+            command.getParameters().add(new ChangeValue(param.getName(), param.getValue(), param.getTypeInfo()));
         }
         return command;
     }
@@ -193,7 +188,6 @@ public class SqlCompiledQuery {
 
     public void setSqlClause(String aValue) throws Exception {
         sqlClause = aValue;
-        createFlow();
     }
 
     /**
@@ -208,22 +202,19 @@ public class SqlCompiledQuery {
     /**
      * @return the databaseId
      */
-    public String getDatabaseId() {
+    public String getDatasourceName() {
         return datasourceName;
     }
 
-    public void setDatabaseId(String aValue) throws Exception {
+    public void setDatasourceName(String aValue) throws Exception {
         datasourceName = aValue;
-        createFlow();
     }
 
-    public String getEntityId() {
+    public String getEntityName() {
         return entityName;
     }
 
-    public void setEntityId(String aEntityId) throws Exception {
-        entityName = aEntityId;
-        createFlow();
+    public void setEntityName(String aValue) throws Exception {
+        entityName = aValue;
     }
-
 }

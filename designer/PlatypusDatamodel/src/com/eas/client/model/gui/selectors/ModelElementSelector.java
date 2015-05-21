@@ -4,15 +4,15 @@
  */
 package com.eas.client.model.gui.selectors;
 
-import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.SqlQuery;
+import com.eas.client.metadata.Parameter;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Model;
 import com.eas.client.model.ModelEditingValidator;
-import com.eas.client.model.ModelElementRef;
 import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
+import com.eas.client.model.gui.ModelElementRef;
 import com.eas.client.model.gui.ResultingDialog;
 import com.eas.client.model.gui.view.entities.EntityView;
 import com.eas.client.model.gui.view.model.ApplicationModelView;

@@ -4,9 +4,9 @@
  */
 package com.eas.designer.application.dbdiagram.nodes;
 
-import com.bearsoft.rowset.metadata.Field;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
+import com.eas.client.metadata.Field;
 import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.designer.datamodel.nodes.FieldNode;
 import java.awt.Image;

@@ -4,7 +4,8 @@
  */
 package com.eas.designer.application.query.completion;
 
-import com.bearsoft.rowset.metadata.Parameter;
+import com.eas.client.metadata.Parameter;
+
 
 /**
  *

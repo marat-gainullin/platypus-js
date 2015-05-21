@@ -4,8 +4,8 @@
  */
 package com.eas.designer.application.query.editing;
 
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
 import com.eas.client.model.QueryDocument.StoredFieldMetadata;
 import com.eas.designer.application.query.PlatypusQueryDataObject;
 import javax.swing.undo.CannotRedoException;

@@ -13,19 +13,23 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bearsoft.rowset.CallbackAdapter;
-import com.bearsoft.rowset.Utils;
+import com.eas.client.CallbackAdapter;
 import com.eas.client.GroupingHandlerRegistration;
 import com.eas.client.PlatypusLogFormatter;
+import com.eas.client.Utils;
 import com.eas.client.form.js.JsContainers;
 import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.js.JsMenus;
 import com.eas.client.form.js.JsModelWidgets;
 import com.eas.client.form.js.JsWidgets;
-import com.eas.client.model.js.JsModel;
+import com.eas.client.model.js.JsManaged;
+import com.eas.client.model.js.JsOrderer;
 import com.eas.client.queries.Query;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
+import com.google.gwt.dom.client.AnchorElement;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.logging.client.LogConfiguration;
 
 /**
@@ -71,34 +75,26 @@ public class Application {
 	public static Query putAppQuery(Query aQuery) {
 		return appQueries.put(aQuery.getEntityName(), aQuery);
 	}
-	
+
 	public static native JavaScriptObject createReport(String reportLocation)/*-{
 		return new $wnd.P.Report(reportLocation);
 	}-*/;
 
 	/*
-	protected static class ExecuteApplicationCallback extends RunnableAdapter {
+	 * protected static class ExecuteApplicationCallback extends RunnableAdapter
+	 * {
+	 * 
+	 * protected String startForm; protected Set<Element> indicators;
+	 * 
+	 * public ExecuteApplicationCallback(String aStartForm, Set<Element>
+	 * aIndicators) { super(); startForm = aStartForm; indicators = aIndicators;
+	 * }
+	 * 
+	 * @Override protected void doWork() throws Exception { for (Element el :
+	 * indicators) { el.<XElement> cast().unmask(); }
+	 * loaderHandlerRegistration.removeHandler(); onReady(); } }
+	 */
 
-		protected String startForm;
-		protected Set<Element> indicators;
-
-		public ExecuteApplicationCallback(String aStartForm, Set<Element> aIndicators) {
-			super();
-			startForm = aStartForm;
-			indicators = aIndicators;
-		}
-
-		@Override
-		protected void doWork() throws Exception {
-			for (Element el : indicators) {
-				el.<XElement> cast().unmask();
-			}
-			loaderHandlerRegistration.removeHandler();
-			onReady();
-		}		
-	}
-	*/
-	
 	/**
 	 * This method is publicONLY because of tests!
 	 * 
@@ -137,7 +133,7 @@ public class Application {
 	    }
 		
 		function invokeLater(aTarget) {
-			@com.bearsoft.rowset.Utils::invokeLater(Lcom/google/gwt/core/client/JavaScriptObject;)(aTarget);
+			@com.eas.client.Utils::invokeLater(Lcom/google/gwt/core/client/JavaScriptObject;)(aTarget);
 		}
 		
         Object.defineProperty($wnd.P, "invokeLater", {get: function () {
@@ -147,7 +143,7 @@ public class Application {
 		function invokeDelayed(aTimeout, aTarget) {
 		    if (arguments.length < 2)
 		        throw "invokeDelayed needs 2 arguments - timeout, callback.";
-			@com.bearsoft.rowset.Utils::invokeScheduled(ILcom/google/gwt/core/client/JavaScriptObject;)(+aTimeout, aTarget);
+			@com.eas.client.Utils::invokeScheduled(ILcom/google/gwt/core/client/JavaScriptObject;)(+aTimeout, aTarget);
 		}
 		
         Object.defineProperty($wnd.P, "invokeDelayed", {get: function () {
@@ -178,7 +174,15 @@ public class Application {
 		}});
 		Object.defineProperty(Resource, "load", {get : function(){
 	        return function(aResName, onSuccess, onFailure){
-            	return $wnd.P.boxAsJs(@com.eas.client.application.AppClient::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aResName, onSuccess, onFailure));
+            	var loaded = $wnd.P.boxAsJs(@com.eas.client.application.AppClient::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aResName, onSuccess, onFailure));
+            	if(loaded)
+            		loaded.length = loaded.byteLength; 
+            	return loaded;
+	        };
+		}});
+		Object.defineProperty(Resource, "loadText", {get : function(){
+	        return function(aResName, onSuccess, onFailure){
+            	return $wnd.P.boxAsJs(@com.eas.client.application.AppClient::jsLoadText(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aResName, onSuccess, onFailure));
 	        };
 		}});
 		
@@ -216,9 +220,9 @@ public class Application {
 		$wnd.P.boxAsJs = function(aValue) {
 			if(aValue == null)
 				return null;
-			else if(@com.bearsoft.rowset.Utils::isNumber(Ljava/lang/Object;)(aValue))
+			else if(@com.eas.client.Utils::isNumber(Ljava/lang/Object;)(aValue))
 				return aValue.@java.lang.Number::doubleValue()();
-			else if(@com.bearsoft.rowset.Utils::isBoolean(Ljava/lang/Object;)(aValue))
+			else if(@com.eas.client.Utils::isBoolean(Ljava/lang/Object;)(aValue))
 				return aValue.@java.lang.Boolean::booleanValue()();
 			else // dates, strings, complex java objects handled in Utils.toJs()
 				return aValue;
@@ -587,7 +591,7 @@ public class Application {
 				aTarget = {};
 			var appElementDoc = aClient.@com.eas.client.application.AppClient::getModelDocument(Ljava/lang/String;)(appElementName);
 			var nativeModel = @com.eas.client.model.store.XmlDom2Model::transform(Lcom/google/gwt/xml/client/Document;Lcom/google/gwt/core/client/JavaScriptObject;)(appElementDoc, aTarget);
-			nativeModel.@com.eas.client.model.Model::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(aTarget);
+			nativeModel.@com.eas.client.model.Model::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(aTarget);			
 			return aTarget;
 		};
 		$wnd.P.loadForm = function(appElementName, aModel, aTarget) {
@@ -664,18 +668,6 @@ public class Application {
 			};
 		}
 		$wnd.P.Report = Report;
-		function parseDates(aObject) {
-	        if (typeof aObject === 'string' || aObject && aObject.constructor && aObject.constructor.name === 'String') {
-	            if(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/.test(aObject)){
-	                return new Date(aObject);
-	            }
-	        } else if (typeof aObject === 'object' || aObject && aObject.constructor && aObject.constructor.name === 'Object') {
-	            for (var prop in aObject) {
-	                aObject[prop] = parseDates(aObject[prop]);
-	            }
-	        }
-	        return aObject;
-	    }
 		
 		function generateFunction(aModuleName, aFunctionName) {
 			return function() {
@@ -686,13 +678,21 @@ public class Application {
 					onSuccess = arguments[arguments.length - 2];
 					onFailure = arguments[arguments.length - 1];
 					argsLength -= 2;
+				}else if(arguments.length > 1 && typeof arguments[arguments.length - 1] == "undefined" && typeof arguments[arguments.length - 2] == "function"){
+					onSuccess = arguments[arguments.length - 2];
+					argsLength -= 2;
 				}else if(arguments.length > 0 && typeof arguments[arguments.length - 1] == "function"){
 					onSuccess = arguments[arguments.length - 1];
 					argsLength -= 1;
 				}
 				var params = [];
 				for (var j = 0; j < argsLength; j++) {
-					params[j] = JSON.stringify(arguments[j]);
+					var to = typeof arguments[j];
+					if(to !== 'undefined' && to !== 'function'){ 
+						params[j] = JSON.stringify(arguments[j]);
+					}else{
+						break;
+					}
 				}
 				var nativeClient = @com.eas.client.application.AppClient::getInstance()();
 				if(onSuccess) {
@@ -701,11 +701,11 @@ public class Application {
 							if(typeof aResult === 'object' && aResult instanceof Report)
 								onSuccess(aResult);
 							else
-								onSuccess(parseDates(JSON.parse(aResult)));
+								onSuccess(JSON.parse(aResult, @com.eas.client.Utils.JsObject::dateReviver()()));
 						}, onFailure);
 				} else {
 					var result = nativeClient.@com.eas.client.application.AppClient::requestServerMethodExecution(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aFunctionName, params, null, null)
-					return typeof result === 'object' && result instanceof Report ? result : parseDates(JSON.parse(result)); 
+					return typeof result === 'object' && result instanceof Report ? result : JSON.parse(result, @com.eas.client.Utils.JsObject::dateReviver()()); 
 				}
 			};
 		}
@@ -851,7 +851,7 @@ public class Application {
 		};
 		$wnd.P.IDGenerator = {
 			genID : function(){
-				return @com.bearsoft.rowset.utils.IDGenerator::genId()();
+				return @com.eas.client.IDGenerator::genId()();
 			}
 		};
 		$wnd.P.MD5Generator = {
@@ -866,7 +866,7 @@ public class Application {
 		};
 		$wnd.P.ID = {
 			generate : function(){
-				return @com.bearsoft.rowset.utils.IDGenerator::genId()();
+				return @com.eas.client.IDGenerator::genId()();
 			}
 		};
 		$wnd.P.Logger = new (function(){
@@ -923,19 +923,14 @@ public class Application {
 			}
 		}
 		publish(client);
-		JsModel.init();
+		JsManaged.init();
+		JsOrderer.init();
 		JsWidgets.init();
 		JsMenus.init();
 		JsContainers.init();
 		JsModelWidgets.init();
 		JsEvents.init();
 		loader = new Loader(client);
-		/*
-		Set<Element> indicators = extractPlatypusProgressIndicators();
-		for (Element el : indicators) {
-			el.<XElement> cast().loadMask();
-		}
-		*/
 		loaderHandlerRegistration.add(loader.addHandler(new LoggingLoadHandler()));
 		client.requestLoggedInUser(new CallbackAdapter<String, String>() {
 
@@ -945,67 +940,109 @@ public class Application {
 			}
 
 			@Override
-			public void onFailure(String reason) {	
+			public void onFailure(String reason) {
 				Logger.getLogger(Application.class.getName()).log(Level.SEVERE, reason);
 			}
 		});
 	}
 
 	/*
-	private static Set<Element> extractPlatypusProgressIndicators() {
-		Set<Element> platypusIndicators = new HashSet<Element>();
-		XElement xBody = Utils.doc.getBody().cast();
-		String platypusIndicatorClass = "platypus-indicator";
-		if (xBody.getClassName() != null && xBody.hasClassName(platypusIndicatorClass)) {
-			platypusIndicators.add(xBody);
-		}
-
-		List<Element> divs2 = xBody.select(platypusIndicatorClass);
-		if (divs2 != null) {
-			for (int i = 0; i < divs2.size(); i++) {
-				Element div = divs2.get(i);
-				platypusIndicators.add(div);
-			}
-		}
-		return platypusIndicators;
-	}
-	*/
+	 * private static Set<Element> extractPlatypusProgressIndicators() {
+	 * Set<Element> platypusIndicators = new HashSet<Element>(); XElement xBody
+	 * = Utils.doc.getBody().cast(); String platypusIndicatorClass =
+	 * "platypus-indicator"; if (xBody.getClassName() != null &&
+	 * xBody.hasClassName(platypusIndicatorClass)) {
+	 * platypusIndicators.add(xBody); }
+	 * 
+	 * List<Element> divs2 = xBody.select(platypusIndicatorClass); if (divs2 !=
+	 * null) { for (int i = 0; i < divs2.size(); i++) { Element div =
+	 * divs2.get(i); platypusIndicators.add(div); } } return platypusIndicators;
+	 * }
+	 */
 
 	protected static native void onReady()/*-{
 		if ($wnd.P.ready)
 			$wnd.P.ready();
 	}-*/;
 
+	private static String toAppModuleId(String aRelative, String aStartPoint) {
+		Element div = Document.get().createDivElement();
+		div.setInnerHTML("<a href=\"" + aStartPoint + "/" + aRelative + "\">o</a>");
+		String absolute = div.getFirstChildElement().<AnchorElement> cast().getHref();
+		String hostContextPrefix = AppClient.relativeUri() + AppClient.APP_RESOURCE_PREFIX;
+		String appModuleId = absolute.substring(hostContextPrefix.length());
+		return appModuleId;
+	}
+
+	private static String extractFileName(StackTraceElement aFrame) {
+		String fileName = aFrame.getFileName();
+		if (fileName != null) {
+			int atIndex = fileName.indexOf("@");
+			if (atIndex != -1) {
+				fileName = fileName.substring(0, atIndex);
+			}
+			return fileName;
+		} else {
+			return null;
+		}
+	}
+
 	public static void require(final JavaScriptObject aDeps, final JavaScriptObject aOnSuccess, final JavaScriptObject aOnFailure) {
+		String calledFromDir = null;
+		try {
+			throw new Exception("test");
+		} catch (Exception ex) {
+			String calledFromFile = null;
+			StackTraceElement[] stackFrames = ex.getStackTrace();
+			String firstFileName = extractFileName(stackFrames[0]);
+			if (firstFileName != null) {
+				for (int frameIdx = 1; frameIdx < stackFrames.length; frameIdx++) {
+					String fileName = extractFileName(stackFrames[frameIdx]);
+					if (fileName != null && !fileName.equals(firstFileName)) {
+						calledFromFile = fileName;
+						break;
+					}
+				}
+			}
+			if (calledFromFile != null) {
+				int lastSlashIndex = calledFromFile.lastIndexOf('/');
+				calledFromDir = calledFromFile.substring(0, lastSlashIndex);
+			}
+		}
 		final Set<String> deps = new HashSet<String>();
 		JsArrayString depsValues = aDeps.<JsArrayString> cast();
 		for (int i = 0; i < depsValues.length(); i++) {
 			String dep = depsValues.get(i);
-			deps.add(dep);
+			if (calledFromDir != null && dep.startsWith("./") || dep.startsWith("../")) {
+				String normalized = toAppModuleId(dep, calledFromDir);
+				deps.add(normalized);
+			} else {
+				deps.add(dep);
+			}
 		}
 		try {
 			loader.load(deps, new CallbackAdapter<Void, String>() {
-				
+
 				@Override
 				public void onFailure(String reason) {
-					if (aOnFailure != null){
+					if (aOnFailure != null) {
 						try {
-	                        Utils.executeScriptEventString(aOnFailure, aOnFailure, reason);
-                        } catch (Exception ex) {
-    						Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-					}else{
+							Utils.executeScriptEventString(aOnFailure, aOnFailure, reason);
+						} catch (Exception ex) {
+							Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
+						}
+					} else {
 						Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require failed and callback is missing. Required modules are: " + aDeps.toString());
 					}
 				}
-				
+
 				@Override
-                protected void doWork(Void aResult) throws Exception {
+				protected void doWork(Void aResult) throws Exception {
 					if (aOnSuccess != null)
 						Utils.invokeJsFunction(aOnSuccess);
 					else
 						Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require succeded, but callback is missing. Required modules are: " + aDeps.toString());
-                }
+				}
 			});
 		} catch (Exception ex) {
 			Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);

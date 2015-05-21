@@ -7,10 +7,7 @@
  */
 package com.eas.client.reports;
 
-import com.bearsoft.rowset.compacts.CompactBlob;
-import com.eas.script.ScriptUtils;
 import java.io.*;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import jdk.nashorn.api.scripting.JSObject;
@@ -52,8 +49,8 @@ public class ExelTemplate {
         scriptData = aValue;
     }
 
-    public CompactBlob getTemplate() throws Exception {
-        return new CompactBlob(template.getConfig().getTemplateContent());
+    public byte[] getTemplate() throws Exception {
+        return template.getConfig().getTemplateContent();
     }
 
     public byte[] create() throws Exception {

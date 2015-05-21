@@ -442,6 +442,20 @@
              */
             P.ModelGrid.prototype.background = {};
         }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.name = '';
+        }
         Object.defineProperty(this, "showVerticalLines", {
             get: function() {
                 var value = delegate.showVerticalLines;
@@ -458,20 +472,6 @@
              * @memberOf ModelGrid
              */
             P.ModelGrid.prototype.showVerticalLines = true;
-        }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ModelGrid){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf ModelGrid
-             */
-            P.ModelGrid.prototype.name = '';
         }
         Object.defineProperty(this, "frozenRows", {
             get: function() {
@@ -949,13 +949,14 @@
         }
     };
         /**
-         * Clears current selection.
-         * @method clearSelection
+         * Shows find dialog.
+         * @deprecated Use find() instead.
+         * @method find
          * @memberOf ModelGrid
          */
-        P.ModelGrid.prototype.clearSelection = function() {
+        P.ModelGrid.prototype.find = function() {
             var delegate = this.unwrap();
-            var value = delegate.clearSelection();
+            var value = delegate.find();
             return P.boxAsJs(value);
         };
 
@@ -979,6 +980,17 @@
         P.ModelGrid.prototype.select = function(instance) {
             var delegate = this.unwrap();
             var value = delegate.select(P.boxAsJava(instance));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Clears current selection.
+         * @method clearSelection
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.clearSelection = function() {
+            var delegate = this.unwrap();
+            var value = delegate.clearSelection();
             return P.boxAsJs(value);
         };
 
@@ -1019,13 +1031,12 @@
         };
 
         /**
-         *
-         * @method elementByModelIndex
+         * @method unsort
          * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.elementByModelIndex = function(arg0) {
+         * Clears sort on all columns, works only in HTML5 */
+        P.ModelGrid.prototype.unsort = function() {
             var delegate = this.unwrap();
-            var value = delegate.elementByModelIndex(P.boxAsJava(arg0));
+            var value = delegate.unsort();
             return P.boxAsJs(value);
         };
 
@@ -1064,6 +1075,17 @@
 
         /**
          *
+         * @method elementByModelIndex
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.elementByModelIndex = function(arg0) {
+            var delegate = this.unwrap();
+            var value = delegate.elementByModelIndex(P.boxAsJava(arg0));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
          * @method try2StopAnyEditing
          * @memberOf ModelGrid
          */
@@ -1081,28 +1103,6 @@
         P.ModelGrid.prototype.try2CancelAnyEditing = function() {
             var delegate = this.unwrap();
             var value = delegate.try2CancelAnyEditing();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * @method unsort
-         * @memberOf ModelGrid
-         * Clears sort on all columns, works only in HTML5 */
-        P.ModelGrid.prototype.unsort = function() {
-            var delegate = this.unwrap();
-            var value = delegate.unsort();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Shows find dialog.
-         * @deprecated Use find() instead.
-         * @method find
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.find = function() {
-            var delegate = this.unwrap();
-            var value = delegate.find();
             return P.boxAsJs(value);
         };
 

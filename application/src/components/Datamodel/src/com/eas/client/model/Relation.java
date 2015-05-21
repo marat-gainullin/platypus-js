@@ -9,9 +9,9 @@
  */
 package com.eas.client.model;
 
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.ForeignKeySpec.ForeignKeyRule;
-import com.bearsoft.rowset.metadata.Parameter;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.ForeignKeySpec.ForeignKeyRule;
+import com.eas.client.metadata.Parameter;
 import com.eas.client.model.visitors.ModelVisitor;
 import java.beans.PropertyChangeSupport;
 

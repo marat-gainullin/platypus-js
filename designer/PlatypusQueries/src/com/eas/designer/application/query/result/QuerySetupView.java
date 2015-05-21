@@ -4,10 +4,10 @@
  */
 package com.eas.designer.application.query.result;
 
-import com.bearsoft.rowset.metadata.DataTypeInfo;
-import com.bearsoft.rowset.metadata.Parameter;
-import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.forms.components.rt.HasValue;
+import com.eas.client.metadata.DataTypeInfo;
+import com.eas.client.metadata.Parameter;
+import com.eas.client.metadata.Parameters;
 import com.eas.designer.application.query.editing.SqlTextEditsComplementor;
 import com.eas.designer.application.query.lexer.SqlLanguageHierarchy;
 import com.eas.designer.application.query.result.QueryResultsView.PageSizeItem;

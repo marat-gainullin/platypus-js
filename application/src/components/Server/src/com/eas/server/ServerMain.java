@@ -180,7 +180,6 @@ public class ServerMain {
      */
     public static void main(String[] args) throws IOException, Exception {
         checkUserHome();
-        ScriptUtils.init();
         parseArgs(args);
         if (url == null || url.isEmpty()) {
             throw new IllegalArgumentException("Application url (-url parameter) is required.");
@@ -203,6 +202,7 @@ public class ServerMain {
                 PlatypusServer server = new PlatypusServer(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), appElement), queries, serverCoreDbClient, sslContext, parseListenAddresses(), parsePortsProtocols(), parsePortsSessionIdleTimeouts(), parsePortsSessionIdleCheckIntervals(), parsePortsNumWorkerThreads(), scriptsConfigs, appElement);
                 serverCoreDbClient.setContextHost(server);
                 ScriptedResource.init(server);
+                ScriptUtils.init();
                 SensorsFactory.init(server.getAcceptorsFactory());
                 RetranslateFactory.init(server.getRetranslateFactory());
                 //

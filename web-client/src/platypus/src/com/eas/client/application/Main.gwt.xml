@@ -5,7 +5,6 @@
 <module rename-to="pwc">
     <inherits name="com.google.gwt.user.User"/>
     <inherits name="com.eas.client.Client"/>
-    <inherits name="com.bearsoft.rowset.Rowset"/>
     <inherits name="com.eas.client.model.Model"/>
 	<inherits name="com.google.gwt.logging.Logging"/>
 	<!--set-property name="gwt.logging.logLevel" value="SEVERE"/-->

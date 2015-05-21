@@ -4,11 +4,12 @@
  */
 package com.eas.client.model.gui.selectors;
 
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Parameter;
 import com.eas.client.model.gui.view.model.SelectedField;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Parameter;
 import com.eas.client.model.*;
 import com.eas.client.model.application.ApplicationEntity;
+import com.eas.client.model.gui.ModelElementRef;
 import com.eas.client.model.gui.view.ModelSelectionListener;
 import com.eas.client.model.query.QueryModel;
 import com.eas.client.model.query.QueryParametersEntity;

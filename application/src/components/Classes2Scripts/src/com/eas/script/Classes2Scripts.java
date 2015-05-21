@@ -20,6 +20,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -50,9 +51,8 @@ public class Classes2Scripts {
 
     private static final String JAVA_CLASS_FILE_EXT = ".class";//NOI18N
     private static final String CONSTRUCTOR_TEMPLATE = getStringResource("constructorTemplate.js");//NOI18N
-    private static final String DEPS_FILE_NAME = "deps.js";//NOI18N
     private static final Set<String> preservedFilesNames = new HashSet<>(Arrays.asList(new String[]{
-        "platypus.js", "internals.js", "http-context.js", "server-deps.js"
+        "platypus.js", "internals.js", "http-context.js", "managed.js", "orderer.js"
     }));
 
     private static final int DEFAULT_IDENTATION_WIDTH = 4;
@@ -207,7 +207,7 @@ public class Classes2Scripts {
                     processJar(classPath);
                 }
             }
-            createDepsFile();
+            //createDepsFile();
         } catch (IOException | ClassNotFoundException ex) {
             Logger.getLogger(Classes2Scripts.class.getName()).log(Level.SEVERE, "Conversion error.", ex);
         }
@@ -228,6 +228,8 @@ public class Classes2Scripts {
             Logger.getLogger(Classes2Scripts.class.getName())
                     .log(Level.FINE, "Processing jar: {0}", new String[]{jarFile.getAbsolutePath()});
             URLClassLoader cl = new URLClassLoader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
+            Set<File> jarApiFiles = new HashSet<>();
+            File subDir = new File(destDirectory, FileNameSupport.getFileName(FileUtils.removeExtension(jarFile.getName())));
             Enumeration<JarEntry> e = jar.entries();
             while (e.hasMoreElements()) {
                 try {
@@ -239,7 +241,6 @@ public class Classes2Scripts {
                         if (jsConstructor != null) {
                             String js = getClassJs(clazz);
                             if (js != null) {
-                                File subDir = new File(destDirectory, FileNameSupport.getFileName(FileUtils.removeExtension(jarFile.getName())));
                                 if (!subDir.exists()) {
                                     subDir.mkdir();
                                 }
@@ -247,13 +248,35 @@ public class Classes2Scripts {
                                         .log(Level.FINE, "\tClass name: {0}", new String[]{className});
                                 File resultFile = new File(subDir, FileNameSupport.getFileName(jsConstructor.name) + ".js"); //NOI18N
                                 FileUtils.writeString(resultFile, js, SettingsConstants.COMMON_ENCODING);
-                                depsPaths.add(getRelativePath(destDirectory, resultFile));
+                                jarApiFiles.add(resultFile);
                             }
                         }
                     }
                 } catch (NoClassDefFoundError ex) {
                     //NO-OP
                 }
+            }
+            if (!jarApiFiles.isEmpty()) {
+                StringBuilder jarApiDeps = new StringBuilder();
+                jarApiDeps.append("try{\n");
+                jarApiDeps.append(getIndentStr(1)).append("P.require([\n");
+                File[] f = jarApiFiles.toArray(new File[]{});
+                for (int i = 0; i < f.length; i++) {
+                    File jarApiFile = f[i];
+                    if (i == 0) {
+                        jarApiDeps.append(getIndentStr(2)).append("  ");
+                    } else {
+                        jarApiDeps.append(getIndentStr(2)).append(", ");
+                    }
+                    jarApiDeps.append("'./").append(jarApiFile.getName()).append("'\n");
+                }
+                jarApiDeps.append(getIndentStr(1)).append("]);\n");
+                jarApiDeps.append("}catch(e){\n");
+                jarApiDeps.append(getIndentStr(1)).append("print(e);\n");
+                jarApiDeps.append("}\n");
+                File depsFile = Paths.get(subDir.toURI()).resolve("index.js").toFile();
+                FileUtils.writeString(depsFile, jarApiDeps.toString(), SettingsConstants.COMMON_ENCODING);
+                depsPaths.add(getRelativePath(destDirectory, depsFile));
             }
         }
     }
@@ -329,11 +352,7 @@ public class Classes2Scripts {
         return js;
     }
 
-    private void createDepsFile() throws IOException {
-        File deps = new File(destDirectory, DEPS_FILE_NAME);
-        FileUtils.writeString(deps, getDepsJsContent(), SettingsConstants.COMMON_ENCODING);
-    }
-
+    /*
     private String getDepsJsContent() {
         StringBuilder sb = new StringBuilder(DEPS_HEADER);
         if (!depsPaths.isEmpty()) {
@@ -351,7 +370,7 @@ public class Classes2Scripts {
                     sb.append("try {\n");
                 }
                 dir = pathDir;
-                sb.append(indent).append(String.format("load('classpath:%s');\n", FileNameSupport.getFileName(path)));
+                sb.append(indent).append(String.format("P.require('%s');\n", FileNameSupport.getFileName(path)));
             }
             sb.append(indent).append("print('").append(dir).append(" API loaded.');\n");
             sb.append("} catch (e) {\n");
@@ -360,7 +379,7 @@ public class Classes2Scripts {
         }
         return sb.toString();
     }
-
+*/
     private static String pathRootDir(String path) {
         String[] pathElements = path.split("/");
         if (pathElements.length > 0) {

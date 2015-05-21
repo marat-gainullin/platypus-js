@@ -134,8 +134,9 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
                 } else {
                     throw new IllegalStateException("Unknown request type " + requestEnv.request.getType());
                 }
-            } catch (Exception ex) {
+            } catch (Throwable ex) {
                 ioSession.write(new ResponseEnvelope(new ErrorResponse(ex.getMessage()), requestEnv.ticket));
+                Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, ex.toString());
             }
         } else {
             throw new IllegalArgumentException(BAD_PROTOCOL_MSG);

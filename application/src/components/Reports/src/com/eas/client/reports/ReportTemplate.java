@@ -8,7 +8,6 @@
 package com.eas.client.reports;
 
 import com.eas.client.report.Report;
-import com.bearsoft.rowset.compacts.CompactBlob;
 import com.eas.client.cache.ReportConfig;
 import com.eas.client.model.application.ApplicationModel;
 import com.eas.script.AlreadyPublishedException;

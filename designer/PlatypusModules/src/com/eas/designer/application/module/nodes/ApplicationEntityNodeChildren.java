@@ -4,8 +4,8 @@
  */
 package com.eas.designer.application.module.nodes;
 
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Parameter;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Parameter;
 import com.eas.client.model.Entity;
 import com.eas.designer.datamodel.nodes.EntityNodeChildren;
 import com.eas.designer.datamodel.nodes.FieldNode;

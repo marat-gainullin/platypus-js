@@ -4,9 +4,9 @@
  */
 package com.eas.client.model.query;
 
-import com.bearsoft.rowset.metadata.Parameters;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SqlQuery;
+import com.eas.client.metadata.Parameters;
 import com.eas.client.model.Model;
 import com.eas.client.model.Relation;
 import com.eas.client.model.visitors.ModelVisitor;

@@ -332,23 +332,6 @@
              */
             P.RadioButton.prototype.onMouseEntered = {};
         }
-        Object.defineProperty(this, "selected", {
-            get: function() {
-                var value = delegate.selected;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.selected = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.RadioButton){
-            /**
-             * The state of the button.
-             * @property selected
-             * @memberOf RadioButton
-             */
-            P.RadioButton.prototype.selected = true;
-        }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
                 var value = delegate.toolTipText;
@@ -365,6 +348,23 @@
              * @memberOf RadioButton
              */
             P.RadioButton.prototype.toolTipText = '';
+        }
+        Object.defineProperty(this, "selected", {
+            get: function() {
+                var value = delegate.selected;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.selected = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.RadioButton){
+            /**
+             * The state of the button.
+             * @property selected
+             * @memberOf RadioButton
+             */
+            P.RadioButton.prototype.selected = true;
         }
         Object.defineProperty(this, "height", {
             get: function() {
@@ -700,6 +700,20 @@
              */
             P.RadioButton.prototype.onMouseExited = {};
         }
+        Object.defineProperty(this, "name", {
+            get: function() {
+                var value = delegate.name;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.RadioButton){
+            /**
+             * Gets name of this component.
+             * @property name
+             * @memberOf RadioButton
+             */
+            P.RadioButton.prototype.name = '';
+        }
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -716,20 +730,6 @@
              * @memberOf RadioButton
              */
             P.RadioButton.prototype.width = 0;
-        }
-        Object.defineProperty(this, "name", {
-            get: function() {
-                var value = delegate.name;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.RadioButton){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf RadioButton
-             */
-            P.RadioButton.prototype.name = '';
         }
         Object.defineProperty(this, "font", {
             get: function() {

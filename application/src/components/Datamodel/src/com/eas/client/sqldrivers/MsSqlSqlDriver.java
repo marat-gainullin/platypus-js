@@ -4,14 +4,12 @@
  */
 package com.eas.client.sqldrivers;
 
-import com.bearsoft.rowset.Converter;
-import com.bearsoft.rowset.RowsetConverter;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.ForeignKeySpec;
-import com.bearsoft.rowset.metadata.PrimaryKeySpec;
 import com.eas.client.ClientConstants;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.ForeignKeySpec;
+import com.eas.client.metadata.PrimaryKeySpec;
 import com.eas.client.sqldrivers.resolvers.MsSqlTypesResolver;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
 import java.sql.Connection;
@@ -32,7 +30,6 @@ public class MsSqlSqlDriver extends SqlDriver {
 
     protected static final String GET_SCHEMA_CLAUSE = "SELECT SCHEMA_NAME()";
     protected static final String CREATE_SCHEMA_CLAUSE = "CREATE SCHEMA %s";
-    protected static final Converter converter = new RowsetConverter();
     protected static final MsSqlTypesResolver resolver = new MsSqlTypesResolver();
     protected static final int[] mssqlErrorCodes = {
         826
@@ -386,11 +383,6 @@ public class MsSqlSqlDriver extends SqlDriver {
     @Override
     public Integer getJdbcTypeByRDBMSTypename(String aLowLevelTypeName) {
         return resolver.getJdbcTypeByRDBMSTypename(aLowLevelTypeName);
-    }
-
-    @Override
-    public Converter getConverter() {
-        return converter;
     }
 
     @Override

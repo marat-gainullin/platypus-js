@@ -4,8 +4,8 @@
  */
 package com.eas.client.sqldrivers.converters;
 
-import com.bearsoft.rowset.RowsetConverter;
-import com.bearsoft.rowset.metadata.DataTypeInfo;
+import com.eas.client.dataflow.Converter;
+import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
 
 /**
@@ -15,7 +15,7 @@ import com.eas.client.sqldrivers.resolvers.TypesResolver;
  *
  * @author mg
  */
-public abstract class PlatypusConverter extends RowsetConverter {
+public abstract class PlatypusConverter extends Converter {
 
     protected TypesResolver resolver;
 
