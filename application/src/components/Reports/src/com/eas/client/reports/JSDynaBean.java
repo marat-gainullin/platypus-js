@@ -5,7 +5,7 @@
  */
 package com.eas.client.reports;
 
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import com.eas.util.IDGenerator;
 import java.lang.reflect.Array;
 import java.util.Date;
@@ -85,7 +85,7 @@ public class JSDynaBean implements DynaBean {
     }
 
     public static Object wrap(Object aValue, int aTimezoneOffset) {
-        aValue = ScriptUtils.toJava(aValue);
+        aValue = Scripts.toJava(aValue);
         if (aValue instanceof Date) {
             return convertDateToExcelDate((Date)aValue, aTimezoneOffset);
         } else if (aValue instanceof Number
@@ -95,7 +95,7 @@ public class JSDynaBean implements DynaBean {
             return aValue;
         } else if (aValue instanceof JSObject) {
             JSObject jsValue = (JSObject) aValue;
-            if (jsValue.isArray() || ScriptUtils.isArrayDeep(jsValue)) {
+            if (jsValue.isArray() || Scripts.isArrayDeep(jsValue)) {
                 return new JSDynaList(jsValue, aTimezoneOffset);
             } else if (!jsValue.isFunction()) {
                 return new JSDynaBean(jsValue, aTimezoneOffset);

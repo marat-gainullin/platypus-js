@@ -20,7 +20,7 @@ import com.eas.client.threetier.PlatypusClient;
 import com.eas.client.threetier.http.PlatypusHttpConnection;
 import com.eas.client.threetier.http.PlatypusHttpConstants;
 import com.eas.client.threetier.platypus.PlatypusPlatypusConnection;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import com.eas.util.args.ThreadsArgsConsumer;
 import java.awt.EventQueue;
 import java.io.File;
@@ -209,8 +209,8 @@ public class PlatypusClientApplication {
             if (config.url != null) {
                 checkUserHome();
                 config.datasourcesArgs.registerDatasources();
-                ScriptUtils.initServices(config.threadsArgs.getMaxServicesTreads());
-                ScriptUtils.setGlobalQueue((Runnable aTask) -> {
+                Scripts.initBIO(config.threadsArgs.getMaxServicesTreads());
+                Scripts.initTasks((Runnable aTask) -> {
                     EventQueue.invokeLater(aTask);
                 });
                 Application app;
@@ -280,9 +280,9 @@ public class PlatypusClientApplication {
                     throw new Exception("Unknown protocol in url: " + config.url);
                 }
                 ScriptedResource.init(app);
-                ScriptUtils.init();
+                Scripts.init();
                 ScriptedResource._require(new String[]{""}, null, new ConcurrentSkipListSet<>(), (Void v) -> {
-//                    JSObject p = ScriptUtils.lookupInGlobal("P");
+//                    JSObject p = Scripts.lookupInGlobal("P");
 //                    if (p != null) {
 //                        Object ready = p.getMember("ready");
 //                        if (ready instanceof JSObject && ((JSObject) ready).isFunction()) {

@@ -55,7 +55,7 @@ public class ModelDate extends ModelComponentDecorator<VDateTimeField, Date> imp
         } else if (aValue instanceof Date) {
             setValue((Date) aValue);
         } else {
-            setValue(com.eas.script.ScriptUtils.isInitialized() ? new Date(JSType.toLong(aValue)) : null);
+            setValue(com.eas.script.Scripts.isInitialized() ? new Date(JSType.toLong(aValue)) : null);
         }
     }
 

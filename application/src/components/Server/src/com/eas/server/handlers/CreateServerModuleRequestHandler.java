@@ -13,7 +13,7 @@ import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.scripts.ScriptedResource;
 import com.eas.client.threetier.requests.CreateServerModuleRequest;
 import com.eas.script.JsDoc;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import com.eas.server.*;
 import java.security.AccessControlException;
 import java.util.Collections;
@@ -48,7 +48,7 @@ public class CreateServerModuleRequestHandler extends SessionRequestHandler<Crea
                 ScriptedResource._require(new String[]{moduleName}, null, new ConcurrentSkipListSet<>(), (Void v) -> {
                     try {
                         AppElementFiles files = serverCore.getIndexer().nameToFiles(moduleName);
-                        JSObject jsConstr = ScriptUtils.lookupInGlobal(moduleName);
+                        JSObject jsConstr = Scripts.lookupInGlobal(moduleName);
                         if (files != null && files.isModule() && jsConstr != null) {
                             Set<String> functionProps = new HashSet<>();
                             CreateServerModuleRequest.Response response = new CreateServerModuleRequest.Response(null);

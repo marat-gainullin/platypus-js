@@ -6,7 +6,7 @@ package com.eas.client.forms.events.rt;
 
 import com.eas.client.forms.components.rt.HasValue;
 import com.eas.client.forms.events.EventsWrapper;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.event.*;
@@ -107,7 +107,7 @@ public class ControlEventsIProxy implements MouseListener,
         try {
             JSObject handler = handlers.get(aEventId);
             if (handler != null) {
-                return ScriptUtils.toJava(handler.call(eventThis, new Object[]{ScriptUtils.toJs(wrapEvent(anEvent))}));
+                return Scripts.toJava(handler.call(eventThis, new Object[]{Scripts.toJs(wrapEvent(anEvent))}));
             } else {
                 return null;
             }

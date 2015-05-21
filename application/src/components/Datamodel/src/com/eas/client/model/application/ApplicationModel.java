@@ -15,7 +15,7 @@ import com.eas.client.queries.Query;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.ScriptFunction;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -193,17 +193,15 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
             String scalarPropertyName = aRelation.getScalarPropertyName();
             String collectionPropertyName = aRelation.getCollectionPropertyName();
             if (scalarPropertyName != null && !scalarPropertyName.isEmpty()) {
-                aRelation.getLeftEntity().putOrmScalarDefinition(
-                        scalarPropertyName,
-                        new Fields.OrmDef(aRelation.getLeftField().getName(), scalarPropertyName, collectionPropertyName, ScriptUtils.scalarPropertyDefinition(
+                aRelation.getLeftEntity().putOrmScalarDefinition(scalarPropertyName,
+                        new Fields.OrmDef(aRelation.getLeftField().getName(), scalarPropertyName, collectionPropertyName, Scripts.scalarPropertyDefinition(
                                         (JSObject) aRelation.getRightEntity().getPublished(),
                                         aRelation.getRightField().getName(),
                                         aRelation.getLeftField().getName())));
             }
             if (collectionPropertyName != null && !collectionPropertyName.isEmpty()) {
-                aRelation.getRightEntity().putOrmCollectionDefinition(
-                        collectionPropertyName,
-                        new Fields.OrmDef(collectionPropertyName, scalarPropertyName, ScriptUtils.collectionPropertyDefinition(
+                aRelation.getRightEntity().putOrmCollectionDefinition(collectionPropertyName,
+                        new Fields.OrmDef(collectionPropertyName, scalarPropertyName, Scripts.collectionPropertyDefinition(
                                         (JSObject) aRelation.getLeftEntity().getPublished(),
                                         aRelation.getRightField().getName(),
                                         aRelation.getLeftField().getName())));

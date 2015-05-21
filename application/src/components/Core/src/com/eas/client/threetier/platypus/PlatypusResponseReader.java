@@ -29,7 +29,7 @@ import com.eas.proto.ProtoReader;
 import com.eas.proto.ProtoReaderException;
 import com.eas.proto.dom.ProtoDOMBuilder;
 import com.eas.proto.dom.ProtoNode;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Collection;
@@ -45,13 +45,15 @@ import jdk.nashorn.api.scripting.JSObject;
 public class PlatypusResponseReader implements PlatypusResponseVisitor {
 
     protected byte[] bytes;
+    protected Scripts.Space space;
 
-    public PlatypusResponseReader(byte[] aBytes) {
+    public PlatypusResponseReader(byte[] aBytes, Scripts.Space aSpace) {
         super();
         bytes = aBytes;
+        space = aSpace;
     }
 
-    public static Response read(ProtoReader reader, Request aRequest) throws Exception {
+    public static Response read(ProtoReader reader, Request aRequest, Scripts.Space aSpace) throws Exception {
         boolean ordinaryReponse = false;
         boolean errorResponse = false;
         byte[] data = null;
@@ -77,7 +79,7 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
                             aRequest.accept(factory);
                             rsp = factory.getResponse();
                         }
-                        PlatypusResponseReader responseReader = new PlatypusResponseReader(data);
+                        PlatypusResponseReader responseReader = new PlatypusResponseReader(data, aSpace);
                         rsp.accept(responseReader);
                         return rsp;
                     } else {
@@ -123,7 +125,7 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
             switch (reader.getNextTag()) {
                 case RequestsTags.TAG_ROWSET:
                     String rowset = reader.getString();
-                    rsp.setRowset((JSObject)ScriptUtils.parseJsonWithDates(rowset));
+                    rsp.setRowset((JSObject)space.parseJsonWithDates(rowset));
                     break;
                 case RequestsTags.TAG_UPDATE_COUNT:
                     rsp.setUpdateCount(reader.getInt());
@@ -149,7 +151,7 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
                     input.getChild(RequestsTags.TAG_FORMAT).getString(),
                     input.getChild(RequestsTags.TAG_FILE_NAME).getString());
         } else if (input.containsChild(RequestsTags.TAG_RESULT_VALUE)) {
-            result = ScriptUtils.parseJsonWithDates(input.getChild(RequestsTags.TAG_RESULT_VALUE).getString());
+            result = space.parseJsonWithDates(input.getChild(RequestsTags.TAG_RESULT_VALUE).getString());
         }
         rsp.setResult(result);
     }

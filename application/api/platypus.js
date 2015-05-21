@@ -1,4 +1,4 @@
-(function () {
+(function (aSpace) {
     if (typeof Set === 'undefined') {
         var LinkedHashSetClass = Java.type('java.util.LinkedHashSet');
         Set = function () {
@@ -42,7 +42,6 @@
     var ScriptTimerTaskClass = Java.type("com.eas.client.scripts.ScriptTimerTask");
     var ScriptedResourceClass = Java.type("com.eas.client.scripts.ScriptedResource");
     var PlatypusPrincipalClass = Java.type("com.eas.client.login.PlatypusPrincipal");
-    var ScriptUtilsClass = Java.type('com.eas.script.ScriptUtils');
     var FileUtilsClass = Java.type("com.eas.util.FileUtils");
     var MD5GeneratorClass = Java.type("com.eas.client.login.MD5Generator");
 
@@ -71,7 +70,7 @@
         }
         return aValue;
     }
-    ScriptUtilsClass.setToPrimitiveFunc(toPrimitive);
+    aSpace.setToPrimitiveFunc(toPrimitive);
 
     /**
      * @private
@@ -132,25 +131,25 @@
         if (arguments.length < 2)
             throw "invokeDelayed needs 2 arguments - timeout, callback.";
         //
-        var lock = ScriptUtilsClass.getLock();
-        var req = ScriptUtilsClass.getRequest();
-        var resp = ScriptUtilsClass.getResponse();
-        var session = ScriptUtilsClass.getSession();
+        var lock = aSpace.getLock();
+        var req = aSpace.getRequest();
+        var resp = aSpace.getResponse();
+        var session = aSpace.getSession();
         var principal = PlatypusPrincipalClass.getInstance();
         //
         ScriptTimerTaskClass.schedule(function () {
-            ScriptUtilsClass.setLock(lock);
-            ScriptUtilsClass.setRequest(req);
-            ScriptUtilsClass.setResponse(resp);
-            ScriptUtilsClass.setSession(session);
+            aSpace.setLock(lock);
+            aSpace.setRequest(req);
+            aSpace.setResponse(resp);
+            aSpace.setSession(session);
             PlatypusPrincipalClass.setInstance(principal);
             try {
-                ScriptUtilsClass.locked(aTarget, lock);
+                aSpace.locked(aTarget, lock);
             } finally {
-                ScriptUtilsClass.setLock(null);
-                ScriptUtilsClass.setRequest(null);
-                ScriptUtilsClass.setResponse(null);
-                ScriptUtilsClass.setSession(null);
+                aSpace.setLock(null);
+                aSpace.setRequest(null);
+                aSpace.setResponse(null);
+                aSpace.setSession(null);
                 PlatypusPrincipalClass.setInstance(null);
             }
         }, aTimeout);
@@ -195,7 +194,7 @@
     }
     Object.defineProperty(P, "require", {value: require});
 
-    P.require('internals.js');
+    load('classpath:internals.js')(space);
 
     var serverCoreClass;
     try {
@@ -718,7 +717,7 @@
     Object.defineProperty(P, "session", {
         get: function () {
             if (serverCoreClass) {
-                return ScriptUtilsClass.getSession().getPublished();
+                return aSpace.getSession().getPublished();
             } else {
                 return null;
             }
@@ -820,7 +819,7 @@
             }
         };
     }
-    ScriptUtilsClass.setListenElementsFunc(listenElements);
+    aSpace.setListenElementsFunc(listenElements);
 
     function listenInstance(aTarget, aPath, aPropListener) {
         function subscribe(aData, aListener, aPropName) {
@@ -867,7 +866,7 @@
             }
         };
     }
-    ScriptUtilsClass.setListenFunc(listenInstance);
+    aSpace.setListenFunc(listenInstance);
     
     function fireSelfScalarsOppositeCollectionsChanges(aSubject, aChange, nFields) {
         var ormDefs = nFields.getOrmScalarExpandings().get(aChange.propertyName);
@@ -984,7 +983,7 @@
         }
     }
 
-    ScriptUtilsClass.setCollectionDefFunc(
+    aSpace.setCollectionDefFunc(
             function (sourcePublishedEntity, targetFieldName, sourceFieldName) {
                 var _self = this;
                 _self.enumerable = false;
@@ -1566,11 +1565,11 @@
         }});
 
     function async(aWorker, onSuccess, onFailure) {
-        ScriptUtilsClass.jsSubmitTask(function () {
+        aSpace.jsSubmitTask(function () {
             try {
                 var result = aWorker();
                 try {
-                    ScriptUtilsClass.jsAcceptTaskResult(function () {
+                    aSpace.jsAcceptTaskResult(function () {
                         onSuccess(result);
                     });
                 } catch (e) {
@@ -1609,7 +1608,7 @@
     Object.defineProperty(P, "writeString", {
         value: writeString
     });
-})();
+})(space);
 
 if (!P) {
     /** 

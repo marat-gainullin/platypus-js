@@ -20,7 +20,7 @@ import com.eas.client.metadata.ForeignKeySpec;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.metadata.Parameters;
 import com.eas.client.scripts.ScriptedResource;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -117,7 +117,7 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
                 Object oElement = sSchema.getSlot(i);
                 if (oElement instanceof JSObject) {
                     JSObject sElement = (JSObject) oElement;
-                    Object oFieldName = ScriptUtils.toJava(sElement.hasMember("name") ? sElement.getMember("name") : null);
+                    Object oFieldName = Scripts.toJava(sElement.hasMember("name") ? sElement.getMember("name") : null);
                     if (oFieldName instanceof String && !((String) oFieldName).isEmpty()) {
                         String sFieldName = (String) oFieldName;
                         Field field = fields instanceof Parameters ? new Parameter() : new Field();
@@ -125,19 +125,19 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
                         fields.add(field);
                         field.setName(sFieldName);
                         field.setOriginalName(sFieldName);
-                        Object oEntity = ScriptUtils.toJava(sElement.hasMember("entity") ? sElement.getMember("entity") : null);
+                        Object oEntity = Scripts.toJava(sElement.hasMember("entity") ? sElement.getMember("entity") : null);
                         if (oEntity instanceof String && !((String) oEntity).isEmpty()) {
                             field.setTableName((String) oEntity);
                         } else {
                             field.setTableName(aQueryId);
                         }
-                        Object oDescription = ScriptUtils.toJava(sElement.hasMember("description") ? sElement.getMember("description") : null);
+                        Object oDescription = Scripts.toJava(sElement.hasMember("description") ? sElement.getMember("description") : null);
                         if (oDescription instanceof String && !((String) oDescription).isEmpty()) {
                             field.setDescription((String) oDescription);
                         }
                         Object oType = sElement.getMember("type");
                         if (oType instanceof JSObject && ((JSObject) oType).isFunction()) {
-                            Object ofName = ScriptUtils.toJava(((JSObject) oType).getMember("name"));
+                            Object ofName = Scripts.toJava(((JSObject) oType).getMember("name"));
                             if (ofName instanceof String) {
                                 String fName = (String) ofName;
                                 if (String.class.getSimpleName().equals(fName)) {
@@ -151,12 +151,12 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
                                 }
                             }
                         }
-                        Object oRequired = ScriptUtils.toJava(sElement.hasMember("required") ? sElement.getMember("required") : null);
+                        Object oRequired = Scripts.toJava(sElement.hasMember("required") ? sElement.getMember("required") : null);
                         if (oRequired instanceof Boolean) {
                             boolean bRequired = (Boolean) oRequired;
                             field.setNullable(!bRequired);
                         }
-                        Object oKey = ScriptUtils.toJava(sElement.hasMember("key") ? sElement.getMember("key") : null);
+                        Object oKey = Scripts.toJava(sElement.hasMember("key") ? sElement.getMember("key") : null);
                         if (oKey instanceof Boolean) {
                             boolean bKey = (Boolean) oKey;
                             field.setPk(bKey);
@@ -165,7 +165,7 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
                         Object oRef = sElement.hasMember("ref") ? sElement.getMember("ref") : null;
                         if (oRef instanceof JSObject) {
                             JSObject sRef = (JSObject) oRef;
-                            Object oProperty = ScriptUtils.toJava(sRef.hasMember("property") ? sRef.getMember("property") : null);
+                            Object oProperty = Scripts.toJava(sRef.hasMember("property") ? sRef.getMember("property") : null);
                             if (oProperty instanceof String) {
                                 String sProperty = (String) oProperty;
                                 if (!sProperty.isEmpty()) {
@@ -188,7 +188,7 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
 
     protected JSObject createModule(String aModuleName) throws Exception {
         ScriptedResource.require(new String[]{aModuleName}, null);
-        return ScriptUtils.createModule(aModuleName);
+        return Scripts.createModule(aModuleName);
     }
 
     protected SqlQuery queryFromModule(String aModuleName) throws Exception {

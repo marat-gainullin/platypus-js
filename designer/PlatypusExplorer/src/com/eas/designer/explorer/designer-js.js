@@ -2,10 +2,10 @@
  * Platypus.js's designer internals initialization.
  */
 (function() {
-    var ScriptUtils = Java.type('com.eas.script.ScriptUtils');
+    var ScriptsClass = Java.type('com.eas.script.Scripts');
     this.P = {loadModel: function() {
         }};
-    ScriptUtils.setToPrimitiveFunc(function (aValue) {
+    ScriptsClass.setToPrimitiveFunc(function (aValue) {
         if (aValue && aValue.constructor) {
             var cName = aValue.constructor.name;
             if (cName === 'Date') {
@@ -22,14 +22,14 @@
         }
         return aValue;
     });
-    ScriptUtils.setToDateFunc(
+    ScriptsClass.setToDateFunc(
             function (aJavaDate) {
                 return aJavaDate !== null ? new Date(aJavaDate.time) : null;
             });
-    ScriptUtils.setMakeObjFunc(function () {
+    ScriptsClass.setMakeObjFunc(function () {
         return {};
     });
-    ScriptUtils.setMakeArrayFunc(function () {
+    ScriptsClass.setMakeArrayFunc(function () {
         return [];
     });
 })();

@@ -7,7 +7,7 @@ package com.eas.server;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import java.util.function.Consumer;
 
 /**
@@ -35,14 +35,14 @@ public abstract class SessionRequestHandler<T extends Request, R extends Respons
         } else {
             aSession.accessed();
             assert PlatypusPrincipal.getInstance() == null : "Principal must be null before session request handler is invoked.";
-            assert ScriptUtils.getSession() == null : "Session must be null before session request handler is invoked.";
+            assert Scripts.getSession() == null : "Session must be null before session request handler is invoked.";
             PlatypusPrincipal.setInstance(aPrincipal);
-            ScriptUtils.setSession(aSession);
+            Scripts.setSession(aSession);
             try {
                 handle2(aSession, onSuccess, onFailure);
             } finally {
                 PlatypusPrincipal.setInstance(null);
-                ScriptUtils.setSession(null);
+                Scripts.setSession(null);
             }
         }
     }

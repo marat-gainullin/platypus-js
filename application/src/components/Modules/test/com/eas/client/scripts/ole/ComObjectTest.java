@@ -4,7 +4,7 @@
  */
 package com.eas.client.scripts.ole;
 
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import javax.script.ScriptException;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -20,7 +20,11 @@ import org.junit.Test;
  */
 public class ComObjectTest {
 
-    public ComObjectTest() {
+    protected Scripts.Space space;
+    
+    public ComObjectTest() throws ScriptException {
+        super();
+        space = Scripts.createSpace();
     }
 
     @BeforeClass
@@ -95,6 +99,6 @@ public class ComObjectTest {
     }
 
     private Object evaluateString(String str) throws ScriptException {
-        return ScriptUtils.exec(str);
+        return space.exec(str);
     }
 }

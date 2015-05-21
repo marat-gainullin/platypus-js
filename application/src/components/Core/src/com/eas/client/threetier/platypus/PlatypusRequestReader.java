@@ -25,7 +25,7 @@ import com.eas.proto.ProtoReader;
 import com.eas.proto.ProtoReaderException;
 import com.eas.proto.dom.ProtoDOMBuilder;
 import com.eas.proto.dom.ProtoNode;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,10 +39,12 @@ import java.util.List;
 public class PlatypusRequestReader implements PlatypusRequestVisitor {
 
     protected byte[] bytes;
+    protected Scripts.Space space;
 
-    public PlatypusRequestReader(byte[] aBytes) {
+    public PlatypusRequestReader(byte[] aBytes, Scripts.Space aSpace) {
         super();
         bytes = aBytes;
+        space = aSpace;
     }
 
     /**
@@ -52,7 +54,7 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
      * @throws IOException
      * @throws ProtoReaderException
      */
-    public static Request read(ProtoReader reader) throws Exception {
+    public static Request read(ProtoReader reader, Scripts.Space aSpace) throws Exception {
         Request rq = null;
         Integer type = null;
         byte[] data = null;
@@ -67,7 +69,7 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
                 case RequestsTags.TAG_REQUEST_END:
                     if (type != null) {
                         rq = PlatypusRequestsFactory.create(type);
-                        PlatypusRequestReader requestReader = new PlatypusRequestReader(data);
+                        PlatypusRequestReader requestReader = new PlatypusRequestReader(data, aSpace);
                         rq.accept(requestReader);
                         break;
                     } else {
@@ -164,7 +166,7 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
                     rq.setMethodName(node.getString());
                     break;
                 case RequestsTags.TAG_ARGUMENT_VALUE: {
-                    args.add(ScriptUtils.parseJsonWithDates(node.getString()));
+                    args.add(space.parseJsonWithDates(node.getString()));
                     break;
                 }
             }

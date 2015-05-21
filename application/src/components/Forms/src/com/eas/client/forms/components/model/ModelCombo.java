@@ -12,7 +12,7 @@ import com.eas.design.Undesignable;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.EventQueue;
@@ -115,14 +115,14 @@ public class ModelCombo extends ModelComponentDecorator<VComboBox<JSObject>, Obj
 
     protected void unbindList(){
         if(boundToList != null){
-            ScriptUtils.unlisten(boundToList);
+            Scripts.unlisten(boundToList);
             boundToList = null;
         }
     }
     
     protected void bindList(){
-        if (displayList != null && com.eas.script.ScriptUtils.isInitialized()) {
-            boundToList = com.eas.script.ScriptUtils.listen(displayList, "length", new AbstractJSObject() {
+        if (displayList != null && com.eas.script.Scripts.isInitialized()) {
+            boundToList = com.eas.script.Scripts.listen(displayList, "length", new AbstractJSObject() {
 
                 @Override
                 public Object call(Object thiz, Object... args) {

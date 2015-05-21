@@ -8,7 +8,7 @@ import com.eas.client.ClientConstants;
 import com.eas.client.DatabasesClient;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.SessionManager;
 import java.util.Map;
@@ -101,7 +101,7 @@ public class JsServerModuleEndPoint {
         
         facade = new WebSocketServerSession(websocketSession, sessionPrincipal.getSession(), sessionPrincipal.getPrincipal());
         PlatypusPrincipal.setInstance(sessionPrincipal.getPrincipal());
-        ScriptUtils.setSession(sessionPrincipal.getSession());
+        Scripts.setSession(sessionPrincipal.getSession());
         try {
             serverCore.executeMethod(aModuleName, WS_ON_OPEN_METHOD_NAME, new Object[]{facade.getPublished()}, sessionPrincipal.getSession(), (Object aResult) -> {
                 Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "{0} method of {1} module called successfully.", new Object[]{WS_ON_OPEN_METHOD_NAME, aModuleName});
@@ -112,27 +112,27 @@ public class JsServerModuleEndPoint {
             });
         } finally {
             PlatypusPrincipal.setInstance(null);
-            ScriptUtils.setSession(null);
+            Scripts.setSession(null);
         }
     }
 
     @OnMessage
     public void messageRecieved(Session websocketSession, String aData) throws Exception {
-        JSObject messageEvent = ScriptUtils.makeObj();
+        JSObject messageEvent = Scripts.makeObj();
         messageEvent.setMember("data", aData);
         executeSessionFacadeMethod(WS_ON_MESSAGE, new Object[]{messageEvent});
     }
 
     @OnError
     public void errorInSession(Session websocketSession, Throwable aError) {
-        JSObject errorEvent = ScriptUtils.makeObj();
+        JSObject errorEvent = Scripts.makeObj();
         errorEvent.setMember("message", aError.getMessage());
         executeSessionFacadeMethod(WS_ON_ERROR, new Object[]{errorEvent});
     }
 
     @OnClose
     public void sessionClosed(Session websocketSession) throws Exception {
-        JSObject closeEvent = ScriptUtils.makeObj();
+        JSObject closeEvent = Scripts.makeObj();
         closeEvent.setMember("wasClean", true);
         closeEvent.setMember("code", CloseReason.CloseCodes.NORMAL_CLOSURE.getCode());
         closeEvent.setMember("reason", "");
@@ -152,12 +152,12 @@ public class JsServerModuleEndPoint {
                 if (oFun instanceof JSObject && ((JSObject) oFun).isFunction()) {
                     JSObject callable = (JSObject) oFun;
                     final Object lock = facade.getLock();
-                    if (ScriptUtils.getLock() == null) {
-                        ScriptUtils.setLock(lock);
-                        ScriptUtils.setSession(facade.getPlatypusSession());
+                    if (Scripts.getLock() == null) {
+                        Scripts.setLock(lock);
+                        Scripts.setSession(facade.getPlatypusSession());
                         PlatypusPrincipal.setInstance(facade.getPrincipal());
-                        ScriptUtils.setRequest(facade.getRequest());
-                        ScriptUtils.setResponse(facade.getResponse());
+                        Scripts.setRequest(facade.getRequest());
+                        Scripts.setResponse(facade.getResponse());
                         try {
                             if (lock != null) {
                                 synchronized (lock) {
@@ -167,11 +167,11 @@ public class JsServerModuleEndPoint {
                                 throw new IllegalStateException("Can't obtain a lock for web socket session callback: " + methodName);
                             }
                         } finally {
-                            ScriptUtils.setLock(null);
-                            ScriptUtils.setSession(null);
+                            Scripts.setLock(null);
+                            Scripts.setSession(null);
                             PlatypusPrincipal.setInstance(null);
-                            ScriptUtils.setRequest(null);
-                            ScriptUtils.setResponse(null);
+                            Scripts.setRequest(null);
+                            Scripts.setResponse(null);
                         }
                     } else {
                         callable.call(facade, args);

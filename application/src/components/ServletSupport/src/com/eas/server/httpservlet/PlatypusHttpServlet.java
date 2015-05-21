@@ -9,7 +9,7 @@ import com.eas.client.threetier.Requests;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.http.PlatypusHttpRequestParams;
 import com.eas.client.threetier.requests.*;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import com.eas.server.*;
 import com.eas.server.handlers.CommonRequestHandler;
 import com.eas.server.SessionRequestHandler;
@@ -146,13 +146,13 @@ public class PlatypusHttpServlet extends HttpServlet {
                         String dataContext = (String) httpSession.getAttribute(PLATYPUS_PRINCIPAL_DATA_CONTEXT_ATTR_NAME);
                         PlatypusPrincipal principal = servletRequestPrincipal(request, dataContext);
                         assert session != null : "Platypus session missing";
-                        ScriptUtils.setRequest(request);
-                        ScriptUtils.setResponse(response);
+                        Scripts.setRequest(request);
+                        Scripts.setResponse(response);
                         try {
                             processPlatypusRequest(request, response, session, principal, httpSession);
                         } finally {
-                            ScriptUtils.setRequest(null);
-                            ScriptUtils.setResponse(null);
+                            Scripts.setRequest(null);
+                            Scripts.setResponse(null);
                         }
                     }
                 }

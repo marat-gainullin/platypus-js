@@ -7,7 +7,7 @@ package com.eas.client.cache;
 import com.eas.script.JsDoc;
 import com.eas.script.JsDoc.Tag;
 import com.eas.script.PropertiesAnnotationsMiner;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import java.util.*;
 import jdk.nashorn.internal.ir.FunctionNode;
 import jdk.nashorn.internal.runtime.Source;
@@ -87,9 +87,9 @@ public class ScriptDocument {
         moduleAnnotations = new ArrayList<>();
         propertyAllowedRoles.clear();
         Source source = Source.sourceFor(aName, aSource);
-        FunctionNode ast = ScriptUtils.parseJs(aSource);
+        FunctionNode ast = Scripts.parseJs(aSource);
         FunctionNode moduleConstructor = PlatypusFilesSupport.extractModuleConstructor(ast, aName);
-        ast.accept(new PropertiesAnnotationsMiner(source, ScriptUtils.getThisAliases(moduleConstructor)) {
+        ast.accept(new PropertiesAnnotationsMiner(source, Scripts.getThisAliases(moduleConstructor)) {
 
             @Override
             protected void commentedFunction(FunctionNode aFunction, String aComment) {

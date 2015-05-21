@@ -7,12 +7,13 @@ package com.eas.client.dataflow;
 import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
-import com.eas.script.ScriptUtils;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.internal.runtime.JSType;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Reader for jdbc result sets sources. Performs reading of a whole rowset and
@@ -57,7 +58,7 @@ public class JdbcReader {
      * @return New Rowset object created.
      * @throws SQLException
      */
-    public JSObject readRowset(ResultSet aResultSet, int aPageSize) throws SQLException {
+    public Collection<Map<String, Object>> readRowset(ResultSet aResultSet, int aPageSize) throws SQLException {
         try {
             if (aResultSet != null) {
                 ResultSetMetaData lowLevelJdbcFields = aResultSet.getMetaData();
@@ -116,16 +117,15 @@ public class JdbcReader {
      * @return Array of rows had been read.
      * @throws SQLException
      */
-    protected static JSObject readRows(Fields aExpectedFields, Fields aJdbcFields, ResultSet aResultSet, int aPageSize) throws SQLException {
+    protected static Collection<Map<String, Object>> readRows(Fields aExpectedFields, Fields aJdbcFields, ResultSet aResultSet, int aPageSize) throws SQLException {
         try {
             if (aResultSet != null) {
-                JSObject jsRows = ScriptUtils.makeArray();
-                JSObject jsPush = (JSObject) jsRows.getMember("push");
-                while ((aPageSize <= 0 || JSType.toInteger(jsRows.getMember("length")) < aPageSize) && aResultSet.next()) {
-                    JSObject jsRow = readRow(aExpectedFields, aJdbcFields, aResultSet);
-                    jsPush.call(jsRows, new Object[]{jsRow});
+                Collection<Map<String, Object>> oRows = new ArrayList<>();
+                while ((aPageSize <= 0 || oRows.size() < aPageSize) && aResultSet.next()) {
+                    Map<String, Object> jsRow = readRow(aExpectedFields, aJdbcFields, aResultSet);
+                    oRows.add(jsRow);
                 }
-                return jsRows;
+                return oRows;
             } else {
                 throw new SQLException(RESULTSET_MISSING_EXCEPTION_MSG);
             }
@@ -147,21 +147,21 @@ public class JdbcReader {
      * @return The row had been read.
      * @throws SQLException
      */
-    protected static JSObject readRow(Fields aExpectedFields, Fields aJdbcFields, ResultSet aResultSet) throws SQLException {
+    protected static Map<String, Object> readRow(Fields aExpectedFields, Fields aJdbcFields, ResultSet aResultSet) throws SQLException {
         if (aResultSet != null) {
             assert aExpectedFields != null;
-            JSObject row = ScriptUtils.makeObj();
+            Map<String, Object> row = new HashMap<>();
             for (int i = 1; i <= aJdbcFields.getFieldsCount(); i++) {
                 Field jdbcField = aJdbcFields.get(i);
                 Field expectedField = aExpectedFields.get(jdbcField.getName());
                 if (expectedField != null) {
                     Object appObject = Converter.get(aResultSet, i, expectedField.getTypeInfo());
-                    appObject = ScriptUtils.toJs(appObject);
-                    row.setMember(expectedField.getName(), appObject);
+                    //appObject = Scripts.toJs(appObject);
+                    row.put(expectedField.getName(), appObject);
                 } else {
                     Object appObject = Converter.get(aResultSet, i, jdbcField.getTypeInfo());
-                    appObject = ScriptUtils.toJs(appObject);
-                    row.setMember(jdbcField.getName(), appObject);
+                    //appObject = Scripts.toJs(appObject);
+                    row.put(jdbcField.getName(), appObject);
                 }
             }
             return row;

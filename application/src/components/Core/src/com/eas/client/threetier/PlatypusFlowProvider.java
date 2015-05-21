@@ -7,7 +7,6 @@ package com.eas.client.threetier;
 import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.Parameters;
 import com.eas.client.AppConnection;
-import com.eas.client.dataflow.FlowProvider;
 import com.eas.client.dataflow.FlowProviderFailedException;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import java.util.function.Consumer;
@@ -17,7 +16,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class PlatypusFlowProvider implements FlowProvider {
+public class PlatypusFlowProvider {
 
     private static final String ROWSET_MISSING_IN_RESPONSE = "Rowset response hasn't returned any rowset. May be dml query is executed as select query.";
 
@@ -35,17 +34,6 @@ public class PlatypusFlowProvider implements FlowProvider {
         expectedFields = aExpectedFields;
     }
 
-    @Override
-    public JSObject nextPage(Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws FlowProviderFailedException {
-        throw new FlowProviderFailedException("Method \"nextPage()\" is not supported in three-tier mode.");
-    }
-
-    @Override
-    public void close() throws Exception {
-        // no op in three-tier mode
-    }
-
-    @Override
     public JSObject refresh(Parameters aParams, Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws FlowProviderFailedException {
         ExecuteQueryRequest request = new ExecuteQueryRequest(entityName, aParams, expectedFields);
         if (onSuccess != null) {
@@ -80,27 +68,15 @@ public class PlatypusFlowProvider implements FlowProvider {
         }
     }
 
-    @Override
     public boolean isProcedure() {
         return procedure;
     }
 
-    @Override
     public void setProcedure(boolean aProcedure) {
         procedure = aProcedure;
     }
 
-    @Override
     public String getEntityName() {
         return entityName;
-    }
-
-    @Override
-    public int getPageSize() {
-        throw new UnsupportedOperationException("Not supported yet."); //NOI18N
-    }
-
-    @Override
-    public void setPageSize(int aValue) {
     }
 }

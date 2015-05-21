@@ -5,7 +5,7 @@
  */
 package com.eas.server.websocket;
 
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import javax.websocket.ClientEndpoint;
 import javax.websocket.CloseReason;
 import javax.websocket.OnClose;
@@ -37,7 +37,7 @@ public class JsClientEndPoint {
     public void onMessage(Session websocketSession, String aData) {
         session.inContext(() -> {
             if (onmessage != null) {
-                JSObject messageEvent = ScriptUtils.makeObj();
+                JSObject messageEvent = Scripts.makeObj();
                 messageEvent.setMember("data", aData);
                 onmessage.call(session.getPublished(), new Object[]{messageEvent});
             }
@@ -46,8 +46,8 @@ public class JsClientEndPoint {
 
     @OnOpen
     public void onOpen(Session aSession) {
-        ScriptUtils.submitTask(() -> {
-            ScriptUtils.acceptTaskResult(() -> {
+        Scripts.submitTask(() -> {
+            Scripts.acceptTaskResult(() -> {
                 if (onopen != null) {
                     onopen.call(session.getPublished(), new Object[]{});
                 }
@@ -59,17 +59,17 @@ public class JsClientEndPoint {
     public void onClose(Session websocketSession, CloseReason aReason) {
         Runnable actor = () -> {
             if (onclose != null) {
-                JSObject closeEvent = ScriptUtils.makeObj();
+                JSObject closeEvent = Scripts.makeObj();
                 closeEvent.setMember("wasClean", aReason.getCloseCode() == CloseReason.CloseCodes.NORMAL_CLOSURE);
                 closeEvent.setMember("code", aReason.getCloseCode().getCode());
                 closeEvent.setMember("reason", aReason.getReasonPhrase());
                 onclose.call(session.getPublished(), new Object[]{closeEvent});
             }
         };
-        if (ScriptUtils.getLock() == null) {
+        if (Scripts.getLock() == null) {
             session.inContext(actor);
         } else {// already in context
-            final Object lock = ScriptUtils.getLock();
+            final Object lock = Scripts.getLock();
             synchronized (lock) {
                 actor.run();
             }
@@ -80,15 +80,15 @@ public class JsClientEndPoint {
     public void onError(Session websocketSession, Throwable aError) {
         Runnable actor = () -> {
             if (onerror != null) {
-                JSObject errorEvent = ScriptUtils.makeObj();
+                JSObject errorEvent = Scripts.makeObj();
                 errorEvent.setMember("message", aError.getMessage());
                 onerror.call(session.getPublished(), new Object[]{errorEvent});
             }
         };
-        if (ScriptUtils.getLock() == null) {
+        if (Scripts.getLock() == null) {
             session.inContext(actor);
         } else {// already in context
-            final Object lock = ScriptUtils.getLock();
+            final Object lock = Scripts.getLock();
             synchronized (lock) {
                 actor.run();
             }

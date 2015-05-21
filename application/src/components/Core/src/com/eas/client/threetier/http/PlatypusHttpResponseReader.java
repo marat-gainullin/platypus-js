@@ -22,7 +22,7 @@ import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.PlatypusResponseVisitor;
 import com.eas.client.threetier.requests.ResourceRequest;
 import com.eas.client.threetier.requests.CredentialRequest;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import com.eas.util.BinaryUtils;
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,13 +55,15 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
     protected int responseCode;
     protected Request request;
     private byte[] bodyContent;
+    protected Scripts.Space space;
 
-    public PlatypusHttpResponseReader(Request aRequest, HttpURLConnection aConn, PlatypusHttpConnection aPConn) throws IOException {
+    public PlatypusHttpResponseReader(Request aRequest, HttpURLConnection aConn, PlatypusHttpConnection aPConn, Scripts.Space aSpace) throws IOException {
         super();
         request = aRequest;
         conn = aConn;
         responseCode = conn.getResponseCode();
         pConn = aPConn;
+        space = aSpace;
     }
 
     public boolean checkIfSecirutyForm() throws IOException {
@@ -76,12 +78,12 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
 
     protected Object extractJSON() throws IOException {
         String contentText = extractText();
-        return ScriptUtils.parseJson(contentText);
+        return space.parseJson(contentText);
     }
     
     protected Object extractJSONWithDates() throws IOException {
         String contentText = extractText();
-        return ScriptUtils.parseJsonWithDates(contentText);
+        return space.parseJsonWithDates(contentText);
     }
 
     protected String extractText() throws IOException {
@@ -219,7 +221,7 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
             long timeStamp = conn.getLastModified();
             rsp.setTimeStamp(new Date(timeStamp));
             JSObject jsQuery = (JSObject) extractJSON();
-            PlatypusQuery query = QueryJSONReader.read(jsQuery);
+            PlatypusQuery query = QueryJSONReader.read(space, jsQuery);
             rsp.setAppQuery(query);
         } else if (responseCode == HttpURLConnection.HTTP_NOT_MODIFIED) {
             rsp.setAppQuery(null);

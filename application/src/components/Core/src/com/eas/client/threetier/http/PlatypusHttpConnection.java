@@ -14,7 +14,7 @@ import com.eas.client.threetier.Response;
 import com.eas.client.threetier.platypus.RequestEnvelope;
 import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.concurrent.DeamonThreadFactory;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
@@ -124,18 +124,18 @@ public class PlatypusHttpConnection extends PlatypusConnection {
     }
 
     @Override
-    public <R extends Response> void enqueueRequest(Request rq, Consumer<R> onSuccess, Consumer<Exception> onFailure) {
-        ScriptUtils.incAsyncsCount();
-        enqueue(new RequestCallback(new RequestEnvelope(rq, null, null, null), (Response aResponse) -> {
+    public <R extends Response> void enqueueRequest(Request aRequest, Consumer<R> onSuccess, Consumer<Exception> onFailure) {
+        Scripts.incAsyncsCount();
+        enqueue(new RequestCallback(new RequestEnvelope(aRequest, null, null, null), (Response aResponse) -> {
             if (aResponse instanceof ErrorResponse) {
                 if (onFailure != null) {
                     Exception cause = handleErrorResponse((ErrorResponse) aResponse);
-                    if (ScriptUtils.getGlobalQueue() != null) {
-                        ScriptUtils.getGlobalQueue().accept(() -> {
+                    if (Scripts.getGlobalQueue() != null) {
+                        Scripts.getGlobalQueue().accept(() -> {
                             onFailure.accept(cause);
                         });
                     } else {
-                        final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
+                        final Object lock = Scripts.getLock() != null ? Scripts.getLock() : this;
                         synchronized (lock) {
                             onFailure.accept(cause);
                         }
@@ -143,9 +143,9 @@ public class PlatypusHttpConnection extends PlatypusConnection {
                 }
             } else {
                 if (onSuccess != null) {
-                    if (ScriptUtils.getGlobalQueue() != null) {
-                        ScriptUtils.getGlobalQueue().accept(() -> {
-                            if (rq instanceof LogoutRequest) {
+                    if (Scripts.getGlobalQueue() != null) {
+                        Scripts.getGlobalQueue().accept(() -> {
+                            if (aRequest instanceof LogoutRequest) {
                                 cookies.clear();
                                 basicCredentials = null;
                                 if (onLogout != null) {
@@ -155,9 +155,9 @@ public class PlatypusHttpConnection extends PlatypusConnection {
                             onSuccess.accept((R) aResponse);
                         });
                     } else {
-                        final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
+                        final Object lock = Scripts.getLock() != null ? Scripts.getLock() : this;
                         synchronized (lock) {
-                            if (rq instanceof LogoutRequest) {
+                            if (aRequest instanceof LogoutRequest) {
                                 cookies.clear();
                                 basicCredentials = null;
                                 if (onLogout != null) {
@@ -173,24 +173,24 @@ public class PlatypusHttpConnection extends PlatypusConnection {
     }
 
     private void startRequestTask(Runnable aTask) {
-        Object closureLock = ScriptUtils.getLock();
-        Object closureRequest = ScriptUtils.getRequest();
-        Object closureResponse = ScriptUtils.getResponse();
-        Object closureSession = ScriptUtils.getSession();
+        Object closureLock = Scripts.getLock();
+        Object closureRequest = Scripts.getRequest();
+        Object closureResponse = Scripts.getResponse();
+        Object closureSession = Scripts.getSession();
         PlatypusPrincipal closurePrincipal = PlatypusPrincipal.getInstance();
         requestsSender.submit(() -> {
-            ScriptUtils.setLock(closureLock);
-            ScriptUtils.setRequest(closureRequest);
-            ScriptUtils.setResponse(closureResponse);
-            ScriptUtils.setSession(closureSession);
+            Scripts.setLock(closureLock);
+            Scripts.setRequest(closureRequest);
+            Scripts.setResponse(closureResponse);
+            Scripts.setSession(closureSession);
             PlatypusPrincipal.setInstance(closurePrincipal);
             try {
                 aTask.run();
             } finally {
-                ScriptUtils.setLock(null);
-                ScriptUtils.setRequest(null);
-                ScriptUtils.setResponse(null);
-                ScriptUtils.setSession(null);
+                Scripts.setLock(null);
+                Scripts.setRequest(null);
+                Scripts.setResponse(null);
+                Scripts.setSession(null);
                 PlatypusPrincipal.setInstance(null);
             }
         });

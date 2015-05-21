@@ -9,7 +9,7 @@ import com.eas.proto.CoreTags;
 import com.eas.proto.ProtoWriter;
 import com.eas.proto.dom.ProtoDOMBuilder;
 import com.eas.proto.dom.ProtoNode;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -132,7 +132,7 @@ public class BinaryChanges {
             valueWriter.put(ChangesTags.TYPE_ID_TAG, aValue.type.getSqlType());
             valueWriter.put(ChangesTags.TYPE_NAME_TAG, aValue.type.getSqlTypeName());
             valueWriter.put(ChangesTags.TYPE_CLASS_NAME_TAG, aValue.type.getJavaClassName());
-            valueWriter.putJDBCCompatible(ChangesTags.VALUE_TAG, aValue.type.getSqlType(), ScriptUtils.toJava(aValue.value));
+            valueWriter.putJDBCCompatible(ChangesTags.VALUE_TAG, aValue.type.getSqlType(), aValue.value);//Scripts.toJava(aValue.value));
             valueWriter.flush();
             return valueOut;
         }

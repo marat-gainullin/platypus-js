@@ -11,7 +11,7 @@ import com.eas.design.Undesignable;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.EventQueue;
@@ -54,7 +54,7 @@ public class ModelFormattedField extends ModelComponentDecorator<VFormattedField
     @ScriptFunction
     @Override
     public void setJsValue(Object aValue) {
-        setValue(ScriptUtils.toJava(aValue));
+        setValue(Scripts.toJava(aValue));
     }
 
     @Override

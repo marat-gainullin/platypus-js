@@ -1,7 +1,7 @@
 package com.eas.client.scripts;
 
 import com.eas.concurrent.CallableConsumer;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,7 +46,7 @@ public class DependenciesWalker {
     }
 
     public void walk() {
-        sourceRoot = ScriptUtils.parseJs(source);
+        sourceRoot = Scripts.parseJs(source);
         sourceRoot.accept(new NodeVisitor<LexicalContext>(new LexicalContext()) {
 
             private final Stack<CallNode> calls = new Stack<>();

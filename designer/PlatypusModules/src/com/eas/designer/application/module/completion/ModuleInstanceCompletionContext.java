@@ -6,7 +6,7 @@
 package com.eas.designer.application.module.completion;
 
 import com.eas.script.PropertiesAnnotationsMiner;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -59,7 +59,7 @@ public class ModuleInstanceCompletionContext extends CompletionContext {
 
         public Collection<JsCompletionItem> getCompletionItems(CompletionPoint point) {
             functionsMap = new HashMap<>();
-            Set<String> thisAlises = ScriptUtils.getThisAliases(moduleConstructor);
+            Set<String> thisAlises = Scripts.getThisAliases(moduleConstructor);
             scan(point, thisAlises);
             List<JsCompletionItem> items = new ArrayList<>(functionsMap.values());
             return items;

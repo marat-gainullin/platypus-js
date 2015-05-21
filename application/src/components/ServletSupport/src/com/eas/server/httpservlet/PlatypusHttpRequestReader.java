@@ -20,7 +20,7 @@ import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.RPCRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.client.threetier.requests.PlatypusRequestVisitor;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.httpservlet.serial.ChangeJsonReader;
 import com.eas.client.threetier.RowsetJsonConstants;
@@ -191,7 +191,7 @@ public class PlatypusHttpRequestReader implements PlatypusRequestVisitor {
 
     private static Object tryParseJson(String aText) {
         try {
-            return ScriptUtils.parseJson(aText);
+            return Scripts.parseJson(aText);
         } catch (Exception ex) {
             return aText;
         }
@@ -199,7 +199,7 @@ public class PlatypusHttpRequestReader implements PlatypusRequestVisitor {
     
     private static Object tryParseJsonWithDates(String aText) {
         try {
-            return ScriptUtils.parseJsonWithDates(aText);
+            return Scripts.parseJsonWithDates(aText);
         } catch (Exception ex) {
             return aText;
         }

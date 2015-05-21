@@ -14,7 +14,7 @@ import com.eas.client.changes.Insert;
 import com.eas.client.changes.Update;
 import com.eas.client.metadata.Field;
 import com.eas.client.threetier.RowsetJsonConstants;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -66,7 +66,7 @@ public class ChangeJsonReader implements ChangeVisitor {
                             }
                         }
                     }
-                    Object convertedValueValue = ScriptUtils.toJava(oValueValue);
+                    Object convertedValueValue = Scripts.toJava(oValueValue);
                     data.add(new ChangeValue(sValueName, convertedValueValue, field.getTypeInfo()));
                 } else {
                     Logger.getLogger(ChangeJsonReader.class.getName()).log(Level.WARNING, String.format("Couldn't resolve entity property name: %s.%s", entityName, sValueName));
@@ -104,7 +104,7 @@ public class ChangeJsonReader implements ChangeVisitor {
 
     public static List<Change> parse(String aJsonText, EntitiesHost aFieldsResolver) throws Exception {
         List<Change> changes = new ArrayList<>();
-        Object sChanges = ScriptUtils.parseJson(aJsonText);
+        Object sChanges = Scripts.parseJson(aJsonText);
         if (sChanges instanceof JSObject) {
             JSObject aChanges = (JSObject) sChanges;
             int length = JSType.toInteger(aChanges.getMember("length"));

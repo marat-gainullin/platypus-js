@@ -16,7 +16,6 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.JSObject;
-import com.eas.script.ScriptUtils;
 
 /**
  * Converter has to convert some value of any compatible class to value of
@@ -157,9 +156,11 @@ public class Converter {
 
     public static void convertAndAssign(Object aValue, DataTypeInfo aTypeInfo, Connection aConn, int aParameterIndex, PreparedStatement aStmt) throws SQLException {
         if (aValue != null) {
+            /*
             if (aValue instanceof JSObject) {
-                aValue = ScriptUtils.toJava(aValue);
+                aValue = aSpace.toJava(aValue);
             }
+            */
             switch (aTypeInfo.getSqlType()) {
                 // Some strange types. No one knows how to work with them.
                 case Types.JAVA_OBJECT:

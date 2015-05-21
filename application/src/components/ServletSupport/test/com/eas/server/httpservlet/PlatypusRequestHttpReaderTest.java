@@ -13,7 +13,7 @@ import com.eas.client.changes.Update;
 import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.Field;
 import com.eas.client.threetier.RowsetJsonConstants;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import com.eas.server.httpservlet.serial.ChangeJsonReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -43,7 +43,7 @@ public class PlatypusRequestHttpReaderTest {
     @Test
     public void changesJsonReadTest() throws Exception {
         System.out.println("changesJsonReadTest");
-        ScriptUtils.init();
+        Scripts.init();
         List<Change> changes = ChangeJsonReader.parse(WRITTEN_CHANGES, (String aEntityId, String aFieldName) -> {
             assertEquals("testEntity", aEntityId);
             switch (aFieldName) {

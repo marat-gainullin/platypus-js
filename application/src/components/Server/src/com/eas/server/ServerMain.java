@@ -16,7 +16,7 @@ import com.eas.client.queries.QueriesProxy;
 import com.eas.client.resourcepool.DatasourcesArgsConsumer;
 import com.eas.client.scripts.ScriptedResource;
 import com.eas.client.threetier.PlatypusConnection;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import com.eas.sensors.api.RetranslateFactory;
 import com.eas.sensors.api.SensorsFactory;
 import com.eas.util.args.ThreadsArgsConsumer;
@@ -195,14 +195,14 @@ public class ServerMain {
                 ServerTasksScanner tasksScanner = new ServerTasksScanner(scriptsConfigs);
                 ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), tasksScanner);
                 indexer.watch();
-                ScriptUtils.initServices(threadsConfig.getMaxServicesTreads());
+                Scripts.initBIO(threadsConfig.getMaxServicesTreads());
                 serverCoreDbClient = new ScriptedDatabasesClient(defDatasource, indexer, true, tasksScanner.getValidators(), threadsConfig.getMaxJdbcTreads());
                 QueriesProxy<SqlQuery> queries = new LocalQueriesProxy(serverCoreDbClient, indexer);
                 serverCoreDbClient.setQueries(queries);
                 PlatypusServer server = new PlatypusServer(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), appElement), queries, serverCoreDbClient, sslContext, parseListenAddresses(), parsePortsProtocols(), parsePortsSessionIdleTimeouts(), parsePortsSessionIdleCheckIntervals(), parsePortsNumWorkerThreads(), scriptsConfigs, appElement);
                 serverCoreDbClient.setContextHost(server);
                 ScriptedResource.init(server);
-                ScriptUtils.init();
+                Scripts.init();
                 SensorsFactory.init(server.getAcceptorsFactory());
                 RetranslateFactory.init(server.getRetranslateFactory());
                 //

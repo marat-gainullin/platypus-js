@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.api.scripting.ScriptUtils;
 import jdk.nashorn.internal.runtime.JSType;
 import jdk.nashorn.internal.runtime.ScriptObject;
 
@@ -37,7 +38,7 @@ public class ModulesJSFacade extends AbstractJSObject {
 
     @Override
     public synchronized void setMember(String name, Object value) {
-        value = value instanceof ScriptObject ? jdk.nashorn.api.scripting.ScriptUtils.wrap((ScriptObject)value) : value;
+        value = value instanceof ScriptObject ? ScriptUtils.wrap((ScriptObject)value) : value;
         if (value instanceof JSObject) {
             if (session.getId() == null) {
                 throw new IllegalStateException(RESIDENT_MODULES_MODIFICATION_MSG);

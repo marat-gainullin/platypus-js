@@ -11,7 +11,7 @@ import com.eas.client.queries.Query;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.client.threetier.http.Cookie;
 import com.eas.client.threetier.http.PlatypusHttpConstants;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import com.eas.util.BinaryUtils;
 import com.eas.util.FileUtils;
 import java.io.File;
@@ -113,17 +113,17 @@ public class ScriptedResource {
 
     public static Object load(final String aResourceName, JSObject onSuccess, JSObject onFailure) throws Exception {
         if (onSuccess != null) {
-            ScriptUtils.submitTask(() -> {
+            Scripts.submitTask(() -> {
                 try {
                     Object loaded = loadSync(aResourceName);
-                    ScriptUtils.acceptTaskResult(() -> {
-                        onSuccess.call(null, new Object[]{ScriptUtils.toJs(loaded)});
+                    Scripts.acceptTaskResult(() -> {
+                        onSuccess.call(null, new Object[]{Scripts.toJs(loaded)});
                     });
                 } catch (Exception ex) {
                     Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, null, ex);
                     if (onFailure != null) {
-                        ScriptUtils.acceptTaskResult(() -> {
-                            onFailure.call(null, new Object[]{ScriptUtils.toJs(ex.getMessage())});
+                        Scripts.acceptTaskResult(() -> {
+                            onFailure.call(null, new Object[]{Scripts.toJs(ex.getMessage())});
                         });
                     }
                 }
@@ -177,7 +177,7 @@ public class ScriptedResource {
         Map<String, Object> headers = new HashMap<>();
         if (aHeaders != null) {
             aHeaders.keySet().stream().forEach((String aKey) -> {
-                Object oValue = ScriptUtils.toJava(aHeaders.getMember(aKey));
+                Object oValue = Scripts.toJava(aHeaders.getMember(aKey));
                 if (oValue != null) {
                     headers.put(aKey.toLowerCase(), oValue);
                 }
@@ -294,7 +294,7 @@ public class ScriptedResource {
         }
 
         public JSObject toJs() {
-            JSObject jsResp = ScriptUtils.makeObj();
+            JSObject jsResp = Scripts.makeObj();
             // general
             jsResp.setMember("status", getStatus());
             jsResp.setMember("statusText", getStatusText());
@@ -303,18 +303,18 @@ public class ScriptedResource {
             jsResp.setMember("bodyBuffer", getBodyBuffer());
             jsResp.setMember("characterEncoding", getCharacterEncoding());
             // headers
-            JSObject jsHeaders = ScriptUtils.makeObj();
+            JSObject jsHeaders = Scripts.makeObj();
             getHeaders().entrySet().stream().forEach((Map.Entry<String, Object> aEntry) -> {
-                jsHeaders.setMember(aEntry.getKey(), ScriptUtils.toJs(aEntry.getValue()));
+                jsHeaders.setMember(aEntry.getKey(), Scripts.toJs(aEntry.getValue()));
             });
             jsResp.setMember("headers", jsHeaders);
             // cookies
-            JSObject jsCookies = ScriptUtils.makeObj();
+            JSObject jsCookies = Scripts.makeObj();
             getCookies().forEach((Cookie aCookie) -> {
-                JSObject jsCookie = ScriptUtils.makeObj();
+                JSObject jsCookie = Scripts.makeObj();
                 jsCookie.setMember("name", aCookie.getName());
                 jsCookie.setMember("domain", aCookie.getDomain());
-                jsCookie.setMember("expires", ScriptUtils.toJs(aCookie.getExpires()));
+                jsCookie.setMember("expires", Scripts.toJs(aCookie.getExpires()));
                 jsCookie.setMember("maxAge", (double) aCookie.getMaxAge());
                 jsCookie.setMember("path", aCookie.getPath());
                 jsCookie.setMember("value", aCookie.getValue());
@@ -518,7 +518,7 @@ public class ScriptedResource {
                     Path apiLocalPath = apiPath.resolve(scriptOrModuleName);
                     if (apiLocalPath != null && apiLocalPath.toFile().exists() && !apiLocalPath.toFile().isDirectory()) {
                         try {
-                            ScriptUtils.exec(apiLocalPath.toUri().toURL());
+                            Scripts.exec(apiLocalPath.toUri().toURL());
                             scriptsProcess.complete(null, null);
                         } catch (Exception ex) {
                             scriptsProcess.complete(null, ex);
@@ -532,7 +532,7 @@ public class ScriptedResource {
                                 RequireProcess scriptProcess = new RequireProcess(3, (Void v) -> {
                                     try {
                                         URL sourceUrl = sourceFile.toURI().toURL();
-                                        ScriptUtils.exec(sourceUrl);
+                                        Scripts.exec(sourceUrl);
                                         try {
                                             scriptsProcess.complete(null, null);
                                         } catch (Exception ex) {
@@ -604,7 +604,7 @@ public class ScriptedResource {
                 required.add(scriptOrModuleName);
                 Path apiLocalPath = apiPath.resolve(scriptOrModuleName);
                 if (apiLocalPath != null && apiLocalPath.toFile().exists() && !apiLocalPath.toFile().isDirectory()) {
-                    ScriptUtils.exec(apiLocalPath.toUri().toURL());
+                    Scripts.exec(apiLocalPath.toUri().toURL());
                 } else {
                     ModuleStructure structure = app.getModules().getModule(scriptOrModuleName, null, null);
                     if (structure != null) {
@@ -616,7 +616,7 @@ public class ScriptedResource {
                             sRequire(structure.getServerDependencies().toArray(new String[]{}), null, null);
                         }
                         _require(structure.getClientDependencies().toArray(new String[]{}), null, required);
-                        ScriptUtils.exec(sourceUrl);
+                        Scripts.exec(sourceUrl);
                     } else {
                         throw new FileNotFoundException(scriptOrModuleName);
                     }
@@ -699,13 +699,13 @@ public class ScriptedResource {
      read.append(buffer, 0, readCount);
      }
      }
-     ScriptUtils.exec(sourceUrl);
+     Scripts.exec(sourceUrl);
      ApplicationElement appElement = cache.get(resourceId);
      if (appElement != null && appElement.isModule()) {
      ScriptDocument doc = Dom2ScriptDocument.transform(appElement.getContent());
-     JSObject nativeConstr = ScriptUtils.lookupInGlobal(appElement.getId());
+     JSObject nativeConstr = Scripts.lookupInGlobal(appElement.getId());
      SecuredJSConstructor securedContr = new SecuredJSConstructor(nativeConstr, appElement.getId(), appElement.getTxtContentLength(), appElement.getTxtCrc32(), cache, getPrincipalHost(), doc);
-     ScriptUtils.putInGlobal(appElement.getId(), securedContr);
+     Scripts.putInGlobal(appElement.getId(), securedContr);
      }
      }
      */

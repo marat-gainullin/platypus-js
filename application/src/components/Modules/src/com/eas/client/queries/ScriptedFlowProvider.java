@@ -10,7 +10,7 @@ import com.eas.client.PlatypusJdbcFlowProvider;
 import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.metadata.Parameters;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -62,14 +62,14 @@ public class ScriptedFlowProvider extends PlatypusJdbcFlowProvider {
             if (oFetch instanceof JSObject) {
                 JSObject jsFetch = (JSObject) oFetch;
                 if (jsFetch.isFunction()) {
-                    JSObject jsParams = ScriptUtils.makeObj();
+                    JSObject jsParams = Scripts.makeObj();
                     for (int i = 0; i < aParameters.getParametersCount(); i++) {
                         Parameter p = aParameters.get(i + 1);
-                        jsParams.setMember(p.getName(), ScriptUtils.toJs(p.getValue()));
+                        jsParams.setMember(p.getName(), Scripts.toJs(p.getValue()));
                     }
                     if (onSuccess != null) {
                         final ExecutionChecker exChecker = new ExecutionChecker();
-                        Object oRowset = jsFetch.call(source, ScriptUtils.toJs(new Object[]{
+                        Object oRowset = jsFetch.call(source, Scripts.toJs(new Object[]{
                             jsParams,
                             new AbstractJSObject() {
 
@@ -77,7 +77,7 @@ public class ScriptedFlowProvider extends PlatypusJdbcFlowProvider {
                                 public Object call(final Object thiz, final Object... args) {
                                     if (exChecker.isExecutionNeeded()) {
                                         try {
-                                            JSObject jsRowset = args.length > 0 ? (JSObject) ScriptUtils.toJava(args[0]) : null;
+                                            JSObject jsRowset = args.length > 0 ? (JSObject) Scripts.toJava(args[0]) : null;
                                             try {
                                                 onSuccess.accept(jsRowset);
                                             } catch (Exception ex) {
@@ -102,7 +102,7 @@ public class ScriptedFlowProvider extends PlatypusJdbcFlowProvider {
                                                 if (args[0] instanceof Exception) {
                                                     onFailure.accept((Exception) args[0]);
                                                 } else {
-                                                    onFailure.accept(new Exception(String.valueOf(ScriptUtils.toJava(args[0]))));
+                                                    onFailure.accept(new Exception(String.valueOf(Scripts.toJava(args[0]))));
                                                 }
                                             } else {
                                                 onFailure.accept(new Exception("No error information from fetch method"));
@@ -114,14 +114,14 @@ public class ScriptedFlowProvider extends PlatypusJdbcFlowProvider {
                             }
                         }));
                         if (!JSType.nullOrUndefined(oRowset)) {
-                            onSuccess.accept((JSObject) ScriptUtils.toJava(oRowset));
+                            onSuccess.accept((JSObject) Scripts.toJava(oRowset));
                             exChecker.setExecutionNeeded(false);
                         }
                         return null;
                     } else {
-                        Object oRowset = jsFetch.call(source, ScriptUtils.toJs(new Object[]{jsParams}));
+                        Object oRowset = jsFetch.call(source, Scripts.toJs(new Object[]{jsParams}));
                         if (!JSType.nullOrUndefined(oRowset)) {
-                            return (JSObject) ScriptUtils.toJava(oRowset);
+                            return (JSObject) Scripts.toJava(oRowset);
                         } else {
                             return null;
                         }
@@ -141,14 +141,14 @@ public class ScriptedFlowProvider extends PlatypusJdbcFlowProvider {
                 if (jsNextPage.isFunction()) {
                     if (onSuccess != null) {
                         final ExecutionChecker exChecker = new ExecutionChecker();
-                        Object oRowset = jsNextPage.call(source, ScriptUtils.toJs(new Object[]{
+                        Object oRowset = jsNextPage.call(source, Scripts.toJs(new Object[]{
                             new AbstractJSObject() {
 
                                 @Override
                                 public Object call(final Object thiz, final Object... args) {
                                     if (exChecker.isExecutionNeeded()) {
                                         try {
-                                            Object oRowset = args.length > 0 ? ScriptUtils.toJava(args[0]) : null;
+                                            Object oRowset = args.length > 0 ? Scripts.toJava(args[0]) : null;
                                             JSObject jsRowset = (JSObject) oRowset;
                                             try {
                                                 onSuccess.accept(jsRowset);
@@ -175,7 +175,7 @@ public class ScriptedFlowProvider extends PlatypusJdbcFlowProvider {
                                                 if (args[0] instanceof Exception) {
                                                     onFailure.accept((Exception) args[0]);
                                                 } else {
-                                                    onFailure.accept(new Exception(String.valueOf(ScriptUtils.toJava(args[0]))));
+                                                    onFailure.accept(new Exception(String.valueOf(Scripts.toJava(args[0]))));
                                                 }
                                             } else {
                                                 onFailure.accept(new Exception("No error information from nextPage method"));
@@ -187,15 +187,15 @@ public class ScriptedFlowProvider extends PlatypusJdbcFlowProvider {
                             }
                         }));
                         if (!JSType.nullOrUndefined(oRowset)) {
-                            onSuccess.accept((JSObject) ScriptUtils.toJava(oRowset));
+                            onSuccess.accept((JSObject) Scripts.toJava(oRowset));
                             exChecker.setExecutionNeeded(false);
                         } else {
                             return null;
                         }
                     } else {
-                        Object oRowset = jsNextPage.call(source, ScriptUtils.toJs(new Object[]{}));
+                        Object oRowset = jsNextPage.call(source, Scripts.toJs(new Object[]{}));
                         if (!JSType.nullOrUndefined(oRowset)) {
-                            return (JSObject) ScriptUtils.toJava(oRowset);
+                            return (JSObject) Scripts.toJava(oRowset);
                         } else {
                             return null;
                         }

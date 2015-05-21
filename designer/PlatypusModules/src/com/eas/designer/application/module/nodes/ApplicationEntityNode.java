@@ -10,7 +10,7 @@ import com.eas.client.model.application.ReferenceRelation;
 import com.eas.client.model.gui.edits.NewReferenceRelationEdit;
 import com.eas.client.model.gui.view.model.ApplicationModelView;
 import com.eas.designer.datamodel.nodes.EntityNode;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 import java.util.logging.Level;
@@ -53,7 +53,7 @@ public class ApplicationEntityNode extends EntityNode<ApplicationDbEntity> {
         try {
             return !name.isEmpty()
                     && (entity.getModel().getEntityByName(name) == null || getName().equalsIgnoreCase(name))
-                    && ScriptUtils.isValidJsIdentifier(name);
+                    && Scripts.isValidJsIdentifier(name);
         } catch (Exception ex) {
             ErrorManager.getDefault().notify(ex);
         }

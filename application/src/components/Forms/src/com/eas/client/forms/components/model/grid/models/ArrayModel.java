@@ -6,7 +6,7 @@ package com.eas.client.forms.components.model.grid.models;
 
 import com.eas.client.forms.components.model.ModelWidget;
 import com.eas.client.forms.components.model.grid.columns.ModelColumn;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import java.awt.EventQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,15 +40,15 @@ public abstract class ArrayModel {
 
     protected void enqueueElementsChanged() {
         if (boundToDataElements != null) {
-            ScriptUtils.unlisten(boundToDataElements);
+            Scripts.unlisten(boundToDataElements);
             boundToDataElements = null;
         }
         elementsChangedEnqueued = true;
         EventQueue.invokeLater(() -> {
             if (elementsChangedEnqueued) {
                 elementsChangedEnqueued = false;
-                if (data != null && com.eas.script.ScriptUtils.isInitialized()) {
-                    boundToDataElements = com.eas.script.ScriptUtils.listenElements(data, new AbstractJSObject() {
+                if (data != null && com.eas.script.Scripts.isInitialized()) {
+                    boundToDataElements = com.eas.script.Scripts.listenElements(data, new AbstractJSObject() {
 
                         @Override
                         public Object call(Object thiz, Object... args) {
@@ -76,8 +76,8 @@ public abstract class ArrayModel {
     }
 
     protected void bind() {
-        if (data != null && com.eas.script.ScriptUtils.isInitialized()) {
-            boundToData = com.eas.script.ScriptUtils.listen(data, "length", new AbstractJSObject() {
+        if (data != null && com.eas.script.Scripts.isInitialized()) {
+            boundToData = com.eas.script.Scripts.listen(data, "length", new AbstractJSObject() {
 
                 @Override
                 public Object call(Object thiz, Object... args) {
@@ -91,11 +91,11 @@ public abstract class ArrayModel {
 
     protected void unbind() {
         if (boundToData != null) {
-            ScriptUtils.unlisten(boundToData);
+            Scripts.unlisten(boundToData);
             boundToData = null;
         }
         if (boundToDataElements != null) {
-            ScriptUtils.unlisten(boundToDataElements);
+            Scripts.unlisten(boundToDataElements);
             boundToDataElements = null;
         }
     }

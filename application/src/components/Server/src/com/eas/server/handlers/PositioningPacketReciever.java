@@ -6,7 +6,7 @@ package com.eas.server.handlers;
 
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.login.SystemPlatypusPrincipal;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import com.eas.sensors.api.Packet;
 import com.eas.sensors.api.PacketReciever;
 import com.eas.sensors.api.RetranslateFactory;
@@ -37,7 +37,7 @@ public class PositioningPacketReciever implements PacketReciever {
     public Object received(Packet aPacket) throws Exception {
         Session session = serverCore.getSessionManager().getSystemSession();
         PlatypusPrincipal.setInstance(new SystemPlatypusPrincipal());
-        ScriptUtils.setSession(session);
+        Scripts.setSession(session);
         try {
             serverCore.executeMethod(moduleName, RECIEVER_METHOD_NAME, new Object[]{aPacket}, session, (Object result) -> {
                 if (result != null) {
@@ -50,7 +50,7 @@ public class PositioningPacketReciever implements PacketReciever {
             }, null);
         } finally {
             PlatypusPrincipal.setInstance(null);
-            ScriptUtils.setSession(null);
+            Scripts.setSession(null);
         }
         return null;
     }

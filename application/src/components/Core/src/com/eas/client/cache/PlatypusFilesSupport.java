@@ -7,7 +7,7 @@ package com.eas.client.cache;
 import com.eas.client.ClientConstants;
 import com.eas.script.BaseAnnotationsMiner;
 import com.eas.script.JsDoc;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import com.eas.util.FileUtils;
 import com.eas.util.StringUtils;
 import java.io.File;
@@ -43,7 +43,7 @@ public class PlatypusFilesSupport {
     }
 
     public static FunctionNode extractModuleConstructor(String aJsContent, String aFileName) {
-        return extractModuleConstructor(ScriptUtils.parseJs(aJsContent), aFileName);
+        return extractModuleConstructor(Scripts.parseJs(aJsContent), aFileName);
     }
 
     public static FunctionNode extractModuleConstructor(FunctionNode jsRoot, String aFileName) {

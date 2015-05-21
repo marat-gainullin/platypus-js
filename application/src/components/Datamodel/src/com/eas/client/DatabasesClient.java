@@ -17,7 +17,7 @@ import com.eas.client.resourcepool.ResourceUnavalableException;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.concurrent.CallableConsumer;
 import com.eas.concurrent.DeamonThreadFactory;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import com.eas.util.StringUtils;
 import java.sql.*;
 import java.util.*;
@@ -321,24 +321,24 @@ public class DatabasesClient {
             startJdbcTask(() -> {
                 try {
                     Integer affected = doWork.call();
-                    if (ScriptUtils.getGlobalQueue() != null) {
-                        ScriptUtils.getGlobalQueue().accept(() -> {
+                    if (Scripts.getGlobalQueue() != null) {
+                        Scripts.getGlobalQueue().accept(() -> {
                             onSuccess.accept(affected);
                         });
                     } else {
-                        final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
+                        final Object lock = Scripts.getLock() != null ? Scripts.getLock() : this;
                         synchronized (lock) {
                             onSuccess.accept(affected);
                         }
                     }
                 } catch (Exception ex) {
                     if (onFailure != null) {
-                        if (ScriptUtils.getGlobalQueue() != null) {
-                            ScriptUtils.getGlobalQueue().accept(() -> {
+                        if (Scripts.getGlobalQueue() != null) {
+                            Scripts.getGlobalQueue().accept(() -> {
                                 onFailure.accept(ex);
                             });
                         } else {
-                            final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
+                            final Object lock = Scripts.getLock() != null ? Scripts.getLock() : this;
                             synchronized (lock) {
                                 onFailure.accept(ex);
                             }
@@ -368,25 +368,25 @@ public class DatabasesClient {
     }
 
     private void startJdbcTask(Runnable aTask) {
-        ScriptUtils.incAsyncsCount();
-        Object closureLock = ScriptUtils.getLock();
-        Object closureRequest = ScriptUtils.getRequest();
-        Object closureResponse = ScriptUtils.getResponse();
-        Object closureSession = ScriptUtils.getSession();
+        Scripts.incAsyncsCount();
+        Object closureLock = Scripts.getLock();
+        Object closureRequest = Scripts.getRequest();
+        Object closureResponse = Scripts.getResponse();
+        Object closureSession = Scripts.getSession();
         PlatypusPrincipal closurePrincipal = PlatypusPrincipal.getInstance();
         jdbcProcessor.submit(() -> {
-            ScriptUtils.setLock(closureLock);
-            ScriptUtils.setRequest(closureRequest);
-            ScriptUtils.setResponse(closureResponse);
-            ScriptUtils.setSession(closureSession);
+            Scripts.setLock(closureLock);
+            Scripts.setRequest(closureRequest);
+            Scripts.setResponse(closureResponse);
+            Scripts.setSession(closureSession);
             PlatypusPrincipal.setInstance(closurePrincipal);
             try {
                 aTask.run();
             } finally {
-                ScriptUtils.setLock(null);
-                ScriptUtils.setRequest(null);
-                ScriptUtils.setResponse(null);
-                ScriptUtils.setSession(null);
+                Scripts.setLock(null);
+                Scripts.setRequest(null);
+                Scripts.setResponse(null);
+                Scripts.setSession(null);
                 PlatypusPrincipal.setInstance(null);
             }
         });
@@ -445,24 +445,24 @@ public class DatabasesClient {
                 ApplyProcess applyProcess = new ApplyProcess(aDatasourcesChangeLogs.size(), (List<ApplyResult> aApplyResults) -> {
                     assert aDatasourcesChangeLogs.size() == aApplyResults.size();
                     CommitProcess commitProcess = new CommitProcess(aApplyResults.size(), (Integer aRowsAffected) -> {
-                        if (ScriptUtils.getGlobalQueue() != null) {
-                            ScriptUtils.getGlobalQueue().accept(() -> {
+                        if (Scripts.getGlobalQueue() != null) {
+                            Scripts.getGlobalQueue().accept(() -> {
                                 onSuccess.accept(aRowsAffected);
                             });
                         } else {
-                            final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
+                            final Object lock = Scripts.getLock() != null ? Scripts.getLock() : this;
                             synchronized (lock) {
                                 onSuccess.accept(aRowsAffected);
                             }
                         }
                     }, (Exception aFailureCause) -> {
                         if (onFailure != null) {
-                            if (ScriptUtils.getGlobalQueue() != null) {
-                                ScriptUtils.getGlobalQueue().accept(() -> {
+                            if (Scripts.getGlobalQueue() != null) {
+                                Scripts.getGlobalQueue().accept(() -> {
                                     onFailure.accept(aFailureCause);
                                 });
                             } else {
-                                final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
+                                final Object lock = Scripts.getLock() != null ? Scripts.getLock() : this;
                                 synchronized (lock) {
                                     onFailure.accept(aFailureCause);
                                 }

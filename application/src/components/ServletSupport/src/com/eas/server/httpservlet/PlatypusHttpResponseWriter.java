@@ -23,7 +23,7 @@ import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.PlatypusResponseVisitor;
 import com.eas.client.threetier.requests.ResourceRequest;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import com.eas.server.httpservlet.serial.query.QueryJsonWriter;
 import com.eas.util.IDGenerator;
 import com.eas.util.JSONUtils;
@@ -84,7 +84,7 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
         makeResponseNotCacheable(servletResponse);
         ExecuteQueryRequest.Response resp = (ExecuteQueryRequest.Response) rsp;
         if (resp.getRowset() != null) {
-            writeJsonResponse(ScriptUtils.toJson(resp.getRowset()), servletResponse);
+            writeJsonResponse(Scripts.toJson(resp.getRowset()), servletResponse);
         } else {
             writeJsonResponse(resp.getUpdateCount() + "", servletResponse);
         }
@@ -103,10 +103,10 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
 //           
 //        } else 
         if (result instanceof String) {
-            writeJsonResponse(ScriptUtils.toJson(result), servletResponse);
+            writeJsonResponse(Scripts.toJson(result), servletResponse);
         } else if (result instanceof JSObject) {
             JSObject jsResult = (JSObject) result;
-            JSObject p = ScriptUtils.lookupInGlobal("P");
+            JSObject p = Scripts.lookupInGlobal("P");
             if (p != null) {
                 Object reportClass = p.getMember("Report");
                 Object dbEntityClass = p.getMember("ApplicationDbEntity");
@@ -132,13 +132,13 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
                     reportLocation = new URI(null, null, reportLocation, null).toASCIIString();
                     writeResponse(reportLocation, servletResponse, PlatypusHttpResponseReader.REPORT_LOCATION_CONTENT_TYPE);
                 } else {
-                    writeJsonResponse(ScriptUtils.toJson(result), servletResponse);
+                    writeJsonResponse(Scripts.toJson(result), servletResponse);
                 }
             } else {
-                writeJsonResponse(ScriptUtils.toJson(result), servletResponse);
+                writeJsonResponse(Scripts.toJson(result), servletResponse);
             }
         } else {// including null result
-            writeJsonResponse(ScriptUtils.toJson(ScriptUtils.toJs(result)), servletResponse);
+            writeJsonResponse(Scripts.toJson(Scripts.toJs(result)), servletResponse);
         }
     }
 

@@ -2,25 +2,24 @@
  * Platypus.js internals initialization.
  * Don't edit unless you are a Platypus.js contributor.
  */
-(function () {
-    var ScriptUtils = Java.type('com.eas.script.ScriptUtils');
-    ScriptUtils.setLookupInGlobalFunc(
+(function (aSpace) {
+    aSpace.setLookupInGlobalFunc(
             function (aPropertyName) {
                 return this[aPropertyName];
             });
-    ScriptUtils.setPutInGlobalFunc(
+    aSpace.setPutInGlobalFunc(
             function (aPropertyName, aValue) {
                 this[aPropertyName] = aValue;
             });
-    ScriptUtils.setToDateFunc(
+    aSpace.setToDateFunc(
             function (aJavaDate) {
                 return aJavaDate !== null ? new Date(aJavaDate.time) : null;
             });
-    ScriptUtils.setParseJsonFunc(
+    aSpace.setParseJsonFunc(
             function (str) {
                 return JSON.parse(str);
             });
-    ScriptUtils.setParseJsonWithDatesFunc(
+    aSpace.setParseJsonWithDatesFunc(
             function (str) {
                 return JSON.parse(str, function (k, v) {
                     if (typeof v === 'string' && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/.test(v)) {
@@ -31,11 +30,11 @@
                 });
             });
 
-    ScriptUtils.setWriteJsonFunc(
+    aSpace.setWriteJsonFunc(
             function (aObj) {
                 return JSON.stringify(aObj);
             });
-    ScriptUtils.setExtendFunc(
+    aSpace.setExtendFunc(
             function (Child, Parent) {
                 var prevChildProto = {};
                 for (var m in Child.prototype) {
@@ -53,7 +52,7 @@
                 Child.prototype.constructor = Child;
                 Child.superclass = Parent.prototype;
             });
-    ScriptUtils.setScalarDefFunc(
+    aSpace.setScalarDefFunc(
             function (targetPublishedEntity, targetFieldName, sourceFieldName) {
                 var _self = this;
                 _self.enumerable = false;
@@ -68,13 +67,16 @@
                     this[sourceFieldName] = aValue ? aValue[targetFieldName] : null;
                 };
             });
-    ScriptUtils.setIsArrayFunc(function (aInstance) {
+    aSpace.setIsArrayFunc(function (aInstance) {
         return aInstance instanceof Array;
     });
-    ScriptUtils.setMakeObjFunc(function () {
+    aSpace.setMakeObjFunc(function () {
         return {};
     });
-    ScriptUtils.setMakeArrayFunc(function () {
+    aSpace.setMakeArrayFunc(function () {
         return [];
     });
-})();
+    aSpace.setLoadFunc(function (aSourceLocation) {
+        return load(aSourceLocation);
+    });
+});

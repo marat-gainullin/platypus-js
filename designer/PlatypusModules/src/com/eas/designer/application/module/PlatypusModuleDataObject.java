@@ -22,7 +22,7 @@ import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.datamodel.nodes.ModelNode;
 import com.eas.designer.explorer.PlatypusDataObject;
 import com.eas.designer.explorer.files.wizard.NewApplicationElementWizardIterator;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import com.eas.util.CollectionListener;
 import com.eas.util.ListenerRegistration;
 import com.eas.xml.dom.Source2XmlDom;
@@ -200,7 +200,7 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
             if (doc != null) {
                 FunctionNode parseResult = null;
                 try {
-                    parseResult = ScriptUtils.parseJs(doc.getText(0, doc.getLength()));
+                    parseResult = Scripts.parseJs(doc.getText(0, doc.getLength()));
                 } catch (BadLocationException ex) {
                     //no op
                 }

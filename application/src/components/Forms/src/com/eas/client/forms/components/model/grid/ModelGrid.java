@@ -40,7 +40,7 @@ import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import com.eas.util.ListenerRegistration;
 import java.awt.*;
 import java.awt.event.*;
@@ -59,6 +59,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.*;
 import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.api.scripting.ScriptUtils;
 import jdk.nashorn.internal.runtime.JSType;
 import jdk.nashorn.internal.runtime.ScriptObject;
 
@@ -1077,14 +1078,14 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     protected void unbindCursor() {
         if (boundToCursor != null) {
-            ScriptUtils.unlisten(boundToCursor);
+            Scripts.unlisten(boundToCursor);
             boundToCursor = null;
         }
     }
 
     protected void bindCursor(JSObject aModelData) {
         if (aModelData != null) {
-            boundToCursor = ScriptUtils.listen(aModelData, cursorProperty, new AbstractJSObject() {
+            boundToCursor = Scripts.listen(aModelData, cursorProperty, new AbstractJSObject() {
 
                 @Override
                 public Object call(Object thiz, Object... args) {
@@ -1099,10 +1100,10 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     protected void bind() {
         if (data != null) {
-            if (com.eas.script.ScriptUtils.isInitialized()) {
+            if (com.eas.script.Scripts.isInitialized()) {
                 Object modelData = field != null && !field.isEmpty() ? ModelWidget.getPathData(data, field) : data;
                 if (rowsModel != null) {
-                    modelData = modelData instanceof ScriptObject ? jdk.nashorn.api.scripting.ScriptUtils.wrap((ScriptObject) modelData) : modelData;
+                    modelData = modelData instanceof ScriptObject ? ScriptUtils.wrap((ScriptObject) modelData) : modelData;
                     if (modelData instanceof JSObject) {
                         JSObject jsModelData = (JSObject) modelData;
                         unbindCursor();
@@ -1114,13 +1115,13 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
                     }
                 }
                 if (field != null && !field.isEmpty()) {
-                    boundToData = com.eas.script.ScriptUtils.listen(data, field, new AbstractJSObject() {
+                    boundToData = com.eas.script.Scripts.listen(data, field, new AbstractJSObject() {
 
                         @Override
                         public Object call(Object thiz, Object... args) {
                             Object newModelData = ModelWidget.getPathData(data, field);
                             if (rowsModel != null) {
-                                newModelData = newModelData instanceof ScriptObject ? jdk.nashorn.api.scripting.ScriptUtils.wrap((ScriptObject) newModelData) : newModelData;
+                                newModelData = newModelData instanceof ScriptObject ? ScriptUtils.wrap((ScriptObject) newModelData) : newModelData;
                                 if (newModelData instanceof JSObject) {
                                     JSObject jsModelData = (JSObject) newModelData;
                                     unbindCursor();
@@ -1144,7 +1145,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     protected void unbind() {
         if (boundToData != null) {
-            ScriptUtils.unlisten(boundToData);
+            Scripts.unlisten(boundToData);
             boundToData = null;
         }
         rowsModel.setData(null);
@@ -1356,7 +1357,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
                 JSObject jsIndexOf = (JSObject) ldata.getMember("indexOf");
                 Object oElementClass = ldata.getMember("elementClass");
                 JSObject jsElementClass = oElementClass instanceof JSObject && ((JSObject) oElementClass).isFunction() ? (JSObject) oElementClass : null;
-                JSObject jsCreated = jsElementClass != null ? (JSObject) jsElementClass.newObject(new Object[]{}) : ScriptUtils.makeObj();
+                JSObject jsCreated = jsElementClass != null ? (JSObject) jsElementClass.newObject(new Object[]{}) : Scripts.makeObj();
                 JSObject jsCursor = getCurrentRow();
                 rowsSelectionModel.removeListSelectionListener(generalSelectionChangesReflector);
                 try {

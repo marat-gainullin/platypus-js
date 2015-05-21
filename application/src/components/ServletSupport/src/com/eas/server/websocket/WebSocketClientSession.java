@@ -11,7 +11,7 @@ import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptObj;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import java.io.IOException;
 import java.net.URI;
 import java.util.logging.Level;
@@ -41,36 +41,36 @@ public class WebSocketClientSession implements HasPublished {
     @ScriptFunction(params = {"uri"})
     public WebSocketClientSession(String aUri) throws Exception {
         super();
-        lock = ScriptUtils.getLock();
+        lock = Scripts.getLock();
         if (lock == null) {
             throw new IllegalStateException("Web socket constructor must be called in valid context (Platypus Async IO attributes must present).");
         }
-        request = ScriptUtils.getRequest();
-        reqponse = ScriptUtils.getResponse();
-        platypusSession = ScriptUtils.getSession();
+        request = Scripts.getRequest();
+        reqponse = Scripts.getResponse();
+        platypusSession = Scripts.getSession();
         principal = PlatypusPrincipal.getInstance();
 
         webSocketSession = ContainerProvider.getWebSocketContainer().connectToServer(endPoint, URI.create(aUri));
     }
 
     public void inContext(Runnable anActor) {
-        if (ScriptUtils.getLock() != null) {
+        if (Scripts.getLock() != null) {
             throw new IllegalStateException("Web socket callback must be called in clear context (from new thread or new pooled task).");
         }
-        ScriptUtils.setLock(lock);
-        ScriptUtils.setRequest(request);
-        ScriptUtils.setResponse(reqponse);
-        ScriptUtils.setSession(platypusSession);
+        Scripts.setLock(lock);
+        Scripts.setRequest(request);
+        Scripts.setResponse(reqponse);
+        Scripts.setSession(platypusSession);
         PlatypusPrincipal.setInstance(principal);
         try {
             synchronized (lock) {
                 anActor.run();
             }
         } finally {
-            ScriptUtils.setLock(null);
-            ScriptUtils.setRequest(null);
-            ScriptUtils.setResponse(null);
-            ScriptUtils.setSession(null);
+            Scripts.setLock(null);
+            Scripts.setRequest(null);
+            Scripts.setResponse(null);
+            Scripts.setSession(null);
             PlatypusPrincipal.setInstance(null);
         }
     }

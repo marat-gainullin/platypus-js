@@ -11,7 +11,7 @@ import com.eas.client.changes.Command;
 import com.eas.client.changes.Delete;
 import com.eas.client.changes.Insert;
 import com.eas.client.changes.Update;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import com.eas.util.JSONUtils;
 import com.eas.util.StringUtils;
 import java.util.ArrayList;
@@ -32,9 +32,11 @@ public class ChangeJSONWriter implements ChangeVisitor {
     private static final String CHANGE_ENTITY_NAME = "entity";
 
     protected String written;
+    protected Scripts.Space space;
 
-    public ChangeJSONWriter() {
+    public ChangeJSONWriter(Scripts.Space aSpace) {
         super();
+        space = aSpace;
     }
 
     public String getWritten() {
@@ -103,10 +105,10 @@ public class ChangeJSONWriter implements ChangeVisitor {
         ).toString();
     }
 
-    private static String valueToString(Object aValue) throws Exception {
+    private String valueToString(Object aValue) throws Exception {
         if (aValue != null) {
             if (aValue instanceof JSObject) {
-                aValue = ScriptUtils.toJava(aValue);
+                aValue = space.toJava(aValue);
             }
             if (aValue instanceof Boolean) {
                 return aValue.toString();

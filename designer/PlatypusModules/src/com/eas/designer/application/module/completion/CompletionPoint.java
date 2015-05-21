@@ -4,7 +4,7 @@
  */
 package com.eas.designer.application.module.completion;
 
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -70,7 +70,7 @@ public class CompletionPoint {
                 boolean afterDotCaretPosintion = !Character.isJavaIdentifierPart(caretPositionChar)
                         && preCaretPositionChar == DOT_CHARACTER;
                 String docStr = doc.getText(0, doc.getLength());
-                cp.astRoot = ScriptUtils.parseJs(
+                cp.astRoot = Scripts.parseJs(
                         afterDotCaretPosintion
                                 ? sanitizeDot(docStr, caretOffset - 1) : docStr);
                 if (cp.astRoot != null) {
@@ -120,10 +120,10 @@ public class CompletionPoint {
             @Override
             public boolean enterAccessNode(AccessNode accessNode) {
                 if (!lc.expressionsNodes.isEmpty()
-                        && ScriptUtils.isInNode(lc.expressionsNodes.peekLast(), accessNode)
-                        && ScriptUtils.isInNode(lc.expressionsNodes.peekLast(), offset)) {
+                        && Scripts.isInNode(lc.expressionsNodes.peekLast(), accessNode)
+                        && Scripts.isInNode(lc.expressionsNodes.peekLast(), offset)) {
                     ctx.add(new CompletionToken(accessNode.getProperty(), accessNode));
-                } else if (lc.expressionsNodes.isEmpty() && ScriptUtils.isInNode(accessNode, offset)) {
+                } else if (lc.expressionsNodes.isEmpty() && Scripts.isInNode(accessNode, offset)) {
                     ctx.add(new CompletionToken(accessNode.getProperty(), accessNode));
                 }
                 return super.enterAccessNode(accessNode);
@@ -132,10 +132,10 @@ public class CompletionPoint {
             @Override
             public boolean enterIdentNode(IdentNode identNode) {
                 if (!lc.expressionsNodes.isEmpty()
-                        && ScriptUtils.isInNode(lc.expressionsNodes.peekLast(), identNode)
-                        && ScriptUtils.isInNode(lc.expressionsNodes.peekLast(), offset)) {
+                        && Scripts.isInNode(lc.expressionsNodes.peekLast(), identNode)
+                        && Scripts.isInNode(lc.expressionsNodes.peekLast(), offset)) {
                     ctx.add(new CompletionToken(identNode.getName(), identNode));
-                } else if (lc.expressionsNodes.isEmpty() && ScriptUtils.isInNode(identNode, offset)) {
+                } else if (lc.expressionsNodes.isEmpty() && Scripts.isInNode(identNode, offset)) {
                     ctx.add(new CompletionToken(identNode.getName(), identNode));
                 }
                 return super.enterIdentNode(identNode);
@@ -144,8 +144,8 @@ public class CompletionPoint {
             @Override
             public boolean enterIndexNode(IndexNode indexNode) {
                 if (!lc.expressionsNodes.isEmpty()
-                        && ScriptUtils.isInNode(lc.expressionsNodes.peekLast(), indexNode)
-                        && ScriptUtils.isInNode(lc.expressionsNodes.peekLast(), offset)) {
+                        && Scripts.isInNode(lc.expressionsNodes.peekLast(), indexNode)
+                        && Scripts.isInNode(lc.expressionsNodes.peekLast(), offset)) {
                     //System.out.println(indexNode.getIndex());
                     if (indexNode.getIndex() instanceof LiteralNode) {
                         LiteralNode ln = (LiteralNode) indexNode.getIndex();

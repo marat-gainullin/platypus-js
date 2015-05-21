@@ -605,7 +605,7 @@ public class FormFactory {
                     String dataPropertyPath = anElement.getAttribute("field");
                     grid.setField(dataPropertyPath);
                 }
-                if (com.eas.script.ScriptUtils.isInitialized()) {
+                if (com.eas.script.Scripts.isInitialized()) {
                     injectColumns(grid, roots);
                 }
                 return grid;

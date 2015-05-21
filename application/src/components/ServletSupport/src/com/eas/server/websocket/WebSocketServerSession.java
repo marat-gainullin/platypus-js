@@ -10,7 +10,7 @@ import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,8 +41,8 @@ public class WebSocketServerSession implements HasPublished {
         session = aSession;
         platypusSession = aPlatypusSession;
         principal = aPlatypusPrincipal;
-        request = ScriptUtils.getRequest();
-        response = ScriptUtils.getResponse();
+        request = Scripts.getRequest();
+        response = Scripts.getResponse();
     }
 
     public com.eas.server.Session getPlatypusSession() {

@@ -6,6 +6,7 @@ package com.eas.client;
 
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
+import com.eas.script.Scripts;
 import java.util.function.Consumer;
 
 /**
@@ -14,9 +15,9 @@ import java.util.function.Consumer;
  */
 public interface AppConnection {
 
-    public <R extends Response> void enqueueRequest(Request rq, Consumer<R> onSuccess, Consumer<Exception> onFailure) throws Exception;
+    public <R extends Response> void enqueueRequest(Request aRequest, Scripts.Space aSpace, Consumer<R> onSuccess, Consumer<Exception> onFailure) throws Exception;
 
-    public <R extends Response> R executeRequest(Request rq) throws Exception;
+    public <R extends Response> R executeRequest(Request aRequest) throws Exception;
 
     public void shutdown();
 }

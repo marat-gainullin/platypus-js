@@ -34,7 +34,7 @@ import com.eas.client.scripts.JSObjectFacade;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.query.PlatypusQueryDataObject;
 import com.eas.designer.application.query.editing.SqlTextEditsComplementor;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import com.eas.util.IDGenerator;
 import java.awt.Color;
 import java.awt.Dialog;
@@ -51,7 +51,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
@@ -597,7 +596,7 @@ public class QueryResultsView extends javax.swing.JPanel {
 
             @Override
             public Object newObject(Object... args) {
-                return new JSWrapper(ScriptUtils.makeObj());
+                return new JSWrapper(Scripts.makeObj());
             }
 
         });

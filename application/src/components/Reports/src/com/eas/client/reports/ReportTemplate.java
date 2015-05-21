@@ -14,7 +14,7 @@ import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -29,7 +29,7 @@ public class ReportTemplate implements HasPublished {
     protected int timezoneOffset = 0;
     protected String name;
     protected JSObject scriptData;
-    protected JSObject fixed = ScriptUtils.makeArray();
+    protected JSObject fixed = Scripts.makeArray();
     private static JSObject publisher;
     protected JSObject published;
 

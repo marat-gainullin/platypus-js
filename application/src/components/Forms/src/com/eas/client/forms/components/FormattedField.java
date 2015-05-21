@@ -9,7 +9,6 @@ import com.eas.client.forms.HasComponentEvents;
 import com.eas.client.forms.components.rt.HasEmptyText;
 import com.eas.client.forms.HasJsName;
 import com.eas.client.forms.HasJsValue;
-import static com.eas.client.forms.HasJsValue.JS_VALUE_JSDOC;
 import com.eas.client.forms.HasOnValueChange;
 import com.eas.client.forms.Widget;
 import com.eas.client.forms.events.ActionEvent;
@@ -25,7 +24,7 @@ import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
@@ -335,13 +334,13 @@ public class FormattedField extends VFormattedField implements HasOnValueChange,
     @Undesignable
     @Override
     public Object getJsValue() {
-        return ScriptUtils.toJs(super.getValue());
+        return Scripts.toJs(super.getValue());
     }
 
     @ScriptFunction
     @Override
     public void setJsValue(Object aValue) {
-        setValue(ScriptUtils.toJava(aValue));
+        setValue(Scripts.toJava(aValue));
     }
 
     @Undesignable
@@ -352,7 +351,7 @@ public class FormattedField extends VFormattedField implements HasOnValueChange,
 
     @Override
     public void setValue(Object aValue) {
-        super.setValue(ScriptUtils.toJava(aValue));
+        super.setValue(Scripts.toJava(aValue));
     }
 
     private static final String FORMAT_JSDOC = ""

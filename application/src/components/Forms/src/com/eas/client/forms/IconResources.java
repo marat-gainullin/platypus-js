@@ -5,7 +5,7 @@
 package com.eas.client.forms;
 
 import com.eas.client.scripts.ScriptedResource;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
@@ -19,17 +19,17 @@ public class IconResources {
 
     public static ImageIcon load(String aResourceName, JSObject onSuccess, JSObject onFailure) throws Exception {
         if (onSuccess != null) {
-            ScriptUtils.submitTask(() -> {
+            Scripts.submitTask(() -> {
                 try {
                     ImageIcon loaded = loadSync(aResourceName);
-                    ScriptUtils.acceptTaskResult(() -> {
-                        onSuccess.call(null, new Object[]{ScriptUtils.toJs(loaded)});
+                    Scripts.acceptTaskResult(() -> {
+                        onSuccess.call(null, new Object[]{Scripts.toJs(loaded)});
                     });
                 } catch (Exception ex) {
                     Logger.getLogger(IconResources.class.getName()).log(Level.SEVERE, null, ex);
                     if (onFailure != null) {
-                        ScriptUtils.acceptTaskResult(() -> {
-                            onFailure.call(null, new Object[]{ScriptUtils.toJs(ex.getMessage())});
+                        Scripts.acceptTaskResult(() -> {
+                            onFailure.call(null, new Object[]{Scripts.toJs(ex.getMessage())});
                         });
                     }
                 }

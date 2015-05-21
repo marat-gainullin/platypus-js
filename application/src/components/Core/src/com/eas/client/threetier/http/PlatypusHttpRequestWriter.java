@@ -16,7 +16,7 @@ import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.*;
 import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.concurrent.CallableConsumer;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import com.eas.util.JSONUtils;
 import com.eas.util.StringUtils;
 import java.io.IOException;
@@ -60,8 +60,9 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
     protected Response response;
     protected Callable<Credentials> onCredentials;
     protected PlatypusHttpConnection pConn;
+    protected Scripts.Space space;
 
-    public PlatypusHttpRequestWriter(URL aUrl, Map<String, Cookie> aCookies, Callable<Credentials> aOnCredentials, Sequence aSequence, int aMaximumAuthenticateAttempts, PlatypusHttpConnection aPConn) {
+    public PlatypusHttpRequestWriter(URL aUrl, Map<String, Cookie> aCookies, Callable<Credentials> aOnCredentials, Sequence aSequence, int aMaximumAuthenticateAttempts, PlatypusHttpConnection aPConn, Scripts.Space aSpace) {
         super();
         url = aUrl;
         cookies = aCookies;
@@ -69,6 +70,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
         maximumAuthenticateAttempts = aMaximumAuthenticateAttempts;
         onCredentials = aOnCredentials;
         pConn = aPConn;
+        space = aSpace;
     }
 
     private String valueToString(Object aValue) {
@@ -218,7 +220,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
             ((ErrorResponse) response).setNotLoggedIn(true);
         } else {
             if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_NOT_MODIFIED) {
-                PlatypusHttpResponseReader reader = new PlatypusHttpResponseReader(aRequest, conn, pConn);
+                PlatypusHttpResponseReader reader = new PlatypusHttpResponseReader(aRequest, conn, pConn, space);
                 if (reader.checkIfSecirutyForm()) {
                     redirectLocation = PlatypusHttpConstants.SECURITY_REDIRECT_LOCATION;
                     authScheme = PlatypusHttpConstants.FORM_AUTH_NAME;
@@ -305,7 +307,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
         params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.TYPE, "" + rq.getType()));
         List<String> changes = new ArrayList<>();
         for (Change change : rq.getChanges()) {
-            ChangeJSONWriter changeWriter = new ChangeJSONWriter();
+            ChangeJSONWriter changeWriter = new ChangeJSONWriter(space);
             change.accept(changeWriter);
             changes.add(changeWriter.written);
         }
@@ -359,7 +361,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
         params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.MODULE_NAME, rq.getModuleName()));
         params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.METHOD_NAME, rq.getMethodName()));
         for (Object oArg : rq.getArguments()) {
-            params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.PARAMS_ARRAY, ScriptUtils.toJson(oArg)));
+            params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.PARAMS_ARRAY, space.toJson(oArg)));
         }
         pushRequest(rq, null);
     }

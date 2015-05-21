@@ -9,6 +9,7 @@ import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.metadata.Parameters;
 import com.eas.client.queries.PlatypusQuery;
+import com.eas.script.Scripts;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.internal.runtime.JSType;
 
@@ -24,8 +25,8 @@ public class QueryJSONReader {
     private static final String PARAMETERS_PROP_NAME = "parameters";
     private static final String FIELDS_PROP_NAME = "fields";
 
-    public static PlatypusQuery read(JSObject o) throws Exception {
-        PlatypusQuery query = new PlatypusQuery(null);
+    public static PlatypusQuery read(Scripts.Space aSpace, JSObject o) throws Exception {
+        PlatypusQuery query = new PlatypusQuery(null, aSpace);
         String title = JSType.toString(o.getMember(TITLE_PROP_NAME));
         query.setTitle(title);
         boolean manual = JSType.toBoolean(o.getMember(MANUAL_PROP_NAME));

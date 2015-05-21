@@ -26,7 +26,7 @@ import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.scripts.ScriptedResource;
 import com.eas.script.JsDoc;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import com.eas.server.handlers.CreateServerModuleRequestHandler;
 import com.eas.server.handlers.RPCRequestHandler;
 import java.io.File;
@@ -42,6 +42,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.api.scripting.ScriptUtils;
 import jdk.nashorn.internal.runtime.Undefined;
 
 /**
@@ -64,14 +65,14 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                     ServerTasksScanner tasksScanner = new ServerTasksScanner(lsecurityConfigs);
                     ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), tasksScanner);
                     indexer.watch();
-                    ScriptUtils.initServices(aMaximumServicesThreads);
+                    Scripts.initBIO(aMaximumServicesThreads);
                     basesProxy = new ScriptedDatabasesClient(aDefaultDatasourceName, indexer, true, tasksScanner.getValidators(), aMaximumJdbcThreads);
                     QueriesProxy<SqlQuery> queries = new LocalQueriesProxy(basesProxy, indexer);
                     basesProxy.setQueries(queries);
                     instance = new PlatypusServerCore(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), aStartAppElementName), queries, basesProxy, lsecurityConfigs, aStartAppElementName);
                     basesProxy.setContextHost(instance);
                     ScriptedResource.init(instance);
-                    ScriptUtils.init();
+                    Scripts.init();
                     instance.startResidents(tasksScanner.getResidents());
                 } else {
                     throw new IllegalArgumentException("applicationUrl: " + aApplicationUrl + " doesn't point to existent directory.");
@@ -183,7 +184,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                     ScriptedResource._require(new String[]{aModuleName}, null, new ConcurrentSkipListSet<>(), (Void v) -> {
                         try {
                             AppElementFiles files = indexer.nameToFiles(aModuleName);
-                            JSObject constr = ScriptUtils.lookupInGlobal(aModuleName);
+                            JSObject constr = Scripts.lookupInGlobal(aModuleName);
                             if (files != null && files.isModule() && constr != null) {
                                 String waitFor;
                                 ScriptDocument config = scriptsConfigs.get(aModuleName, files);
@@ -236,7 +237,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                                 if (!args.isEmpty()) {
                                                     args.clear();
                                                     Object returned = largs.length > 0 ? largs[0] : null;
-                                                    onSuccess.accept(ScriptUtils.toJava(returned));
+                                                    onSuccess.accept(Scripts.toJava(returned));
                                                 } else {
                                                     Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
                                                 }
@@ -249,7 +250,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                             public Object call(final Object thiz, final Object... largs) {
                                                 if (!args.isEmpty()) {
                                                     args.clear();
-                                                    Object reason = largs.length > 0 ? ScriptUtils.toJava(largs[0]) : null;
+                                                    Object reason = largs.length > 0 ? Scripts.toJava(largs[0]) : null;
                                                     if (reason instanceof Exception) {
                                                         onFailure.accept((Exception) reason);
                                                     } else {
@@ -265,7 +266,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                         final Object leveledLock;
                                         switch (waitFor) {
                                             case RPCRequestHandler.SELF_WAIT_OPTION:
-                                                leveledLock = jdk.nashorn.api.scripting.ScriptUtils.unwrap(moduleInstance);
+                                                leveledLock = ScriptUtils.unwrap(moduleInstance);
                                                 break;
                                             case RPCRequestHandler.SESSION_WAIT_OPTION:
                                                 leveledLock = aSession;
@@ -276,31 +277,31 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                             default:
                                                 throw new IllegalStateException("moduleLock must be already known value.");
                                         }
-                                        ScriptUtils.initAsyncs(0);
+                                        Scripts.initAsyncs(0);
                                         try {
                                             if (onLockSelected != null) {
                                                 onLockSelected.accept(leveledLock);
                                             }
                                             synchronized (leveledLock) {
-                                                ScriptUtils.setLock(leveledLock);// provide lock to callback threads
+                                                Scripts.setLock(leveledLock);// provide lock to callback threads
                                                 try {
                                                     CreateServerModuleRequestHandler.checkPrincipalPermission(aSession, config.getPropertyAllowedRoles().get(aMethodName), aMethodName);
                                                     Object result = ((JSObject) oFun).call(moduleInstance, args.toArray());
-                                                    int asyncs = ScriptUtils.getAsyncsCount();
+                                                    int asyncs = Scripts.getAsyncsCount();
                                                     if (!(result instanceof Undefined) || asyncs == 0) {
                                                         if (!args.isEmpty()) {
                                                             args.clear();
-                                                            onSuccess.accept(ScriptUtils.toJava(result));
+                                                            onSuccess.accept(Scripts.toJava(result));
                                                         } else {
                                                             Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
                                                         }
                                                     }
                                                 } finally {
-                                                    ScriptUtils.setLock(null);
+                                                    Scripts.setLock(null);
                                                 }
                                             }
                                         } finally {
-                                            ScriptUtils.initAsyncs(null);
+                                            Scripts.initAsyncs(null);
                                         }
                                     } else {
                                         onFailure.accept(new Exception(String.format(RPCRequestHandler.METHOD_MISSING_MSG, aMethodName, aModuleName)));
@@ -324,9 +325,9 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
 
     public int startResidents(Set<String> aRezidents) throws Exception {
         PlatypusPrincipal oldPrincipal = PlatypusPrincipal.getInstance();
-        Object oldSession = ScriptUtils.getSession();
+        Object oldSession = Scripts.getSession();
         PlatypusPrincipal.setInstance(new SystemPlatypusPrincipal());
-        ScriptUtils.setSession(sessionManager.getSystemSession());
+        Scripts.setSession(sessionManager.getSystemSession());
         try {
             int startedTasks = 0;
             for (String moduleName : aRezidents) {
@@ -341,7 +342,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
             }
             return startedTasks;
         } finally {
-            ScriptUtils.setSession(oldSession);
+            Scripts.setSession(oldSession);
             PlatypusPrincipal.setInstance(oldPrincipal);
         }
     }
@@ -357,7 +358,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
         ScriptedResource.require(new String[]{aModuleName}, null);
         Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.INFO, "Starting resident module \"{0}\"", aModuleName);
         try {
-            JSObject jsConstr = ScriptUtils.lookupInGlobal(aModuleName);
+            JSObject jsConstr = Scripts.lookupInGlobal(aModuleName);
             Object oModule = jsConstr != null ? jsConstr.newObject(new Object[]{}) : null;
             JSObject module = oModule instanceof JSObject ? (JSObject) oModule : null;
             if (module != null) {

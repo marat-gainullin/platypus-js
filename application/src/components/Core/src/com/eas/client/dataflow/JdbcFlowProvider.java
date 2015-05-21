@@ -9,14 +9,15 @@ import com.eas.client.metadata.Parameter;
 import com.eas.client.metadata.Parameters;
 import com.eas.client.resourcepool.BearDatabaseConnection;
 import com.eas.concurrent.CallableConsumer;
-import com.eas.script.ScriptUtils;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
-import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * This flow dataSource intended to support the flow process from and to jdbc
@@ -77,12 +78,12 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
      * @inheritDoc
      */
     @Override
-    public JSObject nextPage(Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public Collection<Map<String, Object>> nextPage(Consumer<Collection<Map<String, Object>>> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (!isPaged() || lowLevelResults == null) {
             throw new FlowProviderNotPagedException(BAD_NEXTPAGE_REFRESH_CHAIN_MSG);
         } else {
             JdbcReader reader = new JdbcReader(expectedFields);
-            Callable<JSObject> doWork = () -> {
+            Callable<Collection<Map<String, Object>>> doWork = () -> {
                 try {
                     return reader.readRowset(lowLevelResults, pageSize);
                 } catch (SQLException ex) {
@@ -96,33 +97,15 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
             if (onSuccess != null) {
                 asyncDataPuller.accept(() -> {
                     try {
-                        JSObject rs = doWork.call();
+                        Collection<Map<String, Object>> rs = doWork.call();
                         try {
-                            if (ScriptUtils.getGlobalQueue() != null) {
-                                ScriptUtils.getGlobalQueue().accept(() -> {
-                                    onSuccess.accept(rs);
-                                });
-                            } else {
-                                final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
-                                synchronized (lock) {
-                                    onSuccess.accept(rs);
-                                }
-                            }
+                            onSuccess.accept(rs);
                         } catch (Exception ex) {
                             Logger.getLogger(JdbcFlowProvider.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     } catch (Exception ex) {
                         if (onFailure != null) {
-                            if (ScriptUtils.getGlobalQueue() != null) {
-                                ScriptUtils.getGlobalQueue().accept(() -> {
-                                    onFailure.accept(ex);
-                                });
-                            } else {
-                                final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
-                                synchronized (lock) {
-                                    onFailure.accept(ex);
-                                }
-                            }
+                            onFailure.accept(ex);
                         }
                     }
                 });
@@ -160,13 +143,13 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
      * @inheritDoc
      */
     @Override
-    public JSObject refresh(Parameters aParams, Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public Collection<Map<String, Object>> refresh(Parameters aParams, Consumer<Collection<Map<String, Object>>> onSuccess, Consumer<Exception> onFailure) throws Exception {
         return select(aParams, (ResultSet rs) -> {
             if (rs != null) {
                 JdbcReader reader = new JdbcReader(expectedFields);
                 return reader.readRowset(rs, pageSize);
             } else {
-                return ScriptUtils.makeArray();
+                return new ArrayList<>();
             }
         }, onSuccess, onFailure);
     }
@@ -282,31 +265,13 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                 try {
                     T processed = doWork.call();
                     try {
-                        if (ScriptUtils.getGlobalQueue() != null) {
-                            ScriptUtils.getGlobalQueue().accept(() -> {
-                                onSuccess.accept(processed);
-                            });
-                        } else {
-                            final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
-                            synchronized (lock) {
-                                onSuccess.accept(processed);
-                            }
-                        }
+                        onSuccess.accept(processed);
                     } catch (Exception ex) {
                         Logger.getLogger(JdbcFlowProvider.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 } catch (Exception ex) {
                     if (onFailure != null) {
-                        if (ScriptUtils.getGlobalQueue() != null) {
-                            ScriptUtils.getGlobalQueue().accept(() -> {
-                                onFailure.accept(ex);
-                            });
-                        } else {
-                            final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
-                            synchronized (lock) {
-                                onFailure.accept(ex);
-                            }
-                        }
+                        onFailure.accept(ex);
                     }
                 }
             });

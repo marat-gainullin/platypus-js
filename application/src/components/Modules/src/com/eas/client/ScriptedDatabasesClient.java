@@ -7,7 +7,7 @@ import com.eas.client.metadata.Fields;
 import com.eas.client.queries.ScriptedQuery;
 import com.eas.client.queries.ScriptedFlowProvider;
 import com.eas.client.scripts.ScriptedResource;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -62,7 +62,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
 
     protected JSObject createModule(String aModuleName) throws Exception {
         ScriptedResource.require(new String[]{aModuleName}, null);
-        return ScriptUtils.createModule(aModuleName);
+        return Scripts.createModule(aModuleName);
     }
 
     /**
@@ -115,14 +115,14 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                             Object oApply = module.getMember("apply");
                             if (oApply instanceof JSObject && ((JSObject) oApply).isFunction()) {
                                 JSObject applyFunction = (JSObject) oApply;
-                                ScriptUtils.toJava(applyFunction.call(module, new Object[]{ScriptUtils.toJs(aLog.toArray()),
+                                Scripts.toJava(applyFunction.call(module, new Object[]{Scripts.toJs(aLog.toArray()),
                                     new AbstractJSObject() {
 
                                         @Override
                                         public Object call(final Object thiz, final Object... args) {
                                             int affected = 0;
                                             if (args.length > 0) {
-                                                Object oAffected = ScriptUtils.toJava(args[0]);
+                                                Object oAffected = Scripts.toJava(args[0]);
                                                 if (oAffected instanceof Number) {
                                                     affected = ((Number) oAffected).intValue();
                                                 }
@@ -141,7 +141,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                                                     if (args[0] instanceof Exception) {
                                                         onFailure.accept((Exception) args[0]);
                                                     } else {
-                                                        onFailure.accept(new Exception(String.valueOf(ScriptUtils.toJava(args[0]))));
+                                                        onFailure.accept(new Exception(String.valueOf(Scripts.toJava(args[0]))));
                                                     }
                                                 } else {
                                                     onFailure.accept(new Exception("No error information from apply method"));
@@ -175,7 +175,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                     if (oApply instanceof JSObject && ((JSObject) oApply).isFunction()) {
                         JSObject applyFunction = (JSObject) oApply;
                         int affectedInModules = 0;
-                        Object oAffected = ScriptUtils.toJava(applyFunction.call(module, new Object[]{ScriptUtils.toJs(aLog.toArray())}));
+                        Object oAffected = Scripts.toJava(applyFunction.call(module, new Object[]{Scripts.toJs(aLog.toArray())}));
                         if (oAffected instanceof Number) {
                             affectedInModules = ((Number) oAffected).intValue();
                         }
@@ -275,7 +275,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
             } else {
                 ValidateProcess process = new ValidateProcess(toBeCalled.size(), onSuccess, onFailure);
                 toBeCalled.stream().forEach((v) -> {
-                    v.function.call(v.module, new Object[]{ScriptUtils.toJs(aLog.toArray()), aDatasourceName,
+                    v.function.call(v.module, new Object[]{Scripts.toJs(aLog.toArray()), aDatasourceName,
                         new AbstractJSObject() {
 
                             @Override
@@ -292,7 +292,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                                     if (args[0] instanceof Exception) {
                                         process.complete((Exception) args[0]);
                                     } else {
-                                        process.complete(new Exception(String.valueOf(ScriptUtils.toJava(args[0]))));
+                                        process.complete(new Exception(String.valueOf(Scripts.toJava(args[0]))));
                                     }
                                 } else {
                                     process.complete(new Exception("No error information from validate method"));
@@ -305,7 +305,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
             }
         } else {
             toBeCalled.stream().forEach((v) -> {
-                v.function.call(v.module, new Object[]{ScriptUtils.toJs(aLog.toArray()), aDatasourceName});
+                v.function.call(v.module, new Object[]{Scripts.toJs(aLog.toArray()), aDatasourceName});
             });
         }
     }
