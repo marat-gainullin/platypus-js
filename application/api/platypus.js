@@ -20,15 +20,9 @@
 
     //this === global;
     var global = this;
-    var oldP = global.P;
     global.P = {};
-
-    /*
-     global.P = this; // global scope of api - for legacy applications
-     global.P.restore = function() {
-     throw "Legacy api can't restore the global namespace.";
-     };
-     */
+    global['-platypus-scripts-space'] = aSpace;
+    
     // core imports
     var EngineUtilsClass = Java.type("jdk.nashorn.api.scripting.ScriptUtils");
     var JavaArrayClass = Java.type("java.lang.Object[]");

@@ -6,12 +6,10 @@ package com.eas.client;
 
 import com.eas.client.dataflow.JdbcFlowProvider;
 import com.eas.client.metadata.Fields;
-import com.eas.client.metadata.Parameters;
 import com.eas.client.queries.ContextHost;
 import java.sql.Connection;
 import java.util.function.Consumer;
 import javax.sql.DataSource;
-import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * This flow provider implements transaction capability for standard JdbcFlowProvider.
@@ -38,11 +36,6 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
     @Override
     public String getEntityName() {
         return entityName;
-    }
-
-    @Override
-    public JSObject refresh(Parameters aParams, Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        return super.refresh(aParams, onSuccess, onFailure);
     }
 
     @Override

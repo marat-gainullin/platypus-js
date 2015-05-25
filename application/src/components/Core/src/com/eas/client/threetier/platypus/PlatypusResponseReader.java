@@ -9,6 +9,7 @@ import com.eas.client.ServerModuleInfo;
 import com.eas.client.metadata.BinaryFields;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.report.Report;
+import com.eas.client.threetier.PlatypusClient;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.AppQueryRequest;
@@ -45,15 +46,17 @@ import jdk.nashorn.api.scripting.JSObject;
 public class PlatypusResponseReader implements PlatypusResponseVisitor {
 
     protected byte[] bytes;
-    protected Scripts.Space space;
+    protected PlatypusClient pClient;
+    protected final Scripts.Space space;
 
-    public PlatypusResponseReader(byte[] aBytes, Scripts.Space aSpace) {
+    public PlatypusResponseReader(byte[] aBytes, PlatypusClient aPClient, Scripts.Space aSpace) {
         super();
         bytes = aBytes;
+        pClient = aPClient;
         space = aSpace;
     }
 
-    public static Response read(ProtoReader reader, Request aRequest, Scripts.Space aSpace) throws Exception {
+    public static Response read(ProtoReader reader, Request aRequest, PlatypusClient aPClient, Scripts.Space aSpace) throws Exception {
         boolean ordinaryReponse = false;
         boolean errorResponse = false;
         byte[] data = null;
@@ -79,7 +82,7 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
                             aRequest.accept(factory);
                             rsp = factory.getResponse();
                         }
-                        PlatypusResponseReader responseReader = new PlatypusResponseReader(data, aSpace);
+                        PlatypusResponseReader responseReader = new PlatypusResponseReader(data, aPClient, aSpace);
                         rsp.accept(responseReader);
                         return rsp;
                     } else {
@@ -203,7 +206,7 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
                 throw new NullPointerException("No query time-stamp specified");
             }
             rsp.setTimeStamp(dom.getChild(RequestsTags.TAG_TIMESTAMP).getDate());
-            PlatypusQuery appQuery = new PlatypusQuery(null);
+            PlatypusQuery appQuery = new PlatypusQuery(pClient, space);
             if (!dom.containsChild(RequestsTags.TAG_FIELDS)) {
                 throw new ProtoReaderException("Query fields are not specified");
             }

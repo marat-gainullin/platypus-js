@@ -48,7 +48,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     // for runtime
     protected JSObject onRequeried;
     //
-    protected JSObject lastSnapshot = Scripts.makeArray();
+    protected JSObject lastSnapshot = Scripts.getSpace().makeArray();
     protected JSObject snapshotConsumer;
     protected JSObject snapshotProducer;
     //
@@ -206,7 +206,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
             Parameter p = copied.getParameters().get(pName);
             if (p != null) {
                 Object jsValue = aJsParams.getMember(pName);
-                p.setValue(Scripts.toJava(jsValue));
+                p.setValue(Scripts.getSpace().toJava(jsValue));
             }
         });
         return copied.execute(aOnSuccess != null ? (JSObject v) -> {
@@ -281,7 +281,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         }
         published = aValue;
         if (com.eas.script.Scripts.isInitialized()) {
-            Scripts.listen(published, "cursor", new AbstractJSObject() {
+            Scripts.getSpace().listen(published, "cursor", new AbstractJSObject() {
 
                 @Override
                 public boolean isFunction() {
@@ -476,7 +476,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         for (int i = 1; i <= selfParameters.getFieldsCount(); i++) {
             Parameter p = selfParameters.get(i);
             boolean oldModified = p.isModified();
-            p.setValue(Scripts.toJava(p.getValue()));
+            p.setValue(Scripts.getSpace().toJava(p.getValue()));
             p.setModified(oldModified);
         }
         //
@@ -495,7 +495,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
                             JSObject leftRowset = leftEntity.getPublished();
                             if (leftRowset != null && leftRowset.getMember(CURSOR_PROP_NAME) instanceof JSObject) {
                                 JSObject jsCursor = (JSObject) leftRowset.getMember(CURSOR_PROP_NAME);
-                                pValue = Scripts.toJava(jsCursor.getMember(relation.getLeftField().getName()));
+                                pValue = Scripts.getSpace().toJava(jsCursor.getMember(relation.getLeftField().getName()));
                             } else {
                                 pValue = null;
                             }
@@ -509,12 +509,12 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
                             Parameter leftParameter = relation.getLeftParameter();
                             if (leftParameter != null) {
                                 pValue = leftParameter.getValue();
-                                // Let's correct Rhino evil!!!
-                                pValue = Scripts.toJava(pValue);
+                                // Let's correct nashorn evil!!!
+                                pValue = Scripts.getSpace().toJava(pValue);
                                 if (pValue == null) {
                                     pValue = leftParameter.getDefaultValue();
                                 }
-                                pValue = Scripts.toJava(pValue);
+                                pValue = Scripts.getSpace().toJava(pValue);
                             } else {
                                 Logger.getLogger(ApplicationEntity.class.getName()).log(Level.SEVERE, "Parameter of left query must present (Relation points to query parameter in entity: {0} [{1}], but query parameter is absent)", new Object[]{getTitle(), String.valueOf(getEntityId())});
                             }
@@ -548,7 +548,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         Object res = null;
         if (aHandler != null) {
             try {
-                return Scripts.toJava(aHandler.call(getPublished(), new Object[]{aEvent.getPublished()}));
+                return Scripts.getSpace().toJava(aHandler.call(getPublished(), new Object[]{aEvent.getPublished()}));
             } catch (Exception ex) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
             }
@@ -563,7 +563,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         }
         if (published != null && published.getMember(CURSOR_PROP_NAME) instanceof JSObject) {
             JSObject jsCursor = (JSObject) published.getMember(CURSOR_PROP_NAME);
-            JSObject jsReg = Scripts.listen(jsCursor, "", new AbstractJSObject() {
+            JSObject jsReg = Scripts.getSpace().listen(jsCursor, "", new AbstractJSObject() {
 
                 @Override
                 public boolean isFunction() {

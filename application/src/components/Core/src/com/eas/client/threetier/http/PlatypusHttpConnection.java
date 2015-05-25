@@ -5,7 +5,6 @@
 package com.eas.client.threetier.http;
 
 import com.eas.client.login.Credentials;
-import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.threetier.PlatypusClient;
 import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.client.threetier.PlatypusConnection;
@@ -63,7 +62,7 @@ public class PlatypusHttpConnection extends PlatypusConnection {
 
     public PlatypusHttpConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts, int aMaximumThreads) throws Exception {
         super(aUrl, aOnCredentials, aMaximumAuthenticateAttempts);
-        requestsSender = new ThreadPoolExecutor(aMaximumThreads, aMaximumThreads,
+        requestsSender = new ThreadPoolExecutor(0, aMaximumThreads,
                 1L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(),
                 new DeamonThreadFactory("http-client-", false));
@@ -124,124 +123,52 @@ public class PlatypusHttpConnection extends PlatypusConnection {
     }
 
     @Override
-    public <R extends Response> void enqueueRequest(Request aRequest, Consumer<R> onSuccess, Consumer<Exception> onFailure) {
-        Scripts.incAsyncsCount();
-        enqueue(new RequestCallback(new RequestEnvelope(aRequest, null, null, null), (Response aResponse) -> {
+    public <R extends Response> void enqueueRequest(Request aRequest, Scripts.Space aSpace, Consumer<R> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        aSpace.incAsyncsCount();
+        PlatypusHttpRequestWriter httpSender = new PlatypusHttpRequestWriter(url, cookies, onCredentials, sequence, maximumAuthenticateAttempts, PlatypusHttpConnection.this);
+        aRequest.accept(httpSender);// wait completion analog
+        Consumer<Response> onComplete = (Response aResponse) -> {
             if (aResponse instanceof ErrorResponse) {
                 if (onFailure != null) {
                     Exception cause = handleErrorResponse((ErrorResponse) aResponse);
-                    if (Scripts.getGlobalQueue() != null) {
-                        Scripts.getGlobalQueue().accept(() -> {
-                            onFailure.accept(cause);
-                        });
-                    } else {
-                        final Object lock = Scripts.getLock() != null ? Scripts.getLock() : this;
-                        synchronized (lock) {
-                            onFailure.accept(cause);
-                        }
-                    }
+                    aSpace.process(() -> {
+                        onFailure.accept(cause);
+                    });
                 }
             } else {
                 if (onSuccess != null) {
-                    if (Scripts.getGlobalQueue() != null) {
-                        Scripts.getGlobalQueue().accept(() -> {
-                            if (aRequest instanceof LogoutRequest) {
-                                cookies.clear();
-                                basicCredentials = null;
-                                if (onLogout != null) {
-                                    onLogout.run();
-                                }
+                    aSpace.process(() -> {
+                        if (aRequest instanceof LogoutRequest) {
+                            cookies.clear();
+                            basicCredentials = null;
+                            if (onLogout != null) {
+                                onLogout.run();
                             }
-                            onSuccess.accept((R) aResponse);
-                        });
-                    } else {
-                        final Object lock = Scripts.getLock() != null ? Scripts.getLock() : this;
-                        synchronized (lock) {
-                            if (aRequest instanceof LogoutRequest) {
-                                cookies.clear();
-                                basicCredentials = null;
-                                if (onLogout != null) {
-                                    onLogout.run();
-                                }
-                            }
-                            onSuccess.accept((R) aResponse);
                         }
-                    }
-                }
-            }
-        }), onFailure);
-    }
-
-    private void startRequestTask(Runnable aTask) {
-        Object closureLock = Scripts.getLock();
-        Object closureRequest = Scripts.getRequest();
-        Object closureResponse = Scripts.getResponse();
-        Object closureSession = Scripts.getSession();
-        PlatypusPrincipal closurePrincipal = PlatypusPrincipal.getInstance();
-        requestsSender.submit(() -> {
-            Scripts.setLock(closureLock);
-            Scripts.setRequest(closureRequest);
-            Scripts.setResponse(closureResponse);
-            Scripts.setSession(closureSession);
-            PlatypusPrincipal.setInstance(closurePrincipal);
-            try {
-                aTask.run();
-            } finally {
-                Scripts.setLock(null);
-                Scripts.setRequest(null);
-                Scripts.setResponse(null);
-                Scripts.setSession(null);
-                PlatypusPrincipal.setInstance(null);
-            }
-        });
-    }
-
-    private void enqueue(final RequestCallback rqc, Consumer<Exception> onFailure) {
-        Runnable doer = () -> {
-            try {
-                PlatypusHttpRequestWriter httpSender = new PlatypusHttpRequestWriter(url, cookies, onCredentials, sequence, maximumAuthenticateAttempts, PlatypusHttpConnection.this);
-                rqc.requestEnv.request.accept(httpSender);// wait completion analog
-                if (rqc.onComplete != null) {
-                    rqc.requestEnv.request.setDone(true);
-                    rqc.completed = true;
-                    rqc.onComplete.accept(httpSender.getResponse());
-                } else {
-                    synchronized (rqc) {
-                        rqc.requestEnv.request.setDone(true);
-                        rqc.response = httpSender.getResponse();
-                        rqc.completed = true;
-                        rqc.notifyAll();
-                    }
-                }
-            } catch (Exception ex) {
-                Logger.getLogger(PlatypusHttpConnection.class.getName()).log(Level.SEVERE, null, ex);
-                if (onFailure != null) {
-                    onFailure.accept(ex);
+                        onSuccess.accept((R) aResponse);
+                    });
                 }
             }
         };
-        if (onFailure != null) {
-            startRequestTask(doer);
-        } else {
-            doer.run();
-        }
     }
 
     @Override
-    public <R extends Response> R executeRequest(Request rq) throws Exception {
-        RequestCallback rqc = new RequestCallback(new RequestEnvelope(rq, null, null, null), null);
-        enqueue(rqc, null);
-        if (rqc.response instanceof ErrorResponse) {
-            throw handleErrorResponse((ErrorResponse) rqc.response);
+    public <R extends Response> R executeRequest(Request aRequest) throws Exception {
+        RequestEnvelope requestEnv = new RequestEnvelope(aRequest, null, null, null, null);
+        PlatypusHttpRequestWriter httpSender = new PlatypusHttpRequestWriter(url, cookies, onCredentials, sequence, maximumAuthenticateAttempts, PlatypusHttpConnection.this);
+        requestEnv.request.accept(httpSender);// wait completion analog
+        
+        if (requestEnv.response instanceof ErrorResponse) {
+            throw handleErrorResponse((ErrorResponse) requestEnv.response);
         } else {
-            if (rq instanceof LogoutRequest) {
+            if (aRequest instanceof LogoutRequest) {
                 cookies.clear();
                 basicCredentials = null;
                 if (onLogout != null) {
                     onLogout.run();
                 }
             }
-            return (R) rqc.response;
+            return (R) requestEnv.response;
         }
     }
 

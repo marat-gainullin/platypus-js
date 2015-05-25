@@ -11,7 +11,10 @@ import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.metadata.Parameters;
 import com.eas.concurrent.CallableConsumer;
+import com.eas.script.Scripts;
 import java.sql.ResultSet;
+import java.util.Collection;
+import java.util.Map;
 import java.util.function.Consumer;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -154,7 +157,18 @@ public class SqlCompiledQuery {
             PlatypusJdbcFlowProvider flow = basesProxy.createFlowProvider(datasourceName, entityName, sqlClause, expectedFields);
             flow.setPageSize(pageSize);
             flow.setProcedure(procedure);
-            return flow.refresh(parameters, onSuccess, onFailure);
+            Scripts.Space space = Scripts.getSpace();
+            Collection<Map<String, Object>> data = flow.refresh(parameters, onSuccess != null ? (Collection<Map<String, Object>> aData) -> {
+                space.process(() -> {
+                    JSObject aJsData = space.readJsArray(aData);
+                    onSuccess.accept(aJsData);
+                });
+            } : null, onFailure != null ? (Exception ex) -> {
+                space.process(() -> {
+                    onFailure.accept(ex);
+                });
+            } : null);
+            return data != null ? space.readJsArray(data) : null;
         } else {
             return null;
         }

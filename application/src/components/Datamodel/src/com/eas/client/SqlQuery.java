@@ -331,8 +331,7 @@ public class SqlQuery extends Query {
     @Override
     public JSObject execute(Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception {
         SqlCompiledQuery compiled = compile();
-        JSObject jsData = compiled.executeQuery(onSuccess, onFailure);
-        if (isProcedure()) {
+        Runnable paramsRetriever = () -> {
             for (int i = 1; i <= compiled.getParameters().getParametersCount(); i++) {
                 Parameter param = compiled.getParameters().get(i);
                 if (param.getMode() == ParameterMetaData.parameterModeOut
@@ -343,6 +342,15 @@ public class SqlQuery extends Query {
                     }
                 }
             }
+        };
+        JSObject jsData = compiled.executeQuery(onSuccess != null ? (JSObject aData) -> {
+            if (compiled.isProcedure()) {
+                paramsRetriever.run();
+            }
+            onSuccess.accept(aData);
+        } : null, onFailure);
+        if (onSuccess == null && compiled.isProcedure()) {
+            paramsRetriever.run();
         }
         return jsData;
     }

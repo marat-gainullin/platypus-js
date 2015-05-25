@@ -55,9 +55,24 @@ public class Scripts {
 
     public static final String THIS_KEYWORD = "this";//NOI18N
 
+    private static ThreadLocal<Space> spaceRef = new ThreadLocal<>();
+
+    public static Space getSpace() {
+        return spaceRef.get();
+    }
+
+    public static void setSpace(Space aSpace) {
+        if (aSpace != null) {
+            spaceRef.set(aSpace);
+        } else {
+            spaceRef.remove();
+        }
+    }
+
     public static class Space {
 
         protected Object global;
+        protected Map<String, JSObject> publishers = new HashMap<>();
 
         private Space() {
         }
@@ -79,9 +94,20 @@ public class Scripts {
         protected JSObject listenFunc;
         protected JSObject listenElementsFunc;
 
-        public Space global(Object aValue) {
-            global = aValue;
-            return this;
+        public void setGlobal(Object aValue) {
+            if (global == null) {
+                global = aValue;
+            } else {
+                throw new IllegalStateException("Scripts space should be initialized only once.");
+            }
+        }
+
+        public void putPublisher(String aClassName, JSObject aPublisher) {
+            publishers.put(aClassName, aPublisher);
+        }
+
+        public JSObject getPublisher(String aClassName) {
+            return publishers.get(aClassName);
         }
 
         public JSObject getLoadFunc() {
@@ -410,9 +436,9 @@ public class Scripts {
         public JSObject readJsArray(Collection<Map<String, Object>> aCollection) {
             JSObject result = makeArray();
             JSObject jsPush = (JSObject) result.getMember("push");
-            aCollection.forEach((Map<String, Object> aItem)->{
+            aCollection.forEach((Map<String, Object> aItem) -> {
                 JSObject jsItem = makeObj();
-                aItem.entrySet().forEach((Map.Entry<String, Object> aItemContent)->{
+                aItem.entrySet().forEach((Map.Entry<String, Object> aItemContent) -> {
                     jsItem.setMember(aItemContent.getKey(), toJs(aItemContent.getValue()));
                 });
                 jsPush.call(result, new Object[]{jsItem});
@@ -424,7 +450,7 @@ public class Scripts {
     protected static ScriptEngine engine;
     protected static Consumer<Runnable> tasks;
     // bio thread pool
-    protected static ThreadPoolExecutor bio = new ThreadPoolExecutor(25, 25,
+    protected static ThreadPoolExecutor bio = new ThreadPoolExecutor(0, 25,
             1L, TimeUnit.SECONDS,
             new LinkedBlockingQueue<>(),
             new DeamonThreadFactory("platypus-bio-", false));
@@ -474,7 +500,8 @@ public class Scripts {
         Space space = new Space();
         bindings.put("space", space);
         Object global = engine.eval("loadWithNewGlobal('classpath:platypus.js', space);", bindings);
-        return space.global(global);
+        space.setGlobal(global);
+        return space;
     }
 
     public static void init() {

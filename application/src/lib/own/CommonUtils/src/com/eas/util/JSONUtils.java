@@ -4,6 +4,10 @@
  */
 package com.eas.util;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
+
 /**
  *
  * @author ab, mg
@@ -109,5 +113,30 @@ public class JSONUtils {
         }
         sb.append("]");
         return sb;
+    }
+    
+    public static String v(Object aValue) throws Exception {
+        if (aValue != null) {
+            /*
+            if (aValue instanceof JSObject) {
+                aValue = space.toJava(aValue);
+            }
+            */
+            if (aValue instanceof Boolean) {
+                return aValue.toString();
+            } else if (aValue instanceof Number) {
+                return StringUtils.formatDouble(((Number) aValue).doubleValue());
+            } else if (aValue instanceof String) {
+                return JSONUtils.s((String) aValue).toString();
+            } else if (aValue instanceof Date) {
+                SimpleDateFormat sdf = new SimpleDateFormat(RowsetJsonConstants.DATE_FORMAT);
+                sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+                return sdf.format((Date) aValue);
+            } else {
+                throw new Exception("Value of unknown or unsupported type found! It's class is: " + aValue.getClass().getName());
+            }
+        } else {
+            return "null";
+        }
     }
 }

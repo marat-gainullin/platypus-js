@@ -16,10 +16,11 @@ import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.*;
 import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.concurrent.CallableConsumer;
-import com.eas.script.Scripts;
+import com.eas.util.BinaryUtils;
 import com.eas.util.JSONUtils;
 import com.eas.util.StringUtils;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
@@ -57,12 +58,10 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
     protected String uriPrefix = "application";
     protected List<Map.Entry<String, String>> params = new ArrayList<>();
     protected HttpURLConnection conn;
-    protected Response response;
     protected Callable<Credentials> onCredentials;
     protected PlatypusHttpConnection pConn;
-    protected Scripts.Space space;
 
-    public PlatypusHttpRequestWriter(URL aUrl, Map<String, Cookie> aCookies, Callable<Credentials> aOnCredentials, Sequence aSequence, int aMaximumAuthenticateAttempts, PlatypusHttpConnection aPConn, Scripts.Space aSpace) {
+    public PlatypusHttpRequestWriter(URL aUrl, Map<String, Cookie> aCookies, Callable<Credentials> aOnCredentials, Sequence aSequence, int aMaximumAuthenticateAttempts, PlatypusHttpConnection aPConn) {
         super();
         url = aUrl;
         cookies = aCookies;
@@ -70,7 +69,6 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
         maximumAuthenticateAttempts = aMaximumAuthenticateAttempts;
         onCredentials = aOnCredentials;
         pConn = aPConn;
-        space = aSpace;
     }
 
     private String valueToString(Object aValue) {
@@ -86,10 +84,6 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
         } else {
             return "null";
         }
-    }
-
-    public Response getResponse() {
-        return response;
     }
 
     protected static class HttpResult {
@@ -205,6 +199,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
         int responseCode = conn.getResponseCode();
         String authScheme = null;
         String redirectLocation = null;
+        Response response;
         if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
             authScheme = conn.getHeaderField(PlatypusHttpConstants.HEADER_WWW_AUTH);
             response = new ErrorResponse(conn.getResponseCode() + " " + conn.getResponseMessage());
@@ -220,18 +215,22 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
             ((ErrorResponse) response).setNotLoggedIn(true);
         } else {
             if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_NOT_MODIFIED) {
-                PlatypusHttpResponseReader reader = new PlatypusHttpResponseReader(aRequest, conn, pConn, space);
-                if (reader.checkIfSecirutyForm()) {
-                    redirectLocation = PlatypusHttpConstants.SECURITY_REDIRECT_LOCATION;
-                    authScheme = PlatypusHttpConstants.FORM_AUTH_NAME;
-                    response = new ErrorResponse(HttpURLConnection.HTTP_UNAUTHORIZED + "");
-                    ((ErrorResponse) response).setAccessControl(true);
-                    ((ErrorResponse) response).setNotLoggedIn(true);
-                } else {
-                    PlatypusResponsesFactory responseFactory = new PlatypusResponsesFactory();
-                    aRequest.accept(responseFactory);
-                    response = responseFactory.getResponse();
-                    response.accept(reader);
+                try (InputStream in = conn.getInputStream()) {
+                    byte[] bodyContent = BinaryUtils.readStream(in, -1);
+                    if (checkIfSecirutyForm(bodyContent)) {
+                        redirectLocation = PlatypusHttpConstants.SECURITY_REDIRECT_LOCATION;
+                        authScheme = PlatypusHttpConstants.FORM_AUTH_NAME;
+                        response = new ErrorResponse(HttpURLConnection.HTTP_UNAUTHORIZED + "");
+                        ((ErrorResponse) response).setAccessControl(true);
+                        ((ErrorResponse) response).setNotLoggedIn(true);
+                    } else {
+                        PlatypusResponsesFactory responseFactory = new PlatypusResponsesFactory();
+                        aRequest.accept(responseFactory);
+                        response = responseFactory.getResponse();
+                        //
+                        //PlatypusHttpResponseReader reader = new PlatypusHttpResponseReader(aRequest, conn, pConn);
+                        //response.accept(reader);
+                    }
                 }
             } else {
                 Logger.getLogger(PlatypusHttpRequestWriter.class.getName()).log(Level.SEVERE, String.format("Server error %d. %s", conn.getResponseCode(), conn.getResponseMessage()));
@@ -240,6 +239,39 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
         }
         pConn.acceptCookies(conn);
         return new HttpResult(responseCode, authScheme, redirectLocation);
+    }
+
+    public boolean checkIfSecirutyForm(byte[] aContent) throws IOException {
+        String contentType = conn.getContentType();
+        if ("text/html".equalsIgnoreCase(contentType)) {
+            String formContent = extractText(aContent);
+            return formContent.toLowerCase().contains(PlatypusHttpRequestWriter.J_SECURITY_CHECK_ACTION_NAME);
+        } else {
+            return false;
+        }
+    }
+    
+    protected String extractText(byte[] aContent) throws IOException {
+        String contentType = conn.getContentType();
+        String[] contentTypeCharset = contentType.split(";");
+        if (contentTypeCharset == null || contentTypeCharset.length == 0) {
+            throw new IOException("Response must contain ContentType header with charset");
+        }
+        if (!contentTypeCharset[0].toLowerCase().startsWith("text/")) {
+            throw new IOException("Response ContentType must be text/...");
+        }
+        if (contentTypeCharset.length > 1) {
+            String[] charsetNameValue = contentTypeCharset[1].split("=");
+            if (charsetNameValue == null || charsetNameValue.length != 2) {
+                throw new IOException("Response must contain ContentType header with charset=... clause");
+            }
+            if (!charsetNameValue[0].equalsIgnoreCase("charset")) {
+                throw new IOException("Response ContentType must be formatted as following: text/...;charset=...");
+            }
+            return new String(aContent, charsetNameValue[1].trim());
+        } else {
+            return new String(aContent, SettingsConstants.COMMON_ENCODING);
+        }
     }
 
     private String assembleUrl() throws UnsupportedEncodingException {
@@ -307,7 +339,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
         params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.TYPE, "" + rq.getType()));
         List<String> changes = new ArrayList<>();
         for (Change change : rq.getChanges()) {
-            ChangeJSONWriter changeWriter = new ChangeJSONWriter(space);
+            ChangeJSONWriter changeWriter = new ChangeJSONWriter();
             change.accept(changeWriter);
             changes.add(changeWriter.written);
         }
@@ -361,7 +393,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
         params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.MODULE_NAME, rq.getModuleName()));
         params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.METHOD_NAME, rq.getMethodName()));
         for (Object oArg : rq.getArguments()) {
-            params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.PARAMS_ARRAY, space.toJson(oArg)));
+            params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.PARAMS_ARRAY, JSONUtils.v(oArg)));
         }
         pushRequest(rq, null);
     }

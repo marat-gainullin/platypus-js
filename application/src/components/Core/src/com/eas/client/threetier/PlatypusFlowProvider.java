@@ -9,6 +9,7 @@ import com.eas.client.metadata.Parameters;
 import com.eas.client.AppConnection;
 import com.eas.client.dataflow.FlowProviderFailedException;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
+import com.eas.script.Scripts;
 import java.util.function.Consumer;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -38,7 +39,7 @@ public class PlatypusFlowProvider {
         ExecuteQueryRequest request = new ExecuteQueryRequest(entityName, aParams, expectedFields);
         if (onSuccess != null) {
             try {
-                conn.<ExecuteQueryRequest.Response>enqueueRequest(request, (ExecuteQueryRequest.Response aResponse) -> {
+                conn.<ExecuteQueryRequest.Response>enqueueRequest(request, Scripts.getSpace(), (ExecuteQueryRequest.Response aResponse) -> {
                     if (aResponse.getRowset() == null) {
                         if (onFailure != null) {
                             onFailure.accept(new FlowProviderFailedException(ROWSET_MISSING_IN_RESPONSE));

@@ -7,7 +7,6 @@ package com.eas.client.threetier.http;
 
 import com.eas.client.ServerModuleInfo;
 import com.eas.client.queries.PlatypusQuery;
-import com.eas.client.report.Report;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.requests.AppQueryRequest;
@@ -27,7 +26,6 @@ import com.eas.util.BinaryUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -50,30 +48,19 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
     //
     public static final String REPORT_LOCATION_CONTENT_TYPE = "text/platypus-report-location";
 
-    protected PlatypusHttpConnection pConn;
     protected HttpURLConnection conn;
     protected int responseCode;
     protected Request request;
-    private byte[] bodyContent;
+    private final byte[] bodyContent;
     protected Scripts.Space space;
 
-    public PlatypusHttpResponseReader(Request aRequest, HttpURLConnection aConn, PlatypusHttpConnection aPConn, Scripts.Space aSpace) throws IOException {
+    public PlatypusHttpResponseReader(Request aRequest, HttpURLConnection aConn, byte[] aBodyContent, Scripts.Space aSpace) throws IOException {
         super();
         request = aRequest;
         conn = aConn;
         responseCode = conn.getResponseCode();
-        pConn = aPConn;
         space = aSpace;
-    }
-
-    public boolean checkIfSecirutyForm() throws IOException {
-        String contentType = conn.getContentType();
-        if ("text/html".equalsIgnoreCase(contentType)) {
-            String formContent = extractText();
-            return formContent.toLowerCase().contains(PlatypusHttpRequestWriter.J_SECURITY_CHECK_ACTION_NAME);
-        } else {
-            return false;
-        }
+        bodyContent = aBodyContent;
     }
 
     protected Object extractJSON() throws IOException {
@@ -87,8 +74,6 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
     }
 
     protected String extractText() throws IOException {
-        try (InputStream in = conn.getInputStream()) {
-            bodyContent = BinaryUtils.readStream(in, -1);
             String contentType = conn.getContentType();
             String[] contentTypeCharset = contentType.split(";");
             if (contentTypeCharset == null || contentTypeCharset.length == 0) {
@@ -109,7 +94,6 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
             } else {
                 return new String(bodyContent, SettingsConstants.COMMON_ENCODING);
             }
-        }
     }
 
     @Override
@@ -143,6 +127,7 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
     @Override
     public void visit(RPCRequest.Response rsp) throws Exception {
         if (conn.getContentType() != null && conn.getContentType().toLowerCase().startsWith(REPORT_LOCATION_CONTENT_TYPE)) {
+            /*
             String reportLocation = extractText();
             URL currentUrl = conn.getURL();
             URL reportUrl = new URL(currentUrl.getProtocol(), currentUrl.getHost(), currentUrl.getPort(), reportLocation);
@@ -164,6 +149,7 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
                 }
             }
             pConn.acceptCookies(reportConn);
+            */
         } else {
             Object oData = extractJSONWithDates();
             rsp.setResult(oData);

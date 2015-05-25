@@ -1,6 +1,6 @@
 (function() {
-    var javaClass = Java.type("${Type}");
-    javaClass.setPublisher(function(aDelegate) {
+    var space = this['-platypus-scripts-space'];
+    space.putPublisher("${Type}", function(aDelegate) {
         return new P.${Name}(${NullParams}aDelegate);
     });
     

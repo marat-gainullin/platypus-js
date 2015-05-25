@@ -86,10 +86,10 @@ public abstract class PlatypusConnection implements AppConnection {
         public Consumer<Response> onComplete;
         public boolean completed;
 
-        public RequestCallback(RequestEnvelope aRequest, Consumer<Response> aOnSuccess) {
+        public RequestCallback(RequestEnvelope aRequest, Consumer<Response> aOnComplete) {
             super();
             requestEnv = aRequest;
-            onComplete = aOnSuccess;
+            onComplete = aOnComplete;
         }
 
         /**

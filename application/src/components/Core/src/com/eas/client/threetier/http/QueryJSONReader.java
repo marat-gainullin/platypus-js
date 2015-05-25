@@ -25,7 +25,7 @@ public class QueryJSONReader {
     private static final String PARAMETERS_PROP_NAME = "parameters";
     private static final String FIELDS_PROP_NAME = "fields";
 
-    public static PlatypusQuery read(Scripts.Space aSpace, JSObject o) throws Exception {
+    public static PlatypusQuery read(Scripts.Space aSpace, JSObject o) {
         PlatypusQuery query = new PlatypusQuery(null, aSpace);
         String title = JSType.toString(o.getMember(TITLE_PROP_NAME));
         query.setTitle(title);

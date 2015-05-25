@@ -295,10 +295,6 @@ public class Classes2Scripts {
             Logger.getLogger(Classes2Scripts.class.getName()).log(Level.WARNING, "HasPublished iterface is not implemented: {0}", clazz.getName());
             return null;
         }
-        if (!checkForSetPublisher(clazz)) {
-            Logger.getLogger(Classes2Scripts.class.getName()).log(Level.WARNING, "setPublisher static method is not implemented: {0}", clazz.getName());
-            return null;
-        }
         ///
         boolean invalidatable = HasPublishedInvalidatableCollection.class.isAssignableFrom(clazz);
         List<Method> methods = new ArrayList<>();
@@ -397,15 +393,6 @@ public class Classes2Scripts {
 
     private static boolean checkForHasPublished(Class clazz) {
         return HasPublished.class.isAssignableFrom(clazz);
-    }
-
-    private static boolean checkForSetPublisher(Class clazz) {
-        for (Method m : clazz.getDeclaredMethods()) {
-            if (m.getName().equals("setPublisher") && Modifier.isStatic(m.getModifiers())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private static String getConstructorJsDoc(FunctionInfo ci) {

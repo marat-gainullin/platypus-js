@@ -9,6 +9,7 @@ import com.eas.client.cache.ActualCacheEntry;
 import com.eas.client.threetier.PlatypusConnection;
 import com.eas.client.threetier.requests.CreateServerModuleRequest;
 import com.eas.client.threetier.requests.RPCRequest;
+import com.eas.script.Scripts;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,7 +55,7 @@ public class ServerModulesProxy {
         }
         CreateServerModuleRequest request = new CreateServerModuleRequest(aName, localTimeStamp);
         if (onSuccess != null) {
-            conn.enqueueRequest(request, (CreateServerModuleRequest.Response response) -> {
+            conn.enqueueRequest(request, Scripts.getSpace(), (CreateServerModuleRequest.Response response) -> {
                 ServerModuleInfo info = response.getInfo();
                 if (info != null) {
                     entries.put(aName, new ActualCacheEntry<>(info, response.getTimeStamp()));
@@ -99,7 +100,7 @@ public class ServerModulesProxy {
     public Object executeServerModuleMethod(String aModuleName, String aMethodName, Consumer<Object> onSuccess, Consumer<Exception> onFailure, Object... aArguments) throws Exception {
         final RPCRequest request = new RPCRequest(aModuleName, aMethodName, aArguments);
         if (onSuccess != null) {
-            conn.<RPCRequest.Response>enqueueRequest(request, (RPCRequest.Response aResponse) -> {
+            conn.<RPCRequest.Response>enqueueRequest(request, Scripts.getSpace(), (RPCRequest.Response aResponse) -> {
                 onSuccess.accept(aResponse.getResult());
             }, onFailure);
             return null;

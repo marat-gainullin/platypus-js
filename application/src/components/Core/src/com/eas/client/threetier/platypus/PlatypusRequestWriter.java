@@ -21,7 +21,7 @@ import com.eas.client.threetier.requests.ResourceRequest;
 import com.eas.client.threetier.requests.CredentialRequest;
 import com.eas.proto.CoreTags;
 import com.eas.proto.ProtoWriter;
-import com.eas.script.Scripts;
+import com.eas.util.JSONUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -36,20 +36,18 @@ import jdk.nashorn.internal.runtime.JSType;
 public class PlatypusRequestWriter implements PlatypusRequestVisitor {
 
     protected OutputStream out;
-    protected Scripts.Space space;
 
-    public PlatypusRequestWriter(OutputStream aOut, Scripts.Space aSpace) {
+    public PlatypusRequestWriter(OutputStream aOut) {
         super();
         out = aOut;
-        space = aSpace;
     }
 
-    public static void write(Request aRequest, ProtoWriter writer, Scripts.Space aSpace) throws IOException {
+    public static void write(Request aRequest, ProtoWriter writer) throws IOException {
         try {
             writer.put(RequestsTags.TAG_REQUEST_TYPE, aRequest.getType());
             writer.put(RequestsTags.TAG_REQUEST_DATA);
             ByteArrayOutputStream subOut = new ByteArrayOutputStream();
-            PlatypusRequestWriter requestsWriter = new PlatypusRequestWriter(subOut, aSpace);
+            PlatypusRequestWriter requestsWriter = new PlatypusRequestWriter(subOut);
             aRequest.accept(requestsWriter);
             byte[] subOutBytes = subOut.toByteArray();
             if (subOutBytes.length > 1024 * 2) {
@@ -132,7 +130,7 @@ public class PlatypusRequestWriter implements PlatypusRequestVisitor {
         writer.put(RequestsTags.TAG_MODULE_NAME, rq.getModuleName());
         writer.put(RequestsTags.TAG_METHOD_NAME, rq.getMethodName());
         for (Object arg : rq.getArguments()) {
-            writer.put(RequestsTags.TAG_ARGUMENT_VALUE, space.toJson(JSType.nullOrUndefined(arg) ? null : arg));
+            writer.put(RequestsTags.TAG_ARGUMENT_VALUE, JSONUtils.v(JSType.nullOrUndefined(arg) ? null : arg));
         }
         writer.flush();
     }

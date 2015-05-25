@@ -11,13 +11,9 @@ import com.eas.client.changes.Command;
 import com.eas.client.changes.Delete;
 import com.eas.client.changes.Insert;
 import com.eas.client.changes.Update;
-import com.eas.script.Scripts;
 import com.eas.util.JSONUtils;
-import com.eas.util.StringUtils;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -32,11 +28,9 @@ public class ChangeJSONWriter implements ChangeVisitor {
     private static final String CHANGE_ENTITY_NAME = "entity";
 
     protected String written;
-    protected Scripts.Space space;
 
-    public ChangeJSONWriter(Scripts.Space aSpace) {
+    public ChangeJSONWriter() {
         super();
-        space = aSpace;
     }
 
     public String getWritten() {
@@ -48,7 +42,7 @@ public class ChangeJSONWriter implements ChangeVisitor {
         List<String> data = new ArrayList<>();
         for (ChangeValue data1 : aChange.getData()) {
             data.add(data1.name);
-            data.add(valueToString(data1.value));
+            data.add(JSONUtils.v(data1.value));
         }
         written = JSONUtils.o(
                 CHANGE_KIND_NAME, JSONUtils.s("insert").toString(),
@@ -62,12 +56,12 @@ public class ChangeJSONWriter implements ChangeVisitor {
         List<String> data = new ArrayList<>();
         for (ChangeValue datum : aChange.getData()) {
             data.add(datum.name);
-            data.add(valueToString(datum.value));
+            data.add(JSONUtils.v(datum.value));
         }
         List<String> keys = new ArrayList<>();
         for (ChangeValue key : aChange.getKeys()) {
             keys.add(key.name);
-            keys.add(valueToString(key.value));
+            keys.add(JSONUtils.v(key.value));
         }
         written = JSONUtils.o(
                 CHANGE_KIND_NAME, JSONUtils.s("update").toString(),
@@ -82,7 +76,7 @@ public class ChangeJSONWriter implements ChangeVisitor {
         List<String> keys = new ArrayList<>();
         for (ChangeValue key : aChange.getKeys()) {
             keys.add(key.name);
-            keys.add(valueToString(key.value));
+            keys.add(JSONUtils.v(key.value));
         }
         written = JSONUtils.o(
                 CHANGE_KIND_NAME, JSONUtils.s("delete").toString(),
@@ -96,34 +90,12 @@ public class ChangeJSONWriter implements ChangeVisitor {
         List<String> params = new ArrayList<>();
         for (ChangeValue parameter : aChange.getParameters()) {
             params.add(parameter.name);
-            params.add(valueToString(parameter.value));
+            params.add(JSONUtils.v(parameter.value));
         }
         written = JSONUtils.o(
                 CHANGE_KIND_NAME, JSONUtils.s("command").toString(),
                 CHANGE_ENTITY_NAME, JSONUtils.s(aChange.entityName).toString(),
                 CHANGE_PARAMETERS_NAME, JSONUtils.as(params.toArray(new String[]{})).toString()
         ).toString();
-    }
-
-    private String valueToString(Object aValue) throws Exception {
-        if (aValue != null) {
-            if (aValue instanceof JSObject) {
-                aValue = space.toJava(aValue);
-            }
-            if (aValue instanceof Boolean) {
-                return aValue.toString();
-            } else if (aValue instanceof Number) {
-                return StringUtils.formatDouble(((Number) aValue).doubleValue());
-            } else if (aValue instanceof String) {
-                return JSONUtils.s((String) aValue).toString();
-            } else if (aValue instanceof Date) {
-                Long millis = ((Date) aValue).getTime();
-                return millis.toString();
-            } else {
-                throw new Exception("Value of unknown or unsupported type found! It's class is: " + aValue.getClass().getName());
-            }
-        } else {
-            return "null";
-        }
     }
 }

@@ -6,6 +6,8 @@
 package com.eas.client.threetier.platypus;
 
 import com.eas.client.threetier.Request;
+import com.eas.client.threetier.Response;
+import java.util.function.Consumer;
 
 /**
  *
@@ -17,13 +19,16 @@ public class RequestEnvelope {
     public String userName;
     public String password;
     public String ticket;
+    public Response response;
+    public Consumer<Response> onComplete;
 
-    public RequestEnvelope(Request aRequest, String aUserName, String aPassword, String aTicket) {
+    public RequestEnvelope(Request aRequest, String aUserName, String aPassword, String aTicket, Consumer<Response> aOnComplete) {
         super();
         request = aRequest;
         userName = aUserName;
         password = aPassword;
         ticket = aTicket;
+        onComplete = aOnComplete;
     }
 
     public void waitRequestCompletion() throws InterruptedException {

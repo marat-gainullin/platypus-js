@@ -194,14 +194,14 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
             String collectionPropertyName = aRelation.getCollectionPropertyName();
             if (scalarPropertyName != null && !scalarPropertyName.isEmpty()) {
                 aRelation.getLeftEntity().putOrmScalarDefinition(scalarPropertyName,
-                        new Fields.OrmDef(aRelation.getLeftField().getName(), scalarPropertyName, collectionPropertyName, Scripts.scalarPropertyDefinition(
+                        new Fields.OrmDef(aRelation.getLeftField().getName(), scalarPropertyName, collectionPropertyName, Scripts.getSpace().scalarPropertyDefinition(
                                         (JSObject) aRelation.getRightEntity().getPublished(),
                                         aRelation.getRightField().getName(),
                                         aRelation.getLeftField().getName())));
             }
             if (collectionPropertyName != null && !collectionPropertyName.isEmpty()) {
                 aRelation.getRightEntity().putOrmCollectionDefinition(collectionPropertyName,
-                        new Fields.OrmDef(collectionPropertyName, scalarPropertyName, Scripts.collectionPropertyDefinition(
+                        new Fields.OrmDef(collectionPropertyName, scalarPropertyName, Scripts.getSpace().collectionPropertyDefinition(
                                         (JSObject) aRelation.getLeftEntity().getPublished(),
                                         aRelation.getRightField().getName(),
                                         aRelation.getLeftField().getName())));

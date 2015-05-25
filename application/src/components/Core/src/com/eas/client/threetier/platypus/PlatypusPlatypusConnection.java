@@ -5,34 +5,42 @@
 package com.eas.client.threetier.platypus;
 
 import com.eas.client.login.Credentials;
-import com.eas.client.login.PlatypusPrincipal;
-import com.eas.client.resourcepool.BearResourcePool;
-import com.eas.client.resourcepool.ResourcePool;
 import com.eas.client.threetier.PlatypusConnection;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.client.threetier.requests.LogoutRequest;
-import com.eas.concurrent.DeamonThreadFactory;
+import com.eas.proto.ProtoReader;
 import com.eas.script.Scripts;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
+import java.net.Socket;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
+import java.util.Queue;
 import java.util.concurrent.Callable;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.net.ssl.SSLContext;
+import org.apache.mina.core.buffer.IoBuffer;
+import org.apache.mina.core.filterchain.IoFilter;
 import org.apache.mina.core.future.ConnectFuture;
+import org.apache.mina.core.future.IoFuture;
+import org.apache.mina.core.future.WriteFuture;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
+import org.apache.mina.filter.codec.ProtocolDecoderOutput;
+import org.apache.mina.filter.codec.ProtocolEncoderOutput;
 import org.apache.mina.filter.ssl.SslFilter;
 import org.apache.mina.transport.socket.SocketConnector;
 import org.apache.mina.transport.socket.nio.NioProcessor;
@@ -46,53 +54,53 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
 
     private final String host;
     private final int port;
+
+    private final Queue<IoSession> sessions = new ConcurrentLinkedQueue<>();
+    private final Queue<RequestEnvelope> pending = new ConcurrentLinkedQueue<>();
+
     private String sessionTicket;
     private final SocketConnector connector;
-    private final ThreadPoolExecutor requestsSender;
-    private final ResourcePool<IoSession> sessionsPool;
+    private final Executor requestsProcessor;
+    private final SSLContext sslContext;
+    // sync requests
+    private final RequestEncoder syncEncoder;
+    private final ResponseDecoder syncDecoder;
 
-    public PlatypusPlatypusConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts, int aMaximumThreads, int aMaximumConnections) throws Exception {
+    public PlatypusPlatypusConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts, Executor aNetworkProcessor) throws Exception {
         super(aUrl, aOnCredentials, aMaximumAuthenticateAttempts);
-        requestsSender = new ThreadPoolExecutor(aMaximumThreads, aMaximumThreads,
-                1L, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(),
-                new DeamonThreadFactory("platypus-client-", false));
-        requestsSender.allowCoreThreadTimeOut(true);
-        sessionsPool = new BearResourcePool<IoSession>(aMaximumConnections) {
 
-            @Override
-            protected IoSession createResource() throws Exception {
-                Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.FINE, "{0} is connecting to {1}:{2}.", new Object[]{Thread.currentThread().getName(), host, port});
-                ConnectFuture onConnect = connector.connect();
-                onConnect.awaitUninterruptibly();
-                Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.FINE, "{0} is connected to {1}:{2}.", new Object[]{Thread.currentThread().getName(), host, port});
-                return onConnect.getSession();
-            }
-        };
         host = aUrl.getHost();
         port = aUrl.getPort();
 
-        ThreadPoolExecutor connectorExecutor = new ThreadPoolExecutor(aMaximumThreads, aMaximumThreads,
-                1L, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(),
-                new DeamonThreadFactory("nio-connector-", true));
-        connectorExecutor.allowCoreThreadTimeOut(true);
-        ThreadPoolExecutor processorExecutor = new ThreadPoolExecutor(aMaximumThreads, aMaximumThreads,
-                1L, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(),
-                new DeamonThreadFactory("nio-processor-", true));
-        processorExecutor.allowCoreThreadTimeOut(true);
-        connector = new NioSocketConnector(connectorExecutor, new NioProcessor(processorExecutor));
-        //connector = new NioSocketConnector(null, new SimpleIoProcessorPool(NioProcessor.class, connectorExecutor, Runtime.getRuntime().availableProcessors() + 1));
-        //connector = new NioSocketConnector();
-        connector.setDefaultRemoteAddress(new InetSocketAddress(host, port));
-        connector.setHandler(new IoHandlerAdapter() {
+        requestsProcessor = aNetworkProcessor;
+        sslContext = createSSLContext();
+
+        connector = configureConnector(requestsProcessor, sslContext);
+        syncEncoder = new RequestEncoder();
+        syncDecoder = new ResponseDecoder();
+    }
+
+    private NioSocketConnector configureConnector(Executor aProcessor, SSLContext sslContext) throws Exception {
+        NioSocketConnector lconnector = new NioSocketConnector(aProcessor, new NioProcessor(aProcessor));
+        lconnector.setDefaultRemoteAddress(new InetSocketAddress(host, port));
+        SslFilter sslFilter = new SslFilter(sslContext);
+        sslFilter.setUseClientMode(true);
+        lconnector.getFilterChain().addLast("encryption", sslFilter);
+        lconnector.getFilterChain().addLast("platypusCodec", new ProtocolCodecFilter(new RequestEncoder(), new ResponseDecoder()));
+        lconnector.setHandler(new IoHandlerAdapter() {
 
             @Override
-            public void messageReceived(IoSession session, Object message) throws Exception {
-                RequestCallback rqc = (RequestCallback) session.getAttribute(RequestCallback.class.getSimpleName());
-                rqc.response = (Response) message;
-                rqc.requestEnv.notifyDone();
+            public void messageReceived(IoSession session, Object in) throws Exception {
+                RequestEnvelope requestEnv = (RequestEnvelope) session.getAttribute(RequestEnvelope.class.getSimpleName());
+                final ProtoReader responseReader = new ProtoReader((InputStream) in);
+                requestEnv.response = PlatypusResponseReader.read(responseReader, requestEnv.request, null, null);
+                sessionTicket = requestEnv.ticket;
+                session.removeAttribute(RequestEnvelope.class.getSimpleName());
+                pendingChanged(session, null);
+                // Report about a response
+                if (requestEnv.onComplete != null) {
+                    requestEnv.onComplete.accept(requestEnv.response);
+                }
             }
 
             @Override
@@ -107,11 +115,7 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
             }
 
         });
-        SSLContext sslContext = createSSLContext();
-        SslFilter sslFilter = new SslFilter(sslContext);
-        sslFilter.setUseClientMode(true);
-        connector.getFilterChain().addLast("encryption", sslFilter);
-        connector.getFilterChain().addLast("platypusCodec", new ProtocolCodecFilter(new RequestEncoder(), new ResponseDecoder()));
+        return lconnector;
     }
 
     @Override
@@ -130,179 +134,260 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
         }
     }
 
-    @Override
-    public <R extends Response> void enqueueRequest(Request rq, Consumer<R> onSuccess, Consumer<Exception> onFailure) {
-        Scripts.incAsyncsCount();
-        enqueue(new RequestCallback(new RequestEnvelope(rq, null, null, null), (Response aResponse) -> {
-            if (aResponse instanceof ErrorResponse) {
-                if (onFailure != null) {
-                    Exception cause = handleErrorResponse((ErrorResponse) aResponse);
-                    if (Scripts.getGlobalQueue() != null) {
-                        Scripts.getGlobalQueue().accept(() -> {
-                            onFailure.accept(cause);
-                        });
-                    } else {
-                        final Object lock = Scripts.getLock() != null ? Scripts.getLock() : this;
-                        synchronized (lock) {
-                            onFailure.accept(cause);
-                        }
-                    }
-                }
-            } else {
-                if (onSuccess != null) {
-                    if (Scripts.getGlobalQueue() != null) {
-                        Scripts.getGlobalQueue().accept(() -> {
-                            if (rq instanceof LogoutRequest) {
-                                sessionTicket = null;
-                                if (onLogout != null) {
-                                    onLogout.run();
-                                }
-                            }
-                            onSuccess.accept((R) aResponse);
-                        });
-                    } else {
-                        final Object lock = Scripts.getLock() != null ? Scripts.getLock() : this;
-                        synchronized (lock) {
-                            if (rq instanceof LogoutRequest) {
-                                sessionTicket = null;
-                                if (onLogout != null) {
-                                    onLogout.run();
-                                }
-                            }
-                            onSuccess.accept((R) aResponse);
-                        }
-                    }
-                }
-            }
-        }), onFailure);
-    }
+    protected int maximumSessions = 25;
+    // Zombie counters...
+    protected volatile int pendingSize;
+    protected volatile int sessionsSize;
+    protected AtomicInteger requestsVersion = new AtomicInteger();
 
-    private void startRequestTask(Runnable aTask) {
-        Object closureLock = Scripts.getLock();
-        Object closureRequest = Scripts.getRequest();
-        Object closureResponse = Scripts.getResponse();
-        Object closureSession = Scripts.getSession();
-        PlatypusPrincipal closurePrincipal = PlatypusPrincipal.getInstance();
-        requestsSender.submit(() -> {
-            Scripts.setLock(closureLock);
-            Scripts.setRequest(closureRequest);
-            Scripts.setResponse(closureResponse);
-            Scripts.setSession(closureSession);
-            PlatypusPrincipal.setInstance(closurePrincipal);
-            try {
-                aTask.run();
-            } finally {
-                Scripts.setLock(null);
-                Scripts.setRequest(null);
-                Scripts.setResponse(null);
-                Scripts.setSession(null);
-                PlatypusPrincipal.setInstance(null);
-            }
+    protected void pendingChanged(IoSession aNewSession, RequestEnvelope aRequest) {
+        requestsProcessor.execute(() -> {
+            IoSession _newSession = aNewSession;
+            RequestEnvelope _request = aRequest;
+            int rVersion;
+            do {
+                rVersion = requestsVersion.get();
+                if (rVersion == Integer.MAX_VALUE) {
+                    rVersion = -1;
+                }
+                // Some social payload
+                if (_newSession != null) {
+                    //if (pendingSize >= sessionsSize) {
+                    sessions.offer(_newSession);
+                    sessionsSize++;
+                    //}
+                    _newSession = null;
+                }
+                if (_request != null) {
+                    pending.offer(_request);
+                    _request = null;
+                    pendingSize++;
+                }
+                // end of social payload
+                IoSession session = sessions.poll();
+                RequestEnvelope request = pending.poll();
+                if (session != null && request != null) {
+                    session.setAttribute(RequestEnvelope.class.getSimpleName(), request);
+                    session.write(request);
+                    pendingSize--;
+                } else {
+                    if (session != null) {
+                        sessions.offer(session);
+                    }
+                    if (request != null) {
+                        pending.offer(request);
+                    }
+                    if (request != null && session == null && sessionsSize < maximumSessions) {
+                        ConnectFuture onConnect = connector.connect();
+                        onConnect.addListener((IoFuture future) -> {
+                            IoSession created = future.getSession();
+                            pendingChanged(created, null);
+                        });
+                    }
+                }
+            } while (requestsVersion.compareAndSet(rVersion, rVersion + 1));
         });
     }
 
-    private void enqueue(RequestCallback rqc, Consumer<Exception> onFailure) {
-        Runnable doer = () -> {
-            try {
-                IoSession ioSession = sessionsPool.achieveResource();
-                ioSession.setAttribute(RequestCallback.class.getSimpleName(), rqc);
-                try {
-                    Callable<Void> performer = () -> {
-                        rqc.response = null;
-                        rqc.completed = false;
-                        rqc.requestEnv.request.setDone(false);
-                        rqc.requestEnv.ticket = sessionTicket;
-                        // enqueue network work
-                        ioSession.write(rqc.requestEnv);
-                        // wait completion from the network subsystem
-                        rqc.requestEnv.waitRequestCompletion();
-                        sessionTicket = rqc.requestEnv.ticket;
-                        return null;
-                    };
-                    // Try to communicate with the server
-                    performer.call();
-                    if (rqc.response instanceof ErrorResponse
-                            && ((ErrorResponse) rqc.response).isNotLoggedIn()) {
-                        sequence.in(() -> {
-                            // probably new ticket from another thread...
-                            rqc.requestEnv.userName = null;
-                            rqc.requestEnv.password = null;
-                            performer.call();
-                            if (rqc.response instanceof ErrorResponse
-                                    && ((ErrorResponse) rqc.response).isNotLoggedIn()) {
-                                // nice try :-(
-                                int authenticateAttempts = 0;
-                                // Try to authenticate
-                                while (rqc.response instanceof ErrorResponse
-                                        && ((ErrorResponse) rqc.response).isNotLoggedIn()
-                                        && authenticateAttempts++ < maximumAuthenticateAttempts) {
-                                    Credentials credentials = onCredentials.call();
-                                    if (credentials != null) {
-                                        rqc.requestEnv.userName = credentials.userName;
-                                        rqc.requestEnv.password = credentials.password;
-                                        sessionTicket = null;
-                                        performer.call();
-                                        if (!(rqc.response instanceof ErrorResponse) || !((ErrorResponse) rqc.response).isAccessControl()) {
-                                            PlatypusPrincipal.setClientSpacePrincipal(new PlatypusPrincipal(credentials.userName, null, null, PlatypusPlatypusConnection.this));
-                                            if (onLogin != null) {
-                                                onLogin.run();
-                                            }
-                                        }
-                                    } else {// Credentials are inaccessible, so leave things as is...
-                                        authenticateAttempts = Integer.MAX_VALUE;
-                                    }
-                                }
-                            }
-                            return null;
-                        });
-                    }
-                } finally {
-                    ioSession.removeAttribute(RequestCallback.class.getSimpleName());
-                    sessionsPool.returnResource(ioSession);
-                }
-                // Report about a result
-                if (rqc.onComplete != null) {
-                    rqc.completed = true;
-                    rqc.onComplete.accept(rqc.response);
-                } else {
-                    synchronized (rqc) {// synchronized due to J2SE javadoc on wait()/notify() methods
-                        rqc.completed = true;
-                        rqc.notifyAll();
-                    }
-                }
-            } catch (Exception ex) {
-                Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.SEVERE, null, ex);
+    @Override
+    public <R extends Response> void enqueueRequest(Request aRequest, Scripts.Space aSpace, Consumer<R> onSuccess, Consumer<Exception> onFailure) {
+        aSpace.incAsyncsCount();
+        RequestEnvelope requestEnv = new RequestEnvelope(aRequest, null, null, sessionTicket, (Response aResponse) -> {
+            if (aResponse instanceof ErrorResponse) {
                 if (onFailure != null) {
-                    onFailure.accept(ex);
+                    Exception cause = handleErrorResponse((ErrorResponse) aResponse);
+                    aSpace.process(() -> {
+                        onFailure.accept(cause);
+                    });
+                }
+            } else {
+                if (onSuccess != null) {
+                    aSpace.process(() -> {
+                        if (aRequest instanceof LogoutRequest) {
+                            sessionTicket = null;
+                            if (onLogout != null) {
+                                onLogout.run();
+                            }
+                        }
+                        onSuccess.accept((R) aResponse);
+                    });
                 }
             }
-        };
-        if (onFailure != null) {
-            startRequestTask(doer);
-        } else {
-            doer.run();
-        }
+        });
+        pendingChanged(null, requestEnv);
     }
+
+    /*
+     private void enqueue(RequestCallback rqc, Consumer<Exception> onFailure) {
+     Runnable doer = () -> {
+     try {
+     try {
+     Callable<Void> performer = () -> {
+     rqc.response = null;
+     rqc.completed = false;
+     rqc.requestEnv.request.setDone(false);
+     rqc.requestEnv.ticket = sessionTicket;
+     // enqueue network work
+     ioSession.write(rqc.requestEnv);
+     // wait completion from the network subsystem
+     rqc.requestEnv.waitRequestCompletion();
+     sessionTicket = rqc.requestEnv.ticket;
+     return null;
+     };
+     // Try to communicate with the server
+     performer.call();
+     if (rqc.response instanceof ErrorResponse
+     && ((ErrorResponse) rqc.response).isNotLoggedIn()) {
+     sequence.in(() -> {
+     // probably new ticket from another thread...
+     rqc.requestEnv.userName = null;
+     rqc.requestEnv.password = null;
+     performer.call();
+     if (rqc.response instanceof ErrorResponse
+     && ((ErrorResponse) rqc.response).isNotLoggedIn()) {
+     // nice try :-(
+     int authenticateAttempts = 0;
+     // Try to authenticate
+     while (rqc.response instanceof ErrorResponse
+     && ((ErrorResponse) rqc.response).isNotLoggedIn()
+     && authenticateAttempts++ < maximumAuthenticateAttempts) {
+     Credentials credentials = onCredentials.call();
+     if (credentials != null) {
+     rqc.requestEnv.userName = credentials.userName;
+     rqc.requestEnv.password = credentials.password;
+     sessionTicket = null;
+     performer.call();
+     if (!(rqc.response instanceof ErrorResponse) || !((ErrorResponse) rqc.response).isAccessControl()) {
+     PlatypusPrincipal.setClientSpacePrincipal(new PlatypusPrincipal(credentials.userName, null, null, PlatypusPlatypusConnection.this));
+     if (onLogin != null) {
+     onLogin.run();
+     }
+     }
+     } else {// Credentials are inaccessible, so leave things as is...
+     authenticateAttempts = Integer.MAX_VALUE;
+     }
+     }
+     }
+     return null;
+     });
+     }
+     } finally {
+     ioSession.removeAttribute(RequestCallback.class.getSimpleName());
+     sessionsPool.returnResource(ioSession);
+     }
+     // Report about a result
+     if (rqc.onComplete != null) {
+     rqc.completed = true;
+     rqc.onComplete.accept(rqc.response);
+     } else {
+     rqc.completed = true;
+     }
+     } catch (Exception ex) {
+     Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.SEVERE, null, ex);
+     if (onFailure != null) {
+     onFailure.accept(ex);
+     }
+     }
+     };
+     if (onFailure != null) {
+     requestsSender.submit(doer);
+     } else {
+     doer.run();
+     }
+     }
+     */
+    protected static class SyncProtocolEncoderOutput implements ProtocolEncoderOutput {
+
+        protected Object filtered;
+
+        public SyncProtocolEncoderOutput() {
+        }
+
+        public Object getFiltered() {
+            return filtered;
+        }
+
+        @Override
+        public void write(Object encodedMessage) {
+            filtered = encodedMessage;
+        }
+
+        @Override
+        public void mergeAll() {
+        }
+
+        @Override
+        public WriteFuture flush() {
+            return null;
+        }
+
+    };
+
+    protected static class SyncProtocolDecoderOutput implements ProtocolDecoderOutput {
+
+        protected Object filtered;
+
+        public SyncProtocolDecoderOutput() {
+        }
+
+        public Object getFiltered() {
+            return filtered;
+        }
+
+        @Override
+        public void write(Object decodedMessage) {
+            filtered = decodedMessage;
+        }
+
+        @Override
+        public void flush(IoFilter.NextFilter nextFilter, IoSession session) {
+        }
+
+    };
 
     @Override
     public <R extends Response> R executeRequest(Request rq) throws Exception {
-        RequestCallback rqc = new RequestCallback(new RequestEnvelope(rq, null, null, null), null);
-        enqueue(rqc, null);
-        if (rqc.response instanceof ErrorResponse) {
-            throw handleErrorResponse((ErrorResponse) rqc.response);
-        } else {
-            if (rq instanceof LogoutRequest) {
-                sessionTicket = null;
-                if (onLogout != null) {
-                    onLogout.run();
+        RequestEnvelope requestEnv = new RequestEnvelope(rq, null, null, sessionTicket, null);
+        Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.FINE, "{0} is connecting to {1}:{2}.", new Object[]{Thread.currentThread().getName(), host, port});
+        try (Socket conn = sslContext.getSocketFactory().createSocket()) {
+            conn.connect(new InetSocketAddress(host, port));
+            Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.FINE, "{0} is connected to {1}:{2}.", new Object[]{Thread.currentThread().getName(), host, port});
+            SyncProtocolEncoderOutput requestOut = new SyncProtocolEncoderOutput();
+            syncEncoder.encode(null, requestEnv, requestOut);
+            Object oFiltered = requestOut.getFiltered();
+            try (OutputStream os = conn.getOutputStream()) {
+                IoBuffer toWrite = (IoBuffer) oFiltered;
+                os.write(toWrite.array());
+            }
+            byte[] readBuffer = new byte[1024 * 16];
+            ByteArrayOutputStream accumulated = new ByteArrayOutputStream();
+            try (InputStream is = conn.getInputStream()) {
+                int read = 0;
+                while (read > -1) {
+                    read = is.read(readBuffer);
+                    accumulated.write(readBuffer, 0, read);
+                    SyncProtocolDecoderOutput responseOut = new SyncProtocolDecoderOutput();
+                    if (syncDecoder.doDecode(null, IoBuffer.wrap(accumulated.toByteArray()), responseOut)) {
+                        Response response = (Response) responseOut.getFiltered();
+                        if (response instanceof ErrorResponse) {
+                            throw handleErrorResponse((ErrorResponse) response);
+                        } else {
+                            if (rq instanceof LogoutRequest) {
+                                sessionTicket = null;
+                                if (onLogout != null) {
+                                    onLogout.run();
+                                }
+                            }
+                            return (R) response;
+                        }
+                    }
                 }
             }
-            return (R) rqc.response;
+            throw new Exception("No response was recieved via platypus protocol");
         }
     }
 
     @Override
     public void shutdown() {
-        requestsSender.shutdown();
     }
 }

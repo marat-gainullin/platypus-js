@@ -69,7 +69,7 @@ public class DatabasesClient {
      */
     public DatabasesClient(String aDefaultDatasourceName, boolean aAutoFillMetadata, int aMaxJdbcThreads) throws Exception {
         super();
-        jdbcProcessor = new ThreadPoolExecutor(aMaxJdbcThreads, aMaxJdbcThreads,
+        jdbcProcessor = new ThreadPoolExecutor(0, aMaxJdbcThreads,
                 10L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(),
                 new DeamonThreadFactory("jdbc-", false));
@@ -318,31 +318,18 @@ public class DatabasesClient {
             return rowsAffected;
         };
         if (onSuccess != null) {
+            Scripts.Space space = Scripts.getSpace();
             startJdbcTask(() -> {
                 try {
                     Integer affected = doWork.call();
-                    if (Scripts.getGlobalQueue() != null) {
-                        Scripts.getGlobalQueue().accept(() -> {
-                            onSuccess.accept(affected);
-                        });
-                    } else {
-                        final Object lock = Scripts.getLock() != null ? Scripts.getLock() : this;
-                        synchronized (lock) {
-                            onSuccess.accept(affected);
-                        }
-                    }
+                    space.process(() -> {
+                        onSuccess.accept(affected);
+                    });
                 } catch (Exception ex) {
                     if (onFailure != null) {
-                        if (Scripts.getGlobalQueue() != null) {
-                            Scripts.getGlobalQueue().accept(() -> {
-                                onFailure.accept(ex);
-                            });
-                        } else {
-                            final Object lock = Scripts.getLock() != null ? Scripts.getLock() : this;
-                            synchronized (lock) {
-                                onFailure.accept(ex);
-                            }
-                        }
+                        space.process(() -> {
+                            onFailure.accept(ex);
+                        });
                     }
                 }
             });
@@ -368,27 +355,10 @@ public class DatabasesClient {
     }
 
     private void startJdbcTask(Runnable aTask) {
-        Scripts.incAsyncsCount();
-        Object closureLock = Scripts.getLock();
-        Object closureRequest = Scripts.getRequest();
-        Object closureResponse = Scripts.getResponse();
-        Object closureSession = Scripts.getSession();
-        PlatypusPrincipal closurePrincipal = PlatypusPrincipal.getInstance();
+        Scripts.Space space = Scripts.getSpace();
+        space.incAsyncsCount();
         jdbcProcessor.submit(() -> {
-            Scripts.setLock(closureLock);
-            Scripts.setRequest(closureRequest);
-            Scripts.setResponse(closureResponse);
-            Scripts.setSession(closureSession);
-            PlatypusPrincipal.setInstance(closurePrincipal);
-            try {
-                aTask.run();
-            } finally {
-                Scripts.setLock(null);
-                Scripts.setRequest(null);
-                Scripts.setResponse(null);
-                Scripts.setSession(null);
-                PlatypusPrincipal.setInstance(null);
-            }
+            aTask.run();
         });
     }
 
@@ -441,32 +411,19 @@ public class DatabasesClient {
 
     public int commit(Map<String, List<Change>> aDatasourcesChangeLogs, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (onSuccess != null) {
+            Scripts.Space space = Scripts.getSpace();
             if (!aDatasourcesChangeLogs.isEmpty()) {
                 ApplyProcess applyProcess = new ApplyProcess(aDatasourcesChangeLogs.size(), (List<ApplyResult> aApplyResults) -> {
                     assert aDatasourcesChangeLogs.size() == aApplyResults.size();
                     CommitProcess commitProcess = new CommitProcess(aApplyResults.size(), (Integer aRowsAffected) -> {
-                        if (Scripts.getGlobalQueue() != null) {
-                            Scripts.getGlobalQueue().accept(() -> {
-                                onSuccess.accept(aRowsAffected);
-                            });
-                        } else {
-                            final Object lock = Scripts.getLock() != null ? Scripts.getLock() : this;
-                            synchronized (lock) {
-                                onSuccess.accept(aRowsAffected);
-                            }
-                        }
+                        space.process(() -> {
+                            onSuccess.accept(aRowsAffected);
+                        });
                     }, (Exception aFailureCause) -> {
                         if (onFailure != null) {
-                            if (Scripts.getGlobalQueue() != null) {
-                                Scripts.getGlobalQueue().accept(() -> {
-                                    onFailure.accept(aFailureCause);
-                                });
-                            } else {
-                                final Object lock = Scripts.getLock() != null ? Scripts.getLock() : this;
-                                synchronized (lock) {
-                                    onFailure.accept(aFailureCause);
-                                }
-                            }
+                            space.process(() -> {
+                                onFailure.accept(aFailureCause);
+                            });
                         }
                     });
                     aApplyResults.stream().forEach((ApplyResult aResult) -> {
@@ -649,25 +606,24 @@ public class DatabasesClient {
     protected static final String UNSUPPORTED_DATASOURCE_IN_COMMIT = "Unsupported datasource: %s. Can't commit to it.";
 
     /*
-    public Rowset getDbTypesInfo(String aDatasourceName) throws Exception {
-        Logger.getLogger(DatabasesClient.class.getName()).fine(String.format(TYPES_INFO_TRACE_MSG, aDatasourceName));
-        Rowset lrowSet = new Rowset();
-        JdbcReader rsReader = new JdbcReader(getDbMetadataCache(aDatasourceName).getConnectionDriver().getConverter());
-        DataSource dataSource = obtainDataSource(aDatasourceName);
-        if (dataSource != null) {
-            try (Connection lconn = dataSource.getConnection()) {
-                DatabaseMetaData dbmd = lconn.getMetaData();
-                if (dbmd != null) {
-                    try (ResultSet rs = dbmd.getTypeInfo()) {
-                        lrowSet = rsReader.readRowset(rs, null, -1);
-                    }
-                }
-            }
-        }
-        return lrowSet;
-    }
-    */
-
+     public Rowset getDbTypesInfo(String aDatasourceName) throws Exception {
+     Logger.getLogger(DatabasesClient.class.getName()).fine(String.format(TYPES_INFO_TRACE_MSG, aDatasourceName));
+     Rowset lrowSet = new Rowset();
+     JdbcReader rsReader = new JdbcReader(getDbMetadataCache(aDatasourceName).getConnectionDriver().getConverter());
+     DataSource dataSource = obtainDataSource(aDatasourceName);
+     if (dataSource != null) {
+     try (Connection lconn = dataSource.getConnection()) {
+     DatabaseMetaData dbmd = lconn.getMetaData();
+     if (dbmd != null) {
+     try (ResultSet rs = dbmd.getTypeInfo()) {
+     lrowSet = rsReader.readRowset(rs, null, -1);
+     }
+     }
+     }
+     }
+     return lrowSet;
+     }
+     */
     public void dbTableChanged(String aDatasourceName, String aSchema, String aTable) throws Exception {
         DatabaseMdCache cache = getDbMetadataCache(aDatasourceName);
         String fullTableName = aTable;

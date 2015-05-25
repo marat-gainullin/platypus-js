@@ -18,6 +18,7 @@ import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.queries.RemoteQueriesProxy;
 import com.eas.client.threetier.requests.*;
+import com.eas.script.Scripts;
 import java.net.URL;
 import java.util.*;
 import java.util.function.Consumer;
@@ -103,7 +104,7 @@ public class PlatypusClient implements Application<PlatypusQuery>, ServerDataSto
     public int commit(List<Change> aLog, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
         CommitRequest request = new CommitRequest(aLog);
         if (onSuccess != null) {
-            conn.<CommitRequest.Response>enqueueRequest(request, (CommitRequest.Response aResponse) -> {
+            conn.<CommitRequest.Response>enqueueRequest(request, Scripts.getSpace(), (CommitRequest.Response aResponse) -> {
                 onSuccess.accept(aResponse.getUpdated());
             }, (Exception aException) -> {
                 if (onFailure != null) {

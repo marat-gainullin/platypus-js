@@ -5,9 +5,7 @@
  */
 package com.eas.client.threetier.platypus;
 
-import com.eas.client.threetier.Response;
 import com.eas.proto.CoreTags;
-import com.eas.proto.ProtoReader;
 import com.eas.proto.ProtoUtil;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
@@ -21,7 +19,7 @@ import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 public class ResponseDecoder extends CumulativeProtocolDecoder {
 
     @Override
-    protected boolean doDecode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
+    public boolean doDecode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
         boolean ordinaryResponse = false;
         boolean errorResponse = false;
         boolean data = false;
@@ -59,16 +57,14 @@ public class ResponseDecoder extends CumulativeProtocolDecoder {
         if (!data) {
             throw new IllegalStateException("Responses should contain response data tag");
         }
-        PlatypusPlatypusConnection.RequestCallback rqc = (PlatypusPlatypusConnection.RequestCallback) session.getAttribute(PlatypusPlatypusConnection.RequestCallback.class.getSimpleName());
-        rqc.requestEnv.ticket = ticket;
+        RequestEnvelope requestEnv = (RequestEnvelope) session.getAttribute(RequestEnvelope.class.getSimpleName());
+        requestEnv.ticket = ticket;
         int position = in.position();
         int limit = in.limit();
         try {
             in.position(start);
             in.limit(position);
-            final ProtoReader responseReader = new ProtoReader(in.slice().asInputStream());
-            Response response = PlatypusResponseReader.read(responseReader, rqc.requestEnv.request);
-            out.write(response);
+            out.write(in.slice().asInputStream());
             return true;
         } finally {
             in.position(position);

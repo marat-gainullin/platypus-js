@@ -9,6 +9,7 @@ import com.eas.client.threetier.PlatypusConnection;
 import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.ResourceRequest;
 import com.eas.concurrent.CallableConsumer;
+import com.eas.script.Scripts;
 import com.eas.util.FileUtils;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -136,7 +137,7 @@ public class RemoteModulesProxy implements ModulesProxy {
     private ModuleStructureRequest.Response requestModuleStructure(String aName, Consumer<ModuleStructureRequest.Response> onSuccess, Consumer<Exception> onFailure) throws Exception {
         ModuleStructureRequest req = new ModuleStructureRequest(aName);
         if (onSuccess != null) {
-            conn.enqueueRequest(req, onSuccess, onFailure);
+            conn.enqueueRequest(req, Scripts.getSpace(), onSuccess, onFailure);
             return null;
         } else {
             return conn.executeRequest(req);
@@ -146,7 +147,7 @@ public class RemoteModulesProxy implements ModulesProxy {
     private ResourceRequest.Response requestResource(Date aTimeStamp, String aResourceName, Consumer<ResourceRequest.Response> onSuccess, Consumer<Exception> onFailure) throws Exception {
         ResourceRequest req = new ResourceRequest(aTimeStamp, aResourceName);
         if (onSuccess != null) {
-            conn.enqueueRequest(req, onSuccess, onFailure);
+            conn.enqueueRequest(req, Scripts.getSpace(), onSuccess, onFailure);
             return null;
         } else {
             return conn.executeRequest(req);
