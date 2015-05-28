@@ -1,11 +1,14 @@
 /**
  * Platypus.js's designer internals initialization.
  */
-(function() {
-    var ScriptsClass = Java.type('com.eas.script.Scripts');
+(function(aSpace) {
     this.P = {loadModel: function() {
         }};
-    ScriptsClass.setToPrimitiveFunc(function (aValue) {
+    aSpace.setLookupInGlobalFunc(
+            function (aPropertyName) {
+                return this[aPropertyName];
+            });
+    aSpace.setToPrimitiveFunc(function (aValue) {
         if (aValue && aValue.constructor) {
             var cName = aValue.constructor.name;
             if (cName === 'Date') {
@@ -22,14 +25,15 @@
         }
         return aValue;
     });
-    ScriptsClass.setToDateFunc(
+    aSpace.setToDateFunc(
             function (aJavaDate) {
                 return aJavaDate !== null ? new Date(aJavaDate.time) : null;
             });
-    ScriptsClass.setMakeObjFunc(function () {
+    aSpace.setMakeObjFunc(function () {
         return {};
     });
-    ScriptsClass.setMakeArrayFunc(function () {
+    aSpace.setMakeArrayFunc(function () {
         return [];
     });
+    return this;
 })();

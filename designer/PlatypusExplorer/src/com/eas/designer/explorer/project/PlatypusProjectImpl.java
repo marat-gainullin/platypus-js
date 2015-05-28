@@ -12,9 +12,6 @@ import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusIndexer;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.resourcepool.BearResourcePool;
-import com.eas.client.resourcepool.GeneralResourceProvider;
-import com.eas.client.settings.DbConnectionSettings;
-import com.eas.client.settings.SettingsConstants;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.indexer.PlatypusPathRecognizer;
@@ -26,6 +23,7 @@ import com.eas.designer.explorer.j2ee.PlatypusWebModule;
 import com.eas.designer.explorer.j2ee.PlatypusWebModuleManager;
 import com.eas.designer.explorer.model.windows.ModelInspector;
 import com.eas.designer.explorer.project.ui.PlatypusProjectCustomizerProvider;
+import com.eas.script.Scripts;
 import com.eas.util.BinaryUtils;
 import com.eas.util.ListenerRegistration;
 import java.awt.Component;
@@ -36,11 +34,11 @@ import java.beans.PropertyChangeSupport;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.script.Bindings;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -49,7 +47,6 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.event.HyperlinkEvent;
 import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.api.scripting.URLReader;
 import org.netbeans.api.db.explorer.ConnectionManager;
 import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.netbeans.api.db.explorer.DatabaseException;
@@ -97,14 +94,25 @@ public class PlatypusProjectImpl implements PlatypusProject {
             return Charset.forName(PlatypusFiles.DEFAULT_ENCODING);
         }
     }
-    protected static final ScriptEngine jsEngine = new ScriptEngineManager().getEngineByName("nashorn");
-    static {
+    protected static final Scripts.Space jsSpace = initScrintSpace();
+
+    static Scripts.Space initScrintSpace(){
         try {
-            jsEngine.eval("load('classpath:com/eas/designer/explorer/designer-js.js')");
+            ScriptEngine jsEngine = new ScriptEngineManager().getEngineByName("nashorn");
+            Bindings bindings = jsEngine.createBindings();
+            Scripts.Space space = new Scripts.Space();
+            bindings.put("space", space);
+            Object global = jsEngine.eval("loadWithNewGlobal('classpath:com/eas/designer/explorer/designer-js.js');", bindings);
+            space.setGlobal(global);
+            return space;
         } catch (ScriptException ex) {
-            Exceptions.printStackTrace(ex);
+            throw new IllegalStateException(ex);
         }
-    }    
+    }
+
+    public static Scripts.Space getJsSpace(){
+        return jsSpace;
+    }
     
     protected Lookup pLookup;
     protected ProjectState state;
@@ -181,14 +189,14 @@ public class PlatypusProjectImpl implements PlatypusProject {
         basesProxy = new ScriptedDatabasesClient(settings.getDefaultDataSourceName(), indexer, false, BearResourcePool.DEFAULT_MAXIMUM_SIZE) {
 
             @Override
-            protected JSObject createModule(String aModuleName) throws Exception {
+            protected JSObject createModule(String aModuleName, Scripts.Space aSpace) throws Exception {
                 return createLocalEngineModule(aModuleName);
             }
         };
         queries = new LocalQueriesProxy(basesProxy, indexer) {
 
             @Override
-            protected JSObject createModule(String aModuleName) throws Exception {
+            protected JSObject createModule(String aModuleName, Scripts.Space aSpace) throws Exception {
                 return createLocalEngineModule(aModuleName);
             }
 
@@ -199,9 +207,8 @@ public class PlatypusProjectImpl implements PlatypusProject {
     protected JSObject createLocalEngineModule(String aModuleName) throws Exception {
         FileObject jsFo = IndexerQuery.appElementId2File(PlatypusProjectImpl.this, aModuleName);
         if (jsFo != null) {
-            URLReader reader = new URLReader(jsFo.toURL(), SettingsConstants.COMMON_ENCODING);
-            jsEngine.eval(reader);
-            return (JSObject) jsEngine.eval("new " + aModuleName + "()");
+            jsSpace.exec(jsFo.toURL());
+            return jsSpace.createModule(aModuleName);
         } else {
             return null;
         }
@@ -212,22 +219,19 @@ public class PlatypusProjectImpl implements PlatypusProject {
         return queries;
     }
 
+    @Override
     public PlatypusIndexer getIndexer() {
         return indexer;
     }
 
     @Override
     public boolean isDbConnected(String aDatasourceName) {
-        try {
-            String datasourceId = aDatasourceName;
-            if (datasourceId == null) {
-                datasourceId = settings.getDefaultDataSourceName();
-            }
-            return GeneralResourceProvider.getInstance().isDatasourceConnected(datasourceId);
-        } catch (SQLException ex) {
-            Exceptions.printStackTrace(ex);
-            return false;
+        String datasourceName = aDatasourceName;
+        if (datasourceName == null) {
+            datasourceName = settings.getDefaultDataSourceName();
         }
+        DatabaseConnection conn = DatabaseConnections.lookup(datasourceName);
+        return conn != null && conn.getJDBCConnection() != null;
     }
 
     @Override
@@ -245,11 +249,11 @@ public class PlatypusProjectImpl implements PlatypusProject {
                     Logger.getLogger(PlatypusProjectImpl.class.getName()).log(Level.SEVERE, null, ex);
                 }
             });
-            String datasourceId = aDatasourceName;
-            if (datasourceId == null) {
-                datasourceId = settings.getDefaultDataSourceName();
+            String datasourceName = aDatasourceName;
+            if (datasourceName == null) {
+                datasourceName = settings.getDefaultDataSourceName();
             }
-            final ProgressHandle ph = ProgressHandleFactory.createHandle(NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_Connecting_Progress", datasourceId), connecting2Db); // NOI18N  
+            final ProgressHandle ph = ProgressHandleFactory.createHandle(NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_Connecting_Progress", datasourceName), connecting2Db); // NOI18N  
             connecting2Db.addTaskListener((org.openide.util.Task task) -> {
                 ph.finish();
             });
@@ -276,7 +280,6 @@ public class PlatypusProjectImpl implements PlatypusProject {
                         mdCache.clear();
                     }
                 }
-                GeneralResourceProvider.getInstance().unregisterDatasource(aDatasourceName);
                 fireClientDisconnected(aDatasourceName);
                 StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Connection_Lost", aDatasourceName)); // NOI18N
             } catch (Exception ex) {
@@ -350,7 +353,6 @@ public class PlatypusProjectImpl implements PlatypusProject {
         assert basesProxy != null;
         final DatabaseConnection conn = DatabaseConnections.lookup(aDatasourceName);
         assert conn != null : "Already connected datasource disappeared";
-        GeneralResourceProvider.getInstance().registerDatasource(aDatasourceName, new DbConnectionSettings(conn.getDatabaseURL(), conn.getUser(), conn.getPassword(), conn.getSchema(), conn.getConnectionProperties()));
         String datasourceName = (aDatasourceName == null ? basesProxy.getDefaultDatasourceName() != null : !aDatasourceName.equals(basesProxy.getDefaultDatasourceName())) ? aDatasourceName : null;
         DatabaseMdCache mdCache = basesProxy.getDbMetadataCache(datasourceName);
         if (mdCache != null) {
@@ -371,17 +373,17 @@ public class PlatypusProjectImpl implements PlatypusProject {
 
     private void connect2db(String aDatasourceName) throws Exception {
         try {
-            String datasourceId = aDatasourceName;
-            if (datasourceId == null) {
-                datasourceId = settings.getDefaultDataSourceName();
+            String datasourceName = aDatasourceName;
+            if (datasourceName == null) {
+                datasourceName = settings.getDefaultDataSourceName();
             }
-            DatabaseConnection conn = DatabaseConnections.lookup(datasourceId);
+            DatabaseConnection conn = DatabaseConnections.lookup(datasourceName);
             if (conn != null) {
                 conn.getPassword();//Restore the connection's saved password. 
                 if (conn.getJDBCConnection(true) == null) {
                     ConnectionManager.getDefault().connect(conn);
                 } else {
-                    connectedToDatasource(datasourceId);
+                    connectedToDatasource(datasourceName);
                 }
             } else {
                 String dbUnableToConnectMsg = NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_DatasourceNameMissing"); // NOI18N

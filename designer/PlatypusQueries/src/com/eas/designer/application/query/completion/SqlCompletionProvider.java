@@ -213,7 +213,7 @@ public class SqlCompletionProvider implements CompletionProvider {
                                     String parserTableName = table.getWholeTableName();
                                     Fields fields = null;
                                     if (parserTableName.startsWith(ClientConstants.STORED_QUERY_REF_PREFIX)) {
-                                        SqlQuery q = basesProxy.getQueries().getQuery(parserTableName.substring(1), null, null);
+                                        SqlQuery q = basesProxy.getQueries().getQuery(parserTableName.substring(1), null, null, null);
                                         if (q != null) {
                                             fields = q.getFields();
                                         }
@@ -285,7 +285,7 @@ public class SqlCompletionProvider implements CompletionProvider {
                                 String parserTableName = table.getWholeTableName();
                                 Fields fields = null;
                                 if (parserTableName.startsWith(ClientConstants.STORED_QUERY_REF_PREFIX)) {
-                                    SqlQuery q = basesProxy.getQueries().getQuery(parserTableName.substring(1), null, null);
+                                    SqlQuery q = basesProxy.getQueries().getQuery(parserTableName.substring(1), null, null, null);
                                     if (q != null) {
                                         fields = q.getFields();
                                     }

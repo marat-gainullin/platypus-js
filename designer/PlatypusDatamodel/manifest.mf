@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
 OpenIDE-Module: com.eas.designer.datamodel/5
-OpenIDE-Module-Implementation-Version: 6
+OpenIDE-Module-Implementation-Version: 7
 OpenIDE-Module-Localizing-Bundle: com/eas/designer/datamodel/Bundle.properties
 

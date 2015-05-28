@@ -74,7 +74,8 @@ public class Scripts {
         protected Object global;
         protected Map<String, JSObject> publishers = new HashMap<>();
 
-        private Space() {
+        public Space() {
+            super();
         }
 
         protected JSObject loadFunc;

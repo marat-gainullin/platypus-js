@@ -105,7 +105,7 @@ public class ApplicationModelView extends ModelView<ApplicationDbEntity, Applica
     protected EntityView<ApplicationDbEntity> createGenericEntityView(ApplicationDbEntity aEntity) throws Exception {
         if (aEntity.getQueryName() != null && !aEntity.getQueryName().isEmpty()) {
             try {
-                model.getQueries().getQuery(aEntity.getQueryName(), null, null);
+                model.getQueries().getQuery(aEntity.getQueryName(), null, null, null);
             } catch (Exception ex) {
                 Logger.getLogger(ApplicationModelView.class.getName()).log(Level.WARNING, ex.getMessage());
             }

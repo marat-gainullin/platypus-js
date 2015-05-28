@@ -519,7 +519,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                         } else {
                             return 0;
                         }
-                    }, null, null);
+                    }, null, null, null);
                     return count != null ? count : 0;
                 } catch (Exception ex) {
                     Logger.getLogger(DbSchemeModelView.class.getName()).log(Level.SEVERE, null, ex);
@@ -823,7 +823,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                         } else {
                             return 0;
                         }
-                    }, null, null);
+                    }, null, null, null);
                     return count != null ? count : 0;
                 } catch (Exception ex) {
                     Logger.getLogger(DbSchemeModelView.class.getName()).log(Level.SEVERE, null, ex);
