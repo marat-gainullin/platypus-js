@@ -36,4 +36,4 @@
         return [];
     });
     return this;
-})();
+})(space);

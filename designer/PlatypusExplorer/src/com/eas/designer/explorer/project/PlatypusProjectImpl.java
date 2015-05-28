@@ -94,15 +94,15 @@ public class PlatypusProjectImpl implements PlatypusProject {
             return Charset.forName(PlatypusFiles.DEFAULT_ENCODING);
         }
     }
-    protected static final Scripts.Space jsSpace = initScrintSpace();
+    protected static final Scripts.Space jsSpace = initScriptSpace();
 
-    static Scripts.Space initScrintSpace(){
+    static Scripts.Space initScriptSpace(){
         try {
             ScriptEngine jsEngine = new ScriptEngineManager().getEngineByName("nashorn");
             Bindings bindings = jsEngine.createBindings();
             Scripts.Space space = new Scripts.Space();
             bindings.put("space", space);
-            Object global = jsEngine.eval("loadWithNewGlobal('classpath:com/eas/designer/explorer/designer-js.js');", bindings);
+            Object global = jsEngine.eval("load('classpath:com/eas/designer/explorer/designer-js.js', space);", bindings);
             space.setGlobal(global);
             return space;
         } catch (ScriptException ex) {

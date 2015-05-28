@@ -97,16 +97,7 @@ public class DatabasesClient {
 
     public void setDefaultDatasourceName(String aValue, boolean fireEvents) throws Exception {
         if (defaultDatasourceName == null ? aValue != null : !defaultDatasourceName.equals(aValue)) {
-            String oldDefaultDatasourceName = defaultDatasourceName;
-            DatabaseMdCache oldMdCache = mdCaches.remove(null);
-            DatabaseMdCache newMdCache = mdCaches.remove(aValue);
             defaultDatasourceName = aValue;
-            if (oldMdCache != null) {
-                mdCaches.put(oldDefaultDatasourceName, oldMdCache);
-            }
-            if (newMdCache != null) {
-                mdCaches.put(null, newMdCache);
-            }
         }
     }
 
@@ -346,6 +337,8 @@ public class DatabasesClient {
     }
 
     public DatabaseMdCache getDbMetadataCache(String aDatasourceName) throws Exception {
+        if(aDatasourceName == null)
+            aDatasourceName = defaultDatasourceName;
         if (!mdCaches.containsKey(aDatasourceName)) {
             DatabaseMdCache cache = new DatabaseMdCache(this, aDatasourceName);
             if (autoFillMetadata) {
@@ -560,7 +553,7 @@ public class DatabasesClient {
                             if (query != null && query.getEntityName() != null) {
                                 fields = query.getFields();
                             } else {// It seems, that aEntityName is a table name...
-                                fields = mdCaches.get(aDatasourceName).getTableMetadata(aEntityName);
+                                fields = mdCache.getTableMetadata(aEntityName);
                             }
                             if (fields != null) {
                                 Field resolved = fields.get(aFieldName);
