@@ -334,13 +334,13 @@ public class FormattedField extends VFormattedField implements HasOnValueChange,
     @Undesignable
     @Override
     public Object getJsValue() {
-        return Scripts.toJs(super.getValue());
+        return Scripts.getSpace().toJs(super.getValue());
     }
 
     @ScriptFunction
     @Override
     public void setJsValue(Object aValue) {
-        setValue(Scripts.toJava(aValue));
+        setValue(Scripts.getSpace().toJava(aValue));
     }
 
     @Undesignable
@@ -351,7 +351,7 @@ public class FormattedField extends VFormattedField implements HasOnValueChange,
 
     @Override
     public void setValue(Object aValue) {
-        super.setValue(Scripts.toJava(aValue));
+        super.setValue(Scripts.getSpace().toJava(aValue));
     }
 
     private static final String FORMAT_JSDOC = ""
@@ -402,12 +402,6 @@ public class FormattedField extends VFormattedField implements HasOnValueChange,
 
     @Override
     public JSObject getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = (JSObject) publisher.call(null, new Object[]{this});
-        }
         return published;
     }
 
@@ -417,12 +411,6 @@ public class FormattedField extends VFormattedField implements HasOnValueChange,
             throw new AlreadyPublishedException();
         }
         published = aValue;
-    }
-
-    private static JSObject publisher;
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
     }
 
     protected ControlEventsIProxy eventsProxy = new ControlEventsIProxy(this);

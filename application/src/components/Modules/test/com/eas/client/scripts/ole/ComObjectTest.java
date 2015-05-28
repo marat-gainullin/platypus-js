@@ -52,7 +52,7 @@ public class ComObjectTest {
      */
     @Ignore
     @Test
-    public void testOleAutomationScripting() throws ScriptException {
+    public void testOleAutomationScripting() throws Exception {
         String s = null;
         try {
             s = "Logger = java.util.logging.Logger.getLogger(\"Application\");\n";
@@ -98,7 +98,7 @@ public class ComObjectTest {
         }
     }
 
-    private Object evaluateString(String str) throws ScriptException {
+    private Object evaluateString(String str) throws Exception {
         return space.exec(str);
     }
 }

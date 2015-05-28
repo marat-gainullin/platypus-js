@@ -22,7 +22,7 @@ public interface PlatypusResponseVisitor {
 
     public void visit(DisposeServerModuleRequest.Response rsp) throws Exception;
 
-    public void visit(CreateServerModuleRequest.Response rsp) throws Exception;
+    public void visit(ServerModuleStructureRequest.Response rsp) throws Exception;
 
     public void visit(CommitRequest.Response rsp) throws Exception;
 

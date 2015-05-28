@@ -29,8 +29,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
+import java.util.HashSet;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.logging.*;
 import javax.swing.UIManager;
 
@@ -220,7 +220,9 @@ public class PlatypusClientApplication {
                 } else if (config.url.getProtocol().equalsIgnoreCase(PlatypusHttpConstants.PROTOCOL_HTTPS)) {
                     app = new PlatypusClient(new PlatypusHttpConnection(config.url, new UIOnCredentials(config), config.maximumAuthenticateAttempts, config.threadsArgs.getMaxHttpTreads()));
                 } else if (config.url.getProtocol().equalsIgnoreCase("platypus")) {
-                    app = new PlatypusClient(new PlatypusPlatypusConnection(config.url, new UIOnCredentials(config), config.maximumAuthenticateAttempts, config.threadsArgs.getMaxPlatypusTreads(), config.threadsArgs.getMaxPlatypusTreads()));
+                    app = new PlatypusClient(new PlatypusPlatypusConnection(config.url, new UIOnCredentials(config), config.maximumAuthenticateAttempts, (Runnable aTask) -> {
+                        EventQueue.invokeLater(aTask);
+                    }, config.threadsArgs.getMaxPlatypusConnections()));
                 } else if (config.url.getProtocol().equalsIgnoreCase("file")) {
                     File f = new File(config.url.toURI());
                     if (f.exists() && f.isDirectory()) {
@@ -281,7 +283,8 @@ public class PlatypusClientApplication {
                 }
                 ScriptedResource.init(app);
                 Scripts.init();
-                ScriptedResource._require(new String[]{""}, null, new ConcurrentSkipListSet<>(), (Void v) -> {
+                Scripts.Space space = Scripts.createSpace();
+                ScriptedResource._require(new String[]{""}, null, new HashSet<>(), space, (Void v) -> {
 //                    JSObject p = Scripts.lookupInGlobal("P");
 //                    if (p != null) {
 //                        Object ready = p.getMember("ready");

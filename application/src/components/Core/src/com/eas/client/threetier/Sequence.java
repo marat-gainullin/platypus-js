@@ -13,6 +13,6 @@ import java.util.concurrent.Callable;
  */
 public interface Sequence {
 
-    public void in(Callable<Void> onAuthenticate) throws Exception;
+    public void in(Callable<Void> aTask) throws Exception;
     
 }

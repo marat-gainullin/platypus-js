@@ -69,7 +69,7 @@ public class CommitRequestHandler extends SessionRequestHandler<CommitRequest, C
             return null;
         }
 
-        public synchronized void complete(Change aChange, SqlQuery aQuery, AccessControlException accessDenied, Exception failed) {
+        public void complete(Change aChange, SqlQuery aQuery, AccessControlException accessDenied, Exception failed) {
             if (aChange != null && aQuery != null) {
                 try {
                     SqlCompiledQuery entity = entities.get(aChange.entityName);
@@ -138,9 +138,9 @@ public class CommitRequestHandler extends SessionRequestHandler<CommitRequest, C
         } else {
             changes.stream().forEach((change) -> {
                 try {
-                    ((LocalQueriesProxy) serverCore.getQueries()).getQuery(change.entityName, (SqlQuery aQuery) -> {
+                    ((LocalQueriesProxy) serverCore.getQueries()).getQuery(change.entityName, aSession.getSpace(), (SqlQuery aQuery) -> {
                         if (aQuery.isPublicAccess()) {
-                            AccessControlException aex = checkWritePrincipalPermission(PlatypusPrincipal.getInstance(), change.entityName, aQuery.getWriteRoles());
+                            AccessControlException aex = checkWritePrincipalPermission((PlatypusPrincipal)aSession.getSpace().getPrincipal(), change.entityName, aQuery.getWriteRoles());
                             if (aex != null) {
                                 process.complete(null, null, aex, null);
                             } else {

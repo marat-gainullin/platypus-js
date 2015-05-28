@@ -1558,29 +1558,6 @@
             applicationLogger.finest("" + aMessage);
         }});
 
-    function async(aWorker, onSuccess, onFailure) {
-        aSpace.jsSubmitTask(function () {
-            try {
-                var result = aWorker();
-                try {
-                    aSpace.jsAcceptTaskResult(function () {
-                        onSuccess(result);
-                    });
-                } catch (e) {
-                    applicationLogger.severe(e);
-                }
-            } catch (e) {
-                if (onFailure)
-                    onFailure('' + e);
-            }
-        });
-    }
-    Object.defineProperty(P, "async", {
-        get: function () {
-            return async;
-        }
-    });
-
     function readString(aFileName, aEncoding) {
         var encoding = 'utf-8';
         if (aEncoding) {

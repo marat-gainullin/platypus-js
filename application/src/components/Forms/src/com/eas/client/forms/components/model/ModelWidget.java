@@ -39,7 +39,7 @@ public interface ModelWidget<V> extends TableCellRenderer, TableCellEditor, HasV
             }
             Object value = null;
             if (propName != null) {
-                value = Scripts.toJava(target.getMember(propName));
+                value = Scripts.getSpace().toJava(target.getMember(propName));
             } else {
                 Logger.getLogger(ModelWidget.class.getName()).log(Level.FINE, PROPERTY_PATH_MISSING_MSG, aPath);
             }
@@ -65,7 +65,7 @@ public interface ModelWidget<V> extends TableCellRenderer, TableCellEditor, HasV
                 }
             }
             if (propName != null) {
-                Object jsData = Scripts.isInitialized() ? Scripts.toJs(aValue) : aValue;
+                Object jsData = Scripts.isInitialized() ? Scripts.getSpace().toJs(aValue) : aValue;
                 target.setMember(propName, jsData);
             } else {
                 Logger.getLogger(ModelWidget.class.getName()).log(Level.FINE, PROPERTY_PATH_MISSING_MSG, aPath);

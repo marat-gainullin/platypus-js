@@ -4,16 +4,17 @@
  */
 package com.eas.metadata;
 
-import com.bearsoft.rowset.Row;
 import com.eas.metadata.gui.MetadataSynchronizerForm;
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.exceptions.InvalidColIndexException;
-import com.bearsoft.rowset.exceptions.InvalidCursorPositionException;
-import com.bearsoft.rowset.metadata.*;
-import com.bearsoft.rowset.metadata.ForeignKeySpec.ForeignKeyRule;
 import com.eas.client.*;
+import com.eas.client.dataflow.ColumnsIndicies;
+import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.ForeignKeySpec;
+import com.eas.client.metadata.ForeignKeySpec.ForeignKeyRule;
+import com.eas.client.metadata.PrimaryKeySpec;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.sqldrivers.SqlDriver;
 import java.io.File;
@@ -22,6 +23,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -229,7 +231,7 @@ public class MetadataSynchronizer {
             errorLog.addHandler(createFileHandler(logPath + "errors.log", logEncoding, new LineLogFormatter()));
             MetadataSynchronizer mds = new MetadataSynchronizer(sysLog, sqlLog, errorLog, null);
             mds.log(Level.INFO, String.format("logPath is '%s'", logPath));
-            MetadataMerger metadataMerger = new MetadataMerger(aClient, aSchema, mds.readDBStructureFromFile(aFileXmlPath), mds.readDBStructure(aClient, aSchema), false, true, new HashSet<String>(), sysLog, sqlLog, errorLog, false);
+            MetadataMerger metadataMerger = new MetadataMerger(aClient, aSchema, mds.readDBStructureFromFile(aFileXmlPath), mds.readDBStructure(aClient, aSchema), false, true, new HashSet<>(), sysLog, sqlLog, errorLog, false);
             metadataMerger.run();
         } finally {
             closeLogHandlers(sysLog);
@@ -322,7 +324,7 @@ public class MetadataSynchronizer {
 
         int MAX_TABLES_IN_SQLS = 100;    // set max count fetched  from database descriptions for primary keys and indexes
 
-        int cntFields = 0;
+        int cntFields;
         int cntIndexes = 0;
         int cntIndexesF = 0;
         int cntPKs = 0;
@@ -337,24 +339,23 @@ public class MetadataSynchronizer {
             DatabaseMdCache mdCache = aClient.getDbMetadataCache(null);
             // search all tables
             String sql4Tables = driver.getSql4TablesEnumeration(dbSchema);
-            SqlCompiledQuery query = new SqlCompiledQuery(aClient, null, sql4Tables);
-            Rowset rowsetTablesList = query.executeQuery(null, null);
-
-            Fields fieldsTable = rowsetTablesList.getFields();
-
             mdCache.fillTablesCacheBySchema(dbSchema, true);
-            if (!rowsetTablesList.isEmpty()) {
-                List<String> tableNamesList = new ArrayList<>();
+
+            List<String> tableNamesList = new ArrayList<>();
+            SqlCompiledQuery query = new SqlCompiledQuery(aClient, null, sql4Tables);
+            cntFields = query.executeQuery((ResultSet rs) -> {
+                int fieldsCount = 0;
+                ColumnsIndicies fieldsTable = new ColumnsIndicies(rs.getMetaData());
                 int tableColIndex = fieldsTable.find(ClientConstants.JDBCCOLS_TABLE_NAME);
                 int tableTypeColIndex = fieldsTable.find(ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME);
-                for (Row r : rowsetTablesList.getCurrent()) {
+                while (rs.next()) {
                     // each table
                     String tableType = null;
                     if (tableTypeColIndex > 0) {
-                        tableType = (String) r.getColumnObject(tableTypeColIndex);
+                        tableType = rs.getString(tableTypeColIndex);
                     }
                     if (tableType == null || tableType.equalsIgnoreCase(ClientConstants.JDBCPKS_TABLE_TYPE_TABLE)) {
-                        String tableName = (String) r.getColumnObject(tableColIndex);
+                        String tableName = rs.getString(tableColIndex);
                         String tableNameUpper = tableName.toUpperCase();
 
                         TableStructure tblStructure = new TableStructure();
@@ -364,7 +365,7 @@ public class MetadataSynchronizer {
                         Fields fields = mdCache.getTableMetadata(dbSchema + "." + tableName);
                         tblStructure.setTableFields(fields);
 
-                        cntFields = cntFields + fields.getFieldsCount();
+                        fieldsCount += fields.getFieldsCount();
 
                         // comment on table
                         tblStructure.setTableDescription(fields.getTableDescription());
@@ -375,59 +376,63 @@ public class MetadataSynchronizer {
                         mdStructure.put(tableNameUpper, tblStructure);
                     }
                 }
+                return fieldsCount;
+            }, null, null, null);
 
-                // get indexes and primary keys
-                int begPos = 0;
-                int endPos = 0;
-                int maxPos = tableNamesList.size();
 
-                do {
-                    endPos = endPos + MAX_TABLES_IN_SQLS;
-                    HashSet<String> tablesSet = new HashSet<>();
-                    if (endPos > maxPos) {
-                        endPos = maxPos;
-                    }
-                    tablesSet.addAll(tableNamesList.subList(begPos, endPos));
-                    begPos = begPos + MAX_TABLES_IN_SQLS;
+            // get indexes and primary keys
+            int begPos = 0;
+            int endPos = 0;
+            int maxPos = tableNamesList.size();
 
-                    if (!tablesSet.isEmpty()) {
-                        // indexes
-                        String sql4Indexes = driver.getSql4Indexes(dbSchema, tablesSet);
-                        SqlCompiledQuery queryIndexes = new SqlCompiledQuery(aClient, null, sql4Indexes);
-                        Rowset rowsetIndexes = queryIndexes.executeQuery(null, null);
-                        cntIndexesF = cntIndexesF + addIndexFromRowset(mdStructure, rowsetIndexes);
+            do {
+                endPos = endPos + MAX_TABLES_IN_SQLS;
+                HashSet<String> tablesSet = new HashSet<>();
+                if (endPos > maxPos) {
+                    endPos = maxPos;
+                }
+                tablesSet.addAll(tableNamesList.subList(begPos, endPos));
+                begPos = begPos + MAX_TABLES_IN_SQLS;
 
-                        // sort all columns in index
-                        Iterator<String> names = tablesSet.iterator();
+                if (!tablesSet.isEmpty()) {
+                    // indexes
+                    String sql4Indexes = driver.getSql4Indexes(dbSchema, tablesSet);
+                    SqlCompiledQuery queryIndexes = new SqlCompiledQuery(aClient, null, sql4Indexes);
+                    cntIndexesF += queryIndexes.executeQuery((ResultSet rs) -> {
+                        return addIndexFromRowset(mdStructure, rs);
+                    }, null, null, null);
 
-                        while (names.hasNext()) {
-                            String name = names.next();
-                            TableStructure tableStructure = mdStructure.get(name.toUpperCase());
-                            Map<String, DbTableIndexSpec> tableIndexSpecs = tableStructure.getTableIndexSpecs();
-                            if (tableIndexSpecs != null) {
-                                for (String nameSpec : tableIndexSpecs.keySet()) {
-                                    tableIndexSpecs.get(nameSpec).sortColumns();
-                                    cntIndexes++;
-                                }
+                    // sort all columns in index
+                    Iterator<String> names = tablesSet.iterator();
+
+                    while (names.hasNext()) {
+                        String name = names.next();
+                        TableStructure tableStructure = mdStructure.get(name.toUpperCase());
+                        Map<String, DbTableIndexSpec> tableIndexSpecs = tableStructure.getTableIndexSpecs();
+                        if (tableIndexSpecs != null) {
+                            for (String nameSpec : tableIndexSpecs.keySet()) {
+                                tableIndexSpecs.get(nameSpec).sortColumns();
+                                cntIndexes++;
                             }
                         }
-
-                        //pk
-                        String sqlPK = driver.getSql4TablePrimaryKeys(dbSchema, tablesSet);
-                        SqlCompiledQuery queryPK = new SqlCompiledQuery(aClient, null, sqlPK);
-                        Rowset rowsetPK = queryPK.executeQuery(null, null);
-
-                        cntPKs = cntPKs + addPKeysFromRowset(mdStructure, rowsetPK);
-
-                        //fk
-                        String sqlFK = driver.getSql4TableForeignKeys(dbSchema, tablesSet);
-                        SqlCompiledQuery queryFK = new SqlCompiledQuery(aClient, null, sqlFK);
-                        Rowset rowsetFK = queryFK.executeQuery(null, null);
-
-                        cntFKs = cntFKs + addFKeysFromRowset(mdStructure, rowsetFK);
                     }
-                } while (endPos < maxPos);
-            }
+
+                    //pk
+                    String sqlPK = driver.getSql4TablePrimaryKeys(dbSchema, tablesSet);
+                    SqlCompiledQuery queryPK = new SqlCompiledQuery(aClient, null, sqlPK);
+                    cntPKs += queryPK.executeQuery((ResultSet rs) -> {
+                        return addPKeysFromRowset(mdStructure, rs);
+                    }, null, null, null);
+
+                    //fk
+                    String sqlFK = driver.getSql4TableForeignKeys(dbSchema, tablesSet);
+                    SqlCompiledQuery queryFK = new SqlCompiledQuery(aClient, null, sqlFK);
+                    cntFKs += queryFK.executeQuery((ResultSet rs) -> {
+                        return addFKeysFromResultSet(mdStructure, rs);
+                    }, null, null, null);
+
+                }
+            } while (endPos < maxPos);
 
             // set all maps uppername -> name
             Iterator<TableStructure> tablesStructure = mdStructure.values().iterator();
@@ -876,14 +881,14 @@ public class MetadataSynchronizer {
      * add to metadata description for indexes from database
      *
      * @param aMDStructure structure metadata
-     * @param aRowset rowset with description indexes from database
+     * @param rs rowset with description indexes from database
      * @return count fetched indexes
      * @throws InvalidColIndexException
      * @throws InvalidCursorPositionException
      */
-    private int addIndexFromRowset(Map<String, TableStructure> aMDStructure, Rowset aRowset) throws InvalidColIndexException, InvalidCursorPositionException {
+    private int addIndexFromRowset(Map<String, TableStructure> aMDStructure, ResultSet rs) throws Exception {
         int cnt = 0;
-        Fields fields = aRowset.getFields();
+        ColumnsIndicies fields = new ColumnsIndicies(rs.getMetaData());
         int nCol_Idx_TableName = fields.find(ClientConstants.JDBCIDX_TABLE_NAME);
         int nCol_Idx_Name = fields.find(ClientConstants.JDBCIDX_INDEX_NAME);
         int nCol_Idx_Non_Uni = fields.find(ClientConstants.JDBCIDX_NON_UNIQUE);
@@ -894,30 +899,26 @@ public class MetadataSynchronizer {
         int nCol_Idx_PKey = fields.find(ClientConstants.JDBCIDX_PRIMARY_KEY);
         int nCol_Idx_FKey = fields.find(ClientConstants.JDBCIDX_FOREIGN_KEY);
 
-        for (Row r : aRowset.getCurrent()) {
-            String tableName = (String) r.getColumnObject(nCol_Idx_TableName);
+        while (rs.next()) {
+            String tableName = rs.getString(nCol_Idx_TableName);
             String tableNameUpper = tableName.toUpperCase();
             TableStructure tableStructure = aMDStructure.get(tableNameUpper);
             Map<String, DbTableIndexSpec> tableIndexSpecs = tableStructure.getTableIndexSpecs();
             if (tableIndexSpecs == null) {
                 tableIndexSpecs = new HashMap<>();
             }
-            DbTableIndexSpec idxSpec = null;
-            String idxName = "";
-
-            Object oIdxName = r.getColumnObject(nCol_Idx_Name);
-            if (oIdxName != null && oIdxName instanceof String) {
-                idxName = (String) oIdxName;
-
-                idxSpec = tableIndexSpecs.get(idxName);
-                if (idxSpec == null) {
-                    idxSpec = new DbTableIndexSpec();
-                    idxSpec.setName(idxName);
-                }
+            String idxName = rs.getString(nCol_Idx_Name);
+            if (idxName == null) {
+                idxName = "";
+            }
+            DbTableIndexSpec idxSpec = tableIndexSpecs.get(idxName);
+            if (idxSpec == null) {
+                idxSpec = new DbTableIndexSpec();
+                idxSpec.setName(idxName);
             }
             assert idxSpec != null;
 
-            Object oNonUnique = r.getColumnObject(nCol_Idx_Non_Uni);
+            Object oNonUnique = rs.getObject(nCol_Idx_Non_Uni);
             if (oNonUnique != null) {
                 boolean isUnique = false;
                 if (oNonUnique instanceof Number) {
@@ -925,7 +926,7 @@ public class MetadataSynchronizer {
                 }
                 idxSpec.setUnique(isUnique);
             }
-            Object oType = r.getColumnObject(nCol_Idx_Type);
+            Object oType = rs.getObject(nCol_Idx_Type);
             if (oType != null) {
                 if (oType instanceof Number) {
                     short type = ((Number) oType).shortValue();
@@ -945,25 +946,23 @@ public class MetadataSynchronizer {
                     }
                 }
             }
-            Object oColumnName = r.getColumnObject(nCol_Idx_ColumnName);
-            if (oColumnName != null && oColumnName instanceof String) {
-                String sColumnName = (String) oColumnName;
+            String sColumnName = rs.getString(nCol_Idx_ColumnName);
+            if (sColumnName != null) {
                 DbTableIndexColumnSpec column = idxSpec.getColumn(sColumnName);
                 if (column == null) {
                     column = new DbTableIndexColumnSpec(sColumnName, true);
                     idxSpec.addColumn(column);
                 }
-                Object oAsc = r.getColumnObject(nCol_Idx_Asc);
-                if (oAsc != null && oAsc instanceof String) {
-                    String sAsc = (String) oAsc;
+                String sAsc = rs.getString(nCol_Idx_Asc);
+                if (sAsc != null) {
                     column.setAscending(sAsc.toLowerCase().equals("a"));
                 }
-                Object oPosition = r.getColumnObject(nCol_Idx_OrdinalPosition);
+                Object oPosition = rs.getObject(nCol_Idx_OrdinalPosition);
                 if (oPosition != null && oPosition instanceof Number) {
                     column.setOrdinalPosition((int) ((Number) oPosition).shortValue());
                 }
             }
-            Object oPKey = r.getColumnObject(nCol_Idx_PKey);
+            Object oPKey = rs.getObject(nCol_Idx_PKey);
             if (oPKey != null) {
                 boolean isPKey = false;
                 if (oPKey instanceof Number) {
@@ -971,9 +970,8 @@ public class MetadataSynchronizer {
                 }
                 idxSpec.setPKey(isPKey);
             }
-            Object oFKeyName = r.getColumnObject(nCol_Idx_FKey);
-            if (oFKeyName != null && oFKeyName instanceof String) {
-                String fKeyName = (String) oFKeyName;
+            String fKeyName = rs.getString(nCol_Idx_FKey);
+            if (fKeyName != null) {
                 idxSpec.setFKeyName(fKeyName);
             }
             tableIndexSpecs.put(idxName, idxSpec);
@@ -987,24 +985,24 @@ public class MetadataSynchronizer {
      * add to metadata description for primary keys from database
      *
      * @param aMDStructure structure metadata
-     * @param aRowset rowset with description primary keys from database
+     * @param rs rowset with description primary keys from database
      * @return count fetched primary keys
      * @throws InvalidColIndexException
      * @throws InvalidCursorPositionException
      */
-    private int addPKeysFromRowset(Map<String, TableStructure> aMDStructure, Rowset aRowset) throws InvalidColIndexException, InvalidCursorPositionException {
+    private int addPKeysFromRowset(Map<String, TableStructure> aMDStructure, ResultSet rs) throws Exception {
         int cnt = 0;
-        Fields fieldsPK = aRowset.getFields();
+        ColumnsIndicies fieldsPK = new ColumnsIndicies(rs.getMetaData());
         int pkNameColIndex = fieldsPK.find(ClientConstants.JDBCPKS_CONSTRAINT_NAME);
         int pkSchemaColIndex = fieldsPK.find(ClientConstants.JDBCPKS_TABLE_SCHEM);
         int pkTableColIndex = fieldsPK.find(ClientConstants.JDBCPKS_TABLE_NAME);
         int pkFieldColIndex = fieldsPK.find(ClientConstants.JDBCPKS_COLUMN_NAME);
 
-        for (Row r : aRowset.getCurrent()) {
-            String pkSchema = (String) r.getColumnObject(pkSchemaColIndex);
-            String pkTable = (String) r.getColumnObject(pkTableColIndex);
-            String pkField = (String) r.getColumnObject(pkFieldColIndex);
-            String pkCName = (String) r.getColumnObject(pkNameColIndex);
+        while (rs.next()) {
+            String pkSchema = rs.getString(pkSchemaColIndex);
+            String pkTable = rs.getString(pkTableColIndex);
+            String pkField = rs.getString(pkFieldColIndex);
+            String pkCName = rs.getString(pkNameColIndex);
 
             String tableNameUpper = pkTable.toUpperCase();
 
@@ -1032,15 +1030,15 @@ public class MetadataSynchronizer {
      * add to metadata description for foreign keys from database
      *
      * @param aMDStructure structure metadata
-     * @param aRowset rowset with description foreign keys from database
+     * @param rs rowset with description foreign keys from database
      * @return count fetched keys
      * @throws InvalidColIndexException
      * @throws InvalidCursorPositionException
      */
-    private int addFKeysFromRowset(Map<String, TableStructure> aMDStructure, Rowset aRowset) throws InvalidColIndexException, InvalidCursorPositionException {
+    private int addFKeysFromResultSet(Map<String, TableStructure> aMDStructure, ResultSet rs) throws Exception {
         int cnt = 0;
 
-        Fields fieldsFK = aRowset.getFields();
+        ColumnsIndicies fieldsFK = new ColumnsIndicies(rs.getMetaData());
         int refSchemaColIndex = fieldsFK.find(ClientConstants.JDBCFKS_FKPKTABLE_SCHEM);
         int refTableColIndex = fieldsFK.find(ClientConstants.JDBCFKS_FKPKTABLE_NAME);
         int refPKeyNameColIndex = fieldsFK.find(ClientConstants.JDBCFKS_FKPK_NAME);
@@ -1055,30 +1053,30 @@ public class MetadataSynchronizer {
         int deleteRuleColIndex = fieldsFK.find(ClientConstants.JDBCFKS_FKDELETE_RULE);
         int deferrabilityColIndex = fieldsFK.find(ClientConstants.JDBCFKS_FKDEFERRABILITY);
 
-        for (Row r : aRowset.getCurrent()) {
-            String refSchemaName = (String) r.getColumnObject(refSchemaColIndex);
-            String refTableName = (String) r.getColumnObject(refTableColIndex);
-            String refPKeyName = (String) r.getColumnObject(refPKeyNameColIndex);
-            String refColumnName = (String) r.getColumnObject(refColumnColIndex);
+        while (rs.next()) {
+            String refSchemaName = rs.getString(refSchemaColIndex);
+            String refTableName = rs.getString(refTableColIndex);
+            String refPKeyName = rs.getString(refPKeyNameColIndex);
+            String refColumnName = rs.getString(refColumnColIndex);
 
-            String schemaName = (String) r.getColumnObject(schemaColIndex);
-            String tableName = (String) r.getColumnObject(tableColIndex);
-            String fKeyName = (String) r.getColumnObject(fKeyNameColIndex);
-            String columnName = (String) r.getColumnObject(columnColIndex);
+            String schemaName = rs.getString(schemaColIndex);
+            String tableName = rs.getString(tableColIndex);
+            String fKeyName = rs.getString(fKeyNameColIndex);
+            String columnName = rs.getString(columnColIndex);
 
             Short updateRule = null;
-            Object oupdateRule = r.getColumnObject(updateRuleColIndex);
+            Object oupdateRule = rs.getObject(updateRuleColIndex);
             if (oupdateRule instanceof Number) {
                 updateRule = ((Number) oupdateRule).shortValue();
             }
             Short deleteRule = null;
-            Object odeleteRule = r.getColumnObject(deleteRuleColIndex);
+            Object odeleteRule = rs.getObject(deleteRuleColIndex);
             if (odeleteRule instanceof Number) {
                 deleteRule = ((Number) odeleteRule).shortValue();
             }
 
             Short deferrability = null;
-            Object odeferrability = r.getColumnObject(deferrabilityColIndex);
+            Object odeferrability = rs.getObject(deferrabilityColIndex);
             if (odeferrability instanceof Number) {
                 deferrability = ((Number) odeferrability).shortValue();
             }
@@ -1102,7 +1100,7 @@ public class MetadataSynchronizer {
             fKeySpec.setReferee(new PrimaryKeySpec(refSchemaName, refTableName, refColumnName, refPKeyName));
             fKeySpec.setFkDeleteRule(deleteRule != null ? ForeignKeySpec.ForeignKeyRule.valueOf(deleteRule) : null);
             fKeySpec.setFkUpdateRule(updateRule != null ? ForeignKeySpec.ForeignKeyRule.valueOf(updateRule) : null);
-            fKeySpec.setFkDeferrable(deferrability != null && deferrability == 5 ? true : false);
+            fKeySpec.setFkDeferrable(deferrability != null && deferrability == 5);
 
             fKeySpecs.add(fKeySpec);
             allFKeySpecs.put(fKeyName, fKeySpecs);

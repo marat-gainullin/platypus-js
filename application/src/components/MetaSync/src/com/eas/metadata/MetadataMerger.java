@@ -4,23 +4,23 @@
  */
 package com.eas.metadata;
 
-import com.bearsoft.rowset.Row;
-import com.bearsoft.rowset.Rowset;
-import com.bearsoft.rowset.changes.Change;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.ForeignKeySpec;
-import com.bearsoft.rowset.metadata.ForeignKeySpec.ForeignKeyRule;
-import com.bearsoft.rowset.metadata.PrimaryKeySpec;
 import com.eas.client.ClientConstants;
 import com.eas.client.DatabaseMdCache;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SqlCompiledQuery;
+import com.eas.client.changes.Change;
+import com.eas.client.dataflow.ColumnsIndicies;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.ForeignKeySpec;
+import com.eas.client.metadata.ForeignKeySpec.ForeignKeyRule;
+import com.eas.client.metadata.PrimaryKeySpec;
 import com.eas.client.sqldrivers.Db2SqlDriver;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
+import java.sql.ResultSet;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -852,34 +852,36 @@ public class MetadataMerger {
                 SqlCompiledQuery queryIndexes;
                 assert client != null;
                 queryIndexes = new SqlCompiledQuery(client, null, sql4Indexes);
-                Rowset rowset = queryIndexes.executeQuery(null, null);
-                Fields fields = rowset.getFields();
-                for (Row r : rowset.getCurrent()) {
-                    int nCol_Idx_TableName = fields.find(ClientConstants.JDBCIDX_TABLE_NAME);
-                    int nCol_Idx_Name = fields.find(ClientConstants.JDBCIDX_INDEX_NAME);
-                    int nCol_Idx_PKey = fields.find(ClientConstants.JDBCIDX_PRIMARY_KEY);
-                    int nCol_Idx_FKey = fields.find(ClientConstants.JDBCIDX_FOREIGN_KEY);
-                    String tableName = (String) r.getColumnObject(nCol_Idx_TableName);
-                    String tableNameUpper = tableName.toUpperCase();
-                    Set<String> indexes = mapIndexes.get(tableNameUpper);
-                    if (indexes == null) {
-                        indexes = new HashSet<>();
+                queryIndexes.executeQuery((ResultSet rs)->{
+                    ColumnsIndicies cols = new ColumnsIndicies(rs.getMetaData());
+                    while(rs.next()){
+                        int nCol_Idx_TableName = cols.find(ClientConstants.JDBCIDX_TABLE_NAME);
+                        int nCol_Idx_Name = cols.find(ClientConstants.JDBCIDX_INDEX_NAME);
+                        int nCol_Idx_PKey = cols.find(ClientConstants.JDBCIDX_PRIMARY_KEY);
+                        int nCol_Idx_FKey = cols.find(ClientConstants.JDBCIDX_FOREIGN_KEY);
+                        String tableName = rs.getString(nCol_Idx_TableName);
+                        String tableNameUpper = tableName.toUpperCase();
+                        Set<String> indexes = mapIndexes.get(tableNameUpper);
+                        if (indexes == null) {
+                            indexes = new HashSet<>();
+                        }
+
+                        Object oIdxName = rs.getObject(nCol_Idx_Name);
+                        Object oPKey = rs.getObject(nCol_Idx_PKey);
+                        Object oFKeyName = rs.getObject(nCol_Idx_FKey);
+
+                        // if not pkey and not fkey
+                        if ((oPKey == null || (oPKey instanceof Number && ((Number) oPKey).intValue() != 0))
+                                && (oFKeyName == null || (oFKeyName instanceof String && ((String) oFKeyName).isEmpty()))
+                                && oIdxName != null && (oIdxName instanceof String) && !((String) oIdxName).isEmpty()) {
+                            indexes.add(((String) oIdxName).toUpperCase());
+                        }
+                        if (!indexes.isEmpty()) {
+                            mapIndexes.put(tableNameUpper, indexes);
+                        }
                     }
-                    
-                    Object oIdxName = r.getColumnObject(nCol_Idx_Name);
-                    Object oPKey = r.getColumnObject(nCol_Idx_PKey);
-                    Object oFKeyName = r.getColumnObject(nCol_Idx_FKey);
-                    
-                    // if not pkey and not fkey
-                    if ((oPKey == null || (oPKey instanceof Number && ((Number) oPKey).intValue() != 0))
-                            && (oFKeyName == null || (oFKeyName instanceof String && ((String) oFKeyName).isEmpty()))
-                            && oIdxName != null && (oIdxName instanceof String) && !((String) oIdxName).isEmpty()) {
-                        indexes.add(((String) oIdxName).toUpperCase());
-                    }
-                    if (!indexes.isEmpty()) {
-                        mapIndexes.put(tableNameUpper, indexes);
-                    }
-                }
+                    return null;
+                }, null, null, null);
             } catch (Exception ex) {
                 log(Level.SEVERE, null, ex);
             }

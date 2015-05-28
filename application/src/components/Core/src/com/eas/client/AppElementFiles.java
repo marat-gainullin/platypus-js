@@ -46,7 +46,7 @@ public class AppElementFiles {
         } else if (appElementType == ClientConstants.ET_QUERY) {
             return PlatypusFilesSupport.getAppElementIdByAnnotation(findFileByExtension(PlatypusFiles.SQL_EXTENSION));
         } else if (appElementType == ClientConstants.ET_DB_SCHEME) {
-            return IDGenerator.genID().toString();
+            return IDGenerator.genID() + "";
         }
         return null;
     }

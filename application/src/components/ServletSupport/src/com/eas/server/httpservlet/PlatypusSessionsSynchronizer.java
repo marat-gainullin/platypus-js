@@ -5,6 +5,7 @@
 package com.eas.server.httpservlet;
 
 import com.eas.server.PlatypusServerCore;
+import com.eas.server.Session;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpSessionEvent;
@@ -18,20 +19,27 @@ public class PlatypusSessionsSynchronizer implements HttpSessionListener {
 
     @Override
     public void sessionCreated(HttpSessionEvent se) {
-        //NO OP
+        try {
+            PlatypusServerCore serverCore = PlatypusServerCore.getInstance();
+            if (serverCore != null && serverCore.getSessionManager() != null) {
+                Session session = serverCore.getSessionManager().create(se.getSession().getId());
+                Logger.getLogger(PlatypusSessionsSynchronizer.class.getName()).log(Level.INFO, "Platypus session opened. Session id: {0}", session.getId());
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(PlatypusSessionsSynchronizer.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @Override
     public void sessionDestroyed(HttpSessionEvent se) {
-        String platypusSessionId = (String) se.getSession().getAttribute(PlatypusHttpServlet.PLATYPUS_SESSION_ATTR_NAME);
-        if (platypusSessionId != null) {
-            PlatypusServerCore serverCore = (PlatypusServerCore) se.getSession().getAttribute(PlatypusHttpServlet.PLATYPUS_SERVER_CORE_ATTR_NAME);
+        try {
+            PlatypusServerCore serverCore = PlatypusServerCore.getInstance();
             if (serverCore != null && serverCore.getSessionManager() != null) {
-                serverCore.getSessionManager().remove(platypusSessionId);
-                Logger.getLogger(PlatypusSessionsSynchronizer.class.getName()).log(Level.INFO, "Platypus session closed id: {0}", platypusSessionId);
+                Session removed = serverCore.getSessionManager().remove(se.getSession().getId());
+                Logger.getLogger(PlatypusSessionsSynchronizer.class.getName()).log(Level.INFO, "Platypus session closed. Session id: {0}", removed.getId());
             }
+        } catch (Exception ex) {
+            Logger.getLogger(PlatypusSessionsSynchronizer.class.getName()).log(Level.SEVERE, null, ex);
         }
-        se.getSession().removeAttribute(PlatypusHttpServlet.PLATYPUS_SESSION_ATTR_NAME);
-        se.getSession().removeAttribute(PlatypusHttpServlet.PLATYPUS_SERVER_CORE_ATTR_NAME);
     }
 }

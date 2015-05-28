@@ -3,9 +3,6 @@ package com.eas.client;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusIndexer;
 import com.eas.client.changes.Change;
-import com.eas.client.metadata.Fields;
-import com.eas.client.queries.ScriptedQuery;
-import com.eas.client.queries.ScriptedFlowProvider;
 import com.eas.client.scripts.ScriptedResource;
 import com.eas.script.Scripts;
 import java.util.ArrayList;
@@ -60,9 +57,9 @@ public class ScriptedDatabasesClient extends DatabasesClient {
         indexer = aIndexer;
     }
 
-    protected JSObject createModule(String aModuleName) throws Exception {
+    protected JSObject createModule(String aModuleName, Scripts.Space aSpace) throws Exception {
         ScriptedResource.require(new String[]{aModuleName}, null);
-        return Scripts.createModule(aModuleName);
+        return aSpace.createModule(aModuleName);
     }
 
     /**
@@ -90,39 +87,25 @@ public class ScriptedDatabasesClient extends DatabasesClient {
     }
 
     @Override
-    public PlatypusJdbcFlowProvider createFlowProvider(String aDatasourceName, final String aEntityName, String aSqlClause, final Fields aExpectedFields) throws Exception {
-        if (ScriptedQuery.JAVASCRIPT_QUERY_CONTENTS.equals(aSqlClause)) {
-            JSObject dataFeeder = createModule(aDatasourceName);
-            if (dataFeeder != null) {
-                return new ScriptedFlowProvider(ScriptedDatabasesClient.this, aExpectedFields, dataFeeder);
-            } else {
-                throw new IllegalStateException("Datasource module: " + aDatasourceName + " is not found");
-            }
-        } else {
-            return super.createFlowProvider(aDatasourceName, aEntityName, aSqlClause, aExpectedFields);
-        }
-    }
-
-    @Override
-    protected ApplyResult apply(final String aDatasourceName, final List<Change> aLog, Consumer<ApplyResult> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    protected ApplyResult apply(final String aDatasourceName, final List<Change> aLog, Scripts.Space aSpace, Consumer<ApplyResult> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (onSuccess != null) {
             validate(aDatasourceName, aLog, (Void v) -> {
                 try {
                     AppElementFiles files = indexer.nameToFiles(aDatasourceName);
                     if (files != null && files.isModule()) {
-                        JSObject module = createModule(aDatasourceName);
+                        JSObject module = createModule(aDatasourceName, aSpace);
                         if (module != null) {
                             Object oApply = module.getMember("apply");
                             if (oApply instanceof JSObject && ((JSObject) oApply).isFunction()) {
                                 JSObject applyFunction = (JSObject) oApply;
-                                Scripts.toJava(applyFunction.call(module, new Object[]{Scripts.toJs(aLog.toArray()),
+                                aSpace.toJava(applyFunction.call(module, new Object[]{aSpace.toJs(aLog.toArray()),
                                     new AbstractJSObject() {
 
                                         @Override
                                         public Object call(final Object thiz, final Object... args) {
                                             int affected = 0;
                                             if (args.length > 0) {
-                                                Object oAffected = Scripts.toJava(args[0]);
+                                                Object oAffected = aSpace.toJava(args[0]);
                                                 if (oAffected instanceof Number) {
                                                     affected = ((Number) oAffected).intValue();
                                                 }
@@ -141,7 +124,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                                                     if (args[0] instanceof Exception) {
                                                         onFailure.accept((Exception) args[0]);
                                                     } else {
-                                                        onFailure.accept(new Exception(String.valueOf(Scripts.toJava(args[0]))));
+                                                        onFailure.accept(new Exception(String.valueOf(aSpace.toJava(args[0]))));
                                                     }
                                                 } else {
                                                     onFailure.accept(new Exception("No error information from apply method"));
@@ -158,24 +141,24 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                             onFailure.accept(new IllegalStateException(String.format(CANT_CREATE_MODULE_MSG, aDatasourceName)));
                         }
                     } else {
-                        super.apply(aDatasourceName, aLog, onSuccess, onFailure);
+                        super.apply(aDatasourceName, aLog, aSpace, onSuccess, onFailure);
                     }
                 } catch (Exception ex) {
                     onFailure.accept(ex);
                 }
-            }, onFailure);
+            }, onFailure, aSpace);
             return null;
         } else {
-            validate(aDatasourceName, aLog, null, null);
+            validate(aDatasourceName, aLog, null, null, aSpace);
             AppElementFiles files = indexer.nameToFiles(aDatasourceName);
             if (files != null && files.isModule()) {
-                JSObject module = createModule(aDatasourceName);
+                JSObject module = createModule(aDatasourceName, aSpace);
                 if (module != null) {
                     Object oApply = module.getMember("apply");
                     if (oApply instanceof JSObject && ((JSObject) oApply).isFunction()) {
                         JSObject applyFunction = (JSObject) oApply;
                         int affectedInModules = 0;
-                        Object oAffected = Scripts.toJava(applyFunction.call(module, new Object[]{Scripts.toJs(aLog.toArray())}));
+                        Object oAffected = aSpace.toJava(applyFunction.call(module, new Object[]{aSpace.toJs(aLog.toArray())}));
                         if (oAffected instanceof Number) {
                             affectedInModules = ((Number) oAffected).intValue();
                         }
@@ -187,7 +170,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                     throw new IllegalStateException(String.format(CANT_CREATE_MODULE_MSG, aDatasourceName));
                 }
             } else {
-                return super.apply(aDatasourceName, aLog, null, null);
+                return super.apply(aDatasourceName, aLog, null, null, null);
             }
         }
     }
@@ -221,7 +204,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
             onFailure = aOnFailure;
         }
 
-        public synchronized void complete(Exception aFailureCause) {
+        public void complete(Exception aFailureCause) {
             if (aFailureCause != null) {
                 exceptions.add(aFailureCause);
             }
@@ -246,13 +229,13 @@ public class ScriptedDatabasesClient extends DatabasesClient {
         }
     }
 
-    private void validate(final String aDatasourceName, final List<Change> aLog, Consumer<Void> onSuccess, Consumer<Exception> onFailure) {
+    private void validate(final String aDatasourceName, final List<Change> aLog, Consumer<Void> onSuccess, Consumer<Exception> onFailure, Scripts.Space aSpace) {
         List<CallPoint> toBeCalled = new ArrayList<>();
         validators.keySet().stream().forEach((validatorName) -> {
             Collection<String> datasourcesUnderControl = validators.get(validatorName);
             if (((datasourcesUnderControl == null || datasourcesUnderControl.isEmpty()) && aDatasourceName == null) || (datasourcesUnderControl != null && datasourcesUnderControl.contains(aDatasourceName))) {
                 try {
-                    JSObject module = createModule(validatorName);
+                    JSObject module = createModule(validatorName, aSpace);
                     if (module != null) {
                         Object oValidate = module.getMember("validate");
                         if (oValidate instanceof JSObject) {
@@ -275,7 +258,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
             } else {
                 ValidateProcess process = new ValidateProcess(toBeCalled.size(), onSuccess, onFailure);
                 toBeCalled.stream().forEach((v) -> {
-                    v.function.call(v.module, new Object[]{Scripts.toJs(aLog.toArray()), aDatasourceName,
+                    v.function.call(v.module, new Object[]{aSpace.toJs(aLog.toArray()), aDatasourceName,
                         new AbstractJSObject() {
 
                             @Override
@@ -292,7 +275,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                                     if (args[0] instanceof Exception) {
                                         process.complete((Exception) args[0]);
                                     } else {
-                                        process.complete(new Exception(String.valueOf(Scripts.toJava(args[0]))));
+                                        process.complete(new Exception(String.valueOf(aSpace.toJava(args[0]))));
                                     }
                                 } else {
                                     process.complete(new Exception("No error information from validate method"));
@@ -305,7 +288,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
             }
         } else {
             toBeCalled.stream().forEach((v) -> {
-                v.function.call(v.module, new Object[]{Scripts.toJs(aLog.toArray()), aDatasourceName});
+                v.function.call(v.module, new Object[]{aSpace.toJs(aLog.toArray()), aDatasourceName});
             });
         }
     }

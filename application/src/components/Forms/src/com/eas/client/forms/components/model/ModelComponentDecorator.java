@@ -667,7 +667,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
 
     protected void bind() {
         if (data != null && field != null && !field.isEmpty() && com.eas.script.Scripts.isInitialized()) {
-            boundToData = com.eas.script.Scripts.listen(data, field, new AbstractJSObject() {
+            boundToData = Scripts.getSpace().listen(data, field, new AbstractJSObject() {
 
                 @Override
                 public Object call(Object thiz, Object... args) {
@@ -690,7 +690,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
                 if (!settingValueFromJs) {
                     settingValueToJs = true;
                     try {
-                        ModelWidget.setPathData(data, field, com.eas.script.Scripts.toJs(evt.getNewValue()));
+                        ModelWidget.setPathData(data, field, Scripts.getSpace().toJs(evt.getNewValue()));
                     } finally {
                         settingValueToJs = false;
                     }
@@ -780,7 +780,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
 
     @Override
     public Object getJsValue() {
-        return com.eas.script.Scripts.toJs(getValue());
+        return Scripts.getSpace().toJs(getValue());
     }
 
     @Override

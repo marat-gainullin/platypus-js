@@ -44,9 +44,9 @@ public class RemoteModulesProxy implements ModulesProxy {
     }
 
     @Override
-    public ModuleStructure getModule(String aName, Consumer<ModuleStructure> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public ModuleStructure getModule(String aName, Scripts.Space aSpace, Consumer<ModuleStructure> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (onSuccess != null) {
-            requestModuleStructure(aName, (ModuleStructureRequest.Response structureResp) -> {
+            requestModuleStructure(aName, aSpace, (ModuleStructureRequest.Response structureResp) -> {
                 try {
                     ModuleStructure structure = new ModuleStructure();
                     structure.getClientDependencies().addAll(structureResp.getClientDependencies());
@@ -55,13 +55,11 @@ public class RemoteModulesProxy implements ModulesProxy {
                     for (String resourceName : structureResp.getStructure()) {
                         String cachePathName = constructResourcePath(resourceName);
                         File cachePath = new File(cachePathName);
-                        syncResource(cachePath, resourceName, (Void aVoid) -> {
-                            synchronized (structure) {
-                                structure.getParts().addFile(cachePath);
-                                if (structure.getParts().getFiles().size() == structureResp.getStructure().size()) {
-                                    id2files.put(aName, structure.getParts());
-                                    onSuccess.accept(structure);
-                                }
+                        syncResource(cachePath, resourceName, aSpace, (Void aVoid) -> {
+                            structure.getParts().addFile(cachePath);
+                            if (structure.getParts().getFiles().size() == structureResp.getStructure().size()) {
+                                id2files.put(aName, structure.getParts());
+                                onSuccess.accept(structure);
                             }
                         }, onFailure);
                     }
@@ -73,7 +71,7 @@ public class RemoteModulesProxy implements ModulesProxy {
             }, onFailure);
             return null;
         } else {
-            ModuleStructureRequest.Response structureResp = requestModuleStructure(aName, null, null);
+            ModuleStructureRequest.Response structureResp = requestModuleStructure(aName, null, null, null);
             ModuleStructure structure = new ModuleStructure();
             id2files.put(aName, structure.getParts());
             structure.getClientDependencies().addAll(structureResp.getClientDependencies());
@@ -82,14 +80,14 @@ public class RemoteModulesProxy implements ModulesProxy {
             for (String resourceName : structureResp.getStructure()) {
                 String cachePathName = constructResourcePath(resourceName);
                 File cachePath = new File(cachePathName);
-                syncResource(cachePath, resourceName, null, null);
+                syncResource(cachePath, resourceName, null, null, null);
                 structure.getParts().addFile(cachePath);
             }
             return structure;
         }
     }
 
-    private void syncResource(File cachePath, String aName, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    private void syncResource(File cachePath, String aName, Scripts.Space aSpace, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
         Date localTimeStamp = null;
         if (cachePath.exists() && cachePath.isFile()) {
             localTimeStamp = new Date(cachePath.lastModified());
@@ -114,7 +112,7 @@ public class RemoteModulesProxy implements ModulesProxy {
             return null;
         };
         if (onSuccess != null) {
-            requestResource(localTimeStamp, aName, (ResourceRequest.Response resourceResp) -> {
+            requestResource(localTimeStamp, aName, aSpace, (ResourceRequest.Response resourceResp) -> {
                 try {
                     doWork.call(resourceResp);
                     try {
@@ -129,25 +127,25 @@ public class RemoteModulesProxy implements ModulesProxy {
                 }
             }, onFailure);
         } else {
-            ResourceRequest.Response resourceResp = requestResource(localTimeStamp, aName, null, null);
+            ResourceRequest.Response resourceResp = requestResource(localTimeStamp, aName, null, null, null);
             doWork.call(resourceResp);
         }
     }
 
-    private ModuleStructureRequest.Response requestModuleStructure(String aName, Consumer<ModuleStructureRequest.Response> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    private ModuleStructureRequest.Response requestModuleStructure(String aName, Scripts.Space aSpace, Consumer<ModuleStructureRequest.Response> onSuccess, Consumer<Exception> onFailure) throws Exception {
         ModuleStructureRequest req = new ModuleStructureRequest(aName);
         if (onSuccess != null) {
-            conn.enqueueRequest(req, Scripts.getSpace(), onSuccess, onFailure);
+            conn.enqueueRequest(req, aSpace, onSuccess, onFailure);
             return null;
         } else {
             return conn.executeRequest(req);
         }
     }
 
-    private ResourceRequest.Response requestResource(Date aTimeStamp, String aResourceName, Consumer<ResourceRequest.Response> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    private ResourceRequest.Response requestResource(Date aTimeStamp, String aResourceName, Scripts.Space aSpace, Consumer<ResourceRequest.Response> onSuccess, Consumer<Exception> onFailure) throws Exception {
         ResourceRequest req = new ResourceRequest(aTimeStamp, aResourceName);
         if (onSuccess != null) {
-            conn.enqueueRequest(req, Scripts.getSpace(), onSuccess, onFailure);
+            conn.enqueueRequest(req, aSpace, onSuccess, onFailure);
             return null;
         } else {
             return conn.executeRequest(req);

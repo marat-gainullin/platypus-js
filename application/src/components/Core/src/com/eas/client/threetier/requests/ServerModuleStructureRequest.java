@@ -13,16 +13,16 @@ import java.util.Date;
  *
  * @author pk, mg refactoring
  */
-public class CreateServerModuleRequest extends Request {
+public class ServerModuleStructureRequest extends Request {
 
     private String moduleName;
     private Date timeStamp;
 
-    public CreateServerModuleRequest() {
+    public ServerModuleStructureRequest() {
         super(Requests.rqCreateServerModule);
     }
 
-    public CreateServerModuleRequest(String aModuleName, Date aTimeStamp) {
+    public ServerModuleStructureRequest(String aModuleName, Date aTimeStamp) {
         this();
         moduleName = aModuleName;
         timeStamp = aTimeStamp;

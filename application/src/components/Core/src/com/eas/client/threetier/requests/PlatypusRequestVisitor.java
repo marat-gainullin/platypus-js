@@ -20,7 +20,7 @@ public interface PlatypusRequestVisitor {
     
     public void visit(ResourceRequest rq) throws Exception;
     
-    public void visit(CreateServerModuleRequest rq) throws Exception;
+    public void visit(ServerModuleStructureRequest rq) throws Exception;
     
     public void visit(DisposeServerModuleRequest rq) throws Exception;
     

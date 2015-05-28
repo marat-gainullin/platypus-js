@@ -4,10 +4,8 @@
  */
 package com.eas.server;
 
-import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
-import com.eas.script.Scripts;
 import java.util.function.Consumer;
 
 /**
@@ -27,23 +25,14 @@ public abstract class SessionRequestHandler<T extends Request, R extends Respons
         return serverCore.getSessionManager();
     }
 
-    public void handle(Session aSession, PlatypusPrincipal aPrincipal, Consumer<R> onSuccess, Consumer<Exception> onFailure) {
+    public void handle(Session aSession, Consumer<R> onSuccess, Consumer<Exception> onFailure) {
         if (aSession == null) {
             if (onFailure != null) {
                 onFailure.accept(new UnauthorizedRequestException("Unauthorized. Login first."));
             }
         } else {
             aSession.accessed();
-            assert PlatypusPrincipal.getInstance() == null : "Principal must be null before session request handler is invoked.";
-            assert Scripts.getSession() == null : "Session must be null before session request handler is invoked.";
-            PlatypusPrincipal.setInstance(aPrincipal);
-            Scripts.setSession(aSession);
-            try {
-                handle2(aSession, onSuccess, onFailure);
-            } finally {
-                PlatypusPrincipal.setInstance(null);
-                Scripts.setSession(null);
-            }
+            handle2(aSession, onSuccess, onFailure);
         }
     }
 

@@ -18,7 +18,6 @@ public class PlatypusFormatter extends Formatter {
 
     // format string for printing the log record
     private static final String format = "%1$td:%1$tm:%1$tY %1$tH:%1$tM:%1$tS\t%2$s\t%3$s\t%4$s%n";
-    private final Date dat = new Date();
 
     public PlatypusFormatter() {
         super();
@@ -28,8 +27,8 @@ public class PlatypusFormatter extends Formatter {
      * @inherit
      */
     @Override
-    public synchronized String format(LogRecord record) {
-        dat.setTime(record.getMillis());
+    public String format(LogRecord record) {
+        Date dat = new Date(record.getMillis());
         String message = formatMessage(record);
         String throwable = "";
         if (record.getThrown() != null) {

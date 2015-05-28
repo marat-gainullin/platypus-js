@@ -16,7 +16,6 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class Delete extends Change {
     
-    private static JSObject publisher;
     private final List<ChangeValue> keys = new ArrayList<>();
 
     public Delete(String aEntityName) {
@@ -35,16 +34,7 @@ public class Delete extends Change {
     
     @Override
     public JSObject getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = (JSObject)publisher.call(null, new Object[]{this});
-        }
         return published;
     }
     
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
-    }
 }

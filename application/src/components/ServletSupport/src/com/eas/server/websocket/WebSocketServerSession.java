@@ -5,12 +5,9 @@
  */
 package com.eas.server.websocket;
 
-import com.eas.client.login.PlatypusPrincipal;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
-import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
-import com.eas.script.Scripts;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,47 +23,14 @@ public class WebSocketServerSession implements HasPublished {
 
     protected JSObject published;
     protected Session session;
-    protected com.eas.server.Session platypusSession;
-    protected PlatypusPrincipal principal;
-    protected Object lock;
-    protected Object request;
-    protected Object response;
     //
     protected JSObject onClose;
     protected JSObject onError;
     protected JSObject onMessage;
 
-    public WebSocketServerSession(Session aSession, com.eas.server.Session aPlatypusSession, PlatypusPrincipal aPlatypusPrincipal) {
+    public WebSocketServerSession(Session aSession) {
         super();
         session = aSession;
-        platypusSession = aPlatypusSession;
-        principal = aPlatypusPrincipal;
-        request = Scripts.getRequest();
-        response = Scripts.getResponse();
-    }
-
-    public com.eas.server.Session getPlatypusSession() {
-        return platypusSession;
-    }
-
-    public PlatypusPrincipal getPrincipal() {
-        return principal;
-    }
-
-    public Object getLock() {
-        return lock;
-    }
-
-    public void setLock(Object aValue) {
-        lock = aValue;
-    }
-
-    public Object getRequest() {
-        return request;
-    }
-
-    public Object getResponse() {
-        return response;
     }
 
     @ScriptFunction
@@ -153,18 +117,6 @@ public class WebSocketServerSession implements HasPublished {
 
     @Override
     public JSObject getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = (JSObject) publisher.call(null, new Object[]{this});
-        }
         return published;
-    }
-
-    private static JSObject publisher;
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
     }
 }

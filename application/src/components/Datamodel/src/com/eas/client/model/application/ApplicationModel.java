@@ -165,7 +165,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
     @Override
     protected boolean validateEntities() throws Exception {
         for (E e : entities.values()) {
-            queries.getQuery(e.getQueryName(), null, null);
+            queries.getQuery(e.getQueryName(), null, null, null);
         }
         return super.validateEntities();
     }
@@ -449,7 +449,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
 
     protected static final String USER_DATASOURCE_NAME = "userQuery";
 
-    public synchronized E createQuery(String aQueryId) throws Exception {
+    public E createQuery(String aQueryId) throws Exception {
         Logger.getLogger(ApplicationModel.class.getName()).log(Level.WARNING, "createQuery deprecated call detected. Use loadEntity() instead.");
         return loadEntity(aQueryId);
     }
@@ -461,7 +461,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
             + "*/";
 
     @ScriptFunction(jsDoc = LOAD_ENTITY_JSDOC, params = {"queryId"})
-    public synchronized E loadEntity(String aQueryId) throws Exception {
+    public E loadEntity(String aQueryId) throws Exception {
         E entity = newGenericEntity();
         entity.setName(USER_DATASOURCE_NAME);
         entity.setQueryName(aQueryId);
@@ -469,7 +469,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
         return entity;
     }
 
-    public synchronized E createQuery(E aLeftEntity, Field aLeftField, String aRightQueryId, Field aRightField) throws Exception {
+    public E createQuery(E aLeftEntity, Field aLeftField, String aRightQueryId, Field aRightField) throws Exception {
         E rightEntity = newGenericEntity();
         rightEntity.setName(USER_DATASOURCE_NAME);
         rightEntity.setQueryName(aRightQueryId);
@@ -488,7 +488,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
         return rightEntity;
     }
 
-    public synchronized void deleteQuery(E entity2Delete) {
+    public void deleteQuery(E entity2Delete) {
         if (entity2Delete != null) {
             Set<Relation<E>> rels = entity2Delete.getInOutRelations();
             if (rels != null) {

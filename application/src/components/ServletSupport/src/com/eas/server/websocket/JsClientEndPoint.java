@@ -27,71 +27,55 @@ public class JsClientEndPoint {
     protected JSObject onclose;
     protected JSObject onerror;
     protected JSObject onmessage;
+    protected Scripts.Space space;
 
-    public JsClientEndPoint(WebSocketClientSession aSession) {
+    public JsClientEndPoint(WebSocketClientSession aSession, Scripts.Space aSpace) {
         super();
         session = aSession;
+        space = aSpace;
     }
 
     @OnMessage
     public void onMessage(Session websocketSession, String aData) {
-        session.inContext(() -> {
-            if (onmessage != null) {
-                JSObject messageEvent = Scripts.makeObj();
+        if (onmessage != null) {
+            space.process(() -> {
+                JSObject messageEvent = space.makeObj();
                 messageEvent.setMember("data", aData);
                 onmessage.call(session.getPublished(), new Object[]{messageEvent});
-            }
-        });
+            });
+        }
     }
 
     @OnOpen
     public void onOpen(Session aSession) {
-        Scripts.submitTask(() -> {
-            Scripts.acceptTaskResult(() -> {
-                if (onopen != null) {
-                    onopen.call(session.getPublished(), new Object[]{});
-                }
+        if (onopen != null) {
+            space.process(() -> {
+                onopen.call(session.getPublished(), new Object[]{});
             });
-        });
+        }
     }
 
     @OnClose
     public void onClose(Session websocketSession, CloseReason aReason) {
-        Runnable actor = () -> {
-            if (onclose != null) {
-                JSObject closeEvent = Scripts.makeObj();
+        if (onclose != null) {
+            space.process(() -> {
+                JSObject closeEvent = space.makeObj();
                 closeEvent.setMember("wasClean", aReason.getCloseCode() == CloseReason.CloseCodes.NORMAL_CLOSURE);
                 closeEvent.setMember("code", aReason.getCloseCode().getCode());
                 closeEvent.setMember("reason", aReason.getReasonPhrase());
                 onclose.call(session.getPublished(), new Object[]{closeEvent});
-            }
-        };
-        if (Scripts.getLock() == null) {
-            session.inContext(actor);
-        } else {// already in context
-            final Object lock = Scripts.getLock();
-            synchronized (lock) {
-                actor.run();
-            }
+            });
         }
     }
 
     @OnError
     public void onError(Session websocketSession, Throwable aError) {
-        Runnable actor = () -> {
-            if (onerror != null) {
-                JSObject errorEvent = Scripts.makeObj();
+        if (onerror != null) {
+            space.process(() -> {
+                JSObject errorEvent = space.makeObj();
                 errorEvent.setMember("message", aError.getMessage());
                 onerror.call(session.getPublished(), new Object[]{errorEvent});
-            }
-        };
-        if (Scripts.getLock() == null) {
-            session.inContext(actor);
-        } else {// already in context
-            final Object lock = Scripts.getLock();
-            synchronized (lock) {
-                actor.run();
-            }
+            });
         }
     }
 

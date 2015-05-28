@@ -4,8 +4,6 @@
  */
 package com.eas.server.handlers;
 
-import com.eas.client.login.PlatypusPrincipal;
-import com.eas.client.login.SystemPlatypusPrincipal;
 import com.eas.script.Scripts;
 import com.eas.sensors.api.Packet;
 import com.eas.sensors.api.PacketReciever;
@@ -26,32 +24,25 @@ public class PositioningPacketReciever implements PacketReciever {
     protected PlatypusServerCore serverCore;
     private final RetranslateFactory sender;
 
-    public PositioningPacketReciever(PlatypusServerCore aServer, String aModuleName, RetranslateFactory aRetranslateFactory) {
+    public PositioningPacketReciever(PlatypusServerCore aServer, String aModuleName, RetranslateFactory aPacketSender) {
         super();
         serverCore = aServer;
         moduleName = aModuleName;
-        sender = aRetranslateFactory;
+        sender = aPacketSender;
     }
 
     @Override
     public Object received(Packet aPacket) throws Exception {
         Session session = serverCore.getSessionManager().getSystemSession();
-        PlatypusPrincipal.setInstance(new SystemPlatypusPrincipal());
-        Scripts.setSession(session);
-        try {
-            serverCore.executeMethod(moduleName, RECIEVER_METHOD_NAME, new Object[]{aPacket}, session, (Object result) -> {
-                if (result != null) {
-                    assert result instanceof String;
-                    assert sender != null;
-                    sender.send(aPacket, (String) result);
-                }
-            }, (Exception ex) -> {
-                Logger.getLogger(PositioningPacketReciever.class.getName()).log(Level.WARNING, null, ex);
-            }, null);
-        } finally {
-            PlatypusPrincipal.setInstance(null);
-            Scripts.setSession(null);
-        }
+        serverCore.executeMethod(moduleName, RECIEVER_METHOD_NAME, new Object[]{aPacket}, session, true, (Object result) -> {
+            if (result != null) {
+                assert result instanceof String;
+                assert sender != null;
+                sender.send(aPacket, (String) result);
+            }
+        }, (Exception ex) -> {
+            Logger.getLogger(PositioningPacketReciever.class.getName()).log(Level.WARNING, null, ex);
+        });
         return null;
     }
 }

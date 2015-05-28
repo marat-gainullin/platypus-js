@@ -10,7 +10,7 @@ import com.eas.client.metadata.Parameter;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.client.threetier.requests.CommitRequest;
-import com.eas.client.threetier.requests.CreateServerModuleRequest;
+import com.eas.client.threetier.requests.ServerModuleStructureRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.RPCRequest;
@@ -96,7 +96,7 @@ public class PlatypusRequestWriter implements PlatypusRequestVisitor {
     }
 
     @Override
-    public void visit(CreateServerModuleRequest rq) throws Exception {
+    public void visit(ServerModuleStructureRequest rq) throws Exception {
         ProtoWriter pw = new ProtoWriter(out);
         pw.put(RequestsTags.TAG_MODULE_NAME, rq.getModuleName());
         if (rq.getTimeStamp() != null) {

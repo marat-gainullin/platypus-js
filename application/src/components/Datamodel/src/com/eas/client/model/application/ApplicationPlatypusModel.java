@@ -12,6 +12,7 @@ import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import com.eas.script.Scripts;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -68,7 +69,7 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
 
     @Override
     public int commit(final Consumer<Integer> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception {
-        return serverProxy.commit(changeLog, aOnSuccess, aOnFailure);
+        return serverProxy.commit(changeLog, Scripts.getSpace(), aOnSuccess, aOnFailure);
     }
 
     @Override
@@ -97,19 +98,7 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
 
     @Override
     public JSObject getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = (JSObject) publisher.call(null, new Object[]{this});
-        }
         return published;
-    }
-
-    private static JSObject publisher;
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
     }
 
 }

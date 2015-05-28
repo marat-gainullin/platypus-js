@@ -21,8 +21,8 @@ public class CellData implements HasPublished  {
     public Object data;
     public String display;
 
-    private static JSObject publisher;
     protected JSObject published;
+    
     /**
      * Simple constructor for controls models data.
      *
@@ -68,12 +68,6 @@ public class CellData implements HasPublished  {
 
     @Override
     public JSObject getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = (JSObject)publisher.call(null, new Object[]{this});
-        }
         return published;
     }
 
@@ -83,9 +77,5 @@ public class CellData implements HasPublished  {
             throw new AlreadyPublishedException();
         }
         published = aValue;
-    }
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
     }
 }

@@ -14,23 +14,23 @@ import jdk.nashorn.internal.runtime.JSType;
  *
  * @author Andrew
  */
-public class JSDynaList implements Collection{
+public class JSDynaList implements Collection {
 
     private final JSObject delegate;
     private final int timezoneOffset;
     private final int length;
-    
+
     public JSDynaList(JSObject aDelegate, int aTimezoneOffset) {
+        super();
         if (aDelegate != null) {
-        delegate = aDelegate;
-        length = JSType.toInteger(delegate.getMember("length"));
-        timezoneOffset = aTimezoneOffset; 
+            delegate = aDelegate;
+            length = JSType.toInteger(delegate.getMember("length"));
+            timezoneOffset = aTimezoneOffset;
         } else {
             throw new IllegalArgumentException("A Delegate could not be null.");
         }
     }
-    
-    
+
     @Override
     public int size() {
         return length;
@@ -57,7 +57,7 @@ public class JSDynaList implements Collection{
     }
 
     @Override
-    public  Object[] toArray(Object[] a) {
+    public Object[] toArray(Object[] a) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -95,5 +95,5 @@ public class JSDynaList implements Collection{
     public void clear() {
         throw new UnsupportedOperationException("Not supported.");
     }
-    
+
 }

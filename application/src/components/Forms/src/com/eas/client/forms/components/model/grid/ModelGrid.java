@@ -1085,7 +1085,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     protected void bindCursor(JSObject aModelData) {
         if (aModelData != null) {
-            boundToCursor = Scripts.listen(aModelData, cursorProperty, new AbstractJSObject() {
+            boundToCursor = Scripts.getSpace().listen(aModelData, cursorProperty, new AbstractJSObject() {
 
                 @Override
                 public Object call(Object thiz, Object... args) {
@@ -1115,7 +1115,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
                     }
                 }
                 if (field != null && !field.isEmpty()) {
-                    boundToData = com.eas.script.Scripts.listen(data, field, new AbstractJSObject() {
+                    boundToData = Scripts.getSpace().listen(data, field, new AbstractJSObject() {
 
                         @Override
                         public Object call(Object thiz, Object... args) {
@@ -1357,7 +1357,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
                 JSObject jsIndexOf = (JSObject) ldata.getMember("indexOf");
                 Object oElementClass = ldata.getMember("elementClass");
                 JSObject jsElementClass = oElementClass instanceof JSObject && ((JSObject) oElementClass).isFunction() ? (JSObject) oElementClass : null;
-                JSObject jsCreated = jsElementClass != null ? (JSObject) jsElementClass.newObject(new Object[]{}) : Scripts.makeObj();
+                JSObject jsCreated = jsElementClass != null ? (JSObject) jsElementClass.newObject(new Object[]{}) : Scripts.getSpace().makeObj();
                 JSObject jsCursor = getCurrentRow();
                 rowsSelectionModel.removeListSelectionListener(generalSelectionChangesReflector);
                 try {
@@ -2585,12 +2585,6 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     @Override
     public JSObject getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = (JSObject) publisher.call(null, new Object[]{this});
-        }
         return published;
     }
 
@@ -2600,12 +2594,6 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
             throw new AlreadyPublishedException();
         }
         published = aValue;
-    }
-
-    private static JSObject publisher;
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
     }
 
     protected JSObject onItemSelected;

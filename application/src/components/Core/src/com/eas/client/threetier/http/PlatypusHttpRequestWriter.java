@@ -18,7 +18,6 @@ import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.concurrent.CallableConsumer;
 import com.eas.util.BinaryUtils;
 import com.eas.util.JSONUtils;
-import com.eas.util.StringUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -27,18 +26,14 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import jdk.nashorn.internal.runtime.JSType;
 
 /**
  *
@@ -60,6 +55,8 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
     protected HttpURLConnection conn;
     protected Callable<Credentials> onCredentials;
     protected PlatypusHttpConnection pConn;
+    protected byte[] responseBody;
+    protected Response response;
 
     public PlatypusHttpRequestWriter(URL aUrl, Map<String, Cookie> aCookies, Callable<Credentials> aOnCredentials, Sequence aSequence, int aMaximumAuthenticateAttempts, PlatypusHttpConnection aPConn) {
         super();
@@ -69,21 +66,6 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
         maximumAuthenticateAttempts = aMaximumAuthenticateAttempts;
         onCredentials = aOnCredentials;
         pConn = aPConn;
-    }
-
-    private String valueToString(Object aValue) {
-        if (!JSType.nullOrUndefined(aValue)) {
-            if (aValue instanceof Date) {
-                SimpleDateFormat sdf = new SimpleDateFormat(PlatypusHttpConstants.HTTP_DATE_FORMAT, Locale.US);
-                return sdf.format((Date) aValue);
-            } else if (aValue instanceof Number) {
-                return StringUtils.formatDouble(((Number) aValue).doubleValue());
-            } else {
-                return aValue.toString();
-            }
-        } else {
-            return "null";
-        }
     }
 
     protected static class HttpResult {
@@ -199,7 +181,6 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
         int responseCode = conn.getResponseCode();
         String authScheme = null;
         String redirectLocation = null;
-        Response response;
         if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
             authScheme = conn.getHeaderField(PlatypusHttpConstants.HEADER_WWW_AUTH);
             response = new ErrorResponse(conn.getResponseCode() + " " + conn.getResponseMessage());
@@ -216,20 +197,18 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
         } else {
             if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_NOT_MODIFIED) {
                 try (InputStream in = conn.getInputStream()) {
-                    byte[] bodyContent = BinaryUtils.readStream(in, -1);
-                    if (checkIfSecirutyForm(bodyContent)) {
+                    responseBody = BinaryUtils.readStream(in, -1);
+                    if (checkIfSecirutyForm(responseBody)) {
                         redirectLocation = PlatypusHttpConstants.SECURITY_REDIRECT_LOCATION;
                         authScheme = PlatypusHttpConstants.FORM_AUTH_NAME;
                         response = new ErrorResponse(HttpURLConnection.HTTP_UNAUTHORIZED + "");
                         ((ErrorResponse) response).setAccessControl(true);
                         ((ErrorResponse) response).setNotLoggedIn(true);
                     } else {
+                        // background bio waiting thread will enqueue responseBody reading to a working thread
                         PlatypusResponsesFactory responseFactory = new PlatypusResponsesFactory();
                         aRequest.accept(responseFactory);
                         response = responseFactory.getResponse();
-                        //
-                        //PlatypusHttpResponseReader reader = new PlatypusHttpResponseReader(aRequest, conn, pConn);
-                        //response.accept(reader);
                     }
                 }
             } else {
@@ -356,7 +335,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
     }
 
     @Override
-    public void visit(CreateServerModuleRequest rq) throws Exception {
+    public void visit(ServerModuleStructureRequest rq) throws Exception {
         method = PlatypusHttpConstants.HTTP_METHOD_GET;
         params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.TYPE, "" + rq.getType()));
         params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.MODULE_NAME, rq.getModuleName()));
@@ -381,7 +360,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
         Parameters qParams = rq.getParams();
         for (int i = 0; i < qParams.getParametersCount(); i++) {
             Parameter p = qParams.get(i + 1);
-            params.add(new AbstractMap.SimpleEntry<>(p.getName(), valueToString(p.getValue())));
+            params.add(new AbstractMap.SimpleEntry<>(p.getName(), JSONUtils.v(p.getValue())));
         }
         pushRequest(rq, null);
     }

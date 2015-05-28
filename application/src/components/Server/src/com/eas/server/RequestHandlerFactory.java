@@ -62,8 +62,8 @@ public class RequestHandlerFactory implements PlatypusRequestVisitor {
     }
 
     @Override
-    public void visit(CreateServerModuleRequest rq) throws Exception {
-        handler = new CreateServerModuleRequestHandler(serverCore, rq);
+    public void visit(ServerModuleStructureRequest rq) throws Exception {
+        handler = new ServerModuleStructureRequestHandler(serverCore, rq);
     }
 
     @Override

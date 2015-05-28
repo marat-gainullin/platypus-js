@@ -16,8 +16,6 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class Font extends java.awt.Font implements HasPublished {
 
-    private static JSObject publisher;
-    
     protected JSObject published;
 
     @ScriptFunction(params = {"family", "style", "size"}, jsDoc = "/**\n"
@@ -81,12 +79,6 @@ public class Font extends java.awt.Font implements HasPublished {
     
     @Override
     public JSObject getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = (JSObject)publisher.call(null, new Object[]{this});
-        }
         return published;
     }
 
@@ -97,11 +89,7 @@ public class Font extends java.awt.Font implements HasPublished {
         }
         published = aValue;
     }
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
-    }
-
+    
     protected String fontStyleToString(int aStyle) {
         switch (aStyle) {
             case FontStyle.NORMAL:

@@ -10,8 +10,9 @@ import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.client.threetier.PlatypusConnection;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
-import com.eas.client.threetier.platypus.RequestEnvelope;
+import com.eas.client.threetier.Sequence;
 import com.eas.client.threetier.requests.LogoutRequest;
+import com.eas.client.threetier.requests.PlatypusResponsesFactory;
 import com.eas.concurrent.DeamonThreadFactory;
 import com.eas.script.Scripts;
 import java.io.IOException;
@@ -57,12 +58,18 @@ public class PlatypusHttpConnection extends PlatypusConnection {
 
     protected Map<String, Cookie> cookies = new ConcurrentHashMap<>();
     protected Credentials basicCredentials;
+    // Avoid parallel login 
+    protected Sequence sequence = (Callable<Void> aCallable) -> {
+        synchronized (this) {
+            aCallable.call();
+        }
+    };
     //
     private final ThreadPoolExecutor requestsSender;
 
-    public PlatypusHttpConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts, int aMaximumThreads) throws Exception {
+    public PlatypusHttpConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts, int aMaximumBIOThreads) throws Exception {
         super(aUrl, aOnCredentials, aMaximumAuthenticateAttempts);
-        requestsSender = new ThreadPoolExecutor(0, aMaximumThreads,
+        requestsSender = new ThreadPoolExecutor(0, aMaximumBIOThreads,
                 1L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(),
                 new DeamonThreadFactory("http-client-", false));
@@ -125,41 +132,53 @@ public class PlatypusHttpConnection extends PlatypusConnection {
     @Override
     public <R extends Response> void enqueueRequest(Request aRequest, Scripts.Space aSpace, Consumer<R> onSuccess, Consumer<Exception> onFailure) throws Exception {
         aSpace.incAsyncsCount();
-        PlatypusHttpRequestWriter httpSender = new PlatypusHttpRequestWriter(url, cookies, onCredentials, sequence, maximumAuthenticateAttempts, PlatypusHttpConnection.this);
-        aRequest.accept(httpSender);// wait completion analog
-        Consumer<Response> onComplete = (Response aResponse) -> {
-            if (aResponse instanceof ErrorResponse) {
-                if (onFailure != null) {
-                    Exception cause = handleErrorResponse((ErrorResponse) aResponse);
-                    aSpace.process(() -> {
-                        onFailure.accept(cause);
-                    });
-                }
-            } else {
-                if (onSuccess != null) {
-                    aSpace.process(() -> {
-                        if (aRequest instanceof LogoutRequest) {
-                            cookies.clear();
-                            basicCredentials = null;
-                            if (onLogout != null) {
-                                onLogout.run();
+        requestsSender.submit(() -> {
+            PlatypusHttpRequestWriter httpSender = new PlatypusHttpRequestWriter(url, cookies, onCredentials, sequence, maximumAuthenticateAttempts, PlatypusHttpConnection.this);
+            try {
+                aRequest.accept(httpSender);// bio in a background thread
+                aSpace.process(() -> {
+                    try {
+                        if (httpSender.response instanceof ErrorResponse) {
+                            if (onFailure != null) {
+                                Exception cause = handleErrorResponse((ErrorResponse) httpSender.response);
+                                onFailure.accept(cause);
+                            }
+                        } else {
+                            if (aRequest instanceof LogoutRequest) {
+                                cookies.clear();
+                                basicCredentials = null;
+                                if (onLogout != null) {
+                                    onLogout.run();
+                                }
+                            }
+                            if (onSuccess != null) {
+                                // Actual response reading in a working thread
+                                PlatypusHttpResponseReader reader = new PlatypusHttpResponseReader(aRequest, httpSender.conn, httpSender.responseBody, aSpace);
+                                httpSender.response.accept(reader);
+                                onSuccess.accept((R) httpSender.response);
                             }
                         }
-                        onSuccess.accept((R) aResponse);
-                    });
-                }
+                    } catch (Exception ex) {
+                        Logger.getLogger(PlatypusHttpConnection.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                });
+            } catch (Exception ex) {
+                Logger.getLogger(PlatypusHttpConnection.class.getName()).log(Level.SEVERE, null, ex);
             }
-        };
+        });
     }
 
     @Override
     public <R extends Response> R executeRequest(Request aRequest) throws Exception {
-        RequestEnvelope requestEnv = new RequestEnvelope(aRequest, null, null, null, null);
         PlatypusHttpRequestWriter httpSender = new PlatypusHttpRequestWriter(url, cookies, onCredentials, sequence, maximumAuthenticateAttempts, PlatypusHttpConnection.this);
-        requestEnv.request.accept(httpSender);// wait completion analog
-        
-        if (requestEnv.response instanceof ErrorResponse) {
-            throw handleErrorResponse((ErrorResponse) requestEnv.response);
+        aRequest.accept(httpSender);// bio
+        PlatypusResponsesFactory responseFactory = new PlatypusResponsesFactory();
+        aRequest.accept(responseFactory);
+        Response response = responseFactory.getResponse();
+        PlatypusHttpResponseReader reader = new PlatypusHttpResponseReader(aRequest, httpSender.conn, httpSender.responseBody, Scripts.getSpace());
+        response.accept(reader);
+        if (response instanceof ErrorResponse) {
+            throw handleErrorResponse((ErrorResponse) response);
         } else {
             if (aRequest instanceof LogoutRequest) {
                 cookies.clear();
@@ -168,7 +187,7 @@ public class PlatypusHttpConnection extends PlatypusConnection {
                     onLogout.run();
                 }
             }
-            return (R) requestEnv.response;
+            return (R) response;
         }
     }
 

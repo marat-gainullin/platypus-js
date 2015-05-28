@@ -135,40 +135,49 @@ public class SqlCompiledQuery {
     /**
      * Executes query and returns results whatever setted in procedure flag.
      *
+     * @param aResultSetProcessor
+     * @param aSpace
      * @param onSuccess
      * @param onFailure
      * @return Rowset insatance, representing query results.
      * @throws Exception
      * @see Rowset
      */
-    public <T> T executeQuery(CallableConsumer<T, ResultSet> aResultSetProcessor, Consumer<T> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public <T> T executeQuery(CallableConsumer<T, ResultSet> aResultSetProcessor, Scripts.Space aSpace, Consumer<T> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (basesProxy != null) {
             PlatypusJdbcFlowProvider flow = basesProxy.createFlowProvider(datasourceName, entityName, sqlClause, expectedFields);
             flow.setPageSize(pageSize);
             flow.setProcedure(procedure);
-            return flow.<T>select(parameters, aResultSetProcessor, onSuccess, onFailure);
+            return flow.<T>select(parameters, aResultSetProcessor, (T t) -> {
+                aSpace.process(() -> {
+                    onSuccess.accept(t);
+                });
+            }, (Exception ex) -> {
+                aSpace.process(() -> {
+                    onFailure.accept(ex);
+                });
+            });
         } else {
             return null;
         }
     }
 
-    public JSObject executeQuery(Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public JSObject executeQuery(Consumer<JSObject> onSuccess, Consumer<Exception> onFailure, Scripts.Space aSpace) throws Exception {
         if (basesProxy != null) {
             PlatypusJdbcFlowProvider flow = basesProxy.createFlowProvider(datasourceName, entityName, sqlClause, expectedFields);
             flow.setPageSize(pageSize);
             flow.setProcedure(procedure);
-            Scripts.Space space = Scripts.getSpace();
             Collection<Map<String, Object>> data = flow.refresh(parameters, onSuccess != null ? (Collection<Map<String, Object>> aData) -> {
-                space.process(() -> {
-                    JSObject aJsData = space.readJsArray(aData);
+                aSpace.process(() -> {
+                    JSObject aJsData = aSpace.readJsArray(aData);
                     onSuccess.accept(aJsData);
                 });
             } : null, onFailure != null ? (Exception ex) -> {
-                space.process(() -> {
+                aSpace.process(() -> {
                     onFailure.accept(ex);
                 });
             } : null);
-            return data != null ? space.readJsArray(data) : null;
+            return data != null ? aSpace.readJsArray(data) : null;
         } else {
             return null;
         }

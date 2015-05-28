@@ -8,12 +8,11 @@ package com.eas.server.httpservlet;
 import com.eas.client.queries.Query;
 import com.eas.client.report.Report;
 import com.eas.client.settings.SettingsConstants;
-import com.eas.client.threetier.RowsetJsonConstants;
 import com.eas.client.threetier.http.PlatypusHttpConstants;
 import com.eas.client.threetier.http.PlatypusHttpResponseReader;
 import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.client.threetier.requests.CommitRequest;
-import com.eas.client.threetier.requests.CreateServerModuleRequest;
+import com.eas.client.threetier.requests.ServerModuleStructureRequest;
 import com.eas.client.threetier.requests.CredentialRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
 import com.eas.client.threetier.requests.ErrorResponse;
@@ -27,6 +26,7 @@ import com.eas.script.Scripts;
 import com.eas.server.httpservlet.serial.query.QueryJsonWriter;
 import com.eas.util.IDGenerator;
 import com.eas.util.JSONUtils;
+import com.eas.util.RowsetJsonConstants;
 import com.eas.util.StringUtils;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -47,11 +47,13 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
 
     protected HttpServletResponse servletResponse;
     protected HttpServletRequest servletRequest;
+    protected Scripts.Space space;
 
-    public PlatypusHttpResponseWriter(HttpServletResponse aServletResponse, HttpServletRequest aServletRequest) {
+    public PlatypusHttpResponseWriter(HttpServletResponse aServletResponse, HttpServletRequest aServletRequest, Scripts.Space aSpace) {
         super();
         servletRequest = aServletRequest;
         servletResponse = aServletResponse;
+        space = aSpace;
     }
 
     @Override
@@ -84,7 +86,7 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
         makeResponseNotCacheable(servletResponse);
         ExecuteQueryRequest.Response resp = (ExecuteQueryRequest.Response) rsp;
         if (resp.getRowset() != null) {
-            writeJsonResponse(Scripts.toJson(resp.getRowset()), servletResponse);
+            writeJsonResponse(space.toJson(resp.getRowset()), servletResponse);
         } else {
             writeJsonResponse(resp.getUpdateCount() + "", servletResponse);
         }
@@ -99,14 +101,11 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
     public void visit(RPCRequest.Response resp) throws Exception {
         final Object result = ((RPCRequest.Response) resp).getResult();
         makeResponseNotCacheable(servletResponse);
-//        if (result instanceof Rowset) {
-//           
-//        } else 
         if (result instanceof String) {
-            writeJsonResponse(Scripts.toJson(result), servletResponse);
+            writeJsonResponse(space.toJson(result), servletResponse);
         } else if (result instanceof JSObject) {
             JSObject jsResult = (JSObject) result;
-            JSObject p = Scripts.lookupInGlobal("P");
+            JSObject p = space.lookupInGlobal("P");
             if (p != null) {
                 Object reportClass = p.getMember("Report");
                 Object dbEntityClass = p.getMember("ApplicationDbEntity");
@@ -132,13 +131,13 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
                     reportLocation = new URI(null, null, reportLocation, null).toASCIIString();
                     writeResponse(reportLocation, servletResponse, PlatypusHttpResponseReader.REPORT_LOCATION_CONTENT_TYPE);
                 } else {
-                    writeJsonResponse(Scripts.toJson(result), servletResponse);
+                    writeJsonResponse(space.toJson(result), servletResponse);
                 }
             } else {
-                writeJsonResponse(Scripts.toJson(result), servletResponse);
+                writeJsonResponse(space.toJson(result), servletResponse);
             }
         } else {// including null result
-            writeJsonResponse(Scripts.toJson(Scripts.toJs(result)), servletResponse);
+            writeJsonResponse(space.toJson(space.toJs(result)), servletResponse);
         }
     }
 
@@ -148,8 +147,8 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
     }
 
     @Override
-    public void visit(CreateServerModuleRequest.Response resp) throws Exception {
-        CreateServerModuleRequest.Response csmr = (CreateServerModuleRequest.Response) resp;
+    public void visit(ServerModuleStructureRequest.Response resp) throws Exception {
+        ServerModuleStructureRequest.Response csmr = (ServerModuleStructureRequest.Response) resp;
         if (csmr.getInfo() != null) {
             assert resp.getTimeStamp() == null;
             servletResponse.setDateHeader(PlatypusHttpConstants.HEADER_LAST_MODIFIED, resp.getTimeStamp().getTime());

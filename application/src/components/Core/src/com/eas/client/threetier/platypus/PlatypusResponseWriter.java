@@ -12,7 +12,7 @@ import com.eas.client.report.Report;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.client.threetier.requests.CommitRequest;
-import com.eas.client.threetier.requests.CreateServerModuleRequest;
+import com.eas.client.threetier.requests.ServerModuleStructureRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
 import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
@@ -214,7 +214,7 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     }
 
     @Override
-    public void visit(CreateServerModuleRequest.Response rsp) throws Exception {
+    public void visit(ServerModuleStructureRequest.Response rsp) throws Exception {
         ProtoWriter pw = new ProtoWriter(out);
         if (rsp.getInfo() != null) {
             ServerModuleInfo info = rsp.getInfo();

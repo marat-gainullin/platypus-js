@@ -209,7 +209,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
                 p.setValue(Scripts.getSpace().toJava(jsValue));
             }
         });
-        return copied.execute(aOnSuccess != null ? (JSObject v) -> {
+        return copied.execute(Scripts.getSpace(), aOnSuccess != null ? (JSObject v) -> {
             aOnSuccess.call(null, new Object[]{v});
         } : null, aOnFailure != null ? (Exception ex) -> {
             aOnFailure.call(null, new Object[]{ex.getMessage()});
@@ -404,7 +404,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     protected JSObject refreshRowset(final Consumer<JSObject> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception {
         if (model.process != null || aOnSuccess != null) {
             Future<Void> f = new RowsetRefreshTask(aOnFailure);
-            query.execute((JSObject aRowset) -> {
+            query.execute(Scripts.getSpace(), (JSObject aRowset) -> {
                 if (!f.isCancelled()) {
                     applySnapshot(aRowset);
                     assert pending == f : PENDING_ASSUMPTION_FAILED_MSG;
@@ -431,7 +431,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
             pending = f;
             return null;
         } else {
-            JSObject jsRowset = query.execute(null, null);
+            JSObject jsRowset = query.execute(null, null, null);
             applySnapshot(jsRowset);
             fireRequeried();
             return jsRowset;

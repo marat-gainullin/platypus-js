@@ -173,7 +173,7 @@ public class QueryModel extends Model<QueryEntity, SqlQuery> {
     @Override
     protected boolean validateEntities() throws Exception {
         for (QueryEntity e : entities.values()) {
-            queries.getQuery(e.getQueryName(), null, null);
+            queries.getQuery(e.getQueryName(), null, null, null);
         }
         return super.validateEntities();
     }

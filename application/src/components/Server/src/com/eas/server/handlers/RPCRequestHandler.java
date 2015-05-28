@@ -32,14 +32,11 @@ public class RPCRequestHandler extends SessionRequestHandler<RPCRequest, RPCRequ
 
     @Override
     protected void handle2(Session aSession, Consumer<RPCRequest.Response> onSuccess, Consumer<Exception> onFailure) {
-        serverCore.executeMethod(getRequest().getModuleName(), getRequest().getMethodName(), getRequest().getArguments(), aSession, (Object result) -> {
+        serverCore.executeMethod(getRequest().getModuleName(), getRequest().getMethodName(), getRequest().getArguments(), aSession, true, (Object result) -> {
             onSuccess.accept(new RPCRequest.Response(result));
-        }, onFailure, null);
+        }, onFailure);
     }
 
-    public static final String SERVER_WAIT_OPTION = "server";
-    public static final String SESSION_WAIT_OPTION = "session";
-    public static final String SELF_WAIT_OPTION = "self";
     public static final String MODULE_MISSING_OR_NOT_A_MODULE = "No module: %s, or it is not a module";
     public static final String BOTH_IO_MODELS_MSG = "Method {0} in module {1} attempts to return value and call a callback. Sync and async io models both are not allowed. You should make a choice.";
 }

@@ -18,12 +18,10 @@ public class BearDatabaseConnection implements Connection {
     protected final Map<String, PreparedStatement> stmts = new HashMap<>();
     protected final Map<String, CallableStatement> calls = new HashMap<>();
     protected ResourcePool<BearDatabaseConnection> connectionsPool;
-    private final Object callsWaitPoint = new Object();
-    private final Object stmtsWaitPoint = new Object();
     protected Connection delegate;
     protected int maxStatements = Integer.MAX_VALUE;
 
-    public BearDatabaseConnection(int aMaxStatetments, Connection aDelegate, ResourcePool<BearDatabaseConnection> aPool) throws Exception {
+    public BearDatabaseConnection(int aMaxStatetments, Connection aDelegate, ResourcePool<BearDatabaseConnection> aPool) {
         super();
         delegate = aDelegate;
         connectionsPool = aPool;
@@ -56,21 +54,11 @@ public class BearDatabaseConnection implements Connection {
     }
 
     public void returnPreparedStatement(String aSqlClause, PreparedStatement aStatement) {
-        synchronized (this) {
-            stmts.put(aSqlClause, aStatement);
-        }
-        synchronized (stmtsWaitPoint) {
-            stmtsWaitPoint.notifyAll();
-        }
+        stmts.put(aSqlClause, aStatement);
     }
 
     public void returnCallableStatement(String aSqlClause, CallableStatement aStatement) {
-        synchronized (this) {
-            calls.put(aSqlClause, aStatement);
-        }
-        synchronized (callsWaitPoint) {
-            callsWaitPoint.notifyAll();
-        }
+        calls.put(aSqlClause, aStatement);
     }
 
     protected static <S extends PreparedStatement> int riddleStatements(Map<String, S> aStmts) throws SQLException {
@@ -114,50 +102,7 @@ public class BearDatabaseConnection implements Connection {
 
     @Override
     public PreparedStatement prepareStatement(String sql) throws SQLException {
-        try {
-            PreparedStatement stmt = tryPrepareStatement(sql);
-            if (stmt == null) {// May become wrong during further execution in parallel threads...
-                synchronized (stmtsWaitPoint) {
-                    // stmt == null - is very old information, so let's begin another solid logic block... 
-                    stmt = tryPrepareStatement(sql);
-                    while (stmt == null && Thread.currentThread().isAlive()) {
-                        stmtsWaitPoint.wait(1000l);// Unlimited waiting is dangerous and limit is nevermind here.
-                        stmt = tryPrepareStatement(sql);
-                    }
-                }
-            }
-            return stmt;
-        } catch (InterruptedException ex) {
-            throw new SQLException(ex);
-        }
-    }
-
-    public synchronized PreparedStatement tryPrepareStatement(String sql) throws SQLException {
-        BearPreparedStatement stmt = null;
-        if (!stmts.containsKey(sql)) {
-            shrinkCallsAndStatements();
-            if (stmts.size() + calls.size() >= maxStatements) {
-                // nothing has changed. It's still to large, so return null;
-                return null;
-            }
-            stmt = wrapPreparedStatement(sql, delegate.prepareStatement(sql));
-        } else {
-            PreparedStatement llstmt = stmts.get(sql);
-            if (llstmt != null) {
-                stmt = wrapPreparedStatement(sql, llstmt);
-            }// else ... possible only in multithreaded environment
-        }
-        stmts.put(sql, null);
-        return stmt;
-    }
-
-    private void shrinkCallsAndStatements() throws SQLException {
-        // we are about to add element into map
-        // let's check if it is possible
-        if (stmts.size() + calls.size() >= maxStatements) {
-            riddleStatements(stmts);
-            riddleStatements(calls);
-        }
+        return wrapPreparedStatement(sql, delegate.prepareStatement(sql));
     }
 
     protected BearCallableStatement wrapPrearedCall(String aSql, CallableStatement aCall) {
@@ -180,41 +125,7 @@ public class BearDatabaseConnection implements Connection {
 
     @Override
     public CallableStatement prepareCall(String sql) throws SQLException {
-        try {
-            CallableStatement stmt = tryPrepareCall(sql);
-            if (stmt == null) {// May become wrong during further execution in parallel threads...
-                synchronized (callsWaitPoint) {
-                    // stmt == null - is very old information, so let's begin another solid logic block...
-                    stmt = tryPrepareCall(sql);
-                    while (stmt == null && Thread.currentThread().isAlive()) {
-                        callsWaitPoint.wait(1000l);// Unlimited waiting is dangerous and limit is nevermind here.
-                        stmt = tryPrepareCall(sql);
-                    }
-                }
-            }
-            return stmt;
-        } catch (InterruptedException ex) {
-            throw new SQLException(ex);
-        }
-    }
-
-    public synchronized CallableStatement tryPrepareCall(String sql) throws SQLException {
-        BearCallableStatement stmt = null;
-        if (!calls.containsKey(sql)) {
-            shrinkCallsAndStatements();
-            if (stmts.size() + calls.size() >= maxStatements) {
-                // nothing has changed. It's still to big, so return null;
-                return null;
-            }
-            stmt = wrapPrearedCall(sql, delegate.prepareCall(sql));
-        } else {
-            CallableStatement llCall = calls.get(sql);
-            if (llCall != null) {
-                stmt = wrapPrearedCall(sql, llCall);
-            }// else ... possible only in multithreaded environment
-        }
-        calls.put(sql, null);
-        return stmt;
+        return wrapPrearedCall(sql, delegate.prepareCall(sql));
     }
 
     @Override
@@ -229,9 +140,6 @@ public class BearDatabaseConnection implements Connection {
 
     /* 
      * Delegating section
-     */
-    /**
-     * @inheritDoc
      */
     @Override
     public Statement createStatement() throws SQLException {
@@ -260,10 +168,8 @@ public class BearDatabaseConnection implements Connection {
     @Override
     public void commit() throws SQLException {
         checkClosed();
-        synchronized (this) {
-            riddleStatements(stmts);
-            riddleStatements(calls);
-        }
+        riddleStatements(stmts);
+        riddleStatements(calls);
         delegate.commit();
     }
 
@@ -489,7 +395,7 @@ public class BearDatabaseConnection implements Connection {
         }
     }
 
-    public synchronized void shutdown() throws SQLException {
+    public void shutdown() throws SQLException {
         if (delegate != null) {
             for (CallableStatement call : calls.values()) {
                 call.close();

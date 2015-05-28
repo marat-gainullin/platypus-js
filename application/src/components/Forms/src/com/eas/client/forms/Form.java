@@ -45,21 +45,17 @@ public class Form implements HasPublished {
     protected static JSObject onChange;
 
     public static Form[] getShownForms() {
-        synchronized (Form.class) {
-            List<Form> notNullForms = new ArrayList<>();
-            showingForms.values().forEach((Form f) -> {
-                if (f != null) {
-                    notNullForms.add(f);
-                }
-            });
-            return notNullForms.toArray(new Form[]{});
-        }
+        List<Form> notNullForms = new ArrayList<>();
+        showingForms.values().forEach((Form f) -> {
+            if (f != null) {
+                notNullForms.add(f);
+            }
+        });
+        return notNullForms.toArray(new Form[]{});
     }
 
     public static Form getShownForm(String aFormKey) {
-        synchronized (Form.class) {
-            return showingForms.get(aFormKey);
-        }
+        return showingForms.get(aFormKey);
     }
 
     public static JSObject getOnChange() {
@@ -97,10 +93,8 @@ public class Form implements HasPublished {
         @Override
         public void windowClosed(WindowEvent e) {
             surface = null;
-            synchronized (Form.class) {
-                showingForms.remove(Form.this.getFormKey());
-                showingFormsChanged();
-            }
+            showingForms.remove(Form.this.getFormKey());
+            showingFormsChanged();
         }
 
         @Override
@@ -114,10 +108,8 @@ public class Form implements HasPublished {
         @Override
         public void internalFrameClosed(InternalFrameEvent e) {
             surface = null;
-            synchronized (Form.class) {
-                showingForms.remove(Form.this.getFormKey());
-                showingFormsChanged();
-            }
+            showingForms.remove(Form.this.getFormKey());
+            showingFormsChanged();
         }
 
         @Override
@@ -156,7 +148,6 @@ public class Form implements HasPublished {
     protected JComponent view;
     protected String formKey;
     //
-    private static JSObject publisher;
     protected JSObject published;
     // frequent runtime
     protected Collection<JSObject> publishedComponents = new ArrayList<>();
@@ -192,12 +183,6 @@ public class Form implements HasPublished {
 
     @Override
     public final JSObject getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = (JSObject) publisher.call(null, new Object[]{this});
-        }
         return published;
     }
 
@@ -212,10 +197,6 @@ public class Form implements HasPublished {
     public void injectPublished(JSObject aValue) {
         published = aValue;
         windowHandler.setEventThis(published);
-    }
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
     }
 
     // Script interface
@@ -317,13 +298,11 @@ public class Form implements HasPublished {
     @ScriptFunction
     public void setFormKey(String aValue) {
         if (formKey == null ? aValue != null : !formKey.equals(aValue)) {
-            synchronized (Form.class) {
-                showingForms.remove(formKey);
-                formKey = aValue;
-                if (isInOpenedWindow()) {
-                    showingForms.put(formKey, this);
-                    showingFormsChanged();
-                }
+            showingForms.remove(formKey);
+            formKey = aValue;
+            if (isInOpenedWindow()) {
+                showingForms.put(formKey, this);
+                showingFormsChanged();
             }
         }
     }
@@ -399,9 +378,7 @@ public class Form implements HasPublished {
             JSObject windowOpenedHandler = windowHandler.getHandlers().get(WindowEventsIProxy.windowOpened);
             windowHandler.getHandlers().remove(WindowEventsIProxy.windowOpened);
             try {
-                synchronized (Form.class) {
-                    showingForms.put(formKey, this);
-                }
+                showingForms.put(formKey, this);
                 frame.setVisible(true);
                 Insets decorInsets = frame.getInsets();
                 windowDecorSize = new Dimension(decorInsets.left + decorInsets.right, decorInsets.top + decorInsets.bottom);
@@ -473,9 +450,7 @@ public class Form implements HasPublished {
             JSObject windowOpenedHandler = windowHandler.getHandlers().get(WindowEventsIProxy.windowOpened);
             windowHandler.getHandlers().remove(WindowEventsIProxy.windowOpened);
             try {
-                synchronized (Form.class) {
-                    showingForms.put(formKey, this);
-                }
+                showingForms.put(formKey, this);
                 aDesktop.add(internalFrame);
                 internalFrame.setVisible(true);
                 Insets decorInsets = internalFrame.getInsets();
@@ -552,9 +527,7 @@ public class Form implements HasPublished {
                                 }
                             });
 
-                            synchronized (Form.class) {
-                                showingForms.put(formKey, Form.this);
-                            }
+                            showingForms.put(formKey, Form.this);
                             surface.revalidate();
                             surface.repaint();
                             showingFormsChanged();

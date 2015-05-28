@@ -101,10 +101,10 @@ public class PlatypusClient implements Application<PlatypusQuery>, ServerDataSto
     }
 
     @Override
-    public int commit(List<Change> aLog, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public int commit(List<Change> aLog, Scripts.Space aSpace, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
         CommitRequest request = new CommitRequest(aLog);
         if (onSuccess != null) {
-            conn.<CommitRequest.Response>enqueueRequest(request, Scripts.getSpace(), (CommitRequest.Response aResponse) -> {
+            conn.<CommitRequest.Response>enqueueRequest(request, aSpace, (CommitRequest.Response aResponse) -> {
                 onSuccess.accept(aResponse.getUpdated());
             }, (Exception aException) -> {
                 if (onFailure != null) {

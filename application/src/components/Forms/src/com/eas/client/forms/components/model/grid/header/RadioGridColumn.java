@@ -21,7 +21,6 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class RadioGridColumn extends GridColumnsNode implements HasPublished {
 
-    private static JSObject publisher;
     protected JSObject published;
 
     @ScriptFunction
@@ -203,12 +202,6 @@ public class RadioGridColumn extends GridColumnsNode implements HasPublished {
 
     @Override
     public JSObject getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = (JSObject) publisher.call(null, new Object[]{this});
-        }
         return published;
     }
 
@@ -220,7 +213,4 @@ public class RadioGridColumn extends GridColumnsNode implements HasPublished {
         published = jsColumn;
     }
 
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
-    }
 }

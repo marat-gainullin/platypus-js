@@ -20,6 +20,7 @@ public class JSDynaListIterator implements Iterator {
     private int position = -1;
 
     public JSDynaListIterator(JSObject aDelegate, int aTimezoneOffset, int aLength) {
+        super();
         if (aDelegate != null) {
             delegate = aDelegate;
             length = aLength;

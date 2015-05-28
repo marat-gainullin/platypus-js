@@ -10,7 +10,7 @@ import com.eas.client.metadata.Parameters;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.client.threetier.requests.CommitRequest;
-import com.eas.client.threetier.requests.CreateServerModuleRequest;
+import com.eas.client.threetier.requests.ServerModuleStructureRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.RPCRequest;
@@ -25,7 +25,7 @@ import com.eas.proto.ProtoReader;
 import com.eas.proto.ProtoReaderException;
 import com.eas.proto.dom.ProtoDOMBuilder;
 import com.eas.proto.dom.ProtoNode;
-import com.eas.script.Scripts;
+import com.eas.util.JSONUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,12 +39,10 @@ import java.util.List;
 public class PlatypusRequestReader implements PlatypusRequestVisitor {
 
     protected byte[] bytes;
-    protected Scripts.Space space;
 
-    public PlatypusRequestReader(byte[] aBytes, Scripts.Space aSpace) {
+    public PlatypusRequestReader(byte[] aBytes) {
         super();
         bytes = aBytes;
-        space = aSpace;
     }
 
     /**
@@ -54,7 +52,7 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
      * @throws IOException
      * @throws ProtoReaderException
      */
-    public static Request read(ProtoReader reader, Scripts.Space aSpace) throws Exception {
+    public static Request read(ProtoReader reader) throws Exception {
         Request rq = null;
         Integer type = null;
         byte[] data = null;
@@ -69,7 +67,7 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
                 case RequestsTags.TAG_REQUEST_END:
                     if (type != null) {
                         rq = PlatypusRequestsFactory.create(type);
-                        PlatypusRequestReader requestReader = new PlatypusRequestReader(data, aSpace);
+                        PlatypusRequestReader requestReader = new PlatypusRequestReader(data);
                         rq.accept(requestReader);
                         break;
                     } else {
@@ -114,7 +112,7 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
     }
 
     @Override
-    public void visit(CreateServerModuleRequest rq) throws Exception {
+    public void visit(ServerModuleStructureRequest rq) throws Exception {
         final ProtoNode dom = ProtoDOMBuilder.buildDOM(bytes);
         if (!dom.containsChild(RequestsTags.TAG_MODULE_NAME)) {
             throw new ProtoReaderException("Module name not specified.");
@@ -166,7 +164,7 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
                     rq.setMethodName(node.getString());
                     break;
                 case RequestsTags.TAG_ARGUMENT_VALUE: {
-                    args.add(space.parseJsonWithDates(node.getString()));
+                    args.add(JSONUtils.toValue(node.getString()));
                     break;
                 }
             }

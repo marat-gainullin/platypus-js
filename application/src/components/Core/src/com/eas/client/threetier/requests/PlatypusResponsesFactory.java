@@ -38,8 +38,8 @@ public class PlatypusResponsesFactory implements PlatypusRequestVisitor {
     }
 
     @Override
-    public void visit(CreateServerModuleRequest rq) throws Exception {
-        response = new CreateServerModuleRequest.Response(null);
+    public void visit(ServerModuleStructureRequest rq) throws Exception {
+        response = new ServerModuleStructureRequest.Response(null);
     }
 
     @Override

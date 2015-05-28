@@ -45,7 +45,7 @@ public class XmlDom2ApplicationModel<E extends ApplicationEntity<M, ?, E>, M ext
             try {
                 Query q = queries.getCachedQuery(entity.getQueryName());
                 if (q == null) {
-                    queries.getQuery(entity.getQueryName(), null, null);
+                    queries.getQuery(entity.getQueryName(), null, null, null);
                 }
                 entity.validateQuery();
             } catch (Exception ex) {

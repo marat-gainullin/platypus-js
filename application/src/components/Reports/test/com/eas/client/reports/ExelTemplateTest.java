@@ -67,7 +67,8 @@ public class ExelTemplateTest {
     public void testGenerateDataNamedMap() throws Exception {
         System.out.println("GenerateDataNamedMap jsObject");
         Scripts.init();
-        JSObject data = (JSObject) Scripts.exec("({name : 'test', count : 5, time : new Date(2014, 05, 11, 11, 11, 11, 0), elems : [1, 'Hi', true, {text:'Hello!'}, new Date(2014, 05, 22, 22, 22, 22, 0)]})");
+        Scripts.Space space = Scripts.createSpace();
+        JSObject data = (JSObject) space.exec("({name : 'test', count : 5, time : new Date(2014, 05, 11, 11, 11, 11, 0), elems : [1, 'Hi', true, {text:'Hello!'}, new Date(2014, 05, 22, 22, 22, 22, 0)]})");
         ExelTemplate template = new ExelTemplate();
         template.setScriptData(data);
         XLSTransformer transformer = new XLSTransformer();

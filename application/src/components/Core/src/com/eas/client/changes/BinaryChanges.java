@@ -9,7 +9,6 @@ import com.eas.proto.CoreTags;
 import com.eas.proto.ProtoWriter;
 import com.eas.proto.dom.ProtoDOMBuilder;
 import com.eas.proto.dom.ProtoNode;
-import com.eas.script.Scripts;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -79,25 +78,25 @@ public class BinaryChanges {
     protected static Change readChange(ProtoNode aNode) throws Exception {
         ChangeReader reader = new ChangeReader(aNode);
         int changeType = aNode.getChild(ChangesTags.CHANGE_TYPE_TAG).getInt();
-        String changedEntityId = aNode.getChild(ChangesTags.CHANGE_ENTITY_TAG).getString();
+        String changedEntityName = aNode.getChild(ChangesTags.CHANGE_ENTITY_TAG).getString();
         switch (changeType) {
             case ChangesTags.CHANGE_TYPE_INSERT: {
-                Insert change = new Insert(changedEntityId);
+                Insert change = new Insert(changedEntityName);
                 change.accept(reader);
                 return change;
             }
             case ChangesTags.CHANGE_TYPE_DELETE: {
-                Delete change = new Delete(changedEntityId);
+                Delete change = new Delete(changedEntityName);
                 change.accept(reader);
                 return change;
             }
             case ChangesTags.CHANGE_TYPE_UPDATE: {
-                Update change = new Update(changedEntityId);
+                Update change = new Update(changedEntityName);
                 change.accept(reader);
                 return change;
             }
             case ChangesTags.CHANGE_TYPE_COMMAND: {
-                Command change = new Command(changedEntityId);
+                Command change = new Command(changedEntityName);
                 change.accept(reader);
                 return change;
             }

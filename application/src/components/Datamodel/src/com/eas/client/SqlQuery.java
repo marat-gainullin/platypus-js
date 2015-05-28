@@ -10,6 +10,7 @@ import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.metadata.Parameters;
 import com.eas.client.queries.Query;
+import com.eas.script.Scripts;
 import java.sql.ParameterMetaData;
 import java.util.HashSet;
 import java.util.Set;
@@ -329,7 +330,7 @@ public class SqlQuery extends Query {
     }
 
     @Override
-    public JSObject execute(Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public JSObject execute(Scripts.Space aSpace, Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception {
         SqlCompiledQuery compiled = compile();
         Runnable paramsRetriever = () -> {
             for (int i = 1; i <= compiled.getParameters().getParametersCount(); i++) {
@@ -348,7 +349,7 @@ public class SqlQuery extends Query {
                 paramsRetriever.run();
             }
             onSuccess.accept(aData);
-        } : null, onFailure);
+        } : null, onFailure, aSpace);
         if (onSuccess == null && compiled.isProcedure()) {
             paramsRetriever.run();
         }

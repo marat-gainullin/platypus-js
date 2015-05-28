@@ -12,9 +12,9 @@ import com.eas.client.changes.Insert;
 import com.eas.client.changes.Update;
 import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.Field;
-import com.eas.client.threetier.RowsetJsonConstants;
 import com.eas.script.Scripts;
 import com.eas.server.httpservlet.serial.ChangeJsonReader;
+import com.eas.util.RowsetJsonConstants;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -44,6 +44,7 @@ public class PlatypusRequestHttpReaderTest {
     public void changesJsonReadTest() throws Exception {
         System.out.println("changesJsonReadTest");
         Scripts.init();
+        Scripts.Space space = Scripts.createSpace();
         List<Change> changes = ChangeJsonReader.parse(WRITTEN_CHANGES, (String aEntityId, String aFieldName) -> {
             assertEquals("testEntity", aEntityId);
             switch (aFieldName) {
@@ -80,7 +81,7 @@ public class PlatypusRequestHttpReaderTest {
                     return null;
                 }
             }
-        });
+        }, space);
 
         ChangeValue key1 = new ChangeValue("key1", 78.9f, DataTypeInfo.FLOAT);
         ChangeValue key2 = new ChangeValue("key2", "key2Value", DataTypeInfo.CHAR);

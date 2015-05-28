@@ -25,7 +25,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.channels.SocketChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -36,11 +35,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -113,17 +112,18 @@ public class ScriptedResource {
 
     public static Object load(final String aResourceName, JSObject onSuccess, JSObject onFailure) throws Exception {
         if (onSuccess != null) {
-            Scripts.submitTask(() -> {
+            Scripts.Space space = Scripts.getSpace();
+            Scripts.startBIO(() -> {
                 try {
                     Object loaded = loadSync(aResourceName);
-                    Scripts.acceptTaskResult(() -> {
-                        onSuccess.call(null, new Object[]{Scripts.toJs(loaded)});
+                    space.process(() -> {
+                        onSuccess.call(null, new Object[]{space.toJs(loaded)});
                     });
                 } catch (Exception ex) {
                     Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, null, ex);
                     if (onFailure != null) {
-                        Scripts.acceptTaskResult(() -> {
-                            onFailure.call(null, new Object[]{Scripts.toJs(ex.getMessage())});
+                        space.process(() -> {
+                            onFailure.call(null, new Object[]{space.toJs(ex.getMessage())});
                         });
                     }
                 }
@@ -149,7 +149,7 @@ public class ScriptedResource {
             SEHttpResponse httpResponse = requestHttpResource(aResourceName, null, null, null);
             return httpResponse.getBody() != null ? httpResponse.getBody() : httpResponse.getBodyBuffer();
         } else {
-            app.getModules().getModule(aResourceName, null, null);
+            app.getModules().getModule(aResourceName, null, null, null);
             String resourceName = normalizeResourcePath(aResourceName);
             String sourcesPath = app.getModules().getLocalPath();
             File resourceFile = new File(sourcesPath + File.separator + resourceName);
@@ -173,18 +173,37 @@ public class ScriptedResource {
         }
     }
 
-    public static JSObject jsRequestHttpResource(String aUrl, String aMethod, String aRequestBody, JSObject aHeaders) throws Exception {
+    public static JSObject jsRequestHttpResource(String aUrl, String aMethod, String aRequestBody, JSObject aHeaders, JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
+        Scripts.Space space = Scripts.getSpace();
         Map<String, Object> headers = new HashMap<>();
         if (aHeaders != null) {
             aHeaders.keySet().stream().forEach((String aKey) -> {
-                Object oValue = Scripts.toJava(aHeaders.getMember(aKey));
+                Object oValue = space.toJava(aHeaders.getMember(aKey));
                 if (oValue != null) {
                     headers.put(aKey.toLowerCase(), oValue);
                 }
             });
         }
-        SEHttpResponse httResponse = requestHttpResource(aUrl, aMethod, aRequestBody, headers);
-        return httResponse.toJs();
+        if (aOnSuccess != null) {
+            Scripts.startBIO(() -> {
+                try {
+                    SEHttpResponse httResponse = requestHttpResource(aUrl, aMethod, aRequestBody, headers);
+                    space.process(() -> {
+                        JSObject jsResponse = httResponse.toJs(space);
+                        aOnSuccess.call(null, new Object[]{jsResponse});
+                    });
+                } catch (Exception ex) {
+                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, null, ex);
+                    space.process(() -> {
+                        aOnFailure.call(null, new Object[]{space.toJs(ex.getMessage())});
+                    });
+                }
+            });
+            return null;
+        } else {
+            SEHttpResponse httResponse = requestHttpResource(aUrl, aMethod, aRequestBody, headers);
+            return httResponse.toJs(space);
+        }
     }
 
     private static String[] absoluteAppPaths(String[] aScriptsNames, URI aCalledFromFile) throws URISyntaxException {
@@ -293,8 +312,8 @@ public class ScriptedResource {
             this.bodyContent = bodyContent;
         }
 
-        public JSObject toJs() {
-            JSObject jsResp = Scripts.makeObj();
+        public JSObject toJs(Scripts.Space aSpace) {
+            JSObject jsResp = aSpace.makeObj();
             // general
             jsResp.setMember("status", getStatus());
             jsResp.setMember("statusText", getStatusText());
@@ -303,18 +322,18 @@ public class ScriptedResource {
             jsResp.setMember("bodyBuffer", getBodyBuffer());
             jsResp.setMember("characterEncoding", getCharacterEncoding());
             // headers
-            JSObject jsHeaders = Scripts.makeObj();
+            JSObject jsHeaders = aSpace.makeObj();
             getHeaders().entrySet().stream().forEach((Map.Entry<String, Object> aEntry) -> {
-                jsHeaders.setMember(aEntry.getKey(), Scripts.toJs(aEntry.getValue()));
+                jsHeaders.setMember(aEntry.getKey(), aSpace.toJs(aEntry.getValue()));
             });
             jsResp.setMember("headers", jsHeaders);
             // cookies
-            JSObject jsCookies = Scripts.makeObj();
+            JSObject jsCookies = aSpace.makeObj();
             getCookies().forEach((Cookie aCookie) -> {
-                JSObject jsCookie = Scripts.makeObj();
+                JSObject jsCookie = aSpace.makeObj();
                 jsCookie.setMember("name", aCookie.getName());
                 jsCookie.setMember("domain", aCookie.getDomain());
-                jsCookie.setMember("expires", Scripts.toJs(aCookie.getExpires()));
+                jsCookie.setMember("expires", aSpace.toJs(aCookie.getExpires()));
                 jsCookie.setMember("maxAge", (double) aCookie.getMaxAge());
                 jsCookie.setMember("path", aCookie.getPath());
                 jsCookie.setMember("value", aCookie.getValue());
@@ -479,7 +498,7 @@ public class ScriptedResource {
         }
 
         @Override
-        public synchronized void complete(Void aValue, Exception aFailureCause) {
+        public void complete(Void aValue, Exception aFailureCause) {
             if (aFailureCause != null) {
                 exceptions.add(aFailureCause);
             }
@@ -491,7 +510,8 @@ public class ScriptedResource {
     }
 
     public static void require(String[] aScriptsNames, String aCalledFromFile, JSObject onSuccess, JSObject onFailure) throws Exception {
-        _require(aScriptsNames, aCalledFromFile != null ? new URL(aCalledFromFile).toURI() : null, new ConcurrentSkipListSet<>(), (Void v) -> {
+        Scripts.Space space = Scripts.getSpace();
+        _require(aScriptsNames, aCalledFromFile != null ? new URL(aCalledFromFile).toURI() : null, new HashSet<>(), space, (Void v) -> {
             if (onSuccess != null) {
                 onSuccess.call(null, new Object[]{});
             }
@@ -502,7 +522,7 @@ public class ScriptedResource {
         });
     }
 
-    public static void _require(String[] aScriptsNames, URI aCalledFromFile, Set<String> required, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public static void _require(String[] aScriptsNames, URI aCalledFromFile, Set<String> required, Scripts.Space aSpace, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (aScriptsNames != null) {
             aScriptsNames = absoluteAppPaths(aScriptsNames, aCalledFromFile);
             aScriptsNames = Arrays.asList(aScriptsNames).stream().filter((String aScriptName) -> {
@@ -518,13 +538,13 @@ public class ScriptedResource {
                     Path apiLocalPath = apiPath.resolve(scriptOrModuleName);
                     if (apiLocalPath != null && apiLocalPath.toFile().exists() && !apiLocalPath.toFile().isDirectory()) {
                         try {
-                            Scripts.exec(apiLocalPath.toUri().toURL());
+                            aSpace.exec(apiLocalPath.toUri().toURL());
                             scriptsProcess.complete(null, null);
                         } catch (Exception ex) {
                             scriptsProcess.complete(null, ex);
                         }
                     } else {
-                        app.getModules().getModule(scriptOrModuleName, (ModuleStructure structure) -> {
+                        app.getModules().getModule(scriptOrModuleName, aSpace, (ModuleStructure structure) -> {
                             if (structure != null) {
                                 AppElementFiles files = structure.getParts();
                                 File sourceFile = files.findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION);
@@ -532,7 +552,7 @@ public class ScriptedResource {
                                 RequireProcess scriptProcess = new RequireProcess(3, (Void v) -> {
                                     try {
                                         URL sourceUrl = sourceFile.toURI().toURL();
-                                        Scripts.exec(sourceUrl);
+                                        aSpace.exec(sourceUrl);
                                         try {
                                             scriptsProcess.complete(null, null);
                                         } catch (Exception ex) {
@@ -546,7 +566,7 @@ public class ScriptedResource {
                                 });
                                 if (files.isModule()) {
                                     try {
-                                        qRequire(structure.getQueryDependencies().toArray(new String[]{}), (Void v) -> {
+                                        qRequire(structure.getQueryDependencies().toArray(new String[]{}), aSpace, (Void v) -> {
                                             scriptProcess.complete(null, null);
                                         }, (Exception ex) -> {
                                             scriptProcess.complete(null, ex);
@@ -555,7 +575,7 @@ public class ScriptedResource {
                                         scriptProcess.complete(null, ex);
                                     }
                                     try {
-                                        sRequire(structure.getServerDependencies().toArray(new String[]{}), (Void v) -> {
+                                        sRequire(structure.getServerDependencies().toArray(new String[]{}), aSpace, (Void v) -> {
                                             scriptProcess.complete(null, null);
                                         }, (Exception ex) -> {
                                             scriptProcess.complete(null, ex);
@@ -568,7 +588,7 @@ public class ScriptedResource {
                                     scriptProcess.complete(null, null);// instead of sRequire
                                 }
                                 try {
-                                    _require(structure.getClientDependencies().toArray(new String[]{}), aCalledFromFile, required, (Void v) -> {
+                                    _require(structure.getClientDependencies().toArray(new String[]{}), aCalledFromFile, required, aSpace, (Void v) -> {
                                         scriptProcess.complete(null, null);
                                     }, (Exception ex) -> {
                                         scriptProcess.complete(null, ex);
@@ -593,10 +613,11 @@ public class ScriptedResource {
     }
 
     public static void require(String[] aScriptsNames, String aCalledFromFile) throws Exception {
-        _require(aScriptsNames, aCalledFromFile != null ? new URL(aCalledFromFile).toURI() : null, new ConcurrentSkipListSet<>());
+        Scripts.Space space = Scripts.getSpace();
+        _require(aScriptsNames, aCalledFromFile != null ? new URL(aCalledFromFile).toURI() : null, new HashSet<>(), space);
     }
 
-    public static void _require(String[] aScriptsNames, URI aCalledFromFile, Set<String> required) throws Exception {
+    public static void _require(String[] aScriptsNames, URI aCalledFromFile, Set<String> required, Scripts.Space aSpace) throws Exception {
         aScriptsNames = absoluteAppPaths(aScriptsNames, aCalledFromFile);
         Path apiPath = absoluteApiPath();
         for (String scriptOrModuleName : aScriptsNames) {
@@ -604,19 +625,19 @@ public class ScriptedResource {
                 required.add(scriptOrModuleName);
                 Path apiLocalPath = apiPath.resolve(scriptOrModuleName);
                 if (apiLocalPath != null && apiLocalPath.toFile().exists() && !apiLocalPath.toFile().isDirectory()) {
-                    Scripts.exec(apiLocalPath.toUri().toURL());
+                    aSpace.exec(apiLocalPath.toUri().toURL());
                 } else {
-                    ModuleStructure structure = app.getModules().getModule(scriptOrModuleName, null, null);
+                    ModuleStructure structure = app.getModules().getModule(scriptOrModuleName, null, null, null);
                     if (structure != null) {
                         AppElementFiles files = structure.getParts();
                         File sourceFile = files.findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION);
                         URL sourceUrl = sourceFile.toURI().toURL();
                         if (files.isModule()) {
-                            qRequire(structure.getQueryDependencies().toArray(new String[]{}), null, null);
-                            sRequire(structure.getServerDependencies().toArray(new String[]{}), null, null);
+                            qRequire(structure.getQueryDependencies().toArray(new String[]{}), null, null, null);
+                            sRequire(structure.getServerDependencies().toArray(new String[]{}), null, null, null);
                         }
-                        _require(structure.getClientDependencies().toArray(new String[]{}), null, required);
-                        Scripts.exec(sourceUrl);
+                        _require(structure.getClientDependencies().toArray(new String[]{}), null, required, aSpace);
+                        aSpace.exec(sourceUrl);
                     } else {
                         throw new FileNotFoundException(scriptOrModuleName);
                     }
@@ -625,12 +646,12 @@ public class ScriptedResource {
         }
     }
 
-    protected static void qRequire(String[] aQueriesNames, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    protected static void qRequire(String[] aQueriesNames, Scripts.Space aSpace, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (onSuccess != null) {
             if (aQueriesNames != null && aQueriesNames.length > 0) {
                 RequireProcess process = new RequireProcess(aQueriesNames.length, onSuccess, onFailure);
                 for (String queryName : aQueriesNames) {
-                    ((QueriesProxy<Query>) app.getQueries()).getQuery(queryName, (Query query) -> {
+                    ((QueriesProxy<Query>) app.getQueries()).getQuery(queryName, aSpace, (Query query) -> {
                         process.complete(null, null);
                     }, (Exception ex) -> {
                         process.complete(null, ex);
@@ -641,17 +662,17 @@ public class ScriptedResource {
             }
         } else {
             for (String queryName : aQueriesNames) {
-                app.getQueries().getQuery(queryName, null, null);
+                app.getQueries().getQuery(queryName, null, null, null);
             }
         }
     }
 
-    protected static void sRequire(String[] aModulesNames, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    protected static void sRequire(String[] aModulesNames, Scripts.Space aSpace, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (onSuccess != null) {
             if (aModulesNames != null && aModulesNames.length > 0) {
                 RequireProcess process = new RequireProcess(aModulesNames.length, onSuccess, onFailure);
                 for (String moduleName : aModulesNames) {
-                    app.getServerModules().getServerModuleStructure(moduleName, (ServerModuleInfo info) -> {
+                    app.getServerModules().getServerModuleStructure(moduleName, aSpace, (ServerModuleInfo info) -> {
                         process.complete(null, null);
                     }, (Exception ex) -> {
                         process.complete(null, ex);
@@ -662,7 +683,7 @@ public class ScriptedResource {
             }
         } else {
             for (String moduleName : aModulesNames) {
-                app.getServerModules().getServerModuleStructure(moduleName, null, null);
+                app.getServerModules().getServerModuleStructure(moduleName, null, null, null);
             }
         }
     }

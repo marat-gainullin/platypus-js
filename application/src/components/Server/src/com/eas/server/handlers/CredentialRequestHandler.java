@@ -24,7 +24,7 @@ public class CredentialRequestHandler extends SessionRequestHandler<CredentialRe
     @Override
     protected void handle2(Session aSession, Consumer<CredentialRequest.Response> onSuccess, Consumer<Exception> onFailure) {
         if (onSuccess != null) {
-            onSuccess.accept(new CredentialRequest.Response(PlatypusPrincipal.getInstance().getName()));
+            onSuccess.accept(new CredentialRequest.Response(((PlatypusPrincipal) aSession.getSpace().getPrincipal()).getName()));
         }
     }
 }

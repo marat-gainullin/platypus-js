@@ -48,7 +48,7 @@ public abstract class ArrayModel {
             if (elementsChangedEnqueued) {
                 elementsChangedEnqueued = false;
                 if (data != null && com.eas.script.Scripts.isInitialized()) {
-                    boundToDataElements = com.eas.script.Scripts.listenElements(data, new AbstractJSObject() {
+                    boundToDataElements = Scripts.getSpace().listenElements(data, new AbstractJSObject() {
 
                         @Override
                         public Object call(Object thiz, Object... args) {
@@ -77,7 +77,7 @@ public abstract class ArrayModel {
 
     protected void bind() {
         if (data != null && com.eas.script.Scripts.isInitialized()) {
-            boundToData = com.eas.script.Scripts.listen(data, "length", new AbstractJSObject() {
+            boundToData = Scripts.getSpace().listen(data, "length", new AbstractJSObject() {
 
                 @Override
                 public Object call(Object thiz, Object... args) {

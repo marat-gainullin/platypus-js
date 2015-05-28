@@ -32,7 +32,7 @@ public class AppQueryRequestHandler extends SessionRequestHandler<AppQueryReques
 
     public static final String ACCESS_DENIED_MSG = "Access denied to query  %s for user %s";
     public static final String MISSING_QUERY_MSG = "Query %s not found neither in application database, nor in hand-constructed queries.";
-    private static final String PUBLIC_ACCESS_DENIED_MSG = "Public access to query %s is denied.";
+    public static final String PUBLIC_ACCESS_DENIED_MSG = "Public access to query %s is denied.";
 
     public AppQueryRequestHandler(PlatypusServerCore aServerCore, AppQueryRequest aRequest) {
         super(aServerCore, aRequest);
@@ -41,7 +41,7 @@ public class AppQueryRequestHandler extends SessionRequestHandler<AppQueryReques
     @Override
     protected void handle2(Session aSession, Consumer<AppQueryRequest.Response> onSuccess, Consumer<Exception> onFailure) {
         try {
-            ((LocalQueriesProxy) getServerCore().getQueries()).getQuery(getRequest().getQueryName(), (SqlQuery query) -> {
+            ((LocalQueriesProxy) getServerCore().getQueries()).getQuery(getRequest().getQueryName(), aSession.getSpace(), (SqlQuery query) -> {
                 try {
                     if (query == null || query.getEntityName() == null) {
                         throw new FileNotFoundException(String.format(MISSING_QUERY_MSG, getRequest().getQueryName()));
@@ -50,8 +50,9 @@ public class AppQueryRequestHandler extends SessionRequestHandler<AppQueryReques
                         throw new AccessControlException(String.format(PUBLIC_ACCESS_DENIED_MSG, getRequest().getQueryName()));//NOI18N
                     }
                     Set<String> rolesAllowed = query.getReadRoles();
-                    if (rolesAllowed != null && !PlatypusPrincipal.getInstance().hasAnyRole(rolesAllowed)) {
-                        throw new AccessControlException(String.format(ACCESS_DENIED_MSG, query.getEntityName(), PlatypusPrincipal.getInstance().getName()), PlatypusPrincipal.getInstance() instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
+                    PlatypusPrincipal principal = (PlatypusPrincipal)aSession.getSpace().getPrincipal();
+                    if (rolesAllowed != null && !principal.hasAnyRole(rolesAllowed)) {
+                        throw new AccessControlException(String.format(ACCESS_DENIED_MSG, query.getEntityName(), principal.getName()), principal instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
                     }
                     assert query.getEntityName().equals(getRequest().getQueryName());
                     /**

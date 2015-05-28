@@ -53,7 +53,7 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
     }
 
     @Override
-    public SqlQuery getQuery(String aName, Consumer<SqlQuery> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public SqlQuery getQuery(String aName, Scripts.Space aSpace, Consumer<SqlQuery> onSuccess, Consumer<Exception> onFailure) throws Exception {
         Callable<SqlQuery> doWork = () -> {
             SqlQuery query;
             if (aName != null) {
@@ -67,7 +67,7 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
                     Date filesTimeStamp = files.getLastModified();
                     if (cachedTimeStamp == null || filesTimeStamp.after(cachedTimeStamp)) {
                         if (files.hasExtension(PlatypusFiles.JAVASCRIPT_EXTENSION)) {
-                            query = queryFromModule(aName);
+                            query = queryFromModule(aName, aSpace);
                         } else if (files.hasExtension(PlatypusFiles.SQL_EXTENSION)) {
                             query = factory.loadQuery(aName);
                         } else {
@@ -75,13 +75,13 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
                         }
                         entries.put(aName, new ActualCacheEntry<>(query, filesTimeStamp));
                     } else {
-                        assert entry != null : "Neither im memory, nor in files query found";
+                        assert entry != null : "Neither in memory, nor in files query found";
                         query = entry.getValue();
                     }
                 } else {// Let's support in memory only (without underlying files) queries. Used in createEntity().
                     if (entry != null) {
                         query = entry.getValue();
-                    }else{
+                    } else {
                         query = null;
                     }
                 }
@@ -91,25 +91,27 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
             return query;
         };
         if (onSuccess != null) {
-            try {
-                SqlQuery query = doWork.call();
+            aSpace.process(() -> {
                 try {
-                    onSuccess.accept(query);
+                    SqlQuery query = doWork.call();
+                    try {
+                        onSuccess.accept(query);
+                    } catch (Exception ex) {
+                        Logger.getLogger(LocalQueriesProxy.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 } catch (Exception ex) {
-                    Logger.getLogger(LocalQueriesProxy.class.getName()).log(Level.SEVERE, null, ex);
+                    if (onFailure != null) {
+                        onFailure.accept(ex);
+                    }
                 }
-            } catch (Exception ex) {
-                if (onFailure != null) {
-                    onFailure.accept(ex);
-                }
-            }
+            });
             return null;
         } else {
             return doWork.call();
         }
     }
 
-    private void readScriptFields(String aQueryId, JSObject sSchema, Fields fields) {
+    private void readScriptFields(String aQueryName, JSObject sSchema, Fields fields, Scripts.Space aSpace) {
         Object oLength = sSchema.getMember("length");
         if (oLength instanceof Number) {
             int length = ((Number) oLength).intValue();
@@ -117,7 +119,7 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
                 Object oElement = sSchema.getSlot(i);
                 if (oElement instanceof JSObject) {
                     JSObject sElement = (JSObject) oElement;
-                    Object oFieldName = Scripts.toJava(sElement.hasMember("name") ? sElement.getMember("name") : null);
+                    Object oFieldName = aSpace.toJava(sElement.hasMember("name") ? sElement.getMember("name") : null);
                     if (oFieldName instanceof String && !((String) oFieldName).isEmpty()) {
                         String sFieldName = (String) oFieldName;
                         Field field = fields instanceof Parameters ? new Parameter() : new Field();
@@ -125,19 +127,19 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
                         fields.add(field);
                         field.setName(sFieldName);
                         field.setOriginalName(sFieldName);
-                        Object oEntity = Scripts.toJava(sElement.hasMember("entity") ? sElement.getMember("entity") : null);
+                        Object oEntity = aSpace.toJava(sElement.hasMember("entity") ? sElement.getMember("entity") : null);
                         if (oEntity instanceof String && !((String) oEntity).isEmpty()) {
                             field.setTableName((String) oEntity);
                         } else {
-                            field.setTableName(aQueryId);
+                            field.setTableName(aQueryName);
                         }
-                        Object oDescription = Scripts.toJava(sElement.hasMember("description") ? sElement.getMember("description") : null);
+                        Object oDescription = aSpace.toJava(sElement.hasMember("description") ? sElement.getMember("description") : null);
                         if (oDescription instanceof String && !((String) oDescription).isEmpty()) {
                             field.setDescription((String) oDescription);
                         }
                         Object oType = sElement.getMember("type");
                         if (oType instanceof JSObject && ((JSObject) oType).isFunction()) {
-                            Object ofName = Scripts.toJava(((JSObject) oType).getMember("name"));
+                            Object ofName = aSpace.toJava(((JSObject) oType).getMember("name"));
                             if (ofName instanceof String) {
                                 String fName = (String) ofName;
                                 if (String.class.getSimpleName().equals(fName)) {
@@ -151,12 +153,12 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
                                 }
                             }
                         }
-                        Object oRequired = Scripts.toJava(sElement.hasMember("required") ? sElement.getMember("required") : null);
+                        Object oRequired = aSpace.toJava(sElement.hasMember("required") ? sElement.getMember("required") : null);
                         if (oRequired instanceof Boolean) {
                             boolean bRequired = (Boolean) oRequired;
                             field.setNullable(!bRequired);
                         }
-                        Object oKey = Scripts.toJava(sElement.hasMember("key") ? sElement.getMember("key") : null);
+                        Object oKey = aSpace.toJava(sElement.hasMember("key") ? sElement.getMember("key") : null);
                         if (oKey instanceof Boolean) {
                             boolean bKey = (Boolean) oKey;
                             field.setPk(bKey);
@@ -165,7 +167,7 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
                         Object oRef = sElement.hasMember("ref") ? sElement.getMember("ref") : null;
                         if (oRef instanceof JSObject) {
                             JSObject sRef = (JSObject) oRef;
-                            Object oProperty = Scripts.toJava(sRef.hasMember("property") ? sRef.getMember("property") : null);
+                            Object oProperty = aSpace.toJava(sRef.hasMember("property") ? sRef.getMember("property") : null);
                             if (oProperty instanceof String) {
                                 String sProperty = (String) oProperty;
                                 if (!sProperty.isEmpty()) {
@@ -174,9 +176,9 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
                                     if (oRefEntity instanceof String && !((String) oRefEntity).isEmpty()) {
                                         sRefEntity = (String) oRefEntity;
                                     } else {
-                                        sRefEntity = aQueryId;
+                                        sRefEntity = aQueryName;
                                     }
-                                    field.setFk(new ForeignKeySpec(null, aQueryId, field.getName(), null, ForeignKeySpec.ForeignKeyRule.CASCADE, ForeignKeySpec.ForeignKeyRule.CASCADE, false, null, sRefEntity, sProperty, null));
+                                    field.setFk(new ForeignKeySpec(null, aQueryName, field.getName(), null, ForeignKeySpec.ForeignKeyRule.CASCADE, ForeignKeySpec.ForeignKeyRule.CASCADE, false, null, sRefEntity, sProperty, null));
                                 }
                             }
                         }
@@ -186,25 +188,25 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
         }
     }
 
-    protected JSObject createModule(String aModuleName) throws Exception {
+    protected JSObject createModule(String aModuleName, Scripts.Space aSpace) throws Exception {
         ScriptedResource.require(new String[]{aModuleName}, null);
-        return Scripts.createModule(aModuleName);
+        return aSpace.createModule(aModuleName);
     }
 
-    protected SqlQuery queryFromModule(String aModuleName) throws Exception {
+    protected SqlQuery queryFromModule(String aModuleName, Scripts.Space aSpace) throws Exception {
         SqlQuery query = new ScriptedQuery(core, aModuleName);
-        JSObject schemaContainer = createModule(aModuleName);
+        JSObject schemaContainer = createModule(aModuleName, aSpace);
         if (schemaContainer != null) {
             Fields fields = new Fields();
             query.setFields(fields);
             Object oSchema = schemaContainer.hasMember("schema") ? schemaContainer.getMember("schema") : null;
             if (oSchema instanceof JSObject) {
-                readScriptFields(aModuleName, (JSObject) oSchema, fields);
+                readScriptFields(aModuleName, (JSObject) oSchema, fields, aSpace);
                 Parameters params;
                 Object oParams = schemaContainer.hasMember("params") ? schemaContainer.getMember("params") : null;
                 if (oParams instanceof JSObject) {
                     params = new Parameters();
-                    readScriptFields(aModuleName, (JSObject) oParams, params);
+                    readScriptFields(aModuleName, (JSObject) oParams, params, aSpace);
                     params.toCollection().stream().forEach((p) -> {
                         query.putParameter(p.getName(), p.getTypeInfo(), null);
                     });

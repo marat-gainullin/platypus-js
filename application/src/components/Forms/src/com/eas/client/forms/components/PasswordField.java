@@ -333,12 +333,6 @@ public class PasswordField extends VPasswordField implements HasOnValueChange, H
 
     @Override
     public JSObject getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = (JSObject) publisher.call(null, new Object[]{this});
-        }
         return published;
     }
 
@@ -348,12 +342,6 @@ public class PasswordField extends VPasswordField implements HasOnValueChange, H
             throw new AlreadyPublishedException();
         }
         published = aValue;
-    }
-
-    private static JSObject publisher;
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
     }
 
     protected ControlEventsIProxy eventsProxy = new ControlEventsIProxy(this);

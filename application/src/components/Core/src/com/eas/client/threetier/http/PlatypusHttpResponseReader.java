@@ -11,7 +11,7 @@ import com.eas.client.settings.SettingsConstants;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.client.threetier.requests.CommitRequest;
-import com.eas.client.threetier.requests.CreateServerModuleRequest;
+import com.eas.client.threetier.requests.ServerModuleStructureRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
 import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
@@ -162,7 +162,7 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
     }
 
     @Override
-    public void visit(CreateServerModuleRequest.Response rsp) throws Exception {
+    public void visit(ServerModuleStructureRequest.Response rsp) throws Exception {
         if (responseCode == HttpURLConnection.HTTP_OK) {
             long timeStamp = conn.getLastModified();
             rsp.setTimeStamp(new Date(timeStamp));
@@ -175,7 +175,7 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
                 functions.add(fName);
             }
             boolean permitted = JSType.toBoolean(jsProxy.getMember(CREATE_MODULE_RESPONSE_IS_PERMITTED_PROP));
-            rsp.setInfo(new ServerModuleInfo(((CreateServerModuleRequest) request).getModuleName(), functions, permitted));
+            rsp.setInfo(new ServerModuleInfo(((ServerModuleStructureRequest) request).getModuleName(), functions, permitted));
         } else if (responseCode == HttpURLConnection.HTTP_NOT_MODIFIED) {
             rsp.setInfo(null);
             rsp.setTimeStamp(null);
@@ -207,7 +207,7 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
             long timeStamp = conn.getLastModified();
             rsp.setTimeStamp(new Date(timeStamp));
             JSObject jsQuery = (JSObject) extractJSON();
-            PlatypusQuery query = QueryJSONReader.read(space, jsQuery);
+            PlatypusQuery query = QueryJSONReader.read(jsQuery);
             rsp.setAppQuery(query);
         } else if (responseCode == HttpURLConnection.HTTP_NOT_MODIFIED) {
             rsp.setAppQuery(null);

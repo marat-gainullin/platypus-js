@@ -22,7 +22,6 @@ public class ChangeValue implements HasPublished {
     public Object value;
     public DataTypeInfo type;
 
-    private static JSObject publisher;
     private JSObject published;
 
     public ChangeValue(String aName, Object aValue, DataTypeInfo aType) {
@@ -43,12 +42,6 @@ public class ChangeValue implements HasPublished {
 
     @Override
     public JSObject getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = (JSObject)publisher.call(null, new Object[]{this});
-        }
         return published;
     }
 
@@ -58,9 +51,5 @@ public class ChangeValue implements HasPublished {
             throw new AlreadyPublishedException();
         }
         published = aValue;
-    }
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
     }
 }

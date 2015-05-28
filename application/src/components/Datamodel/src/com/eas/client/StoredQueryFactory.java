@@ -427,7 +427,7 @@ public class StoredQueryFactory {
         if (tableFields != null) {// Tables have a higher priority in soft reference case
             return tableFields;
         } else {
-            SqlQuery query = subQueriesProxy.getQuery(aTablyName, null, null);
+            SqlQuery query = subQueriesProxy.getQuery(aTablyName, null, null, null);
             if (query != null) {
                 return query.getFields();
             } else {

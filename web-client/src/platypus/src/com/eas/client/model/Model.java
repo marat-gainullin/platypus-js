@@ -1154,7 +1154,7 @@ public class Model implements HasPublished {
 
 	protected static final String USER_DATASOURCE_NAME = "userEntity";
 
-	public synchronized Object jsLoadEntity(String aQueryName) throws Exception {
+	public Object jsLoadEntity(String aQueryName) throws Exception {
 		if (client == null) {
 			throw new NullPointerException("Null client detected while creating an entity");
 		}

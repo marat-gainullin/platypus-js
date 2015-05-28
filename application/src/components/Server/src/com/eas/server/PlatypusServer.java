@@ -9,7 +9,6 @@ import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.SqlQuery;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.ScriptConfigs;
-import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.sensors.api.RetranslateFactory;
 import com.eas.sensors.api.SensorsFactory;
@@ -21,7 +20,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -48,7 +46,7 @@ public class PlatypusServer extends PlatypusServerCore {
     public final static String HTTP_PROTOCOL = "http";
     public final static String HTTPS_PROTOCOL = "https";
     public final static int DEFAULT_EXECUTOR_POOL_SIZE = 16;
-    private final Map<String, PlatypusPrincipal> principals = new ConcurrentSkipListMap<>();
+    //private final Map<String, PlatypusPrincipal> principals = new ConcurrentSkipListMap<>();
     private final SensorsFactory acceptorsFactory;
     private final RetranslateFactory retranslateFactory;
     private final InetSocketAddress[] listenAddresses;
@@ -73,11 +71,11 @@ public class PlatypusServer extends PlatypusServerCore {
         acceptorsFactory = obtainAcceptorsFactory();
         retranslateFactory = obtainRetranslateFactory();
     }
-
+/*
     public Map<String, PlatypusPrincipal> getPrincipals() {
         return principals;
     }
-
+*/
     public void start(Set<String> aResidents, Map<String, String> aAcceptors) throws Exception {
         instance = this;// Hack, but server is natural singleton and so it is ok.
         startResidents(aResidents);

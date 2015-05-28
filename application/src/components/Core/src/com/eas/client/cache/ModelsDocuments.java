@@ -24,7 +24,7 @@ public class ModelsDocuments extends ActualCache<Document> {
     }
 
     @Override
-    public synchronized Document get(String aName, AppElementFiles aFiles) throws Exception {
+    public Document get(String aName, AppElementFiles aFiles) throws Exception {
         AppElementFiles files = new AppElementFiles();
         if (aFiles.hasExtension(PlatypusFiles.MODEL_EXTENSION)) {
             files.addFile(aFiles.findFileByExtension(PlatypusFiles.MODEL_EXTENSION));

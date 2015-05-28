@@ -117,7 +117,7 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Sq
         });
     }
 
-    public synchronized ApplicationDbEntity createEntity(String aSqlText) throws Exception {
+    public ApplicationDbEntity createEntity(String aSqlText) throws Exception {
         return createEntity(aSqlText, null);
     }
 
@@ -130,7 +130,7 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Sq
             + "*/";
 
     @ScriptFunction(jsDoc = CREATE_ENTITY_JSDOC, params = {"sqlText", "datasourceName"})
-    public synchronized ApplicationDbEntity createEntity(String aSqlText, String aDatasourceName) throws Exception {
+    public ApplicationDbEntity createEntity(String aSqlText, String aDatasourceName) throws Exception {
         if (basesProxy == null) {
             throw new NullPointerException("null basesProxy detected while creating a query");
         }
@@ -188,19 +188,7 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Sq
 
     @Override
     public JSObject getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = (JSObject) publisher.call(null, new Object[]{this});
-        }
         return published;
-    }
-
-    private static JSObject publisher;
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
     }
 
 }

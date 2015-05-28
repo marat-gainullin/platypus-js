@@ -7,7 +7,7 @@ package com.eas.client;
 
 import com.eas.client.cache.ActualCacheEntry;
 import com.eas.client.threetier.PlatypusConnection;
-import com.eas.client.threetier.requests.CreateServerModuleRequest;
+import com.eas.client.threetier.requests.ServerModuleStructureRequest;
 import com.eas.client.threetier.requests.RPCRequest;
 import com.eas.script.Scripts;
 import java.util.Date;
@@ -35,7 +35,7 @@ public class ServerModulesProxy {
         conn.setOnLogout(() -> {
             entries.clear();
         });
-                */
+        */
     }
 
     public ServerModuleInfo getCachedStructure(String aName) throws Exception {
@@ -47,15 +47,15 @@ public class ServerModulesProxy {
         }
     }
 
-    public ServerModuleInfo getServerModuleStructure(String aName, Consumer<ServerModuleInfo> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public ServerModuleInfo getServerModuleStructure(String aName, Scripts.Space aSpace, Consumer<ServerModuleInfo> onSuccess, Consumer<Exception> onFailure) throws Exception {
         Date localTimeStamp = null;
         ActualCacheEntry<ServerModuleInfo> entry = entries.get(aName);
         if (entry != null) {
             localTimeStamp = entry.getTimeStamp();
         }
-        CreateServerModuleRequest request = new CreateServerModuleRequest(aName, localTimeStamp);
+        ServerModuleStructureRequest request = new ServerModuleStructureRequest(aName, localTimeStamp);
         if (onSuccess != null) {
-            conn.enqueueRequest(request, Scripts.getSpace(), (CreateServerModuleRequest.Response response) -> {
+            conn.enqueueRequest(request, aSpace, (ServerModuleStructureRequest.Response response) -> {
                 ServerModuleInfo info = response.getInfo();
                 if (info != null) {
                     entries.put(aName, new ActualCacheEntry<>(info, response.getTimeStamp()));
@@ -69,7 +69,7 @@ public class ServerModulesProxy {
             });
             return null;
         } else {
-            CreateServerModuleRequest.Response response = conn.executeRequest(request);
+            ServerModuleStructureRequest.Response response = conn.executeRequest(request);
             ServerModuleInfo info = response.getInfo();
             if (info != null) {
                 entries.put(aName, new ActualCacheEntry<>(info, response.getTimeStamp()));
@@ -82,9 +82,9 @@ public class ServerModulesProxy {
     }
     private static final String NEITHER_SM_INFO = "Neither cached nor network response server module info found";
 
-    public Object callServerModuleMethod(String aModuleName, String aMethodName, JSObject onSuccess, JSObject onFailure, Object... aArguments) throws Exception {
+    public Object callServerModuleMethod(String aModuleName, String aMethodName, Scripts.Space aSpace, JSObject onSuccess, JSObject onFailure, Object... aArguments) throws Exception {
         if (onSuccess != null) {
-            executeServerModuleMethod(aModuleName, aMethodName, (Object aResult) -> {
+            executeServerModuleMethod(aModuleName, aMethodName, aSpace, (Object aResult) -> {
                 onSuccess.call(null, new Object[]{aResult});
             }, (Exception ex) -> {
                 if (onFailure != null) {
@@ -93,14 +93,14 @@ public class ServerModulesProxy {
             }, aArguments);
             return null;
         } else {
-            return executeServerModuleMethod(aModuleName, aMethodName, null, null, aArguments);
+            return executeServerModuleMethod(aModuleName, aMethodName, null, null, null, aArguments);
         }
     }
 
-    public Object executeServerModuleMethod(String aModuleName, String aMethodName, Consumer<Object> onSuccess, Consumer<Exception> onFailure, Object... aArguments) throws Exception {
+    public Object executeServerModuleMethod(String aModuleName, String aMethodName, Scripts.Space aSpace, Consumer<Object> onSuccess, Consumer<Exception> onFailure, Object... aArguments) throws Exception {
         final RPCRequest request = new RPCRequest(aModuleName, aMethodName, aArguments);
         if (onSuccess != null) {
-            conn.<RPCRequest.Response>enqueueRequest(request, Scripts.getSpace(), (RPCRequest.Response aResponse) -> {
+            conn.<RPCRequest.Response>enqueueRequest(request, aSpace, (RPCRequest.Response aResponse) -> {
                 onSuccess.accept(aResponse.getResult());
             }, onFailure);
             return null;

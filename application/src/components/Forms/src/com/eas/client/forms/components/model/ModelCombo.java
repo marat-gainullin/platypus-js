@@ -86,19 +86,7 @@ public class ModelCombo extends ModelComponentDecorator<VComboBox<JSObject>, Obj
 
     @Override
     public JSObject getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = (JSObject) publisher.call(null, new Object[]{this});
-        }
         return published;
-    }
-
-    private static JSObject publisher;
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
     }
 
     protected boolean listChangedEnqueued;
@@ -122,7 +110,7 @@ public class ModelCombo extends ModelComponentDecorator<VComboBox<JSObject>, Obj
     
     protected void bindList(){
         if (displayList != null && com.eas.script.Scripts.isInitialized()) {
-            boundToList = com.eas.script.Scripts.listen(displayList, "length", new AbstractJSObject() {
+            boundToList = Scripts.getSpace().listen(displayList, "length", new AbstractJSObject() {
 
                 @Override
                 public Object call(Object thiz, Object... args) {

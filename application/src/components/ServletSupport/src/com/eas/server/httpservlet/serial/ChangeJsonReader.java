@@ -13,8 +13,8 @@ import com.eas.client.changes.EntitiesHost;
 import com.eas.client.changes.Insert;
 import com.eas.client.changes.Update;
 import com.eas.client.metadata.Field;
-import com.eas.client.threetier.RowsetJsonConstants;
 import com.eas.script.Scripts;
+import com.eas.util.RowsetJsonConstants;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -37,12 +37,14 @@ public class ChangeJsonReader implements ChangeVisitor {
     protected JSObject sChange;
     protected String entityName;
     protected EntitiesHost fieldsResolver;
+    protected Scripts.Space space;
 
-    public ChangeJsonReader(JSObject aSChange, String aEntityName, EntitiesHost aFieldsResolver) throws Exception {
+    public ChangeJsonReader(JSObject aSChange, String aEntityName, EntitiesHost aFieldsResolver, Scripts.Space aSpace) throws Exception {
         super();
         sChange = aSChange;
         entityName = aEntityName;
         fieldsResolver = aFieldsResolver;
+        space = aSpace;
     }
 
     protected List<ChangeValue> parseObjectProperties(Object oData) throws Exception {
@@ -66,7 +68,7 @@ public class ChangeJsonReader implements ChangeVisitor {
                             }
                         }
                     }
-                    Object convertedValueValue = Scripts.toJava(oValueValue);
+                    Object convertedValueValue = space.toJava(oValueValue);
                     data.add(new ChangeValue(sValueName, convertedValueValue, field.getTypeInfo()));
                 } else {
                     Logger.getLogger(ChangeJsonReader.class.getName()).log(Level.WARNING, String.format("Couldn't resolve entity property name: %s.%s", entityName, sValueName));
@@ -102,9 +104,9 @@ public class ChangeJsonReader implements ChangeVisitor {
         aChange.getParameters().addAll(parseObjectProperties(parameters));
     }
 
-    public static List<Change> parse(String aJsonText, EntitiesHost aFieldsResolver) throws Exception {
+    public static List<Change> parse(String aJsonText, EntitiesHost aFieldsResolver, Scripts.Space aSpace) throws Exception {
         List<Change> changes = new ArrayList<>();
-        Object sChanges = Scripts.parseJson(aJsonText);
+        Object sChanges = aSpace.parseJson(aJsonText);
         if (sChanges instanceof JSObject) {
             JSObject aChanges = (JSObject) sChanges;
             int length = JSType.toInteger(aChanges.getMember("length"));
@@ -131,7 +133,7 @@ public class ChangeJsonReader implements ChangeVisitor {
                                 break;
                         }
                         if (change != null) {
-                            ChangeJsonReader reader = new ChangeJsonReader(sChange, sEntityId, aFieldsResolver);
+                            ChangeJsonReader reader = new ChangeJsonReader(sChange, sEntityId, aFieldsResolver, aSpace);
                             change.accept(reader);
                             changes.add(change);
                         } else {

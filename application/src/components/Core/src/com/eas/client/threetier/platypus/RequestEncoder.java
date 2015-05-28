@@ -24,7 +24,6 @@ public class RequestEncoder extends ProtocolEncoderAdapter {
     public void encode(IoSession is, Object o, ProtocolEncoderOutput peo) throws Exception {
         assert o instanceof RequestEnvelope;
         RequestEnvelope env = (RequestEnvelope) o;
-        Request request = env.request;
         ByteArrayOutputStream bufOutStream = new ByteArrayOutputStream();
         ProtoWriter writer = new ProtoWriter(bufOutStream);
         if (env.ticket != null) {
@@ -34,7 +33,7 @@ public class RequestEncoder extends ProtocolEncoderAdapter {
             writer.put(CoreTags.TAG_USER_NAME, env.userName);
             writer.put(CoreTags.TAG_PASSWORD, env.password != null ? env.password : "");
         }
-        PlatypusRequestWriter.write(request, writer);
+        PlatypusRequestWriter.write(env.request, writer);
         writer.flush();
         peo.write(IoBuffer.wrap(bufOutStream.toByteArray()));
     }

@@ -55,7 +55,7 @@ public class Scripts {
 
     public static final String THIS_KEYWORD = "this";//NOI18N
 
-    private static ThreadLocal<Space> spaceRef = new ThreadLocal<>();
+    private static final ThreadLocal<Space> spaceRef = new ThreadLocal<>();
 
     public static Space getSpace() {
         return spaceRef.get();
@@ -352,32 +352,38 @@ public class Scripts {
         protected AtomicReference worker = new AtomicReference(null);
 
         public void process(Runnable aTask) {
+            final Scripts.Space space = this;
             offerTask(() -> {
-                Runnable processedTask = aTask;
-                int version;
-                int newVersion;
-                Thread thisThread = Thread.currentThread();
-                do {
-                    version = queueVersion.get();
-                    // Zombie counter ...
-                    newVersion = version + 1;
-                    if (newVersion == Integer.MAX_VALUE) {
-                        newVersion = 0;
-                    }
-                    if (processedTask != null) {//Single attempt to offer ioTask.
-                        queue.offer(processedTask);
-                        processedTask = null;
-                    }
-                    if (worker.compareAndSet(null, thisThread)) {// Worker electing.
-                        // Zombie processing ...
-                        Runnable task = queue.poll();
-                        while (task != null) {
-                            task.run();
-                            task = queue.poll();
+                setSpace(space);
+                try {
+                    Runnable processedTask = aTask;
+                    int version;
+                    int newVersion;
+                    Thread thisThread = Thread.currentThread();
+                    do {
+                        version = queueVersion.get();
+                        // Zombie counter ...
+                        newVersion = version + 1;
+                        if (newVersion == Integer.MAX_VALUE) {
+                            newVersion = 0;
                         }
-                        assert worker.compareAndSet(thisThread, null) : "Worker electing assumption failed";// Always successfull CAS.
-                    }
-                } while (!queueVersion.compareAndSet(version, newVersion));
+                        if (processedTask != null) {//Single attempt to offer ioTask.
+                            queue.offer(processedTask);
+                            processedTask = null;
+                        }
+                        if (worker.compareAndSet(null, thisThread)) {// Worker electing.
+                            // Zombie processing ...
+                            Runnable task = queue.poll();
+                            while (task != null) {
+                                task.run();
+                                task = queue.poll();
+                            }
+                            assert worker.compareAndSet(thisThread, null) : "Worker electing assumption failed";// Always successfull CAS.
+                        }
+                    } while (!queueVersion.compareAndSet(version, newVersion));
+                } finally {
+                    setSpace(null);
+                }
             });
         }
 
@@ -535,17 +541,6 @@ public class Scripts {
         return p.parse();
     }
 
-    /*
-     public static Object exec(String aSource) throws ScriptException {
-     return engine.eval(aSource);
-     }
-
-     public static void locked(JSObject aFunction, final Object aLock) {
-     synchronized (aLock) {
-     aFunction.call(null, new Object[]{});
-     }
-     }
-     */
     /**
      * Extracts the comments tokens from a JavaScript source.
      *

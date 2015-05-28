@@ -35,11 +35,11 @@ public class PlatypusFlowProvider {
         expectedFields = aExpectedFields;
     }
 
-    public JSObject refresh(Parameters aParams, Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws FlowProviderFailedException {
+    public JSObject refresh(Parameters aParams, Scripts.Space aSpace, Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws FlowProviderFailedException {
         ExecuteQueryRequest request = new ExecuteQueryRequest(entityName, aParams, expectedFields);
         if (onSuccess != null) {
             try {
-                conn.<ExecuteQueryRequest.Response>enqueueRequest(request, Scripts.getSpace(), (ExecuteQueryRequest.Response aResponse) -> {
+                conn.<ExecuteQueryRequest.Response>enqueueRequest(request, aSpace, (ExecuteQueryRequest.Response aResponse) -> {
                     if (aResponse.getRowset() == null) {
                         if (onFailure != null) {
                             onFailure.accept(new FlowProviderFailedException(ROWSET_MISSING_IN_RESPONSE));

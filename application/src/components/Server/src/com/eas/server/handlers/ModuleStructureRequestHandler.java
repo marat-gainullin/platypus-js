@@ -13,6 +13,7 @@ import com.eas.client.cache.ScriptDocument;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.threetier.requests.ModuleStructureRequest;
+import com.eas.script.Scripts;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.Session;
 import java.io.File;
@@ -46,7 +47,7 @@ public class ModuleStructureRequestHandler extends SessionRequestHandler<ModuleS
                 // Security check
                 checkModuleRoles(aSession, moduleOrResourceName, files);
                 // Actual work
-                serverCore.getModules().getModule(moduleOrResourceName, (ModuleStructure aStructure) -> {
+                serverCore.getModules().getModule(moduleOrResourceName, Scripts.getSpace(), (ModuleStructure aStructure) -> {
                     ModuleStructureRequest.Response resp = new ModuleStructureRequest.Response();
                     String localPath = serverCore.getModules().getLocalPath();
                     aStructure.getParts().getFiles().stream().forEach((File f) -> {
@@ -74,8 +75,9 @@ public class ModuleStructureRequestHandler extends SessionRequestHandler<ModuleS
         if (aAppElementFiles != null && aAppElementFiles.hasExtension(PlatypusFiles.JAVASCRIPT_EXTENSION)) {
             ScriptDocument jsDoc = serverCore.getScriptsConfigs().get(aModuleName, aAppElementFiles);
             Set<String> rolesAllowed = jsDoc.getModuleAllowedRoles();
-            if (rolesAllowed != null && !PlatypusPrincipal.getInstance().hasAnyRole(rolesAllowed)) {
-                throw new AccessControlException(String.format(ACCESS_DENIED_MSG, aModuleName, getRequest().getModuleOrResourceName(), PlatypusPrincipal.getInstance().getName()), PlatypusPrincipal.getInstance() instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
+            PlatypusPrincipal principal = (PlatypusPrincipal)aSession.getSpace().getPrincipal();
+            if (rolesAllowed != null && !principal.hasAnyRole(rolesAllowed)) {
+                throw new AccessControlException(String.format(ACCESS_DENIED_MSG, aModuleName, getRequest().getModuleOrResourceName(), principal.getName()), principal instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
             }
         }
     }

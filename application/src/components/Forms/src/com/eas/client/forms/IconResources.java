@@ -19,17 +19,18 @@ public class IconResources {
 
     public static ImageIcon load(String aResourceName, JSObject onSuccess, JSObject onFailure) throws Exception {
         if (onSuccess != null) {
-            Scripts.submitTask(() -> {
+            Scripts.Space space = Scripts.getSpace();
+            Scripts.startBIO(() -> {
                 try {
                     ImageIcon loaded = loadSync(aResourceName);
-                    Scripts.acceptTaskResult(() -> {
-                        onSuccess.call(null, new Object[]{Scripts.toJs(loaded)});
+                    space.process(() -> {
+                        onSuccess.call(null, new Object[]{space.toJs(loaded)});
                     });
                 } catch (Exception ex) {
                     Logger.getLogger(IconResources.class.getName()).log(Level.SEVERE, null, ex);
                     if (onFailure != null) {
-                        Scripts.acceptTaskResult(() -> {
-                            onFailure.call(null, new Object[]{Scripts.toJs(ex.getMessage())});
+                        space.process(() -> {
+                            onFailure.call(null, new Object[]{space.toJs(ex.getMessage())});
                         });
                     }
                 }

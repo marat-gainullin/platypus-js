@@ -12,6 +12,7 @@ import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.metadata.Parameters;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
+import com.eas.script.Scripts;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.Session;
 import java.security.AccessControlException;
@@ -26,7 +27,7 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class ExecuteQueryRequestHandler extends SessionRequestHandler<ExecuteQueryRequest, ExecuteQueryRequest.Response> {
 
-    private static final String PUBLIC_ACCESS_DENIED_MSG = "Public access to query %s is denied.";
+    public static final String PUBLIC_ACCESS_DENIED_MSG = "Public access to query %s is denied.";
     public static final String ACCESS_DENIED_MSG = "Access denied to query  %s for user %s";
     public static final String MISSING_QUERY_MSG = "Query %s not found neither in application database, nor in hand-constructed queries.";
 
@@ -37,7 +38,7 @@ public class ExecuteQueryRequestHandler extends SessionRequestHandler<ExecuteQue
     @Override
     protected void handle2(Session aSession, Consumer<ExecuteQueryRequest.Response> onSuccess, Consumer<Exception> onFailure) {
         try {
-            ((LocalQueriesProxy) getServerCore().getQueries()).getQuery(getRequest().getQueryName(), (SqlQuery query) -> {
+            ((LocalQueriesProxy) getServerCore().getQueries()).getQuery(getRequest().getQueryName(), aSession.getSpace(), (SqlQuery query) -> {
                 try {
                     if (query == null || query.getEntityName() == null) {
                         throw new Exception(String.format(MISSING_QUERY_MSG, getRequest().getQueryName()));
@@ -46,14 +47,15 @@ public class ExecuteQueryRequestHandler extends SessionRequestHandler<ExecuteQue
                         throw new AccessControlException(String.format(PUBLIC_ACCESS_DENIED_MSG, getRequest().getQueryName()));//NOI18N
                     }
                     Set<String> rolesAllowed = query.getReadRoles();
-                    if (rolesAllowed != null && !PlatypusPrincipal.getInstance().hasAnyRole(rolesAllowed)) {
-                        throw new AccessControlException(String.format(ACCESS_DENIED_MSG, query.getEntityName(), PlatypusPrincipal.getInstance().getName()), PlatypusPrincipal.getInstance() instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
+                    PlatypusPrincipal principal = (PlatypusPrincipal) aSession.getSpace().getPrincipal();
+                    if (rolesAllowed != null && !principal.hasAnyRole(rolesAllowed)) {
+                        throw new AccessControlException(String.format(ACCESS_DENIED_MSG, query.getEntityName(), principal.getName()), principal instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
                     }
                     handleQuery(query.copy(), (JSObject rowset) -> {
                         if (onSuccess != null) {
                             onSuccess.accept(new ExecuteQueryRequest.Response(rowset, 0));
                         }
-                    }, onFailure);
+                    }, onFailure, aSession.getSpace());
                 } catch (Exception ex) {
                     if (onFailure != null) {
                         onFailure.accept(ex);
@@ -67,7 +69,7 @@ public class ExecuteQueryRequestHandler extends SessionRequestHandler<ExecuteQue
         }
     }
 
-    public void handleQuery(SqlQuery aQuery, Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception  {
+    public void handleQuery(SqlQuery aQuery, Consumer<JSObject> onSuccess, Consumer<Exception> onFailure, Scripts.Space aSpace) throws Exception  {
         Parameters queryParams = aQuery.getParameters();
         assert queryParams.getParametersCount() == getRequest().getParams().getParametersCount();
         for (int i = 1; i <= queryParams.getParametersCount(); i++) {
@@ -75,7 +77,7 @@ public class ExecuteQueryRequestHandler extends SessionRequestHandler<ExecuteQue
         }
         SqlCompiledQuery compiledQuery = aQuery.compile();
         // SqlCompiledQuery.executeUpdate/Client.enqueueUpdate is prohibited here, because no security check is performed in it.
-        compiledQuery.executeQuery(onSuccess, onFailure);
+        compiledQuery.executeQuery(onSuccess, onFailure, aSpace);
         // Stored procedures can't be called directly from three-tier clients for security reasons
         // and out parameters can't pass through the network.
         /*

@@ -22,7 +22,7 @@ public class ScriptConfigs extends ActualCache<ScriptDocument> {
     }
 
     @Override
-    public synchronized ScriptDocument get(String aName, AppElementFiles aFiles) throws Exception {
+    public ScriptDocument get(String aName, AppElementFiles aFiles) throws Exception {
         AppElementFiles files = new AppElementFiles();
         if (aFiles.hasExtension(PlatypusFiles.JAVASCRIPT_EXTENSION)) {
             files.addFile(aFiles.findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION));

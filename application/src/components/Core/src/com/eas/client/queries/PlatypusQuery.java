@@ -23,22 +23,15 @@ import jdk.nashorn.api.scripting.JSObject;
 public class PlatypusQuery extends Query {
 
     protected PlatypusClient serverProxy;
-    protected Scripts.Space space;
 
-    public PlatypusQuery(PlatypusClient aServerProxy, Scripts.Space aSpace) {
+    public PlatypusQuery(PlatypusClient aServerProxy) {
         super();
         serverProxy = aServerProxy;
-        space = aSpace;
-    }
-
-    public Scripts.Space getSpace() {
-        return space;
     }
 
     protected PlatypusQuery(PlatypusQuery aSource) {
         super(aSource);
         serverProxy = aSource.getServerProxy();
-        space = aSource.getSpace();
     }
 
     public PlatypusClient getServerProxy() {
@@ -46,10 +39,10 @@ public class PlatypusQuery extends Query {
     }
 
     @Override
-    public JSObject execute(Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public JSObject execute(Scripts.Space aSpace, Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (serverProxy != null && entityName != null) {
             PlatypusFlowProvider flow = new PlatypusFlowProvider(serverProxy, entityName, fields);
-            JSObject rowset = flow.refresh(params, onSuccess, onFailure);
+            JSObject rowset = flow.refresh(params, aSpace, onSuccess, onFailure);
             return rowset;
         } else {
             return null;

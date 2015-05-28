@@ -22,7 +22,6 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class ModelGridColumn extends GridColumnsNode implements HasPublished {
 
-    private static JSObject publisher;
     protected JSObject published;
 
     protected String field;
@@ -277,12 +276,6 @@ public class ModelGridColumn extends GridColumnsNode implements HasPublished {
 
     @Override
     public JSObject getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = (JSObject) publisher.call(null, new Object[]{this});
-        }
         return published;
     }
 
@@ -301,9 +294,6 @@ public class ModelGridColumn extends GridColumnsNode implements HasPublished {
          */
     }
 
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
-    }
     private static final String SORT = ""
             + "/**\n"
             + " * Column sort, works only in HTML5"

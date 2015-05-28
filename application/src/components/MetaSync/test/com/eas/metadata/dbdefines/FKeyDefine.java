@@ -4,7 +4,7 @@
  */
 package com.eas.metadata.dbdefines;
 
-import com.bearsoft.rowset.metadata.ForeignKeySpec;
+import com.eas.client.metadata.ForeignKeySpec;
 
 /**
  *

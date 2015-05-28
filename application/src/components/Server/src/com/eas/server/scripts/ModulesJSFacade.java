@@ -32,12 +32,12 @@ public class ModulesJSFacade extends AbstractJSObject {
     }
 
     @Override
-    public synchronized Object getMember(String name) {
+    public Object getMember(String name) {
         return session.getModule(name);
     }
 
     @Override
-    public synchronized void setMember(String name, Object value) {
+    public void setMember(String name, Object value) {
         value = value instanceof ScriptObject ? ScriptUtils.wrap((ScriptObject)value) : value;
         if (value instanceof JSObject) {
             if (session.getId() == null) {
@@ -51,7 +51,7 @@ public class ModulesJSFacade extends AbstractJSObject {
     }
 
     @Override
-    public synchronized void removeMember(String name) {
+    public void removeMember(String name) {
         if (session.getId() == null) {
             throw new IllegalStateException(RESIDENT_MODULES_MODIFICATION_MSG);
         }
@@ -59,12 +59,12 @@ public class ModulesJSFacade extends AbstractJSObject {
     }
 
     @Override
-    public synchronized boolean hasMember(String name) {
+    public boolean hasMember(String name) {
         return session.containsModule(name);
     }
 
     @Override
-    public synchronized Set<String> keySet() {
+    public Set<String> keySet() {
         Set<String> keys = new HashSet<>();
         session.getModulesEntries().stream().forEach((Map.Entry<String, JSObject> aEntry) -> {
             keys.add(aEntry.getKey());
@@ -73,7 +73,7 @@ public class ModulesJSFacade extends AbstractJSObject {
     }
 
     @Override
-    public synchronized Collection<Object> values() {
+    public Collection<Object> values() {
         Set<Object> values = new HashSet<>();
         session.getModulesEntries().stream().forEach((Map.Entry<String, JSObject> aEntry) -> {
             values.add(aEntry.getValue());

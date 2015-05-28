@@ -4,7 +4,6 @@
  */
 package com.eas.metadata;
 
-import com.bearsoft.rowset.changes.Change;
 import com.eas.metadata.testdefine.DbTestDefine;
 import com.eas.metadata.testdefine.DbTestDefine.Database;
 import com.eas.metadata.dbdefines.TableDefine;
@@ -14,18 +13,18 @@ import com.eas.metadata.dbdefines.FKeyDefine;
 import com.eas.metadata.dbdefines.SourceDbSetting;
 import com.eas.metadata.dbdefines.DestinationDbSetting;
 import com.eas.metadata.dbdefines.DbConnection;
-import com.bearsoft.rowset.metadata.DataTypeInfo;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.ForeignKeySpec;
-import com.bearsoft.rowset.metadata.ForeignKeySpec.ForeignKeyRule;
-import com.bearsoft.rowset.metadata.PrimaryKeySpec;
 import com.eas.client.DatabasesClient;
 import com.eas.client.DatabasesClientWithResource;
-import com.eas.client.DbClient;
+import com.eas.client.SqlCompiledQuery;
+import com.eas.client.changes.Change;
+import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
-import com.eas.client.queries.SqlCompiledQuery;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.ForeignKeySpec;
+import com.eas.client.metadata.ForeignKeySpec.ForeignKeyRule;
+import com.eas.client.metadata.PrimaryKeySpec;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.metadata.testdefine.Db2TestDefine;
@@ -36,6 +35,7 @@ import com.eas.metadata.testdefine.MySqlTestDefine;
 import com.eas.metadata.testdefine.OracleTestDefine;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -416,8 +416,8 @@ public class MetadataSynchronizerTest2 {
             SqlDriver driver = client.getDbMetadataCache(null).getConnectionDriver();
             assertNotNull(driver);
             for (TableDefine tableDefine : aTableDefine) {
-                String tableName = driver.doWrap(tableDefine.getTableName(),true);
-                String pkFieldName = driver.doWrap(tableDefine.getPkFieldName(),true);
+                String tableName = driver.wrapName(tableDefine.getTableName(),true);
+                String pkFieldName = driver.wrapName(tableDefine.getPkFieldName(),true);
                 String sql = driver.getSql4EmptyTableCreation(aDbConnection.getSchema(), tableName, pkFieldName);
                 executeSql(client, sql);
                 sql = driver.getSql4CreateTableComment(aDbConnection.getSchema(), tableName, tableDefine.getDescription());
@@ -439,7 +439,7 @@ public class MetadataSynchronizerTest2 {
             for (int i = 0; i < aFieldNames.length; i++) {
                 String tableName = aTableName + i;
                 String fieldName = aFieldNames[i];
-                String wFieldName = driver.doWrap(fieldName,true);
+                String wFieldName = driver.wrapName(fieldName, true);
                 String description = "Comment for " + tableName.toUpperCase();
 
                 String schema = dbConnection.getSchema();
@@ -479,7 +479,7 @@ public class MetadataSynchronizerTest2 {
             assertNotNull(client);
             SqlDriver driver = client.getDbMetadataCache(null).getConnectionDriver();
             assertNotNull(driver);
-            String tableName = driver.doWrap(aTableName, true);
+            String tableName = driver.wrapName(aTableName, true);
             String pkField = "id";
             String schema = aDbConnection.getSchema();
             // create table
@@ -487,13 +487,13 @@ public class MetadataSynchronizerTest2 {
             executeSql(client, sql);
             // drop pkey
             String defaultPlatypusPkName = aTableName + "_pk";
-            sql = driver.getSql4DropPkConstraint(schema, new PrimaryKeySpec(schema, tableName, pkField, driver.doWrap(defaultPlatypusPkName,true)));
+            sql = driver.getSql4DropPkConstraint(schema, new PrimaryKeySpec(schema, tableName, pkField, driver.wrapName(defaultPlatypusPkName,true)));
             executeSql(client, sql);
             for (IndexDefine indexDefine : aIndexesDefine) {
                 IndexColumnDefine[] columnsDefines = indexDefine.getColumns();
                 assertNotNull(columnsDefines);
                 DbTableIndexSpec indexSpec = new DbTableIndexSpec();
-                indexSpec.setName(driver.doWrap(indexDefine.getIndexName(),true));
+                indexSpec.setName(driver.wrapName(indexDefine.getIndexName(),true));
                 indexSpec.setClustered(indexDefine.isClustered());
                 indexSpec.setHashed(indexDefine.isHashed());
                 indexSpec.setUnique(indexDefine.isUnique());
@@ -504,8 +504,8 @@ public class MetadataSynchronizerTest2 {
                     // create fields
                     if (!fields.contains(fieldName.toUpperCase())) {
                         Field field = new Field();
-                        field.setName(driver.doWrap(fieldName,true));
-                        field.setSchemaName(driver.doWrap(schema,true));
+                        field.setName(driver.wrapName(fieldName,true));
+                        field.setSchemaName(driver.wrapName(schema,true));
                         field.setTypeInfo(DataTypeInfo.VARCHAR);
                         field.setSize(10);
                         String[] sqls = driver.getSqls4AddingField(schema, tableName, field);
@@ -545,12 +545,12 @@ public class MetadataSynchronizerTest2 {
             for (String tblName : aPKeysDefine.keySet()) {
                 String upperTableName = tblName.toUpperCase();
                 //create table
-                String tableName = driver.doWrap(tblName,true);
+                String tableName = driver.wrapName(tblName,true);
                 String sql = driver.getSql4EmptyTableCreation(schema, tableName, pkField);
                 executeSql(client, sql);
                 // drop pkey
                 String defaultPlatypusPkName = tblName + "_pk";
-                sql = driver.getSql4DropPkConstraint(schema, new PrimaryKeySpec(schema, tableName, pkField, driver.doWrap(defaultPlatypusPkName,true)));
+                sql = driver.getSql4DropPkConstraint(schema, new PrimaryKeySpec(schema, tableName, pkField, driver.wrapName(defaultPlatypusPkName,true)));
                 executeSql(client, sql);
                 String[] fieldsDefine = aPKeysDefine.get(tblName);
                 Set<String> tableFields = new HashSet();
@@ -559,7 +559,7 @@ public class MetadataSynchronizerTest2 {
                     for (String fldName : fieldsDefine) {
                         // create field
                         assertNotNull(fldName);
-                        String fieldName = driver.doWrap(fldName, true);
+                        String fieldName = driver.wrapName(fldName, true);
                         Field field = new Field();
                         field.setName(fieldName);
                         field.setSchemaName(schema);
@@ -598,13 +598,13 @@ public class MetadataSynchronizerTest2 {
 
                         ForeignKeySpec fkSpec = new ForeignKeySpec();
                         fkSpec.setSchema(schema);
-                        fkSpec.setTable(driver.doWrap(tableName,true));
-                        fkSpec.setCName(driver.doWrap(fkeyDefine.getName(), true));
-                        fkSpec.setField(driver.doWrap(fieldName, true));
+                        fkSpec.setTable(driver.wrapName(tableName,true));
+                        fkSpec.setCName(driver.wrapName(fkeyDefine.getName(), true));
+                        fkSpec.setField(driver.wrapName(fieldName, true));
                         PrimaryKeySpec pk = pkSpecs.get(i);
-                        pk.setCName(driver.doWrap(pk.getCName(),true));
-                        pk.setField(driver.doWrap(pk.getField(),true));
-                        pk.setTable(driver.doWrap(pk.getTable(),true));
+                        pk.setCName(driver.wrapName(pk.getCName(),true));
+                        pk.setField(driver.wrapName(pk.getField(),true));
+                        pk.setTable(driver.wrapName(pk.getTable(),true));
                         pk.setSchema(schema);
                         fkSpec.setReferee(pk);
 
@@ -939,7 +939,7 @@ public class MetadataSynchronizerTest2 {
     private void clearSchema(DbConnection aDbConnection) throws Exception {
         MetadataSynchronizer mds = new MetadataSynchronizer();
         try (DatabasesClientWithResource resource = createClient(aDbConnection)) {
-            DbClient client = resource.getClient();
+            DatabasesClient client = resource.getClient();
             DBStructure databaseStructure = mds.readDBStructure(aDbConnection.getUrl(), aDbConnection.getSchema(), aDbConnection.getUser(), aDbConnection.getPassword());
             assertNotNull(databaseStructure);
             Map<String, TableStructure> dbStructure = databaseStructure.getTablesStructure();
@@ -956,11 +956,11 @@ public class MetadataSynchronizerTest2 {
                         assert fkeys.size() > 0;
                         ForeignKeySpec fKey = fkeys.get(0);
                         String cName = fKey.getCName();
-                        fKey.setCName(driver.doWrap(cName,driver.isHadWrapped(cName)));
+                        fKey.setCName(driver.wrapName(cName,driver.isHadWrapped(cName)));
                         String field = fKey.getField();
-                        fKey.setField(driver.doWrap(field,driver.isHadWrapped(field)));
+                        fKey.setField(driver.wrapName(field,driver.isHadWrapped(field)));
                         String table = fKey.getTable();
-                        fKey.setTable(driver.doWrap(table,driver.isHadWrapped(table)));
+                        fKey.setTable(driver.wrapName(table,driver.isHadWrapped(table)));
                         String sql = driver.getSql4DropFkConstraint(aDbConnection.getSchema(), fKey);
                         assertNotNull(sql);
                         executeSql(client, sql);
@@ -970,7 +970,7 @@ public class MetadataSynchronizerTest2 {
             for (String upperTblName : dbStructure.keySet()) {
                 TableStructure tblStructure = dbStructure.get(upperTblName);
                 String tableName = tblStructure.getTableName();
-                String sql = driver.getSql4DropTable(aDbConnection.getSchema(), driver.doWrap(tableName, driver.isHadWrapped(tableName)));
+                String sql = driver.getSql4DropTable(aDbConnection.getSchema(), driver.wrapName(tableName, driver.isHadWrapped(tableName)));
                 assertNotNull(sql);
                 executeSql(client, sql);
             }
@@ -1014,25 +1014,17 @@ public class MetadataSynchronizerTest2 {
         synchronizeDb(aLogName, aSourceConnection, aDestinationConnection, false, null);
     }
 
-    private void executeSql(DbClient aClient, String aSql) throws Exception {
+    private void executeSql(DatabasesClient aClient, String aSql) throws Exception {
         logText(cntTabs + 1, "sql=" + aSql);
 
         assertNotNull(aClient);
         assertNotNull(aSql);
         assertFalse(aSql.isEmpty());
         SqlCompiledQuery compiledSql = new SqlCompiledQuery(aClient, null, aSql);
-        compiledSql.enqueueUpdate();
-        try {
-            Map<String, List<Change>> changeLogs = new HashMap<>();
-            changeLogs.put(null, compiledSql.getFlow().getChangeLog());
-            aClient.commit(changeLogs);
-        } catch (Exception e) {
-            aClient.rollback();
-            throw e;
-        }
+        aClient.commit(Collections.singletonMap((String)null, Collections.singletonList((Change)compiledSql.prepareCommand())), null, null);
     }
 
-    private void executeSql(DbClient aClient, String[] aSqls) throws Exception {
+    private void executeSql(DatabasesClient aClient, String[] aSqls) throws Exception {
         for (String sql : aSqls) {
             executeSql(aClient, sql);
         }

@@ -27,8 +27,6 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class Report implements HasPublished {
 
-    private static JSObject publisher;
-    //
     private final byte[] report;
     protected JSObject scriptData;
     private final String format;
@@ -52,12 +50,6 @@ public class Report implements HasPublished {
 
     @Override
     public JSObject getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = (JSObject)publisher.call(null, new Object[]{this});
-        }
         return published;
     }
 
@@ -68,10 +60,6 @@ public class Report implements HasPublished {
         }
         published = aValue;
     }
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
-    } 
 
     public JSObject getScriptData() {
         return scriptData;

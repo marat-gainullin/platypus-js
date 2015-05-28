@@ -32,7 +32,7 @@ public class RemoteQueriesProxy implements QueriesProxy<PlatypusQuery> {
     }
 
     @Override
-    public PlatypusQuery getQuery(String aName, Consumer<PlatypusQuery> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public PlatypusQuery getQuery(String aName, Scripts.Space aSpace, Consumer<PlatypusQuery> onSuccess, Consumer<Exception> onFailure) throws Exception {
         Date localTimeStamp = null;
         ActualCacheEntry<PlatypusQuery> entry = entries.get(aName);
         if (entry != null) {
@@ -40,7 +40,7 @@ public class RemoteQueriesProxy implements QueriesProxy<PlatypusQuery> {
         }
         AppQueryRequest request = new AppQueryRequest(aName, localTimeStamp);
         if (onSuccess != null) {
-            conn.<AppQueryRequest.Response>enqueueRequest(request, Scripts.getSpace(), (AppQueryRequest.Response aResponse) -> {
+            conn.<AppQueryRequest.Response>enqueueRequest(request, aSpace, (AppQueryRequest.Response aResponse) -> {
                 if (aResponse.getAppQuery() != null) {
                     assert aResponse.getAppQuery() instanceof PlatypusQuery;
                     PlatypusQuery query = (PlatypusQuery) aResponse.getAppQuery();

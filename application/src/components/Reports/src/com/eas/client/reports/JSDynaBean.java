@@ -27,6 +27,7 @@ public class JSDynaBean implements DynaBean {
     private final int timezoneOffset;
 
     public JSDynaBean(JSObject aDelegate, int aTimezoneOffset) {
+        super();
         delegate = aDelegate;
         timezoneOffset = aTimezoneOffset;
     }
@@ -85,7 +86,7 @@ public class JSDynaBean implements DynaBean {
     }
 
     public static Object wrap(Object aValue, int aTimezoneOffset) {
-        aValue = Scripts.toJava(aValue);
+        aValue = Scripts.getSpace().toJava(aValue);
         if (aValue instanceof Date) {
             return convertDateToExcelDate((Date)aValue, aTimezoneOffset);
         } else if (aValue instanceof Number
@@ -95,7 +96,7 @@ public class JSDynaBean implements DynaBean {
             return aValue;
         } else if (aValue instanceof JSObject) {
             JSObject jsValue = (JSObject) aValue;
-            if (jsValue.isArray() || Scripts.isArrayDeep(jsValue)) {
+            if (jsValue.isArray() || Scripts.getSpace().isArrayDeep(jsValue)) {
                 return new JSDynaList(jsValue, aTimezoneOffset);
             } else if (!jsValue.isFunction()) {
                 return new JSDynaBean(jsValue, aTimezoneOffset);

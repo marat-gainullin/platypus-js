@@ -6,6 +6,7 @@
 
 package com.eas.client.queries;
 
+import com.eas.script.Scripts;
 import java.util.function.Consumer;
 
 /**
@@ -15,7 +16,7 @@ import java.util.function.Consumer;
  */
 public interface QueriesProxy <Q extends Query> {
     
-    public Q getQuery(String aName, Consumer<Q> onSuccess, Consumer<Exception> onFailure) throws Exception;
+    public Q getQuery(String aName, Scripts.Space aSpace, Consumer<Q> onSuccess, Consumer<Exception> onFailure) throws Exception;
     
     public Q getCachedQuery(String aName);
 }
