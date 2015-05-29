@@ -1,6 +1,8 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.components.Label");
-    javaClass.setPublisher(function(aDelegate) {
+    var className = "com.eas.client.forms.components.Label";
+    var javaClass = Java.type(className);
+    var space = this['-platypus-scripts-space'];
+    space.putPublisher(className, function(aDelegate) {
         return new P.Label(null, null, null, aDelegate);
     });
     
@@ -465,23 +467,6 @@
              */
             P.Label.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Label){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf Label
-             */
-            P.Label.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -498,6 +483,23 @@
              * @memberOf Label
              */
             P.Label.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Label){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf Label
+             */
+            P.Label.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

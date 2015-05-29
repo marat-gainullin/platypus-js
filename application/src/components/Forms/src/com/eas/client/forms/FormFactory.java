@@ -62,6 +62,7 @@ import com.eas.client.forms.menu.PopupMenu;
 import com.eas.client.forms.menu.RadioMenuItem;
 import com.eas.gui.ScriptColor;
 import com.eas.script.HasPublished;
+import com.eas.script.Scripts;
 import com.eas.xml.dom.XmlDomUtils;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -605,7 +606,7 @@ public class FormFactory {
                     String dataPropertyPath = anElement.getAttribute("field");
                     grid.setField(dataPropertyPath);
                 }
-                if (com.eas.script.Scripts.isInitialized()) {
+                if (Scripts.isInitialized()) {
                     injectColumns(grid, roots);
                 }
                 return grid;

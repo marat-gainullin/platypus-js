@@ -47,7 +47,7 @@ public abstract class ArrayModel {
         EventQueue.invokeLater(() -> {
             if (elementsChangedEnqueued) {
                 elementsChangedEnqueued = false;
-                if (data != null && com.eas.script.Scripts.isInitialized()) {
+                if (data != null && Scripts.isInitialized()) {
                     boundToDataElements = Scripts.getSpace().listenElements(data, new AbstractJSObject() {
 
                         @Override
@@ -76,7 +76,7 @@ public abstract class ArrayModel {
     }
 
     protected void bind() {
-        if (data != null && com.eas.script.Scripts.isInitialized()) {
+        if (data != null && Scripts.isInitialized()) {
             boundToData = Scripts.getSpace().listen(data, "length", new AbstractJSObject() {
 
                 @Override

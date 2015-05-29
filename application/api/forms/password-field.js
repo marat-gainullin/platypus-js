@@ -1,6 +1,8 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.components.PasswordField");
-    javaClass.setPublisher(function(aDelegate) {
+    var className = "com.eas.client.forms.components.PasswordField";
+    var javaClass = Java.type(className);
+    var space = this['-platypus-scripts-space'];
+    space.putPublisher(className, function(aDelegate) {
         return new P.PasswordField(null, aDelegate);
     });
     
@@ -478,23 +480,6 @@
              */
             P.PasswordField.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.PasswordField){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf PasswordField
-             */
-            P.PasswordField.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -511,6 +496,23 @@
              * @memberOf PasswordField
              */
             P.PasswordField.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.PasswordField){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf PasswordField
+             */
+            P.PasswordField.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

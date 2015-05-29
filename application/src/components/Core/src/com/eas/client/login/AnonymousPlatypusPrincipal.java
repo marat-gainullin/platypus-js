@@ -4,6 +4,7 @@
  */
 package com.eas.client.login;
 
+import com.eas.script.Scripts;
 import com.eas.util.IDGenerator;
 import java.util.Collections;
 import jdk.nashorn.api.scripting.JSObject;
@@ -31,7 +32,9 @@ public class AnonymousPlatypusPrincipal extends PlatypusPrincipal {
     public void logout(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
         if (aOnSuccess != null) {
             // async style
-            aOnSuccess.call(null, new Object[]{});
+            Scripts.getSpace().process(() -> {
+                aOnSuccess.call(null, new Object[]{});
+            });
         }
         // sync style
     }

@@ -59,6 +59,13 @@ public class ModelFormattedField extends ModelComponentDecorator<VFormattedField
 
     @Override
     public JSObject getPublished() {
+        if (published == null) {
+            JSObject publisher = Scripts.getSpace().getPublisher(this.getClass().getName());
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = (JSObject) publisher.call(null, new Object[]{this});
+        }
         return published;
     }
 

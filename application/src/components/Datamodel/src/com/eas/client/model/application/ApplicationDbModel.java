@@ -12,7 +12,6 @@ import com.eas.client.changes.Change;
 import com.eas.client.model.Model;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.QueriesProxy;
-import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.util.IDGenerator;
 import java.util.ArrayList;
@@ -59,10 +58,11 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Sq
         aEntity.setModel(this);
         super.addEntity(aEntity);
     }
-     private static final String MODIFIED_JSDOC = ""
+    private static final String MODIFIED_JSDOC = ""
             + "/**\n"
             + "* Flagis set to true if model has been modified"
             + "*/";
+
     @ScriptFunction(jsDoc = MODIFIED_JSDOC)
     @Override
     public boolean isModified() throws Exception {
@@ -185,10 +185,4 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Sq
     public void executeSql(String aSqlClause, String aDatasourceName) throws Exception {
         executeSql(aSqlClause, aDatasourceName, null, null);
     }
-
-    @Override
-    public JSObject getPublished() {
-        return published;
-    }
-
 }

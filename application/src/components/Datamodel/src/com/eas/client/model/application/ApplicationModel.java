@@ -14,6 +14,7 @@ import com.eas.client.queries.QueriesProxy;
 import com.eas.client.queries.Query;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.script.Scripts;
 import java.sql.Types;
@@ -178,6 +179,18 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
 
     public Collection<E> entities() {
         return entities.values();
+    }
+
+    @Override
+    public JSObject getPublished() {
+        if (published == null) {
+            JSObject publisher = Scripts.getSpace().getPublisher(this.getClass().getName());
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = (JSObject) publisher.call(null, new Object[]{this});
+        }
+        return published;
     }
 
     @Override

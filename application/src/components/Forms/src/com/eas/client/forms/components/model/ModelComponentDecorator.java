@@ -666,7 +666,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     protected boolean settingValueToJs;
 
     protected void bind() {
-        if (data != null && field != null && !field.isEmpty() && com.eas.script.Scripts.isInitialized()) {
+        if (data != null && field != null && !field.isEmpty() && Scripts.isInitialized()) {
             boundToData = Scripts.getSpace().listen(data, field, new AbstractJSObject() {
 
                 @Override

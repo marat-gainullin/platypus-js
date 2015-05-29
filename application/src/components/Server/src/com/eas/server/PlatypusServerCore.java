@@ -69,7 +69,6 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                     instance = new PlatypusServerCore(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), aStartAppElementName), queries, basesProxy, lsecurityConfigs, aStartAppElementName);
                     basesProxy.setContextHost(instance);
                     ScriptedResource.init(instance);
-                    Scripts.init();
                     instance.startResidents(tasksScanner.getResidents());
                 } else {
                     throw new IllegalArgumentException("applicationUrl: " + aApplicationUrl + " doesn't point to existent directory.");

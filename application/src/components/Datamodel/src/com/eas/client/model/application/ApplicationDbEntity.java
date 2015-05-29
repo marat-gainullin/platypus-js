@@ -12,7 +12,6 @@ import com.eas.client.changes.Command;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
-import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.util.List;
 import java.util.logging.Level;
@@ -117,10 +116,4 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
             }
         }
     }
-
-    @Override
-    public JSObject getPublished() {
-        return published;
-    }
-
 }

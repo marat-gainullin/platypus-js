@@ -13,6 +13,7 @@ import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import com.eas.script.Scripts;
 import com.eas.util.IDGenerator;
 import java.awt.Desktop;
 import java.io.File;
@@ -50,6 +51,13 @@ public class Report implements HasPublished {
 
     @Override
     public JSObject getPublished() {
+        if (published == null) {
+            JSObject publisher = Scripts.getSpace().getPublisher(this.getClass().getName());
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = (JSObject) publisher.call(null, new Object[]{this});
+        }
         return published;
     }
 

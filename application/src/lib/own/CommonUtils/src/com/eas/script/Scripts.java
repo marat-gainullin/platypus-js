@@ -20,6 +20,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -71,11 +73,13 @@ public class Scripts {
 
     public static class Space {
 
+        protected ScriptEngine engine;
         protected Object global;
         protected Map<String, JSObject> publishers = new HashMap<>();
 
-        public Space() {
+        public Space(ScriptEngine aEngine) {
             super();
+            engine = aEngine;
         }
 
         protected JSObject loadFunc;
@@ -355,6 +359,7 @@ public class Scripts {
         public void process(Runnable aTask) {
             final Scripts.Space space = this;
             offerTask(() -> {
+                Scripts.Space oldSpace = getSpace();
                 setSpace(space);
                 try {
                     Runnable processedTask = aTask;
@@ -373,17 +378,28 @@ public class Scripts {
                             processedTask = null;
                         }
                         if (worker.compareAndSet(null, thisThread)) {// Worker electing.
+                            // already single threaded environment
+                            if (global == null) {
+                                Bindings bindings = engine.createBindings();
+                                bindings.put("space", space);
+                                try {
+                                    engine.eval("load('classpath:platypus.js', space);", bindings);
+                                } catch (ScriptException ex) {
+                                    Logger.getLogger(Scripts.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                            }
                             // Zombie processing ...
                             Runnable task = queue.poll();
                             while (task != null) {
                                 task.run();
                                 task = queue.poll();
                             }
-                            assert worker.compareAndSet(thisThread, null) : "Worker electing assumption failed";// Always successfull CAS.
+                            boolean setted = worker.compareAndSet(thisThread, null);
+                            assert setted : "Worker electing assumption failed";// Always successfull CAS.
                         }
                     } while (!queueVersion.compareAndSet(version, newVersion));
                 } finally {
-                    setSpace(null);
+                    setSpace(oldSpace);
                 }
             });
         }
@@ -454,7 +470,6 @@ public class Scripts {
         }
 
     }
-    protected static ScriptEngine engine;
     protected static Consumer<Runnable> tasks;
     // bio thread pool
     protected static ThreadPoolExecutor bio = new ThreadPoolExecutor(0, 25,
@@ -503,22 +518,18 @@ public class Scripts {
     }
 
     public static Space createSpace() throws ScriptException {
-        Bindings bindings = engine.createBindings();
-        Space space = new Space();
-        bindings.put("space", space);
-        Object global = engine.eval("loadWithNewGlobal('classpath:platypus.js', space);", bindings);
-        space.setGlobal(global);
+        ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
+        Space space = new Space(engine);
         return space;
     }
 
-    public static void init() {
-        if (engine == null) {
-            engine = new ScriptEngineManager().getEngineByName("nashorn");
-        }
-    }
-
     public static boolean isInitialized() {
-        return engine != null;
+        Space space = getSpace();
+        return space != null
+                && space.listenElementsFunc != null
+                && space.listenFunc != null
+                && space.scalarDefFunc != null
+                && space.collectionDefFunc != null;
     }
 
     public static boolean isValidJsIdentifier(final String aName) {

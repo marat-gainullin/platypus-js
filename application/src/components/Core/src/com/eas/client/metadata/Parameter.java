@@ -374,8 +374,4 @@ public class Parameter extends Field {
         return new Parameter(this);
     }
 
-    @Override
-    public JSObject getPublished() {
-        return published;
-    }
 }

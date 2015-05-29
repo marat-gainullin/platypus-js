@@ -1,16 +1,16 @@
 (function() {
-    var className = "com.eas.client.forms.events.WindowEvent";
+    var className = "com.eas.server.httpservlet.HttpPlatypusPrincipal";
     var javaClass = Java.type(className);
     var space = this['-platypus-scripts-space'];
     space.putPublisher(className, function(aDelegate) {
-        return new P.WindowEvent(aDelegate);
+        return new P.HttpPlatypusPrincipal(aDelegate);
     });
     
     /**
      * Generated constructor.
-     * @constructor WindowEvent WindowEvent
+     * @constructor HttpPlatypusPrincipal HttpPlatypusPrincipal
      */
-    P.WindowEvent = function () {
+    P.HttpPlatypusPrincipal = function () {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -21,22 +21,22 @@
                 return delegate;
             }
         });
-        if(P.WindowEvent.superclass)
-            P.WindowEvent.superclass.constructor.apply(this, arguments);
+        if(P.HttpPlatypusPrincipal.superclass)
+            P.HttpPlatypusPrincipal.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        Object.defineProperty(this, "source", {
+        Object.defineProperty(this, "name", {
             get: function() {
-                var value = delegate.source;
+                var value = delegate.name;
                 return P.boxAsJs(value);
             }
         });
-        if(!P.WindowEvent){
+        if(!P.HttpPlatypusPrincipal){
             /**
-             * The source object of the event.
-             * @property source
-             * @memberOf WindowEvent
+             * The username..
+             * @property name
+             * @memberOf HttpPlatypusPrincipal
              */
-            P.WindowEvent.prototype.source = {};
+            P.HttpPlatypusPrincipal.prototype.name = '';
         }
     };
 })();

@@ -1,6 +1,8 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.containers.BoxPane");
-    javaClass.setPublisher(function(aDelegate) {
+    var className = "com.eas.client.forms.containers.BoxPane";
+    var javaClass = Java.type(className);
+    var space = this['-platypus-scripts-space'];
+    space.putPublisher(className, function(aDelegate) {
         return new P.BoxPane(null, null, null, aDelegate);
     });
     
@@ -510,23 +512,6 @@
              */
             P.BoxPane.prototype.count = 0;
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.BoxPane){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf BoxPane
-             */
-            P.BoxPane.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -543,6 +528,23 @@
              * @memberOf BoxPane
              */
             P.BoxPane.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.BoxPane){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf BoxPane
+             */
+            P.BoxPane.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

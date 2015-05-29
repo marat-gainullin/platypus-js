@@ -10,6 +10,7 @@ import com.eas.design.Undesignable;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import com.eas.script.Scripts;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -47,6 +48,13 @@ public class ModelCheckBox extends ModelComponentDecorator<VCheckBox, Boolean> i
 
     @Override
     public JSObject getPublished() {
+        if (published == null) {
+            JSObject publisher = Scripts.getSpace().getPublisher(this.getClass().getName());
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = (JSObject) publisher.call(null, new Object[]{this});
+        }
         return published;
     }
 
@@ -63,7 +71,7 @@ public class ModelCheckBox extends ModelComponentDecorator<VCheckBox, Boolean> i
         if (aValue instanceof Boolean) {
             setValue((Boolean)aValue);
         }else if(aValue != null){
-            setValue(com.eas.script.Scripts.isInitialized() ? JSType.toBoolean(aValue) : null);
+            setValue(Scripts.isInitialized() ? JSType.toBoolean(aValue) : null);
         }else
             setValue(null);
     }

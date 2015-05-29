@@ -1100,7 +1100,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     protected void bind() {
         if (data != null) {
-            if (com.eas.script.Scripts.isInitialized()) {
+            if (Scripts.isInitialized()) {
                 Object modelData = field != null && !field.isEmpty() ? ModelWidget.getPathData(data, field) : data;
                 if (rowsModel != null) {
                     modelData = modelData instanceof ScriptObject ? ScriptUtils.wrap((ScriptObject) modelData) : modelData;
@@ -2585,6 +2585,13 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     @Override
     public JSObject getPublished() {
+        if (published == null) {
+            JSObject publisher = Scripts.getSpace().getPublisher(this.getClass().getName());
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = (JSObject) publisher.call(null, new Object[]{this});
+        }
         return published;
     }
 

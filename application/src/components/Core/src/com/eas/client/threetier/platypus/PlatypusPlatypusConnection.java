@@ -145,10 +145,12 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
             IoSession _newSession = aNewSession;
             RequestEnvelope _request = aRequest;
             int rVersion;
+            int rNewVersion;
             do {
                 rVersion = requestsVersion.get();
-                if (rVersion == Integer.MAX_VALUE) {
-                    rVersion = -1;
+                rNewVersion = rVersion + 1;
+                if (rNewVersion == Integer.MAX_VALUE) {
+                    rNewVersion = 0;
                 }
                 // Some social payload
                 if (_newSession != null) {
@@ -185,7 +187,7 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
                         });
                     }
                 }
-            } while (!requestsVersion.compareAndSet(rVersion, rVersion + 1));
+            } while (!requestsVersion.compareAndSet(rVersion, rNewVersion));
         });
     }
 

@@ -1,6 +1,8 @@
 (function() {
-    var javaClass = Java.type("com.eas.server.websocket.WebSocketServerSession");
-    javaClass.setPublisher(function(aDelegate) {
+    var className = "com.eas.server.websocket.WebSocketServerSession";
+    var javaClass = Java.type(className);
+    var space = this['-platypus-scripts-space'];
+    space.putPublisher(className, function(aDelegate) {
         return new P.WebSocketServerSession(aDelegate);
     });
     

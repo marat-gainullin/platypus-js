@@ -1,6 +1,8 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.components.DropDownButton");
-    javaClass.setPublisher(function(aDelegate) {
+    var className = "com.eas.client.forms.components.DropDownButton";
+    var javaClass = Java.type(className);
+    var space = this['-platypus-scripts-space'];
+    space.putPublisher(className, function(aDelegate) {
         return new P.DropDownButton(null, null, null, null, aDelegate);
     });
     
@@ -283,23 +285,6 @@
              */
             P.DropDownButton.prototype.text = '';
         }
-        Object.defineProperty(this, "onMouseEntered", {
-            get: function() {
-                var value = delegate.onMouseEntered;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMouseEntered = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.DropDownButton){
-            /**
-             * Mouse entered over the component event handler function.
-             * @property onMouseEntered
-             * @memberOf DropDownButton
-             */
-            P.DropDownButton.prototype.onMouseEntered = {};
-        }
         Object.defineProperty(this, "dropDownMenu", {
             get: function() {
                 var value = delegate.dropDownMenu;
@@ -316,6 +301,23 @@
              * @memberOf DropDownButton
              */
             P.DropDownButton.prototype.dropDownMenu = {};
+        }
+        Object.defineProperty(this, "onMouseEntered", {
+            get: function() {
+                var value = delegate.onMouseEntered;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseEntered = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.DropDownButton){
+            /**
+             * Mouse entered over the component event handler function.
+             * @property onMouseEntered
+             * @memberOf DropDownButton
+             */
+            P.DropDownButton.prototype.onMouseEntered = {};
         }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
@@ -484,23 +486,6 @@
              */
             P.DropDownButton.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.DropDownButton){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf DropDownButton
-             */
-            P.DropDownButton.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -517,6 +502,23 @@
              * @memberOf DropDownButton
              */
             P.DropDownButton.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.DropDownButton){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf DropDownButton
+             */
+            P.DropDownButton.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

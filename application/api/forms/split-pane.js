@@ -1,6 +1,8 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.containers.SplitPane");
-    javaClass.setPublisher(function(aDelegate) {
+    var className = "com.eas.client.forms.containers.SplitPane";
+    var javaClass = Java.type(className);
+    var space = this['-platypus-scripts-space'];
+    space.putPublisher(className, function(aDelegate) {
         return new P.SplitPane(null, aDelegate);
     });
     
@@ -526,23 +528,6 @@
              */
             P.SplitPane.prototype.count = 0;
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.SplitPane){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf SplitPane
-             */
-            P.SplitPane.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -559,6 +544,23 @@
              * @memberOf SplitPane
              */
             P.SplitPane.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.SplitPane){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf SplitPane
+             */
+            P.SplitPane.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

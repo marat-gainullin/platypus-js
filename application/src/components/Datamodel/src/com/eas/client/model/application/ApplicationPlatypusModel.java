@@ -10,7 +10,6 @@ import com.eas.client.model.Model;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.queries.QueriesProxy;
-import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.script.Scripts;
 import java.util.ArrayList;
@@ -95,10 +94,4 @@ public class ApplicationPlatypusModel extends ApplicationModel<ApplicationPlatyp
     public List<Change> getChangeLog() {
         return changeLog;
     }
-
-    @Override
-    public JSObject getPublished() {
-        return published;
-    }
-
 }

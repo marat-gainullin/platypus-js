@@ -341,6 +341,7 @@ public class DatabasesClient {
             aDatasourceName = defaultDatasourceName;
         if (!mdCaches.containsKey(aDatasourceName)) {
             DatabaseMdCache cache = new DatabaseMdCache(this, aDatasourceName);
+            mdCaches.put(aDatasourceName, cache);
             if (autoFillMetadata) {
                 try {
                     cache.fillTablesCacheByConnectionSchema(true);
@@ -348,7 +349,6 @@ public class DatabasesClient {
                     Logger.getLogger(DatabasesClient.class.getName()).log(Level.WARNING, ex.getMessage());
                 }
             }
-            mdCaches.put(aDatasourceName, cache);
         }
         return mdCaches.get(aDatasourceName);
     }
@@ -612,14 +612,7 @@ public class DatabasesClient {
 
     public void dbTableChanged(String aDatasourceName, String aSchema, String aTable) throws Exception {
         DatabaseMdCache cache = getDbMetadataCache(aDatasourceName);
-        /*
-        String fullTableName = aTable;
-        if (aSchema != null && !aSchema.isEmpty()) {
-            fullTableName = aSchema + "." + fullTableName;
-        }
-        */
-        cache.fillTablesCacheBySchema(aSchema, true);
-        cache.fillIndexesCacheBySchema(aSchema);
+        cache.removeSchema(aSchema);
     }
 
     public String getConnectionSchema(String aDatasourceName) throws Exception {

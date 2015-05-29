@@ -6,6 +6,7 @@ import com.eas.client.cache.FormsDocuments;
 import com.eas.client.cache.ModelsDocuments;
 import com.eas.client.cache.ReportsConfigs;
 import com.eas.client.cache.ScriptConfigs;
+import com.eas.client.forms.Forms;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.ConnectionsSelector;
 import com.eas.client.login.Credentials;
@@ -14,6 +15,7 @@ import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.resourcepool.DatasourcesArgsConsumer;
+import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.scripts.ScriptedResource;
 import com.eas.client.settings.ConnectionSettings;
 import com.eas.client.threetier.PlatypusClient;
@@ -208,6 +210,7 @@ public class PlatypusClientApplication {
             checkUrl(config);
             if (config.url != null) {
                 checkUserHome();
+                GeneralResourceProvider.registerDrivers();
                 config.datasourcesArgs.registerDatasources();
                 Scripts.initBIO(config.threadsArgs.getMaxServicesTreads());
                 Scripts.initTasks((Runnable aTask) -> {
@@ -229,7 +232,7 @@ public class PlatypusClientApplication {
                         ModelsDocuments models = new ModelsDocuments();
                         ScriptConfigs scriptsConfigs = new ScriptConfigs();
                         ValidatorsScanner validatorsScanner = new ValidatorsScanner(scriptsConfigs);
-                        ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), validatorsScanner);                        
+                        ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), validatorsScanner);
                         ScriptedDatabasesClient twoTierCore = new ScriptedDatabasesClient(config.defDatasource, indexer, true, validatorsScanner.getValidators(), config.threadsArgs.getMaxJdbcTreads());
                         QueriesProxy qp = new LocalQueriesProxy(twoTierCore, indexer);
                         ModulesProxy mp = new LocalModulesProxy(indexer, models, config.startScriptPath);
@@ -282,23 +285,18 @@ public class PlatypusClientApplication {
                     throw new Exception("Unknown protocol in url: " + config.url);
                 }
                 ScriptedResource.init(app);
-                Scripts.init();
                 Scripts.Space space = Scripts.createSpace();
-                ScriptedResource._require(new String[]{""}, null, new HashSet<>(), space, (Void v) -> {
-//                    JSObject p = Scripts.lookupInGlobal("P");
-//                    if (p != null) {
-//                        Object ready = p.getMember("ready");
-//                        if (ready instanceof JSObject && ((JSObject) ready).isFunction()) {
-//                            ((JSObject) ready).call(null, new Object[]{});
-//                        } 
-//                        else {
-//                            throw new IllegalStateException("P.ready is missing or is not a function. Nothing to do :-(");
-//                        }
-//                    } else {
-//                        throw new IllegalStateException("Platypus js API is not initialized (global.P is missing).");
-//                    }
-                }, (Exception ex) -> {
-                    Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, ex);
+                Forms.initScripts(space);
+                space.process(() -> {
+                    try {
+                        ScriptedResource._require(new String[]{""}, null, new HashSet<>(), space, (Void v) -> {
+                            Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.INFO, "Platypus application started.");
+                        }, (Exception ex) -> {
+                            Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, ex);
+                        });
+                    } catch (Exception ex) {
+                        Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 });
             } else {
                 throw new IllegalArgumentException("Application url is missing. url is a required parameter.");

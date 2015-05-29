@@ -105,20 +105,18 @@ public class LocalModulesProxy implements ModulesProxy {
             }
         };
         if (onSuccess != null) {
-            aSpace.process(() -> {
-                try {
-                    ModuleStructure structure = doWork.call();
-                    try {
-                        onSuccess.accept(structure);
-                    } catch (Exception ex) {
-                        Logger.getLogger(LocalModulesProxy.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                } catch (Exception ex) {
-                    if (onFailure != null) {
+            try {
+                ModuleStructure structure = doWork.call();
+                aSpace.process(() -> {
+                    onSuccess.accept(structure);
+                });
+            } catch (Exception ex) {
+                if (onFailure != null) {
+                    aSpace.process(() -> {
                         onFailure.accept(ex);
-                    }
+                    });
                 }
-            });
+            }
             return null;
         } else {
             return doWork.call();

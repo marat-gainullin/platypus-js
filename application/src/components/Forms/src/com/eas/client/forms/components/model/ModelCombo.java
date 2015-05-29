@@ -86,6 +86,13 @@ public class ModelCombo extends ModelComponentDecorator<VComboBox<JSObject>, Obj
 
     @Override
     public JSObject getPublished() {
+        if (published == null) {
+            JSObject publisher = Scripts.getSpace().getPublisher(this.getClass().getName());
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = (JSObject) publisher.call(null, new Object[]{this});
+        }
         return published;
     }
 
@@ -109,7 +116,7 @@ public class ModelCombo extends ModelComponentDecorator<VComboBox<JSObject>, Obj
     }
     
     protected void bindList(){
-        if (displayList != null && com.eas.script.Scripts.isInitialized()) {
+        if (displayList != null && Scripts.isInitialized()) {
             boundToList = Scripts.getSpace().listen(displayList, "length", new AbstractJSObject() {
 
                 @Override

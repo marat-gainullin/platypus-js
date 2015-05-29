@@ -8,6 +8,7 @@ import com.eas.client.threetier.PlatypusConnection;
 import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.script.Scripts;
 import java.security.Principal;
@@ -79,8 +80,9 @@ public class PlatypusPrincipal implements Principal, HasPublished {
     public void logout(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
         LogoutRequest req = new LogoutRequest();
         if (aOnSuccess != null) {
+            Scripts.Space space = Scripts.getSpace();
             if (conn != null) {
-                conn.enqueueRequest(req, Scripts.getSpace(), (LogoutRequest.Response res) -> {
+                conn.enqueueRequest(req, space, (LogoutRequest.Response res) -> {
                     clientSpacePrincipal = new AnonymousPlatypusPrincipal();
                     aOnSuccess.call(null, new Object[]{});
                 }, (Exception ex) -> {
@@ -89,7 +91,9 @@ public class PlatypusPrincipal implements Principal, HasPublished {
                     }
                 });
             } else {
-                aOnSuccess.call(null, new Object[]{});
+                space.process(()->{
+                    aOnSuccess.call(null, new Object[]{});
+                });
             }
         } else {
             if (conn != null) {
@@ -161,15 +165,13 @@ public class PlatypusPrincipal implements Principal, HasPublished {
 
     @Override
     public JSObject getPublished() {
-        /*
         if (published == null) {
-            JSObject publisher = space.getPublisher(this.getClass().getName());
+            JSObject publisher = Scripts.getSpace().getPublisher(this.getClass().getName());
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
             published = (JSObject) publisher.call(null, new Object[]{this});
         }
-        */
         return published;
     }
 }

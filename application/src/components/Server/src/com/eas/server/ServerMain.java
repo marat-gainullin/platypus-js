@@ -14,6 +14,7 @@ import com.eas.client.cache.ScriptConfigs;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.resourcepool.DatasourcesArgsConsumer;
+import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.scripts.ScriptedResource;
 import com.eas.client.threetier.PlatypusConnection;
 import com.eas.script.Scripts;
@@ -191,6 +192,7 @@ public class ServerMain {
             File f = new File(new URI(url));
             if (f.exists() && f.isDirectory()) {
                 Logger.getLogger(ServerMain.class.getName()).log(Level.INFO, "Application is located at: {0}", f.getPath());
+                GeneralResourceProvider.registerDrivers();
                 ScriptConfigs scriptsConfigs = new ScriptConfigs();
                 ServerTasksScanner tasksScanner = new ServerTasksScanner(scriptsConfigs);
                 ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), tasksScanner);
@@ -202,7 +204,6 @@ public class ServerMain {
                 PlatypusServer server = new PlatypusServer(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), appElement), queries, serverCoreDbClient, sslContext, parseListenAddresses(), parsePortsProtocols(), parsePortsSessionIdleTimeouts(), parsePortsSessionIdleCheckIntervals(), parsePortsNumWorkerThreads(), scriptsConfigs, appElement);
                 serverCoreDbClient.setContextHost(server);
                 ScriptedResource.init(server);
-                Scripts.init();
                 SensorsFactory.init(server.getAcceptorsFactory());
                 RetranslateFactory.init(server.getRetranslateFactory());
                 //

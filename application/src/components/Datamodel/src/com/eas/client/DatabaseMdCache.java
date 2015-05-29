@@ -23,7 +23,6 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -36,21 +35,47 @@ import java.util.logging.Logger;
  */
 public class DatabaseMdCache {
 
+    protected class CaseInsesitiveMap<V> extends HashMap<String, V> {
+
+        protected String transformKey(String aKey) {
+            return aKey != null ? aKey.toLowerCase() : null;
+        }
+
+        @Override
+        public V get(Object key) {
+            return super.get(transformKey((String) key));
+        }
+
+        @Override
+        public V put(String key, V value) {
+            return super.put(transformKey(key), value);
+        }
+
+        @Override
+        public V remove(Object key) {
+            return super.remove(transformKey((String) key));
+        }
+
+        @Override
+        public boolean containsKey(Object key) {
+            return super.containsKey(transformKey((String) key));
+        }
+
+    }
+
     protected String datasourceName;
     protected DatabasesClient client;
-    // Named tables cache
-    protected TablesFieldsCache tablesFields;
+    // Named tables fields cache
+    protected Map<String, TablesFieldsCache> schemasTablesFields = new CaseInsesitiveMap<>();
     // Named tables indexes cache
-    protected IndexesCache tablesIndexes;
+    protected Map<String, TablesIndexesCache> schemasTablesIndexes = new CaseInsesitiveMap<>();
     protected String connectionSchema;
     protected SqlDriver connectionDriver;
 
-    public DatabaseMdCache(DatabasesClient aClient, String aDbId) throws Exception {
+    public DatabaseMdCache(DatabasesClient aClient, String aDatasourceName) throws Exception {
         super();
         client = aClient;
-        datasourceName = aDbId;
-        tablesFields = new TablesFieldsCache();
-        tablesIndexes = new IndexesCache();
+        datasourceName = aDatasourceName;
     }
 
     public String getConnectionSchema() throws Exception {
@@ -67,20 +92,61 @@ public class DatabaseMdCache {
         return connectionDriver;
     }
 
+    private String schemaFromTableName(String aTableName) {
+        int indexOfDot = aTableName.indexOf(".");
+        String schema = null;
+        if (indexOfDot != -1) {
+            schema = aTableName.substring(0, indexOfDot);
+        }
+        return schema;
+    }
+
+    private TablesFieldsCache lookupFieldsCache(String aTableName) {
+        String schema = schemaFromTableName(aTableName);
+        return schemasTablesFields.get(schema);
+    }
+
+    private TablesIndexesCache lookupIndexesCache(String aTableName) {
+        String schema = schemaFromTableName(aTableName);
+        return schemasTablesIndexes.get(schema);
+    }
+
+    private void checkSchemaFields(String aTableName) throws Exception {
+        String schema = schemaFromTableName(aTableName);
+        if (!schemasTablesFields.containsKey(schema)) {
+            fillTablesCacheBySchema(schema, true);
+        }
+    }
+
+    private void checkSchemaIndexes(String aTableName) throws Exception {
+        String schema = schemaFromTableName(aTableName);
+        if (!schemasTablesIndexes.containsKey(schema)) {
+            fillIndexesCacheBySchema(schema);
+        }
+    }
+
     public Fields getTableMetadata(String aTableName) throws Exception {
-        return tablesFields.get(aTableName);
+        checkSchemaFields(aTableName);
+        TablesFieldsCache cache = lookupFieldsCache(aTableName);
+        return cache != null ? cache.get(aTableName) : null;
     }
 
     public void removeTableMetadata(String aTableName) throws Exception {
-        tablesFields.remove(aTableName);
+        TablesFieldsCache cache = lookupFieldsCache(aTableName);
+        if (cache != null) {
+            cache.remove(aTableName);
+        }
     }
 
     public boolean containsTableMetadata(String aTableName) throws Exception {
-        return tablesFields.containsKey(aTableName);
+        return getTableMetadata(aTableName) != null;
     }
 
     public void removeTableIndexes(String aTableName) throws Exception {
-        tablesIndexes.remove(aTableName);
+        TablesIndexesCache cache = lookupIndexesCache(aTableName);
+        if (cache != null) {
+            cache.remove(aTableName);
+        }
     }
 
     /**
@@ -125,7 +191,8 @@ public class DatabaseMdCache {
                 }
                 return tablesNames;
             }, null, null, null);
-            tablesFields.clear();
+            TablesFieldsCache tablesFields = new TablesFieldsCache();
+            schemasTablesFields.put(aSchema, tablesFields);
             Map<String, String> tablesNames = new HashMap<>();
             aTablesNames.entrySet().forEach((Map.Entry<String, String> aTableName) -> {
                 tablesNames.put(aTableName.getKey(), aTableName.getValue());
@@ -191,7 +258,8 @@ public class DatabaseMdCache {
                 }
                 return tablesNames;
             }, null, null, null);
-            tablesIndexes.clear();
+            TablesIndexesCache tablesIndexes = new TablesIndexesCache();
+            schemasTablesIndexes.put(aSchema, tablesIndexes);
             Map<String, String> tablesNames = new HashMap<>();
             aTablesNames.entrySet().forEach((Map.Entry<String, String> aTableName) -> {
                 tablesNames.put(aTableName.getKey(), aTableName.getValue());
@@ -218,35 +286,25 @@ public class DatabaseMdCache {
     }
 
     public void clear() throws Exception {
-        if (tablesFields != null) {
-            tablesFields.clear();
+        if (schemasTablesFields != null) {
+            schemasTablesFields.clear();
         }
-        if (tablesIndexes != null) {
-            tablesIndexes.clear();
+        if (schemasTablesIndexes != null) {
+            schemasTablesIndexes.clear();
         }
         connectionSchema = null;
         connectionDriver = null;
     }
 
-    protected class TablesFieldsCache extends HashMap<String, Fields> {
+    public void removeSchema(String aSchema) {
+        schemasTablesFields.remove(aSchema);
+        schemasTablesIndexes.remove(aSchema);
+    }
+
+    protected class TablesFieldsCache extends CaseInsesitiveMap<Fields> {
 
         public TablesFieldsCache() {
             super();
-        }
-
-        @Override
-        public Fields put(String key, Fields value) {
-            return super.put(transformKey(key), value);
-        }
-
-        @Override
-        public Fields remove(Object key) {
-            return super.remove(transformKey((String)key));
-        }
-
-        @Override
-        public boolean containsKey(Object key) {
-            return super.containsKey(transformKey((String)key));
         }
 
         protected void merge(String aSchema, Map<String, Fields> aTablesFields, Map<String, DbTableKeys> aTablesKeys) throws Exception {
@@ -283,11 +341,6 @@ public class DatabaseMdCache {
                 });
             }
         }
-
-        protected String transformKey(String aKey) {
-            return aKey != null ? aKey.toLowerCase() : null;
-        }
-
         /*
          @Override
          protected Fields getNewEntry(String aId) throws Exception {
@@ -328,6 +381,7 @@ public class DatabaseMdCache {
          return null;
          }
          */
+
         protected Map<String, Fields> query(String aSchema, Set<String> aTables, boolean aFullMetadata) throws Exception {
             if (aTables != null) {
                 SqlDriver sqlDriver = getConnectionDriver();
@@ -335,27 +389,17 @@ public class DatabaseMdCache {
                 if (schema4Sql == null || schema4Sql.isEmpty()) {
                     schema4Sql = getConnectionSchema();
                 }
-                Set<String> tables2Retrive = new HashSet<>();
-                for (String lTable : aTables) {
-                    String qtn = lTable;
-                    if (aSchema != null && !aSchema.isEmpty()) {
-                        qtn = aSchema + "." + qtn;
-                    }
-                    if (!containsTableMetadata(qtn)) {
-                        tables2Retrive.add(lTable);
-                    }
-                }
-                if (!tables2Retrive.isEmpty()) {
-                    String colsSql = sqlDriver.getSql4TableColumns(schema4Sql, tables2Retrive);
+                if (!aTables.isEmpty()) {
+                    String colsSql = sqlDriver.getSql4TableColumns(schema4Sql, aTables);
                     Map<String, Fields> columns = new SqlCompiledQuery(client, datasourceName, colsSql).<Map<String, Fields>>executeQuery((ResultSet r) -> {
                         return readTablesColumns(r, aSchema, sqlDriver);
                     }, null, null, null);
-                    String sqlPks = sqlDriver.getSql4TablePrimaryKeys(schema4Sql, tables2Retrive);
+                    String sqlPks = sqlDriver.getSql4TablePrimaryKeys(schema4Sql, aTables);
                     Map<String, DbTableKeys> keys = new SqlCompiledQuery(client, datasourceName, sqlPks).<Map<String, DbTableKeys>>executeQuery((ResultSet r) -> {
                         return readTablesPrimaryKeys(r, aSchema, sqlDriver);
                     }, null, null, null);
                     if (aFullMetadata) {
-                        String sqlFks = sqlDriver.getSql4TableForeignKeys(schema4Sql, tables2Retrive);
+                        String sqlFks = sqlDriver.getSql4TableForeignKeys(schema4Sql, aTables);
                         if (sqlFks != null && !sqlFks.isEmpty()) {
                             SqlCompiledQuery foreignKeysQuery = new SqlCompiledQuery(client, datasourceName, sqlFks);
                             foreignKeysQuery.executeQuery((ResultSet r) -> {
@@ -515,36 +559,20 @@ public class DatabaseMdCache {
         }
     }
 
-    public DbTableIndexes getTableIndexes(String aTableName) throws Exception {
-        if (aTableName != null && !aTableName.isEmpty() && tablesIndexes != null) {
-            return tablesIndexes.get(aTableName);
-        }
-        return null;
+    public boolean containsTableIndexes(String aTableName) throws Exception {
+        return getTableIndexes(aTableName) != null;
     }
 
-    protected class IndexesCache extends HashMap<String, DbTableIndexes> {
+    public DbTableIndexes getTableIndexes(String aTableName) throws Exception {
+        checkSchemaIndexes(aTableName);
+        TablesIndexesCache cache = lookupIndexesCache(aTableName);
+        return cache != null ? cache.get(aTableName) : null;
+    }
 
-        public IndexesCache() {
+    protected class TablesIndexesCache extends CaseInsesitiveMap<DbTableIndexes> {
+
+        public TablesIndexesCache() {
             super();
-        }
-
-        protected String transformKey(String aKey) {
-            return aKey != null ? aKey.toLowerCase() : null;
-        }
-
-        @Override
-        public DbTableIndexes put(String key, DbTableIndexes value) {
-            return super.put(transformKey(key), value);
-        }
-
-        @Override
-        public DbTableIndexes remove(Object key) {
-            return super.remove(transformKey((String)key));
-        }
-
-        @Override
-        public boolean containsKey(Object key) {
-            return super.containsKey(transformKey((String)key));
         }
 
         protected void fill(String aSchema, Map<String, DbTableIndexes> aTablesIndexes) throws Exception {
@@ -559,7 +587,7 @@ public class DatabaseMdCache {
                 });
             }
         }
-        
+
         protected Map<String, DbTableIndexes> query(String aSchema, Set<String> aTables) throws Exception {
             if (aTables != null) {
                 SqlDriver sqlDriver = getConnectionDriver();
@@ -567,18 +595,8 @@ public class DatabaseMdCache {
                 if (schema4Sql == null || schema4Sql.isEmpty()) {
                     schema4Sql = getConnectionSchema();
                 }
-                Set<String> tables2Retrive = new HashSet<>();
-                for (String lTable : aTables) {
-                    String qtn = lTable;
-                    if (aSchema != null && !aSchema.isEmpty()) {
-                        qtn = aSchema + "." + qtn;
-                    }
-                    if (!containsTableMetadata(qtn)) {
-                        tables2Retrive.add(lTable);
-                    }
-                }
-                if (!tables2Retrive.isEmpty()) {
-                    String sql4IndexesText = sqlDriver.getSql4Indexes(schema4Sql, tables2Retrive);
+                if (!aTables.isEmpty()) {
+                    String sql4IndexesText = sqlDriver.getSql4Indexes(schema4Sql, aTables);
                     if (sql4IndexesText != null && !sql4IndexesText.isEmpty()) {
                         SqlCompiledQuery indexesQuery = new SqlCompiledQuery(client, datasourceName, sql4IndexesText);
                         return indexesQuery.executeQuery((ResultSet r) -> {

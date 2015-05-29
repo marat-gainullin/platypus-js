@@ -12,6 +12,7 @@ import com.eas.design.Undesignable;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import com.eas.script.Scripts;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.EventQueue;
@@ -55,12 +56,19 @@ public class ModelDate extends ModelComponentDecorator<VDateTimeField, Date> imp
         } else if (aValue instanceof Date) {
             setValue((Date) aValue);
         } else {
-            setValue(com.eas.script.Scripts.isInitialized() ? new Date(JSType.toLong(aValue)) : null);
+            setValue(Scripts.isInitialized() ? new Date(JSType.toLong(aValue)) : null);
         }
     }
 
     @Override
     public JSObject getPublished() {
+        if (published == null) {
+            JSObject publisher = Scripts.getSpace().getPublisher(this.getClass().getName());
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = (JSObject) publisher.call(null, new Object[]{this});
+        }
         return published;
     }
 

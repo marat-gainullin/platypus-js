@@ -7,7 +7,6 @@ package com.eas.client.model.application;
 import com.eas.client.changes.Change;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.PlatypusQuery;
-import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import java.util.List;
 import jdk.nashorn.api.scripting.JSObject;
@@ -63,10 +62,5 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
                 throw new IllegalStateException("Only managed queries are allowed in three-tier mode!");
             }
         }
-    }
-
-    @Override
-    public JSObject getPublished() {
-        return published;
     }
 }

@@ -41,7 +41,7 @@ public class GeneralResourceProvider {
      *
      * @throws SQLException
      */
-    static void registerDrivers() throws SQLException {
+    public static void registerDrivers() throws SQLException {
         for (String driverClassName : driversClasses) {
             try {
                 Class<?> clazz = Class.forName(driverClassName);

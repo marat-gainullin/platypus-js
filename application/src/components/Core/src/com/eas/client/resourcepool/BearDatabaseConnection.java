@@ -102,6 +102,7 @@ public class BearDatabaseConnection implements Connection {
 
     @Override
     public PreparedStatement prepareStatement(String sql) throws SQLException {
+        shrinkStatements();
         return wrapPreparedStatement(sql, delegate.prepareStatement(sql));
     }
 
@@ -125,6 +126,7 @@ public class BearDatabaseConnection implements Connection {
 
     @Override
     public CallableStatement prepareCall(String sql) throws SQLException {
+        shrinkCalls();
         return wrapPrearedCall(sql, delegate.prepareCall(sql));
     }
 
@@ -392,6 +394,22 @@ public class BearDatabaseConnection implements Connection {
     private void checkClosed() throws SQLException {
         if (delegate == null) {
             throw new SQLException("Connection already closed.");
+        }
+    }
+
+    protected void shrinkStatements() throws SQLException {
+        while(stmts.size() >= maxStatements){
+            String toRemove = stmts.keySet().iterator().next();
+            PreparedStatement stmt = stmts.remove(toRemove);
+            stmt.close();
+        }
+    }
+
+    protected void shrinkCalls() throws SQLException {
+        while(calls.size() >= maxStatements){
+            String toRemove = calls.keySet().iterator().next();
+            CallableStatement call = calls.remove(toRemove);
+            call.close();
         }
     }
 

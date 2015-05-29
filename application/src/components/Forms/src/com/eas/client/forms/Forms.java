@@ -13,6 +13,7 @@ import com.eas.client.forms.components.model.ModelTextArea;
 import com.eas.client.forms.components.model.ModelWidget;
 import com.eas.client.metadata.DataTypeInfo;
 import com.eas.script.HasPublished;
+import com.eas.script.Scripts;
 import java.util.ResourceBundle;
 import javax.swing.JComponent;
 
@@ -23,6 +24,15 @@ import javax.swing.JComponent;
 public class Forms {
 
     protected static ResourceBundle rb = ResourceBundle.getBundle(Form.class.getPackage().getName() + "/Bundle");
+    protected static Scripts.Space space;
+
+    public static void initScripts(Scripts.Space aSpace) {
+        space = aSpace;
+    }
+    
+    public static Scripts.Space getSpace(){
+        return space;
+    }
 
     public static String getLocalizedString(String aKey) {
         if (rb.containsKey(aKey)) {
@@ -65,12 +75,12 @@ public class Forms {
                 return new ModelTextArea();
         }
     }
-    
-    public static Widget lookupPublishedParent(JComponent aWidget){
+
+    public static Widget lookupPublishedParent(JComponent aWidget) {
         java.awt.Component cur = aWidget.getParent();
-        while(cur != null && !(cur instanceof HasPublished)){
+        while (cur != null && !(cur instanceof HasPublished)) {
             cur = cur.getParent();
         }
-        return (Widget)cur;
+        return (Widget) cur;
     }
 }

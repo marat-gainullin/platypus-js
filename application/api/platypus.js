@@ -20,6 +20,7 @@
 
     //this === global;
     var global = this;
+    aSpace.setGlobal(global);
     global.P = {};
     global['-platypus-scripts-space'] = aSpace;
     
@@ -31,7 +32,9 @@
     var FileClass = Java.type("java.io.File");
     var JavaDateClass = Java.type("java.util.Date");
     var LoggerClass = Java.type("java.util.logging.Logger");
-    var FieldsClass = Java.type("com.eas.client.metadata.Fields");
+    var FieldsClassName = "com.eas.client.metadata.Fields";
+    var ParametersClassName = "com.eas.client.metadata.Parameters";
+    //var FieldsClass = Java.type(FieldsClassName);
     var IDGeneratorClass = Java.type("com.eas.util.IDGenerator");
     var ScriptTimerTaskClass = Java.type("com.eas.client.scripts.ScriptTimerTask");
     var ScriptedResourceClass = Java.type("com.eas.client.scripts.ScriptedResource");
@@ -726,7 +729,7 @@
         }
     });
 
-    FieldsClass.setPublisher(function (aDelegate) {
+    function fieldsAndParametersPublisher(aDelegate) {
         var target = {};
         var nnFields = aDelegate.toCollection();
         for (var n = 0; n < nnFields.size(); n++) {
@@ -742,7 +745,9 @@
             })();
         }
         return target;
-    });
+    };
+    space.putPublisher(ParametersClassName, fieldsAndParametersPublisher);
+    space.putPublisher(FieldsClassName, fieldsAndParametersPublisher);
 
     var addListenerName = '-platypus-listener-add-func';
     var removeListenerName = '-platypus-listener-remove-func';

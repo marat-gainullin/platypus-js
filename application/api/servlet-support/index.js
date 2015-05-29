@@ -1,6 +1,8 @@
 try{
     P.require([
-          './web-socket-server-session.js'
+          './http-platypus-principal.js'
+        , './web-socket-platypus-principal.js'
+        , './web-socket-server-session.js'
         , './web-socket-client-session.js'
     ]);
 }catch(e){
