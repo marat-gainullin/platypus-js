@@ -66,7 +66,7 @@ public class PlatypusNativeDataSource extends BearResourcePool<BearDatabaseConne
     }
 
     @Override
-    public BearDatabaseConnection getConnection() throws SQLException {
+    public Connection getConnection() throws SQLException {
         try {
             return achieveResource();
         } catch (Exception ex) {

@@ -66,11 +66,6 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
 
     protected SqlActionsController sqlController;
 
-    public void resolveRelations() throws Exception {
-        model.clearRelations();
-        addFkRelations(true, null);
-    }
-
     @Override
     public void doAddQuery(String aAppQueryName, int aX, int aY) throws Exception {
         // No op. We can't add queries to db-diagram model
@@ -1093,7 +1088,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
         String content = XmlDom2String.transform(doc);
         string2SystemClipboard(content);
     }
-
+    
     public void resolveTables() throws Exception {
         Map<Long, FieldsEntity> entities = model.getEntities();
         if (entities != null && !entities.isEmpty()) {
@@ -1115,35 +1110,9 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
         }
     }
 
-    private void resolveFields() throws Exception {
-        Map<Long, FieldsEntity> entities = model.getEntities();
-        if (entities != null) {
-            for (FieldsEntity entity : entities.values()) {
-                model.getBasesProxy().dbTableChanged(entity.getTableDatasourceName(), entity.getTableSchemaName(), entity.getTableName());
-            }
-        }
-    }
-
-    private void resolveIndexes() {
-        Map<Long, FieldsEntity> entities = model.getEntities();
-        if (entities != null) {
-            for (FieldsEntity entity : entities.values()) {
-                entity.achiveIndexes();
-            }
-        }
-    }
-
-    public void entireSynchronizeWithDb() throws Exception {
-        model.removeEditingListener(modelListener);
-        try {
-            resolveTables();
-            resolveFields();
-            resolveIndexes();
-            resolveRelations();
-        } finally {
-            model.addEditingListener(modelListener);
-        }
-        refreshView();
+    public void resolveRelations() throws Exception {
+        model.clearRelations();
+        addFkRelations(true, null);
     }
 
     private boolean isEntityTableExists(FieldsEntity fEntity) throws Exception {
@@ -1165,4 +1134,36 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
          }
          */
     }
+/*
+    private void resolveFields() throws Exception {
+        Map<Long, FieldsEntity> entities = model.getEntities();
+        if (entities != null) {
+            for (FieldsEntity entity : entities.values()) {
+                model.getBasesProxy().dbTableChanged(entity.getTableDatasourceName(), entity.getTableSchemaName(), entity.getTableName());
+            }
+        }
+    }
+
+    private void resolveIndexes() {
+        Map<Long, FieldsEntity> entities = model.getEntities();
+        if (entities != null) {
+            entities.values().stream().forEach((entity) -> {
+                entity.achiveIndexes();
+            });
+        }
+    }
+
+    public void entireSynchronizeWithDb() throws Exception {
+        model.removeEditingListener(modelListener);
+        try {
+            resolveTables();
+            resolveFields();
+            resolveIndexes();
+            resolveRelations();
+        } finally {
+            model.addEditingListener(modelListener);
+        }
+        refreshView();
+    }
+*/
 }

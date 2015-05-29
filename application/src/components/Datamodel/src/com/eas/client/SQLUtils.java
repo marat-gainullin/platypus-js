@@ -15,7 +15,6 @@ import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.PrimaryKeySpec;
 import com.eas.client.sqldrivers.*;
-import com.eas.util.IDGenerator;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URL;

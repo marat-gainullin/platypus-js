@@ -610,33 +610,16 @@ public class DatabasesClient {
     protected static final String UNKNOWN_DATASOURCE_IN_COMMIT = "Unknown datasource: %s. Can't commit to it.";
     protected static final String UNSUPPORTED_DATASOURCE_IN_COMMIT = "Unsupported datasource: %s. Can't commit to it.";
 
-    /*
-     public Rowset getDbTypesInfo(String aDatasourceName) throws Exception {
-     Logger.getLogger(DatabasesClient.class.getName()).fine(String.format(TYPES_INFO_TRACE_MSG, aDatasourceName));
-     Rowset lrowSet = new Rowset();
-     JdbcReader rsReader = new JdbcReader(getDbMetadataCache(aDatasourceName).getConnectionDriver().getConverter());
-     DataSource dataSource = obtainDataSource(aDatasourceName);
-     if (dataSource != null) {
-     try (Connection lconn = dataSource.getConnection()) {
-     DatabaseMetaData dbmd = lconn.getMetaData();
-     if (dbmd != null) {
-     try (ResultSet rs = dbmd.getTypeInfo()) {
-     lrowSet = rsReader.readRowset(rs, null, -1);
-     }
-     }
-     }
-     }
-     return lrowSet;
-     }
-     */
     public void dbTableChanged(String aDatasourceName, String aSchema, String aTable) throws Exception {
         DatabaseMdCache cache = getDbMetadataCache(aDatasourceName);
+        /*
         String fullTableName = aTable;
         if (aSchema != null && !aSchema.isEmpty()) {
             fullTableName = aSchema + "." + fullTableName;
         }
-        cache.removeTableMetadata(fullTableName);
-        cache.removeTableIndexes(fullTableName);
+        */
+        cache.fillTablesCacheBySchema(aSchema, true);
+        cache.fillIndexesCacheBySchema(aSchema);
     }
 
     public String getConnectionSchema(String aDatasourceName) throws Exception {

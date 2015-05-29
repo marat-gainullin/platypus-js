@@ -44,7 +44,6 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import javax.swing.JEditorPane;
 import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
 import javax.swing.event.HyperlinkEvent;
 import jdk.nashorn.api.scripting.JSObject;
 import org.netbeans.api.db.explorer.ConnectionManager;
@@ -96,7 +95,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
     }
     protected static final Scripts.Space jsSpace = initScriptSpace();
 
-    static Scripts.Space initScriptSpace(){
+    static Scripts.Space initScriptSpace() {
         try {
             ScriptEngine jsEngine = new ScriptEngineManager().getEngineByName("nashorn");
             Bindings bindings = jsEngine.createBindings();
@@ -104,16 +103,19 @@ public class PlatypusProjectImpl implements PlatypusProject {
             bindings.put("space", space);
             Object global = jsEngine.eval("load('classpath:com/eas/designer/explorer/designer-js.js', space);", bindings);
             space.setGlobal(global);
+            EventQueue.invokeLater(()->{
+                Scripts.setSpace(space);
+            });
             return space;
         } catch (ScriptException ex) {
             throw new IllegalStateException(ex);
         }
     }
 
-    public static Scripts.Space getJsSpace(){
+    public static Scripts.Space getJsSpace() {
         return jsSpace;
     }
-    
+
     protected Lookup pLookup;
     protected ProjectState state;
     protected final FileObject projectDir;
@@ -262,30 +264,24 @@ public class PlatypusProjectImpl implements PlatypusProject {
         }
     }
 
-    public void disconnectedFromDatasource(final String aDatasourceName) {
-        SwingUtilities.invokeLater(() -> {
-            try {
-                if (ModelInspector.isInstance()) {
-                    ModelInspector mi = ModelInspector.getInstance();
-                    mi.setNodesReflector(null);
-                    mi.setViewData(null);
-                }
-                DatabaseMdCache mdCache = basesProxy.getDbMetadataCache(aDatasourceName);
-                if (mdCache != null) {
-                    mdCache.clear();
-                }
-                if (aDatasourceName == null ? basesProxy.getDefaultDatasourceName() == null : aDatasourceName.equals(basesProxy.getDefaultDatasourceName())) {
-                    mdCache = basesProxy.getDbMetadataCache(null);
-                    if (mdCache != null) {
-                        mdCache.clear();
-                    }
-                }
-                fireClientDisconnected(aDatasourceName);
-                StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Connection_Lost", aDatasourceName)); // NOI18N
-            } catch (Exception ex) {
-                Exceptions.printStackTrace(ex);
+    public void disconnectedFromDatasource(final String aDatasourceName) throws Exception {
+        if (ModelInspector.isInstance()) {
+            ModelInspector mi = ModelInspector.getInstance();
+            mi.setNodesReflector(null);
+            mi.setViewData(null);
+        }
+        DatabaseMdCache mdCache = basesProxy.getDbMetadataCache(aDatasourceName);
+        if (mdCache != null) {
+            mdCache.clear();
+        }
+        if (aDatasourceName == null ? basesProxy.getDefaultDatasourceName() == null : aDatasourceName.equals(basesProxy.getDefaultDatasourceName())) {
+            mdCache = basesProxy.getDbMetadataCache(null);
+            if (mdCache != null) {
+                mdCache.clear();
             }
-        });
+        }
+        fireClientDisconnected(aDatasourceName);
+        StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Connection_Lost", aDatasourceName)); // NOI18N
     }
 
     @Override
@@ -362,13 +358,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
         String dbConnectingCompleteMsg = NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_Connecting_Complete", aDatasourceName); // NOI18N
         StatusDisplayer.getDefault().setStatusText(dbConnectingCompleteMsg);
         getOutputWindowIO().getOut().println(dbConnectingCompleteMsg);
-        EventQueue.invokeLater(() -> {
-            try {
-                fireClientConnected(aDatasourceName);
-            } catch (Exception ex) {
-                Logger.getLogger(PlatypusProjectImpl.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        });
+        fireClientConnected(aDatasourceName);
     }
 
     private void connect2db(String aDatasourceName) throws Exception {
@@ -583,7 +573,11 @@ public class PlatypusProjectImpl implements PlatypusProject {
 
         @Override
         public void disconnected(DatabaseConnection aConnection) {
-            disconnectedFromDatasource(aConnection.getDisplayName());
+            try {
+                disconnectedFromDatasource(aConnection.getDisplayName());
+            } catch (Exception ex) {
+                Exceptions.printStackTrace(ex);
+            }
         }
     }
 

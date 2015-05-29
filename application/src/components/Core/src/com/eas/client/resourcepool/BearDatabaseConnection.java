@@ -405,7 +405,11 @@ public class BearDatabaseConnection implements Connection {
                 stmt.close();
             }
             stmts.clear();
-            delegate.close();
+            shutdownDelegate();
         }
+    }
+
+    protected void shutdownDelegate() throws SQLException {
+        delegate.close();
     }
 }

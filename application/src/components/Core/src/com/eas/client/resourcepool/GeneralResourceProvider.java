@@ -23,7 +23,7 @@ public class GeneralResourceProvider {
 
     protected static class InstanceHolder {
 
-        private static final GeneralResourceProvider instance = initialize();
+        private static final GeneralResourceProvider instance = new GeneralResourceProvider();
     }
     // dom constants
     public static transient final String DB_DRIVER_TAG_NAME = "driver";
@@ -36,15 +36,6 @@ public class GeneralResourceProvider {
         "com.ibm.db2.jcc.DB2Driver",
         "org.h2.Driver"
     };
-
-    static GeneralResourceProvider initialize() {
-        try {
-            registerDrivers();
-            return new GeneralResourceProvider();
-        } catch (SQLException ex) {
-            throw new IllegalStateException(ex);
-        }
-    }
 
     /**
      *
@@ -84,6 +75,10 @@ public class GeneralResourceProvider {
 
     public void registerDatasource(String aName, DbConnectionSettings aSettings) {
         connectionPools.put(aName, constructDataSource(aSettings));
+    }
+
+    public void registerDatasource(String aName, PlatypusNativeDataSource aPool) {
+        connectionPools.put(aName, aPool);
     }
 
     public void unregisterDatasource(String aName) throws SQLException {
