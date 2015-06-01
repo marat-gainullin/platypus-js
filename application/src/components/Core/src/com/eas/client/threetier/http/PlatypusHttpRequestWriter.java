@@ -8,9 +8,7 @@ import com.eas.client.changes.Change;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.metadata.Parameters;
 import com.eas.client.login.Credentials;
-import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.settings.SettingsConstants;
-import com.eas.client.threetier.Sequence;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.*;
@@ -28,9 +26,9 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,29 +44,28 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
     //
     protected URL url;
     protected Map<String, Cookie> cookies;
-    protected Sequence sequence;
-    protected int maximumAuthenticateAttempts = 1;
     //
     protected String method = PlatypusHttpConstants.HTTP_METHOD_GET;
     protected String uriPrefix = "application";
     protected List<Map.Entry<String, String>> params = new ArrayList<>();
     protected HttpURLConnection conn;
-    protected Callable<Credentials> onCredentials;
-    protected PlatypusHttpConnection pConn;
     protected byte[] responseBody;
     protected Response response;
+    protected Credentials basicCredentials;
+    protected HttpResult httpResult;
 
-    public PlatypusHttpRequestWriter(URL aUrl, Map<String, Cookie> aCookies, Callable<Credentials> aOnCredentials, Sequence aSequence, int aMaximumAuthenticateAttempts, PlatypusHttpConnection aPConn) {
+    public PlatypusHttpRequestWriter(URL aUrl, Map<String, Cookie> aCookies, Credentials aBasicCredentials) {
         super();
         url = aUrl;
         cookies = aCookies;
-        sequence = aSequence;
-        maximumAuthenticateAttempts = aMaximumAuthenticateAttempts;
-        onCredentials = aOnCredentials;
-        pConn = aPConn;
+        basicCredentials = aBasicCredentials;
     }
 
-    protected static class HttpResult {
+    public HttpResult getHttpResult() {
+        return httpResult;
+    }
+
+    public static class HttpResult {
 
         public int responseCode;
         public String authScheme;
@@ -91,10 +88,41 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
             return responseCode == HttpURLConnection.HTTP_OK;
         }
 
-        private boolean isUnauthorized() {
+        public boolean isUnauthorized() {
             return (redirectLocation != null && redirectLocation.toLowerCase().contains(J_SECURITY_CHECK_ACTION_NAME))
                     || (authScheme != null && !authScheme.isEmpty())
                     || responseCode == HttpURLConnection.HTTP_UNAUTHORIZED;
+        }
+    }
+
+    private void addCookies(HttpURLConnection aConnection) {
+        addCookies(cookies, aConnection);
+    }
+    
+    public static  void addCookies(Map<String, Cookie> aCookies, HttpURLConnection aConnection) {
+        String[] cookiesNames = aCookies.keySet().toArray(new String[]{});
+        for (String cookieName : cookiesNames) {
+            Cookie cookie = aCookies.get(cookieName);
+            if (cookie != null && cookie.isActual()) {
+                String cookieHeaderValue = cookieName + "=" + cookie.getValue();
+                aConnection.addRequestProperty(PlatypusHttpConstants.HEADER_COOKIE, cookieHeaderValue);
+            } else {
+                aCookies.remove(cookieName);
+            }
+        }
+    }
+
+    public static void addBasicAuthentication(HttpURLConnection aConnection, String aLogin, String aPassword) throws UnsupportedEncodingException {
+        if (aLogin != null && !aLogin.isEmpty() && aPassword != null) {
+            Base64.Encoder encoder = Base64.getEncoder();
+            String requestAuthSting = PlatypusHttpConstants.BASIC_AUTH_NAME + " " + encoder.encodeToString(aLogin.concat(":").concat(aPassword).getBytes(PlatypusHttpConstants.HEADERS_ENCODING_NAME));
+            aConnection.setRequestProperty(PlatypusHttpConstants.HEADER_AUTHORIZATION, requestAuthSting);
+        }
+    }
+
+    private void checkedAddBasicAuthentication(HttpURLConnection aConn) throws UnsupportedEncodingException {
+        if (basicCredentials != null) {
+            addBasicAuthentication(aConn, basicCredentials.userName, basicCredentials.password);
         }
     }
 
@@ -109,9 +137,9 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
             conn.setDoOutput(true);
             conn.setDoInput(true);
             // add headers
-            pConn.checkedAddBasicAuthentication(conn);
+            checkedAddBasicAuthentication(conn);
             conn.setRequestProperty(PlatypusHttpConstants.HEADER_USER_AGENT, PlatypusHttpConstants.AGENT_NAME);
-            pConn.addCookies(conn);
+            addCookies(conn);
             if (lonHeaders != null) {
                 lonHeaders.accept(conn);
             }
@@ -120,7 +148,8 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
             conn.disconnect();
             return res;
         };
-        HttpResult res = performer.call(onHeaders);
+        httpResult = performer.call(onHeaders);
+        /*
         if (res.isUnauthorized() && res.authScheme != null && !res.authScheme.isEmpty()) {
             sequence.in(() -> {
                 // Probably new cookies from another thread...
@@ -175,6 +204,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
                 return null;
             });
         }
+                */
     }
 
     private HttpResult completeRequest(Request aRequest) throws Exception {
@@ -216,7 +246,6 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
                 response = new ErrorResponse(conn.getResponseCode() + " " + conn.getResponseMessage());
             }
         }
-        pConn.acceptCookies(conn);
         return new HttpResult(responseCode, authScheme, redirectLocation);
     }
 

@@ -78,36 +78,27 @@ public abstract class PlatypusConnection implements AppConnection {
     public static final int DEFAULT_MAX_THREADS = 25;
 
     protected final URL url;
+    protected Credentials credentials;
     protected Callable<Credentials> onCredentials;
     protected int maximumAuthenticateAttempts = 1;
-    protected Runnable onLogin;
-    protected Runnable onLogout;
+
+    protected static class Attempts {
+
+        public Attempts() {
+            super();
+        }
+        public int count;
+    }
 
     public PlatypusConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts) {
         super();
         url = aUrl;
         onCredentials = aOnCredentials;
-        maximumAuthenticateAttempts = aMaximumAuthenticateAttempts;
+        maximumAuthenticateAttempts = Math.max(1, aMaximumAuthenticateAttempts);
     }
 
     public URL getUrl() {
         return url;
-    }
-
-    public Runnable getOnLogin() {
-        return onLogin;
-    }
-
-    public void setOnLogin(Runnable aValue) {
-        onLogin = aValue;
-    }
-
-    public Runnable getOnLogout() {
-        return onLogout;
-    }
-
-    public void setOnLogout(Runnable aValue) {
-        onLogout = aValue;
     }
 
     public Exception handleErrorResponse(ErrorResponse aResponse) {

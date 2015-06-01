@@ -26,6 +26,7 @@ import com.eas.util.BinaryUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -127,29 +128,10 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
     @Override
     public void visit(RPCRequest.Response rsp) throws Exception {
         if (conn.getContentType() != null && conn.getContentType().toLowerCase().startsWith(REPORT_LOCATION_CONTENT_TYPE)) {
-            /*
             String reportLocation = extractText();
             URL currentUrl = conn.getURL();
             URL reportUrl = new URL(currentUrl.getProtocol(), currentUrl.getHost(), currentUrl.getPort(), reportLocation);
-            HttpURLConnection reportConn = (HttpURLConnection) reportUrl.openConnection();
-            reportConn.setDoInput(true);
-            pConn.addCookies(reportConn);
-            pConn.checkedAddBasicAuthentication(reportConn);
-            try (InputStream in = reportConn.getInputStream()) {
-                byte[] content = BinaryUtils.readStream(in, -1);
-                int slashIdx = reportLocation.lastIndexOf("/");
-                String fileName = reportLocation.substring(slashIdx + 1);
-                if (fileName.contains(".")) {
-                    String[] nameFormat = fileName.split("\\.");
-                    Report report = new Report(content, nameFormat[nameFormat.length - 1], nameFormat[0]);
-                    rsp.setResult(report);
-                } else {
-                    Report report = new Report(content, "unknown", "unknown");
-                    rsp.setResult(report);
-                }
-            }
-            pConn.acceptCookies(reportConn);
-            */
+            rsp.setResult(reportUrl);
         } else {
             Object oData = extractJSONWithDates();
             rsp.setResult(oData);

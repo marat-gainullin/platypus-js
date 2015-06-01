@@ -28,14 +28,6 @@ public class ServerModulesProxy {
     public ServerModulesProxy(PlatypusConnection aConn) {
         super();
         conn = aConn;
-        /* If uncomment, concurrency problems will occur while dependencies resolving process.
-        conn.setOnLogin(() -> {
-            entries.clear();
-        });
-        conn.setOnLogout(() -> {
-            entries.clear();
-        });
-        */
     }
 
     public ServerModuleInfo getCachedStructure(String aName) throws Exception {

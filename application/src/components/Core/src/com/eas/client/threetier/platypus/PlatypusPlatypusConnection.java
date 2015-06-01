@@ -4,7 +4,9 @@
  */
 package com.eas.client.threetier.platypus;
 
+import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.Credentials;
+import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.threetier.PlatypusConnection;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
@@ -37,6 +39,7 @@ import org.apache.mina.core.future.ConnectFuture;
 import org.apache.mina.core.future.IoFuture;
 import org.apache.mina.core.future.WriteFuture;
 import org.apache.mina.core.service.IoHandlerAdapter;
+import org.apache.mina.core.session.DummySession;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
@@ -60,7 +63,7 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
 
     private String sessionTicket;
     private final SocketConnector connector;
-    private final Executor requestsProcessor;
+    private final Executor networkProcessor;
     private final SSLContext sslContext;
     private final int maximumConnections;
     // sync requests
@@ -73,12 +76,12 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
         host = aUrl.getHost();
         port = aUrl.getPort();
 
-        requestsProcessor = aNetworkProcessor;
+        networkProcessor = aNetworkProcessor;
         sslContext = createSSLContext();
 
-        maximumConnections = aMaximumConnections;
+        maximumConnections = Math.max(1, aMaximumConnections);
 
-        connector = configureConnector(requestsProcessor, sslContext);
+        connector = configureConnector(networkProcessor, sslContext);
         syncEncoder = new RequestEncoder();
         syncDecoder = new ResponseDecoder();
     }
@@ -141,7 +144,7 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
     protected AtomicInteger requestsVersion = new AtomicInteger();
 
     protected void pendingChanged(IoSession aNewSession, RequestEnvelope aRequest) {
-        requestsProcessor.execute(() -> {
+        networkProcessor.execute(() -> {
             IoSession _newSession = aNewSession;
             RequestEnvelope _request = aRequest;
             int rVersion;
@@ -194,6 +197,29 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
     @Override
     public <R extends Response> void enqueueRequest(Request aRequest, Scripts.Space aSpace, Consumer<R> onSuccess, Consumer<Exception> onFailure) {
         aSpace.incAsyncsCount();
+        Attempts attemps = new Attempts();
+        Consumer<Response> responseHandler = (Response response) -> {
+            if (response instanceof ErrorResponse) {
+                if (onFailure != null) {
+                    Exception cause = handleErrorResponse((ErrorResponse) response);
+                    onFailure.accept(cause);
+                }
+            } else {
+                if (onSuccess != null) {
+                    if (aRequest instanceof LogoutRequest) {
+                        credentials = null;
+                        sessionTicket = null;
+                    }
+                    onSuccess.accept((R) response);
+                }
+            }
+
+        };
+        retry(aRequest, aSpace, responseHandler, attemps);
+    }
+
+    private <R extends Response> void retry(Request aRequest, Scripts.Space aSpace, Consumer<Response> responseHandler, Attempts attemps) {
+        Credentials sentCreds = credentials;
         RequestEnvelope requestEnv = new RequestEnvelope(aRequest, null, null, sessionTicket, (InputStream is) -> {
             aSpace.process(() -> {
                 try {
@@ -204,21 +230,25 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
                     } finally {
                         is.close();
                     }
-                    if (response instanceof ErrorResponse) {
-                        if (onFailure != null) {
-                            Exception cause = handleErrorResponse((ErrorResponse) response);
-                            onFailure.accept(cause);
-                        }
-                    } else {
-                        if (onSuccess != null) {
-                            if (aRequest instanceof LogoutRequest) {
-                                sessionTicket = null;
-                                if (onLogout != null) {
-                                    onLogout.run();
+                    if (response instanceof ErrorResponse && ((ErrorResponse) response).isNotLoggedIn()) {
+                        if (attemps.count++ < maximumAuthenticateAttempts) {
+                            if (credentials != null && !credentials.equals(sentCreds)) {
+                                retry(aRequest, aSpace, responseHandler, attemps);
+                            } else {
+                                Credentials creds = onCredentials.call();
+                                if (creds != null) {
+                                    credentials = creds;
+                                    retry(aRequest, aSpace, responseHandler, attemps);
+                                } else { // Credentials are inaccessible, so leave things as is...
+                                    responseHandler.accept(response);
                                 }
                             }
-                            onSuccess.accept((R) response);
+                        } else {// Maximum authentication attempts per request exceeded, so leave things as is...
+                            responseHandler.accept(response);
                         }
+                    } else {
+                        PlatypusPrincipal.setClientSpacePrincipal(credentials != null ? new PlatypusPrincipal(credentials.userName, null, null, this) : new AnonymousPlatypusPrincipal());
+                        responseHandler.accept(response);
                     }
                 } catch (Exception ex) {
                     Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.SEVERE, null, ex);
@@ -228,85 +258,6 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
         pendingChanged(null, requestEnv);
     }
 
-    /*
-     private void enqueue(RequestCallback rqc, Consumer<Exception> onFailure) {
-     Runnable doer = () -> {
-     try {
-     try {
-     Callable<Void> performer = () -> {
-     rqc.response = null;
-     rqc.completed = false;
-     rqc.requestEnv.request.setDone(false);
-     rqc.requestEnv.ticket = sessionTicket;
-     // enqueue network work
-     ioSession.write(rqc.requestEnv);
-     // wait completion from the network subsystem
-     rqc.requestEnv.waitRequestCompletion();
-     sessionTicket = rqc.requestEnv.ticket;
-     return null;
-     };
-     // Try to communicate with the server
-     performer.call();
-     if (rqc.response instanceof ErrorResponse
-     && ((ErrorResponse) rqc.response).isNotLoggedIn()) {
-     sequence.in(() -> {
-     // probably new ticket from another thread...
-     rqc.requestEnv.userName = null;
-     rqc.requestEnv.password = null;
-     performer.call();
-     if (rqc.response instanceof ErrorResponse
-     && ((ErrorResponse) rqc.response).isNotLoggedIn()) {
-     // nice try :-(
-     int authenticateAttempts = 0;
-     // Try to authenticate
-     while (rqc.response instanceof ErrorResponse
-     && ((ErrorResponse) rqc.response).isNotLoggedIn()
-     && authenticateAttempts++ < maximumAuthenticateAttempts) {
-     Credentials credentials = onCredentials.call();
-     if (credentials != null) {
-     rqc.requestEnv.userName = credentials.userName;
-     rqc.requestEnv.password = credentials.password;
-     sessionTicket = null;
-     performer.call();
-     if (!(rqc.response instanceof ErrorResponse) || !((ErrorResponse) rqc.response).isAccessControl()) {
-     PlatypusPrincipal.setClientSpacePrincipal(new PlatypusPrincipal(credentials.userName, null, null, PlatypusPlatypusConnection.this));
-     if (onLogin != null) {
-     onLogin.run();
-     }
-     }
-     } else {// Credentials are inaccessible, so leave things as is...
-     authenticateAttempts = Integer.MAX_VALUE;
-     }
-     }
-     }
-     return null;
-     });
-     }
-     } finally {
-     ioSession.removeAttribute(RequestCallback.class.getSimpleName());
-     sessionsPool.returnResource(ioSession);
-     }
-     // Report about a result
-     if (rqc.onComplete != null) {
-     rqc.completed = true;
-     rqc.onComplete.accept(rqc.response);
-     } else {
-     rqc.completed = true;
-     }
-     } catch (Exception ex) {
-     Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.SEVERE, null, ex);
-     if (onFailure != null) {
-     onFailure.accept(ex);
-     }
-     }
-     };
-     if (onFailure != null) {
-     requestsSender.submit(doer);
-     } else {
-     doer.run();
-     }
-     }
-     */
     protected static class SyncProtocolEncoderOutput implements ProtocolEncoderOutput {
 
         protected Object filtered;
@@ -357,8 +308,26 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
     };
 
     @Override
-    public <R extends Response> R executeRequest(Request rq) throws Exception {
-        RequestEnvelope requestEnv = new RequestEnvelope(rq, null, null, sessionTicket, null);
+    public <R extends Response> R executeRequest(Request aRequest) throws Exception {
+        R response = retrySync(aRequest);
+        int authenticateAttempts = 0;
+        while (response instanceof ErrorResponse && ((ErrorResponse) response).isNotLoggedIn() && authenticateAttempts++ < maximumAuthenticateAttempts && onCredentials != null) {
+            credentials = onCredentials.call();
+            response = retrySync(aRequest);
+        }
+        if (response instanceof ErrorResponse) {
+            throw handleErrorResponse((ErrorResponse) response);
+        } else {
+            if (aRequest instanceof LogoutRequest) {
+                credentials = null;
+                sessionTicket = null;
+            }
+            return (R) response;
+        }
+    }
+
+    private <R extends Response> R retrySync(Request aRequest) throws Exception {
+        RequestEnvelope requestEnv = new RequestEnvelope(aRequest, null, null, sessionTicket, null);
         Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.FINE, "{0} is connecting to {1}:{2}.", new Object[]{Thread.currentThread().getName(), host, port});
         try (Socket conn = sslContext.getSocketFactory().createSocket()) {
             conn.connect(new InetSocketAddress(host, port));
@@ -378,21 +347,13 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
                     read = is.read(readBuffer);
                     accumulated.write(readBuffer, 0, read);
                     SyncProtocolDecoderOutput responseOut = new SyncProtocolDecoderOutput();
-                    if (syncDecoder.doDecode(null, IoBuffer.wrap(accumulated.toByteArray()), responseOut)) {
+                    IoSession session = new DummySession();
+                    session.setAttribute(RequestEnvelope.class.getSimpleName(), requestEnv);
+                    if (syncDecoder.doDecode(session, IoBuffer.wrap(accumulated.toByteArray()), responseOut)) {
+                        sessionTicket = requestEnv.ticket;
                         try (InputStream responseIs = (InputStream) responseOut.getFiltered()) {
                             final ProtoReader responseReader = new ProtoReader(responseIs);
-                            Response response = PlatypusResponseReader.read(responseReader, rq, Scripts.getSpace());
-                            if (response instanceof ErrorResponse) {
-                                throw handleErrorResponse((ErrorResponse) response);
-                            } else {
-                                if (rq instanceof LogoutRequest) {
-                                    sessionTicket = null;
-                                    if (onLogout != null) {
-                                        onLogout.run();
-                                    }
-                                }
-                                return (R) response;
-                            }
+                            return (R) PlatypusResponseReader.read(responseReader, aRequest, Scripts.getSpace());
                         }
                     }
                 }
