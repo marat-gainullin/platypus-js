@@ -28,13 +28,13 @@ import org.apache.mina.core.session.IoSession;
 
 /**
  *
- * @author pk
+ * @author pk, mg, ab
  */
 public class PlatypusRequestsHandler extends IoHandlerAdapter {
 
     public static final String BAD_PROTOCOL_MSG = "The message is not Platypus protocol request.";
     public static final String GOT_SIGNATURE_MSG = "Got signature from client.";
-    public static final String SESSION_ID = "sessionID";
+    public static final String SESSION_ID = "platypus-session-id";
     private static final String GENERAL_EXCEPTION_MESSAGE = "Exception on request of type %d | %s.";
     private static final String ACCESS_CONTROL_EXCEPTION_MESSAGE = "AccessControlException on request of type %d | %s. Message: %s.";
     private static final String SQL_EXCEPTION_MESSAGE = "SQLException on request of type %d | %s. Message: %s. sqlState: %s, errorCode: %d";
@@ -138,6 +138,7 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
                     if (requestEnv.ticket == null) {
                         DatabaseAuthorizer.authorize(server, requestEnv.userName, requestEnv.password, (Session aSession) -> {
                             requestEnv.ticket = aSession.getId();
+                            ioSession.setAttribute(SESSION_ID, aSession.getId());
                             ((SessionRequestHandler<Request, Response>) handler).handle(aSession, (Response aResponse) -> {
                                 pushResponse(ioSession, aResponse, requestEnv.ticket, aSession.getSpace());
                             }, onError);
@@ -145,6 +146,7 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
                     } else {
                         Session session = server.getSessionManager().get(requestEnv.ticket);
                         if (session != null) {
+                            ioSession.setAttribute(SESSION_ID, session.getId());
                             session.getSpace().process(() -> {
                                 ((SessionRequestHandler<Request, Response>) handler).handle(session, (Response aResponse) -> {
                                     pushResponse(ioSession, aResponse, requestEnv.ticket, session.getSpace());

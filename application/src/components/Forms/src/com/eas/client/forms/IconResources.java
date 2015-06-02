@@ -20,6 +20,7 @@ public class IconResources {
     public static ImageIcon load(String aResourceName, JSObject onSuccess, JSObject onFailure) throws Exception {
         if (onSuccess != null) {
             Scripts.Space space = Scripts.getSpace();
+            space.incAsyncsCount();
             Scripts.startBIO(() -> {
                 try {
                     ImageIcon loaded = loadSync(aResourceName);

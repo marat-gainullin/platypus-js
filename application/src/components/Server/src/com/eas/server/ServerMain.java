@@ -17,6 +17,7 @@ import com.eas.client.resourcepool.DatasourcesArgsConsumer;
 import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.scripts.ScriptedResource;
 import com.eas.client.threetier.PlatypusConnection;
+import com.eas.concurrent.DeamonThreadFactory;
 import com.eas.script.Scripts;
 import com.eas.sensors.api.RetranslateFactory;
 import com.eas.sensors.api.SensorsFactory;
@@ -26,6 +27,9 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.net.ssl.*;
@@ -51,6 +55,9 @@ public class ServerMain {
     public static final String LOGS_PATH = "logs";
     public static final String SECURITY_SUBDIRECTORY = "security";
     // error messages    
+    public static final String NUM_WORKER_THREADS_WITHOUT_VALUE_MSG = "Number of worker threads is not specified.";
+    public static final String SESSION_IDLE_TIMEOUT_WITHOUT_VALUE_MSG = "Session idle timeout is not specified.";
+    public static final String SESSION_IDLE_CHECK_INTERVAL_WITHOUT_VALUE_MSG = "Session idle check interval is not specified.";
     public static final String INTERFACES_WITHOUT_VALUE_MSG = "Interfaces not specified.";
     public static final String BACKGROUND_TASK_WITHOUT_VALUE_MSG = "Background task not specified";
     public static final String BAD_APP_URL_MSG = "url not specified";
@@ -133,21 +140,21 @@ public class ServerMain {
                     numWorkerThreads = args[i + 1];
                     i += 2;
                 } else {
-                    printHelp(PROTOCOLS_WITHOUT_VALUE_MSG);
+                    printHelp(NUM_WORKER_THREADS_WITHOUT_VALUE_MSG);
                 }
             } else if ((CMD_SWITCHS_PREFIX + SESSION_IDLE_TIMEOUT_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
                     sessionIdleTimeout = args[i + 1];
                     i += 2;
                 } else {
-                    printHelp(PROTOCOLS_WITHOUT_VALUE_MSG);
+                    printHelp(SESSION_IDLE_TIMEOUT_WITHOUT_VALUE_MSG);
                 }
             } else if ((CMD_SWITCHS_PREFIX + SESSION_IDLE_CHECK_INTERVAL_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
                     sessionIdleCheckInterval = args[i + 1];
                     i += 2;
                 } else {
-                    printHelp(PROTOCOLS_WITHOUT_VALUE_MSG);
+                    printHelp(SESSION_IDLE_CHECK_INTERVAL_WITHOUT_VALUE_MSG);
                 }
             } else if ((CMD_SWITCHS_PREFIX + APP_ELEMENT_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
@@ -181,6 +188,7 @@ public class ServerMain {
      */
     public static void main(String[] args) throws IOException, Exception {
         checkUserHome();
+        GeneralResourceProvider.registerDrivers();
         parseArgs(args);
         if (url == null || url.isEmpty()) {
             throw new IllegalArgumentException("Application url (-url parameter) is required.");
@@ -198,10 +206,21 @@ public class ServerMain {
                 ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), tasksScanner);
                 indexer.watch();
                 Scripts.initBIO(threadsConfig.getMaxServicesTreads());
+
+                int maxWorkerThreads = parseNumWorkerThreads();
+                ThreadPoolExecutor serverProcessor = new ThreadPoolExecutor(maxWorkerThreads, maxWorkerThreads,
+                        3L, TimeUnit.SECONDS,
+                        new LinkedBlockingQueue<>(),
+                        new DeamonThreadFactory("TSA-", false));
+                serverProcessor.allowCoreThreadTimeOut(true);
+
+                Scripts.initTasks((Runnable aTask) -> {
+                    serverProcessor.submit(aTask);
+                });
                 serverCoreDbClient = new ScriptedDatabasesClient(defDatasource, indexer, true, tasksScanner.getValidators(), threadsConfig.getMaxJdbcTreads());
                 QueriesProxy<SqlQuery> queries = new LocalQueriesProxy(serverCoreDbClient, indexer);
                 serverCoreDbClient.setQueries(queries);
-                PlatypusServer server = new PlatypusServer(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), appElement), queries, serverCoreDbClient, sslContext, parseListenAddresses(), parsePortsProtocols(), parsePortsSessionIdleTimeouts(), parsePortsSessionIdleCheckIntervals(), parsePortsNumWorkerThreads(), scriptsConfigs, appElement);
+                PlatypusServer server = new PlatypusServer(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), appElement), queries, serverCoreDbClient, sslContext, parseListenAddresses(), parsePortsProtocols(), parsePortsSessionIdleTimeouts(), parsePortsSessionIdleCheckIntervals(), serverProcessor, scriptsConfigs, appElement);
                 serverCoreDbClient.setContextHost(server);
                 ScriptedResource.init(server);
                 SensorsFactory.init(server.getAcceptorsFactory());
@@ -260,18 +279,15 @@ public class ServerMain {
         return protocolsMap;
     }
 
-    private static Map<Integer, Integer> parsePortsNumWorkerThreads() {
-        Map<Integer, Integer> numWorkerThreadsMap = new HashMap<>();
+    private static int parseNumWorkerThreads() {
         if (numWorkerThreads != null && !numWorkerThreads.isEmpty()) {
-            String[] splitted = numWorkerThreads.replace(" ", "").split(",");
-            for (int i = 0; i < splitted.length; i++) {
-                String[] protParts = splitted[i].split(":");
-                if (protParts.length == 2) {
-                    numWorkerThreadsMap.put(Integer.valueOf(protParts[0]), Integer.valueOf(protParts[1]));
-                }
+            try {
+                return Math.max(1, Integer.valueOf(numWorkerThreads));
+            } catch (Exception ex) {
+                Logger.getLogger(ServerMain.class.getName()).log(Level.WARNING, "Can''t parse numWorkerThreads. Falling back to default: {0}", PlatypusServer.DEFAULT_EXECUTOR_POOL_SIZE);
             }
         }
-        return numWorkerThreadsMap;
+        return PlatypusServer.DEFAULT_EXECUTOR_POOL_SIZE;
     }
 
     private static Map<Integer, Integer> parsePortsSessionIdleTimeouts() {

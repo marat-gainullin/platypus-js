@@ -22,12 +22,10 @@ public class DatabaseAuthorizer {
 
     public static final String LOGIN_INCORRECT_MSG = "Bad user name or password";
     public static final String CREDENTIALS_MISSING_MSG = "User name and password are required while anonymous access is disabled.";
-    private static final int LOGIN_DELAY = 500;
 
     public static void authorize(PlatypusServer aServer, String aUserName, String aPassword, Consumer<Session> onSuccess, Consumer<Exception> onFailure) {
         try {
             if (aUserName != null && !aUserName.isEmpty()) {
-                Thread.sleep(LOGIN_DELAY);
                 String passwordMd5 = MD5Generator.generate(aPassword != null ? aPassword : "");
                 Session created = aServer.getSessionManager().create(String.valueOf(IDGenerator.genID()));
                 DatabasesClient.credentialsToPrincipalWithBasicAuthentication(aServer.getDatabasesClient(), aUserName, passwordMd5, created.getSpace(), (PlatypusPrincipal principal) -> {

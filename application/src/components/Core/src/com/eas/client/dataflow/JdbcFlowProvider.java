@@ -241,6 +241,8 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                         } finally {
                             stmt.close();
                         }
+                    } else {
+                        return null;
                     }
                 } finally {
                     if (!isPaged()) {
@@ -257,8 +259,9 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                         lowLevelConnection = null;
                     }
                 }
+            } else {
+                return null;
             }
-            return null;
         };
         if (onSuccess != null) {
             asyncDataPuller.accept(() -> {

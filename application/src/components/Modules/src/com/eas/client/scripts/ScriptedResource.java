@@ -47,6 +47,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
+import javax.script.ScriptException;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -113,6 +114,7 @@ public class ScriptedResource {
     public static Object load(final String aResourceName, JSObject onSuccess, JSObject onFailure) throws Exception {
         if (onSuccess != null) {
             Scripts.Space space = Scripts.getSpace();
+            space.incAsyncsCount();
             Scripts.startBIO(() -> {
                 try {
                     Object loaded = loadSync(aResourceName);
@@ -537,11 +539,16 @@ public class ScriptedResource {
                     required.add(scriptOrModuleName);
                     Path apiLocalPath = apiPath.resolve(scriptOrModuleName);
                     if (apiLocalPath != null && apiLocalPath.toFile().exists() && !apiLocalPath.toFile().isDirectory()) {
+                        aSpace.incAsyncsCount();
                         try {
                             aSpace.exec(apiLocalPath.toUri().toURL());
-                            scriptsProcess.complete(null, null);
-                        } catch (Exception ex) {
-                            scriptsProcess.complete(null, ex);
+                            aSpace.process(()->{
+                                scriptsProcess.complete(null, null);
+                            });
+                        } catch (MalformedURLException | ScriptException | URISyntaxException ex) {
+                            aSpace.process(()->{
+                                scriptsProcess.complete(null, ex);
+                            });
                         }
                     } else {
                         app.getModules().getModule(scriptOrModuleName, aSpace, (ModuleStructure structure) -> {
@@ -605,10 +612,16 @@ public class ScriptedResource {
                     }
                 }
             } else {
-                onSuccess.accept(null);
+                aSpace.incAsyncsCount();
+                aSpace.process(() -> {
+                    onSuccess.accept(null);
+                });
             }
         } else {
-            onSuccess.accept(null);
+            aSpace.incAsyncsCount();
+            aSpace.process(() -> {
+                onSuccess.accept(null);
+            });
         }
     }
 

@@ -12,6 +12,7 @@ import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.client.threetier.requests.LogoutRequest;
+import com.eas.concurrent.DeamonThreadFactory;
 import com.eas.proto.ProtoReader;
 import com.eas.script.Scripts;
 import java.io.ByteArrayOutputStream;
@@ -28,6 +29,9 @@ import java.util.Queue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -44,6 +48,7 @@ import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 import org.apache.mina.filter.codec.ProtocolEncoderOutput;
+import org.apache.mina.filter.executor.ExecutorFilter;
 import org.apache.mina.filter.ssl.SslFilter;
 import org.apache.mina.transport.socket.SocketConnector;
 import org.apache.mina.transport.socket.nio.NioProcessor;
@@ -87,10 +92,16 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
     }
 
     private NioSocketConnector configureConnector(Executor aProcessor, SSLContext sslContext) throws Exception {
-        NioSocketConnector lconnector = new NioSocketConnector(aProcessor, new NioProcessor(aProcessor));
+        ThreadPoolExecutor ioProcessorExecutor = new ThreadPoolExecutor(1, 1,
+                3L, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(),
+                new DeamonThreadFactory("polling-", false));
+        ioProcessorExecutor.allowCoreThreadTimeOut(true);
+        NioSocketConnector lconnector = new NioSocketConnector(aProcessor, new NioProcessor(ioProcessorExecutor));
         lconnector.setDefaultRemoteAddress(new InetSocketAddress(host, port));
         SslFilter sslFilter = new SslFilter(sslContext);
         sslFilter.setUseClientMode(true);
+        lconnector.getFilterChain().addLast("executor", new ExecutorFilter(aProcessor));
         lconnector.getFilterChain().addLast("encryption", sslFilter);
         lconnector.getFilterChain().addLast("platypusCodec", new ProtocolCodecFilter(new RequestEncoder(), new ResponseDecoder()));
         lconnector.setHandler(new IoHandlerAdapter() {

@@ -21,13 +21,13 @@ public abstract class BearResourcePool<T> implements ResourcePool<T> {
 
     public BearResourcePool(int aMaximumSize) {
         super();
-        maximumSize = aMaximumSize;
+        maximumSize = Math.max(1, aMaximumSize);
         resources = new LinkedBlockingQueue<>(maximumSize);
     }
 
     @Override
     public T achieveResource() throws Exception {
-        T resource = resources.poll(0, TimeUnit.MILLISECONDS);
+        T resource = resources.poll();
         if (resource == null) {
             if (currentSize < maximumSize) {// zombie condition
                 try {
@@ -36,13 +36,13 @@ public abstract class BearResourcePool<T> implements ResourcePool<T> {
                     return created;
                 } catch (Exception ex) {
                     if (currentSize > 0) {// ever-increasing counter saves this logic
-                        return resources.poll();
+                        return resources.poll(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
                     } else {
                         throw ex;
                     }
                 }
             } else {
-                return resources.poll();
+                return resources.poll(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
             }
         } else {
             return resource;

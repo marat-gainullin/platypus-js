@@ -70,8 +70,8 @@ public class DatabasesClient {
      */
     public DatabasesClient(String aDefaultDatasourceName, boolean aAutoFillMetadata, int aMaxJdbcThreads) throws Exception {
         super();
-        jdbcProcessor = new ThreadPoolExecutor(0, aMaxJdbcThreads,
-                10L, TimeUnit.SECONDS,
+        jdbcProcessor = new ThreadPoolExecutor(aMaxJdbcThreads, aMaxJdbcThreads,
+                3L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(),
                 new DeamonThreadFactory("jdbc-", false));
         jdbcProcessor.allowCoreThreadTimeOut(true);

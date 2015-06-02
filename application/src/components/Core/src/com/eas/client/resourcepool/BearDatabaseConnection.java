@@ -20,12 +20,14 @@ public class BearDatabaseConnection implements Connection {
     protected ResourcePool<BearDatabaseConnection> connectionsPool;
     protected Connection delegate;
     protected int maxStatements = Integer.MAX_VALUE;
+    protected int currentStatements;
+    protected int currentCalls;
 
     public BearDatabaseConnection(int aMaxStatetments, Connection aDelegate, ResourcePool<BearDatabaseConnection> aPool) {
         super();
         delegate = aDelegate;
         connectionsPool = aPool;
-        maxStatements = aMaxStatetments;
+        maxStatements = Math.max(1, aMaxStatetments);
     }
 
     @Override
@@ -53,7 +55,7 @@ public class BearDatabaseConnection implements Connection {
         delegate.setSchema(schema);
     }
 
-    public void returnPreparedStatement(String aSqlClause, PreparedStatement aStatement) {
+    public void returnPreparedStatement(String aSqlClause, PreparedStatement aStatement) throws SQLException {
         stmts.put(aSqlClause, aStatement);
     }
 
@@ -103,7 +105,13 @@ public class BearDatabaseConnection implements Connection {
     @Override
     public PreparedStatement prepareStatement(String sql) throws SQLException {
         shrinkStatements();
-        return wrapPreparedStatement(sql, delegate.prepareStatement(sql));
+        PreparedStatement cachedStmt = stmts.remove(sql);
+        if (cachedStmt != null) {
+            return wrapPreparedStatement(sql, cachedStmt);
+        } else {
+            currentStatements++;
+            return wrapPreparedStatement(sql, delegate.prepareStatement(sql));
+        }
     }
 
     protected BearCallableStatement wrapPrearedCall(String aSql, CallableStatement aCall) {
@@ -127,7 +135,13 @@ public class BearDatabaseConnection implements Connection {
     @Override
     public CallableStatement prepareCall(String sql) throws SQLException {
         shrinkCalls();
-        return wrapPrearedCall(sql, delegate.prepareCall(sql));
+        CallableStatement cachedCall = calls.remove(sql);
+        if (cachedCall != null) {
+            return wrapPrearedCall(sql, cachedCall);
+        } else {
+            currentCalls++;
+            return wrapPrearedCall(sql, delegate.prepareCall(sql));
+        }
     }
 
     @Override
@@ -398,18 +412,20 @@ public class BearDatabaseConnection implements Connection {
     }
 
     protected void shrinkStatements() throws SQLException {
-        while(stmts.size() >= maxStatements){
+        while (!stmts.isEmpty() && currentStatements >= maxStatements) {
             String toRemove = stmts.keySet().iterator().next();
             PreparedStatement stmt = stmts.remove(toRemove);
             stmt.close();
+            currentStatements--;
         }
     }
 
     protected void shrinkCalls() throws SQLException {
-        while(calls.size() >= maxStatements){
+        while (!calls.isEmpty() && currentCalls >= maxStatements) {
             String toRemove = calls.keySet().iterator().next();
             CallableStatement call = calls.remove(toRemove);
             call.close();
+            currentCalls--;
         }
     }
 

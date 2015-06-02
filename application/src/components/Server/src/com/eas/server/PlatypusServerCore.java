@@ -354,7 +354,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
 
     @Override
     public String preparationContext() throws Exception {
-        PlatypusPrincipal principal = (PlatypusPrincipal)Scripts.getSpace().getPrincipal();
+        PlatypusPrincipal principal = (PlatypusPrincipal) Scripts.getSpace().getPrincipal();
         return principal != null ? principal.getContext() : null;
     }
 

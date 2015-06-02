@@ -68,7 +68,7 @@ public class PlatypusHttpConnection extends PlatypusConnection {
 
     public PlatypusHttpConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts, int aMaximumBIOThreads) throws Exception {
         super(aUrl, aOnCredentials, aMaximumAuthenticateAttempts);
-        bioExecutor = new ThreadPoolExecutor(0, aMaximumBIOThreads,
+        bioExecutor = new ThreadPoolExecutor(aMaximumBIOThreads, aMaximumBIOThreads,
                 1L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(),
                 new DeamonThreadFactory("http-client-", false));

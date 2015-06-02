@@ -373,7 +373,7 @@ public class Scripts {
                         if (newVersion == Integer.MAX_VALUE) {
                             newVersion = 0;
                         }
-                        if (processedTask != null) {//Single attempt to offer ioTask.
+                        if (processedTask != null) {//Single attempt to offer aTask.
                             queue.offer(processedTask);
                             processedTask = null;
                         }
@@ -485,7 +485,7 @@ public class Scripts {
     }
 
     public static void initBIO(int aMaxThreads) {
-        bio = new ThreadPoolExecutor(0, aMaxThreads,
+        bio = new ThreadPoolExecutor(aMaxThreads, aMaxThreads,
                     1L, TimeUnit.SECONDS,
                     new LinkedBlockingQueue<>(),
                     new DeamonThreadFactory("platypus-bio-", false));
