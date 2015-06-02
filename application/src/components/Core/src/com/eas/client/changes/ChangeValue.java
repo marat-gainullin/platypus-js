@@ -27,7 +27,7 @@ public class ChangeValue implements HasPublished {
 
     public ChangeValue(String aName, Object aValue, DataTypeInfo aType) {
         name = aName;
-        value = aValue;
+        value = Scripts.getSpace() != null ? Scripts.getSpace().toJava(aValue) : aValue;
         type = aType;
     }
 
@@ -36,9 +36,9 @@ public class ChangeValue implements HasPublished {
         return name;
     }
 
-    @ScriptFunction(jsDoc = "New value.")
+    @ScriptFunction(jsDoc = "Value of changed property.")
     public Object getValue() {
-        return value;
+        return Scripts.getSpace().toJs(value);
     }
 
     @Override

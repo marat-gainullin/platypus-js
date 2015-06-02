@@ -148,11 +148,11 @@ public class SqlCompiledQuery {
             PlatypusJdbcFlowProvider flow = basesProxy.createFlowProvider(datasourceName, entityName, sqlClause, expectedFields);
             flow.setPageSize(pageSize);
             flow.setProcedure(procedure);
-            return flow.<T>select(parameters, aResultSetProcessor, aSpace != null ? (T t) -> {
+            return flow.<T>select(parameters, aResultSetProcessor, onSuccess != null ? (T t) -> {
                 aSpace.process(() -> {
                     onSuccess.accept(t);
                 });
-            } : null, aSpace != null ? (Exception ex) -> {
+            } : null, onFailure != null ? (Exception ex) -> {
                 aSpace.process(() -> {
                     onFailure.accept(ex);
                 });
@@ -167,12 +167,12 @@ public class SqlCompiledQuery {
             PlatypusJdbcFlowProvider flow = basesProxy.createFlowProvider(datasourceName, entityName, sqlClause, expectedFields);
             flow.setPageSize(pageSize);
             flow.setProcedure(procedure);
-            Collection<Map<String, Object>> data = flow.refresh(parameters, aSpace != null ? (Collection<Map<String, Object>> aData) -> {
+            Collection<Map<String, Object>> data = flow.refresh(parameters, onSuccess != null ? (Collection<Map<String, Object>> aData) -> {
                 aSpace.process(() -> {
                     JSObject aJsData = aSpace.readJsArray(aData);
                     onSuccess.accept(aJsData);
                 });
-            } : null, aSpace != null ? (Exception ex) -> {
+            } : null, onFailure != null ? (Exception ex) -> {
                 aSpace.process(() -> {
                     onFailure.accept(ex);
                 });

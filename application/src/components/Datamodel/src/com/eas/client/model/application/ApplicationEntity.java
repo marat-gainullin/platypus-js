@@ -444,7 +444,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
             pending = f;
             return null;
         } else {
-            JSObject jsRowset = query.execute(null, null, null);
+            JSObject jsRowset = query.execute(Scripts.getSpace(), null, null);
             applySnapshot(jsRowset);
             fireRequeried();
             return jsRowset;

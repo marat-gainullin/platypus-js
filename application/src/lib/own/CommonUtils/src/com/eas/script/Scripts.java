@@ -472,10 +472,7 @@ public class Scripts {
     }
     protected static Consumer<Runnable> tasks;
     // bio thread pool
-    protected static ThreadPoolExecutor bio = new ThreadPoolExecutor(0, 25,
-            1L, TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(),
-            new DeamonThreadFactory("platypus-bio-", false));
+    protected static ThreadPoolExecutor bio;
 
     public static void initTasks(Consumer<Runnable> aTasks) {
         assert tasks == null : "Scripts tasks are already initialized";
@@ -488,8 +485,11 @@ public class Scripts {
     }
 
     public static void initBIO(int aMaxThreads) {
-        bio.setCorePoolSize(aMaxThreads);
-        bio.setMaximumPoolSize(aMaxThreads);
+        bio = new ThreadPoolExecutor(0, aMaxThreads,
+                    1L, TimeUnit.SECONDS,
+                    new LinkedBlockingQueue<>(),
+                    new DeamonThreadFactory("platypus-bio-", false));
+        bio.allowCoreThreadTimeOut(true);
     }
 
     public static void startBIO(Runnable aBlocked) {
