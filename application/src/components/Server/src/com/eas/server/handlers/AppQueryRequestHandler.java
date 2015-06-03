@@ -56,7 +56,7 @@ public class AppQueryRequestHandler extends SessionRequestHandler<AppQueryReques
                     }
                     assert query.getEntityName().equals(getRequest().getQueryName());
                     /**
-                     * this code is moved to stored query factory in order to
+                     * this code was moved to stored query factory in order to
                      * code abstraction SqlDriver driver =
                      * getServerCore().getDatabasesClient().getDbMetadataCache(query.getDbId()).getConnectionDriver();
                      * Fields queryFields = query.getFields(); if (queryFields

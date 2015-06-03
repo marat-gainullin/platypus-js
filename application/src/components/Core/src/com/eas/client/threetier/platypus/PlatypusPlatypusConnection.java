@@ -44,6 +44,7 @@ import org.apache.mina.core.future.IoFuture;
 import org.apache.mina.core.future.WriteFuture;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.DummySession;
+import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
@@ -101,8 +102,8 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
         lconnector.setDefaultRemoteAddress(new InetSocketAddress(host, port));
         SslFilter sslFilter = new SslFilter(sslContext);
         sslFilter.setUseClientMode(true);
-        lconnector.getFilterChain().addLast("executor", new ExecutorFilter(aProcessor));
         lconnector.getFilterChain().addLast("encryption", sslFilter);
+        lconnector.getFilterChain().addLast("executor", new ExecutorFilter(aProcessor));
         lconnector.getFilterChain().addLast("platypusCodec", new ProtocolCodecFilter(new RequestEncoder(), new ResponseDecoder()));
         lconnector.setHandler(new IoHandlerAdapter() {
 
@@ -121,6 +122,16 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
             @Override
             public void messageSent(IoSession session, Object message) throws Exception {
                 super.messageSent(session, message);
+            }
+
+            @Override
+            public void sessionIdle(IoSession session, IdleStatus status) throws Exception {
+                super.sessionIdle(session, status);
+            }
+
+            @Override
+            public void sessionClosed(IoSession session) throws Exception {
+                super.sessionClosed(session); //To change body of generated methods, choose Tools | Templates.
             }
 
             @Override

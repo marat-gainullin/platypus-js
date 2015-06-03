@@ -78,6 +78,8 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
             ioSession.close(false);
             String sessionId = (String) ioSession.getAttribute(SESSION_ID);
             if (sessionId != null) {
+                // A bit hacky, due to sessions nature. ioSession is NOT an equivalent of sessionManager.session,
+                // but we use idle events as source of information about idle sessions
                 server.getSessionManager().remove(sessionId);
             } else {
                 Logger.getLogger(PlatypusRequestsHandler.class.getName()).severe("An attempt to remove system (null) session occured.");

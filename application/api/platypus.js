@@ -36,7 +36,6 @@
     var ParametersClassName = "com.eas.client.metadata.Parameters";
     //var FieldsClass = Java.type(FieldsClassName);
     var IDGeneratorClass = Java.type("com.eas.util.IDGenerator");
-    var ScriptTimerTaskClass = Java.type("com.eas.client.scripts.ScriptTimerTask");
     var ScriptedResourceClass = Java.type("com.eas.client.scripts.ScriptedResource");
     var PlatypusPrincipalClass = Java.type("com.eas.client.login.PlatypusPrincipal");
     var FileUtilsClass = Java.type("com.eas.util.FileUtils");
@@ -127,35 +126,20 @@
     function invokeDelayed(aTimeout, aTarget) {
         if (arguments.length < 2)
             throw "invokeDelayed needs 2 arguments - timeout, callback.";
-        //
-        var lock = aSpace.getLock();
-        var req = aSpace.getRequest();
-        var resp = aSpace.getResponse();
-        var session = aSpace.getSession();
-        var principal = PlatypusPrincipalClass.getInstance();
-        //
-        ScriptTimerTaskClass.schedule(function () {
-            aSpace.setLock(lock);
-            aSpace.setRequest(req);
-            aSpace.setResponse(resp);
-            aSpace.setSession(session);
-            PlatypusPrincipalClass.setInstance(principal);
-            try {
-                aSpace.locked(aTarget, lock);
-            } finally {
-                aSpace.setLock(null);
-                aSpace.setRequest(null);
-                aSpace.setResponse(null);
-                aSpace.setSession(null);
-                PlatypusPrincipalClass.setInstance(null);
-            }
-        }, aTimeout);
+        aSpace.schedule(aTarget, aTimeout);
     }
 
     Object.defineProperty(P, "invokeDelayed", {get: function () {
             return invokeDelayed;
         }});
 
+    function invokeLater(aTarget) {
+        aSpace.enqueue(aTarget);
+    }
+
+    Object.defineProperty(P, "invokeLater", {get: function () {
+            return invokeLater;
+        }});
     /**
      * @static
      * @param {type} deps
@@ -198,13 +182,6 @@
         serverCoreClass = Java.type('com.eas.server.PlatypusServerCore');
         // in server (EE or standalone)
 
-        function invokeLater(aTarget) {
-            invokeDelayed(1, aTarget);
-        }
-
-        Object.defineProperty(P, "invokeLater", {get: function () {
-                return invokeLater;
-            }});
         P.require([
             'core/index.js'
                     , 'server/index.js']);
@@ -232,13 +209,6 @@
         var VerticalPositionClass = Java.type("com.eas.client.forms.VerticalPosition");
         var OrientationClass = Java.type("com.eas.client.forms.Orientation");
 
-        function invokeLater(aTarget) {
-            SwingUtilitiesClass.invokeLater(aTarget);
-        }
-
-        Object.defineProperty(P, "invokeLater", {get: function () {
-                return invokeLater;
-            }});
         //
         P.require('common-utils/color.js');
         Object.defineProperty(P.Color, "black", {value: new P.Color(0, 0, 0)});
@@ -710,6 +680,8 @@
         Child.superclass = Parent.prototype;
     }
     Object.defineProperty(P, "extend", {value: extend});
+    
+    Object.defineProperty(P, "exit", {value: exit});
 
     Object.defineProperty(P, "session", {
         get: function () {
@@ -724,7 +696,7 @@
     Object.defineProperty(P, "principal", {
         get: function () {
             var clientSpacePrincipal = PlatypusPrincipalClass.getClientSpacePrincipal();
-            var tlsPrincipal = PlatypusPrincipalClass.getInstance();
+            var tlsPrincipal = aSpace.getPrincipal();
             return boxAsJs(clientSpacePrincipal !== null ? clientSpacePrincipal : tlsPrincipal);
         }
     });

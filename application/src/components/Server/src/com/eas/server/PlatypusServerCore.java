@@ -32,7 +32,6 @@ import java.net.URI;
 import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -199,7 +198,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                             }
                             targetSpace.process(() -> {
                                 try {
-                                    ScriptedResource._require(new String[]{aModuleName}, null, new HashSet<>(), targetSpace, (Void v) -> {
+                                    ScriptedResource._require(new String[]{aModuleName}, null, targetSpace, (Void v) -> {
                                         try {
                                             JSObject moduleInstance;
                                             if (targetSession == null || !targetSession.containsModule(aModuleName)) {

@@ -31,7 +31,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
-import java.util.HashSet;
 import java.util.concurrent.Callable;
 import java.util.logging.*;
 import javax.swing.UIManager;
@@ -289,7 +288,7 @@ public class PlatypusClientApplication {
                 Forms.initScripts(space);
                 space.process(() -> {
                     try {
-                        ScriptedResource._require(new String[]{""}, null, new HashSet<>(), space, (Void v) -> {
+                        ScriptedResource._require(new String[]{""}, null, space, (Void v) -> {
                             Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.INFO, "Platypus application started.");
                         }, (Exception ex) -> {
                             Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, ex);

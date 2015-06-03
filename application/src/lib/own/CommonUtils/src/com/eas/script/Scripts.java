@@ -3,7 +3,6 @@ package com.eas.script;
 import com.eas.concurrent.DeamonThreadFactory;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -71,15 +70,50 @@ public class Scripts {
         }
     }
 
+    public static class Pending {
+
+        protected Consumer<Void> onLoad;
+        protected Consumer<Exception> onError;
+
+        public Pending(Consumer<Void> aOnLoad, Consumer<Exception> aOnError) {
+            super();
+            onLoad = aOnLoad;
+            onError = aOnError;
+        }
+
+        public void loaded() {
+            onLoad.accept(null);
+        }
+
+        public void failed(Exception ex) {
+            onError.accept(ex);
+        }
+    }
+
     public static class Space {
 
         protected ScriptEngine engine;
         protected Object global;
         protected Map<String, JSObject> publishers = new HashMap<>();
+        protected Set<String> required = new HashSet<>();
+        protected Set<String> executed = new HashSet<>();
+        protected Map<String, Set<Pending>> pending = new HashMap<>();
 
         public Space(ScriptEngine aEngine) {
             super();
             engine = aEngine;
+        }
+
+        public Set<String> getRequired() {
+            return required;
+        }
+
+        public Set<String> getExecuted() {
+            return executed;
+        }
+
+        public Map<String, Set<Pending>> getPending() {
+            return pending;
         }
 
         protected JSObject loadFunc;
@@ -332,24 +366,33 @@ public class Scripts {
             putInGlobalFunc.call(null, new Object[]{aName, aValue});
         }
 
-        protected Map<URL, Executed> executed = new HashMap<>();
-
         public Object exec(URL aSourcePlace) throws ScriptException, URISyntaxException {
             assert loadFunc != null : SCRIPT_NOT_INITIALIZED;
-            Executed eEntry = executed.get(aSourcePlace);
-            long lastModified = Paths.get(aSourcePlace.toURI()).toFile().lastModified();
-            if (eEntry == null || lastModified > eEntry.getTimeStamp()) {
-                Object scriptRes = loadFunc.call(null, aSourcePlace.toString());
-                executed.put(aSourcePlace, new Executed(lastModified, scriptRes));
-                return scriptRes;
-            } else {
-                return eEntry.getScriptResult();
-            }
+            return loadFunc.call(null, aSourcePlace.toString());
         }
 
         public Object exec(String aSource) throws ScriptException, URISyntaxException {
             assert loadFunc != null : SCRIPT_NOT_INITIALIZED;
             return engine.eval(aSource);
+        }
+
+        public void schedule(JSObject aJsTask, long aTimeout) {
+            bio.submit(() -> {
+                try {
+                    Thread.sleep(aTimeout);
+                    process(() -> {
+                        aJsTask.call(null, new Object[]{});
+                    });
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Scripts.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            });
+        }
+
+        public void enqueue(JSObject aJsTask) {
+            process(() -> {
+                aJsTask.call(null, new Object[]{});
+            });
         }
 
         protected Queue<Runnable> queue = new ConcurrentLinkedQueue<>();
@@ -486,9 +529,9 @@ public class Scripts {
 
     public static void initBIO(int aMaxThreads) {
         bio = new ThreadPoolExecutor(aMaxThreads, aMaxThreads,
-                    1L, TimeUnit.SECONDS,
-                    new LinkedBlockingQueue<>(),
-                    new DeamonThreadFactory("platypus-bio-", false));
+                1L, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(),
+                new DeamonThreadFactory("platypus-bio-", false));
         bio.allowCoreThreadTimeOut(true);
     }
 
@@ -496,25 +539,6 @@ public class Scripts {
         bio.submit(() -> {
             aBlocked.run();
         });
-    }
-
-    protected static class Executed {
-
-        protected long timeStamp;
-        protected Object scriptResult;
-
-        public Executed(long aTimeStamp, Object aScriptResult) {
-            timeStamp = aTimeStamp;
-            scriptResult = aScriptResult;
-        }
-
-        public long getTimeStamp() {
-            return timeStamp;
-        }
-
-        public Object getScriptResult() {
-            return scriptResult;
-        }
     }
 
     public static Space createSpace() throws ScriptException {

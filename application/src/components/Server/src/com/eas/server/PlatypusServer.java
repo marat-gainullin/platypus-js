@@ -134,9 +134,9 @@ public class PlatypusServer extends PlatypusServerCore {
                 new LinkedBlockingQueue<>(),
                 new DeamonThreadFactory("nio-polling-", false));
         final IoAcceptor acceptor = new NioSocketAcceptor(executor, new NioProcessor(ioProcessorExecutor));
+        acceptor.getFilterChain().addLast("encryption", sslFilter);
         acceptor.getFilterChain().addLast("executor", new ExecutorFilter(executor, IoEventType.EXCEPTION_CAUGHT,
                 IoEventType.MESSAGE_RECEIVED, IoEventType.MESSAGE_SENT, IoEventType.SESSION_CLOSED));
-        acceptor.getFilterChain().addLast("encryption", sslFilter);
         acceptor.getFilterChain().addLast("platypusCodec", new ProtocolCodecFilter(new ResponseEncoder(), new RequestDecoder()));
         PlatypusRequestsHandler handler = new PlatypusRequestsHandler(this);
         acceptor.setHandler(handler);
