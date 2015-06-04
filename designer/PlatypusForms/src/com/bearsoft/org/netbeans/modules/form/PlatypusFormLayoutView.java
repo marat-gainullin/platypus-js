@@ -59,6 +59,7 @@ import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyVetoException;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.List;
@@ -80,6 +81,7 @@ import org.openide.ErrorManager;
 import org.openide.NotifyDescriptor;
 import org.openide.actions.FileSystemAction;
 import org.openide.awt.UndoRedo;
+import org.openide.cookies.SaveCookie;
 import org.openide.explorer.ExplorerManager;
 import org.openide.explorer.ExplorerUtils;
 import org.openide.nodes.AbstractNode;
@@ -144,6 +146,9 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
      */
     private static final String iconURL
             = "com/bearsoft/org/netbeans/modules/form/resources/formDesigner.gif"; // NOI18N
+    
+    private static final String SAVE_ACTION_KEY = "save";
+    private static final String CTRL_S_KEY_STROKE = "control S";
 
     // constructors and setup
     PlatypusFormLayoutView(FormEditor aFormEditor) {
@@ -178,6 +183,20 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
             formToolBar = new FormToolBar(this);
         }
         setMinimumSize(new Dimension(10, 10));
+        
+        InputMap iMap = getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        ActionMap aMap = getActionMap();
+        iMap.put(KeyStroke.getKeyStroke(CTRL_S_KEY_STROKE), SAVE_ACTION_KEY);
+        aMap.put(SAVE_ACTION_KEY, new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    formModel.getDataObject().getLookup().lookup(SaveCookie.class).save();
+                } catch (IOException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            }
+        });
     }
 
     void initialize() {
