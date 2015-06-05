@@ -207,11 +207,10 @@ public class ScriptedResource {
         }
     }
 
-    private static String[] absoluteAppPaths(String[] aScriptsNames, URI aCalledFromFile) throws URISyntaxException {
+    private static String[] absoluteAppPaths(Path apiPath, String[] aScriptsNames, URI aCalledFromFile) throws URISyntaxException {
         if (aScriptsNames.length > 0 && aCalledFromFile != null) {
             String[] absolute = new String[aScriptsNames.length];
             Path appPath = Paths.get(new File(app.getModules().getLocalPath()).toURI());
-            Path apiPath = absoluteApiPath();
             Path calledFromFile = Paths.get(aCalledFromFile);
             Path calledFromDir = calledFromFile.getParent();
             for (int i = 0; i < aScriptsNames.length; i++) {
@@ -510,6 +509,81 @@ public class ScriptedResource {
 
     }
 
+    private static void loadModule(Path apiPath, String scriptOrModuleName, URI aCalledFromFile, Scripts.Space aSpace, Consumer<URL> onSuccess, Consumer<Exception> onFailure) {
+        Path apiLocalPath = apiPath.resolve(scriptOrModuleName);
+        if (apiLocalPath != null && apiLocalPath.toFile().exists() && !apiLocalPath.toFile().isDirectory()) {
+            aSpace.incAsyncsCount();// network activity simulation
+            aSpace.process(() -> {
+                try {
+                    URL toLoad = apiLocalPath.toUri().toURL();
+                    onSuccess.accept(toLoad);
+                } catch (MalformedURLException ex) {
+                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, "{0} - Failed {1}", new Object[]{scriptOrModuleName, ex.toString()});
+                }
+            });
+        } else {
+            try {
+                app.getModules().getModule(scriptOrModuleName, aSpace, (ModuleStructure structure) -> {
+                    if (structure != null) {
+                        try {
+                            AppElementFiles files = structure.getParts();
+                            File sourceFile = files.findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION);
+
+                            RequireProcess moduleProcess = new RequireProcess(3, (Void v) -> {
+                                try {
+                                    URL toLoad = sourceFile.toURI().toURL();
+                                    onSuccess.accept(toLoad);
+                                } catch (MalformedURLException ex) {
+                                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, "{0} - Failed {1}", new Object[]{scriptOrModuleName, ex.toString()});
+                                }
+                            }, (Exception ex) -> {
+                                onFailure.accept(ex);
+                            });
+                            if (files.isModule()) {
+                                try {
+                                    // 1
+                                    qRequire(structure.getQueryDependencies().toArray(new String[]{}), aSpace, (Void v) -> {
+                                        moduleProcess.complete(null, null);
+                                    }, (Exception ex) -> {
+                                        moduleProcess.complete(null, ex);
+                                    });
+                                    // 2
+                                    sRequire(structure.getServerDependencies().toArray(new String[]{}), aSpace, (Void v) -> {
+                                        moduleProcess.complete(null, null);
+                                    }, (Exception ex) -> {
+                                        moduleProcess.complete(null, ex);
+                                    });
+                                } catch (Exception ex) {
+                                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Failed {1}", new Object[]{scriptOrModuleName, ex.toString()});
+                                }
+                            } else {
+                                // 1
+                                moduleProcess.complete(null, null);// instead of qRequire
+                                // 2
+                                moduleProcess.complete(null, null);// instead of sRequire
+                            }
+                            // 3
+                            _require(structure.getClientDependencies().toArray(new String[]{}), aCalledFromFile, aSpace, (Void v) -> {
+                                moduleProcess.complete(null, null);
+                            }, (Exception ex) -> {
+                                moduleProcess.complete(null, ex);
+                            });
+                        } catch (Exception ex) {
+                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Failed {1}", new Object[]{scriptOrModuleName, ex.toString()});
+                        }
+                    } else {
+                        Exception ex = new FileNotFoundException(scriptOrModuleName);
+                        onFailure.accept(ex);
+                    }
+                }, (Exception ex) -> {
+                    onFailure.accept(ex);
+                });
+            } catch (Exception ex) {
+                Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Failed {1}", new Object[]{scriptOrModuleName, ex.toString()});
+            }
+        }
+    }
+
     public static void require(String[] aScriptsNames, String aCalledFromFile, JSObject onSuccess, JSObject onFailure) throws Exception {
         Scripts.Space space = Scripts.getSpace();
         _require(aScriptsNames, aCalledFromFile != null ? new URL(aCalledFromFile).toURI() : null, space, (Void v) -> {
@@ -526,8 +600,8 @@ public class ScriptedResource {
     public static void _require(String[] aScriptsNames, URI aCalledFromFile, Scripts.Space aSpace, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (aScriptsNames != null && aScriptsNames.length > 0) {
             Path apiPath = absoluteApiPath();
-            aScriptsNames = absoluteAppPaths(aScriptsNames, aCalledFromFile);
-            RequireProcess scriptsProcess = new RequireProcess(aScriptsNames.length, (Void v) -> {
+            aScriptsNames = absoluteAppPaths(apiPath, aScriptsNames, aCalledFromFile);
+            RequireProcess process = new RequireProcess(aScriptsNames.length, (Void v) -> {
                 aSpace.incAsyncsCount();
                 aSpace.process(() -> {
                     onSuccess.accept(v);
@@ -537,11 +611,10 @@ public class ScriptedResource {
                 aSpace.process(() -> {
                     onFailure.accept(ex);
                 });
-            }
-            );
+            });
             for (String scriptOrModuleName : aScriptsNames) {
                 if (aSpace.getExecuted().contains(scriptOrModuleName)) {
-                    scriptsProcess.complete(null, null);
+                    process.complete(null, null);
                 } else {
                     // add callbacks to pendings
                     if (!aSpace.getPending().containsKey(scriptOrModuleName)) {
@@ -549,108 +622,37 @@ public class ScriptedResource {
                     }
                     Set<Scripts.Pending> pending = aSpace.getPending().get(scriptOrModuleName);
                     pending.add(new Scripts.Pending((Void v) -> {
-                        scriptsProcess.complete(null, null);
+                        process.complete(null, null);
                     }, (Exception ex) -> {
-                        scriptsProcess.complete(null, ex);
+                        process.complete(null, ex);
                     }));
                     if (!aSpace.getRequired().contains(scriptOrModuleName)) {
+                        Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "Loading {0}...", scriptOrModuleName);
                         aSpace.getRequired().add(scriptOrModuleName);
-                        Path apiLocalPath = apiPath.resolve(scriptOrModuleName);
-                        if (apiLocalPath != null && apiLocalPath.toFile().exists() && !apiLocalPath.toFile().isDirectory()) {
+                        loadModule(apiPath, scriptOrModuleName, aCalledFromFile, aSpace, (URL aLocalURL) -> {
                             try {
-                                URL toLoad = apiLocalPath.toUri().toURL();
                                 // sync require may occur while pending
                                 if (!aSpace.getExecuted().contains(scriptOrModuleName)) {
                                     aSpace.getExecuted().add(scriptOrModuleName);
-                                    aSpace.exec(toLoad);
+                                    aSpace.exec(aLocalURL);
+                                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Loaded", scriptOrModuleName);
                                 }
-                                try {
-                                    Set<Scripts.Pending> lpending = new HashSet(pending);
-                                    pending.clear();
-                                    lpending.forEach((Scripts.Pending p) -> {
-                                        p.loaded();
-                                    });
-                                } catch (Exception ex) {
-                                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, ex.getMessage());
-                                }
-                            } catch (URISyntaxException | ScriptException ex) {
                                 Set<Scripts.Pending> lpending = new HashSet(pending);
                                 pending.clear();
                                 lpending.forEach((Scripts.Pending p) -> {
-                                    p.failed(ex);
+                                    p.loaded();
                                 });
+                            } catch (ScriptException | URISyntaxException ex) {
+                                Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, null, ex);
                             }
-                        } else {
-                            app.getModules().getModule(scriptOrModuleName, aSpace, (ModuleStructure structure) -> {
-                                if (structure != null) {
-                                    try {
-                                        AppElementFiles files = structure.getParts();
-                                        File sourceFile = files.findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION);
-
-                                        RequireProcess scriptProcess = new RequireProcess(3, (Void v) -> {
-                                            try {
-                                                URL toLoad = sourceFile.toURI().toURL();
-                                                // sync require may occur while pending
-                                                if (!aSpace.getExecuted().contains(scriptOrModuleName)) {
-                                                    aSpace.getExecuted().add(scriptOrModuleName);
-                                                    aSpace.exec(toLoad);
-                                                }
-                                                try {
-                                                    Set<Scripts.Pending> lpending = new HashSet(pending);
-                                                    pending.clear();
-                                                    lpending.forEach((Scripts.Pending p) -> {
-                                                        p.loaded();
-                                                    });
-                                                } catch (Exception ex) {
-                                                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, ex.getMessage());
-                                                }
-                                            } catch (MalformedURLException | URISyntaxException | ScriptException ex) {
-                                                Set<Scripts.Pending> lpending = new HashSet(pending);
-                                                pending.clear();
-                                                lpending.forEach((Scripts.Pending p) -> {
-                                                    p.failed(ex);
-                                                });
-                                            }
-                                        }, (Exception ex) -> {
-                                            scriptsProcess.complete(null, ex);
-                                        });
-                                        // 1, 2
-                                        if (files.isModule()) {
-                                            try {
-                                                qRequire(structure.getQueryDependencies().toArray(new String[]{}), aSpace, (Void v) -> {
-                                                    scriptProcess.complete(null, null);
-                                                }, (Exception ex) -> {
-                                                    scriptProcess.complete(null, ex);
-                                                });
-                                                sRequire(structure.getServerDependencies().toArray(new String[]{}), aSpace, (Void v) -> {
-                                                    scriptProcess.complete(null, null);
-                                                }, (Exception ex) -> {
-                                                    scriptProcess.complete(null, ex);
-                                                });
-                                            } catch (Exception ex) {
-                                                Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, null, ex);
-                                            }
-                                        } else {
-                                            scriptProcess.complete(null, null);// instead of qRequire
-                                            scriptProcess.complete(null, null);// instead of sRequire
-                                        }
-                                        // 3
-                                        _require(structure.getClientDependencies().toArray(new String[]{}), aCalledFromFile, aSpace, (Void v) -> {
-                                            scriptProcess.complete(null, null);
-                                        }, (Exception ex) -> {
-                                            scriptProcess.complete(null, ex);
-                                        });
-                                    } catch (Exception ex) {
-                                        Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, null, ex);
-                                    }
-                                } else {
-                                    Exception ex = new FileNotFoundException(scriptOrModuleName);
-                                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, null, ex);
-                                }
-                            }, (Exception ex) -> {
-                                scriptsProcess.complete(null, ex);
+                        }, (Exception ex) -> {
+                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Failed {1}", new Object[]{scriptOrModuleName, ex.toString()});
+                            Set<Scripts.Pending> lpending = new HashSet(pending);
+                            pending.clear();
+                            lpending.forEach((Scripts.Pending p) -> {
+                                p.failed(ex);
                             });
-                        }
+                        });
                     }
                 }
             }
@@ -668,8 +670,8 @@ public class ScriptedResource {
     }
 
     public static void _require(String[] aScriptsNames, URI aCalledFromFile, Scripts.Space aSpace) throws Exception {
-        aScriptsNames = absoluteAppPaths(aScriptsNames, aCalledFromFile);
         Path apiPath = absoluteApiPath();
+        aScriptsNames = absoluteAppPaths(apiPath, aScriptsNames, aCalledFromFile);
         for (String scriptOrModuleName : aScriptsNames) {
             if (!aSpace.getExecuted().contains(scriptOrModuleName)) {
                 aSpace.getExecuted().add(scriptOrModuleName);

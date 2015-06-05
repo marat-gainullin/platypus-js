@@ -23,6 +23,7 @@ import java.sql.*;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -170,7 +171,7 @@ public class DatabasesClient {
         return sb.toString();
     }
 
-    public static Map<String, String> getUserProperties(DatabasesClient aClient, String aUserName, Scripts.Space aSpace, Consumer<Map<String, String>> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public static Map<String, String> getUserProperties(DatabasesClient aClient, String aUserName, Executor aCallbacksExecutor, Consumer<Map<String, String>> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (aUserName != null && aClient != null) {
             final SqlQuery q = new SqlQuery(aClient, USER_QUERY_TEXT);
             q.putParameter(USERNAME_PARAMETER_NAME, DataTypeInfo.VARCHAR, aUserName.toUpperCase());
@@ -190,7 +191,7 @@ public class DatabasesClient {
                 return properties;
             };
             if (onSuccess != null) {
-                compiled.<Map<String, String>>executeQuery(doWork, aSpace, (Map<String, String> props) -> {
+                compiled.<Map<String, String>>executeQuery(doWork, aCallbacksExecutor, (Map<String, String> props) -> {
                     onSuccess.accept(props);
                 }, onFailure);
                 return null;
@@ -199,11 +200,11 @@ public class DatabasesClient {
             }
         } else {
             if (onSuccess != null) {
-                aSpace.process(()->{
+                aCallbacksExecutor.execute(() -> {
                     onSuccess.accept(new HashMap<>());
                 });
                 return null;
-            }else{
+            } else {
                 return null;
             }
         }
@@ -253,13 +254,13 @@ public class DatabasesClient {
         }
     }
 
-    public static PlatypusPrincipal credentialsToPrincipalWithBasicAuthentication(DatabasesClient aClient, String aUserName, String aPassword, Scripts.Space aSpace, Consumer<PlatypusPrincipal> aOnSuccess, Consumer<Exception> aOnFailure) throws Exception {
+    public static PlatypusPrincipal credentialsToPrincipalWithBasicAuthentication(DatabasesClient aClient, String aUserName, String aPassword, Executor aCallbacksExecutor, Consumer<PlatypusPrincipal> aOnSuccess, Consumer<Exception> aOnFailure) throws Exception {
         final UserInfo ui = new UserInfo(aUserName, aPassword, aOnSuccess, true);
         if (aOnSuccess != null) {
-            getUserProperties(aClient, aUserName, aSpace, (Map<String, String> userProperties) -> {
+            getUserProperties(aClient, aUserName, aCallbacksExecutor, (Map<String, String> userProperties) -> {
                 ui.complete(userProperties, null);
             }, aOnFailure);
-            getUserRoles(aClient, aUserName, aSpace, (Set<String> aRoles) -> {
+            getUserRoles(aClient, aUserName, aCallbacksExecutor, (Set<String> aRoles) -> {
                 ui.complete(null, aRoles);
             }, aOnFailure);
             return null;
@@ -274,13 +275,13 @@ public class DatabasesClient {
         }
     }
 
-    public static PlatypusPrincipal userNameToPrincipal(DatabasesClient aClient, String aUserName, Scripts.Space aSpace, Consumer<PlatypusPrincipal> aOnSuccess, Consumer<Exception> aOnFailure) throws Exception {
+    public static PlatypusPrincipal userNameToPrincipal(DatabasesClient aClient, String aUserName, Executor aCallbacksExecutor, Consumer<PlatypusPrincipal> aOnSuccess, Consumer<Exception> aOnFailure) throws Exception {
         final UserInfo ui = new UserInfo(aUserName, null, aOnSuccess, false);
         if (aOnSuccess != null) {
-            getUserProperties(aClient, aUserName, aSpace, (Map<String, String> userProperties) -> {
+            getUserProperties(aClient, aUserName, aCallbacksExecutor, (Map<String, String> userProperties) -> {
                 ui.complete(userProperties, null);
             }, aOnFailure);
-            getUserRoles(aClient, aUserName, aSpace, (Set<String> aRoles) -> {
+            getUserRoles(aClient, aUserName, aCallbacksExecutor, (Set<String> aRoles) -> {
                 ui.complete(null, aRoles);
             }, aOnFailure);
             return null;
@@ -337,8 +338,9 @@ public class DatabasesClient {
     }
 
     public DatabaseMdCache getDbMetadataCache(String aDatasourceName) throws Exception {
-        if(aDatasourceName == null)
+        if (aDatasourceName == null) {
             aDatasourceName = defaultDatasourceName;
+        }
         if (!mdCaches.containsKey(aDatasourceName)) {
             DatabaseMdCache cache = new DatabaseMdCache(this, aDatasourceName);
             mdCaches.put(aDatasourceName, cache);
@@ -355,7 +357,9 @@ public class DatabasesClient {
 
     private void startJdbcTask(Runnable aTask) {
         Scripts.Space space = Scripts.getSpace();
-        space.incAsyncsCount();
+        if (space != null) {
+            space.incAsyncsCount();
+        }
         jdbcProcessor.submit(() -> {
             aTask.run();
         });
@@ -640,7 +644,7 @@ public class DatabasesClient {
         }
     }
 
-    protected static Set<String> getUserRoles(DatabasesClient aClient, String aUserName, Scripts.Space aSpace, Consumer<Set<String>> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    protected static Set<String> getUserRoles(DatabasesClient aClient, String aUserName, Executor aCallbacksExecutor, Consumer<Set<String>> onSuccess, Consumer<Exception> onFailure) throws Exception {
         CallableConsumer<Set<String>, ResultSet> doWork = (ResultSet rs) -> {
             Set<String> roles = new HashSet<>();
             ColumnsIndicies idxs = new ColumnsIndicies(rs.getMetaData());
@@ -654,14 +658,8 @@ public class DatabasesClient {
         q.putParameter(USERNAME_PARAMETER_NAME, DataTypeInfo.VARCHAR, aUserName.toUpperCase());
         SqlCompiledQuery compiled = q.compile();
         if (onSuccess != null) {
-            compiled.<Set<String>>executeQuery(doWork, aSpace, (Set<String> aRoles) -> {
-                try {
-                    onSuccess.accept(aRoles);
-                } catch (Exception ex) {
-                    if (onFailure != null) {
-                        onFailure.accept(ex);
-                    }
-                }
+            compiled.<Set<String>>executeQuery(doWork, aCallbacksExecutor, (Set<String> aRoles) -> {
+                onSuccess.accept(aRoles);
             }, onFailure);
             return null;
         } else {

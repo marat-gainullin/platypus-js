@@ -242,7 +242,7 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
 
     private <R extends Response> void retry(Request aRequest, Scripts.Space aSpace, Consumer<Response> responseHandler, Attempts attemps) {
         Credentials sentCreds = credentials;
-        RequestEnvelope requestEnv = new RequestEnvelope(aRequest, null, null, sessionTicket, (InputStream is) -> {
+        RequestEnvelope requestEnv = new RequestEnvelope(aRequest, credentials != null ? credentials.userName : null, credentials != null ? credentials.password : null, sessionTicket, (InputStream is) -> {
             aSpace.process(() -> {
                 try {
                     final ProtoReader responseReader = new ProtoReader(is);
@@ -260,6 +260,7 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
                                 Credentials creds = onCredentials.call();
                                 if (creds != null) {
                                     credentials = creds;
+                                    sessionTicket = null;
                                     retry(aRequest, aSpace, responseHandler, attemps);
                                 } else { // Credentials are inaccessible, so leave things as is...
                                     responseHandler.accept(response);
@@ -334,7 +335,11 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
         R response = retrySync(aRequest);
         int authenticateAttempts = 0;
         while (response instanceof ErrorResponse && ((ErrorResponse) response).isNotLoggedIn() && authenticateAttempts++ < maximumAuthenticateAttempts && onCredentials != null) {
-            credentials = onCredentials.call();
+            Credentials creds = onCredentials.call();
+            if (creds != null) {
+                credentials = creds;
+                sessionTicket = null;
+            }
             response = retrySync(aRequest);
         }
         if (response instanceof ErrorResponse) {

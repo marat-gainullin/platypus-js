@@ -149,62 +149,6 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
             return res;
         };
         httpResult = performer.call(onHeaders);
-        /*
-        if (res.isUnauthorized() && res.authScheme != null && !res.authScheme.isEmpty()) {
-            sequence.in(() -> {
-                // Probably new cookies from another thread...
-                res.assign(performer.call(onHeaders));
-                if (res.isUnauthorized()) {
-                    // nice try :-(
-                    int authenticateAttempts = 0;
-                    while (res.isUnauthorized() && authenticateAttempts++ < maximumAuthenticateAttempts) {
-                        Credentials credentials = onCredentials.call();
-                        if (credentials != null) {
-                            if (res.authScheme.toLowerCase().contains(PlatypusHttpConstants.BASIC_AUTH_NAME.toLowerCase())) {
-                                pConn.setBasicCredentials(credentials);
-                                res.assign(performer.call(onHeaders));
-                                if (!res.isUnauthorized()) {
-                                    PlatypusPrincipal.setClientSpacePrincipal(new PlatypusPrincipal(credentials.userName, null, null, pConn));
-                                    pConn.reloggedIn();
-                                }
-                                return null;
-                                //} else if (authScheme.toLowerCase().contains(PlatypusHttpConstants.DIGEST_AUTH_NAME.toLowerCase())) {
-                            } else if (PlatypusHttpConstants.FORM_AUTH_NAME.equalsIgnoreCase(res.authScheme)) {
-                                String redirectLocation = res.redirectLocation;
-                                URL securityFormUrl = new URL(url + (url.toString().endsWith("/") ? "" : "/") + redirectLocation);
-                                HttpURLConnection securityFormConn = (HttpURLConnection) securityFormUrl.openConnection();
-                                securityFormConn.setInstanceFollowRedirects(false);
-                                securityFormConn.setDoOutput(true);
-                                securityFormConn.setRequestMethod(PlatypusHttpConstants.HTTP_METHOD_POST);
-                                securityFormConn.setRequestProperty(PlatypusHttpConstants.HEADER_CONTENTTYPE, PlatypusHttpConstants.FORM_CONTENT_TYPE);
-                                pConn.addCookies(securityFormConn);
-                                String formData = PlatypusHttpConstants.SECURITY_CHECK_USER + "=" + URLEncoder.encode(credentials.userName, SettingsConstants.COMMON_ENCODING) + "&" + PlatypusHttpConstants.SECURITY_CHECK_PASSWORD + "=" + URLEncoder.encode(credentials.password, SettingsConstants.COMMON_ENCODING);
-                                byte[] formDataConent = formData.getBytes(SettingsConstants.COMMON_ENCODING);
-                                securityFormConn.setRequestProperty(PlatypusHttpConstants.HEADER_CONTENTLENGTH, "" + formDataConent.length);
-                                try (OutputStream out = securityFormConn.getOutputStream()) {
-                                    out.write(formDataConent);
-                                }
-                                int responseCode = securityFormConn.getResponseCode();
-                                pConn.acceptCookies(securityFormConn);
-                                res.assign(performer.call(onHeaders));
-                                if (!res.isUnauthorized()) {
-                                    PlatypusPrincipal.setClientSpacePrincipal(new PlatypusPrincipal(credentials.userName, null, null, pConn));
-                                    pConn.reloggedIn();
-                                }
-                                return null;
-                            } else {
-                                Logger.getLogger(PlatypusHttpRequestWriter.class.getName()).log(Level.SEVERE, "Unsupported authorization scheme: {0}", res.authScheme);
-                                return null;
-                            }
-                        } else {// Credentials are inaccessible, so leave things as is...
-                            authenticateAttempts = Integer.MAX_VALUE;
-                        }
-                    }
-                }
-                return null;
-            });
-        }
-                */
     }
 
     private HttpResult completeRequest(Request aRequest) throws Exception {

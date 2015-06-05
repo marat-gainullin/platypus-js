@@ -681,8 +681,6 @@
     }
     Object.defineProperty(P, "extend", {value: extend});
     
-    Object.defineProperty(P, "exit", {value: exit});
-
     Object.defineProperty(P, "session", {
         get: function () {
             if (serverCoreClass) {

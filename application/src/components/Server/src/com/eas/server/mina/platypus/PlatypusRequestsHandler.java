@@ -35,7 +35,7 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
     public static final String BAD_PROTOCOL_MSG = "The message is not Platypus protocol request.";
     public static final String GOT_SIGNATURE_MSG = "Got signature from client.";
     public static final String SESSION_ID = "platypus-session-id";
-    private static final String GENERAL_EXCEPTION_MESSAGE = "Exception on request of type %d | %s.";
+    private static final String GENERAL_EXCEPTION_MESSAGE = "Exception on request of type %d | %s. %s";
     private static final String ACCESS_CONTROL_EXCEPTION_MESSAGE = "AccessControlException on request of type %d | %s. Message: %s.";
     private static final String SQL_EXCEPTION_MESSAGE = "SQLException on request of type %d | %s. Message: %s. sqlState: %s, errorCode: %d";
     public static final int IDLE_TIME_EVENT = 5 * 60; // 5 minutes
@@ -130,7 +130,7 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
                         Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, String.format(ACCESS_CONTROL_EXCEPTION_MESSAGE, requestEnv.request.getType(), requestEnv.request.getClass().getSimpleName(), aex.getMessage()));
                         pushResponse(ioSession, new ErrorResponse(aex), requestEnv.ticket, null);
                     } else {
-                        Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, String.format(GENERAL_EXCEPTION_MESSAGE, requestEnv.request.getType(), requestEnv.request.getClass().getSimpleName()), ex);
+                        Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, String.format(GENERAL_EXCEPTION_MESSAGE, requestEnv.request.getType(), requestEnv.request.getClass().getSimpleName(), ex.toString()));
                         pushResponse(ioSession, new ErrorResponse(ex.getMessage() != null && !ex.getMessage().isEmpty() ? ex.getMessage() : ex.toString()), requestEnv.ticket, null);
                     }
                 };
@@ -138,12 +138,16 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
                 final RequestHandler<?, ?> handler = RequestHandlerFactory.getHandler(server, requestEnv.request);
                 if (handler != null) {
                     if (requestEnv.ticket == null) {
-                        DatabaseAuthorizer.authorize(server, requestEnv.userName, requestEnv.password, (Session aSession) -> {
+                        DatabaseAuthorizer.authorize(server, requestEnv.userName, requestEnv.password, (Runnable aTask)->{
+                            Scripts.offerTask(aTask);
+                        }, (Session aSession) -> {
                             requestEnv.ticket = aSession.getId();
                             ioSession.setAttribute(SESSION_ID, aSession.getId());
-                            ((SessionRequestHandler<Request, Response>) handler).handle(aSession, (Response aResponse) -> {
-                                pushResponse(ioSession, aResponse, requestEnv.ticket, aSession.getSpace());
-                            }, onError);
+                            aSession.getSpace().process(() -> {
+                                ((SessionRequestHandler<Request, Response>) handler).handle(aSession, (Response aResponse) -> {
+                                    pushResponse(ioSession, aResponse, requestEnv.ticket, aSession.getSpace());
+                                }, onError);
+                            });
                         }, onError);
                     } else {
                         Session session = server.getSessionManager().get(requestEnv.ticket);

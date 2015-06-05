@@ -60,7 +60,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                     ScriptConfigs lsecurityConfigs = new ScriptConfigs();
                     ServerTasksScanner tasksScanner = new ServerTasksScanner(lsecurityConfigs);
                     ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), tasksScanner);
-                    indexer.watch();
+                    //indexer.watch();
                     Scripts.initBIO(aMaximumServicesThreads);
                     basesProxy = new ScriptedDatabasesClient(aDefaultDatasourceName, indexer, true, tasksScanner.getValidators(), aMaximumJdbcThreads);
                     QueriesProxy<SqlQuery> queries = new LocalQueriesProxy(basesProxy, indexer);
@@ -353,8 +353,12 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
 
     @Override
     public String preparationContext() throws Exception {
-        PlatypusPrincipal principal = (PlatypusPrincipal) Scripts.getSpace().getPrincipal();
-        return principal != null ? principal.getContext() : null;
+        Scripts.Space space = Scripts.getSpace();
+        if (space != null && space.getPrincipal() != null) {
+            return ((PlatypusPrincipal) space.getPrincipal()).getContext();
+        } else {
+            return null;
+        }
     }
 
     @Override

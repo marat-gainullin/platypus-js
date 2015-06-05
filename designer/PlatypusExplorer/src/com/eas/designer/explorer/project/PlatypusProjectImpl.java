@@ -99,7 +99,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
         try {
             ScriptEngine jsEngine = new ScriptEngineManager().getEngineByName("nashorn");
             Bindings bindings = jsEngine.createBindings();
-            Scripts.Space space = new Scripts.Space();
+            Scripts.Space space = new Scripts.Space(jsEngine);
             bindings.put("space", space);
             Object global = jsEngine.eval("load('classpath:com/eas/designer/explorer/designer-js.js', space);", bindings);
             space.setGlobal(global);

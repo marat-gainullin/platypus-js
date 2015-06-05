@@ -15,6 +15,7 @@ import com.eas.script.Scripts;
 import java.sql.ResultSet;
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -136,24 +137,24 @@ public class SqlCompiledQuery {
      * Executes query and returns results whatever setted in procedure flag.
      *
      * @param aResultSetProcessor
-     * @param aSpace
+     * @param aCallbacksExecutor
      * @param onSuccess
      * @param onFailure
      * @return Rowset insatance, representing query results.
      * @throws Exception
      * @see Rowset
      */
-    public <T> T executeQuery(CallableConsumer<T, ResultSet> aResultSetProcessor, Scripts.Space aSpace, Consumer<T> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public <T> T executeQuery(CallableConsumer<T, ResultSet> aResultSetProcessor, Executor aCallbacksExecutor, Consumer<T> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (basesProxy != null) {
             PlatypusJdbcFlowProvider flow = basesProxy.createFlowProvider(datasourceName, entityName, sqlClause, expectedFields);
             flow.setPageSize(pageSize);
             flow.setProcedure(procedure);
             return flow.<T>select(parameters, aResultSetProcessor, onSuccess != null ? (T t) -> {
-                aSpace.process(() -> {
+                aCallbacksExecutor.execute(() -> {
                     onSuccess.accept(t);
                 });
             } : null, onFailure != null ? (Exception ex) -> {
-                aSpace.process(() -> {
+                aCallbacksExecutor.execute(() -> {
                     onFailure.accept(ex);
                 });
             } : null);

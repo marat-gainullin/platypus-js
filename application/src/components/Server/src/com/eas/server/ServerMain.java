@@ -204,7 +204,7 @@ public class ServerMain {
                 ScriptConfigs scriptsConfigs = new ScriptConfigs();
                 ServerTasksScanner tasksScanner = new ServerTasksScanner(scriptsConfigs);
                 ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), tasksScanner);
-                indexer.watch();
+                //indexer.watch();
                 Scripts.initBIO(threadsConfig.getMaxServicesTreads());
 
                 int maxWorkerThreads = parseNumWorkerThreads();

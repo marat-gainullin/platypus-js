@@ -47,7 +47,7 @@ public class PlatypusServer extends PlatypusServerCore {
     protected SSLContext sslContext;
     public final static String HTTP_PROTOCOL = "http";
     public final static String HTTPS_PROTOCOL = "https";
-    public final static int DEFAULT_EXECUTOR_POOL_SIZE = Runtime.getRuntime().availableProcessors();
+    public final static int DEFAULT_EXECUTOR_POOL_SIZE = Runtime.getRuntime().availableProcessors() + 1;
     private final SensorsFactory acceptorsFactory;
     private final RetranslateFactory retranslateFactory;
     private final InetSocketAddress[] listenAddresses;
@@ -128,16 +128,15 @@ public class PlatypusServer extends PlatypusServerCore {
 
     private void initializeAndBindPlatypusAcceptor(InetSocketAddress s) throws IOException, Exception {
         final SslFilter sslFilter = new SslFilter(sslContext);
-
         ThreadPoolExecutor ioProcessorExecutor = new ThreadPoolExecutor(1, 1,
                 3L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(),
                 new DeamonThreadFactory("nio-polling-", false));
         final IoAcceptor acceptor = new NioSocketAcceptor(executor, new NioProcessor(ioProcessorExecutor));
         acceptor.getFilterChain().addLast("encryption", sslFilter);
-        acceptor.getFilterChain().addLast("executor", new ExecutorFilter(executor, IoEventType.EXCEPTION_CAUGHT,
-                IoEventType.MESSAGE_RECEIVED, IoEventType.MESSAGE_SENT, IoEventType.SESSION_CLOSED));
         acceptor.getFilterChain().addLast("platypusCodec", new ProtocolCodecFilter(new ResponseEncoder(), new RequestDecoder()));
+        acceptor.getFilterChain().addLast("executor", new ExecutorFilter(executor, IoEventType.EXCEPTION_CAUGHT,
+                IoEventType.MESSAGE_RECEIVED, IoEventType.MESSAGE_SENT, IoEventType.SESSION_CLOSED, IoEventType.SESSION_IDLE, IoEventType.CLOSE, IoEventType.WRITE));
         PlatypusRequestsHandler handler = new PlatypusRequestsHandler(this);
         acceptor.setHandler(handler);
 
