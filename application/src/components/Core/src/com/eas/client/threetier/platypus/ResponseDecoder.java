@@ -5,8 +5,11 @@
  */
 package com.eas.client.threetier.platypus;
 
+import com.eas.client.threetier.Response;
 import com.eas.proto.CoreTags;
+import com.eas.proto.ProtoReader;
 import com.eas.proto.ProtoUtil;
+import java.io.InputStream;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.CumulativeProtocolDecoder;
@@ -50,7 +53,7 @@ public class ResponseDecoder extends CumulativeProtocolDecoder {
                 in.skip(tagSize);
             }
         } while (tag != RequestsTags.TAG_RESPONSE_END);
-        
+
         if (!ordinaryResponse && !errorResponse) {
             throw new IllegalStateException("Responses should contain ordinary response marker or error response marker tag");
         }
@@ -64,7 +67,11 @@ public class ResponseDecoder extends CumulativeProtocolDecoder {
         try {
             in.position(start);
             in.limit(position);
-            out.write(in.slice().asInputStream());
+            try (InputStream is = in.slice().asInputStream()) {
+                ProtoReader responseReader = new ProtoReader(is);
+                Response response = PlatypusResponseReader.read(responseReader, requestEnv.request);
+                out.write(response);
+            }
             return true;
         } finally {
             in.position(position);

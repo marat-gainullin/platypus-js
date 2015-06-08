@@ -32,8 +32,13 @@ public class RPCRequestHandler extends SessionRequestHandler<RPCRequest, RPCRequ
 
     @Override
     protected void handle2(Session aSession, Consumer<RPCRequest.Response> onSuccess, Consumer<Exception> onFailure) {
-        serverCore.executeMethod(getRequest().getModuleName(), getRequest().getMethodName(), getRequest().getArguments(), aSession, true, (Object result) -> {
-            onSuccess.accept(new RPCRequest.Response(result));
+        String[] jsons = getRequest().getArgumentsJsons();
+        Object[] arguments = new Object[jsons.length];
+        for (int i = 0; i < arguments.length; i++) {
+            arguments[i] = aSession.getSpace().parseJson(jsons[i]);
+        }
+        serverCore.executeMethod(getRequest().getModuleName(), getRequest().getMethodName(), arguments, aSession, true, (Object result) -> {
+            onSuccess.accept(new RPCRequest.Response(aSession.getSpace().toJson(result)));
         }, onFailure);
     }
 

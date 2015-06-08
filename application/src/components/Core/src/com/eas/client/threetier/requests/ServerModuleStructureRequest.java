@@ -51,20 +51,20 @@ public class ServerModuleStructureRequest extends Request {
 
     public static class Response extends com.eas.client.threetier.Response {
 
-        protected ServerModuleInfo info;
+        protected String infoJson;
         private Date timeStamp;
 
-        public Response(ServerModuleInfo aInfo) {
+        public Response(String aInfoJson) {
             super();
-            info = aInfo;
+            infoJson = aInfoJson;
         }
 
-        public ServerModuleInfo getInfo() {
-            return info;
+        public String getInfoJson() {
+            return infoJson;
         }
 
-        public void setInfo(ServerModuleInfo aValue) {
-            info = aValue;
+        public void setInfoJson(String aValue) {
+            infoJson = aValue;
         }
 
         public Date getTimeStamp() {

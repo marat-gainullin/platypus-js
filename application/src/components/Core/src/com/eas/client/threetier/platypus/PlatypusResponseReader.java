@@ -4,10 +4,6 @@
  */
 package com.eas.client.threetier.platypus;
 
-import com.eas.client.metadata.Fields;
-import com.eas.client.ServerModuleInfo;
-import com.eas.client.metadata.BinaryFields;
-import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.report.Report;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
@@ -26,17 +22,10 @@ import com.eas.client.threetier.requests.CredentialRequest;
 import com.eas.client.threetier.requests.PlatypusResponsesFactory;
 import com.eas.proto.CoreTags;
 import com.eas.proto.ProtoReader;
-import com.eas.proto.ProtoReaderException;
 import com.eas.proto.dom.ProtoDOMBuilder;
 import com.eas.proto.dom.ProtoNode;
-import com.eas.script.Scripts;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -45,15 +34,13 @@ import jdk.nashorn.api.scripting.JSObject;
 public class PlatypusResponseReader implements PlatypusResponseVisitor {
 
     protected byte[] bytes;
-    protected final Scripts.Space space;
 
-    public PlatypusResponseReader(byte[] aBytes, Scripts.Space aSpace) {
+    public PlatypusResponseReader(byte[] aBytes) {
         super();
         bytes = aBytes;
-        space = aSpace;
     }
 
-    public static Response read(ProtoReader reader, Request aRequest, Scripts.Space aSpace) throws Exception {
+    public static Response read(ProtoReader reader, Request aRequest) throws Exception {
         boolean ordinaryReponse = false;
         boolean errorResponse = false;
         byte[] data = null;
@@ -79,7 +66,7 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
                             aRequest.accept(factory);
                             rsp = factory.getResponse();
                         }
-                        PlatypusResponseReader responseReader = new PlatypusResponseReader(data, aSpace);
+                        PlatypusResponseReader responseReader = new PlatypusResponseReader(data);
                         rsp.accept(responseReader);
                         return rsp;
                     } else {
@@ -123,14 +110,10 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
         ProtoReader reader = new ProtoReader(new ByteArrayInputStream(bytes));
         do {
             switch (reader.getNextTag()) {
-                case RequestsTags.TAG_ROWSET:
-                    String rowset = reader.getString();
-                    rsp.setRowset((JSObject)space.parseJsonWithDates(rowset));
+                case RequestsTags.TAG_RESULT_VALUE:
+                    String json = reader.getString();
+                    rsp.setJson(json);
                     break;
-                case RequestsTags.TAG_UPDATE_COUNT:
-                    rsp.setUpdateCount(reader.getInt());
-                    break;
-
             }
         } while (reader.getCurrentTag() != CoreTags.TAG_EOF);
     }
@@ -151,7 +134,7 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
                     input.getChild(RequestsTags.TAG_FORMAT).getString(),
                     input.getChild(RequestsTags.TAG_FILE_NAME).getString());
         } else if (input.containsChild(RequestsTags.TAG_RESULT_VALUE)) {
-            result = space.parseJsonWithDates(input.getChild(RequestsTags.TAG_RESULT_VALUE).getString());
+            result = input.getChild(RequestsTags.TAG_RESULT_VALUE).getString();
         }
         rsp.setResult(result);
     }
@@ -169,73 +152,87 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
     @Override
     public void visit(ModuleStructureRequest.Response rsp) throws Exception {
         ProtoNode dom = ProtoDOMBuilder.buildDOM(bytes);
-        Collection<ProtoNode> parts = dom.getChildren(RequestsTags.TAG_RESOURCE_NAME);
-        if (parts != null) {
-            for (ProtoNode node : parts) {
-                rsp.getStructure().add(node.getString());
-            }
-        }
-        Collection<ProtoNode> clientDependencies = dom.getChildren(RequestsTags.TAG_MODULE_CLIENT_DEPENDENCY);
-        if (clientDependencies != null) {
-            for (ProtoNode node : clientDependencies) {
-                rsp.getClientDependencies().add(node.getString());
-            }
-        }
-        Collection<ProtoNode> serverDependencies = dom.getChildren(RequestsTags.TAG_MODULE_SERVER_DEPENDENCY);
-        if (serverDependencies != null) {
-            for (ProtoNode node : serverDependencies) {
-                rsp.getServerDependencies().add(node.getString());
-            }
-        }
-        Collection<ProtoNode> queriesDependecies = dom.getChildren(RequestsTags.TAG_MODULE_QUERY_DEPENDENCY);
-        if (queriesDependecies != null) {
-            for (ProtoNode node : queriesDependecies) {
-                rsp.getQueryDependencies().add(node.getString());
-            }
-        }
+        String text = dom.getChild(RequestsTags.TAG_RESULT_VALUE).getString();
+        rsp.setJson(text);
+        /*
+         Collection<ProtoNode> parts = dom.getChildren(RequestsTags.TAG_RESOURCE_NAME);
+         if (parts != null) {
+         for (ProtoNode node : parts) {
+         rsp.getStructure().add(node.getString());
+         }
+         }
+         Collection<ProtoNode> clientDependencies = dom.getChildren(RequestsTags.TAG_MODULE_CLIENT_DEPENDENCY);
+         if (clientDependencies != null) {
+         for (ProtoNode node : clientDependencies) {
+         rsp.getClientDependencies().add(node.getString());
+         }
+         }
+         Collection<ProtoNode> serverDependencies = dom.getChildren(RequestsTags.TAG_MODULE_SERVER_DEPENDENCY);
+         if (serverDependencies != null) {
+         for (ProtoNode node : serverDependencies) {
+         rsp.getServerDependencies().add(node.getString());
+         }
+         }
+         Collection<ProtoNode> queriesDependecies = dom.getChildren(RequestsTags.TAG_MODULE_QUERY_DEPENDENCY);
+         if (queriesDependecies != null) {
+         for (ProtoNode node : queriesDependecies) {
+         rsp.getQueryDependencies().add(node.getString());
+         }
+         }
+         */
     }
 
     @Override
     public void visit(AppQueryRequest.Response rsp) throws Exception {
         ProtoNode dom = ProtoDOMBuilder.buildDOM(bytes);
-        if (dom.containsChild(RequestsTags.TAG_QUERY_ID)) {
+        if (dom.containsChild(RequestsTags.TAG_RESULT_VALUE)) {
             if (!dom.containsChild(RequestsTags.TAG_TIMESTAMP)) {
                 throw new NullPointerException("No query time-stamp specified");
             }
             rsp.setTimeStamp(dom.getChild(RequestsTags.TAG_TIMESTAMP).getDate());
-            PlatypusQuery appQuery = new PlatypusQuery(null);
-            if (!dom.containsChild(RequestsTags.TAG_FIELDS)) {
-                throw new ProtoReaderException("Query fields are not specified");
-            }
-            appQuery.setEntityName(dom.getChild(RequestsTags.TAG_QUERY_ID).getString());
-            if (dom.containsChild(RequestsTags.TAG_DML)) {
-                appQuery.setManual(dom.getChild(RequestsTags.TAG_DML).getInt() == 1);
-            }
-            ProtoNode titleNode = dom.getChild(RequestsTags.TAG_TITLE);
-            if (titleNode != null) {
-                appQuery.setTitle(titleNode.getString());
-            }
-
-            Fields fields = BinaryFields.read(dom.getChild(RequestsTags.TAG_FIELDS));
-            appQuery.setFields(fields);
-            List<ProtoNode> paramsNodes = dom.getChildren(RequestsTags.TAG_QUERY_SQL_PARAMETER);
-            for (ProtoNode node : paramsNodes) {
-                appQuery.getParameters().add(PlatypusRequestReader.readParameter(node));
-            }
-            List<ProtoNode> rolesNodes = dom.getChildren(RequestsTags.TAG_READ_ROLE);
-            if (rolesNodes != null) {
-                for (ProtoNode node : rolesNodes) {
-                    appQuery.getReadRoles().add(node.getString());
-                }
-            }
-            rolesNodes = dom.getChildren(RequestsTags.TAG_WRITE_ROLE);
-            if (rolesNodes != null) {
-                for (ProtoNode node : rolesNodes) {
-                    appQuery.getWriteRoles().add(node.getString());
-                }
-            }
-            rsp.setAppQuery(appQuery);
+            String text = dom.getChild(RequestsTags.TAG_RESULT_VALUE).getString();
+            rsp.setAppQueryJson(text);
         }
+        /*
+         if (dom.containsChild(RequestsTags.TAG_QUERY_ID)) {
+         if (!dom.containsChild(RequestsTags.TAG_TIMESTAMP)) {
+         throw new NullPointerException("No query time-stamp specified");
+         }
+         rsp.setTimeStamp(dom.getChild(RequestsTags.TAG_TIMESTAMP).getDate());
+         PlatypusQuery appQuery = new PlatypusQuery(null);
+         if (!dom.containsChild(RequestsTags.TAG_FIELDS)) {
+         throw new ProtoReaderException("Query fields are not specified");
+         }
+         appQuery.setEntityName(dom.getChild(RequestsTags.TAG_QUERY_ID).getString());
+         if (dom.containsChild(RequestsTags.TAG_DML)) {
+         appQuery.setManual(dom.getChild(RequestsTags.TAG_DML).getInt() == 1);
+         }
+         ProtoNode titleNode = dom.getChild(RequestsTags.TAG_TITLE);
+         if (titleNode != null) {
+         appQuery.setTitle(titleNode.getString());
+         }
+
+         Fields fields = BinaryFields.read(dom.getChild(RequestsTags.TAG_FIELDS));
+         appQuery.setFields(fields);
+         List<ProtoNode> paramsNodes = dom.getChildren(RequestsTags.TAG_QUERY_SQL_PARAMETER);
+         for (ProtoNode node : paramsNodes) {
+         appQuery.getParameters().add(PlatypusRequestReader.readParameter(node));
+         }
+         List<ProtoNode> rolesNodes = dom.getChildren(RequestsTags.TAG_READ_ROLE);
+         if (rolesNodes != null) {
+         for (ProtoNode node : rolesNodes) {
+         appQuery.getReadRoles().add(node.getString());
+         }
+         }
+         rolesNodes = dom.getChildren(RequestsTags.TAG_WRITE_ROLE);
+         if (rolesNodes != null) {
+         for (ProtoNode node : rolesNodes) {
+         appQuery.getWriteRoles().add(node.getString());
+         }
+         }
+         rsp.setAppQuery(appQuery);
+         }
+         */
     }
 
     @Override
@@ -256,23 +253,32 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
     @Override
     public void visit(ServerModuleStructureRequest.Response rsp) throws Exception {
         final ProtoNode dom = ProtoDOMBuilder.buildDOM(bytes);
-        if (dom.containsChild(RequestsTags.TAG_MODULE_NAME)) {
+        if (dom.containsChild(RequestsTags.TAG_RESULT_VALUE)) {
             if (!dom.containsChild(RequestsTags.TAG_TIMESTAMP)) {
                 throw new NullPointerException("No server module info time-stamp specified");
             }
             rsp.setTimeStamp(dom.getChild(RequestsTags.TAG_TIMESTAMP).getDate());
-            String moduleName = dom.getChild(RequestsTags.TAG_MODULE_NAME).getString();
-            boolean permitted = dom.containsChild(RequestsTags.TAG_MODULE_PERMITTED);
-            Set<String> functionNames = new HashSet<>();
-            if (dom.containsChild(RequestsTags.TAG_MODULE_FUNCTION_NAMES)) {
-                List<ProtoNode> functionNodes = dom.getChild(RequestsTags.TAG_MODULE_FUNCTION_NAMES).getChildren(RequestsTags.TAG_MODULE_FUNCTION_NAME);
-                for (ProtoNode functionNode : functionNodes) {
-                    assert functionNode != null;
-                    functionNames.add(functionNode.getString());
-                }
-            }
-            rsp.setInfo(new ServerModuleInfo(moduleName, functionNames, permitted));
+            rsp.setInfoJson(dom.getChild(RequestsTags.TAG_RESULT_VALUE).getString());
         }
+        /*
+         if (dom.containsChild(RequestsTags.TAG_MODULE_NAME)) {
+         if (!dom.containsChild(RequestsTags.TAG_TIMESTAMP)) {
+         throw new NullPointerException("No server module info time-stamp specified");
+         }
+         rsp.setTimeStamp(dom.getChild(RequestsTags.TAG_TIMESTAMP).getDate());
+         String moduleName = dom.getChild(RequestsTags.TAG_MODULE_NAME).getString();
+         boolean permitted = dom.containsChild(RequestsTags.TAG_MODULE_PERMITTED);
+         Set<String> functionNames = new HashSet<>();
+         if (dom.containsChild(RequestsTags.TAG_MODULE_FUNCTION_NAMES)) {
+         List<ProtoNode> functionNodes = dom.getChild(RequestsTags.TAG_MODULE_FUNCTION_NAMES).getChildren(RequestsTags.TAG_MODULE_FUNCTION_NAME);
+         for (ProtoNode functionNode : functionNodes) {
+         assert functionNode != null;
+         functionNames.add(functionNode.getString());
+         }
+         }
+         rsp.setInfo(new ServerModuleInfo(moduleName, functionNames, permitted));
+         }
+         */
     }
 
 }

@@ -15,9 +15,9 @@ import java.util.Set;
  *
  * @author mg
  */
-public class ScriptConfigs extends ActualCache<ScriptDocument> {
+public class ScriptsConfigs extends ActualCache<ScriptDocument> {
 
-    public ScriptConfigs() {
+    public ScriptsConfigs() {
         super();
     }
 

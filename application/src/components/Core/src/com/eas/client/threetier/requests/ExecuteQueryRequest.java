@@ -5,10 +5,9 @@
 package com.eas.client.threetier.requests;
 
 import com.eas.client.metadata.Fields;
-import com.eas.client.metadata.Parameters;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Requests;
-import jdk.nashorn.api.scripting.JSObject;
+import java.util.Map;
 
 /**
  *
@@ -17,17 +16,17 @@ import jdk.nashorn.api.scripting.JSObject;
 public class ExecuteQueryRequest extends Request {
 
     protected String queryName;
-    protected Parameters params;
+    protected Map<String, String> paramsJsons;
     protected Fields expectedFields;
 
     public ExecuteQueryRequest() {
         super(Requests.rqExecuteQuery);
     }
 
-    public ExecuteQueryRequest(String aQueryName, Parameters aParams, Fields aExpectedFields) {
+    public ExecuteQueryRequest(String aQueryName, Map<String, String> aParamsJsons, Fields aExpectedFields) {
         this();
         queryName = aQueryName;
-        params = aParams;
+        paramsJsons = aParamsJsons;
         expectedFields = aExpectedFields;
     }
 
@@ -39,12 +38,12 @@ public class ExecuteQueryRequest extends Request {
         queryName = aValue;
     }
 
-    public Parameters getParams() {
-        return params;
+    public Map<String, String> getParamsJsons() {
+        return paramsJsons;
     }
 
-    public void setParams(Parameters aValue) {
-        params = aValue;
+    public void setParamsJsons(Map<String, String> aValue) {
+        paramsJsons = aValue;
     }
 
     public Fields getExpectedFields() {
@@ -58,27 +57,25 @@ public class ExecuteQueryRequest extends Request {
 
     public static class Response extends com.eas.client.threetier.Response {
 
-        private JSObject rowset;
+        private String json;
         private Fields expectedFields;
-        private int updateCount;
 
-        public Response(JSObject aRowset, int aUpdateCount) {
+        public Response(String aJson) {
             super();
-            rowset = aRowset;
-            updateCount = aUpdateCount;
+            json = aJson;
         }
 
-        public Response(JSObject aRowset, int aUpdateCount, Fields aExpectedFields) {
-            this(aRowset, aUpdateCount);
+        public Response(String aJson, Fields aExpectedFields) {
+            this(aJson);
             expectedFields = aExpectedFields;
         }
 
-        public JSObject getRowset() {
-            return rowset;
+        public String getJson() {
+            return json;
         }
 
-        public void setRowset(JSObject aValue) {
-            rowset = aValue;
+        public void setJson(String aValue) {
+            json = aValue;
         }
 
         public Fields getExpectedFields() {
@@ -87,17 +84,6 @@ public class ExecuteQueryRequest extends Request {
 
         public void setExpectedFields(Fields aFields) {
             expectedFields = aFields;
-        }
-
-        /**
-         * @return the updateCount
-         */
-        public int getUpdateCount() {
-            return updateCount;
-        }
-
-        public void setUpdateCount(int aValue) {
-            updateCount = aValue;
         }
 
         @Override

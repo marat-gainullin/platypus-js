@@ -4,10 +4,6 @@
  */
 package com.eas.server.httpservlet;
 
-import com.eas.client.SqlQuery;
-import com.eas.client.changes.Change;
-import com.eas.client.metadata.Parameter;
-import com.eas.client.metadata.Parameters;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.client.threetier.http.PlatypusHttpRequestParams;
 import com.eas.client.threetier.requests.AppQueryRequest;
@@ -18,19 +14,15 @@ import com.eas.client.threetier.requests.ExecuteQueryRequest;
 import com.eas.client.threetier.requests.RPCRequest;
 import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.client.threetier.requests.PlatypusRequestVisitor;
-import com.eas.script.Scripts;
 import com.eas.server.PlatypusServerCore;
-import com.eas.server.httpservlet.serial.ChangeJsonReader;
 import com.eas.client.threetier.requests.CredentialRequest;
 import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.ResourceRequest;
 import com.eas.util.BinaryUtils;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.HashMap;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -49,13 +41,11 @@ public class PlatypusHttpRequestReader implements PlatypusRequestVisitor {
     public static final String MUST_BE_RESOURCE_MSG = "Application element requests nust be resource requests.";
     protected PlatypusServerCore serverCore;
     protected HttpServletRequest httpRequest;
-    protected Scripts.Space space;
 
-    public PlatypusHttpRequestReader(PlatypusServerCore aServerCore, HttpServletRequest aHttpRequest, Scripts.Space aSpace) {
+    public PlatypusHttpRequestReader(PlatypusServerCore aServerCore, HttpServletRequest aHttpRequest) {
         super();
         serverCore = aServerCore;
         httpRequest = aHttpRequest;
-        space = aSpace;
     }
 
     @Override
@@ -71,20 +61,7 @@ public class PlatypusHttpRequestReader implements PlatypusRequestVisitor {
     @Override
     public void visit(CommitRequest rq) throws Exception {
         String jsonText = getRequestText(httpRequest);
-        List<Change> changes = ChangeJsonReader.parse(jsonText, (String aEntityName, String aFieldName) -> {
-            SqlQuery query = serverCore.getQueries().getQuery(aEntityName, null, null, null);
-            if (query != null) {
-                if (!query.getFields().isEmpty()) {
-                    return query.getFields().get(aFieldName);
-                } else {
-                    return query.getParameters().get(aFieldName);
-                }
-            } else {
-                Logger.getLogger(PlatypusHttpRequestReader.class.getName()).log(Level.SEVERE, String.format("Entity not found %s.", aEntityName));
-                return null;
-            }
-        }, space);
-        rq.setChanges(changes);
+        rq.setChangesJson(jsonText);
     }
 
     @Override
@@ -112,19 +89,15 @@ public class PlatypusHttpRequestReader implements PlatypusRequestVisitor {
         }
         rq.setModuleName(moduleName);
         rq.setMethodName(methodName);
-        String param = httpRequest.getParameter(PlatypusHttpRequestParams.PARAMETER);
+        String param = httpRequest.getParameter(PlatypusHttpRequestParams.PARAMS_ARRAY.substring(0, PlatypusHttpRequestParams.PARAMS_ARRAY.length() - 2));
         if (param != null) {
-            rq.setArguments(new Object[]{tryParseJsonWithDates(param)});
+            rq.setArgumentsJsons(new String[]{param});
         } else {
-            String[] params = httpRequest.getParameterValues(PlatypusHttpRequestParams.PARAMETER + ARGUMENTS_ARRAY_PARAM_SUFFIX);
+            String[] params = httpRequest.getParameterValues(PlatypusHttpRequestParams.PARAMS_ARRAY);
             if (params != null) {
-                List<Object> argsList = new ArrayList<>();
-                for (String arg : params) {
-                    argsList.add(tryParseJsonWithDates(arg));
-                }
-                rq.setArguments(argsList.toArray());
+                rq.setArgumentsJsons(params);
             } else {
-                rq.setArguments(new Object[]{});
+                rq.setArgumentsJsons(new String[]{});
             }
         }
     }
@@ -147,22 +120,16 @@ public class PlatypusHttpRequestReader implements PlatypusRequestVisitor {
     public void visit(ExecuteQueryRequest rq) throws Exception {
         String queryName = httpRequest.getParameter(PlatypusHttpRequestParams.QUERY_ID);
         rq.setQueryName(queryName);
-        rq.setParams(decodeQueryParams(queryName, httpRequest));
-    }
-    
-    private Parameters decodeQueryParams(String aQueryName, HttpServletRequest aRequest) throws Exception {
-        SqlQuery query = serverCore.getQueries().getQuery(aQueryName, null, null, null);
-        Parameters params = query.getParameters().copy();
-        for (int i = 1; i <= params.getParametersCount(); i++) {
-            Parameter param = params.get(i);
-            String paramValue = aRequest.getParameter(param.getName());
-            if (paramValue != null && !"null".equals(paramValue.toLowerCase()) && !paramValue.isEmpty()) {
-                param.setValue(space.toJava(space.parseJson(paramValue)));
-            } else {
-                param.setValue(null);
+        Map<String, String> res = new HashMap<>();
+        httpRequest.getParameterMap().entrySet().forEach((Map.Entry<String, String[]> pEntry) -> {
+            if (!PlatypusHttpRequestParams.isSystemParameter(pEntry.getKey())) {
+                String[] pValues = pEntry.getValue();
+                if (pValues != null && pValues.length == 1) {
+                    res.put(pEntry.getKey(), pValues[0]);
+                }
             }
-        }
-        return params;
+        });
+        rq.setParamsJsons(res);
     }
 
     private static byte[] getRequestContent(HttpServletRequest aRequest) throws IOException {
@@ -173,21 +140,5 @@ public class PlatypusHttpRequestReader implements PlatypusRequestVisitor {
 
     private static String getRequestText(HttpServletRequest aRequest) throws IOException {
         return new String(getRequestContent(aRequest), aRequest.getCharacterEncoding() != null ? aRequest.getCharacterEncoding() : SettingsConstants.COMMON_ENCODING);
-    }
-
-    private Object tryParseJson(String aText) {
-        try {
-            return space.parseJson(aText);
-        } catch (Exception ex) {
-            return aText;
-        }
-    }
-    
-    private Object tryParseJsonWithDates(String aText) {
-        try {
-            return space.parseJsonWithDates(aText);
-        } catch (Exception ex) {
-            return aText;
-        }
     }
 }

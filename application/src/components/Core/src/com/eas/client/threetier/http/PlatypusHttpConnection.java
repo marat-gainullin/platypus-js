@@ -106,8 +106,8 @@ public class PlatypusHttpConnection extends PlatypusConnection {
                 }
                 if (onSuccess != null) {
                     try {
-                        // Actual response reading in a working thread
-                        PlatypusHttpResponseReader reader = new PlatypusHttpResponseReader(aRequest, aHttpSender.conn, aHttpSender.responseBody, aSpace);
+                        // Response reading in a working thread because of BIO nature of http client :(
+                        PlatypusHttpResponseReader reader = new PlatypusHttpResponseReader(aRequest, aHttpSender.conn, aHttpSender.responseBody);
                         aHttpSender.response.accept(reader);
                         if (aHttpSender.response instanceof RPCRequest.Response && ((RPCRequest.Response) aHttpSender.response).getResult() instanceof URL) {
                             RPCRequest.Response rpcResponse = (RPCRequest.Response) aHttpSender.response;
@@ -301,7 +301,7 @@ public class PlatypusHttpConnection extends PlatypusConnection {
         PlatypusResponsesFactory responseFactory = new PlatypusResponsesFactory();
         aRequest.accept(responseFactory);
         Response response = responseFactory.getResponse();
-        PlatypusHttpResponseReader reader = new PlatypusHttpResponseReader(aRequest, httpSender.conn, httpSender.responseBody, Scripts.getSpace());
+        PlatypusHttpResponseReader reader = new PlatypusHttpResponseReader(aRequest, httpSender.conn, httpSender.responseBody);
         response.accept(reader);
         if (response instanceof ErrorResponse) {
             throw handleErrorResponse((ErrorResponse) response);

@@ -7,7 +7,6 @@ package com.eas.client.threetier.platypus;
 
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
-import java.io.InputStream;
 import java.util.function.Consumer;
 
 /**
@@ -21,9 +20,9 @@ public class RequestEnvelope {
     public String password;
     public volatile String ticket;
     public Response response;
-    public final Consumer<InputStream> onComplete;
+    public final Consumer<Response> onComplete;
 
-    public RequestEnvelope(Request aRequest, String aUserName, String aPassword, String aTicket, Consumer<InputStream> aOnComplete) {
+    public RequestEnvelope(Request aRequest, String aUserName, String aPassword, String aTicket, Consumer<Response> aOnComplete) {
         super();
         request = aRequest;
         userName = aUserName;

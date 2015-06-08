@@ -12,6 +12,7 @@ import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.queries.PlatypusQuery;
+import com.eas.client.threetier.json.QueryJSONWriter;
 import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.Session;
@@ -80,7 +81,7 @@ public class AppQueryRequestHandler extends SessionRequestHandler<AppQueryReques
                             query.getParameters().toCollection().stream().forEach((p) -> {
                                 pQuery.putParameter(p.getName(), p.getTypeInfo(), ((Parameter) p).getValue());
                             });
-                            resp.setAppQuery(pQuery);
+                            resp.setAppQueryJson(QueryJSONWriter.write(pQuery));
                             resp.setTimeStamp(serverQueryTime);
                         }
                         try {

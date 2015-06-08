@@ -5,10 +5,10 @@
 package com.eas.server.handlers;
 
 import com.eas.server.SessionRequestHandler;
-import com.eas.client.SqlCompiledQuery;
 import com.eas.client.SqlQuery;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
+import com.eas.client.metadata.Parameter;
 import com.eas.client.metadata.Parameters;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
@@ -51,9 +51,9 @@ public class ExecuteQueryRequestHandler extends SessionRequestHandler<ExecuteQue
                     if (rolesAllowed != null && !principal.hasAnyRole(rolesAllowed)) {
                         throw new AccessControlException(String.format(ACCESS_DENIED_MSG, query.getEntityName(), principal.getName()), principal instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
                     }
-                    handleQuery(query.copy(), (JSObject rowset) -> {
+                    handleQuery(query.copy(), (JSObject aResult) -> {
                         if (onSuccess != null) {
-                            onSuccess.accept(new ExecuteQueryRequest.Response(rowset, 0));
+                            onSuccess.accept(new ExecuteQueryRequest.Response(aSession.getSpace().toJson(aResult)));
                         }
                     }, onFailure, aSession.getSpace());
                 } catch (Exception ex) {
@@ -71,13 +71,14 @@ public class ExecuteQueryRequestHandler extends SessionRequestHandler<ExecuteQue
 
     public void handleQuery(SqlQuery aQuery, Consumer<JSObject> onSuccess, Consumer<Exception> onFailure, Scripts.Space aSpace) throws Exception  {
         Parameters queryParams = aQuery.getParameters();
-        assert queryParams.getParametersCount() == getRequest().getParams().getParametersCount();
+        assert queryParams.getParametersCount() == getRequest().getParamsJsons().size();
         for (int i = 1; i <= queryParams.getParametersCount(); i++) {
-            queryParams.get(i).setValue(getRequest().getParams().get(i).getValue());
+            Parameter p = queryParams.get(i);
+            String pJson = getRequest().getParamsJsons().get(p.getName());
+            p.setValue(aSpace.parseJsonWithDates(pJson));
         }
-        SqlCompiledQuery compiledQuery = aQuery.compile();
+        aQuery.execute(aSpace, onSuccess, onFailure);
         // SqlCompiledQuery.executeUpdate/Client.enqueueUpdate is prohibited here, because no security check is performed in it.
-        compiledQuery.executeQuery(onSuccess, onFailure, aSpace);
         // Stored procedures can't be called directly from three-tier clients for security reasons
         // and out parameters can't pass through the network.
         /*

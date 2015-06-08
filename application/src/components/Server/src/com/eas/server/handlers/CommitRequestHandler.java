@@ -13,6 +13,7 @@ import com.eas.client.changes.Command;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.queries.LocalQueriesProxy;
+import com.eas.client.threetier.json.ChangesJSONReader;
 import com.eas.client.threetier.requests.CommitRequest;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.Session;
@@ -118,44 +119,48 @@ public class CommitRequestHandler extends SessionRequestHandler<CommitRequest, C
 
     @Override
     public void handle2(Session aSession, Consumer<CommitRequest.Response> onSuccess, Consumer<Exception> onFailure) {
-        DatabasesClient client = getServerCore().getDatabasesClient();
-        List<Change> changes = getRequest().getChanges();
-        ChangesSortProcess process = new ChangesSortProcess(changes.size(), (Map<String, List<Change>> changeLogs) -> {
-            try {
-                client.commit(changeLogs, (Integer aUpdated) -> {
-                    if (onSuccess != null) {
-                        onSuccess.accept(new CommitRequest.Response(aUpdated));
-                    }
-                }, onFailure);
-            } catch (Exception ex) {
-                Logger.getLogger(CommitRequestHandler.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }, onFailure);
-        if (changes.isEmpty()) {
-            if (onSuccess != null) {
-                onSuccess.accept(new CommitRequest.Response(0));
-            }
-        } else {
-            changes.stream().forEach((change) -> {
+        try {
+            DatabasesClient client = getServerCore().getDatabasesClient();
+            List<Change> changes = ChangesJSONReader.read(getRequest().getChangesJson(), aSession.getSpace());
+            ChangesSortProcess process = new ChangesSortProcess(changes.size(), (Map<String, List<Change>> changeLogs) -> {
                 try {
-                    ((LocalQueriesProxy) serverCore.getQueries()).getQuery(change.entityName, aSession.getSpace(), (SqlQuery aQuery) -> {
-                        if (aQuery.isPublicAccess()) {
-                            AccessControlException aex = checkWritePrincipalPermission((PlatypusPrincipal)aSession.getSpace().getPrincipal(), change.entityName, aQuery.getWriteRoles());
-                            if (aex != null) {
-                                process.complete(null, null, aex, null);
-                            } else {
-                                process.complete(change, aQuery, null, null);
-                            }
-                        } else {
-                            process.complete(null, null, new AccessControlException(String.format("Public access to query %s is denied while commiting changes for it's entity.", change.entityName)), null);
+                    client.commit(changeLogs, (Integer aUpdated) -> {
+                        if (onSuccess != null) {
+                            onSuccess.accept(new CommitRequest.Response(aUpdated));
                         }
-                    }, (Exception ex) -> {
-                        process.complete(null, null, null, ex);
-                    });
+                    }, onFailure);
                 } catch (Exception ex) {
                     Logger.getLogger(CommitRequestHandler.class.getName()).log(Level.SEVERE, null, ex);
                 }
-            });
+            }, onFailure);
+            if (changes.isEmpty()) {
+                if (onSuccess != null) {
+                    onSuccess.accept(new CommitRequest.Response(0));
+                }
+            } else {
+                changes.stream().forEach((change) -> {
+                    try {
+                        ((LocalQueriesProxy) serverCore.getQueries()).getQuery(change.entityName, aSession.getSpace(), (SqlQuery aQuery) -> {
+                            if (aQuery.isPublicAccess()) {
+                                AccessControlException aex = checkWritePrincipalPermission((PlatypusPrincipal)aSession.getSpace().getPrincipal(), change.entityName, aQuery.getWriteRoles());
+                                if (aex != null) {
+                                    process.complete(null, null, aex, null);
+                                } else {
+                                    process.complete(change, aQuery, null, null);
+                                }
+                            } else {
+                                process.complete(null, null, new AccessControlException(String.format("Public access to query %s is denied while commiting changes for it's entity.", change.entityName)), null);
+                            }
+                        }, (Exception ex) -> {
+                            process.complete(null, null, null, ex);
+                        });
+                    } catch (Exception ex) {
+                        Logger.getLogger(CommitRequestHandler.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                });
+            }
+        } catch (Exception ex) {
+            onFailure.accept(ex);
         }
     }
 

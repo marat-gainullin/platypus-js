@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.threetier.http;
+package com.eas.client.threetier.json;
 
+import com.eas.client.changes.Change;
 import com.eas.client.changes.ChangeValue;
 import com.eas.client.changes.ChangeVisitor;
 import com.eas.client.changes.Command;
@@ -19,7 +20,7 @@ import java.util.List;
  *
  * @author mg
  */
-public class ChangeJSONWriter implements ChangeVisitor {
+public class ChangesJSONWriter implements ChangeVisitor {
 
     private static final String CHANGE_DATA_NAME = "data";
     private static final String CHANGE_KEYS_NAME = "keys";
@@ -29,8 +30,19 @@ public class ChangeJSONWriter implements ChangeVisitor {
 
     protected String written;
 
-    public ChangeJSONWriter() {
+    public ChangesJSONWriter() {
         super();
+    }
+
+    public static String write(List<Change> aLog) throws Exception {
+        List<String> changes = new ArrayList<>();
+        for (Change change : aLog) {
+            ChangesJSONWriter changeWriter = new ChangesJSONWriter();
+            change.accept(changeWriter);
+            changes.add(changeWriter.getWritten());
+        }
+        String changesJson = JSONUtils.a(changes.toArray(new String[]{})).toString();
+        return changesJson;
     }
 
     public String getWritten() {

@@ -5,7 +5,7 @@ import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.FormsDocuments;
 import com.eas.client.cache.ModelsDocuments;
 import com.eas.client.cache.ReportsConfigs;
-import com.eas.client.cache.ScriptConfigs;
+import com.eas.client.cache.ScriptsConfigs;
 import com.eas.client.forms.Forms;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.ConnectionsSelector;
@@ -229,7 +229,7 @@ public class PlatypusClientApplication {
                     File f = new File(config.url.toURI());
                     if (f.exists() && f.isDirectory()) {
                         ModelsDocuments models = new ModelsDocuments();
-                        ScriptConfigs scriptsConfigs = new ScriptConfigs();
+                        ScriptsConfigs scriptsConfigs = new ScriptsConfigs();
                         ValidatorsScanner validatorsScanner = new ValidatorsScanner(scriptsConfigs);
                         ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), validatorsScanner);
                         ScriptedDatabasesClient twoTierCore = new ScriptedDatabasesClient(config.defDatasource, indexer, true, validatorsScanner.getValidators(), config.threadsArgs.getMaxJdbcTreads());
@@ -272,7 +272,7 @@ public class PlatypusClientApplication {
                             }
 
                             @Override
-                            public ScriptConfigs getScriptsConfigs() {
+                            public ScriptsConfigs getScriptsConfigs() {
                                 return scriptsConfigs;
                             }
 

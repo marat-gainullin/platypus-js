@@ -4,6 +4,7 @@
  */
 package com.eas.client.threetier;
 
+import com.eas.client.threetier.json.ChangesJSONWriter;
 import com.eas.client.changes.Change;
 import com.eas.client.Application;
 import com.eas.client.ModulesProxy;
@@ -12,7 +13,7 @@ import com.eas.client.ServerModulesProxy;
 import com.eas.client.cache.FormsDocuments;
 import com.eas.client.cache.ModelsDocuments;
 import com.eas.client.cache.ReportsConfigs;
-import com.eas.client.cache.ScriptConfigs;
+import com.eas.client.cache.ScriptsConfigs;
 import com.eas.client.cache.ServerDataStorage;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.queries.QueriesProxy;
@@ -39,7 +40,7 @@ public class PlatypusClient implements Application<PlatypusQuery>, ServerDataSto
     protected QueriesProxy<PlatypusQuery> queries;
     protected ModulesProxy modules;
     protected ServerModulesProxy serverModulesProxy;
-    protected ScriptConfigs securityConfigs;
+    protected ScriptsConfigs securityConfigs;
     protected FormsDocuments forms;
     protected ReportsConfigs reports;
     protected ModelsDocuments models;
@@ -51,7 +52,7 @@ public class PlatypusClient implements Application<PlatypusQuery>, ServerDataSto
         queries = new RemoteQueriesProxy(aConn, this);
         modules = new RemoteModulesProxy(aConn);
         serverModulesProxy = new ServerModulesProxy(aConn);
-        securityConfigs = new ScriptConfigs();
+        securityConfigs = new ScriptsConfigs();
         forms = new FormsDocuments();
         reports = new ReportsConfigs();
         models = new ModelsDocuments();
@@ -77,7 +78,7 @@ public class PlatypusClient implements Application<PlatypusQuery>, ServerDataSto
     }
 
     @Override
-    public ScriptConfigs getScriptsConfigs() {
+    public ScriptsConfigs getScriptsConfigs() {
         return securityConfigs;
     }
 
@@ -102,7 +103,8 @@ public class PlatypusClient implements Application<PlatypusQuery>, ServerDataSto
 
     @Override
     public int commit(List<Change> aLog, Scripts.Space aSpace, Consumer<Integer> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        CommitRequest request = new CommitRequest(aLog);
+        String changesJson = ChangesJSONWriter.write(aLog);
+        CommitRequest request = new CommitRequest(changesJson);
         if (onSuccess != null) {
             conn.<CommitRequest.Response>enqueueRequest(request, aSpace, (CommitRequest.Response aResponse) -> {
                 onSuccess.accept(aResponse.getUpdated());

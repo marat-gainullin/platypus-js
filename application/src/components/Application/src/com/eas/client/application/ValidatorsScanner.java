@@ -8,7 +8,7 @@ package com.eas.client.application;
 import com.eas.client.AppElementFiles;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.PlatypusFiles;
-import com.eas.client.cache.ScriptConfigs;
+import com.eas.client.cache.ScriptsConfigs;
 import com.eas.client.cache.ScriptDocument;
 import com.eas.script.JsDoc;
 import com.eas.util.FileUtils;
@@ -26,10 +26,10 @@ import java.util.logging.Logger;
  */
 public class ValidatorsScanner implements ApplicationSourceIndexer.ScanCallback {
 
-    private final ScriptConfigs scriptsConfigs;
+    private final ScriptsConfigs scriptsConfigs;
     private final Map<String, Collection<String>> validators = new HashMap<>();
 
-    public ValidatorsScanner(ScriptConfigs aScriptsConfigs) {
+    public ValidatorsScanner(ScriptsConfigs aScriptsConfigs) {
         super();
         scriptsConfigs = aScriptsConfigs;
     }

@@ -5,7 +5,6 @@
  */
 package com.eas.server.httpservlet;
 
-import com.eas.client.queries.Query;
 import com.eas.client.report.Report;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.client.threetier.http.PlatypusHttpConstants;
@@ -23,18 +22,15 @@ import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.PlatypusResponseVisitor;
 import com.eas.client.threetier.requests.ResourceRequest;
 import com.eas.script.Scripts;
-import com.eas.server.httpservlet.serial.query.QueryJsonWriter;
 import com.eas.util.IDGenerator;
 import com.eas.util.JSONUtils;
 import com.eas.util.RowsetJsonConstants;
-import com.eas.util.StringUtils;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URI;
-import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import jdk.nashorn.api.scripting.JSObject;
@@ -85,11 +81,7 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
     public void visit(ExecuteQueryRequest.Response rsp) throws Exception {
         makeResponseNotCacheable(servletResponse);
         ExecuteQueryRequest.Response resp = (ExecuteQueryRequest.Response) rsp;
-        if (resp.getRowset() != null) {
-            writeJsonResponse(space.toJson(resp.getRowset()), servletResponse);
-        } else {
-            writeJsonResponse(resp.getUpdateCount() + "", servletResponse);
-        }
+        writeJsonResponse(resp.getJson(), servletResponse);
     }
 
     @Override
@@ -121,7 +113,7 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
                     String reportName = report.getName() + IDGenerator.genID() + "." + report.getFormat();
                     File rep = new File(docsRoot + userHomeInApplication + reportName);
                     try (FileOutputStream out = new FileOutputStream(rep)) {
-                        out.write(report.getReport());
+                        out.write(report.getBody());
                         out.flush();
                     }
                     String reportLocation = userHomeInApplication + reportName;
@@ -149,10 +141,10 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
     @Override
     public void visit(ServerModuleStructureRequest.Response resp) throws Exception {
         ServerModuleStructureRequest.Response csmr = (ServerModuleStructureRequest.Response) resp;
-        if (csmr.getInfo() != null) {
+        if (csmr.getInfoJson()!= null) {
             assert resp.getTimeStamp() == null;
             servletResponse.setDateHeader(PlatypusHttpConstants.HEADER_LAST_MODIFIED, resp.getTimeStamp().getTime());
-            writeJsonResponse(moduleResponseToJson(csmr.getInfo().getFunctionsNames(), csmr.getInfo().isPermitted()), servletResponse);
+            writeJsonResponse(resp.getInfoJson(), servletResponse);
         } else {
             servletResponse.sendError(HttpURLConnection.HTTP_NOT_MODIFIED);
         }
@@ -166,10 +158,10 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
     @Override
     public void visit(AppQueryRequest.Response resp) throws Exception {
         AppQueryRequest.Response aqr = ((AppQueryRequest.Response) resp);
-        if (aqr.getAppQuery() != null) {
+        if (aqr.getAppQueryJson()!= null) {
             assert resp.getTimeStamp() != null;
             servletResponse.setDateHeader(PlatypusHttpConstants.HEADER_LAST_MODIFIED, resp.getTimeStamp().getTime());
-            writeResponse(aqr.getAppQuery(), servletResponse);
+            writeJsonResponse(aqr.getAppQueryJson(), servletResponse);
         } else {
             servletResponse.sendError(HttpURLConnection.HTTP_NOT_MODIFIED);
         }
@@ -182,38 +174,14 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
 
     @Override
     public void visit(ModuleStructureRequest.Response resp) throws Exception {
-        StringBuilder content = JSONUtils.o(new StringBuilder(PlatypusHttpResponseReader.STRUCTURE_PROP_NAME), JSONUtils.as(resp.getStructure().toArray(new String[]{})),
-                new StringBuilder(PlatypusHttpResponseReader.CLIENT_DEPENDENCIES_PROP_NAME), JSONUtils.as(resp.getClientDependencies().toArray(new String[]{})),
-                new StringBuilder(PlatypusHttpResponseReader.QUERY_DEPENDENCIES_PROP_NAME), JSONUtils.as(resp.getQueryDependencies().toArray(new String[]{})),
-                new StringBuilder(PlatypusHttpResponseReader.SERVER_DEPENDENCIES_PROP_NAME), JSONUtils.as(resp.getServerDependencies().toArray(new String[]{}))
-        );
         makeResponseNotCacheable(servletResponse);
-        writeJsonResponse(content.toString(), servletResponse);
+        writeJsonResponse(resp.getJson(), servletResponse);
     }
 
     private static void makeResponseNotCacheable(HttpServletResponse aHttpResponse) {
         aHttpResponse.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1.
         aHttpResponse.setHeader("Pragma", "no-cache"); // HTTP 1.0.
         aHttpResponse.setDateHeader("Expires", 0);// Proxies
-    }
-
-    private static String moduleResponseToJson(Set<String> functionsNames, boolean isPermitted) {
-        return (new StringBuilder())
-                .append("{")
-                .append("\"").append(PlatypusHttpResponseReader.CREATE_MODULE_RESPONSE_FUNCTIONS_PROP).append("\"")
-                .append(":")
-                .append("[").append(functionsNames.isEmpty() ? "" : "\"").append(StringUtils.join("\", \"", functionsNames.toArray(new String[]{}))).append(functionsNames.isEmpty() ? "" : "\"").append("]")
-                .append(",")
-                .append("\"").append(PlatypusHttpResponseReader.CREATE_MODULE_RESPONSE_IS_PERMITTED_PROP).append("\"")
-                .append(":")
-                .append(isPermitted)
-                .append("}")
-                .toString();
-    }
-
-    private static void writeResponse(Query query, HttpServletResponse aHttpResponse) throws Exception {
-        QueryJsonWriter writer = new QueryJsonWriter(query);
-        writeJsonResponse(writer.write(), aHttpResponse);
     }
 
     private static void writeResponse(String aResponse, HttpServletResponse aHttpResponse, String aContentType) throws UnsupportedEncodingException, IOException {

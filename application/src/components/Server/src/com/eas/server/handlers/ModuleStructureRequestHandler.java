@@ -8,6 +8,7 @@ package com.eas.server.handlers;
 import com.eas.server.SessionRequestHandler;
 import com.eas.client.AppElementFiles;
 import com.eas.client.ModuleStructure;
+import com.eas.client.RemoteModulesProxy;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.ScriptDocument;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
@@ -16,9 +17,11 @@ import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.script.Scripts;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.Session;
+import com.eas.util.JSONUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.security.AccessControlException;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 import javax.security.auth.AuthPermission;
@@ -48,19 +51,22 @@ public class ModuleStructureRequestHandler extends SessionRequestHandler<ModuleS
                 checkModuleRoles(aSession, moduleOrResourceName, files);
                 // Actual work
                 serverCore.getModules().getModule(moduleOrResourceName, Scripts.getSpace(), (ModuleStructure aStructure) -> {
-                    ModuleStructureRequest.Response resp = new ModuleStructureRequest.Response();
                     String localPath = serverCore.getModules().getLocalPath();
+                    Set<String> structure = new HashSet<>();
                     aStructure.getParts().getFiles().stream().forEach((File f) -> {
                         String resourceName = f.getPath().substring(localPath.length());
                         resourceName = resourceName.replace("\\", "/");
                         if (resourceName.startsWith("/")) {
                             resourceName = resourceName.substring(1);
                         }
-                        resp.getStructure().add(resourceName);
+                        structure.add(resourceName);
                     });
-                    resp.getClientDependencies().addAll(aStructure.getClientDependencies());
-                    resp.getServerDependencies().addAll(aStructure.getServerDependencies());
-                    resp.getQueryDependencies().addAll(aStructure.getQueryDependencies());
+                    StringBuilder json = JSONUtils.o(new StringBuilder(RemoteModulesProxy.STRUCTURE_PROP_NAME), JSONUtils.as(structure.toArray(new String[]{})),
+                            new StringBuilder(RemoteModulesProxy.CLIENT_DEPENDENCIES_PROP_NAME), JSONUtils.as(aStructure.getClientDependencies().toArray(new String[]{})),
+                            new StringBuilder(RemoteModulesProxy.QUERY_DEPENDENCIES_PROP_NAME), JSONUtils.as(aStructure.getQueryDependencies().toArray(new String[]{})),
+                            new StringBuilder(RemoteModulesProxy.SERVER_DEPENDENCIES_PROP_NAME), JSONUtils.as(aStructure.getServerDependencies().toArray(new String[]{}))
+                    );
+                    ModuleStructureRequest.Response resp = new ModuleStructureRequest.Response(json.toString());
                     onSuccess.accept(resp);
                 }, onFailure);
             } else {
@@ -75,7 +81,7 @@ public class ModuleStructureRequestHandler extends SessionRequestHandler<ModuleS
         if (aAppElementFiles != null && aAppElementFiles.hasExtension(PlatypusFiles.JAVASCRIPT_EXTENSION)) {
             ScriptDocument jsDoc = serverCore.getScriptsConfigs().get(aModuleName, aAppElementFiles);
             Set<String> rolesAllowed = jsDoc.getModuleAllowedRoles();
-            PlatypusPrincipal principal = (PlatypusPrincipal)aSession.getSpace().getPrincipal();
+            PlatypusPrincipal principal = (PlatypusPrincipal) aSession.getSpace().getPrincipal();
             if (rolesAllowed != null && !principal.hasAnyRole(rolesAllowed)) {
                 throw new AccessControlException(String.format(ACCESS_DENIED_MSG, aModuleName, getRequest().getModuleOrResourceName(), principal.getName()), principal instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
             }

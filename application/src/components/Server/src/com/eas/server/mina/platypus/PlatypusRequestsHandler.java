@@ -6,16 +6,11 @@ package com.eas.server.mina.platypus;
 
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
-import com.eas.client.threetier.platypus.PlatypusResponseWriter;
 import com.eas.client.threetier.platypus.RequestEnvelope;
 import com.eas.client.threetier.requests.ErrorResponse;
-import com.eas.proto.CoreTags;
-import com.eas.proto.ProtoWriter;
-import com.eas.script.Scripts;
 import com.eas.server.*;
 import com.eas.server.SessionRequestHandler;
 import com.eas.server.DatabaseAuthorizer;
-import java.io.ByteArrayOutputStream;
 import java.net.NetPermission;
 import java.security.AccessControlException;
 import java.sql.SQLException;
@@ -87,28 +82,6 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
         }
     }
 
-    protected void pushResponse(IoSession ioSession, Response aResponse, String aTicket, Scripts.Space aSpace) {
-        Runnable pusher = () -> {
-            try {
-                ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-                ProtoWriter writer = new ProtoWriter(outStream);
-                if (aTicket != null) {
-                    writer.put(CoreTags.TAG_SESSION_TICKET, aTicket);
-                }
-                PlatypusResponseWriter.write(aResponse, writer, aSpace);
-                writer.flush();
-                ioSession.write(outStream);
-            } catch (Exception ex) {
-                Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        };
-        if (aSpace != null) {
-            aSpace.process(pusher);
-        } else {
-            pusher.run();
-        }
-    }
-
     /**
      *
      * @param ioSession
@@ -124,28 +97,26 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
                     if (ex instanceof SQLException) {
                         SQLException sex = (SQLException) ex;
                         Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, String.format(SQL_EXCEPTION_MESSAGE, requestEnv.request.getType(), requestEnv.request.getClass().getSimpleName(), sex.getMessage(), sex.getSQLState(), sex.getErrorCode()));
-                        pushResponse(ioSession, new ErrorResponse(sex), requestEnv.ticket, null);
+                        ioSession.write(new ErrorResponse(sex));
                     } else if (ex instanceof AccessControlException) {
                         AccessControlException aex = (AccessControlException) ex;
                         Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, String.format(ACCESS_CONTROL_EXCEPTION_MESSAGE, requestEnv.request.getType(), requestEnv.request.getClass().getSimpleName(), aex.getMessage()));
-                        pushResponse(ioSession, new ErrorResponse(aex), requestEnv.ticket, null);
+                        ioSession.write(new ErrorResponse(aex));
                     } else {
                         Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, String.format(GENERAL_EXCEPTION_MESSAGE, requestEnv.request.getType(), requestEnv.request.getClass().getSimpleName(), ex.toString()));
-                        pushResponse(ioSession, new ErrorResponse(ex.getMessage() != null && !ex.getMessage().isEmpty() ? ex.getMessage() : ex.toString()), requestEnv.ticket, null);
+                        ioSession.write(new ErrorResponse(ex.getMessage() != null && !ex.getMessage().isEmpty() ? ex.getMessage() : ex.toString()));
                     }
                 };
                 Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.FINE, "Request {0}", requestEnv.request.toString());
                 final RequestHandler<?, ?> handler = RequestHandlerFactory.getHandler(server, requestEnv.request);
                 if (handler != null) {
                     if (requestEnv.ticket == null) {
-                        DatabaseAuthorizer.authorize(server, requestEnv.userName, requestEnv.password, (Runnable aTask)->{
-                            Scripts.offerTask(aTask);
-                        }, (Session aSession) -> {
+                        DatabaseAuthorizer.authorize(server, requestEnv.userName, requestEnv.password, (Session aSession) -> {
                             requestEnv.ticket = aSession.getId();
                             ioSession.setAttribute(SESSION_ID, aSession.getId());
                             aSession.getSpace().process(() -> {
                                 ((SessionRequestHandler<Request, Response>) handler).handle(aSession, (Response aResponse) -> {
-                                    pushResponse(ioSession, aResponse, requestEnv.ticket, aSession.getSpace());
+                                    ioSession.write(aResponse);
                                 }, onError);
                             });
                         }, onError);
@@ -155,7 +126,7 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
                             ioSession.setAttribute(SESSION_ID, session.getId());
                             session.getSpace().process(() -> {
                                 ((SessionRequestHandler<Request, Response>) handler).handle(session, (Response aResponse) -> {
-                                    pushResponse(ioSession, aResponse, requestEnv.ticket, session.getSpace());
+                                    ioSession.write(aResponse);
                                 }, onError);
                             });
                         } else {
@@ -166,7 +137,7 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
                     throw new IllegalStateException("Unknown request type " + requestEnv.request.getType());
                 }
             } catch (Throwable ex) {
-                pushResponse(ioSession, new ErrorResponse(ex.getMessage()), requestEnv.ticket, null);
+                ioSession.write(new ErrorResponse(ex.getMessage()));
                 Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, ex.toString());
             }
         } else {

@@ -10,7 +10,7 @@ import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.SqlQuery;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.ModelsDocuments;
-import com.eas.client.cache.ScriptConfigs;
+import com.eas.client.cache.ScriptsConfigs;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.resourcepool.DatasourcesArgsConsumer;
@@ -201,7 +201,7 @@ public class ServerMain {
             if (f.exists() && f.isDirectory()) {
                 Logger.getLogger(ServerMain.class.getName()).log(Level.INFO, "Application is located at: {0}", f.getPath());
                 GeneralResourceProvider.registerDrivers();
-                ScriptConfigs scriptsConfigs = new ScriptConfigs();
+                ScriptsConfigs scriptsConfigs = new ScriptsConfigs();
                 ServerTasksScanner tasksScanner = new ServerTasksScanner(scriptsConfigs);
                 ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), tasksScanner);
                 //indexer.watch();

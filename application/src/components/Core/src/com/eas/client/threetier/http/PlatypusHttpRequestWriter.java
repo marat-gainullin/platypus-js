@@ -4,9 +4,6 @@
  */
 package com.eas.client.threetier.http;
 
-import com.eas.client.changes.Change;
-import com.eas.client.metadata.Parameter;
-import com.eas.client.metadata.Parameters;
 import com.eas.client.login.Credentials;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.client.threetier.Request;
@@ -15,7 +12,6 @@ import com.eas.client.threetier.requests.*;
 import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.concurrent.CallableConsumer;
 import com.eas.util.BinaryUtils;
-import com.eas.util.JSONUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -289,17 +285,10 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
     public void visit(CommitRequest rq) throws Exception {
         method = PlatypusHttpConstants.HTTP_METHOD_POST;
         params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.TYPE, "" + rq.getType()));
-        List<String> changes = new ArrayList<>();
-        for (Change change : rq.getChanges()) {
-            ChangeJSONWriter changeWriter = new ChangeJSONWriter();
-            change.accept(changeWriter);
-            changes.add(changeWriter.written);
-        }
-        String bodyText = JSONUtils.a(changes.toArray(new String[]{})).toString();
         pushRequest(rq, (HttpURLConnection aConn) -> {
             aConn.setRequestProperty(PlatypusHttpConstants.HEADER_CONTENTTYPE, PlatypusHttpConstants.JSON_CONTENT_TYPE + ";charset=" + SettingsConstants.COMMON_ENCODING);
             try (OutputStream out = aConn.getOutputStream()) {
-                byte[] bodyContent = bodyText.getBytes(SettingsConstants.COMMON_ENCODING);
+                byte[] bodyContent = rq.getChangesJson().getBytes(SettingsConstants.COMMON_ENCODING);
                 out.write(bodyContent);
             } catch (IOException ex) {
                 Logger.getLogger(PlatypusHttpRequestWriter.class.getName()).log(Level.SEVERE, null, ex);
@@ -330,11 +319,7 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
         method = PlatypusHttpConstants.HTTP_METHOD_GET;
         params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.TYPE, "" + rq.getType()));
         params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.QUERY_ID, rq.getQueryName()));
-        Parameters qParams = rq.getParams();
-        for (int i = 0; i < qParams.getParametersCount(); i++) {
-            Parameter p = qParams.get(i + 1);
-            params.add(new AbstractMap.SimpleEntry<>(p.getName(), JSONUtils.v(p.getValue())));
-        }
+        params.addAll(rq.getParamsJsons().entrySet());
         pushRequest(rq, null);
     }
 
@@ -344,8 +329,8 @@ public class PlatypusHttpRequestWriter implements PlatypusRequestVisitor {
         params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.TYPE, "" + rq.getType()));
         params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.MODULE_NAME, rq.getModuleName()));
         params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.METHOD_NAME, rq.getMethodName()));
-        for (Object oArg : rq.getArguments()) {
-            params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.PARAMS_ARRAY, JSONUtils.v(oArg)));
+        for (String argJson : rq.getArgumentsJsons()) {
+            params.add(new AbstractMap.SimpleEntry<>(PlatypusHttpRequestParams.PARAMS_ARRAY, argJson));
         }
         pushRequest(rq, null);
     }

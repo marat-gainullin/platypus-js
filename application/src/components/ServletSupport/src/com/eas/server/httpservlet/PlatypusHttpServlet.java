@@ -328,7 +328,7 @@ public class PlatypusHttpServlet extends HttpServlet {
             int rqType = Integer.valueOf(sType);
             Request rq = PlatypusRequestsFactory.create(rqType);
             if (rq != null) {
-                PlatypusHttpRequestReader reader = new PlatypusHttpRequestReader(serverCore, aHttpRequest, aSession.getSpace());
+                PlatypusHttpRequestReader reader = new PlatypusHttpRequestReader(serverCore, aHttpRequest);
                 rq.accept(reader);
                 return rq;
             } else {

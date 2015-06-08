@@ -21,12 +21,20 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.internal.runtime.JSType;
 
 /**
  *
  * @author mg
  */
 public class RemoteModulesProxy implements ModulesProxy {
+
+    public static final String SERVER_DEPENDENCIES_PROP_NAME = "serverDependencies";
+    public static final String QUERY_DEPENDENCIES_PROP_NAME = "queryDependencies";
+    public static final String CLIENT_DEPENDENCIES_PROP_NAME = "clientDependencies";
+    public static final String STRUCTURE_PROP_NAME = "structure";
+    public static final String LENGTH_PROP_NAME = "length";
 
     protected PlatypusConnection conn;
     protected String basePath;
@@ -49,15 +57,17 @@ public class RemoteModulesProxy implements ModulesProxy {
             requestModuleStructure(aName, aSpace, (ModuleStructureRequest.Response structureResp) -> {
                 try {
                     ModuleStructure structure = new ModuleStructure();
-                    structure.getClientDependencies().addAll(structureResp.getClientDependencies());
-                    structure.getServerDependencies().addAll(structureResp.getServerDependencies());
-                    structure.getQueryDependencies().addAll(structureResp.getQueryDependencies());
-                    for (String resourceName : structureResp.getStructure()) {
+                    JSObject jsStructure = (JSObject) aSpace.parseJson(structureResp.getJson());
+                    readCommons(jsStructure, structure);
+                    JSObject jsParts = (JSObject) jsStructure.getMember(STRUCTURE_PROP_NAME);
+                    int partsLength = JSType.toInteger(jsParts.getMember(LENGTH_PROP_NAME));
+                    for (int i = 0; i < partsLength; i++) {
+                        String resourceName = JSType.toString(jsParts.getSlot(i));
                         String cachePathName = constructResourcePath(resourceName);
                         File cachePath = new File(cachePathName);
                         syncResource(cachePath, resourceName, aSpace, (Void aVoid) -> {
                             structure.getParts().addFile(cachePath);
-                            if (structure.getParts().getFiles().size() == structureResp.getStructure().size()) {
+                            if (structure.getParts().getFiles().size() == partsLength) {
                                 id2files.put(aName, structure.getParts());
                                 onSuccess.accept(structure);
                             }
@@ -73,17 +83,40 @@ public class RemoteModulesProxy implements ModulesProxy {
         } else {
             ModuleStructureRequest.Response structureResp = requestModuleStructure(aName, null, null, null);
             ModuleStructure structure = new ModuleStructure();
-            id2files.put(aName, structure.getParts());
-            structure.getClientDependencies().addAll(structureResp.getClientDependencies());
-            structure.getServerDependencies().addAll(structureResp.getServerDependencies());
-            structure.getQueryDependencies().addAll(structureResp.getQueryDependencies());
-            for (String resourceName : structureResp.getStructure()) {
+            JSObject jsStructure = (JSObject) aSpace.parseJson(structureResp.getJson());
+            readCommons(jsStructure, structure);
+            JSObject jsParts = (JSObject) jsStructure.getMember(STRUCTURE_PROP_NAME);
+            int partsLength = JSType.toInteger(jsParts.getMember(LENGTH_PROP_NAME));
+            for (int i = 0; i < partsLength; i++) {
+                String resourceName = JSType.toString(jsParts.getSlot(i));
                 String cachePathName = constructResourcePath(resourceName);
                 File cachePath = new File(cachePathName);
                 syncResource(cachePath, resourceName, null, null, null);
                 structure.getParts().addFile(cachePath);
             }
+            id2files.put(aName, structure.getParts());
             return structure;
+        }
+    }
+
+    private void readCommons(JSObject jsStructure, ModuleStructure structure) {
+        JSObject jsClientDependencies = (JSObject) jsStructure.getMember(CLIENT_DEPENDENCIES_PROP_NAME);
+        int clientDepsLength = JSType.toInteger(jsClientDependencies.getMember(LENGTH_PROP_NAME));
+        for (int i = 0; i < clientDepsLength; i++) {
+            String dep = JSType.toString(jsClientDependencies.getSlot(i));
+            structure.getClientDependencies().add(dep);
+        }
+        JSObject jsQueryDependencies = (JSObject) jsStructure.getMember(QUERY_DEPENDENCIES_PROP_NAME);
+        int queryDepsLength = JSType.toInteger(jsQueryDependencies.getMember(LENGTH_PROP_NAME));
+        for (int i = 0; i < queryDepsLength; i++) {
+            String dep = JSType.toString(jsQueryDependencies.getSlot(i));
+            structure.getQueryDependencies().add(dep);
+        }
+        JSObject jsServerDependencies = (JSObject) jsStructure.getMember(SERVER_DEPENDENCIES_PROP_NAME);
+        int serverDepsLength = JSType.toInteger(jsServerDependencies.getMember(LENGTH_PROP_NAME));
+        for (int i = 0; i < serverDepsLength; i++) {
+            String dep = JSType.toString(jsServerDependencies.getSlot(i));
+            structure.getServerDependencies().add(dep);
         }
     }
 

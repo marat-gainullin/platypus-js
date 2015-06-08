@@ -4,10 +4,6 @@
  */
 package com.eas.client.threetier.platypus;
 
-import com.eas.client.metadata.Field;
-import com.eas.client.metadata.Parameter;
-import com.eas.client.ServerModuleInfo;
-import com.eas.client.metadata.BinaryFields;
 import com.eas.client.report.Report;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.AppQueryRequest;
@@ -24,13 +20,10 @@ import com.eas.client.threetier.requests.ResourceRequest;
 import com.eas.client.threetier.requests.CredentialRequest;
 import com.eas.proto.CoreTags;
 import com.eas.proto.ProtoWriter;
-import com.eas.script.Scripts;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
-import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -41,15 +34,13 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     public static final int COMPRESS_TOLERANCE = 1024 * 2;// 2KB
     public static final String ZIP_ENTRY_NAME = "responseData";
     protected OutputStream out;
-    protected Scripts.Space space;
 
-    public PlatypusResponseWriter(OutputStream aOut, Scripts.Space aSpace) {
+    public PlatypusResponseWriter(OutputStream aOut) {
         super();
         out = aOut;
-        space = aSpace;
     }
 
-    public static void write(Response response, ProtoWriter writer, Scripts.Space aSpace) throws Exception {
+    public static void write(Response response, ProtoWriter writer) throws Exception {
         if (response instanceof ErrorResponse) {
             writer.put(RequestsTags.TAG_ERROR_RESPONSE);
         } else {
@@ -57,7 +48,7 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
         }
         writer.put(RequestsTags.TAG_RESPONSE_DATA);
         ByteArrayOutputStream subOut = new ByteArrayOutputStream();
-        PlatypusResponseWriter responseWriter = new PlatypusResponseWriter(subOut, aSpace);
+        PlatypusResponseWriter responseWriter = new PlatypusResponseWriter(subOut);
         response.accept(responseWriter);
         byte[] subOutBytes = subOut.toByteArray();
         if (subOutBytes.length > COMPRESS_TOLERANCE) {
@@ -109,9 +100,8 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     @Override
     public void visit(ExecuteQueryRequest.Response rsp) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
-        writer.put(RequestsTags.TAG_UPDATE_COUNT, rsp.getUpdateCount());
-        if (rsp.getRowset() != null) {
-            writer.put(RequestsTags.TAG_ROWSET, space.toJson(rsp.getRowset()));
+        if (rsp.getJson() != null) {
+            writer.put(RequestsTags.TAG_RESULT_VALUE, rsp.getJson());
         }
     }
 
@@ -122,7 +112,12 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     @Override
     public void visit(RPCRequest.Response rsp) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
-        if (rsp.getResult() instanceof JSObject) {
+        if (rsp.getResult() instanceof Report) {
+            Report report = (Report) rsp.getResult();
+            writer.put(RequestsTags.TAG_FILE_NAME, report.getName());
+            writer.put(RequestsTags.TAG_FORMAT, report.getFormat());
+            writer.put(RequestsTags.TAG_RESULT_VALUE, report.getBody());
+            /*
             JSObject jsResult = (JSObject) rsp.getResult();
             JSObject p = space.lookupInGlobal("P");
             if (p != null) {
@@ -131,15 +126,16 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
                     Report report = (Report) ((JSObject) jsResult.getMember("unwrap")).call(null, new Object[]{});
                     writer.put(RequestsTags.TAG_FILE_NAME, report.getName());
                     writer.put(RequestsTags.TAG_FORMAT, report.getFormat());
-                    writer.put(RequestsTags.TAG_RESULT_VALUE, report.getReport());
+                    writer.put(RequestsTags.TAG_RESULT_VALUE, report.getBody());
                 } else {
-                    writer.put(RequestsTags.TAG_RESULT_VALUE, space.toJson(rsp.getResult()));
+                    writer.put(RequestsTags.TAG_RESULT_VALUE, (String)rsp.getResult());
                 }
             } else {
-                writer.put(RequestsTags.TAG_RESULT_VALUE, space.toJson(rsp.getResult()));
+                writer.put(RequestsTags.TAG_RESULT_VALUE, (String)rsp.getResult());
             }
+            */
         } else {
-            writer.put(RequestsTags.TAG_RESULT_VALUE, space.toJson(space.toJs(rsp.getResult())));
+            writer.put(RequestsTags.TAG_RESULT_VALUE, (String)rsp.getResult());
         }
         writer.flush();
     }
@@ -158,6 +154,7 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     @Override
     public void visit(ModuleStructureRequest.Response rsp) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
+        /*
         for (String partName : rsp.getStructure()) {
             writer.put(RequestsTags.TAG_RESOURCE_NAME, partName);
         }
@@ -170,35 +167,40 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
         for (String queryDependency : rsp.getQueryDependencies()) {
             writer.put(RequestsTags.TAG_MODULE_QUERY_DEPENDENCY, queryDependency);
         }
+        */
+        writer.put(RequestsTags.TAG_RESULT_VALUE, rsp.getJson());
         writer.flush();
     }
 
     @Override
     public void visit(AppQueryRequest.Response rsp) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
-        if (rsp.getAppQuery() != null) {
+        if (rsp.getAppQueryJson() != null) {
             writer.put(RequestsTags.TAG_TIMESTAMP, rsp.getTimeStamp());
-            writer.put(RequestsTags.TAG_QUERY_ID, rsp.getAppQuery().getEntityName());
+            /*
+            writer.put(RequestsTags.TAG_QUERY_ID, rsp.getAppQueryJson().getEntityName());
             ByteArrayOutputStream fieldsStream = new ByteArrayOutputStream();
-            BinaryFields.write(rsp.getAppQuery().getFields(), fieldsStream);
-            writer.put(RequestsTags.TAG_DML, rsp.getAppQuery().isManual() ? 1 : 0);
-            if (rsp.getAppQuery().getTitle() != null) {
-                writer.put(RequestsTags.TAG_TITLE, rsp.getAppQuery().getTitle());
+            BinaryFields.write(rsp.getAppQueryJson().getFields(), fieldsStream);
+            writer.put(RequestsTags.TAG_DML, rsp.getAppQueryJson().isManual() ? 1 : 0);
+            if (rsp.getAppQueryJson().getTitle() != null) {
+                writer.put(RequestsTags.TAG_TITLE, rsp.getAppQueryJson().getTitle());
             }
             writer.put(RequestsTags.TAG_FIELDS);
             writer.put(CoreTags.TAG_STREAM, fieldsStream);
-            for (Field param : rsp.getAppQuery().getParameters().toCollection()) {
+            for (Field param : rsp.getAppQueryJson().getParameters().toCollection()) {
                 writer.put(RequestsTags.TAG_QUERY_SQL_PARAMETER);
                 writer.put(CoreTags.TAG_STREAM, PlatypusRequestWriter.writeParameter((Parameter) param));
             }
-            Set<String> roles = rsp.getAppQuery().getReadRoles();
+            Set<String> roles = rsp.getAppQueryJson().getReadRoles();
             for (String role : roles) {
                 writer.put(RequestsTags.TAG_READ_ROLE, role);
             }
-            roles = rsp.getAppQuery().getWriteRoles();
+            roles = rsp.getAppQueryJson().getWriteRoles();
             for (String role : roles) {
                 writer.put(RequestsTags.TAG_WRITE_ROLE, role);
             }
+            */
+            writer.put(RequestsTags.TAG_RESULT_VALUE, rsp.getAppQueryJson());
             writer.flush();
         }
     }
@@ -215,11 +217,13 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
 
     @Override
     public void visit(ServerModuleStructureRequest.Response rsp) throws Exception {
-        ProtoWriter pw = new ProtoWriter(out);
-        if (rsp.getInfo() != null) {
+        ProtoWriter writer = new ProtoWriter(out);
+        if (rsp.getInfoJson() != null) {
+            writer.put(RequestsTags.TAG_TIMESTAMP, rsp.getTimeStamp());
+            writer.put(RequestsTags.TAG_RESULT_VALUE, rsp.getInfoJson());
+            /*
             ServerModuleInfo info = rsp.getInfo();
             pw.put(RequestsTags.TAG_MODULE_NAME, info.getModuleName());
-            pw.put(RequestsTags.TAG_TIMESTAMP, rsp.getTimeStamp());
             if (info.isPermitted()) {
                 pw.put(RequestsTags.TAG_MODULE_PERMITTED);
             }
@@ -233,8 +237,9 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
                 pw.put(RequestsTags.TAG_MODULE_FUNCTION_NAMES);
                 pw.put(CoreTags.TAG_STREAM, functions);
             }
+            */
         }
-        pw.flush();
+        writer.flush();
     }
 
 }

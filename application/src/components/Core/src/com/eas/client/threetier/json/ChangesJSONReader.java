@@ -2,24 +2,18 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.server.httpservlet.serial;
+package com.eas.client.threetier.json;
 
 import com.eas.client.changes.Change;
 import com.eas.client.changes.ChangeValue;
 import com.eas.client.changes.ChangeVisitor;
 import com.eas.client.changes.Command;
 import com.eas.client.changes.Delete;
-import com.eas.client.changes.EntitiesHost;
 import com.eas.client.changes.Insert;
 import com.eas.client.changes.Update;
-import com.eas.client.metadata.Field;
 import com.eas.script.Scripts;
-import com.eas.util.RowsetJsonConstants;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.JSObject;
@@ -29,21 +23,19 @@ import jdk.nashorn.internal.runtime.JSType;
  *
  * @author mg
  */
-public class ChangeJsonReader implements ChangeVisitor {
+public class ChangesJSONReader implements ChangeVisitor {
 
     private static final String CHANGE_DATA_NAME = "data";
     private static final String CHANGE_KEYS_NAME = "keys";
     private static final String CHANGE_PARAMETERS_NAME = "parameters";
     protected JSObject sChange;
     protected String entityName;
-    protected EntitiesHost fieldsResolver;
     protected Scripts.Space space;
 
-    public ChangeJsonReader(JSObject aSChange, String aEntityName, EntitiesHost aFieldsResolver, Scripts.Space aSpace) throws Exception {
+    public ChangesJSONReader(JSObject aSChange, String aEntityName, Scripts.Space aSpace) throws Exception {
         super();
         sChange = aSChange;
         entityName = aEntityName;
-        fieldsResolver = aFieldsResolver;
         space = aSpace;
     }
 
@@ -51,29 +43,11 @@ public class ChangeJsonReader implements ChangeVisitor {
         List<ChangeValue> data = new ArrayList<>();
         if (oData instanceof JSObject) {
             JSObject sValue = (JSObject) oData;
-            for (String sValueName : sValue.keySet()) {
+            sValue.keySet().stream().forEach((sValueName) -> {
                 Object oValueValue = sValue.getMember(sValueName);
-                Field field = fieldsResolver.resolveField(entityName, sValueName);
-                if (field != null) {
-                    if (oValueValue instanceof String && (field.getTypeInfo().getSqlType() == java.sql.Types.DATE || field.getTypeInfo().getSqlType() == java.sql.Types.TIME || field.getTypeInfo().getSqlType() == java.sql.Types.TIMESTAMP)) {
-                        try {
-                            SimpleDateFormat sdf = new SimpleDateFormat(RowsetJsonConstants.DATE_FORMAT);
-                            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-                            oValueValue = sdf.parse((String) oValueValue);
-                        } catch (ParseException pex) {
-                            if (((String) oValueValue).matches("\\d+")) {
-                                oValueValue = Long.valueOf((String) oValueValue);
-                            } else {
-                                oValueValue = Double.valueOf((String) oValueValue);
-                            }
-                        }
-                    }
-                    Object convertedValueValue = space.toJava(oValueValue);
-                    data.add(new ChangeValue(sValueName, convertedValueValue, field.getTypeInfo()));
-                } else {
-                    Logger.getLogger(ChangeJsonReader.class.getName()).log(Level.WARNING, String.format("Couldn't resolve entity property name: %s.%s", entityName, sValueName));
-                }
-            }
+                Object convertedValueValue = space.toJava(oValueValue);
+                data.add(new ChangeValue(sValueName, convertedValueValue, null));
+            });
         }
         return data;
     }
@@ -104,9 +78,9 @@ public class ChangeJsonReader implements ChangeVisitor {
         aChange.getParameters().addAll(parseObjectProperties(parameters));
     }
 
-    public static List<Change> parse(String aJsonText, EntitiesHost aFieldsResolver, Scripts.Space aSpace) throws Exception {
+    public static List<Change> read(String aChangesJson, Scripts.Space aSpace) throws Exception {
         List<Change> changes = new ArrayList<>();
-        Object sChanges = aSpace.parseJson(aJsonText);
+        Object sChanges = aSpace.parseJsonWithDates(aChangesJson);
         if (sChanges instanceof JSObject) {
             JSObject aChanges = (JSObject) sChanges;
             int length = JSType.toInteger(aChanges.getMember("length"));
@@ -133,21 +107,21 @@ public class ChangeJsonReader implements ChangeVisitor {
                                 break;
                         }
                         if (change != null) {
-                            ChangeJsonReader reader = new ChangeJsonReader(sChange, sEntityId, aFieldsResolver, aSpace);
+                            ChangesJSONReader reader = new ChangesJSONReader(sChange, sEntityId, aSpace);
                             change.accept(reader);
                             changes.add(change);
                         } else {
-                            Logger.getLogger(ChangeJsonReader.class.getName()).log(Level.SEVERE, String.format("Unknown type of change occured %s.", sKind));
+                            Logger.getLogger(ChangesJSONReader.class.getName()).log(Level.SEVERE, String.format("Unknown type of change occured %s.", sKind));
                         }
                     } else {
-                        Logger.getLogger(ChangeJsonReader.class.getName()).log(Level.SEVERE, "Kind and entity of change both must present");
+                        Logger.getLogger(ChangesJSONReader.class.getName()).log(Level.SEVERE, "Kind and entity of change both must present");
                     }
                 } else {
-                    Logger.getLogger(ChangeJsonReader.class.getName()).log(Level.SEVERE, "Every change must be an object.");
+                    Logger.getLogger(ChangesJSONReader.class.getName()).log(Level.SEVERE, "Every change must be an object.");
                 }
             }
         } else {
-            Logger.getLogger(ChangeJsonReader.class.getName()).log(Level.SEVERE, "Changes must be an array.");
+            Logger.getLogger(ChangesJSONReader.class.getName()).log(Level.SEVERE, "Changes must be an array.");
         }
         return changes;
     }

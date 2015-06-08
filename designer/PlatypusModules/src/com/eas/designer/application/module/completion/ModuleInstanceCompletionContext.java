@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import jdk.nashorn.internal.ir.AccessNode;
 import jdk.nashorn.internal.ir.BinaryNode;
+import jdk.nashorn.internal.ir.Expression;
 import jdk.nashorn.internal.ir.ExpressionStatement;
 import jdk.nashorn.internal.ir.FunctionNode;
 import jdk.nashorn.internal.ir.IdentNode;
@@ -78,6 +79,11 @@ public class ModuleInstanceCompletionContext extends CompletionContext {
                     
                     @Override
                     protected void commentedFunction(FunctionNode aFunction, String aComment) {
+                        //no-op
+                    }
+
+                    @Override
+                    protected void property(String string, Expression exprsn) {
                         //no-op
                     }
 

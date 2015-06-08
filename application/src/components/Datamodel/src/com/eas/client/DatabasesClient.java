@@ -1,6 +1,7 @@
 package com.eas.client;
 
 import com.eas.client.changes.Change;
+import com.eas.client.changes.EntitiesHost;
 import com.eas.client.dataflow.ColumnsIndicies;
 import com.eas.client.dataflow.Converter;
 import com.eas.client.dataflow.StatementsGenerator;
@@ -23,7 +24,6 @@ import java.sql.*;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -171,7 +171,7 @@ public class DatabasesClient {
         return sb.toString();
     }
 
-    public static Map<String, String> getUserProperties(DatabasesClient aClient, String aUserName, Executor aCallbacksExecutor, Consumer<Map<String, String>> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public static Map<String, String> getUserProperties(DatabasesClient aClient, String aUserName, Scripts.Space aSpace, Consumer<Map<String, String>> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (aUserName != null && aClient != null) {
             final SqlQuery q = new SqlQuery(aClient, USER_QUERY_TEXT);
             q.putParameter(USERNAME_PARAMETER_NAME, DataTypeInfo.VARCHAR, aUserName.toUpperCase());
@@ -191,7 +191,9 @@ public class DatabasesClient {
                 return properties;
             };
             if (onSuccess != null) {
-                compiled.<Map<String, String>>executeQuery(doWork, aCallbacksExecutor, (Map<String, String> props) -> {
+                compiled.<Map<String, String>>executeQuery(doWork, (Runnable aTask) -> {
+                    aSpace.process(aTask);
+                }, (Map<String, String> props) -> {
                     onSuccess.accept(props);
                 }, onFailure);
                 return null;
@@ -200,7 +202,7 @@ public class DatabasesClient {
             }
         } else {
             if (onSuccess != null) {
-                aCallbacksExecutor.execute(() -> {
+                aSpace.process(() -> {
                     onSuccess.accept(new HashMap<>());
                 });
                 return null;
@@ -254,13 +256,13 @@ public class DatabasesClient {
         }
     }
 
-    public static PlatypusPrincipal credentialsToPrincipalWithBasicAuthentication(DatabasesClient aClient, String aUserName, String aPassword, Executor aCallbacksExecutor, Consumer<PlatypusPrincipal> aOnSuccess, Consumer<Exception> aOnFailure) throws Exception {
+    public static PlatypusPrincipal credentialsToPrincipalWithBasicAuthentication(DatabasesClient aClient, String aUserName, String aPassword, Scripts.Space aSpace, Consumer<PlatypusPrincipal> aOnSuccess, Consumer<Exception> aOnFailure) throws Exception {
         final UserInfo ui = new UserInfo(aUserName, aPassword, aOnSuccess, true);
         if (aOnSuccess != null) {
-            getUserProperties(aClient, aUserName, aCallbacksExecutor, (Map<String, String> userProperties) -> {
+            getUserProperties(aClient, aUserName, aSpace, (Map<String, String> userProperties) -> {
                 ui.complete(userProperties, null);
             }, aOnFailure);
-            getUserRoles(aClient, aUserName, aCallbacksExecutor, (Set<String> aRoles) -> {
+            getUserRoles(aClient, aUserName, aSpace, (Set<String> aRoles) -> {
                 ui.complete(null, aRoles);
             }, aOnFailure);
             return null;
@@ -275,13 +277,13 @@ public class DatabasesClient {
         }
     }
 
-    public static PlatypusPrincipal userNameToPrincipal(DatabasesClient aClient, String aUserName, Executor aCallbacksExecutor, Consumer<PlatypusPrincipal> aOnSuccess, Consumer<Exception> aOnFailure) throws Exception {
+    public static PlatypusPrincipal userNameToPrincipal(DatabasesClient aClient, String aUserName, Scripts.Space aSpace, Consumer<PlatypusPrincipal> aOnSuccess, Consumer<Exception> aOnFailure) throws Exception {
         final UserInfo ui = new UserInfo(aUserName, null, aOnSuccess, false);
         if (aOnSuccess != null) {
-            getUserProperties(aClient, aUserName, aCallbacksExecutor, (Map<String, String> userProperties) -> {
+            getUserProperties(aClient, aUserName, aSpace, (Map<String, String> userProperties) -> {
                 ui.complete(userProperties, null);
             }, aOnFailure);
-            getUserRoles(aClient, aUserName, aCallbacksExecutor, (Set<String> aRoles) -> {
+            getUserRoles(aClient, aUserName, aSpace, (Set<String> aRoles) -> {
                 ui.complete(null, aRoles);
             }, aOnFailure);
             return null;
@@ -539,8 +541,52 @@ public class DatabasesClient {
                 // while transaction processing.
                 final Map<String, SqlQuery> entityQueries = new HashMap<>();
                 for (Change change : aLog) {
-                    StatementsGenerator generator = new StatementsGenerator((String aEntityName, String aFieldName) -> {
-                        if (aEntityName != null) {
+                    StatementsGenerator generator = new StatementsGenerator(new EntitiesHost() {
+
+                        @Override
+                        public Parameter resolveParameter(String aEntityName, String aParamName) throws Exception {
+                            if (aEntityName != null) {
+                                SqlQuery query = query(aEntityName);
+                                if (query != null && query.getEntityName() != null) {
+                                    Parameter p = query.getParameters().get(aParamName);
+                                    return p;
+                                } else {
+                                    return null;
+                                }
+                            } else {
+                                return null;
+                            }
+                        }
+
+                        @Override
+                        public Field resolveField(String aEntityName, String aFieldName) throws Exception {
+                            if (aEntityName != null) {
+                                SqlQuery query = query(aEntityName);
+                                Fields fields;
+                                if (query != null && query.getEntityName() != null) {
+                                    fields = query.getFields();
+                                } else {// It seems, that aEntityName is a table name...
+                                    fields = mdCache.getTableMetadata(aEntityName);
+                                }
+                                if (fields != null) {
+                                    Field resolved = fields.get(aFieldName);
+                                    String resolvedTableName = resolved != null ? resolved.getTableName() : null;
+                                    resolvedTableName = resolvedTableName != null ? resolvedTableName.toLowerCase() : "";
+                                    if (query != null && query.getWritable() != null && !query.getWritable().contains(resolvedTableName)) {
+                                        return null;
+                                    } else {
+                                        return resolved;
+                                    }
+                                } else {
+                                    Logger.getLogger(DatabasesClient.class.getName()).log(Level.WARNING, "Cant find fields for entity id:{0}", aEntityName);
+                                    return null;
+                                }
+                            } else {
+                                return null;
+                            }
+                        }
+
+                        private SqlQuery query(String aEntityName) throws Exception {
                             SqlQuery query;
                             if (queries != null) {
                                 query = entityQueries.get(aEntityName);
@@ -553,27 +599,7 @@ public class DatabasesClient {
                             } else {
                                 query = null;
                             }
-                            Fields fields;
-                            if (query != null && query.getEntityName() != null) {
-                                fields = query.getFields();
-                            } else {// It seems, that aEntityName is a table name...
-                                fields = mdCache.getTableMetadata(aEntityName);
-                            }
-                            if (fields != null) {
-                                Field resolved = fields.get(aFieldName);
-                                String resolvedTableName = resolved != null ? resolved.getTableName() : null;
-                                resolvedTableName = resolvedTableName != null ? resolvedTableName.toLowerCase() : "";
-                                if (query != null && query.getWritable() != null && !query.getWritable().contains(resolvedTableName)) {
-                                    return null;
-                                } else {
-                                    return resolved;
-                                }
-                            } else {
-                                Logger.getLogger(DatabasesClient.class.getName()).log(Level.WARNING, "Cant find fields for entity id:{0}", aEntityName);
-                                return null;
-                            }
-                        } else {
-                            return null;
+                            return query;
                         }
                     }, ClientConstants.F_USR_CONTEXT, contextHost != null ? contextHost.preparationContext() : null);
                     change.accept(generator);
@@ -644,7 +670,7 @@ public class DatabasesClient {
         }
     }
 
-    protected static Set<String> getUserRoles(DatabasesClient aClient, String aUserName, Executor aCallbacksExecutor, Consumer<Set<String>> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    protected static Set<String> getUserRoles(DatabasesClient aClient, String aUserName, Scripts.Space aSpace, Consumer<Set<String>> onSuccess, Consumer<Exception> onFailure) throws Exception {
         CallableConsumer<Set<String>, ResultSet> doWork = (ResultSet rs) -> {
             Set<String> roles = new HashSet<>();
             ColumnsIndicies idxs = new ColumnsIndicies(rs.getMetaData());
@@ -658,7 +684,9 @@ public class DatabasesClient {
         q.putParameter(USERNAME_PARAMETER_NAME, DataTypeInfo.VARCHAR, aUserName.toUpperCase());
         SqlCompiledQuery compiled = q.compile();
         if (onSuccess != null) {
-            compiled.<Set<String>>executeQuery(doWork, aCallbacksExecutor, (Set<String> aRoles) -> {
+            compiled.<Set<String>>executeQuery(doWork, (Runnable aTask) -> {
+                aSpace.process(aTask);
+            }, (Set<String> aRoles) -> {
                 onSuccess.accept(aRoles);
             }, onFailure);
             return null;

@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.server.httpservlet.serial;
+package com.eas.client.threetier.json;
 
 import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.Field;
@@ -13,7 +13,7 @@ import com.eas.util.JSONUtils;
  *
  * @author mg
  */
-public class FieldsJsonWriter {
+public class FieldsJSONWriter {
 
     // Field props
     private static final String NAME_PROP_NAME = "name";

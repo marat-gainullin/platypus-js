@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.threetier.http;
+package com.eas.client.threetier.json;
 
 import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.Field;

@@ -5,6 +5,7 @@
 package com.eas.client.changes;
 
 import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Parameter;
 
 
 /**
@@ -13,5 +14,7 @@ import com.eas.client.metadata.Field;
  */
 public interface EntitiesHost {
 
-    public Field resolveField(String aEntityId, String aFieldName) throws Exception;
+    public Field resolveField(String aEntityName, String aFieldName) throws Exception;
+    
+    public Parameter resolveParameter(String aEntityName, String aParamName) throws Exception;
 }

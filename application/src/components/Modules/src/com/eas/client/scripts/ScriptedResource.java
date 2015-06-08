@@ -518,7 +518,7 @@ public class ScriptedResource {
                     URL toLoad = apiLocalPath.toUri().toURL();
                     onSuccess.accept(toLoad);
                 } catch (MalformedURLException ex) {
-                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, "{0} - Failed {1}", new Object[]{scriptOrModuleName, ex.toString()});
+                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, "{0} - Failed {1}", new Object[]{checkedScriptOrModuleName(scriptOrModuleName), ex.toString()});
                 }
             });
         } else {
@@ -534,7 +534,7 @@ public class ScriptedResource {
                                     URL toLoad = sourceFile.toURI().toURL();
                                     onSuccess.accept(toLoad);
                                 } catch (MalformedURLException ex) {
-                                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, "{0} - Failed {1}", new Object[]{scriptOrModuleName, ex.toString()});
+                                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, "{0} - Failed {1}", new Object[]{checkedScriptOrModuleName(scriptOrModuleName), ex.toString()});
                                 }
                             }, (Exception ex) -> {
                                 onFailure.accept(ex);
@@ -554,7 +554,7 @@ public class ScriptedResource {
                                         moduleProcess.complete(null, ex);
                                     });
                                 } catch (Exception ex) {
-                                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Failed {1}", new Object[]{scriptOrModuleName, ex.toString()});
+                                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Failed {1}", new Object[]{checkedScriptOrModuleName(scriptOrModuleName), ex.toString()});
                                 }
                             } else {
                                 // 1
@@ -569,7 +569,7 @@ public class ScriptedResource {
                                 moduleProcess.complete(null, ex);
                             });
                         } catch (Exception ex) {
-                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Failed {1}", new Object[]{scriptOrModuleName, ex.toString()});
+                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Failed {1}", new Object[]{checkedScriptOrModuleName(scriptOrModuleName), ex.toString()});
                         }
                     } else {
                         Exception ex = new FileNotFoundException(scriptOrModuleName);
@@ -579,9 +579,13 @@ public class ScriptedResource {
                     onFailure.accept(ex);
                 });
             } catch (Exception ex) {
-                Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Failed {1}", new Object[]{scriptOrModuleName, ex.toString()});
+                Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Failed {1}", new Object[]{checkedScriptOrModuleName(scriptOrModuleName), ex.toString()});
             }
         }
+    }
+
+    private static Object checkedScriptOrModuleName(String scriptOrModuleName) {
+        return scriptOrModuleName != null && !scriptOrModuleName.isEmpty() ? scriptOrModuleName : "[start]";
     }
 
     public static void require(String[] aScriptsNames, String aCalledFromFile, JSObject onSuccess, JSObject onFailure) throws Exception {
@@ -627,15 +631,15 @@ public class ScriptedResource {
                         process.complete(null, ex);
                     }));
                     if (!aSpace.getRequired().contains(scriptOrModuleName)) {
-                        Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "Loading {0}...", scriptOrModuleName);
+                        Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "Loading {0} ...", checkedScriptOrModuleName(scriptOrModuleName));
                         aSpace.getRequired().add(scriptOrModuleName);
                         loadModule(apiPath, scriptOrModuleName, aCalledFromFile, aSpace, (URL aLocalURL) -> {
                             try {
                                 // sync require may occur while pending
                                 if (!aSpace.getExecuted().contains(scriptOrModuleName)) {
                                     aSpace.getExecuted().add(scriptOrModuleName);
+                                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Loaded", checkedScriptOrModuleName(scriptOrModuleName));
                                     aSpace.exec(aLocalURL);
-                                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Loaded", scriptOrModuleName);
                                 }
                                 Set<Scripts.Pending> lpending = new HashSet(pending);
                                 pending.clear();
@@ -646,7 +650,7 @@ public class ScriptedResource {
                                 Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, null, ex);
                             }
                         }, (Exception ex) -> {
-                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Failed {1}", new Object[]{scriptOrModuleName, ex.toString()});
+                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Failed {1}", new Object[]{checkedScriptOrModuleName(scriptOrModuleName), ex.toString()});
                             Set<Scripts.Pending> lpending = new HashSet(pending);
                             pending.clear();
                             lpending.forEach((Scripts.Pending p) -> {

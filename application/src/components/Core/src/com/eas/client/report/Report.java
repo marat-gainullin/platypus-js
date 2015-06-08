@@ -28,7 +28,7 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class Report implements HasPublished {
 
-    private final byte[] report;
+    private final byte[] body;
     protected JSObject scriptData;
     private final String format;
     private final String name;
@@ -42,9 +42,9 @@ public class Report implements HasPublished {
             + " * @param name Name of the report. May be used as output file name.\n"
             + " */"
             + "", params = {"body", "format", "name"})
-    public Report(byte[] aReport, String aFormat, String aName) {
+    public Report(byte[] aBody, String aFormat, String aName) {
         super();
-        report = aReport;
+        body = aBody;
         format = aFormat;
         name = aName;
     }
@@ -84,7 +84,7 @@ public class Report implements HasPublished {
 
     @ScriptFunction(jsDoc = SHOW_JSDOC)
     public void show() throws Exception {
-        if (getReport() != null) {
+        if (getBody() != null) {
             shellShowReport(save());
         }
     }
@@ -95,7 +95,7 @@ public class Report implements HasPublished {
 
     @ScriptFunction(jsDoc = PRINT_JSDOC)
     public void print() throws Exception {
-        if (getReport() != null) {
+        if (getBody() != null) {
             shellPrintReport(save());
         }
     }
@@ -108,14 +108,14 @@ public class Report implements HasPublished {
 
     @ScriptFunction(jsDoc = SAVE_JSDOC, params = {"aFileName"})
     public void save(String aFileName) throws Exception {
-        if (getReport() != null) {
-            saveReport(getReport(), aFileName);
+        if (getBody() != null) {
+            saveReport(getBody(), aFileName);
         }
     }
 
     private String save() throws IOException {
         String path = generateReportPath(getFormat());
-        saveReport(getReport(), path);
+        saveReport(getBody(), path);
         return path;
     }
 
@@ -192,9 +192,9 @@ public class Report implements HasPublished {
     }
 
     /**
-     * @return the report
+     * @return the body
      */
-    public byte[] getReport() {
-        return report;
+    public byte[] getBody() {
+        return body;
     }
 }

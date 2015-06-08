@@ -16,7 +16,7 @@ import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.FormsDocuments;
 import com.eas.client.cache.ModelsDocuments;
 import com.eas.client.cache.ReportsConfigs;
-import com.eas.client.cache.ScriptConfigs;
+import com.eas.client.cache.ScriptsConfigs;
 import com.eas.client.cache.ScriptDocument;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.queries.ContextHost;
@@ -57,7 +57,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
             if (aApplicationUrl.toLowerCase().startsWith("file")) {
                 File f = new File(new URI(aApplicationUrl));
                 if (f.exists() && f.isDirectory()) {
-                    ScriptConfigs lsecurityConfigs = new ScriptConfigs();
+                    ScriptsConfigs lsecurityConfigs = new ScriptsConfigs();
                     ServerTasksScanner tasksScanner = new ServerTasksScanner(lsecurityConfigs);
                     ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), tasksScanner);
                     //indexer.watch();
@@ -89,12 +89,12 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
     protected ApplicationSourceIndexer indexer;
     protected ModulesProxy modules;
     protected QueriesProxy<SqlQuery> queries;
-    protected ScriptConfigs scriptsConfigs;
+    protected ScriptsConfigs scriptsConfigs;
     protected FormsDocuments forms = new FormsDocuments();
     protected ReportsConfigs reports = new ReportsConfigs();
     protected ModelsDocuments models = new ModelsDocuments();
 
-    public PlatypusServerCore(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, ScriptConfigs aSecurityConfigs, String aDefaultAppElement) throws Exception {
+    public PlatypusServerCore(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, ScriptsConfigs aSecurityConfigs, String aDefaultAppElement) throws Exception {
         super();
         indexer = aIndexer;
         modules = aModules;
@@ -120,7 +120,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
     }
 
     @Override
-    public ScriptConfigs getScriptsConfigs() {
+    public ScriptsConfigs getScriptsConfigs() {
         return scriptsConfigs;
     }
 

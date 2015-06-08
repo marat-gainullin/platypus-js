@@ -8,12 +8,14 @@ package com.eas.client.queries;
 import com.eas.client.cache.ActualCacheEntry;
 import com.eas.client.threetier.PlatypusClient;
 import com.eas.client.threetier.PlatypusConnection;
+import com.eas.client.threetier.json.QueryJSONReader;
 import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.script.Scripts;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -41,9 +43,8 @@ public class RemoteQueriesProxy implements QueriesProxy<PlatypusQuery> {
         AppQueryRequest request = new AppQueryRequest(aName, localTimeStamp);
         if (onSuccess != null) {
             conn.<AppQueryRequest.Response>enqueueRequest(request, aSpace, (AppQueryRequest.Response aResponse) -> {
-                if (aResponse.getAppQuery() != null) {
-                    assert aResponse.getAppQuery() instanceof PlatypusQuery;
-                    PlatypusQuery query = (PlatypusQuery) aResponse.getAppQuery();
+                if (aResponse.getAppQueryJson() != null) {
+                    PlatypusQuery query = QueryJSONReader.read((JSObject) aSpace.parseJson(aResponse.getAppQueryJson()));
                     query.setServerProxy(core);
                     assert aName.equals(query.getEntityName());
                     entries.put(aName, new ActualCacheEntry<>(query, aResponse.getTimeStamp()));
@@ -56,9 +57,8 @@ public class RemoteQueriesProxy implements QueriesProxy<PlatypusQuery> {
             return null;
         } else {
             AppQueryRequest.Response response = conn.executeRequest(request);
-            if (response.getAppQuery() != null) {
-                assert response.getAppQuery() instanceof PlatypusQuery;
-                PlatypusQuery query = (PlatypusQuery) response.getAppQuery();
+            if (response.getAppQueryJson() != null) {
+                PlatypusQuery query = QueryJSONReader.read((JSObject) aSpace.parseJson(response.getAppQueryJson()));
                 query.setServerProxy(core);
                 assert aName.equals(query.getEntityName());
                 entries.put(aName, new ActualCacheEntry<>(query, response.getTimeStamp()));

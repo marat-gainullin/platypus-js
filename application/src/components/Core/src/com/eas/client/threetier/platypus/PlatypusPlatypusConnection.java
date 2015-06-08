@@ -13,7 +13,6 @@ import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.client.threetier.requests.LogoutRequest;
 import com.eas.concurrent.DeamonThreadFactory;
-import com.eas.proto.ProtoReader;
 import com.eas.script.Scripts;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -75,6 +74,8 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
     // sync requests
     private final RequestEncoder syncEncoder;
     private final ResponseDecoder syncDecoder;
+    // WARNING!!! syncSocket is intended only for single threaded using
+    private final Socket syncSocket;
 
     public PlatypusPlatypusConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts, Executor aNetworkProcessor, int aMaximumConnections) throws Exception {
         super(aUrl, aOnCredentials, aMaximumAuthenticateAttempts);
@@ -88,6 +89,8 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
         maximumConnections = Math.max(1, aMaximumConnections);
 
         connector = configureConnector(networkProcessor, sslContext);
+
+        syncSocket = sslContext.getSocketFactory().createSocket();
         syncEncoder = new RequestEncoder();
         syncDecoder = new ResponseDecoder();
     }
@@ -108,14 +111,14 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
         lconnector.setHandler(new IoHandlerAdapter() {
 
             @Override
-            public void messageReceived(IoSession session, Object in) throws Exception {
+            public void messageReceived(IoSession session, Object aResponse) throws Exception {
                 RequestEnvelope requestEnv = (RequestEnvelope) session.getAttribute(RequestEnvelope.class.getSimpleName());
                 sessionTicket = requestEnv.ticket;
                 session.removeAttribute(RequestEnvelope.class.getSimpleName());
                 pendingChanged(session, null);
                 // Report about a response
                 if (requestEnv.onComplete != null) {
-                    requestEnv.onComplete.accept((InputStream) in);
+                    requestEnv.onComplete.accept((Response) aResponse);
                 }
             }
 
@@ -242,16 +245,9 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
 
     private <R extends Response> void retry(Request aRequest, Scripts.Space aSpace, Consumer<Response> responseHandler, Attempts attemps) {
         Credentials sentCreds = credentials;
-        RequestEnvelope requestEnv = new RequestEnvelope(aRequest, credentials != null ? credentials.userName : null, credentials != null ? credentials.password : null, sessionTicket, (InputStream is) -> {
+        RequestEnvelope requestEnv = new RequestEnvelope(aRequest, credentials != null ? credentials.userName : null, credentials != null ? credentials.password : null, sessionTicket, (Response response) -> {
             aSpace.process(() -> {
                 try {
-                    final ProtoReader responseReader = new ProtoReader(is);
-                    Response response;
-                    try {
-                        response = PlatypusResponseReader.read(responseReader, aRequest, aSpace);
-                    } finally {
-                        is.close();
-                    }
                     if (response instanceof ErrorResponse && ((ErrorResponse) response).isNotLoggedIn()) {
                         if (attemps.count++ < maximumAuthenticateAttempts) {
                             if (credentials != null && !credentials.equals(sentCreds)) {
@@ -356,40 +352,42 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
     private <R extends Response> R retrySync(Request aRequest) throws Exception {
         RequestEnvelope requestEnv = new RequestEnvelope(aRequest, null, null, sessionTicket, null);
         Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.FINE, "{0} is connecting to {1}:{2}.", new Object[]{Thread.currentThread().getName(), host, port});
-        try (Socket conn = sslContext.getSocketFactory().createSocket()) {
-            conn.connect(new InetSocketAddress(host, port));
-            Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.FINE, "{0} is connected to {1}:{2}.", new Object[]{Thread.currentThread().getName(), host, port});
-            SyncProtocolEncoderOutput requestOut = new SyncProtocolEncoderOutput();
-            syncEncoder.encode(null, requestEnv, requestOut);
-            Object oFiltered = requestOut.getFiltered();
-            try (OutputStream os = conn.getOutputStream()) {
-                IoBuffer toWrite = (IoBuffer) oFiltered;
-                os.write(toWrite.array());
-            }
-            byte[] readBuffer = new byte[1024 * 16];
-            ByteArrayOutputStream accumulated = new ByteArrayOutputStream();
-            try (InputStream is = conn.getInputStream()) {
-                int read = 0;
-                while (read > -1) {
-                    read = is.read(readBuffer);
-                    accumulated.write(readBuffer, 0, read);
-                    SyncProtocolDecoderOutput responseOut = new SyncProtocolDecoderOutput();
-                    IoSession session = new DummySession();
-                    session.setAttribute(RequestEnvelope.class.getSimpleName(), requestEnv);
-                    if (syncDecoder.doDecode(session, IoBuffer.wrap(accumulated.toByteArray()), responseOut)) {
-                        sessionTicket = requestEnv.ticket;
-                        try (InputStream responseIs = (InputStream) responseOut.getFiltered()) {
-                            final ProtoReader responseReader = new ProtoReader(responseIs);
-                            return (R) PlatypusResponseReader.read(responseReader, aRequest, Scripts.getSpace());
-                        }
-                    }
-                }
-            }
-            throw new Exception("No response was recieved via platypus protocol");
+        if (!syncSocket.isConnected()) {
+            syncSocket.connect(new InetSocketAddress(host, port));
         }
+        Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.FINE, "{0} is connected to {1}:{2}.", new Object[]{Thread.currentThread().getName(), host, port});
+        SyncProtocolEncoderOutput requestOut = new SyncProtocolEncoderOutput();
+        syncEncoder.encode(null, requestEnv, requestOut);
+        Object oFiltered = requestOut.getFiltered();
+        OutputStream os = syncSocket.getOutputStream();
+        IoBuffer toWrite = (IoBuffer) oFiltered;
+        os.write(toWrite.array());
+        byte[] readBuffer = new byte[1024 * 16];
+        ByteArrayOutputStream accumulated = new ByteArrayOutputStream();
+        InputStream is = syncSocket.getInputStream();
+        int read = 0;
+        while (read > -1) {
+            read = is.read(readBuffer);
+            accumulated.write(readBuffer, 0, read);
+            SyncProtocolDecoderOutput responseOut = new SyncProtocolDecoderOutput();
+            IoSession session = new DummySession();
+            session.setAttribute(RequestEnvelope.class.getSimpleName(), requestEnv);
+            if (syncDecoder.doDecode(session, IoBuffer.wrap(accumulated.toByteArray()), responseOut)) {
+                sessionTicket = requestEnv.ticket;
+                return (R) responseOut.getFiltered();
+            }
+        }
+        throw new Exception("No response was recieved via platypus protocol");
     }
 
     @Override
     public void shutdown() {
+        try {
+            if (syncSocket.isConnected()) {
+                syncSocket.close();
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

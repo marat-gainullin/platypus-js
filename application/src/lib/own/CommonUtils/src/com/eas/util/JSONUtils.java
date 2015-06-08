@@ -152,16 +152,21 @@ public class JSONUtils {
                 SimpleDateFormat sdf = new SimpleDateFormat(RowsetJsonConstants.DATE_FORMAT);
                 sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
                 return sdf.parse(aJson.substring(1, aJson.length() - 1));
-            } else if(aJson.matches("\".*\"")){// string
-                String unescapesQuotes = aJson.substring(1, aJson.length() - 1).replace("\\\"", "\"");
-                String unescapesSlashes = unescapesQuotes.replace("\\\\", "\\");
-                return unescapesSlashes;
+            } else if(aJson.matches("\".*\"")){
+                return jsonUnescape(aJson);
             } else {
                 return Double.valueOf(aJson);
             }
         } else {
             return null;
         }
+    }
+
+    public static String jsonUnescape(String aJson) {
+        // string
+        String unescapesQuotes = aJson.substring(1, aJson.length() - 1).replace("\\\"", "\"");
+        String unescapesSlashes = unescapesQuotes.replace("\\\\", "\\");
+        return unescapesSlashes;
     }
 
 }

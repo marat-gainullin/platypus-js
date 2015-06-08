@@ -6,20 +6,19 @@ package com.eas.server.handlers;
 
 import com.eas.client.AppElementFiles;
 import com.eas.server.SessionRequestHandler;
-import com.eas.client.ServerModuleInfo;
+import com.eas.client.ServerModulesProxy;
 import com.eas.client.cache.ScriptDocument;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.threetier.requests.ServerModuleStructureRequest;
 import com.eas.server.*;
+import com.eas.util.JSONUtils;
 import java.security.AccessControlException;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 import javax.security.auth.AuthPermission;
-import jdk.nashorn.api.scripting.JSObject;
 
 /**
  *
@@ -40,16 +39,17 @@ public class ServerModuleStructureRequestHandler extends SessionRequestHandler<S
             Date clientModuleTime = getRequest().getTimeStamp();
             try {
                 AppElementFiles files = serverCore.getIndexer().nameToFiles(moduleName);
-                JSObject jsConstr = aSession.getSpace().lookupInGlobal(moduleName);
-                if (files != null && files.isModule() && jsConstr != null) {
-                    Set<String> functionProps = new HashSet<>();
+                if (files != null && files.isModule()) {
                     ServerModuleStructureRequest.Response response = new ServerModuleStructureRequest.Response(null);
                     Date serverModuleTime = files.getLastModified();
                     if (clientModuleTime == null || serverModuleTime.after(clientModuleTime)) {
                         ScriptDocument config = serverCore.getScriptsConfigs().get(moduleName, files);
                         checkPrincipalPermission(aSession, config.getModuleAllowedRoles(), moduleName);
-                        functionProps.addAll(config.getPropertyAllowedRoles().keySet());
-                        response.setInfo(new ServerModuleInfo(moduleName, functionProps, true));
+                        StringBuilder json = JSONUtils.o(
+                                ServerModulesProxy.CREATE_MODULE_RESPONSE_FUNCTIONS_PROP, JSONUtils.as(config.getFunctionProperties().toArray(new String[]{})).toString(),
+                                ServerModulesProxy.CREATE_MODULE_RESPONSE_IS_PERMITTED_PROP, String.valueOf(true)
+                        );
+                        response.setInfoJson(json.toString());
                         response.setTimeStamp(serverModuleTime);
                     }
                     onSuccess.accept(response);
@@ -60,7 +60,11 @@ public class ServerModuleStructureRequestHandler extends SessionRequestHandler<S
                 if (ex.getPermission() instanceof AuthPermission) {
                     onFailure.accept(ex);
                 } else {
-                    ServerModuleStructureRequest.Response response = new ServerModuleStructureRequest.Response(new ServerModuleInfo(moduleName, Collections.emptySet(), false));
+                    StringBuilder json = JSONUtils.o(
+                            ServerModulesProxy.CREATE_MODULE_RESPONSE_FUNCTIONS_PROP, JSONUtils.a(Collections.emptySet().toArray(new String[]{})).toString(),
+                            ServerModulesProxy.CREATE_MODULE_RESPONSE_IS_PERMITTED_PROP, String.valueOf(false)
+                    );
+                    ServerModuleStructureRequest.Response response = new ServerModuleStructureRequest.Response(json.toString());
                     if (clientModuleTime == null) {
                         // If a client has no the resource, let's give it a chance to update the resource, when it will be permitted
                         response.setTimeStamp(new Date(0));

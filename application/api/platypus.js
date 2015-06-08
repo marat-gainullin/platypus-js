@@ -1428,9 +1428,9 @@
                                     params[j] = arguments[j];
                                 }
                                 if (onSuccess) {
-                                    proxy.callServerModuleMethod(aModuleName, aFunctionName, onSuccess, onFailure, params);
+                                    proxy.callServerModuleMethod(aModuleName, aFunctionName, aSpace, onSuccess, onFailure, params);
                                 } else {
-                                    var result = proxy.callServerModuleMethod(aModuleName, aFunctionName, null, null, params);
+                                    var result = proxy.callServerModuleMethod(aModuleName, aFunctionName, aSpace, null, null, params);
                                     return result && result.getPublished ? result.getPublished() : result;
                                 }
                             };

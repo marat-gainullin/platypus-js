@@ -11,9 +11,8 @@ import com.eas.client.changes.Delete;
 import com.eas.client.changes.Insert;
 import com.eas.client.changes.Update;
 import com.eas.client.metadata.DataTypeInfo;
-import com.eas.client.metadata.Field;
+import com.eas.client.threetier.json.ChangesJSONReader;
 import com.eas.script.Scripts;
-import com.eas.server.httpservlet.serial.ChangeJsonReader;
 import com.eas.util.RowsetJsonConstants;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -43,45 +42,8 @@ public class PlatypusRequestHttpReaderTest {
     @Test
     public void changesJsonReadTest() throws Exception {
         System.out.println("changesJsonReadTest");
-        Scripts.init();
         Scripts.Space space = Scripts.createSpace();
-        List<Change> changes = ChangeJsonReader.parse(WRITTEN_CHANGES, (String aEntityId, String aFieldName) -> {
-            assertEquals("testEntity", aEntityId);
-            switch (aFieldName) {
-                case "key1": {
-                    Field field = new Field(aFieldName, "", DataTypeInfo.FLOAT);
-                    return field;
-                }
-                case "key2": {
-                    Field field = new Field(aFieldName, "", DataTypeInfo.CHAR);
-                    return field;
-                }
-                case "data\"\"1": {
-                    Field field = new Field(aFieldName, "", DataTypeInfo.INTEGER);
-                    return field;
-                }
-                case "data2": {
-                    Field field = new Field(aFieldName, "", DataTypeInfo.VARCHAR);
-                    return field;
-                }
-                case "da\"ta3": {
-                    Field field = new Field(aFieldName, "", DataTypeInfo.BOOLEAN);
-                    return field;
-                }
-                case "data4": {
-                    Field field = new Field(aFieldName, "", DataTypeInfo.BIT);
-                    return field;
-                }
-                case "data5": {
-                    Field field = new Field(aFieldName, "", DataTypeInfo.TIMESTAMP);
-                    return field;
-                }
-                default: {
-                    fail("Unknown field name ocured while testing");
-                    return null;
-                }
-            }
-        }, space);
+        List<Change> changes = ChangesJSONReader.read(WRITTEN_CHANGES, space);
 
         ChangeValue key1 = new ChangeValue("key1", 78.9f, DataTypeInfo.FLOAT);
         ChangeValue key2 = new ChangeValue("key2", "key2Value", DataTypeInfo.CHAR);

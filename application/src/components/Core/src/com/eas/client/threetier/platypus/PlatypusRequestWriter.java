@@ -4,8 +4,6 @@
  */
 package com.eas.client.threetier.platypus;
 
-import com.eas.client.changes.BinaryChanges;
-import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.requests.AppQueryRequest;
@@ -21,13 +19,12 @@ import com.eas.client.threetier.requests.ResourceRequest;
 import com.eas.client.threetier.requests.CredentialRequest;
 import com.eas.proto.CoreTags;
 import com.eas.proto.ProtoWriter;
-import com.eas.util.JSONUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import jdk.nashorn.internal.runtime.JSType;
 
 /**
  *
@@ -112,8 +109,7 @@ public class PlatypusRequestWriter implements PlatypusRequestVisitor {
     @Override
     public void visit(CommitRequest rq) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
-        writer.put(RequestsTags.TAG_CHANGES);
-        writer.put(CoreTags.TAG_STREAM, BinaryChanges.write(rq.getChanges()));
+        writer.put(RequestsTags.TAG_CHANGES, rq.getChangesJson());
         writer.flush();
     }
 
@@ -129,8 +125,8 @@ public class PlatypusRequestWriter implements PlatypusRequestVisitor {
         ProtoWriter writer = new ProtoWriter(out);
         writer.put(RequestsTags.TAG_MODULE_NAME, rq.getModuleName());
         writer.put(RequestsTags.TAG_METHOD_NAME, rq.getMethodName());
-        for (Object arg : rq.getArguments()) {
-            writer.put(RequestsTags.TAG_ARGUMENT_VALUE, JSONUtils.v(JSType.nullOrUndefined(arg) ? null : arg));
+        for (String argJson : rq.getArgumentsJsons()) {
+            writer.put(RequestsTags.TAG_ARGUMENT_VALUE, argJson);
         }
         writer.flush();
     }
@@ -162,9 +158,14 @@ public class PlatypusRequestWriter implements PlatypusRequestVisitor {
     public void visit(ExecuteQueryRequest rq) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
         writer.put(RequestsTags.TAG_QUERY_ID, rq.getQueryName());
-        for (Field param : rq.getParams().toCollection()) {
+        for(Map.Entry<String, String> pEntry : rq.getParamsJsons().entrySet()){
             writer.put(RequestsTags.TAG_SQL_PARAMETER);
-            writer.put(CoreTags.TAG_STREAM, writeParameter((Parameter) param));
+            ByteArrayOutputStream pOut = new ByteArrayOutputStream();
+            ProtoWriter pWriter = new ProtoWriter(pOut);
+            pWriter.put(RequestsTags.TAG_SQL_PARAMETER_NAME, pEntry.getKey());
+            pWriter.put(RequestsTags.TAG_SQL_PARAMETER_VALUE, pEntry.getValue());
+            pWriter.flush();
+            writer.put(CoreTags.TAG_STREAM, pOut);
         }
         writer.flush();
     }

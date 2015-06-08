@@ -9,6 +9,7 @@ import com.eas.client.DatabasesClient;
 import com.eas.client.SqlCompiledQuery;
 import com.eas.client.SqlQuery;
 import com.eas.client.metadata.Parameter;
+import com.eas.client.scripts.ScriptedResource;
 import com.eas.script.Scripts;
 import java.util.Collections;
 import java.util.Set;
@@ -30,7 +31,7 @@ public class ScriptedQuery extends SqlQuery {
     public ScriptedQuery(ScriptedQuery aSource) {
         super(aSource);
     }
-    
+
     public ScriptedQuery(DatabasesClient aBasesProxy, String aModuleName) {
         super(aBasesProxy);
         publicAccess = true;
@@ -67,80 +68,91 @@ public class ScriptedQuery extends SqlQuery {
 
     @Override
     public JSObject execute(Scripts.Space aSpace, Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        JSObject source = aSpace.createModule(entityName);
-        if (source.hasMember("fetch")) {
-            Object oFetch = source.getMember("fetch");
-            if (oFetch instanceof JSObject) {
-                JSObject jsFetch = (JSObject) oFetch;
-                if (jsFetch.isFunction()) {
-                    JSObject jsParams = aSpace.makeObj();
-                    for (int i = 0; i < params.getParametersCount(); i++) {
-                        Parameter p = params.get(i + 1);
-                        jsParams.setMember(p.getName(), aSpace.toJs(p.getValue()));
-                    }
-                    if (onSuccess != null) {
-                        final ExecutionChecker exChecker = new ExecutionChecker();
-                        Object oRowset = jsFetch.call(source, aSpace.toJs(new Object[]{
-                            jsParams,
-                            new AbstractJSObject() {
-
-                                @Override
-                                public Object call(final Object thiz, final Object... args) {
-                                    if (exChecker.isExecutionNeeded()) {
-                                        try {
-                                            JSObject jsRowset = args.length > 0 ? (JSObject) aSpace.toJava(args[0]) : null;
-                                            try {
-                                                onSuccess.accept(jsRowset);
-                                            } catch (Exception ex) {
-                                                Logger.getLogger(ScriptedQuery.class.getName()).log(Level.SEVERE, null, ex);
-                                            }
-                                        } catch (Exception ex) {
-                                            if (onFailure != null) {
-                                                onFailure.accept(ex);
-                                            }
-                                        }
-                                    }
-                                    return null;
-                                }
-                            },
-                            new AbstractJSObject() {
-
-                                @Override
-                                public Object call(final Object thiz, final Object... args) {
-                                    if (exChecker.isExecutionNeeded()) {
-                                        if (onFailure != null) {
-                                            if (args.length > 0) {
-                                                if (args[0] instanceof Exception) {
-                                                    onFailure.accept((Exception) args[0]);
-                                                } else {
-                                                    onFailure.accept(new Exception(String.valueOf(aSpace.toJava(args[0]))));
-                                                }
-                                            } else {
-                                                onFailure.accept(new Exception("No error information from fetch method"));
-                                            }
-                                        }
-                                    }
-                                    return null;
-                                }
+        assert Scripts.getSpace() == aSpace : "Scripts.Space TLS assumption failed";
+        if (onSuccess != null) {
+            ScriptedResource._require(new String[]{entityName}, null, aSpace, (Void v) -> {
+                JSObject source = aSpace.createModule(entityName);
+                if (source.hasMember("fetch")) {
+                    Object oFetch = source.getMember("fetch");
+                    if (oFetch instanceof JSObject) {
+                        JSObject jsFetch = (JSObject) oFetch;
+                        if (jsFetch.isFunction()) {
+                            JSObject jsParams = aSpace.makeObj();
+                            for (int i = 0; i < params.getParametersCount(); i++) {
+                                Parameter p = params.get(i + 1);
+                                jsParams.setMember(p.getName(), aSpace.toJs(p.getValue()));
                             }
-                        }));
-                        if (!JSType.nullOrUndefined(oRowset)) {
-                            onSuccess.accept((JSObject) aSpace.toJava(oRowset));
-                            exChecker.setExecutionNeeded(false);
+                            final ExecutionChecker exChecker = new ExecutionChecker();
+                            Object oRowset = jsFetch.call(source, aSpace.toJs(new Object[]{
+                                jsParams,
+                                new AbstractJSObject() {
+
+                                    @Override
+                                    public Object call(final Object thiz, final Object... args) {
+                                        if (exChecker.isExecutionNeeded()) {
+                                            try {
+                                                JSObject jsRowset = args.length > 0 ? (JSObject) aSpace.toJava(args[0]) : null;
+                                                try {
+                                                    onSuccess.accept(jsRowset);
+                                                } catch (Exception ex) {
+                                                    Logger.getLogger(ScriptedQuery.class.getName()).log(Level.SEVERE, null, ex);
+                                                }
+                                            } catch (Exception ex) {
+                                                if (onFailure != null) {
+                                                    onFailure.accept(ex);
+                                                }
+                                            }
+                                        }
+                                        return null;
+                                    }
+                                },
+                                new AbstractJSObject() {
+
+                                    @Override
+                                    public Object call(final Object thiz, final Object... args) {
+                                        if (exChecker.isExecutionNeeded()) {
+                                            if (onFailure != null) {
+                                                if (args.length > 0) {
+                                                    if (args[0] instanceof Exception) {
+                                                        onFailure.accept((Exception) args[0]);
+                                                    } else {
+                                                        onFailure.accept(new Exception(String.valueOf(aSpace.toJava(args[0]))));
+                                                    }
+                                                } else {
+                                                    onFailure.accept(new Exception("No error information from fetch method"));
+                                                }
+                                            }
+                                        }
+                                        return null;
+                                    }
+                                }
+                            }));
+                            if (!JSType.nullOrUndefined(oRowset)) {
+                                onSuccess.accept((JSObject) aSpace.toJava(oRowset));
+                                exChecker.setExecutionNeeded(false);
+                            }
                         }
-                        return null;
-                    } else {
+                    }
+                }
+            }, onFailure);
+            return null;
+        } else {
+            JSObject source = aSpace.createModule(entityName);
+            if (source.hasMember("fetch")) {
+                Object oFetch = source.getMember("fetch");
+                if (oFetch instanceof JSObject) {
+                    JSObject jsFetch = (JSObject) oFetch;
+                    if (jsFetch.isFunction()) {
+                        JSObject jsParams = aSpace.makeObj();
                         Object oRowset = jsFetch.call(source, aSpace.toJs(new Object[]{jsParams}));
                         if (!JSType.nullOrUndefined(oRowset)) {
                             return (JSObject) aSpace.toJava(oRowset);
-                        } else {
-                            return null;
                         }
                     }
                 }
             }
+            return null;
         }
-        return null;
     }
 
     @Override

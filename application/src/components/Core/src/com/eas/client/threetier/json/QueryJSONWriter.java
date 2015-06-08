@@ -2,17 +2,16 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.server.httpservlet.serial.query;
+package com.eas.client.threetier.json;
 
 import com.eas.client.queries.Query;
-import com.eas.server.httpservlet.serial.FieldsJsonWriter;
 import com.eas.util.JSONUtils;
 
 /**
  *
  * @author mg
  */
-public class QueryJsonWriter extends FieldsJsonWriter{
+public class QueryJSONWriter extends FieldsJSONWriter{
 
     private static final String TITLE_PROP_NAME = "title";
     private static final String MANUAL_PROP_NAME = "manual";
@@ -21,11 +20,16 @@ public class QueryJsonWriter extends FieldsJsonWriter{
     private static final String FIELDS_PROP_NAME = "fields";
     protected Query query;
 
-    public QueryJsonWriter(Query aQuery) {
+    public QueryJSONWriter(Query aQuery) {
         super();
         query = aQuery;
     }
 
+    public static String write(Query aQuery){
+        QueryJSONWriter w = new QueryJSONWriter(aQuery);
+        return w.write();
+    }
+    
     public String write() {
         StringBuilder sb = JSONUtils.o(
                 TITLE_PROP_NAME, JSONUtils.s(query.getTitle()).toString(),

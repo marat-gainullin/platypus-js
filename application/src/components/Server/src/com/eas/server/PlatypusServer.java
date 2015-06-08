@@ -8,7 +8,7 @@ import com.eas.client.ModulesProxy;
 import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.SqlQuery;
 import com.eas.client.cache.ApplicationSourceIndexer;
-import com.eas.client.cache.ScriptConfigs;
+import com.eas.client.cache.ScriptsConfigs;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.concurrent.DeamonThreadFactory;
 import com.eas.sensors.api.RetranslateFactory;
@@ -56,7 +56,7 @@ public class PlatypusServer extends PlatypusServerCore {
     private final Map<Integer, Integer> portsSessionIdleCheckIntervals;
     private final Executor executor;
 
-    public PlatypusServer(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, SSLContext aSslContext, InetSocketAddress[] aAddresses, Map<Integer, String> aPortsProtocols, Map<Integer, Integer> aPortsSessionIdleTimeouts, Map<Integer, Integer> aPortsSessionIdleCheckInterval, Executor aExecutor, ScriptConfigs aScriptsConfigs, String aDefaultAppElement) throws Exception {
+    public PlatypusServer(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, SSLContext aSslContext, InetSocketAddress[] aAddresses, Map<Integer, String> aPortsProtocols, Map<Integer, Integer> aPortsSessionIdleTimeouts, Map<Integer, Integer> aPortsSessionIdleCheckInterval, Executor aExecutor, ScriptsConfigs aScriptsConfigs, String aDefaultAppElement) throws Exception {
         super(aIndexer, aModules, aQueries, aDatabasesClient, aScriptsConfigs, aDefaultAppElement);
         if (aAddresses == null) {
             throw new NullPointerException("listenAddresses is null");

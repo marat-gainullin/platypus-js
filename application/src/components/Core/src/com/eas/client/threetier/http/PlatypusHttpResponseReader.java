@@ -5,8 +5,6 @@
  */
 package com.eas.client.threetier.http;
 
-import com.eas.client.ServerModuleInfo;
-import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.requests.AppQueryRequest;
@@ -21,17 +19,15 @@ import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.PlatypusResponseVisitor;
 import com.eas.client.threetier.requests.ResourceRequest;
 import com.eas.client.threetier.requests.CredentialRequest;
-import com.eas.script.Scripts;
 import com.eas.util.BinaryUtils;
+import com.eas.util.JSONUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.internal.runtime.JSType;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -39,62 +35,42 @@ import jdk.nashorn.internal.runtime.JSType;
  */
 public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
 
-    public static final String SERVER_DEPENDENCIES_PROP_NAME = "serverDependencies";
-    public static final String QUERY_DEPENDENCIES_PROP_NAME = "queryDependencies";
-    public static final String CLIENT_DEPENDENCIES_PROP_NAME = "clientDependencies";
-    public static final String STRUCTURE_PROP_NAME = "structure";
-    //
-    public static final String CREATE_MODULE_RESPONSE_FUNCTIONS_PROP = "functions";
-    public static final String CREATE_MODULE_RESPONSE_IS_PERMITTED_PROP = "isPermitted";
-    //
     public static final String REPORT_LOCATION_CONTENT_TYPE = "text/platypus-report-location";
 
     protected HttpURLConnection conn;
     protected int responseCode;
     protected Request request;
     private final byte[] bodyContent;
-    protected Scripts.Space space;
 
-    public PlatypusHttpResponseReader(Request aRequest, HttpURLConnection aConn, byte[] aBodyContent, Scripts.Space aSpace) throws IOException {
+    public PlatypusHttpResponseReader(Request aRequest, HttpURLConnection aConn, byte[] aBodyContent) throws IOException {
         super();
         request = aRequest;
         conn = aConn;
         responseCode = conn.getResponseCode();
-        space = aSpace;
         bodyContent = aBodyContent;
     }
 
-    protected Object extractJSON() throws IOException {
-        String contentText = extractText();
-        return space.parseJson(contentText);
-    }
-    
-    protected Object extractJSONWithDates() throws IOException {
-        String contentText = extractText();
-        return space.parseJsonWithDates(contentText);
-    }
-
     protected String extractText() throws IOException {
-            String contentType = conn.getContentType();
-            String[] contentTypeCharset = contentType.split(";");
-            if (contentTypeCharset == null || contentTypeCharset.length == 0) {
-                throw new IOException("Response must contain ContentType header with charset");
+        String contentType = conn.getContentType();
+        String[] contentTypeCharset = contentType.split(";");
+        if (contentTypeCharset == null || contentTypeCharset.length == 0) {
+            throw new IOException("Response must contain ContentType header with charset");
+        }
+        if (!contentTypeCharset[0].toLowerCase().startsWith("text/")) {
+            throw new IOException("Response ContentType must be text/...");
+        }
+        if (contentTypeCharset.length > 1) {
+            String[] charsetNameValue = contentTypeCharset[1].split("=");
+            if (charsetNameValue == null || charsetNameValue.length != 2) {
+                throw new IOException("Response must contain ContentType header with charset=... clause");
             }
-            if (!contentTypeCharset[0].toLowerCase().startsWith("text/")) {
-                throw new IOException("Response ContentType must be text/...");
+            if (!charsetNameValue[0].equalsIgnoreCase("charset")) {
+                throw new IOException("Response ContentType must be formatted as following: text/...;charset=...");
             }
-            if (contentTypeCharset.length > 1) {
-                String[] charsetNameValue = contentTypeCharset[1].split("=");
-                if (charsetNameValue == null || charsetNameValue.length != 2) {
-                    throw new IOException("Response must contain ContentType header with charset=... clause");
-                }
-                if (!charsetNameValue[0].equalsIgnoreCase("charset")) {
-                    throw new IOException("Response ContentType must be formatted as following: text/...;charset=...");
-                }
-                return new String(bodyContent, charsetNameValue[1].trim());
-            } else {
-                return new String(bodyContent, SettingsConstants.COMMON_ENCODING);
-            }
+            return new String(bodyContent, charsetNameValue[1].trim());
+        } else {
+            return new String(bodyContent, SettingsConstants.COMMON_ENCODING);
+        }
     }
 
     @Override
@@ -104,20 +80,28 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
 
     @Override
     public void visit(CredentialRequest.Response rsp) throws Exception {
-        JSObject jsCredential = (JSObject) extractJSON();
-        String userName = JSType.toString(jsCredential.getMember("userName"));
-        rsp.setName(userName);
+        String text = extractText();
+        Pattern userNamePattern = Pattern.compile("\\{\\s*userName\\s*:(.+)\\}");
+        Matcher m = userNamePattern.matcher(text);
+        if (m.find()) {
+            String userName = m.group(1);
+            rsp.setName(JSONUtils.jsonUnescape(userName));
+        }
     }
 
     @Override
     public void visit(ExecuteQueryRequest.Response rsp) throws Exception {
-        Object oData = extractJSONWithDates();
-        if (oData instanceof JSObject && ((JSObject) oData).isArray()) {
-            rsp.setRowset((JSObject) oData);
-        } else {
-            int updated = JSType.toInteger(oData);
-            rsp.setUpdateCount(updated);
-        }
+        String json = extractText();
+        rsp.setJson(json);
+        /*
+         Object oData = extractJSONWithDates();
+         if (oData instanceof JSObject && ((JSObject) oData).isArray()) {
+         rsp.setRowsetJson((JSObject) oData);
+         } else {
+         int updated = JSType.toInteger(oData);
+         rsp.setUpdateCount(updated);
+         }
+         */
     }
 
     @Override
@@ -133,8 +117,8 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
             URL reportUrl = new URL(currentUrl.getProtocol(), currentUrl.getHost(), currentUrl.getPort(), reportLocation);
             rsp.setResult(reportUrl);
         } else {
-            Object oData = extractJSONWithDates();
-            rsp.setResult(oData);
+            String text = extractText();
+            rsp.setResult(text);
         }
     }
 
@@ -148,18 +132,9 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
         if (responseCode == HttpURLConnection.HTTP_OK) {
             long timeStamp = conn.getLastModified();
             rsp.setTimeStamp(new Date(timeStamp));
-            Set<String> functions = new HashSet<>();
-            JSObject jsProxy = (JSObject) extractJSON();
-            JSObject jsFunctions = (JSObject) jsProxy.getMember(CREATE_MODULE_RESPONSE_FUNCTIONS_PROP);
-            int length = JSType.toInteger(jsFunctions.getMember(LENGTH_PROP_NAME));
-            for (int i = 0; i < length; i++) {
-                String fName = JSType.toString(jsFunctions.getSlot(i));
-                functions.add(fName);
-            }
-            boolean permitted = JSType.toBoolean(jsProxy.getMember(CREATE_MODULE_RESPONSE_IS_PERMITTED_PROP));
-            rsp.setInfo(new ServerModuleInfo(((ServerModuleStructureRequest) request).getModuleName(), functions, permitted));
+            rsp.setInfoJson(extractText());
         } else if (responseCode == HttpURLConnection.HTTP_NOT_MODIFIED) {
-            rsp.setInfo(null);
+            rsp.setInfoJson(null);
             rsp.setTimeStamp(null);
         }
     }
@@ -188,49 +163,22 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
         if (responseCode == HttpURLConnection.HTTP_OK) {
             long timeStamp = conn.getLastModified();
             rsp.setTimeStamp(new Date(timeStamp));
-            JSObject jsQuery = (JSObject) extractJSON();
-            PlatypusQuery query = QueryJSONReader.read(jsQuery);
-            rsp.setAppQuery(query);
+            rsp.setAppQueryJson(extractText());
         } else if (responseCode == HttpURLConnection.HTTP_NOT_MODIFIED) {
-            rsp.setAppQuery(null);
+            rsp.setAppQueryJson(null);
             rsp.setTimeStamp(null);
         }
     }
 
     @Override
     public void visit(CommitRequest.Response rsp) throws Exception {
-        Object oData = extractJSON();
-        int updated = JSType.toInteger(oData);
+        String text = extractText();
+        int updated = Double.valueOf(text).intValue();
         rsp.setUpdated(updated);
     }
 
     @Override
     public void visit(ModuleStructureRequest.Response rsp) throws Exception {
-        JSObject jsStructure = (JSObject) extractJSON();
-        JSObject jsParts = (JSObject) jsStructure.getMember(STRUCTURE_PROP_NAME);
-        int partsLength = JSType.toInteger(jsParts.getMember(LENGTH_PROP_NAME));
-        for (int i = 0; i < partsLength; i++) {
-            String part = JSType.toString(jsParts.getSlot(i));
-            rsp.getStructure().add(part);
-        }
-        JSObject jsClientDependencies = (JSObject) jsStructure.getMember(CLIENT_DEPENDENCIES_PROP_NAME);
-        int clientDepsLength = JSType.toInteger(jsClientDependencies.getMember(LENGTH_PROP_NAME));
-        for (int i = 0; i < clientDepsLength; i++) {
-            String dep = JSType.toString(jsClientDependencies.getSlot(i));
-            rsp.getClientDependencies().add(dep);
-        }
-        JSObject jsQueryDependencies = (JSObject) jsStructure.getMember(QUERY_DEPENDENCIES_PROP_NAME);
-        int queryDepsLength = JSType.toInteger(jsQueryDependencies.getMember(LENGTH_PROP_NAME));
-        for (int i = 0; i < queryDepsLength; i++) {
-            String dep = JSType.toString(jsQueryDependencies.getSlot(i));
-            rsp.getQueryDependencies().add(dep);
-        }
-        JSObject jsServerDependencies = (JSObject) jsStructure.getMember(SERVER_DEPENDENCIES_PROP_NAME);
-        int serverDepsLength = JSType.toInteger(jsServerDependencies.getMember(LENGTH_PROP_NAME));
-        for (int i = 0; i < serverDepsLength; i++) {
-            String dep = JSType.toString(jsServerDependencies.getSlot(i));
-            rsp.getServerDependencies().add(dep);
-        }
+        rsp.setJson(extractText());
     }
-    protected static final String LENGTH_PROP_NAME = "length";
 }
