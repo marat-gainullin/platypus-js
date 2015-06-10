@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,19 +36,18 @@ public class CommitRequestHandler extends SessionRequestHandler<CommitRequest, C
 
     protected static class ChangesSortProcess {
 
-        private final int expectedChanges;
+        private final List<Change> expectedChanges;
         private int factCalls;
         private final Consumer<Map<String, List<Change>>> onSuccess;
         private final Consumer<Exception> onFailure;
 
         private final Map<String, SqlCompiledQuery> entities = new HashMap<>();
-        private final List<AccessControlException> accessDeniedEntities = new CopyOnWriteArrayList<>();
-        private final List<Exception> notRetrievedQueries = new CopyOnWriteArrayList<>();
-        private final Map<String, List<Change>> changeLogs = new HashMap<>();
+        private final List<AccessControlException> accessDeniedEntities = new ArrayList<>();
+        private final List<Exception> notRetrievedEntities = new ArrayList<>();
 
-        public ChangesSortProcess(int aExpectedChanges, Consumer<Map<String, List<Change>>> aOnSuccess, Consumer<Exception> aOnFailure) {
+        public ChangesSortProcess(List<Change> aChanges, Consumer<Map<String, List<Change>>> aOnSuccess, Consumer<Exception> aOnFailure) {
             super();
-            expectedChanges = aExpectedChanges;
+            expectedChanges = aChanges;
             onSuccess = aOnSuccess;
             onFailure = aOnFailure;
         }
@@ -64,7 +62,7 @@ public class CommitRequestHandler extends SessionRequestHandler<CommitRequest, C
                     sb.append(ex.getMessage());
                 };
                 accessDeniedEntities.stream().forEach(appender);
-                notRetrievedQueries.stream().forEach(appender);
+                notRetrievedEntities.stream().forEach(appender);
                 return sb.toString();
             }
             return null;
@@ -81,27 +79,31 @@ public class CommitRequestHandler extends SessionRequestHandler<CommitRequest, C
                     if (aChange instanceof Command) {
                         ((Command) aChange).command = entity.getSqlClause();
                     }
-                    List<Change> targetChangeLog = changeLogs.get(entity.getDatasourceName());
-                    if (targetChangeLog == null) {
-                        targetChangeLog = new ArrayList<>();
-                        changeLogs.put(entity.getDatasourceName(), targetChangeLog);
-                    }
-                    targetChangeLog.add(aChange);
                 } catch (Exception ex) {
                     Logger.getLogger(CommitRequestHandler.class.getName()).log(Level.SEVERE, null, ex);
-                    notRetrievedQueries.add(ex);
+                    notRetrievedEntities.add(ex);
                 }
             }
             if (accessDenied != null) {
                 accessDeniedEntities.add(accessDenied);
             }
             if (failed != null) {
-                notRetrievedQueries.add(failed);
+                notRetrievedEntities.add(failed);
             }
 
-            if (++factCalls == expectedChanges) {
-                if (accessDeniedEntities.isEmpty() && notRetrievedQueries.isEmpty()) {
+            if (++factCalls == expectedChanges.size()) {
+                if (accessDeniedEntities.isEmpty() && notRetrievedEntities.isEmpty()) {
                     if (onSuccess != null) {
+                        Map<String, List<Change>> changeLogs = new HashMap<>();
+                        expectedChanges.stream().forEach((Change aSortedChange) -> {
+                            SqlCompiledQuery entity = entities.get(aSortedChange.entityName);
+                            List<Change> targetChangeLog = changeLogs.get(entity.getDatasourceName());
+                            if (targetChangeLog == null) {
+                                targetChangeLog = new ArrayList<>();
+                                changeLogs.put(entity.getDatasourceName(), targetChangeLog);
+                            }
+                            targetChangeLog.add(aSortedChange);
+                        });
                         onSuccess.accept(changeLogs);
                     }
                 } else {
@@ -122,7 +124,7 @@ public class CommitRequestHandler extends SessionRequestHandler<CommitRequest, C
         try {
             DatabasesClient client = getServerCore().getDatabasesClient();
             List<Change> changes = ChangesJSONReader.read(getRequest().getChangesJson(), aSession.getSpace());
-            ChangesSortProcess process = new ChangesSortProcess(changes.size(), (Map<String, List<Change>> changeLogs) -> {
+            ChangesSortProcess process = new ChangesSortProcess(changes, (Map<String, List<Change>> changeLogs) -> {
                 try {
                     client.commit(changeLogs, (Integer aUpdated) -> {
                         if (onSuccess != null) {
@@ -142,7 +144,7 @@ public class CommitRequestHandler extends SessionRequestHandler<CommitRequest, C
                     try {
                         ((LocalQueriesProxy) serverCore.getQueries()).getQuery(change.entityName, aSession.getSpace(), (SqlQuery aQuery) -> {
                             if (aQuery.isPublicAccess()) {
-                                AccessControlException aex = checkWritePrincipalPermission((PlatypusPrincipal)aSession.getSpace().getPrincipal(), change.entityName, aQuery.getWriteRoles());
+                                AccessControlException aex = checkWritePrincipalPermission((PlatypusPrincipal) aSession.getSpace().getPrincipal(), change.entityName, aQuery.getWriteRoles());
                                 if (aex != null) {
                                     process.complete(null, null, aex, null);
                                 } else {

@@ -35,7 +35,7 @@ public class RPCRequestHandler extends SessionRequestHandler<RPCRequest, RPCRequ
         String[] jsons = getRequest().getArgumentsJsons();
         Object[] arguments = new Object[jsons.length];
         for (int i = 0; i < arguments.length; i++) {
-            arguments[i] = aSession.getSpace().parseJson(jsons[i]);
+            arguments[i] = aSession.getSpace().parseJsonWithDates(jsons[i]);
         }
         serverCore.executeMethod(getRequest().getModuleName(), getRequest().getMethodName(), arguments, aSession, true, (Object result) -> {
             onSuccess.accept(new RPCRequest.Response(aSession.getSpace().toJson(result)));

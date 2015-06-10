@@ -421,24 +421,29 @@ public class Scripts {
                             processedTask = null;
                         }
                         if (worker.compareAndSet(null, thisThread)) {// Worker electing.
-                            // already single threaded environment
-                            if (global == null) {
-                                Bindings bindings = engine.createBindings();
-                                bindings.put("space", space);
-                                try {
-                                    engine.eval("load('classpath:platypus.js', space);", bindings);
-                                } catch (ScriptException ex) {
-                                    Logger.getLogger(Scripts.class.getName()).log(Level.SEVERE, null, ex);
+                            try {
+                                // already single threaded environment
+                                if (global == null) {
+                                    Bindings bindings = engine.createBindings();
+                                    bindings.put("space", space);
+                                    try {
+                                        engine.eval("load('classpath:platypus.js', space);", bindings);
+                                    } catch (ScriptException ex) {
+                                        Logger.getLogger(Scripts.class.getName()).log(Level.SEVERE, null, ex);
+                                    }
                                 }
+                                // Zombie processing ...
+                                Runnable task = queue.poll();
+                                while (task != null) {
+                                    task.run();
+                                    task = queue.poll();
+                                }
+                            } catch (Throwable t) {
+                                Logger.getLogger(Scripts.class.getName()).log(Level.SEVERE, null, t);
+                            } finally {
+                                boolean setted = worker.compareAndSet(thisThread, null);
+                                assert setted : "Worker electing assumption failed";// Always successfull CAS.
                             }
-                            // Zombie processing ...
-                            Runnable task = queue.poll();
-                            while (task != null) {
-                                task.run();
-                                task = queue.poll();
-                            }
-                            boolean setted = worker.compareAndSet(thisThread, null);
-                            assert setted : "Worker electing assumption failed";// Always successfull CAS.
                         }
                     } while (!queueVersion.compareAndSet(version, newVersion));
                 } finally {
@@ -533,6 +538,12 @@ public class Scripts {
                 new LinkedBlockingQueue<>(),
                 new DeamonThreadFactory("platypus-bio-", false));
         bio.allowCoreThreadTimeOut(true);
+    }
+
+    public static void shutdown() {
+        if (bio != null) {
+            bio.shutdownNow();
+        }
     }
 
     public static void startBIO(Runnable aBlocked) {

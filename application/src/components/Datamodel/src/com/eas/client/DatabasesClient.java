@@ -80,6 +80,10 @@ public class DatabasesClient {
         autoFillMetadata = aAutoFillMetadata;
     }
 
+    public void shutdown(){
+        jdbcProcessor.shutdownNow();
+    }
+    
     public QueriesProxy<SqlQuery> getQueries() {
         return queries;
     }
@@ -479,7 +483,9 @@ public class DatabasesClient {
                     }
                 });
             } else {
-                onSuccess.accept(0);
+                space.process(()->{
+                    onSuccess.accept(0);
+                });
             }
             return 0;
         } else {

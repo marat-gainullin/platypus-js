@@ -117,11 +117,6 @@ public class JSONUtils {
 
     public static String v(Object aValue) throws Exception {
         if (aValue != null) {
-            /*
-             if (aValue instanceof JSObject) {
-             aValue = space.toJava(aValue);
-             }
-             */
             if (aValue instanceof Boolean) {
                 return aValue.toString();
             } else if (aValue instanceof Number) {
@@ -131,7 +126,7 @@ public class JSONUtils {
             } else if (aValue instanceof Date) {
                 SimpleDateFormat sdf = new SimpleDateFormat(RowsetJsonConstants.DATE_FORMAT);
                 sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-                return sdf.format((Date) aValue);
+                return JSONUtils.s(sdf.format((Date) aValue)).toString();
             } else {
                 throw new Exception("Value of unknown or unsupported type found! It's class is: " + aValue.getClass().getName());
             }

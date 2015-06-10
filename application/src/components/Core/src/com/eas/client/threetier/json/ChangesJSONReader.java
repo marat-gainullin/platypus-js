@@ -82,32 +82,32 @@ public class ChangesJSONReader implements ChangeVisitor {
         List<Change> changes = new ArrayList<>();
         Object sChanges = aSpace.parseJsonWithDates(aChangesJson);
         if (sChanges instanceof JSObject) {
-            JSObject aChanges = (JSObject) sChanges;
-            int length = JSType.toInteger(aChanges.getMember("length"));
+            JSObject jsChanges = (JSObject) sChanges;
+            int length = JSType.toInteger(jsChanges.getMember("length"));
             for (int i = 0; i < length; i++) {
-                Object oChange = aChanges.getSlot(i);
+                Object oChange = jsChanges.getSlot(i);
                 if (oChange instanceof JSObject) {
                     JSObject sChange = (JSObject) oChange;
                     if (sChange.hasMember("kind") && sChange.hasMember("entity")) {
                         String sKind = JSType.toString(sChange.getMember("kind"));
-                        String sEntityId = JSType.toString(sChange.getMember("entity"));
+                        String sEntityName = JSType.toString(sChange.getMember("entity"));
                         Change change = null;
                         switch (sKind) {
                             case "insert":
-                                change = new Insert(sEntityId);
+                                change = new Insert(sEntityName);
                                 break;
                             case "update":
-                                change = new Update(sEntityId);
+                                change = new Update(sEntityName);
                                 break;
                             case "delete":
-                                change = new Delete(sEntityId);
+                                change = new Delete(sEntityName);
                                 break;
                             case "command":
-                                change = new Command(sEntityId);
+                                change = new Command(sEntityName);
                                 break;
                         }
                         if (change != null) {
-                            ChangesJSONReader reader = new ChangesJSONReader(sChange, sEntityId, aSpace);
+                            ChangesJSONReader reader = new ChangesJSONReader(sChange, sEntityName, aSpace);
                             change.accept(reader);
                             changes.add(change);
                         } else {

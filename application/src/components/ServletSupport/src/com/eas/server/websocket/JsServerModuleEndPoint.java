@@ -11,6 +11,7 @@ import com.eas.client.login.PlatypusPrincipal;
 import com.eas.script.Scripts;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.SessionManager;
+import com.eas.server.httpservlet.PlatypusHttpServlet;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -128,7 +129,7 @@ public class JsServerModuleEndPoint {
     }
 
     protected PlatypusServerCore lookupPlaypusServerCore() throws IllegalStateException, Exception {
-        PlatypusServerCore serverCore = PlatypusServerCore.getInstance();
+        PlatypusServerCore serverCore = PlatypusHttpServlet.getCore();
         if (serverCore == null) {
             throw new IllegalStateException("Platypus server core is not initialized");
         }

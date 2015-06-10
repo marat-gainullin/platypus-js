@@ -51,25 +51,29 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
     }
 
     protected String extractText() throws IOException {
-        String contentType = conn.getContentType();
-        String[] contentTypeCharset = contentType.split(";");
-        if (contentTypeCharset == null || contentTypeCharset.length == 0) {
-            throw new IOException("Response must contain ContentType header with charset");
-        }
-        if (!contentTypeCharset[0].toLowerCase().startsWith("text/")) {
-            throw new IOException("Response ContentType must be text/...");
-        }
-        if (contentTypeCharset.length > 1) {
-            String[] charsetNameValue = contentTypeCharset[1].split("=");
-            if (charsetNameValue == null || charsetNameValue.length != 2) {
-                throw new IOException("Response must contain ContentType header with charset=... clause");
+        if (bodyContent != null) {
+            String contentType = conn.getContentType();
+            String[] contentTypeCharset = contentType != null ? contentType.split(";") : null;
+            if (contentTypeCharset == null || contentTypeCharset.length == 0) {
+                throw new IOException("Response must contain ContentType header with charset");
             }
-            if (!charsetNameValue[0].equalsIgnoreCase("charset")) {
-                throw new IOException("Response ContentType must be formatted as following: text/...;charset=...");
+            if (!contentTypeCharset[0].toLowerCase().startsWith("text/")) {
+                throw new IOException("Response ContentType must be text/...");
             }
-            return new String(bodyContent, charsetNameValue[1].trim());
+            if (contentTypeCharset.length > 1) {
+                String[] charsetNameValue = contentTypeCharset[1].split("=");
+                if (charsetNameValue == null || charsetNameValue.length != 2) {
+                    throw new IOException("Response must contain ContentType header with charset=... clause");
+                }
+                if (!charsetNameValue[0].equalsIgnoreCase("charset")) {
+                    throw new IOException("Response ContentType must be formatted as following: text/...;charset=...");
+                }
+                return new String(bodyContent, charsetNameValue[1].trim());
+            } else {
+                return new String(bodyContent, SettingsConstants.COMMON_ENCODING);
+            }
         } else {
-            return new String(bodyContent, SettingsConstants.COMMON_ENCODING);
+            return null;
         }
     }
 

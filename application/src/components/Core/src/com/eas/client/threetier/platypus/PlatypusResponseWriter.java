@@ -176,6 +176,7 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     public void visit(AppQueryRequest.Response rsp) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
         if (rsp.getAppQueryJson() != null) {
+            assert rsp.getTimeStamp() != null;
             writer.put(RequestsTags.TAG_TIMESTAMP, rsp.getTimeStamp());
             /*
             writer.put(RequestsTags.TAG_QUERY_ID, rsp.getAppQueryJson().getEntityName());
@@ -209,6 +210,7 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     public void visit(ResourceRequest.Response rsp) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
         if (rsp.getContent() != null) {
+            assert rsp.getTimeStamp() != null;
             writer.put(RequestsTags.TAG_TIMESTAMP, rsp.getTimeStamp());
             writer.put(RequestsTags.TAG_RESOUCRE_CONTENT, rsp.getContent());
         }
@@ -219,6 +221,7 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
     public void visit(ServerModuleStructureRequest.Response rsp) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
         if (rsp.getInfoJson() != null) {
+            assert rsp.getTimeStamp() != null;
             writer.put(RequestsTags.TAG_TIMESTAMP, rsp.getTimeStamp());
             writer.put(RequestsTags.TAG_RESULT_VALUE, rsp.getInfoJson());
             /*

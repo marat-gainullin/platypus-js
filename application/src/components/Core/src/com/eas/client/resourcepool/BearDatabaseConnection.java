@@ -6,7 +6,6 @@ package com.eas.client.resourcepool;
 
 import java.sql.*;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.concurrent.Executor;
 
 /**
@@ -61,20 +60,6 @@ public class BearDatabaseConnection implements Connection {
 
     public void returnCallableStatement(String aSqlClause, CallableStatement aStatement) {
         calls.put(aSqlClause, aStatement);
-    }
-
-    protected static <S extends PreparedStatement> int riddleStatements(Map<String, S> aStmts) throws SQLException {
-        Set<String> toRemove = new HashSet<>();
-        for (Entry<String, S> stmt : aStmts.entrySet()) {
-            if (stmt.getValue() != null) {
-                stmt.getValue().close();
-                toRemove.add(stmt.getKey());
-            }
-        }
-        toRemove.stream().forEach((callKey) -> {
-            aStmts.remove(callKey);
-        });
-        return toRemove.size();
     }
 
     @Override
@@ -184,8 +169,6 @@ public class BearDatabaseConnection implements Connection {
     @Override
     public void commit() throws SQLException {
         checkClosed();
-        riddleStatements(stmts);
-        riddleStatements(calls);
         delegate.commit();
     }
 

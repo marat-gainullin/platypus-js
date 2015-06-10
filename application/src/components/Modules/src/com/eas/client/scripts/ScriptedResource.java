@@ -103,35 +103,88 @@ public class ScriptedResource {
     }
 
     public static Object load(final String aResourceName) throws Exception {
-        return load(aResourceName, null, null);
+        return load(aResourceName, (JSObject) null, (JSObject) null);
     }
 
     public static Object load(final String aResourceName, JSObject onSuccess) throws Exception {
-        return load(aResourceName, null, null);
+        return load(aResourceName, onSuccess, (JSObject) null);
     }
 
     public static Object load(final String aResourceName, JSObject onSuccess, JSObject onFailure) throws Exception {
+        Scripts.Space space = Scripts.getSpace();
+        return load(aResourceName, space, onSuccess != null ? (Object aLoaded) -> {
+            onSuccess.call(null, new Object[]{space.toJs(aLoaded)});
+        } : null, onSuccess != null ? (Exception ex) -> {
+            onFailure.call(null, new Object[]{space.toJs(ex.getMessage())});
+        } : null);
+    }
+
+    public static Object load(final String aResourceName, Scripts.Space aSpace, Consumer<Object> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (onSuccess != null) {
-            Scripts.Space space = Scripts.getSpace();
-            space.incAsyncsCount();
-            Scripts.startBIO(() -> {
-                try {
-                    Object loaded = loadSync(aResourceName);
-                    space.process(() -> {
-                        onSuccess.call(null, new Object[]{space.toJs(loaded)});
-                    });
-                } catch (Exception ex) {
-                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, null, ex);
-                    if (onFailure != null) {
-                        space.process(() -> {
-                            onFailure.call(null, new Object[]{space.toJs(ex.getMessage())});
-                        });
+            Matcher htppMatcher = httpPattern.matcher(aResourceName);
+            if (htppMatcher.matches()) {
+                aSpace.incAsyncsCount();
+                Scripts.startBIO(() -> {
+                    try {
+                        SEHttpResponse httpResponse = requestHttpResource(aResourceName, null, null, null);
+                        try {
+                            aSpace.process(() -> {
+                                onSuccess.accept(httpResponse.getBody() != null ? httpResponse.getBody() : httpResponse.getBodyBuffer());
+                            });
+                        } catch (Exception ex) {
+                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    } catch (Exception ex) {
+                        if (onFailure != null) {
+                            aSpace.process(() -> {
+                                onFailure.accept(ex);
+                            });
+                        } else {
+                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, null, ex);
+                        }
                     }
-                }
-            });
+                });
+            } else {
+                app.getModules().getModule(aResourceName, aSpace, (ModuleStructure s) -> {
+                    try {
+                        String resourceName = normalizeResourcePath(aResourceName);
+                        String sourcesPath = app.getModules().getLocalPath();
+                        File resourceFile = new File(sourcesPath + File.separator + resourceName);
+                        if (resourceFile.exists() && !resourceFile.isDirectory()) {
+                            byte[] data = FileUtils.readBytes(resourceFile);
+                            String fileExt = FileUtils.getFileExtension(resourceFile);
+                            String encoding;
+                            if (PlatypusFiles.isPlatypusProjectFileExt(fileExt) && !PlatypusFiles.REPORT_LAYOUT_EXTENSION.equalsIgnoreCase(fileExt) && !PlatypusFiles.REPORT_LAYOUT_EXTENSION_X.equalsIgnoreCase(fileExt)) {
+                                encoding = SettingsConstants.COMMON_ENCODING;
+                            } else {
+                                String contentType = Files.probeContentType(resourceFile.toPath());
+                                if (contentType != null && contentType.toLowerCase().startsWith("text/")) {
+                                    encoding = SettingsConstants.COMMON_ENCODING;
+                                } else {
+                                    encoding = null;// assume binary content
+                                }
+                            }
+                            onSuccess.accept(encoding != null ? new String(data, encoding) : data);
+                        } else {
+                            Exception ex = new IllegalArgumentException(String.format("Resource %s not found", aResourceName));
+                            if (onFailure != null) {
+                                onFailure.accept(ex);
+                            } else {
+                                throw ex;
+                            }
+                        }
+                    } catch (Exception ex) {
+                        Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }, (Exception ex) -> {
+                    if (onFailure != null) {
+                        onFailure.accept(ex);
+                    }
+                });
+            }
             return null;
         } else {
-            return loadSync(aResourceName);
+            return loadSync(aResourceName, aSpace);
         }
     }
 
@@ -139,10 +192,11 @@ public class ScriptedResource {
      * Loads a resource as text for UTF-8 encoding.
      *
      * @param aResourceName An relative path to the resource
+     * @param aSpace
      * @return Resource's text
      * @throws Exception If some error occurs when reading the resource
      */
-    protected static Object loadSync(String aResourceName) throws Exception {
+    protected static Object loadSync(String aResourceName, Scripts.Space aSpace) throws Exception {
         byte[] data = null;
         String encoding;
         Matcher htppMatcher = httpPattern.matcher(aResourceName);
@@ -150,7 +204,7 @@ public class ScriptedResource {
             SEHttpResponse httpResponse = requestHttpResource(aResourceName, null, null, null);
             return httpResponse.getBody() != null ? httpResponse.getBody() : httpResponse.getBodyBuffer();
         } else {
-            app.getModules().getModule(aResourceName, null, null, null);
+            app.getModules().getModule(aResourceName, aSpace, null, null);
             String resourceName = normalizeResourcePath(aResourceName);
             String sourcesPath = app.getModules().getLocalPath();
             File resourceFile = new File(sourcesPath + File.separator + resourceName);

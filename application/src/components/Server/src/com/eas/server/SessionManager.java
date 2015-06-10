@@ -8,6 +8,8 @@ import com.eas.client.login.SystemPlatypusPrincipal;
 import com.eas.script.Scripts;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.script.ScriptException;
 
 /**
@@ -20,6 +22,20 @@ import javax.script.ScriptException;
  * @author pk, mg refactoring
  */
 public class SessionManager {
+
+    public static class Singleton {
+
+        public static final SessionManager instance = init();
+
+        private static SessionManager init() {
+            try {
+                return new SessionManager();
+            } catch (ScriptException ex) {
+                Logger.getLogger(SessionManager.class.getName()).log(Level.SEVERE, "Unable to establish script engines", ex);
+                return null;
+            }
+        }
+    }
 
     protected final Map<String, Session> sessions = new ConcurrentHashMap<>();
     protected final Session systemSession;

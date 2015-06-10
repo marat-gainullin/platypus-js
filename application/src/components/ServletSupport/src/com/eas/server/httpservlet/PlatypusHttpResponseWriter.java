@@ -56,14 +56,14 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
     public void visit(ErrorResponse resp) throws Exception {
         if (resp.isAccessControl()) {
             /*
-            // we can't send HttpServletResponse.SC_UNAUTHORIZED without knowlege about login mechanisms
-            // of J2EE container.
-            if (resp.isNotLoggedIn()) {
-                servletResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, resp.getErrorMessage());
-            } else {
-                servletResponse.sendError(HttpServletResponse.SC_FORBIDDEN, resp.getErrorMessage());
-            }
-            */
+             // we can't send HttpServletResponse.SC_UNAUTHORIZED without knowlege about login mechanisms
+             // of J2EE container.
+             if (resp.isNotLoggedIn()) {
+             servletResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, resp.getErrorMessage());
+             } else {
+             servletResponse.sendError(HttpServletResponse.SC_FORBIDDEN, resp.getErrorMessage());
+             }
+             */
             servletResponse.sendError(HttpServletResponse.SC_FORBIDDEN, resp.getErrorMessage());
         } else {
             servletResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, resp.getErrorMessage());
@@ -141,8 +141,8 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
     @Override
     public void visit(ServerModuleStructureRequest.Response resp) throws Exception {
         ServerModuleStructureRequest.Response csmr = (ServerModuleStructureRequest.Response) resp;
-        if (csmr.getInfoJson()!= null) {
-            assert resp.getTimeStamp() == null;
+        if (csmr.getInfoJson() != null) {
+            assert resp.getTimeStamp() != null;
             servletResponse.setDateHeader(PlatypusHttpConstants.HEADER_LAST_MODIFIED, resp.getTimeStamp().getTime());
             writeJsonResponse(resp.getInfoJson(), servletResponse);
         } else {
@@ -158,7 +158,7 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
     @Override
     public void visit(AppQueryRequest.Response resp) throws Exception {
         AppQueryRequest.Response aqr = ((AppQueryRequest.Response) resp);
-        if (aqr.getAppQueryJson()!= null) {
+        if (aqr.getAppQueryJson() != null) {
             assert resp.getTimeStamp() != null;
             servletResponse.setDateHeader(PlatypusHttpConstants.HEADER_LAST_MODIFIED, resp.getTimeStamp().getTime());
             writeJsonResponse(aqr.getAppQueryJson(), servletResponse);

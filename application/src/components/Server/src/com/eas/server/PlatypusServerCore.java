@@ -7,7 +7,6 @@ package com.eas.server;
 import com.eas.client.AppElementFiles;
 import com.eas.client.Application;
 import com.eas.client.DatabasesClient;
-import com.eas.client.LocalModulesProxy;
 import com.eas.client.ModulesProxy;
 import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.ServerModulesProxy;
@@ -20,15 +19,12 @@ import com.eas.client.cache.ScriptsConfigs;
 import com.eas.client.cache.ScriptDocument;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.queries.ContextHost;
-import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.scripts.ScriptedResource;
 import com.eas.script.JsDoc;
 import com.eas.script.Scripts;
 import com.eas.server.handlers.ServerModuleStructureRequestHandler;
 import com.eas.server.handlers.RPCRequestHandler;
-import java.io.File;
-import java.net.URI;
 import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,40 +45,6 @@ import jdk.nashorn.internal.runtime.Undefined;
  */
 public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
 
-    protected static PlatypusServerCore instance;
-
-    public static PlatypusServerCore getInstance(String aApplicationUrl, String aDefaultDatasourceName, String aStartAppElementName, int aMaximumJdbcThreads, int aMaximumServicesThreads) throws Exception {
-        if (instance == null) {
-            ScriptedDatabasesClient basesProxy;
-            if (aApplicationUrl.toLowerCase().startsWith("file")) {
-                File f = new File(new URI(aApplicationUrl));
-                if (f.exists() && f.isDirectory()) {
-                    ScriptsConfigs lsecurityConfigs = new ScriptsConfigs();
-                    ServerTasksScanner tasksScanner = new ServerTasksScanner(lsecurityConfigs);
-                    ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), tasksScanner);
-                    //indexer.watch();
-                    Scripts.initBIO(aMaximumServicesThreads);
-                    basesProxy = new ScriptedDatabasesClient(aDefaultDatasourceName, indexer, true, tasksScanner.getValidators(), aMaximumJdbcThreads);
-                    QueriesProxy<SqlQuery> queries = new LocalQueriesProxy(basesProxy, indexer);
-                    basesProxy.setQueries(queries);
-                    instance = new PlatypusServerCore(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), aStartAppElementName), queries, basesProxy, lsecurityConfigs, aStartAppElementName);
-                    basesProxy.setContextHost(instance);
-                    ScriptedResource.init(instance);
-                    instance.startResidents(tasksScanner.getResidents());
-                } else {
-                    throw new IllegalArgumentException("applicationUrl: " + aApplicationUrl + " doesn't point to existent directory.");
-                }
-            } else {
-                throw new Exception("Unknown protocol in url: " + aApplicationUrl);
-            }
-        }
-        return instance;
-    }
-
-    public static PlatypusServerCore getInstance() throws Exception {
-        return instance;
-    }
-
     protected String defaultAppElement;
     protected SessionManager sessionManager;
     protected ScriptedDatabasesClient basesProxy;
@@ -95,12 +57,16 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
     protected ModelsDocuments models = new ModelsDocuments();
 
     public PlatypusServerCore(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, ScriptsConfigs aSecurityConfigs, String aDefaultAppElement) throws Exception {
+        this(aIndexer, aModules, aQueries, aDatabasesClient, aSecurityConfigs, aDefaultAppElement, new SessionManager());
+    }
+    
+    public PlatypusServerCore(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, ScriptsConfigs aSecurityConfigs, String aDefaultAppElement, SessionManager aSessionManager) throws Exception {
         super();
         indexer = aIndexer;
         modules = aModules;
         queries = aQueries;
         basesProxy = aDatabasesClient;
-        sessionManager = new SessionManager();
+        sessionManager = aSessionManager;
         defaultAppElement = aDefaultAppElement;
         scriptsConfigs = aSecurityConfigs;
     }
@@ -165,6 +131,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
      * @param aMethodName
      * @param aArguments
      * @param aSession
+     * @param aNetworkRPC
      * @param onSuccess
      * @param onFailure
      */
@@ -226,7 +193,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                                                 args.clear();
                                                                 Object returned = largs.length > 0 ? largs[0] : null;
                                                                 aSession.getSpace().process(() -> {
-                                                                    onSuccess.accept(targetSpace.toJava(returned));
+                                                                    onSuccess.accept(returned);// WARNING! Don't insert .toJava() because of RPC handler
                                                                 });
                                                             } else {
                                                                 Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
@@ -263,7 +230,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                                         if (!(result instanceof Undefined) || asyncs == 0) {
                                                             if (!args.isEmpty()) {
                                                                 args.clear();
-                                                                onSuccess.accept(targetSpace.toJava(result));
+                                                                onSuccess.accept(result);// WARNING! Don't insert .toJava() because of RPC handler
                                                             } else {
                                                                 Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
                                                             }

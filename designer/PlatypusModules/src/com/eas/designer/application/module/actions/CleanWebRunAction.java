@@ -9,6 +9,7 @@ import com.eas.designer.explorer.project.PlatypusProjectActions;
 import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
+import java.util.MissingResourceException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.api.project.FileOwnerQuery;
@@ -19,6 +20,7 @@ import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
 import org.openide.awt.ActionRegistration;
 import org.openide.loaders.DataObject;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 @ActionID(category = "File",
@@ -45,9 +47,14 @@ public final class CleanWebRunAction extends RunAction {
                 project.getOutputWindowIO().getOut().println(NbBundle.getMessage(PlatypusProjectActions.class, "MSG_Cleaning_Web_Dir")); // NOI18N
                 pwmm.clearWebDir();
                 project.getOutputWindowIO().getOut().println(NbBundle.getMessage(PlatypusProjectActions.class, "MSG_Cleaning_Web_Dir_Complete")); // NOI18N
-            } catch (IOException | Deployment.DeploymentException ex) {
-                Logger.getLogger(PlatypusProjectActions.class.getName()).log(Level.WARNING, "Error cleaning web directory", ex);
+            } catch (Deployment.DeploymentException | MissingResourceException | IOException ex) {
+                Logger.getLogger(PlatypusProjectActions.class.getName()).log(Level.WARNING, NbBundle.getMessage(PlatypusProjectActions.class, "MSG_Cleaning_Web_Dir") + " - Failed", ex);
                 project.getOutputWindowIO().getErr().println(ex.getMessage());
+                try {
+                    pwmm.prepareWebApplication(true);
+                } catch (Exception ex1) {
+                    Exceptions.printStackTrace(ex1);
+                }
             }
         }
         super.actionPerformed(ev);

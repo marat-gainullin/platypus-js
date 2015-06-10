@@ -6,6 +6,7 @@
 package com.eas.client;
 
 import com.eas.client.cache.ActualCacheEntry;
+import com.eas.client.report.Report;
 import com.eas.client.threetier.PlatypusConnection;
 import com.eas.client.threetier.requests.ServerModuleStructureRequest;
 import com.eas.client.threetier.requests.RPCRequest;
@@ -119,12 +120,28 @@ public class ServerModulesProxy {
         final RPCRequest request = new RPCRequest(aModuleName, aMethodName, argumentsJsons);
         if (onSuccess != null) {
             conn.<RPCRequest.Response>enqueueRequest(request, aSpace, (RPCRequest.Response aResponse) -> {
-                onSuccess.accept(aResponse.getResult());
+                Object sResult = adoptRPCResponse(aResponse, aSpace);
+                onSuccess.accept(sResult);
             }, onFailure);
             return null;
         } else {
             RPCRequest.Response response = conn.executeRequest(request);
-            return response.getResult();
+            Object sResult = adoptRPCResponse(response, aSpace);
+            return sResult;
         }
+    }
+
+    private Object adoptRPCResponse(RPCRequest.Response aResponse, Scripts.Space aSpace) {
+        Object sResult;
+        Object rpcResult = aResponse.getResult();
+        if(rpcResult instanceof String){
+            sResult = aSpace.parseJsonWithDates((String)rpcResult);
+        }else if(rpcResult instanceof Report){
+            Report report = (Report)rpcResult;
+            sResult = report.getPublished();
+        }else{
+            sResult = rpcResult;
+        }
+        return sResult;
     }
 }

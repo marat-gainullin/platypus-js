@@ -16,7 +16,7 @@ import jdk.nashorn.api.scripting.JSObject;
 public class AnonymousPlatypusPrincipal extends PlatypusPrincipal {
 
     public AnonymousPlatypusPrincipal() {
-        this("anonymous-" + String.valueOf(IDGenerator.genID()));
+        this("anonymous-" + IDGenerator.genID());
     }
 
     public AnonymousPlatypusPrincipal(String aName) {
