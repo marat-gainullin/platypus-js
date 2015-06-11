@@ -99,6 +99,11 @@ public class Scripts {
         protected Set<String> executed = new HashSet<>();
         protected Map<String, Set<Pending>> pending = new HashMap<>();
 
+        protected Space() {
+            this(null);
+            global = new Object();
+        }
+        
         public Space(ScriptEngine aEngine) {
             super();
             engine = aEngine;
@@ -555,6 +560,11 @@ public class Scripts {
     public static Space createSpace() throws ScriptException {
         ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
         Space space = new Space(engine);
+        return space;
+    }
+
+    public static Space createQueue() throws ScriptException {
+        Space space = new Space();
         return space;
     }
 

@@ -52,6 +52,10 @@ public class AppQueryRequestHandler extends SessionRequestHandler<AppQueryReques
                     }
                     Set<String> rolesAllowed = query.getReadRoles();
                     PlatypusPrincipal principal = (PlatypusPrincipal)aSession.getSpace().getPrincipal();
+                    boolean _role1 = rolesAllowed.contains("role1");
+                    boolean _role2 = rolesAllowed.contains("role2");
+                    boolean role1 = principal.hasRole("role1");
+                    boolean role2 = principal.hasRole("role2");
                     if (rolesAllowed != null && !principal.hasAnyRole(rolesAllowed)) {
                         throw new AccessControlException(String.format(ACCESS_DENIED_MSG, query.getEntityName(), principal.getName()), principal instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
                     }

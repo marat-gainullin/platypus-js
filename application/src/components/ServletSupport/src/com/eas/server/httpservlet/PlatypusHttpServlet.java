@@ -38,6 +38,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.script.ScriptException;
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -62,7 +63,7 @@ public class PlatypusHttpServlet extends HttpServlet {
     public static final String PLATYPUS_SERVER_CORE_ATTR_NAME = "PLATYPUS_SERVER_CORE_ATTR_NAME";
     public static final String PLATYPUS_SESSION_ATTR_NAME = "PLATYPUS_SESSION_ATTR_NAME";
     public static final String PLATYPUS_PRINCIPAL_DATA_CONTEXT_ATTR_NAME = "PLATYPUS_PRINCIPAL_DATA_CONTEXT_ATTR_NAME";
-    public static final String REQUEST_PARAMETER_MISSING_MSG = "Http request parameter '{0}' not found.";
+    public static final String REQUEST_PARAMETER_MISSING_MSG = "Http request parameter {0} not found.";
     public static final String UNKNOWN_REQUEST_MSG = "Unknown http request has arrived. It's type is %d";
     public static final String REQUEST_PROCESSSING_ERROR_MSG = "Request processsing error";
     public static final String SUBJECT_CONTEXT_KEY = "javax.security.auth.Subject.container";
@@ -73,11 +74,12 @@ public class PlatypusHttpServlet extends HttpServlet {
     public static final String TEXT_CONTENTTYPE = "text/plain";
     public static final String PLATYPUS_SESSION_ID_ATTR_NAME = "platypus-session-id";
 
-    private static PlatypusServerCore platypusCore;
+    private static volatile PlatypusServerCore platypusCore;
     private String realRootPath;
     private PlatypusServerConfig platypusConfig;
     private ExecutorService containerExecutor;
     private ThreadPoolExecutor falledBackExecutor;
+    private Scripts.Space queueSpace;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
@@ -120,6 +122,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                         containerExecutor.submit(aTask);
                     });
                     platypusCore.startResidents(tasksScanner.getResidents());
+                    queueSpace = Scripts.createQueue();
                 } else {
                     throw new IllegalArgumentException("applicationUrl: " + realRootUrl + " doesn't point to existent directory.");
                 }
@@ -130,8 +133,8 @@ public class PlatypusHttpServlet extends HttpServlet {
             throw new ServletException(ex);
         }
     }
-    
-    public static PlatypusServerCore getCore(){
+
+    public static PlatypusServerCore getCore() {
         return platypusCore;
     }
 
@@ -218,37 +221,70 @@ public class PlatypusHttpServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
         if (!checkUpload(request, response)) {
             if (platypusCore != null) {
-                HttpSession httpSession = request.getSession(true);
+                HttpSession httpSession = request.getSession();
                 if (httpSession != null) {
-                    Session session = platypusSessionByHttpSession(httpSession);
-                    if (session != null) {
-                        AsyncContext async = request.startAsync(request, response);
-                        DatabasesClient.getUserProperties(platypusCore.getDatabasesClient(), request.getUserPrincipal() != null ? request.getUserPrincipal().getName() : null, session.getSpace(), (Map<String, String> aUserProps) -> {
-                            String dataContext = aUserProps.get(ClientConstants.F_USR_CONTEXT);
-                            PlatypusPrincipal principal = servletRequestPrincipal(request, dataContext);
-                            Scripts.Space space = session.getSpace();
-                            space.setPrincipal(principal);
-                            space.setRequest(request);
-                            space.setResponse(response);
-                            try {
-                                processPlatypusRequest(request, response, session, httpSession, async);
-                            } catch (Exception ex) {
-                                Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex);
+                    AsyncContext async = request.startAsync();//request, response);
+                    async.setTimeout(-1);
+                    Consumer<Session> requestProcessor = (Session aSession) -> {
+                        try {
+                            DatabasesClient.getUserProperties(platypusCore.getDatabasesClient(), request.getUserPrincipal() != null ? request.getUserPrincipal().getName() : null, aSession.getSpace(), (Map<String, String> aUserProps) -> {
+                                String dataContext = aUserProps.get(ClientConstants.F_USR_CONTEXT);
+                                PlatypusPrincipal principal = servletRequestPrincipal(request, dataContext);
+                                Scripts.Space space = aSession.getSpace();
+                                //space.setPrincipal(principal);
+                                //space.setRequest(request);
+                                //space.setResponse(response);
+                                try {
+                                    processPlatypusRequest(request, response, aSession, httpSession, async);
+                                } catch (Exception ex) {
+                                    Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex);
+                                    try {
+                                        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.toString());
+                                    } catch (IOException | IllegalStateException ex1) {
+                                        Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex1);
+                                    }
+                                }
+                            }, (Exception ex) -> {
                                 try {
                                     response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.toString());
                                 } catch (IOException | IllegalStateException ex1) {
                                     Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex1);
                                 }
-                            }
-                        }, (Exception ex) -> {
+                            });
+                        } catch (Exception ex) {
                             try {
                                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.toString());
                             } catch (IOException | IllegalStateException ex1) {
                                 Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex1);
                             }
+                        }
+                    };
+                    Session session = platypusSessionByHttpSession(httpSession);
+                    if (session == null) {// Zombie check
+                        queueSpace.process(() -> {
+                            try {
+                                String platypusSessionId = (String) httpSession.getAttribute(PLATYPUS_SESSION_ID_ATTR_NAME);
+                                // platypusSessionId may be replicated from another instance in cluster
+                                Session lookedup = platypusSessionId != null ? SessionManager.Singleton.instance.get(platypusSessionId) : null;
+                                if (lookedup == null) {
+                                    // preserve replicated session id
+                                    if (platypusSessionId == null) {
+                                        platypusSessionId = IDGenerator.genID() + "";
+                                    }
+                                    lookedup = SessionManager.Singleton.instance.create(platypusSessionId);
+                                    httpSession.setAttribute(PLATYPUS_SESSION_ID_ATTR_NAME, platypusSessionId);
+                                    Logger.getLogger(PlatypusSessionsSynchronizer.class.getName()).log(Level.INFO, "Platypus session opened. Session id: {0}", lookedup.getId());
+                                }
+                                final Session effective = lookedup;
+                                lookedup.getSpace().process(() -> {
+                                    requestProcessor.accept(effective);
+                                });
+                            } catch (ScriptException ex) {
+                                Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex);
+                            }
                         });
                     } else {
-                        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, PLATYPUS_SESSION_MISSING_MSG);
+                        requestProcessor.accept(session);
                     }
                 } else {
                     response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, HTTP_SESSION_MISSING_MSG);
@@ -270,7 +306,8 @@ public class PlatypusHttpServlet extends HttpServlet {
         if (aRequest.getUserPrincipal() != null) {
             return new HttpPlatypusPrincipal(aRequest.getUserPrincipal().getName(), aDataContext, aRequest);
         } else {
-            return aRequest.getSession() != null ? new AnonymousPlatypusPrincipal("anonymous-" + aRequest.getSession().getId()) : new AnonymousPlatypusPrincipal();
+            HttpSession httpSession = aRequest.getSession(false);
+            return httpSession != null ? new AnonymousPlatypusPrincipal("anonymous-" + httpSession.getId()) : new AnonymousPlatypusPrincipal();
         }
     }
 

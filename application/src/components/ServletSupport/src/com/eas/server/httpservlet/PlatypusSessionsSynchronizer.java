@@ -7,7 +7,6 @@ package com.eas.server.httpservlet;
 import com.eas.server.Session;
 import com.eas.server.SessionManager;
 import static com.eas.server.httpservlet.PlatypusHttpServlet.PLATYPUS_SESSION_ID_ATTR_NAME;
-import com.eas.util.IDGenerator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpSessionEvent;
@@ -20,18 +19,6 @@ import javax.servlet.http.HttpSessionListener;
 public class PlatypusSessionsSynchronizer implements HttpSessionListener {
 
     @Override
-    public void sessionCreated(HttpSessionEvent se) {
-        try {
-            String platypusSessionId = IDGenerator.genID() + "";
-            se.getSession().setAttribute(PLATYPUS_SESSION_ID_ATTR_NAME, platypusSessionId);
-            Session session = SessionManager.Singleton.instance.create(platypusSessionId);
-            Logger.getLogger(PlatypusSessionsSynchronizer.class.getName()).log(Level.INFO, "Platypus session opened. Session id: {0}", session.getId());
-        } catch (Exception ex) {
-            Logger.getLogger(PlatypusSessionsSynchronizer.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    @Override
     public void sessionDestroyed(HttpSessionEvent se) {
         try {
             Session removed = SessionManager.Singleton.instance.remove((String) se.getSession().getAttribute(PLATYPUS_SESSION_ID_ATTR_NAME));
@@ -41,5 +28,10 @@ public class PlatypusSessionsSynchronizer implements HttpSessionListener {
         } catch (Exception ex) {
             Logger.getLogger(PlatypusSessionsSynchronizer.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    @Override
+    public void sessionCreated(HttpSessionEvent se) {
+        // no op. Scripts.Space is appended to session by servlet code, due to parallel and sessions replication problems.
     }
 }

@@ -5,6 +5,7 @@
  */
 package com.eas.server.httpservlet;
 
+import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.report.Report;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.client.threetier.http.PlatypusHttpConstants;
@@ -104,7 +105,7 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
                 if (jsResult.isInstanceOf(reportClass)) {
                     Report report = (Report) ((JSObject) jsResult.getMember("unwrap")).call(null, new Object[]{});
                     String docsRoot = servletRequest.getServletContext().getRealPath("/");
-                    String userName = servletRequest.getUserPrincipal() != null ? servletRequest.getUserPrincipal().getName() : servletRequest.getSession().getId();
+                    String userName = ((PlatypusPrincipal)space.getPrincipal()).getName();
                     String userHomeInApplication = "/reports/" + userName + "/";
                     File userDir = new File(docsRoot + userHomeInApplication);
                     if (!userDir.exists()) {
