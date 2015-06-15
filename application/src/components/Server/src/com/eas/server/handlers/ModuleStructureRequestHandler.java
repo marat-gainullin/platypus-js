@@ -5,7 +5,7 @@
  */
 package com.eas.server.handlers;
 
-import com.eas.server.SessionRequestHandler;
+import com.eas.server.RequestHandler;
 import com.eas.client.AppElementFiles;
 import com.eas.client.ModuleStructure;
 import com.eas.client.RemoteModulesProxy;
@@ -30,7 +30,7 @@ import javax.security.auth.AuthPermission;
  *
  * @author mg
  */
-public class ModuleStructureRequestHandler extends SessionRequestHandler<ModuleStructureRequest, ModuleStructureRequest.Response> {
+public class ModuleStructureRequestHandler extends RequestHandler<ModuleStructureRequest, ModuleStructureRequest.Response> {
 
     public static final String ACCESS_DENIED_MSG = "Access denied to application element '%s' [ %s ] for user %s";
 
@@ -39,7 +39,7 @@ public class ModuleStructureRequestHandler extends SessionRequestHandler<ModuleS
     }
 
     @Override
-    public void handle2(Session aSession, Consumer<ModuleStructureRequest.Response> onSuccess, Consumer<Exception> onFailure) {
+    public void handle(Session aSession, Consumer<ModuleStructureRequest.Response> onSuccess, Consumer<Exception> onFailure) {
         try {
             String moduleOrResourceName = getRequest().getModuleOrResourceName();
             if (moduleOrResourceName == null || moduleOrResourceName.isEmpty()) {
@@ -48,7 +48,7 @@ public class ModuleStructureRequestHandler extends SessionRequestHandler<ModuleS
             AppElementFiles files = serverCore.getIndexer().nameToFiles(moduleOrResourceName);
             if (files != null) {
                 // Security check
-                checkModuleRoles(aSession, moduleOrResourceName, files);
+                checkModuleRoles(moduleOrResourceName, files);
                 // Actual work
                 serverCore.getModules().getModule(moduleOrResourceName, Scripts.getSpace(), (ModuleStructure aStructure) -> {
                     String localPath = serverCore.getModules().getLocalPath();
@@ -77,11 +77,11 @@ public class ModuleStructureRequestHandler extends SessionRequestHandler<ModuleS
         }
     }
 
-    private void checkModuleRoles(Session aSession, String aModuleName, AppElementFiles aAppElementFiles) throws Exception {
+    private void checkModuleRoles(String aModuleName, AppElementFiles aAppElementFiles) throws Exception {
         if (aAppElementFiles != null && aAppElementFiles.hasExtension(PlatypusFiles.JAVASCRIPT_EXTENSION)) {
             ScriptDocument jsDoc = serverCore.getScriptsConfigs().get(aModuleName, aAppElementFiles);
             Set<String> rolesAllowed = jsDoc.getModuleAllowedRoles();
-            PlatypusPrincipal principal = (PlatypusPrincipal) aSession.getSpace().getPrincipal();
+            PlatypusPrincipal principal = (PlatypusPrincipal) Scripts.getContext().getPrincipal();
             if (rolesAllowed != null && !principal.hasAnyRole(rolesAllowed)) {
                 throw new AccessControlException(String.format(ACCESS_DENIED_MSG, aModuleName, getRequest().getModuleOrResourceName(), principal.getName()), principal instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
             }

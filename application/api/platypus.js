@@ -26,6 +26,7 @@
     
     // core imports
     var EngineUtilsClass = Java.type("jdk.nashorn.api.scripting.ScriptUtils");
+    var ScriptsClass = Java.type("com.eas.script.Scripts");
     var JavaArrayClass = Java.type("java.lang.Object[]");
     var JavaStringArrayClass = Java.type("java.lang.String[]");
     var JavaCollectionClass = Java.type("java.util.Collection");
@@ -681,20 +682,22 @@
     }
     Object.defineProperty(P, "extend", {value: extend});
     
+    /*
     Object.defineProperty(P, "session", {
         get: function () {
             if (serverCoreClass) {
-                return aSpace.getSession().getPublished();
+                return ScriptsClass.getContext().getSession().getPublished();
             } else {
                 return null;
             }
         }
     });
+    */
 
     Object.defineProperty(P, "principal", {
         get: function () {
             var clientSpacePrincipal = PlatypusPrincipalClass.getClientSpacePrincipal();
-            var tlsPrincipal = aSpace.getPrincipal();
+            var tlsPrincipal = ScriptsClass.getContext().getPrincipal();
             return boxAsJs(clientSpacePrincipal !== null ? clientSpacePrincipal : tlsPrincipal);
         }
     });

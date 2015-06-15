@@ -56,18 +56,92 @@ public class Scripts {
 
     public static final String THIS_KEYWORD = "this";//NOI18N
 
-    private static final ThreadLocal<Space> spaceRef = new ThreadLocal<>();
+    private static final ThreadLocal<LocalContext> contextRef = new ThreadLocal<>();
 
     public static Space getSpace() {
-        return spaceRef.get();
+        return getContext() != null ? getContext().getSpace() : null;
     }
 
-    public static void setSpace(Space aSpace) {
-        if (aSpace != null) {
-            spaceRef.set(aSpace);
+    public static LocalContext getContext() {
+        return contextRef.get();
+    }
+
+    public static void setContext(LocalContext aContext) {
+        if (aContext != null) {
+            contextRef.set(aContext);
         } else {
-            spaceRef.remove();
+            contextRef.remove();
         }
+    }
+
+    public static class LocalContext {
+
+        protected Object request;
+        protected Object response;
+        protected Object async;
+        protected Object principal;
+        protected Integer asyncsCount;
+        protected Scripts.Space space;
+
+        public Object getRequest() {
+            return request;
+        }
+
+        public void setRequest(Object aRequest) {
+            request = aRequest;
+        }
+
+        public Object getResponse() {
+            return response;
+        }
+
+        public void setResponse(Object aResponse) {
+            response = aResponse;
+        }
+
+        public Object getAsync() {
+            return async;
+        }
+
+        public void setAsync(Object aValue) {
+            async = aValue;
+        }
+
+        public Object getPrincipal() {
+            return principal;
+        }
+
+        public void setPrincipal(Object aSession) {
+            principal = aSession;
+        }
+
+        public int getAsyncsCount() {
+            return asyncsCount != null ? asyncsCount : 0;
+        }
+
+        public void incAsyncsCount() {
+            if (asyncsCount != null) {
+                asyncsCount++;
+            }
+        }
+
+        public void initAsyncs(Integer aSeed) {
+            asyncsCount = aSeed;
+        }
+
+        public Space getSpace() {
+            return space;
+        }
+
+        public void setSpace(Space aValue) {
+            space = aValue;
+        }
+    }
+
+    public static LocalContext createContext(Scripts.Space aSpace) {
+        LocalContext res = new LocalContext();
+        res.setSpace(aSpace);
+        return res;
     }
 
     public static class Pending {
@@ -103,7 +177,7 @@ public class Scripts {
             this(null);
             global = new Object();
         }
-        
+
         public Space(ScriptEngine aEngine) {
             super();
             engine = aEngine;
@@ -405,108 +479,49 @@ public class Scripts {
         protected AtomicReference worker = new AtomicReference(null);
 
         public void process(Runnable aTask) {
-            final Scripts.Space space = this;
             offerTask(() -> {
-                Scripts.Space oldSpace = getSpace();
-                setSpace(space);
-                try {
-                    Runnable processedTask = aTask;
-                    int version;
-                    int newVersion;
-                    Thread thisThread = Thread.currentThread();
-                    do {
-                        version = queueVersion.get();
-                        // Zombie counter ...
-                        newVersion = version + 1;
-                        if (newVersion == Integer.MAX_VALUE) {
-                            newVersion = 0;
-                        }
-                        if (processedTask != null) {//Single attempt to offer aTask.
-                            queue.offer(processedTask);
-                            processedTask = null;
-                        }
-                        if (worker.compareAndSet(null, thisThread)) {// Worker electing.
-                            try {
-                                // already single threaded environment
-                                if (global == null) {
-                                    Bindings bindings = engine.createBindings();
-                                    bindings.put("space", space);
-                                    try {
-                                        engine.eval("load('classpath:platypus.js', space);", bindings);
-                                    } catch (ScriptException ex) {
-                                        Logger.getLogger(Scripts.class.getName()).log(Level.SEVERE, null, ex);
-                                    }
+                Runnable processedTask = aTask;
+                int version;
+                int newVersion;
+                Thread thisThread = Thread.currentThread();
+                do {
+                    version = queueVersion.get();
+                    // Zombie counter ...
+                    newVersion = version + 1;
+                    if (newVersion == Integer.MAX_VALUE) {
+                        newVersion = 0;
+                    }
+                    if (processedTask != null) {//Single attempt to offer aTask.
+                        queue.offer(processedTask);
+                        processedTask = null;
+                    }
+                    if (worker.compareAndSet(null, thisThread)) {// Worker electing.
+                        try {
+                            // already single threaded environment
+                            if (global == null) {
+                                Bindings bindings = engine.createBindings();
+                                bindings.put("space", Scripts.getContext().getSpace());
+                                try {
+                                    engine.eval("load('classpath:platypus.js', space);", bindings);
+                                } catch (ScriptException ex) {
+                                    Logger.getLogger(Scripts.class.getName()).log(Level.SEVERE, null, ex);
                                 }
-                                // Zombie processing ...
-                                Runnable task = queue.poll();
-                                while (task != null) {
-                                    task.run();
-                                    task = queue.poll();
-                                }
-                            } catch (Throwable t) {
-                                Logger.getLogger(Scripts.class.getName()).log(Level.SEVERE, null, t);
-                            } finally {
-                                boolean setted = worker.compareAndSet(thisThread, null);
-                                assert setted : "Worker electing assumption failed";// Always successfull CAS.
                             }
+                            // Zombie processing ...
+                            Runnable task = queue.poll();
+                            while (task != null) {
+                                task.run();
+                                task = queue.poll();
+                            }
+                        } catch (Throwable t) {
+                            Logger.getLogger(Scripts.class.getName()).log(Level.SEVERE, null, t);
+                        } finally {
+                            boolean setted = worker.compareAndSet(thisThread, null);
+                            assert setted : "Worker electing assumption failed";// Always successfull CAS.
                         }
-                    } while (!queueVersion.compareAndSet(version, newVersion));
-                } finally {
-                    setSpace(oldSpace);
-                }
+                    }
+                } while (!queueVersion.compareAndSet(version, newVersion));
             });
-        }
-
-        protected Object request;
-        protected Object response;
-        protected Object session;
-        protected Object principal;
-        protected Integer asyncsCount;
-
-        public Object getRequest() {
-            return request;
-        }
-
-        public void setRequest(Object aRequest) {
-            request = aRequest;
-        }
-
-        public Object getResponse() {
-            return response;
-        }
-
-        public void setResponse(Object aResponse) {
-            response = aResponse;
-        }
-
-        public Object getSession() {
-            return session;
-        }
-
-        public void setSession(Object aSession) {
-            session = aSession;
-        }
-
-        public Object getPrincipal() {
-            return principal;
-        }
-
-        public void setPrincipal(Object aSession) {
-            principal = aSession;
-        }
-
-        public int getAsyncsCount() {
-            return asyncsCount != null ? asyncsCount : 0;
-        }
-
-        public void incAsyncsCount() {
-            if (asyncsCount != null) {
-                asyncsCount++;
-            }
-        }
-
-        public void initAsyncs(Integer aSeed) {
-            asyncsCount = aSeed;
         }
 
         public JSObject readJsArray(Collection<Map<String, Object>> aCollection) {
@@ -534,6 +549,7 @@ public class Scripts {
 
     public static void offerTask(Runnable aTask) {
         assert tasks != null : "Scripts tasks are not initialized";
+        Scripts.getContext().incAsyncsCount();
         tasks.accept(aTask);
     }
 
@@ -552,8 +568,15 @@ public class Scripts {
     }
 
     public static void startBIO(Runnable aBlocked) {
+        LocalContext context = getContext();
+        context.incAsyncsCount();
         bio.submit(() -> {
-            aBlocked.run();
+            setContext(context);
+            try {
+                aBlocked.run();
+            } finally {
+                setContext(null);
+            }
         });
     }
 
@@ -569,7 +592,7 @@ public class Scripts {
     }
 
     public static boolean isInitialized() {
-        Space space = getSpace();
+        Space space = getContext().getSpace();
         return space != null
                 && space.listenElementsFunc != null
                 && space.listenFunc != null

@@ -24,14 +24,14 @@ import javax.swing.JComponent;
 public class Forms {
 
     protected static ResourceBundle rb = ResourceBundle.getBundle(Form.class.getPackage().getName() + "/Bundle");
-    protected static Scripts.Space space;
+    protected static Scripts.LocalContext context;
 
-    public static void initScripts(Scripts.Space aSpace) {
-        space = aSpace;
+    public static void initContext(Scripts.LocalContext aValue) {
+        context = aValue;
     }
     
-    public static Scripts.Space getSpace(){
-        return space;
+    public static Scripts.LocalContext getContext(){
+        return context;
     }
 
     public static String getLocalizedString(String aKey) {

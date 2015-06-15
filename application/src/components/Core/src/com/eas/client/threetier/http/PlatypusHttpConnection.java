@@ -92,7 +92,7 @@ public class PlatypusHttpConnection extends PlatypusConnection {
 
     @Override
     public <R extends Response> void enqueueRequest(Request aRequest, Scripts.Space aSpace, Consumer<R> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        aSpace.incAsyncsCount();
+        Scripts.getContext().incAsyncsCount();
         Consumer<PlatypusHttpRequestWriter> responseHandler = (PlatypusHttpRequestWriter aHttpSender) -> {
             if (aHttpSender.response instanceof ErrorResponse) {
                 if (onFailure != null) {
@@ -124,7 +124,9 @@ public class PlatypusHttpConnection extends PlatypusConnection {
         Consumer<Consumer<PlatypusHttpRequestWriter>> requestPusher = (Consumer<PlatypusHttpRequestWriter> aOnComplete) -> {
             Map<String, Cookie> localCookies = new HashMap<>();
             localCookies.putAll(cookies);
+            Scripts.LocalContext context = Scripts.getContext();
             bioExecutor.submit(() -> {
+                Scripts.setContext(context);
                 try {
                     PlatypusHttpRequestWriter httpSender = new PlatypusHttpRequestWriter(url, localCookies, basicSchemeMet ? new Credentials(credentials.userName, credentials.password) : null);
                     aRequest.accept(httpSender);// bio in a background thread
@@ -136,8 +138,10 @@ public class PlatypusHttpConnection extends PlatypusConnection {
                             Logger.getLogger(PlatypusHttpConnection.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     });
-                } catch (Exception ex) {
+                }catch (Exception ex) {
                     Logger.getLogger(PlatypusHttpConnection.class.getName()).log(Level.SEVERE, null, ex);
+                } finally {
+                    Scripts.setContext(null);
                 }
             });
         };

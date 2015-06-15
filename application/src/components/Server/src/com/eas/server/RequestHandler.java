@@ -6,6 +6,7 @@ package com.eas.server;
 
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
+import java.util.function.Consumer;
 
 /**
  *
@@ -31,5 +32,7 @@ public abstract class RequestHandler<T extends Request, R extends Response> {
     public PlatypusServerCore getServerCore() {
         return serverCore;
     }
+
+    public abstract void handle(Session aSession, Consumer<R> onSuccess, Consumer<Exception> onFailure);
 
 }

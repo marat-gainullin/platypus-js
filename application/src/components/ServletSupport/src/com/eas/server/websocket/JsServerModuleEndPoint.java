@@ -41,10 +41,23 @@ public class JsServerModuleEndPoint {
 
     protected com.eas.server.Session session;
     protected WebSocketServerSession facade;
-    protected Scripts.Space space;
 
     public JsServerModuleEndPoint() {
         super();
+    }
+
+    private static void inContext(Runnable aTask, com.eas.server.Session aSession) {
+        Scripts.LocalContext context = Scripts.createContext(aSession.getSpace());
+        context.setAsync(null);
+        context.setPrincipal(aSession.getPrincipal());
+        context.setRequest(null);
+        context.setResponse(null);
+        Scripts.setContext(context);
+        try {
+            aTask.run();
+        } finally {
+            Scripts.setContext(null);
+        }
     }
 
     @OnOpen
@@ -55,7 +68,7 @@ public class JsServerModuleEndPoint {
         String userName = websocketSession.getUserPrincipal() != null ? websocketSession.getUserPrincipal().getName() : null;
         session = sessionManager.create(websocketSession.getId());
         Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.INFO, "WebSocket platypus session opened. Session id: {0}", session.getId());
-        DatabasesClient.getUserProperties(serverCore.getDatabasesClient(), userName, session.getSpace(), (Map<String, String> aUserProps) -> {
+        DatabasesClient.getUserProperties(serverCore.getDatabasesClient(), userName, serverCore.getQueueSpace(), (Map<String, String> aUserProps) -> {
             String usrContext = aUserProps.get(ClientConstants.F_USR_CONTEXT);
             PlatypusPrincipal principal;
             if (handshake.getUserPrincipal() != null) {
@@ -64,13 +77,14 @@ public class JsServerModuleEndPoint {
                 principal = new AnonymousPlatypusPrincipal(websocketSession.getId());
             }
             facade = new WebSocketServerSession(websocketSession);
-            space = session.getSpace();
-            space.setPrincipal(principal);
-            serverCore.executeMethod(aModuleName, WS_ON_OPEN_METHOD_NAME, new Object[]{facade.getPublished()}, session, true, (Object aResult) -> {
-                Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "{0} method of {1} module called successfully.", new Object[]{WS_ON_OPEN_METHOD_NAME, aModuleName});
-            }, (Exception ex) -> {
-                Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.SEVERE, null, ex);
-            });
+            session.setPrincipal(principal);
+            inContext(() -> {
+                serverCore.executeMethod(aModuleName, WS_ON_OPEN_METHOD_NAME, new Object[]{facade.getPublished()}, true, session, (Object aResult) -> {
+                    Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "{0} method of {1} module called successfully.", new Object[]{WS_ON_OPEN_METHOD_NAME, aModuleName});
+                }, (Exception ex) -> {
+                    Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.SEVERE, null, ex);
+                });
+            }, session);
         }, (Exception ex) -> {
             Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.WARNING, "Could not get user {0} properties (USR_CONTEXT, etc).", userName);
         });
@@ -78,38 +92,43 @@ public class JsServerModuleEndPoint {
 
     @OnMessage
     public void messageRecieved(Session websocketSession, String aData) throws Exception {
-        space.process(() -> {
-            JSObject messageEvent = space.makeObj();
-            messageEvent.setMember("data", aData);
-            executeSessionFacadeMethod(WS_ON_MESSAGE, new Object[]{messageEvent});
-        });
+        inContext(() -> {
+            Scripts.getSpace().process(() -> {
+                JSObject messageEvent = Scripts.getSpace().makeObj();
+                messageEvent.setMember("data", aData);
+                executeSessionFacadeMethod(WS_ON_MESSAGE, new Object[]{messageEvent});
+            });
+        }, session);
     }
 
     @OnError
     public void errorInSession(Session websocketSession, Throwable aError) {
-        space.process(() -> {
-            JSObject errorEvent = space.makeObj();
-            errorEvent.setMember("message", aError.getMessage());
-            executeSessionFacadeMethod(WS_ON_ERROR, new Object[]{errorEvent});
-        });
+        inContext(() -> {
+            Scripts.getSpace().process(() -> {
+                JSObject errorEvent = Scripts.getSpace().makeObj();
+                errorEvent.setMember("message", aError.getMessage());
+                executeSessionFacadeMethod(WS_ON_ERROR, new Object[]{errorEvent});
+            });
+        }, session);
     }
 
     @OnClose
     public void sessionClosed(Session websocketSession) throws Exception {
         PlatypusServerCore serverCore = lookupPlaypusServerCore();
-        space.process(() -> {
-            JSObject closeEvent = space.makeObj();
-            closeEvent.setMember("wasClean", true);
-            closeEvent.setMember("code", CloseReason.CloseCodes.NORMAL_CLOSURE.getCode());
-            closeEvent.setMember("reason", "");
-            executeSessionFacadeMethod(WS_ON_CLOSE, new Object[]{closeEvent});
+        inContext(() -> {
+            Scripts.getSpace().process(() -> {
+                JSObject closeEvent = Scripts.getSpace().makeObj();
+                closeEvent.setMember("wasClean", true);
+                closeEvent.setMember("code", CloseReason.CloseCodes.NORMAL_CLOSURE.getCode());
+                closeEvent.setMember("reason", "");
+                executeSessionFacadeMethod(WS_ON_CLOSE, new Object[]{closeEvent});
 
-            serverCore.getSessionManager().remove(session.getId());
-            Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.INFO, "WebSocket platypus session closed. Session id: {0}", session.getId());
-            session = null;
-            space = null;
-            facade = null;
-        });
+                serverCore.getSessionManager().remove(session.getId());
+                Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.INFO, "WebSocket platypus session closed. Session id: {0}", session.getId());
+                session = null;
+                facade = null;
+            });
+        }, session);
     }
 
     protected void executeSessionFacadeMethod(String methodName, Object[] args) {

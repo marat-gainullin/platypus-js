@@ -80,10 +80,10 @@ public class DatabasesClient {
         autoFillMetadata = aAutoFillMetadata;
     }
 
-    public void shutdown(){
+    public void shutdown() {
         jdbcProcessor.shutdownNow();
     }
-    
+
     public QueriesProxy<SqlQuery> getQueries() {
         return queries;
     }
@@ -362,12 +362,17 @@ public class DatabasesClient {
     }
 
     private void startJdbcTask(Runnable aTask) {
-        Scripts.Space space = Scripts.getSpace();
-        if (space != null) {
-            space.incAsyncsCount();
+        Scripts.LocalContext context = Scripts.getContext();
+        if (context != null) {
+            context.incAsyncsCount();
         }
         jdbcProcessor.submit(() -> {
-            aTask.run();
+            Scripts.setContext(context);
+            try {
+                aTask.run();
+            } finally {
+                Scripts.setContext(null);
+            }
         });
     }
 
@@ -483,7 +488,7 @@ public class DatabasesClient {
                     }
                 });
             } else {
-                space.process(()->{
+                space.process(() -> {
                     onSuccess.accept(0);
                 });
             }

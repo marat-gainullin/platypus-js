@@ -4,9 +4,9 @@
  */
 package com.eas.server;
 
+import com.eas.client.login.PlatypusPrincipal;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
-import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.script.Scripts;
 import com.eas.server.scripts.ModulesJSFacade;
@@ -39,6 +39,7 @@ public class Session implements HasPublished {
     private final Map<String, JSObject> modulesInstances = new HashMap<>();
     private int maxInactiveInterval = 3600000; // 1 hour
     private Scripts.Space space;
+    private PlatypusPrincipal principal;
     private final JSObject jsModules = new ModulesJSFacade(this);
 
     /**
@@ -59,6 +60,19 @@ public class Session implements HasPublished {
 
     public void setSpace(Scripts.Space aValue) {
         space = aValue;
+    }
+
+    /**
+     * Warning!!! Don't call this getter. It is provided only for TSA Server authentication process
+     * Instead call Scripts.getContext().getPrincipal() please.
+     * @return 
+     */
+    public PlatypusPrincipal getPrincipal() {
+        return principal;
+    }
+
+    public void setPrincipal(PlatypusPrincipal aValue) {
+        principal = aValue;
     }
 
     /**

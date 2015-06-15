@@ -215,7 +215,15 @@ public class ServerMain {
                 serverProcessor.allowCoreThreadTimeOut(true);
 
                 Scripts.initTasks((Runnable aTask) -> {
-                    serverProcessor.submit(aTask);
+                    Scripts.LocalContext context = Scripts.getContext();
+                    serverProcessor.submit(() -> {
+                        Scripts.setContext(context);
+                        try {
+                            aTask.run();
+                        } finally {
+                            Scripts.setContext(null);
+                        }
+                    });
                 });
                 serverCoreDbClient = new ScriptedDatabasesClient(defDatasource, indexer, true, tasksScanner.getValidators(), threadsConfig.getMaxJdbcTreads());
                 QueriesProxy<SqlQuery> queries = new LocalQueriesProxy(serverCoreDbClient, indexer);
@@ -266,10 +274,10 @@ public class ServerMain {
         Map<Integer, String> protocolsMap = new HashMap<>();
         if (protocols != null && !protocols.isEmpty()) {
             String[] splitted = protocols.replace(" ", "").split(",");
-            for (int i = 0; i < splitted.length; i++) {
-                String[] protParts = splitted[i].split(":");
-                if (protParts.length == 2) {
-                    protocolsMap.put(Integer.valueOf(protParts[0]), protParts[1]);
+            for (String portProtocol : splitted) {
+                String[] portProtocolParts = portProtocol.split(":");
+                if (portProtocolParts.length == 2) {
+                    protocolsMap.put(Integer.valueOf(portProtocolParts[0]), portProtocolParts[1]);
                 }
             }
         }
@@ -294,10 +302,10 @@ public class ServerMain {
         Map<Integer, Integer> sessionIdleTimeoutMap = new HashMap<>();
         if (sessionIdleTimeout != null && !sessionIdleTimeout.isEmpty()) {
             String[] splitted = sessionIdleTimeout.replace(" ", "").split(",");
-            for (int i = 0; i < splitted.length; i++) {
-                String[] protParts = splitted[i].split(":");
-                if (protParts.length == 2) {
-                    sessionIdleTimeoutMap.put(Integer.valueOf(protParts[0]), Integer.valueOf(protParts[1]));
+            for (String portTimeout : splitted) {
+                String[] portTimeoutParts = portTimeout.split(":");
+                if (portTimeoutParts.length == 2) {
+                    sessionIdleTimeoutMap.put(Integer.valueOf(portTimeoutParts[0]), Integer.valueOf(portTimeoutParts[1]));
                 }
             }
         }
@@ -308,71 +316,13 @@ public class ServerMain {
         Map<Integer, Integer> sessionIdleCheckIntervalsMap = new HashMap<>();
         if (sessionIdleCheckInterval != null && !sessionIdleCheckInterval.isEmpty()) {
             String[] splitted = sessionIdleCheckInterval.replace(" ", "").split(",");
-            for (int i = 0; i < splitted.length; i++) {
-                String[] protParts = splitted[i].split(":");
-                if (protParts.length == 2) {
-                    sessionIdleCheckIntervalsMap.put(Integer.valueOf(protParts[0]), Integer.valueOf(protParts[1]));
+            for (String portInterval : splitted) {
+                String[] portIntervalParts = portInterval.split(":");
+                if (portIntervalParts.length == 2) {
+                    sessionIdleCheckIntervalsMap.put(Integer.valueOf(portIntervalParts[0]), Integer.valueOf(portIntervalParts[1]));
                 }
             }
         }
         return sessionIdleCheckIntervalsMap;
     }
-    /*
-     private static KeyManager[] createKeyManagers() throws NoSuchAlgorithmException, NoSuchProviderException, KeyStoreException, FileNotFoundException, IOException, CertificateException, UnrecoverableKeyException, URISyntaxException {
-     KeyStore ks = KeyStore.getInstance("JKS");
-     // get user password and file input stream
-     char[] sslPassword = "keyword".toCharArray();
-     File keyStoreFile = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY, "keystore"));
-     if (!keyStoreFile.exists()) {
-     File keyPath = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY));
-     keyPath.mkdirs();
-     keyStoreFile.createNewFile();
-     try (OutputStream keyOut = new FileOutputStream(keyStoreFile); InputStream keyIn = PlatypusConnection.class.getResourceAsStream("emptyKeystore")) {
-     byte[] resData = BinaryUtils.readStream(keyIn, -1);
-     keyOut.write(resData);
-     }
-     }
-     if (keyStoreFile.exists()) {
-     try (InputStream is = new FileInputStream(keyStoreFile)) {
-     ks.load(is, sslPassword);
-     }
-     final KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
-     keyManagerFactory.init(ks, sslPassword);
-     return keyManagerFactory.getKeyManagers();
-     } else {
-     throw new FileNotFoundException(KEYSTORE_MISING_MSG);
-     }
-     }
-
-     private static TrustManager[] createTrustManagers() throws NoSuchAlgorithmException, NoSuchProviderException, KeyStoreException, FileNotFoundException, IOException, CertificateException, URISyntaxException {
-     KeyStore ks = KeyStore.getInstance("JKS");
-     char[] ksPassword = "trustword".toCharArray();
-     File trustStore = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY, "truststore"));
-     if (!trustStore.exists()) {
-     File trustPath = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY));
-     trustPath.mkdirs();
-     trustStore.createNewFile();
-     try (OutputStream trustOut = new FileOutputStream(trustStore); InputStream trustIn = PlatypusConnection.class.getResourceAsStream("emptyTruststore")) {
-     byte[] resData = BinaryUtils.readStream(trustIn, -1);
-     trustOut.write(resData);
-     }
-     }
-     if (trustStore.exists()) {
-     try (InputStream is = new FileInputStream(trustStore)) {
-     ks.load(is, ksPassword);
-     }
-     final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance("PKIX");
-     trustManagerFactory.init(ks);
-     return trustManagerFactory.getTrustManagers();
-     } else {
-     throw new FileNotFoundException(TRUSTSTORE_MISSING_MSG);
-     }
-     }
-
-     public static SSLContext createSSLContext() throws NoSuchAlgorithmException, KeyManagementException, NoSuchProviderException, KeyStoreException, FileNotFoundException, IOException, CertificateException, UnrecoverableKeyException, URISyntaxException {
-     SSLContext context = SSLContext.getInstance("TLS");
-     context.init(createKeyManagers(), createTrustManagers(), SecureRandom.getInstance("SHA1PRNG"));
-     return context;
-     }
-     */
 }

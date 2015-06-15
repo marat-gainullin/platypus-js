@@ -221,7 +221,7 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
 
     @Override
     public <R extends Response> void enqueueRequest(Request aRequest, Scripts.Space aSpace, Consumer<R> onSuccess, Consumer<Exception> onFailure) {
-        aSpace.incAsyncsCount();
+        Scripts.getContext().incAsyncsCount();
         Attempts attemps = new Attempts();
         Consumer<Response> responseHandler = (Response response) -> {
             if (response instanceof ErrorResponse) {

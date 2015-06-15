@@ -103,8 +103,9 @@ public class PlatypusProjectImpl implements PlatypusProject {
             bindings.put("space", space);
             Object global = jsEngine.eval("load('classpath:com/eas/designer/explorer/designer-js.js', space);", bindings);
             space.setGlobal(global);
+            Scripts.LocalContext context = Scripts.createContext(space);
             EventQueue.invokeLater(()->{
-                Scripts.setSpace(space);
+                Scripts.setContext(context);
             });
             return space;
         } catch (ScriptException ex) {

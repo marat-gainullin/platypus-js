@@ -5,12 +5,13 @@
 package com.eas.server.handlers;
 
 import com.eas.client.AppElementFiles;
-import com.eas.server.SessionRequestHandler;
+import com.eas.server.RequestHandler;
 import com.eas.client.ServerModulesProxy;
 import com.eas.client.cache.ScriptDocument;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.threetier.requests.ServerModuleStructureRequest;
+import com.eas.script.Scripts;
 import com.eas.server.*;
 import com.eas.util.JSONUtils;
 import java.security.AccessControlException;
@@ -24,14 +25,14 @@ import javax.security.auth.AuthPermission;
  *
  * @author pk, mg, ab
  */
-public class ServerModuleStructureRequestHandler extends SessionRequestHandler<ServerModuleStructureRequest, ServerModuleStructureRequest.Response> {
+public class ServerModuleStructureRequestHandler extends RequestHandler<ServerModuleStructureRequest, ServerModuleStructureRequest.Response> {
 
     public ServerModuleStructureRequestHandler(PlatypusServerCore aServerCore, ServerModuleStructureRequest aRequest) {
         super(aServerCore, aRequest);
     }
 
     @Override
-    protected void handle2(Session aSession, Consumer<ServerModuleStructureRequest.Response> onSuccess, Consumer<Exception> onFailure) {
+    public void handle(Session aSession, Consumer<ServerModuleStructureRequest.Response> onSuccess, Consumer<Exception> onFailure) {
         String moduleName = getRequest().getModuleName();
         if (moduleName == null || moduleName.isEmpty()) {
             onFailure.accept(new Exception("Module name is missing. Unnamed server modules are not allowed."));
@@ -44,7 +45,7 @@ public class ServerModuleStructureRequestHandler extends SessionRequestHandler<S
                     Date serverModuleTime = files.getLastModified();
                     if (clientModuleTime == null || serverModuleTime.after(clientModuleTime)) {
                         ScriptDocument config = serverCore.getScriptsConfigs().get(moduleName, files);
-                        checkPrincipalPermission(aSession, config.getModuleAllowedRoles(), moduleName);
+                        checkPrincipalPermission(config.getModuleAllowedRoles(), moduleName);
                         StringBuilder json = JSONUtils.o(
                                 ServerModulesProxy.CREATE_MODULE_RESPONSE_FUNCTIONS_PROP, JSONUtils.as(config.getFunctionProperties().toArray(new String[]{})).toString(),
                                 ServerModulesProxy.CREATE_MODULE_RESPONSE_IS_PERMITTED_PROP, String.valueOf(true)
@@ -83,15 +84,14 @@ public class ServerModuleStructureRequestHandler extends SessionRequestHandler<S
     /**
      * Checks module roles.
      *
-     * @param aSession
      * @param anAllowedRoles
      * @param aModuleName
      * @throws AccessControlException
      */
-    public static void checkPrincipalPermission(Session aSession, Set<String> anAllowedRoles, String aModuleName) throws AccessControlException {
+    public static void checkPrincipalPermission(Set<String> anAllowedRoles, String aModuleName) throws AccessControlException {
         if (anAllowedRoles != null && !anAllowedRoles.isEmpty()) {
             try {
-                PlatypusPrincipal principal = (PlatypusPrincipal) aSession.getSpace().getPrincipal();
+                PlatypusPrincipal principal = (PlatypusPrincipal) Scripts.getContext().getPrincipal();
                 if (principal == null || !principal.hasAnyRole(anAllowedRoles)) {
                     throw new AccessControlException(String.format("Access denied to %s module for '%s'.",//NOI18N
                             aModuleName,

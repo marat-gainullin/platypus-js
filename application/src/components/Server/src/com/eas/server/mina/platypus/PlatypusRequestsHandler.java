@@ -4,19 +4,22 @@
  */
 package com.eas.server.mina.platypus;
 
+import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.platypus.RequestEnvelope;
 import com.eas.client.threetier.requests.ErrorResponse;
+import com.eas.script.Scripts;
 import com.eas.server.*;
-import com.eas.server.SessionRequestHandler;
 import com.eas.server.DatabaseAuthorizer;
+import com.eas.util.IDGenerator;
 import java.net.NetPermission;
 import java.security.AccessControlException;
 import java.sql.SQLException;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.script.ScriptException;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
@@ -108,27 +111,41 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
                     }
                 };
                 Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.FINE, "Request {0}", requestEnv.request.toString());
-                final RequestHandler<?, ?> handler = RequestHandlerFactory.getHandler(server, requestEnv.request);
+                final RequestHandler<Request, Response> handler = (RequestHandler<Request, Response>)RequestHandlerFactory.getHandler(server, requestEnv.request);
                 if (handler != null) {
-                    if (requestEnv.ticket == null) {
-                        DatabaseAuthorizer.authorize(server, requestEnv.userName, requestEnv.password, (Session aSession) -> {
-                            requestEnv.ticket = aSession.getId();
-                            ioSession.setAttribute(SESSION_ID, aSession.getId());
-                            aSession.getSpace().process(() -> {
-                                ((SessionRequestHandler<Request, Response>) handler).handle(aSession, (Response aResponse) -> {
+                    Consumer<Session> handle = (aSession) -> {
+                        Scripts.LocalContext context = Scripts.createContext(aSession.getSpace());
+                        // The only place to use this getter.
+                        // See its javadoc please.
+                        context.setPrincipal(aSession.getPrincipal());
+                        Scripts.setContext(context);
+                        try {
+                            Scripts.getSpace().process(() -> {
+                                handler.handle(aSession, (Response aResponse) -> {
                                     ioSession.write(aResponse);
                                 }, onError);
                             });
+                        } finally {
+                            Scripts.setContext(null);
+                        }
+                    };
+                    if (requestEnv.ticket == null) {
+                        DatabaseAuthorizer.authorize(server, requestEnv.userName, requestEnv.password, server.getQueueSpace(), (PlatypusPrincipal aPrincipal) -> {
+                            try {
+                                Session created = server.getSessionManager().create(String.valueOf(IDGenerator.genID()));
+                                created.setPrincipal(aPrincipal);
+                                requestEnv.ticket = created.getId();
+                                ioSession.setAttribute(SESSION_ID, created.getId());
+                                handle.accept(created);
+                            } catch (ScriptException ex) {
+                                Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, null, ex);
+                            }
                         }, onError);
                     } else {
                         Session session = server.getSessionManager().get(requestEnv.ticket);
                         if (session != null) {
                             ioSession.setAttribute(SESSION_ID, session.getId());
-                            session.getSpace().process(() -> {
-                                ((SessionRequestHandler<Request, Response>) handler).handle(session, (Response aResponse) -> {
-                                    ioSession.write(aResponse);
-                                }, onError);
-                            });
+                            handle.accept(session);
                         } else {
                             throw new AccessControlException("Bad session ticket.", new NetPermission("*"));
                         }

@@ -27,21 +27,32 @@ public class JsClientEndPoint {
     protected JSObject onclose;
     protected JSObject onerror;
     protected JSObject onmessage;
-    protected Scripts.Space space;
+    protected Scripts.LocalContext context;
 
-    public JsClientEndPoint(WebSocketClientSession aSession, Scripts.Space aSpace) {
+    public JsClientEndPoint(WebSocketClientSession aSession, Scripts.LocalContext aContext) {
         super();
         session = aSession;
-        space = aSpace;
+        context = aContext;
+    }
+
+    private void inContext(Runnable aTask) {
+        Scripts.setContext(context);
+        try {
+            aTask.run();
+        } finally {
+            Scripts.setContext(null);
+        }
     }
 
     @OnMessage
     public void onMessage(Session websocketSession, String aData) {
         if (onmessage != null) {
-            space.process(() -> {
-                JSObject messageEvent = space.makeObj();
-                messageEvent.setMember("data", aData);
-                onmessage.call(session.getPublished(), new Object[]{messageEvent});
+            inContext(() -> {
+                Scripts.getSpace().process(() -> {
+                    JSObject messageEvent = Scripts.getSpace().makeObj();
+                    messageEvent.setMember("data", aData);
+                    onmessage.call(session.getPublished(), new Object[]{messageEvent});
+                });
             });
         }
     }
@@ -49,8 +60,10 @@ public class JsClientEndPoint {
     @OnOpen
     public void onOpen(Session aSession) {
         if (onopen != null) {
-            space.process(() -> {
-                onopen.call(session.getPublished(), new Object[]{});
+            inContext(() -> {
+                Scripts.getSpace().process(() -> {
+                    onopen.call(session.getPublished(), new Object[]{});
+                });
             });
         }
     }
@@ -58,12 +71,14 @@ public class JsClientEndPoint {
     @OnClose
     public void onClose(Session websocketSession, CloseReason aReason) {
         if (onclose != null) {
-            space.process(() -> {
-                JSObject closeEvent = space.makeObj();
-                closeEvent.setMember("wasClean", aReason.getCloseCode() == CloseReason.CloseCodes.NORMAL_CLOSURE);
-                closeEvent.setMember("code", aReason.getCloseCode().getCode());
-                closeEvent.setMember("reason", aReason.getReasonPhrase());
-                onclose.call(session.getPublished(), new Object[]{closeEvent});
+            inContext(() -> {
+                Scripts.getSpace().process(() -> {
+                    JSObject closeEvent = Scripts.getSpace().makeObj();
+                    closeEvent.setMember("wasClean", aReason.getCloseCode() == CloseReason.CloseCodes.NORMAL_CLOSURE);
+                    closeEvent.setMember("code", aReason.getCloseCode().getCode());
+                    closeEvent.setMember("reason", aReason.getReasonPhrase());
+                    onclose.call(session.getPublished(), new Object[]{closeEvent});
+                });
             });
         }
     }
@@ -71,10 +86,12 @@ public class JsClientEndPoint {
     @OnError
     public void onError(Session websocketSession, Throwable aError) {
         if (onerror != null) {
-            space.process(() -> {
-                JSObject errorEvent = space.makeObj();
-                errorEvent.setMember("message", aError.getMessage());
-                onerror.call(session.getPublished(), new Object[]{errorEvent});
+            inContext(() -> {
+                Scripts.getSpace().process(() -> {
+                    JSObject errorEvent = Scripts.getSpace().makeObj();
+                    errorEvent.setMember("message", aError.getMessage());
+                    onerror.call(session.getPublished(), new Object[]{errorEvent});
+                });
             });
         }
     }

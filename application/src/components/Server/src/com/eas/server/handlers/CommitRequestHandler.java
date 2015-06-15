@@ -4,7 +4,7 @@
  */
 package com.eas.server.handlers;
 
-import com.eas.server.SessionRequestHandler;
+import com.eas.server.RequestHandler;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SqlCompiledQuery;
 import com.eas.client.SqlQuery;
@@ -15,6 +15,7 @@ import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.threetier.json.ChangesJSONReader;
 import com.eas.client.threetier.requests.CommitRequest;
+import com.eas.script.Scripts;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.Session;
 import java.security.AccessControlException;
@@ -32,7 +33,7 @@ import javax.security.auth.AuthPermission;
  *
  * @author pk, mg refactoring
  */
-public class CommitRequestHandler extends SessionRequestHandler<CommitRequest, CommitRequest.Response> {
+public class CommitRequestHandler extends RequestHandler<CommitRequest, CommitRequest.Response> {
 
     protected static class ChangesSortProcess {
 
@@ -120,10 +121,10 @@ public class CommitRequestHandler extends SessionRequestHandler<CommitRequest, C
     }
 
     @Override
-    public void handle2(Session aSession, Consumer<CommitRequest.Response> onSuccess, Consumer<Exception> onFailure) {
+    public void handle(Session aSession, Consumer<CommitRequest.Response> onSuccess, Consumer<Exception> onFailure) {
         try {
             DatabasesClient client = getServerCore().getDatabasesClient();
-            List<Change> changes = ChangesJSONReader.read(getRequest().getChangesJson(), aSession.getSpace());
+            List<Change> changes = ChangesJSONReader.read(getRequest().getChangesJson(), Scripts.getSpace());
             ChangesSortProcess process = new ChangesSortProcess(changes, (Map<String, List<Change>> changeLogs) -> {
                 try {
                     client.commit(changeLogs, (Integer aUpdated) -> {
@@ -142,9 +143,9 @@ public class CommitRequestHandler extends SessionRequestHandler<CommitRequest, C
             } else {
                 changes.stream().forEach((change) -> {
                     try {
-                        ((LocalQueriesProxy) serverCore.getQueries()).getQuery(change.entityName, aSession.getSpace(), (SqlQuery aQuery) -> {
+                        ((LocalQueriesProxy) serverCore.getQueries()).getQuery(change.entityName, Scripts.getSpace(), (SqlQuery aQuery) -> {
                             if (aQuery.isPublicAccess()) {
-                                AccessControlException aex = checkWritePrincipalPermission((PlatypusPrincipal) aSession.getSpace().getPrincipal(), change.entityName, aQuery.getWriteRoles());
+                                AccessControlException aex = checkWritePrincipalPermission((PlatypusPrincipal) Scripts.getContext().getPrincipal(), change.entityName, aQuery.getWriteRoles());
                                 if (aex != null) {
                                     process.complete(null, null, aex, null);
                                 } else {

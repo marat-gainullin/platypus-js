@@ -50,8 +50,7 @@ public class SessionManager {
         Session created = new Session(null);
         Scripts.Space space = Scripts.createSpace();
         created.setSpace(space);
-        space.setSession(created);
-        space.setPrincipal(new SystemPlatypusPrincipal());
+        created.setPrincipal(new SystemPlatypusPrincipal());
         systemSession = created;
     }
 
@@ -75,7 +74,6 @@ public class SessionManager {
         Session result = new Session(sessionId);
         Scripts.Space space = Scripts.createSpace();
         result.setSpace(space);
-        space.setSession(result);
         sessions.put(sessionId, result);
         return result;
     }

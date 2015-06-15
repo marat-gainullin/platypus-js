@@ -4,8 +4,9 @@
  */
 package com.eas.server.handlers;
 
-import com.eas.server.SessionRequestHandler;
+import com.eas.server.RequestHandler;
 import com.eas.client.threetier.requests.RPCRequest;
+import com.eas.script.Scripts;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.Session;
 import java.util.function.Consumer;
@@ -14,7 +15,7 @@ import java.util.function.Consumer;
  *
  * @author pk
  */
-public class RPCRequestHandler extends SessionRequestHandler<RPCRequest, RPCRequest.Response> {
+public class RPCRequestHandler extends RequestHandler<RPCRequest, RPCRequest.Response> {
 
     public static final String EXECUTING_METHOD_TRACE_MSG = "Executing method {0} of module {1}";
     public static final String MODEL_SAVE_ERROR_MSG = "While attempting to save model of unactual server module %s";
@@ -31,14 +32,14 @@ public class RPCRequestHandler extends SessionRequestHandler<RPCRequest, RPCRequ
     }
 
     @Override
-    protected void handle2(Session aSession, Consumer<RPCRequest.Response> onSuccess, Consumer<Exception> onFailure) {
+    public void handle(Session aSession, Consumer<RPCRequest.Response> onSuccess, Consumer<Exception> onFailure) {
         String[] jsons = getRequest().getArgumentsJsons();
         Object[] arguments = new Object[jsons.length];
         for (int i = 0; i < arguments.length; i++) {
-            arguments[i] = aSession.getSpace().parseJsonWithDates(jsons[i]);
+            arguments[i] = Scripts.getSpace().parseJsonWithDates(jsons[i]);
         }
-        serverCore.executeMethod(getRequest().getModuleName(), getRequest().getMethodName(), arguments, aSession, true, (Object result) -> {
-            onSuccess.accept(new RPCRequest.Response(aSession.getSpace().toJson(result)));
+        serverCore.executeMethod(getRequest().getModuleName(), getRequest().getMethodName(), arguments, true, aSession, (Object result) -> {
+            onSuccess.accept(new RPCRequest.Response(Scripts.getSpace().toJson(result)));
         }, onFailure);
     }
 

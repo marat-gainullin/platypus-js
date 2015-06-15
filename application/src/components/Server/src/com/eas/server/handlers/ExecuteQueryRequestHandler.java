@@ -4,7 +4,7 @@
  */
 package com.eas.server.handlers;
 
-import com.eas.server.SessionRequestHandler;
+import com.eas.server.RequestHandler;
 import com.eas.client.SqlQuery;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
@@ -25,7 +25,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author pk, mg refactoring
  */
-public class ExecuteQueryRequestHandler extends SessionRequestHandler<ExecuteQueryRequest, ExecuteQueryRequest.Response> {
+public class ExecuteQueryRequestHandler extends RequestHandler<ExecuteQueryRequest, ExecuteQueryRequest.Response> {
 
     public static final String PUBLIC_ACCESS_DENIED_MSG = "Public access to query %s is denied.";
     public static final String ACCESS_DENIED_MSG = "Access denied to query  %s for user %s";
@@ -36,9 +36,9 @@ public class ExecuteQueryRequestHandler extends SessionRequestHandler<ExecuteQue
     }
 
     @Override
-    protected void handle2(Session aSession, Consumer<ExecuteQueryRequest.Response> onSuccess, Consumer<Exception> onFailure) {
+    public void handle(Session aSession, Consumer<ExecuteQueryRequest.Response> onSuccess, Consumer<Exception> onFailure) {
         try {
-            ((LocalQueriesProxy) getServerCore().getQueries()).getQuery(getRequest().getQueryName(), aSession.getSpace(), (SqlQuery query) -> {
+            ((LocalQueriesProxy) getServerCore().getQueries()).getQuery(getRequest().getQueryName(), Scripts.getSpace(), (SqlQuery query) -> {
                 try {
                     if (query == null || query.getEntityName() == null) {
                         throw new Exception(String.format(MISSING_QUERY_MSG, getRequest().getQueryName()));
@@ -47,15 +47,15 @@ public class ExecuteQueryRequestHandler extends SessionRequestHandler<ExecuteQue
                         throw new AccessControlException(String.format(PUBLIC_ACCESS_DENIED_MSG, getRequest().getQueryName()));//NOI18N
                     }
                     Set<String> rolesAllowed = query.getReadRoles();
-                    PlatypusPrincipal principal = (PlatypusPrincipal) aSession.getSpace().getPrincipal();
+                    PlatypusPrincipal principal = (PlatypusPrincipal) Scripts.getContext().getPrincipal();
                     if (rolesAllowed != null && !principal.hasAnyRole(rolesAllowed)) {
                         throw new AccessControlException(String.format(ACCESS_DENIED_MSG, query.getEntityName(), principal.getName()), principal instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
                     }
                     handleQuery(query.copy(), (JSObject aResult) -> {
                         if (onSuccess != null) {
-                            onSuccess.accept(new ExecuteQueryRequest.Response(aSession.getSpace().toJson(aResult)));
+                            onSuccess.accept(new ExecuteQueryRequest.Response(Scripts.getSpace().toJson(aResult)));
                         }
-                    }, onFailure, aSession.getSpace());
+                    }, onFailure, Scripts.getSpace());
                 } catch (Exception ex) {
                     if (onFailure != null) {
                         onFailure.accept(ex);

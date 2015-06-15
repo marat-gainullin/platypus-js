@@ -123,7 +123,6 @@ public class ScriptedResource {
         if (onSuccess != null) {
             Matcher htppMatcher = httpPattern.matcher(aResourceName);
             if (htppMatcher.matches()) {
-                aSpace.incAsyncsCount();
                 Scripts.startBIO(() -> {
                     try {
                         SEHttpResponse httpResponse = requestHttpResource(aResourceName, null, null, null);
@@ -566,7 +565,7 @@ public class ScriptedResource {
     private static void loadModule(Path apiPath, String scriptOrModuleName, URI aCalledFromFile, Scripts.Space aSpace, Consumer<URL> onSuccess, Consumer<Exception> onFailure) {
         Path apiLocalPath = apiPath.resolve(scriptOrModuleName);
         if (apiLocalPath != null && apiLocalPath.toFile().exists() && !apiLocalPath.toFile().isDirectory()) {
-            aSpace.incAsyncsCount();// network activity simulation
+            // network activity simulation
             aSpace.process(() -> {
                 try {
                     URL toLoad = apiLocalPath.toUri().toURL();
@@ -660,12 +659,10 @@ public class ScriptedResource {
             Path apiPath = absoluteApiPath();
             aScriptsNames = absoluteAppPaths(apiPath, aScriptsNames, aCalledFromFile);
             RequireProcess process = new RequireProcess(aScriptsNames.length, (Void v) -> {
-                aSpace.incAsyncsCount();
                 aSpace.process(() -> {
                     onSuccess.accept(v);
                 });
             }, (Exception ex) -> {
-                aSpace.incAsyncsCount();
                 aSpace.process(() -> {
                     onFailure.accept(ex);
                 });
@@ -715,7 +712,6 @@ public class ScriptedResource {
                 }
             }
         } else {
-            aSpace.incAsyncsCount();
             aSpace.process(() -> {
                 onSuccess.accept(null);
             });

@@ -55,11 +55,12 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
     protected FormsDocuments forms = new FormsDocuments();
     protected ReportsConfigs reports = new ReportsConfigs();
     protected ModelsDocuments models = new ModelsDocuments();
+    protected Scripts.Space queueSpace;
 
     public PlatypusServerCore(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, ScriptsConfigs aSecurityConfigs, String aDefaultAppElement) throws Exception {
         this(aIndexer, aModules, aQueries, aDatabasesClient, aSecurityConfigs, aDefaultAppElement, new SessionManager());
     }
-    
+
     public PlatypusServerCore(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, ScriptsConfigs aSecurityConfigs, String aDefaultAppElement, SessionManager aSessionManager) throws Exception {
         super();
         indexer = aIndexer;
@@ -69,6 +70,11 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
         sessionManager = aSessionManager;
         defaultAppElement = aDefaultAppElement;
         scriptsConfigs = aSecurityConfigs;
+        queueSpace = Scripts.createQueue();
+    }
+
+    public Scripts.Space getQueueSpace() {
+        return queueSpace;
     }
 
     public ApplicationSourceIndexer getIndexer() {
@@ -132,10 +138,33 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
      * @param aArguments
      * @param aSession
      * @param aNetworkRPC
-     * @param onSuccess
-     * @param onFailure
+     * @param aOnSuccess
+     * @param aOnFailure
      */
-    public void executeMethod(String aModuleName, String aMethodName, Object[] aArguments, Session aSession, boolean aNetworkRPC, Consumer<Object> onSuccess, Consumer<Exception> onFailure) {
+    public void executeMethod(String aModuleName, String aMethodName, Object[] aArguments, boolean aNetworkRPC, Session aSession, Consumer<Object> aOnSuccess, Consumer<Exception> aOnFailure) {
+        Scripts.LocalContext callingContext = Scripts.getContext();
+        Consumer<Object> onSuccess = (Object res) -> {
+            Scripts.LocalContext oldContext = Scripts.getContext();
+            Scripts.setContext(callingContext);
+            try {
+                Scripts.getSpace().process(() -> {
+                    aOnSuccess.accept(res);
+                });
+            } finally {
+                Scripts.setContext(oldContext);
+            }
+        };
+        Consumer<Exception> onFailure = (Exception ex) -> {
+            Scripts.LocalContext oldContext = Scripts.getContext();
+            Scripts.setContext(callingContext);
+            try {
+                Scripts.getSpace().process(() -> {
+                    aOnFailure.accept(ex);
+                });
+            } finally {
+                Scripts.setContext(oldContext);
+            }
+        };
         if (aModuleName == null || aModuleName.isEmpty()) {
             onFailure.accept(new Exception("Module name is missing. Unnamed server modules are not allowed."));
         } else {
@@ -148,7 +177,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                         ScriptDocument config = scriptsConfigs.get(aModuleName, files);
                         if (!aNetworkRPC || config.hasModuleAnnotation(JsDoc.Tag.PUBLIC_TAG)) {
                             // Let's perform security checks
-                            ServerModuleStructureRequestHandler.checkPrincipalPermission(aSession, config.getModuleAllowedRoles(), aModuleName);
+                            ServerModuleStructureRequestHandler.checkPrincipalPermission(config.getModuleAllowedRoles(), aModuleName);
                             Scripts.Space targetSpace;
                             Session targetSession;
                             if (config.hasModuleAnnotation(JsDoc.Tag.RESIDENT_TAG)) {
@@ -156,106 +185,106 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                 targetSpace = sessionManager.getSystemSession().getSpace();
                             } else if (config.hasModuleAnnotation(JsDoc.Tag.STATELESS_TAG)) {
                                 targetSpace = Scripts.createSpace();
-                                targetSpace.setSession(aSession.getSpace().getSession());
-                                targetSpace.setPrincipal(aSession.getSpace().getPrincipal());
                                 targetSession = null;
                             } else {
-                                targetSpace = aSession.getSpace();
+                                targetSpace = Scripts.getSpace();
                                 targetSession = aSession;
                             }
-                            targetSpace.process(() -> {
-                                try {
-                                    ScriptedResource._require(new String[]{aModuleName}, null, targetSpace, (Void v) -> {
-                                        try {
-                                            JSObject moduleInstance;
-                                            if (targetSession == null || !targetSession.containsModule(aModuleName)) {
-                                                JSObject constr = targetSpace.lookupInGlobal(aModuleName);
-                                                if (constr != null) {
-                                                    moduleInstance = (JSObject) constr.newObject(new Object[]{});
-                                                    if (targetSession != null) {
-                                                        targetSession.registerModule(aModuleName, moduleInstance);
+                            Scripts.LocalContext targetContext = Scripts.createContext(targetSpace);
+                            targetContext.setAsync(callingContext.getAsync());
+                            targetContext.setPrincipal(callingContext.getPrincipal());
+                            targetContext.setRequest(callingContext.getRequest());
+                            targetContext.setResponse(callingContext.getResponse());
+                            Scripts.setContext(targetContext);
+                            try {
+                                targetSpace.process(() -> {
+                                    try {
+                                        ScriptedResource._require(new String[]{aModuleName}, null, Scripts.getSpace(), (Void v) -> {
+                                            try {
+                                                JSObject moduleInstance;
+                                                if (targetSession == null || !targetSession.containsModule(aModuleName)) {
+                                                    JSObject constr = Scripts.getSpace().lookupInGlobal(aModuleName);
+                                                    if (constr != null) {
+                                                        moduleInstance = (JSObject) constr.newObject(new Object[]{});
+                                                        if (targetSession != null) {
+                                                            targetSession.registerModule(aModuleName, moduleInstance);
+                                                        }
+                                                    } else {
+                                                        throw new IllegalArgumentException(String.format(RPCRequestHandler.MODULE_MISSING_OR_NOT_A_MODULE, aModuleName));
                                                     }
                                                 } else {
-                                                    throw new IllegalArgumentException(String.format(RPCRequestHandler.MODULE_MISSING_OR_NOT_A_MODULE, aModuleName));
+                                                    moduleInstance = targetSession.getModule(aModuleName);
                                                 }
-                                            } else {
-                                                moduleInstance = targetSession.getModule(aModuleName);
-                                            }
-                                            if (moduleInstance != null) {
-                                                Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.FINE, RPCRequestHandler.EXECUTING_METHOD_TRACE_MSG, new Object[]{aMethodName, aModuleName});
-                                                Object oFun = moduleInstance.getMember(aMethodName);
-                                                if (oFun instanceof JSObject && ((JSObject) oFun).isFunction()) {
-                                                    List<Object> args = new ArrayList<>(Arrays.asList(aArguments));
-                                                    args.add(new AbstractJSObject() {
-                                                        @Override
-                                                        public Object call(final Object thiz, final Object... largs) {
-                                                            if (!args.isEmpty()) {
-                                                                args.clear();
-                                                                Object returned = largs.length > 0 ? largs[0] : null;
-                                                                aSession.getSpace().process(() -> {
+                                                if (moduleInstance != null) {
+                                                    Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.FINE, RPCRequestHandler.EXECUTING_METHOD_TRACE_MSG, new Object[]{aMethodName, aModuleName});
+                                                    Object oFun = moduleInstance.getMember(aMethodName);
+                                                    if (oFun instanceof JSObject && ((JSObject) oFun).isFunction()) {
+                                                        List<Object> args = new ArrayList<>(Arrays.asList(aArguments));
+                                                        args.add(new AbstractJSObject() {
+                                                            @Override
+                                                            public Object call(final Object thiz, final Object... largs) {
+                                                                if (!args.isEmpty()) {
+                                                                    args.clear();
+                                                                    Object returned = largs.length > 0 ? largs[0] : null;
                                                                     onSuccess.accept(returned);// WARNING! Don't insert .toJava() because of RPC handler
-                                                                });
-                                                            } else {
-                                                                Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
+                                                                } else {
+                                                                    Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
+                                                                }
+                                                                return null;
                                                             }
-                                                            return null;
-                                                        }
 
-                                                    });
-                                                    args.add(new AbstractJSObject() {
-                                                        @Override
-                                                        public Object call(final Object thiz, final Object... largs) {
-                                                            if (!args.isEmpty()) {
-                                                                args.clear();
-                                                                Object reason = largs.length > 0 ? targetSpace.toJava(largs[0]) : null;
-                                                                aSession.getSpace().process(() -> {
+                                                        });
+                                                        args.add(new AbstractJSObject() {
+                                                            @Override
+                                                            public Object call(final Object thiz, final Object... largs) {
+                                                                if (!args.isEmpty()) {
+                                                                    args.clear();
+                                                                    Object reason = largs.length > 0 ? Scripts.getSpace().toJava(largs[0]) : null;
                                                                     if (reason instanceof Exception) {
                                                                         onFailure.accept((Exception) reason);
                                                                     } else {
                                                                         onFailure.accept(new Exception(String.valueOf(reason)));
                                                                     }
-                                                                });
-                                                            } else {
-                                                                Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
+                                                                } else {
+                                                                    Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
+                                                                }
+                                                                return null;
                                                             }
-                                                            return null;
-                                                        }
 
-                                                    });
-                                                    targetSpace.initAsyncs(0);
-                                                    try {
-                                                        ServerModuleStructureRequestHandler.checkPrincipalPermission(aSession, config.getPropertyAllowedRoles().get(aMethodName), aMethodName);
-                                                        Object result = ((JSObject) oFun).call(moduleInstance, args.toArray());
-                                                        int asyncs = targetSpace.getAsyncsCount();
-                                                        if (!(result instanceof Undefined) || asyncs == 0) {
-                                                            if (!args.isEmpty()) {
-                                                                args.clear();
-                                                                onSuccess.accept(result);// WARNING! Don't insert .toJava() because of RPC handler
-                                                            } else {
-                                                                Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
+                                                        });
+                                                        Scripts.getContext().initAsyncs(0);
+                                                        try {
+                                                            ServerModuleStructureRequestHandler.checkPrincipalPermission(config.getPropertyAllowedRoles().get(aMethodName), aMethodName);
+                                                            Object result = ((JSObject) oFun).call(moduleInstance, args.toArray());
+                                                            int asyncs = Scripts.getContext().getAsyncsCount();
+                                                            if (!(result instanceof Undefined) || asyncs == 0) {
+                                                                if (!args.isEmpty()) {
+                                                                    args.clear();
+                                                                    onSuccess.accept(result);// WARNING! Don't insert .toJava() because of RPC handler
+                                                                } else {
+                                                                    Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
+                                                                }
                                                             }
+                                                        } finally {
+                                                            Scripts.getContext().initAsyncs(null);
                                                         }
-                                                    } finally {
-                                                        targetSpace.initAsyncs(null);
+                                                    } else {
+                                                        throw new Exception(String.format(RPCRequestHandler.METHOD_MISSING_MSG, aMethodName, aModuleName));
                                                     }
                                                 } else {
-                                                    throw new Exception(String.format(RPCRequestHandler.METHOD_MISSING_MSG, aMethodName, aModuleName));
+                                                    throw new Exception(String.format(RPCRequestHandler.MODULE_MISSING_MSG, aModuleName));
                                                 }
-                                            } else {
-                                                throw new Exception(String.format(RPCRequestHandler.MODULE_MISSING_MSG, aModuleName));
-                                            }
-                                        } catch (Exception ex) {
-                                            aSession.getSpace().process(() -> {
+                                            } catch (Exception ex) {
                                                 onFailure.accept(ex);
-                                            });
-                                        }
-                                    }, onFailure);
-                                } catch (Exception ex) {
-                                    aSession.getSpace().process(() -> {
+                                            }
+                                        }, onFailure);
+                                    } catch (Exception ex) {
                                         onFailure.accept(ex);
-                                    });
-                                }
-                            });
+                                    }
+                                });
+                            } finally {
+                                Scripts.setContext(callingContext);
+                            }
                         } else {
                             throw new AccessControlException(String.format("Public access to module %s is denied.", aModuleName));//NOI18N
                         }
@@ -263,9 +292,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                         throw new IllegalArgumentException(String.format(RPCRequestHandler.MODULE_MISSING_OR_NOT_A_MODULE, aModuleName));
                     }
                 } catch (Exception ex) {
-                    aSession.getSpace().process(() -> {
-                        onFailure.accept(ex);
-                    });
+                    onFailure.accept(ex);
                 }
             }
         }
@@ -273,20 +300,30 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
 
     public void startResidents(Set<String> aRezidents) throws Exception {
         Scripts.Space space = sessionManager.getSystemSession().getSpace();
-        space.process(() -> {
-            aRezidents.stream().forEach((moduleName) -> {
-                try {
-                    AppElementFiles files = modules.nameToFiles(moduleName);
-                    if (files != null && files.isModule()) {
-                        startResidentModule(moduleName, space);
-                    } else {
-                        Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.WARNING, "Rezident task \"{0}\" is illegal (no module). Skipping it.", moduleName);
+        Scripts.LocalContext context = Scripts.createContext(space);
+        context.setAsync(null);
+        context.setPrincipal(sessionManager.getSystemSession().getPrincipal());
+        context.setRequest(null);
+        context.setResponse(null);
+        Scripts.setContext(context);
+        try {
+            space.process(() -> {
+                aRezidents.stream().forEach((moduleName) -> {
+                    try {
+                        AppElementFiles files = modules.nameToFiles(moduleName);
+                        if (files != null && files.isModule()) {
+                            startResidentModule(moduleName, space);
+                        } else {
+                            Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.WARNING, "Rezident task \"{0}\" is illegal (no module). Skipping it.", moduleName);
+                        }
+                    } catch (Exception ex) {
+                        Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                } catch (Exception ex) {
-                    Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                });
             });
-        });
+        } finally {
+            Scripts.setContext(context);
+        }
     }
 
     /**
@@ -320,9 +357,9 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
 
     @Override
     public String preparationContext() throws Exception {
-        Scripts.Space space = Scripts.getSpace();
-        if (space != null && space.getPrincipal() != null) {
-            return ((PlatypusPrincipal) space.getPrincipal()).getContext();
+        Scripts.LocalContext context = Scripts.getContext();
+        if (context != null && context.getPrincipal() != null) {
+            return ((PlatypusPrincipal) context.getPrincipal()).getContext();
         } else {
             return null;
         }

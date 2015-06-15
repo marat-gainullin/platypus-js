@@ -213,7 +213,15 @@ public class PlatypusClientApplication {
                 config.datasourcesArgs.registerDatasources();
                 Scripts.initBIO(config.threadsArgs.getMaxServicesTreads());
                 Scripts.initTasks((Runnable aTask) -> {
-                    EventQueue.invokeLater(aTask);
+                    Scripts.LocalContext context = Scripts.getContext();
+                    EventQueue.invokeLater(() -> {
+                        Scripts.setContext(context);
+                        try {
+                            aTask.run();
+                        } finally {
+                            Scripts.setContext(null);
+                        }
+                    });
                 });
                 Application app;
                 PlatypusPrincipal.setClientSpacePrincipal(new AnonymousPlatypusPrincipal());
@@ -223,7 +231,7 @@ public class PlatypusClientApplication {
                     app = new PlatypusClient(new PlatypusHttpConnection(config.url, new UIOnCredentials(config), config.maximumAuthenticateAttempts, config.threadsArgs.getMaxHttpTreads()));
                 } else if (config.url.getProtocol().equalsIgnoreCase("platypus")) {
                     app = new PlatypusClient(new PlatypusPlatypusConnection(config.url, new UIOnCredentials(config), config.maximumAuthenticateAttempts, (Runnable aTask) -> {
-                        EventQueue.invokeLater(aTask);
+                        Scripts.offerTask(aTask);
                     }, config.threadsArgs.getMaxPlatypusConnections()));
                 } else if (config.url.getProtocol().equalsIgnoreCase("file")) {
                     File f = new File(config.url.toURI());
@@ -284,19 +292,24 @@ public class PlatypusClientApplication {
                     throw new Exception("Unknown protocol in url: " + config.url);
                 }
                 ScriptedResource.init(app);
-                Scripts.Space space = Scripts.createSpace();
-                Forms.initScripts(space);
-                space.process(() -> {
-                    try {
-                        ScriptedResource._require(new String[]{""}, null, space, (Void v) -> {
-                            Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.INFO, "Platypus application started.");
-                        }, (Exception ex) -> {
+                Scripts.LocalContext context = Scripts.createContext(Scripts.createSpace());
+                Forms.initContext(context);
+                Scripts.setContext(context);
+                try {
+                    Scripts.getSpace().process(() -> {
+                        try {
+                            ScriptedResource._require(new String[]{""}, null, Scripts.getSpace(), (Void v) -> {
+                                Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.INFO, "Platypus application started.");
+                            }, (Exception ex) -> {
+                                Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, ex);
+                            });
+                        } catch (Exception ex) {
                             Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, ex);
-                        });
-                    } catch (Exception ex) {
-                        Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                });
+                        }
+                    });
+                } finally {
+                    Scripts.setContext(null);
+                }
             } else {
                 throw new IllegalArgumentException("Application url is missing. url is a required parameter.");
             }
