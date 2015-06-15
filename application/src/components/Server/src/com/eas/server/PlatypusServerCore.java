@@ -322,7 +322,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                 });
             });
         } finally {
-            Scripts.setContext(context);
+            Scripts.setContext(null);
         }
     }
 

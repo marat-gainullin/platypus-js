@@ -111,41 +111,51 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
                     }
                 };
                 Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.FINE, "Request {0}", requestEnv.request.toString());
-                final RequestHandler<Request, Response> handler = (RequestHandler<Request, Response>)RequestHandlerFactory.getHandler(server, requestEnv.request);
+                final RequestHandler<Request, Response> handler = (RequestHandler<Request, Response>) RequestHandlerFactory.getHandler(server, requestEnv.request);
                 if (handler != null) {
-                    Consumer<Session> handle = (aSession) -> {
-                        Scripts.LocalContext context = Scripts.createContext(aSession.getSpace());
-                        // The only place to use this getter.
-                        // See its javadoc please.
-                        context.setPrincipal(aSession.getPrincipal());
-                        Scripts.setContext(context);
-                        try {
-                            Scripts.getSpace().process(() -> {
-                                handler.handle(aSession, (Response aResponse) -> {
-                                    ioSession.write(aResponse);
-                                }, onError);
-                            });
-                        } finally {
-                            Scripts.setContext(null);
-                        }
-                    };
                     if (requestEnv.ticket == null) {
-                        DatabaseAuthorizer.authorize(server, requestEnv.userName, requestEnv.password, server.getQueueSpace(), (PlatypusPrincipal aPrincipal) -> {
+                        try {
+                            Session session = server.getSessionManager().create(String.valueOf(IDGenerator.genID()));
+                            requestEnv.ticket = session.getId();
+                            ioSession.setAttribute(SESSION_ID, session.getId());
+                            Scripts.LocalContext context = Scripts.createContext(session.getSpace());
+                            Scripts.setContext(context);
                             try {
-                                Session created = server.getSessionManager().create(String.valueOf(IDGenerator.genID()));
-                                created.setPrincipal(aPrincipal);
-                                requestEnv.ticket = created.getId();
-                                ioSession.setAttribute(SESSION_ID, created.getId());
-                                handle.accept(created);
-                            } catch (ScriptException ex) {
-                                Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, null, ex);
+                                DatabaseAuthorizer.authorize(server, requestEnv.userName, requestEnv.password, Scripts.getSpace(), (PlatypusPrincipal aPrincipal) -> {
+                                    session.setPrincipal(aPrincipal);
+                                    // The only place to use this getter.
+                                    // See its javadoc please.
+                                    context.setPrincipal(session.getPrincipal());
+                                    Scripts.getSpace().process(() -> {
+                                        handler.handle(session, (Response aResponse) -> {
+                                            ioSession.write(aResponse);
+                                        }, onError);
+                                    });
+                                }, onError);
+                            } finally {
+                                Scripts.setContext(null);
                             }
-                        }, onError);
+                        } catch (ScriptException ex) {
+                            Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, null, ex);
+                        }
                     } else {
                         Session session = server.getSessionManager().get(requestEnv.ticket);
                         if (session != null) {
                             ioSession.setAttribute(SESSION_ID, session.getId());
-                            handle.accept(session);
+                            Scripts.LocalContext context = Scripts.createContext(session.getSpace());
+                            // The only place to use this getter.
+                            // See its javadoc please.
+                            context.setPrincipal(session.getPrincipal());
+                            Scripts.setContext(context);
+                            try {
+                                Scripts.getSpace().process(() -> {
+                                    handler.handle(session, (Response aResponse) -> {
+                                        ioSession.write(aResponse);
+                                    }, onError);
+                                });
+                            } finally {
+                                Scripts.setContext(null);
+                            }
                         } else {
                             throw new AccessControlException("Bad session ticket.", new NetPermission("*"));
                         }

@@ -549,7 +549,9 @@ public class Scripts {
 
     public static void offerTask(Runnable aTask) {
         assert tasks != null : "Scripts tasks are not initialized";
-        Scripts.getContext().incAsyncsCount();
+        if (Scripts.getContext() != null) {
+            Scripts.getContext().incAsyncsCount();
+        }
         tasks.accept(aTask);
     }
 

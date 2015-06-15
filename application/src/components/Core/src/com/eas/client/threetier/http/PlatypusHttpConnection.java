@@ -138,7 +138,7 @@ public class PlatypusHttpConnection extends PlatypusConnection {
                             Logger.getLogger(PlatypusHttpConnection.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     });
-                }catch (Exception ex) {
+                } catch (Exception ex) {
                     Logger.getLogger(PlatypusHttpConnection.class.getName()).log(Level.SEVERE, null, ex);
                 } finally {
                     Scripts.setContext(null);
@@ -152,7 +152,9 @@ public class PlatypusHttpConnection extends PlatypusConnection {
     private <R extends Response> void fetchReport(RPCRequest.Response rpcResponse, Scripts.Space aSpace, Consumer<R> onSuccess, Consumer<Exception> onFailure) {
         URL reportUrl = (URL) rpcResponse.getResult();
         String reportLocation = reportUrl.getFile();
+        Scripts.LocalContext context = Scripts.getContext();
         bioExecutor.submit(() -> {// bio background thread
+            Scripts.setContext(context);
             try {
                 HttpURLConnection reportConn = (HttpURLConnection) reportUrl.openConnection();
                 reportConn.setDoInput(true);
@@ -189,6 +191,8 @@ public class PlatypusHttpConnection extends PlatypusConnection {
                 } else {
                     Logger.getLogger(PlatypusHttpConnection.class.getName()).log(Level.SEVERE, null, ex);
                 }
+            } finally {
+                Scripts.setContext(null);
             }
         });
     }
@@ -215,7 +219,9 @@ public class PlatypusHttpConnection extends PlatypusConnection {
                                     String redirectLocation = nextResendedRes.redirectLocation;
                                     Map<String, Cookie> localCookies = new HashMap<>();
                                     localCookies.putAll(cookies);
+                                    Scripts.LocalContext context = Scripts.getContext();
                                     bioExecutor.submit(() -> {// bio background thread
+                                        Scripts.setContext(context);
                                         try {
                                             URL securityFormUrl = new URL(url + (url.toString().endsWith("/") ? "" : "/") + redirectLocation);
                                             HttpURLConnection securityFormConn = (HttpURLConnection) securityFormUrl.openConnection();
@@ -242,6 +248,8 @@ public class PlatypusHttpConnection extends PlatypusConnection {
                                             });
                                         } catch (Exception ex) {
                                             Logger.getLogger(PlatypusHttpConnection.class.getName()).log(Level.SEVERE, null, ex);
+                                        } finally {
+                                            Scripts.setContext(null);
                                         }
                                     });
                                 } else {

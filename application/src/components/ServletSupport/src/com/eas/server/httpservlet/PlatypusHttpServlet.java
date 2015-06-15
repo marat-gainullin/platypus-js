@@ -90,8 +90,8 @@ public class PlatypusHttpServlet extends HttpServlet {
                 try {
                     containerExecutor = (ExecutorService) InitialContext.doLookup("java:comp/env/concurrent/ThreadPool");
                 } catch (NamingException ex1) {
-                    int maxContainerThreads = 8;
-                    selfExecutor = new ThreadPoolExecutor(maxContainerThreads, maxContainerThreads,
+                    int maxSelfThreads = Runtime.getRuntime().availableProcessors() + 1;
+                    selfExecutor = new ThreadPoolExecutor(maxSelfThreads, maxSelfThreads,
                             1L, TimeUnit.SECONDS,
                             new LinkedBlockingQueue<>(),
                             new DeamonThreadFactory("platypus-worker-", false));
@@ -129,7 +129,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                         if (containerExecutor != null) {// J2EE 7+
                             containerExecutor.submit(taskWrapper);
                         } else {
-                            if (context.getAsync() != null) {// Servlet 3+
+                            if (context != null && context.getAsync() != null) {// Servlet 3+
                                 assert context.getAsync() instanceof AsyncContext;
                                 ((AsyncContext) context.getAsync()).start(taskWrapper);
                             } else {// Any other environment
@@ -242,16 +242,16 @@ public class PlatypusHttpServlet extends HttpServlet {
                     async.setTimeout(-1);
                     Consumer<Session> requestProcessor = (Session aSession) -> {
                         try {
-                            DatabasesClient.getUserProperties(platypusCore.getDatabasesClient(), request.getUserPrincipal() != null ? request.getUserPrincipal().getName() : null, aSession.getSpace(), (Map<String, String> aUserProps) -> {
-                                String dataContext = aUserProps.get(ClientConstants.F_USR_CONTEXT);
-                                Scripts.LocalContext context = Scripts.createContext(aSession.getSpace());
-                                PlatypusPrincipal principal = servletRequestPrincipal(request, dataContext);
-                                context.setAsync(async);
-                                context.setPrincipal(principal);
-                                context.setRequest(request);
-                                context.setResponse(response);
-                                Scripts.setContext(context);
-                                try {
+                            Scripts.LocalContext context = Scripts.createContext(aSession.getSpace());
+                            context.setAsync(async);
+                            context.setRequest(request);
+                            context.setResponse(response);
+                            Scripts.setContext(context);
+                            try {
+                                DatabasesClient.getUserProperties(platypusCore.getDatabasesClient(), request.getUserPrincipal() != null ? request.getUserPrincipal().getName() : null, Scripts.getSpace(), (Map<String, String> aUserProps) -> {
+                                    String dataContext = aUserProps.get(ClientConstants.F_USR_CONTEXT);
+                                    PlatypusPrincipal principal = servletRequestPrincipal(request, dataContext);
+                                    context.setPrincipal(principal);
                                     Scripts.getSpace().process(() -> {
                                         try {
                                             processPlatypusRequest(request, response, httpSession, aSession, async);
@@ -264,16 +264,16 @@ public class PlatypusHttpServlet extends HttpServlet {
                                             }
                                         }
                                     });
-                                } finally {
-                                    Scripts.setContext(null);
-                                }
-                            }, (Exception ex) -> {
-                                try {
-                                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.toString());
-                                } catch (IOException | IllegalStateException ex1) {
-                                    Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex1);
-                                }
-                            });
+                                }, (Exception ex) -> {
+                                    try {
+                                        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.toString());
+                                    } catch (IOException | IllegalStateException ex1) {
+                                        Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex1);
+                                    }
+                                });
+                            } finally {
+                                Scripts.setContext(null);
+                            }
                         } catch (Exception ex) {
                             try {
                                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.toString());
