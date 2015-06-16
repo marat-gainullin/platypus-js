@@ -254,7 +254,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                                         });
                                                         Scripts.getContext().initAsyncs(0);
                                                         try {
-                                                            ServerModuleStructureRequestHandler.checkPrincipalPermission(config.getPropertyAllowedRoles().get(aMethodName), aMethodName);
+                                                            ServerModuleStructureRequestHandler.checkPrincipalPermission(config.getPropertyAllowedRoles().get(aMethodName), aModuleName + "." + aMethodName);
                                                             Object result = ((JSObject) oFun).call(moduleInstance, args.toArray());
                                                             int asyncs = Scripts.getContext().getAsyncsCount();
                                                             if (!(result instanceof Undefined) || asyncs == 0) {

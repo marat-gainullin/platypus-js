@@ -22,10 +22,13 @@ import com.eas.concurrent.DeamonThreadFactory;
 import com.eas.script.Scripts;
 import com.eas.server.*;
 import com.eas.util.IDGenerator;
+import com.eas.util.JSONUtils;
 import java.io.*;
 import java.net.URI;
 import java.security.AccessControlException;
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -117,24 +120,13 @@ public class PlatypusHttpServlet extends HttpServlet {
                     Scripts.initBIO(platypusConfig.getMaximumServicesTreads());
                     ScriptedResource.init(platypusCore);
                     Scripts.initTasks((Runnable aTask) -> {
-                        Scripts.LocalContext context = Scripts.getContext();
-                        Runnable taskWrapper = () -> {
-                            Scripts.setContext(context);
-                            try {
-                                aTask.run();
-                            } finally {
-                                Scripts.setContext(null);
-                            }
-                        };
                         if (containerExecutor != null) {// J2EE 7+
-                            containerExecutor.submit(taskWrapper);
+                            containerExecutor.submit(aTask);
+                        } else if (Scripts.getContext().getAsync() != null) {// Servlet 3+
+                            ((AsyncContext) Scripts.getContext().getAsync()).start(aTask);
                         } else {
-                            if (context != null && context.getAsync() != null) {// Servlet 3+
-                                assert context.getAsync() instanceof AsyncContext;
-                                ((AsyncContext) context.getAsync()).start(taskWrapper);
-                            } else {// Any other environment
-                                selfExecutor.submit(taskWrapper);
-                            }
+                            // Other environment
+                            selfExecutor.submit(aTask);
                         }
                     });
                     platypusCore.startResidents(tasksScanner.getResidents());
@@ -180,8 +172,8 @@ public class PlatypusHttpServlet extends HttpServlet {
     protected static final String PUB_CONTEXT = "/pub/";
 
     protected boolean checkUpload(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        StringBuilder uploadedLocations = new StringBuilder();
         if (request.getContentType() != null && request.getContentType().contains("multipart/form-data")) {
+            List<StringBuilder> uploadedLocations = new ArrayList();
             for (Part part : request.getParts()) {
                 String dispositionHeader = part.getHeader("content-disposition");
                 if (dispositionHeader != null) {
@@ -212,16 +204,17 @@ public class PlatypusHttpServlet extends HttpServlet {
                         } finally {
                             part.delete();
                         }
-                        uploadedLocations.append(uploadedLocations.length() > 0 ? "\n" : "").append("http://").append(request.getHeader("host")).append(request.getServletContext().getContextPath()).append(PUB_CONTEXT).append(uploadedFileName);
+                        StringBuilder uploadedLocation = new StringBuilder();
+                        uploadedLocation.append("http://").append(request.getHeader("host")).append(request.getServletContext().getContextPath()).append(PUB_CONTEXT).append(uploadedFileName);
+                        uploadedLocations.add(uploadedLocation);
                     }
                 }
             }
-            if (uploadedLocations.length() > 0) {
-                PlatypusHttpResponseWriter.writeJsonResponse(uploadedLocations.toString(), response);
-                return true;
-            }
+            PlatypusHttpResponseWriter.writeJsonResponse(JSONUtils.as(uploadedLocations.toArray(new StringBuilder[]{})).toString(), response, null);
+            return true;
+        } else {
+            return false;
         }
-        return false;
     }
 
     /**
@@ -238,7 +231,7 @@ public class PlatypusHttpServlet extends HttpServlet {
             if (platypusCore != null) {
                 HttpSession httpSession = request.getSession();
                 if (httpSession != null) {
-                    AsyncContext async = request.startAsync();//request, response);
+                    AsyncContext async = request.startAsync();
                     async.setTimeout(-1);
                     Consumer<Session> requestProcessor = (Session aSession) -> {
                         try {
@@ -259,6 +252,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                                             Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex);
                                             try {
                                                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.toString());
+                                                async.complete();
                                             } catch (IOException | IllegalStateException ex1) {
                                                 Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex1);
                                             }
@@ -267,6 +261,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                                 }, (Exception ex) -> {
                                     try {
                                         response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.toString());
+                                        async.complete();
                                     } catch (IOException | IllegalStateException ex1) {
                                         Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex1);
                                     }
@@ -275,8 +270,10 @@ public class PlatypusHttpServlet extends HttpServlet {
                                 Scripts.setContext(null);
                             }
                         } catch (Exception ex) {
+                            Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex);
                             try {
                                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.toString());
+                                async.complete();
                             } catch (IOException | IllegalStateException ex1) {
                                 Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex1);
                             }
@@ -284,26 +281,32 @@ public class PlatypusHttpServlet extends HttpServlet {
                     };
                     Session session = platypusSessionByHttpSession(httpSession);
                     if (session == null) {// Zombie check
-                        platypusCore.getQueueSpace().process(() -> {
-                            try {
-                                String platypusSessionId = (String) httpSession.getAttribute(PLATYPUS_SESSION_ID_ATTR_NAME);
-                                // platypusSessionId may be replicated from another instance in cluster
-                                Session lookedup = platypusSessionId != null ? SessionManager.Singleton.instance.get(platypusSessionId) : null;
-                                if (lookedup == null) {
-                                    // preserve replicated session id
-                                    if (platypusSessionId == null) {
-                                        platypusSessionId = IDGenerator.genID() + "";
+                        Scripts.LocalContext queueSpaceContext = Scripts.createContext(platypusCore.getQueueSpace());
+                        Scripts.setContext(queueSpaceContext);
+                        try {
+                            platypusCore.getQueueSpace().process(() -> {
+                                try {
+                                    String platypusSessionId = (String) httpSession.getAttribute(PLATYPUS_SESSION_ID_ATTR_NAME);
+                                    // platypusSessionId may be replicated from another instance in cluster
+                                    Session lookedup = platypusSessionId != null ? SessionManager.Singleton.instance.get(platypusSessionId) : null;
+                                    if (lookedup == null) {
+                                        // preserve replicated session id
+                                        if (platypusSessionId == null) {
+                                            platypusSessionId = IDGenerator.genID() + "";
+                                        }
+                                        lookedup = SessionManager.Singleton.instance.create(platypusSessionId);
+                                        httpSession.setAttribute(PLATYPUS_SESSION_ID_ATTR_NAME, platypusSessionId);
+                                        Logger.getLogger(PlatypusSessionsSynchronizer.class.getName()).log(Level.INFO, "Platypus session opened. Session id: {0}", lookedup.getId());
                                     }
-                                    lookedup = SessionManager.Singleton.instance.create(platypusSessionId);
-                                    httpSession.setAttribute(PLATYPUS_SESSION_ID_ATTR_NAME, platypusSessionId);
-                                    Logger.getLogger(PlatypusSessionsSynchronizer.class.getName()).log(Level.INFO, "Platypus session opened. Session id: {0}", lookedup.getId());
+                                    final Session effective = lookedup;
+                                    requestProcessor.accept(effective);
+                                } catch (ScriptException ex) {
+                                    Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex);
                                 }
-                                final Session effective = lookedup;
-                                requestProcessor.accept(effective);
-                            } catch (ScriptException ex) {
-                                Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                        });
+                            });
+                        } finally {
+                            Scripts.setContext(null);
+                        }
                     } else {
                         requestProcessor.accept(session);
                     }
@@ -345,7 +348,7 @@ public class PlatypusHttpServlet extends HttpServlet {
      * @param aHttpSession
      * @throws Exception
      */
-    private void processPlatypusRequest(final HttpServletRequest aHttpRequest, final HttpServletResponse aHttpResponse, HttpSession aHttpSession, Session aPlatypusSession, AsyncContext async) throws Exception {
+    private void processPlatypusRequest(final HttpServletRequest aHttpRequest, final HttpServletResponse aHttpResponse, HttpSession aHttpSession, Session aPlatypusSession, AsyncContext aAsync) throws Exception {
         Request platypusRequest = readPlatypusRequest(aHttpRequest, aHttpResponse);
         if (platypusRequest.getType() == Requests.rqLogout) {
             aHttpRequest.logout();
@@ -364,10 +367,13 @@ public class PlatypusHttpServlet extends HttpServlet {
                              aHttpResponse.sendError(accEx.getPermission() instanceof AuthPermission ? HttpServletResponse.SC_UNAUTHORIZED : HttpServletResponse.SC_FORBIDDEN, ex.getMessage());
                              */
                             aHttpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, ex.getMessage());
+                            aAsync.complete();
                         } else if (ex instanceof FileNotFoundException) {
                             aHttpResponse.sendError(HttpServletResponse.SC_NOT_FOUND, ex.getMessage());
+                            aAsync.complete();
                         } else {
                             aHttpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
+                            aAsync.complete();
                         }
                     } catch (IOException ex1) {
                         Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex1);
@@ -375,10 +381,9 @@ public class PlatypusHttpServlet extends HttpServlet {
                 };
                 aPlatypusSession.accessed();
                 handler.handle(aPlatypusSession, (Response resp) -> {
-                    PlatypusHttpResponseWriter writer = new PlatypusHttpResponseWriter(aHttpResponse, aHttpRequest, Scripts.getSpace(), ((Principal) Scripts.getContext().getPrincipal()).getName());
+                    PlatypusHttpResponseWriter writer = new PlatypusHttpResponseWriter(aHttpResponse, aHttpRequest, Scripts.getSpace(), ((Principal) Scripts.getContext().getPrincipal()).getName(), aAsync);
                     try {
                         resp.accept(writer);
-                        async.complete();
                     } catch (Exception ex) {
                         Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, ex.getMessage());
                     }

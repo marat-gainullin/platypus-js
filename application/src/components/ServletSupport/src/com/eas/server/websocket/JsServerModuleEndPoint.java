@@ -62,32 +62,38 @@ public class JsServerModuleEndPoint {
 
     @OnOpen
     public void sessionOpened(Session websocketSession, @PathParam("module-name") String aModuleName) throws Exception {
-        PlatypusServerCore serverCore = lookupPlaypusServerCore();
+        PlatypusServerCore platypusCore = lookupPlaypusServerCore();
         HandshakeRequest handshake = (HandshakeRequest) websocketSession.getUserProperties().get(JsServerModuleEndPointConfigurator.HANDSHAKE_REQUEST);
-        SessionManager sessionManager = serverCore.getSessionManager();
+        SessionManager sessionManager = platypusCore.getSessionManager();
         String userName = websocketSession.getUserPrincipal() != null ? websocketSession.getUserPrincipal().getName() : null;
         session = sessionManager.create(websocketSession.getId());
         Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.INFO, "WebSocket platypus session opened. Session id: {0}", session.getId());
-        DatabasesClient.getUserProperties(serverCore.getDatabasesClient(), userName, serverCore.getQueueSpace(), (Map<String, String> aUserProps) -> {
-            String usrContext = aUserProps.get(ClientConstants.F_USR_CONTEXT);
-            PlatypusPrincipal principal;
-            if (handshake.getUserPrincipal() != null) {
-                principal = new WebSocketPlatypusPrincipal(handshake.getUserPrincipal().getName(), usrContext, handshake);
-            } else {
-                principal = new AnonymousPlatypusPrincipal(websocketSession.getId());
-            }
-            facade = new WebSocketServerSession(websocketSession);
-            session.setPrincipal(principal);
-            inContext(() -> {
-                serverCore.executeMethod(aModuleName, WS_ON_OPEN_METHOD_NAME, new Object[]{facade.getPublished()}, true, session, (Object aResult) -> {
-                    Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "{0} method of {1} module called successfully.", new Object[]{WS_ON_OPEN_METHOD_NAME, aModuleName});
-                }, (Exception ex) -> {
-                    Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.SEVERE, null, ex);
-                });
-            }, session);
-        }, (Exception ex) -> {
-            Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.WARNING, "Could not get user {0} properties (USR_CONTEXT, etc).", userName);
-        });
+        Scripts.LocalContext queueSpaceContext = Scripts.createContext(platypusCore.getQueueSpace());
+        Scripts.setContext(queueSpaceContext);
+        try {
+            DatabasesClient.getUserProperties(platypusCore.getDatabasesClient(), userName, platypusCore.getQueueSpace(), (Map<String, String> aUserProps) -> {
+                String usrContext = aUserProps.get(ClientConstants.F_USR_CONTEXT);
+                PlatypusPrincipal principal;
+                if (handshake.getUserPrincipal() != null) {
+                    principal = new WebSocketPlatypusPrincipal(handshake.getUserPrincipal().getName(), usrContext, handshake);
+                } else {
+                    principal = new AnonymousPlatypusPrincipal(websocketSession.getId());
+                }
+                facade = new WebSocketServerSession(websocketSession);
+                session.setPrincipal(principal);
+                inContext(() -> {
+                    platypusCore.executeMethod(aModuleName, WS_ON_OPEN_METHOD_NAME, new Object[]{facade.getPublished()}, true, session, (Object aResult) -> {
+                        Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "{0} method of {1} module called successfully.", new Object[]{WS_ON_OPEN_METHOD_NAME, aModuleName});
+                    }, (Exception ex) -> {
+                        Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.SEVERE, null, ex);
+                    });
+                }, session);
+            }, (Exception ex) -> {
+                Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.WARNING, "Could not get user {0} properties (USR_CONTEXT, etc).", userName);
+            });
+        } finally {
+            Scripts.setContext(null);
+        }
     }
 
     @OnMessage

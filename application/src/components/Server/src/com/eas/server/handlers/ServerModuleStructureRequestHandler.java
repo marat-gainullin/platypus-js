@@ -85,16 +85,16 @@ public class ServerModuleStructureRequestHandler extends RequestHandler<ServerMo
      * Checks module roles.
      *
      * @param anAllowedRoles
-     * @param aModuleName
+     * @param aSubjectName
      * @throws AccessControlException
      */
-    public static void checkPrincipalPermission(Set<String> anAllowedRoles, String aModuleName) throws AccessControlException {
+    public static void checkPrincipalPermission(Set<String> anAllowedRoles, String aSubjectName) throws AccessControlException {
         if (anAllowedRoles != null && !anAllowedRoles.isEmpty()) {
             try {
                 PlatypusPrincipal principal = (PlatypusPrincipal) Scripts.getContext().getPrincipal();
                 if (principal == null || !principal.hasAnyRole(anAllowedRoles)) {
-                    throw new AccessControlException(String.format("Access denied to %s module for '%s'.",//NOI18N
-                            aModuleName,
+                    throw new AccessControlException(String.format("Access denied to %s for '%s'.",//NOI18N
+                            aSubjectName,
                             principal != null ? principal.getName() : null), principal instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
                 }
             } catch (Exception ex) {

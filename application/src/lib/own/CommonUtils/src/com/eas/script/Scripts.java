@@ -479,8 +479,17 @@ public class Scripts {
         protected AtomicReference worker = new AtomicReference(null);
 
         public void process(Runnable aTask) {
+            Scripts.LocalContext context = Scripts.getContext();
+            Runnable taskWrapper = () -> {
+                Scripts.setContext(context);
+                try {
+                    aTask.run();
+                } finally {
+                    Scripts.setContext(null);
+                }
+            };
             offerTask(() -> {
-                Runnable processedTask = aTask;
+                Runnable processedTask = taskWrapper;
                 int version;
                 int newVersion;
                 Thread thisThread = Thread.currentThread();
@@ -500,9 +509,15 @@ public class Scripts {
                             // already single threaded environment
                             if (global == null) {
                                 Bindings bindings = engine.createBindings();
-                                bindings.put("space", Scripts.getContext().getSpace());
+                                bindings.put("space", Scripts.Space.this);
                                 try {
-                                    engine.eval("load('classpath:platypus.js', space);", bindings);
+                                    Scripts.LocalContext ctx = Scripts.createContext(Scripts.Space.this);
+                                    Scripts.setContext(ctx);
+                                    try {
+                                        engine.eval("load('classpath:platypus.js', space);", bindings);
+                                    } finally {
+                                        Scripts.setContext(null);
+                                    }
                                 } catch (ScriptException ex) {
                                     Logger.getLogger(Scripts.class.getName()).log(Level.SEVERE, null, ex);
                                 }
@@ -549,9 +564,7 @@ public class Scripts {
 
     public static void offerTask(Runnable aTask) {
         assert tasks != null : "Scripts tasks are not initialized";
-        if (Scripts.getContext() != null) {
-            Scripts.getContext().incAsyncsCount();
-        }
+        Scripts.getContext().incAsyncsCount();
         tasks.accept(aTask);
     }
 

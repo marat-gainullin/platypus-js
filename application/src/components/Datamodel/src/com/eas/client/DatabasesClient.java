@@ -363,9 +363,7 @@ public class DatabasesClient {
 
     private void startJdbcTask(Runnable aTask) {
         Scripts.LocalContext context = Scripts.getContext();
-        if (context != null) {
-            context.incAsyncsCount();
-        }
+        context.incAsyncsCount();
         jdbcProcessor.submit(() -> {
             Scripts.setContext(context);
             try {

@@ -15,7 +15,6 @@ import com.eas.client.threetier.PlatypusConnection;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.LogoutRequest;
-import com.eas.client.threetier.requests.PlatypusResponsesFactory;
 import com.eas.client.threetier.requests.RPCRequest;
 import com.eas.concurrent.DeamonThreadFactory;
 import com.eas.script.Scripts;
@@ -310,48 +309,42 @@ public class PlatypusHttpConnection extends PlatypusConnection {
                 Logger.getLogger(PlatypusHttpRequestWriter.class.getName()).log(Level.SEVERE, "Unsupported authorization scheme: {0}", res.authScheme);
             }
         }
-        PlatypusResponsesFactory responseFactory = new PlatypusResponsesFactory();
-        aRequest.accept(responseFactory);
-        Response response = responseFactory.getResponse();
-        PlatypusHttpResponseReader reader = new PlatypusHttpResponseReader(aRequest, httpSender.conn, httpSender.responseBody);
-        response.accept(reader);
-        if (response instanceof ErrorResponse) {
-            throw handleErrorResponse((ErrorResponse) response);
-        } else if (response instanceof RPCRequest.Response) {
-            RPCRequest.Response rpcResponse = (RPCRequest.Response) response;
-            if (rpcResponse.getResult() instanceof URL) {
-                URL reportUrl = (URL) rpcResponse.getResult();
-                String reportLocation = reportUrl.getFile();
-                HttpURLConnection reportConn = (HttpURLConnection) reportUrl.openConnection();
-                reportConn.setDoInput(true);
-                PlatypusHttpRequestWriter.addCookies(cookies, reportConn);
-                if (basicSchemeMet) {
-                    PlatypusHttpRequestWriter.addBasicAuthentication(reportConn, credentials.userName, credentials.password);
-                }
-                try (InputStream in = reportConn.getInputStream()) {
-                    byte[] content = BinaryUtils.readStream(in, -1);
-                    int slashIdx = reportLocation.lastIndexOf("/");
-                    String fileName = reportLocation.substring(slashIdx + 1);
-                    if (fileName.contains(".")) {
-                        String[] nameFormat = fileName.split("\\.");
-                        Report report = new Report(content, nameFormat[nameFormat.length - 1], nameFormat[0]);
-                        rpcResponse.setResult(report);
-                    } else {
-                        Report report = new Report(content, "unknown", fileName);
-                        rpcResponse.setResult(report);
-                    }
-                }
-                acceptCookies(reportConn);
-                return (R) rpcResponse;
-            } else {
-                return (R) response;
-            }
+        if (httpSender.response instanceof ErrorResponse) {
+            throw handleErrorResponse((ErrorResponse) httpSender.response);
         } else {
+            PlatypusHttpResponseReader reader = new PlatypusHttpResponseReader(aRequest, httpSender.conn, httpSender.responseBody);
+            httpSender.response.accept(reader);
             if (aRequest instanceof LogoutRequest) {
                 cookies.clear();
                 credentials = null;
+            } else if (httpSender.response instanceof RPCRequest.Response) {
+                RPCRequest.Response rpcResponse = (RPCRequest.Response) httpSender.response;
+                if (rpcResponse.getResult() instanceof URL) {
+                    URL reportUrl = (URL) rpcResponse.getResult();
+                    String reportLocation = reportUrl.getFile();
+                    HttpURLConnection reportConn = (HttpURLConnection) reportUrl.openConnection();
+                    reportConn.setDoInput(true);
+                    PlatypusHttpRequestWriter.addCookies(cookies, reportConn);
+                    if (basicSchemeMet) {
+                        PlatypusHttpRequestWriter.addBasicAuthentication(reportConn, credentials.userName, credentials.password);
+                    }
+                    try (InputStream in = reportConn.getInputStream()) {
+                        byte[] content = BinaryUtils.readStream(in, -1);
+                        int slashIdx = reportLocation.lastIndexOf("/");
+                        String fileName = reportLocation.substring(slashIdx + 1);
+                        if (fileName.contains(".")) {
+                            String[] nameFormat = fileName.split("\\.");
+                            Report report = new Report(content, nameFormat[nameFormat.length - 1], nameFormat[0]);
+                            rpcResponse.setResult(report);
+                        } else {
+                            Report report = new Report(content, "unknown", fileName);
+                            rpcResponse.setResult(report);
+                        }
+                    }
+                    acceptCookies(reportConn);
+                }
             }
-            return (R) response;
+            return (R) httpSender.response;
         }
     }
 

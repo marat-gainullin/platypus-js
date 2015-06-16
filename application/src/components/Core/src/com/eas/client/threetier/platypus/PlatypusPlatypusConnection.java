@@ -245,34 +245,40 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
 
     private <R extends Response> void retry(Request aRequest, Scripts.Space aSpace, Consumer<Response> responseHandler, Attempts attemps) {
         Credentials sentCreds = credentials;
+        Scripts.LocalContext context = Scripts.getContext();
         RequestEnvelope requestEnv = new RequestEnvelope(aRequest, credentials != null ? credentials.userName : null, credentials != null ? credentials.password : null, sessionTicket, (Response response) -> {
-            aSpace.process(() -> {
-                try {
-                    if (response instanceof ErrorResponse && ((ErrorResponse) response).isNotLoggedIn()) {
-                        if (attemps.count++ < maximumAuthenticateAttempts) {
-                            if (credentials != null && !credentials.equals(sentCreds)) {
-                                retry(aRequest, aSpace, responseHandler, attemps);
-                            } else {
-                                Credentials creds = onCredentials.call();
-                                if (creds != null) {
-                                    credentials = creds;
-                                    sessionTicket = null;
+            Scripts.setContext(context);
+            try {
+                aSpace.process(() -> {
+                    try {
+                        if (response instanceof ErrorResponse && ((ErrorResponse) response).isNotLoggedIn()) {
+                            if (attemps.count++ < maximumAuthenticateAttempts) {
+                                if (credentials != null && !credentials.equals(sentCreds)) {
                                     retry(aRequest, aSpace, responseHandler, attemps);
-                                } else { // Credentials are inaccessible, so leave things as is...
-                                    responseHandler.accept(response);
+                                } else {
+                                    Credentials creds = onCredentials.call();
+                                    if (creds != null) {
+                                        credentials = creds;
+                                        sessionTicket = null;
+                                        retry(aRequest, aSpace, responseHandler, attemps);
+                                    } else { // Credentials are inaccessible, so leave things as is...
+                                        responseHandler.accept(response);
+                                    }
                                 }
+                            } else {// Maximum authentication attempts per request exceeded, so leave things as is...
+                                responseHandler.accept(response);
                             }
-                        } else {// Maximum authentication attempts per request exceeded, so leave things as is...
+                        } else {
+                            PlatypusPrincipal.setClientSpacePrincipal(credentials != null ? new PlatypusPrincipal(credentials.userName, null, null, this) : new AnonymousPlatypusPrincipal());
                             responseHandler.accept(response);
                         }
-                    } else {
-                        PlatypusPrincipal.setClientSpacePrincipal(credentials != null ? new PlatypusPrincipal(credentials.userName, null, null, this) : new AnonymousPlatypusPrincipal());
-                        responseHandler.accept(response);
+                    } catch (Exception ex) {
+                        Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                } catch (Exception ex) {
-                    Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            });
+                });
+            } finally {
+                Scripts.setContext(null);
+            }
         });
         pendingChanged(null, requestEnv);
     }

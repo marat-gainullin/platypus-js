@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URI;
+import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import jdk.nashorn.api.scripting.JSObject;
@@ -43,14 +44,16 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
 
     protected HttpServletResponse servletResponse;
     protected HttpServletRequest servletRequest;
+    protected AsyncContext async;
     protected Scripts.Space space;
     protected String userName;
 
-    public PlatypusHttpResponseWriter(HttpServletResponse aServletResponse, HttpServletRequest aServletRequest, Scripts.Space aSpace, String aUserName) {
+    public PlatypusHttpResponseWriter(HttpServletResponse aServletResponse, HttpServletRequest aServletRequest, Scripts.Space aSpace, String aUserName, AsyncContext aAsync) {
         super();
         servletRequest = aServletRequest;
         servletResponse = aServletResponse;
         space = aSpace;
+        async = aAsync;
     }
 
     @Override
@@ -69,20 +72,21 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
         } else {
             servletResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, resp.getErrorMessage());
         }
+        async.complete();
     }
 
     @Override
     public void visit(CredentialRequest.Response resp) throws Exception {
         String name = ((CredentialRequest.Response) resp).getName();
         StringBuilder content = JSONUtils.o(new StringBuilder("userName"), JSONUtils.s(name));
-        writeJsonResponse(content.toString(), servletResponse);
+        writeJsonResponse(content.toString(), servletResponse, async);
     }
 
     @Override
     public void visit(ExecuteQueryRequest.Response rsp) throws Exception {
         makeResponseNotCacheable(servletResponse);
         ExecuteQueryRequest.Response resp = (ExecuteQueryRequest.Response) rsp;
-        writeJsonResponse(resp.getJson(), servletResponse);
+        writeJsonResponse(resp.getJson(), servletResponse, async);
     }
 
     @Override
@@ -95,7 +99,7 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
         final Object result = ((RPCRequest.Response) resp).getResult();
         makeResponseNotCacheable(servletResponse);
         if (result instanceof String) {
-            writeJsonResponse(space.toJson(result), servletResponse);
+            writeJsonResponse((String)result, servletResponse, async);
         } else if (result instanceof JSObject) {
             JSObject jsResult = (JSObject) result;
             JSObject p = space.lookupInGlobal("P");
@@ -121,21 +125,22 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
                         reportLocation = servletRequest.getContextPath() + reportLocation;
                     }
                     reportLocation = new URI(null, null, reportLocation, null).toASCIIString();
-                    writeResponse(reportLocation, servletResponse, PlatypusHttpResponseReader.REPORT_LOCATION_CONTENT_TYPE);
+                    writeResponse(reportLocation, servletResponse, PlatypusHttpResponseReader.REPORT_LOCATION_CONTENT_TYPE, async);
                 } else {
-                    writeJsonResponse(space.toJson(result), servletResponse);
+                    writeJsonResponse(space.toJson(result), servletResponse, async);
                 }
             } else {
-                writeJsonResponse(space.toJson(result), servletResponse);
+                writeJsonResponse(space.toJson(result), servletResponse, async);
             }
         } else {// including null result
-            writeJsonResponse(space.toJson(space.toJs(result)), servletResponse);
+            writeJsonResponse(space.toJson(space.toJs(result)), servletResponse, async);
         }
     }
 
     @Override
     public void visit(DisposeServerModuleRequest.Response resp) throws Exception {
         // simple OK response is needed
+        async.complete();
     }
 
     @Override
@@ -144,9 +149,10 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
         if (csmr.getInfoJson() != null) {
             assert resp.getTimeStamp() != null;
             servletResponse.setDateHeader(PlatypusHttpConstants.HEADER_LAST_MODIFIED, resp.getTimeStamp().getTime());
-            writeJsonResponse(resp.getInfoJson(), servletResponse);
+            writeJsonResponse(resp.getInfoJson(), servletResponse, async);
         } else {
             servletResponse.sendError(HttpURLConnection.HTTP_NOT_MODIFIED);
+            async.complete();
         }
     }
 
@@ -161,21 +167,22 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
         if (aqr.getAppQueryJson() != null) {
             assert resp.getTimeStamp() != null;
             servletResponse.setDateHeader(PlatypusHttpConstants.HEADER_LAST_MODIFIED, resp.getTimeStamp().getTime());
-            writeJsonResponse(aqr.getAppQueryJson(), servletResponse);
+            writeJsonResponse(aqr.getAppQueryJson(), servletResponse, async);
         } else {
             servletResponse.sendError(HttpURLConnection.HTTP_NOT_MODIFIED);
+            async.complete();
         }
     }
 
     @Override
     public void visit(CommitRequest.Response resp) throws Exception {
-        writeJsonResponse(resp.getUpdated() + "", servletResponse);
+        writeJsonResponse(resp.getUpdated() + "", servletResponse, async);
     }
 
     @Override
     public void visit(ModuleStructureRequest.Response resp) throws Exception {
         makeResponseNotCacheable(servletResponse);
-        writeJsonResponse(resp.getJson(), servletResponse);
+        writeJsonResponse(resp.getJson(), servletResponse, async);
     }
 
     private static void makeResponseNotCacheable(HttpServletResponse aHttpResponse) {
@@ -184,7 +191,7 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
         aHttpResponse.setDateHeader("Expires", 0);// Proxies
     }
 
-    private static void writeResponse(String aResponse, HttpServletResponse aHttpResponse, String aContentType) throws UnsupportedEncodingException, IOException {
+    private static void writeResponse(String aResponse, HttpServletResponse aHttpResponse, String aContentType, AsyncContext aAsync) throws UnsupportedEncodingException, IOException {
         byte[] bytes = aResponse.getBytes(SettingsConstants.COMMON_ENCODING);
         aHttpResponse.setCharacterEncoding(SettingsConstants.COMMON_ENCODING);
         if (aHttpResponse.getContentType() == null) {
@@ -193,9 +200,12 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
         aHttpResponse.setContentLength(bytes.length);
         aHttpResponse.getOutputStream().write(bytes);
         aHttpResponse.getOutputStream().flush();
+        if (aAsync != null) {
+            aAsync.complete();
+        }
     }
 
-    public static void writeJsonResponse(String aResponse, HttpServletResponse aHttpResponse) throws UnsupportedEncodingException, IOException {
-        writeResponse(aResponse, aHttpResponse, RowsetJsonConstants.JSON_CONTENTTYPE);
+    public static void writeJsonResponse(String aResponse, HttpServletResponse aHttpResponse, AsyncContext aAsync) throws UnsupportedEncodingException, IOException {
+        writeResponse(aResponse, aHttpResponse, RowsetJsonConstants.JSON_CONTENTTYPE, aAsync);
     }
 }

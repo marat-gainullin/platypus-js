@@ -213,15 +213,7 @@ public class PlatypusClientApplication {
                 config.datasourcesArgs.registerDatasources();
                 Scripts.initBIO(config.threadsArgs.getMaxServicesTreads());
                 Scripts.initTasks((Runnable aTask) -> {
-                    Scripts.LocalContext context = Scripts.getContext();
-                    EventQueue.invokeLater(() -> {
-                        Scripts.setContext(context);
-                        try {
-                            aTask.run();
-                        } finally {
-                            Scripts.setContext(null);
-                        }
-                    });
+                    EventQueue.invokeLater(aTask);
                 });
                 Application app;
                 PlatypusPrincipal.setClientSpacePrincipal(new AnonymousPlatypusPrincipal());
@@ -231,7 +223,7 @@ public class PlatypusClientApplication {
                     app = new PlatypusClient(new PlatypusHttpConnection(config.url, new UIOnCredentials(config), config.maximumAuthenticateAttempts, config.threadsArgs.getMaxHttpTreads()));
                 } else if (config.url.getProtocol().equalsIgnoreCase("platypus")) {
                     app = new PlatypusClient(new PlatypusPlatypusConnection(config.url, new UIOnCredentials(config), config.maximumAuthenticateAttempts, (Runnable aTask) -> {
-                        Scripts.offerTask(aTask);
+                        EventQueue.invokeLater(aTask);
                     }, config.threadsArgs.getMaxPlatypusConnections()));
                 } else if (config.url.getProtocol().equalsIgnoreCase("file")) {
                     File f = new File(config.url.toURI());

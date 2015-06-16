@@ -215,15 +215,7 @@ public class ServerMain {
                 serverProcessor.allowCoreThreadTimeOut(true);
 
                 Scripts.initTasks((Runnable aTask) -> {
-                    Scripts.LocalContext context = Scripts.getContext();
-                    serverProcessor.submit(() -> {
-                        Scripts.setContext(context);
-                        try {
-                            aTask.run();
-                        } finally {
-                            Scripts.setContext(null);
-                        }
-                    });
+                    serverProcessor.submit(aTask);
                 });
                 serverCoreDbClient = new ScriptedDatabasesClient(defDatasource, indexer, true, tasksScanner.getValidators(), threadsConfig.getMaxJdbcTreads());
                 QueriesProxy<SqlQuery> queries = new LocalQueriesProxy(serverCoreDbClient, indexer);
