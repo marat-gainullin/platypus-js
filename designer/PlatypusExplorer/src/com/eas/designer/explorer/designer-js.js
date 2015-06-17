@@ -8,12 +8,12 @@
             function (aPropertyName) {
                 return this[aPropertyName];
             });
+    var DateClass = Java.type('java.util.Date');
     aSpace.setToPrimitiveFunc(function (aValue) {
         if (aValue && aValue.constructor) {
             var cName = aValue.constructor.name;
             if (cName === 'Date') {
-                var dateClass = Java.type('java.util.Date');
-                var converted = new dateClass(aValue.getTime());
+                var converted = new DateClass(aValue.getTime());
                 return converted;
             } else if (cName === 'String') {
                 return aValue + '';
@@ -34,6 +34,9 @@
     });
     aSpace.setMakeArrayFunc(function () {
         return [];
+    });
+    aSpace.setLoadFunc(function (aSourceLocation) {
+        return load(aSourceLocation);
     });
     return this;
 })(space);

@@ -49,7 +49,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     // for runtime
     protected JSObject onRequeried;
     //
-    protected JSObject lastSnapshot = Scripts.getSpace().makeArray();
+    protected JSObject lastSnapshot = Scripts.getSpace() != null ? Scripts.getSpace().makeArray() : null;
     protected JSObject snapshotConsumer;
     protected JSObject snapshotProducer;
     //

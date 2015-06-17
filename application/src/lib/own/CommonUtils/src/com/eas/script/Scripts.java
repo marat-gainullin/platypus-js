@@ -607,7 +607,7 @@ public class Scripts {
     }
 
     public static boolean isInitialized() {
-        Space space = getContext().getSpace();
+        Space space = getContext() != null ? getContext().getSpace() : null;
         return space != null
                 && space.listenElementsFunc != null
                 && space.listenFunc != null

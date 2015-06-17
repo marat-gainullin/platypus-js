@@ -166,7 +166,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
     @Override
     protected boolean validateEntities() throws Exception {
         for (E e : entities.values()) {
-            queries.getQuery(e.getQueryName(), null, null, null);
+            queries.getQuery(e.getQueryName(), Scripts.getSpace(), null, null);
         }
         return super.validateEntities();
     }
