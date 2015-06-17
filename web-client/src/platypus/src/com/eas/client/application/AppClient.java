@@ -6,7 +6,6 @@ package com.eas.client.application;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -240,7 +239,7 @@ public class AppClient {
 							if (aResult.isComplete() && aResult.getRequest() != null) {
 								completed = true;
 								if (aCompleteCallback != null) {
-									Utils.executeScriptEventVoid(aCompleteCallback, aCompleteCallback, aResult.getRequest().getResponseText());
+									Utils.executeScriptEventVoid(aCompleteCallback, aCompleteCallback, Utils.JsObject.parseJSON(aResult.getRequest().getResponseText()));
 								}
 							}
 						}
@@ -448,15 +447,7 @@ public class AppClient {
 		for (int i = 0; i < parameters.getParametersCount(); i++) {
 			Parameter p = parameters.get(i + 1);// parameters and fields are
 			                                    // 1-based
-			String sv = "null";
-			if (p.getValue() != null) {
-				if (p.getValue() instanceof Date) {
-					sv = JsObject.formatDateValueWithJSON(Long.valueOf(((Date) p.getValue()).getTime()).doubleValue());
-					sv = sv.substring(1, sv.length() - 1);
-				} else {
-					sv = p.getValue().toString();
-				}
-			}
+			String sv = Utils.jsonStringify(p.getJsValue());
 			res[i] = param(p.getName(), sv);
 		}
 		return params(res);

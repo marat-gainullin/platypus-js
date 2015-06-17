@@ -12,11 +12,11 @@
         var ScriptsClass = Java.type('com.eas.script.Scripts');
 
         Object.defineProperty(this, "request", {
-            value: ScriptsClass.getRequest() ? new Request(ScriptsClass.getRequest()) : null
+            value: ScriptsClass.getContext().getRequest() ? new Request(ScriptsClass.getContext().getRequest()) : null
         });
 
         Object.defineProperty(this, "response", {
-            value: ScriptsClass.getResponse() ? new Response(ScriptsClass.getResponse()) : null
+            value: ScriptsClass.getContext().getResponse() ? new Response(ScriptsClass.getContext().getResponse()) : null
         });
 
         function Request(aHttpRequest) {

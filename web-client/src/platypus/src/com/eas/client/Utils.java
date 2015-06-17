@@ -175,6 +175,10 @@ public class Utils {
 			return JSON.parse(aText);
 		}-*/;
 		
+		public static native String stringifyJSON(Object aValue)/*-{
+			return JSON.stringify(aValue);
+		}-*/;
+	
 		public static native JavaScriptObject parseJSONDateReviver(String aText)/*-{
 			return JSON.parse(aText, @com.eas.client.Utils.JsObject::dateReviver()());
 		}-*/;
@@ -366,6 +370,10 @@ public class Utils {
 
 	public native static Object jsonParse(String aData) throws Exception /*-{
 		return $wnd.P.boxAsJava(JSON.parse(aData));
+	}-*/;
+
+	public native static String jsonStringify(Object aToJsedObject) /*-{
+		return JSON.stringify($wnd.P.boxAsJs(aToJsedObject));
 	}-*/;
 
 	public native static void invokeJsFunction(JavaScriptObject aHandler) /*-{

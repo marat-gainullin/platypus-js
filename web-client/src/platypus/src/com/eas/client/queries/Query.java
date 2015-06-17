@@ -41,10 +41,10 @@ public class Query {
     protected Map<String, Map<String, String>> parametersBinds = new HashMap<>();
     protected Fields fields = new Fields();
     protected Parameters params = new Parameters();
-    protected String title = null;
+    protected String title;
     protected String entityName;
-    protected boolean procedure = false;
-    protected boolean manual = false;
+    protected boolean procedure;
+    protected boolean manual;
     protected Set<String> readRoles = new HashSet<>();
     protected Set<String> writeRoles = new HashSet<>();
 
