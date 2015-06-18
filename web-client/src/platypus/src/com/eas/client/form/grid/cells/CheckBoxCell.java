@@ -73,7 +73,7 @@ public class CheckBoxCell extends AbstractEditableCell<Object, Boolean> {
 	public void onBrowserEvent(Context context, Element parent, Object value, NativeEvent event, ValueUpdater<Object> valueUpdater) {
 		String type = event.getType();
 
-		boolean enterPressed = BrowserEvents.KEYDOWN.equals(type) && event.getKeyCode() == KeyCodes.KEY_ENTER;
+		boolean enterPressed = (BrowserEvents.KEYDOWN.equals(type) && event.getKeyCode() == KeyCodes.KEY_ENTER);
 		if (BrowserEvents.CHANGE.equals(type) || enterPressed) {
 			InputElement input = parent.getFirstChild().cast();
 			Boolean isChecked = input.isChecked();

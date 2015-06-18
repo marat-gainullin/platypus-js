@@ -81,6 +81,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.client.ui.HasEnabled;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -117,6 +118,7 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 	protected String groupName = "group-name-" + Document.get().createUniqueId();
 	protected List<HeaderNode<JavaScriptObject>> header = new ArrayList<>();
 	// runtime
+	protected Widget activeEditor;
 	protected ListHandler<JavaScriptObject> sortHandler;
 	protected HandlerRegistration sortHandlerReg;
 	protected HandlerRegistration positionSelectionHandler;
@@ -134,7 +136,7 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 				Object oData = data != null && field != null && !field.isEmpty() ? Utils.getPathData(data, field) : data;
 				JsObject jsData = oData instanceof JavaScriptObject ? ((JavaScriptObject) oData).<JsObject> cast() : null;
 				if (jsData != null) {
-					if (getSelectionModel() instanceof SetSelectionModel<?>) {
+					if (activeEditor == null && getSelectionModel() instanceof SetSelectionModel<?>) {
 						final SetSelectionModel<JavaScriptObject> rowsSelection = (SetSelectionModel<JavaScriptObject>) getSelectionModel();
 						if (event.getNativeKeyCode() == KeyCodes.KEY_DELETE && deletable) {
 							final List<JavaScriptObject> viewElements = dataProvider.getList();
@@ -229,7 +231,15 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		}, KeyDownEvent.getType());
 		applyRows();
 	}
-
+	
+	public Widget getActiveEditor(){
+		return activeEditor;
+	}
+	
+	public void setActiveEditor(Widget aWidget) {
+	    activeEditor = aWidget;
+    }
+	
 	public String getGroupName() {
 		return groupName;
 	}
