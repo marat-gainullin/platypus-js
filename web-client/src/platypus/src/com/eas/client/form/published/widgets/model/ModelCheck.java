@@ -91,15 +91,12 @@ public class ModelCheck extends ModelDecoratorBox<Boolean> implements HasActionH
 
 	@Override
 	public String getText() {
-		return getValue() != null ? (getValue() ? "true" : "false") : "";
+		return ((NullableCheckBox)decorated).getText();
 	}
 
 	@Override
 	public void setText(String aText) {
-		if (aText == null)
-			setValue(null);
-		else
-			setValue(!aText.isEmpty());
+		((NullableCheckBox)decorated).setText(aText);
 	}
 
 	@Override

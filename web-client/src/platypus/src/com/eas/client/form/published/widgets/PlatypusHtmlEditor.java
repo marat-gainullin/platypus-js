@@ -269,7 +269,7 @@ HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHan
 		btnBackground.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				ControlsUtils.selectColor(new Callback<String, String>() {
+				ControlsUtils.selectColor(textContainer.getFormatter().getBackColor(), new Callback<String, String>() {
 					@Override
 					public void onSuccess(String result) {
 						try {
@@ -288,7 +288,7 @@ HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHan
 		btnForeground.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				ControlsUtils.selectColor(new Callback<String, String>() {
+				ControlsUtils.selectColor(textContainer.getFormatter().getForeColor(), new Callback<String, String>() {
 					@Override
 					public void onSuccess(String result) {
 						try {

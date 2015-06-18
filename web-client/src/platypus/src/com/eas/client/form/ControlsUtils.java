@@ -1,12 +1,9 @@
 package com.eas.client.form;
 
-import java.io.File;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.apache.tools.ant.types.FileList;
 
 import com.bearsoft.gwt.ui.XElement;
 import com.eas.client.Utils;
@@ -26,18 +23,13 @@ import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
-import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.FocusEvent;
-import com.google.gwt.event.dom.client.FocusHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -113,57 +105,38 @@ public class ControlsUtils {
 		}
 	}
 
-	public static void selectFile(final Callback<JavaScriptObject, String> aCallback,String aFileTypes) {
-		
-		final TextBox tmpField = new TextBox();
-		tmpField.getElement().setAttribute("type", "file");
-		tmpField.getElement().setAttribute("positon", "absolute");
-		tmpField.getElement().setAttribute("multiple","true");
-		tmpField.setWidth("0px");
-		tmpField.setHeight("0px");
-		RootPanel.get().add(tmpField, -100, -100);
-		
-		if (aFileTypes != null) {
-			tmpField.getElement().setAttribute("accept", aFileTypes);
-		}
-		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+	public static void selectFile(final Callback<JavaScriptObject, String> aCallback, String aFileTypes) {
+		final FileUpload fu = new FileUpload();
+		fu.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
+		fu.setWidth("10px");
+		fu.setHeight("10px");
+		fu.getElement().getStyle().setLeft(-100, Style.Unit.PX);
+		fu.getElement().getStyle().setTop(-100, Style.Unit.PX);
+		fu.addChangeHandler(new ChangeHandler() {
 			@Override
-			public void execute() {
-				tmpField.setFocus(true);
-				if (aCallback != null) {
-					tmpField.addFocusHandler(new FocusHandler() {
-						@Override
-						public void onFocus(FocusEvent event) {
-								try {
-									JsObject jsFu = tmpField.getElement().cast();
-									JavaScriptObject oFiles = jsFu.getJs("files");
-									if (oFiles != null) {
-										JsArray<JavaScriptObject> jsFiles = oFiles.cast(); 
-										for (int i = 0; i < jsFiles.length(); i++) {
-											try {
-												aCallback.onSuccess(jsFiles.get(i));
-											} catch (Exception ex) {
-												Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
-											}
-										}
-									}
-								} catch (Exception ex) {
-									Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
-								}
-							
-							tmpField.removeFromParent();
-							// focusHandler.removeHandler();
+			public void onChange(ChangeEvent event) {
+				JsObject jsFu = fu.getElement().cast();
+				JavaScriptObject oFiles = jsFu.getJs("files");
+				if (oFiles != null) {
+					JsArray<JavaScriptObject> jsFiles = oFiles.cast();
+					for (int i = 0; i < jsFiles.length(); i++) {
+						try {
+							aCallback.onSuccess(jsFiles.get(i));
+						} catch (Exception ex) {
+							Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
 						}
-					});
+					}
 				}
-				click(tmpField.getElement());
+				fu.removeFromParent();
 			}
 		});
+		RootPanel.get().add(fu, -100, -100);
+		fu.click();
 	}
-	
-	public static void jsSelectColor(final JavaScriptObject aCallback) {
+
+	public static void jsSelectColor(String aOldValue, final JavaScriptObject aCallback) {
 		if (aCallback != null) {
-			selectColor(new Callback<String, String>() {
+			selectColor(aOldValue, new Callback<String, String>() {
 
 				@Override
 				public void onSuccess(String result) {
@@ -182,40 +155,38 @@ public class ControlsUtils {
 		}
 	}
 
-	public static void selectColor(final Callback<String, String> aCallback) {
+	public static void selectColor(String aOldValue, final Callback<String, String> aCallback) {
 		final TextBox tmpField = new TextBox();
 		tmpField.getElement().setAttribute("type", "color");
-		tmpField.getElement().setAttribute("positon", "absolute");
-		tmpField.setWidth("0px");
-		tmpField.setHeight("0px");
-		RootPanel.get().add(tmpField, -100, -100);
+		tmpField.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
+		tmpField.setWidth("10px");
+		tmpField.setHeight("10px");
+		tmpField.setValue(aOldValue);
 
+		tmpField.addChangeHandler(new ChangeHandler() {
+
+			@Override
+			public void onChange(ChangeEvent event) {
+				try {
+					aCallback.onSuccess(tmpField.getValue());
+				} finally {
+					tmpField.removeFromParent();
+				}
+			}
+
+		});
+		RootPanel.get().add(tmpField, 100, 100);
 		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 			@Override
 			public void execute() {
 				tmpField.setFocus(true);
-				tmpField.addFocusHandler(new FocusHandler() {
-					@Override
-					public void onFocus(FocusEvent event) {
-						if (aCallback != null) {
-							try {
-								aCallback.onSuccess(tmpField.getValue());
-							} catch (Exception ex) {
-								Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
-							}
-						}
-						tmpField.removeFromParent();
-						// focusHandler.removeHandler();
-					}
-				});
 				click(tmpField.getElement());
 			}
 		});
-
 	}
 
-	public native static void click(Element element)/*-{
-		element.click();
+	public static native void click(Element aElement)/*-{
+		aElement.click();
 	}-*/;
 
 	protected static RegExp rgbPattern = RegExp.compile("rgb *\\( *([0-9]+) *, *([0-9]+) *, *([0-9]+) *\\)");
@@ -302,10 +273,10 @@ public class ControlsUtils {
 		if (aEventThis != null && cellFunction != null) {
 			PublishedCell cell = aAlreadyCell != null ? aAlreadyCell : Publisher.publishCell(Utils.toJs(aValue), aDisplay);
 			try {
-	            Utils.executeScriptEventVoid(aEventThis, cellFunction, JsEvents.publishOnRenderEvent(aEventThis, null, null, null, cell));
-            } catch (Exception ex) {
-            	Logger.getLogger(ControlsUtils.class.getName()).log(Level.SEVERE, null, ex);
-            }
+				Utils.executeScriptEventVoid(aEventThis, cellFunction, JsEvents.publishOnRenderEvent(aEventThis, null, null, null, cell));
+			} catch (Exception ex) {
+				Logger.getLogger(ControlsUtils.class.getName()).log(Level.SEVERE, null, ex);
+			}
 			return cell;
 		} else {
 			return null;

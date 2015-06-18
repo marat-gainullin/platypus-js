@@ -234,49 +234,47 @@ public class PlatypusHttpServlet extends HttpServlet {
                     AsyncContext async = request.startAsync();
                     async.setTimeout(-1);
                     Consumer<Session> requestProcessor = (Session aSession) -> {
+                        String userName = request.getUserPrincipal() != null ? request.getUserPrincipal().getName() : null;
+                        Scripts.LocalContext context = Scripts.createContext(aSession.getSpace());
+                        context.setAsync(async);
+                        context.setRequest(request);
+                        context.setResponse(response);
+                        Scripts.setContext(context);
                         try {
-                            Scripts.LocalContext context = Scripts.createContext(aSession.getSpace());
-                            context.setAsync(async);
-                            context.setRequest(request);
-                            context.setResponse(response);
-                            Scripts.setContext(context);
-                            try {
-                                DatabasesClient.getUserProperties(platypusCore.getDatabasesClient(), request.getUserPrincipal() != null ? request.getUserPrincipal().getName() : null, Scripts.getSpace(), (Map<String, String> aUserProps) -> {
-                                    String dataContext = aUserProps.get(ClientConstants.F_USR_CONTEXT);
-                                    PlatypusPrincipal principal = servletRequestPrincipal(request, dataContext);
-                                    context.setPrincipal(principal);
-                                    Scripts.getSpace().process(() -> {
-                                        try {
-                                            processPlatypusRequest(request, response, httpSession, aSession, async);
-                                        } catch (Exception ex) {
-                                            Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex);
-                                            try {
-                                                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.toString());
-                                                async.complete();
-                                            } catch (IOException | IllegalStateException ex1) {
-                                                Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex1);
-                                            }
-                                        }
-                                    });
-                                }, (Exception ex) -> {
+                            Consumer<String> withDataContext = (dataContext) -> {
+                                PlatypusPrincipal principal = servletRequestPrincipal(request, dataContext);
+                                context.setPrincipal(principal);
+                                try {
+                                    processPlatypusRequest(request, response, httpSession, aSession, async);
+                                } catch (Exception ex) {
+                                    Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex);
                                     try {
                                         response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.toString());
                                         async.complete();
                                     } catch (IOException | IllegalStateException ex1) {
                                         Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex1);
                                     }
-                                });
-                            } finally {
-                                Scripts.setContext(null);
-                            }
-                        } catch (Exception ex) {
-                            Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                            };
                             try {
-                                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.toString());
-                                async.complete();
-                            } catch (IOException | IllegalStateException ex1) {
-                                Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex1);
+                                DatabasesClient.getUserProperties(platypusCore.getDatabasesClient(), userName, Scripts.getSpace(), (Map<String, String> aUserProps) -> {
+                                    String dataContext = aUserProps.get(ClientConstants.F_USR_CONTEXT);
+                                    withDataContext.accept(dataContext);
+                                }, (Exception ex) -> {
+                                    Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.FINE, "Unable to obtain properties of user {0} due to an error: {1}", new Object[]{userName, ex.toString()});
+                                    withDataContext.accept(null);
+                                });
+                            } catch (Exception ex) {
+                                Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex);
+                                try {
+                                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.toString());
+                                    async.complete();
+                                } catch (IOException | IllegalStateException ex1) {
+                                    Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex1);
+                                }
                             }
+                        } finally {
+                            Scripts.setContext(null);
                         }
                     };
                     Session session = platypusSessionByHttpSession(httpSession);

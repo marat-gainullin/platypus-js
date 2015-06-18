@@ -114,7 +114,7 @@ public class DatabasesClient {
         if (aDataSourceName == null) {
             aDataSourceName = defaultDatasourceName;
         }
-        if (aDataSourceName != null) {
+        if (aDataSourceName != null && !aDataSourceName.isEmpty()) {
             Context initContext = new InitialContext();
             try {
                 // J2EE servers
@@ -130,7 +130,7 @@ public class DatabasesClient {
                 }
             }
         } else {
-            throw new NamingException("Null datasource name is not allowed (Default datasource name is null also).");
+            throw new NamingException("Datasource name missing.");
         }
     }
 
@@ -179,7 +179,6 @@ public class DatabasesClient {
         if (aUserName != null && aClient != null) {
             final SqlQuery q = new SqlQuery(aClient, USER_QUERY_TEXT);
             q.putParameter(USERNAME_PARAMETER_NAME, DataTypeInfo.VARCHAR, aUserName.toUpperCase());
-            aClient.initUsersSpace(q.getDatasourceName());
             SqlCompiledQuery compiled = q.compile();
             CallableConsumer<Map<String, String>, ResultSet> doWork = (ResultSet r) -> {
                 Map<String, String> properties = new HashMap<>();
@@ -195,12 +194,17 @@ public class DatabasesClient {
                 return properties;
             };
             if (onSuccess != null) {
-                compiled.<Map<String, String>>executeQuery(doWork, (Runnable aTask) -> {
-                    aSpace.process(aTask);
-                }, (Map<String, String> props) -> {
-                    onSuccess.accept(props);
-                }, onFailure);
-                return null;
+                try {
+                    compiled.<Map<String, String>>executeQuery(doWork, (Runnable aTask) -> {
+                        aSpace.process(aTask);
+                    }, onSuccess, onFailure);
+                    return null;
+                } catch (Exception ex) {
+                    aSpace.process(() -> {
+                        onFailure.accept(ex);
+                    });
+                    return null;
+                }
             } else {
                 return compiled.<Map<String, String>>executeQuery(doWork, null, null, null);
             }

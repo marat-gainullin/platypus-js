@@ -158,8 +158,8 @@ public class Application {
             return selectFile;
         }});
         
-		function selectColor(aCallback) {
-			@com.eas.client.form.ControlsUtils::jsSelectColor(Lcom/google/gwt/core/client/JavaScriptObject;)(aCallback);
+		function selectColor(aCallback, aOldValue) {
+			@com.eas.client.form.ControlsUtils::jsSelectColor(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aOldValue != null ? aOldValue + '' : '', aCallback);
 		}
 		
         Object.defineProperty($wnd.P, "selectColor", {get: function () {
