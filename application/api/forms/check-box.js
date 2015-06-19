@@ -1,6 +1,8 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.components.CheckBox");
-    javaClass.setPublisher(function(aDelegate) {
+    var className = "com.eas.client.forms.components.CheckBox";
+    var javaClass = Java.type(className);
+    var space = this['-platypus-scripts-space'];
+    space.putPublisher(className, function(aDelegate) {
         return new P.CheckBox(null, null, null, aDelegate);
     });
     
@@ -480,23 +482,6 @@
              */
             P.CheckBox.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.CheckBox){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf CheckBox
-             */
-            P.CheckBox.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -513,6 +498,23 @@
              * @memberOf CheckBox
              */
             P.CheckBox.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.CheckBox){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf CheckBox
+             */
+            P.CheckBox.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

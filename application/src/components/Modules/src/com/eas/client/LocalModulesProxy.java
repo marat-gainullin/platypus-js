@@ -11,6 +11,7 @@ import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.model.store.Model2XmlDom;
 import com.eas.client.scripts.DependenciesWalker;
 import com.eas.client.settings.SettingsConstants;
+import com.eas.script.Scripts;
 import com.eas.util.FileUtils;
 import java.io.File;
 import java.util.concurrent.Callable;
@@ -45,7 +46,7 @@ public class LocalModulesProxy implements ModulesProxy {
     }
 
     @Override
-    public ModuleStructure getModule(String aName, Consumer<ModuleStructure> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public ModuleStructure getModule(String aName, Scripts.Space aSpace, Consumer<ModuleStructure> onSuccess, Consumer<Exception> onFailure) throws Exception {
         Callable<ModuleStructure> doWork = () -> {
             String name = aName;
             if (name == null || name.isEmpty()) {
@@ -106,14 +107,14 @@ public class LocalModulesProxy implements ModulesProxy {
         if (onSuccess != null) {
             try {
                 ModuleStructure structure = doWork.call();
-                try {
+                aSpace.process(() -> {
                     onSuccess.accept(structure);
-                } catch (Exception ex) {
-                    Logger.getLogger(LocalModulesProxy.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                });
             } catch (Exception ex) {
                 if (onFailure != null) {
-                    onFailure.accept(ex);
+                    aSpace.process(() -> {
+                        onFailure.accept(ex);
+                    });
                 }
             }
             return null;

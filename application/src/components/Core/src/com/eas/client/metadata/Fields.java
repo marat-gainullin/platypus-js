@@ -12,6 +12,7 @@ package com.eas.client.metadata;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
+import com.eas.script.Scripts;
 import com.eas.util.CollectionEditingSupport;
 import java.beans.PropertyChangeSupport;
 import java.util.*;
@@ -61,7 +62,6 @@ public class Fields implements HasPublished {
     }
 
     private static final String DEFAULT_PARAM_NAME_PREFIX = "Field";
-    private static JSObject publisher;
     protected String tableDescription;
     protected List<Field> fields = new ArrayList<>();
     // Map of field name to it's index (0-based)
@@ -606,6 +606,7 @@ public class Fields implements HasPublished {
     @Override
     public JSObject getPublished() {
         if (published == null) {
+            JSObject publisher = Scripts.getSpace().getPublisher(this.getClass().getName());
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
@@ -620,9 +621,5 @@ public class Fields implements HasPublished {
             throw new AlreadyPublishedException();
         }
         published = aValue;
-    }
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
     }
 }

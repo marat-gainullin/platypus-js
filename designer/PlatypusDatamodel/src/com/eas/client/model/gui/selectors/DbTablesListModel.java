@@ -65,7 +65,7 @@ public class DbTablesListModel implements ListModel<String> {
                         _tables.add(schemaName != null && !schemaName.isEmpty() ? schemaName + "." + tableName : tableName);
                     }
                     return _tables;
-                }, null, null);
+                }, null, null, null);
             } catch (Exception ex) {
                 Logger.getLogger(DbTablesListModel.class.getName()).log(Level.SEVERE, null, ex);
             }

@@ -11,14 +11,11 @@ import com.google.gwt.event.dom.client.HasAllTouchHandlers;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.dom.client.HasDoubleClickHandlers;
 import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.HasHTML;
 import com.google.gwt.user.client.ui.HasText;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.ScrollPanel;
 
 public class ImageParagraph extends FocusWidget implements HasText, HasHTML, HasClickHandlers, HasDoubleClickHandlers, Focusable, HasEnabled, HasAllMouseHandlers, HasAllTouchHandlers,
         HasImageParagraph {
@@ -35,6 +32,7 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Has
 	protected Element container;
 	protected Element content;
 	protected Element aligner;
+
 	//
 
 	protected ImageParagraph(Element aContainer, String aTitle, boolean asHtml) {
@@ -54,15 +52,20 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Has
 		//
 		content = Document.get().createPElement();
 		content.getStyle().setMargin(0, Unit.PX);
+		content.getStyle().setPosition(Style.Position.RELATIVE);
+		content.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+
 		aligner = Document.get().createDivElement();
 		aligner.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 		aligner.getStyle().setPosition(Style.Position.RELATIVE);
 		aligner.getStyle().setHeight(100, Style.Unit.PCT);
 		aligner.getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
 		aligner.getStyle().setVisibility(Style.Visibility.HIDDEN);
+
 		//
 		container.insertFirst(content);
-		container.insertAfter(aligner, content);// aligner must go after content because of Gecko's craziness.
+		container.insertAfter(aligner, content);// aligner must go after content
+												// because of Gecko's craziness.
 		setElement(container);
 	}
 
@@ -73,14 +76,16 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Has
 
 	private void organize() {
 		if (isAttached()) {
-			final Style contentStyle = content.getStyle();
+			//final Style contentStyle = content.getStyle();
 			organizeText();
 			organizeImage();
+			/*
 			if (isAttached() && (getParent() instanceof FlowPanel || getParent() instanceof RootPanel || getParent() instanceof ScrollPanel)) {
 				contentStyle.setPosition(Style.Position.RELATIVE);
 			} else {
 				contentStyle.setPosition(Style.Position.ABSOLUTE);
 			}
+			*/
 			organizeHorizontalAlignment();
 			organizeVerticalAlignment();
 		}
@@ -105,8 +110,8 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Has
 			containerStyle.setTextAlign(Style.TextAlign.RIGHT);
 			break;
 		case CENTER:
-			//contentStyle.setLeft(0, Style.Unit.PX);
-			//contentStyle.setRight(0, Style.Unit.PX);
+			// contentStyle.setLeft(0, Style.Unit.PX);
+			// contentStyle.setRight(0, Style.Unit.PX);
 			contentStyle.setTextAlign(Style.TextAlign.CENTER);
 			containerStyle.setTextAlign(Style.TextAlign.CENTER);
 			break;
@@ -116,26 +121,16 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Has
 	protected void organizeVerticalAlignment() {
 		final Style contentStyle = content.getStyle();
 		final Style alignerStyle = aligner.getStyle();
-		contentStyle.clearDisplay();
-		contentStyle.clearProperty("verticalAlign");
-		alignerStyle.setDisplay(Style.Display.NONE);
 		switch (verticalAlignment) {
 		case TOP:
-			contentStyle.setTop(0, Style.Unit.PX);
-			contentStyle.clearBottom();
+			contentStyle.setVerticalAlign(Style.VerticalAlign.TOP);
 			break;
 		case BOTTOM: {
-			contentStyle.clearTop();
-			contentStyle.setBottom(0, Style.Unit.PX);
+			contentStyle.setVerticalAlign(Style.VerticalAlign.BOTTOM);
 			break;
 		}
 		case CENTER: {
-			contentStyle.clearTop();
-			contentStyle.clearBottom();
-			contentStyle.setPosition(Style.Position.RELATIVE);
-			contentStyle.setDisplay(Style.Display.INLINE_BLOCK);
 			contentStyle.setVerticalAlign(Style.VerticalAlign.MIDDLE);
-			alignerStyle.setDisplay(Style.Display.INLINE_BLOCK);
 			break;
 		}
 		}

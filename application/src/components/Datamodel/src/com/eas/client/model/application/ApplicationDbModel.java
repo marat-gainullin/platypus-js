@@ -12,7 +12,6 @@ import com.eas.client.changes.Change;
 import com.eas.client.model.Model;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.QueriesProxy;
-import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.util.IDGenerator;
 import java.util.ArrayList;
@@ -59,10 +58,11 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Sq
         aEntity.setModel(this);
         super.addEntity(aEntity);
     }
-     private static final String MODIFIED_JSDOC = ""
+    private static final String MODIFIED_JSDOC = ""
             + "/**\n"
             + "* Flagis set to true if model has been modified"
             + "*/";
+
     @ScriptFunction(jsDoc = MODIFIED_JSDOC)
     @Override
     public boolean isModified() throws Exception {
@@ -117,7 +117,7 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Sq
         });
     }
 
-    public synchronized ApplicationDbEntity createEntity(String aSqlText) throws Exception {
+    public ApplicationDbEntity createEntity(String aSqlText) throws Exception {
         return createEntity(aSqlText, null);
     }
 
@@ -130,7 +130,7 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Sq
             + "*/";
 
     @ScriptFunction(jsDoc = CREATE_ENTITY_JSDOC, params = {"sqlText", "datasourceName"})
-    public synchronized ApplicationDbEntity createEntity(String aSqlText, String aDatasourceName) throws Exception {
+    public ApplicationDbEntity createEntity(String aSqlText, String aDatasourceName) throws Exception {
         if (basesProxy == null) {
             throw new NullPointerException("null basesProxy detected while creating a query");
         }
@@ -185,22 +185,4 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Sq
     public void executeSql(String aSqlClause, String aDatasourceName) throws Exception {
         executeSql(aSqlClause, aDatasourceName, null, null);
     }
-
-    @Override
-    public JSObject getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = (JSObject) publisher.call(null, new Object[]{this});
-        }
-        return published;
-    }
-
-    private static JSObject publisher;
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
-    }
-
 }

@@ -6,6 +6,7 @@ package com.eas.designer.explorer;
 
 import com.eas.client.DatabasesClient;
 import com.eas.designer.application.project.PlatypusProject;
+import com.eas.script.Scripts;
 import com.eas.util.ListenerRegistration;
 import java.awt.EventQueue;
 import java.io.IOException;
@@ -77,12 +78,15 @@ public abstract class PlatypusDataObject extends MultiDataObject {
         if (!isModelValid() && !validationStarted) {
             validationStarted = true;
             EventQueue.invokeLater(() -> {
+                Scripts.LocalContext context = Scripts.getContext();
                 RP.execute(() -> {
+                    Scripts.setContext(context);
                     try {
                         validateModel();
                     } catch (Exception ex) {
                         Logger.getLogger(PlatypusDataObject.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
                     } finally {
+                        Scripts.setContext(null);
                         EventQueue.invokeLater(() -> {
                             validationStarted = false;
                             setModelValid(true);

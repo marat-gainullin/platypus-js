@@ -1,6 +1,8 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.model.application.ApplicationPlatypusEntity");
-    javaClass.setPublisher(function(aDelegate) {
+    var className = "com.eas.client.model.application.ApplicationPlatypusEntity";
+    var javaClass = Java.type(className);
+    var space = this['-platypus-scripts-space'];
+    space.putPublisher(className, function(aDelegate) {
         return new P.ApplicationPlatypusEntity(aDelegate);
     });
     

@@ -20,6 +20,8 @@ import com.eas.client.form.published.PublishedCell;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -38,6 +40,8 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 	protected HandlerRegistration boundToList;
 	protected HandlerRegistration boundToListElements;
 	protected Runnable onRedraw;
+	protected Element nonListMask;
+	protected Element nonListMaskAligner;
 
 	protected boolean list = true;
 
@@ -49,6 +53,21 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 		box.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
         CommonResources.INSTANCE.commons().ensureInjected();
         box.getElement().addClassName(CommonResources.INSTANCE.commons().withoutDropdown());
+        nonListMask = Document.get().createDivElement();
+        nonListMask.getStyle().setPosition(Style.Position.RELATIVE);
+        nonListMask.getStyle().setDisplay(Style.Display.NONE);
+        nonListMask.getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
+        nonListMask.getStyle().setPaddingLeft(4, Style.Unit.PX);
+        
+        nonListMaskAligner = Document.get().createDivElement();
+        nonListMaskAligner.getStyle().setVisibility(Style.Visibility.HIDDEN);
+        nonListMaskAligner.getStyle().setPosition(Style.Position.RELATIVE);
+        nonListMaskAligner.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+        nonListMaskAligner.getStyle().setHeight(100, Style.Unit.PCT);
+        nonListMaskAligner.getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
+        
+        contentWrapper.getElement().insertFirst(nonListMaskAligner);
+        contentWrapper.getElement().insertFirst(nonListMask);
 	}
 
 	public Runnable getOnRedraw() {
@@ -108,6 +127,7 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 				injected = aValue;
 			}
 			super.setValue(aValue, fireEvents);
+			nonListMask.setInnerText(box.getSelectedItemText());
 		}
 	}
 
@@ -169,6 +189,7 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 			}
 			int valueIndex = box.indexOf(value);
 			box.setSelectedIndex(valueIndex);
+			nonListMask.setInnerText(box.getSelectedItemText());
 			if (onRedraw != null)
 				onRedraw.run();
 		} catch (Exception e) {
@@ -277,8 +298,12 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 			StyledListBox<JavaScriptObject> box = (StyledListBox<JavaScriptObject>) decorated;
 			if (list){
 				box.getElement().addClassName(CUSTOM_DROPDOWN_CLASS);
+				box.getElement().getStyle().clearVisibility();
+				nonListMask.getStyle().setDisplay(Style.Display.NONE);
 			}else{
 				box.getElement().removeClassName(CUSTOM_DROPDOWN_CLASS);
+				box.getElement().getStyle().setVisibility(Style.Visibility.HIDDEN);
+				nonListMask.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 			}
 			redraw();
 		}

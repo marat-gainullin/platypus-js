@@ -38,8 +38,7 @@ public class Cursor extends java.awt.Cursor implements HasPublished{
 
     protected java.awt.Cursor delegate;
     protected JSObject published;
-    private static JSObject publisher;
-
+    
     @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * Constructs new cursor object.\n"
@@ -111,12 +110,6 @@ public class Cursor extends java.awt.Cursor implements HasPublished{
 
     @Override
     public JSObject getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = (JSObject)publisher.call(null, new Object[]{this});
-        }
         return published;
     }
 
@@ -126,9 +119,5 @@ public class Cursor extends java.awt.Cursor implements HasPublished{
             throw new AlreadyPublishedException();
         }
         published = aValue;
-    }
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
     }
 }

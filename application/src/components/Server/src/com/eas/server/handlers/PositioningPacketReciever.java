@@ -4,9 +4,7 @@
  */
 package com.eas.server.handlers;
 
-import com.eas.client.login.PlatypusPrincipal;
-import com.eas.client.login.SystemPlatypusPrincipal;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import com.eas.sensors.api.Packet;
 import com.eas.sensors.api.PacketReciever;
 import com.eas.sensors.api.RetranslateFactory;
@@ -26,31 +24,37 @@ public class PositioningPacketReciever implements PacketReciever {
     protected PlatypusServerCore serverCore;
     private final RetranslateFactory sender;
 
-    public PositioningPacketReciever(PlatypusServerCore aServer, String aModuleName, RetranslateFactory aRetranslateFactory) {
+    public PositioningPacketReciever(PlatypusServerCore aServer, String aModuleName, RetranslateFactory aPacketSender) {
         super();
         serverCore = aServer;
         moduleName = aModuleName;
-        sender = aRetranslateFactory;
+        sender = aPacketSender;
     }
 
     @Override
     public Object received(Packet aPacket) throws Exception {
         Session session = serverCore.getSessionManager().getSystemSession();
-        PlatypusPrincipal.setInstance(new SystemPlatypusPrincipal());
-        ScriptUtils.setSession(session);
+        Scripts.Space space = session.getSpace();
+        Scripts.LocalContext context = Scripts.createContext(space);
+        context.setAsync(null);
+        context.setPrincipal(session.getPrincipal());
+        context.setRequest(null);
+        context.setResponse(null);
+        Scripts.setContext(context);
         try {
-            serverCore.executeMethod(moduleName, RECIEVER_METHOD_NAME, new Object[]{aPacket}, session, (Object result) -> {
-                if (result != null) {
-                    assert result instanceof String;
-                    assert sender != null;
-                    sender.send(aPacket, (String) result);
-                }
-            }, (Exception ex) -> {
-                Logger.getLogger(PositioningPacketReciever.class.getName()).log(Level.WARNING, null, ex);
-            }, null);
+            space.process(() -> {
+                serverCore.executeMethod(moduleName, RECIEVER_METHOD_NAME, new Object[]{aPacket}, true, session, (Object result) -> {
+                    if (result != null) {
+                        assert result instanceof String;
+                        assert sender != null;
+                        sender.send(aPacket, (String) result);
+                    }
+                }, (Exception ex) -> {
+                    Logger.getLogger(PositioningPacketReciever.class.getName()).log(Level.WARNING, null, ex);
+                });
+            });
         } finally {
-            PlatypusPrincipal.setInstance(null);
-            ScriptUtils.setSession(null);
+            Scripts.setContext(null);
         }
         return null;
     }

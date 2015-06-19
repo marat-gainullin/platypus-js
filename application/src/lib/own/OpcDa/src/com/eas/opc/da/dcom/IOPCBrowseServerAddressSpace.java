@@ -17,17 +17,15 @@ import org.jinterop.dcom.impls.JIObjectFactory;
  *
  * @author pk
  */
-public class IOPCBrowseServerAddressSpace extends JIComObjectImplWrapper
-{
+public class IOPCBrowseServerAddressSpace extends JIComObjectImplWrapper {
+
     public static final String IID_IOPCServerPublicGroups = "39c13a4f-011e-11d0-9675-0020afd8adb3";
 
-    public IOPCBrowseServerAddressSpace(IJIComObject comObject)
-    {
+    public IOPCBrowseServerAddressSpace(IJIComObject comObject) {
         super(comObject);
     }
 
-    public short queryOrganization() throws JIException
-    {
+    public short queryOrganization() throws JIException {
         JICallBuilder callObject = new JICallBuilder(true);
         callObject.setOpnum(0);
         callObject.addOutParamAsType(Short.class, JIFlags.FLAG_NULL);
@@ -35,8 +33,7 @@ public class IOPCBrowseServerAddressSpace extends JIComObjectImplWrapper
         return ((Short) result[0]);
     }
 
-    public void changeBrowsePosition(short direction, String string) throws JIException
-    {
+    public void changeBrowsePosition(short direction, String string) throws JIException {
         JICallBuilder callObject = new JICallBuilder(true);
         callObject.setOpnum(1);
         callObject.addInParamAsShort(direction, JIFlags.FLAG_NULL);
@@ -44,8 +41,7 @@ public class IOPCBrowseServerAddressSpace extends JIComObjectImplWrapper
         comObject.call(callObject);
     }
 
-    public IEnumString browseOPCItemIDs(short browseType, String filterCriteria, short dataTypeFilter, int accessRightsFilter) throws JIException
-    {
+    public IEnumString browseOPCItemIDs(short browseType, String filterCriteria, short dataTypeFilter, int accessRightsFilter) throws JIException {
         JICallBuilder callObject = new JICallBuilder(true);
         callObject.setOpnum(2);
 
@@ -56,22 +52,20 @@ public class IOPCBrowseServerAddressSpace extends JIComObjectImplWrapper
         callObject.addOutParamAsType(IJIComObject.class, JIFlags.FLAG_NULL);
 
         Object result[];
-        try
-        {
+        try {
             result = comObject.call(callObject);
-        } catch (JIException ex)
-        {
-            if (ex.getErrorCode() == 1 /*S_FALSE*/)
+        } catch (JIException ex) {
+            if (ex.getErrorCode() == 1 /*S_FALSE*/) {
                 result = callObject.getResultsInCaseOfException();
-            else
+            } else {
                 throw ex;
+            }
         }
 
         return new IEnumString(JIObjectFactory.narrowObject((IJIComObject) result[0]));
     }
 
-    public String getItemId(String itemDataId) throws JIException
-    {
+    public String getItemId(String itemDataId) throws JIException {
         JICallBuilder callObject = new JICallBuilder(true);
         callObject.setOpnum(3);
         callObject.addInParamAsString(itemDataId, JIFlags.FLAG_REPRESENTATION_STRING_LPWSTR);
@@ -80,22 +74,20 @@ public class IOPCBrowseServerAddressSpace extends JIComObjectImplWrapper
         return ((JIString) ((JIPointer) result[0]).getReferent()).getString();
     }
 
-    public IEnumString browseAccessPaths(String itemId) throws JIException
-    {
+    public IEnumString browseAccessPaths(String itemId) throws JIException {
         JICallBuilder callObject = new JICallBuilder(true);
         callObject.setOpnum(4);
         callObject.addInParamAsString(itemId, JIFlags.FLAG_REPRESENTATION_STRING_LPWSTR);
         callObject.addOutParamAsType(IJIComObject.class, JIFlags.FLAG_NULL);
         Object[] result;
-        try
-        {
+        try {
             result = comObject.call(callObject);
-        } catch (JIException ex)
-        {
-            if (ex.getErrorCode() == 1 /*S_FALSE*/)
+        } catch (JIException ex) {
+            if (ex.getErrorCode() == 1 /*S_FALSE*/) {
                 result = callObject.getResultsInCaseOfException();
-            else
+            } else {
                 throw ex;
+            }
         }
         return new IEnumString(JIObjectFactory.narrowObject((IJIComObject) result[0]));
     }

@@ -9,6 +9,7 @@ import com.eas.client.threetier.PlatypusConnection;
 import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.ResourceRequest;
 import com.eas.concurrent.CallableConsumer;
+import com.eas.script.Scripts;
 import com.eas.util.FileUtils;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -20,12 +21,20 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.internal.runtime.JSType;
 
 /**
  *
  * @author mg
  */
 public class RemoteModulesProxy implements ModulesProxy {
+
+    public static final String SERVER_DEPENDENCIES_PROP_NAME = "serverDependencies";
+    public static final String QUERY_DEPENDENCIES_PROP_NAME = "queryDependencies";
+    public static final String CLIENT_DEPENDENCIES_PROP_NAME = "clientDependencies";
+    public static final String STRUCTURE_PROP_NAME = "structure";
+    public static final String LENGTH_PROP_NAME = "length";
 
     protected PlatypusConnection conn;
     protected String basePath;
@@ -43,24 +52,24 @@ public class RemoteModulesProxy implements ModulesProxy {
     }
 
     @Override
-    public ModuleStructure getModule(String aName, Consumer<ModuleStructure> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public ModuleStructure getModule(String aName, Scripts.Space aSpace, Consumer<ModuleStructure> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (onSuccess != null) {
-            requestModuleStructure(aName, (ModuleStructureRequest.Response structureResp) -> {
+            requestModuleStructure(aName, aSpace, (ModuleStructureRequest.Response structureResp) -> {
                 try {
                     ModuleStructure structure = new ModuleStructure();
-                    structure.getClientDependencies().addAll(structureResp.getClientDependencies());
-                    structure.getServerDependencies().addAll(structureResp.getServerDependencies());
-                    structure.getQueryDependencies().addAll(structureResp.getQueryDependencies());
-                    for (String resourceName : structureResp.getStructure()) {
+                    JSObject jsStructure = (JSObject) aSpace.parseJson(structureResp.getJson());
+                    readCommons(jsStructure, structure);
+                    JSObject jsParts = (JSObject) jsStructure.getMember(STRUCTURE_PROP_NAME);
+                    int partsLength = JSType.toInteger(jsParts.getMember(LENGTH_PROP_NAME));
+                    for (int i = 0; i < partsLength; i++) {
+                        String resourceName = JSType.toString(jsParts.getSlot(i));
                         String cachePathName = constructResourcePath(resourceName);
                         File cachePath = new File(cachePathName);
-                        syncResource(cachePath, resourceName, (Void aVoid) -> {
-                            synchronized (structure) {
-                                structure.getParts().addFile(cachePath);
-                                if (structure.getParts().getFiles().size() == structureResp.getStructure().size()) {
-                                    id2files.put(aName, structure.getParts());
-                                    onSuccess.accept(structure);
-                                }
+                        syncResource(cachePath, resourceName, aSpace, (Void aVoid) -> {
+                            structure.getParts().addFile(cachePath);
+                            if (structure.getParts().getFiles().size() == partsLength) {
+                                id2files.put(aName, structure.getParts());
+                                onSuccess.accept(structure);
                             }
                         }, onFailure);
                     }
@@ -72,23 +81,46 @@ public class RemoteModulesProxy implements ModulesProxy {
             }, onFailure);
             return null;
         } else {
-            ModuleStructureRequest.Response structureResp = requestModuleStructure(aName, null, null);
+            ModuleStructureRequest.Response structureResp = requestModuleStructure(aName, null, null, null);
             ModuleStructure structure = new ModuleStructure();
-            id2files.put(aName, structure.getParts());
-            structure.getClientDependencies().addAll(structureResp.getClientDependencies());
-            structure.getServerDependencies().addAll(structureResp.getServerDependencies());
-            structure.getQueryDependencies().addAll(structureResp.getQueryDependencies());
-            for (String resourceName : structureResp.getStructure()) {
+            JSObject jsStructure = (JSObject) aSpace.parseJson(structureResp.getJson());
+            readCommons(jsStructure, structure);
+            JSObject jsParts = (JSObject) jsStructure.getMember(STRUCTURE_PROP_NAME);
+            int partsLength = JSType.toInteger(jsParts.getMember(LENGTH_PROP_NAME));
+            for (int i = 0; i < partsLength; i++) {
+                String resourceName = JSType.toString(jsParts.getSlot(i));
                 String cachePathName = constructResourcePath(resourceName);
                 File cachePath = new File(cachePathName);
-                syncResource(cachePath, resourceName, null, null);
+                syncResource(cachePath, resourceName, null, null, null);
                 structure.getParts().addFile(cachePath);
             }
+            id2files.put(aName, structure.getParts());
             return structure;
         }
     }
 
-    private void syncResource(File cachePath, String aName, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    private void readCommons(JSObject jsStructure, ModuleStructure structure) {
+        JSObject jsClientDependencies = (JSObject) jsStructure.getMember(CLIENT_DEPENDENCIES_PROP_NAME);
+        int clientDepsLength = JSType.toInteger(jsClientDependencies.getMember(LENGTH_PROP_NAME));
+        for (int i = 0; i < clientDepsLength; i++) {
+            String dep = JSType.toString(jsClientDependencies.getSlot(i));
+            structure.getClientDependencies().add(dep);
+        }
+        JSObject jsQueryDependencies = (JSObject) jsStructure.getMember(QUERY_DEPENDENCIES_PROP_NAME);
+        int queryDepsLength = JSType.toInteger(jsQueryDependencies.getMember(LENGTH_PROP_NAME));
+        for (int i = 0; i < queryDepsLength; i++) {
+            String dep = JSType.toString(jsQueryDependencies.getSlot(i));
+            structure.getQueryDependencies().add(dep);
+        }
+        JSObject jsServerDependencies = (JSObject) jsStructure.getMember(SERVER_DEPENDENCIES_PROP_NAME);
+        int serverDepsLength = JSType.toInteger(jsServerDependencies.getMember(LENGTH_PROP_NAME));
+        for (int i = 0; i < serverDepsLength; i++) {
+            String dep = JSType.toString(jsServerDependencies.getSlot(i));
+            structure.getServerDependencies().add(dep);
+        }
+    }
+
+    private void syncResource(File cachePath, String aName, Scripts.Space aSpace, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
         Date localTimeStamp = null;
         if (cachePath.exists() && cachePath.isFile()) {
             localTimeStamp = new Date(cachePath.lastModified());
@@ -113,7 +145,7 @@ public class RemoteModulesProxy implements ModulesProxy {
             return null;
         };
         if (onSuccess != null) {
-            requestResource(localTimeStamp, aName, (ResourceRequest.Response resourceResp) -> {
+            requestResource(localTimeStamp, aName, aSpace, (ResourceRequest.Response resourceResp) -> {
                 try {
                     doWork.call(resourceResp);
                     try {
@@ -128,25 +160,25 @@ public class RemoteModulesProxy implements ModulesProxy {
                 }
             }, onFailure);
         } else {
-            ResourceRequest.Response resourceResp = requestResource(localTimeStamp, aName, null, null);
+            ResourceRequest.Response resourceResp = requestResource(localTimeStamp, aName, null, null, null);
             doWork.call(resourceResp);
         }
     }
 
-    private ModuleStructureRequest.Response requestModuleStructure(String aName, Consumer<ModuleStructureRequest.Response> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    private ModuleStructureRequest.Response requestModuleStructure(String aName, Scripts.Space aSpace, Consumer<ModuleStructureRequest.Response> onSuccess, Consumer<Exception> onFailure) throws Exception {
         ModuleStructureRequest req = new ModuleStructureRequest(aName);
         if (onSuccess != null) {
-            conn.enqueueRequest(req, onSuccess, onFailure);
+            conn.enqueueRequest(req, aSpace, onSuccess, onFailure);
             return null;
         } else {
             return conn.executeRequest(req);
         }
     }
 
-    private ResourceRequest.Response requestResource(Date aTimeStamp, String aResourceName, Consumer<ResourceRequest.Response> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    private ResourceRequest.Response requestResource(Date aTimeStamp, String aResourceName, Scripts.Space aSpace, Consumer<ResourceRequest.Response> onSuccess, Consumer<Exception> onFailure) throws Exception {
         ResourceRequest req = new ResourceRequest(aTimeStamp, aResourceName);
         if (onSuccess != null) {
-            conn.enqueueRequest(req, onSuccess, onFailure);
+            conn.enqueueRequest(req, aSpace, onSuccess, onFailure);
             return null;
         } else {
             return conn.executeRequest(req);

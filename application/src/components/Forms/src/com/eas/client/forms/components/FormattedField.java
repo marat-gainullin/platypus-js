@@ -9,7 +9,6 @@ import com.eas.client.forms.HasComponentEvents;
 import com.eas.client.forms.components.rt.HasEmptyText;
 import com.eas.client.forms.HasJsName;
 import com.eas.client.forms.HasJsValue;
-import static com.eas.client.forms.HasJsValue.JS_VALUE_JSDOC;
 import com.eas.client.forms.HasOnValueChange;
 import com.eas.client.forms.Widget;
 import com.eas.client.forms.events.ActionEvent;
@@ -25,7 +24,7 @@ import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
@@ -335,13 +334,13 @@ public class FormattedField extends VFormattedField implements HasOnValueChange,
     @Undesignable
     @Override
     public Object getJsValue() {
-        return ScriptUtils.toJs(super.getValue());
+        return Scripts.getSpace().toJs(super.getValue());
     }
 
     @ScriptFunction
     @Override
     public void setJsValue(Object aValue) {
-        setValue(ScriptUtils.toJava(aValue));
+        setValue(Scripts.getSpace().toJava(aValue));
     }
 
     @Undesignable
@@ -352,7 +351,7 @@ public class FormattedField extends VFormattedField implements HasOnValueChange,
 
     @Override
     public void setValue(Object aValue) {
-        super.setValue(ScriptUtils.toJava(aValue));
+        super.setValue(Scripts.getSpace().toJava(aValue));
     }
 
     private static final String FORMAT_JSDOC = ""
@@ -404,6 +403,7 @@ public class FormattedField extends VFormattedField implements HasOnValueChange,
     @Override
     public JSObject getPublished() {
         if (published == null) {
+            JSObject publisher = Scripts.getSpace().getPublisher(this.getClass().getName());
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
@@ -418,12 +418,6 @@ public class FormattedField extends VFormattedField implements HasOnValueChange,
             throw new AlreadyPublishedException();
         }
         published = aValue;
-    }
-
-    private static JSObject publisher;
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
     }
 
     protected ControlEventsIProxy eventsProxy = new ControlEventsIProxy(this);

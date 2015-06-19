@@ -9,14 +9,14 @@
         var HttpCookie = Java.type("javax.servlet.http.Cookie");
         var CharsetClass = Java.type("java.nio.charset.Charset");
         var ByteArray = Java.type("byte[]");
-        var ScriptUtilsClass = Java.type('com.eas.script.ScriptUtils');
+        var ScriptsClass = Java.type('com.eas.script.Scripts');
 
         Object.defineProperty(this, "request", {
-            value: ScriptUtilsClass.getRequest() ? new Request(ScriptUtilsClass.getRequest()) : null
+            value: ScriptsClass.getContext().getRequest() ? new Request(ScriptsClass.getContext().getRequest()) : null
         });
 
         Object.defineProperty(this, "response", {
-            value: ScriptUtilsClass.getResponse() ? new Response(ScriptUtilsClass.getResponse()) : null
+            value: ScriptsClass.getContext().getResponse() ? new Response(ScriptsClass.getContext().getResponse()) : null
         });
 
         function Request(aHttpRequest) {

@@ -4,7 +4,6 @@
  */
 package com.eas.client.threetier.requests;
 
-import com.eas.client.queries.PlatypusQuery;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Requests;
 import java.util.Date;
@@ -51,21 +50,21 @@ public class AppQueryRequest extends Request {
 
     public static class Response extends com.eas.client.threetier.Response {
 
-        protected PlatypusQuery appQuery;
+        protected String appQueryJson;
         protected Date timeStamp;
 
-        public Response(PlatypusQuery aAppQuery, Date aTimeStamp) {
+        public Response(String aAppQueryJson, Date aTimeStamp) {
             super();
-            appQuery = aAppQuery;
+            appQueryJson = aAppQueryJson;
             timeStamp = aTimeStamp;
         }
 
-        public PlatypusQuery getAppQuery() {
-            return appQuery;
+        public String getAppQueryJson() {
+            return appQueryJson;
         }
 
-        public void setAppQuery(PlatypusQuery aValue) {
-            appQuery = aValue;
+        public void setAppQueryJson(String aValue) {
+            appQueryJson = aValue;
         }
 
         public Date getTimeStamp() {

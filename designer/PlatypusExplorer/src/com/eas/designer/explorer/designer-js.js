@@ -1,16 +1,19 @@
 /**
  * Platypus.js's designer internals initialization.
  */
-(function() {
-    var ScriptUtils = Java.type('com.eas.script.ScriptUtils');
+(function(aSpace) {
     this.P = {loadModel: function() {
         }};
-    ScriptUtils.setToPrimitiveFunc(function (aValue) {
+    aSpace.setLookupInGlobalFunc(
+            function (aPropertyName) {
+                return this[aPropertyName];
+            });
+    var DateClass = Java.type('java.util.Date');
+    aSpace.setToPrimitiveFunc(function (aValue) {
         if (aValue && aValue.constructor) {
             var cName = aValue.constructor.name;
             if (cName === 'Date') {
-                var dateClass = Java.type('java.util.Date');
-                var converted = new dateClass(aValue.getTime());
+                var converted = new DateClass(aValue.getTime());
                 return converted;
             } else if (cName === 'String') {
                 return aValue + '';
@@ -22,14 +25,18 @@
         }
         return aValue;
     });
-    ScriptUtils.setToDateFunc(
+    aSpace.setToDateFunc(
             function (aJavaDate) {
                 return aJavaDate !== null ? new Date(aJavaDate.time) : null;
             });
-    ScriptUtils.setMakeObjFunc(function () {
+    aSpace.setMakeObjFunc(function () {
         return {};
     });
-    ScriptUtils.setMakeArrayFunc(function () {
+    aSpace.setMakeArrayFunc(function () {
         return [];
     });
-})();
+    aSpace.setLoadFunc(function (aSourceLocation) {
+        return load(aSourceLocation);
+    });
+    return this;
+})(space);

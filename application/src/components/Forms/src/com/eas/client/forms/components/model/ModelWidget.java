@@ -6,7 +6,7 @@ package com.eas.client.forms.components.model;
 
 import com.eas.client.forms.HasJsValue;
 import com.eas.client.forms.components.rt.HasValue;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.table.TableCellEditor;
@@ -39,7 +39,7 @@ public interface ModelWidget<V> extends TableCellRenderer, TableCellEditor, HasV
             }
             Object value = null;
             if (propName != null) {
-                value = ScriptUtils.toJava(target.getMember(propName));
+                value = Scripts.getSpace().toJava(target.getMember(propName));
             } else {
                 Logger.getLogger(ModelWidget.class.getName()).log(Level.FINE, PROPERTY_PATH_MISSING_MSG, aPath);
             }
@@ -65,7 +65,7 @@ public interface ModelWidget<V> extends TableCellRenderer, TableCellEditor, HasV
                 }
             }
             if (propName != null) {
-                Object jsData = ScriptUtils.isInitialized() ? ScriptUtils.toJs(aValue) : aValue;
+                Object jsData = Scripts.isInitialized() ? Scripts.getSpace().toJs(aValue) : aValue;
                 target.setMember(propName, jsData);
             } else {
                 Logger.getLogger(ModelWidget.class.getName()).log(Level.FINE, PROPERTY_PATH_MISSING_MSG, aPath);

@@ -13,6 +13,7 @@ import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import com.eas.script.Scripts;
 import java.beans.PropertyChangeSupport;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -47,7 +48,6 @@ public class Field implements HasPublished {
     protected String tableName;
     protected String schemaName;
     protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
-    private static JSObject publisher;
     protected JSObject published;
 
     public static final String PK_PROPERTY = "pk";
@@ -663,10 +663,11 @@ public class Field implements HasPublished {
     @Override
     public JSObject getPublished() {
         if (published == null) {
+            JSObject publisher = Scripts.getSpace().getPublisher(this.getClass().getName());
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
-            published = (JSObject)publisher.call(null, new Object[]{this});
+            published = (JSObject) publisher.call(null, new Object[]{this});
         }
         return published;
     }
@@ -677,9 +678,5 @@ public class Field implements HasPublished {
             throw new AlreadyPublishedException();
         }
         published = aValue;
-    }
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
     }
 }

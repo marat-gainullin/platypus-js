@@ -13,6 +13,7 @@ import com.eas.client.changes.Insert;
 import com.eas.client.changes.Update;
 import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Parameter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.*;
@@ -55,7 +56,7 @@ public class StatementsGenerator implements ChangeVisitor {
                         Converter.convertAndAssign(v.value, v.type, aConnection, i, stmt);
                     }
                     if (queriesLogger.isLoggable(Level.FINE)) {
-                        queriesLogger.log(Level.FINE, "Executing sql with {0} parameters:\n {1}", new Object[]{parameters.size(), clause});
+                        queriesLogger.log(Level.FINE, "Executing sql with {0} parameters: {1}", new Object[]{parameters.size(), clause});
                     }
                     return stmt.executeUpdate();
                 }
@@ -129,6 +130,7 @@ public class StatementsGenerator implements ChangeVisitor {
             for (ChangeValue data : aChange.getData()) {
                 Field field = entitiesHost.resolveField(aChange.entityName, data.name);
                 if (field != null) {
+                    data.type = field.getTypeInfo();
                     InsertChunk chunk = inserts.get(field.getTableName());
                     if (chunk == null) {
                         chunk = new InsertChunk();
@@ -180,7 +182,7 @@ public class StatementsGenerator implements ChangeVisitor {
                 }
                 //
                 chunk.insert.clause = String.format(INSERT_CLAUSE, tableName, chunk.dataColumnsNames.toString(), generatePlaceholders(chunk.insert.parameters.size()));
-            // Validness of the insert statement is outlined by inserted columns and key columns existance also
+                // Validness of the insert statement is outlined by inserted columns and key columns existance also
                 // because we have to prevent unexpected inserts in any joined table.
                 // In this case inserts will be valid only if they include at least one key column per table.
                 // Another case is single table per Insert instance.
@@ -208,6 +210,7 @@ public class StatementsGenerator implements ChangeVisitor {
             for (ChangeValue data : aChange.getData()) {
                 Field field = entitiesHost.resolveField(aChange.entityName, data.name);
                 if (field != null) {
+                    data.type = field.getTypeInfo();
                     UpdateChunk chunk = updates.get(field.getTableName());
                     if (chunk == null) {
                         chunk = new UpdateChunk();
@@ -230,6 +233,7 @@ public class StatementsGenerator implements ChangeVisitor {
             for (ChangeValue key : aChange.getKeys()) {
                 Field field = entitiesHost.resolveField(aChange.entityName, key.name);
                 if (field != null) {
+                    key.type = field.getTypeInfo();
                     UpdateChunk chunk = updates.get(field.getTableName());
                     if (chunk != null) {
                         if (chunk.keys == null) {
@@ -262,6 +266,7 @@ public class StatementsGenerator implements ChangeVisitor {
             for (ChangeValue key : aChange.getKeys()) {
                 Field field = entitiesHost.resolveField(aChange.entityName, key.name);
                 if (field != null) {
+                    key.type = field.getTypeInfo();
                     StatementsLogEntry delete = deletes.get(field.getTableName());
                     if (delete == null) {
                         delete = new StatementsLogEntry();
@@ -288,6 +293,12 @@ public class StatementsGenerator implements ChangeVisitor {
             StatementsLogEntry logEntry = new StatementsLogEntry();
             logEntry.clause = aChange.command;
             logEntry.parameters.addAll(aChange.getParameters());
+            for (ChangeValue cv : logEntry.parameters) {
+                Parameter p = entitiesHost.resolveParameter(aChange.entityName, cv.name);
+                if (p != null) {
+                    cv.type = p.getTypeInfo();
+                }
+            }
             logEntries.add(logEntry);
         }
     }

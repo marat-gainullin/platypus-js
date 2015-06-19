@@ -4,7 +4,7 @@
  */
 package com.eas.client.scripts.ole;
 
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import javax.script.ScriptException;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -20,7 +20,11 @@ import org.junit.Test;
  */
 public class ComObjectTest {
 
-    public ComObjectTest() {
+    protected Scripts.Space space;
+    
+    public ComObjectTest() throws ScriptException {
+        super();
+        space = Scripts.createSpace();
     }
 
     @BeforeClass
@@ -48,7 +52,7 @@ public class ComObjectTest {
      */
     @Ignore
     @Test
-    public void testOleAutomationScripting() throws ScriptException {
+    public void testOleAutomationScripting() throws Exception {
         String s = null;
         try {
             s = "Logger = java.util.logging.Logger.getLogger(\"Application\");\n";
@@ -94,7 +98,7 @@ public class ComObjectTest {
         }
     }
 
-    private Object evaluateString(String str) throws ScriptException {
-        return ScriptUtils.exec(str);
+    private Object evaluateString(String str) throws Exception {
+        return space.exec(str);
     }
 }

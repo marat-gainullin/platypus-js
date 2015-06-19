@@ -23,7 +23,6 @@ public class MapMouseEvent implements HasPublished {
     protected Geometry cartesianPoint;
     protected Geometry geoPoint;
     //
-    private static JSObject publisher;
     protected JSObject published;
 
     public MapMouseEvent(MouseEvent aAwtEvent, Geometry aCartesianPoint, Geometry aGeoPoint) {
@@ -67,12 +66,6 @@ public class MapMouseEvent implements HasPublished {
 
     @Override
     public JSObject getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = (JSObject)publisher.call(null, new Object[]{this});
-        }
         return published;
     }
 
@@ -82,9 +75,5 @@ public class MapMouseEvent implements HasPublished {
             throw new AlreadyPublishedException();
         }
         published = aValue;
-    }
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
     }
 }

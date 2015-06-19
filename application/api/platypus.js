@@ -1,4 +1,4 @@
-(function () {
+(function (aSpace) {
     if (typeof Set === 'undefined') {
         var LinkedHashSetClass = Java.type('java.util.LinkedHashSet');
         Set = function () {
@@ -20,29 +20,25 @@
 
     //this === global;
     var global = this;
-    var oldP = global.P;
+    aSpace.setGlobal(global);
     global.P = {};
-
-    /*
-     global.P = this; // global scope of api - for legacy applications
-     global.P.restore = function() {
-     throw "Legacy api can't restore the global namespace.";
-     };
-     */
+    global['-platypus-scripts-space'] = aSpace;
+    
     // core imports
     var EngineUtilsClass = Java.type("jdk.nashorn.api.scripting.ScriptUtils");
+    var ScriptsClass = Java.type("com.eas.script.Scripts");
     var JavaArrayClass = Java.type("java.lang.Object[]");
     var JavaStringArrayClass = Java.type("java.lang.String[]");
     var JavaCollectionClass = Java.type("java.util.Collection");
     var FileClass = Java.type("java.io.File");
     var JavaDateClass = Java.type("java.util.Date");
     var LoggerClass = Java.type("java.util.logging.Logger");
-    var FieldsClass = Java.type("com.eas.client.metadata.Fields");
+    var FieldsClassName = "com.eas.client.metadata.Fields";
+    var ParametersClassName = "com.eas.client.metadata.Parameters";
+    //var FieldsClass = Java.type(FieldsClassName);
     var IDGeneratorClass = Java.type("com.eas.util.IDGenerator");
-    var ScriptTimerTaskClass = Java.type("com.eas.client.scripts.ScriptTimerTask");
     var ScriptedResourceClass = Java.type("com.eas.client.scripts.ScriptedResource");
     var PlatypusPrincipalClass = Java.type("com.eas.client.login.PlatypusPrincipal");
-    var ScriptUtilsClass = Java.type('com.eas.script.ScriptUtils');
     var FileUtilsClass = Java.type("com.eas.util.FileUtils");
     var MD5GeneratorClass = Java.type("com.eas.client.login.MD5Generator");
 
@@ -71,7 +67,7 @@
         }
         return aValue;
     }
-    ScriptUtilsClass.setToPrimitiveFunc(toPrimitive);
+    aSpace.setToPrimitiveFunc(toPrimitive);
 
     /**
      * @private
@@ -131,35 +127,20 @@
     function invokeDelayed(aTimeout, aTarget) {
         if (arguments.length < 2)
             throw "invokeDelayed needs 2 arguments - timeout, callback.";
-        //
-        var lock = ScriptUtilsClass.getLock();
-        var req = ScriptUtilsClass.getRequest();
-        var resp = ScriptUtilsClass.getResponse();
-        var session = ScriptUtilsClass.getSession();
-        var principal = PlatypusPrincipalClass.getInstance();
-        //
-        ScriptTimerTaskClass.schedule(function () {
-            ScriptUtilsClass.setLock(lock);
-            ScriptUtilsClass.setRequest(req);
-            ScriptUtilsClass.setResponse(resp);
-            ScriptUtilsClass.setSession(session);
-            PlatypusPrincipalClass.setInstance(principal);
-            try {
-                ScriptUtilsClass.locked(aTarget, lock);
-            } finally {
-                ScriptUtilsClass.setLock(null);
-                ScriptUtilsClass.setRequest(null);
-                ScriptUtilsClass.setResponse(null);
-                ScriptUtilsClass.setSession(null);
-                PlatypusPrincipalClass.setInstance(null);
-            }
-        }, aTimeout);
+        aSpace.schedule(aTarget, aTimeout);
     }
 
     Object.defineProperty(P, "invokeDelayed", {get: function () {
             return invokeDelayed;
         }});
 
+    function invokeLater(aTarget) {
+        aSpace.enqueue(aTarget);
+    }
+
+    Object.defineProperty(P, "invokeLater", {get: function () {
+            return invokeLater;
+        }});
     /**
      * @static
      * @param {type} deps
@@ -195,20 +176,13 @@
     }
     Object.defineProperty(P, "require", {value: require});
 
-    P.require('internals.js');
+    load('classpath:internals.js')(space);
 
     var serverCoreClass;
     try {
         serverCoreClass = Java.type('com.eas.server.PlatypusServerCore');
         // in server (EE or standalone)
 
-        function invokeLater(aTarget) {
-            invokeDelayed(1, aTarget);
-        }
-
-        Object.defineProperty(P, "invokeLater", {get: function () {
-                return invokeLater;
-            }});
         P.require([
             'core/index.js'
                     , 'server/index.js']);
@@ -236,13 +210,6 @@
         var VerticalPositionClass = Java.type("com.eas.client.forms.VerticalPosition");
         var OrientationClass = Java.type("com.eas.client.forms.Orientation");
 
-        function invokeLater(aTarget) {
-            SwingUtilitiesClass.invokeLater(aTarget);
-        }
-
-        Object.defineProperty(P, "invokeLater", {get: function () {
-                return invokeLater;
-            }});
         //
         P.require('common-utils/color.js');
         Object.defineProperty(P.Color, "black", {value: new P.Color(0, 0, 0)});
@@ -714,26 +681,28 @@
         Child.superclass = Parent.prototype;
     }
     Object.defineProperty(P, "extend", {value: extend});
-
+    
+    /*
     Object.defineProperty(P, "session", {
         get: function () {
             if (serverCoreClass) {
-                return ScriptUtilsClass.getSession().getPublished();
+                return ScriptsClass.getContext().getSession().getPublished();
             } else {
                 return null;
             }
         }
     });
+    */
 
     Object.defineProperty(P, "principal", {
         get: function () {
             var clientSpacePrincipal = PlatypusPrincipalClass.getClientSpacePrincipal();
-            var tlsPrincipal = PlatypusPrincipalClass.getInstance();
+            var tlsPrincipal = ScriptsClass.getContext().getPrincipal();
             return boxAsJs(clientSpacePrincipal !== null ? clientSpacePrincipal : tlsPrincipal);
         }
     });
 
-    FieldsClass.setPublisher(function (aDelegate) {
+    function fieldsAndParametersPublisher(aDelegate) {
         var target = {};
         var nnFields = aDelegate.toCollection();
         for (var n = 0; n < nnFields.size(); n++) {
@@ -749,7 +718,9 @@
             })();
         }
         return target;
-    });
+    };
+    space.putPublisher(ParametersClassName, fieldsAndParametersPublisher);
+    space.putPublisher(FieldsClassName, fieldsAndParametersPublisher);
 
     var addListenerName = '-platypus-listener-add-func';
     var removeListenerName = '-platypus-listener-remove-func';
@@ -820,7 +791,7 @@
             }
         };
     }
-    ScriptUtilsClass.setListenElementsFunc(listenElements);
+    aSpace.setListenElementsFunc(listenElements);
 
     function listenInstance(aTarget, aPath, aPropListener) {
         function subscribe(aData, aListener, aPropName) {
@@ -867,7 +838,7 @@
             }
         };
     }
-    ScriptUtilsClass.setListenFunc(listenInstance);
+    aSpace.setListenFunc(listenInstance);
     
     function fireSelfScalarsOppositeCollectionsChanges(aSubject, aChange, nFields) {
         var ormDefs = nFields.getOrmScalarExpandings().get(aChange.propertyName);
@@ -984,7 +955,7 @@
         }
     }
 
-    ScriptUtilsClass.setCollectionDefFunc(
+    aSpace.setCollectionDefFunc(
             function (sourcePublishedEntity, targetFieldName, sourceFieldName) {
                 var _self = this;
                 _self.enumerable = false;
@@ -1460,9 +1431,9 @@
                                     params[j] = arguments[j];
                                 }
                                 if (onSuccess) {
-                                    proxy.callServerModuleMethod(aModuleName, aFunctionName, onSuccess, onFailure, params);
+                                    proxy.callServerModuleMethod(aModuleName, aFunctionName, aSpace, onSuccess, onFailure, params);
                                 } else {
-                                    var result = proxy.callServerModuleMethod(aModuleName, aFunctionName, null, null, params);
+                                    var result = proxy.callServerModuleMethod(aModuleName, aFunctionName, aSpace, null, null, params);
                                     return result && result.getPublished ? result.getPublished() : result;
                                 }
                             };
@@ -1565,29 +1536,6 @@
             applicationLogger.finest("" + aMessage);
         }});
 
-    function async(aWorker, onSuccess, onFailure) {
-        ScriptUtilsClass.jsSubmitTask(function () {
-            try {
-                var result = aWorker();
-                try {
-                    ScriptUtilsClass.jsAcceptTaskResult(function () {
-                        onSuccess(result);
-                    });
-                } catch (e) {
-                    applicationLogger.severe(e);
-                }
-            } catch (e) {
-                if (onFailure)
-                    onFailure('' + e);
-            }
-        });
-    }
-    Object.defineProperty(P, "async", {
-        get: function () {
-            return async;
-        }
-    });
-
     function readString(aFileName, aEncoding) {
         var encoding = 'utf-8';
         if (aEncoding) {
@@ -1609,7 +1557,7 @@
     Object.defineProperty(P, "writeString", {
         value: writeString
     });
-})();
+})(space);
 
 if (!P) {
     /** 

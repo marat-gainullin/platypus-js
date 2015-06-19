@@ -5,6 +5,7 @@
 package com.eas.server;
 
 import com.eas.client.threetier.Request;
+import com.eas.client.threetier.Response;
 import com.eas.client.threetier.requests.*;
 import com.eas.proto.ProtoReaderException;
 import com.eas.server.handlers.*;
@@ -16,7 +17,7 @@ import java.io.IOException;
  */
 public class RequestHandlerFactory implements PlatypusRequestVisitor {
 
-    protected RequestHandler<?, ?> handler;
+    protected RequestHandler<? extends Request, ? extends Response> handler;
     protected PlatypusServerCore serverCore;
 
     public RequestHandlerFactory(PlatypusServerCore aServerCore) {
@@ -24,7 +25,7 @@ public class RequestHandlerFactory implements PlatypusRequestVisitor {
         serverCore = aServerCore;
     }
 
-    public RequestHandler<?, ?> getHandler() {
+    public RequestHandler<? extends Request, ? extends Response> getHandler() {
         return handler;
     }
 
@@ -40,7 +41,7 @@ public class RequestHandlerFactory implements PlatypusRequestVisitor {
      * @see Session
      * @see UnknownRequest
      */
-    public static RequestHandler<?, ?> getHandler(PlatypusServerCore serverCore, Request rq) throws Exception {
+    public static RequestHandler<? extends Request, ? extends Response> getHandler(PlatypusServerCore serverCore, Request rq) throws Exception {
         RequestHandlerFactory factory = new RequestHandlerFactory(serverCore);
         rq.accept(factory);
         return factory.getHandler();
@@ -62,8 +63,8 @@ public class RequestHandlerFactory implements PlatypusRequestVisitor {
     }
 
     @Override
-    public void visit(CreateServerModuleRequest rq) throws Exception {
-        handler = new CreateServerModuleRequestHandler(serverCore, rq);
+    public void visit(ServerModuleStructureRequest rq) throws Exception {
+        handler = new ServerModuleStructureRequestHandler(serverCore, rq);
     }
 
     @Override

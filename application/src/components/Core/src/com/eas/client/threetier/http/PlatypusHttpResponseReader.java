@@ -5,14 +5,11 @@
  */
 package com.eas.client.threetier.http;
 
-import com.eas.client.ServerModuleInfo;
-import com.eas.client.queries.PlatypusQuery;
-import com.eas.client.report.Report;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.requests.AppQueryRequest;
 import com.eas.client.threetier.requests.CommitRequest;
-import com.eas.client.threetier.requests.CreateServerModuleRequest;
+import com.eas.client.threetier.requests.ServerModuleStructureRequest;
 import com.eas.client.threetier.requests.DisposeServerModuleRequest;
 import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.client.threetier.requests.ExecuteQueryRequest;
@@ -22,17 +19,15 @@ import com.eas.client.threetier.requests.ModuleStructureRequest;
 import com.eas.client.threetier.requests.PlatypusResponseVisitor;
 import com.eas.client.threetier.requests.ResourceRequest;
 import com.eas.client.threetier.requests.CredentialRequest;
-import com.eas.script.ScriptUtils;
 import com.eas.util.BinaryUtils;
+import com.eas.util.JSONUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.internal.runtime.JSType;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -40,55 +35,25 @@ import jdk.nashorn.internal.runtime.JSType;
  */
 public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
 
-    public static final String SERVER_DEPENDENCIES_PROP_NAME = "serverDependencies";
-    public static final String QUERY_DEPENDENCIES_PROP_NAME = "queryDependencies";
-    public static final String CLIENT_DEPENDENCIES_PROP_NAME = "clientDependencies";
-    public static final String STRUCTURE_PROP_NAME = "structure";
-    //
-    public static final String CREATE_MODULE_RESPONSE_FUNCTIONS_PROP = "functions";
-    public static final String CREATE_MODULE_RESPONSE_IS_PERMITTED_PROP = "isPermitted";
-    //
     public static final String REPORT_LOCATION_CONTENT_TYPE = "text/platypus-report-location";
 
-    protected PlatypusHttpConnection pConn;
     protected HttpURLConnection conn;
     protected int responseCode;
     protected Request request;
-    private byte[] bodyContent;
+    private final byte[] bodyContent;
 
-    public PlatypusHttpResponseReader(Request aRequest, HttpURLConnection aConn, PlatypusHttpConnection aPConn) throws IOException {
+    public PlatypusHttpResponseReader(Request aRequest, HttpURLConnection aConn, byte[] aBodyContent) throws IOException {
         super();
         request = aRequest;
         conn = aConn;
         responseCode = conn.getResponseCode();
-        pConn = aPConn;
-    }
-
-    public boolean checkIfSecirutyForm() throws IOException {
-        String contentType = conn.getContentType();
-        if ("text/html".equalsIgnoreCase(contentType)) {
-            String formContent = extractText();
-            return formContent.toLowerCase().contains(PlatypusHttpRequestWriter.J_SECURITY_CHECK_ACTION_NAME);
-        } else {
-            return false;
-        }
-    }
-
-    protected Object extractJSON() throws IOException {
-        String contentText = extractText();
-        return ScriptUtils.parseJson(contentText);
-    }
-    
-    protected Object extractJSONWithDates() throws IOException {
-        String contentText = extractText();
-        return ScriptUtils.parseJsonWithDates(contentText);
+        bodyContent = aBodyContent;
     }
 
     protected String extractText() throws IOException {
-        try (InputStream in = conn.getInputStream()) {
-            bodyContent = BinaryUtils.readStream(in, -1);
+        if (bodyContent != null) {
             String contentType = conn.getContentType();
-            String[] contentTypeCharset = contentType.split(";");
+            String[] contentTypeCharset = contentType != null ? contentType.split(";") : null;
             if (contentTypeCharset == null || contentTypeCharset.length == 0) {
                 throw new IOException("Response must contain ContentType header with charset");
             }
@@ -107,6 +72,8 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
             } else {
                 return new String(bodyContent, SettingsConstants.COMMON_ENCODING);
             }
+        } else {
+            return null;
         }
     }
 
@@ -117,20 +84,28 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
 
     @Override
     public void visit(CredentialRequest.Response rsp) throws Exception {
-        JSObject jsCredential = (JSObject) extractJSON();
-        String userName = JSType.toString(jsCredential.getMember("userName"));
-        rsp.setName(userName);
+        String text = extractText();
+        Pattern userNamePattern = Pattern.compile("\\{\\s*userName\\s*:(.+)\\}");
+        Matcher m = userNamePattern.matcher(text);
+        if (m.find()) {
+            String userName = m.group(1);
+            rsp.setName(JSONUtils.jsonUnescape(userName));
+        }
     }
 
     @Override
     public void visit(ExecuteQueryRequest.Response rsp) throws Exception {
-        Object oData = extractJSONWithDates();
-        if (oData instanceof JSObject && ((JSObject) oData).isArray()) {
-            rsp.setRowset((JSObject) oData);
-        } else {
-            int updated = JSType.toInteger(oData);
-            rsp.setUpdateCount(updated);
-        }
+        String json = extractText();
+        rsp.setJson(json);
+        /*
+         Object oData = extractJSONWithDates();
+         if (oData instanceof JSObject && ((JSObject) oData).isArray()) {
+         rsp.setRowsetJson((JSObject) oData);
+         } else {
+         int updated = JSType.toInteger(oData);
+         rsp.setUpdateCount(updated);
+         }
+         */
     }
 
     @Override
@@ -144,27 +119,10 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
             String reportLocation = extractText();
             URL currentUrl = conn.getURL();
             URL reportUrl = new URL(currentUrl.getProtocol(), currentUrl.getHost(), currentUrl.getPort(), reportLocation);
-            HttpURLConnection reportConn = (HttpURLConnection) reportUrl.openConnection();
-            reportConn.setDoInput(true);
-            pConn.addCookies(reportConn);
-            pConn.checkedAddBasicAuthentication(reportConn);
-            try (InputStream in = reportConn.getInputStream()) {
-                byte[] content = BinaryUtils.readStream(in, -1);
-                int slashIdx = reportLocation.lastIndexOf("/");
-                String fileName = reportLocation.substring(slashIdx + 1);
-                if (fileName.contains(".")) {
-                    String[] nameFormat = fileName.split("\\.");
-                    Report report = new Report(content, nameFormat[nameFormat.length - 1], nameFormat[0]);
-                    rsp.setResult(report);
-                } else {
-                    Report report = new Report(content, "unknown", "unknown");
-                    rsp.setResult(report);
-                }
-            }
-            pConn.acceptCookies(reportConn);
+            rsp.setResult(reportUrl);
         } else {
-            Object oData = extractJSONWithDates();
-            rsp.setResult(oData);
+            String text = extractText();
+            rsp.setResult(text);
         }
     }
 
@@ -174,22 +132,13 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
     }
 
     @Override
-    public void visit(CreateServerModuleRequest.Response rsp) throws Exception {
+    public void visit(ServerModuleStructureRequest.Response rsp) throws Exception {
         if (responseCode == HttpURLConnection.HTTP_OK) {
             long timeStamp = conn.getLastModified();
             rsp.setTimeStamp(new Date(timeStamp));
-            Set<String> functions = new HashSet<>();
-            JSObject jsProxy = (JSObject) extractJSON();
-            JSObject jsFunctions = (JSObject) jsProxy.getMember(CREATE_MODULE_RESPONSE_FUNCTIONS_PROP);
-            int length = JSType.toInteger(jsFunctions.getMember(LENGTH_PROP_NAME));
-            for (int i = 0; i < length; i++) {
-                String fName = JSType.toString(jsFunctions.getSlot(i));
-                functions.add(fName);
-            }
-            boolean permitted = JSType.toBoolean(jsProxy.getMember(CREATE_MODULE_RESPONSE_IS_PERMITTED_PROP));
-            rsp.setInfo(new ServerModuleInfo(((CreateServerModuleRequest) request).getModuleName(), functions, permitted));
+            rsp.setInfoJson(extractText());
         } else if (responseCode == HttpURLConnection.HTTP_NOT_MODIFIED) {
-            rsp.setInfo(null);
+            rsp.setInfoJson(null);
             rsp.setTimeStamp(null);
         }
     }
@@ -218,49 +167,22 @@ public class PlatypusHttpResponseReader implements PlatypusResponseVisitor {
         if (responseCode == HttpURLConnection.HTTP_OK) {
             long timeStamp = conn.getLastModified();
             rsp.setTimeStamp(new Date(timeStamp));
-            JSObject jsQuery = (JSObject) extractJSON();
-            PlatypusQuery query = QueryJSONReader.read(jsQuery);
-            rsp.setAppQuery(query);
+            rsp.setAppQueryJson(extractText());
         } else if (responseCode == HttpURLConnection.HTTP_NOT_MODIFIED) {
-            rsp.setAppQuery(null);
+            rsp.setAppQueryJson(null);
             rsp.setTimeStamp(null);
         }
     }
 
     @Override
     public void visit(CommitRequest.Response rsp) throws Exception {
-        Object oData = extractJSON();
-        int updated = JSType.toInteger(oData);
+        String text = extractText();
+        int updated = Double.valueOf(text).intValue();
         rsp.setUpdated(updated);
     }
 
     @Override
     public void visit(ModuleStructureRequest.Response rsp) throws Exception {
-        JSObject jsStructure = (JSObject) extractJSON();
-        JSObject jsParts = (JSObject) jsStructure.getMember(STRUCTURE_PROP_NAME);
-        int partsLength = JSType.toInteger(jsParts.getMember(LENGTH_PROP_NAME));
-        for (int i = 0; i < partsLength; i++) {
-            String part = JSType.toString(jsParts.getSlot(i));
-            rsp.getStructure().add(part);
-        }
-        JSObject jsClientDependencies = (JSObject) jsStructure.getMember(CLIENT_DEPENDENCIES_PROP_NAME);
-        int clientDepsLength = JSType.toInteger(jsClientDependencies.getMember(LENGTH_PROP_NAME));
-        for (int i = 0; i < clientDepsLength; i++) {
-            String dep = JSType.toString(jsClientDependencies.getSlot(i));
-            rsp.getClientDependencies().add(dep);
-        }
-        JSObject jsQueryDependencies = (JSObject) jsStructure.getMember(QUERY_DEPENDENCIES_PROP_NAME);
-        int queryDepsLength = JSType.toInteger(jsQueryDependencies.getMember(LENGTH_PROP_NAME));
-        for (int i = 0; i < queryDepsLength; i++) {
-            String dep = JSType.toString(jsQueryDependencies.getSlot(i));
-            rsp.getQueryDependencies().add(dep);
-        }
-        JSObject jsServerDependencies = (JSObject) jsStructure.getMember(SERVER_DEPENDENCIES_PROP_NAME);
-        int serverDepsLength = JSType.toInteger(jsServerDependencies.getMember(LENGTH_PROP_NAME));
-        for (int i = 0; i < serverDepsLength; i++) {
-            String dep = JSType.toString(jsServerDependencies.getSlot(i));
-            rsp.getServerDependencies().add(dep);
-        }
+        rsp.setJson(extractText());
     }
-    protected static final String LENGTH_PROP_NAME = "length";
 }

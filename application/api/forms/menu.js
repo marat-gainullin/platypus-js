@@ -1,6 +1,8 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.menu.Menu");
-    javaClass.setPublisher(function(aDelegate) {
+    var className = "com.eas.client.forms.menu.Menu";
+    var javaClass = Java.type(className);
+    var space = this['-platypus-scripts-space'];
+    space.putPublisher(className, function(aDelegate) {
         return new P.Menu(null, aDelegate);
     });
     
@@ -477,23 +479,6 @@
              */
             P.Menu.prototype.count = 0;
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Menu){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf Menu
-             */
-            P.Menu.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -510,6 +495,23 @@
              * @memberOf Menu
              */
             P.Menu.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Menu){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf Menu
+             */
+            P.Menu.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

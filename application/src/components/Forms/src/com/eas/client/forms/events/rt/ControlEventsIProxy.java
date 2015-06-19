@@ -4,9 +4,10 @@
  */
 package com.eas.client.forms.events.rt;
 
+import com.eas.client.forms.Forms;
 import com.eas.client.forms.components.rt.HasValue;
 import com.eas.client.forms.events.EventsWrapper;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.event.*;
@@ -106,12 +107,12 @@ public class ControlEventsIProxy implements MouseListener,
     protected Object executeEvent(final int aEventId, final Object anEvent) {
         try {
             JSObject handler = handlers.get(aEventId);
-            if (handler != null) {
-                return ScriptUtils.toJava(handler.call(eventThis, new Object[]{ScriptUtils.toJs(wrapEvent(anEvent))}));
+            if (handler != null) {                
+                Scripts.setContext(Forms.getContext());
+                return Scripts.getSpace().toJava(handler.call(eventThis, new Object[]{Scripts.getSpace().toJs(wrapEvent(anEvent))}));
             } else {
                 return null;
             }
-
         } catch (Exception ex) {
             Logger.getLogger(ControlEventsIProxy.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
             return null;

@@ -9,7 +9,6 @@ import com.eas.client.threetier.platypus.PlatypusPlatypusConnection;
 import com.eas.client.AppConnection;
 import com.eas.client.ClientConstants;
 import com.eas.client.login.Credentials;
-import com.eas.client.threetier.platypus.RequestEnvelope;
 import com.eas.util.BinaryUtils;
 import com.eas.util.StringUtils;
 import java.awt.EventQueue;
@@ -38,7 +37,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.Callable;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.net.ssl.KeyManager;
@@ -79,69 +77,28 @@ public abstract class PlatypusConnection implements AppConnection {
     // misc
     public static final int DEFAULT_MAX_THREADS = 25;
 
-    public static class RequestCallback {
-
-        public final RequestEnvelope requestEnv;
-        public Response response;
-        public Consumer<Response> onComplete;
-        public boolean completed;
-
-        public RequestCallback(RequestEnvelope aRequest, Consumer<Response> aOnSuccess) {
-            super();
-            requestEnv = aRequest;
-            onComplete = aOnSuccess;
-        }
-
-        /**
-         * Waits infinite for request done status. Synchronized due to J2SE
-         * javadoc on wait()/notify() methods
-         *
-         * @throws InterruptedException
-         */
-        public synchronized void waitCompletion() throws InterruptedException {
-            while (!completed) {
-                wait();
-            }
-        }
-    }
-
     protected final URL url;
-    // Parallel login avoid
-    protected Sequence sequence = (Callable<Void> aCallable) -> {
-        synchronized (this) {
-            aCallable.call();
-        }
-    };
+    protected Credentials credentials;
     protected Callable<Credentials> onCredentials;
     protected int maximumAuthenticateAttempts = 1;
-    protected Runnable onLogin;
-    protected Runnable onLogout;
+
+    protected static class Attempts {
+
+        public Attempts() {
+            super();
+        }
+        public int count;
+    }
 
     public PlatypusConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts) {
         super();
         url = aUrl;
         onCredentials = aOnCredentials;
-        maximumAuthenticateAttempts = aMaximumAuthenticateAttempts;
+        maximumAuthenticateAttempts = Math.max(1, aMaximumAuthenticateAttempts);
     }
 
     public URL getUrl() {
         return url;
-    }
-
-    public Runnable getOnLogin() {
-        return onLogin;
-    }
-
-    public void setOnLogin(Runnable aValue) {
-        onLogin = aValue;
-    }
-
-    public Runnable getOnLogout() {
-        return onLogout;
-    }
-
-    public void setOnLogout(Runnable aValue) {
-        onLogout = aValue;
     }
 
     public Exception handleErrorResponse(ErrorResponse aResponse) {

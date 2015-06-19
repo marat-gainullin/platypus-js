@@ -12,6 +12,7 @@ import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import com.eas.script.Scripts;
 import java.awt.Color;
 import java.awt.Font;
 import jdk.nashorn.api.scripting.JSObject;
@@ -22,7 +23,6 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class ModelGridColumn extends GridColumnsNode implements HasPublished {
 
-    private static JSObject publisher;
     protected JSObject published;
 
     protected String field;
@@ -278,6 +278,7 @@ public class ModelGridColumn extends GridColumnsNode implements HasPublished {
     @Override
     public JSObject getPublished() {
         if (published == null) {
+            JSObject publisher = Scripts.getSpace().getPublisher(this.getClass().getName());
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
@@ -301,9 +302,6 @@ public class ModelGridColumn extends GridColumnsNode implements HasPublished {
          */
     }
 
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
-    }
     private static final String SORT = ""
             + "/**\n"
             + " * Column sort, works only in HTML5"

@@ -23,6 +23,7 @@ import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import com.eas.script.Scripts;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
@@ -376,6 +377,7 @@ public class Slider extends VSlider implements HasOnValueChange, HasPublished, H
     @Override
     public JSObject getPublished() {
         if (published == null) {
+            JSObject publisher = Scripts.getSpace().getPublisher(this.getClass().getName());
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
@@ -390,12 +392,6 @@ public class Slider extends VSlider implements HasOnValueChange, HasPublished, H
             throw new AlreadyPublishedException();
         }
         published = aValue;
-    }
-
-    private static JSObject publisher;
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
     }
 
     protected ControlEventsIProxy eventsProxy = new ControlEventsIProxy(this);

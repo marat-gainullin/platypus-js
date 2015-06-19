@@ -83,17 +83,17 @@ public class ModelColumn extends TableColumn {
     }
 
     @Override
-    public synchronized void addPropertyChangeListener(PropertyChangeListener listener) {
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
         changeSupport.addPropertyChangeListener(listener);
     }
 
     @Override
-    public synchronized void removePropertyChangeListener(PropertyChangeListener listener) {
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
         changeSupport.removePropertyChangeListener(listener);
     }
 
     @Override
-    public synchronized PropertyChangeListener[] getPropertyChangeListeners() {
+    public PropertyChangeListener[] getPropertyChangeListeners() {
         return changeSupport.getPropertyChangeListeners();
     }
 

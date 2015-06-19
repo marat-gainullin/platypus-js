@@ -22,36 +22,18 @@ import org.xml.sax.SAXException;
 public class Source2XmlDom {
 
     // setup documents framework
-    protected static final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-    protected static DocumentBuilder builder;
-
     private Source2XmlDom() {
         super();
     }
 
-    public static synchronized Document transform(String source) {
+    public static Document transform(String source) {
         try {
-            if (builder == null) {
-                builder = factory.newDocumentBuilder();
-            }
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
             return builder.parse(new InputSource(new StringReader(source)));
         } catch (SAXException | IOException | ParserConfigurationException ex) {
             Logger.getLogger(Source2XmlDom.class.getName()).log(Level.WARNING, null, ex);
             return null;
         }
     }
-/*
-    public static synchronized Document transform(Reader source) {
-        try {
-            if (builder != null) {
-                return builder.parse(new InputSource(source));
-            } else {
-                return null;
-            }
-        } catch (SAXException | IOException ex) {
-            Logger.getLogger(Source2XmlDom.class.getName()).log(Level.WARNING, null, ex);
-            return null;
-        }
-    }
-    */
 }

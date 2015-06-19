@@ -21,7 +21,7 @@ public class ReportsConfigs extends ActualCache<ReportConfig> {
     }
 
     @Override
-    public synchronized ReportConfig get(String aName, AppElementFiles aFiles) throws Exception {
+    public ReportConfig get(String aName, AppElementFiles aFiles) throws Exception {
         AppElementFiles files = new AppElementFiles();
         if (aFiles.hasExtension(PlatypusFiles.REPORT_LAYOUT_EXTENSION)) {
             files.addFile(aFiles.findFileByExtension(PlatypusFiles.REPORT_LAYOUT_EXTENSION));

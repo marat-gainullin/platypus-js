@@ -6,14 +6,19 @@
 package com.eas.client;
 
 import com.eas.client.cache.ActualCacheEntry;
+import com.eas.client.report.Report;
 import com.eas.client.threetier.PlatypusConnection;
-import com.eas.client.threetier.requests.CreateServerModuleRequest;
+import com.eas.client.threetier.requests.ServerModuleStructureRequest;
 import com.eas.client.threetier.requests.RPCRequest;
+import com.eas.script.Scripts;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.internal.runtime.JSType;
 
 /**
  *
@@ -21,20 +26,16 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class ServerModulesProxy {
 
+    public static final String LENGTH_PROP_NAME = "length";
+    public static final String CREATE_MODULE_RESPONSE_FUNCTIONS_PROP = "functions";
+    public static final String CREATE_MODULE_RESPONSE_IS_PERMITTED_PROP = "isPermitted";
+
     protected PlatypusConnection conn;
     protected Map<String, ActualCacheEntry<ServerModuleInfo>> entries = new ConcurrentHashMap<>();
 
     public ServerModulesProxy(PlatypusConnection aConn) {
         super();
         conn = aConn;
-        /* If uncomment, concurrency problems will occur while dependencies resolving process.
-        conn.setOnLogin(() -> {
-            entries.clear();
-        });
-        conn.setOnLogout(() -> {
-            entries.clear();
-        });
-                */
     }
 
     public ServerModuleInfo getCachedStructure(String aName) throws Exception {
@@ -46,17 +47,18 @@ public class ServerModulesProxy {
         }
     }
 
-    public ServerModuleInfo getServerModuleStructure(String aName, Consumer<ServerModuleInfo> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public ServerModuleInfo getServerModuleStructure(String aName, Scripts.Space aSpace, Consumer<ServerModuleInfo> onSuccess, Consumer<Exception> onFailure) throws Exception {
         Date localTimeStamp = null;
         ActualCacheEntry<ServerModuleInfo> entry = entries.get(aName);
         if (entry != null) {
             localTimeStamp = entry.getTimeStamp();
         }
-        CreateServerModuleRequest request = new CreateServerModuleRequest(aName, localTimeStamp);
+        ServerModuleStructureRequest request = new ServerModuleStructureRequest(aName, localTimeStamp);
         if (onSuccess != null) {
-            conn.enqueueRequest(request, (CreateServerModuleRequest.Response response) -> {
-                ServerModuleInfo info = response.getInfo();
-                if (info != null) {
+            conn.enqueueRequest(request, aSpace, (ServerModuleStructureRequest.Response response) -> {
+                String infoJson = response.getInfoJson();
+                if (infoJson != null) {
+                    ServerModuleInfo info = readInfo(aName, (JSObject)aSpace.parseJson(infoJson));
                     entries.put(aName, new ActualCacheEntry<>(info, response.getTimeStamp()));
                     onSuccess.accept(info);
                 } else {
@@ -68,9 +70,10 @@ public class ServerModulesProxy {
             });
             return null;
         } else {
-            CreateServerModuleRequest.Response response = conn.executeRequest(request);
-            ServerModuleInfo info = response.getInfo();
-            if (info != null) {
+            ServerModuleStructureRequest.Response response = conn.executeRequest(request);
+            String infoJson = response.getInfoJson();
+            if (infoJson != null) {
+                ServerModuleInfo info = readInfo(aName, (JSObject)aSpace.parseJson(infoJson));
                 entries.put(aName, new ActualCacheEntry<>(info, response.getTimeStamp()));
                 return info;
             } else {
@@ -79,11 +82,24 @@ public class ServerModulesProxy {
             }
         }
     }
+
+    private ServerModuleInfo readInfo(String aModuleName, JSObject jsProxy) {
+        Set<String> functions = new HashSet<>();
+        JSObject jsFunctions = (JSObject) jsProxy.getMember(CREATE_MODULE_RESPONSE_FUNCTIONS_PROP);
+        int length = JSType.toInteger(jsFunctions.getMember(LENGTH_PROP_NAME));
+        for (int i = 0; i < length; i++) {
+            String fName = JSType.toString(jsFunctions.getSlot(i));
+            functions.add(fName);
+        }
+        boolean permitted = JSType.toBoolean(jsProxy.getMember(CREATE_MODULE_RESPONSE_IS_PERMITTED_PROP));
+        return new ServerModuleInfo(aModuleName, functions, permitted);
+    }
+
     private static final String NEITHER_SM_INFO = "Neither cached nor network response server module info found";
 
-    public Object callServerModuleMethod(String aModuleName, String aMethodName, JSObject onSuccess, JSObject onFailure, Object... aArguments) throws Exception {
+    public Object callServerModuleMethod(String aModuleName, String aMethodName, Scripts.Space aSpace, JSObject onSuccess, JSObject onFailure, Object... aArguments) throws Exception {
         if (onSuccess != null) {
-            executeServerModuleMethod(aModuleName, aMethodName, (Object aResult) -> {
+            executeServerModuleMethod(aModuleName, aMethodName, aSpace, (Object aResult) -> {
                 onSuccess.call(null, new Object[]{aResult});
             }, (Exception ex) -> {
                 if (onFailure != null) {
@@ -92,20 +108,40 @@ public class ServerModulesProxy {
             }, aArguments);
             return null;
         } else {
-            return executeServerModuleMethod(aModuleName, aMethodName, null, null, aArguments);
+            return executeServerModuleMethod(aModuleName, aMethodName, aSpace, null, null, aArguments);
         }
     }
 
-    public Object executeServerModuleMethod(String aModuleName, String aMethodName, Consumer<Object> onSuccess, Consumer<Exception> onFailure, Object... aArguments) throws Exception {
-        final RPCRequest request = new RPCRequest(aModuleName, aMethodName, aArguments);
+    public Object executeServerModuleMethod(String aModuleName, String aMethodName, Scripts.Space aSpace, Consumer<Object> onSuccess, Consumer<Exception> onFailure, Object... aArguments) throws Exception {
+        String[] argumentsJsons = new String[aArguments.length];
+        for (int i = 0; i < argumentsJsons.length; i++) {
+            argumentsJsons[i] = aSpace.toJson(aArguments[i]);
+        }
+        final RPCRequest request = new RPCRequest(aModuleName, aMethodName, argumentsJsons);
         if (onSuccess != null) {
-            conn.<RPCRequest.Response>enqueueRequest(request, (RPCRequest.Response aResponse) -> {
-                onSuccess.accept(aResponse.getResult());
+            conn.<RPCRequest.Response>enqueueRequest(request, aSpace, (RPCRequest.Response aResponse) -> {
+                Object sResult = adoptRPCResponse(aResponse, aSpace);
+                onSuccess.accept(sResult);
             }, onFailure);
             return null;
         } else {
             RPCRequest.Response response = conn.executeRequest(request);
-            return response.getResult();
+            Object sResult = adoptRPCResponse(response, aSpace);
+            return sResult;
         }
+    }
+
+    private Object adoptRPCResponse(RPCRequest.Response aResponse, Scripts.Space aSpace) {
+        Object sResult;
+        Object rpcResult = aResponse.getResult();
+        if(rpcResult instanceof String){
+            sResult = aSpace.parseJsonWithDates((String)rpcResult);
+        }else if(rpcResult instanceof Report){
+            Report report = (Report)rpcResult;
+            sResult = report.getPublished();
+        }else{
+            sResult = rpcResult;
+        }
+        return sResult;
     }
 }

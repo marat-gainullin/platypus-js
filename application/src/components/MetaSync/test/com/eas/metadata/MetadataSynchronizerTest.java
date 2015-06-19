@@ -4,7 +4,6 @@
  */
 package com.eas.metadata;
 
-import com.bearsoft.rowset.changes.Change;
 import com.eas.metadata.testdefine.DbTestDefine;
 import com.eas.metadata.testdefine.DbTestDefine.Database;
 import com.eas.metadata.dbdefines.TableDefine;
@@ -14,17 +13,18 @@ import com.eas.metadata.dbdefines.FKeyDefine;
 import com.eas.metadata.dbdefines.SourceDbSetting;
 import com.eas.metadata.dbdefines.DestinationDbSetting;
 import com.eas.metadata.dbdefines.DbConnection;
-import com.bearsoft.rowset.metadata.DataTypeInfo;
-import com.bearsoft.rowset.metadata.Field;
-import com.bearsoft.rowset.metadata.Fields;
-import com.bearsoft.rowset.metadata.ForeignKeySpec;
-import com.bearsoft.rowset.metadata.ForeignKeySpec.ForeignKeyRule;
-import com.bearsoft.rowset.metadata.PrimaryKeySpec;
 import com.eas.client.DatabasesClient;
 import com.eas.client.DatabasesClientWithResource;
 import com.eas.client.SqlCompiledQuery;
+import com.eas.client.changes.Change;
+import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.ForeignKeySpec;
+import com.eas.client.metadata.ForeignKeySpec.ForeignKeyRule;
+import com.eas.client.metadata.PrimaryKeySpec;
 import com.eas.client.settings.DbConnectionSettings;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.metadata.testdefine.Db2TestDefine;

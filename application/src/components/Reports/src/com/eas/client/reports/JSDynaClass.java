@@ -5,9 +5,7 @@
  */
 package com.eas.client.reports;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import jdk.nashorn.api.scripting.JSObject;
 import org.apache.commons.beanutils.DynaBean;
@@ -25,6 +23,7 @@ public class JSDynaClass implements DynaClass {
     private final Map<String, DynaProperty> properties = new HashMap<>();
 
     public JSDynaClass(JSObject aDelegate, String aName) {
+        super();
         delegate = aDelegate;
         name = aName;
     }

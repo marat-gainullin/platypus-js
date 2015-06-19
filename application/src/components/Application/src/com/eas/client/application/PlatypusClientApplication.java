@@ -5,7 +5,8 @@ import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.FormsDocuments;
 import com.eas.client.cache.ModelsDocuments;
 import com.eas.client.cache.ReportsConfigs;
-import com.eas.client.cache.ScriptConfigs;
+import com.eas.client.cache.ScriptsConfigs;
+import com.eas.client.forms.Forms;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.ConnectionsSelector;
 import com.eas.client.login.Credentials;
@@ -14,13 +15,14 @@ import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.resourcepool.DatasourcesArgsConsumer;
+import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.scripts.ScriptedResource;
 import com.eas.client.settings.ConnectionSettings;
 import com.eas.client.threetier.PlatypusClient;
 import com.eas.client.threetier.http.PlatypusHttpConnection;
 import com.eas.client.threetier.http.PlatypusHttpConstants;
 import com.eas.client.threetier.platypus.PlatypusPlatypusConnection;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import com.eas.util.args.ThreadsArgsConsumer;
 import java.awt.EventQueue;
 import java.io.File;
@@ -30,7 +32,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.logging.*;
 import javax.swing.UIManager;
 
@@ -208,9 +209,10 @@ public class PlatypusClientApplication {
             checkUrl(config);
             if (config.url != null) {
                 checkUserHome();
+                GeneralResourceProvider.registerDrivers();
                 config.datasourcesArgs.registerDatasources();
-                ScriptUtils.initServices(config.threadsArgs.getMaxServicesTreads());
-                ScriptUtils.setGlobalQueue((Runnable aTask) -> {
+                Scripts.initBIO(config.threadsArgs.getMaxServicesTreads());
+                Scripts.initTasks((Runnable aTask) -> {
                     EventQueue.invokeLater(aTask);
                 });
                 Application app;
@@ -220,14 +222,16 @@ public class PlatypusClientApplication {
                 } else if (config.url.getProtocol().equalsIgnoreCase(PlatypusHttpConstants.PROTOCOL_HTTPS)) {
                     app = new PlatypusClient(new PlatypusHttpConnection(config.url, new UIOnCredentials(config), config.maximumAuthenticateAttempts, config.threadsArgs.getMaxHttpTreads()));
                 } else if (config.url.getProtocol().equalsIgnoreCase("platypus")) {
-                    app = new PlatypusClient(new PlatypusPlatypusConnection(config.url, new UIOnCredentials(config), config.maximumAuthenticateAttempts, config.threadsArgs.getMaxPlatypusTreads(), config.threadsArgs.getMaxPlatypusTreads()));
+                    app = new PlatypusClient(new PlatypusPlatypusConnection(config.url, new UIOnCredentials(config), config.maximumAuthenticateAttempts, (Runnable aTask) -> {
+                        EventQueue.invokeLater(aTask);
+                    }, config.threadsArgs.getMaxPlatypusConnections()));
                 } else if (config.url.getProtocol().equalsIgnoreCase("file")) {
                     File f = new File(config.url.toURI());
                     if (f.exists() && f.isDirectory()) {
                         ModelsDocuments models = new ModelsDocuments();
-                        ScriptConfigs scriptsConfigs = new ScriptConfigs();
+                        ScriptsConfigs scriptsConfigs = new ScriptsConfigs();
                         ValidatorsScanner validatorsScanner = new ValidatorsScanner(scriptsConfigs);
-                        ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), validatorsScanner);                        
+                        ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), validatorsScanner);
                         ScriptedDatabasesClient twoTierCore = new ScriptedDatabasesClient(config.defDatasource, indexer, true, validatorsScanner.getValidators(), config.threadsArgs.getMaxJdbcTreads());
                         QueriesProxy qp = new LocalQueriesProxy(twoTierCore, indexer);
                         ModulesProxy mp = new LocalModulesProxy(indexer, models, config.startScriptPath);
@@ -268,7 +272,7 @@ public class PlatypusClientApplication {
                             }
 
                             @Override
-                            public ScriptConfigs getScriptsConfigs() {
+                            public ScriptsConfigs getScriptsConfigs() {
                                 return scriptsConfigs;
                             }
 
@@ -280,23 +284,24 @@ public class PlatypusClientApplication {
                     throw new Exception("Unknown protocol in url: " + config.url);
                 }
                 ScriptedResource.init(app);
-                ScriptUtils.init();
-                ScriptedResource._require(new String[]{""}, null, new ConcurrentSkipListSet<>(), (Void v) -> {
-//                    JSObject p = ScriptUtils.lookupInGlobal("P");
-//                    if (p != null) {
-//                        Object ready = p.getMember("ready");
-//                        if (ready instanceof JSObject && ((JSObject) ready).isFunction()) {
-//                            ((JSObject) ready).call(null, new Object[]{});
-//                        } 
-//                        else {
-//                            throw new IllegalStateException("P.ready is missing or is not a function. Nothing to do :-(");
-//                        }
-//                    } else {
-//                        throw new IllegalStateException("Platypus js API is not initialized (global.P is missing).");
-//                    }
-                }, (Exception ex) -> {
-                    Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, ex);
-                });
+                Scripts.LocalContext context = Scripts.createContext(Scripts.createSpace());
+                Forms.initContext(context);
+                Scripts.setContext(context);
+                try {
+                    Scripts.getSpace().process(() -> {
+                        try {
+                            ScriptedResource._require(new String[]{""}, null, Scripts.getSpace(), (Void v) -> {
+                                Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.INFO, "Platypus application started.");
+                            }, (Exception ex) -> {
+                                Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, ex);
+                            });
+                        } catch (Exception ex) {
+                            Logger.getLogger(PlatypusClientApplication.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    });
+                } finally {
+                    Scripts.setContext(null);
+                }
             } else {
                 throw new IllegalArgumentException("Application url is missing. url is a required parameter.");
             }

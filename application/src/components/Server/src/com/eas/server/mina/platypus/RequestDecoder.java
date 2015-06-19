@@ -66,9 +66,9 @@ public class RequestDecoder extends CumulativeProtocolDecoder {
         try {
             in.position(start);
             in.limit(position);
-            final ProtoReader requestReader = new ProtoReader(in.slice().asInputStream());
+            ProtoReader requestReader = new ProtoReader(in.slice().asInputStream());
             Request request = PlatypusRequestReader.read(requestReader);
-            out.write(new RequestEnvelope(request, userName, password, ticket));
+            out.write(new RequestEnvelope(request, userName, password, ticket, null));
             return true;
         } finally {
             in.position(position);

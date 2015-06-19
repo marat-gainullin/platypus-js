@@ -9,30 +9,31 @@ import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
 import com.eas.client.threetier.platypus.RequestEnvelope;
 import com.eas.client.threetier.requests.ErrorResponse;
+import com.eas.script.Scripts;
 import com.eas.server.*;
-import com.eas.server.handlers.CommonRequestHandler;
-import com.eas.server.SessionRequestHandler;
 import com.eas.server.DatabaseAuthorizer;
+import com.eas.util.IDGenerator;
 import java.net.NetPermission;
 import java.security.AccessControlException;
 import java.sql.SQLException;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.script.ScriptException;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
 
 /**
  *
- * @author pk
+ * @author pk, mg, ab
  */
 public class PlatypusRequestsHandler extends IoHandlerAdapter {
 
     public static final String BAD_PROTOCOL_MSG = "The message is not Platypus protocol request.";
     public static final String GOT_SIGNATURE_MSG = "Got signature from client.";
-    public static final String SESSION_ID = "sessionID";
-    private static final String GENERAL_EXCEPTION_MESSAGE = "Exception on request of type %d | %s.";
+    public static final String SESSION_ID = "platypus-session-id";
+    private static final String GENERAL_EXCEPTION_MESSAGE = "Exception on request of type %d | %s. %s";
     private static final String ACCESS_CONTROL_EXCEPTION_MESSAGE = "AccessControlException on request of type %d | %s. Message: %s.";
     private static final String SQL_EXCEPTION_MESSAGE = "SQLException on request of type %d | %s. Message: %s. sqlState: %s, errorCode: %d";
     public static final int IDLE_TIME_EVENT = 5 * 60; // 5 minutes
@@ -75,6 +76,8 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
             ioSession.close(false);
             String sessionId = (String) ioSession.getAttribute(SESSION_ID);
             if (sessionId != null) {
+                // A bit hacky, due to sessions nature. ioSession is NOT an equivalent of sessionManager.session,
+                // but we use idle events as source of information about idle sessions
                 server.getSessionManager().remove(sessionId);
             } else {
                 Logger.getLogger(PlatypusRequestsHandler.class.getName()).severe("An attempt to remove system (null) session occured.");
@@ -97,45 +100,71 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
                     if (ex instanceof SQLException) {
                         SQLException sex = (SQLException) ex;
                         Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, String.format(SQL_EXCEPTION_MESSAGE, requestEnv.request.getType(), requestEnv.request.getClass().getSimpleName(), sex.getMessage(), sex.getSQLState(), sex.getErrorCode()));
-                        ioSession.write(new ResponseEnvelope(new ErrorResponse(sex), requestEnv.ticket));
+                        ioSession.write(new ErrorResponse(sex));
                     } else if (ex instanceof AccessControlException) {
                         AccessControlException aex = (AccessControlException) ex;
                         Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, String.format(ACCESS_CONTROL_EXCEPTION_MESSAGE, requestEnv.request.getType(), requestEnv.request.getClass().getSimpleName(), aex.getMessage()));
-                        ioSession.write(new ResponseEnvelope(new ErrorResponse(aex), requestEnv.ticket));
+                        ioSession.write(new ErrorResponse(aex));
                     } else {
-                        Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, String.format(GENERAL_EXCEPTION_MESSAGE, requestEnv.request.getType(), requestEnv.request.getClass().getSimpleName()), ex);
-                        ioSession.write(new ResponseEnvelope(new ErrorResponse(ex.getMessage() != null && !ex.getMessage().isEmpty() ? ex.getMessage() : ex.toString()), requestEnv.ticket));
+                        Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, String.format(GENERAL_EXCEPTION_MESSAGE, requestEnv.request.getType(), requestEnv.request.getClass().getSimpleName(), ex.toString()));
+                        ioSession.write(new ErrorResponse(ex.getMessage() != null && !ex.getMessage().isEmpty() ? ex.getMessage() : ex.toString()));
                     }
                 };
                 Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.FINE, "Request {0}", requestEnv.request.toString());
-                final RequestHandler<?, ?> handler = RequestHandlerFactory.getHandler(server, requestEnv.request);
+                final RequestHandler<Request, Response> handler = (RequestHandler<Request, Response>) RequestHandlerFactory.getHandler(server, requestEnv.request);
                 if (handler != null) {
-                    Consumer<Response> onSuccess = (Response aResponse) -> {
-                        ioSession.write(new ResponseEnvelope(aResponse, requestEnv.ticket));
-                    };
-                    if (handler instanceof SessionRequestHandler<?, ?>) {
-                        if (requestEnv.ticket == null) {
-                            DatabaseAuthorizer.authorize(server, requestEnv.userName, requestEnv.password, (DatabaseAuthorizer.SessionPrincipal aSessionPrincipal) -> {
-                                requestEnv.ticket = aSessionPrincipal.getSession().getId();
-                                ((SessionRequestHandler<Request, Response>) handler).handle(aSessionPrincipal.getSession(), aSessionPrincipal.getPrincipal(), onSuccess, onError);
-                            }, onError);
-                        } else {
-                            Session session = server.getSessionManager().get(requestEnv.ticket);
-                            PlatypusPrincipal principal = server.getPrincipals().get(requestEnv.ticket);
-                            if (session != null && principal != null) {
-                                ((SessionRequestHandler<Request, Response>) handler).handle(session, principal, onSuccess, onError);
-                            } else {
-                                onError.accept(new AccessControlException("Bad session ticket.", new NetPermission("*")));
+                    if (requestEnv.ticket == null) {
+                        try {
+                            Session session = server.getSessionManager().create(String.valueOf(IDGenerator.genID()));
+                            requestEnv.ticket = session.getId();
+                            ioSession.setAttribute(SESSION_ID, session.getId());
+                            Scripts.LocalContext context = Scripts.createContext(session.getSpace());
+                            Scripts.setContext(context);
+                            try {
+                                DatabaseAuthorizer.authorize(server, requestEnv.userName, requestEnv.password, Scripts.getSpace(), (PlatypusPrincipal aPrincipal) -> {
+                                    session.setPrincipal(aPrincipal);
+                                    // The only place to use this getter.
+                                    // See its javadoc please.
+                                    context.setPrincipal(session.getPrincipal());
+                                    Scripts.getSpace().process(() -> {
+                                        handler.handle(session, (Response aResponse) -> {
+                                            ioSession.write(aResponse);
+                                        }, onError);
+                                    });
+                                }, onError);
+                            } finally {
+                                Scripts.setContext(null);
                             }
+                        } catch (ScriptException ex) {
+                            Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     } else {
-                        ((CommonRequestHandler<Request, Response>) handler).handle(onSuccess, onError);
+                        Session session = server.getSessionManager().get(requestEnv.ticket);
+                        if (session != null) {
+                            ioSession.setAttribute(SESSION_ID, session.getId());
+                            Scripts.LocalContext context = Scripts.createContext(session.getSpace());
+                            // The only place to use this getter.
+                            // See its javadoc please.
+                            context.setPrincipal(session.getPrincipal());
+                            Scripts.setContext(context);
+                            try {
+                                Scripts.getSpace().process(() -> {
+                                    handler.handle(session, (Response aResponse) -> {
+                                        ioSession.write(aResponse);
+                                    }, onError);
+                                });
+                            } finally {
+                                Scripts.setContext(null);
+                            }
+                        } else {
+                            throw new AccessControlException("Bad session ticket.", new NetPermission("*"));
+                        }
                     }
                 } else {
                     throw new IllegalStateException("Unknown request type " + requestEnv.request.getType());
                 }
             } catch (Throwable ex) {
-                ioSession.write(new ResponseEnvelope(new ErrorResponse(ex.getMessage()), requestEnv.ticket));
+                ioSession.write(new ErrorResponse(ex.getMessage()));
                 Logger.getLogger(PlatypusRequestsHandler.class.getName()).log(Level.SEVERE, ex.toString());
             }
         } else {

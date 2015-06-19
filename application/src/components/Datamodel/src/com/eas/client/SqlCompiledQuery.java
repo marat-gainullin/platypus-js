@@ -11,7 +11,11 @@ import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.metadata.Parameters;
 import com.eas.concurrent.CallableConsumer;
+import com.eas.script.Scripts;
 import java.sql.ResultSet;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -132,29 +136,49 @@ public class SqlCompiledQuery {
     /**
      * Executes query and returns results whatever setted in procedure flag.
      *
+     * @param aResultSetProcessor
+     * @param aCallbacksExecutor
      * @param onSuccess
      * @param onFailure
      * @return Rowset insatance, representing query results.
      * @throws Exception
      * @see Rowset
      */
-    public <T> T executeQuery(CallableConsumer<T, ResultSet> aResultSetProcessor, Consumer<T> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public <T> T executeQuery(CallableConsumer<T, ResultSet> aResultSetProcessor, Executor aCallbacksExecutor, Consumer<T> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (basesProxy != null) {
             PlatypusJdbcFlowProvider flow = basesProxy.createFlowProvider(datasourceName, entityName, sqlClause, expectedFields);
             flow.setPageSize(pageSize);
             flow.setProcedure(procedure);
-            return flow.<T>select(parameters, aResultSetProcessor, onSuccess, onFailure);
+            return flow.<T>select(parameters, aResultSetProcessor, onSuccess != null ? (T t) -> {
+                aCallbacksExecutor.execute(() -> {
+                    onSuccess.accept(t);
+                });
+            } : null, onFailure != null ? (Exception ex) -> {
+                aCallbacksExecutor.execute(() -> {
+                    onFailure.accept(ex);
+                });
+            } : null);
         } else {
             return null;
         }
     }
 
-    public JSObject executeQuery(Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public JSObject executeQuery(Consumer<JSObject> onSuccess, Consumer<Exception> onFailure, Scripts.Space aSpace) throws Exception {
         if (basesProxy != null) {
             PlatypusJdbcFlowProvider flow = basesProxy.createFlowProvider(datasourceName, entityName, sqlClause, expectedFields);
             flow.setPageSize(pageSize);
             flow.setProcedure(procedure);
-            return flow.refresh(parameters, onSuccess, onFailure);
+            Collection<Map<String, Object>> data = flow.refresh(parameters, onSuccess != null ? (Collection<Map<String, Object>> aData) -> {
+                aSpace.process(() -> {
+                    JSObject aJsData = aSpace.readJsArray(aData);
+                    onSuccess.accept(aJsData);
+                });
+            } : null, onFailure != null ? (Exception ex) -> {
+                aSpace.process(() -> {
+                    onFailure.accept(ex);
+                });
+            } : null);
+            return data != null ? aSpace.readJsArray(data) : null;
         } else {
             return null;
         }

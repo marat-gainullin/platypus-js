@@ -8,8 +8,8 @@ package com.eas.opc.da.dcom;
  *
  * @author pk
  */
-public class OPCBROWSETYPE
-{
+public class OPCBROWSETYPE {
+
     public final static int OPC_BRANCH = 1;
     public final static int OPC_LEAF = 2;
     public final static int OPC_FLAT = 3;

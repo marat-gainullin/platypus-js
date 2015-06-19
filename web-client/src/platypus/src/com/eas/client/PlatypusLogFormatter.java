@@ -28,7 +28,7 @@ public class PlatypusLogFormatter extends TextLogFormatter {
 	private static final DateTimeFormat dateFormat = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm:ss");
 
 	@Override
-	public synchronized String format(LogRecord event) {
+	public String format(LogRecord event) {
 		StringBuilder message = new StringBuilder();
 		Date date = new Date(event.getMillis());
 		message.append(dateFormat.format(date)).append("\t");

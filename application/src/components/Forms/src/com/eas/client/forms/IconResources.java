@@ -5,9 +5,8 @@
 package com.eas.client.forms;
 
 import com.eas.client.scripts.ScriptedResource;
-import com.eas.script.ScriptUtils;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.eas.script.Scripts;
+import java.util.function.Consumer;
 import javax.swing.ImageIcon;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -18,38 +17,38 @@ import jdk.nashorn.api.scripting.JSObject;
 public class IconResources {
 
     public static ImageIcon load(String aResourceName, JSObject onSuccess, JSObject onFailure) throws Exception {
+        Scripts.Space space = Scripts.getSpace();
+        return load(aResourceName, space, onSuccess != null ? (ImageIcon aLoaded) -> {
+            onSuccess.call(null, new Object[]{aLoaded});
+        } : null, onSuccess != null ? (Exception ex) -> {
+            onFailure.call(null, new Object[]{space.toJs(ex.getMessage())});
+        } : null);
+    }
+
+    public static ImageIcon load(String aResourceName, Scripts.Space aSpace, Consumer<ImageIcon> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (onSuccess != null) {
-            ScriptUtils.submitTask(() -> {
-                try {
-                    ImageIcon loaded = loadSync(aResourceName);
-                    ScriptUtils.acceptTaskResult(() -> {
-                        onSuccess.call(null, new Object[]{ScriptUtils.toJs(loaded)});
-                    });
-                } catch (Exception ex) {
-                    Logger.getLogger(IconResources.class.getName()).log(Level.SEVERE, null, ex);
+            ScriptedResource.load(aResourceName, aSpace, (Object aLoaded) -> {
+                if (aLoaded instanceof byte[]) {
+                    byte[] content = (byte[]) aLoaded;
+                    onSuccess.accept(new ImageIcon(content));
+                } else {
                     if (onFailure != null) {
-                        ScriptUtils.acceptTaskResult(() -> {
-                            onFailure.call(null, new Object[]{ScriptUtils.toJs(ex.getMessage())});
-                        });
+                        onFailure.accept(new IllegalArgumentException(aResourceName + " is not a binary resource"));
                     }
+                }
+            }, (Exception ex) -> {
+                if (onFailure != null) {
+                    onFailure.accept(ex);
                 }
             });
             return null;
         } else {
-            return loadSync(aResourceName);
-        }
-    }
-    
-    protected static ImageIcon loadSync(String imageName) throws Exception {
-        ImageIcon icon = IconCache.getIcon(imageName);
-        if (icon != null) {
-            return icon;
-        } else {
-            byte[] resData = (byte[])ScriptedResource.load(imageName);
-            if (resData != null) {
-                return new ImageIcon(resData);
+            Object loaded = ScriptedResource.load(aResourceName);
+            if (loaded instanceof byte[]) {
+                byte[] content = (byte[]) loaded;
+                return new ImageIcon(content);
             } else {
-                return null;
+                throw new IllegalArgumentException(aResourceName + " is not a binary resource");
             }
         }
     }

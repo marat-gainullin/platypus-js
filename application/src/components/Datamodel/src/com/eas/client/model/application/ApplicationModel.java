@@ -14,8 +14,9 @@ import com.eas.client.queries.QueriesProxy;
 import com.eas.client.queries.Query;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
+import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -165,7 +166,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
     @Override
     protected boolean validateEntities() throws Exception {
         for (E e : entities.values()) {
-            queries.getQuery(e.getQueryName(), null, null);
+            queries.getQuery(e.getQueryName(), Scripts.getSpace(), null, null);
         }
         return super.validateEntities();
     }
@@ -181,6 +182,18 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
     }
 
     @Override
+    public JSObject getPublished() {
+        if (published == null) {
+            JSObject publisher = Scripts.getSpace().getPublisher(this.getClass().getName());
+            if (publisher == null || !publisher.isFunction()) {
+                throw new NoPublisherException();
+            }
+            published = (JSObject) publisher.call(null, new Object[]{this});
+        }
+        return published;
+    }
+
+    @Override
     public void setPublished(JSObject aValue) {
         if (published != null) {
             throw new AlreadyPublishedException();
@@ -193,17 +206,15 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
             String scalarPropertyName = aRelation.getScalarPropertyName();
             String collectionPropertyName = aRelation.getCollectionPropertyName();
             if (scalarPropertyName != null && !scalarPropertyName.isEmpty()) {
-                aRelation.getLeftEntity().putOrmScalarDefinition(
-                        scalarPropertyName,
-                        new Fields.OrmDef(aRelation.getLeftField().getName(), scalarPropertyName, collectionPropertyName, ScriptUtils.scalarPropertyDefinition(
+                aRelation.getLeftEntity().putOrmScalarDefinition(scalarPropertyName,
+                        new Fields.OrmDef(aRelation.getLeftField().getName(), scalarPropertyName, collectionPropertyName, Scripts.getSpace().scalarPropertyDefinition(
                                         (JSObject) aRelation.getRightEntity().getPublished(),
                                         aRelation.getRightField().getName(),
                                         aRelation.getLeftField().getName())));
             }
             if (collectionPropertyName != null && !collectionPropertyName.isEmpty()) {
-                aRelation.getRightEntity().putOrmCollectionDefinition(
-                        collectionPropertyName,
-                        new Fields.OrmDef(collectionPropertyName, scalarPropertyName, ScriptUtils.collectionPropertyDefinition(
+                aRelation.getRightEntity().putOrmCollectionDefinition(collectionPropertyName,
+                        new Fields.OrmDef(collectionPropertyName, scalarPropertyName, Scripts.getSpace().collectionPropertyDefinition(
                                         (JSObject) aRelation.getLeftEntity().getPublished(),
                                         aRelation.getRightField().getName(),
                                         aRelation.getLeftField().getName())));
@@ -451,7 +462,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
 
     protected static final String USER_DATASOURCE_NAME = "userQuery";
 
-    public synchronized E createQuery(String aQueryId) throws Exception {
+    public E createQuery(String aQueryId) throws Exception {
         Logger.getLogger(ApplicationModel.class.getName()).log(Level.WARNING, "createQuery deprecated call detected. Use loadEntity() instead.");
         return loadEntity(aQueryId);
     }
@@ -463,7 +474,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
             + "*/";
 
     @ScriptFunction(jsDoc = LOAD_ENTITY_JSDOC, params = {"queryId"})
-    public synchronized E loadEntity(String aQueryId) throws Exception {
+    public E loadEntity(String aQueryId) throws Exception {
         E entity = newGenericEntity();
         entity.setName(USER_DATASOURCE_NAME);
         entity.setQueryName(aQueryId);
@@ -471,7 +482,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
         return entity;
     }
 
-    public synchronized E createQuery(E aLeftEntity, Field aLeftField, String aRightQueryId, Field aRightField) throws Exception {
+    public E createQuery(E aLeftEntity, Field aLeftField, String aRightQueryId, Field aRightField) throws Exception {
         E rightEntity = newGenericEntity();
         rightEntity.setName(USER_DATASOURCE_NAME);
         rightEntity.setQueryName(aRightQueryId);
@@ -490,7 +501,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
         return rightEntity;
     }
 
-    public synchronized void deleteQuery(E entity2Delete) {
+    public void deleteQuery(E entity2Delete) {
         if (entity2Delete != null) {
             Set<Relation<E>> rels = entity2Delete.getInOutRelations();
             if (rels != null) {

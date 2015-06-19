@@ -14,7 +14,7 @@ import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -29,8 +29,7 @@ public class ReportTemplate implements HasPublished {
     protected int timezoneOffset = 0;
     protected String name;
     protected JSObject scriptData;
-    protected JSObject fixed = ScriptUtils.makeArray();
-    private static JSObject publisher;
+    protected JSObject fixed;
     protected JSObject published;
 
     @ScriptFunction(jsDoc = ""
@@ -42,6 +41,7 @@ public class ReportTemplate implements HasPublished {
             + "", params = {"config", "data"})
     public ReportTemplate(ReportConfig aConfig, JSObject aData) {
         super();
+        fixed = Scripts.getSpace().makeArray();
         config = aConfig;
         scriptData = aData;
         name = config.getNameTemplate();
@@ -83,12 +83,6 @@ public class ReportTemplate implements HasPublished {
 
     @Override
     public JSObject getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = (JSObject) publisher.call(null, new Object[]{this});
-        }
         return published;
     }
 
@@ -98,10 +92,6 @@ public class ReportTemplate implements HasPublished {
             throw new AlreadyPublishedException();
         }
         published = aValue;
-    }
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
     }
 
     private static final String NAME_JSDOC = ""

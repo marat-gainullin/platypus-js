@@ -21,7 +21,7 @@ import com.eas.design.Undesignable;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
 import com.eas.script.ScriptFunction;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -666,8 +666,8 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
     protected boolean settingValueToJs;
 
     protected void bind() {
-        if (data != null && field != null && !field.isEmpty() && com.eas.script.ScriptUtils.isInitialized()) {
-            boundToData = com.eas.script.ScriptUtils.listen(data, field, new AbstractJSObject() {
+        if (data != null && field != null && !field.isEmpty() && Scripts.isInitialized()) {
+            boundToData = Scripts.getSpace().listen(data, field, new AbstractJSObject() {
 
                 @Override
                 public Object call(Object thiz, Object... args) {
@@ -690,7 +690,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
                 if (!settingValueFromJs) {
                     settingValueToJs = true;
                     try {
-                        ModelWidget.setPathData(data, field, com.eas.script.ScriptUtils.toJs(evt.getNewValue()));
+                        ModelWidget.setPathData(data, field, Scripts.getSpace().toJs(evt.getNewValue()));
                     } finally {
                         settingValueToJs = false;
                     }
@@ -702,7 +702,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
 
     protected void unbind() {
         if (boundToData != null) {
-            ScriptUtils.unlisten(boundToData);
+            Scripts.unlisten(boundToData);
             boundToData = null;
         }
         if (boundToValue != null) {
@@ -780,7 +780,7 @@ public abstract class ModelComponentDecorator<D extends JComponent, V> extends J
 
     @Override
     public Object getJsValue() {
-        return com.eas.script.ScriptUtils.toJs(getValue());
+        return Scripts.getSpace().toJs(getValue());
     }
 
     @Override

@@ -1,6 +1,8 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.forms.components.Slider");
-    javaClass.setPublisher(function(aDelegate) {
+    var className = "com.eas.client.forms.components.Slider";
+    var javaClass = Java.type(className);
+    var space = this['-platypus-scripts-space'];
+    space.putPublisher(className, function(aDelegate) {
         return new P.Slider(null, null, null, aDelegate);
     });
     
@@ -465,23 +467,6 @@
              */
             P.Slider.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Slider){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf Slider
-             */
-            P.Slider.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -498,6 +483,23 @@
              * @memberOf Slider
              */
             P.Slider.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Slider){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf Slider
+             */
+            P.Slider.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

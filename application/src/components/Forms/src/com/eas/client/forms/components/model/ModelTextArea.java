@@ -12,6 +12,7 @@ import com.eas.design.Undesignable;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
+import com.eas.script.Scripts;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.EventQueue;
@@ -58,18 +59,13 @@ public class ModelTextArea extends ModelComponentDecorator<VTextArea, String> im
     @Override
     public JSObject getPublished() {
         if (published == null) {
+            JSObject publisher = Scripts.getSpace().getPublisher(this.getClass().getName());
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }
             published = (JSObject) publisher.call(null, new Object[]{this});
         }
         return published;
-    }
-
-    private static JSObject publisher;
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
     }
 
     @ScriptFunction(jsDoc = EDITABLE_JSDOC)

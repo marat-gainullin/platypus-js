@@ -13,6 +13,7 @@ import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.metadata.Parameters;
+import com.eas.script.Scripts;
 import java.beans.PropertyChangeSupport;
 import java.util.*;
 import java.util.Map;
@@ -265,7 +266,7 @@ public abstract class Query {
         parametersBinds = aValue;
     }
 
-    public abstract JSObject execute(Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception;
+    public abstract JSObject execute(Scripts.Space aSpace, Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception;
 
     /**
      * @return The application element identifier;

@@ -34,7 +34,8 @@ import com.eas.client.scripts.JSObjectFacade;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.query.PlatypusQueryDataObject;
 import com.eas.designer.application.query.editing.SqlTextEditsComplementor;
-import com.eas.script.ScriptUtils;
+import com.eas.designer.explorer.project.PlatypusProjectImpl;
+import com.eas.script.Scripts;
 import com.eas.util.IDGenerator;
 import java.awt.Color;
 import java.awt.Dialog;
@@ -47,11 +48,12 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
@@ -222,7 +224,7 @@ public class QueryResultsView extends javax.swing.JPanel {
         });
     }
 
-    private void showQueryResultsMessage() throws Exception {
+    private void showQueryResultsMessage() {
         if (query.getFields() != null && grid.getData() != null) {
             String message = String.format(NbBundle.getMessage(QuerySetupView.class, "QueryResultsView.resultMessage"), JSType.toInteger(grid.getData().getMember("length")));
             List<Field> pks = query.getFields().getPrimaryKeys();
@@ -428,17 +430,21 @@ public class QueryResultsView extends javax.swing.JPanel {
                     } else {
                         changeLog = new ArrayList<>();
                         if (flow != null) {
-                            JSObject fetched = flow.refresh(query.compile().getParameters(), null, null);
-                            JSObject processed = processData(fetched);
-                            grid.setData(processed);
+                            Collection<Map<String, Object>> fetched = flow.refresh(query.compile().getParameters(), null, null);
+                            EventQueue.invokeLater(() -> {
+                                Scripts.Space space = PlatypusProjectImpl.getJsSpace();
+                                JSObject jsFetched = space.readJsArray(fetched);
+                                JSObject processed = processData(jsFetched, space);
+                                grid.setData(processed);
+                                showQueryResultsMessage();
+                                EventQueue.invokeLater(() -> {
+                                    reEnableButtons.run();
+                                    nextPageButton.setEnabled(true);
+                                    gridPanel.revalidate();
+                                    gridPanel.repaint();
+                                });
+                            });
                         }
-                        showQueryResultsMessage();
-                        EventQueue.invokeLater(() -> {
-                            reEnableButtons.run();
-                            nextPageButton.setEnabled(true);
-                            gridPanel.revalidate();
-                            gridPanel.repaint();
-                        });
                     }
                 } catch (Exception ex) {
                     showWarning(ex.getMessage() != null ? ex.getMessage() : ex.toString()); //NO1I18N
@@ -537,7 +543,7 @@ public class QueryResultsView extends javax.swing.JPanel {
 
     }
 
-    protected JSObject processData(JSObject aSubject) {
+    protected JSObject processData(JSObject aSubject, Scripts.Space aSpace) {
         JSObject processed = new JSObjectFacade(aSubject) {
 
             @Override
@@ -597,7 +603,7 @@ public class QueryResultsView extends javax.swing.JPanel {
 
             @Override
             public Object newObject(Object... args) {
-                return new JSWrapper(ScriptUtils.makeObj());
+                return new JSWrapper(aSpace.makeObj());
             }
 
         });
@@ -608,7 +614,7 @@ public class QueryResultsView extends javax.swing.JPanel {
         try {
             if (query != null && !changeLog.isEmpty()) {
                 final Runnable reEnableButtons = disableButtons();
-                final String entityName = IDGenerator.genID().toString();
+                final String entityName = IDGenerator.genID() + "";
                 query.setEntityName(entityName);
                 changeLog.forEach((Change aChange) -> {
                     aChange.entityName = entityName;
@@ -644,14 +650,16 @@ public class QueryResultsView extends javax.swing.JPanel {
             final Runnable reEnableButtons = disableButtons();
             RequestProcessor.getDefault().execute(() -> {
                 try {
-                    JSObject fetched = flow.nextPage(null, null);
-                    int length = JSType.toInteger(fetched.getMember("length"));
-                    if (length > 0) {
-                        JSObject processed = processData(fetched);
-                        grid.setData(processed);
-                        showQueryResultsMessage();
-                    }
+                    Collection<Map<String, Object>> fetched = flow.nextPage(null, null);
                     EventQueue.invokeLater(() -> {
+                        Scripts.Space space = PlatypusProjectImpl.getJsSpace();
+                        JSObject jsFetched = space.readJsArray(fetched);
+                        int length = JSType.toInteger(jsFetched.getMember("length"));
+                        if (length > 0) {
+                            JSObject processed = processData(jsFetched, space);
+                            grid.setData(processed);
+                            showQueryResultsMessage();
+                        }
                         reEnableButtons.run();
                         gridPanel.revalidate();
                         gridPanel.repaint();

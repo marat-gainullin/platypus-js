@@ -62,6 +62,7 @@ import com.eas.client.forms.menu.PopupMenu;
 import com.eas.client.forms.menu.RadioMenuItem;
 import com.eas.gui.ScriptColor;
 import com.eas.script.HasPublished;
+import com.eas.script.Scripts;
 import com.eas.xml.dom.XmlDomUtils;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -169,7 +170,12 @@ public class FormFactory {
         viewWidget.setSize(viewWidget.getPreferredSize());
         form = new Form(viewWidget);
         form.setDefaultCloseOperation(XmlDomUtils.readIntegerAttribute(element, "defaultCloseOperation", JFrame.DISPOSE_ON_CLOSE));
-        form.setIcon(resolveIcon(element.getAttribute("icon")));
+        resolveIcon(element.getAttribute("icon"), (ImageIcon aLoaded) -> {
+            form.setIcon(aLoaded);
+        }, (Exception ex) -> {
+            Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, ex.getMessage());
+        });
+
         form.setTitle(element.getAttribute("title"));
         form.setMaximizable(XmlDomUtils.readBooleanAttribute(element, "maximizable", Boolean.TRUE));
         form.setMinimizable(XmlDomUtils.readBooleanAttribute(element, "minimizable", Boolean.TRUE));
@@ -198,16 +204,14 @@ public class FormFactory {
         return prefSize;
     }
 
-    protected ImageIcon resolveIcon(String aIconName) {
-        if (aIconName != null) {
+    protected void resolveIcon(String aIconName, Consumer<ImageIcon> onLoad, Consumer<Exception> onFailure) {
+        if (aIconName != null && !aIconName.isEmpty()) {
+            Scripts.Space space = Scripts.getSpace();
             try {
-                return IconResources.load(aIconName, null, null);
+                IconResources.load(aIconName, space, onLoad, onFailure);
             } catch (Exception ex) {
                 Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
-                return null;
             }
-        } else {
-            return null;
         }
     }
 
@@ -246,7 +250,11 @@ public class FormFactory {
                 Label label = new Label();
                 readGeneralProps(anElement, label);
                 if (anElement.hasAttribute("icon")) {
-                    label.setIcon(resolveIcon(anElement.getAttribute("icon")));
+                    resolveIcon(anElement.getAttribute("icon"), (ImageIcon aLoaded) -> {
+                        label.setIcon(aLoaded);
+                    }, (Exception ex) -> {
+                        Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, ex.getMessage());
+                    });
                 }
                 if (anElement.hasAttribute("text")) {
                     label.setText(anElement.getAttribute("text"));
@@ -485,12 +493,14 @@ public class FormFactory {
                 ModelSpin modelSpin = new ModelSpin();
                 readGeneralProps(anElement, modelSpin);
                 Double min = null;
-                if(anElement.hasAttribute("min"))
+                if (anElement.hasAttribute("min")) {
                     min = XmlDomUtils.readDoubleAttribute(anElement, "min", -Double.MAX_VALUE);
+                }
                 double step = XmlDomUtils.readDoubleAttribute(anElement, "step", 1.0d);
                 Double max = null;
-                if(anElement.hasAttribute("max"))
+                if (anElement.hasAttribute("max")) {
                     max = XmlDomUtils.readDoubleAttribute(anElement, "max", Double.MAX_VALUE);
+                }
                 try {
                     modelSpin.setMin(min);
                     modelSpin.setMax(max);
@@ -605,7 +615,7 @@ public class FormFactory {
                     String dataPropertyPath = anElement.getAttribute("field");
                     grid.setField(dataPropertyPath);
                 }
-                if (com.eas.script.ScriptUtils.isInitialized()) {
+                if (Scripts.isInitialized()) {
                     injectColumns(grid, roots);
                 }
                 return grid;
@@ -776,7 +786,11 @@ public class FormFactory {
 
     protected void readButton(Element anElement, AbstractButton button) {
         if (anElement.hasAttribute("icon")) {
-            button.setIcon(resolveIcon(anElement.getAttribute("icon")));
+            resolveIcon(anElement.getAttribute("icon"), (ImageIcon aLoaded) -> {
+                button.setIcon(aLoaded);
+            }, (Exception ex) -> {
+                Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, ex.getMessage());
+            });
         }
         if (anElement.hasAttribute("text")) {
             button.setText(anElement.getAttribute("text"));
@@ -1016,7 +1030,17 @@ public class FormFactory {
             String tabTitle = constraintsElement.getAttribute("tabTitle");
             String tabIconName = constraintsElement.getAttribute("tabIcon");
             String tabTooltipText = oldFormat ? constraintsElement.getAttribute("tabToolTip") : constraintsElement.getAttribute("tabTooltipText");
-            ((TabbedPane) parent).add(aTarget, tabTitle, resolveIcon(tabIconName));
+            TabbedPane tabs = (TabbedPane) parent;
+            tabs.add(aTarget, tabTitle);
+            int tabIndex = tabs.getTabCount() - 1;
+            tabs.setToolTipTextAt(tabIndex, tabTooltipText);
+            resolveIcon(tabIconName, (ImageIcon aLoaded) -> {
+                if (tabIndex >= 0 && tabIndex < tabs.getTabCount()) {
+                    tabs.setIconAt(tabIndex, aLoaded);
+                }
+            }, (Exception ex) -> {
+                Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
+            });
         } else if (parent instanceof SplitPane) {
             // Split pane children are:
             // - left component

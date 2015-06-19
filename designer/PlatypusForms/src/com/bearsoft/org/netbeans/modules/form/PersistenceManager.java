@@ -96,6 +96,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.function.Consumer;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.xml.parsers.DocumentBuilder;
@@ -132,12 +133,12 @@ public class PersistenceManager {
             FormFactory formFactory = new FormFactory(doc.getDocumentElement(), formDataObject.getModel().getPublished()) {
 
                 @Override
-                protected ImageIcon resolveIcon(String aIconName) {
+                protected void resolveIcon(String aIconName, Consumer<ImageIcon> onLoad, Consumer<Exception> onFailure) {
                     try {
-                        return IconEditor.iconFromResourceName(formDataObject, aIconName);
+                        NbImageIcon loaded = IconEditor.iconFromResourceName(formDataObject, aIconName);
+                        onLoad.accept(loaded);
                     } catch (Exception ex) {
                         nonfatalErrors.add(ex);
-                        return null;
                     }
                 }
 

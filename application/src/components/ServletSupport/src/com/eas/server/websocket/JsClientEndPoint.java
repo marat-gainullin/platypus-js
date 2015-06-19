@@ -5,7 +5,7 @@
  */
 package com.eas.server.websocket;
 
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import javax.websocket.ClientEndpoint;
 import javax.websocket.CloseReason;
 import javax.websocket.OnClose;
@@ -27,71 +27,72 @@ public class JsClientEndPoint {
     protected JSObject onclose;
     protected JSObject onerror;
     protected JSObject onmessage;
+    protected Scripts.LocalContext context;
 
-    public JsClientEndPoint(WebSocketClientSession aSession) {
+    public JsClientEndPoint(WebSocketClientSession aSession, Scripts.LocalContext aContext) {
         super();
         session = aSession;
+        context = aContext;
+    }
+
+    private void inContext(Runnable aTask) {
+        Scripts.setContext(context);
+        try {
+            aTask.run();
+        } finally {
+            Scripts.setContext(null);
+        }
     }
 
     @OnMessage
     public void onMessage(Session websocketSession, String aData) {
-        session.inContext(() -> {
-            if (onmessage != null) {
-                JSObject messageEvent = ScriptUtils.makeObj();
-                messageEvent.setMember("data", aData);
-                onmessage.call(session.getPublished(), new Object[]{messageEvent});
-            }
-        });
+        if (onmessage != null) {
+            inContext(() -> {
+                Scripts.getSpace().process(() -> {
+                    JSObject messageEvent = Scripts.getSpace().makeObj();
+                    messageEvent.setMember("data", aData);
+                    onmessage.call(session.getPublished(), new Object[]{messageEvent});
+                });
+            });
+        }
     }
 
     @OnOpen
     public void onOpen(Session aSession) {
-        ScriptUtils.submitTask(() -> {
-            ScriptUtils.acceptTaskResult(() -> {
-                if (onopen != null) {
+        if (onopen != null) {
+            inContext(() -> {
+                Scripts.getSpace().process(() -> {
                     onopen.call(session.getPublished(), new Object[]{});
-                }
+                });
             });
-        });
+        }
     }
 
     @OnClose
     public void onClose(Session websocketSession, CloseReason aReason) {
-        Runnable actor = () -> {
-            if (onclose != null) {
-                JSObject closeEvent = ScriptUtils.makeObj();
-                closeEvent.setMember("wasClean", aReason.getCloseCode() == CloseReason.CloseCodes.NORMAL_CLOSURE);
-                closeEvent.setMember("code", aReason.getCloseCode().getCode());
-                closeEvent.setMember("reason", aReason.getReasonPhrase());
-                onclose.call(session.getPublished(), new Object[]{closeEvent});
-            }
-        };
-        if (ScriptUtils.getLock() == null) {
-            session.inContext(actor);
-        } else {// already in context
-            final Object lock = ScriptUtils.getLock();
-            synchronized (lock) {
-                actor.run();
-            }
+        if (onclose != null) {
+            inContext(() -> {
+                Scripts.getSpace().process(() -> {
+                    JSObject closeEvent = Scripts.getSpace().makeObj();
+                    closeEvent.setMember("wasClean", aReason.getCloseCode() == CloseReason.CloseCodes.NORMAL_CLOSURE);
+                    closeEvent.setMember("code", aReason.getCloseCode().getCode());
+                    closeEvent.setMember("reason", aReason.getReasonPhrase());
+                    onclose.call(session.getPublished(), new Object[]{closeEvent});
+                });
+            });
         }
     }
 
     @OnError
     public void onError(Session websocketSession, Throwable aError) {
-        Runnable actor = () -> {
-            if (onerror != null) {
-                JSObject errorEvent = ScriptUtils.makeObj();
-                errorEvent.setMember("message", aError.getMessage());
-                onerror.call(session.getPublished(), new Object[]{errorEvent});
-            }
-        };
-        if (ScriptUtils.getLock() == null) {
-            session.inContext(actor);
-        } else {// already in context
-            final Object lock = ScriptUtils.getLock();
-            synchronized (lock) {
-                actor.run();
-            }
+        if (onerror != null) {
+            inContext(() -> {
+                Scripts.getSpace().process(() -> {
+                    JSObject errorEvent = Scripts.getSpace().makeObj();
+                    errorEvent.setMember("message", aError.getMessage());
+                    onerror.call(session.getPublished(), new Object[]{errorEvent});
+                });
+            });
         }
     }
 

@@ -59,7 +59,7 @@ public class DbStructureUtils {
                     } else {
                         return 0;
                     }
-                }, null, null);
+                }, null, null, null);
                 return count != null ? count : 0;
             } catch (Exception ex) {
                 Logger.getLogger(DbStructureUtils.class.getName()).log(Level.SEVERE, null, ex);

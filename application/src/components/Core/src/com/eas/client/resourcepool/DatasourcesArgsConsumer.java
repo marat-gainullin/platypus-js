@@ -117,10 +117,10 @@ public class DatasourcesArgsConsumer {
     }
 
     public void registerDatasources() throws SQLException {
-        for (DbConnectionSettings settings : parsedDatasources) {
+        parsedDatasources.stream().forEach((settings) -> {
             GeneralResourceProvider.getInstance().registerDatasource(settings.getName(), settings);
             Logger.getLogger(DatasourcesArgsConsumer.class.getName()).log(Level.INFO, "Datasource \"{0}\" has been registered", settings.getName());
-        }
+        });
     }
 
 }

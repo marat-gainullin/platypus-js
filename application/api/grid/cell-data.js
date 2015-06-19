@@ -1,6 +1,8 @@
 (function() {
-    var javaClass = Java.type("com.bearsoft.gui.grid.data.CellData");
-    javaClass.setPublisher(function(aDelegate) {
+    var className = "com.bearsoft.gui.grid.data.CellData";
+    var javaClass = Java.type(className);
+    var space = this['-platypus-scripts-space'];
+    space.putPublisher(className, function(aDelegate) {
         return new P.CellData(aDelegate);
     });
     

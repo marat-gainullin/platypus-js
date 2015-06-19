@@ -5,12 +5,11 @@
 package com.eas.client.resourcepool;
 
 import com.eas.client.settings.DbConnectionSettings;
-import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.naming.NamingException;
@@ -22,7 +21,10 @@ import javax.sql.DataSource;
  */
 public class GeneralResourceProvider {
 
-    private static GeneralResourceProvider instance;
+    protected static class InstanceHolder {
+
+        private static final GeneralResourceProvider instance = new GeneralResourceProvider();
+    }
     // dom constants
     public static transient final String DB_DRIVER_TAG_NAME = "driver";
     public static transient final String DB_DRIVER_DIALECT_ATTR_NAME = "dialect";
@@ -39,7 +41,7 @@ public class GeneralResourceProvider {
      *
      * @throws SQLException
      */
-    static void registerDrivers() throws SQLException {
+    public static void registerDrivers() throws SQLException {
         for (String driverClassName : driversClasses) {
             try {
                 Class<?> clazz = Class.forName(driverClassName);
@@ -61,26 +63,10 @@ public class GeneralResourceProvider {
         }
     }
 
-    /* db connections pools
-     * <String, >  - is connection pool id. It's the same as a connection descriptor db id.
-     */
-    private final Map<String, PlatypusNativeDataSource> connectionPools = new HashMap<>();
-    private final Map<String, DbConnectionSettings> connectionPoolsSettings = new HashMap<>();
+    private final Map<String, PlatypusNativeDataSource> connectionPools = new ConcurrentHashMap<>();
 
-    public static GeneralResourceProvider getInstance() throws SQLException {
-        if (instance == null) {
-            return getInstanceSync();
-        } else {
-            return instance;
-        }
-    }
-
-    private static synchronized GeneralResourceProvider getInstanceSync() throws SQLException {
-        if (instance == null) {
-            registerDrivers();
-            instance = new GeneralResourceProvider();
-        }
-        return instance;
+    public static GeneralResourceProvider getInstance() {
+        return InstanceHolder.instance;
     }
 
     protected GeneralResourceProvider() {
@@ -88,63 +74,79 @@ public class GeneralResourceProvider {
     }
 
     public void registerDatasource(String aName, DbConnectionSettings aSettings) {
-        connectionPoolsSettings.put(aName, aSettings);
+        connectionPools.put(aName, constructDataSource(aSettings));
+    }
+
+    public void registerDatasource(String aName, PlatypusNativeDataSource aPool) {
+        connectionPools.put(aName, aPool);
     }
 
     public void unregisterDatasource(String aName) throws SQLException {
-        disconnectDatasource(aName);
-        connectionPoolsSettings.remove(aName);
+        PlatypusNativeDataSource removed = connectionPools.remove(aName);
+        if (removed != null) {
+            removed.shutdown();
+        }
     }
 
-    private PlatypusNativeDataSource constructDataSource(DbConnectionSettings aSettings) throws Exception {
+    private PlatypusNativeDataSource constructDataSource(DbConnectionSettings aSettings) {
         return new PlatypusNativeDataSource(aSettings.getMaxConnections(), aSettings.getMaxStatements(), aSettings.getUrl(), aSettings.getUser(), aSettings.getPassword(), aSettings.getSchema(), aSettings.getProperties());
     }
 
-    public synchronized DataSource getPooledDataSource(String aDatasourceName) throws Exception {
-        if (connectionPoolsSettings.containsKey(aDatasourceName)) {
-            try {
-                DataSource dbPool = connectionPools.get(aDatasourceName);
-                if (dbPool == null) {
-                    dbPool = try2CreatePool(aDatasourceName);
-                }
-                return dbPool;
-            } catch (Exception ex) {
-                throw new ResourceUnavalableException(ex);
-            }
-        } else {
+    public DataSource getPooledDataSource(String aDatasourceName) throws Exception {
+        DataSource ds = connectionPools.get(aDatasourceName);
+        if (ds == null) {
             throw new NamingException("Datasource " + aDatasourceName + " is not registered");
-        }
-    }
-
-    private void testDataSource(DataSource aSource) throws Exception {
-        try (Connection lconn = aSource.getConnection()) {
-        }
-    }
-
-    private DataSource try2CreatePool(String aDataSourceId) throws Exception {
-        DbConnectionSettings lsettings = connectionPoolsSettings.get(aDataSourceId);
-        if (lsettings != null) {
-            PlatypusNativeDataSource lPool = constructDataSource(lsettings);
-            testDataSource(lPool);
-            connectionPools.put(aDataSourceId, lPool);
-            return lPool;
         } else {
-            throw new NamingException("Datasource " + aDataSourceId + " is not registered");
+            return ds;
         }
     }
 
-    public synchronized boolean disconnectDatasource(String aName) throws SQLException {
-        if (connectionPools.containsKey(aName)) {
-            PlatypusNativeDataSource pool = connectionPools.remove(aName);
-            pool.shutdown();
-            return true;
-        } else {
-            return false;
-        }
-    }
+    /*
+     public synchronized DataSource getPooledDataSource(String aDatasourceName) throws Exception {
+     if (connectionPoolsSettings.containsKey(aDatasourceName)) {
+     try {
+     DataSource dbPool = connectionPools.get(aDatasourceName);
+     if (dbPool == null) {
+     dbPool = try2CreatePool(aDatasourceName);
+     }
+     return dbPool;
+     } catch (Exception ex) {
+     throw new ResourceUnavalableException(ex);
+     }
+     } else {
+     throw new NamingException("Datasource " + aDatasourceName + " is not registered");
+     }
+     }
 
-    public synchronized boolean isDatasourceConnected(String aName) {
-        return connectionPools.containsKey(aName);
-    }
+     private void testDataSource(DataSource aSource) throws Exception {
+     try (Connection lconn = aSource.getConnection()) {
+     }
+     }
 
+     private DataSource try2CreatePool(String aDataSourceName) throws Exception {
+     DbConnectionSettings lsettings = connectionPoolsSettings.get(aDataSourceName);
+     if (lsettings != null) {
+     PlatypusNativeDataSource lPool = constructDataSource(lsettings);
+     testDataSource(lPool);
+     connectionPools.put(aDataSourceName, lPool);
+     return lPool;
+     } else {
+     throw new NamingException("Datasource " + aDataSourceName + " is not registered");
+     }
+     }
+
+     public synchronized boolean disconnectDatasource(String aName) throws SQLException {
+     if (connectionPools.containsKey(aName)) {
+     PlatypusNativeDataSource pool = connectionPools.remove(aName);
+     pool.shutdown();
+     return true;
+     } else {
+     return false;
+     }
+     }
+
+     public synchronized boolean isDatasourceConnected(String aName) {
+     return connectionPools.containsKey(aName);
+     }
+     */
 }

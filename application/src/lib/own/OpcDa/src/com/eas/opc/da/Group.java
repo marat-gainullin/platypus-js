@@ -28,8 +28,8 @@ import org.jinterop.dcom.core.JIVariant;
  *
  * @author pk
  */
-public class Group
-{
+public class Group {
+
     private String name;
     private boolean active;
     private int requestedUpdateRate;
@@ -48,8 +48,7 @@ public class Group
     private final List<DataListener> dataListeners = new ArrayList<>();
     private final InternalDataListener internalListener = new InternalDataListener();
 
-    protected Group(String name, boolean active, int requestedUpdateRate, int revisedUpdateRate, int clientHandle, int serverHandle, Integer timeBias, Float percentDeadBand, int localeID, IOPCGroupStateMgt groupStateMgt) throws JIException
-    {
+    protected Group(String name, boolean active, int requestedUpdateRate, int revisedUpdateRate, int clientHandle, int serverHandle, Integer timeBias, Float percentDeadBand, int localeID, IOPCGroupStateMgt groupStateMgt) throws JIException {
         this.name = name;
         this.active = active;
         this.requestedUpdateRate = requestedUpdateRate;
@@ -66,178 +65,139 @@ public class Group
         this.asyncIO.addDataListener(internalListener);
     }
 
-    public void addDataListener(DataListener l)
-    {
-        synchronized (dataListeners)
-        {
+    public void addDataListener(DataListener l) {
+        synchronized (dataListeners) {
             dataListeners.add(l);
         }
     }
 
-    public void removeDataListener(DataListener l)
-    {
-        synchronized (dataListeners)
-        {
+    public void removeDataListener(DataListener l) {
+        synchronized (dataListeners) {
             dataListeners.remove(l);
         }
     }
 
-    public boolean isActive()
-    {
+    public boolean isActive() {
         return active;
     }
 
-    public void setActive(boolean active) throws JIException
-    {
-        if (this.active != active)
-        {
+    public void setActive(boolean active) throws JIException {
+        if (this.active != active) {
             final boolean oldValue = this.active;
             this.active = active;
-            try
-            {
+            try {
                 updateStateOnServer();
-            } catch (JIException ex)
-            {
+            } catch (JIException ex) {
                 this.active = oldValue;
                 throw ex;
             }
         }
     }
 
-    public int getClientHandle()
-    {
+    public int getClientHandle() {
         return clientHandle;
     }
 
-    public void setClientHandle(int clientHandle) throws JIException
-    {
-        if (this.clientHandle != clientHandle)
-        {
+    public void setClientHandle(int clientHandle) throws JIException {
+        if (this.clientHandle != clientHandle) {
             final int oldValue = this.clientHandle;
             this.clientHandle = clientHandle;
-            try
-            {
+            try {
                 updateStateOnServer();
-            } catch (JIException ex)
-            {
+            } catch (JIException ex) {
                 this.clientHandle = oldValue;
                 throw ex;
             }
         }
     }
 
-    public int getLocaleID()
-    {
+    public int getLocaleID() {
         return localeID;
     }
 
-    public void setLocaleID(int localeID) throws JIException
-    {
-        if (this.localeID != localeID)
-        {
+    public void setLocaleID(int localeID) throws JIException {
+        if (this.localeID != localeID) {
             final int oldValue = this.localeID;
             this.localeID = localeID;
-            try
-            {
+            try {
                 updateStateOnServer();
-            } catch (JIException ex)
-            {
+            } catch (JIException ex) {
                 this.localeID = oldValue;
                 throw ex;
             }
         }
     }
 
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
 
-    public void setName(String name) throws JIException
-    {
+    public void setName(String name) throws JIException {
         groupStateMgt.setName(name);
         this.name = name;
     }
 
-    public Float getPercentDeadBand()
-    {
+    public Float getPercentDeadBand() {
         return percentDeadBand;
     }
 
-    public void setPercentDeadBand(Float percentDeadBand) throws JIException
-    {
-        if (this.percentDeadBand == null && percentDeadBand != null || this.percentDeadBand != null && !this.percentDeadBand.equals(percentDeadBand))
-        {
+    public void setPercentDeadBand(Float percentDeadBand) throws JIException {
+        if (this.percentDeadBand == null && percentDeadBand != null || this.percentDeadBand != null && !this.percentDeadBand.equals(percentDeadBand)) {
             final Float oldValue = this.percentDeadBand;
             this.percentDeadBand = percentDeadBand;
-            try
-            {
+            try {
                 updateStateOnServer();
 
-            } catch (JIException ex)
-            {
+            } catch (JIException ex) {
                 this.percentDeadBand = oldValue;
                 throw ex;
             }
         }
     }
 
-    public int getRequestedUpdateRate()
-    {
+    public int getRequestedUpdateRate() {
         return requestedUpdateRate;
     }
 
-    public void setRequestedUpdateRate(int requestedUpdateRate) throws JIException
-    {
-        if (this.requestedUpdateRate != requestedUpdateRate)
-        {
+    public void setRequestedUpdateRate(int requestedUpdateRate) throws JIException {
+        if (this.requestedUpdateRate != requestedUpdateRate) {
             final int oldValue = this.requestedUpdateRate;
             this.requestedUpdateRate = requestedUpdateRate;
-            try
-            {
+            try {
                 updateStateOnServer();
-            } catch (JIException ex)
-            {
+            } catch (JIException ex) {
                 this.requestedUpdateRate = oldValue;
                 throw ex;
             }
         }
     }
 
-    public int getRevisedUpdateRate()
-    {
+    public int getRevisedUpdateRate() {
         return revisedUpdateRate;
     }
 
-    public int getServerHandle()
-    {
+    public int getServerHandle() {
         return serverHandle;
     }
 
-    public Integer getTimeBias()
-    {
+    public Integer getTimeBias() {
         return timeBias;
     }
 
-    public void setTimeBias(Integer timeBias) throws JIException
-    {
-        if (this.timeBias == null && timeBias != null || this.timeBias != null && !this.timeBias.equals(timeBias))
-        {
+    public void setTimeBias(Integer timeBias) throws JIException {
+        if (this.timeBias == null && timeBias != null || this.timeBias != null && !this.timeBias.equals(timeBias)) {
             final Integer oldValue = this.timeBias;
             this.timeBias = timeBias;
-            try
-            {
+            try {
                 updateStateOnServer();
-            } catch (JIException ex)
-            {
+            } catch (JIException ex) {
                 this.timeBias = oldValue;
                 throw ex;
             }
         }
     }
 
-    public void updateState() throws JIException
-    {
+    public void updateState() throws JIException {
         final GroupState state = groupStateMgt.getState();
         name = state.getName();
         clientHandle = state.getClientHandle();
@@ -248,19 +208,18 @@ public class Group
         revisedUpdateRate = state.getUpdateRate();
     }
 
-    public int[] addItems(Item... items) throws JIException
-    {
-        synchronized (this)
-        {
-            for (Item i : items)
-                if (knownItems.contains(i))
+    public int[] addItems(Item... items) throws JIException {
+        synchronized (this) {
+            for (Item i : items) {
+                if (knownItems.contains(i)) {
                     throw new IllegalArgumentException(String.format("Item %s is already added.", i.getItemID()));
+                }
+            }
         }
         final OPCITEMDEF[] itemsDefs = buildItemsDefs(items);
         final ResultTable<OPCITEMDEF, OPCITEMRESULT> result = itemMgt.addItems(itemsDefs);
         final int[] errors = new int[items.length];
-        for (int i = 0; i < items.length; i++)
-        {
+        for (int i = 0; i < items.length; i++) {
             errors[i] = result.errorCode(itemsDefs[i]);
             final OPCITEMRESULT itemResult = result.get(itemsDefs[i]);
             items[i].setAccessRights(itemResult.getAccessRights());
@@ -268,10 +227,8 @@ public class Group
             items[i].setReserved(itemResult.getReserved());
             items[i].setServerHandle(itemResult.getServerHandle());
         }
-        synchronized (this)
-        {
-            for (Item i : items)
-            {
+        synchronized (this) {
+            for (Item i : items) {
                 knownItems.add(i);
                 knownItemsByClientHandle.put(i.getClientHandle(), i);
                 i.setGroup(this);
@@ -280,13 +237,11 @@ public class Group
         return errors;
     }
 
-    public int[] validateItems(Item... items) throws JIException
-    {
+    public int[] validateItems(Item... items) throws JIException {
         final OPCITEMDEF[] itemsDefs = buildItemsDefs(items);
         final ResultTable<OPCITEMDEF, OPCITEMRESULT> result = itemMgt.validateItems(itemsDefs, false);
         final int[] errors = new int[items.length];
-        for (int i = 0; i < items.length; i++)
-        {
+        for (int i = 0; i < items.length; i++) {
             errors[i] = result.errorCode(itemsDefs[i]);
             final OPCITEMRESULT itemResult = result.get(itemsDefs[i]);
             items[i].setAccessRights(itemResult.getAccessRights());
@@ -297,25 +252,25 @@ public class Group
         return errors;
     }
 
-    public int[] removeItems(Item... items) throws JIException
-    {
-        synchronized (this)
-        {
-            for (Item i : items)
-                if (!knownItems.contains(i))
+    public int[] removeItems(Item... items) throws JIException {
+        synchronized (this) {
+            for (Item i : items) {
+                if (!knownItems.contains(i)) {
                     throw new IllegalArgumentException(String.format("Item %s is not added.", i.getItemID()));
+                }
+            }
         }
         final Integer[] serverHandles = new Integer[items.length];
-        for (int i = 0; i < items.length; i++)
+        for (int i = 0; i < items.length; i++) {
             serverHandles[i] = items[i].getServerHandle();
+        }
         final Map<Integer, Integer> result = itemMgt.removeItems(serverHandles);
         final int[] errors = new int[items.length];
-        for (int i = 0; i < items.length; i++)
+        for (int i = 0; i < items.length; i++) {
             errors[i] = result.get(items[i].getServerHandle());
-        synchronized (this)
-        {
-            for (Item i : items)
-            {
+        }
+        synchronized (this) {
+            for (Item i : items) {
                 knownItems.remove(i);
                 knownItemsByClientHandle.remove(i.getClientHandle());
             }
@@ -323,47 +278,40 @@ public class Group
         return errors;
     }
 
-    public int[] removeAllItems() throws JIException
-    {
+    public int[] removeAllItems() throws JIException {
         Item[] items;
-        synchronized (this)
-        {
+        synchronized (this) {
             items = new Item[knownItems.size()];
             items = knownItems.toArray(items);
         }
         return removeItems(items);
     }
 
-    public Item[] getItems()
-    {
+    public Item[] getItems() {
         Item[] result;
-        synchronized (this)
-        {
+        synchronized (this) {
             result = new Item[knownItems.size()];
             result = knownItems.toArray(result);
         }
         return result;
     }
 
-    public Item.State[] read(DataSource ds, Item... items) throws JIException
-    {
+    public Item.State[] read(DataSource ds, Item... items) throws JIException {
         final int[] serverHandles = new int[items.length];
-        synchronized (this)
-        {
-            for (int i = 0; i < items.length; i++)
-            {
-                if (!knownItemsByClientHandle.containsKey(items[i].getClientHandle()))
+        synchronized (this) {
+            for (int i = 0; i < items.length; i++) {
+                if (!knownItemsByClientHandle.containsKey(items[i].getClientHandle())) {
                     throw new IllegalArgumentException("Group does not contain item " + items[i]);
-                else if (items[i].getServerHandle() == null)
+                } else if (items[i].getServerHandle() == null) {
                     throw new IllegalArgumentException("" + items[i] + " has not been added to any group.");
-                else
+                } else {
                     serverHandles[i] = items[i].getServerHandle();
+                }
             }
         }
         final ResultTable<Integer, OPCITEMSTATE> out = syncIO.read(ds.getValue(), serverHandles);
         final Item.State[] result = new Item.State[items.length];
-        for (int i = 0; i < items.length; i++)
-        {
+        for (int i = 0; i < items.length; i++) {
             final OPCITEMSTATE state = out.get(items[i].getServerHandle());
             result[i] = new Item.State(items[i], state.getTimeStamp().getTime(),
                     state.getQuality(), (short) 0, state.getDataValue().getObject(),
@@ -372,140 +320,131 @@ public class Group
         return result;
     }
 
-    public Item.State[] read(DataSource ds) throws JIException
-    {
+    public Item.State[] read(DataSource ds) throws JIException {
         Item[] items;
-        synchronized (this)
-        {
+        synchronized (this) {
             items = new Item[knownItems.size()];
             items = knownItems.toArray(items);
         }
         return read(ds, items);
     }
 
-    public void readRawHistory(Date startTime, Date endTime, int numValues, boolean withBounds, Item... items)
-    {
+    public void readRawHistory(Date startTime, Date endTime, int numValues, boolean withBounds, Item... items) {
         final Integer[] serverHandles = new Integer[items.length];
-        synchronized (this)
-        {
-            for (int i = 0; i < items.length; i++)
-            {
-                if (!knownItemsByClientHandle.containsKey(items[i].getClientHandle()))
+        synchronized (this) {
+            for (int i = 0; i < items.length; i++) {
+                if (!knownItemsByClientHandle.containsKey(items[i].getClientHandle())) {
                     throw new IllegalArgumentException("Group does not contain item " + items[i]);
-                else if (items[i].getServerHandle() == null)
+                } else if (items[i].getServerHandle() == null) {
                     throw new IllegalArgumentException("" + items[i] + " has not been added to any group.");
-                else
+                } else {
                     serverHandles[i] = items[i].getServerHandle();
+                }
             }
         }
     }
 
-    public int[] write(Object... data) throws JIException
-    {
-        if (data.length % 2 != 0)
+    public int[] write(Object... data) throws JIException {
+        if (data.length % 2 != 0) {
             throw new IllegalArgumentException("syntax: write(item1, value1, item2, value2, ...");
+        }
         final int[] serverHandles = new int[data.length / 2];
         final JIVariant[] values = new JIVariant[serverHandles.length];
-        for (int i = 0; i < serverHandles.length; i++)
-        {
-            if (!(data[i] instanceof Item))
+        for (int i = 0; i < serverHandles.length; i++) {
+            if (!(data[i] instanceof Item)) {
                 throw new IllegalArgumentException("syntax: write(item1, value1, item2, value2, ...");
+            }
             Item item = (Item) data[i * 2];
-            if (item.getServerHandle() == null || item.getGroup() != this)
+            if (item.getServerHandle() == null || item.getGroup() != this) {
                 throw new IllegalArgumentException("" + item + " not in this group.");
+            }
             serverHandles[i] = item.getServerHandle();
             values[i] = new JIVariant(data[i * 2 + 1], false);
         }
         final Map<Integer, Integer> result = syncIO.write(serverHandles, values);
         final int[] errors = new int[serverHandles.length];
-        for (int i = 0; i < serverHandles.length; i++)
+        for (int i = 0; i < serverHandles.length; i++) {
             errors[i] = result.get(serverHandles[i]);
+        }
         return errors;
     }
 
-    public AsyncOperationInfo readAsync(int transactionID, Item... items) throws JIException
-    {
+    public AsyncOperationInfo readAsync(int transactionID, Item... items) throws JIException {
         final int[] serverHandles = new int[items.length];
-        synchronized (this)
-        {
-            for (int i = 0; i < items.length; i++)
-            {
-                if (!knownItemsByClientHandle.containsKey(items[i].getClientHandle()))
+        synchronized (this) {
+            for (int i = 0; i < items.length; i++) {
+                if (!knownItemsByClientHandle.containsKey(items[i].getClientHandle())) {
                     throw new IllegalArgumentException("Group does not contain item " + items[i]);
-                else if (items[i].getServerHandle() == null)
+                } else if (items[i].getServerHandle() == null) {
                     throw new IllegalArgumentException("" + items[i] + " has not been added to any group.");
-                else
+                } else {
                     serverHandles[i] = items[i].getServerHandle();
+                }
             }
         }
         final ReadResult r = asyncIO.read(serverHandles, transactionID);
         final int[] errors = new int[serverHandles.length];
-        for (int i = 0; i < serverHandles.length; i++)
+        for (int i = 0; i < serverHandles.length; i++) {
             errors[i] = r.getErrorCodes().get(serverHandles[i]);
+        }
         return new AsyncOperationInfo(r.getCancelId(), errors);
     }
 
-    public AsyncOperationInfo writeAsync(int transactionID, Object... data) throws JIException
-    {
-        if (data.length % 2 != 0)
+    public AsyncOperationInfo writeAsync(int transactionID, Object... data) throws JIException {
+        if (data.length % 2 != 0) {
             throw new IllegalArgumentException("syntax: writeAsync(transid, item1, value1, item2, value2, ...");
+        }
         final int[] serverHandles = new int[data.length / 2];
         final JIVariant[] values = new JIVariant[serverHandles.length];
-        for (int i = 0; i < serverHandles.length; i++)
-        {
-            if (!(data[i] instanceof Item))
+        for (int i = 0; i < serverHandles.length; i++) {
+            if (!(data[i] instanceof Item)) {
                 throw new IllegalArgumentException("syntax: writeAsync(transid, item1, value1, item2, value2, ...");
+            }
             Item item = (Item) data[i * 2];
-            if (item.getServerHandle() == null || item.getGroup() != this)
+            if (item.getServerHandle() == null || item.getGroup() != this) {
                 throw new IllegalArgumentException("" + item + " not in this group.");
+            }
             serverHandles[i] = item.getServerHandle();
             values[i] = new JIVariant(data[i * 2 + 1], false);
         }
         final ReadResult r = asyncIO.write(serverHandles, values, transactionID);
         final int[] errors = new int[serverHandles.length];
-        for (int i = 0; i < serverHandles.length; i++)
+        for (int i = 0; i < serverHandles.length; i++) {
             errors[i] = r.getErrorCodes().get(serverHandles[i]);
+        }
         return new AsyncOperationInfo(r.getCancelId(), errors);
     }
 
-    public AsyncOperationInfo refreshAsync(DataSource ds, int transactionID) throws JIException
-    {
+    public AsyncOperationInfo refreshAsync(DataSource ds, int transactionID) throws JIException {
         final int cancelID = asyncIO.refresh2(ds.getValue(), transactionID);
         return new AsyncOperationInfo(cancelID, new int[0]);
     }
 
-    public void cancelAsync(AsyncOperationInfo info) throws JIException
-    {
+    public void cancelAsync(AsyncOperationInfo info) throws JIException {
         asyncIO.cancel2(info.getCancelID());
     }
 
-    public boolean isSubscriptionEnabled() throws JIException
-    {
+    public boolean isSubscriptionEnabled() throws JIException {
         return asyncIO.getEnable();
     }
 
-    public void setSubscriptionEnabled(boolean enabled) throws JIException
-    {
+    public void setSubscriptionEnabled(boolean enabled) throws JIException {
         asyncIO.setEnable(enabled);
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return String.format("[OPC DA group %s, clientHandle=%d, serverHandle=%d]", name, clientHandle, serverHandle);
     }
 
-    protected void cleanup() throws JIException
-    {
-        synchronized (this)
-        {
+    protected void cleanup() throws JIException {
+        synchronized (this) {
             asyncIO.removeDataListener(internalListener);
             removeAllItems();
         }
     }
 
-    private void updateStateOnServer() throws JIException
-    {
+    private void updateStateOnServer() throws JIException {
         final GroupState state = new GroupState();
         state.setActive(active);
         state.setClientHandle(clientHandle);
@@ -518,11 +457,9 @@ public class Group
         this.revisedUpdateRate = groupStateMgt.setState(state);
     }
 
-    private OPCITEMDEF[] buildItemsDefs(Item[] items)
-    {
+    private OPCITEMDEF[] buildItemsDefs(Item[] items) {
         final OPCITEMDEF[] itemsDefs = new OPCITEMDEF[items.length];
-        for (int i = 0; i < items.length; i++)
-        {
+        for (int i = 0; i < items.length; i++) {
             itemsDefs[i] = new OPCITEMDEF();
             itemsDefs[i].setAccessPath(items[i].getAccessPath());
             itemsDefs[i].setActive(items[i].isActive());
@@ -534,85 +471,79 @@ public class Group
         return itemsDefs;
     }
 
-    public static class AsyncOperationInfo
-    {
+    public static class AsyncOperationInfo {
+
         private final int[] errors;
         private final int cancelID;
 
-        public AsyncOperationInfo(int cancelID, int[] errors)
-        {
+        public AsyncOperationInfo(int cancelID, int[] errors) {
             this.errors = errors;
             this.cancelID = cancelID;
         }
 
-        public int getCancelID()
-        {
+        public int getCancelID() {
             return cancelID;
         }
 
-        public int[] getErrors()
-        {
+        public int[] getErrors() {
             return errors;
         }
     }
 
-    private class InternalDataListener implements OPCDataListener
-    {
-        private DataListener[] getListeners()
-        {
+    private class InternalDataListener implements OPCDataListener {
+
+        private DataListener[] getListeners() {
             DataListener[] result;
-            synchronized (Group.this.dataListeners)
-            {
+            synchronized (Group.this.dataListeners) {
                 result = new DataListener[Group.this.dataListeners.size()];
                 result = Group.this.dataListeners.toArray(result);
             }
             return result;
         }
 
-        private Item.State[] getResult(Integer[] clientHandles, Object[] values, Short[] qualities, Date[] timeStamps, Integer[] errors)
-        {
+        private Item.State[] getResult(Integer[] clientHandles, Object[] values, Short[] qualities, Date[] timeStamps, Integer[] errors) {
             final List<State> states = new ArrayList<>(clientHandles.length);
-            for (int i = 0; i < clientHandles.length; i++)
-            {
+            for (int i = 0; i < clientHandles.length; i++) {
                 final Item item = Group.this.knownItemsByClientHandle.get(clientHandles[i]);
-                if (item != null)
+                if (item != null) {
                     states.add(new Item.State(item, timeStamps == null ? null : timeStamps[i], qualities == null ? 0 : qualities[i],
                             (short) 0, values == null ? null : values[i], errors == null ? 0 : errors[i]));
+                }
             }
             State[] result = new Item.State[states.size()];
             result = states.toArray(result);
             return result;
         }
 
-        public void dataChanged(Integer transid, Integer group, Integer masterQuality, Integer masterError, Integer[] clientHandles, Object[] values, Short[] qualities, Date[] timeStamps, Integer[] errors)
-        {
+        public void dataChanged(Integer transid, Integer group, Integer masterQuality, Integer masterError, Integer[] clientHandles, Object[] values, Short[] qualities, Date[] timeStamps, Integer[] errors) {
             final DataListener[] listeners = getListeners();
             final Item.State[] result = getResult(clientHandles, values, qualities, timeStamps, errors);
-            for (DataListener l : listeners)
+            for (DataListener l : listeners) {
                 l.dataChanged(transid, Group.this, masterQuality, masterError, result);
+            }
         }
 
-        public void readCompleted(Integer transid, Integer group, Integer masterQuality, Integer masterError, Integer[] clientHandles, Object[] values, Short[] qualities, Date[] timeStamps, Integer[] errors)
-        {
+        public void readCompleted(Integer transid, Integer group, Integer masterQuality, Integer masterError, Integer[] clientHandles, Object[] values, Short[] qualities, Date[] timeStamps, Integer[] errors) {
             final DataListener[] listeners = getListeners();
             final Item.State[] result = getResult(clientHandles, values, qualities, timeStamps, errors);
-            for (DataListener l : listeners)
+            for (DataListener l : listeners) {
                 l.readCompleted(transid, Group.this, masterQuality, masterError, result);
+            }
         }
 
-        public void writeCompleted(Integer transid, Integer group, Integer masterError, Integer[] clientHandles, Integer[] errors)
-        {
+        public void writeCompleted(Integer transid, Integer group, Integer masterError, Integer[] clientHandles, Integer[] errors) {
             final DataListener[] listeners = getListeners();
             final Item.State[] result = getResult(clientHandles, null, null, null, errors);
-            for (DataListener l : listeners)
+            for (DataListener l : listeners) {
                 l.writeCompleted(transid, Group.this, masterError, result);
+            }
         }
 
-        public void cancelCompleted(Integer transid, Integer group)
-        {
+        public void cancelCompleted(Integer transid, Integer group) {
             final DataListener[] listeners = getListeners();
-            for (DataListener l : listeners)
+            for (DataListener l : listeners) {
                 l.cancelCompleted(transid, Group.this);
+            }
         }
     }
 }

@@ -5,13 +5,11 @@
  */
 package com.eas.server.websocket;
 
-import com.eas.client.login.PlatypusPrincipal;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
-import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.script.ScriptObj;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import java.io.IOException;
 import java.net.URI;
 import java.util.logging.Level;
@@ -30,49 +28,13 @@ public class WebSocketClientSession implements HasPublished {
 
     protected JSObject published;
     protected Session webSocketSession;
-    protected final Object lock;
-    protected final Object request;
-    protected final Object reqponse;
-    protected final Object platypusSession;
-    protected final PlatypusPrincipal principal;
     //
-    protected JsClientEndPoint endPoint = new JsClientEndPoint(this);
+    protected JsClientEndPoint endPoint = new JsClientEndPoint(this, Scripts.getContext());
 
     @ScriptFunction(params = {"uri"})
     public WebSocketClientSession(String aUri) throws Exception {
         super();
-        lock = ScriptUtils.getLock();
-        if (lock == null) {
-            throw new IllegalStateException("Web socket constructor must be called in valid context (Platypus Async IO attributes must present).");
-        }
-        request = ScriptUtils.getRequest();
-        reqponse = ScriptUtils.getResponse();
-        platypusSession = ScriptUtils.getSession();
-        principal = PlatypusPrincipal.getInstance();
-
         webSocketSession = ContainerProvider.getWebSocketContainer().connectToServer(endPoint, URI.create(aUri));
-    }
-
-    public void inContext(Runnable anActor) {
-        if (ScriptUtils.getLock() != null) {
-            throw new IllegalStateException("Web socket callback must be called in clear context (from new thread or new pooled task).");
-        }
-        ScriptUtils.setLock(lock);
-        ScriptUtils.setRequest(request);
-        ScriptUtils.setResponse(reqponse);
-        ScriptUtils.setSession(platypusSession);
-        PlatypusPrincipal.setInstance(principal);
-        try {
-            synchronized (lock) {
-                anActor.run();
-            }
-        } finally {
-            ScriptUtils.setLock(null);
-            ScriptUtils.setRequest(null);
-            ScriptUtils.setResponse(null);
-            ScriptUtils.setSession(null);
-            PlatypusPrincipal.setInstance(null);
-        }
     }
 
     @ScriptFunction
@@ -167,18 +129,6 @@ public class WebSocketClientSession implements HasPublished {
 
     @Override
     public JSObject getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = (JSObject) publisher.call(null, new Object[]{this});
-        }
         return published;
-    }
-
-    private static JSObject publisher;
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
     }
 }

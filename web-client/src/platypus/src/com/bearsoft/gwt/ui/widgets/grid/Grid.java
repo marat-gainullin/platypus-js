@@ -18,6 +18,7 @@ import com.bearsoft.gwt.ui.widgets.grid.builders.ThemedCellTableBuilder;
 import com.bearsoft.gwt.ui.widgets.grid.builders.ThemedHeaderOrFooterBuilder;
 import com.bearsoft.gwt.ui.widgets.grid.header.HasSortList;
 import com.bearsoft.gwt.ui.widgets.grid.header.HeaderNode;
+import com.eas.client.Utils;
 import com.eas.client.form.grid.columns.ModelColumn;
 import com.eas.client.form.published.PublishedColor;
 import com.google.gwt.cell.client.Cell;
@@ -396,23 +397,14 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 			public void onDrag(DragEvent event) {
 				if (DraggedColumn.instance != null && DraggedColumn.instance.isResize()) {
 					event.stopPropagation();
-					Element hostElement = Grid.this.getElement();
-					int clientX = event.getNativeEvent().getClientX();
-					int hostAbsX = hostElement.getAbsoluteLeft();
-					int hostScrollX = hostElement.getScrollLeft();
-					int docScrollX = hostElement.getOwnerDocument().getScrollLeft();
-					int relativeX = clientX - hostAbsX + hostScrollX + docScrollX;
-					ghostLine.getStyle().setLeft(relativeX, Style.Unit.PX);
-					ghostLine.getStyle().setHeight(hostElement.getClientHeight(), Style.Unit.PX);
-					if (ghostLine.getParentElement() != hostElement) {
-						hostElement.appendChild(ghostLine);
-					}
+					/*
 					int newWidth = event.getNativeEvent().getClientX() - DraggedColumn.instance.getCellElement().getAbsoluteLeft();
 					if (newWidth > MINIMUM_COLUMN_WIDTH) {
 						event.getDataTransfer().<XDataTransfer> cast().setDropEffect("move");
 					} else {
 						event.getDataTransfer().<XDataTransfer> cast().setDropEffect("none");
 					}
+					*/
 				}
 			}
 		}, DragEvent.getType());
@@ -432,6 +424,17 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 							event.getDataTransfer().<XDataTransfer> cast().setDropEffect("none");
 						}
 					} else {
+						Element hostElement = Grid.this.getElement();
+						int clientX = event.getNativeEvent().getClientX();
+						int hostAbsX = hostElement.getAbsoluteLeft();
+						int hostScrollX = hostElement.getScrollLeft();
+						int docScrollX = hostElement.getOwnerDocument().getScrollLeft();
+						int relativeX = clientX - hostAbsX + hostScrollX + docScrollX;
+						ghostLine.getStyle().setLeft(relativeX, Style.Unit.PX);
+						ghostLine.getStyle().setHeight(hostElement.getClientHeight(), Style.Unit.PX);
+						if (ghostLine.getParentElement() != hostElement) {
+							hostElement.appendChild(ghostLine);
+						}
 					}
 				}
 			}

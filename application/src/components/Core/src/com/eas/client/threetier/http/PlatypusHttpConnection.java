@@ -4,22 +4,28 @@
  */
 package com.eas.client.threetier.http;
 
+import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.Credentials;
 import com.eas.client.login.PlatypusPrincipal;
+import com.eas.client.report.Report;
+import com.eas.client.settings.SettingsConstants;
 import com.eas.client.threetier.PlatypusClient;
 import com.eas.client.threetier.requests.ErrorResponse;
 import com.eas.client.threetier.PlatypusConnection;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Response;
-import com.eas.client.threetier.platypus.RequestEnvelope;
 import com.eas.client.threetier.requests.LogoutRequest;
+import com.eas.client.threetier.requests.RPCRequest;
 import com.eas.concurrent.DeamonThreadFactory;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
+import com.eas.util.BinaryUtils;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -27,10 +33,10 @@ import java.security.NoSuchProviderException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.text.ParseException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -39,7 +45,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
-import sun.misc.BASE64Encoder;
 
 /**
  *
@@ -56,43 +61,17 @@ public class PlatypusHttpConnection extends PlatypusConnection {
         }
     }
 
-    protected Map<String, Cookie> cookies = new ConcurrentHashMap<>();
-    protected Credentials basicCredentials;
-    //
-    private final ThreadPoolExecutor requestsSender;
+    protected Map<String, Cookie> cookies = new HashMap<>();
+    private final ThreadPoolExecutor bioExecutor;
+    protected boolean basicSchemeMet = false;
 
-    public PlatypusHttpConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts, int aMaximumThreads) throws Exception {
+    public PlatypusHttpConnection(URL aUrl, Callable<Credentials> aOnCredentials, int aMaximumAuthenticateAttempts, int aMaximumBIOThreads) throws Exception {
         super(aUrl, aOnCredentials, aMaximumAuthenticateAttempts);
-        requestsSender = new ThreadPoolExecutor(aMaximumThreads, aMaximumThreads,
+        bioExecutor = new ThreadPoolExecutor(aMaximumBIOThreads, aMaximumBIOThreads,
                 1L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(),
                 new DeamonThreadFactory("http-client-", false));
-        requestsSender.allowCoreThreadTimeOut(true);
-    }
-
-    public void checkedAddBasicAuthentication(HttpURLConnection aConn) throws UnsupportedEncodingException {
-        Credentials creds = basicCredentials; // To avoid multithreading issues
-        if (creds != null) {
-            addBasicAuthentication(aConn, creds.userName, creds.password);
-        }
-    }
-
-    public void setBasicCredentials(Credentials aValue) {
-        basicCredentials = aValue;
-    }
-
-    void reloggedIn() {
-        if (onLogin != null) {
-            onLogin.run();
-        }
-    }
-
-    private static void addBasicAuthentication(HttpURLConnection aConnection, String aLogin, String aPassword) throws UnsupportedEncodingException {
-        if (aLogin != null && !aLogin.isEmpty() && aPassword != null) {
-            BASE64Encoder encoder = new BASE64Encoder();
-            String requestAuthSting = PlatypusHttpConstants.BASIC_AUTH_NAME + " " + encoder.encode(aLogin.concat(":").concat(aPassword).getBytes(PlatypusHttpConstants.HEADERS_ENCODING_NAME));
-            aConnection.setRequestProperty(PlatypusHttpConstants.HEADER_AUTHORIZATION, requestAuthSting);
-        }
+        bioExecutor.allowCoreThreadTimeOut(true);
     }
 
     public void acceptCookies(HttpURLConnection aConnection) throws ParseException, NumberFormatException {
@@ -110,143 +89,267 @@ public class PlatypusHttpConnection extends PlatypusConnection {
         }
     }
 
-    public void addCookies(HttpURLConnection aConnection) {
-        String[] cookiesNames = cookies.keySet().toArray(new String[]{});
-        for (String cookieName : cookiesNames) {
-            Cookie cookie = cookies.get(cookieName);
-            if (cookie != null && cookie.isActual()) {
-                String cookieHeaderValue = cookieName + "=" + cookie.getValue();
-                aConnection.addRequestProperty(PlatypusHttpConstants.HEADER_COOKIE, cookieHeaderValue);
-            } else {
-                cookies.remove(cookieName);
-            }
-        }
-    }
-
     @Override
-    public <R extends Response> void enqueueRequest(Request rq, Consumer<R> onSuccess, Consumer<Exception> onFailure) {
-        ScriptUtils.incAsyncsCount();
-        enqueue(new RequestCallback(new RequestEnvelope(rq, null, null, null), (Response aResponse) -> {
-            if (aResponse instanceof ErrorResponse) {
+    public <R extends Response> void enqueueRequest(Request aRequest, Scripts.Space aSpace, Consumer<R> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        Scripts.getContext().incAsyncsCount();
+        Consumer<PlatypusHttpRequestWriter> responseHandler = (PlatypusHttpRequestWriter aHttpSender) -> {
+            if (aHttpSender.response instanceof ErrorResponse) {
                 if (onFailure != null) {
-                    Exception cause = handleErrorResponse((ErrorResponse) aResponse);
-                    if (ScriptUtils.getGlobalQueue() != null) {
-                        ScriptUtils.getGlobalQueue().accept(() -> {
-                            onFailure.accept(cause);
-                        });
-                    } else {
-                        final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
-                        synchronized (lock) {
-                            onFailure.accept(cause);
-                        }
-                    }
+                    Exception cause = handleErrorResponse((ErrorResponse) aHttpSender.response);
+                    onFailure.accept(cause);
                 }
             } else {
+                if (aRequest instanceof LogoutRequest) {
+                    cookies.clear();
+                    credentials = null;
+                }
                 if (onSuccess != null) {
-                    if (ScriptUtils.getGlobalQueue() != null) {
-                        ScriptUtils.getGlobalQueue().accept(() -> {
-                            if (rq instanceof LogoutRequest) {
-                                cookies.clear();
-                                basicCredentials = null;
-                                if (onLogout != null) {
-                                    onLogout.run();
-                                }
-                            }
-                            onSuccess.accept((R) aResponse);
-                        });
-                    } else {
-                        final Object lock = ScriptUtils.getLock() != null ? ScriptUtils.getLock() : this;
-                        synchronized (lock) {
-                            if (rq instanceof LogoutRequest) {
-                                cookies.clear();
-                                basicCredentials = null;
-                                if (onLogout != null) {
-                                    onLogout.run();
-                                }
-                            }
-                            onSuccess.accept((R) aResponse);
+                    try {
+                        // Response reading in a working thread because of BIO nature of http client :(
+                        PlatypusHttpResponseReader reader = new PlatypusHttpResponseReader(aRequest, aHttpSender.conn, aHttpSender.responseBody);
+                        aHttpSender.response.accept(reader);
+                        if (aHttpSender.response instanceof RPCRequest.Response && ((RPCRequest.Response) aHttpSender.response).getResult() instanceof URL) {
+                            RPCRequest.Response rpcResponse = (RPCRequest.Response) aHttpSender.response;
+                            fetchReport(rpcResponse, aSpace, onSuccess, onFailure);
+                        } else {
+                            onSuccess.accept((R) aHttpSender.response);
                         }
+                    } catch (Exception ex) {
+                        Logger.getLogger(PlatypusHttpConnection.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
             }
-        }), onFailure);
+        };
+        Consumer<Consumer<PlatypusHttpRequestWriter>> requestPusher = (Consumer<PlatypusHttpRequestWriter> aOnComplete) -> {
+            Map<String, Cookie> localCookies = new HashMap<>();
+            localCookies.putAll(cookies);
+            Scripts.LocalContext context = Scripts.getContext();
+            bioExecutor.submit(() -> {
+                Scripts.setContext(context);
+                try {
+                    PlatypusHttpRequestWriter httpSender = new PlatypusHttpRequestWriter(url, localCookies, basicSchemeMet ? new Credentials(credentials.userName, credentials.password) : null);
+                    aRequest.accept(httpSender);// bio in a background thread
+                    aSpace.process(() -> {
+                        try {
+                            acceptCookies(httpSender.conn);
+                            aOnComplete.accept(httpSender);
+                        } catch (ParseException | NumberFormatException ex) {
+                            Logger.getLogger(PlatypusHttpConnection.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    });
+                } catch (Exception ex) {
+                    Logger.getLogger(PlatypusHttpConnection.class.getName()).log(Level.SEVERE, null, ex);
+                } finally {
+                    Scripts.setContext(null);
+                }
+            });
+        };
+        Attempts attempts = new Attempts();
+        retryRequest(requestPusher, aSpace, responseHandler, attempts);
     }
 
-    private void startRequestTask(Runnable aTask) {
-        Object closureLock = ScriptUtils.getLock();
-        Object closureRequest = ScriptUtils.getRequest();
-        Object closureResponse = ScriptUtils.getResponse();
-        Object closureSession = ScriptUtils.getSession();
-        PlatypusPrincipal closurePrincipal = PlatypusPrincipal.getInstance();
-        requestsSender.submit(() -> {
-            ScriptUtils.setLock(closureLock);
-            ScriptUtils.setRequest(closureRequest);
-            ScriptUtils.setResponse(closureResponse);
-            ScriptUtils.setSession(closureSession);
-            PlatypusPrincipal.setInstance(closurePrincipal);
+    private <R extends Response> void fetchReport(RPCRequest.Response rpcResponse, Scripts.Space aSpace, Consumer<R> onSuccess, Consumer<Exception> onFailure) {
+        URL reportUrl = (URL) rpcResponse.getResult();
+        String reportLocation = reportUrl.getFile();
+        Scripts.LocalContext context = Scripts.getContext();
+        bioExecutor.submit(() -> {// bio background thread
+            Scripts.setContext(context);
             try {
-                aTask.run();
+                HttpURLConnection reportConn = (HttpURLConnection) reportUrl.openConnection();
+                reportConn.setDoInput(true);
+                PlatypusHttpRequestWriter.addCookies(cookies, reportConn);
+                if (basicSchemeMet) {
+                    PlatypusHttpRequestWriter.addBasicAuthentication(reportConn, credentials.userName, credentials.password);
+                }
+                try (InputStream in = reportConn.getInputStream()) {
+                    byte[] content = BinaryUtils.readStream(in, -1);
+                    int slashIdx = reportLocation.lastIndexOf("/");
+                    String fileName = reportLocation.substring(slashIdx + 1);
+                    if (fileName.contains(".")) {
+                        String[] nameFormat = fileName.split("\\.");
+                        Report report = new Report(content, nameFormat[nameFormat.length - 1], nameFormat[0]);
+                        rpcResponse.setResult(report);
+                    } else {
+                        Report report = new Report(content, "unknown", fileName);
+                        rpcResponse.setResult(report);
+                    }
+                }
+                aSpace.process(() -> {// worker thread
+                    try {
+                        acceptCookies(reportConn);
+                        onSuccess.accept((R) rpcResponse);
+                    } catch (ParseException | NumberFormatException ex) {
+                        Logger.getLogger(PlatypusHttpConnection.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                });
+            } catch (IOException ex) {
+                if (onFailure != null) {
+                    aSpace.process(() -> {// worker thread
+                        onFailure.accept(ex);
+                    });
+                } else {
+                    Logger.getLogger(PlatypusHttpConnection.class.getName()).log(Level.SEVERE, null, ex);
+                }
             } finally {
-                ScriptUtils.setLock(null);
-                ScriptUtils.setRequest(null);
-                ScriptUtils.setResponse(null);
-                ScriptUtils.setSession(null);
-                PlatypusPrincipal.setInstance(null);
+                Scripts.setContext(null);
             }
         });
     }
 
-    private void enqueue(final RequestCallback rqc, Consumer<Exception> onFailure) {
-        Runnable doer = () -> {
-            try {
-                PlatypusHttpRequestWriter httpSender = new PlatypusHttpRequestWriter(url, cookies, onCredentials, sequence, maximumAuthenticateAttempts, PlatypusHttpConnection.this);
-                rqc.requestEnv.request.accept(httpSender);// wait completion analog
-                if (rqc.onComplete != null) {
-                    rqc.requestEnv.request.setDone(true);
-                    rqc.completed = true;
-                    rqc.onComplete.accept(httpSender.getResponse());
-                } else {
-                    synchronized (rqc) {
-                        rqc.requestEnv.request.setDone(true);
-                        rqc.response = httpSender.getResponse();
-                        rqc.completed = true;
-                        rqc.notifyAll();
+    private void retryRequest(Consumer<Consumer<PlatypusHttpRequestWriter>> requestPusher, Scripts.Space aSpace, Consumer<PlatypusHttpRequestWriter> responseHandler, Attempts attempts) {
+        Credentials sentCreds = credentials;
+        requestPusher.accept((PlatypusHttpRequestWriter resender) -> {
+            PlatypusHttpRequestWriter.HttpResult nextResendedRes = resender.getHttpResult();
+            if (nextResendedRes.isUnauthorized()) {
+                if (attempts.count++ < maximumAuthenticateAttempts) {
+                    try {
+                        if (credentials != null && !credentials.equals(sentCreds)) {
+                            // retry                    
+                            retryRequest(requestPusher, aSpace, responseHandler, attempts);
+                        } else {
+                            Credentials creds = onCredentials.call();
+                            if (creds != null) {
+                                credentials = creds;
+                                if (nextResendedRes.authScheme.toLowerCase().contains(PlatypusHttpConstants.BASIC_AUTH_NAME.toLowerCase())) {
+                                    basicSchemeMet = true;
+                                    // retry
+                                    retryRequest(requestPusher, aSpace, responseHandler, attempts);
+                                } else if (PlatypusHttpConstants.FORM_AUTH_NAME.equalsIgnoreCase(nextResendedRes.authScheme)) {
+                                    String redirectLocation = nextResendedRes.redirectLocation;
+                                    Map<String, Cookie> localCookies = new HashMap<>();
+                                    localCookies.putAll(cookies);
+                                    Scripts.LocalContext context = Scripts.getContext();
+                                    bioExecutor.submit(() -> {// bio background thread
+                                        Scripts.setContext(context);
+                                        try {
+                                            URL securityFormUrl = new URL(url + (url.toString().endsWith("/") ? "" : "/") + redirectLocation);
+                                            HttpURLConnection securityFormConn = (HttpURLConnection) securityFormUrl.openConnection();
+                                            securityFormConn.setInstanceFollowRedirects(false);
+                                            securityFormConn.setDoOutput(true);
+                                            securityFormConn.setRequestMethod(PlatypusHttpConstants.HTTP_METHOD_POST);
+                                            securityFormConn.setRequestProperty(PlatypusHttpConstants.HEADER_CONTENTTYPE, PlatypusHttpConstants.FORM_CONTENT_TYPE);
+                                            PlatypusHttpRequestWriter.addCookies(localCookies, securityFormConn);
+                                            String formData = PlatypusHttpConstants.SECURITY_CHECK_USER + "=" + URLEncoder.encode(credentials.userName, SettingsConstants.COMMON_ENCODING) + "&" + PlatypusHttpConstants.SECURITY_CHECK_PASSWORD + "=" + URLEncoder.encode(credentials.password, SettingsConstants.COMMON_ENCODING);
+                                            byte[] formDataConent = formData.getBytes(SettingsConstants.COMMON_ENCODING);
+                                            securityFormConn.setRequestProperty(PlatypusHttpConstants.HEADER_CONTENTLENGTH, "" + formDataConent.length);
+                                            try (OutputStream out = securityFormConn.getOutputStream()) {
+                                                out.write(formDataConent);
+                                            }
+                                            int responseCode = securityFormConn.getResponseCode();
+                                            aSpace.process(() -> {
+                                                try {
+                                                    acceptCookies(securityFormConn);
+                                                    // retry
+                                                    retryRequest(requestPusher, aSpace, responseHandler, attempts);
+                                                } catch (ParseException | NumberFormatException ex) {
+                                                    Logger.getLogger(PlatypusHttpConnection.class.getName()).log(Level.SEVERE, null, ex);
+                                                }
+                                            });
+                                        } catch (Exception ex) {
+                                            Logger.getLogger(PlatypusHttpConnection.class.getName()).log(Level.SEVERE, null, ex);
+                                        } finally {
+                                            Scripts.setContext(null);
+                                        }
+                                    });
+                                } else {
+                                    Logger.getLogger(PlatypusHttpRequestWriter.class.getName()).log(Level.SEVERE, "Unsupported authorization scheme: {0}", nextResendedRes.authScheme);
+                                }
+                            } else {// Credentials are inaccessible, so leave things as is...
+                                responseHandler.accept(resender);
+                            }
+                        }
+                    } catch (Exception ex) {
+                        Logger.getLogger(PlatypusHttpConnection.class.getName()).log(Level.SEVERE, null, ex);
                     }
+                } else {// Maximum authentication attempts per request exceeded, so leave things as is...
+                    responseHandler.accept(resender);
                 }
-            } catch (Exception ex) {
-                Logger.getLogger(PlatypusHttpConnection.class.getName()).log(Level.SEVERE, null, ex);
-                if (onFailure != null) {
-                    onFailure.accept(ex);
-                }
+            } else {
+                PlatypusPrincipal.setClientSpacePrincipal(credentials != null ? new PlatypusPrincipal(credentials.userName, null, null, this) : new AnonymousPlatypusPrincipal());
+                responseHandler.accept(resender);
             }
-        };
-        if (onFailure != null) {
-            startRequestTask(doer);
-        } else {
-            doer.run();
-        }
+        });
     }
 
     @Override
-    public <R extends Response> R executeRequest(Request rq) throws Exception {
-        RequestCallback rqc = new RequestCallback(new RequestEnvelope(rq, null, null, null), null);
-        enqueue(rqc, null);
-        if (rqc.response instanceof ErrorResponse) {
-            throw handleErrorResponse((ErrorResponse) rqc.response);
+    public <R extends Response> R executeRequest(Request aRequest) throws Exception {
+        PlatypusHttpRequestWriter httpSender = new PlatypusHttpRequestWriter(url, cookies, basicSchemeMet ? credentials : null);
+        aRequest.accept(httpSender);// bio
+        acceptCookies(httpSender.conn);
+        int authenticationAttempts = 0;
+        PlatypusHttpRequestWriter.HttpResult res = httpSender.httpResult;
+        while (res.isUnauthorized() && onCredentials != null && authenticationAttempts++ < maximumAuthenticateAttempts) {
+            credentials = onCredentials.call();
+            if (res.authScheme.toLowerCase().contains(PlatypusHttpConstants.BASIC_AUTH_NAME.toLowerCase())) {
+                basicSchemeMet = true;
+                httpSender = new PlatypusHttpRequestWriter(url, cookies, credentials);
+                aRequest.accept(httpSender);// bio
+                acceptCookies(httpSender.conn);
+            } else if (PlatypusHttpConstants.FORM_AUTH_NAME.equalsIgnoreCase(res.authScheme)) {
+                String redirectLocation = res.redirectLocation;
+                URL securityFormUrl = new URL(url + (url.toString().endsWith("/") ? "" : "/") + redirectLocation);
+                HttpURLConnection securityFormConn = (HttpURLConnection) securityFormUrl.openConnection();
+                securityFormConn.setInstanceFollowRedirects(false);
+                securityFormConn.setDoOutput(true);
+                securityFormConn.setRequestMethod(PlatypusHttpConstants.HTTP_METHOD_POST);
+                securityFormConn.setRequestProperty(PlatypusHttpConstants.HEADER_CONTENTTYPE, PlatypusHttpConstants.FORM_CONTENT_TYPE);
+                PlatypusHttpRequestWriter.addCookies(cookies, securityFormConn);
+                String formData = PlatypusHttpConstants.SECURITY_CHECK_USER + "=" + URLEncoder.encode(credentials.userName, SettingsConstants.COMMON_ENCODING) + "&" + PlatypusHttpConstants.SECURITY_CHECK_PASSWORD + "=" + URLEncoder.encode(credentials.password, SettingsConstants.COMMON_ENCODING);
+                byte[] formDataConent = formData.getBytes(SettingsConstants.COMMON_ENCODING);
+                securityFormConn.setRequestProperty(PlatypusHttpConstants.HEADER_CONTENTLENGTH, "" + formDataConent.length);
+                try (OutputStream out = securityFormConn.getOutputStream()) {
+                    out.write(formDataConent);
+                }
+                int responseCode = securityFormConn.getResponseCode();
+                acceptCookies(securityFormConn);
+                httpSender = new PlatypusHttpRequestWriter(url, cookies, null);
+                aRequest.accept(httpSender);// bio
+                acceptCookies(httpSender.conn);
+            } else {
+                Logger.getLogger(PlatypusHttpRequestWriter.class.getName()).log(Level.SEVERE, "Unsupported authorization scheme: {0}", res.authScheme);
+            }
+        }
+        if (httpSender.response instanceof ErrorResponse) {
+            throw handleErrorResponse((ErrorResponse) httpSender.response);
         } else {
-            if (rq instanceof LogoutRequest) {
+            PlatypusHttpResponseReader reader = new PlatypusHttpResponseReader(aRequest, httpSender.conn, httpSender.responseBody);
+            httpSender.response.accept(reader);
+            if (aRequest instanceof LogoutRequest) {
                 cookies.clear();
-                basicCredentials = null;
-                if (onLogout != null) {
-                    onLogout.run();
+                credentials = null;
+            } else if (httpSender.response instanceof RPCRequest.Response) {
+                RPCRequest.Response rpcResponse = (RPCRequest.Response) httpSender.response;
+                if (rpcResponse.getResult() instanceof URL) {
+                    URL reportUrl = (URL) rpcResponse.getResult();
+                    String reportLocation = reportUrl.getFile();
+                    HttpURLConnection reportConn = (HttpURLConnection) reportUrl.openConnection();
+                    reportConn.setDoInput(true);
+                    PlatypusHttpRequestWriter.addCookies(cookies, reportConn);
+                    if (basicSchemeMet) {
+                        PlatypusHttpRequestWriter.addBasicAuthentication(reportConn, credentials.userName, credentials.password);
+                    }
+                    try (InputStream in = reportConn.getInputStream()) {
+                        byte[] content = BinaryUtils.readStream(in, -1);
+                        int slashIdx = reportLocation.lastIndexOf("/");
+                        String fileName = reportLocation.substring(slashIdx + 1);
+                        if (fileName.contains(".")) {
+                            String[] nameFormat = fileName.split("\\.");
+                            Report report = new Report(content, nameFormat[nameFormat.length - 1], nameFormat[0]);
+                            rpcResponse.setResult(report);
+                        } else {
+                            Report report = new Report(content, "unknown", fileName);
+                            rpcResponse.setResult(report);
+                        }
+                    }
+                    acceptCookies(reportConn);
                 }
             }
-            return (R) rqc.response;
+            return (R) httpSender.response;
         }
     }
 
     @Override
     public void shutdown() {
-        requestsSender.shutdown();
+        bioExecutor.shutdown();
     }
 }

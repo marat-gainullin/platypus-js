@@ -5,8 +5,9 @@
 package com.eas.client.dataflow;
 
 import com.eas.client.metadata.Parameters;
+import java.util.Collection;
+import java.util.Map;
 import java.util.function.Consumer;
-import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * This flow provider intended to support the flow process from and to jdbc data sources.
@@ -68,12 +69,12 @@ public abstract class DatabaseFlowProvider<JKT> implements FlowProvider {
      * @inheritDoc
      */
     @Override
-    public abstract JSObject nextPage(Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception;
+    public abstract Collection<Map<String, Object>> nextPage(Consumer<Collection<Map<String, Object>>> onSuccess, Consumer<Exception> onFailure) throws Exception;
 
     /**
      * @inheritDoc
      */
     @Override
-    public abstract JSObject refresh(Parameters aParams, Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception;
+    public abstract Collection<Map<String, Object>> refresh(Parameters aParams, Consumer<Collection<Map<String, Object>>> onSuccess, Consumer<Exception> onFailure) throws Exception;
 
 }

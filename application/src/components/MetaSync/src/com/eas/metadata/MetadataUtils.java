@@ -4,12 +4,16 @@
  */
 package com.eas.metadata;
 
-import com.bearsoft.rowset.metadata.*;
-import com.bearsoft.rowset.metadata.ForeignKeySpec.ForeignKeyRule;
 import com.eas.client.ClientConstants;
 import com.eas.client.SQLUtils;
+import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
+import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.ForeignKeySpec;
+import com.eas.client.metadata.ForeignKeySpec.ForeignKeyRule;
+import com.eas.client.metadata.PrimaryKeySpec;
 import java.sql.Types;
 import java.util.HashSet;
 import java.util.List;

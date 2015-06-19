@@ -33,7 +33,6 @@ public class Parameter extends Field {
     private Object defaultValue;
     private Object value;
     private boolean modified;
-    private static JSObject publisher;
 
     /**
      * The default constructor.
@@ -375,18 +374,4 @@ public class Parameter extends Field {
         return new Parameter(this);
     }
 
-    @Override
-    public JSObject getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = (JSObject) publisher.call(null, new Object[]{this});
-        }
-        return published;
-    }
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
-    }
 }

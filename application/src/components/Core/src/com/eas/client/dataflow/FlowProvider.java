@@ -5,8 +5,9 @@
 package com.eas.client.dataflow;
 
 import com.eas.client.metadata.Parameters;
+import java.util.Collection;
+import java.util.Map;
 import java.util.function.Consumer;
-import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * This interface is intended to serve as base contract for data
@@ -46,7 +47,7 @@ public interface FlowProvider extends AutoCloseable{
      * @throws java.lang.Exception
      * @see Parameters
      */
-    public JSObject refresh(Parameters aParams, Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception;
+    public Collection<Map<String, Object>> refresh(Parameters aParams, Consumer<Collection<Map<String, Object>>> onSuccess, Consumer<Exception> onFailure) throws Exception;
 
     /**
      * Fetches a next page of data from an abstract data source.
@@ -58,7 +59,7 @@ public interface FlowProvider extends AutoCloseable{
      * @throws Exception
      * @see FlowProviderNotPagedException
      */
-    public JSObject nextPage(Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception;
+    public Collection<Map<String, Object>> nextPage(Consumer<Collection<Map<String, Object>>> onSuccess, Consumer<Exception> onFailure) throws Exception;
 
     /**
      * Returns page size for paged flow providers.

@@ -8,7 +8,7 @@ import com.eas.client.AppElementFiles;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.ScriptDocument;
-import com.eas.client.cache.ScriptConfigs;
+import com.eas.client.cache.ScriptsConfigs;
 import com.eas.script.JsDoc;
 import com.eas.util.FileUtils;
 import java.io.File;
@@ -32,9 +32,9 @@ public class ServerTasksScanner implements ApplicationSourceIndexer.ScanCallback
     private final Set<String> residents = new HashSet<>();
 
     private final Map<String, Collection<String>> validators = new HashMap<>();
-    private final ScriptConfigs scriptsConfigs;
+    private final ScriptsConfigs scriptsConfigs;
 
-    public ServerTasksScanner(ScriptConfigs aSecurityConfigs) {
+    public ServerTasksScanner(ScriptsConfigs aSecurityConfigs) {
         super();
         scriptsConfigs = aSecurityConfigs;
     }

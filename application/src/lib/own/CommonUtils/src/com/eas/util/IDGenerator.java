@@ -9,25 +9,24 @@
  */
 package com.eas.util;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 /**
  *
  * @author mg
  */
 public class IDGenerator {
 
-    public final static Long rndIDPart = 100L;
-    private static long lastValue = 0;
+    private static final Long rndIDPart = 100L;
+    private static final AtomicLong lastValue = new AtomicLong();
 
-    public static synchronized Long genID() {
-        long newValue = genIDImpl();
-        while (lastValue >= newValue) {
-            newValue = lastValue + 1;
-        }
-        lastValue = newValue;
-        return lastValue;
-    }
-
-    private static long genIDImpl() {
-        return System.currentTimeMillis() * rndIDPart + Math.round(Math.random() * rndIDPart);
+    public static long genID() {
+        long newValue;
+        long last;
+        do {
+            last = lastValue.get();
+            newValue = System.currentTimeMillis() * rndIDPart + Math.round(Math.random() * rndIDPart);
+        } while (last == newValue || !lastValue.compareAndSet(last, newValue));
+        return newValue;
     }
 }

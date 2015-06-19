@@ -7,8 +7,9 @@ package com.eas.client.cache;
 import com.eas.script.JsDoc;
 import com.eas.script.JsDoc.Tag;
 import com.eas.script.PropertiesAnnotationsMiner;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import java.util.*;
+import jdk.nashorn.internal.ir.Expression;
 import jdk.nashorn.internal.ir.FunctionNode;
 import jdk.nashorn.internal.runtime.Source;
 
@@ -32,6 +33,11 @@ public class ScriptDocument {
      * allowed
      */
     private Map<String, Set<String>> propertyAllowedRoles = new HashMap<>();
+    /**
+     * Functions that may be accessed over network via RPC
+     */
+    private Set<String> functionProperties = new HashSet<>();
+    
 
     protected ScriptDocument() {
         super();
@@ -74,6 +80,11 @@ public class ScriptDocument {
             return aTag.getName().equalsIgnoreCase(anAnnotation);
         }).findAny().get() : null;
     }
+
+    public Set<String> getFunctionProperties() {
+        return functionProperties;
+    }
+    
     /**
      * Reads script annotations. Annotations, accompanied with
      *
@@ -87,13 +98,13 @@ public class ScriptDocument {
         moduleAnnotations = new ArrayList<>();
         propertyAllowedRoles.clear();
         Source source = Source.sourceFor(aName, aSource);
-        FunctionNode ast = ScriptUtils.parseJs(aSource);
+        FunctionNode ast = Scripts.parseJs(aSource);
         FunctionNode moduleConstructor = PlatypusFilesSupport.extractModuleConstructor(ast, aName);
-        ast.accept(new PropertiesAnnotationsMiner(source, ScriptUtils.getThisAliases(moduleConstructor)) {
+        ast.accept(new PropertiesAnnotationsMiner(source, Scripts.getThisAliases(moduleConstructor)) {
 
             @Override
             protected void commentedFunction(FunctionNode aFunction, String aComment) {
-                if (scopeLevel == 2) {
+                if (scopeLevel == TOP_CONSTRUCTORS_SCOPE_LEVEL) {
                     JsDoc jsDoc = new JsDoc(aComment);
                     jsDoc.parseAnnotations();
                     jsDoc.getAnnotations().stream().forEach((Tag tag) -> {
@@ -110,6 +121,13 @@ public class ScriptDocument {
             @Override
             protected void commentedProperty(String aPropertyName, String aComment) {
                 readPropertyRoles(aPropertyName, aComment);
+            }
+
+            @Override
+            protected void property(String aPropertyName, Expression aValue) {
+                if(!aPropertyName.contains(".") && aValue instanceof FunctionNode){
+                    functionProperties.add(aPropertyName);
+                }
             }
 
         });

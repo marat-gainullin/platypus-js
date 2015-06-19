@@ -10,13 +10,15 @@ import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.SqlQuery;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.ModelsDocuments;
-import com.eas.client.cache.ScriptConfigs;
+import com.eas.client.cache.ScriptsConfigs;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.resourcepool.DatasourcesArgsConsumer;
+import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.scripts.ScriptedResource;
 import com.eas.client.threetier.PlatypusConnection;
-import com.eas.script.ScriptUtils;
+import com.eas.concurrent.DeamonThreadFactory;
+import com.eas.script.Scripts;
 import com.eas.sensors.api.RetranslateFactory;
 import com.eas.sensors.api.SensorsFactory;
 import com.eas.util.args.ThreadsArgsConsumer;
@@ -25,6 +27,9 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.net.ssl.*;
@@ -50,6 +55,9 @@ public class ServerMain {
     public static final String LOGS_PATH = "logs";
     public static final String SECURITY_SUBDIRECTORY = "security";
     // error messages    
+    public static final String NUM_WORKER_THREADS_WITHOUT_VALUE_MSG = "Number of worker threads is not specified.";
+    public static final String SESSION_IDLE_TIMEOUT_WITHOUT_VALUE_MSG = "Session idle timeout is not specified.";
+    public static final String SESSION_IDLE_CHECK_INTERVAL_WITHOUT_VALUE_MSG = "Session idle check interval is not specified.";
     public static final String INTERFACES_WITHOUT_VALUE_MSG = "Interfaces not specified.";
     public static final String BACKGROUND_TASK_WITHOUT_VALUE_MSG = "Background task not specified";
     public static final String BAD_APP_URL_MSG = "url not specified";
@@ -132,21 +140,21 @@ public class ServerMain {
                     numWorkerThreads = args[i + 1];
                     i += 2;
                 } else {
-                    printHelp(PROTOCOLS_WITHOUT_VALUE_MSG);
+                    printHelp(NUM_WORKER_THREADS_WITHOUT_VALUE_MSG);
                 }
             } else if ((CMD_SWITCHS_PREFIX + SESSION_IDLE_TIMEOUT_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
                     sessionIdleTimeout = args[i + 1];
                     i += 2;
                 } else {
-                    printHelp(PROTOCOLS_WITHOUT_VALUE_MSG);
+                    printHelp(SESSION_IDLE_TIMEOUT_WITHOUT_VALUE_MSG);
                 }
             } else if ((CMD_SWITCHS_PREFIX + SESSION_IDLE_CHECK_INTERVAL_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
                     sessionIdleCheckInterval = args[i + 1];
                     i += 2;
                 } else {
-                    printHelp(PROTOCOLS_WITHOUT_VALUE_MSG);
+                    printHelp(SESSION_IDLE_CHECK_INTERVAL_WITHOUT_VALUE_MSG);
                 }
             } else if ((CMD_SWITCHS_PREFIX + APP_ELEMENT_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
@@ -180,6 +188,7 @@ public class ServerMain {
      */
     public static void main(String[] args) throws IOException, Exception {
         checkUserHome();
+        GeneralResourceProvider.registerDrivers();
         parseArgs(args);
         if (url == null || url.isEmpty()) {
             throw new IllegalArgumentException("Application url (-url parameter) is required.");
@@ -191,18 +200,29 @@ public class ServerMain {
             File f = new File(new URI(url));
             if (f.exists() && f.isDirectory()) {
                 Logger.getLogger(ServerMain.class.getName()).log(Level.INFO, "Application is located at: {0}", f.getPath());
-                ScriptConfigs scriptsConfigs = new ScriptConfigs();
+                GeneralResourceProvider.registerDrivers();
+                ScriptsConfigs scriptsConfigs = new ScriptsConfigs();
                 ServerTasksScanner tasksScanner = new ServerTasksScanner(scriptsConfigs);
                 ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), tasksScanner);
-                indexer.watch();
-                ScriptUtils.initServices(threadsConfig.getMaxServicesTreads());
+                //indexer.watch();
+                Scripts.initBIO(threadsConfig.getMaxServicesTreads());
+
+                int maxWorkerThreads = parseNumWorkerThreads();
+                ThreadPoolExecutor serverProcessor = new ThreadPoolExecutor(maxWorkerThreads, maxWorkerThreads,
+                        3L, TimeUnit.SECONDS,
+                        new LinkedBlockingQueue<>(),
+                        new DeamonThreadFactory("TSA-", false));
+                serverProcessor.allowCoreThreadTimeOut(true);
+
+                Scripts.initTasks((Runnable aTask) -> {
+                    serverProcessor.submit(aTask);
+                });
                 serverCoreDbClient = new ScriptedDatabasesClient(defDatasource, indexer, true, tasksScanner.getValidators(), threadsConfig.getMaxJdbcTreads());
                 QueriesProxy<SqlQuery> queries = new LocalQueriesProxy(serverCoreDbClient, indexer);
                 serverCoreDbClient.setQueries(queries);
-                PlatypusServer server = new PlatypusServer(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), appElement), queries, serverCoreDbClient, sslContext, parseListenAddresses(), parsePortsProtocols(), parsePortsSessionIdleTimeouts(), parsePortsSessionIdleCheckIntervals(), parsePortsNumWorkerThreads(), scriptsConfigs, appElement);
+                PlatypusServer server = new PlatypusServer(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), appElement), queries, serverCoreDbClient, sslContext, parseListenAddresses(), parsePortsProtocols(), parsePortsSessionIdleTimeouts(), parsePortsSessionIdleCheckIntervals(), serverProcessor, scriptsConfigs, appElement);
                 serverCoreDbClient.setContextHost(server);
                 ScriptedResource.init(server);
-                ScriptUtils.init();
                 SensorsFactory.init(server.getAcceptorsFactory());
                 RetranslateFactory.init(server.getRetranslateFactory());
                 //
@@ -246,10 +266,10 @@ public class ServerMain {
         Map<Integer, String> protocolsMap = new HashMap<>();
         if (protocols != null && !protocols.isEmpty()) {
             String[] splitted = protocols.replace(" ", "").split(",");
-            for (int i = 0; i < splitted.length; i++) {
-                String[] protParts = splitted[i].split(":");
-                if (protParts.length == 2) {
-                    protocolsMap.put(Integer.valueOf(protParts[0]), protParts[1]);
+            for (String portProtocol : splitted) {
+                String[] portProtocolParts = portProtocol.split(":");
+                if (portProtocolParts.length == 2) {
+                    protocolsMap.put(Integer.valueOf(portProtocolParts[0]), portProtocolParts[1]);
                 }
             }
         }
@@ -259,28 +279,25 @@ public class ServerMain {
         return protocolsMap;
     }
 
-    private static Map<Integer, Integer> parsePortsNumWorkerThreads() {
-        Map<Integer, Integer> numWorkerThreadsMap = new HashMap<>();
+    private static int parseNumWorkerThreads() {
         if (numWorkerThreads != null && !numWorkerThreads.isEmpty()) {
-            String[] splitted = numWorkerThreads.replace(" ", "").split(",");
-            for (int i = 0; i < splitted.length; i++) {
-                String[] protParts = splitted[i].split(":");
-                if (protParts.length == 2) {
-                    numWorkerThreadsMap.put(Integer.valueOf(protParts[0]), Integer.valueOf(protParts[1]));
-                }
+            try {
+                return Math.max(1, Integer.valueOf(numWorkerThreads));
+            } catch (Exception ex) {
+                Logger.getLogger(ServerMain.class.getName()).log(Level.WARNING, "Can''t parse numWorkerThreads. Falling back to default: {0}", PlatypusServer.DEFAULT_EXECUTOR_POOL_SIZE);
             }
         }
-        return numWorkerThreadsMap;
+        return PlatypusServer.DEFAULT_EXECUTOR_POOL_SIZE;
     }
 
     private static Map<Integer, Integer> parsePortsSessionIdleTimeouts() {
         Map<Integer, Integer> sessionIdleTimeoutMap = new HashMap<>();
         if (sessionIdleTimeout != null && !sessionIdleTimeout.isEmpty()) {
             String[] splitted = sessionIdleTimeout.replace(" ", "").split(",");
-            for (int i = 0; i < splitted.length; i++) {
-                String[] protParts = splitted[i].split(":");
-                if (protParts.length == 2) {
-                    sessionIdleTimeoutMap.put(Integer.valueOf(protParts[0]), Integer.valueOf(protParts[1]));
+            for (String portTimeout : splitted) {
+                String[] portTimeoutParts = portTimeout.split(":");
+                if (portTimeoutParts.length == 2) {
+                    sessionIdleTimeoutMap.put(Integer.valueOf(portTimeoutParts[0]), Integer.valueOf(portTimeoutParts[1]));
                 }
             }
         }
@@ -291,71 +308,13 @@ public class ServerMain {
         Map<Integer, Integer> sessionIdleCheckIntervalsMap = new HashMap<>();
         if (sessionIdleCheckInterval != null && !sessionIdleCheckInterval.isEmpty()) {
             String[] splitted = sessionIdleCheckInterval.replace(" ", "").split(",");
-            for (int i = 0; i < splitted.length; i++) {
-                String[] protParts = splitted[i].split(":");
-                if (protParts.length == 2) {
-                    sessionIdleCheckIntervalsMap.put(Integer.valueOf(protParts[0]), Integer.valueOf(protParts[1]));
+            for (String portInterval : splitted) {
+                String[] portIntervalParts = portInterval.split(":");
+                if (portIntervalParts.length == 2) {
+                    sessionIdleCheckIntervalsMap.put(Integer.valueOf(portIntervalParts[0]), Integer.valueOf(portIntervalParts[1]));
                 }
             }
         }
         return sessionIdleCheckIntervalsMap;
     }
-    /*
-     private static KeyManager[] createKeyManagers() throws NoSuchAlgorithmException, NoSuchProviderException, KeyStoreException, FileNotFoundException, IOException, CertificateException, UnrecoverableKeyException, URISyntaxException {
-     KeyStore ks = KeyStore.getInstance("JKS");
-     // get user password and file input stream
-     char[] sslPassword = "keyword".toCharArray();
-     File keyStoreFile = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY, "keystore"));
-     if (!keyStoreFile.exists()) {
-     File keyPath = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY));
-     keyPath.mkdirs();
-     keyStoreFile.createNewFile();
-     try (OutputStream keyOut = new FileOutputStream(keyStoreFile); InputStream keyIn = PlatypusConnection.class.getResourceAsStream("emptyKeystore")) {
-     byte[] resData = BinaryUtils.readStream(keyIn, -1);
-     keyOut.write(resData);
-     }
-     }
-     if (keyStoreFile.exists()) {
-     try (InputStream is = new FileInputStream(keyStoreFile)) {
-     ks.load(is, sslPassword);
-     }
-     final KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
-     keyManagerFactory.init(ks, sslPassword);
-     return keyManagerFactory.getKeyManagers();
-     } else {
-     throw new FileNotFoundException(KEYSTORE_MISING_MSG);
-     }
-     }
-
-     private static TrustManager[] createTrustManagers() throws NoSuchAlgorithmException, NoSuchProviderException, KeyStoreException, FileNotFoundException, IOException, CertificateException, URISyntaxException {
-     KeyStore ks = KeyStore.getInstance("JKS");
-     char[] ksPassword = "trustword".toCharArray();
-     File trustStore = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY, "truststore"));
-     if (!trustStore.exists()) {
-     File trustPath = new File(StringUtils.join(File.separator, System.getProperty(ClientConstants.USER_HOME_PROP_NAME), ClientConstants.USER_HOME_PLATYPUS_DIRECTORY_NAME, SECURITY_SUBDIRECTORY));
-     trustPath.mkdirs();
-     trustStore.createNewFile();
-     try (OutputStream trustOut = new FileOutputStream(trustStore); InputStream trustIn = PlatypusConnection.class.getResourceAsStream("emptyTruststore")) {
-     byte[] resData = BinaryUtils.readStream(trustIn, -1);
-     trustOut.write(resData);
-     }
-     }
-     if (trustStore.exists()) {
-     try (InputStream is = new FileInputStream(trustStore)) {
-     ks.load(is, ksPassword);
-     }
-     final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance("PKIX");
-     trustManagerFactory.init(ks);
-     return trustManagerFactory.getTrustManagers();
-     } else {
-     throw new FileNotFoundException(TRUSTSTORE_MISSING_MSG);
-     }
-     }
-
-     public static SSLContext createSSLContext() throws NoSuchAlgorithmException, KeyManagementException, NoSuchProviderException, KeyStoreException, FileNotFoundException, IOException, CertificateException, UnrecoverableKeyException, URISyntaxException {
-     SSLContext context = SSLContext.getInstance("TLS");
-     context.init(createKeyManagers(), createTrustManagers(), SecureRandom.getInstance("SHA1PRNG"));
-     return context;
-     }
-     */
 }

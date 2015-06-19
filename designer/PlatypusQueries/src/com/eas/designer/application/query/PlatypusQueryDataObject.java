@@ -719,7 +719,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
                     schemas.add(schemaName);
                 }
                 return null;
-            }, null, null);
+            }, null, null, null);
         }
         return schemas;
     }
@@ -744,7 +744,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
                     Fields fields = mdCache.getTableMetadata(cachedTableName);
                     tables.put(cachedTableName/*.toLowerCase()*/, fields);
                 }
-                return null;}, null, null);
+                return null;}, null, null, null);
         }
         return tables;
     }

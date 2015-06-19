@@ -4,8 +4,13 @@
  */
 package com.eas.server;
 
-import java.util.HashMap;
+import com.eas.client.login.SystemPlatypusPrincipal;
+import com.eas.script.Scripts;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.script.ScriptException;
 
 /**
  * Manages active sessions.
@@ -18,14 +23,35 @@ import java.util.Map;
  */
 public class SessionManager {
 
-    protected final Map<String, Session> sessions = new HashMap<>();
+    public static class Singleton {
+
+        public static final SessionManager instance = init();
+
+        private static SessionManager init() {
+            try {
+                return new SessionManager();
+            } catch (ScriptException ex) {
+                Logger.getLogger(SessionManager.class.getName()).log(Level.SEVERE, "Unable to establish script engines", ex);
+                return null;
+            }
+        }
+    }
+
+    protected final Map<String, Session> sessions = new ConcurrentHashMap<>();
+    protected final Session systemSession;
 
     /**
      * Creates a new session manager.
+     *
+     * @throws javax.script.ScriptException
      */
-    public SessionManager() {
+    public SessionManager() throws ScriptException {
         super();
-        sessions.put(null, new Session(null));
+        Session created = new Session(null);
+        Scripts.Space space = Scripts.createSpace();
+        created.setSpace(space);
+        created.setPrincipal(new SystemPlatypusPrincipal());
+        systemSession = created;
     }
 
     /**
@@ -41,26 +67,19 @@ public class SessionManager {
      *
      * @param sessionId session id; use IDGenerator to generate.
      * @return a new Session instance.
+     * @throws javax.script.ScriptException
      */
-    public synchronized Session createSession(String sessionId) {
+    public Session create(String sessionId) throws ScriptException {
         assert sessionId != null;
-        assert !sessions.containsKey(sessionId);
         Session result = new Session(sessionId);
+        Scripts.Space space = Scripts.createSpace();
+        result.setSpace(space);
         sessions.put(sessionId, result);
         return result;
     }
 
-    public synchronized Session getOrCreateSession(String sessionId) {
-        assert sessionId != null;
-        if (!sessions.containsKey(sessionId)) {
-            return createSession(sessionId);
-        } else {
-            return sessions.get(sessionId);
-        }
-    }
-
     public Session getSystemSession() {
-        return sessions.get(null);
+        return systemSession;
     }
 
     /**
@@ -69,7 +88,7 @@ public class SessionManager {
      * @param sessionId the session id
      * @return session instance, or null if no such session.
      */
-    public synchronized Session get(String sessionId) {
+    public Session get(String sessionId) {
         return sessions.get(sessionId);
     }
 
@@ -83,25 +102,11 @@ public class SessionManager {
      * @param sessionId the session to remove.
      * @return instance removed, or null if no such session found.
      */
-    public synchronized Session remove(String sessionId) {
+    public Session remove(String sessionId) {
         Session removed = sessions.remove(sessionId);
         if (removed != null) {
             removed.cleanup();
         }
         return removed;
     }
-
-    /**
-     * Returns a set of active sessions.
-     *
-     * <p>
-     * However this method is synchronized, caller should always use the set
-     * returned in a section synchronized with this class instance to protect it
-     * from modifications made by other threads.</p>
-     *
-     * @return set of active sessions.
-    public synchronized Set<Entry<String, Session>> entrySet() {
-        return sessions.entrySet();
-    }
-     */
 }

@@ -9,7 +9,7 @@ import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
 import com.eas.designer.application.module.completion.CompletionPoint.CompletionToken;
 import com.eas.script.EventMethod;
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import com.eas.util.PropertiesUtils;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -119,7 +119,7 @@ public class ModuleCompletionContext extends CompletionContext {
 
                 @Override
                 public boolean enterVarNode(VarNode varNode) {
-                    if (ScriptUtils.isInNode(lc.getCurrentFunction(), offset)) {
+                    if (Scripts.isInNode(lc.getCurrentFunction(), offset)) {
                         parentModuleContext.injectVarContext(lc.systemCompletionContexts, varNode);
                     }
                     return super.enterVarNode(varNode);
@@ -140,7 +140,7 @@ public class ModuleCompletionContext extends CompletionContext {
 
                 @Override
                 public boolean enterBinaryNode(BinaryNode binaryNode) {
-                    if (ScriptUtils.isInNode(binaryNode, offset)
+                    if (Scripts.isInNode(binaryNode, offset)
                             && TokenType.ASSIGN.equals(binaryNode.tokenType())) {
                         if (binaryNode.getAssignmentDest() instanceof AccessNode) {
                             List<CompletionToken> tokens = CompletionPoint.getContextTokens(parentModuleContext.dataObject.getAstRoot(), binaryNode.getAssignmentDest().getFinish());
@@ -173,7 +173,7 @@ public class ModuleCompletionContext extends CompletionContext {
 
                 @Override
                 public boolean enterCallNode(CallNode callNode) {
-                    if (ScriptUtils.isInNode(callNode, offset)
+                    if (Scripts.isInNode(callNode, offset)
                             && callNode.getArgs() != null
                             && callNode.getArgs().size() > 0
                             && callNode.getArgs().get(0) instanceof FunctionNode) {

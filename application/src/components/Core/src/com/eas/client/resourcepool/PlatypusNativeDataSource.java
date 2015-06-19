@@ -10,6 +10,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
 
@@ -26,7 +27,7 @@ public class PlatypusNativeDataSource extends BearResourcePool<BearDatabaseConne
     protected PrintWriter printWriter;
     protected int loginTimeout;
 
-    public PlatypusNativeDataSource(int aMaxConnections, int aMaxStatements, String aUrl, String aUser, String aPassword, String aSchema, Properties aProperties) throws Exception {
+    public PlatypusNativeDataSource(int aMaxConnections, int aMaxStatements, String aUrl, String aUser, String aPassword, String aSchema, Properties aProperties) {
         super(aMaxConnections);
         url = aUrl;
         maxStatements = aMaxStatements;
@@ -41,17 +42,31 @@ public class PlatypusNativeDataSource extends BearResourcePool<BearDatabaseConne
     }
 
     @Override
+    protected void resourceOverflow(BearDatabaseConnection aResource) {
+        try {
+            aResource.shutdown();
+        } catch (SQLException ex) {
+            Logger.getLogger(PlatypusNativeDataSource.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    @Override
     public Logger getParentLogger() throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException("Not supported yet.");
     }
 
     @Override
     protected BearDatabaseConnection createResource() throws Exception {
-        return new BearDatabaseConnection(maxStatements, DriverManager.getConnection(url, props), this);
+        try{
+            Connection sqlConnection = DriverManager.getConnection(url, props);
+            return new BearDatabaseConnection(maxStatements, sqlConnection, this);
+        }catch(SQLException ex){
+            throw new ResourceUnavalableException(ex);
+        }
     }
 
     @Override
-    public BearDatabaseConnection getConnection() throws SQLException {
+    public Connection getConnection() throws SQLException {
         try {
             return achieveResource();
         } catch (Exception ex) {

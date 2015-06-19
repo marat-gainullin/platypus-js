@@ -8,6 +8,7 @@ package com.eas.script;
 import java.util.Set;
 import jdk.nashorn.internal.ir.AccessNode;
 import jdk.nashorn.internal.ir.BinaryNode;
+import jdk.nashorn.internal.ir.Expression;
 import jdk.nashorn.internal.ir.IdentNode;
 import jdk.nashorn.internal.runtime.Source;
 
@@ -37,7 +38,8 @@ public abstract class PropertiesAnnotationsMiner extends BaseAnnotationsMiner {
                     if (prevComments.containsKey(ft)) {
                         long prevComment = prevComments.get(ft);
                         commentedProperty(left.getProperty(), source.getString(prevComment));
-                    }
+                    }                    
+                    property(left.getProperty(), binaryNode.getAssignmentSource());
                 }
             }
         }
@@ -45,4 +47,6 @@ public abstract class PropertiesAnnotationsMiner extends BaseAnnotationsMiner {
     }
 
     protected abstract void commentedProperty(String aPropertyName, String aComment);
+
+    protected abstract void property(String aPropertyName, Expression aValueExpression);
 }

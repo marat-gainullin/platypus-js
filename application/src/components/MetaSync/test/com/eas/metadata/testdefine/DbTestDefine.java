@@ -4,7 +4,7 @@
  */
 package com.eas.metadata.testdefine;
 
-import com.bearsoft.rowset.metadata.ForeignKeySpec.ForeignKeyRule;
+import com.eas.client.metadata.ForeignKeySpec.ForeignKeyRule;
 import java.util.Map;
 
 /**

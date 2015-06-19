@@ -66,7 +66,6 @@ public class RequestsTags extends CoreTags{
     public static final int TAG_FORMAT = 44;
     public static final int TAG_RESULT_VALUE = 45;
     //ExecuteQueryRequest.Response
-    public static final int TAG_ROWSET = 46;
     public static final int TAG_PARAMETERS = 47;
     public static final int TAG_UPDATE_COUNT = 48;
     //CreateServerModuleResuest.Reponse

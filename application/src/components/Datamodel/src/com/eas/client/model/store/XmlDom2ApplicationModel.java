@@ -12,6 +12,7 @@ import com.eas.client.model.application.ReferenceRelation;
 import com.eas.client.model.visitors.ApplicationModelVisitor;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.queries.Query;
+import com.eas.script.Scripts;
 import com.eas.xml.dom.XmlDomUtils;
 import java.util.List;
 import java.util.logging.Level;
@@ -45,7 +46,7 @@ public class XmlDom2ApplicationModel<E extends ApplicationEntity<M, ?, E>, M ext
             try {
                 Query q = queries.getCachedQuery(entity.getQueryName());
                 if (q == null) {
-                    queries.getQuery(entity.getQueryName(), null, null);
+                    queries.getQuery(entity.getQueryName(), Scripts.getSpace(), null, null);
                 }
                 entity.validateQuery();
             } catch (Exception ex) {

@@ -5,7 +5,7 @@
  */
 package com.eas.client.forms.components.rt;
 
-import com.eas.script.ScriptUtils;
+import com.eas.script.Scripts;
 import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -78,11 +78,11 @@ public abstract class VFormattedField extends JFormattedTextField implements Has
         @Override
         public Object stringToValue(String text) throws ParseException {
             if (onParse != null) {
-                JSObject jsEvent = ScriptUtils.makeObj();
+                JSObject jsEvent = Scripts.getSpace().makeObj();
                 jsEvent.setMember("source", getPublished());
                 jsEvent.setMember("text", text);
                 try {
-                    return ScriptUtils.toJava(onParse.call(getPublished(), new Object[]{jsEvent}));
+                    return Scripts.getSpace().toJava(onParse.call(getPublished(), new Object[]{jsEvent}));
                 } catch (Throwable t) {
                     throw new ParseException(text, 0);
                 }
@@ -116,9 +116,9 @@ public abstract class VFormattedField extends JFormattedTextField implements Has
         @Override
         public String valueToString(Object value) throws ParseException {
             if (onFormat != null) {
-                JSObject jsEvent = ScriptUtils.makeObj();
+                JSObject jsEvent = Scripts.getSpace().makeObj();
                 jsEvent.setMember("source", getPublished());
-                jsEvent.setMember("value", ScriptUtils.toJs(value));
+                jsEvent.setMember("value", Scripts.getSpace().toJs(value));
                 try {
                     return JSType.toString(onFormat.call(getPublished(), new Object[]{jsEvent}));
                 } catch (Throwable t) {

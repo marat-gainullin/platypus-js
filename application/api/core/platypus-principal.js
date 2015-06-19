@@ -1,6 +1,8 @@
 (function() {
-    var javaClass = Java.type("com.eas.client.login.PlatypusPrincipal");
-    javaClass.setPublisher(function(aDelegate) {
+    var className = "com.eas.client.login.PlatypusPrincipal";
+    var javaClass = Java.type(className);
+    var space = this['-platypus-scripts-space'];
+    space.putPublisher(className, function(aDelegate) {
         return new P.PlatypusPrincipal(aDelegate);
     });
     

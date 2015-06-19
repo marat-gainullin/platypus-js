@@ -4,7 +4,9 @@
  */
 package com.eas.server.httpservlet;
 
-import com.eas.server.PlatypusServerCore;
+import com.eas.server.Session;
+import com.eas.server.SessionManager;
+import static com.eas.server.httpservlet.PlatypusHttpServlet.PLATYPUS_SESSION_ID_ATTR_NAME;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpSessionEvent;
@@ -17,21 +19,19 @@ import javax.servlet.http.HttpSessionListener;
 public class PlatypusSessionsSynchronizer implements HttpSessionListener {
 
     @Override
-    public void sessionCreated(HttpSessionEvent se) {
-        //NO OP
+    public void sessionDestroyed(HttpSessionEvent se) {
+        try {
+            Session removed = SessionManager.Singleton.instance.remove((String) se.getSession().getAttribute(PLATYPUS_SESSION_ID_ATTR_NAME));
+            if (removed != null) {
+                Logger.getLogger(PlatypusSessionsSynchronizer.class.getName()).log(Level.INFO, "Platypus session closed. Session id: {0}", removed.getId());
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(PlatypusSessionsSynchronizer.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @Override
-    public void sessionDestroyed(HttpSessionEvent se) {
-        String platypusSessionId = (String) se.getSession().getAttribute(PlatypusHttpServlet.PLATYPUS_SESSION_ATTR_NAME);
-        if (platypusSessionId != null) {
-            PlatypusServerCore serverCore = (PlatypusServerCore) se.getSession().getAttribute(PlatypusHttpServlet.PLATYPUS_SERVER_CORE_ATTR_NAME);
-            if (serverCore != null && serverCore.getSessionManager() != null) {
-                serverCore.getSessionManager().remove(platypusSessionId);
-                Logger.getLogger(PlatypusSessionsSynchronizer.class.getName()).log(Level.INFO, "Platypus session closed id: {0}", platypusSessionId);
-            }
-        }
-        se.getSession().removeAttribute(PlatypusHttpServlet.PLATYPUS_SESSION_ATTR_NAME);
-        se.getSession().removeAttribute(PlatypusHttpServlet.PLATYPUS_SERVER_CORE_ATTR_NAME);
+    public void sessionCreated(HttpSessionEvent se) {
+        // no op. Scripts.Space is appended to session by servlet code, due to parallel and sessions replication problems.
     }
 }

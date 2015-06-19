@@ -91,7 +91,7 @@ public class QueryModelView extends ModelView<QueryEntity, QueryModel> {
             return new QueryParametersEntityView((QueryParametersEntity) aEntity, entitiesViewsMover);
         } else {
             if (aEntity.getQueryName() != null && !aEntity.getQueryName().isEmpty()) {
-                model.getQueries().getQuery(aEntity.getQueryName(), null, null);
+                model.getQueries().getQuery(aEntity.getQueryName(), null, null, null);
             }
             aEntity.validateQuery();
             return new QueryEntityView(aEntity, entitiesViewsMover);

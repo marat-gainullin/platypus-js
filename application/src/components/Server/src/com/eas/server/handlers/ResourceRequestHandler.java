@@ -5,7 +5,7 @@
  */
 package com.eas.server.handlers;
 
-import com.eas.server.SessionRequestHandler;
+import com.eas.server.RequestHandler;
 import com.eas.client.threetier.requests.ResourceRequest;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.Session;
@@ -22,14 +22,14 @@ import java.util.logging.Logger;
  *
  * @author mg
  */
-public class ResourceRequestHandler extends SessionRequestHandler<ResourceRequest, ResourceRequest.Response> {
+public class ResourceRequestHandler extends RequestHandler<ResourceRequest, ResourceRequest.Response> {
 
     public ResourceRequestHandler(PlatypusServerCore aServerCore, ResourceRequest aRequest) {
         super(aServerCore, aRequest);
     }
 
     @Override
-    protected void handle2(Session aSession, Consumer<ResourceRequest.Response> onSuccess, Consumer<Exception> onFailure) {
+    public void handle(Session aSession, Consumer<ResourceRequest.Response> onSuccess, Consumer<Exception> onFailure) {
         String fileRelativeName = getRequest().getResourceName();
         fileRelativeName = fileRelativeName.replace("\\", File.separator);
         fileRelativeName = fileRelativeName.replace("/", File.separator);

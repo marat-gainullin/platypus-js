@@ -6,9 +6,8 @@
 
 package com.eas.sensors.api;
 
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
-import jdk.nashorn.api.scripting.JSObject;
 import org.apache.mina.core.service.IoAcceptor;
 
 /**
@@ -33,9 +32,7 @@ public abstract class SensorsFactory {
     
     public abstract boolean isSupported(String aProtocol);
     
-    public abstract IoAcceptor create(String aProtocol, int aNumWorkerThreads, int aSessionIdleTimeout, int aSessionIdleCheckInterval, PacketReciever aReciver) throws Exception;
-    
-    public abstract IoAcceptor create(String aProtocol, int aSessionIdleTimeout, int aSessionIdleCheckInterval, PacketReciever aReciver, ExecutorService executor) throws Exception;
+    public abstract IoAcceptor create(String aProtocol, Executor aExecutor, int aSessionIdleTimeout, int aSessionIdleCheckInterval, PacketReciever aReciver) throws Exception;
     
     public abstract void sendRequest(Object aRequest, Consumer aCallback);
 }

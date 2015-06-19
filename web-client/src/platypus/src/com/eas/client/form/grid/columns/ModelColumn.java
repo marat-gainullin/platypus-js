@@ -371,6 +371,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 								ModelDecoratorBox<Object> modelEditor = (ModelDecoratorBox<Object>) getEditor();
 								value = modelEditor.convert(Utils.toJava(value));
 							}
+							grid.setActiveEditor(getEditor());
 							super.startEditing(context, aBoxPositionTemplate, aBoxParent, value, valueUpdater, onEditorClose);
 						} catch (Exception ex) {
 							Logger.getLogger(ModelColumn.class.getName()).log(Level.SEVERE, null, ex);
@@ -389,6 +390,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 				cell.setOnEditorClose(new RenderedEditorCell.EditorCloser() {
 					@Override
 					public void closed(Element aTable) {
+						grid.setActiveEditor(null);
 						final GridSection<?> toFocus = GridSection.getInstance(aTable);
 						if (toFocus != null) {
 							Scheduler.get().scheduleDeferred(new ScheduledCommand() {
@@ -520,9 +522,11 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 	public void sort(){
 		grid.addSort(this, true);
 	}
+	
 	public void sortDesc(){
 		grid.addSort(this, false);
 	}
+	
 	public void unsort(){
 		grid.unsortColumn(this);
 	}

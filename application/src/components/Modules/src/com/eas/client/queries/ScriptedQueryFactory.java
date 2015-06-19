@@ -76,7 +76,7 @@ public class ScriptedQueryFactory extends StoredQueryFactory{
                     }
                     Matcher subQueryMatcher = subQueryPattern.matcher(processedSql);
                     if (subQueryMatcher.find()) {
-                        SqlQuery subQuery = subQueriesProxy.getQuery(entity.getQueryName(), null, null);
+                        SqlQuery subQuery = subQueriesProxy.getQuery(entity.getQueryName(), null, null, null);
                         if (subQuery != null && subQuery.getSqlText() != null) {
                             String subQueryText = subQuery.getSqlText();
                             subQueryText = replaceLinkedParameters(subQueryText, entity.getInRelations());

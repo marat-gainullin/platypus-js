@@ -93,7 +93,7 @@ public class AsyncMapTilesCache extends MapTilesCache {
         }
     }
     protected Map<Point, AsyncRenderingTask> offeredTasks = new ConcurrentHashMap<>();
-    protected ExecutorService executor = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors(), Runtime.getRuntime().availableProcessors() * 4,
+    protected ExecutorService executor = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors(), Runtime.getRuntime().availableProcessors(),
             0L, TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<Runnable>(), new DeamonThreadFactory());
     protected Set<RenderingTaskListener> listeners = new HashSet<>();

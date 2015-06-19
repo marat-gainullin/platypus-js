@@ -38,8 +38,8 @@ public class PlatypusResponsesFactory implements PlatypusRequestVisitor {
     }
 
     @Override
-    public void visit(CreateServerModuleRequest rq) throws Exception {
-        response = new CreateServerModuleRequest.Response(null);
+    public void visit(ServerModuleStructureRequest rq) throws Exception {
+        response = new ServerModuleStructureRequest.Response(null);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class PlatypusResponsesFactory implements PlatypusRequestVisitor {
 
     @Override
     public void visit(ExecuteQueryRequest rq) throws Exception {
-        response = new ExecuteQueryRequest.Response(null, 0, rq.getExpectedFields());
+        response = new ExecuteQueryRequest.Response(null, rq.getExpectedFields());
     }
 
     @Override
@@ -64,7 +64,7 @@ public class PlatypusResponsesFactory implements PlatypusRequestVisitor {
 
     @Override
     public void visit(ModuleStructureRequest rq) throws Exception {
-        response = new ModuleStructureRequest.Response();
+        response = new ModuleStructureRequest.Response(null);
     }
 
     @Override

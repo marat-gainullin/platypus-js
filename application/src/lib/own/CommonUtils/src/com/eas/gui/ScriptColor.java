@@ -22,7 +22,6 @@ import jdk.nashorn.api.scripting.JSObject;
         + " */")
 public class ScriptColor extends java.awt.Color implements HasPublished {
 
-    private static JSObject publisher;
     protected JSObject published;
 
     @ScriptFunction(name = "Color", params = {"red", "green", "blue", "alpha"}, jsDoc = "/**\n"
@@ -54,12 +53,6 @@ public class ScriptColor extends java.awt.Color implements HasPublished {
 
     @Override
     public JSObject getPublished() {
-        if (published == null) {
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = (JSObject) publisher.call(null, new Object[]{this});
-        }
         return published;
     }
 
@@ -69,10 +62,6 @@ public class ScriptColor extends java.awt.Color implements HasPublished {
             throw new AlreadyPublishedException();
         }
         published = aValue;
-    }
-
-    public static void setPublisher(JSObject aPublisher) {
-        publisher = aPublisher;
     }
 
     @ScriptFunction

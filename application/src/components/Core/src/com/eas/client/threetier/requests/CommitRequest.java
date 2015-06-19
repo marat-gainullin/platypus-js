@@ -4,11 +4,8 @@
  */
 package com.eas.client.threetier.requests;
 
-import com.eas.client.changes.Change;
 import com.eas.client.threetier.Request;
 import com.eas.client.threetier.Requests;
-import java.util.Collections;
-import java.util.List;
 
 /**
  *
@@ -16,19 +13,19 @@ import java.util.List;
  */
 public class CommitRequest extends Request {
 
-    protected List<Change> changes;
+    protected String changesJson;
     
     public CommitRequest() {
         super(Requests.rqCommit);
     }
     
-    public CommitRequest(List<Change> aChanges) {
+    public CommitRequest(String aChangesJson) {
         this();
-        changes = aChanges;
+        changesJson = aChangesJson;
     }
 
-    public List<Change> getChanges() {
-        return Collections.unmodifiableList(changes);
+    public String getChangesJson() {
+        return changesJson;
     }
 
     @Override
@@ -36,8 +33,8 @@ public class CommitRequest extends Request {
         aVisitor.visit(this);
     }
 
-    public void setChanges(List<Change> aValue) {
-        changes = aValue;
+    public void setChangesJson(String aValue) {
+        changesJson = aValue;
     }
 
     public static class Response extends com.eas.client.threetier.Response {

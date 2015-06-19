@@ -8,7 +8,7 @@ package com.eas.client;
 import com.eas.client.cache.FormsDocuments;
 import com.eas.client.cache.ModelsDocuments;
 import com.eas.client.cache.ReportsConfigs;
-import com.eas.client.cache.ScriptConfigs;
+import com.eas.client.cache.ScriptsConfigs;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.queries.Query;
 
@@ -31,5 +31,5 @@ public interface Application<Q extends Query> {
     
     public ReportsConfigs getReports();
     
-    public ScriptConfigs getScriptsConfigs();
+    public ScriptsConfigs getScriptsConfigs();
 }
