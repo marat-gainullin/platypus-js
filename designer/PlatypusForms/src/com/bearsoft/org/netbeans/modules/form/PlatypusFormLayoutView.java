@@ -56,6 +56,7 @@ import com.bearsoft.org.netbeans.modules.form.palette.PaletteUtils;
 import com.eas.client.forms.layouts.MarginConstraints;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyVetoException;
@@ -148,7 +149,6 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
             = "com/bearsoft/org/netbeans/modules/form/resources/formDesigner.gif"; // NOI18N
     
     private static final String SAVE_ACTION_KEY = "save";
-    private static final String CTRL_S_KEY_STROKE = "control S";
 
     // constructors and setup
     PlatypusFormLayoutView(FormEditor aFormEditor) {
@@ -186,7 +186,7 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
         
         InputMap iMap = getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         ActionMap aMap = getActionMap();
-        iMap.put(KeyStroke.getKeyStroke(CTRL_S_KEY_STROKE), SAVE_ACTION_KEY);
+        iMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK), SAVE_ACTION_KEY);
         aMap.put(SAVE_ACTION_KEY, new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
