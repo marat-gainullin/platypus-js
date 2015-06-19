@@ -1,6 +1,9 @@
+/* global P */
+
 /**
  * 
  * @author ${user}
+ * {global P}
  */
 function ${appElementName}(){
     var self = this

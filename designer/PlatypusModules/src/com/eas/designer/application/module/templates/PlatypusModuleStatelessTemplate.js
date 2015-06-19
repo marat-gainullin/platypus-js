@@ -1,3 +1,5 @@
+/* global P */
+
 /**
  * 
  * @author ${user}

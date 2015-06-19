@@ -201,7 +201,7 @@ public class Loader {
 								assert !aStructure.getStructure().isEmpty() : "Module [" + moduleName + "] structure should contain at least one element.";
 								for (final String part : aStructure.getStructure()) {
 									if (part.toLowerCase().endsWith(".js")) {
-										String jsURL = AppClient.relativeUri() + AppClient.APP_RESOURCE_PREFIX + part + URL_QUERY_PROCESSOR.process("");
+										String jsURL = AppClient.checkedCacheBust(AppClient.relativeUri() + AppClient.APP_RESOURCE_PREFIX + part);
 										ScriptInjector.fromUrl(jsURL).setCallback(new Callback<Void, Exception>() {
 
 											@Override
