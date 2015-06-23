@@ -31,12 +31,13 @@ import org.openide.util.Exceptions;
 
 /**
  * Platypus web application.
+ *
  * @author vv
  */
 public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleImplementation2,
         ModuleChangeReporter,
         EjbChangeDescriptor {
-    
+
     public static final String WEB_DIRECTORY = "web"; //NOI18N
     public static final String WEB_INF_DIRECTORY = "WEB-INF"; //NOI18N
     public static final String LIB_DIRECTORY_NAME = "lib"; //NOI18N
@@ -51,8 +52,12 @@ public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleI
         super();
         project = aProject;
         project.getSettings().getChangeSupport().addPropertyChangeListener(PlatypusProjectSettingsImpl.J2EE_SERVER_ID_KEY, (PropertyChangeEvent evt) -> {
-            fireServerChange(getServerByServerInstanceId((String)evt.getOldValue()), getServerByServerInstanceId((String)evt.getNewValue()));
+            fireServerChange(getServerByServerInstanceId((String) evt.getOldValue()), getServerByServerInstanceId((String) evt.getNewValue()));
         });
+    }
+
+    public void forceServerChanged() {
+        fireServerChange(null, getServerByServerInstanceId(project.getSettings().getJ2eeServerId()));
     }
 
     @Override
@@ -84,14 +89,14 @@ public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleI
         return getServerByServerInstanceId(inst);
     }
 
-    protected String getServerByServerInstanceId(String aServerInstanceId){
+    protected String getServerByServerInstanceId(String aServerInstanceId) {
         try {
             return aServerInstanceId != null ? Deployment.getDefault().getServerInstance(aServerInstanceId).getServerID() : null;
         } catch (InstanceRemovedException ex) {
             return null;
         }
     }
-    
+
     @Override
     public J2eeModule.Type getModuleType() {
         return J2eeModule.Type.WAR;
@@ -153,13 +158,13 @@ public class PlatypusWebModule extends J2eeModuleProvider implements J2eeModuleI
             FileObject fo = dir.getFileObject(path);
             return fo != null ? FileUtil.toFile(fo) : null;
         } catch (IOException ex) {
-            ErrorManager.getDefault().notify(ex);         
+            ErrorManager.getDefault().notify(ex);
         }
         return null;
     }
-    
+
     private String formatRelativePath(String directoryName) {
-        return directoryName  + "/"; //NOI18
+        return directoryName + "/"; //NOI18
     }
 
     @Override

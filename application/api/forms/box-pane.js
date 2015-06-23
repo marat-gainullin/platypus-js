@@ -23,6 +23,7 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
+            configurable: true,
             value: function() {
                 return delegate;
             }
@@ -512,23 +513,6 @@
              */
             P.BoxPane.prototype.count = 0;
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.BoxPane){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf BoxPane
-             */
-            P.BoxPane.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -545,6 +529,23 @@
              * @memberOf BoxPane
              */
             P.BoxPane.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.BoxPane){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf BoxPane
+             */
+            P.BoxPane.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

@@ -231,6 +231,8 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 					style.setHeight(100, Style.Unit.PCT);
 					style.setWidth(100, Style.Unit.PCT);
 					style.setOutlineStyle(Style.OutlineStyle.NONE);
+					style.setBackgroundColor("inherit");
+					style.setColor("inherit");
 					contentWrapper.setWidget((Widget) decorated);
 				}
 				if (decorated instanceof HasKeyDownHandlers) {

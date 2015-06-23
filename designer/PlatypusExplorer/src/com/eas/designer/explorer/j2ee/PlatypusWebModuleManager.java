@@ -92,9 +92,10 @@ public class PlatypusWebModuleManager {
     public void undeploy() throws Deployment.DeploymentException {
         PlatypusWebModule webModule = project.getLookup().lookup(PlatypusWebModule.class);
         assert webModule != null : "J2eeModuleProvider instance should be in the project's lookup.";
+        webModule.forceServerChanged();// Crazy NetBeans architecture of "Deployment" pushs us to do this dirty hack :(
         Deployment.getDefault().undeploy(webModule, false, (String message) -> {
             if (message != null) {
-                if (message.contains("FAIL")) {
+                if (message.contains("FAIL")) {// Crazy NetBeans' Tomcat manager module architecture push us to do this dirty hack :(
                     project.getOutputWindowIO().getErr().println(message);
                 } else {
                     project.getOutputWindowIO().getOut().println(message);
@@ -120,6 +121,7 @@ public class PlatypusWebModuleManager {
                 return null;
             }
             setupWebApplication(webModule);
+            webModule.forceServerChanged();// Crazy NetBeans architecture of "Deployment" pushs us to do this dirty hack :(
             webAppRunUrl = Deployment.getDefault().deploy(webModule,
                     debug ? Deployment.Mode.DEBUG : Deployment.Mode.RUN,
                     webModule.getUrl(),

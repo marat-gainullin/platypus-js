@@ -4,6 +4,7 @@
  */
 package com.eas.client.forms.components.model;
 
+import com.eas.client.forms.Forms;
 import com.eas.client.forms.components.rt.HasEditable;
 import com.eas.client.forms.components.rt.HasEmptyText;
 import com.eas.client.forms.components.rt.VComboBox;
@@ -101,6 +102,7 @@ public class ModelCombo extends ModelComponentDecorator<VComboBox<JSObject>, Obj
     protected void enqueueListChanged() {
         listChangedEnqueued = true;
         EventQueue.invokeLater(() -> {
+            Scripts.setContext(Forms.getContext());
             if (listChangedEnqueued) {
                 listChangedEnqueued = false;
                 refill();
@@ -108,14 +110,14 @@ public class ModelCombo extends ModelComponentDecorator<VComboBox<JSObject>, Obj
         });
     }
 
-    protected void unbindList(){
-        if(boundToList != null){
+    protected void unbindList() {
+        if (boundToList != null) {
             Scripts.unlisten(boundToList);
             boundToList = null;
         }
     }
-    
-    protected void bindList(){
+
+    protected void bindList() {
         if (displayList != null && Scripts.isInitialized()) {
             boundToList = Scripts.getSpace().listen(displayList, "length", new AbstractJSObject() {
 
@@ -128,7 +130,7 @@ public class ModelCombo extends ModelComponentDecorator<VComboBox<JSObject>, Obj
             });
         }
     }
-    
+
     private static final String DISPLAY_LIST_JSDOC = ""
             + "/**\n"
             + "* List of displayed options in a dropdown list of the component.\n"

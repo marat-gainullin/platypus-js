@@ -349,33 +349,33 @@ public class Classes2Scripts {
     }
 
     /*
-    private String getDepsJsContent() {
-        StringBuilder sb = new StringBuilder(DEPS_HEADER);
-        if (!depsPaths.isEmpty()) {
-            String dir = "";
-            String indent = getIndentStr(1);
-            sb.append("try {\n");
-            for (String path : depsPaths) {
-                String pathDir = pathRootDir(path);
-                if (!dir.equals(pathDir) && !dir.isEmpty()) {
-                    sb.append(indent).append("print('").append(dir).append(" API loaded.');\n");
-                    sb.append("} catch (e) {\n");
-                    sb.append(indent).append("print('").append(dir).append(" API skipped.');\n");
-                    sb.append("}\n");
-                    sb.append("\n");
-                    sb.append("try {\n");
-                }
-                dir = pathDir;
-                sb.append(indent).append(String.format("P.require('%s');\n", FileNameSupport.getFileName(path)));
-            }
-            sb.append(indent).append("print('").append(dir).append(" API loaded.');\n");
-            sb.append("} catch (e) {\n");
-            sb.append(indent).append("print('").append(dir).append(" API skipped.');\n");
-            sb.append("}\n");
-        }
-        return sb.toString();
-    }
-*/
+     private String getDepsJsContent() {
+     StringBuilder sb = new StringBuilder(DEPS_HEADER);
+     if (!depsPaths.isEmpty()) {
+     String dir = "";
+     String indent = getIndentStr(1);
+     sb.append("try {\n");
+     for (String path : depsPaths) {
+     String pathDir = pathRootDir(path);
+     if (!dir.equals(pathDir) && !dir.isEmpty()) {
+     sb.append(indent).append("print('").append(dir).append(" API loaded.');\n");
+     sb.append("} catch (e) {\n");
+     sb.append(indent).append("print('").append(dir).append(" API skipped.');\n");
+     sb.append("}\n");
+     sb.append("\n");
+     sb.append("try {\n");
+     }
+     dir = pathDir;
+     sb.append(indent).append(String.format("P.require('%s');\n", FileNameSupport.getFileName(path)));
+     }
+     sb.append(indent).append("print('").append(dir).append(" API loaded.');\n");
+     sb.append("} catch (e) {\n");
+     sb.append(indent).append("print('").append(dir).append(" API skipped.');\n");
+     sb.append("}\n");
+     }
+     return sb.toString();
+     }
+     */
     private static String pathRootDir(String path) {
         String[] pathElements = path.split("/");
         if (pathElements.length > 0) {
@@ -452,14 +452,15 @@ public class Classes2Scripts {
     }
 
     private FunctionInfo getFunctionInfo(String defaultName, Executable ae) {
-        FunctionInfo ci = new FunctionInfo();
+        FunctionInfo fi = new FunctionInfo();
         ScriptFunction sf = (ScriptFunction) ae.getAnnotation(ScriptFunction.class);
-        ci.name = sf.name().isEmpty() ? defaultName : sf.name();
-        ci.jsDoc = formJsDoc(sf.jsDoc());
-        ci.params = new String[sf.params().length];
-        ci.nativeParams = ae.getParameters();
-        System.arraycopy(sf.params(), 0, ci.params, 0, sf.params().length);
-        return ci;
+        fi.name = sf.name().isEmpty() ? defaultName : sf.name();
+        fi.apiName = sf.name();
+        fi.jsDoc = formJsDoc(sf.jsDoc());
+        fi.params = new String[sf.params().length];
+        fi.nativeParams = ae.getParameters();
+        System.arraycopy(sf.params(), 0, fi.params, 0, sf.params().length);
+        return fi;
     }
 
     private String getPropertyPart(String namespace, MethodedPropBox property, int ident) {
@@ -528,9 +529,13 @@ public class Classes2Scripts {
         FunctionInfo fi = getFunctionInfo(method.getName(), method);
         StringBuilder sb = new StringBuilder();
         int i = ident;
-        sb.append(getMethodJsDoc(namespace, fi.name, fi.jsDoc, ++i)).append("\n");
+        String methodName = fi.name;
+        if (fi.apiName != null && !fi.apiName.isEmpty()) {
+            methodName = fi.apiName;
+        }
+        sb.append(getMethodJsDoc(namespace, methodName, fi.jsDoc, ++i)).append("\n");
         sb.append(getIndentStr(i));
-        sb.append("P.").append(namespace).append(".prototype.").append(method.getName()).append(" = ")
+        sb.append("P.").append(namespace).append(".prototype.").append(methodName).append(" = ")
                 .append("function(");
         StringBuilder paramsInCall = new StringBuilder();
         StringBuilder formalParams = new StringBuilder();
@@ -656,6 +661,7 @@ public class Classes2Scripts {
         }
 
         public String name;
+        public String apiName;
         public String javaClassName;
         public String[] params;
         public Parameter[] nativeParams;

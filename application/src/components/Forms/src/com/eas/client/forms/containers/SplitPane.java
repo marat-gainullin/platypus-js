@@ -410,8 +410,8 @@ public class SplitPane extends JSplitPane implements HasPublished, HasContainerE
             + "* @param component the component to add.\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component"})
-    public void add(JComponent aComponent) {
+    @ScriptFunction(name = "add", jsDoc = ADD_JSDOC, params = {"component"})
+    public void jsAdd(JComponent aComponent) {
         if (getFirstComponent() == null) {
             setFirstComponent(aComponent);
         } else {

@@ -8,16 +8,18 @@ import com.bearsoft.gui.grid.columns.ConstrainedColumnModel;
 import com.bearsoft.gui.grid.data.CellData;
 import com.bearsoft.gui.grid.editing.InsettedTreeEditor;
 import com.bearsoft.gui.grid.rendering.InsettedTreeRenderer;
+import com.eas.client.forms.Forms;
 import com.eas.client.forms.ModelCellEditingListener;
 import com.eas.client.forms.components.model.CellRenderEvent;
 import com.eas.client.forms.components.model.grid.columns.ModelColumn;
 import com.eas.client.forms.components.model.grid.columns.RadioServiceColumn;
 import com.eas.gui.ScriptColor;
 import com.eas.script.HasPublished;
+import com.eas.script.Scripts;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
+import java.util.EventObject;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
@@ -96,6 +98,12 @@ public class GridTable extends JTable implements ModelCellEditingListener {
         return allowCellEdit(row, column) && super.isCellEditable(row, column);
     }
 
+    @Override
+    public boolean editCellAt(int row, int column, EventObject e) {
+        Scripts.setContext(Forms.getContext());
+        return super.editCellAt(row, column, e);
+    }
+
     protected boolean cellEditingCompletion;
 
     @Override
@@ -122,6 +130,7 @@ public class GridTable extends JTable implements ModelCellEditingListener {
 
     @Override
     public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+        Scripts.setContext(Forms.getContext());
         Component res = super.prepareRenderer(renderer, row, column);
             int lrow = row;
             if (aboveNeightbour != null) {

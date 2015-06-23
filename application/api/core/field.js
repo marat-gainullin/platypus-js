@@ -17,6 +17,7 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
+            configurable: true,
             value: function() {
                 return delegate;
             }
@@ -89,23 +90,6 @@
              */
             P.Field.prototype.precision = 0;
         }
-        Object.defineProperty(this, "description", {
-            get: function() {
-                var value = delegate.description;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.description = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Field){
-            /**
-             * The description of the field.
-             * @property description
-             * @memberOf Field
-             */
-            P.Field.prototype.description = '';
-        }
         Object.defineProperty(this, "scale", {
             get: function() {
                 var value = delegate.scale;
@@ -122,6 +106,23 @@
              * @memberOf Field
              */
             P.Field.prototype.scale = 0;
+        }
+        Object.defineProperty(this, "description", {
+            get: function() {
+                var value = delegate.description;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.description = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Field){
+            /**
+             * The description of the field.
+             * @property description
+             * @memberOf Field
+             */
+            P.Field.prototype.description = '';
         }
         Object.defineProperty(this, "signed", {
             get: function() {

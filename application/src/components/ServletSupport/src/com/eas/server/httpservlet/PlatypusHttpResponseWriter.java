@@ -105,7 +105,6 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
             JSObject p = space.lookupInGlobal("P");
             if (p != null) {
                 Object reportClass = p.getMember("Report");
-                Object dbEntityClass = p.getMember("ApplicationDbEntity");
                 if (jsResult.isInstanceOf(reportClass)) {
                     Report report = (Report) ((JSObject) jsResult.getMember("unwrap")).call(null, new Object[]{});
                     String docsRoot = servletRequest.getServletContext().getRealPath("/");

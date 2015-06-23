@@ -117,23 +117,6 @@ public class PlatypusResponseWriter implements PlatypusResponseVisitor {
             writer.put(RequestsTags.TAG_FILE_NAME, report.getName());
             writer.put(RequestsTags.TAG_FORMAT, report.getFormat());
             writer.put(RequestsTags.TAG_RESULT_VALUE, report.getBody());
-            /*
-            JSObject jsResult = (JSObject) rsp.getResult();
-            JSObject p = space.lookupInGlobal("P");
-            if (p != null) {
-                Object reportClass = p.getMember("Report");
-                if (jsResult.isInstanceOf(reportClass)) {
-                    Report report = (Report) ((JSObject) jsResult.getMember("unwrap")).call(null, new Object[]{});
-                    writer.put(RequestsTags.TAG_FILE_NAME, report.getName());
-                    writer.put(RequestsTags.TAG_FORMAT, report.getFormat());
-                    writer.put(RequestsTags.TAG_RESULT_VALUE, report.getBody());
-                } else {
-                    writer.put(RequestsTags.TAG_RESULT_VALUE, (String)rsp.getResult());
-                }
-            } else {
-                writer.put(RequestsTags.TAG_RESULT_VALUE, (String)rsp.getResult());
-            }
-            */
         } else {
             writer.put(RequestsTags.TAG_RESULT_VALUE, (String)rsp.getResult());
         }

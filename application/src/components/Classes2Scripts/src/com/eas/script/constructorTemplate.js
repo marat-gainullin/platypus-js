@@ -14,6 +14,7 @@ ${JsDoc}
             : ${UnwrappedParams};
 
         Object.defineProperty(this, "unwrap", {
+            configurable: true,
             value: function() {
                 return ${Delegate};
             }

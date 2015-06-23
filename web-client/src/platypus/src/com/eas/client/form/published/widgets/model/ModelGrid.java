@@ -261,15 +261,17 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 			public void execute() {
 				if (serviceColumnsRedrawQueued) {
 					serviceColumnsRedrawQueued = false;
-					for (int i = 0; i < getDataColumnCount(); i++) {
-						ModelColumn col = (ModelColumn) getDataColumn(i);
-						if (col instanceof UsualServiceColumn) {
-							if (i < frozenColumns) {
-								frozenLeft.redrawAllRowsInColumn(i, dataProvider);
-								scrollableLeft.redrawAllRowsInColumn(i, dataProvider);
-							} else {
-								frozenRight.redrawAllRowsInColumn(i - frozenColumns, dataProvider);
-								scrollableRight.redrawAllRowsInColumn(i - frozenColumns, dataProvider);
+					if(getDataColumnCount() > 0){
+						for (int i = 0; i < getDataColumnCount(); i++) {
+							ModelColumn col = (ModelColumn) getDataColumn(i);
+							if (col instanceof UsualServiceColumn) {
+								if (i < frozenColumns) {
+									frozenLeft.redrawAllRowsInColumn(i, dataProvider);
+									scrollableLeft.redrawAllRowsInColumn(i, dataProvider);
+								} else {
+									frozenRight.redrawAllRowsInColumn(i - frozenColumns, dataProvider);
+									scrollableRight.redrawAllRowsInColumn(i - frozenColumns, dataProvider);
+								}
 							}
 						}
 					}
@@ -402,8 +404,21 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		frozenRight.redraw();
 		scrollableLeft.redraw();
 		scrollableRight.redraw();
+		pingGWTFinallyCommands();
 	}
 
+	private void pingGWTFinallyCommands(){
+		// Dirty hack of GWT Scgeduler.get().scheduleFinally();
+		// Finally commands ocasionally not been executed without user interaction for while.
+		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+			
+			@Override
+			public void execute() {
+				Logger.getLogger(ModelGrid.class.getName()).log(Level.FINE, "ping GWT Finally commands");
+			}
+		});
+	}
+	
 	protected void bind() {
 		if (data != null) {
 			applyRows();
@@ -1088,10 +1103,12 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 
 	public void selectElement(JavaScriptObject aElement) {
 		getSelectionModel().setSelected(aElement, true);
+		pingGWTFinallyCommands();
 	}
 
 	public void unselectElement(JavaScriptObject anElement) {
 		getSelectionModel().setSelected(anElement, false);
+		pingGWTFinallyCommands();
 	}
 
 	public List<JavaScriptObject> getJsSelected() throws Exception {
@@ -1110,6 +1127,7 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 				sm.setSelected(row, false);
 			}
 		}
+		pingGWTFinallyCommands();
 	}
 
 	public boolean isEditable() {
@@ -1170,6 +1188,7 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 					scrollableRight.setKeyboardSelectedRow(index - frozenRows, true);
 				}
 			}
+			pingGWTFinallyCommands();
 			return true;
 		} else
 			return false;

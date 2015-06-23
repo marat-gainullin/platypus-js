@@ -186,6 +186,8 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 		field.getElement().getStyle().setBorderWidth(0, Style.Unit.PX);
 		field.getElement().getStyle().setMargin(0, Style.Unit.PX);
 		field.getElement().getStyle().setPadding(0, Style.Unit.PX);
+		field.getElement().getStyle().setBackgroundColor("inherit");
+		field.getElement().getStyle().setColor("inherit");
 		fieldWrapper.setWidget(field);
 
 		right.getElement().addClassName("date-select");

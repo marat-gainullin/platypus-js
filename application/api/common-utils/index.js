@@ -1,8 +1,8 @@
 try{
     P.require([
-          './font.js'
-        , './cursor.js'
+          './cursor.js'
         , './color.js'
+        , './font.js'
     ]);
 }catch(e){
     print(e);

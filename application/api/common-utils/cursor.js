@@ -19,6 +19,7 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
+            configurable: true,
             value: function() {
                 return delegate;
             }

@@ -315,8 +315,8 @@ public class ButtonGroup extends ButtonGroupWrapper implements HasPublished, Has
             + " * @param component Component to add to the group.\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = ADD_JSDOC, params = {"component"})
-    public void add(JComponent aComp) {
+    @ScriptFunction(name = "add", jsDoc = ADD_JSDOC, params = {"component"})
+    public void jsAdd(JComponent aComp) {
         if (!settingButtonGroup && aComp != null) {
             super.add(aComp);
             invalidatePublishedCollection();

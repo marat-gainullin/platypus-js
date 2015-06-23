@@ -19,6 +19,7 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
+            configurable: true,
             value: function() {
                 return delegate;
             }
@@ -330,23 +331,6 @@
              */
             P.HtmlArea.prototype.onMouseEntered = {};
         }
-        Object.defineProperty(this, "value", {
-            get: function() {
-                var value = delegate.value;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.value = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.HtmlArea){
-            /**
-             * Generated property jsDoc.
-             * @property value
-             * @memberOf HtmlArea
-             */
-            P.HtmlArea.prototype.value = {};
-        }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
                 var value = delegate.toolTipText;
@@ -497,23 +481,6 @@
              */
             P.HtmlArea.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.HtmlArea){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf HtmlArea
-             */
-            P.HtmlArea.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -530,6 +497,23 @@
              * @memberOf HtmlArea
              */
             P.HtmlArea.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.HtmlArea){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf HtmlArea
+             */
+            P.HtmlArea.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
