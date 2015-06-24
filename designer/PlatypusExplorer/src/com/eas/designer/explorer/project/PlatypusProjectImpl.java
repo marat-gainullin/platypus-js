@@ -10,6 +10,7 @@ import com.eas.client.DatabasesClient;
 import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusIndexer;
+import com.eas.client.forms.Forms;
 import com.eas.client.queries.LocalQueriesProxy;
 import com.eas.client.resourcepool.BearResourcePool;
 import com.eas.designer.application.PlatypusUtils;
@@ -106,6 +107,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
             Scripts.LocalContext context = Scripts.createContext(space);
             EventQueue.invokeLater(()->{
                 Scripts.setContext(context);
+                Forms.initContext(context);
             });
             return space;
         } catch (ScriptException ex) {

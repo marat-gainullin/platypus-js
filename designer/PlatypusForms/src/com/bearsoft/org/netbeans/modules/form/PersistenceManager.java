@@ -60,6 +60,7 @@ import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.SplitPaneS
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.TabbedPaneSupport;
 import com.eas.client.forms.Form;
 import com.eas.client.forms.FormFactory;
+import com.eas.client.forms.Forms;
 import com.eas.client.forms.HasChildren;
 import com.eas.client.forms.HorizontalPosition;
 import com.eas.client.forms.Orientation;
@@ -83,6 +84,7 @@ import com.eas.client.settings.SettingsConstants;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.application.module.EntityJSObject;
 import com.eas.gui.ScriptColor;
+import com.eas.script.Scripts;
 import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
 import java.awt.BorderLayout;

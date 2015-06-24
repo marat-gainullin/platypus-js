@@ -113,7 +113,7 @@ public class Loader {
 
 	public void load(final Collection<String> aModulesNames, final Callback<Void, String> aCallback) throws Exception {
 		if (!aModulesNames.isEmpty()) {
-			final CumulativeCallbackAdapter<Void, String> process = new CumulativeCallbackAdapter<Void, String>(aModulesNames.size()) {
+			final CumulativeCallbackAdapter<String> process = new CumulativeCallbackAdapter<String>(aModulesNames.size()) {
 
 				@Override
 				protected void failed(List<String> aReasons) {
@@ -150,7 +150,7 @@ public class Loader {
 
 							@Override
 							protected void doWork(AppClient.ModuleStructure aStructure) throws Exception {
-								final CumulativeCallbackAdapter<Void, String> moduleProcess = new CumulativeCallbackAdapter<Void, String>(2) {
+								final CumulativeCallbackAdapter<String> moduleProcess = new CumulativeCallbackAdapter<String>(2) {
 
 									@Override
 									protected void failed(final List<String> aReasons) {
@@ -185,7 +185,7 @@ public class Loader {
 									}
 
 								};
-								final CumulativeCallbackAdapter<Void, String> structureProcess = new CumulativeCallbackAdapter<Void, String>(aStructure.getStructure().size()) {
+								final CumulativeCallbackAdapter<String> structureProcess = new CumulativeCallbackAdapter<String>(aStructure.getStructure().size()) {
 
 									@Override
 									protected void failed(List<String> aReasons) {
@@ -232,7 +232,7 @@ public class Loader {
 										});
 									}
 								}
-								final CumulativeCallbackAdapter<Void, String> dependenciesProcess = new CumulativeCallbackAdapter<Void, String>(3) {
+								final CumulativeCallbackAdapter<String> dependenciesProcess = new CumulativeCallbackAdapter<String>(3) {
 
 									@Override
 									protected void failed(List<String> aReasons) {
@@ -278,7 +278,7 @@ public class Loader {
 				serverModulesNames.add(serverModuleName);
 		}
 		if (!serverModulesNames.isEmpty()) {
-			final CumulativeCallbackAdapter<Void, String> process = new CumulativeCallbackAdapter<Void, String>(serverModulesNames.size()) {
+			final CumulativeCallbackAdapter<String> process = new CumulativeCallbackAdapter<String>(serverModulesNames.size()) {
 
 				@Override
 				protected void failed(List<String> aReasons) {
@@ -329,7 +329,7 @@ public class Loader {
 				queriesNames.add(queryName);
 		}
 		if (!queriesNames.isEmpty()) {
-			final CumulativeCallbackAdapter<Void, String> process = new CumulativeCallbackAdapter<Void, String>(queriesNames.size()) {
+			final CumulativeCallbackAdapter<String> process = new CumulativeCallbackAdapter<String>(queriesNames.size()) {
 
 				@Override
 				protected void failed(List<String> aReasons) {

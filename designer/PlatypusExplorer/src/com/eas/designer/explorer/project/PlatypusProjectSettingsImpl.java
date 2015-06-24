@@ -59,13 +59,19 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
             + "// this === global\n" //NOI18N
             + "(function () {\n" //NOI18N
             + "    function ready() {\n" //NOI18N
-            + "        P.cacheBust = true;\n" //NOI18N
-            + "\n" //NOI18N
-            + "        P.require(['%s'], function(){\n" //NOI18N
+            + "        P.cacheBust = true;\n"
+            + "        var startModule = '%s';" //NOI18N
+            + "        P.require([startModule], function(){\n" //NOI18N
             + "    %s"//NOI18N
             + "    %s"//NOI18N
             + "        }, function(e){\n" //NOI18N
-            + "            P.Logger.severe(e);\n" //NOI18N
+            + "            P.Logger.severe(e);\n"
+            + "            var messageParagraph = document.createElement(\"p\");\n"
+            + "            document.body.appendChild(messageParagraph);\n" 
+            + "            messageParagraph.innerHTML = \"An error occured while require('\" + startModule + \"'). Error: \" + e;\n" 
+            + "            messageParagraph.style.margin = '10px';\n"
+            + "            messageParagraph.style.fontFamily = 'Arial';\n"
+            + "            messageParagraph.style.fontSize = '14pt';\n" //NOI18N
             + "        });\n"//NOI18N
             + "    }\n"//NOI18N
             + "    if(!this.P) {\n" //NOI18N

@@ -7,12 +7,11 @@ package com.eas.client;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
  * 
  * @author mg
  */
-public abstract class CumulativeCallbackAdapter<T, F> extends CallbackAdapter<T, F> {
+public abstract class CumulativeCallbackAdapter<F> extends CallbackAdapter<Void, F> {
 
 	protected List<F> reasons = new ArrayList<>();
 	protected int exepectedCallsCount;
@@ -23,18 +22,24 @@ public abstract class CumulativeCallbackAdapter<T, F> extends CallbackAdapter<T,
 		exepectedCallsCount = aExpectedCallsCount;
 	}
 
-	public void onSuccess(T result) {
+	protected void complete() {
 		if (++calls == exepectedCallsCount) {
-			super.onSuccess(result);
+			if (reasons.isEmpty()) {
+				super.onSuccess(null);
+			} else {
+				failed(reasons);
+			}
 		}
 	}
-	
+
+	public void onSuccess(Void result) {
+		complete();
+	}
+
 	public void onFailure(F reason) {
 		reasons.add(reason);
-		if (++calls == exepectedCallsCount) {
-			failed(reasons);
-		}		
+		complete();
 	}
-	
+
 	protected abstract void failed(List<F> aReasons);
 }

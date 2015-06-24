@@ -111,13 +111,12 @@ public class PlatypusHttpServlet extends HttpServlet {
                     ScriptsConfigs lsecurityConfigs = new ScriptsConfigs();
                     ServerTasksScanner tasksScanner = new ServerTasksScanner(lsecurityConfigs);
                     ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), tasksScanner);
-                    //indexer.watch();
                     ScriptedDatabasesClient basesProxy = new ScriptedDatabasesClient(platypusConfig.getDefaultDatasourceName(), indexer, true, tasksScanner.getValidators(), platypusConfig.getMaximumJdbcThreads());
                     QueriesProxy<SqlQuery> queries = new LocalQueriesProxy(basesProxy, indexer);
                     basesProxy.setQueries(queries);
                     platypusCore = new PlatypusServerCore(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), platypusConfig.getAppElementName()), queries, basesProxy, lsecurityConfigs, platypusConfig.getAppElementName(), SessionManager.Singleton.instance);
                     basesProxy.setContextHost(platypusCore);
-                    Scripts.initBIO(platypusConfig.getMaximumServicesTreads());
+                    Scripts.initBIO(platypusConfig.getMaximumBIOTreads());
                     ScriptedResource.init(platypusCore);
                     Scripts.initTasks((Runnable aTask) -> {
                         if (containerExecutor != null) {// J2EE 7+
@@ -130,6 +129,9 @@ public class PlatypusHttpServlet extends HttpServlet {
                         }
                     });
                     platypusCore.startResidents(tasksScanner.getResidents());
+                    if (platypusConfig.isWatch()) {
+                        indexer.watch();
+                    }
                 } else {
                     throw new IllegalArgumentException("applicationUrl: " + realRootUrl + " doesn't point to existent directory.");
                 }
@@ -147,13 +149,13 @@ public class PlatypusHttpServlet extends HttpServlet {
 
     @Override
     public void destroy() {
-        /*
-         try {
-         platypusCore.getIndexer().unwatch();
-         } catch (Exception ex) {
-         Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex);
-         }
-         */
+        if (platypusConfig.isWatch()) {
+            try {
+                platypusCore.getIndexer().unwatch();
+            } catch (Exception ex) {
+                Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
         Scripts.shutdown();
         if (platypusCore.getDatabasesClient() != null) {
             platypusCore.getDatabasesClient().shutdown();
