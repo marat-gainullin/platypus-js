@@ -60,7 +60,7 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
             + "(function () {\n" //NOI18N
             + "    function ready() {\n" //NOI18N
             + "        P.cacheBust = true;\n"
-            + "        var startModule = '%s';" //NOI18N
+            + "        var startModule = '%s';\n" //NOI18N
             + "        P.require([startModule], function(){\n" //NOI18N
             + "    %s"//NOI18N
             + "    %s"//NOI18N
