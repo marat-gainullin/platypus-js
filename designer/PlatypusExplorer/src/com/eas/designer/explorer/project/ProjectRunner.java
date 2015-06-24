@@ -436,7 +436,7 @@ public class ProjectRunner {
         arguments.add(OPTION_PREFIX
                 + LOG_LEVEL_OPTION_NAME
                 + EQUALS_SIGN
-                + Level.SEVERE.getName());
+                + logLevel.getName());
         arguments.add(OPTION_PREFIX
                 + LOG_HANDLERS_OPTION_NAME
                 + EQUALS_SIGN
@@ -445,10 +445,12 @@ public class ProjectRunner {
                 + CONSOLE_LOG_HANDLER_LEVEL_OPION_NAME
                 + EQUALS_SIGN
                 + logLevel.getName());
+        /*
         arguments.add(OPTION_PREFIX
                 + JS_APPLICATION_LOG_LEVEL_OPTION_NAME
                 + EQUALS_SIGN
                 + logLevel.getName());
+        */        
         arguments.add(OPTION_PREFIX
                 + CONSOLE_LOG_FORMATTER_OPTION_NAME
                 + EQUALS_SIGN

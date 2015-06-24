@@ -35,6 +35,7 @@ public class ArrayTreedModel extends ArrayModel implements TreedModel<JSObject> 
     public ArrayTreedModel(TableColumnModel aColumns, JSObject aData, String aParentField, String aChildrenField, JSObject aOnRender) {
         super(aColumns, aData, aOnRender);
         parentField = aParentField;
+        childrenField = aChildrenField;
     }
 
     public String getParentField() {

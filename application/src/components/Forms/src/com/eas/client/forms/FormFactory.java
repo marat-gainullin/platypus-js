@@ -423,6 +423,9 @@ public class FormFactory {
                 if (anElement.hasAttribute("text")) {
                     modelCheckBox.setText(anElement.getAttribute("text"));
                 }
+                if(anElement.hasAttribute("nullable")) {
+                    modelCheckBox.setNullable(XmlDomUtils.readBooleanAttribute(anElement, "nullable", true));
+                }
                 return modelCheckBox;
             case "ModelCombo":
             case "DbComboDesignInfo":
@@ -450,6 +453,9 @@ public class FormFactory {
                         modelCombo.setDisplayField(displayField);
                     }
                 }
+                if(anElement.hasAttribute("nullable")) {
+                    modelCombo.setNullable(XmlDomUtils.readBooleanAttribute(anElement, "nullable", true));
+                }
                 return modelCombo;
             case "ModelDate":
             case "DbDateDesignInfo":
@@ -471,6 +477,9 @@ public class FormFactory {
                     boolean selected = XmlDomUtils.readBooleanAttribute(anElement, "timeField", Boolean.FALSE);
                     modelDate.setTimePicker(selected);
                 }
+                if(anElement.hasAttribute("nullable")) {
+                    modelDate.setNullable(XmlDomUtils.readBooleanAttribute(anElement, "nullable", true));
+                }
                 return modelDate;
             case "ModelFormattedField":
             case "DbLabelDesignInfo":
@@ -486,6 +495,9 @@ public class FormFactory {
                     }
                 } catch (Exception ex) {
                     Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                if(anElement.hasAttribute("nullable")) {
+                    modelFormattedField.setNullable(XmlDomUtils.readBooleanAttribute(anElement, "nullable", true));
                 }
                 return modelFormattedField;
             case "ModelSpin":
@@ -508,19 +520,25 @@ public class FormFactory {
                 } catch (Exception ex) {
                     Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
                 }
+                if(anElement.hasAttribute("nullable")) {
+                    modelSpin.setNullable(XmlDomUtils.readBooleanAttribute(anElement, "nullable", true));
+                }
                 return modelSpin;
             case "ModelTextArea":
             case "DbTextDesignInfo":
-                ModelTextArea textarea = new ModelTextArea();
-                readGeneralProps(anElement, textarea);
+                ModelTextArea modelTextArea = new ModelTextArea();
+                readGeneralProps(anElement, modelTextArea);
                 if (anElement.hasAttribute("text")) {
                     try {
-                        textarea.setText(anElement.getAttribute("text"));
+                        modelTextArea.setText(anElement.getAttribute("text"));
                     } catch (Exception ex) {
                         Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
-                return textarea;
+                if(anElement.hasAttribute("nullable")) {
+                    modelTextArea.setNullable(XmlDomUtils.readBooleanAttribute(anElement, "nullable", true));
+                }
+                return modelTextArea;
             case "ModelGrid":
             case "DbGridDesignInfo": {
                 ModelGrid grid = new ModelGrid();

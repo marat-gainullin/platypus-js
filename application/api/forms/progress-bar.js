@@ -21,6 +21,7 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
+            configurable: true,
             value: function() {
                 return delegate;
             }
@@ -79,23 +80,6 @@
              */
             P.ProgressBar.prototype.onMouseReleased = {};
         }
-        Object.defineProperty(this, "onFocusLost", {
-            get: function() {
-                var value = delegate.onFocusLost;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onFocusLost = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ProgressBar){
-            /**
-             * Keyboard focus lost by the component event handler function.
-             * @property onFocusLost
-             * @memberOf ProgressBar
-             */
-            P.ProgressBar.prototype.onFocusLost = {};
-        }
         Object.defineProperty(this, "onValueChange", {
             get: function() {
                 var value = delegate.onValueChange;
@@ -112,6 +96,23 @@
              * @memberOf ProgressBar
              */
             P.ProgressBar.prototype.onValueChange = {};
+        }
+        Object.defineProperty(this, "onFocusLost", {
+            get: function() {
+                var value = delegate.onFocusLost;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onFocusLost = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ProgressBar){
+            /**
+             * Keyboard focus lost by the component event handler function.
+             * @property onFocusLost
+             * @memberOf ProgressBar
+             */
+            P.ProgressBar.prototype.onFocusLost = {};
         }
         Object.defineProperty(this, "onMousePressed", {
             get: function() {
@@ -465,23 +466,6 @@
              */
             P.ProgressBar.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ProgressBar){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf ProgressBar
-             */
-            P.ProgressBar.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -498,6 +482,23 @@
              * @memberOf ProgressBar
              */
             P.ProgressBar.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ProgressBar){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf ProgressBar
+             */
+            P.ProgressBar.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

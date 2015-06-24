@@ -4,6 +4,7 @@
  */
 package com.eas.client.forms.components.model.grid.models;
 
+import com.eas.client.forms.Forms;
 import com.eas.client.forms.components.model.ModelWidget;
 import com.eas.client.forms.components.model.grid.columns.ModelColumn;
 import com.eas.script.Scripts;
@@ -45,6 +46,7 @@ public abstract class ArrayModel {
         }
         elementsChangedEnqueued = true;
         EventQueue.invokeLater(() -> {
+            Scripts.setContext(Forms.getContext());
             if (elementsChangedEnqueued) {
                 elementsChangedEnqueued = false;
                 if (data != null && Scripts.isInitialized()) {
@@ -68,6 +70,7 @@ public abstract class ArrayModel {
     protected void enqueueElementsDataChanged() {
         elementsDataChangedEnqueued = true;
         EventQueue.invokeLater(() -> {
+            Scripts.setContext(Forms.getContext());
             if (elementsDataChangedEnqueued) {
                 elementsDataChangedEnqueued = false;
                 fireElementsDataChanged();

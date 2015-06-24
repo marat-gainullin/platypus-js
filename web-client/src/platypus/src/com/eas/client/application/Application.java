@@ -945,28 +945,20 @@ public class Application {
 
 			@Override
 			public void onFailure(String reason) {
+				onError(reason);
 				Logger.getLogger(Application.class.getName()).log(Level.SEVERE, reason);
 			}
 		});
 	}
 
-	/*
-	 * private static Set<Element> extractPlatypusProgressIndicators() {
-	 * Set<Element> platypusIndicators = new HashSet<Element>(); XElement xBody
-	 * = Utils.doc.getBody().cast(); String platypusIndicatorClass =
-	 * "platypus-indicator"; if (xBody.getClassName() != null &&
-	 * xBody.hasClassName(platypusIndicatorClass)) {
-	 * platypusIndicators.add(xBody); }
-	 * 
-	 * List<Element> divs2 = xBody.select(platypusIndicatorClass); if (divs2 !=
-	 * null) { for (int i = 0; i < divs2.size(); i++) { Element div =
-	 * divs2.get(i); platypusIndicators.add(div); } } return platypusIndicators;
-	 * }
-	 */
-
 	protected static native void onReady()/*-{
 		if ($wnd.P.ready)
 			$wnd.P.ready();
+	}-*/;
+
+	protected static native void onError(String aMessage)/*-{
+		if ($wnd.P.onError)
+			$wnd.P.onError(aMessage);
 	}-*/;
 
 	private static String toAppModuleId(String aRelative, String aStartPoint) {

@@ -121,6 +121,11 @@ public class Entity implements HasPublished {
 				nEntity.@com.eas.client.model.Entity::enqueueUpdate()();
 			}
 		});
+		Object.defineProperty(aTarget, 'executeUpdate', {
+			value : function(onSuccess, onFailure) {
+				nEntity.@com.eas.client.model.Entity::executeUpdate(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
+			}
+		});
 		Object.defineProperty(aTarget, 'execute', {
 			value : function(onSuccess, onFailure) {
 				nEntity.@com.eas.client.model.Entity::execute(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
@@ -434,6 +439,30 @@ public class Entity implements HasPublished {
 		changeLog.setSlot(changeLog.length(), query.prepareCommand());
 	}
 
+	public void executeUpdate(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
+		Utils.JsObject changeLog = JavaScriptObject.createArray(1).cast();
+		changeLog.setSlot(0, query.prepareCommand());
+		model.client.requestCommit(changeLog, new CallbackAdapter<Void, String>() {
+
+			@Override
+			protected void doWork(Void aVoid) throws Exception {
+				if (onSuccess != null)
+					Utils.invokeJsFunction(onSuccess);
+			}
+
+			@Override
+			public void onFailure(String aReason) {
+				try {
+					if (onFailure != null)
+						Utils.executeScriptEventVoid(jsPublished, onFailure, aReason);
+				} catch (Exception ex) {
+					Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
+				}
+			}
+
+		});
+	}
+
 	public JavaScriptObject getChangeLog() {
 		return model.getChangeLog();
 	}
@@ -608,14 +637,14 @@ public class Entity implements HasPublished {
 		JavaScriptObject jsCursor = jsPublished.<JsObject> cast().getJs("cursor");
 		if (jsCursor != null) {
 			cursorListener = Utils.listenPath(jsCursor, "", new Utils.OnChangeHandler() {
-				
+
 				@Override
 				public void onChange(JavaScriptObject anEvent) {
 					try {
-	                    internalExecuteChildren(false);
-                    } catch (Exception ex) {
-                    	Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+						internalExecuteChildren(false);
+					} catch (Exception ex) {
+						Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
+					}
 				}
 			});
 		}
@@ -644,18 +673,18 @@ public class Entity implements HasPublished {
 	public void setPublished(JavaScriptObject aPublished) {
 		if (jsPublished != aPublished) {
 			jsPublished = aPublished;
-			if (jsPublished != null){
+			if (jsPublished != null) {
 				publishFacade(this, jsPublished);
 				Utils.listenPath(jsPublished, "cursor", new Utils.OnChangeHandler() {
-					
+
 					@Override
 					public void onChange(JavaScriptObject anEvent) {
-		                try {
-		                    resignOnCursor();
-		                    internalExecuteChildren(false);
-		                } catch (Exception ex) {
-		                    Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
-		                }
+						try {
+							resignOnCursor();
+							internalExecuteChildren(false);
+						} catch (Exception ex) {
+							Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
+						}
 					}
 				});
 			}

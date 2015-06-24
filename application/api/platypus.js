@@ -23,7 +23,7 @@
     aSpace.setGlobal(global);
     global.P = {};
     global['-platypus-scripts-space'] = aSpace;
-    
+
     // core imports
     var EngineUtilsClass = Java.type("jdk.nashorn.api.scripting.ScriptUtils");
     var ScriptsClass = Java.type("com.eas.script.Scripts");
@@ -681,18 +681,18 @@
         Child.superclass = Parent.prototype;
     }
     Object.defineProperty(P, "extend", {value: extend});
-    
+
     /*
-    Object.defineProperty(P, "session", {
-        get: function () {
-            if (serverCoreClass) {
-                return ScriptsClass.getContext().getSession().getPublished();
-            } else {
-                return null;
-            }
-        }
-    });
-    */
+     Object.defineProperty(P, "session", {
+     get: function () {
+     if (serverCoreClass) {
+     return ScriptsClass.getContext().getSession().getPublished();
+     } else {
+     return null;
+     }
+     }
+     });
+     */
 
     Object.defineProperty(P, "principal", {
         get: function () {
@@ -718,7 +718,8 @@
             })();
         }
         return target;
-    };
+    }
+    ;
     space.putPublisher(ParametersClassName, fieldsAndParametersPublisher);
     space.putPublisher(FieldsClassName, fieldsAndParametersPublisher);
 
@@ -736,7 +737,7 @@
         Object.defineProperty(aTarget, fireChangeName, {value: function (aChange) {
                 Object.freeze(aChange);
                 var _listeners = [];
-                listeners.forEach(function(aListener) {
+                listeners.forEach(function (aListener) {
                     _listeners.push(aListener);
                 });
                 _listeners.forEach(function (aListener) {
@@ -794,52 +795,56 @@
     aSpace.setListenElementsFunc(listenElements);
 
     function listenInstance(aTarget, aPath, aPropListener) {
-        function subscribe(aData, aListener, aPropName) {
-            return listen(aData, function(aChange){
-                if(!aPropName || aChange.propertyName == aPropName){
-                    aListener(aChange);
+        if (aTarget[addListenerName]) {
+            function subscribe(aData, aListener, aPropName) {
+                return listen(aData, function (aChange) {
+                    if (!aPropName || aChange.propertyName == aPropName) {
+                        aListener(aChange);
+                    }
+                });
+            }
+            var subscribed = [];
+            function listenPath() {
+                subscribed = [];
+                var data = aTarget;
+                var path = aPath.split(".");
+                for (var i = 0; i < path.length; i++) {
+                    var propName = path[i];
+                    var listener = i === path.length - 1 ? aPropListener : function (aChange) {
+                        subscribed.forEach(function (aEntry) {
+                            aEntry();
+                        });
+                        listenPath();
+                        aPropListener(aChange);
+                    };
+                    var cookie = subscribe(data, listener, propName);
+                    if (cookie) {
+                        subscribed.push(cookie);
+                        if (data[propName])
+                            data = data[propName];
+                        else
+                            break;
+                    } else {
+                        break;
+                    }
                 }
-            });
-        }
-        var subscribed = [];
-        function listenPath() {
-            subscribed = [];
-            var data = aTarget;
-            var path = aPath.split(".");
-            for (var i = 0; i < path.length; i++) {
-                var propName = path[i];
-                var listener = i === path.length - 1 ? aPropListener : function (aChange) {
+            }
+            if (aTarget) {
+                listenPath();
+            }
+            return {
+                unlisten: function () {
                     subscribed.forEach(function (aEntry) {
                         aEntry();
                     });
-                    listenPath();
-                    aPropListener(aChange);
-                };
-                var cookie = subscribe(data, listener, propName);
-                if (cookie) {
-                    subscribed.push(cookie);
-                    if (data[propName])
-                        data = data[propName];
-                    else
-                        break;
-                } else {
-                    break;
                 }
-            }
+            };
+        } else {
+            return null;
         }
-        if (aTarget) {
-            listenPath();
-        }
-        return {
-            unlisten: function () {
-                subscribed.forEach(function (aEntry) {
-                    aEntry();
-                });
-            }
-        };
     }
     aSpace.setListenFunc(listenInstance);
-    
+
     function fireSelfScalarsOppositeCollectionsChanges(aSubject, aChange, nFields) {
         var ormDefs = nFields.getOrmScalarExpandings().get(aChange.propertyName);
         if (ormDefs) {
@@ -1311,7 +1316,7 @@
                     orderers = {};
                     published.cursor = published.length > 0 ? published[0] : null;
                     fire(published, {source: published, propertyName: 'length'});
-                    published.forEach(function(aItem){
+                    published.forEach(function (aItem) {
                         fireOppositeScalarsChanges(aItem, nFields);
                         fireOppositeCollectionsChanges(aItem, nFields);
                     });
@@ -1334,6 +1339,7 @@
                 });
                 listenable(published);
                 entityCTor.call(published, nEntity);
+                delete published.unwrap;
                 for (var protoEntryName in entityCTor.prototype) {
                     if (!published[protoEntryName]) {
                         var protoEntry = entityCTor.prototype[protoEntryName];

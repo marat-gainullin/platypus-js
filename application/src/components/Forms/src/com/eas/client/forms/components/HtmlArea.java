@@ -75,7 +75,6 @@ public class HtmlArea extends VHtmlArea implements HasOnValueChange, HasJsValue,
         return super.getValue();
     }
 
-    @ScriptFunction
     @Override
     public void setValue(String aValue) {
         super.setValue(aValue);

@@ -17,6 +17,7 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
+            configurable: true,
             value: function() {
                 return delegate;
             }
@@ -40,6 +41,20 @@
              * @memberOf ModelGrid
              */
             P.ModelGrid.prototype.onMouseReleased = {};
+        }
+        Object.defineProperty(this, "selected", {
+            get: function() {
+                var value = delegate.jsSelected;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * Generated property jsDoc.
+             * @property jsSelected
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.selected = {};
         }
         Object.defineProperty(this, "data", {
             get: function() {
@@ -291,23 +306,6 @@
              */
             P.ModelGrid.prototype.onComponentHidden = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelGrid){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf ModelGrid
-             */
-            P.ModelGrid.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -324,6 +322,23 @@
              * @memberOf ModelGrid
              */
             P.ModelGrid.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -526,23 +541,6 @@
              */
             P.ModelGrid.prototype.onFocusLost = {};
         }
-        Object.defineProperty(this, "deletable", {
-            get: function() {
-                var value = delegate.deletable;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.deletable = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelGrid){
-            /**
-             * Determines if grid allows to delete rows.
-             * @property deletable
-             * @memberOf ModelGrid
-             */
-            P.ModelGrid.prototype.deletable = true;
-        }
         Object.defineProperty(this, "onMousePressed", {
             get: function() {
                 var value = delegate.onMousePressed;
@@ -559,6 +557,23 @@
              * @memberOf ModelGrid
              */
             P.ModelGrid.prototype.onMousePressed = {};
+        }
+        Object.defineProperty(this, "deletable", {
+            get: function() {
+                var value = delegate.deletable;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.deletable = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * Determines if grid allows to delete rows.
+             * @property deletable
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.deletable = true;
         }
         Object.defineProperty(this, "error", {
             get: function() {
@@ -796,23 +811,6 @@
              */
             P.ModelGrid.prototype.onFocusGained = {};
         }
-        Object.defineProperty(this, "rowsHeight", {
-            get: function() {
-                var value = delegate.rowsHeight;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.rowsHeight = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelGrid){
-            /**
-             * The height of grid's rows.
-             * @property rowsHeight
-             * @memberOf ModelGrid
-             */
-            P.ModelGrid.prototype.rowsHeight = 0;
-        }
         Object.defineProperty(this, "onMouseClicked", {
             get: function() {
                 var value = delegate.onMouseClicked;
@@ -829,6 +827,23 @@
              * @memberOf ModelGrid
              */
             P.ModelGrid.prototype.onMouseClicked = {};
+        }
+        Object.defineProperty(this, "rowsHeight", {
+            get: function() {
+                var value = delegate.rowsHeight;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.rowsHeight = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * The height of grid's rows.
+             * @property rowsHeight
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.rowsHeight = 0;
         }
         Object.defineProperty(this, "onMouseExited", {
             get: function() {
@@ -1033,12 +1048,35 @@
         };
 
         /**
-         * @method unsort
+         *
+         * @method addColumnNode
          * @memberOf ModelGrid
-         * Clears sort on all columns, works only in HTML5 */
-        P.ModelGrid.prototype.unsort = function() {
+         */
+        P.ModelGrid.prototype.addColumnNode = function(arg0) {
             var delegate = this.unwrap();
-            var value = delegate.unsort();
+            var value = delegate.addColumnNode(P.boxAsJava(arg0));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
+         * @method removeColumnNode
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.removeColumnNode = function(arg0) {
+            var delegate = this.unwrap();
+            var value = delegate.removeColumnNode(P.boxAsJava(arg0));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
+         * @method insertColumnNode
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.insertColumnNode = function(arg0, arg1) {
+            var delegate = this.unwrap();
+            var value = delegate.insertColumnNode(P.boxAsJava(arg0), P.boxAsJava(arg1));
             return P.boxAsJs(value);
         };
 
@@ -1076,35 +1114,12 @@
         };
 
         /**
-         *
-         * @method addColumnNode
+         * @method unsort
          * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.addColumnNode = function(arg0) {
+         * Clears sort on all columns, works only in HTML5 */
+        P.ModelGrid.prototype.unsort = function() {
             var delegate = this.unwrap();
-            var value = delegate.addColumnNode(P.boxAsJava(arg0));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         *
-         * @method removeColumnNode
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.removeColumnNode = function(arg0) {
-            var delegate = this.unwrap();
-            var value = delegate.removeColumnNode(P.boxAsJava(arg0));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         *
-         * @method insertColumnNode
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.insertColumnNode = function(arg0, arg1) {
-            var delegate = this.unwrap();
-            var value = delegate.insertColumnNode(P.boxAsJava(arg0), P.boxAsJava(arg1));
+            var value = delegate.unsort();
             return P.boxAsJs(value);
         };
 

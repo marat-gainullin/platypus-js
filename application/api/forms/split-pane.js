@@ -19,6 +19,7 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
+            configurable: true,
             value: function() {
                 return delegate;
             }
@@ -528,23 +529,6 @@
              */
             P.SplitPane.prototype.count = 0;
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.SplitPane){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf SplitPane
-             */
-            P.SplitPane.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -561,6 +545,23 @@
              * @memberOf SplitPane
              */
             P.SplitPane.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.SplitPane){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf SplitPane
+             */
+            P.SplitPane.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -817,18 +818,6 @@
         });
     };
         /**
-         * Appends the specified component to the end of this container.
-         * @param component the component to add.
-         * @method add
-         * @memberOf SplitPane
-         */
-        P.SplitPane.prototype.add = function(component) {
-            var delegate = this.unwrap();
-            var value = delegate.add(P.boxAsJava(component));
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf SplitPane
@@ -849,6 +838,18 @@
         P.SplitPane.prototype.child = function(index) {
             var delegate = this.unwrap();
             var value = delegate.child(P.boxAsJava(index));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Appends the specified component to the end of this container.
+         * @param component the component to add.
+         * @method add
+         * @memberOf SplitPane
+         */
+        P.SplitPane.prototype.add = function(component) {
+            var delegate = this.unwrap();
+            var value = delegate.jsAdd(P.boxAsJava(component));
             return P.boxAsJs(value);
         };
 

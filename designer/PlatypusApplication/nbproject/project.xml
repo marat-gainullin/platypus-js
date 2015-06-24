@@ -453,10 +453,6 @@
                 <binary-origin>release/modules/ext/SqlParser.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/MetaSync.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/MetaSync.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
                 <runtime-relative-path>ext/Grid.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/Grid.jar</binary-origin>
             </class-path-extension>

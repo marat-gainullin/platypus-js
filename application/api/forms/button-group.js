@@ -18,6 +18,7 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
+            configurable: true,
             value: function() {
                 return delegate;
             }
@@ -459,23 +460,6 @@
              */
             P.ButtonGroup.prototype.count = 0;
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ButtonGroup){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf ButtonGroup
-             */
-            P.ButtonGroup.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -492,6 +476,23 @@
              * @memberOf ButtonGroup
              */
             P.ButtonGroup.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ButtonGroup){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf ButtonGroup
+             */
+            P.ButtonGroup.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -748,18 +749,6 @@
         });
     };
         /**
-         * Appends the specified component to the end of this group.
-         * @param component Component to add to the group.
-         * @method add
-         * @memberOf ButtonGroup
-         */
-        P.ButtonGroup.prototype.add = function(component) {
-            var delegate = this.unwrap();
-            var value = delegate.add(P.boxAsJava(component));
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Removes the specified component from the group.
          * @param component Component to remove from the group.
          * @method remove
@@ -803,6 +792,18 @@
         P.ButtonGroup.prototype.child = function(index) {
             var delegate = this.unwrap();
             var value = delegate.child(P.boxAsJava(index));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Appends the specified component to the end of this group.
+         * @param component Component to add to the group.
+         * @method add
+         * @memberOf ButtonGroup
+         */
+        P.ButtonGroup.prototype.add = function(component) {
+            var delegate = this.unwrap();
+            var value = delegate.jsAdd(P.boxAsJava(component));
             return P.boxAsJs(value);
         };
 

@@ -42,14 +42,8 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
         visitor.visit(this);
     }
 
-    private static final String EXECUTE_UPDATE_JSDOC = ""
-            + "/**\n"
-            + "* Applies the updates into the database and commits the transaction.\n"
-            + "* @param onSuccess Success callback. It has an argument, - updates rows count.\n"
-            + "* @param onFailure Failure callback. It has an argument, - exception occured while applying updates into the database.\n"
-            + "*/";
-
-    @ScriptFunction(jsDoc = EXECUTE_UPDATE_JSDOC)
+    @ScriptFunction(jsDoc = EXECUTE_UPDATE_JSDOC, params = {"onSuccess", "onFailure"})
+    @Override
     public int executeUpdate(JSObject onSuccess, JSObject onFailure) throws Exception {
         if (onSuccess != null) {
             model.getBasesProxy().executeUpdate(getQuery().compile(), (Integer aUpdated) -> {
@@ -64,11 +58,6 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
             return model.getBasesProxy().executeUpdate(getQuery().compile(), null, null);
         }
     }
-
-    private static final String ENQUEUE_UPDATE_JSDOC = ""
-            + "/**\n"
-            + "* Adds the updates into the change log as a command.\n"
-            + "*/";
 
     @ScriptFunction(jsDoc = ENQUEUE_UPDATE_JSDOC)
     @Override

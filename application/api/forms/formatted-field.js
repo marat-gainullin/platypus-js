@@ -19,6 +19,7 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
+            configurable: true,
             value: function() {
                 return delegate;
             }
@@ -77,23 +78,6 @@
              */
             P.FormattedField.prototype.onMouseReleased = {};
         }
-        Object.defineProperty(this, "onFocusLost", {
-            get: function() {
-                var value = delegate.onFocusLost;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onFocusLost = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.FormattedField){
-            /**
-             * Keyboard focus lost by the component event handler function.
-             * @property onFocusLost
-             * @memberOf FormattedField
-             */
-            P.FormattedField.prototype.onFocusLost = {};
-        }
         Object.defineProperty(this, "onValueChange", {
             get: function() {
                 var value = delegate.onValueChange;
@@ -110,6 +94,23 @@
              * @memberOf FormattedField
              */
             P.FormattedField.prototype.onValueChange = {};
+        }
+        Object.defineProperty(this, "onFocusLost", {
+            get: function() {
+                var value = delegate.onFocusLost;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onFocusLost = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.FormattedField){
+            /**
+             * Keyboard focus lost by the component event handler function.
+             * @property onFocusLost
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.onFocusLost = {};
         }
         Object.defineProperty(this, "emptyText", {
             get: function() {
@@ -429,23 +430,6 @@
              */
             P.FormattedField.prototype.onComponentShown = {};
         }
-        Object.defineProperty(this, "onMouseMoved", {
-            get: function() {
-                var value = delegate.onMouseMoved;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onMouseMoved = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.FormattedField){
-            /**
-             * Mouse moved event handler function.
-             * @property onMouseMoved
-             * @memberOf FormattedField
-             */
-            P.FormattedField.prototype.onMouseMoved = {};
-        }
         Object.defineProperty(this, "onFormat", {
             get: function() {
                 var value = delegate.onFormat;
@@ -462,6 +446,23 @@
              * @memberOf FormattedField
              */
             P.FormattedField.prototype.onFormat = {};
+        }
+        Object.defineProperty(this, "onMouseMoved", {
+            get: function() {
+                var value = delegate.onMouseMoved;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onMouseMoved = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.FormattedField){
+            /**
+             * Mouse moved event handler function.
+             * @property onMouseMoved
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.onMouseMoved = {};
         }
         Object.defineProperty(this, "opaque", {
             get: function() {
@@ -548,23 +549,6 @@
              */
             P.FormattedField.prototype.format = '';
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.FormattedField){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf FormattedField
-             */
-            P.FormattedField.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -581,6 +565,23 @@
              * @memberOf FormattedField
              */
             P.FormattedField.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.FormattedField){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

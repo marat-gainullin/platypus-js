@@ -19,6 +19,7 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
+            configurable: true,
             value: function() {
                 return delegate;
             }
@@ -77,23 +78,6 @@
              */
             P.TextArea.prototype.onMouseReleased = {};
         }
-        Object.defineProperty(this, "onFocusLost", {
-            get: function() {
-                var value = delegate.onFocusLost;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onFocusLost = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.TextArea){
-            /**
-             * Keyboard focus lost by the component event handler function.
-             * @property onFocusLost
-             * @memberOf TextArea
-             */
-            P.TextArea.prototype.onFocusLost = {};
-        }
         Object.defineProperty(this, "onValueChange", {
             get: function() {
                 var value = delegate.onValueChange;
@@ -110,6 +94,23 @@
              * @memberOf TextArea
              */
             P.TextArea.prototype.onValueChange = {};
+        }
+        Object.defineProperty(this, "onFocusLost", {
+            get: function() {
+                var value = delegate.onFocusLost;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onFocusLost = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.TextArea){
+            /**
+             * Keyboard focus lost by the component event handler function.
+             * @property onFocusLost
+             * @memberOf TextArea
+             */
+            P.TextArea.prototype.onFocusLost = {};
         }
         Object.defineProperty(this, "emptyText", {
             get: function() {
@@ -480,23 +481,6 @@
              */
             P.TextArea.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.TextArea){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf TextArea
-             */
-            P.TextArea.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -513,6 +497,23 @@
              * @memberOf TextArea
              */
             P.TextArea.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.TextArea){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf TextArea
+             */
+            P.TextArea.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

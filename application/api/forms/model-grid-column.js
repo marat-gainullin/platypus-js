@@ -17,6 +17,7 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
+            configurable: true,
             value: function() {
                 return delegate;
             }
@@ -322,16 +323,6 @@
         };
 
         /**
-         * @method unsort
-         * @memberOf ModelGridColumn
-         * Clears sort column, works only in HTML5 */
-        P.ModelGridColumn.prototype.unsort = function() {
-            var delegate = this.unwrap();
-            var value = delegate.unsort();
-            return P.boxAsJs(value);
-        };
-
-        /**
          *
          * @method addColumnNode
          * @memberOf ModelGridColumn
@@ -361,6 +352,16 @@
         P.ModelGridColumn.prototype.insertColumnNode = function(position, node) {
             var delegate = this.unwrap();
             var value = delegate.insertColumnNode(P.boxAsJava(position), P.boxAsJava(node));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * @method unsort
+         * @memberOf ModelGridColumn
+         * Clears sort column, works only in HTML5 */
+        P.ModelGridColumn.prototype.unsort = function() {
+            var delegate = this.unwrap();
+            var value = delegate.unsort();
             return P.boxAsJs(value);
         };
 

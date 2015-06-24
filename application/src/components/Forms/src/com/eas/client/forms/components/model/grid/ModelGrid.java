@@ -787,6 +787,18 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         return selectedRows;
     }
 
+    @Undesignable
+    @ScriptFunction(name = "selected")
+    public JSObject getJsSelected() throws Exception {
+        List<JSObject> selectedRows = getSelected();
+        JSObject jsArray = Scripts.getSpace().makeArray();
+        JSObject jsPush = (JSObject) jsArray.getMember("push");
+        selectedRows.forEach((Object aItem) -> {
+            jsPush.call(jsArray, new Object[]{aItem});
+        });
+        return jsArray;
+    }
+
     @ScriptFunction
     @Override
     public JPopupMenu getComponentPopupMenu() {
@@ -1180,7 +1192,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
             bind();
         }
     }
-    
+
     public static final String CURSOR_FIELD_JSDOC = ""
             + "/**\n"
             + " * Determines wich property of ModelGrid's collection is responsible of \"current\" item. Its default value is \"cursor\".\n"
@@ -1219,7 +1231,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     }
 
     protected void applyRows() {
-        if(collapseExpandListener != null){
+        if (collapseExpandListener != null) {
             collapseExpandListener.remove();
         }
         if (rowsModel != null) {
@@ -1230,18 +1242,18 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         if (isTreeConfigured()) {
             rowsModel = new ArrayTreedModel(columnModel, modelData, parentField, childrenField, generalOnRender);
             deepModel = new TableFront2TreedModel<>((ArrayTreedModel) rowsModel);
-            collapseExpandListener = ((TableFront2TreedModel<JSObject>)deepModel).addCollapseExpandListener(new CollapseExpandListener<JSObject>(){
+            collapseExpandListener = ((TableFront2TreedModel<JSObject>) deepModel).addCollapseExpandListener(new CollapseExpandListener<JSObject>() {
 
                 @Override
                 public void collapsed(JSObject aItem) {
-                    if(onCollapse != null){
+                    if (onCollapse != null) {
                         onCollapse.call(published, new Object[]{new com.eas.client.forms.events.ItemEvent(ModelGrid.this, aItem).getPublished()});
                     }
                 }
 
                 @Override
                 public void expanded(JSObject aItem) {
-                    if(onExpand != null){
+                    if (onExpand != null) {
                         onExpand.call(published, new Object[]{new com.eas.client.forms.events.ItemEvent(ModelGrid.this, aItem).getPublished()});
                     }
                 }
@@ -1382,6 +1394,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
                 }
                 EventQueue.invokeLater(() -> {
                     try {
+                        Scripts.setContext(Forms.getContext());
                         makeVisible(jsCreated);
                         restoreColumnsSelection(columnSelection);
                     } catch (Exception ex) {
@@ -1478,6 +1491,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
         @Override
         public void valueChanged(ListSelectionEvent e) {
+            Scripts.setContext(Forms.getContext());
             if (rowsSelectionModel.getLeadSelectionIndex() != -1) {
                 try {
                     if (!try2StopAnyEditing()) {
@@ -1707,7 +1721,11 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     public boolean isAutoRedraw() {
         Object oModelData = field != null && !field.isEmpty() ? ModelWidget.getPathData(data, field) : data;
         JSObject modelData = oModelData instanceof JSObject ? (JSObject) oModelData : null;
-        return modelData != null && !modelData.hasMember("unwrap");
+        return modelData != null && !likeEntity(modelData);
+    }
+
+    private boolean likeEntity(JSObject aCandidate) {
+        return aCandidate.hasMember("onRequeried") && aCandidate.hasMember("append");
     }
 
     protected boolean redrawEnqueued;
@@ -1718,6 +1736,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         EventQueue.invokeLater(() -> {
             if (redrawEnqueued) {
                 redrawEnqueued = false;
+                Scripts.setContext(Forms.getContext());
                 redraw();
             }
         });
@@ -2882,7 +2901,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     public Widget getParentWidget() {
         return Forms.lookupPublishedParent(this);
     }
-    
+
     private static final String UNSORT = ""
             + "/**\n"
             + " * Clears sort on all columns, works only in HTML5"
@@ -2890,6 +2909,6 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
 
     @ScriptFunction(jsDoc = UNSORT)
     public void unsort() {
-        
+
     }
 }

@@ -17,6 +17,7 @@
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
+            configurable: true,
             value: function() {
                 return delegate;
             }
@@ -46,7 +47,7 @@
         });
         if(!P.ChangeValue){
             /**
-             * New value.
+             * Value of changed property.
              * @property value
              * @memberOf ChangeValue
              */
