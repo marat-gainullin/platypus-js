@@ -86,23 +86,6 @@
              */
             P.ToggleButton.prototype.onMouseReleased = {};
         }
-        Object.defineProperty(this, "onFocusLost", {
-            get: function() {
-                var value = delegate.onFocusLost;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onFocusLost = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ToggleButton){
-            /**
-             * Keyboard focus lost by the component event handler function.
-             * @property onFocusLost
-             * @memberOf ToggleButton
-             */
-            P.ToggleButton.prototype.onFocusLost = {};
-        }
         Object.defineProperty(this, "onValueChange", {
             get: function() {
                 var value = delegate.onValueChange;
@@ -119,6 +102,23 @@
              * @memberOf ToggleButton
              */
             P.ToggleButton.prototype.onValueChange = {};
+        }
+        Object.defineProperty(this, "onFocusLost", {
+            get: function() {
+                var value = delegate.onFocusLost;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onFocusLost = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ToggleButton){
+            /**
+             * Keyboard focus lost by the component event handler function.
+             * @property onFocusLost
+             * @memberOf ToggleButton
+             */
+            P.ToggleButton.prototype.onFocusLost = {};
         }
         Object.defineProperty(this, "icon", {
             get: function() {

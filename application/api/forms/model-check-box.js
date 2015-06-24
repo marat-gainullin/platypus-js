@@ -129,23 +129,6 @@
              */
             P.ModelCheckBox.prototype.nullable = true;
         }
-        Object.defineProperty(this, "onFocusLost", {
-            get: function() {
-                var value = delegate.onFocusLost;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onFocusLost = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelCheckBox){
-            /**
-             * Keyboard focus lost by the component event handler function.
-             * @property onFocusLost
-             * @memberOf ModelCheckBox
-             */
-            P.ModelCheckBox.prototype.onFocusLost = {};
-        }
         Object.defineProperty(this, "onValueChange", {
             get: function() {
                 var value = delegate.onValueChange;
@@ -162,6 +145,23 @@
              * @memberOf ModelCheckBox
              */
             P.ModelCheckBox.prototype.onValueChange = {};
+        }
+        Object.defineProperty(this, "onFocusLost", {
+            get: function() {
+                var value = delegate.onFocusLost;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onFocusLost = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelCheckBox){
+            /**
+             * Keyboard focus lost by the component event handler function.
+             * @property onFocusLost
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.onFocusLost = {};
         }
         Object.defineProperty(this, "icon", {
             get: function() {

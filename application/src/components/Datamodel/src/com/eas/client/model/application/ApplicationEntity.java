@@ -359,8 +359,22 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
         snapshotProducer = aValue;
     }
 
+    protected static final String ENQUEUE_UPDATE_JSDOC = ""
+            + "/**\n"
+            + "* Adds the updates into the change log as a command.\n"
+            + "*/";
+
     public abstract void enqueueUpdate() throws Exception;
 
+    protected static final String EXECUTE_UPDATE_JSDOC = ""
+            + "/**\n"
+            + "* Applies the updates into the database and commits the transaction.\n"
+            + "* @param onSuccess Success callback. It has an argument, - updates rows count.\n"
+            + "* @param onFailure Failure callback. It has an argument, - exception occured while applying updates into the database.\n"
+            + "*/";
+
+    public abstract int executeUpdate(JSObject onSuccess, JSObject onFailure) throws Exception;
+    
     protected void internalExecute(final Consumer<JSObject> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception {
         if (query == null) {
             throw new IllegalStateException("Query must present. Query name: " + queryName + "; tableName: " + getTableNameForDescription());

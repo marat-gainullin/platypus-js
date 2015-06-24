@@ -61,6 +61,19 @@
         }
     };
         /**
+         * Applies the updates into the database and commits the transaction.
+         * @param onSuccess Success callback. It has an argument, - updates rows count.
+         * @param onFailure Failure callback. It has an argument, - exception occured while applying updates into the database.
+         * @method executeUpdate
+         * @memberOf ApplicationPlatypusEntity
+         */
+        P.ApplicationPlatypusEntity.prototype.executeUpdate = function(onSuccess, onFailure) {
+            var delegate = this.unwrap();
+            var value = delegate.executeUpdate(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Adds the updates into the change log as a command.
          * @method enqueueUpdate
          * @memberOf ApplicationPlatypusEntity

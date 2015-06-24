@@ -8,6 +8,8 @@ import com.eas.client.changes.Change;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.PlatypusQuery;
 import com.eas.script.ScriptFunction;
+import com.eas.script.Scripts;
+import java.util.ArrayList;
 import java.util.List;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -34,15 +36,28 @@ public class ApplicationPlatypusEntity extends ApplicationEntity<ApplicationPlat
         visitor.visit(this);
     }
 
-    private static final String ENQUEUE_UPDATE_JSDOC = ""
-            + "/**\n"
-            + "* Adds the updates into the change log as a command.\n"
-            + "*/";
-
     @ScriptFunction(jsDoc = ENQUEUE_UPDATE_JSDOC)
     @Override
     public void enqueueUpdate() throws Exception {
         model.getChangeLog().add(getQuery().prepareCommand());
+    }
+
+    @ScriptFunction(jsDoc = EXECUTE_UPDATE_JSDOC, params = {"onSuccess", "onFailure"})
+    @Override
+    public int executeUpdate(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
+        List<Change> localLog = new ArrayList<>();
+        localLog.add(getQuery().prepareCommand());
+        if (aOnSuccess != null) {
+            return model.serverProxy.commit(localLog, Scripts.getSpace(), (Integer aUpdated) -> {
+                aOnSuccess.call(null, new Object[]{aUpdated});
+            }, (Exception ex) -> {
+                if (aOnFailure != null) {
+                    aOnFailure.call(null, new Object[]{ex.getMessage()});
+                }
+            });
+        } else {
+            return model.serverProxy.commit(localLog, Scripts.getSpace(), null, null);
+        }
     }
 
     @Override

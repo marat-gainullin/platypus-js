@@ -67,9 +67,9 @@
          * @method executeUpdate
          * @memberOf ApplicationDbEntity
          */
-        P.ApplicationDbEntity.prototype.executeUpdate = function(arg0, arg1) {
+        P.ApplicationDbEntity.prototype.executeUpdate = function(onSuccess, onFailure) {
             var delegate = this.unwrap();
-            var value = delegate.executeUpdate(P.boxAsJava(arg0), P.boxAsJava(arg1));
+            var value = delegate.executeUpdate(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
             return P.boxAsJs(value);
         };
 
