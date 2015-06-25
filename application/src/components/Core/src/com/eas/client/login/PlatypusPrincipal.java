@@ -166,7 +166,7 @@ public class PlatypusPrincipal implements Principal, HasPublished {
     @Override
     public JSObject getPublished() {
         if (published == null) {
-            JSObject publisher = Scripts.getSpace().getPublisher(this.getClass().getName());
+            JSObject publisher = Scripts.getSpace().getPublisher(PlatypusPrincipal.class.getName());
             if (publisher == null || !publisher.isFunction()) {
                 throw new NoPublisherException();
             }

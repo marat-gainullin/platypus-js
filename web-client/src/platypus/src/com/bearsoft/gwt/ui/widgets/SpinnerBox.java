@@ -161,14 +161,18 @@ public abstract class SpinnerBox<T> extends Composite implements RequiresResize,
 
 			@Override
 			public void onClick(ClickEvent event) {
-				decrement();
+				if (!isReadonly()) {
+					decrement();
+				}
 			}
 		}, ClickEvent.getType());
 		right.addDomHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
-				increment();
+				if (!isReadonly()) {
+					increment();
+				}
 			}
 		}, ClickEvent.getType());
 		organaizeFieldWrapperLeftRight();
@@ -277,5 +281,13 @@ public abstract class SpinnerBox<T> extends Composite implements RequiresResize,
 	@Override
 	protected void onDetach() {
 		super.onDetach();
+	}
+
+	public void setReadonly(boolean aValue) {
+		field.getElement().setPropertyBoolean("readOnly", aValue);
+	}
+
+	public boolean isReadonly() {
+		return field.getElement().getPropertyBoolean("readOnly");
 	}
 }

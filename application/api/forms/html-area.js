@@ -78,23 +78,6 @@
              */
             P.HtmlArea.prototype.onMouseReleased = {};
         }
-        Object.defineProperty(this, "onValueChange", {
-            get: function() {
-                var value = delegate.onValueChange;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onValueChange = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.HtmlArea){
-            /**
-             * Value change handler.
-             * @property onValueChange
-             * @memberOf HtmlArea
-             */
-            P.HtmlArea.prototype.onValueChange = {};
-        }
         Object.defineProperty(this, "onFocusLost", {
             get: function() {
                 var value = delegate.onFocusLost;
@@ -111,6 +94,23 @@
              * @memberOf HtmlArea
              */
             P.HtmlArea.prototype.onFocusLost = {};
+        }
+        Object.defineProperty(this, "onValueChange", {
+            get: function() {
+                var value = delegate.onValueChange;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onValueChange = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.HtmlArea){
+            /**
+             * Value change handler.
+             * @property onValueChange
+             * @memberOf HtmlArea
+             */
+            P.HtmlArea.prototype.onValueChange = {};
         }
         Object.defineProperty(this, "emptyText", {
             get: function() {

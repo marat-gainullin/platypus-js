@@ -10,6 +10,7 @@ import com.eas.client.form.events.ActionEvent;
 import com.eas.client.form.events.ActionHandler;
 import com.eas.client.form.events.HasActionHandlers;
 import com.eas.client.form.published.HasEmptyText;
+import com.eas.client.form.published.widgets.ConstraintedSpinnerBox;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -189,4 +190,14 @@ public class ModelDate extends ModelDecoratorBox<Date> implements HasEmptyText, 
 		super.clearValue();
 		ActionEvent.fire(this, this);
 	}
+	
+	@Override
+    protected void setReadonly(boolean aValue) {
+		((DateTimeBox)decorated).setReadonly(aValue);
+    }
+
+	@Override
+    protected boolean isReadonly() {
+		return ((DateTimeBox)decorated).isReadonly();
+    }
 }

@@ -208,4 +208,14 @@ public class ModelFormattedField extends ModelDecoratorBox<Object> implements Ha
 		super.clearValue();
 		ActionEvent.fire(this, this);
 	}
+
+	@Override
+    protected void setReadonly(boolean aValue) {
+		((FormattedObjectBox)decorated).getElement().setPropertyBoolean("readOnly", aValue);
+    }
+
+	@Override
+    protected boolean isReadonly() {
+		return ((FormattedObjectBox)decorated).getElement().getPropertyBoolean("readOnly");
+    }
 }

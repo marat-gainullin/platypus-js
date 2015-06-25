@@ -353,6 +353,8 @@ public class PlatypusHttpServlet extends HttpServlet {
         if (platypusRequest.getType() == Requests.rqLogout) {
             aHttpRequest.logout();
             aHttpSession.invalidate();
+            aHttpResponse.setStatus(HttpServletResponse.SC_OK);
+            aAsync.complete();
         } else {
             RequestHandler<Request, Response> handler = (RequestHandler<Request, Response>) RequestHandlerFactory.getHandler(platypusCore, platypusRequest);
             if (handler != null) {

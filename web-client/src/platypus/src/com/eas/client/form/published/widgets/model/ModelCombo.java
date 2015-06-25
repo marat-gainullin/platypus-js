@@ -414,4 +414,13 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 			bindList();
 		}
 	}
+
+	@Override
+    protected void setReadonly(boolean aValue) {
+    }
+
+	@Override
+    protected boolean isReadonly() {
+	    return false;
+    }
 }

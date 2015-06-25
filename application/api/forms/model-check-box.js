@@ -129,23 +129,6 @@
              */
             P.ModelCheckBox.prototype.nullable = true;
         }
-        Object.defineProperty(this, "onValueChange", {
-            get: function() {
-                var value = delegate.onValueChange;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onValueChange = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelCheckBox){
-            /**
-             * Value change handler.
-             * @property onValueChange
-             * @memberOf ModelCheckBox
-             */
-            P.ModelCheckBox.prototype.onValueChange = {};
-        }
         Object.defineProperty(this, "onFocusLost", {
             get: function() {
                 var value = delegate.onFocusLost;
@@ -162,6 +145,23 @@
              * @memberOf ModelCheckBox
              */
             P.ModelCheckBox.prototype.onFocusLost = {};
+        }
+        Object.defineProperty(this, "onValueChange", {
+            get: function() {
+                var value = delegate.onValueChange;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onValueChange = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelCheckBox){
+            /**
+             * Value change handler.
+             * @property onValueChange
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.onValueChange = {};
         }
         Object.defineProperty(this, "icon", {
             get: function() {

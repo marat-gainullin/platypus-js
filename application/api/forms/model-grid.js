@@ -1049,39 +1049,6 @@
 
         /**
          *
-         * @method addColumnNode
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.addColumnNode = function(arg0) {
-            var delegate = this.unwrap();
-            var value = delegate.addColumnNode(P.boxAsJava(arg0));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         *
-         * @method removeColumnNode
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.removeColumnNode = function(arg0) {
-            var delegate = this.unwrap();
-            var value = delegate.removeColumnNode(P.boxAsJava(arg0));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         *
-         * @method insertColumnNode
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.insertColumnNode = function(arg0, arg1) {
-            var delegate = this.unwrap();
-            var value = delegate.insertColumnNode(P.boxAsJava(arg0), P.boxAsJava(arg1));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         *
          * @method elementByModelIndex
          * @memberOf ModelGrid
          */
@@ -1110,6 +1077,39 @@
         P.ModelGrid.prototype.try2CancelAnyEditing = function() {
             var delegate = this.unwrap();
             var value = delegate.try2CancelAnyEditing();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
+         * @method addColumnNode
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.addColumnNode = function(arg0) {
+            var delegate = this.unwrap();
+            var value = delegate.addColumnNode(P.boxAsJava(arg0));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
+         * @method removeColumnNode
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.removeColumnNode = function(arg0) {
+            var delegate = this.unwrap();
+            var value = delegate.removeColumnNode(P.boxAsJava(arg0));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
+         * @method insertColumnNode
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.insertColumnNode = function(arg0, arg1) {
+            var delegate = this.unwrap();
+            var value = delegate.insertColumnNode(P.boxAsJava(arg0), P.boxAsJava(arg1));
             return P.boxAsJs(value);
         };
 

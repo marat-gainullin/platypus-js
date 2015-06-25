@@ -82,23 +82,6 @@
              */
             P.Slider.prototype.onMouseReleased = {};
         }
-        Object.defineProperty(this, "onValueChange", {
-            get: function() {
-                var value = delegate.onValueChange;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.onValueChange = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Slider){
-            /**
-             * Value change handler.
-             * @property onValueChange
-             * @memberOf Slider
-             */
-            P.Slider.prototype.onValueChange = {};
-        }
         Object.defineProperty(this, "onFocusLost", {
             get: function() {
                 var value = delegate.onFocusLost;
@@ -115,6 +98,23 @@
              * @memberOf Slider
              */
             P.Slider.prototype.onFocusLost = {};
+        }
+        Object.defineProperty(this, "onValueChange", {
+            get: function() {
+                var value = delegate.onValueChange;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.onValueChange = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Slider){
+            /**
+             * Value change handler.
+             * @property onValueChange
+             * @memberOf Slider
+             */
+            P.Slider.prototype.onValueChange = {};
         }
         Object.defineProperty(this, "onMousePressed", {
             get: function() {

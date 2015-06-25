@@ -161,11 +161,15 @@ public abstract class ModelDecoratorBox<T> extends DecoratorBox<T> implements Ha
 		return editable;
 	}
 
+	protected abstract void setReadonly(boolean aValue);
+
+	protected abstract boolean isReadonly();
+
 	@Override
 	public void setEditable(boolean aValue) {
 		if (editable != aValue) {
 			editable = aValue;
-			// target.setReadOnly(!editable || selectOnly);
+			setReadonly(!editable || selectOnly);
 		}
 	}
 
@@ -178,7 +182,7 @@ public abstract class ModelDecoratorBox<T> extends DecoratorBox<T> implements Ha
 	public void setSelectOnly(boolean aValue) {
 		if (selectOnly != aValue) {
 			selectOnly = aValue;
-			// target.setReadOnly(!editable || selectOnly);
+			setReadonly(!editable || selectOnly);
 		}
 	}
 
@@ -256,7 +260,7 @@ public abstract class ModelDecoratorBox<T> extends DecoratorBox<T> implements Ha
 	protected void bind() {
 		if (data != null && field != null && !field.isEmpty()) {
 			boundToData = Utils.listenPath(data, field, new Utils.OnChangeHandler() {
-				
+
 				@Override
 				public void onChange(JavaScriptObject anEvent) {
 					if (!settingValueToJs) {
