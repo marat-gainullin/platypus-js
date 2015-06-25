@@ -29,7 +29,9 @@ import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -56,6 +58,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
     protected ReportsConfigs reports = new ReportsConfigs();
     protected ModelsDocuments models = new ModelsDocuments();
     protected Scripts.Space queueSpace;
+    protected Queue<Scripts.Space> spacesPool = new ConcurrentLinkedQueue<>();
 
     public PlatypusServerCore(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, ScriptsConfigs aSecurityConfigs, String aDefaultAppElement) throws Exception {
         this(aIndexer, aModules, aQueries, aDatabasesClient, aSecurityConfigs, aDefaultAppElement, new SessionManager());
@@ -184,7 +187,8 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                 targetSession = sessionManager.getSystemSession();
                                 targetSpace = sessionManager.getSystemSession().getSpace();
                             } else if (config.hasModuleAnnotation(JsDoc.Tag.STATELESS_TAG)) {
-                                targetSpace = Scripts.createSpace();
+                                Scripts.Space pooledSpace = spacesPool.poll();
+                                targetSpace = pooledSpace == null ? Scripts.createSpace() : pooledSpace;
                                 targetSession = null;
                             } else {
                                 targetSpace = Scripts.getSpace();
@@ -227,6 +231,9 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                                                     args.clear();
                                                                     Object returned = largs.length > 0 ? largs[0] : null;
                                                                     onSuccess.accept(returned);// WARNING! Don't insert .toJava() because of RPC handler
+                                                                    if (targetSession == null) {// stateless module called
+                                                                        spacesPool.offer(targetSpace);
+                                                                    }
                                                                 } else {
                                                                     Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
                                                                 }
@@ -245,6 +252,9 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                                                     } else {
                                                                         onFailure.accept(new Exception(String.valueOf(reason)));
                                                                     }
+                                                                    if (targetSession == null) {// stateless module called
+                                                                        spacesPool.offer(targetSpace);
+                                                                    }
                                                                 } else {
                                                                     Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
                                                                 }
@@ -261,6 +271,9 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                                                 if (!args.isEmpty()) {
                                                                     args.clear();
                                                                     onSuccess.accept(result);// WARNING! Don't insert .toJava() because of RPC handler
+                                                                    if (targetSession == null) {// stateless module called
+                                                                        spacesPool.offer(targetSpace);
+                                                                    }
                                                                 } else {
                                                                     Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
                                                                 }
@@ -276,10 +289,21 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                                 }
                                             } catch (Exception ex) {
                                                 onFailure.accept(ex);
+                                                if (targetSession == null) {// stateless module called
+                                                    spacesPool.offer(targetSpace);
+                                                }
                                             }
-                                        }, onFailure);
+                                        }, (Exception ex) -> {
+                                            onFailure.accept(ex);
+                                            if (targetSession == null) {// stateless module called
+                                                spacesPool.offer(targetSpace);
+                                            }
+                                        });
                                     } catch (Exception ex) {
                                         onFailure.accept(ex);
+                                        if (targetSession == null) {// stateless module called
+                                            spacesPool.offer(targetSpace);
+                                        }
                                     }
                                 });
                             } finally {

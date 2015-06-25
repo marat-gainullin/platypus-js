@@ -1,3 +1,4 @@
+/*global P, space, Java, Function*/
 (function (aSpace) {
     if (typeof Set === 'undefined') {
         var LinkedHashSetClass = Java.type('java.util.LinkedHashSet');
@@ -17,7 +18,7 @@
             };
         };
     }
-
+    
     //this === global;
     var global = this;
     aSpace.setGlobal(global);
@@ -32,6 +33,7 @@
     var JavaCollectionClass = Java.type("java.util.Collection");
     var FileClass = Java.type("java.io.File");
     var JavaDateClass = Java.type("java.util.Date");
+    var JavaStringClass = Java.type("java.lang.String");
     var LoggerClass = Java.type("java.util.logging.Logger");
     var FieldsClassName = "com.eas.client.metadata.Fields";
     var ParametersClassName = "com.eas.client.metadata.Parameters";
@@ -102,6 +104,8 @@
                 aValue = aValue.getPublished();
             } else if (aValue instanceof JavaDateClass) {
                 aValue = new Date(aValue.time);
+            } else if (aValue instanceof JavaStringClass) {
+                aValue += '';
             } else if (aValue instanceof JavaArrayClass) {
                 var converted = [];
                 for (var i = 0; i < aValue.length; i++) {
@@ -176,7 +180,7 @@
     }
     Object.defineProperty(P, "require", {value: require});
 
-    load('classpath:internals.js')(space);
+    load('classpath:internals.js')(aSpace);
 
     var serverCoreClass;
     try {
@@ -288,6 +292,7 @@
          *
          * @param curDir current directory [optional]
          * @param save flag tells whether this is a save dialog or not
+         * @param aFileFilter
          * @return selected file or else null
          */
         function fileDialog(curDir, save, aFileFilter) {
@@ -322,8 +327,8 @@
         /**
          * Opens a Select file dialog box 
          *
-         * @param Callback
-         * @param file name filter string
+         * @param aCallback
+         * @param aFileFilter name filter string
          * @param curDir current directory [optional]
          * @return selected file or else null
          */
@@ -698,7 +703,7 @@
         get: function () {
             var clientSpacePrincipal = PlatypusPrincipalClass.getClientSpacePrincipal();
             var tlsPrincipal = ScriptsClass.getContext().getPrincipal();
-            return boxAsJs(clientSpacePrincipal !== null ? clientSpacePrincipal : tlsPrincipal);
+            return clientSpacePrincipal !== null ? clientSpacePrincipal : tlsPrincipal;
         }
     });
 
@@ -719,9 +724,9 @@
         }
         return target;
     }
-    ;
-    space.putPublisher(ParametersClassName, fieldsAndParametersPublisher);
-    space.putPublisher(FieldsClassName, fieldsAndParametersPublisher);
+    
+    aSpace.putPublisher(ParametersClassName, fieldsAndParametersPublisher);
+    aSpace.putPublisher(FieldsClassName, fieldsAndParametersPublisher);
 
     var addListenerName = '-platypus-listener-add-func';
     var removeListenerName = '-platypus-listener-remove-func';
@@ -798,7 +803,7 @@
         if (aTarget[addListenerName]) {
             function subscribe(aData, aListener, aPropName) {
                 return listen(aData, function (aChange) {
-                    if (!aPropName || aChange.propertyName == aPropName) {
+                    if (!aPropName || aChange.propertyName === aPropName) {
                         aListener(aChange);
                     }
                 });
@@ -951,7 +956,7 @@
                     var fieldName = field.getName();
                     var value = aSubject[fieldName];
                     // Some tricky processing of primary keys modification case ...
-                    if (fieldName == propName) {
+                    if (fieldName === propName) {
                         value = oldValue;
                     }
                     keys.add(new ValueClass(fieldName, value, field.getTypeInfo()));

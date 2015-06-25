@@ -6,10 +6,6 @@ package com.eas.client.login;
 
 import com.eas.client.threetier.PlatypusConnection;
 import com.eas.client.threetier.requests.LogoutRequest;
-import com.eas.script.AlreadyPublishedException;
-import com.eas.script.HasPublished;
-import com.eas.script.NoPublisherException;
-import com.eas.script.ScriptFunction;
 import com.eas.script.Scripts;
 import java.security.Principal;
 import java.util.Collections;
@@ -20,9 +16,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author pk, mg, bl, vv
  */
-public class PlatypusPrincipal implements Principal, HasPublished {
-
-    protected JSObject published;
+public class PlatypusPrincipal implements Principal {
 
     private final String context;
     private final Set<String> roles;
@@ -47,36 +41,34 @@ public class PlatypusPrincipal implements Principal, HasPublished {
         conn = aConn;
     }
 
-    private static final String NAME_JS_DOC = "/**\n"
-            + "* The username..\n"
-            + "*/";
+//    private static final String NAME_JS_DOC = "/**\n"
+//            + "* The username..\n"
+//            + "*/";
 
-    @ScriptFunction(jsDoc = NAME_JS_DOC)
     @Override
     public String getName() {
         return name;
     }
 
-    protected static final String HAS_ROLE_JS_DOC = ""
-            + "/**\n"
-            + "* Checks if a user have a specified role.\n"
-            + "* @param role a role's name to test.\n"
-            + "* @return <code>true</code> if the user has the role.\n"
-            + "*/";
+//    protected static final String HAS_ROLE_JS_DOC = ""
+//            + "/**\n"
+//            + "* Checks if a user have a specified role.\n"
+//            + "* @param role a role's name to test.\n"
+//            + "* @return <code>true</code> if the user has the role.\n"
+//            + "*/";
 
-    @ScriptFunction(jsDoc = HAS_ROLE_JS_DOC)
     public boolean hasRole(String aRole) {
         return roles != null ? roles.contains(aRole) : true;
     }
 
-    protected static final String LOGOUT_JS_DOC = ""
-            + "/**\n"
-            + " * Logs out from  user's session on a server.\n"
-            + " * @param onSuccess The function to be invoked after the logout (optional).\n"
-            + " * @param onFailure The function to be invoked when exception raised while logout process (optional).\n"
-            + " */";
-
-    @ScriptFunction(jsDoc = LOGOUT_JS_DOC, params = {"onSuccess", "onFailure"})
+//    protected static final String LOGOUT_JS_DOC = ""
+//            + "/**\n"
+//            + " * Logs out from  user's session on a server.\n"
+//            + " * @param onSuccess The function to be invoked after the logout (optional).\n"
+//            + " * @param onFailure The function to be invoked when exception raised while logout process (optional).\n"
+//            + " */";
+//
+//    @ScriptFunction(jsDoc = LOGOUT_JS_DOC, params = {"onSuccess", "onFailure"})
     public void logout(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
         LogoutRequest req = new LogoutRequest();
         if (aOnSuccess != null) {
@@ -153,25 +145,5 @@ public class PlatypusPrincipal implements Principal, HasPublished {
     @Override
     public int hashCode() {
         return name.hashCode();
-    }
-
-    @Override
-    public void setPublished(JSObject aValue) {
-        if (published != null) {
-            throw new AlreadyPublishedException();
-        }
-        published = aValue;
-    }
-
-    @Override
-    public JSObject getPublished() {
-        if (published == null) {
-            JSObject publisher = Scripts.getSpace().getPublisher(PlatypusPrincipal.class.getName());
-            if (publisher == null || !publisher.isFunction()) {
-                throw new NoPublisherException();
-            }
-            published = (JSObject) publisher.call(null, new Object[]{this});
-        }
-        return published;
     }
 }

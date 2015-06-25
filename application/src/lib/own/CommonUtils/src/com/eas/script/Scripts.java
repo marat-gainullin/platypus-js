@@ -22,11 +22,14 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.script.Bindings;
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.api.scripting.NashornScriptEngine;
 import jdk.nashorn.api.scripting.ScriptUtils;
+import jdk.nashorn.api.scripting.URLReader;
 import jdk.nashorn.internal.ir.FunctionNode;
 import jdk.nashorn.internal.ir.IdentNode;
 import jdk.nashorn.internal.ir.LexicalContext;
@@ -55,7 +58,9 @@ import jdk.nashorn.internal.runtime.options.Options;
 public class Scripts {
 
     public static final String THIS_KEYWORD = "this";//NOI18N
+    public static final URL platypusJsUrl = Thread.currentThread().getContextClassLoader().getResource("platypus.js");
 
+    private static final Queue<Object> globalsPool = new ConcurrentLinkedQueue<>();
     private static final ThreadLocal<LocalContext> contextRef = new ThreadLocal<>();
 
     public static Space getSpace() {
@@ -166,7 +171,7 @@ public class Scripts {
 
     public static class Space {
 
-        protected ScriptEngine engine;
+        protected NashornScriptEngine engine;
         protected Object global;
         protected Map<String, JSObject> publishers = new HashMap<>();
         protected Set<String> required = new HashSet<>();
@@ -178,7 +183,7 @@ public class Scripts {
             global = new Object();
         }
 
-        public Space(ScriptEngine aEngine) {
+        public Space(NashornScriptEngine aEngine) {
             super();
             engine = aEngine;
         }
@@ -446,12 +451,12 @@ public class Scripts {
         }
 
         public Object exec(URL aSourcePlace) throws ScriptException, URISyntaxException {
-            assert loadFunc != null : SCRIPT_NOT_INITIALIZED;
-            return loadFunc.call(null, aSourcePlace.toString());
+            engine.getContext().setAttribute(ScriptEngine.FILENAME, aSourcePlace, ScriptContext.ENGINE_SCOPE);
+            return engine.eval(new URLReader(aSourcePlace));
         }
 
         public Object exec(String aSource) throws ScriptException, URISyntaxException {
-            assert loadFunc != null : SCRIPT_NOT_INITIALIZED;
+            assert engine != null : SCRIPT_NOT_INITIALIZED;
             return engine.eval(aSource);
         }
 
@@ -508,19 +513,7 @@ public class Scripts {
                         try {
                             // already single threaded environment
                             if (global == null) {
-                                Bindings bindings = engine.createBindings();
-                                bindings.put("space", Scripts.Space.this);
-                                try {
-                                    Scripts.LocalContext ctx = Scripts.createContext(Scripts.Space.this);
-                                    Scripts.setContext(ctx);
-                                    try {
-                                        engine.eval("load('classpath:platypus.js', space);", bindings);
-                                    } finally {
-                                        Scripts.setContext(null);
-                                    }
-                                } catch (ScriptException ex) {
-                                    Logger.getLogger(Scripts.class.getName()).log(Level.SEVERE, null, ex);
-                                }
+                                initSpaceGlobal(Scripts.Space.this);
                             }
                             // Zombie processing ...
                             Runnable task = queue.poll();
@@ -537,6 +530,23 @@ public class Scripts {
                     }
                 } while (!queueVersion.compareAndSet(version, newVersion));
             });
+        }
+
+        public void initSpaceGlobal(Scripts.Space aSpace) {
+            Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
+            bindings.put("space", aSpace);
+            try {
+                Scripts.LocalContext ctx = Scripts.createContext(Scripts.Space.this);
+                Scripts.setContext(ctx);
+                try {
+                    engine.getContext().setAttribute(ScriptEngine.FILENAME, platypusJsUrl, ScriptContext.ENGINE_SCOPE);
+                    engine.eval(new URLReader(platypusJsUrl));
+                } finally {
+                    Scripts.setContext(null);
+                }
+            } catch (ScriptException ex) {
+                Logger.getLogger(Scripts.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
 
         public JSObject readJsArray(Collection<Map<String, Object>> aCollection) {
@@ -596,7 +606,7 @@ public class Scripts {
     }
 
     public static Space createSpace() throws ScriptException {
-        ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
+        NashornScriptEngine engine = (NashornScriptEngine) new ScriptEngineManager().getEngineByName("nashorn");
         Space space = new Space(engine);
         return space;
     }
