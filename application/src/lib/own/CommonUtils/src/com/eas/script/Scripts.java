@@ -27,7 +27,6 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.api.scripting.NashornScriptEngine;
 import jdk.nashorn.api.scripting.ScriptUtils;
 import jdk.nashorn.api.scripting.URLReader;
 import jdk.nashorn.internal.ir.FunctionNode;
@@ -171,8 +170,9 @@ public class Scripts {
 
     public static class Space {
 
-        protected NashornScriptEngine engine;
+        protected ScriptEngine engine;
         protected Object global;
+        protected Object session;
         protected Map<String, JSObject> publishers = new HashMap<>();
         protected Set<String> required = new HashSet<>();
         protected Set<String> executed = new HashSet<>();
@@ -183,9 +183,17 @@ public class Scripts {
             global = new Object();
         }
 
-        public Space(NashornScriptEngine aEngine) {
+        public Space(ScriptEngine aEngine) {
             super();
             engine = aEngine;
+        }
+
+        public Object getSession() {
+            return session;
+        }
+
+        public void setSession(Object aValue) {
+            session = aValue;
         }
 
         public Set<String> getRequired() {
@@ -216,6 +224,7 @@ public class Scripts {
         protected JSObject makeArrayFunc;
         protected JSObject listenFunc;
         protected JSObject listenElementsFunc;
+        protected JSObject copyObjectFunc;
 
         public void setGlobal(Object aValue) {
             if (global == null) {
@@ -328,6 +337,15 @@ public class Scripts {
             listenElementsFunc = aValue;
         }
 
+        public void setCopyObjectFunc(JSObject aValue) {
+            assert copyObjectFunc == null;
+            copyObjectFunc = aValue;
+        }
+
+        public JSObject getCopyObjectFunc() {
+            return copyObjectFunc;
+        }
+
         public Object toJava(Object aValue) {
             if (aValue instanceof ScriptObject) {
                 aValue = ScriptUtils.wrap((ScriptObject) aValue);
@@ -414,6 +432,12 @@ public class Scripts {
             assert makeArrayFunc != null : SCRIPT_NOT_INITIALIZED;
             Object oResult = makeArrayFunc.call(null, new Object[]{});
             return (JSObject) oResult;
+        }
+        
+        public Object makeCopy(Object aSource) {
+            assert copyObjectFunc != null : SCRIPT_NOT_INITIALIZED;
+            Object oResult = copyObjectFunc.call(null, new Object[]{aSource});
+            return oResult;
         }
 
         public JSObject listen(JSObject aTarget, String aPath, JSObject aCallback) {
@@ -606,7 +630,7 @@ public class Scripts {
     }
 
     public static Space createSpace() throws ScriptException {
-        NashornScriptEngine engine = (NashornScriptEngine) new ScriptEngineManager().getEngineByName("nashorn");
+        ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
         Space space = new Space(engine);
         return space;
     }

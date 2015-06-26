@@ -57,6 +57,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
     protected FormsDocuments forms = new FormsDocuments();
     protected ReportsConfigs reports = new ReportsConfigs();
     protected ModelsDocuments models = new ModelsDocuments();
+    protected ServerModulesProxy localServerModules = new LocalServerModulesProxy(this);
     protected Scripts.Space queueSpace;
     protected Queue<Scripts.Space> spacesPool = new ConcurrentLinkedQueue<>();
 
@@ -116,7 +117,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
 
     @Override
     public ServerModulesProxy getServerModules() {
-        return null;
+        return localServerModules;
     }
 
     public SessionManager getSessionManager() {
@@ -139,19 +140,20 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
      * @param aModuleName
      * @param aMethodName
      * @param aArguments
-     * @param aSession
      * @param aNetworkRPC
      * @param aOnSuccess
      * @param aOnFailure
      */
-    public void executeMethod(String aModuleName, String aMethodName, Object[] aArguments, boolean aNetworkRPC, Session aSession, Consumer<Object> aOnSuccess, Consumer<Exception> aOnFailure) {
+    public void executeMethod(String aModuleName, String aMethodName, Object[] aArguments, boolean aNetworkRPC, Consumer<Object> aOnSuccess, Consumer<Exception> aOnFailure) {
         Scripts.LocalContext callingContext = Scripts.getContext();
+        Object[] copiedArguments = copyArgumnets(aArguments, callingContext);
         Consumer<Object> onSuccess = (Object res) -> {
             Scripts.LocalContext oldContext = Scripts.getContext();
+            Object copiedRes = oldContext.getSpace().makeCopy(res);
             Scripts.setContext(callingContext);
             try {
                 Scripts.getSpace().process(() -> {
-                    aOnSuccess.accept(res);
+                    aOnSuccess.accept(copiedRes);
                 });
             } finally {
                 Scripts.setContext(oldContext);
@@ -189,10 +191,11 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                             } else if (config.hasModuleAnnotation(JsDoc.Tag.STATELESS_TAG)) {
                                 Scripts.Space pooledSpace = spacesPool.poll();
                                 targetSpace = pooledSpace == null ? Scripts.createSpace() : pooledSpace;
+                                targetSpace.setSession(callingContext.getSpace().getSession());
                                 targetSession = null;
-                            } else {
+                            } else {// statefull session module
                                 targetSpace = Scripts.getSpace();
-                                targetSession = aSession;
+                                targetSession = (Session) targetSpace.getSession();
                             }
                             Scripts.LocalContext targetContext = Scripts.createContext(targetSpace);
                             targetContext.setAsync(callingContext.getAsync());
@@ -223,15 +226,16 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                                     Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.FINE, RPCRequestHandler.EXECUTING_METHOD_TRACE_MSG, new Object[]{aMethodName, aModuleName});
                                                     Object oFun = moduleInstance.getMember(aMethodName);
                                                     if (oFun instanceof JSObject && ((JSObject) oFun).isFunction()) {
-                                                        List<Object> args = new ArrayList<>(Arrays.asList(aArguments));
-                                                        args.add(new AbstractJSObject() {
+                                                        List<Object> arguments = new ArrayList<>(Arrays.asList(copiedArguments));
+                                                        arguments.add(new AbstractJSObject() {
                                                             @Override
                                                             public Object call(final Object thiz, final Object... largs) {
-                                                                if (!args.isEmpty()) {
-                                                                    args.clear();
+                                                                if (!arguments.isEmpty()) {
+                                                                    arguments.clear();
                                                                     Object returned = largs.length > 0 ? largs[0] : null;
                                                                     onSuccess.accept(returned);// WARNING! Don't insert .toJava() because of RPC handler
                                                                     if (targetSession == null) {// stateless module called
+                                                                        targetSpace.setSession(null);
                                                                         spacesPool.offer(targetSpace);
                                                                     }
                                                                 } else {
@@ -241,11 +245,11 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                                             }
 
                                                         });
-                                                        args.add(new AbstractJSObject() {
+                                                        arguments.add(new AbstractJSObject() {
                                                             @Override
                                                             public Object call(final Object thiz, final Object... largs) {
-                                                                if (!args.isEmpty()) {
-                                                                    args.clear();
+                                                                if (!arguments.isEmpty()) {
+                                                                    arguments.clear();
                                                                     Object reason = largs.length > 0 ? Scripts.getSpace().toJava(largs[0]) : null;
                                                                     if (reason instanceof Exception) {
                                                                         onFailure.accept((Exception) reason);
@@ -253,6 +257,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                                                         onFailure.accept(new Exception(String.valueOf(reason)));
                                                                     }
                                                                     if (targetSession == null) {// stateless module called
+                                                                        targetSpace.setSession(null);
                                                                         spacesPool.offer(targetSpace);
                                                                     }
                                                                 } else {
@@ -265,13 +270,14 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                                         Scripts.getContext().initAsyncs(0);
                                                         try {
                                                             ServerModuleStructureRequestHandler.checkPrincipalPermission(config.getPropertyAllowedRoles().get(aMethodName), aModuleName + "." + aMethodName);
-                                                            Object result = ((JSObject) oFun).call(moduleInstance, args.toArray());
+                                                            Object result = ((JSObject) oFun).call(moduleInstance, arguments.toArray());
                                                             int asyncs = Scripts.getContext().getAsyncsCount();
                                                             if (!(result instanceof Undefined) || asyncs == 0) {
-                                                                if (!args.isEmpty()) {
-                                                                    args.clear();
+                                                                if (!arguments.isEmpty()) {
+                                                                    arguments.clear();
                                                                     onSuccess.accept(result);// WARNING! Don't insert .toJava() because of RPC handler
                                                                     if (targetSession == null) {// stateless module called
+                                                                        targetSpace.setSession(null);
                                                                         spacesPool.offer(targetSpace);
                                                                     }
                                                                 } else {
@@ -290,18 +296,21 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                             } catch (Exception ex) {
                                                 onFailure.accept(ex);
                                                 if (targetSession == null) {// stateless module called
+                                                    targetSpace.setSession(null);
                                                     spacesPool.offer(targetSpace);
                                                 }
                                             }
                                         }, (Exception ex) -> {
                                             onFailure.accept(ex);
                                             if (targetSession == null) {// stateless module called
+                                                targetSpace.setSession(null);
                                                 spacesPool.offer(targetSpace);
                                             }
                                         });
                                     } catch (Exception ex) {
                                         onFailure.accept(ex);
                                         if (targetSession == null) {// stateless module called
+                                            targetSpace.setSession(null);
                                             spacesPool.offer(targetSpace);
                                         }
                                     }
@@ -320,6 +329,14 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                 }
             }
         }
+    }
+
+    public Object[] copyArgumnets(Object[] aArguments, Scripts.LocalContext callingContext) {
+        Object[] arguments = Arrays.copyOf(aArguments, aArguments.length);
+        for (int a = 0; a < arguments.length; a++) {
+            arguments[a] = callingContext.getSpace().makeCopy(arguments[a]);
+        }
+        return arguments;
     }
 
     public void startResidents(Set<String> aRezidents) throws Exception {

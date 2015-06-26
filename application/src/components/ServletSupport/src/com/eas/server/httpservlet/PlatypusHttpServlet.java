@@ -76,6 +76,7 @@ public class PlatypusHttpServlet extends HttpServlet {
     public static final String HTML_CONTENTTYPE = "text/html";
     public static final String TEXT_CONTENTTYPE = "text/plain";
     public static final String PLATYPUS_SESSION_ID_ATTR_NAME = "platypus-session-id";
+    public static final String PLATYPUS_USER_CONTEXT_ATTR_NAME = "platypus-user-context";
 
     private static volatile PlatypusServerCore platypusCore;
     private String realRootPath;
@@ -235,19 +236,20 @@ public class PlatypusHttpServlet extends HttpServlet {
                 if (httpSession != null) {
                     AsyncContext async = request.startAsync();
                     async.setTimeout(-1);
-                    Consumer<Session> requestProcessor = (Session aSession) -> {
-                        String userName = request.getUserPrincipal() != null ? request.getUserPrincipal().getName() : null;
+                    String userName = request.getUserPrincipal() != null ? request.getUserPrincipal().getName() : null;
+                    Consumer<Session> withPlatypusSession = (Session aSession) -> {
+                        // http executor thread or sessions accounting thread
                         Scripts.LocalContext context = Scripts.createContext(aSession.getSpace());
                         context.setAsync(async);
                         context.setRequest(request);
                         context.setResponse(response);
+                        context.setPrincipal(httpRequestPrincipal(request));
                         Scripts.setContext(context);
                         try {
-                            Consumer<String> withDataContext = (dataContext) -> {
-                                PlatypusPrincipal principal = servletRequestPrincipal(request, dataContext);
-                                context.setPrincipal(principal);
+                            aSession.getSpace().process(() -> {
+                                // temporarily session thread 
                                 try {
-                                    processPlatypusRequest(request, response, httpSession, aSession, async);
+                                    handlePlatypusRequest(request, response, httpSession, aSession, async);
                                 } catch (Exception ex) {
                                     Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex);
                                     try {
@@ -257,24 +259,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                                         Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex1);
                                     }
                                 }
-                            };
-                            try {
-                                DatabasesClient.getUserProperties(platypusCore.getDatabasesClient(), userName, Scripts.getSpace(), (Map<String, String> aUserProps) -> {
-                                    String dataContext = aUserProps.get(ClientConstants.F_USR_CONTEXT);
-                                    withDataContext.accept(dataContext);
-                                }, (Exception ex) -> {
-                                    Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.FINE, "Unable to obtain properties of user {0} due to an error: {1}", new Object[]{userName, ex.toString()});
-                                    withDataContext.accept(null);
-                                });
-                            } catch (Exception ex) {
-                                Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex);
-                                try {
-                                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.toString());
-                                    async.complete();
-                                } catch (IOException | IllegalStateException ex1) {
-                                    Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex1);
-                                }
-                            }
+                            });
                         } finally {
                             Scripts.setContext(null);
                         }
@@ -285,6 +270,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                         Scripts.setContext(queueSpaceContext);
                         try {
                             platypusCore.getQueueSpace().process(() -> {
+                                // sessions accounting thread
                                 try {
                                     String platypusSessionId = (String) httpSession.getAttribute(PLATYPUS_SESSION_ID_ATTR_NAME);
                                     // platypusSessionId may be replicated from another instance in cluster
@@ -296,10 +282,30 @@ public class PlatypusHttpServlet extends HttpServlet {
                                         }
                                         lookedup = SessionManager.Singleton.instance.create(platypusSessionId);
                                         httpSession.setAttribute(PLATYPUS_SESSION_ID_ATTR_NAME, platypusSessionId);
+                                        final Session effective = lookedup;
+                                        try {
+                                            DatabasesClient.getUserProperties(platypusCore.getDatabasesClient(), userName, platypusCore.getQueueSpace(), (Map<String, String> aUserProps) -> {
+                                                // still sessions accounting thread
+                                                String dataContext = aUserProps.get(ClientConstants.F_USR_CONTEXT);
+                                                httpSession.setAttribute(PLATYPUS_USER_CONTEXT_ATTR_NAME, dataContext);
+                                                withPlatypusSession.accept(effective);
+                                            }, (Exception ex) -> {
+                                                // still sessions accounting thread
+                                                Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.FINE, "Unable to obtain properties of user {0} due to an error: {1}", new Object[]{userName, ex.toString()});
+                                                httpSession.setAttribute(PLATYPUS_USER_CONTEXT_ATTR_NAME, null);
+                                                withPlatypusSession.accept(effective);
+                                            });
+                                        } catch (Exception ex) {
+                                            Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex);
+                                            try {
+                                                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.toString());
+                                                async.complete();
+                                            } catch (IOException | IllegalStateException ex1) {
+                                                Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex1);
+                                            }
+                                        }
                                         Logger.getLogger(PlatypusSessionsSynchronizer.class.getName()).log(Level.INFO, "Platypus session opened. Session id: {0}", lookedup.getId());
                                     }
-                                    final Session effective = lookedup;
-                                    requestProcessor.accept(effective);
                                 } catch (ScriptException ex) {
                                     Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex);
                                 }
@@ -308,7 +314,8 @@ public class PlatypusHttpServlet extends HttpServlet {
                             Scripts.setContext(null);
                         }
                     } else {
-                        requestProcessor.accept(session);
+                        // http executor thread
+                        withPlatypusSession.accept(session);
                     }
                 } else {
                     response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, HTTP_SESSION_MISSING_MSG);
@@ -326,11 +333,11 @@ public class PlatypusHttpServlet extends HttpServlet {
         return session;
     }
 
-    private static PlatypusPrincipal servletRequestPrincipal(final HttpServletRequest aRequest, final String aDataContext) {
+    private static PlatypusPrincipal httpRequestPrincipal(final HttpServletRequest aRequest) {
+        HttpSession httpSession = aRequest.getSession(false);
         if (aRequest.getUserPrincipal() != null) {
-            return new HttpPlatypusPrincipal(aRequest.getUserPrincipal().getName(), aDataContext, aRequest);
+            return new HttpPlatypusPrincipal(aRequest.getUserPrincipal().getName(), (String) httpSession.getAttribute(PLATYPUS_USER_CONTEXT_ATTR_NAME), aRequest);
         } else {
-            HttpSession httpSession = aRequest.getSession(false);
             return httpSession != null ? new AnonymousPlatypusPrincipal("anonymous-" + httpSession.getId()) : new AnonymousPlatypusPrincipal();
         }
     }
@@ -348,7 +355,8 @@ public class PlatypusHttpServlet extends HttpServlet {
      * @param aHttpSession
      * @throws Exception
      */
-    private void processPlatypusRequest(final HttpServletRequest aHttpRequest, final HttpServletResponse aHttpResponse, HttpSession aHttpSession, Session aPlatypusSession, AsyncContext aAsync) throws Exception {
+    private void handlePlatypusRequest(final HttpServletRequest aHttpRequest, final HttpServletResponse aHttpResponse, HttpSession aHttpSession, Session aPlatypusSession, AsyncContext aAsync) throws Exception {
+        // temporarily session thread 
         Request platypusRequest = readPlatypusRequest(aHttpRequest, aHttpResponse);
         if (platypusRequest.getType() == Requests.rqLogout) {
             aHttpRequest.logout();
@@ -363,7 +371,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                     try {
                         if (ex instanceof AccessControlException) {
                             /*
-                             // we can't send HttpServletResponse.SC_UNAUTHORIZED without knowlege about login mechanisms
+                             // We can't send HttpServletResponse.SC_UNAUTHORIZED without knowlege about login mechanisms
                              // of J2EE container.
                              AccessControlException accEx = (AccessControlException)ex;
                              aHttpResponse.sendError(accEx.getPermission() instanceof AuthPermission ? HttpServletResponse.SC_UNAUTHORIZED : HttpServletResponse.SC_FORBIDDEN, ex.getMessage());
@@ -442,7 +450,7 @@ public class PlatypusHttpServlet extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Platypus servlet provides platypus http clients communication with J2EE/Servlet containers";
+        return "Platypus servlet provides platypus server functionality within J2EE/Servlet containers";
     }// </editor-fold>
 
     protected Request readPlatypusRequest(HttpServletRequest aHttpRequest, HttpServletResponse aResponse) throws Exception {

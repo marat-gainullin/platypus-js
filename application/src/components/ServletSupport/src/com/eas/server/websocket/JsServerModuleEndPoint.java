@@ -82,7 +82,7 @@ public class JsServerModuleEndPoint {
                 facade = new WebSocketServerSession(websocketSession);
                 session.setPrincipal(principal);
                 inContext(() -> {
-                    platypusCore.executeMethod(aModuleName, WS_ON_OPEN_METHOD_NAME, new Object[]{facade.getPublished()}, true, session, (Object aResult) -> {
+                    platypusCore.executeMethod(aModuleName, WS_ON_OPEN_METHOD_NAME, new Object[]{facade.getPublished()}, true, (Object aResult) -> {
                         Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "{0} method of {1} module called successfully.", new Object[]{WS_ON_OPEN_METHOD_NAME, aModuleName});
                     }, (Exception ex) -> {
                         Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.SEVERE, null, ex);

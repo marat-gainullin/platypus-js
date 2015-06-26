@@ -59,13 +59,21 @@ public class Session implements HasPublished {
     }
 
     public void setSpace(Scripts.Space aValue) {
+        if (space != null) {
+            space.setSession(null);
+        }
         space = aValue;
+        if (space != null) {
+            space.setSession(aValue);
+        }
     }
 
     /**
-     * Warning!!! Don't call this getter. It is provided only for TSA Server authentication process
-     * Instead call Scripts.getContext().getPrincipal() please.
-     * @return 
+     * Warning!!! Don't call this getter. It is provided only for TSA Server
+     * authentication process Instead call Scripts.getContext().getPrincipal()
+     * please.
+     *
+     * @return
      */
     public PlatypusPrincipal getPrincipal() {
         return principal;
@@ -126,32 +134,32 @@ public class Session implements HasPublished {
         return atime.get();
     }
 
-/*
-    public void setPrincipal(PlatypusPrincipal aPrincipal) {
-        String oldUserName = principal != null ? principal.getName() : null;
-        String newUserName = aPrincipal != null ? aPrincipal.getName() : null;
-        if (oldUserName == null ? newUserName != null : !oldUserName.equals(newUserName)) {
-            userContext = null;
-            if (newUserName != null && serverCore != null && serverCore.getDatabasesClient() != null) {
-                try {
-                    Map<String, String> userProps = DatabasesClient.getUserProperties(serverCore.getDatabasesClient(), newUserName, null, null);
-                    userContext = userProps.get(ClientConstants.F_USR_CONTEXT);
-                } catch (Exception ex) {
-                    Logger.getLogger(SessionManager.class.getName()).log(Level.WARNING, "Could not get user {0} properties (USR_CONTEXT, etc).", newUserName);
-                }
-            }
-        }
-        if (principal != null) {
-            principal.setContext(null);
-        }
-        principal = aPrincipal;
-        if (principal != null) {
-            // let's update pricipal's 
-            principal.setContext(userContext);
-            // pricipal's roles are processed by container, so there is no need to update them here
-        }
-    }
-*/
+    /*
+     public void setPrincipal(PlatypusPrincipal aPrincipal) {
+     String oldUserName = principal != null ? principal.getName() : null;
+     String newUserName = aPrincipal != null ? aPrincipal.getName() : null;
+     if (oldUserName == null ? newUserName != null : !oldUserName.equals(newUserName)) {
+     userContext = null;
+     if (newUserName != null && serverCore != null && serverCore.getDatabasesClient() != null) {
+     try {
+     Map<String, String> userProps = DatabasesClient.getUserProperties(serverCore.getDatabasesClient(), newUserName, null, null);
+     userContext = userProps.get(ClientConstants.F_USR_CONTEXT);
+     } catch (Exception ex) {
+     Logger.getLogger(SessionManager.class.getName()).log(Level.WARNING, "Could not get user {0} properties (USR_CONTEXT, etc).", newUserName);
+     }
+     }
+     }
+     if (principal != null) {
+     principal.setContext(null);
+     }
+     principal = aPrincipal;
+     if (principal != null) {
+     // let's update pricipal's 
+     principal.setContext(userContext);
+     // pricipal's roles are processed by container, so there is no need to update them here
+     }
+     }
+     */
     /**
      * Returns server module by name.
      *

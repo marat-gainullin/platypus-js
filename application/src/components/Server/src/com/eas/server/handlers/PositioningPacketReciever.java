@@ -43,7 +43,7 @@ public class PositioningPacketReciever implements PacketReciever {
         Scripts.setContext(context);
         try {
             space.process(() -> {
-                serverCore.executeMethod(moduleName, RECIEVER_METHOD_NAME, new Object[]{aPacket}, true, session, (Object result) -> {
+                serverCore.executeMethod(moduleName, RECIEVER_METHOD_NAME, new Object[]{aPacket}, true, (Object result) -> {
                     if (result != null) {
                         assert result instanceof String;
                         assert sender != null;

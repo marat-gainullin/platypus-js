@@ -79,4 +79,54 @@
     aSpace.setLoadFunc(function (aSourceLocation) {
         return load(aSourceLocation);
     });
+    var HashMapClass = Java.type('java.util.HashMap');
+    function copy(aValue, aMapping) {
+        if (!aMapping)
+            aMapping = new HashMapClass();
+        if (aValue === null || aValue === undefined)
+            return null;
+        else {
+            var type = typeof aValue;
+            if (type === 'number')
+                return +aValue;
+            else if (type === 'string')
+                return aValue + '';
+            else if (type === 'boolean')
+                return !!aValue;
+            else if (type === 'object') {
+                if (aValue instanceof Date) {
+                    return new Date(aValue.getTime());
+                }else if (aValue instanceof RegExp) {
+                    var flags = '';
+                    if(aValue.global)
+                        flags += 'g';
+                    if(aValue.ignoreCase)
+                        flags += 'i';
+                    if(aValue.multiline)
+                        flags += 'm';
+                    return new RegExp(aValue.source, flags);
+                } else if (aValue instanceof Number) {
+                    return +aValue;
+                } else if (aValue instanceof String) {
+                    return aValue + '';
+                } else if (aValue instanceof Boolean) {
+                    return !!aValue;
+                } else {
+                    var copied = aValue instanceof Array ? [] : {};
+                    aMapping.put(aValue, copied);
+                    for (var p in aValue) {
+                        var pValue = aValue[p];
+                        if (typeof pValue !== 'function') {
+                            if (aMapping.containsKey(pValue))
+                                copied[p] = aMapping.get(pValue);
+                            else
+                                copied[p] = copy(pValue, aMapping);
+                        }
+                    }
+                    return copied;
+                }
+            }
+        }
+    }
+    aSpace.setCopyObjectFunc(copy);
 });

@@ -9,6 +9,7 @@ import com.eas.client.changes.Change;
 import com.eas.client.Application;
 import com.eas.client.ModulesProxy;
 import com.eas.client.RemoteModulesProxy;
+import com.eas.client.RemoteServerModulesProxy;
 import com.eas.client.ServerModulesProxy;
 import com.eas.client.cache.FormsDocuments;
 import com.eas.client.cache.ModelsDocuments;
@@ -51,7 +52,7 @@ public class PlatypusClient implements Application<PlatypusQuery>, ServerDataSto
         conn = aConn;
         queries = new RemoteQueriesProxy(aConn, this);
         modules = new RemoteModulesProxy(aConn);
-        serverModulesProxy = new ServerModulesProxy(aConn);
+        serverModulesProxy = new RemoteServerModulesProxy(aConn);
         securityConfigs = new ScriptsConfigs();
         forms = new FormsDocuments();
         reports = new ReportsConfigs();

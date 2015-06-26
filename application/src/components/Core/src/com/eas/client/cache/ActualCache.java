@@ -7,7 +7,6 @@ package com.eas.client.cache;
 
 import com.eas.client.AppElementFiles;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -15,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Auto updated cache, without shrink.
  *
  * @author mg
+ * @param <E>
  */
 public abstract class ActualCache<E> {
 
