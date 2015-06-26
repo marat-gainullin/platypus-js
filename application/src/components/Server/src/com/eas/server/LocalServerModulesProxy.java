@@ -70,6 +70,7 @@ public class LocalServerModulesProxy implements ServerModulesProxy {
 
     @Override
     public Object callServerModuleMethod(String aModuleName, String aMethodName, Scripts.Space aSpace, JSObject onSuccess, JSObject onFailure, Object... aArguments) throws Exception {
+        Scripts.getContext().incAsyncsCount();
         serverCore.executeMethod(aModuleName, aMethodName, aArguments, false, (Object aResult) -> {
             onSuccess.call(null, new Object[]{aSpace.toJs(aResult)});
         }, (Exception ex) -> {
