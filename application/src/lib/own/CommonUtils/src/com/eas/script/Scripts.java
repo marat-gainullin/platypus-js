@@ -433,7 +433,7 @@ public class Scripts {
             Object oResult = makeArrayFunc.call(null, new Object[]{});
             return (JSObject) oResult;
         }
-        
+
         public Object makeCopy(Object aSource) {
             assert copyObjectFunc != null : SCRIPT_NOT_INITIALIZED;
             Object oResult = copyObjectFunc.call(null, new Object[]{aSource});
@@ -485,12 +485,18 @@ public class Scripts {
         }
 
         public void schedule(JSObject aJsTask, long aTimeout) {
+            Scripts.LocalContext context = Scripts.getContext();
             bio.submit(() -> {
                 try {
                     Thread.sleep(aTimeout);
-                    process(() -> {
-                        aJsTask.call(null, new Object[]{});
-                    });
+                    Scripts.setContext(context);
+                    try {
+                        process(() -> {
+                            aJsTask.call(null, new Object[]{});
+                        });
+                    } finally {
+                        Scripts.setContext(null);
+                    }
                 } catch (InterruptedException ex) {
                     Logger.getLogger(Scripts.class.getName()).log(Level.SEVERE, null, ex);
                 }
