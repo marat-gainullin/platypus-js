@@ -24,8 +24,9 @@ public class CursorPropertySelectionReflector implements SelectionChangeEvent.Ha
 		if (rowsSource != null && selectionModel instanceof HasSelectionLead<?>) {
 			try {
 				JavaScriptObject lead = ((HasSelectionLead<JavaScriptObject>) selectionModel).getLead();
-				if (lead != null)
+				if (lead != null){// To avoid assignment of null value to "cursor"
 					scrollTo(rowsSource, lead);
+				}
 			} catch (Exception e) {
 				Logger.getLogger(CursorPropertySelectionReflector.class.getName()).log(Level.SEVERE, e.getMessage());
 			}

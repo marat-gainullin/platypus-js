@@ -23,6 +23,7 @@ import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
@@ -132,6 +133,13 @@ public class ControlsUtils {
 		});
 		RootPanel.get().add(fu, -100, -100);
 		fu.click();
+		Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+			@Override
+			public boolean execute() {
+				fu.removeFromParent();
+				return false;
+			}
+		}, 1000 * 60 * 1);// 1 min
 	}
 
 	public static void jsSelectColor(String aOldValue, final JavaScriptObject aCallback) {
@@ -181,6 +189,13 @@ public class ControlsUtils {
 			public void execute() {
 				tmpField.setFocus(true);
 				click(tmpField.getElement());
+				Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+					@Override
+					public boolean execute() {
+						tmpField.removeFromParent();
+						return false;
+					}
+				}, 1000 * 60 * 1);// 1 min
 			}
 		});
 	}
