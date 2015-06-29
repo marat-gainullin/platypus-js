@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 OpenIDE-Module: com.eas.designer.application.report/5
-OpenIDE-Module-Implementation-Version: 6
+OpenIDE-Module-Implementation-Version: 7
 OpenIDE-Module-Layer: com/eas/designer/application/report/layer.xml
 OpenIDE-Module-Localizing-Bundle: com/eas/designer/application/report/Bundle.properties
 
