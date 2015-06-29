@@ -177,7 +177,12 @@ public class PlatypusClientApplication {
                     }
                 };
                 if (EventQueue.isDispatchThread()) {
-                    return selector.call();
+                    Scripts.LocalContext context = Scripts.getContext();
+                    try {
+                        return selector.call();
+                    } finally {
+                        Scripts.setContext(context);
+                    }
                 } else {
                     Credentials res = new Credentials(null, null);
                     EventQueue.invokeAndWait(() -> {

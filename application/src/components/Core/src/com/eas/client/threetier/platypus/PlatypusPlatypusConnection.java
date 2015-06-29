@@ -139,7 +139,7 @@ public class PlatypusPlatypusConnection extends PlatypusConnection {
 
             @Override
             public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
-                Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.SEVERE, cause.getMessage());
+                Logger.getLogger(PlatypusPlatypusConnection.class.getName()).log(Level.SEVERE, cause.toString());
                 session.close(true);
             }
 

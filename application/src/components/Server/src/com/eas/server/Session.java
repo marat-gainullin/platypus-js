@@ -64,7 +64,7 @@ public class Session implements HasPublished {
         }
         space = aValue;
         if (space != null) {
-            space.setSession(aValue);
+            space.setSession(this);
         }
     }
 
