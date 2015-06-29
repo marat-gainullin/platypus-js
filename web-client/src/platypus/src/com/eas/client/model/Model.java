@@ -864,6 +864,13 @@ public class Model implements HasPublished {
 				}
 			}
 		});
+		Object.defineProperty(publishedModel, "execute", {
+			get : function() {
+				return function(onSuccess, onFailure) {
+					aModel.@com.eas.client.model.Model::execute(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
+				}
+			}
+		});
 		Object.defineProperty(publishedModel, "unwrap", {
 			get : function() {
 				return function() {

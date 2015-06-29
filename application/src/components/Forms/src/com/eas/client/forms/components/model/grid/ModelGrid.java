@@ -1501,7 +1501,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
                     JSObject modelData = oModelData instanceof JSObject ? (JSObject) oModelData : null;
                     if (modelData != null) {
                         JSObject jsNewCursor = elementByViewIndex(rowsSelectionModel.getLeadSelectionIndex());
-                        if (modelData.hasMember(cursorProperty)) {
+                        if (jsNewCursor != null && modelData.hasMember(cursorProperty)) {
                             modelData.setMember(cursorProperty, jsNewCursor);
                         }
                     }

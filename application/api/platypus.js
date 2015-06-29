@@ -1344,7 +1344,7 @@
                 });
                 listenable(published);
                 entityCTor.call(published, nEntity);
-                delete published.unwrap;
+                //WARNING Don't delete unwrap, due to its uses in methods bodies.
                 for (var protoEntryName in entityCTor.prototype) {
                     if (!published[protoEntryName]) {
                         var protoEntry = entityCTor.prototype[protoEntryName];

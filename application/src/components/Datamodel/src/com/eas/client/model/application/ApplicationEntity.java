@@ -93,7 +93,8 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
             cancelled = true;
             valid = true;
             pending = null;
-            Exception ex = new InterruptedException("Canceled");
+            String msg = "Canceled query on " + (name != null && !name.isEmpty() ? name : "") + (title != null && !title.isEmpty() ? "[" + title + "]" : "");
+            Exception ex = new InterruptedException(msg);
             model.terminateProcess((E) ApplicationEntity.this, ex);
             if (onCancel != null) {
                 onCancel.accept(ex);
@@ -374,7 +375,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
             + "*/";
 
     public abstract int executeUpdate(JSObject onSuccess, JSObject onFailure) throws Exception;
-    
+
     protected void internalExecute(final Consumer<JSObject> aOnSuccess, final Consumer<Exception> aOnFailure) throws Exception {
         if (query == null) {
             throw new IllegalStateException("Query must present. Query name: " + queryName + "; tableName: " + getTableNameForDescription());
