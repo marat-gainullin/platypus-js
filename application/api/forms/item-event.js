@@ -28,7 +28,7 @@
         Object.defineProperty(this, "item", {
             get: function() {
                 var value = delegate.item;
-                return P.boxAsJs(value);
+                return value;
             }
         });
         if(!P.ItemEvent){

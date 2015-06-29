@@ -25,27 +25,13 @@
         if(P.ModelGrid.superclass)
             P.ModelGrid.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        Object.defineProperty(this, "selected", {
-            get: function() {
-                var value = delegate.jsSelected;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ModelGrid){
-            /**
-             * Generated property jsDoc.
-             * @property jsSelected
-             * @memberOf ModelGrid
-             */
-            P.ModelGrid.prototype.selected = {};
-        }
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
                 var value = delegate.onMouseReleased;
-                return P.boxAsJs(value);
+                return value;
             },
             set: function(aValue) {
-                delegate.onMouseReleased = P.boxAsJava(aValue);
+                delegate.onMouseReleased = aValue;
             }
         });
         if(!P.ModelGrid){
@@ -56,13 +42,27 @@
              */
             P.ModelGrid.prototype.onMouseReleased = {};
         }
+        Object.defineProperty(this, "selected", {
+            get: function() {
+                var value = delegate.jsSelected;
+                return value;
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * Generated property jsDoc.
+             * @property jsSelected
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.selected = {};
+        }
         Object.defineProperty(this, "data", {
             get: function() {
                 var value = delegate.data;
-                return P.boxAsJs(value);
+                return value;
             },
             set: function(aValue) {
-                delegate.data = P.boxAsJava(aValue);
+                delegate.data = aValue;
             }
         });
         if(!P.ModelGrid){
@@ -110,10 +110,10 @@
         Object.defineProperty(this, "onComponentMoved", {
             get: function() {
                 var value = delegate.onComponentMoved;
-                return P.boxAsJs(value);
+                return value;
             },
             set: function(aValue) {
-                delegate.onComponentMoved = P.boxAsJava(aValue);
+                delegate.onComponentMoved = aValue;
             }
         });
         if(!P.ModelGrid){
@@ -161,10 +161,10 @@
         Object.defineProperty(this, "onRender", {
             get: function() {
                 var value = delegate.onRender;
-                return P.boxAsJs(value);
+                return value;
             },
             set: function(aValue) {
-                delegate.onRender = P.boxAsJava(aValue);
+                delegate.onRender = aValue;
             }
         });
         if(!P.ModelGrid){
@@ -193,10 +193,10 @@
         Object.defineProperty(this, "onMouseEntered", {
             get: function() {
                 var value = delegate.onMouseEntered;
-                return P.boxAsJs(value);
+                return value;
             },
             set: function(aValue) {
-                delegate.onMouseEntered = P.boxAsJava(aValue);
+                delegate.onMouseEntered = aValue;
             }
         });
         if(!P.ModelGrid){
@@ -258,10 +258,10 @@
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
-                return P.boxAsJs(value);
+                return value;
             },
             set: function(aValue) {
-                delegate.onComponentShown = P.boxAsJava(aValue);
+                delegate.onComponentShown = aValue;
             }
         });
         if(!P.ModelGrid){
@@ -292,10 +292,10 @@
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
                 var value = delegate.onComponentHidden;
-                return P.boxAsJs(value);
+                return value;
             },
             set: function(aValue) {
-                delegate.onComponentHidden = P.boxAsJava(aValue);
+                delegate.onComponentHidden = aValue;
             }
         });
         if(!P.ModelGrid){
@@ -309,10 +309,10 @@
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
-                return P.boxAsJs(value);
+                return value;
             },
             set: function(aValue) {
-                delegate.onKeyReleased = P.boxAsJava(aValue);
+                delegate.onKeyReleased = aValue;
             }
         });
         if(!P.ModelGrid){
@@ -326,10 +326,10 @@
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
-                return P.boxAsJs(value);
+                return value;
             },
             set: function(aValue) {
-                delegate.onActionPerformed = P.boxAsJava(aValue);
+                delegate.onActionPerformed = aValue;
             }
         });
         if(!P.ModelGrid){
@@ -360,10 +360,10 @@
         Object.defineProperty(this, "onKeyTyped", {
             get: function() {
                 var value = delegate.onKeyTyped;
-                return P.boxAsJs(value);
+                return value;
             },
             set: function(aValue) {
-                delegate.onKeyTyped = P.boxAsJava(aValue);
+                delegate.onKeyTyped = aValue;
             }
         });
         if(!P.ModelGrid){
@@ -377,10 +377,10 @@
         Object.defineProperty(this, "onMouseWheelMoved", {
             get: function() {
                 var value = delegate.onMouseWheelMoved;
-                return P.boxAsJs(value);
+                return value;
             },
             set: function(aValue) {
-                delegate.onMouseWheelMoved = P.boxAsJava(aValue);
+                delegate.onMouseWheelMoved = aValue;
             }
         });
         if(!P.ModelGrid){
@@ -510,10 +510,10 @@
         Object.defineProperty(this, "onMouseDragged", {
             get: function() {
                 var value = delegate.onMouseDragged;
-                return P.boxAsJs(value);
+                return value;
             },
             set: function(aValue) {
-                delegate.onMouseDragged = P.boxAsJava(aValue);
+                delegate.onMouseDragged = aValue;
             }
         });
         if(!P.ModelGrid){
@@ -527,10 +527,10 @@
         Object.defineProperty(this, "onFocusLost", {
             get: function() {
                 var value = delegate.onFocusLost;
-                return P.boxAsJs(value);
+                return value;
             },
             set: function(aValue) {
-                delegate.onFocusLost = P.boxAsJava(aValue);
+                delegate.onFocusLost = aValue;
             }
         });
         if(!P.ModelGrid){
@@ -561,10 +561,10 @@
         Object.defineProperty(this, "onMousePressed", {
             get: function() {
                 var value = delegate.onMousePressed;
-                return P.boxAsJs(value);
+                return value;
             },
             set: function(aValue) {
-                delegate.onMousePressed = P.boxAsJava(aValue);
+                delegate.onMousePressed = aValue;
             }
         });
         if(!P.ModelGrid){
@@ -647,10 +647,10 @@
         Object.defineProperty(this, "onComponentResized", {
             get: function() {
                 var value = delegate.onComponentResized;
-                return P.boxAsJs(value);
+                return value;
             },
             set: function(aValue) {
-                delegate.onComponentResized = P.boxAsJava(aValue);
+                delegate.onComponentResized = aValue;
             }
         });
         if(!P.ModelGrid){
@@ -681,10 +681,10 @@
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
                 var value = delegate.onMouseMoved;
-                return P.boxAsJs(value);
+                return value;
             },
             set: function(aValue) {
-                delegate.onMouseMoved = P.boxAsJava(aValue);
+                delegate.onMouseMoved = aValue;
             }
         });
         if(!P.ModelGrid){
@@ -766,10 +766,10 @@
         Object.defineProperty(this, "onItemSelected", {
             get: function() {
                 var value = delegate.onItemSelected;
-                return P.boxAsJs(value);
+                return value;
             },
             set: function(aValue) {
-                delegate.onItemSelected = P.boxAsJava(aValue);
+                delegate.onItemSelected = aValue;
             }
         });
         if(!P.ModelGrid){
@@ -797,10 +797,10 @@
         Object.defineProperty(this, "onFocusGained", {
             get: function() {
                 var value = delegate.onFocusGained;
-                return P.boxAsJs(value);
+                return value;
             },
             set: function(aValue) {
-                delegate.onFocusGained = P.boxAsJava(aValue);
+                delegate.onFocusGained = aValue;
             }
         });
         if(!P.ModelGrid){
@@ -831,10 +831,10 @@
         Object.defineProperty(this, "onMouseClicked", {
             get: function() {
                 var value = delegate.onMouseClicked;
-                return P.boxAsJs(value);
+                return value;
             },
             set: function(aValue) {
-                delegate.onMouseClicked = P.boxAsJava(aValue);
+                delegate.onMouseClicked = aValue;
             }
         });
         if(!P.ModelGrid){
@@ -848,10 +848,10 @@
         Object.defineProperty(this, "onMouseExited", {
             get: function() {
                 var value = delegate.onMouseExited;
-                return P.boxAsJs(value);
+                return value;
             },
             set: function(aValue) {
-                delegate.onMouseExited = P.boxAsJava(aValue);
+                delegate.onMouseExited = aValue;
             }
         });
         if(!P.ModelGrid){
@@ -950,10 +950,10 @@
         Object.defineProperty(this, "onKeyPressed", {
             get: function() {
                 var value = delegate.onKeyPressed;
-                return P.boxAsJs(value);
+                return value;
             },
             set: function(aValue) {
-                delegate.onKeyPressed = P.boxAsJava(aValue);
+                delegate.onKeyPressed = aValue;
             }
         });
         if(!P.ModelGrid){
@@ -1049,49 +1049,6 @@
 
         /**
          *
-         * @method addColumnNode
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.addColumnNode = function(arg0) {
-            var delegate = this.unwrap();
-            var value = delegate.addColumnNode(P.boxAsJava(arg0));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         *
-         * @method removeColumnNode
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.removeColumnNode = function(arg0) {
-            var delegate = this.unwrap();
-            var value = delegate.removeColumnNode(P.boxAsJava(arg0));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         *
-         * @method insertColumnNode
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.insertColumnNode = function(arg0, arg1) {
-            var delegate = this.unwrap();
-            var value = delegate.insertColumnNode(P.boxAsJava(arg0), P.boxAsJava(arg1));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * @method unsort
-         * @memberOf ModelGrid
-         * Clears sort on all columns, works only in HTML5 */
-        P.ModelGrid.prototype.unsort = function() {
-            var delegate = this.unwrap();
-            var value = delegate.unsort();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         *
          * @method elementByModelIndex
          * @memberOf ModelGrid
          */
@@ -1120,6 +1077,49 @@
         P.ModelGrid.prototype.try2CancelAnyEditing = function() {
             var delegate = this.unwrap();
             var value = delegate.try2CancelAnyEditing();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * @method unsort
+         * @memberOf ModelGrid
+         * Clears sort on all columns, works only in HTML5 */
+        P.ModelGrid.prototype.unsort = function() {
+            var delegate = this.unwrap();
+            var value = delegate.unsort();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
+         * @method addColumnNode
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.addColumnNode = function(arg0) {
+            var delegate = this.unwrap();
+            var value = delegate.addColumnNode(P.boxAsJava(arg0));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
+         * @method removeColumnNode
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.removeColumnNode = function(arg0) {
+            var delegate = this.unwrap();
+            var value = delegate.removeColumnNode(P.boxAsJava(arg0));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
+         * @method insertColumnNode
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.insertColumnNode = function(arg0, arg1) {
+            var delegate = this.unwrap();
+            var value = delegate.insertColumnNode(P.boxAsJava(arg0), P.boxAsJava(arg1));
             return P.boxAsJs(value);
         };
 

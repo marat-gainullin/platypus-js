@@ -28,10 +28,10 @@
         Object.defineProperty(this, "onRequeried", {
             get: function() {
                 var value = delegate.onRequeried;
-                return P.boxAsJs(value);
+                return value;
             },
             set: function(aValue) {
-                delegate.onRequeried = P.boxAsJava(aValue);
+                delegate.onRequeried = aValue;
             }
         });
         if(!P.ApplicationPlatypusEntity){
@@ -45,10 +45,10 @@
         Object.defineProperty(this, "elementClass", {
             get: function() {
                 var value = delegate.elementClass;
-                return P.boxAsJs(value);
+                return value;
             },
             set: function(aValue) {
-                delegate.elementClass = P.boxAsJava(aValue);
+                delegate.elementClass = aValue;
             }
         });
         if(!P.ApplicationPlatypusEntity){

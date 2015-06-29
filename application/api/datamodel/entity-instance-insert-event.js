@@ -28,7 +28,7 @@
         Object.defineProperty(this, "inserted", {
             get: function() {
                 var value = delegate.inserted;
-                return P.boxAsJs(value);
+                return value;
             }
         });
         if(!P.EntityInstanceInsertEvent){
@@ -56,7 +56,7 @@
         Object.defineProperty(this, "object", {
             get: function() {
                 var value = delegate.object;
-                return P.boxAsJs(value);
+                return value;
             }
         });
         if(!P.EntityInstanceInsertEvent){

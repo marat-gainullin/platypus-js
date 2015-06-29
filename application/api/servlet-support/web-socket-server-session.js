@@ -28,10 +28,10 @@
         Object.defineProperty(this, "onmessage", {
             get: function() {
                 var value = delegate.onmessage;
-                return P.boxAsJs(value);
+                return value;
             },
             set: function(aValue) {
-                delegate.onmessage = P.boxAsJava(aValue);
+                delegate.onmessage = aValue;
             }
         });
         if(!P.WebSocketServerSession){
@@ -45,10 +45,10 @@
         Object.defineProperty(this, "onerror", {
             get: function() {
                 var value = delegate.onerror;
-                return P.boxAsJs(value);
+                return value;
             },
             set: function(aValue) {
-                delegate.onerror = P.boxAsJava(aValue);
+                delegate.onerror = aValue;
             }
         });
         if(!P.WebSocketServerSession){
@@ -76,10 +76,10 @@
         Object.defineProperty(this, "onclose", {
             get: function() {
                 var value = delegate.onclose;
-                return P.boxAsJs(value);
+                return value;
             },
             set: function(aValue) {
-                delegate.onclose = P.boxAsJava(aValue);
+                delegate.onclose = aValue;
             }
         });
         if(!P.WebSocketServerSession){

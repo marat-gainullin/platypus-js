@@ -28,7 +28,7 @@
         Object.defineProperty(this, "deleted", {
             get: function() {
                 var value = delegate.deleted;
-                return P.boxAsJs(value);
+                return value;
             }
         });
         if(!P.EntityInstanceDeleteEvent){

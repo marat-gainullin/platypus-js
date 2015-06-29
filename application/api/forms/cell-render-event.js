@@ -70,7 +70,7 @@
         Object.defineProperty(this, "object", {
             get: function() {
                 var value = delegate.object;
-                return P.boxAsJs(value);
+                return value;
             }
         });
         if(!P.CellRenderEvent){

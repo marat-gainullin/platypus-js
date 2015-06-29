@@ -28,7 +28,7 @@
         Object.defineProperty(this, "modules", {
             get: function() {
                 var value = delegate.modules;
-                return P.boxAsJs(value);
+                return value;
             }
         });
         if(!P.Session){

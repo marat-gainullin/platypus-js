@@ -18,7 +18,7 @@
             };
         };
     }
-    
+
     //this === global;
     var global = this;
     aSpace.setGlobal(global);
@@ -724,7 +724,7 @@
         }
         return target;
     }
-    
+
     aSpace.putPublisher(ParametersClassName, fieldsAndParametersPublisher);
     aSpace.putPublisher(FieldsClassName, fieldsAndParametersPublisher);
 
@@ -760,10 +760,14 @@
     }
 
     function listen(aTarget, aListener) {
-        aTarget[addListenerName](aListener);
-        return function () {
-            aTarget[removeListenerName](aListener);
-        };
+        if (aTarget[addListenerName]) {
+            aTarget[addListenerName](aListener);
+            return function () {
+                aTarget[removeListenerName](aListener);
+            };
+        } else {
+            return null;
+        }
     }
 
     function unlisten(aTarget, aListener) {
@@ -1344,7 +1348,7 @@
                 });
                 listenable(published);
                 entityCTor.call(published, nEntity);
-                //WARNING Don't delete unwrap, due to its uses in methods bodies.
+                //WARNING Don't delete unwrap, due to it is used in methods bodies.
                 for (var protoEntryName in entityCTor.prototype) {
                     if (!published[protoEntryName]) {
                         var protoEntry = entityCTor.prototype[protoEntryName];

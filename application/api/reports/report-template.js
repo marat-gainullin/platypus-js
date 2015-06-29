@@ -66,10 +66,10 @@
         Object.defineProperty(this, "fixed", {
             get: function() {
                 var value = delegate.fixed;
-                return P.boxAsJs(value);
+                return value;
             },
             set: function(aValue) {
-                delegate.fixed = P.boxAsJava(aValue);
+                delegate.fixed = aValue;
             }
         });
         if(!P.ReportTemplate){

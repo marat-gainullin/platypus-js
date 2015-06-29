@@ -35,6 +35,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * The utility application to convert JavaScript API classes with
@@ -485,7 +486,11 @@ public class Classes2Scripts {
             sb.append(getIndentStr(++i));
             sb.append("var value = ").append(DELEGATE_OBJECT).append(".").append(property.name).append(";\n");
             sb.append(getIndentStr(i));
-            sb.append("return P.boxAsJs(value);\n");
+            if (JSObject.class.isAssignableFrom(property.method.getReturnType())) {
+                sb.append("return value;\n");
+            } else {
+                sb.append("return P.boxAsJs(value);\n");
+            }
         }
         sb.append(getIndentStr(--i));
         sb.append("}");
@@ -494,7 +499,12 @@ public class Classes2Scripts {
             sb.append(getIndentStr(i));
             sb.append("set: function(aValue) {\n");
             sb.append(getIndentStr(++i));
-            sb.append(DELEGATE_OBJECT).append(".").append(property.name).append(" = P.boxAsJava(aValue);\n");
+            sb.append(DELEGATE_OBJECT).append(".").append(property.name);
+            if (JSObject.class.isAssignableFrom(property.method.getReturnType())) {
+                sb.append(" = aValue;\n");
+            } else {
+                sb.append(" = P.boxAsJava(aValue);\n");
+            }
             sb.append(getIndentStr(--i));
             sb.append("}\n");
         } else {
