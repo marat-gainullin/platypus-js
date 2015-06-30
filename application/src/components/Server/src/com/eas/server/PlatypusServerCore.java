@@ -21,6 +21,7 @@ import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.queries.ContextHost;
 import com.eas.client.queries.QueriesProxy;
 import com.eas.client.scripts.ScriptedResource;
+import com.eas.script.HasPublished;
 import com.eas.script.JsDoc;
 import com.eas.script.Scripts;
 import com.eas.server.handlers.ServerModuleStructureRequestHandler;
@@ -32,6 +33,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -190,7 +192,12 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                 targetSpace = sessionManager.getSystemSession().getSpace();
                             } else if (config.hasModuleAnnotation(JsDoc.Tag.STATELESS_TAG)) {
                                 Scripts.Space pooledSpace = spacesPool.poll();
-                                targetSpace = pooledSpace == null ? Scripts.createSpace() : pooledSpace;
+                                if (pooledSpace == null) {
+                                    targetSpace = Scripts.createSpace();
+                                    targetSpace.initSpaceGlobal();
+                                } else {
+                                    targetSpace = pooledSpace;
+                                }
                                 targetSpace.setSession(callingContext.getSpace().getSession());
                                 targetSession = null;
                             } else {// statefull session module
@@ -226,12 +233,13 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                                     Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.FINE, RPCRequestHandler.EXECUTING_METHOD_TRACE_MSG, new Object[]{aMethodName, aModuleName});
                                                     Object oFun = moduleInstance.getMember(aMethodName);
                                                     if (oFun instanceof JSObject && ((JSObject) oFun).isFunction()) {
+                                                        AtomicBoolean executed = new AtomicBoolean();
                                                         List<Object> arguments = new ArrayList<>(Arrays.asList(copiedArguments));
                                                         arguments.add(new AbstractJSObject() {
                                                             @Override
                                                             public Object call(final Object thiz, final Object... largs) {
-                                                                if (!arguments.isEmpty()) {
-                                                                    arguments.clear();
+                                                                if (!executed.get()) {
+                                                                    executed.set(true);
                                                                     Object returned = largs.length > 0 ? largs[0] : null;
                                                                     onSuccess.accept(returned);// WARNING! Don't insert .toJava() because of RPC handler
                                                                     if (targetSession == null) {// stateless module called
@@ -248,8 +256,8 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                                         arguments.add(new AbstractJSObject() {
                                                             @Override
                                                             public Object call(final Object thiz, final Object... largs) {
-                                                                if (!arguments.isEmpty()) {
-                                                                    arguments.clear();
+                                                                if (!executed.get()) {
+                                                                    executed.set(true);
                                                                     Object reason = largs.length > 0 ? Scripts.getSpace().toJava(largs[0]) : null;
                                                                     if (reason instanceof Exception) {
                                                                         onFailure.accept((Exception) reason);
@@ -273,8 +281,8 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                                             Object result = ((JSObject) oFun).call(moduleInstance, arguments.toArray());
                                                             int asyncs = Scripts.getContext().getAsyncsCount();
                                                             if (!(result instanceof Undefined) || asyncs == 0) {
-                                                                if (!arguments.isEmpty()) {
-                                                                    arguments.clear();
+                                                                if (!executed.get()) {
+                                                                    executed.set(true);
                                                                     onSuccess.accept(result);// WARNING! Don't insert .toJava() because of RPC handler
                                                                     if (targetSession == null) {// stateless module called
                                                                         targetSpace.setSession(null);
@@ -334,7 +342,11 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
     public Object[] copyArgumnets(Object[] aArguments, Scripts.LocalContext callingContext) {
         Object[] arguments = Arrays.copyOf(aArguments, aArguments.length);
         for (int a = 0; a < arguments.length; a++) {
-            arguments[a] = callingContext.getSpace().makeCopy(arguments[a]);
+            if (arguments[a] instanceof HasPublished) {
+                arguments[a] = ((HasPublished) arguments[a]).getPublished();
+            } else {
+                arguments[a] = callingContext.getSpace().makeCopy(arguments[a]);
+            }
         }
         return arguments;
     }

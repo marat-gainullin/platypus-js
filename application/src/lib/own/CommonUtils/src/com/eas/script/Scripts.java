@@ -26,6 +26,7 @@ import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.ScriptUtils;
 import jdk.nashorn.api.scripting.URLReader;
@@ -434,10 +435,24 @@ public class Scripts {
             return (JSObject) oResult;
         }
 
+        private static class Wrapper {
+
+            public Object value;
+        }
+
         public Object makeCopy(Object aSource) {
             assert copyObjectFunc != null : SCRIPT_NOT_INITIALIZED;
-            Object oResult = copyObjectFunc.call(null, new Object[]{aSource});
-            return oResult;
+            Wrapper w = new Wrapper();
+            copyObjectFunc.call(null, new Object[]{aSource, new AbstractJSObject() {
+
+                @Override
+                public Object call(Object thiz, Object... args) {
+                    w.value = args.length > 0 ? args[0] : null;
+                    return null;
+                }
+
+            }});
+            return w.value;
         }
 
         public JSObject listen(JSObject aTarget, String aPath, JSObject aCallback) {
@@ -543,7 +558,7 @@ public class Scripts {
                         try {
                             // already single threaded environment
                             if (global == null) {
-                                initSpaceGlobal(Scripts.Space.this);
+                                Scripts.Space.this.initSpaceGlobal();
                             }
                             // Zombie processing ...
                             Runnable task = queue.poll();
@@ -562,9 +577,9 @@ public class Scripts {
             });
         }
 
-        public void initSpaceGlobal(Scripts.Space aSpace) {
+        public void initSpaceGlobal() {
             Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
-            bindings.put("space", aSpace);
+            bindings.put("space", this);
             try {
                 Scripts.LocalContext ctx = Scripts.createContext(Scripts.Space.this);
                 Scripts.setContext(ctx);
