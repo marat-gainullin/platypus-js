@@ -612,7 +612,7 @@ public class Scripts {
         bio = new ThreadPoolExecutor(aMaxThreads, aMaxThreads,
                 1L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(),
-                new DeamonThreadFactory("platypus-bio-", false));
+                new DeamonThreadFactory("platypus-abio-", false));
         bio.allowCoreThreadTimeOut(true);
     }
 
@@ -622,13 +622,13 @@ public class Scripts {
         }
     }
 
-    public static void startBIO(Runnable aBlocked) {
+    public static void startBIO(Runnable aBioTask) {
         LocalContext context = getContext();
         context.incAsyncsCount();
         bio.submit(() -> {
             setContext(context);
             try {
-                aBlocked.run();
+                aBioTask.run();
             } finally {
                 setContext(null);
             }
