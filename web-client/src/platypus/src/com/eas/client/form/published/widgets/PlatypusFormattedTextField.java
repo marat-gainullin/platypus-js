@@ -234,6 +234,15 @@ public class PlatypusFormattedTextField extends FormattedObjectBox implements Ha
 				aWidget.@com.eas.client.form.published.widgets.PlatypusFormattedTextField::setJsValue(Ljava/lang/Object;)($wnd.P.boxAsJava(aValue));
 			}
 		});
+		Object.defineProperty(published, "valueType", {
+			get : function() {
+				return $wnd.P.boxAsJs(aWidget.@com.eas.client.form.published.widgets.PlatypusFormattedTextField::getValueType()());
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.widgets.PlatypusFormattedTextField::setValueType(I)(aValue != null ? aValue : null);
+			}
+		});
+		
 		Object.defineProperty(published, "format", {
 			get : function() {
 				return aWidget.@com.eas.client.form.published.widgets.PlatypusFormattedTextField::getFormat()();
