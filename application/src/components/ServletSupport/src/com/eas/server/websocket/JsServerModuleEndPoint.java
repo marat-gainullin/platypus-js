@@ -82,10 +82,12 @@ public class JsServerModuleEndPoint {
                 facade = new WebSocketServerSession(websocketSession);
                 session.setPrincipal(principal);
                 inContext(() -> {
-                    platypusCore.executeMethod(aModuleName, WS_ON_OPEN_METHOD_NAME, new Object[]{facade.getPublished()}, true, (Object aResult) -> {
-                        Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "{0} method of {1} module called successfully.", new Object[]{WS_ON_OPEN_METHOD_NAME, aModuleName});
-                    }, (Exception ex) -> {
-                        Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.SEVERE, null, ex);
+                    Scripts.getSpace().process(() -> {
+                        platypusCore.executeMethod(aModuleName, WS_ON_OPEN_METHOD_NAME, new Object[]{facade}, true, (Object aResult) -> {
+                            Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "{0} method of {1} module called successfully.", new Object[]{WS_ON_OPEN_METHOD_NAME, aModuleName});
+                        }, (Exception ex) -> {
+                            Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.SEVERE, null, ex);
+                        });
                     });
                 }, session);
             }, (Exception ex) -> {
@@ -143,7 +145,7 @@ public class JsServerModuleEndPoint {
                 Object oFun = facade.getPublished().getMember(methodName);
                 if (oFun instanceof JSObject && ((JSObject) oFun).isFunction()) {
                     JSObject callable = (JSObject) oFun;
-                    callable.call(facade, args);
+                    callable.call(facade.getPublished(), args);
                 } else {
                     Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.WARNING, "No method {0} found in {1}", new Object[]{methodName, WebSocketServerSession.class.getSimpleName()});
                 }
