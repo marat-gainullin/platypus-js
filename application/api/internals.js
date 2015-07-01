@@ -79,8 +79,10 @@
     aSpace.setLoadFunc(function (aSourceLocation) {
         return load(aSourceLocation);
     });
+    var EngineUtilsClass = Java.type("jdk.nashorn.api.scripting.ScriptUtils");
     var HashMapClass = Java.type('java.util.HashMap');
     function copy(aValue, aMapping) {
+        aValue = EngineUtilsClass.unwrap(aValue);
         if (!aMapping)
             aMapping = new HashMapClass();
         if (aValue === null || aValue === undefined)
@@ -96,13 +98,13 @@
             else if (type === 'object') {
                 if (aValue instanceof Date) {
                     return new Date(aValue.getTime());
-                }else if (aValue instanceof RegExp) {
+                } else if (aValue instanceof RegExp) {
                     var flags = '';
-                    if(aValue.global)
+                    if (aValue.global)
                         flags += 'g';
-                    if(aValue.ignoreCase)
+                    if (aValue.ignoreCase)
                         flags += 'i';
-                    if(aValue.multiline)
+                    if (aValue.multiline)
                         flags += 'm';
                     return new RegExp(aValue.source, flags);
                 } else if (aValue instanceof Number) {
@@ -128,5 +130,7 @@
             }
         }
     }
-    aSpace.setCopyObjectFunc(copy);
+    aSpace.setCopyObjectFunc(function (aValue, aConsumer) {
+        aConsumer(copy(aValue));
+    });
 });
