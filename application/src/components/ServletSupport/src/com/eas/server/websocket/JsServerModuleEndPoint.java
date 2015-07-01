@@ -12,9 +12,12 @@ import com.eas.script.Scripts;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.SessionManager;
 import com.eas.server.httpservlet.PlatypusHttpServlet;
+import com.eas.util.IDGenerator;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.script.ScriptException;
 import javax.websocket.CloseReason;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
@@ -34,125 +37,181 @@ import jdk.nashorn.api.scripting.JSObject;
 public class JsServerModuleEndPoint {
 
     //
-    private static final String WS_ON_OPEN_METHOD_NAME = "onopen";
+    private static final String WS_ON_OPEN = "onopen";
     private static final String WS_ON_MESSAGE = "onmessage";
     private static final String WS_ON_CLOSE = "onclose";
     private static final String WS_ON_ERROR = "onerror";
 
-    protected com.eas.server.Session session;
-    protected WebSocketServerSession facade;
+    protected volatile String wasPlatypusSessionId;
+    protected volatile String moduleName;
 
     public JsServerModuleEndPoint() {
         super();
     }
 
-    private static void inContext(Runnable aTask, com.eas.server.Session aSession) {
-        Scripts.LocalContext context = Scripts.createContext(aSession.getSpace());
-        context.setAsync(null);
-        context.setPrincipal(aSession.getPrincipal());
-        context.setRequest(null);
-        context.setResponse(null);
-        Scripts.setContext(context);
-        try {
-            aTask.run();
-        } finally {
-            Scripts.setContext(null);
+    protected void in(PlatypusServerCore platypusCore, Session websocketSession, Consumer<com.eas.server.Session> aHandler) throws Exception {
+        HandshakeRequest handshake = (HandshakeRequest) websocketSession.getUserProperties().get(JsServerModuleEndPointConfigurator.HANDSHAKE_REQUEST);
+        String userName = websocketSession.getUserPrincipal() != null ? websocketSession.getUserPrincipal().getName() : null;
+        Consumer<com.eas.server.Session> withPlatypusSession = (com.eas.server.Session aSession) -> {
+            // websocket executor thread or sessions accounting thread
+            Scripts.LocalContext context = Scripts.createContext(aSession.getSpace());
+            context.setAsync(null);
+            context.setRequest(null);
+            context.setResponse(null);
+            context.setPrincipal(platypusPrincipal(handshake, websocketSession));
+            Scripts.setContext(context);
+            try {
+                aSession.getSpace().process(() -> {
+                    // temporarily session thread 
+                    try {
+                        aHandler.accept(aSession);
+                    } catch (Exception ex) {
+                        Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                });
+            } finally {
+                Scripts.setContext(null);
+            }
+        };
+        com.eas.server.Session lookedup0 = platypusSessionByWebSocketSession(websocketSession);
+        if (lookedup0 == null) {// Zombie check
+            Scripts.LocalContext queueSpaceContext = Scripts.createContext(platypusCore.getQueueSpace());
+            Scripts.setContext(queueSpaceContext);
+            try {
+                platypusCore.getQueueSpace().process(() -> {
+                    // sessions accounting thread
+                    com.eas.server.Session lookedup1 = platypusSessionByWebSocketSession(websocketSession);
+                    if (lookedup1 == null) {// Zombie check
+                        try {
+                            Consumer<String> withDataContext = (String dataContext) -> {
+                                // still sessions accounting thread
+                                String platypusSessionId = (String) websocketSession.getUserProperties().get(PlatypusHttpServlet.PLATYPUS_SESSION_ID_ATTR_NAME);
+                                // platypusSessionId may be replicated from another instance in cluster
+                                com.eas.server.Session lookedup2 = platypusSessionId != null ? SessionManager.Singleton.instance.get(platypusSessionId) : null;
+                                if (lookedup2 == null) {// Non zombie check
+                                    try {
+                                        // preserve replicated session id
+                                        com.eas.server.Session created = SessionManager.Singleton.instance.create(platypusSessionId == null ? IDGenerator.genID() + "" : platypusSessionId);
+                                        if (dataContext == null) {
+                                            websocketSession.getUserProperties().remove(PlatypusHttpServlet.PLATYPUS_USER_CONTEXT_ATTR_NAME);
+                                        } else {
+                                            websocketSession.getUserProperties().put(PlatypusHttpServlet.PLATYPUS_USER_CONTEXT_ATTR_NAME, dataContext);
+                                        }
+                                        // publishing a session
+                                        wasPlatypusSessionId = created.getId();
+                                        websocketSession.getUserProperties().put(PlatypusHttpServlet.PLATYPUS_SESSION_ID_ATTR_NAME, created.getId());
+                                        // a session has been published
+                                        Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.INFO, "WebSocket platypus session opened. Session id: {0}", created.getId());
+                                        withPlatypusSession.accept(created);
+                                    } catch (ScriptException ex) {
+                                        Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.SEVERE, null, ex);
+                                    }
+                                } else {
+                                    withPlatypusSession.accept(lookedup2);
+                                }
+                            };
+                            DatabasesClient.getUserProperties(platypusCore.getDatabasesClient(), userName, platypusCore.getQueueSpace(), (Map<String, String> aUserProps) -> {
+                                // still sessions accounting thread
+                                String dataContext = aUserProps.get(ClientConstants.F_USR_CONTEXT);
+                                withDataContext.accept(dataContext);
+                            }, (Exception ex) -> {
+                                // still sessions accounting thread
+                                Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.FINE, "Unable to obtain properties of user {0} due to an error: {1}", new Object[]{userName, ex.toString()});
+                                withDataContext.accept(null);
+                            });
+                        } catch (Exception ex) {
+                            Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    } else {
+                        withPlatypusSession.accept(lookedup1);
+                    }
+                });
+            } finally {
+                Scripts.setContext(null);
+            }
+        } else {
+            withPlatypusSession.accept(lookedup0);
         }
+    }
+
+    public PlatypusPrincipal platypusPrincipal(HandshakeRequest handshake, Session websocketSession) {
+        PlatypusPrincipal principal;
+        if (handshake.getUserPrincipal() != null) {
+            principal = new WebSocketPlatypusPrincipal(handshake.getUserPrincipal().getName(), (String) websocketSession.getUserProperties().get(PlatypusHttpServlet.PLATYPUS_USER_CONTEXT_ATTR_NAME), handshake);
+        } else {
+            principal = new AnonymousPlatypusPrincipal(websocketSession.getId());
+        }
+        return principal;
+    }
+
+    public com.eas.server.Session platypusSessionByWebSocketSession(Session websocketSession) {
+        String platypusSessionId = (String) websocketSession.getUserProperties().get(PlatypusHttpServlet.PLATYPUS_SESSION_ID_ATTR_NAME);
+        return platypusSessionId != null ? SessionManager.Singleton.instance.get(platypusSessionId) : null;
     }
 
     @OnOpen
     public void sessionOpened(Session websocketSession, @PathParam("module-name") String aModuleName) throws Exception {
+        moduleName = aModuleName;
         PlatypusServerCore platypusCore = lookupPlaypusServerCore();
-        HandshakeRequest handshake = (HandshakeRequest) websocketSession.getUserProperties().get(JsServerModuleEndPointConfigurator.HANDSHAKE_REQUEST);
-        SessionManager sessionManager = platypusCore.getSessionManager();
-        String userName = websocketSession.getUserPrincipal() != null ? websocketSession.getUserPrincipal().getName() : null;
-        session = sessionManager.create(websocketSession.getId());
-        Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.INFO, "WebSocket platypus session opened. Session id: {0}", session.getId());
-        Scripts.LocalContext queueSpaceContext = Scripts.createContext(platypusCore.getQueueSpace());
-        Scripts.setContext(queueSpaceContext);
-        try {
-            DatabasesClient.getUserProperties(platypusCore.getDatabasesClient(), userName, platypusCore.getQueueSpace(), (Map<String, String> aUserProps) -> {
-                String usrContext = aUserProps.get(ClientConstants.F_USR_CONTEXT);
-                PlatypusPrincipal principal;
-                if (handshake.getUserPrincipal() != null) {
-                    principal = new WebSocketPlatypusPrincipal(handshake.getUserPrincipal().getName(), usrContext, handshake);
-                } else {
-                    principal = new AnonymousPlatypusPrincipal(websocketSession.getId());
-                }
-                facade = new WebSocketServerSession(websocketSession);
-                session.setPrincipal(principal);
-                inContext(() -> {
-                    Scripts.getSpace().process(() -> {
-                        platypusCore.executeMethod(aModuleName, WS_ON_OPEN_METHOD_NAME, new Object[]{facade}, true, (Object aResult) -> {
-                            Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "{0} method of {1} module called successfully.", new Object[]{WS_ON_OPEN_METHOD_NAME, aModuleName});
-                        }, (Exception ex) -> {
-                            Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.SEVERE, null, ex);
-                        });
-                    });
-                }, session);
+        in(platypusCore, websocketSession, (com.eas.server.Session aSession) -> {
+            Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.INFO, "Container OnOpen {0}.", aSession.getId());
+            platypusCore.executeMethod(moduleName, WS_ON_OPEN, new Object[]{new WebSocketServerSession(websocketSession)}, true, (Object aResult) -> {
+                Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "{0} method of {1} module called successfully.", new Object[]{WS_ON_OPEN, aModuleName});
             }, (Exception ex) -> {
-                Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.WARNING, "Could not get user {0} properties (USR_CONTEXT, etc).", userName);
+                Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.SEVERE, null, ex);
             });
-        } finally {
-            Scripts.setContext(null);
-        }
+        });
     }
 
     @OnMessage
     public void messageRecieved(Session websocketSession, String aData) throws Exception {
-        inContext(() -> {
-            Scripts.getSpace().process(() -> {
-                JSObject messageEvent = Scripts.getSpace().makeObj();
-                messageEvent.setMember("data", aData);
-                executeSessionFacadeMethod(WS_ON_MESSAGE, new Object[]{messageEvent});
+        PlatypusServerCore platypusCore = lookupPlaypusServerCore();
+        in(platypusCore, websocketSession, (com.eas.server.Session aSession) -> {
+            Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.INFO, "Container OnMessage {0}.", aSession.getId());
+            JSObject messageEvent = Scripts.getSpace().makeObj();
+            messageEvent.setMember("data", aData);
+            platypusCore.executeMethod(moduleName, WS_ON_MESSAGE, new Object[]{messageEvent}, true, (Object aResult) -> {
+                Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "{0} method of {1} module called successfully.", new Object[]{WS_ON_MESSAGE, moduleName});
+            }, (Exception ex) -> {
+                Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.SEVERE, null, ex);
             });
-        }, session);
+        });
     }
 
     @OnError
-    public void errorInSession(Session websocketSession, Throwable aError) {
-        inContext(() -> {
-            Scripts.getSpace().process(() -> {
-                JSObject errorEvent = Scripts.getSpace().makeObj();
-                errorEvent.setMember("message", aError.getMessage());
-                executeSessionFacadeMethod(WS_ON_ERROR, new Object[]{errorEvent});
+    public void errorInSession(Session websocketSession, Throwable aError) throws Exception {
+        PlatypusServerCore platypusCore = lookupPlaypusServerCore();
+        in(platypusCore, websocketSession, (com.eas.server.Session aSession) -> {
+            Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.INFO, "Container OnError {0}.", aSession.getId());
+            JSObject errorEvent = Scripts.getSpace().makeObj();
+            errorEvent.setMember("message", aError.getMessage());
+            platypusCore.executeMethod(moduleName, WS_ON_ERROR, new Object[]{errorEvent}, true, (Object aResult) -> {
+                Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "{0} method of {1} module called successfully.", new Object[]{WS_ON_ERROR, moduleName});
+            }, (Exception ex) -> {
+                Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.SEVERE, null, ex);
             });
-        }, session);
+        });
     }
 
     @OnClose
     public void sessionClosed(Session websocketSession) throws Exception {
-        PlatypusServerCore serverCore = lookupPlaypusServerCore();
-        inContext(() -> {
-            Scripts.getSpace().process(() -> {
-                JSObject closeEvent = Scripts.getSpace().makeObj();
-                closeEvent.setMember("wasClean", true);
-                closeEvent.setMember("code", CloseReason.CloseCodes.NORMAL_CLOSURE.getCode());
-                closeEvent.setMember("reason", "");
-                executeSessionFacadeMethod(WS_ON_CLOSE, new Object[]{closeEvent});
-
-                serverCore.getSessionManager().remove(session.getId());
+        PlatypusServerCore platypusCore = lookupPlaypusServerCore();
+        in(platypusCore, websocketSession, (com.eas.server.Session aSession) -> {
+            Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.INFO, "Container OnClose {0}.", aSession.getId());
+            JSObject closeEvent = Scripts.getSpace().makeObj();
+            closeEvent.setMember("wasClean", true);
+            closeEvent.setMember("code", CloseReason.CloseCodes.NORMAL_CLOSURE.getCode());
+            closeEvent.setMember("reason", "");
+            platypusCore.executeMethod(moduleName, WS_ON_CLOSE, new Object[]{closeEvent}, true, (Object aResult) -> {
+                com.eas.server.Session session = SessionManager.Singleton.instance.remove(wasPlatypusSessionId);
                 Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.INFO, "WebSocket platypus session closed. Session id: {0}", session.getId());
-                session = null;
-                facade = null;
+                Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "{0} method of {1} module called successfully.", new Object[]{WS_ON_CLOSE, moduleName});
+            }, (Exception ex) -> {
+                com.eas.server.Session session = SessionManager.Singleton.instance.remove(wasPlatypusSessionId);
+                Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.INFO, "WebSocket platypus session closed. Session id: {0}", session.getId());
+                Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.SEVERE, null, ex);
             });
-        }, session);
-    }
-
-    protected void executeSessionFacadeMethod(String methodName, Object[] args) {
-        if (facade != null) {
-            try {
-                Object oFun = facade.getPublished().getMember(methodName);
-                if (oFun instanceof JSObject && ((JSObject) oFun).isFunction()) {
-                    JSObject callable = (JSObject) oFun;
-                    callable.call(facade.getPublished(), args);
-                } else {
-                    Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.WARNING, "No method {0} found in {1}", new Object[]{methodName, WebSocketServerSession.class.getSimpleName()});
-                }
-            } catch (Exception ex) {
-                Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.WARNING, null, ex);
-            }
-        }
+        });
     }
 
     protected PlatypusServerCore lookupPlaypusServerCore() throws IllegalStateException, Exception {

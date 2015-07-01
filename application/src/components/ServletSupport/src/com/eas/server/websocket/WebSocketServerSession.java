@@ -25,10 +25,6 @@ public class WebSocketServerSession implements HasPublished {
 
     protected JSObject published;
     protected Session session;
-    //
-    protected JSObject onClose;
-    protected JSObject onError;
-    protected JSObject onMessage;
 
     public WebSocketServerSession(Session aSession) {
         super();
@@ -77,36 +73,6 @@ public class WebSocketServerSession implements HasPublished {
     @ScriptFunction
     public String getUri() {
         return session.getRequestURI().toString();
-    }
-
-    @ScriptFunction
-    public JSObject getOnclose() {
-        return onClose;
-    }
-
-    @ScriptFunction
-    public void setOnclose(JSObject aValue) {
-        onClose = aValue;
-    }
-
-    @ScriptFunction
-    public JSObject getOnerror() {
-        return onError;
-    }
-
-    @ScriptFunction
-    public void setOnerror(JSObject aValue) {
-        onError = aValue;
-    }
-
-    @ScriptFunction
-    public JSObject getOnmessage() {
-        return onMessage;
-    }
-
-    @ScriptFunction
-    public void setOnmessage(JSObject aValue) {
-        onMessage = aValue;
     }
 
     @Override
