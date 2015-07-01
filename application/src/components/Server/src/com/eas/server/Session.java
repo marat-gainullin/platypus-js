@@ -70,7 +70,7 @@ public class Session implements HasPublished {
 
     /**
      * Warning!!! Don't call this getter. It is provided only for TSA Server
-     * authentication process Instead call Scripts.getContext().getPrincipal()
+     * authentication process. Instead use Scripts.getContext().getPrincipal()
      * please.
      *
      * @return

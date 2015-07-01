@@ -149,6 +149,12 @@ public class JsDoc {
          * Annotation marks module as stateless.
          */
         public static final String STATELESS_TAG = "@stateless";
+        /**
+         * Annotation marks module as a WebSocket endpoint. Incompatible with @stateless and @resident
+         * WebSocket endpoint are session modules by Java EE design.
+         */
+        public static final String WEBSOCKET_TAG = "@websocket";
+        
         private String name;
         private String text;
         private List<String> params;

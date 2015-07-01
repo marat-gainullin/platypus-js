@@ -36,7 +36,7 @@ public class ScriptDocument {
     /**
      * Functions that may be accessed over network via RPC
      */
-    private Set<String> functionProperties = new HashSet<>();
+    private final Set<String> functionProperties = new HashSet<>();
     
 
     protected ScriptDocument() {

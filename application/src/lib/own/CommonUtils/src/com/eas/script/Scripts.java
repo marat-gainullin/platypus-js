@@ -177,7 +177,7 @@ public class Scripts {
         protected Map<String, JSObject> publishers = new HashMap<>();
         protected Set<String> required = new HashSet<>();
         protected Set<String> executed = new HashSet<>();
-        protected Map<String, Set<Pending>> pending = new HashMap<>();
+        protected Map<String, List<Pending>> pending = new HashMap<>();
 
         protected Space() {
             this(null);
@@ -205,7 +205,7 @@ public class Scripts {
             return executed;
         }
 
-        public Map<String, Set<Pending>> getPending() {
+        public Map<String, List<Pending>> getPending() {
             return pending;
         }
 
@@ -538,8 +538,9 @@ public class Scripts {
                     Scripts.setContext(null);
                 }
             };
+            queue.offer(taskWrapper);
             offerTask(() -> {
-                Runnable processedTask = taskWrapper;
+                //Runnable processedTask = taskWrapper;
                 int version;
                 int newVersion;
                 Thread thisThread = Thread.currentThread();
@@ -550,10 +551,12 @@ public class Scripts {
                     if (newVersion == Integer.MAX_VALUE) {
                         newVersion = 0;
                     }
+                    /* moved to top of body
                     if (processedTask != null) {//Single attempt to offer aTask.
-                        queue.offer(processedTask);
+                        queue.offer(processedTask); 
                         processedTask = null;
                     }
+                    */
                     if (worker.compareAndSet(null, thisThread)) {// Worker electing.
                         try {
                             // already single threaded environment
