@@ -36,11 +36,12 @@ public class JsClientEndPoint {
     }
 
     private void inContext(Runnable aTask) {
+        Scripts.LocalContext oldContext = Scripts.getContext();
         Scripts.setContext(context);
         try {
             aTask.run();
         } finally {
-            Scripts.setContext(null);
+            Scripts.setContext(oldContext);
         }
     }
 

@@ -161,6 +161,14 @@ public class ModelFormattedField extends ModelDecoratorBox<Object> implements Ha
 				aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::setJsValue(Ljava/lang/Object;)($wnd.P.boxAsJava(aValue));
 			}
 		});
+		Object.defineProperty(aPublished, "valueType", {
+			get : function() {
+				return $wnd.P.boxAsJs(aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::getValueType()());
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::setValueType(I)(aValue != null ? aValue : null);
+			}
+		});
 		Object.defineProperty(aPublished, "text", {
 			get : function() {
 				return aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::getText()();

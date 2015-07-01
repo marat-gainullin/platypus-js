@@ -34,10 +34,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -544,14 +542,14 @@ public class ScriptedResource {
         return url;
     }
 
-    protected static class RequireProcess extends AsyncProcess<Void, Void> {
+    protected static class RequireProcess extends AsyncProcess<String, Void> {
 
         public RequireProcess(int aExpected, Consumer<Void> aOnSuccess, Consumer<Exception> aOnFailure) {
             super(aExpected, aOnSuccess, aOnFailure);
         }
 
         @Override
-        public void complete(Void aValue, Exception aFailureCause) {
+        public void complete(String aValue, Exception aFailureCause) {
             if (aFailureCause != null) {
                 exceptions.add(aFailureCause);
             }
@@ -596,24 +594,24 @@ public class ScriptedResource {
                                 try {
                                     // 1
                                     qRequire(structure.getQueryDependencies().toArray(new String[]{}), aSpace, (Void v) -> {
-                                        moduleProcess.complete(null, null);
+                                        moduleProcess.complete(scriptOrModuleName + ".q", null);
                                     }, (Exception ex) -> {
-                                        moduleProcess.complete(null, ex);
+                                        moduleProcess.complete(scriptOrModuleName + ".q", ex);
                                     });
                                     // 2
                                     sRequire(structure.getServerDependencies().toArray(new String[]{}), aSpace, (Void v) -> {
-                                        moduleProcess.complete(null, null);
+                                        moduleProcess.complete(scriptOrModuleName + ".s", null);
                                     }, (Exception ex) -> {
-                                        moduleProcess.complete(null, ex);
+                                        moduleProcess.complete(scriptOrModuleName + ".s", ex);
                                     });
                                 } catch (Exception ex) {
                                     Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Failed {1}", new Object[]{checkedScriptOrModuleName(scriptOrModuleName), ex.toString()});
                                 }
                             } else {
                                 // 1
-                                moduleProcess.complete(null, null);// instead of qRequire
+                                moduleProcess.complete(scriptOrModuleName + ".q", null);// instead of qRequire
                                 // 2
-                                moduleProcess.complete(null, null);// instead of sRequire
+                                moduleProcess.complete(scriptOrModuleName + ".s", null);// instead of sRequire
                             }
                             // 3
                             _require(structure.getClientDependencies().toArray(new String[]{}), aCalledFromFile, aSpace, (Void v) -> {
@@ -669,17 +667,17 @@ public class ScriptedResource {
             });
             for (String scriptOrModuleName : aScriptsNames) {
                 if (aSpace.getExecuted().contains(scriptOrModuleName)) {
-                    process.complete(null, null);
+                    process.complete(scriptOrModuleName, null);
                 } else {
                     // add callbacks to pendings
                     if (!aSpace.getPending().containsKey(scriptOrModuleName)) {
-                        aSpace.getPending().put(scriptOrModuleName, new HashSet<>());
+                        aSpace.getPending().put(scriptOrModuleName, new ArrayList<>());
                     }
-                    Set<Scripts.Pending> pending = aSpace.getPending().get(scriptOrModuleName);
+                    List<Scripts.Pending> pending = aSpace.getPending().get(scriptOrModuleName);
                     pending.add(new Scripts.Pending((Void v) -> {
-                        process.complete(null, null);
+                        process.complete(scriptOrModuleName, null);
                     }, (Exception ex) -> {
-                        process.complete(null, ex);
+                        process.complete(scriptOrModuleName, ex);
                     }));
                     if (!aSpace.getRequired().contains(scriptOrModuleName)) {
                         Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "Loading {0} ...", checkedScriptOrModuleName(scriptOrModuleName));
@@ -692,21 +690,21 @@ public class ScriptedResource {
                                     Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Loaded", checkedScriptOrModuleName(scriptOrModuleName));
                                     aSpace.exec(aLocalURL);
                                 }
-                                Set<Scripts.Pending> lpending = new HashSet(pending);
+                                Scripts.Pending[] pend = pending.toArray(new Scripts.Pending[]{});
                                 pending.clear();
-                                lpending.forEach((Scripts.Pending p) -> {
+                                for (Scripts.Pending p : pend) {
                                     p.loaded();
-                                });
+                                }
                             } catch (ScriptException | URISyntaxException ex) {
                                 Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, null, ex);
                             }
                         }, (Exception ex) -> {
                             Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Failed {1}", new Object[]{checkedScriptOrModuleName(scriptOrModuleName), ex.toString()});
-                            Set<Scripts.Pending> lpending = new HashSet(pending);
+                            Scripts.Pending[] pend = pending.toArray(new Scripts.Pending[]{});
                             pending.clear();
-                            lpending.forEach((Scripts.Pending p) -> {
+                            for (Scripts.Pending p : pend) {
                                 p.failed(ex);
-                            });
+                            }
                         });
                     }
                 }
@@ -759,9 +757,9 @@ public class ScriptedResource {
                 RequireProcess process = new RequireProcess(aQueriesNames.length, onSuccess, onFailure);
                 for (String queryName : aQueriesNames) {
                     ((QueriesProxy<Query>) app.getQueries()).getQuery(queryName, aSpace, (Query query) -> {
-                        process.complete(null, null);
+                        process.complete(queryName, null);
                     }, (Exception ex) -> {
-                        process.complete(null, ex);
+                        process.complete(queryName, ex);
                     });
                 }
             } else {
@@ -780,9 +778,9 @@ public class ScriptedResource {
                 RequireProcess process = new RequireProcess(aModulesNames.length, onSuccess, onFailure);
                 for (String moduleName : aModulesNames) {
                     app.getServerModules().getServerModuleStructure(moduleName, aSpace, (ServerModuleInfo info) -> {
-                        process.complete(null, null);
+                        process.complete(moduleName, null);
                     }, (Exception ex) -> {
-                        process.complete(null, ex);
+                        process.complete(moduleName, ex);
                     });
                 }
             } else {
