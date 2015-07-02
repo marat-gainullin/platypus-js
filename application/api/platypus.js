@@ -193,7 +193,7 @@
         try {
             Java.type('com.eas.server.httpservlet.PlatypusHttpServlet');
             // EE server
-            P.require(['servlet-support/index.js']);
+            P.require(['servlet-support/index.js', 'http-context.js']);
         } catch (se) {
             // TSA server
         }
