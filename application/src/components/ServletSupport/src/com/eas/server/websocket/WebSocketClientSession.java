@@ -17,6 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.websocket.CloseReason;
 import javax.websocket.ContainerProvider;
+import javax.websocket.DeploymentException;
 import javax.websocket.Session;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -35,7 +36,13 @@ public class WebSocketClientSession implements HasPublished {
     @ScriptFunction(params = {"uri"})
     public WebSocketClientSession(String aUri) throws Exception {
         super();
-        webSocketSession = ContainerProvider.getWebSocketContainer().connectToServer(endPoint, URI.create(aUri));
+        Scripts.getSpace().process(() -> {
+            try {
+                webSocketSession = ContainerProvider.getWebSocketContainer().connectToServer(endPoint, URI.create(aUri));
+            } catch (DeploymentException | IOException ex) {
+                Logger.getLogger(WebSocketClientSession.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
     }
 
     @ScriptFunction
@@ -54,7 +61,9 @@ public class WebSocketClientSession implements HasPublished {
     @ScriptFunction(params = "data")
     public void send(String aData) {
         try {
-            webSocketSession.getBasicRemote().sendText(aData);
+            if (webSocketSession.isOpen()) {
+                webSocketSession.getBasicRemote().sendText(aData);
+            }
         } catch (IOException ex) {
             Logger.getLogger(WebSocketClientSession.class.getName()).log(Level.SEVERE, null, ex);
         }
