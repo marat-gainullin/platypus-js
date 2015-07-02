@@ -286,16 +286,17 @@ public class ScriptedResource {
         }
     }
 
-    private static Path absoluteApiPath;
+    private static final Path absoluteApiPath = lookupPlatypusJs();
 
-    static {
+    private static Path lookupPlatypusJs(){
         try {
             URL platypusURL = Thread.currentThread().getContextClassLoader().getResource("platypus.js");
             Path apiPath = Paths.get(platypusURL.toURI());
             apiPath = apiPath.getParent();
-            absoluteApiPath = apiPath;
+            return apiPath;
         } catch (URISyntaxException ex) {
             Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
         }
     }
 
