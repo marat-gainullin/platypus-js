@@ -117,6 +117,12 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
                         try {
                             Session session = server.getSessionManager().create(String.valueOf(IDGenerator.genID()));
                             requestEnv.ticket = session.getId();
+                            // It is safe to put SESSION_ID attribute here because of request-response
+                            // protocol nature.
+                            // Another thread needs access to the same ioSession or same ticket to
+                            // get access to partially initialized platypus session.
+                            // So, the following call to DatabaseAuthorizer.authorize and further initialization
+                            // of platypus session in callback body is safe.
                             ioSession.setAttribute(SESSION_ID, session.getId());
                             Scripts.LocalContext context = Scripts.createContext(session.getSpace());
                             Scripts.setContext(context);

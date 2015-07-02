@@ -40,6 +40,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.script.Bindings;
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -99,7 +100,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
     static Scripts.Space initScriptSpace() {
         try {
             ScriptEngine jsEngine = new ScriptEngineManager().getEngineByName("nashorn");
-            Bindings bindings = jsEngine.createBindings();
+            Bindings bindings = jsEngine.getBindings(ScriptContext.ENGINE_SCOPE);
             Scripts.Space space = new Scripts.Space(jsEngine);
             bindings.put("space", space);
             Object global = jsEngine.eval("load('classpath:com/eas/designer/explorer/designer-js.js', space);", bindings);

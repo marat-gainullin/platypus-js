@@ -2,11 +2,12 @@
  * Platypus.js's designer internals initialization.
  */
 (function(aSpace) {
+    var global = this;
     this.P = {loadModel: function() {
         }};
     aSpace.setLookupInGlobalFunc(
             function (aPropertyName) {
-                return this[aPropertyName];
+                return global[aPropertyName];
             });
     var DateClass = Java.type('java.util.Date');
     aSpace.setToPrimitiveFunc(function (aValue) {
@@ -38,5 +39,5 @@
     aSpace.setLoadFunc(function (aSourceLocation) {
         return load(aSourceLocation);
     });
-    return this;
+    return global;
 })(space);
