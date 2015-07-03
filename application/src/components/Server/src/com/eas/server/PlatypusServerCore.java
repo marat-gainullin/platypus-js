@@ -29,6 +29,7 @@ import com.eas.server.handlers.RPCRequestHandler;
 import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
@@ -213,7 +214,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                             try {
                                 targetSpace.process(() -> {
                                     try {
-                                        ScriptedResource._require(new String[]{aModuleName}, null, Scripts.getSpace(), (Void v) -> {
+                                        ScriptedResource._require(new String[]{aModuleName}, null, Scripts.getSpace(), new HashSet<>(), (Void v) -> {
                                             try {
                                                 JSObject moduleInstance;
                                                 if (targetSession == null || !targetSession.containsModule(aModuleName)) {
