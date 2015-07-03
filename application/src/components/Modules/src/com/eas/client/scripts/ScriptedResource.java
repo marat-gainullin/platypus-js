@@ -286,11 +286,18 @@ public class ScriptedResource {
         }
     }
 
-    protected static Path absoluteApiPath() throws URISyntaxException {
-        URL platypusURL = Thread.currentThread().getContextClassLoader().getResource("platypus.js");
-        Path apiPath = Paths.get(platypusURL.toURI());
-        apiPath = apiPath.getParent();
-        return apiPath;
+    private static final Path absoluteApiPath = lookupPlatypusJs();
+
+    private static Path lookupPlatypusJs(){
+        try {
+            URL platypusURL = Thread.currentThread().getContextClassLoader().getResource("platypus.js");
+            Path apiPath = Paths.get(platypusURL.toURI());
+            apiPath = apiPath.getParent();
+            return apiPath;
+        } catch (URISyntaxException ex) {
+            Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
+        }
     }
 
     protected static class SEHttpResponse {
@@ -654,7 +661,7 @@ public class ScriptedResource {
 
     public static void _require(String[] aScriptsNames, URI aCalledFromFile, Scripts.Space aSpace, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (aScriptsNames != null && aScriptsNames.length > 0) {
-            Path apiPath = absoluteApiPath();
+            Path apiPath = absoluteApiPath;
             aScriptsNames = absoluteAppPaths(apiPath, aScriptsNames, aCalledFromFile);
             RequireProcess process = new RequireProcess(aScriptsNames.length, (Void v) -> {
                 aSpace.process(() -> {
@@ -722,7 +729,7 @@ public class ScriptedResource {
     }
 
     public static void _require(String[] aScriptsNames, URI aCalledFromFile, Scripts.Space aSpace) throws Exception {
-        Path apiPath = absoluteApiPath();
+        Path apiPath = absoluteApiPath;
         aScriptsNames = absoluteAppPaths(apiPath, aScriptsNames, aCalledFromFile);
         for (String scriptOrModuleName : aScriptsNames) {
             if (!aSpace.getExecuted().contains(scriptOrModuleName)) {
