@@ -1039,7 +1039,7 @@ public class Application {
 					else
 						Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require succeded, but callback is missing. Required modules are: " + aDeps.toString());
 				}
-			});
+			}, new HashSet<String>());
 		} catch (Exception ex) {
 			Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
 		}

@@ -21,9 +21,12 @@ public class PlatypusSessionsSynchronizer implements HttpSessionListener {
     @Override
     public void sessionDestroyed(HttpSessionEvent se) {
         try {
-            Session removed = SessionManager.Singleton.instance.remove((String) se.getSession().getAttribute(PLATYPUS_SESSION_ID_ATTR_NAME));
-            if (removed != null) {
-                Logger.getLogger(PlatypusSessionsSynchronizer.class.getName()).log(Level.INFO, "Platypus session closed. Session id: {0}", removed.getId());
+            String pSessionId = (String) se.getSession().getAttribute(PLATYPUS_SESSION_ID_ATTR_NAME);
+            if (pSessionId != null) {
+                Session removed = SessionManager.Singleton.instance.remove(pSessionId);
+                if (removed != null) {
+                    Logger.getLogger(PlatypusSessionsSynchronizer.class.getName()).log(Level.INFO, "Platypus session closed. Session id: {0}", removed.getId());
+                }
             }
         } catch (Exception ex) {
             Logger.getLogger(PlatypusSessionsSynchronizer.class.getName()).log(Level.SEVERE, null, ex);

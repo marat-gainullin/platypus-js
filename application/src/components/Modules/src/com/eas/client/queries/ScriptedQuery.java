@@ -12,6 +12,7 @@ import com.eas.client.metadata.Parameter;
 import com.eas.client.scripts.ScriptedResource;
 import com.eas.script.Scripts;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -70,7 +71,7 @@ public class ScriptedQuery extends SqlQuery {
     public JSObject execute(Scripts.Space aSpace, Consumer<JSObject> onSuccess, Consumer<Exception> onFailure) throws Exception {
         assert Scripts.getSpace() == aSpace : "Scripts.Space TLS assumption failed";
         if (onSuccess != null) {
-            ScriptedResource._require(new String[]{entityName}, null, aSpace, (Void v) -> {
+            ScriptedResource._require(new String[]{entityName}, null, aSpace, new HashSet<>(), (Void v) -> {
                 JSObject source = aSpace.createModule(entityName);
                 if (source.hasMember("fetch")) {
                     Object oFetch = source.getMember("fetch");

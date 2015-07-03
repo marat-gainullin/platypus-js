@@ -36,6 +36,7 @@ import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
@@ -71,6 +72,7 @@ public class AppClient {
 	private String principal;
 	private Map<String, Document> documents = new HashMap<String, Document>();
 	private Map<String, ModuleStructure> modulesStructures = new HashMap<String, ModuleStructure>();
+	private Map<String, Query> queries = new HashMap<String, Query>();
 
 	public static class ModuleStructure {
 
@@ -174,7 +176,7 @@ public class AppClient {
 					if (aResult.getStatus() == Response.SC_OK) {
 						String responseType = aResult.getResponseType();
 						if (ResponseType.ArrayBuffer.getResponseTypeString().equalsIgnoreCase(responseType)) {
-							Utils.JsObject buffer = (Utils.JsObject)Utils.toJs(aResult.getResponseArrayBuffer());
+							Utils.JsObject buffer = (Utils.JsObject) Utils.toJs(aResult.getResponseArrayBuffer());
 							int length = buffer.getInteger("byteLength");
 							buffer.setInteger("length", length);
 							Utils.executeScriptEventVoid(onSuccess, onSuccess, buffer);
@@ -691,8 +693,15 @@ public class AppClient {
 
 	public Cancellable requestModuleStructure(final String aModuleName, final Callback<ModuleStructure, XMLHttpRequest> aCallback) throws Exception {
 		if (modulesStructures.containsKey(aModuleName)) {
-			if (aCallback != null)
-				aCallback.onSuccess(modulesStructures.get(aModuleName));
+			if (aCallback != null){
+				Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+
+					@Override
+					public void execute() {
+						aCallback.onSuccess(modulesStructures.get(aModuleName));
+					}
+				});
+			}
 			return new Cancellable() {
 				@Override
 				public void cancel() {
@@ -748,11 +757,17 @@ public class AppClient {
 
 	public Cancellable requestDocument(final String aResourceName, final Callback<Document, XMLHttpRequest> aCallback) throws Exception {
 		if (documents.containsKey(aResourceName)) {
-			Document doc = documents.get(aResourceName);
+			final Document doc = documents.get(aResourceName);
 			// doc may be null, because of application elements without a
 			// xml-dom, plain scripts for example.
 			if (aCallback != null) {
-				aCallback.onSuccess(doc);
+				Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+
+					@Override
+					public void execute() {
+						aCallback.onSuccess(doc);
+					}
+				});
 			}
 			return new Cancellable() {
 
@@ -794,8 +809,15 @@ public class AppClient {
 
 	public Cancellable createServerModule(final String aModuleName, final Callback<Void, String> aCallback) throws Exception {
 		if (isServerModule(aModuleName)) {
-			if (aCallback != null)
-				aCallback.onSuccess(null);
+			if (aCallback != null) {
+				Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+
+					@Override
+					public void execute() {
+						aCallback.onSuccess(null);
+					}
+				});
+			}
 			return new Cancellable() {
 
 				@Override
@@ -899,31 +921,52 @@ public class AppClient {
 		}
 	}
 
-	public Cancellable getAppQuery(String queryId, final Callback<Query, String> aCallback) throws Exception {
-		String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqAppQuery)), param(PlatypusHttpRequestParams.QUERY_ID, queryId));
-		return startApiRequest(null, query, "", RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
+	public Cancellable getAppQuery(final String queryName, final Callback<Query, String> aCallback) throws Exception {
+		final Query alreadyQuery = queries.get(queryName);
+		if (alreadyQuery != null) {
+			if (aCallback != null) {
+				Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 
-			@Override
-			public void doWork(XMLHttpRequest aResponse) throws Exception {
-				// Some post processing
-				Query query = readQuery(aResponse);
-				query.setClient(AppClient.this);
-				//
-				if (aCallback != null)
-					aCallback.onSuccess(query);
+					@Override
+					public void execute() {
+						aCallback.onSuccess(alreadyQuery);
+					}
+				});
 			}
+			return new Cancellable() {
 
-			private Query readQuery(XMLHttpRequest aResponse) throws Exception {
-				return QueryJSONReader.read(Utils.JsObject.parseJSON(aResponse.getResponseText()));
-			}
-
-			@Override
-			public void onFailure(XMLHttpRequest aResponse) {
-				if (aCallback != null) {
-					aCallback.onFailure(aResponse.getStatusText());
+				@Override
+				public void cancel() {
+					// no op here because of no request have been sent
 				}
-			}
-		});
+			};
+		} else {
+			String urlQuery = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqAppQuery)), param(PlatypusHttpRequestParams.QUERY_ID, queryName));
+			return startApiRequest(null, urlQuery, "", RequestBuilder.GET, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
+
+				@Override
+				public void doWork(XMLHttpRequest aResponse) throws Exception {
+					// Some post processing
+					Query query = readQuery(aResponse);
+					query.setClient(AppClient.this);
+					//
+					queries.put(queryName, query);
+					if (aCallback != null)
+						aCallback.onSuccess(query);
+				}
+
+				private Query readQuery(XMLHttpRequest aResponse) throws Exception {
+					return QueryJSONReader.read(Utils.JsObject.parseJSON(aResponse.getResponseText()));
+				}
+
+				@Override
+				public void onFailure(XMLHttpRequest aResponse) {
+					if (aCallback != null) {
+						aCallback.onFailure(aResponse.getStatusText());
+					}
+				}
+			});
+		}
 	}
 
 	public Cancellable requestData(String aQueryName, Parameters aParams, final Fields aExpectedFields, final Callback<JavaScriptObject, String> aCallback) throws Exception {
@@ -951,9 +994,8 @@ public class AppClient {
 			}
 		});
 	}
-	
+
 	public static String checkedCacheBust(String aUrl) {
-		return Application.isCacheBustEnabled() ? 
-				aUrl + "?" + PlatypusHttpRequestParams.CACHE_BUSTER + "=" + IDGenerator.genId() : aUrl;
+		return Application.isCacheBustEnabled() ? aUrl + "?" + PlatypusHttpRequestParams.CACHE_BUSTER + "=" + IDGenerator.genId() : aUrl;
 	}
 }
