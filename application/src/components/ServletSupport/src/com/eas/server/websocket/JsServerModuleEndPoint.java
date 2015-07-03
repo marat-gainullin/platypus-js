@@ -110,15 +110,19 @@ public class JsServerModuleEndPoint {
                                     withPlatypusSession.accept(lookedup2);
                                 }
                             };
-                            DatabasesClient.getUserProperties(platypusCore.getDatabasesClient(), userName, platypusCore.getQueueSpace(), (Map<String, String> aUserProps) -> {
-                                // still sessions accounting thread
-                                String dataContext = aUserProps.get(ClientConstants.F_USR_CONTEXT);
-                                withDataContext.accept(dataContext);
-                            }, (Exception ex) -> {
-                                // still sessions accounting thread
-                                Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.FINE, "Unable to obtain properties of user {0} due to an error: {1}", new Object[]{userName, ex.toString()});
+                            if (websocketSession.getUserPrincipal() != null) {// Additional properties can be obtained only for authorized users
+                                DatabasesClient.getUserProperties(platypusCore.getDatabasesClient(), userName, platypusCore.getQueueSpace(), (Map<String, String> aUserProps) -> {
+                                    // still sessions accounting thread
+                                    String dataContext = aUserProps.get(ClientConstants.F_USR_CONTEXT);
+                                    withDataContext.accept(dataContext);
+                                }, (Exception ex) -> {
+                                    // still sessions accounting thread
+                                    Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.FINE, "Unable to obtain properties of user {0} due to an error: {1}", new Object[]{userName, ex.toString()});
+                                    withDataContext.accept(null);
+                                });
+                            } else {
                                 withDataContext.accept(null);
-                            });
+                            }
                         } catch (Exception ex) {
                             Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, null, ex);
                         }
