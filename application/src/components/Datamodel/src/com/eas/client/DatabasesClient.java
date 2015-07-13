@@ -351,18 +351,22 @@ public class DatabasesClient {
         if (aDatasourceName == null) {
             aDatasourceName = defaultDatasourceName;
         }
-        if (!mdCaches.containsKey(aDatasourceName)) {
-            DatabaseMdCache cache = new DatabaseMdCache(this, aDatasourceName);
-            mdCaches.put(aDatasourceName, cache);
-            if (autoFillMetadata) {
-                try {
-                    cache.fillTablesCacheByConnectionSchema(true);
-                } catch (ResourceUnavalableException ex) {
-                    Logger.getLogger(DatabasesClient.class.getName()).log(Level.WARNING, ex.getMessage());
+        if (aDatasourceName != null) {
+            if (!mdCaches.containsKey(aDatasourceName)) {
+                DatabaseMdCache cache = new DatabaseMdCache(this, aDatasourceName);
+                mdCaches.put(aDatasourceName, cache);
+                if (autoFillMetadata) {
+                    try {
+                        cache.fillTablesCacheByConnectionSchema(true);
+                    } catch (ResourceUnavalableException ex) {
+                        Logger.getLogger(DatabasesClient.class.getName()).log(Level.WARNING, ex.getMessage());
+                    }
                 }
             }
+            return mdCaches.get(aDatasourceName);
+        } else {
+            return null;
         }
-        return mdCaches.get(aDatasourceName);
     }
 
     private void startJdbcTask(Runnable aTask) {

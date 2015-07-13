@@ -163,8 +163,10 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
                 arguments.add(connection.getDatabaseURL());
                 arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_USERNAME_CONF_PARAM);
                 arguments.add(connection.getUser());
-                arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_PASSWORD_CONF_PARAM);
-                arguments.add(connection.getPassword());
+                if(connection.getPassword() != null && !connection.getPassword().isEmpty()){
+                    arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_PASSWORD_CONF_PARAM);
+                    arguments.add(connection.getPassword());
+                }
                 if (connection.getSchema() != null && !connection.getSchema().isEmpty()) {
                     arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_SCHEMA_CONF_PARAM);
                     arguments.add(connection.getSchema());

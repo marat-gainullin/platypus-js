@@ -23,6 +23,7 @@ import com.eas.designer.application.platform.PlatformHomePathException;
 import com.eas.designer.application.platform.PlatypusPlatform;
 import com.eas.designer.application.project.ClientType;
 import com.eas.designer.application.project.PlatypusProjectSettings;
+import com.eas.designer.explorer.j2ee.dd.WelcomeFile;
 import com.eas.designer.explorer.project.PlatypusProjectImpl;
 import com.eas.server.httpservlet.PlatypusServerConfig;
 import com.eas.server.httpservlet.PlatypusHttpServlet;
@@ -332,6 +333,7 @@ public class PlatypusWebModuleManager {
         platypusServlet.setMultipartConfig(multiPartConfig);
         wa.addServlet(platypusServlet);
         wa.addServletMapping(new ServletMapping(PLATYPUS_SERVLET_NAME, PLATYPUS_SERVLET_URL_PATTERN));
+        wa.addWelcomeFile(new WelcomeFile(START_PAGE_FILE_NAME));
     }
 
     private void configureDatasources(WebApplication wa) {

@@ -295,8 +295,10 @@ public class ProjectRunner {
                             arguments.add(connection.getDatabaseURL());
                             arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_USERNAME_CONF_PARAM);
                             arguments.add(connection.getUser());
-                            arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_PASSWORD_CONF_PARAM);
-                            arguments.add(connection.getPassword());
+                            if(connection.getPassword() != null && !connection.getPassword().isEmpty()){
+                                arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_PASSWORD_CONF_PARAM);
+                                arguments.add(connection.getPassword());
+                            }
                             if (connection.getSchema() != null && !connection.getSchema().isEmpty()) {
                                 arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_SCHEMA_CONF_PARAM);
                                 arguments.add(connection.getSchema());
@@ -495,8 +497,7 @@ public class ProjectRunner {
     public static boolean isConnectionValid(DatabaseConnection connection) {
         return connection.getDisplayName() != null && !connection.getDisplayName().isEmpty() && !connection.getDisplayName().contains(" ") //NOI18N
                 && connection.getDatabaseURL() != null && !connection.getDatabaseURL().isEmpty()
-                && connection.getUser() != null && !connection.getUser().isEmpty()
-                && connection.getPassword() != null && !connection.getPassword().isEmpty();
+                && connection.getUser() != null && !connection.getUser().isEmpty();
     }
 
     private static String getServiceDisplayName(PlatypusProject project, boolean debug) {

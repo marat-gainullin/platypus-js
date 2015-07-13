@@ -295,12 +295,15 @@ public class StoredQueryFactory {
             if (parsedQuery instanceof Select) {
                 Select select = (Select) parsedQuery;
                 resolveOutputFieldsFromTables(aQuery, select.getSelectBody());
-                SqlDriver driver = basesProxy.getDbMetadataCache(aQuery.getDatasourceName()).getConnectionDriver();
-                Fields queryFields = aQuery.getFields();
-                if (queryFields != null) {
-                    queryFields.toCollection().stream().forEach((field) -> {
-                        driver.getTypesResolver().resolve2Application(field);
-                    });
+                DatabaseMdCache mdCache = basesProxy.getDbMetadataCache(aQuery.getDatasourceName());
+                if (mdCache != null) {
+                    SqlDriver driver = mdCache.getConnectionDriver();
+                    Fields queryFields = aQuery.getFields();
+                    if (queryFields != null) {
+                        queryFields.toCollection().stream().forEach((field) -> {
+                            driver.getTypesResolver().resolve2Application(field);
+                        });
+                    }
                 }
                 return true;
             }
