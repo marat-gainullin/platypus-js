@@ -60,18 +60,19 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
             + "(function () {\n" //NOI18N
             + "    function ready() {\n" //NOI18N
             + "        P.cacheBust = true;\n"
-            + "        var startModule = '%s';\n" //NOI18N
-            + "        P.require([startModule], function(){\n" //NOI18N
+            + "        P.require('%s', function(){\n" //NOI18N
             + "    %s"//NOI18N
             + "    %s"//NOI18N
             + "        }, function(e){\n" //NOI18N
             + "            P.Logger.severe(e);\n"
-            + "            var messageParagraph = document.createElement(\"p\");\n"
-            + "            document.body.appendChild(messageParagraph);\n" 
-            + "            messageParagraph.innerHTML = \"An error occured while require('\" + startModule + \"'). Error: \" + e;\n" 
-            + "            messageParagraph.style.margin = '10px';\n"
-            + "            messageParagraph.style.fontFamily = 'Arial';\n"
-            + "            messageParagraph.style.fontSize = '14pt';\n" //NOI18N
+            + "            if(document){\n"
+            + "                var messageParagraph = document.createElement('p');\n"
+            + "                document.body.appendChild(messageParagraph);\n" 
+            + "                messageParagraph.innerHTML = 'An error occured while require(\\'%s\\'). Error: ' + e;\n" 
+            + "                messageParagraph.style.margin = '10px';\n"
+            + "                messageParagraph.style.fontFamily = 'Arial';\n"
+            + "                messageParagraph.style.fontSize = '14pt';\n"
+            + "            }\n" //NOI18N
             + "        });\n"//NOI18N
             + "    }\n"//NOI18N
             + "    if(!this.P) {\n" //NOI18N

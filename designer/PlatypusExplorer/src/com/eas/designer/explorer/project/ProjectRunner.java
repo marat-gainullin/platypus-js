@@ -181,10 +181,10 @@ public class ProjectRunner {
             AppElementFiles startFiles = project.getIndexer().nameToFiles(appElementName);
             if (startFiles != null) {
                 String startMethod = startFiles.hasExtension(PlatypusFiles.FORM_EXTENSION) ? "show" : "execute";
-                String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, appElementName, "        var m = new " + appElementName+"();\n", "        m." + startMethod+"();\n");
+                String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, appElementName, "        var m = new " + appElementName+"();\n", "        m." + startMethod+"();\n", appElementName);
                 FileUtils.writeString(FileUtil.toFile(startJs), starupScript, PlatypusUtils.COMMON_ENCODING_NAME);
             } else if (appElementName.toLowerCase().endsWith("." + PlatypusFiles.JAVASCRIPT_EXTENSION)) {
-                String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, appElementName, "", "");
+                String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, appElementName, "", "", appElementName);
                 FileUtils.writeString(FileUtil.toFile(startJs), starupScript, PlatypusUtils.COMMON_ENCODING_NAME);
             }
         } else {
