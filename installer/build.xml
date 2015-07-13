@@ -230,8 +230,8 @@
 			<create-bundle root="${output.dir}/registry-temp" 
 				platform="${platform}" 
 				target="${bundles.release.dir}/${bundle.files.prefix}-${platform}.${bundle.extention}">
-				<component uid="${main.product.uid}" version="0.5.0.0.0"/>
-				<component uid="platypus-runtime" version="0.5.0.0.0"/>
+				<component uid="${main.product.uid}" version="0.4.0.0.0"/>
+				<component uid="platypus-runtime" version="0.4.0.0.0"/>
 				<component uid="tomcat" version="8.0.24.0.0"/>
 			</create-bundle>
 			<if property="bundle.extention" value="zip">
