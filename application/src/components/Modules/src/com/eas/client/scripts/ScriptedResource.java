@@ -34,8 +34,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -286,11 +288,18 @@ public class ScriptedResource {
         }
     }
 
-    protected static Path absoluteApiPath() throws URISyntaxException {
-        URL platypusURL = Thread.currentThread().getContextClassLoader().getResource("platypus.js");
-        Path apiPath = Paths.get(platypusURL.toURI());
-        apiPath = apiPath.getParent();
-        return apiPath;
+    private static final Path absoluteApiPath = lookupPlatypusJs();
+
+    private static Path lookupPlatypusJs(){
+        try {
+            URL platypusURL = Thread.currentThread().getContextClassLoader().getResource("platypus.js");
+            Path apiPath = Paths.get(platypusURL.toURI());
+            apiPath = apiPath.getParent();
+            return apiPath;
+        } catch (URISyntaxException ex) {
+            Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
+        }
     }
 
     protected static class SEHttpResponse {
@@ -560,7 +569,7 @@ public class ScriptedResource {
 
     }
 
-    private static void loadModule(Path apiPath, String scriptOrModuleName, URI aCalledFromFile, Scripts.Space aSpace, Consumer<URL> onSuccess, Consumer<Exception> onFailure) {
+    private static void loadModule(Path apiPath, String scriptOrModuleName, URI aCalledFromFile, Scripts.Space aSpace, Set<String> aCyclic, Consumer<URL> onSuccess, Consumer<Exception> onFailure) {
         Path apiLocalPath = apiPath.resolve(scriptOrModuleName);
         if (apiLocalPath != null && apiLocalPath.toFile().exists() && !apiLocalPath.toFile().isDirectory()) {
             // network activity simulation
@@ -614,7 +623,7 @@ public class ScriptedResource {
                                 moduleProcess.complete(scriptOrModuleName + ".s", null);// instead of sRequire
                             }
                             // 3
-                            _require(structure.getClientDependencies().toArray(new String[]{}), aCalledFromFile, aSpace, (Void v) -> {
+                            _require(structure.getClientDependencies().toArray(new String[]{}), aCalledFromFile, aSpace, aCyclic, (Void v) -> {
                                 moduleProcess.complete(null, null);
                             }, (Exception ex) -> {
                                 moduleProcess.complete(null, ex);
@@ -641,7 +650,7 @@ public class ScriptedResource {
 
     public static void require(String[] aScriptsNames, String aCalledFromFile, JSObject onSuccess, JSObject onFailure) throws Exception {
         Scripts.Space space = Scripts.getSpace();
-        _require(aScriptsNames, aCalledFromFile != null ? new URL(aCalledFromFile).toURI() : null, space, (Void v) -> {
+        _require(aScriptsNames, aCalledFromFile != null ? new URL(aCalledFromFile).toURI() : null, space, new HashSet<>(), (Void v) -> {
             if (onSuccess != null) {
                 onSuccess.call(null, new Object[]{});
             }
@@ -652,9 +661,9 @@ public class ScriptedResource {
         });
     }
 
-    public static void _require(String[] aScriptsNames, URI aCalledFromFile, Scripts.Space aSpace, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public static void _require(String[] aScriptsNames, URI aCalledFromFile, Scripts.Space aSpace, Set<String> aCyclic, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (aScriptsNames != null && aScriptsNames.length > 0) {
-            Path apiPath = absoluteApiPath();
+            Path apiPath = absoluteApiPath;
             aScriptsNames = absoluteAppPaths(apiPath, aScriptsNames, aCalledFromFile);
             RequireProcess process = new RequireProcess(aScriptsNames.length, (Void v) -> {
                 aSpace.process(() -> {
@@ -666,9 +675,10 @@ public class ScriptedResource {
                 });
             });
             for (String scriptOrModuleName : aScriptsNames) {
-                if (aSpace.getExecuted().contains(scriptOrModuleName)) {
+                if (aSpace.getExecuted().contains(scriptOrModuleName) || aCyclic.contains(scriptOrModuleName)) {
                     process.complete(scriptOrModuleName, null);
                 } else {
+                    aCyclic.add(scriptOrModuleName);
                     // add callbacks to pendings
                     if (!aSpace.getPending().containsKey(scriptOrModuleName)) {
                         aSpace.getPending().put(scriptOrModuleName, new ArrayList<>());
@@ -682,7 +692,7 @@ public class ScriptedResource {
                     if (!aSpace.getRequired().contains(scriptOrModuleName)) {
                         Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "Loading {0} ...", checkedScriptOrModuleName(scriptOrModuleName));
                         aSpace.getRequired().add(scriptOrModuleName);
-                        loadModule(apiPath, scriptOrModuleName, aCalledFromFile, aSpace, (URL aLocalURL) -> {
+                        loadModule(apiPath, scriptOrModuleName, aCalledFromFile, aSpace, aCyclic, (URL aLocalURL) -> {
                             try {
                                 // sync require may occur while pending
                                 if (!aSpace.getExecuted().contains(scriptOrModuleName)) {
@@ -722,7 +732,7 @@ public class ScriptedResource {
     }
 
     public static void _require(String[] aScriptsNames, URI aCalledFromFile, Scripts.Space aSpace) throws Exception {
-        Path apiPath = absoluteApiPath();
+        Path apiPath = absoluteApiPath;
         aScriptsNames = absoluteAppPaths(apiPath, aScriptsNames, aCalledFromFile);
         for (String scriptOrModuleName : aScriptsNames) {
             if (!aSpace.getExecuted().contains(scriptOrModuleName)) {
@@ -763,7 +773,9 @@ public class ScriptedResource {
                     });
                 }
             } else {
-                onSuccess.accept(null);
+                aSpace.process(()->{
+                    onSuccess.accept(null);
+                });
             }
         } else {
             for (String queryName : aQueriesNames) {
@@ -784,7 +796,9 @@ public class ScriptedResource {
                     });
                 }
             } else {
-                onSuccess.accept(null);
+                aSpace.process(()->{
+                    onSuccess.accept(null);
+                });
             }
         } else {
             for (String moduleName : aModulesNames) {
@@ -792,47 +806,4 @@ public class ScriptedResource {
             }
         }
     }
-
-    /**
-     * Executes a plain js resource.
-     *
-     * @param aResourceName
-     * @throws Exception
-     */
-    /*
-     public static void executeScriptResource(final String aResourceName) throws Exception {
-     final String resourceId = ScriptedResource.normalizeResourcePath(aResourceName);
-     String sourcesPath = app.getModules().getLocalPath();
-     String sourcePath = sourcesPath + File.separator + resourceId;
-     URL sourceUrl;
-     File test = new File(sourcePath);
-     if (test.exists()) {
-     sourceUrl = test.toURI().toURL();
-     } else {
-     try {
-     sourceUrl = new URL(sourcePath);
-     } catch (MalformedURLException ex) {
-     throw new FileNotFoundException(sourcePath);
-     }
-     }
-     URLReader reader = new URLReader(sourceUrl, SettingsConstants.COMMON_ENCODING);
-     StringBuilder read = new StringBuilder();
-     char[] buffer = new char[1024 * 4];// 4kb
-     int readCount = 0;
-     while (readCount != -1) {
-     readCount = reader.read(buffer);
-     if (readCount != -1) {
-     read.append(buffer, 0, readCount);
-     }
-     }
-     Scripts.exec(sourceUrl);
-     ApplicationElement appElement = cache.get(resourceId);
-     if (appElement != null && appElement.isModule()) {
-     ScriptDocument doc = Dom2ScriptDocument.transform(appElement.getContent());
-     JSObject nativeConstr = Scripts.lookupInGlobal(appElement.getId());
-     SecuredJSConstructor securedContr = new SecuredJSConstructor(nativeConstr, appElement.getId(), appElement.getTxtContentLength(), appElement.getTxtCrc32(), cache, getPrincipalHost(), doc);
-     Scripts.putInGlobal(appElement.getId(), securedContr);
-     }
-     }
-     */
 }

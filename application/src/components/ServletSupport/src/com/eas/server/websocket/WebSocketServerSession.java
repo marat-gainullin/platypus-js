@@ -46,7 +46,7 @@ public class WebSocketServerSession implements HasPublished {
 
     @ScriptFunction(params = "data")
     public void send(String aData) {
-        if (aData != null) {
+        if (aData != null && session.isOpen()) {
             try {
                 session.getBasicRemote().sendText(aData);
             } catch (IOException ex) {
