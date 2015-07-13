@@ -163,10 +163,31 @@ public class ModelFormattedField extends ModelDecoratorBox<Object> implements Ha
 		});
 		Object.defineProperty(aPublished, "valueType", {
 			get : function() {
-				return $wnd.P.boxAsJs(aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::getValueType()());
+				var typeNum = aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::getValueType()()
+				var type;
+				if (typeNum === @com.bearsoft.gwt.ui.widgets.ObjectFormat::NUMBER ){
+					type = $wnd.Number;
+				} else if (typeNum === @com.bearsoft.gwt.ui.widgets.ObjectFormat::DATE ){
+					type = $wnd.Date;
+				} else if (typeNum === @com.bearsoft.gwt.ui.widgets.ObjectFormat::REGEXP ){
+					type = $wnd.RegExp;
+				} else {
+					type = $wnd.String;
+				}
+				return type;
 			},
 			set : function(aValue) {
-				aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::setValueType(I)(aValue != null ? aValue : null);
+				var typeNum;
+				if (aValue === $wnd.Number ){
+					typeNum = @com.bearsoft.gwt.ui.widgets.ObjectFormat::NUMBER;
+				} else if (aValue === $wnd.Date ){
+					typeNum = @com.bearsoft.gwt.ui.widgets.ObjectFormat::DATE;
+				} else if (aValue === $wnd.RegExp ){
+					typeNum = @com.bearsoft.gwt.ui.widgets.ObjectFormat::REGEXP;
+				} else {
+					typeNum = @com.bearsoft.gwt.ui.widgets.ObjectFormat::TEXT;
+				}
+				aWidget.@com.eas.client.form.published.widgets.model.ModelFormattedField::setValueType(I)(typeNum);
 			}
 		});
 		Object.defineProperty(aPublished, "text", {
