@@ -77,19 +77,6 @@ public class QueryModel extends Model<QueryEntity, SqlQuery> {
         return copied;
     }
 
-    /*
-     @Override
-     public QueryEntity getEntityByName(String aName) {
-     QueryEntity found = super.getEntityByName(aName);
-     if (found == null) {
-     assert parametersEntity != null;
-     if (parametersEntity.getName() != null && parametersEntity.getName().equalsIgnoreCase(aName)) {
-     found = parametersEntity;
-     }
-     }
-     return found;
-     }
-     */
     public QueryParametersEntity getParametersEntity() {
         return parametersEntity;
     }
