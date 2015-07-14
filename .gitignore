@@ -44,7 +44,6 @@ com.google.gdt.eclipse.core.prefs
 /application/src/components/Server/build/
 /application/src/components/ServletSupport/build/
 /application/src/components/Deploy/build/
-/application/src/components/MetaSync/build/
 /designer/PlatypusForms/build/
 /designer/PlatypusReport/build/
 /designer/dist/
@@ -72,7 +71,6 @@ com.google.gdt.eclipse.core.prefs
 /application/src/components/GeoAddon/nbproject/private/
 /application/src/components/Server/nbproject/private/
 /application/src/lib/own/Updater/nbproject/private/
-/application/src/components/MetaSync/nbproject/private/
 /application/src/lib/own/GeoPane/nbproject/private/
 /application/src/lib/own/BinaryTags/nbproject/private/
 /application/src/lib/own/Sensors/

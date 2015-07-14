@@ -44,6 +44,7 @@
                 <clean-target>clean</clean-target>
                 <id>jar</id>
             </reference>
+<!--
             <reference>
                 <foreign-project>MetaSync</foreign-project>
                 <artifact-type>jar</artifact-type>
@@ -52,6 +53,7 @@
                 <clean-target>clean</clean-target>
                 <id>jar</id>
             </reference>
+-->
             <reference>
                 <foreign-project>Modules</foreign-project>
                 <artifact-type>jar</artifact-type>
