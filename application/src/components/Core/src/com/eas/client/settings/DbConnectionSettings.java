@@ -18,7 +18,7 @@ import java.util.Properties;
 public class DbConnectionSettings extends ConnectionSettings {
 
     protected String user;
-    protected String password;
+    protected String password = "";
     protected int maxConnections = BearResourcePool.DEFAULT_MAXIMUM_SIZE;
     protected int maxStatements = BearResourcePool.DEFAULT_MAXIMUM_SIZE * 5;
     protected String schema;
@@ -26,35 +26,6 @@ public class DbConnectionSettings extends ConnectionSettings {
 
     public DbConnectionSettings() {
         super();
-    }
-
-    public DbConnectionSettings(String anUrl, String anUser, String aPassword) throws Exception {
-        this(anUrl, anUser, aPassword, null, null);
-    }
-
-    public DbConnectionSettings(String anUrl, String anUser, String aPassword, String aSchema) throws Exception {
-        this(anUrl, anUser, aPassword, aSchema, null);
-    }
-
-    public DbConnectionSettings(String anUrl, String anUser, String aPassword, String aSchema, int aMaxConnections) throws Exception {
-        this(anUrl, anUser, aPassword, aSchema);
-        maxConnections = aMaxConnections;
-    }
-
-    public DbConnectionSettings(String anUrl, String anUser, String aPassword, String aSchema, int aMaxConnections, int aMaxStatements) throws Exception {
-        this(anUrl, anUser, aPassword, aSchema, aMaxConnections);
-        maxStatements = aMaxStatements;
-    }
-    
-    public DbConnectionSettings(String anUrl, String anUser, String aPassword, String aSchema, Properties aProperties) throws Exception {
-        this();
-        url = anUrl;
-        user = anUser;
-        password = aPassword;
-        schema = aSchema;
-        if (aProperties != null) {
-            props.putAll(aProperties);
-        }
     }
 
     public String getSchema() {

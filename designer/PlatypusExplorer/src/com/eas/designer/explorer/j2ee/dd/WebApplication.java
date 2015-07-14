@@ -34,6 +34,7 @@ public class WebApplication {
     private final Set<SecurityConstraint> securityConstraints = new HashSet<>();
     private LoginConfig loginConfig;
     private final List<SecurityRole> securityRoles = new ArrayList<>();
+    private final List<WelcomeFile> welcomeFiles = new ArrayList<>();
 
     public WebApplication() throws ParserConfigurationException {
         factory.setNamespaceAware(true);
@@ -73,6 +74,11 @@ public class WebApplication {
         for (SecurityRole role : securityRoles) {
             webApp.appendChild(role.getElement(doc));
         }
+        Element welcomeFilesElement = doc.createElement("welcome-file-list");
+        webApp.appendChild(welcomeFilesElement);
+        for (WelcomeFile wf : welcomeFiles) {
+            welcomeFilesElement.appendChild(wf.getElement(doc));
+        }
         return doc;
     }
 
@@ -95,15 +101,15 @@ public class WebApplication {
             }
         }
     }
-    
+
     public void addAppListener(AppListener aListener) {
         appListeners.add(aListener);
     }
-    
+
     public List<AppListener> getAppListeners() {
         return Collections.unmodifiableList(appListeners);
     }
-    
+
     public void removeAppListener(String aListenerClassName) {
         if (aListenerClassName != null) {
             Iterator<AppListener> i = appListeners.iterator();
@@ -115,15 +121,27 @@ public class WebApplication {
             }
         }
     }
-    
+
+    public List<WelcomeFile> getWelcomeFiles() {
+        return welcomeFiles;
+    }
+
+    public void addWelcomeFile(WelcomeFile aWelcomeFile) {
+        welcomeFiles.add(aWelcomeFile);
+    }
+
+    public void removeWelcomeFile(WelcomeFile toRemove) {
+        welcomeFiles.remove(toRemove);
+    }
+
     public void addServlet(Servlet aServlet) {
         servlets.add(aServlet);
     }
-    
+
     public List<Servlet> getServlets() {
         return Collections.unmodifiableList(servlets);
     }
-    
+
     public void removeServlet(String aServletName) {
         if (aServletName != null) {
             Iterator<Servlet> i = servlets.iterator();
@@ -135,15 +153,15 @@ public class WebApplication {
             }
         }
     }
-    
+
     public void addServletMapping(ServletMapping aServletMapping) {
         servletMappings.add(aServletMapping);
     }
-    
+
     public List<ServletMapping> getServletMappings() {
         return Collections.unmodifiableList(servletMappings);
     }
-    
+
     public void removeServletMapping(String aServletName) {
         if (aServletName != null) {
             Iterator<ServletMapping> i = servletMappings.iterator();
@@ -155,15 +173,15 @@ public class WebApplication {
             }
         }
     }
-    
+
     public void addResourceRef(ResourceRef aResourceRef) {
         resourceRefs.add(aResourceRef);
     }
-    
+
     public List<ResourceRef> getResourceRefs() {
         return Collections.unmodifiableList(resourceRefs);
     }
-    
+
     public void removeResourceRef(String aResourceName) {
         if (aResourceName != null) {
             Iterator<ResourceRef> i = resourceRefs.iterator();
@@ -191,15 +209,15 @@ public class WebApplication {
     public void setLoginConfig(LoginConfig aLoginConfig) {
         loginConfig = aLoginConfig;
     }
-    
+
     public void addSecurityRole(SecurityRole aSecurityRole) {
         securityRoles.add(aSecurityRole);
     }
-    
+
     public List<SecurityRole> getSecurityRoles() {
         return Collections.unmodifiableList(securityRoles);
     }
-    
+
     public void removeSecurityRole(String aSecurityRoleNme) {
         if (aSecurityRoleNme != null) {
             Iterator<SecurityRole> i = securityRoles.iterator();
@@ -211,6 +229,5 @@ public class WebApplication {
             }
         }
     }
-    
-    
+
 }

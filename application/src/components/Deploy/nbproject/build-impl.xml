@@ -928,6 +928,7 @@ is divided into following sections:
             <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
             <param name="transfer.not.archive.disabled" value="true"/>
         </antcall>
+<!--
         <antcall target="-maybe-call-dep">
             <param name="call.built.properties" value="${built-jar.properties}"/>
             <param location="${project.MetaSync}" name="call.subproject"/>
@@ -936,6 +937,7 @@ is divided into following sections:
             <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
             <param name="transfer.not.archive.disabled" value="true"/>
         </antcall>
+-->
         <antcall target="-maybe-call-dep">
             <param name="call.built.properties" value="${built-jar.properties}"/>
             <param location="${project.Modules}" name="call.subproject"/>
@@ -1477,6 +1479,7 @@ is divided into following sections:
             <param name="transfer.built-clean.properties" value="${built-clean.properties}"/>
             <param name="transfer.not.archive.disabled" value="true"/>
         </antcall>
+<!--
         <antcall target="-maybe-call-dep">
             <param name="call.built.properties" value="${built-clean.properties}"/>
             <param location="${project.MetaSync}" name="call.subproject"/>
@@ -1485,6 +1488,7 @@ is divided into following sections:
             <param name="transfer.built-clean.properties" value="${built-clean.properties}"/>
             <param name="transfer.not.archive.disabled" value="true"/>
         </antcall>
+-->
         <antcall target="-maybe-call-dep">
             <param name="call.built.properties" value="${built-clean.properties}"/>
             <param location="${project.Modules}" name="call.subproject"/>
