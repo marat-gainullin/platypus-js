@@ -355,6 +355,7 @@ public class ScrollPane extends JScrollPane implements HasPublished, HasContaine
         return (JComponent) super.getViewport().getView();
     }
 
+    @ScriptFunction
     public void setView(JComponent aView) {
         if (getView() != aView) {
             if (getView() != null) {

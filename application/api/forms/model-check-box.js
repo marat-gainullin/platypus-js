@@ -565,23 +565,6 @@
              */
             P.ModelCheckBox.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = aValue;
-            }
-        });
-        if(!P.ModelCheckBox){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf ModelCheckBox
-             */
-            P.ModelCheckBox.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -598,6 +581,23 @@
              * @memberOf ModelCheckBox
              */
             P.ModelCheckBox.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = aValue;
+            }
+        });
+        if(!P.ModelCheckBox){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

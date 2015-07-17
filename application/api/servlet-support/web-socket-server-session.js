@@ -25,40 +25,6 @@
         if(P.WebSocketServerSession.superclass)
             P.WebSocketServerSession.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        Object.defineProperty(this, "onmessage", {
-            get: function() {
-                var value = delegate.onmessage;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onmessage = aValue;
-            }
-        });
-        if(!P.WebSocketServerSession){
-            /**
-             * Generated property jsDoc.
-             * @property onmessage
-             * @memberOf WebSocketServerSession
-             */
-            P.WebSocketServerSession.prototype.onmessage = {};
-        }
-        Object.defineProperty(this, "onerror", {
-            get: function() {
-                var value = delegate.onerror;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onerror = aValue;
-            }
-        });
-        if(!P.WebSocketServerSession){
-            /**
-             * Generated property jsDoc.
-             * @property onerror
-             * @memberOf WebSocketServerSession
-             */
-            P.WebSocketServerSession.prototype.onerror = {};
-        }
         Object.defineProperty(this, "query", {
             get: function() {
                 var value = delegate.query;
@@ -72,23 +38,6 @@
              * @memberOf WebSocketServerSession
              */
             P.WebSocketServerSession.prototype.query = '';
-        }
-        Object.defineProperty(this, "onclose", {
-            get: function() {
-                var value = delegate.onclose;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onclose = aValue;
-            }
-        });
-        if(!P.WebSocketServerSession){
-            /**
-             * Generated property jsDoc.
-             * @property onclose
-             * @memberOf WebSocketServerSession
-             */
-            P.WebSocketServerSession.prototype.onclose = {};
         }
         Object.defineProperty(this, "protocolVersion", {
             get: function() {

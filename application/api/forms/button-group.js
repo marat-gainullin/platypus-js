@@ -460,23 +460,6 @@
              */
             P.ButtonGroup.prototype.count = 0;
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = aValue;
-            }
-        });
-        if(!P.ButtonGroup){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf ButtonGroup
-             */
-            P.ButtonGroup.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -493,6 +476,23 @@
              * @memberOf ButtonGroup
              */
             P.ButtonGroup.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = aValue;
+            }
+        });
+        if(!P.ButtonGroup){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf ButtonGroup
+             */
+            P.ButtonGroup.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

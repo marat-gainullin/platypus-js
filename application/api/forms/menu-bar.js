@@ -459,23 +459,6 @@
              */
             P.MenuBar.prototype.count = 0;
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = aValue;
-            }
-        });
-        if(!P.MenuBar){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf MenuBar
-             */
-            P.MenuBar.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -492,6 +475,23 @@
              * @memberOf MenuBar
              */
             P.MenuBar.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = aValue;
+            }
+        });
+        if(!P.MenuBar){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf MenuBar
+             */
+            P.MenuBar.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

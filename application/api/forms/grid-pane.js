@@ -481,23 +481,6 @@
              */
             P.GridPane.prototype.count = 0;
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = aValue;
-            }
-        });
-        if(!P.GridPane){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf GridPane
-             */
-            P.GridPane.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -514,6 +497,23 @@
              * @memberOf GridPane
              */
             P.GridPane.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = aValue;
+            }
+        });
+        if(!P.GridPane){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf GridPane
+             */
+            P.GridPane.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

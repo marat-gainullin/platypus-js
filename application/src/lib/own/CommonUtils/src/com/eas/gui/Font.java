@@ -6,7 +6,6 @@ package com.eas.gui;
 
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
-import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import jdk.nashorn.api.scripting.JSObject;
 

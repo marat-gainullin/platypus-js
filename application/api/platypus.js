@@ -376,14 +376,14 @@
             return result;
         }
         directoryDialog.docString = "shows a directory dialog box";
-        function selectDirectory(curDir, aCallback) {
+        function selectDirectory(aCallback, aCurDir) {
             if (aCallback) {
                 invokeLater(function () {
-                    var file = directoryDialog(curDir);
+                    var file = directoryDialog(aCurDir);
                     aCallback(file);
                 });
             } else {
-                return directoryDialog(curDir);
+                return directoryDialog(aCurDir);
             }
         }
 
@@ -413,14 +413,14 @@
             return result;
         }
         colorDialog.docString = "shows a color chooser dialog box";
-        function selectColor(title, color, aCallback) {
+        function selectColor(aCallback, aOldColor, aTitle) {
             if (aCallback) {
                 invokeLater(function () {
-                    var selected = colorDialog(title, color);
+                    var selected = colorDialog(aTitle, aOldColor);
                     aCallback(selected);
                 });
             } else {
-                return colorDialog(title, color);
+                return colorDialog(aTitle, aOldColor);
             }
         }
 
@@ -610,6 +610,19 @@
         });
         Object.defineProperty(P, "Orientation", {
             value: Orientation
+        });
+        var ScrollBarPolicy = {};
+        Object.defineProperty(ScrollBarPolicy, "AUTO", {
+            value: 30
+        });
+        Object.defineProperty(ScrollBarPolicy, "NEVER", {
+            value: 31
+        });
+        Object.defineProperty(ScrollBarPolicy, "ALLWAYS", {
+            value: 32
+        });
+        Object.defineProperty(P, "ScrollBarPolicy", {
+            value: ScrollBarPolicy
         });
         //
         var FontStyleClass = Java.type("com.eas.gui.FontStyle");
