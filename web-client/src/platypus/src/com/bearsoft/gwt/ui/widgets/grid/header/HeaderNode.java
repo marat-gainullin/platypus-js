@@ -92,10 +92,11 @@ public class HeaderNode<T> {
 		header = aHeader;
 	}
 
-	public void removeColumnNode(HeaderNode<T> aNode) {
+	public boolean removeColumnNode(HeaderNode<T> aNode) {
 		if (children != null) {
-			children.remove(aNode);
-		}
+			return children.remove(aNode);
+		}else
+			return false;
 	}
 
 	public void addColumnNode(HeaderNode<T> aNode) {

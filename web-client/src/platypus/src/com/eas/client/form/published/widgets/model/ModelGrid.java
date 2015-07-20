@@ -630,6 +630,28 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 			publishColumnNodes(header);
 		}
 	}
+	
+	public boolean removeColumnNode(HeaderNode<JavaScriptObject> aNode){
+		boolean res = header.remove(aNode);
+		if (autoRefreshHeader) {
+			applyColumns();
+		}
+		return res;
+	}
+
+	public void addColumnNode(HeaderNode<JavaScriptObject> aNode){
+		header.add(aNode);
+		if (autoRefreshHeader) {
+			applyColumns();
+		}
+	}
+
+	public void insertColumnNode(int aIndex, HeaderNode<JavaScriptObject> aNode){
+		header.add(aIndex, aNode);
+		if (autoRefreshHeader) {
+			applyColumns();
+		}
+	}
 
 	@Override
 	public void moveColumnNode(HeaderNode<JavaScriptObject> aSubject, HeaderNode<JavaScriptObject> aInsertBefore) {
@@ -907,8 +929,26 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 			else
 				return false;
 		};
+		aPublished.unsort = function() {
+			aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::unsort()();
+		};
+		
 		aPublished.redraw = function() {
 			aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::redraw()();
+		};
+		aPublished.removeColumnNode = function(aColumnFacade){
+			if(aColumnFacade && aColumnFacade.unwrap)
+				return aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::removeColumnNode(Lcom/bearsoft/gwt/ui/widgets/grid/header/HeaderNode;)(aColumnFacade.unwrap());
+			else
+				return false;
+		};
+		aPublished.addColumnNode = function(aColumnFacade){
+			if(aColumnFacade && aColumnFacade.unwrap)
+				aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::addColumnNode(Lcom/bearsoft/gwt/ui/widgets/grid/header/HeaderNode;)(aColumnFacade.unwrap());
+		};
+		aPublished.insertColumnNode = function(aIndex, aColumnFacade){
+			if(aColumnFacade && aColumnFacade.unwrap)
+				aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::insertColumnNode(ILcom/bearsoft/gwt/ui/widgets/grid/header/HeaderNode;)(aIndex, aColumnFacade.unwrap());
 		};
 
 		Object.defineProperty(aPublished, "rowsHeight", {
@@ -1058,11 +1098,6 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 				aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::setChildrenField(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
 			}
 		});
-
-		aPublished.unsort = function() {
-			aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::unsort()();
-		};
-
 	}-*/;
 
 	public JavaScriptObject getOnRender() {

@@ -723,10 +723,13 @@
     function fieldsAndParametersPublisher(aDelegate) {
         var target = {};
         var nnFields = aDelegate.toCollection();
+        var lengthMet = false;
         for (var n = 0; n < nnFields.size(); n++) {
             (function () {
                 var nField = nnFields[n];
                 var pField = EngineUtilsClass.unwrap(nField.getPublished());
+                if('length' == nField.name)
+                  lengthMet = true;  
                 Object.defineProperty(target, nField.name, {
                     value: pField
                 });
@@ -735,6 +738,10 @@
                 });
             })();
         }
+        if(!lengthMet)
+            Object.defineProperty(target, 'length', {
+                value: nnFields.size()
+            });
         return target;
     }
 
@@ -1210,6 +1217,7 @@
                 var nnFields = nFields.toCollection();
                 var noFields = {};
                 // schema
+                var pSchemaLengthMet = false;
                 for (var n = 0; n < nnFields.size(); n++) {
                     (function () {
                         var nField = nnFields[n];
@@ -1219,6 +1227,8 @@
                         var schemaDesc = {
                             value: nField.getPublished()
                         };
+                        if('length' == nField.name)
+                            pSchemaLengthMet = true;
                         if (!pSchema[nField.name]) {
                             Object.defineProperty(pSchema, nField.name, schemaDesc);
                         } else {
@@ -1227,6 +1237,9 @@
                         }
                         Object.defineProperty(pSchema, n, schemaDesc);
                     })();
+                }
+                if(!pSchemaLengthMet){
+                    Object.defineProperty(pSchema, 'length', {value: nnFields.size()});
                 }
                 // entity.params.p1 syntax
                 var nParameters = nEntity.getQuery().getParameters();

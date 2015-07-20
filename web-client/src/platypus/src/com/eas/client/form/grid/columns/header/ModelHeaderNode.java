@@ -339,14 +339,27 @@ public class ModelHeaderNode extends HeaderNode<JavaScriptObject> implements Has
 			}
 		});
 		aPublished.sort = function() {
-				aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::sort()();
+			aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::sort()();
 		};
 		aPublished.sortDesc = function() {
-				aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::sortDesc()();
+			aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::sortDesc()();
 		};
 		aPublished.unsort = function() {
-				aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::unsort()();
+			aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::unsort()();
 		};
-		
+		aPublished.removeColumnNode = function(aColumnFacade){
+			if(aColumnFacade && aColumnFacade.unwrap)
+				return aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::removeColumnNode(Lcom/bearsoft/gwt/ui/widgets/grid/header/HeaderNode;)(aColumnFacade.unwrap());
+			else
+				return false;
+		};
+		aPublished.addColumnNode = function(aColumnFacade){
+			if(aColumnFacade && aColumnFacade.unwrap)
+				aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::addColumnNode(Lcom/bearsoft/gwt/ui/widgets/grid/header/HeaderNode;)(aColumnFacade.unwrap());
+		};
+		aPublished.insertColumnNode = function(aIndex, aColumnFacade){
+			if(aColumnFacade && aColumnFacade.unwrap)
+				aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::insertColumnNode(ILcom/bearsoft/gwt/ui/widgets/grid/header/HeaderNode;)(aIndex, aColumnFacade.unwrap());
+		};
 	}-*/;
 }
