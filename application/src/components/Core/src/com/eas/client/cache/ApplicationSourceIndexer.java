@@ -1,7 +1,6 @@
 package com.eas.client.cache;
 
 import com.eas.client.AppElementFiles;
-import com.sun.nio.file.ExtendedWatchEventModifier;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.ClosedWatchServiceException;
@@ -16,6 +15,7 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -28,7 +28,7 @@ import java.util.logging.Logger;
  *
  * @author mg
  */
-public class ApplicationSourceIndexer implements PlatypusIndexer{
+public class ApplicationSourceIndexer implements PlatypusIndexer {
 
     public interface ScanCallback {
 
@@ -67,7 +67,7 @@ public class ApplicationSourceIndexer implements PlatypusIndexer{
                                             }
                                         } else if (kind == StandardWatchEventKinds.ENTRY_DELETE) {
                                             if (subject.isDirectory() || !subject.getName().contains(".")) {
-                                                clearFamiliesByPathPrefix(subject.getPath());
+                                                clearFamiliesByPathPrefix(resolvedPath);
                                             } else {
                                                 removeFileFromIndex(subject);
                                             }
@@ -88,8 +88,7 @@ public class ApplicationSourceIndexer implements PlatypusIndexer{
                         keyTaken.cancel();
                         Path directoryPathTaken = watchKey2Directory.remove(keyTaken);
                         if (directoryPathTaken != null) {
-                            File subject = directoryPathTaken.toFile();
-                            clearFamiliesByPathPrefix(subject.getPath());
+                            clearFamiliesByPathPrefix(directoryPathTaken);
                         }
                     }
                 }
@@ -138,23 +137,16 @@ public class ApplicationSourceIndexer implements PlatypusIndexer{
         return srcDirectory;
     }
 
-    public synchronized void watch() throws Exception {
+    public void watch() throws Exception {
         service = FileSystems.getDefault().newWatchService();
-        if (isWindows()) {
-            String srcPathName = calcSrcPath();
-            Path srcPath = Paths.get(new File(srcPathName).toURI());
-            WatchKey wk = srcPath.register(service, new WatchEvent.Kind<?>[]{StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY}, ExtendedWatchEventModifier.FILE_TREE);
-            watchKey2Directory.put(wk, srcPath);
-        } else {
-            File srcDirectory = checkRootDirectory();
-            registerOnFolders(srcDirectory);
-        }
+        File srcDirectory = checkRootDirectory();
+        register(srcDirectory);
         watchDog = new Thread(new FilesWatchDog());
         watchDog.setDaemon(true);
         watchDog.start();
     }
 
-    public synchronized void unwatch() throws Exception {
+    public void unwatch() throws Exception {
         assert service != null && watchDog != null;
         service.close();
         watchDog.join();
@@ -163,13 +155,7 @@ public class ApplicationSourceIndexer implements PlatypusIndexer{
         watchKey2Directory.clear();
     }
 
-    private static boolean isWindows() {
-        String os = System.getProperty("os.name").toLowerCase();
-        // windows
-        return (os.contains("win"));
-    }
-
-    public synchronized void rescan() {
+    public void rescan() {
         id2Paths.clear();
         path2Id.clear();
         families.clear();
@@ -177,7 +163,7 @@ public class ApplicationSourceIndexer implements PlatypusIndexer{
         scanSource(srcDirectory);
     }
 
-    private synchronized void scanSource(File aDirectory) {
+    private void scanSource(File aDirectory) {
         assert aDirectory.exists() && aDirectory.isDirectory();
         try {
             Files.walkFileTree(Paths.get(aDirectory.toURI()), new SimpleFileVisitor<Path>() {
@@ -197,14 +183,13 @@ public class ApplicationSourceIndexer implements PlatypusIndexer{
         }
     }
 
-    private synchronized void registerOnFolders(File aDirectory) {
+    private void register(File aDirectory) {
         assert aDirectory.exists() && aDirectory.isDirectory();
         try {
             Files.walkFileTree(Paths.get(aDirectory.toURI()), new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult preVisitDirectory(Path aDirectoryPath, BasicFileAttributes attrs) throws IOException {
                     try {
-                        assert !isWindows();
                         WatchKey wk = aDirectoryPath.register(service, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
                         watchKey2Directory.put(wk, aDirectoryPath);
                     } catch (Exception ex) {
@@ -229,12 +214,12 @@ public class ApplicationSourceIndexer implements PlatypusIndexer{
         }
     }
 
-    protected synchronized void readdFileToIndex(File aFile) {
+    protected void readdFileToIndex(File aFile) {
         removeFileFromIndex(aFile);
         addFileToIndex(aFile);
     }
 
-    protected synchronized void addFileToIndex(File aFile) {
+    protected void addFileToIndex(File aFile) {
         try {
             String familyPath = fileNameWithoutExtension(aFile);
             if (familyPath != null) {
@@ -277,7 +262,7 @@ public class ApplicationSourceIndexer implements PlatypusIndexer{
         }
     }
 
-    protected synchronized void removeFileFromIndex(File aFile) {
+    protected void removeFileFromIndex(File aFile) {
         try {
             String familyPath = fileNameWithoutExtension(aFile);
             if (familyPath != null) {
@@ -317,7 +302,7 @@ public class ApplicationSourceIndexer implements PlatypusIndexer{
      * @throws Exception
      */
     @Override
-    public synchronized AppElementFiles nameToFiles(String aName) throws Exception {
+    public AppElementFiles nameToFiles(String aName) throws Exception {
         if (aName != null) {
             File resource = new File(calcSrcPath() + File.separator + aName.replace('/', File.separatorChar));
             if (resource.exists()) {
@@ -342,15 +327,24 @@ public class ApplicationSourceIndexer implements PlatypusIndexer{
         }
     }
 
-    protected synchronized void clearFamiliesByPathPrefix(String aPathPrefix) {
-        for (WatchKey wk : watchKey2Directory.keySet().toArray(new WatchKey[]{})) {
-            if (!wk.isValid()) {
-                watchKey2Directory.remove(wk);
+    protected void unregister(Path aPathPrefix) {
+        List<WatchKey> toRemove = new ArrayList<>();
+        watchKey2Directory.entrySet().stream().filter((entry) -> {
+            return entry.getValue().startsWith(aPathPrefix);
+        }).forEach((entry) -> {
+            toRemove.add(entry.getKey());
+        });
+        toRemove.stream().forEach((wk) -> {
+            if (wk.isValid()) {
                 wk.cancel();
             }
-        }
+            watchKey2Directory.remove(wk);
+        });
+    }
+
+    protected void clearFamiliesByPathPrefix(Path aPathPrefix) {
         for (String familyPath : families.keySet().toArray(new String[]{})) {
-            if (familyPath.startsWith(aPathPrefix)) {
+            if (familyPath.startsWith(aPathPrefix.toString())) {
                 String id = path2Id.remove(familyPath);
                 id2Paths.remove(id);
                 families.remove(familyPath);

@@ -29,8 +29,12 @@ public class JsClientEndPoint {
     protected JSObject onmessage;
     protected Scripts.LocalContext context;
 
-    public JsClientEndPoint(WebSocketClientSession aSession, Scripts.LocalContext aContext) {
+    public JsClientEndPoint(){
         super();
+    }
+    
+    public JsClientEndPoint(WebSocketClientSession aSession, Scripts.LocalContext aContext) {
+        this();
         session = aSession;
         context = aContext;
     }

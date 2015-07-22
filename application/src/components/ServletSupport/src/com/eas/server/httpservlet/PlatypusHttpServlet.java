@@ -25,6 +25,7 @@ import com.eas.util.IDGenerator;
 import com.eas.util.JSONUtils;
 import java.io.*;
 import java.net.URI;
+import java.nio.file.Paths;
 import java.security.AccessControlException;
 import java.security.Principal;
 import java.util.ArrayList;
@@ -114,7 +115,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                     platypusCore = new PlatypusServerCore(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), platypusConfig.getAppElementName()), queries, basesProxy, lsecurityConfigs, platypusConfig.getAppElementName(), SessionManager.Singleton.instance);
                     basesProxy.setContextHost(platypusCore);
                     Scripts.initBIO(platypusConfig.getMaximumBIOTreads());
-                    ScriptedResource.init(platypusCore);
+                    ScriptedResource.init(platypusCore, Paths.get(realRoot.toURI()).resolve("WEB-INF").resolve("classes"));
                     Scripts.initTasks((Runnable aTask) -> {
                         if (containerExecutor != null) {// J2EE 7+
                             containerExecutor.submit(aTask);
@@ -127,7 +128,8 @@ public class PlatypusHttpServlet extends HttpServlet {
                     });
                     platypusCore.startResidents(tasksScanner.getResidents());
                     if (platypusConfig.isWatch()) {
-                        indexer.watch();
+                        // TODO: uncomment after watcher refactoring
+                        //indexer.watch();
                     }
                 } else {
                     throw new IllegalArgumentException("applicationUrl: " + realRootUrl + " doesn't point to existent directory.");

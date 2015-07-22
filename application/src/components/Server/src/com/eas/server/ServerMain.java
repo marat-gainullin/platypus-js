@@ -204,6 +204,7 @@ public class ServerMain {
                 ScriptsConfigs scriptsConfigs = new ScriptsConfigs();
                 ServerTasksScanner tasksScanner = new ServerTasksScanner(scriptsConfigs);
                 ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), tasksScanner);
+                // TODO: add command line argument "watch" after watcher refactoring
                 //indexer.watch();
                 Scripts.initBIO(threadsConfig.getMaxServicesTreads());
 
@@ -222,7 +223,7 @@ public class ServerMain {
                 serverCoreDbClient.setQueries(queries);
                 PlatypusServer server = new PlatypusServer(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), appElement), queries, serverCoreDbClient, sslContext, parseListenAddresses(), parsePortsProtocols(), parsePortsSessionIdleTimeouts(), parsePortsSessionIdleCheckIntervals(), serverProcessor, scriptsConfigs, appElement);
                 serverCoreDbClient.setContextHost(server);
-                ScriptedResource.init(server);
+                ScriptedResource.init(server, ScriptedResource.lookupPlatypusJs());
                 SensorsFactory.init(server.getAcceptorsFactory());
                 RetranslateFactory.init(server.getRetranslateFactory());
                 //

@@ -19,13 +19,13 @@ public class PlatypusServerConfig {
     public static final String DEF_DATASOURCE_CONF_PARAM = "default-datasource";
     public static final String MAX_JDBC_THREADS_CONF_PARAM = "max-jdbc-threads";
     public static final String MAX_BIO_THREADS_CONF_PARAM = "max-bio-threads";
-    public static final String WATCH_CONF_PARAM = "watch-source";
+    public static final String WATCH_CONF_PARAM = "watch";
     //
     protected String appElementName;
     protected String defaultDatasourceName;
     protected int maximumJdbcThreads = 25;
     protected int maximumBIOTreads = 25;
-    protected boolean watch = true;
+    protected boolean watch = false;
 
     public static PlatypusServerConfig parse(ServletConfig aConfig) throws Exception {
         return new PlatypusServerConfig(aConfig);
