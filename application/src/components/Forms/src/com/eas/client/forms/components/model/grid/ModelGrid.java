@@ -2641,6 +2641,40 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         }
     }
 
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Event that is fired when user collapses ModelGrid's row.\n"
+            + " */")
+    @EventMethod(eventClass = com.eas.client.forms.events.ItemEvent.class)
+    @Undesignable
+    public JSObject getOnCollapse() {
+        return onCollapse;
+    }
+
+    @ScriptFunction
+    public void setOnCollapse(JSObject aValue) {
+        if (onCollapse != aValue) {
+            onCollapse = aValue;
+        }
+    }
+
+    @ScriptFunction(jsDoc = ""
+            + "/**\n"
+            + " * Event that is fired when user expands ModelGrid's row.\n"
+            + " */")
+    @EventMethod(eventClass = com.eas.client.forms.events.ItemEvent.class)
+    @Undesignable
+    public JSObject getOnExpand() {
+        return onExpand;
+    }
+
+    @ScriptFunction
+    public void setOnExpand(JSObject aValue) {
+        if (onExpand != aValue) {
+            onExpand = aValue;
+        }
+    }
+
     protected ControlEventsIProxy eventsProxy = new ControlEventsIProxy(this);
 
     @ScriptFunction(jsDoc = ON_MOUSE_CLICKED_JSDOC)

@@ -233,11 +233,8 @@
         }
         Object.defineProperty(this, "children", {
             get: function() {
-                if (!invalidatable) {
-                    var value = delegate.children;
-                    invalidatable = P.boxAsJs(value);
-                }
-                return invalidatable;
+                var value = delegate.children;
+                return P.boxAsJs(value);
             }
         });
         if(!P.TabbedPane){
@@ -477,23 +474,6 @@
              */
             P.TabbedPane.prototype.count = 0;
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = aValue;
-            }
-        });
-        if(!P.TabbedPane){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf TabbedPane
-             */
-            P.TabbedPane.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -510,6 +490,23 @@
              * @memberOf TabbedPane
              */
             P.TabbedPane.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = aValue;
+            }
+        });
+        if(!P.TabbedPane){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf TabbedPane
+             */
+            P.TabbedPane.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -777,10 +774,6 @@
              */
             P.TabbedPane.prototype.onKeyPressed = {};
         }
-        var invalidatable = null;
-        delegate.setPublishedCollectionInvalidator(function() {
-            invalidatable = null;
-        });
     };
         /**
          * Appends the component whith specified text to the end of this container.

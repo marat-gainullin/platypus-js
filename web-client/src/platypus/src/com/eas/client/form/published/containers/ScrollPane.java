@@ -301,6 +301,22 @@ public class ScrollPane extends ScrollBoxPanel implements HasJsFacade, HasEnable
 					published.clear();
 			}
 		});
+		Object.defineProperty(published, "horizontalScrollBarPolicy", {
+			get: function(){
+				return aWidget.@com.eas.client.form.published.containers.ScrollPane::getHorizontalScrollBarPolicy()();
+			},
+			set: function(aValue){
+				aWidget.@com.eas.client.form.published.containers.ScrollPane::setHorizontalScrollBarPolicy(I)(+aValue);
+			}
+		});
+		Object.defineProperty(published, "verticalScrollBarPolicy", {
+			get: function(){
+				return aWidget.@com.eas.client.form.published.containers.ScrollPane::getVerticalScrollBarPolicy()();
+			},
+			set: function(aValue){
+				aWidget.@com.eas.client.form.published.containers.ScrollPane::setVerticalScrollBarPolicy(I)(+aValue);
+			}
+		});
 	}-*/;
 
 	@Override

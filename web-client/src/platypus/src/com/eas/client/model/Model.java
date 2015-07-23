@@ -606,10 +606,15 @@ public class Model implements HasPublished {
         var nnFields = nFields.@com.eas.client.metadata.Fields::toCollection()();
         var noFields = {};
         // schema
-        for (var n = 0; n < nnFields.@java.util.List::size()(); n++) {
+        var pSchemaLengthMet = false;
+        var fieldsCount = nnFields.@java.util.List::size()();  
+        for (var n = 0; n < fieldsCount; n++) {
             (function () {
                 var nField = nnFields.@java.util.List::get(I)(n);
                 var nFieldName = nField.@com.eas.client.metadata.Field::getName()();
+                if("length" == nFieldName){
+                	pSchemaLengthMet = true;
+                }
                 noFields[nFieldName] = nField;
                 if (nField.@com.eas.client.metadata.Field::isPk()())
                     pkFieldName = nFieldName;
@@ -626,6 +631,9 @@ public class Model implements HasPublished {
                 }
                 Object.defineProperty(pSchema, n, schemaDesc);
             })();
+        }
+        if (!pSchemaLengthMet) {
+            Object.defineProperty(pSchema, "length", {value: fieldsCount});
         }
         // entity.params.p1 syntax
         var nParameters = nEntity.@com.eas.client.model.Entity::getQuery()().@com.eas.client.queries.Query::getParameters()();

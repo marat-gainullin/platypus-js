@@ -544,16 +544,23 @@ public class Fields {
 				
 				Object.defineProperty(published, "empty", { get : function(){ return aFields.@com.eas.client.metadata.Fields::isEmpty()(); }});
 				Object.defineProperty(published, "tableDescription", { get : function(){ return aFields.@com.eas.client.metadata.Fields::getTableDescription()()}});
-				var fieldsCount = aFields.@com.eas.client.metadata.Fields::getFieldsCount()();				
+				var fieldsCount = aFields.@com.eas.client.metadata.Fields::getFieldsCount()();
+				var lengthMet = false;				
 				for(var i = 0; i < fieldsCount; i++){
 					(function(){
 						var nField = aFields.@com.eas.client.metadata.Fields::get(I)(i + 1);
 						var nFieldName = nField.@com.eas.client.metadata.Field::getName()();
+						if('length' == nFieldName){
+							lengthMet = true;
+						}
 						var pField = @com.eas.client.metadata.Field::publishFacade(Lcom/eas/client/metadata/Field;)(nField);
 						if(!published[nFieldName])
 							Object.defineProperty(published, nFieldName, { get : function(){ return pField; }});
 						Object.defineProperty(published, i+"", { get : function(){ return pField; }});
 					})();
+				}
+				if(!lengthMet){
+					Object.defineProperty(published, 'length', {value : fieldsCount});
 				}
 				aFields.@com.eas.client.metadata.Fields::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 			}

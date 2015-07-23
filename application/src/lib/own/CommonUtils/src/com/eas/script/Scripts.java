@@ -1,8 +1,10 @@
 package com.eas.script;
 
 import com.eas.concurrent.DeamonThreadFactory;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -58,9 +60,9 @@ import jdk.nashorn.internal.runtime.options.Options;
 public class Scripts {
 
     public static final String THIS_KEYWORD = "this";//NOI18N
-    public static final URL platypusJsUrl = Thread.currentThread().getContextClassLoader().getResource("platypus.js");
+    protected static volatile Path absoluteApiPath;
+    protected static volatile URL platypusJsUrl;
 
-    private static final Queue<Object> globalsPool = new ConcurrentLinkedQueue<>();
     private static final ThreadLocal<LocalContext> contextRef = new ThreadLocal<>();
 
     public static Space getSpace() {
@@ -615,6 +617,15 @@ public class Scripts {
     // bio thread pool
     protected static ThreadPoolExecutor bio;
 
+    public static void init(Path aAbsoluteApiPath) throws MalformedURLException{
+        absoluteApiPath = aAbsoluteApiPath;
+        platypusJsUrl = absoluteApiPath.resolve("platypus.js").toUri().toURL();
+    }
+
+    public static Path getAbsoluteApiPath() {
+        return absoluteApiPath;
+    }
+    
     public static void initTasks(Consumer<Runnable> aTasks) {
         assert tasks == null : "Scripts tasks are already initialized";
         tasks = aTasks;

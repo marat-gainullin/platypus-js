@@ -232,11 +232,8 @@
         }
         Object.defineProperty(this, "children", {
             get: function() {
-                if (!invalidatable) {
-                    var value = delegate.children;
-                    invalidatable = P.boxAsJs(value);
-                }
-                return invalidatable;
+                var value = delegate.children;
+                return P.boxAsJs(value);
             }
         });
         if(!P.PopupMenu){
@@ -459,23 +456,6 @@
              */
             P.PopupMenu.prototype.count = 0;
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = aValue;
-            }
-        });
-        if(!P.PopupMenu){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf PopupMenu
-             */
-            P.PopupMenu.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -492,6 +472,23 @@
              * @memberOf PopupMenu
              */
             P.PopupMenu.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = aValue;
+            }
+        });
+        if(!P.PopupMenu){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf PopupMenu
+             */
+            P.PopupMenu.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -725,10 +722,6 @@
              */
             P.PopupMenu.prototype.onKeyPressed = {};
         }
-        var invalidatable = null;
-        delegate.setPublishedCollectionInvalidator(function() {
-            invalidatable = null;
-        });
     };
         /**
          * Adds the item to the menu.

@@ -236,11 +236,8 @@
         }
         Object.defineProperty(this, "children", {
             get: function() {
-                if (!invalidatable) {
-                    var value = delegate.children;
-                    invalidatable = P.boxAsJs(value);
-                }
-                return invalidatable;
+                var value = delegate.children;
+                return P.boxAsJs(value);
             }
         });
         if(!P.BorderPane){
@@ -496,23 +493,6 @@
              */
             P.BorderPane.prototype.count = 0;
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = aValue;
-            }
-        });
-        if(!P.BorderPane){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf BorderPane
-             */
-            P.BorderPane.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -529,6 +509,23 @@
              * @memberOf BorderPane
              */
             P.BorderPane.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = aValue;
+            }
+        });
+        if(!P.BorderPane){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf BorderPane
+             */
+            P.BorderPane.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -816,10 +813,6 @@
              */
             P.BorderPane.prototype.onKeyPressed = {};
         }
-        var invalidatable = null;
-        delegate.setPublishedCollectionInvalidator(function() {
-            invalidatable = null;
-        });
     };
         /**
          * Appends the specified component to this container on the specified placement.

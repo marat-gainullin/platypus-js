@@ -376,14 +376,14 @@
             return result;
         }
         directoryDialog.docString = "shows a directory dialog box";
-        function selectDirectory(curDir, aCallback) {
+        function selectDirectory(aCallback, aCurDir) {
             if (aCallback) {
                 invokeLater(function () {
-                    var file = directoryDialog(curDir);
+                    var file = directoryDialog(aCurDir);
                     aCallback(file);
                 });
             } else {
-                return directoryDialog(curDir);
+                return directoryDialog(aCurDir);
             }
         }
 
@@ -413,14 +413,14 @@
             return result;
         }
         colorDialog.docString = "shows a color chooser dialog box";
-        function selectColor(title, color, aCallback) {
+        function selectColor(aCallback, aOldColor, aTitle) {
             if (aCallback) {
                 invokeLater(function () {
-                    var selected = colorDialog(title, color);
+                    var selected = colorDialog(aTitle, aOldColor);
                     aCallback(selected);
                 });
             } else {
-                return colorDialog(title, color);
+                return colorDialog(aTitle, aOldColor);
             }
         }
 
@@ -611,6 +611,19 @@
         Object.defineProperty(P, "Orientation", {
             value: Orientation
         });
+        var ScrollBarPolicy = {};
+        Object.defineProperty(ScrollBarPolicy, "AUTO", {
+            value: 30
+        });
+        Object.defineProperty(ScrollBarPolicy, "NEVER", {
+            value: 31
+        });
+        Object.defineProperty(ScrollBarPolicy, "ALLWAYS", {
+            value: 32
+        });
+        Object.defineProperty(P, "ScrollBarPolicy", {
+            value: ScrollBarPolicy
+        });
         //
         var FontStyleClass = Java.type("com.eas.gui.FontStyle");
         var FontStyle = {};
@@ -710,10 +723,13 @@
     function fieldsAndParametersPublisher(aDelegate) {
         var target = {};
         var nnFields = aDelegate.toCollection();
+        var lengthMet = false;
         for (var n = 0; n < nnFields.size(); n++) {
             (function () {
                 var nField = nnFields[n];
                 var pField = EngineUtilsClass.unwrap(nField.getPublished());
+                if('length' == nField.name)
+                  lengthMet = true;  
                 Object.defineProperty(target, nField.name, {
                     value: pField
                 });
@@ -722,6 +738,10 @@
                 });
             })();
         }
+        if(!lengthMet)
+            Object.defineProperty(target, 'length', {
+                value: nnFields.size()
+            });
         return target;
     }
 
@@ -1197,6 +1217,7 @@
                 var nnFields = nFields.toCollection();
                 var noFields = {};
                 // schema
+                var pSchemaLengthMet = false;
                 for (var n = 0; n < nnFields.size(); n++) {
                     (function () {
                         var nField = nnFields[n];
@@ -1206,6 +1227,8 @@
                         var schemaDesc = {
                             value: nField.getPublished()
                         };
+                        if('length' == nField.name)
+                            pSchemaLengthMet = true;
                         if (!pSchema[nField.name]) {
                             Object.defineProperty(pSchema, nField.name, schemaDesc);
                         } else {
@@ -1214,6 +1237,9 @@
                         }
                         Object.defineProperty(pSchema, n, schemaDesc);
                     })();
+                }
+                if(!pSchemaLengthMet){
+                    Object.defineProperty(pSchema, 'length', {value: nnFields.size()});
                 }
                 // entity.params.p1 syntax
                 var nParameters = nEntity.getQuery().getParameters();

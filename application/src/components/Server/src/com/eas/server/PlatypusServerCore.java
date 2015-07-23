@@ -137,7 +137,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
 
     /**
      * Executes a script module according to all rules defimed within
-     * Platypus.js Such as @wait, @stateless and @rezident annotations, async-io
+     * Platypus.js Such as @stateless and @rezident annotations, async-io
      * convensions etc.
      *
      * @param aModuleName

@@ -56,17 +56,19 @@ import jdk.nashorn.api.scripting.JSObject;
 public class ScriptedResource {
 
     private static final Pattern httpPattern = Pattern.compile("https?://.*");
-    protected static Application<?> app;
+    protected static volatile Application<?> app;
 
     /**
      * Initializes a static fields.
      *
      * @param aApp
+     * @param aAbsoluteApiPath
      * @throws Exception If something goes wrong
      */
-    public static void init(Application<?> aApp) throws Exception {
+    public static void init(Application<?> aApp, Path aAbsoluteApiPath) throws Exception {
         assert app == null : "Platypus application resource may be initialized only once.";
         app = aApp;
+        Scripts.init(aAbsoluteApiPath);
     }
 
     public static Application<?> getApp() {
@@ -288,18 +290,11 @@ public class ScriptedResource {
         }
     }
 
-    private static final Path absoluteApiPath = lookupPlatypusJs();
-
-    private static Path lookupPlatypusJs(){
-        try {
-            URL platypusURL = Thread.currentThread().getContextClassLoader().getResource("platypus.js");
-            Path apiPath = Paths.get(platypusURL.toURI());
-            apiPath = apiPath.getParent();
-            return apiPath;
-        } catch (URISyntaxException ex) {
-            Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
-        }
+    public static Path lookupPlatypusJs() throws URISyntaxException{
+        URL platypusURL = Thread.currentThread().getContextClassLoader().getResource("platypus.js");
+        Path apiPath = Paths.get(platypusURL.toURI());
+        apiPath = apiPath.getParent();
+        return apiPath;
     }
 
     protected static class SEHttpResponse {
@@ -663,7 +658,7 @@ public class ScriptedResource {
 
     public static void _require(String[] aScriptsNames, URI aCalledFromFile, Scripts.Space aSpace, Set<String> aCyclic, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (aScriptsNames != null && aScriptsNames.length > 0) {
-            Path apiPath = absoluteApiPath;
+            Path apiPath = Scripts.getAbsoluteApiPath();
             aScriptsNames = absoluteAppPaths(apiPath, aScriptsNames, aCalledFromFile);
             RequireProcess process = new RequireProcess(aScriptsNames.length, (Void v) -> {
                 aSpace.process(() -> {
@@ -732,7 +727,7 @@ public class ScriptedResource {
     }
 
     public static void _require(String[] aScriptsNames, URI aCalledFromFile, Scripts.Space aSpace) throws Exception {
-        Path apiPath = absoluteApiPath;
+        Path apiPath = Scripts.getAbsoluteApiPath();
         aScriptsNames = absoluteAppPaths(apiPath, aScriptsNames, aCalledFromFile);
         for (String scriptOrModuleName : aScriptsNames) {
             if (!aSpace.getExecuted().contains(scriptOrModuleName)) {

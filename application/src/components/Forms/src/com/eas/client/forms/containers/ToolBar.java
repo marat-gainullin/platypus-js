@@ -19,16 +19,13 @@ import com.eas.design.Undesignable;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
-import com.eas.script.HasPublishedInvalidatableCollection;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.script.Scripts;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
-import java.awt.event.ContainerAdapter;
 import java.awt.event.ContainerEvent;
-import java.awt.event.ContainerListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -42,7 +39,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class ToolBar extends JToolBar implements HasPublished, HasContainerEvents, HasChildren, HasPublishedInvalidatableCollection, HasJsName, Widget {
+public class ToolBar extends JToolBar implements HasPublished, HasContainerEvents, HasChildren, HasJsName, Widget {
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
@@ -55,7 +52,6 @@ public class ToolBar extends JToolBar implements HasPublished, HasContainerEvent
         super();
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         super.setFloatable(floatable);
-        super.addContainerListener(invalidatorListener);
     }
 
     public ToolBar() {
@@ -301,39 +297,6 @@ public class ToolBar extends JToolBar implements HasPublished, HasContainerEvent
             super.add(aComp);
             super.revalidate();
             super.repaint();
-        }
-    }
-
-    protected ContainerListener invalidatorListener = new ContainerAdapter() {
-
-        @Override
-        public void componentAdded(ContainerEvent e) {
-            invalidatePublishedCollection();
-        }
-
-        @Override
-        public void componentRemoved(ContainerEvent e) {
-            invalidatePublishedCollection();
-        }
-
-    };
-
-    protected JSObject publishedCollectionInvalidator;
-
-    @Override
-    public JSObject getPublishedCollectionInvalidator() {
-        return publishedCollectionInvalidator;
-    }
-
-    @Override
-    public void setPublishedCollectionInvalidator(JSObject aValue) {
-        publishedCollectionInvalidator = aValue;
-    }
-
-    @Override
-    public void invalidatePublishedCollection() {
-        if (publishedCollectionInvalidator != null && publishedCollectionInvalidator.isFunction()) {
-            publishedCollectionInvalidator.call(getPublished(), new Object[]{});
         }
     }
 

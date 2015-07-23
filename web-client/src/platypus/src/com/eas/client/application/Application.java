@@ -84,21 +84,6 @@ public class Application {
 		return new $wnd.P.Report(reportLocation);
 	}-*/;
 
-	/*
-	 * protected static class ExecuteApplicationCallback extends RunnableAdapter
-	 * {
-	 * 
-	 * protected String startForm; protected Set<Element> indicators;
-	 * 
-	 * public ExecuteApplicationCallback(String aStartForm, Set<Element>
-	 * aIndicators) { super(); startForm = aStartForm; indicators = aIndicators;
-	 * }
-	 * 
-	 * @Override protected void doWork() throws Exception { for (Element el :
-	 * indicators) { el.<XElement> cast().unmask(); }
-	 * loaderHandlerRegistration.removeHandler(); onReady(); } }
-	 */
-
 	/**
 	 * This method is publicONLY because of tests!
 	 * 

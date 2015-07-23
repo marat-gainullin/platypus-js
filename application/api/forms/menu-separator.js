@@ -413,23 +413,6 @@
              */
             P.MenuSeparator.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = aValue;
-            }
-        });
-        if(!P.MenuSeparator){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf MenuSeparator
-             */
-            P.MenuSeparator.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -446,6 +429,23 @@
              * @memberOf MenuSeparator
              */
             P.MenuSeparator.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = aValue;
+            }
+        });
+        if(!P.MenuSeparator){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf MenuSeparator
+             */
+            P.MenuSeparator.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

@@ -2,6 +2,7 @@ package com.eas.client.form.grid.columns.header;
 
 import com.bearsoft.gwt.ui.widgets.grid.DraggableHeader;
 import com.eas.client.form.grid.columns.RadioServiceColumn;
+import com.eas.client.form.published.widgets.model.ModelDecoratorBox;
 import com.google.gwt.core.client.JavaScriptObject;
 
 public class RadioHeaderNode extends ModelHeaderNode {
@@ -21,4 +22,14 @@ public class RadioHeaderNode extends ModelHeaderNode {
 		return copied;
 	}
 	
+
+	@Override
+	public JavaScriptObject getJsEditor() {
+		return null;
+	}
+
+	@Override
+	public void setEditor(ModelDecoratorBox<?> aEditor) {
+		// no op since node type
+	}
 }

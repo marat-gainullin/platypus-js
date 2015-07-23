@@ -238,6 +238,8 @@ public class PlatypusClientApplication {
                         ScriptsConfigs scriptsConfigs = new ScriptsConfigs();
                         ValidatorsScanner validatorsScanner = new ValidatorsScanner(scriptsConfigs);
                         ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), validatorsScanner);
+                        // TODO: add command line argument "watch" after watcher refactoring
+                        //indexer.watch();
                         ScriptedDatabasesClient twoTierCore = new ScriptedDatabasesClient(config.defDatasource, indexer, true, validatorsScanner.getValidators(), config.threadsArgs.getMaxJdbcTreads());
                         QueriesProxy qp = new LocalQueriesProxy(twoTierCore, indexer);
                         ModulesProxy mp = new LocalModulesProxy(indexer, models, config.startScriptPath);
@@ -289,7 +291,7 @@ public class PlatypusClientApplication {
                 } else {
                     throw new Exception("Unknown protocol in url: " + config.url);
                 }
-                ScriptedResource.init(app);
+                ScriptedResource.init(app, ScriptedResource.lookupPlatypusJs());
                 Scripts.LocalContext context = Scripts.createContext(Scripts.createSpace());
                 Forms.initContext(context);
                 Scripts.setContext(context);

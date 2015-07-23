@@ -3,6 +3,7 @@ package com.eas.client.form.js;
 public class JsContainers {
 
 	public native static void init()/*-{
+		$wnd.P.ScrollBarPolicy = {ALLWAYS: 32, NEVER: 31, AUTO: 30};
 
 		function publishComponentProperties(aPublished) {
 			@com.eas.client.form.js.JsWidgets::publishComponentProperties(Lcom/eas/client/form/published/PublishedComponent;)(aPublished);

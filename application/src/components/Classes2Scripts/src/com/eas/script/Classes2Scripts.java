@@ -30,7 +30,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
@@ -71,11 +70,6 @@ public class Classes2Scripts {
     private static final String JSDOC_TAG = "${JsDoc}";//NOI18N
     private static final String DELEGATE_TAG = "${Delegate}";//NOI18N
     private static final String DELEGATE_OBJECT = "delegate";//NOI18N
-    private static final String INVALIDATOR_PART = ""
-            + "        var invalidatable = null;\n"
-            + "        " + DELEGATE_OBJECT + ".setPublishedCollectionInvalidator(function() {\n"
-            + "            invalidatable = null;\n"
-            + "        });\n";
     private static final String DEFAULT_CONSTRUCTOR_JS_DOC = ""
             + "/**\n"//NOI18N
             + " * Generated constructor.\n"//NOI18N
@@ -114,7 +108,6 @@ public class Classes2Scripts {
 
         public Method method;
         public String apiName;
-        public boolean invalidatable;
 
         public MethodedPropBox() {
             super();
@@ -125,7 +118,6 @@ public class Classes2Scripts {
     private static Classes2Scripts convertor;
     private final List<File> classPaths = new ArrayList<>();
     private File destDirectory;
-    private final Set<String> depsPaths = new TreeSet<>();
 
     public static void main(String[] args) throws Exception {
         convertor = new Classes2Scripts();
@@ -277,7 +269,6 @@ public class Classes2Scripts {
                 jarApiDeps.append("}\n");
                 File depsFile = Paths.get(subDir.toURI()).resolve("index.js").toFile();
                 FileUtils.writeString(depsFile, jarApiDeps.toString(), SettingsConstants.COMMON_ENCODING);
-                depsPaths.add(getRelativePath(destDirectory, depsFile));
             }
         }
     }
@@ -297,7 +288,6 @@ public class Classes2Scripts {
             return null;
         }
         ///
-        boolean invalidatable = HasPublishedInvalidatableCollection.class.isAssignableFrom(clazz);
         List<Method> methods = new ArrayList<>();
         Map<String, MethodedPropBox> props = new HashMap<>();
         for (Method method : clazz.getMethods()) {
@@ -315,7 +305,6 @@ public class Classes2Scripts {
                             pb.apiName = propName;
                         }
                         pb.method = method;
-                        pb.invalidatable = invalidatable;
                         props.put(pb.name, pb);
                     }
                     PropertiesUtils.setPropertyAccessStatus(pb, method.getName());
@@ -341,42 +330,10 @@ public class Classes2Scripts {
                 .replace(MAX_ARGS_TAG, Integer.toString(ci.params.length))
                 .replace(PROPERTIES_TAG, getPropsPart(clazz, ci, props.values(), CONSTRUCTOR_IDENT_LEVEL + 1))
                 .replace(METHODS_TAG, getMethodsPart(clazz, ci, methods, CONSTRUCTOR_IDENT_LEVEL));
-        if (HasPublishedInvalidatableCollection.class.isAssignableFrom(clazz)) {
-            js = js.replace(BODY_TAG, INVALIDATOR_PART);
-        } else {
-            js = js.replace(BODY_TAG, "");
-        }
+        js = js.replace(BODY_TAG, "");
         return js;
     }
 
-    /*
-     private String getDepsJsContent() {
-     StringBuilder sb = new StringBuilder(DEPS_HEADER);
-     if (!depsPaths.isEmpty()) {
-     String dir = "";
-     String indent = getIndentStr(1);
-     sb.append("try {\n");
-     for (String path : depsPaths) {
-     String pathDir = pathRootDir(path);
-     if (!dir.equals(pathDir) && !dir.isEmpty()) {
-     sb.append(indent).append("print('").append(dir).append(" API loaded.');\n");
-     sb.append("} catch (e) {\n");
-     sb.append(indent).append("print('").append(dir).append(" API skipped.');\n");
-     sb.append("}\n");
-     sb.append("\n");
-     sb.append("try {\n");
-     }
-     dir = pathDir;
-     sb.append(indent).append(String.format("P.require('%s');\n", FileNameSupport.getFileName(path)));
-     }
-     sb.append(indent).append("print('").append(dir).append(" API loaded.');\n");
-     sb.append("} catch (e) {\n");
-     sb.append(indent).append("print('").append(dir).append(" API skipped.');\n");
-     sb.append("}\n");
-     }
-     return sb.toString();
-     }
-     */
     private static String pathRootDir(String path) {
         String[] pathElements = path.split("/");
         if (pathElements.length > 0) {
@@ -476,21 +433,13 @@ public class Classes2Scripts {
         sb.append(getIndentStr(++i));
         assert property.readable;
         sb.append("get: function() {\n");
-        if (property.invalidatable && property.method.getReturnType().isArray()) {
-            sb.append(getIndentStr(++i)).append("if (!invalidatable) {\n")
-                    .append(getIndentStr(++i)).append("var value = " + DELEGATE_OBJECT + ".").append(property.name).append(";\n")
-                    .append(getIndentStr(i)).append("invalidatable = P.boxAsJs(value);\n")
-                    .append(getIndentStr(--i)).append("}\n")
-                    .append(getIndentStr(i)).append("return invalidatable;\n");
+        sb.append(getIndentStr(++i));
+        sb.append("var value = ").append(DELEGATE_OBJECT).append(".").append(property.name).append(";\n");
+        sb.append(getIndentStr(i));
+        if (JSObject.class.isAssignableFrom(property.method.getReturnType())) {
+            sb.append("return value;\n");
         } else {
-            sb.append(getIndentStr(++i));
-            sb.append("var value = ").append(DELEGATE_OBJECT).append(".").append(property.name).append(";\n");
-            sb.append(getIndentStr(i));
-            if (JSObject.class.isAssignableFrom(property.method.getReturnType())) {
-                sb.append("return value;\n");
-            } else {
-                sb.append("return P.boxAsJs(value);\n");
-            }
+            sb.append("return P.boxAsJs(value);\n");
         }
         sb.append(getIndentStr(--i));
         sb.append("}");

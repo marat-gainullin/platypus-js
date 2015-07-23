@@ -253,9 +253,7 @@
                 for (var i = 0; i < httpCookies.length; i++) {
                     var aCookie = httpCookies[i];
                     var cookie = new Cookie(aCookie);
-                    Object.defineProperty(self, aCookie.getName(), {
-                        value: cookie
-                    });
+                    self[aCookie.getName()] = cookie;
                 }
             }
         }

@@ -236,6 +236,9 @@
             get: function() {
                 var value = delegate.view;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.view = P.boxAsJava(aValue);
             }
         });
         if(!P.ScrollPane){
@@ -282,11 +285,8 @@
         }
         Object.defineProperty(this, "children", {
             get: function() {
-                if (!invalidatable) {
-                    var value = delegate.children;
-                    invalidatable = P.boxAsJs(value);
-                }
-                return invalidatable;
+                var value = delegate.children;
+                return P.boxAsJs(value);
             }
         });
         if(!P.ScrollPane){
@@ -509,23 +509,6 @@
              */
             P.ScrollPane.prototype.count = 0;
         }
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = aValue;
-            }
-        });
-        if(!P.ScrollPane){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf ScrollPane
-             */
-            P.ScrollPane.prototype.onKeyReleased = {};
-        }
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -542,6 +525,23 @@
              * @memberOf ScrollPane
              */
             P.ScrollPane.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = aValue;
+            }
+        });
+        if(!P.ScrollPane){
+            /**
+             * Key released event handler function.
+             * @property onKeyReleased
+             * @memberOf ScrollPane
+             */
+            P.ScrollPane.prototype.onKeyReleased = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -775,10 +775,6 @@
              */
             P.ScrollPane.prototype.onKeyPressed = {};
         }
-        var invalidatable = null;
-        delegate.setPublishedCollectionInvalidator(function() {
-            invalidatable = null;
-        });
     };
         /**
          * Sets the specified component as the scroll's view, replacing old view component.

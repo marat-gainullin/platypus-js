@@ -19,16 +19,13 @@ import com.eas.design.Undesignable;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
-import com.eas.script.HasPublishedInvalidatableCollection;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.script.Scripts;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
-import java.awt.event.ContainerAdapter;
 import java.awt.event.ContainerEvent;
-import java.awt.event.ContainerListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.JComponent;
@@ -41,7 +38,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class ScrollPane extends JScrollPane implements HasPublished, HasContainerEvents, HasChildren, HasPublishedInvalidatableCollection, HasJsName, Widget {
+public class ScrollPane extends JScrollPane implements HasPublished, HasContainerEvents, HasChildren, HasJsName, Widget {
 
     private static final String CONSTRUCTOR_JSDOC = ""
             + "/**\n"
@@ -338,7 +335,6 @@ public class ScrollPane extends JScrollPane implements HasPublished, HasContaine
     public void add(JComponent aComp) {
         if (aComp != null) {
             super.setViewportView(aComp);
-            invalidatePublishedCollection();
             super.revalidate();
             super.repaint();
         }
@@ -355,13 +351,13 @@ public class ScrollPane extends JScrollPane implements HasPublished, HasContaine
         return (JComponent) super.getViewport().getView();
     }
 
+    @ScriptFunction
     public void setView(JComponent aView) {
         if (getView() != aView) {
             if (getView() != null) {
                 getView().setPreferredSize(null);
             }
             super.setViewportView(aView);
-            invalidatePublishedCollection();
         }
     }
 
@@ -371,13 +367,11 @@ public class ScrollPane extends JScrollPane implements HasPublished, HasContaine
         if (aComp == getView()) {
             setView(null);
         }
-        invalidatePublishedCollection();
     }
 
     @Override
     public void clear() {
         setView(null);
-        invalidatePublishedCollection();
     }
 
     @ScriptFunction
@@ -403,38 +397,6 @@ public class ScrollPane extends JScrollPane implements HasPublished, HasContaine
         return getView();// to avoid swing's viewports to be included in results
     }
 
-    protected ContainerListener invalidatorListener = new ContainerAdapter() {
-
-        @Override
-        public void componentAdded(ContainerEvent e) {
-            invalidatePublishedCollection();
-        }
-
-        @Override
-        public void componentRemoved(ContainerEvent e) {
-            invalidatePublishedCollection();
-        }
-
-    };
-
-    protected JSObject publishedCollectionInvalidator;
-
-    @Override
-    public JSObject getPublishedCollectionInvalidator() {
-        return publishedCollectionInvalidator;
-    }
-
-    @Override
-    public void setPublishedCollectionInvalidator(JSObject aValue) {
-        publishedCollectionInvalidator = aValue;
-    }
-
-    @Override
-    public void invalidatePublishedCollection() {
-        if (publishedCollectionInvalidator != null && publishedCollectionInvalidator.isFunction()) {
-            publishedCollectionInvalidator.call(getPublished(), new Object[]{});
-        }
-    }
     protected JSObject published;
 
     @Override
