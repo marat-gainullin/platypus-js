@@ -20,7 +20,6 @@ import com.eas.design.Undesignable;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
-import com.eas.script.HasPublishedInvalidatableCollection;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.script.Scripts;
@@ -50,7 +49,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class BoxPane extends JPanel implements HasPublished, HasContainerEvents, HasChildren, HasPublishedInvalidatableCollection, HasJsName, Widget {
+public class BoxPane extends JPanel implements HasPublished, HasContainerEvents, HasChildren, HasJsName, Widget {
 
     protected Resizer resizer = new Resizer();
     private static final String CONSTRUCTOR_JSDOC = ""
@@ -82,7 +81,6 @@ public class BoxPane extends JPanel implements HasPublished, HasContainerEvents,
         super.setLayout(layout);
         super.addContainerListener(resizer);
         super.addHierarchyBoundsListener(resizer);
-        super.addContainerListener(invalidatorListener);
     }
 
     @ScriptFunction(jsDoc = JS_NAME_DOC)
@@ -374,39 +372,6 @@ public class BoxPane extends JPanel implements HasPublished, HasContainerEvents,
             super.add(aComp);
             super.revalidate();
             super.repaint();
-        }
-    }
-
-    protected ContainerListener invalidatorListener = new ContainerAdapter() {
-
-        @Override
-        public void componentAdded(ContainerEvent e) {
-            invalidatePublishedCollection();
-        }
-
-        @Override
-        public void componentRemoved(ContainerEvent e) {
-            invalidatePublishedCollection();
-        }
-
-    };
-
-    protected JSObject publishedCollectionInvalidator;
-
-    @Override
-    public JSObject getPublishedCollectionInvalidator() {
-        return publishedCollectionInvalidator;
-    }
-
-    @Override
-    public void setPublishedCollectionInvalidator(JSObject aValue) {
-        publishedCollectionInvalidator = aValue;
-    }
-
-    @Override
-    public void invalidatePublishedCollection() {
-        if (publishedCollectionInvalidator != null && publishedCollectionInvalidator.isFunction()) {
-            publishedCollectionInvalidator.call(getPublished(), new Object[]{});
         }
     }
 

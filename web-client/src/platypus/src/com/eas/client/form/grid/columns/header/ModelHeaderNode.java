@@ -7,6 +7,8 @@ import com.eas.client.form.published.HasJsName;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.PublishedColor;
 import com.eas.client.form.published.PublishedFont;
+import com.eas.client.form.published.widgets.model.ModelDecoratorBox;
+import com.eas.client.form.published.widgets.model.ModelFormattedField;
 import com.google.gwt.core.client.JavaScriptObject;
 
 public class ModelHeaderNode extends HeaderNode<JavaScriptObject> implements HasJsName, HasPublished {
@@ -17,6 +19,7 @@ public class ModelHeaderNode extends HeaderNode<JavaScriptObject> implements Has
 	public ModelHeaderNode() {
 		super();
 		column = new ModelColumn();
+		((ModelColumn)column).setEditor(new ModelFormattedField());
 		header = new DraggableHeader<JavaScriptObject>("", null, column, this);
 	}
 
@@ -200,8 +203,23 @@ public class ModelHeaderNode extends HeaderNode<JavaScriptObject> implements Has
 		((ModelColumn) column).unsort();
 	}
 	
+	public JavaScriptObject getJsEditor(){
+		return ((ModelColumn) column).getEditor().getPublished();
+	}
+	
+	public void setEditor(ModelDecoratorBox<?> aEditor){
+		((ModelColumn) column).setEditor(aEditor);
+	}
 	
 	private static native void publish(ModelHeaderNode aColumn, JavaScriptObject aPublished)/*-{
+		Object.defineProperty(aPublished, "editor", {
+			get : function() {
+				return aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::getJsEditor()();
+			},
+			set : function(aValue) {
+				aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::setEditor(Lcom/eas/client/form/published/widgets/model/ModelDecoratorBox;)(aValue && aValue.unwrap ? aValue.unwrap() : null);
+			}
+		});
 		Object.defineProperty(aPublished, "field", {
 			get : function() {
 				return aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::getField()();
@@ -360,6 +378,17 @@ public class ModelHeaderNode extends HeaderNode<JavaScriptObject> implements Has
 		aPublished.insertColumnNode = function(aIndex, aColumnFacade){
 			if(aColumnFacade && aColumnFacade.unwrap)
 				aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::insertColumnNode(ILcom/bearsoft/gwt/ui/widgets/grid/header/HeaderNode;)(aIndex, aColumnFacade.unwrap());
+		};
+		aPublished.getColumnNodes = function(){
+			var nChildren = aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::getChildren()();
+			var nChildrenCount = nChildren.@java.util.List::size()();
+			var res = [];
+			for(var c = 0; c < nChildrenCount; c++){
+				var nNode = nChildren.@java.util.List::get(I)(c);
+				var jsNode = nNode.@com.eas.client.form.published.HasPublished::getPublished()();
+				res.push(jsNode);
+			}
+			return res;
 		};
 	}-*/;
 }

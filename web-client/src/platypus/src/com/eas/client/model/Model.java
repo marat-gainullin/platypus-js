@@ -634,6 +634,7 @@ public class Model implements HasPublished {
         }
         if (!pSchemaLengthMet) {
             Object.defineProperty(pSchema, "length", {value: fieldsCount});
+        }
         // entity.params.p1 syntax
         var nParameters = nEntity.@com.eas.client.model.Entity::getQuery()().@com.eas.client.queries.Query::getParameters()();
         var ncParameters = nParameters.@com.eas.client.metadata.Parameters::toCollection()();

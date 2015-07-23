@@ -379,10 +379,10 @@
         Object.defineProperty(this, "displayList", {
             get: function() {
                 var value = delegate.displayList;
-                return value;
+                return P.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.displayList = aValue;
+                delegate.displayList = P.boxAsJava(aValue);
             }
         });
         if(!P.ModelCombo){

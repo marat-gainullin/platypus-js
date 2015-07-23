@@ -236,11 +236,8 @@
         }
         Object.defineProperty(this, "children", {
             get: function() {
-                if (!invalidatable) {
-                    var value = delegate.children;
-                    invalidatable = P.boxAsJs(value);
-                }
-                return invalidatable;
+                var value = delegate.children;
+                return P.boxAsJs(value);
             }
         });
         if(!P.FlowPane){
@@ -729,10 +726,6 @@
              */
             P.FlowPane.prototype.onKeyPressed = {};
         }
-        var invalidatable = null;
-        delegate.setPublishedCollectionInvalidator(function() {
-            invalidatable = null;
-        });
     };
         /**
          * Appends the specified component to the end of this container.

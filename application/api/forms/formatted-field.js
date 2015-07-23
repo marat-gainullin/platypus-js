@@ -430,23 +430,6 @@
              */
             P.FormattedField.prototype.onComponentShown = {};
         }
-        Object.defineProperty(this, "onFormat", {
-            get: function() {
-                var value = delegate.onFormat;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onFormat = aValue;
-            }
-        });
-        if(!P.FormattedField){
-            /**
-             * Generated property jsDoc.
-             * @property onFormat
-             * @memberOf FormattedField
-             */
-            P.FormattedField.prototype.onFormat = {};
-        }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
                 var value = delegate.onMouseMoved;
@@ -463,6 +446,23 @@
              * @memberOf FormattedField
              */
             P.FormattedField.prototype.onMouseMoved = {};
+        }
+        Object.defineProperty(this, "onFormat", {
+            get: function() {
+                var value = delegate.onFormat;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onFormat = aValue;
+            }
+        });
+        if(!P.FormattedField){
+            /**
+             * Generated property jsDoc.
+             * @property onFormat
+             * @memberOf FormattedField
+             */
+            P.FormattedField.prototype.onFormat = {};
         }
         Object.defineProperty(this, "opaque", {
             get: function() {

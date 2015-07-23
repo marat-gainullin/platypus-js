@@ -123,9 +123,9 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 	protected HandlerRegistration sortHandlerReg;
 	protected HandlerRegistration positionSelectionHandler;
 	protected HandlerRegistration onSelectEventSelectionHandler;
-	protected boolean editable;
-	protected boolean deletable;
-	protected boolean insertable;
+	protected boolean editable = true;
+	protected boolean deletable = true;
+	protected boolean insertable = true;
 
 	public ModelGrid() {
 		super(new JavaScriptObjectKeyProvider());
@@ -949,6 +949,17 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		aPublished.insertColumnNode = function(aIndex, aColumnFacade){
 			if(aColumnFacade && aColumnFacade.unwrap)
 				aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::insertColumnNode(ILcom/bearsoft/gwt/ui/widgets/grid/header/HeaderNode;)(aIndex, aColumnFacade.unwrap());
+		};
+		aPublished.getColumnNodes = function(){
+			var headerRoots = aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::getHeader()();
+			var rootsCount = headerRoots.@java.util.List::size()();
+			var res = [];
+			for(var r = 0; r < rootsCount; r++){
+				var nNode = headerRoots.@java.util.List::get(I)(r);
+				var jsNode = nNode.@com.eas.client.form.published.HasPublished::getPublished()();
+				res.push(jsNode);
+			}
+			return res;
 		};
 
 		Object.defineProperty(aPublished, "rowsHeight", {

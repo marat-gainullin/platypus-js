@@ -541,23 +541,6 @@
              */
             P.ModelGrid.prototype.onCollapse = {};
         }
-        Object.defineProperty(this, "onExpand", {
-            get: function() {
-                var value = delegate.onExpand;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onExpand = aValue;
-            }
-        });
-        if(!P.ModelGrid){
-            /**
-             * Event that is fired when user expands ModelGrid's row.
-             * @property onExpand
-             * @memberOf ModelGrid
-             */
-            P.ModelGrid.prototype.onExpand = {};
-        }
         Object.defineProperty(this, "onFocusLost", {
             get: function() {
                 var value = delegate.onFocusLost;
@@ -574,6 +557,23 @@
              * @memberOf ModelGrid
              */
             P.ModelGrid.prototype.onFocusLost = {};
+        }
+        Object.defineProperty(this, "onExpand", {
+            get: function() {
+                var value = delegate.onExpand;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onExpand = aValue;
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * Event that is fired when user expands ModelGrid's row.
+             * @property onExpand
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.onExpand = {};
         }
         Object.defineProperty(this, "onMousePressed", {
             get: function() {

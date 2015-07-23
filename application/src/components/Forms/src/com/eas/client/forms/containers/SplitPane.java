@@ -20,16 +20,13 @@ import com.eas.design.Undesignable;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
-import com.eas.script.HasPublishedInvalidatableCollection;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.script.Scripts;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
-import java.awt.event.ContainerAdapter;
 import java.awt.event.ContainerEvent;
-import java.awt.event.ContainerListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -43,7 +40,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class SplitPane extends JSplitPane implements HasPublished, HasContainerEvents, HasChildren, HasPublishedInvalidatableCollection, HasJsName, Widget {
+public class SplitPane extends JSplitPane implements HasPublished, HasContainerEvents, HasChildren, HasJsName, Widget {
 
     public SplitPane() {
         this(Orientation.VERTICAL);
@@ -59,7 +56,6 @@ public class SplitPane extends JSplitPane implements HasPublished, HasContainerE
     public SplitPane(int aOrientation) {
         super(aOrientation == Orientation.VERTICAL ? JSplitPane.VERTICAL_SPLIT : JSplitPane.HORIZONTAL_SPLIT);
         super.setOneTouchExpandable(true);
-        super.addContainerListener(invalidatorListener);
         //super.setDividerSize(3);
     }
 
@@ -468,38 +464,6 @@ public class SplitPane extends JSplitPane implements HasPublished, HasContainerE
         }
     }
 
-    protected ContainerListener invalidatorListener = new ContainerAdapter() {
-
-        @Override
-        public void componentAdded(ContainerEvent e) {
-            invalidatePublishedCollection();
-        }
-
-        @Override
-        public void componentRemoved(ContainerEvent e) {
-            invalidatePublishedCollection();
-        }
-
-    };
-
-    protected JSObject publishedCollectionInvalidator;
-
-    @Override
-    public JSObject getPublishedCollectionInvalidator() {
-        return publishedCollectionInvalidator;
-    }
-
-    @Override
-    public void setPublishedCollectionInvalidator(JSObject aValue) {
-        publishedCollectionInvalidator = aValue;
-    }
-
-    @Override
-    public void invalidatePublishedCollection() {
-        if (publishedCollectionInvalidator != null && publishedCollectionInvalidator.isFunction()) {
-            publishedCollectionInvalidator.call(getPublished(), new Object[]{});
-        }
-    }
     protected JSObject published;
 
     @Override

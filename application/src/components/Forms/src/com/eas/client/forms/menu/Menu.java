@@ -17,16 +17,13 @@ import com.eas.design.Undesignable;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.EventMethod;
 import com.eas.script.HasPublished;
-import com.eas.script.HasPublishedInvalidatableCollection;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.script.Scripts;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
-import java.awt.event.ContainerAdapter;
 import java.awt.event.ContainerEvent;
-import java.awt.event.ContainerListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -41,7 +38,7 @@ import jdk.nashorn.api.scripting.JSObject;
  *
  * @author mg
  */
-public class Menu extends JMenu implements HasPublished, HasContainerEvents, HasChildren, HasPublishedInvalidatableCollection, HasJsName, Widget {
+public class Menu extends JMenu implements HasPublished, HasContainerEvents, HasChildren, HasJsName, Widget {
 
     public Menu() {
         this(null);
@@ -58,7 +55,6 @@ public class Menu extends JMenu implements HasPublished, HasContainerEvents, Has
     @ScriptFunction(jsDoc = CONSTRUCTOR_JSDOC, params = {"text"})
     public Menu(String aText) {
         super(aText);
-        getPopupMenu().addContainerListener(invalidatorListener);
     }
 
     @ScriptFunction(jsDoc = JS_NAME_DOC)
@@ -311,39 +307,6 @@ public class Menu extends JMenu implements HasPublished, HasContainerEvents, Has
     @Override
     public void setText(String aValue) {
         super.setText(aValue);
-    }
-
-    protected ContainerListener invalidatorListener = new ContainerAdapter() {
-
-        @Override
-        public void componentAdded(ContainerEvent e) {
-            invalidatePublishedCollection();
-        }
-
-        @Override
-        public void componentRemoved(ContainerEvent e) {
-            invalidatePublishedCollection();
-        }
-
-    };
-
-    protected JSObject publishedCollectionInvalidator;
-
-    @Override
-    public JSObject getPublishedCollectionInvalidator() {
-        return publishedCollectionInvalidator;
-    }
-
-    @Override
-    public void setPublishedCollectionInvalidator(JSObject aValue) {
-        publishedCollectionInvalidator = aValue;
-    }
-
-    @Override
-    public void invalidatePublishedCollection() {
-        if (publishedCollectionInvalidator != null && publishedCollectionInvalidator.isFunction()) {
-            publishedCollectionInvalidator.call(getPublished(), new Object[]{});
-        }
     }
 
     private static final String ADD_JSDOC = ""

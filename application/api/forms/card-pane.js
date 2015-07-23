@@ -236,11 +236,8 @@
         }
         Object.defineProperty(this, "children", {
             get: function() {
-                if (!invalidatable) {
-                    var value = delegate.children;
-                    invalidatable = P.boxAsJs(value);
-                }
-                return invalidatable;
+                var value = delegate.children;
+                return P.boxAsJs(value);
             }
         });
         if(!P.CardPane){
@@ -746,10 +743,6 @@
              */
             P.CardPane.prototype.onKeyPressed = {};
         }
-        var invalidatable = null;
-        delegate.setPublishedCollectionInvalidator(function() {
-            invalidatable = null;
-        });
     };
         /**
          * Appends the component to this container with the specified name.

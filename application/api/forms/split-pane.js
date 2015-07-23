@@ -285,11 +285,8 @@
         }
         Object.defineProperty(this, "children", {
             get: function() {
-                if (!invalidatable) {
-                    var value = delegate.children;
-                    invalidatable = P.boxAsJs(value);
-                }
-                return invalidatable;
+                var value = delegate.children;
+                return P.boxAsJs(value);
             }
         });
         if(!P.SplitPane){
@@ -812,10 +809,6 @@
              */
             P.SplitPane.prototype.onKeyPressed = {};
         }
-        var invalidatable = null;
-        delegate.setPublishedCollectionInvalidator(function() {
-            invalidatable = null;
-        });
     };
         /**
          * Tries to acquire focus for this component.
