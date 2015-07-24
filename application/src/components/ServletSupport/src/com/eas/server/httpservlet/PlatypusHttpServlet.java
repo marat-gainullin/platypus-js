@@ -119,8 +119,6 @@ public class PlatypusHttpServlet extends HttpServlet {
                     Scripts.initTasks((Runnable aTask) -> {
                         if (containerExecutor != null) {// J2EE 7+
                             containerExecutor.submit(aTask);
-                        } else if (Scripts.getContext().getAsync() != null) {// Servlet 3+
-                            ((AsyncContext) Scripts.getContext().getAsync()).start(aTask);
                         } else {
                             // Other environment
                             selfExecutor.submit(aTask);
