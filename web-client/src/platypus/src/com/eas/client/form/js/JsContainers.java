@@ -390,22 +390,22 @@ public class JsContainers {
 					}
 				}
 			});
-			if (aLeft) {
+			if (aLeft != null) {
 				published.left = '' + aLeft;
 			}
-			if (aWidth) {
+			if (aWidth != null) {
 				published.width = '' + aWidth;
 			}
-			if (aRight) {
+			if (aRight != null) {
 				published.right = '' + aRight;
 			}
-			if (aTop) {
+			if (aTop != null) {
 				published.top = '' + aTop;
 			}
-			if (aHeight) {
+			if (aHeight != null) {
 				published.height = '' + aHeight;
 			}
-			if (aBottom) {
+			if (aBottom != null) {
 				published.bottom = '' + aBottom;
 			}
 		} 
