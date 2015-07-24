@@ -950,7 +950,7 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 			if(aColumnFacade && aColumnFacade.unwrap)
 				aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::insertColumnNode(ILcom/bearsoft/gwt/ui/widgets/grid/header/HeaderNode;)(aIndex, aColumnFacade.unwrap());
 		};
-		aPublished.getColumnNodes = function(){
+		aPublished.columnNodes = function(){
 			var headerRoots = aWidget.@com.eas.client.form.published.widgets.model.ModelGrid::getHeader()();
 			var rootsCount = headerRoots.@java.util.List::size()();
 			var res = [];

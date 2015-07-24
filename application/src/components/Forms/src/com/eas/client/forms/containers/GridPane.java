@@ -381,14 +381,14 @@ public class GridPane extends JPanel implements HasPublished, HasContainerEvents
     @Undesignable
     @Override
     public int getCount() {
-        JComponent[] comps = getChildren();
+        JComponent[] comps = children();
         return comps.length;
     }
 
     @ScriptFunction
     @Undesignable
     @Override
-    public JComponent[] getChildren() {
+    public JComponent[] children() {
         List<JComponent> ch = new ArrayList<>();
         for (int i = 0; i < layout.getRows(); i++) {
             for (int j = 0; j < layout.getColumns(); j++) {

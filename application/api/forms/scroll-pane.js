@@ -283,20 +283,6 @@
              */
             P.ScrollPane.prototype.top = 0;
         }
-        Object.defineProperty(this, "children", {
-            get: function() {
-                var value = delegate.children;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ScrollPane){
-            /**
-             * Generated property jsDoc.
-             * @property children
-             * @memberOf ScrollPane
-             */
-            P.ScrollPane.prototype.children = [];
-        }
         Object.defineProperty(this, "onComponentResized", {
             get: function() {
                 var value = delegate.onComponentResized;
@@ -808,6 +794,17 @@
         P.ScrollPane.prototype.focus = function() {
             var delegate = this.unwrap();
             var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
+         * @method children
+         * @memberOf ScrollPane
+         */
+        P.ScrollPane.prototype.children = function() {
+            var delegate = this.unwrap();
+            var value = delegate.children();
             return P.boxAsJs(value);
         };
 

@@ -381,7 +381,7 @@ public class FormUtils {
         }
 
         @Override
-        public JComponent[] getChildren() {
+        public JComponent[] children() {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
 

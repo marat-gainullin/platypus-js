@@ -339,7 +339,7 @@ public class Menu extends JMenu implements HasPublished, HasContainerEvents, Has
 
     @ScriptFunction(jsDoc = CHILDREN_JSDOC)
     @Override
-    public JComponent[] getChildren() {
+    public JComponent[] children() {
         List<JComponent> ch = new ArrayList<>();
         for (int i = 0; i < getCount(); i++) {
             ch.add(child(i));

@@ -358,7 +358,7 @@ public class ButtonGroup extends ButtonGroupWrapper implements HasPublished, Has
     @ScriptFunction(jsDoc = CHILDREN_JSDOC)
     @Undesignable
     @Override
-    public JComponent[] getChildren() {
+    public JComponent[] children() {
         List<JComponent> ch = new ArrayList<>();
         for (int i = 0; i < getCount(); i++) {
             ch.add(child(i));

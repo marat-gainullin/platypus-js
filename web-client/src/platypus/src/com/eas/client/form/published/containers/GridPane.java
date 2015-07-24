@@ -234,14 +234,14 @@ public class GridPane extends GridPanel implements HasJsFacade, HasEnabled, HasC
 			}
 		});
 		Object.defineProperty(published, "children", {
-			get : function(){
+			value : function(){
 				var ch = [];
 				for(var r = 0; r < published.rows; r++){
 					for(var c = 0; c < published.columns; c++){
 						var index = published.columns * r + c;
 						var comp = published.child(r, c);
 						if(comp != null){
-							ch[ch.length] = comp;
+							ch.push(comp);
 						}
 					}
 				}

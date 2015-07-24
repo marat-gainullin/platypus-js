@@ -574,14 +574,14 @@ public class Model implements HasPublished {
                     try {
                         _onInserted({source: published, items: added});
                     } catch (e) {
-                        Logger.severe(e);
+                        $wnd.P.Logger.severe(e);
                     }
                 }
                 if (_onDeleted && deleted.length > 0) {
                     try {
                         _onDeleted({source: published, items: deleted});
                     } catch (e) {
-                        Logger.severe(e);
+                        $wnd.P.Logger.severe(e);
                     }
                 }
             	@com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(published, {source: published, propertyName: 'length'});
@@ -591,7 +591,7 @@ public class Model implements HasPublished {
                     try {
                         _onScrolled({source: published, propertyName: 'cursor', oldValue: oldCursor, newValue: newCursor});
                     } catch (e) {
-                        Logger.severe(e);
+                        $wnd.P.Logger.severe(e);
                     }
                 }
                 @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(published, {source: published, propertyName: 'cursor', oldValue: oldCursor, newValue: newCursor});

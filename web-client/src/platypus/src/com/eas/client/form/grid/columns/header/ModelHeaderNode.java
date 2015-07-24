@@ -379,7 +379,7 @@ public class ModelHeaderNode extends HeaderNode<JavaScriptObject> implements Has
 			if(aColumnFacade && aColumnFacade.unwrap)
 				aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::insertColumnNode(ILcom/bearsoft/gwt/ui/widgets/grid/header/HeaderNode;)(aIndex, aColumnFacade.unwrap());
 		};
-		aPublished.getColumnNodes = function(){
+		aPublished.columnNodes = function(){
 			var nChildren = aColumn.@com.eas.client.form.grid.columns.header.ModelHeaderNode::getChildren()();
 			var nChildrenCount = nChildren.@java.util.List::size()();
 			var res = [];
