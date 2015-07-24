@@ -10,6 +10,7 @@ import com.bearsoft.gwt.ui.XElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.LayoutPanel;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -27,10 +28,14 @@ public class AnchorsPanel extends LayoutPanel {
 		if (child.getParent() == this) {
 			Element el = getWidgetContainerElement(child);
 			boolean visible = !child.getElement().hasAttribute("aria-hidden");
-			if (visible)
+			if (visible){
 				el.getStyle().clearDisplay();
-			else
+				if(child instanceof RequiresResize){
+					((RequiresResize)child).onResize();
+				}
+			} else {
 				el.getStyle().setDisplay(Style.Display.NONE);
+			}
 		}
 	}
 
