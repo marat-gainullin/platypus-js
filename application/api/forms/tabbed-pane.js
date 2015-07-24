@@ -231,20 +231,6 @@
              */
             P.TabbedPane.prototype.top = 0;
         }
-        Object.defineProperty(this, "children", {
-            get: function() {
-                var value = delegate.children;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.TabbedPane){
-            /**
-             * Gets the container's children components.
-             * @property children
-             * @memberOf TabbedPane
-             */
-            P.TabbedPane.prototype.children = [];
-        }
         Object.defineProperty(this, "onComponentResized", {
             get: function() {
                 var value = delegate.onComponentResized;
@@ -820,6 +806,17 @@
         P.TabbedPane.prototype.focus = function() {
             var delegate = this.unwrap();
             var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Gets the container's children components.
+         * @method children
+         * @memberOf TabbedPane
+         */
+        P.TabbedPane.prototype.children = function() {
+            var delegate = this.unwrap();
+            var value = delegate.children();
             return P.boxAsJs(value);
         };
 

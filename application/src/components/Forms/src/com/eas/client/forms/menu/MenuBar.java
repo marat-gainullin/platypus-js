@@ -299,7 +299,7 @@ public class MenuBar extends JMenuBar implements HasPublished, HasContainerEvent
 
     @ScriptFunction(jsDoc = CHILDREN_JSDOC)
     @Override
-    public JComponent[] getChildren() {
+    public JComponent[] children() {
         List<JComponent> ch = new ArrayList<>();
         for (int i = 0; i < getCount(); i++) {
             ch.add(child(i));

@@ -252,20 +252,6 @@
              */
             P.GridPane.prototype.top = 0;
         }
-        Object.defineProperty(this, "children", {
-            get: function() {
-                var value = delegate.children;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.GridPane){
-            /**
-             * Generated property jsDoc.
-             * @property children
-             * @memberOf GridPane
-             */
-            P.GridPane.prototype.children = [];
-        }
         Object.defineProperty(this, "onComponentResized", {
             get: function() {
                 var value = delegate.onComponentResized;
@@ -804,6 +790,17 @@
         P.GridPane.prototype.focus = function() {
             var delegate = this.unwrap();
             var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
+         * @method children
+         * @memberOf GridPane
+         */
+        P.GridPane.prototype.children = function() {
+            var delegate = this.unwrap();
+            var value = delegate.children();
             return P.boxAsJs(value);
         };
 

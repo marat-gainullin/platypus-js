@@ -377,7 +377,7 @@ public class ScrollPane extends JScrollPane implements HasPublished, HasContaine
     @ScriptFunction
     @Undesignable
     @Override
-    public JComponent[] getChildren() {
+    public JComponent[] children() {
         return getView() != null ? new JComponent[]{getView()} : new JComponent[]{};
     }
 

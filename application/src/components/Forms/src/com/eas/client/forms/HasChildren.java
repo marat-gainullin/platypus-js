@@ -29,7 +29,7 @@ public interface HasChildren {
             + "*/";
 
     @ScriptFunction(jsDoc = CHILDREN_JSDOC)
-    public JComponent[] getChildren();
+    public JComponent[] children();
 
     public static final String REMOVE_JSDOC = ""
             + "/**\n"

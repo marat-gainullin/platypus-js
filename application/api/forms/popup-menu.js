@@ -230,20 +230,6 @@
              */
             P.PopupMenu.prototype.top = 0;
         }
-        Object.defineProperty(this, "children", {
-            get: function() {
-                var value = delegate.children;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.PopupMenu){
-            /**
-             * Gets the container's children components.
-             * @property children
-             * @memberOf PopupMenu
-             */
-            P.PopupMenu.prototype.children = [];
-        }
         Object.defineProperty(this, "onComponentResized", {
             get: function() {
                 var value = delegate.onComponentResized;
@@ -766,6 +752,17 @@
         P.PopupMenu.prototype.focus = function() {
             var delegate = this.unwrap();
             var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Gets the container's children components.
+         * @method children
+         * @memberOf PopupMenu
+         */
+        P.PopupMenu.prototype.children = function() {
+            var delegate = this.unwrap();
+            var value = delegate.children();
             return P.boxAsJs(value);
         };
 

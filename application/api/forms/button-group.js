@@ -231,20 +231,6 @@
              */
             P.ButtonGroup.prototype.top = 0;
         }
-        Object.defineProperty(this, "children", {
-            get: function() {
-                var value = delegate.children;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ButtonGroup){
-            /**
-             * Gets the container's children components.
-             * @property children
-             * @memberOf ButtonGroup
-             */
-            P.ButtonGroup.prototype.children = [];
-        }
         Object.defineProperty(this, "onComponentResized", {
             get: function() {
                 var value = delegate.onComponentResized;
@@ -772,6 +758,17 @@
         P.ButtonGroup.prototype.focus = function() {
             var delegate = this.unwrap();
             var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Gets the container's children components.
+         * @method children
+         * @memberOf ButtonGroup
+         */
+        P.ButtonGroup.prototype.children = function() {
+            var delegate = this.unwrap();
+            var value = delegate.children();
             return P.boxAsJs(value);
         };
 

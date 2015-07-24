@@ -93,6 +93,11 @@ public class ModelGridColumn extends GridColumnsNode implements HasPublished {
     }
     
     @ScriptFunction
+    public GridColumnsNode[] columnNodes() {
+        return children.toArray(new GridColumnsNode[]{});
+    }
+
+    @ScriptFunction
     @Designable(category = "model")
     public String getField() {
         return field;

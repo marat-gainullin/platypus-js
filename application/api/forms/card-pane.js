@@ -234,20 +234,6 @@
              */
             P.CardPane.prototype.top = 0;
         }
-        Object.defineProperty(this, "children", {
-            get: function() {
-                var value = delegate.children;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.CardPane){
-            /**
-             * Gets the container's children components.
-             * @property children
-             * @memberOf CardPane
-             */
-            P.CardPane.prototype.children = [];
-        }
         Object.defineProperty(this, "onComponentResized", {
             get: function() {
                 var value = delegate.onComponentResized;
@@ -800,6 +786,17 @@
         P.CardPane.prototype.focus = function() {
             var delegate = this.unwrap();
             var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Gets the container's children components.
+         * @method children
+         * @memberOf CardPane
+         */
+        P.CardPane.prototype.children = function() {
+            var delegate = this.unwrap();
+            var value = delegate.children();
             return P.boxAsJs(value);
         };
 

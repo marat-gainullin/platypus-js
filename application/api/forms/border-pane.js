@@ -234,20 +234,6 @@
              */
             P.BorderPane.prototype.top = 0;
         }
-        Object.defineProperty(this, "children", {
-            get: function() {
-                var value = delegate.children;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.BorderPane){
-            /**
-             * Gets the container's children components.
-             * @property children
-             * @memberOf BorderPane
-             */
-            P.BorderPane.prototype.children = [];
-        }
         Object.defineProperty(this, "onComponentResized", {
             get: function() {
                 var value = delegate.onComponentResized;
@@ -859,6 +845,17 @@
         P.BorderPane.prototype.focus = function() {
             var delegate = this.unwrap();
             var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Gets the container's children components.
+         * @method children
+         * @memberOf BorderPane
+         */
+        P.BorderPane.prototype.children = function() {
+            var delegate = this.unwrap();
+            var value = delegate.children();
             return P.boxAsJs(value);
         };
 

@@ -458,12 +458,14 @@ public class JsContainers {
 		}
 
 		function publishChildren(aPublished){
-			Object.defineProperty(aPublished, "children", {get : function(){
-				var ch = [];
-				for(var i=0; i < aPublished.count; i++)
-					ch[ch.length] = aPublished.child(i);
-				return ch;
-			}});
+			Object.defineProperty(aPublished, "children", {
+				value : function(){
+					var ch = [];
+					for(var i=0; i < aPublished.count; i++)
+						ch.push(aPublished.child(i));
+					return ch;
+				}
+			});
 		}		
 	}-*/;
 }

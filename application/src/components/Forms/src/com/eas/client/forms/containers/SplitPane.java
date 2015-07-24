@@ -433,7 +433,7 @@ public class SplitPane extends JSplitPane implements HasPublished, HasContainerE
     @ScriptFunction(jsDoc = CHILDREN_JSDOC)
     @Undesignable
     @Override
-    public JComponent[] getChildren() {
+    public JComponent[] children() {
         List<JComponent> children = new ArrayList<>();
         JComponent first = getFirstComponent();
         if (first != null) {

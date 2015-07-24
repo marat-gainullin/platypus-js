@@ -1082,6 +1082,16 @@
         };
 
         /**
+         * @method unsort
+         * @memberOf ModelGrid
+         * Clears sort on all columns, works only in HTML5 */
+        P.ModelGrid.prototype.unsort = function() {
+            var delegate = this.unwrap();
+            var value = delegate.unsort();
+            return P.boxAsJs(value);
+        };
+
+        /**
          *
          * @method addColumnNode
          * @memberOf ModelGrid
@@ -1089,6 +1099,17 @@
         P.ModelGrid.prototype.addColumnNode = function(arg0) {
             var delegate = this.unwrap();
             var value = delegate.addColumnNode(P.boxAsJava(arg0));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
+         * @method columnNodes
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.columnNodes = function() {
+            var delegate = this.unwrap();
+            var value = delegate.columnNodes();
             return P.boxAsJs(value);
         };
 
@@ -1144,16 +1165,6 @@
         P.ModelGrid.prototype.try2CancelAnyEditing = function() {
             var delegate = this.unwrap();
             var value = delegate.try2CancelAnyEditing();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * @method unsort
-         * @memberOf ModelGrid
-         * Clears sort on all columns, works only in HTML5 */
-        P.ModelGrid.prototype.unsort = function() {
-            var delegate = this.unwrap();
-            var value = delegate.unsort();
             return P.boxAsJs(value);
         };
 

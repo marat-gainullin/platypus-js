@@ -1609,6 +1609,11 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     }
 
     @ScriptFunction
+    public GridColumnsNode[] columnNodes() {
+        return header.toArray(new GridColumnsNode[]{});
+    }
+
+    @ScriptFunction
     @Override
     public void removeColumnNode(GridColumnsNode aNode) {
         if (aNode != null) {

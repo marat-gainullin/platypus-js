@@ -249,10 +249,10 @@ public class PlatypusMenuBar extends MenuBar implements HasJsFacade, HasEnabled,
 			}
 		});
 		Object.defineProperty(published, "children", {
-			get : function(){
+			value : function(){
 				var ch = [];
 				for(var i=0; i < published.count; i++)
-					ch[ch.length] = published.child(i);
+					ch.push(published.child(i));
 				return ch;
 		    }
 		});
