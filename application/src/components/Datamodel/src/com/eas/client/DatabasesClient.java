@@ -6,7 +6,6 @@ import com.eas.client.dataflow.ColumnsIndicies;
 import com.eas.client.dataflow.Converter;
 import com.eas.client.dataflow.StatementsGenerator;
 import com.eas.client.login.PlatypusPrincipal;
-import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.Parameter;
@@ -178,7 +177,7 @@ public class DatabasesClient {
     public static Map<String, String> getUserProperties(DatabasesClient aClient, String aUserName, Scripts.Space aSpace, Consumer<Map<String, String>> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (aUserName != null && aClient != null) {
             final SqlQuery q = new SqlQuery(aClient, USER_QUERY_TEXT);
-            q.putParameter(USERNAME_PARAMETER_NAME, DataTypeInfo.VARCHAR, aUserName.toUpperCase());
+            q.putParameter(USERNAME_PARAMETER_NAME, "String", aUserName.toUpperCase());
             SqlCompiledQuery compiled = q.compile();
             CallableConsumer<Map<String, String>, ResultSet> doWork = (ResultSet r) -> {
                 Map<String, String> properties = new HashMap<>();
@@ -312,7 +311,7 @@ public class DatabasesClient {
                     Parameters params = aQuery.getParameters();
                     for (int i = 1; i <= params.getParametersCount(); i++) {
                         Parameter param = params.get(i);
-                        Converter.convertAndAssign(param.getValue(), param.getTypeInfo(), connection, i, stmt);
+                        Converter.convertAndAssign(param.getValue(), connection, i, stmt);
                     }
                     try {
                         rowsAffected += stmt.executeUpdate();
@@ -698,7 +697,7 @@ public class DatabasesClient {
             return roles;
         };
         final SqlQuery q = new SqlQuery(aClient, USER_GROUPS_QUERY_TEXT);
-        q.putParameter(USERNAME_PARAMETER_NAME, DataTypeInfo.VARCHAR, aUserName.toUpperCase());
+        q.putParameter(USERNAME_PARAMETER_NAME, "String", aUserName.toUpperCase());
         SqlCompiledQuery compiled = q.compile();
         if (onSuccess != null) {
             compiled.<Set<String>>executeQuery(doWork, (Runnable aTask) -> {

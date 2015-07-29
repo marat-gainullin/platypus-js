@@ -9,11 +9,8 @@
  */
 package com.eas.client.metadata;
 
-import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
-import java.math.BigDecimal;
 import java.sql.ParameterMetaData;
-import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * This class is a parameter specification for queries, forms, reports and
@@ -65,11 +62,11 @@ public class Parameter extends Field {
      *
      * @param aName Name of the created parameter.
      * @param aDescription Description of the created parameter.
-     * @param aTypeInfo Type info of the created parameter.
+     * @param aType Type name of the created parameter.
      * @see DataTypeInfo
      */
-    public Parameter(String aName, String aDescription, DataTypeInfo aTypeInfo) {
-        super(aName, aDescription, aTypeInfo);
+    public Parameter(String aName, String aDescription, String aType) {
+        super(aName, aDescription, aType);
     }
 
     /**
@@ -183,15 +180,6 @@ public class Parameter extends Field {
     }
 
     /**
-     * Returns parameter's class name.
-     *
-     * @return Parameter's class name.
-     */
-    public String getParameterClassName() {
-        return getTypeInfo().getJavaClassName();
-    }
-
-    /**
      * Returns parameter's mode.
      *
      * @return Parameter's mode.
@@ -277,7 +265,7 @@ public class Parameter extends Field {
      * @throws Exception if parameter's value not to be converted.
      */
     public String getValueAsString() throws Exception {
-        if (getTypeInfo() != null && getValue() != null) {
+        if (getValue() != null) {
             if (getValue() instanceof java.math.BigDecimal
                     || getValue() instanceof Float
                     || getValue() instanceof Double
@@ -301,10 +289,9 @@ public class Parameter extends Field {
      * with <code>getValueAsString()</code> method.
      *
      * @throws Exception if operation fails.
-     */
     public void setValueByString(String aValue) throws Exception {
         if (aValue != null) {
-            if (getTypeInfo() != null) {
+            if (getType() != null) {
                 if (getTypeInfo().javaClassName.equals(String.class.getName())) {
                     value = aValue;
                 } else if (getTypeInfo().javaClassName.equals(java.math.BigDecimal.class.getName())) {
@@ -331,6 +318,7 @@ public class Parameter extends Field {
             throw new IllegalArgumentException("Parameter must not be null."); //NOI18N
         }
     }
+     */
 
     /**
      * Returns selection form of the parameter.

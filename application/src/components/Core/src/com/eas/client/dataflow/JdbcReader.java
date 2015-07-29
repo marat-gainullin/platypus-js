@@ -4,7 +4,6 @@
  */
 package com.eas.client.dataflow;
 
-import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
 import java.sql.ResultSet;
@@ -79,28 +78,22 @@ public class JdbcReader {
     public static Fields readFields(ResultSetMetaData lowLevelJdbcFields) throws SQLException {
         Fields jdbcFields = new Fields();
         for (int i = 1; i <= lowLevelJdbcFields.getColumnCount(); i++) {
-            Field field = new Field();
+            Field jdbcField = new Field();
             String columnLabel = lowLevelJdbcFields.getColumnLabel(i);// Column label in jdbc is the name of platypus property
             String columnName = lowLevelJdbcFields.getColumnName(i);
-            field.setName(columnLabel != null && !columnLabel.isEmpty() ? columnLabel : columnName);
-            field.setOriginalName(columnName);
+            jdbcField.setName(columnLabel != null && !columnLabel.isEmpty() ? columnLabel : columnName);
+            jdbcField.setOriginalName(columnName);
+            
+            jdbcField.setNullable(lowLevelJdbcFields.isNullable(i) == ResultSetMetaData.columnNullable);
+            jdbcField.setType(lowLevelJdbcFields.getColumnTypeName(i));
+            jdbcField.setSize(lowLevelJdbcFields.getColumnDisplaySize(i));
+            jdbcField.setPrecision(lowLevelJdbcFields.getPrecision(i));
+            jdbcField.setScale(lowLevelJdbcFields.getScale(i));
+            jdbcField.setSigned(lowLevelJdbcFields.isSigned(i));
 
-            field.setNullable(lowLevelJdbcFields.isNullable(i) == ResultSetMetaData.columnNullable);
-
-            DataTypeInfo typeInfo = new DataTypeInfo();
-            typeInfo.setSqlType(lowLevelJdbcFields.getColumnType(i));
-            typeInfo.setSqlTypeName(lowLevelJdbcFields.getColumnTypeName(i));
-            typeInfo.setJavaClassName(lowLevelJdbcFields.getColumnClassName(i));
-            field.setTypeInfo(typeInfo);
-
-            field.setSize(lowLevelJdbcFields.getColumnDisplaySize(i));
-            field.setPrecision(lowLevelJdbcFields.getPrecision(i));
-            field.setScale(lowLevelJdbcFields.getScale(i));
-            field.setSigned(lowLevelJdbcFields.isSigned(i));
-
-            field.setTableName(lowLevelJdbcFields.getTableName(i));
-            field.setSchemaName(lowLevelJdbcFields.getSchemaName(i));
-            jdbcFields.add(field);
+            jdbcField.setTableName(lowLevelJdbcFields.getTableName(i));
+            jdbcField.setSchemaName(lowLevelJdbcFields.getSchemaName(i));
+            jdbcFields.add(jdbcField);
         }
         return jdbcFields;
     }
@@ -155,11 +148,11 @@ public class JdbcReader {
                 Field jdbcField = aJdbcFields.get(i);
                 Field expectedField = aExpectedFields.get(jdbcField.getName());
                 if (expectedField != null) {
-                    Object appObject = Converter.get(aResultSet, i, expectedField.getTypeInfo());
+                    Object appObject = Converter.get(aResultSet, i);
                     //appObject = Scripts.toJs(appObject);
                     row.put(expectedField.getName(), appObject);
                 } else {
-                    Object appObject = Converter.get(aResultSet, i, jdbcField.getTypeInfo());
+                    Object appObject = Converter.get(aResultSet, i);
                     //appObject = Scripts.toJs(appObject);
                     row.put(jdbcField.getName(), appObject);
                 }

@@ -36,7 +36,7 @@ public class Field implements HasPublished {
     // but be able to generate right update sql clauses for multiple tables.
     protected String originalName = "";
     protected String description;// Such data is read from db, and so may be null
-    protected DataTypeInfo typeInfo = DataTypeInfo.JAVA_OBJECT.copy();
+    protected String type;// Null value will be used as "unknown" type
     protected int size;
     protected int scale;
     protected int precision;
@@ -57,7 +57,7 @@ public class Field implements HasPublished {
     public static final String NAME_PROPERTY = "name";
     public static final String ORIGINAL_NAME_PROPERTY = "originalName";
     public static final String DESCRIPTION_PROPERTY = "description";
-    public static final String TYPE_INFO_PROPERTY = "typeInfo";
+    public static final String TYPE_PROPERTY = "type";
     public static final String SCHEMA_NAME_PROPERTY = "schemaName";
     public static final String TABLE_NAME_PROPERTY = "tableName";
     public static final String SIZE_PROPERTY = "size";
@@ -99,12 +99,11 @@ public class Field implements HasPublished {
      *
      * @param aName Name of the created field.
      * @param aDescription Description of the created field.
-     * @param aTypeInfo Type info of the created field.
-     * @see DataTypeInfo
+     * @param aType Type name of the created field.
      */
-    public Field(String aName, String aDescription, DataTypeInfo aTypeInfo) {
+    public Field(String aName, String aDescription, String aType) {
         this(aName, aDescription);
-        typeInfo = aTypeInfo;
+        type = aType;
     }
 
     /**
@@ -234,10 +233,10 @@ public class Field implements HasPublished {
                     && precision == rf.getPrecision()
                     && scale == rf.getScale()
                     && size == rf.getSize()
-                    && typeInfo.equals(rf.getTypeInfo())
                     && ((fk == null && lfk == null) || (fk != null && fk.equals(lfk)))
                     && ((description == null && rfDescription == null) || (description != null && description.equals(rfDescription)))
                     && ((name == null && rfName == null) || (name != null && name.equals(rfName)))
+                    && ((type == null && rfName == null) || (type != null && type.equals(rfName)))
                     && ((originalName == null && rfOriginalName == null) || (originalName != null && originalName.equals(rfOriginalName)))
                     && ((tableName == null && rfTableName == null) || (tableName != null && tableName.equals(rfTableName)))
                     && ((schemaName == null && rfSchemaName == null) || (schemaName != null && schemaName.equals(rfSchemaName)));
@@ -347,8 +346,8 @@ public class Field implements HasPublished {
      * @return The field's type information
      */
     @ScriptFunction(jsDoc = TYPE_INFO_JS_DOC)
-    public DataTypeInfo getTypeInfo() {
-        return typeInfo;
+    public String getType() {
+        return type;
     }
 
     /**
@@ -358,10 +357,10 @@ public class Field implements HasPublished {
      * @see DataTypeInfo
      */
     @ScriptFunction
-    public void setTypeInfo(DataTypeInfo aValue) {
-        DataTypeInfo oldValue = typeInfo;
-        typeInfo = aValue != null ? aValue.copy() : null;
-        changeSupport.firePropertyChange(TYPE_INFO_PROPERTY, oldValue, typeInfo);
+    public void setType(String aValue) {
+        String oldValue = type;
+        type = aValue;
+        changeSupport.firePropertyChange(TYPE_PROPERTY, oldValue, type);
     }
 
     private static final String SCHEMA_NAME_JS_DOC = "/**\n"
@@ -580,7 +579,7 @@ public class Field implements HasPublished {
             if (!equalsOrNulls(getSchemaName(), aSourceField.getSchemaName())) {
                 setSchemaName(aSourceField.getSchemaName());
             }
-            setTypeInfo(aSourceField.getTypeInfo().copy());
+            setType(aSourceField.getType());
             if (getSize() != aSourceField.getSize()) {
                 setSize(aSourceField.getSize());
             }
@@ -646,7 +645,7 @@ public class Field implements HasPublished {
             }
             sb.append(rf.field);
         }
-        sb.append(", ").append(typeInfo.toString());
+        sb.append(", ").append(type);
         sb.append(", size ").append(size).append(", precision ").append(precision).append(", scale ").append(scale);
         if (signed) {
             sb.append(", signed");

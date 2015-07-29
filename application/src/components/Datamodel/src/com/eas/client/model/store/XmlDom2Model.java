@@ -20,7 +20,6 @@ import java.math.BigInteger;
 import java.sql.Date;
 import java.sql.ParameterMetaData;
 import java.sql.Time;
-import java.sql.Types;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -236,8 +235,7 @@ public abstract class XmlDom2Model<E extends Entity<M, ?, E>, M extends Model<E,
         try {
             aField.setName(currentNode.getAttribute(Model2XmlDom.NAME_ATTR_NAME));
             aField.setDescription(currentNode.getAttribute(Model2XmlDom.DESCRIPTION_ATTR_NAME));
-            aField.getTypeInfo().setSqlType(readIntegerAttribute(Model2XmlDom.TYPE_ATTR_NAME, Types.LONGVARCHAR));
-            aField.getTypeInfo().setSqlTypeName(currentNode.getAttribute(Model2XmlDom.TYPE_NAME_ATTR_NAME));
+            aField.setType(currentNode.getAttribute(Model2XmlDom.TYPE_ATTR_NAME));
             aField.setSize(readIntegerAttribute(Model2XmlDom.SIZE_ATTR_NAME, 100));
             aField.setScale(readIntegerAttribute(Model2XmlDom.SCALE_ATTR_NAME, 0));
             aField.setPrecision(readIntegerAttribute(Model2XmlDom.PRECISION_ATTR_NAME, 0));

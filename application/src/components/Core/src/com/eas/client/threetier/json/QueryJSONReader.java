@@ -39,7 +39,7 @@ public class QueryJSONReader {
         FieldsJSONReader.readFields(jsParameters, params);
         for (int i = 0; i < params.getParametersCount(); i++) {
             Parameter p = params.get(i + 1);
-            query.putParameter(p.getName(), p.getTypeInfo(), p.getValue());
+            query.putParameter(p.getName(), p.getType(), p.getValue());
         }
         // fields
         JSObject jsFields = (JSObject) o.getMember(FIELDS_PROP_NAME);

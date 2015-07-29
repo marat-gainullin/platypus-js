@@ -189,13 +189,6 @@ public class StoredQueryFactory {
     private void putParametersMetadata(SqlQuery aQuery, QueryModel aModel) {
         for (int i = 1; i <= aModel.getParameters().getParametersCount(); i++) {
             Parameter p = aModel.getParameters().get(i);
-            if (p.getTypeInfo().getSqlTypeName() == null || p.getTypeInfo().getSqlTypeName().isEmpty()) {
-                DataTypeInfo dt = DataTypeInfo.valueOf(p.getTypeInfo().getSqlType());
-                if (dt != null) {
-                    p.getTypeInfo().setJavaClassName(dt.getJavaClassName());
-                    p.getTypeInfo().setSqlTypeName(dt.getSqlTypeName());
-                }
-            }
             aQuery.getParameters().add(p);
         }
     }
@@ -209,8 +202,8 @@ public class StoredQueryFactory {
                     if (addition.description != null && !addition.description.isEmpty()) {
                         queryField.setDescription(addition.description);
                     }
-                    if (addition.getTypeInfo() != null && !addition.getTypeInfo().equals(queryField.getTypeInfo())) {
-                        queryField.setTypeInfo(addition.getTypeInfo());
+                    if (addition.getType() != null && !addition.getType().equals(queryField.getType())) {
+                        queryField.setType(addition.getType());
                     }
                 }
             });
@@ -396,7 +389,7 @@ public class StoredQueryFactory {
                      * field's type and description information during
                      * "putStoredTableFieldsMetadata(...)" call.
                      */
-                    field.getTypeInfo().setSqlType(Types.OTHER);
+                    field.setType(null);
                 }
                 aQuery.getFields().add(field);
             }

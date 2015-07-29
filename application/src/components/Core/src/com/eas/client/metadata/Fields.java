@@ -342,7 +342,6 @@ public class Fields implements HasPublished {
             aName = generateNewName();
         }
         Field lfield = new Field(aName, null);
-        lfield.setTypeInfo(DataTypeInfo.VARCHAR);
         return lfield;
     }
 

@@ -42,8 +42,6 @@ public class RequestsTags extends CoreTags{
     public static final int TABLE_NAME_TAG = 20;
     public static final int TAG_SQL_PARAMETER = 21;
     public static final int TAG_SQL_PARAMETER_TYPE = 22;
-    public static final int TAG_SQL_PARAMETER_TYPE_NAME = 23;
-    public static final int TAG_SQL_PARAMETER_TYPE_CLASS_NAME = 24;
     public static final int TAG_SQL_PARAMETER_VALUE = 25;
     public static final int TAG_SQL_PARAMETER_MODE = 26;
     public static final int TAG_SQL_PARAMETER_NAME = 27;

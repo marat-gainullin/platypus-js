@@ -173,23 +173,14 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                                 for (int i = 1; i <= aParams.getParametersCount(); i++) {
                                     Parameter param = aParams.get(i);
                                     Object paramValue = param.getValue();
-                                    if (paramValue != null) {
-                                        Converter.convertAndAssign(paramValue, param.getTypeInfo(), null, i, stmt);
-                                    } else {
-                                        try {
-                                            stmt.setNull(i, param.getTypeInfo().getSqlType());
-                                        } catch (SQLException ex) {
-                                            stmt.setNull(i, param.getTypeInfo().getSqlType(), param.getTypeInfo().getSqlTypeName());
-                                        }
-                                    }
+                                    Converter.convertAndAssign(paramValue, null, i, stmt);
                                     if (procedure && (param.getMode() == ParameterMetaData.parameterModeOut
                                             || param.getMode() == ParameterMetaData.parameterModeInOut)) {
                                         assert stmt instanceof CallableStatement;
                                         CallableStatement cStmt = (CallableStatement) stmt;
-                                        cStmt.registerOutParameter(i, param.getTypeInfo().getSqlType());
+                                        cStmt.registerOutParameter(i, stmt.getParameterMetaData().getParameterType(i));
                                     }
                                 }
-
                                 if (queriesLogger.isLoggable(Level.FINE)) {
                                     queriesLogger.log(Level.FINE, "Executing sql with {0} parameters:\n{1}", new Object[]{aParams.getParametersCount(), sqlClause});
                                 }
@@ -203,7 +194,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                                         Parameter param = aParams.get(i);
                                         if (param.getMode() == ParameterMetaData.parameterModeOut
                                                 || param.getMode() == ParameterMetaData.parameterModeInOut) {
-                                            Object outedParamValue = Converter.get(cStmt, i, param.getTypeInfo());
+                                            Object outedParamValue = Converter.get(cStmt, i);
                                             param.setValue(outedParamValue);
                                         }
                                     }

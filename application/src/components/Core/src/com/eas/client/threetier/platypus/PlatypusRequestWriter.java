@@ -22,6 +22,7 @@ import com.eas.proto.ProtoWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Date;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -135,17 +136,23 @@ public class PlatypusRequestWriter implements PlatypusRequestVisitor {
         try {
             ByteArrayOutputStream outStream = new ByteArrayOutputStream();
             ProtoWriter writer = new ProtoWriter(outStream);
-            writer.put(RequestsTags.TAG_SQL_PARAMETER_TYPE, aParam.getTypeInfo().getSqlType());
-            writer.put(RequestsTags.TAG_SQL_PARAMETER_TYPE_NAME, aParam.getTypeInfo().getSqlTypeName());
-            writer.put(RequestsTags.TAG_SQL_PARAMETER_TYPE_CLASS_NAME, aParam.getTypeInfo().getJavaClassName());
-            writer.put(RequestsTags.TAG_SQL_PARAMETER_MODE, aParam.getMode());
             writer.put(RequestsTags.TAG_SQL_PARAMETER_NAME, aParam.getName());
+            writer.put(RequestsTags.TAG_SQL_PARAMETER_TYPE, aParam.getType());
+            writer.put(RequestsTags.TAG_SQL_PARAMETER_MODE, aParam.getMode());
             if (aParam.getDescription() != null) {
                 writer.put(RequestsTags.TAG_SQL_PARAMETER_DESCRIPTION, aParam.getDescription());
             }
             Object paramValue = aParam.getValue();
             if (paramValue != null) {
-                writer.putJDBCCompatible(RequestsTags.TAG_SQL_PARAMETER_VALUE, aParam.getTypeInfo().getSqlType(), paramValue);
+                if (paramValue instanceof Number) {
+                    writer.put(RequestsTags.TAG_SQL_PARAMETER_VALUE, ((Number) paramValue).doubleValue());
+                } else if (paramValue instanceof Boolean) {
+                    writer.put(RequestsTags.TAG_SQL_PARAMETER_VALUE, (Boolean) paramValue);
+                } else if (paramValue instanceof CharSequence) {
+                    writer.put(RequestsTags.TAG_SQL_PARAMETER_VALUE, paramValue.toString());
+                } else if (paramValue instanceof Date) {
+                    writer.put(RequestsTags.TAG_SQL_PARAMETER_VALUE, (Date) paramValue);
+                }
             }
             writer.flush();
             return outStream.toByteArray();
@@ -158,7 +165,7 @@ public class PlatypusRequestWriter implements PlatypusRequestVisitor {
     public void visit(ExecuteQueryRequest rq) throws Exception {
         ProtoWriter writer = new ProtoWriter(out);
         writer.put(RequestsTags.TAG_QUERY_ID, rq.getQueryName());
-        for(Map.Entry<String, String> pEntry : rq.getParamsJsons().entrySet()){
+        for (Map.Entry<String, String> pEntry : rq.getParamsJsons().entrySet()) {
             writer.put(RequestsTags.TAG_SQL_PARAMETER);
             ByteArrayOutputStream pOut = new ByteArrayOutputStream();
             ProtoWriter pWriter = new ProtoWriter(pOut);

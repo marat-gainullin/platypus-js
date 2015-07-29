@@ -8,7 +8,6 @@ import com.eas.client.AppElementFiles;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SqlQuery;
 import com.eas.client.cache.PlatypusFiles;
-import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.model.query.QueryModel;
 import com.eas.client.model.store.XmlDom2QueryModel;
 import com.eas.client.queries.QueriesProxy;
@@ -34,13 +33,13 @@ public class QueryDocument {
     public final static String OUTPUT_FIELD_TAG_NAME = "field";
     public final static String FIELD_NAME_ATTRIBUTE_NAME = "bindedColumn";
     public final static String FIELD_DESCRIPTION_ATTRIBUTE_NAME = "description";
-    public final static String FIELD_TYPE_ATTRIBUTE_NAME = "sqlType";
+    public final static String FIELD_TYPE_ATTRIBUTE_NAME = "type";
     
     public static class StoredFieldMetadata {
 
         public String bindedColumn;
         public String description;
-        public DataTypeInfo typeInfo;
+        public String type;
 
         public StoredFieldMetadata() {
             super();
@@ -51,12 +50,12 @@ public class QueryDocument {
             bindedColumn = aBindedColumn;
         }
 
-        public DataTypeInfo getTypeInfo() {
-            return typeInfo;
+        public String getType() {
+            return type;
         }
 
-        public void setTypeInfo(DataTypeInfo aValue) {
-            typeInfo = aValue;
+        public void setType(String aValue) {
+            type = aValue;
         }
 
         public String getBindedColumn() {
@@ -139,7 +138,7 @@ public class QueryDocument {
                         additionalField.description = descAttr.getNodeValue();
                     }
                     if (typeAttr != null) {
-                        additionalField.typeInfo = DataTypeInfo.valueOf(Integer.valueOf(typeAttr.getNodeValue()));
+                        additionalField.type = typeAttr.getNodeValue();
                     }
                     additionalFields.add(additionalField);
                 }

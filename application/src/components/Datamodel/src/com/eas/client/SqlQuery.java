@@ -6,7 +6,6 @@ package com.eas.client;
 
 import com.eas.client.dataflow.FlowProvider;
 import com.eas.client.exceptions.UnboundSqlParameterException;
-import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.metadata.Parameters;
 import com.eas.client.queries.Query;
@@ -225,7 +224,7 @@ public class SqlQuery extends Query {
                 if (paramName != null) {
                     if (!forUniqueness.contains(paramName)) {
                         forUniqueness.add(paramName);
-                        Parameter spmdi = new Parameter(paramName, "", DataTypeInfo.VARCHAR);
+                        Parameter spmdi = new Parameter(paramName, "", "String");
                         params.add(spmdi);
                     }
                 }

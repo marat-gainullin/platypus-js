@@ -60,8 +60,8 @@ public class QueryDocument2XmlDom {
                     descAttr.setTextContent(additionalField.getDescription());
                     attrs.setNamedItem(descAttr);
                 }
-                if (additionalField.getTypeInfo() != null && (queryField == null || !additionalField.getTypeInfo().equals(queryField.getTypeInfo()))) {
-                    typeAttr.setTextContent(String.valueOf(additionalField.getTypeInfo().getSqlType()));
+                if (additionalField.getType() != null && (queryField == null || !additionalField.getType().equals(queryField.getType()))) {
+                    typeAttr.setTextContent(additionalField.getType());
                     attrs.setNamedItem(typeAttr);
                 }
                 outputFields.appendChild(outputFieldNode);
@@ -78,7 +78,7 @@ public class QueryDocument2XmlDom {
                 if (aAdditionalField.getDescription() != null && !aAdditionalField.getDescription().equals(queryField.getDescription())) {
                     return true;
                 }
-                if (aAdditionalField.getTypeInfo() != null && !aAdditionalField.getTypeInfo().equals(queryField.getTypeInfo())) {
+                if (aAdditionalField.getType() != null && !aAdditionalField.getType().equals(queryField.getType())) {
                     return true;
                 }
             }

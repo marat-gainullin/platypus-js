@@ -4,9 +4,9 @@
  */
 package com.eas.client.dataflow;
 
-import com.eas.client.metadata.DataTypeInfo;
 import com.eas.util.BinaryUtils;
 import com.eas.util.StringUtils;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -15,7 +15,6 @@ import java.sql.*;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import jdk.nashorn.api.scripting.JSObject;
 
 /**
  * Converter has to convert some value of any compatible class to value of
@@ -37,10 +36,11 @@ public class Converter {
         }
     }
 
-    public static Object get(Wrapper aRs, int aColIndex, DataTypeInfo aTypeInfo) throws SQLException {
+    public static Object get(Wrapper aRs, int aColumnIndex) throws SQLException {
         try {
+            int sqlType = aRs instanceof ResultSet ? ((ResultSet) aRs).getMetaData().getColumnType(aColumnIndex) : ((CallableStatement) aRs).getMetaData().getColumnType(aColumnIndex);
             Object value = null;
-            switch (aTypeInfo.getSqlType()) {
+            switch (sqlType) {
                 case Types.JAVA_OBJECT:
                 case Types.DATALINK:
                 case Types.DISTINCT:
@@ -51,15 +51,15 @@ public class Converter {
                 case Types.ARRAY:
                 case Types.STRUCT:
                 case Types.OTHER:
-                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getString(aColIndex) : ((CallableStatement) aRs).getString(aColIndex);
+                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getString(aColumnIndex) : ((CallableStatement) aRs).getString(aColumnIndex);
                     break;
                 case Types.BINARY:
                 case Types.VARBINARY:
                 case Types.LONGVARBINARY:
-                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getBytes(aColIndex) : ((CallableStatement) aRs).getBytes(aColIndex);
+                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getBytes(aColumnIndex) : ((CallableStatement) aRs).getBytes(aColumnIndex);
                     break;
                 case Types.BLOB:
-                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getBlob(aColIndex) : ((CallableStatement) aRs).getBlob(aColIndex);
+                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getBlob(aColumnIndex) : ((CallableStatement) aRs).getBlob(aColumnIndex);
                     if (value != null) {
                         try (InputStream is = ((Blob) value).getBinaryStream()) {
                             value = BinaryUtils.readStream(is, -1);
@@ -68,7 +68,7 @@ public class Converter {
                     break;
                 // clobs
                 case Types.CLOB:
-                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getClob(aColIndex) : ((CallableStatement) aRs).getClob(aColIndex);
+                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getClob(aColumnIndex) : ((CallableStatement) aRs).getClob(aColumnIndex);
                     if (value != null) {
                         try (Reader reader = ((Clob) value).getCharacterStream()) {
                             value = StringUtils.readReader(reader, -1);
@@ -76,7 +76,7 @@ public class Converter {
                     }
                     break;
                 case Types.NCLOB:
-                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getNClob(aColIndex) : ((CallableStatement) aRs).getNClob(aColIndex);
+                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getNClob(aColumnIndex) : ((CallableStatement) aRs).getNClob(aColumnIndex);
                     if (value != null) {
                         try (Reader reader = ((NClob) value).getCharacterStream()) {
                             value = StringUtils.readReader(reader, -1);
@@ -87,32 +87,32 @@ public class Converter {
                 case Types.DECIMAL:
                 case Types.NUMERIC:
                     // target type - BigDecimal
-                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getBigDecimal(aColIndex) : ((CallableStatement) aRs).getBigDecimal(aColIndex);
+                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getBigDecimal(aColumnIndex) : ((CallableStatement) aRs).getBigDecimal(aColumnIndex);
                     break;
                 case Types.BIGINT:
                     // target type - BigInteger
-                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getBigDecimal(aColIndex) : ((CallableStatement) aRs).getBigDecimal(aColIndex);
+                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getBigDecimal(aColumnIndex) : ((CallableStatement) aRs).getBigDecimal(aColumnIndex);
                     if (value != null) {
                         value = ((BigDecimal) value).toBigInteger();
                     }
                     break;
                 case Types.SMALLINT:
                     // target type - Short
-                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getShort(aColIndex) : ((CallableStatement) aRs).getShort(aColIndex);
+                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getShort(aColumnIndex) : ((CallableStatement) aRs).getShort(aColumnIndex);
                     break;
                 case Types.TINYINT:
                 case Types.INTEGER:
                     // target type - Int
-                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getInt(aColIndex) : ((CallableStatement) aRs).getInt(aColIndex);
+                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getInt(aColumnIndex) : ((CallableStatement) aRs).getInt(aColumnIndex);
                     break;
                 case Types.REAL:
                 case Types.FLOAT:
                     // target type - Float
-                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getFloat(aColIndex) : ((CallableStatement) aRs).getFloat(aColIndex);
+                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getFloat(aColumnIndex) : ((CallableStatement) aRs).getFloat(aColumnIndex);
                     break;
                 case Types.DOUBLE:
                     // target type - Double
-                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getDouble(aColIndex) : ((CallableStatement) aRs).getDouble(aColIndex);
+                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getDouble(aColumnIndex) : ((CallableStatement) aRs).getDouble(aColumnIndex);
                     break;
                 // strings
                 case Types.CHAR:
@@ -122,46 +122,46 @@ public class Converter {
                 case Types.LONGVARCHAR:
                 case Types.LONGNVARCHAR:
                     // target type - string
-                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getString(aColIndex) : ((CallableStatement) aRs).getString(aColIndex);
+                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getString(aColumnIndex) : ((CallableStatement) aRs).getString(aColumnIndex);
                     break;
                 // booleans
                 case Types.BOOLEAN:
                 case Types.BIT:
                     // target type - Boolean
-                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getBoolean(aColIndex) : ((CallableStatement) aRs).getBoolean(aColIndex);
+                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getBoolean(aColumnIndex) : ((CallableStatement) aRs).getBoolean(aColumnIndex);
                     break;
                 // dates, times
                 case Types.DATE:
-                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getDate(aColIndex) : ((CallableStatement) aRs).getDate(aColIndex);
+                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getDate(aColumnIndex) : ((CallableStatement) aRs).getDate(aColumnIndex);
                     break;
                 case Types.TIMESTAMP:
-                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getTimestamp(aColIndex) : ((CallableStatement) aRs).getTimestamp(aColIndex);
+                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getTimestamp(aColumnIndex) : ((CallableStatement) aRs).getTimestamp(aColumnIndex);
                     break;
                 case Types.TIME:
-                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getTime(aColIndex) : ((CallableStatement) aRs).getTime(aColIndex);
+                    value = aRs instanceof ResultSet ? ((ResultSet) aRs).getTime(aColumnIndex) : ((CallableStatement) aRs).getTime(aColumnIndex);
                     break;
             }
             if (aRs instanceof ResultSet ? ((ResultSet) aRs).wasNull() : ((CallableStatement) aRs).wasNull()) {
                 value = null;
             }
             return value;
-        } catch (Exception ex) {
-            if (ex instanceof SQLException) {
-                throw (SQLException) ex;
-            } else {
-                throw new SQLException(ex);
-            }
+        } catch (SQLException ex) {
+            throw ex;
+        } catch (IOException ex) {
+            throw new SQLException(ex);
         }
     }
 
-    public static void convertAndAssign(Object aValue, DataTypeInfo aTypeInfo, Connection aConn, int aParameterIndex, PreparedStatement aStmt) throws SQLException {
+    public static void convertAndAssign(Object aValue, Connection aConn, int aParameterIndex, PreparedStatement aStmt) throws SQLException {
+        int parameterSqlType = aStmt.getParameterMetaData().getParameterType(aParameterIndex);
+        String parameterSqlTypeName = aStmt.getParameterMetaData().getParameterTypeName(aParameterIndex);
         if (aValue != null) {
             /*
-            if (aValue instanceof JSObject) {
-                aValue = aSpace.toJava(aValue);
-            }
-            */
-            switch (aTypeInfo.getSqlType()) {
+             if (aValue instanceof JSObject) {
+             aValue = aSpace.toJava(aValue);
+             }
+             */
+            switch (parameterSqlType) {
                 // Some strange types. No one knows how to work with them.
                 case Types.JAVA_OBJECT:
                 case Types.DATALINK:
@@ -176,7 +176,7 @@ public class Converter {
                     try {
                         aStmt.setString(aParameterIndex, aValue.toString());
                     } catch (Exception ex) {
-                        aStmt.setNull(aParameterIndex, aTypeInfo.getSqlType(), aTypeInfo.getSqlTypeName());
+                        aStmt.setNull(aParameterIndex, parameterSqlType, parameterSqlTypeName);
                         Logger.getLogger(Converter.class.getName()).log(Level.WARNING, FALLED_TO_NULL_MSG, aValue.getClass().getName());
                     }
                     break;
@@ -348,7 +348,7 @@ public class Converter {
                         castedString = ((Clob) aValue).getSubString(1, (int) ((Clob) aValue).length());
                     }
                     if (castedString != null) {
-                        if (aTypeInfo.getSqlType() == Types.NCHAR || aTypeInfo.getSqlType() == Types.NVARCHAR || aTypeInfo.getSqlType() == Types.LONGNVARCHAR) {
+                        if (parameterSqlType == Types.NCHAR || parameterSqlType == Types.NVARCHAR || parameterSqlType == Types.LONGNVARCHAR) {
                             aStmt.setNString(aParameterIndex, castedString);
                         } else {
                             aStmt.setString(aParameterIndex, castedString);
@@ -364,7 +364,7 @@ public class Converter {
                     if (aValue instanceof Number) {
                         castedBoolean = !(((Number) aValue).intValue() == 0);
                     } else if (aValue instanceof String || aValue instanceof Clob) {
-                        String s = null;
+                        String s;
                         if (aValue instanceof String) {
                             s = (String) aValue;
                         } else {
@@ -397,11 +397,11 @@ public class Converter {
                         castedDate = ((Date) aValue);
                     }
                     if (castedDate != null) {
-                        if (aTypeInfo.getSqlType() == Types.DATE) {
+                        if (parameterSqlType == Types.DATE) {
                             aStmt.setDate(aParameterIndex, new java.sql.Date(castedDate.getTime()));
-                        } else if (aTypeInfo.getSqlType() == Types.TIMESTAMP) {
+                        } else if (parameterSqlType == Types.TIMESTAMP) {
                             aStmt.setTimestamp(aParameterIndex, new java.sql.Timestamp(castedDate.getTime()));
-                        } else if (aTypeInfo.getSqlType() == Types.TIME) {
+                        } else if (parameterSqlType == Types.TIME) {
                             aStmt.setTime(aParameterIndex, new java.sql.Time(castedDate.getTime()));
                         } else {
                             assert false;
@@ -413,9 +413,9 @@ public class Converter {
             }
         } else {
             try {
-                aStmt.setNull(aParameterIndex, aTypeInfo.getSqlType());
+                aStmt.setNull(aParameterIndex, parameterSqlType);
             } catch (SQLException ex) {
-                aStmt.setNull(aParameterIndex, aTypeInfo.getSqlType(), aTypeInfo.getSqlTypeName());
+                aStmt.setNull(aParameterIndex, parameterSqlType, parameterSqlTypeName);
             }
         }
     }

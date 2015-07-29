@@ -16,8 +16,12 @@ public class JSONUtils {
 
     public static StringBuilder s(String aValue) {
         StringBuilder sb = new StringBuilder();
-        aValue = aValue == null ? "null" : aValue.replace("\\", "\\\\").replace("\"", "\\\"").replace("\t", "\\t").replace("\r", "").replace("\n", "\\n");
-        sb.append("\"").append(aValue).append("\"");
+        String sValue = aValue == null ? null : aValue.replace("\\", "\\\\").replace("\"", "\\\"").replace("\t", "\\t").replace("\r", "").replace("\n", "\\n");
+        if (sValue == null) {
+            sb.append("null");
+        } else {
+            sb.append("\"").append(sValue).append("\"");
+        }
         return sb;
     }
 
@@ -143,11 +147,11 @@ public class JSONUtils {
                 return false;
             } else if ("null".equals(aJson)) {
                 return null;
-            } else if(aJson.matches("\"\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z\"")){// date
+            } else if (aJson.matches("\"\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z\"")) {// date
                 SimpleDateFormat sdf = new SimpleDateFormat(RowsetJsonConstants.DATE_FORMAT);
                 sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
                 return sdf.parse(aJson.substring(1, aJson.length() - 1));
-            } else if(aJson.matches("\".*\"")){
+            } else if (aJson.matches("\".*\"")) {
                 return jsonUnescape(aJson);
             } else {
                 return Double.valueOf(aJson);

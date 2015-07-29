@@ -11,9 +11,7 @@ import com.eas.client.changes.Delete;
 import com.eas.client.changes.EntitiesHost;
 import com.eas.client.changes.Insert;
 import com.eas.client.changes.Update;
-import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.Field;
-import com.eas.client.metadata.Parameter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.*;
@@ -53,7 +51,7 @@ public class StatementsGenerator implements ChangeVisitor {
                 try (PreparedStatement stmt = aConnection.prepareStatement(clause)) {
                     for (int i = 1; i <= parameters.size(); i++) {
                         ChangeValue v = parameters.get(i - 1);
-                        Converter.convertAndAssign(v.value, v.type, aConnection, i, stmt);
+                        Converter.convertAndAssign(v.value, aConnection, i, stmt);
                     }
                     if (queriesLogger.isLoggable(Level.FINE)) {
                         queriesLogger.log(Level.FINE, "Executing sql with {0} parameters: {1}", new Object[]{parameters.size(), clause});
@@ -130,7 +128,6 @@ public class StatementsGenerator implements ChangeVisitor {
             for (ChangeValue data : aChange.getData()) {
                 Field field = entitiesHost.resolveField(aChange.entityName, data.name);
                 if (field != null) {
-                    data.type = field.getTypeInfo();
                     InsertChunk chunk = inserts.get(field.getTableName());
                     if (chunk == null) {
                         chunk = new InsertChunk();
@@ -153,7 +150,7 @@ public class StatementsGenerator implements ChangeVisitor {
                             && dataColumnName.equalsIgnoreCase(schemaContextFieldName)) {
                         chunk.contexted = true;
                         if (data.value == null) {
-                            chunk.insert.parameters.add(new ChangeValue(schemaContextFieldName, schemaContext, DataTypeInfo.VARCHAR));
+                            chunk.insert.parameters.add(new ChangeValue(schemaContextFieldName, schemaContext));
                         } else {
                             chunk.insert.parameters.add(data);
                         }
@@ -177,7 +174,7 @@ public class StatementsGenerator implements ChangeVisitor {
                             chunk.dataColumnsNames.append(", ");
                         }
                         chunk.dataColumnsNames.append(schemaContextFieldName);
-                        chunk.insert.parameters.add(new ChangeValue(schemaContextFieldName, schemaContext, DataTypeInfo.VARCHAR));
+                        chunk.insert.parameters.add(new ChangeValue(schemaContextFieldName, schemaContext));
                     }
                 }
                 //
@@ -210,7 +207,6 @@ public class StatementsGenerator implements ChangeVisitor {
             for (ChangeValue data : aChange.getData()) {
                 Field field = entitiesHost.resolveField(aChange.entityName, data.name);
                 if (field != null) {
-                    data.type = field.getTypeInfo();
                     UpdateChunk chunk = updates.get(field.getTableName());
                     if (chunk == null) {
                         chunk = new UpdateChunk();
@@ -233,13 +229,12 @@ public class StatementsGenerator implements ChangeVisitor {
             for (ChangeValue key : aChange.getKeys()) {
                 Field field = entitiesHost.resolveField(aChange.entityName, key.name);
                 if (field != null) {
-                    key.type = field.getTypeInfo();
                     UpdateChunk chunk = updates.get(field.getTableName());
                     if (chunk != null) {
                         if (chunk.keys == null) {
                             chunk.keys = new ArrayList<>();
                         }
-                        chunk.keys.add(new ChangeValue(field.getOriginalName() != null ? field.getOriginalName() : field.getName(), key.value, key.type));
+                        chunk.keys.add(new ChangeValue(field.getOriginalName() != null ? field.getOriginalName() : field.getName(), key.value));
                     }
                 }
             }
@@ -266,7 +261,6 @@ public class StatementsGenerator implements ChangeVisitor {
             for (ChangeValue key : aChange.getKeys()) {
                 Field field = entitiesHost.resolveField(aChange.entityName, key.name);
                 if (field != null) {
-                    key.type = field.getTypeInfo();
                     StatementsLogEntry delete = deletes.get(field.getTableName());
                     if (delete == null) {
                         delete = new StatementsLogEntry();
@@ -275,7 +269,7 @@ public class StatementsGenerator implements ChangeVisitor {
                         // to the log and therefore applied into a database during a transaction.
                         logEntries.add(delete);
                     }
-                    delete.parameters.add(new ChangeValue(field.getOriginalName() != null ? field.getOriginalName() : field.getName(), key.value, key.type));
+                    delete.parameters.add(new ChangeValue(field.getOriginalName() != null ? field.getOriginalName() : field.getName(), key.value));
                 }
             }
             deletes.entrySet().stream().forEach((Map.Entry<String, StatementsLogEntry> entry) -> {
@@ -293,12 +287,6 @@ public class StatementsGenerator implements ChangeVisitor {
             StatementsLogEntry logEntry = new StatementsLogEntry();
             logEntry.clause = aChange.command;
             logEntry.parameters.addAll(aChange.getParameters());
-            for (ChangeValue cv : logEntry.parameters) {
-                Parameter p = entitiesHost.resolveParameter(aChange.entityName, cv.name);
-                if (p != null) {
-                    cv.type = p.getTypeInfo();
-                }
-            }
             logEntries.add(logEntry);
         }
     }

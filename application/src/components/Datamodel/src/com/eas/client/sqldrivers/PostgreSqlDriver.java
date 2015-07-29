@@ -337,7 +337,6 @@ public class PostgreSqlDriver extends SqlDriver {
     }
 
     private String getFieldTypeDefinition(Field aField) {
-        resolver.resolve2RDBMS(aField);
         String typeDefine = "";
         String sqlTypeName = aField.getTypeInfo().getSqlTypeName().toLowerCase();
         // field length

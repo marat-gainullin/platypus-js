@@ -7,14 +7,9 @@ package com.eas.proto;
 import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import com.eas.proto.dom.ProtoNode;
-import com.eas.proto.dom.ProtoDOMBuilder;
-import java.math.BigInteger;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.sql.Types;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -82,150 +77,6 @@ public class ProtoWriterTest {
         assertEquals(val1, reader.getBigDecimal());
         assertEquals(val2, reader.getBigDecimal(2));
         assertEquals(val3, reader.getBigDecimal(3));
-    }
-
-    /**
-     * Test of putJDBCCompatible method, of class ProtoWriter.
-     * @throws Exception
-     */
-    @Test
-    public void testPutJDBCCompatible() throws Exception {
-        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-        ProtoWriter writer = new ProtoWriter(outStream);
-        writer.putJDBCCompatible(1, Types.NUMERIC, 234L);
-        writer.putJDBCCompatible(2, Types.BIGINT, null);
-        writer.flush();
-        ByteArrayInputStream inStream = new ByteArrayInputStream(outStream.toByteArray());
-        ProtoReader reader = new ProtoReader(inStream);
-        assertEquals(1, reader.getNextTag());
-        assertEquals(new BigDecimal(234L), reader.getJDBCCompatible(Types.NUMERIC));
-        assertEquals(2, reader.getNextTag());
-        assertNull(reader.getJDBCCompatible(Types.BIGINT));
-
-    }
-
-    @Test
-    public void testLongAsBigInt() throws IOException, ProtoReaderException {
-        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-        ProtoWriter writer = new ProtoWriter(outStream);
-        final long val1 = 124350724232787552L;
-        writer.putJDBCCompatible(1, Types.BIGINT, new BigDecimal(val1));
-        writer.flush();
-        ProtoReader reader = new ProtoReader(new ByteArrayInputStream(outStream.toByteArray()));
-        assertEquals(1, reader.getNextTag());
-        assertEquals(BigInteger.valueOf(val1), reader.getJDBCCompatible(1, Types.BIGINT));
-    }
-
-    @Test
-    public void testLongAsBIGINT() throws IOException, ProtoReaderException {
-        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-        ProtoWriter writer = new ProtoWriter(outStream);
-        final long val1 = 124350724232787552L;
-        writer.putJDBCCompatible(1, Types.BIGINT, new BigDecimal(val1));
-        writer.flush();
-        ProtoReader reader = new ProtoReader(new ByteArrayInputStream(outStream.toByteArray()));
-        assertEquals(1, reader.getNextTag());
-        assertEquals(BigInteger.valueOf(val1), reader.getJDBCCompatible(1, Types.BIGINT));
-
-        ProtoNode node = ProtoDOMBuilder.buildDOM(outStream.toByteArray());
-        assertTrue(node.containsChild(1));
-        assertEquals(BigInteger.valueOf(val1), node.getChild(1).getJDBCCompatible(Types.BIGINT));
-    }
-
-    @Test
-    public void testLongAsDECIMAL() throws IOException, ProtoReaderException {
-        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-        ProtoWriter writer = new ProtoWriter(outStream);
-        final long val1 = 124350724232787552L;
-        writer.putJDBCCompatible(1, Types.DECIMAL, new BigDecimal(val1));
-        writer.flush();
-        ProtoReader reader = new ProtoReader(new ByteArrayInputStream(outStream.toByteArray()));
-        assertEquals(1, reader.getNextTag());
-        assertEquals(BigDecimal.valueOf(val1), reader.getJDBCCompatible(1, Types.DECIMAL));
-
-        ProtoNode node = ProtoDOMBuilder.buildDOM(outStream.toByteArray());
-        assertTrue(node.containsChild(1));
-        assertEquals(BigDecimal.valueOf(val1), node.getChild(1).getJDBCCompatible(Types.DECIMAL));
-    }
-
-    @Test
-    public void testLongAsNUMERIC() throws IOException, ProtoReaderException {
-        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-        ProtoWriter writer = new ProtoWriter(outStream);
-        final long val1 = 124350724232787552L;
-        writer.putJDBCCompatible(1, Types.NUMERIC, new BigDecimal(val1));
-        writer.flush();
-        ProtoReader reader = new ProtoReader(new ByteArrayInputStream(outStream.toByteArray()));
-        assertEquals(1, reader.getNextTag());
-        assertEquals(BigDecimal.valueOf(val1), reader.getJDBCCompatible(1, Types.NUMERIC));
-
-        ProtoNode node = ProtoDOMBuilder.buildDOM(outStream.toByteArray());
-        assertTrue(node.containsChild(1));
-        assertEquals(BigDecimal.valueOf(val1), node.getChild(1).getJDBCCompatible(Types.NUMERIC));
-    }
-
-    @Test
-    public void testShortAsSmallInt() throws IOException, ProtoReaderException {
-        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-        ProtoWriter writer = new ProtoWriter(outStream);
-        final short val1 = 12435;
-        writer.putJDBCCompatible(1, Types.SMALLINT, val1);
-        writer.flush();
-        ProtoReader reader = new ProtoReader(new ByteArrayInputStream(outStream.toByteArray()));
-        assertEquals(1, reader.getNextTag());
-        assertEquals(val1, reader.getJDBCCompatible(1, Types.SMALLINT));
-
-        ProtoNode node = ProtoDOMBuilder.buildDOM(outStream.toByteArray());
-        assertTrue(node.containsChild(1));
-        assertEquals(val1, node.getChild(1).getJDBCCompatible(Types.SMALLINT));
-    }
-
-    @Test
-    public void testFloatAsFLOAT() throws IOException, ProtoReaderException {
-        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-        ProtoWriter writer = new ProtoWriter(outStream);
-        final float val1 = 124.2f;
-        writer.putJDBCCompatible(1, Types.FLOAT, val1);
-        writer.flush();
-        ProtoReader reader = new ProtoReader(new ByteArrayInputStream(outStream.toByteArray()));
-        assertEquals(1, reader.getNextTag());
-        assertEquals(val1, reader.getJDBCCompatible(1, Types.FLOAT));
-
-        ProtoNode node = ProtoDOMBuilder.buildDOM(outStream.toByteArray());
-        assertTrue(node.containsChild(1));
-        assertTrue(Math.abs(val1 - (Float) node.getChild(1).getJDBCCompatible(Types.FLOAT)) < 1e-5);
-    }
-
-    @Test
-    public void testDoubleAsREAL() throws IOException, ProtoReaderException {
-        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-        ProtoWriter writer = new ProtoWriter(outStream);
-        final double val1 = 12435.2f;
-        writer.putJDBCCompatible(1, Types.DOUBLE, val1);
-        writer.flush();
-        ProtoReader reader = new ProtoReader(new ByteArrayInputStream(outStream.toByteArray()));
-        assertEquals(1, reader.getNextTag());
-        assertEquals(val1, reader.getJDBCCompatible(1, Types.DOUBLE));
-
-        ProtoNode node = ProtoDOMBuilder.buildDOM(outStream.toByteArray());
-        assertTrue(node.containsChild(1));
-        assertEquals(val1, node.getChild(1).getJDBCCompatible(Types.DOUBLE));
-    }
-
-    @Test
-    public void testDoubleAsDOUBLE() throws IOException, ProtoReaderException {
-        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-        ProtoWriter writer = new ProtoWriter(outStream);
-        final double val1 = 12435.2f;
-        writer.putJDBCCompatible(1, Types.DOUBLE, val1);
-        writer.flush();
-        ProtoReader reader = new ProtoReader(new ByteArrayInputStream(outStream.toByteArray()));
-        assertEquals(1, reader.getNextTag());
-        assertEquals(val1, reader.getJDBCCompatible(1, Types.DOUBLE));
-
-        ProtoNode node = ProtoDOMBuilder.buildDOM(outStream.toByteArray());
-        assertTrue(node.containsChild(1));
-        assertEquals(val1, node.getChild(1).getJDBCCompatible(Types.DOUBLE));
     }
     
     private static final int TEST_TAG_1 = 10;

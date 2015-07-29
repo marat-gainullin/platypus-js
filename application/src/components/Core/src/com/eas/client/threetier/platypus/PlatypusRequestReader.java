@@ -169,41 +169,46 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
     public static Parameter readParameter(ProtoNode node) throws ProtoReaderException {
         Parameter param = new Parameter();
         Object value;
-        int paramType;
+        String paramType = null;
         int paramMode;
-        String paramTypeName = null;
-        String paramTypeClassName = null;
-        String paramName = null;
+        String paramName;
+        if (!node.containsChild(RequestsTags.TAG_SQL_PARAMETER_NAME)) {
+            throw new ProtoReaderException("No parameter name");
+        }
         if (!node.containsChild(RequestsTags.TAG_SQL_PARAMETER_TYPE)) {
             throw new ProtoReaderException("No parameter type");
-        }
-        if (!node.containsChild(RequestsTags.TAG_SQL_PARAMETER_TYPE_NAME)) {
-            throw new ProtoReaderException("No parameter type name");
-        }
-        if (!node.containsChild(RequestsTags.TAG_SQL_PARAMETER_TYPE_CLASS_NAME)) {
-            throw new ProtoReaderException("No parameter type java class name");
         }
         if (!node.containsChild(RequestsTags.TAG_SQL_PARAMETER_MODE)) {
             throw new ProtoReaderException("No parameter mode");
         }
-        if (!node.containsChild(RequestsTags.TAG_SQL_PARAMETER_NAME)) {
-            throw new ProtoReaderException("No parameter name");
+        ProtoNode typeNode = node.getChild(RequestsTags.TAG_SQL_PARAMETER_TYPE);
+        if (typeNode != null) {
+            paramType = typeNode.getString();
         }
-        paramType = node.getChild(RequestsTags.TAG_SQL_PARAMETER_TYPE).getInt();
-        paramTypeName = node.getChild(RequestsTags.TAG_SQL_PARAMETER_TYPE_NAME).getString();
-        paramTypeClassName = node.getChild(RequestsTags.TAG_SQL_PARAMETER_TYPE_CLASS_NAME).getString();
+        param.setType(paramType);
         paramMode = node.getChild(RequestsTags.TAG_SQL_PARAMETER_MODE).getInt();
         paramName = node.getChild(RequestsTags.TAG_SQL_PARAMETER_NAME).getString();
-        param.getTypeInfo().setSqlType(paramType);
-        param.getTypeInfo().setSqlTypeName(paramTypeName);
-        param.getTypeInfo().setJavaClassName(paramTypeClassName);
         if (node.containsChild(RequestsTags.TAG_SQL_PARAMETER_DESCRIPTION)) {
             param.setDescription(node.getChild(RequestsTags.TAG_SQL_PARAMETER_DESCRIPTION).getString());
         }
         value = null;
         if (node.containsChild(RequestsTags.TAG_SQL_PARAMETER_VALUE)) {
             ProtoNode valueNode = node.getChild(RequestsTags.TAG_SQL_PARAMETER_VALUE);
-            value = valueNode.getJDBCCompatible(paramType);
+            if (paramType != null) {
+                if ("String".equals(paramType)) {
+                    value = valueNode.getString();
+                } else if ("Number".equals(paramType)) {
+                    value = valueNode.getDouble();
+                } else if ("Date".equals(paramType)) {
+                    value = valueNode.getDate();
+                } else if ("Boolean".equals(paramType)) {
+                    value = valueNode.getBoolean();
+                } else if ("Geometry".equals(paramType)) {
+                    value = valueNode.getString();
+                }
+            } else {
+                value = valueNode.getString();
+            }
         }
         param.setName(paramName);
         param.setValue(value);

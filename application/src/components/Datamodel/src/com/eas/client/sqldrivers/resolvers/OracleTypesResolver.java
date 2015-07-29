@@ -210,36 +210,4 @@ public class OracleTypesResolver extends TypesResolver {
         assert aTypeName != null;
         return rdbmsTypes2JdbcTypes.containsKey(aTypeName.toUpperCase());
     }
-
-    @Override
-    public void resolveFieldSize(Field aField) {
-        DataTypeInfo typeInfo = aField.getTypeInfo();
-        int sqlType = typeInfo.getSqlType();
-        String sqlTypeName = typeInfo.getSqlTypeName();
-        sqlTypeName = sqlTypeName.toUpperCase();
-        // check on max size
-        int fieldSize = aField.getSize();
-        Integer maxSize = jdbcTypesMaxSize.get(sqlTypeName);
-        if (maxSize != null && maxSize < fieldSize) {
-            List<Integer> typesOrder = getTypesOrder(sqlType);
-            if (typesOrder != null) {
-                for (int i = typesOrder.indexOf(sqlType); i < typesOrder.size(); i++) {
-                    sqlType = typesOrder.get(i);
-                    sqlTypeName = jdbcTypes2RdbmsTypes.get(sqlType);
-                    maxSize = jdbcTypesMaxSize.get(sqlTypeName);
-                    if (maxSize != null && maxSize >= fieldSize) {
-                        break;
-                    }
-                }
-            }
-            if (maxSize != null && maxSize < fieldSize) {
-                aField.setSize(maxSize);
-            }
-        }
-        aField.setTypeInfo(new DataTypeInfo(sqlType, sqlTypeName, typeInfo.getJavaClassName()));
-        // check on default size
-        if (fieldSize <= 0 && jdbcTypesDefaultSize.containsKey(sqlTypeName)) {
-            aField.setSize(jdbcTypesDefaultSize.get(sqlTypeName));
-        }
-    }
 }

@@ -440,16 +440,7 @@ public class DatabaseMdCache {
                     Field field = new Field(fName.toLowerCase(), fDescription);
                     field.setOriginalName(fName);
                     String rdbmsTypeName = r.getString(JDBCCOLS_TYPE_NAME_INDEX);
-                    Integer correctType = sqlDriver.getJdbcTypeByRDBMSTypename(rdbmsTypeName);
-                    if (correctType != null) {
-                        field.getTypeInfo().setSqlType(correctType);
-                    } else {
-                        Object oSqlType = r.getObject(JDBCCOLS_DATA_TYPE_INDEX);
-                        if (oSqlType instanceof Number) {
-                            field.getTypeInfo().setSqlType(((Number) oSqlType).intValue());
-                        }
-                    }
-                    field.getTypeInfo().setSqlTypeName(rdbmsTypeName);
+                    field.setType(rdbmsTypeName);
                     Object oSize = r.getObject(JDBCCOLS_COLUMN_SIZE_INDEX);
                     if (oSize instanceof Number) {
                         field.setSize(((Number) oSize).intValue());
@@ -468,10 +459,6 @@ public class DatabaseMdCache {
                     }
                     field.setSchemaName(aSchema);
                     field.setTableName(fTableName);
-                    // Fields types abstraction is partly used here,
-                    // because of metadata processing tasks
-                    sqlDriver.getTypesResolver().resolve2Application(field);
-                    field.getTypeInfo().setSqlTypeName(rdbmsTypeName);
                     //
                     fields.add(field);
                 }

@@ -9,7 +9,6 @@
  */
 package com.eas.client.queries;
 
-import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.metadata.Parameters;
@@ -198,7 +197,7 @@ public abstract class Query {
         return params;
     }
 
-    public void putParameter(String aName, DataTypeInfo aTypeInfo, Object aValue) {
+    public void putParameter(String aName, String aType, Object aValue) {
         if (params == null) {
             params = new Parameters();
         }
@@ -208,28 +207,12 @@ public abstract class Query {
             params.add(param);
         }
         param.setName(aName);
-        param.setTypeInfo(aTypeInfo.copy());
+        param.setType(aType);
         param.setDefaultValue(aValue);
         param.setValue(aValue);
     }
 
-    /*
-     public void putParameter(String aName, int aType, Object aValue) {
-     if (params == null) {
-     params = new Parameters();
-     }
-     Parameter param = params.getApplicationElement(aName);
-     if (param == null) {
-     param = new Parameter();
-     params.add(param);
-     }
-     param.setName(aName.toUpperCase());
-     param.getTypeInfo().setSqlType(aType);
-     param.setDefaultValue(aValue);
-     param.setValue(aValue);
-     }
-     */
-    public void putParameter(String aName, int aType, Object aDefaultValue, Object aValue) {
+    public void putParameter(String aName, String aType, Object aDefaultValue, Object aValue) {
         if (params == null) {
             params = new Parameters();
         }
@@ -239,7 +222,7 @@ public abstract class Query {
             params.add(param);
         }
         param.setName(aName);
-        param.getTypeInfo().setSqlType(aType);
+        param.setType(aType);
         param.setDefaultValue(aDefaultValue);
         param.setValue(aValue);
     }

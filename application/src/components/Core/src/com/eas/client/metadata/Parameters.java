@@ -66,7 +66,6 @@ public class Parameters extends Fields {
             aName = generateNewName();
         }
         Parameter param = new Parameter(aName, null);
-        param.setTypeInfo(DataTypeInfo.VARCHAR);
         return param;
     }
 

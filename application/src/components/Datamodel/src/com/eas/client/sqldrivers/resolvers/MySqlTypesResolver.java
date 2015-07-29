@@ -10,7 +10,6 @@ import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.Field;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -171,14 +170,6 @@ public class MySqlTypesResolver extends TypesResolver {
     }
 
     @Override
-    public void resolve2RDBMS(Field aField) {
-        super.resolve2RDBMS(aField);
-        if (SQLUtils.getTypeGroup(aField.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.NUMBERS && aField.getSize() > MAXIMUM_NUMBERS_PRECISION) {// MySql treats size as precision in error messages
-            aField.setSize(MAXIMUM_NUMBERS_PRECISION);
-        }
-    }
-
-    @Override
     public void resolve2Application(Field aField) {
         if (isGeometryTypeName(aField.getTypeInfo().getSqlTypeName())) {
             aField.setTypeInfo(DataTypeInfo.GEOMETRY.copy());
@@ -231,35 +222,4 @@ public class MySqlTypesResolver extends TypesResolver {
         return rdbmsTypes2JdbcTypes.containsKey(aTypeName.toLowerCase());
     }
 
-    @Override
-    public void resolveFieldSize(Field aField) {
-        DataTypeInfo typeInfo = aField.getTypeInfo();
-        int sqlType = typeInfo.getSqlType();
-        String sqlTypeName = typeInfo.getSqlTypeName();
-        sqlTypeName = sqlTypeName.toLowerCase();
-        // check on max size
-        int fieldSize = aField.getSize();
-        Integer maxSize = jdbcTypesMaxSize.get(sqlTypeName);
-        if (maxSize != null && maxSize < fieldSize) {
-            List<Integer> typesOrder = getTypesOrder(sqlType);
-            if (typesOrder != null) {
-                for (int i = typesOrder.indexOf(sqlType); i < typesOrder.size(); i++) {
-                    sqlType = typesOrder.get(i);
-                    sqlTypeName = jdbcTypes2RdbmsTypes.get(sqlType);
-                    maxSize = jdbcTypesMaxSize.get(sqlTypeName);
-                    if (maxSize != null && maxSize >= fieldSize) {
-                        break;
-                    }
-                }
-            }
-            if (maxSize != null && maxSize < fieldSize) {
-                aField.setSize(maxSize);
-            }
-        }
-        aField.setTypeInfo(new DataTypeInfo(sqlType, sqlTypeName, typeInfo.getJavaClassName()));
-        // check on default size
-        if (fieldSize <= 0 && jdbcTypesDefaultSize.containsKey(sqlTypeName)) {
-            aField.setSize(jdbcTypesDefaultSize.get(sqlTypeName));
-        }
-    }
 }

@@ -136,6 +136,7 @@ public class SqlCompiledQuery {
     /**
      * Executes query and returns results whatever setted in procedure flag.
      *
+     * @param <T>
      * @param aResultSetProcessor
      * @param aCallbacksExecutor
      * @param onSuccess
@@ -196,7 +197,7 @@ public class SqlCompiledQuery {
         command.command = sqlClause;
         for (int i = 0; i < parameters.getParametersCount(); i++) {
             Parameter param = parameters.get(i + 1);
-            command.getParameters().add(new ChangeValue(param.getName(), param.getValue(), param.getTypeInfo()));
+            command.getParameters().add(new ChangeValue(param.getName(), param.getValue()));
         }
         return command;
     }

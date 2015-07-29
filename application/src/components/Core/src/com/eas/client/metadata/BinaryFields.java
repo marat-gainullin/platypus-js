@@ -38,20 +38,10 @@ public class BinaryFields {
             if (fDescNode != null) {
                 field.setDescription(fDescNode.getString());
             }
-            DataTypeInfo typeInfo = new DataTypeInfo();
-            ProtoNode fTypeNode = fieldNode.getChild(FieldsTags.FIELD_TYPE);
-            if (fTypeNode != null) {
-                typeInfo.setSqlType(fTypeNode.getInt());
-            }
             ProtoNode fTypeNameNode = fieldNode.getChild(FieldsTags.FIELD_TYPENAME);
             if (fTypeNameNode != null) {
-                typeInfo.setSqlTypeName(fTypeNameNode.getString());
+                field.setType(fTypeNameNode.getString());
             }
-            ProtoNode fClassNameNode = fieldNode.getChild(FieldsTags.FIELD_CLASSNAME);
-            if (fClassNameNode != null) {
-                typeInfo.setJavaClassName(fClassNameNode.getString());
-            }
-            field.setTypeInfo(typeInfo);
             ProtoNode fSizeNode = fieldNode.getChild(FieldsTags.FIELD_SIZE);
             if (fSizeNode != null) {
                 field.setSize(fSizeNode.getInt());
@@ -163,13 +153,8 @@ public class BinaryFields {
         if (field.getDescription() != null) {
             fieldPw.put(FieldsTags.FIELD_DESCRIPTION, field.getDescription());
         }
-        assert field.getTypeInfo() != null;
-        fieldPw.put(FieldsTags.FIELD_TYPE, field.getTypeInfo().getSqlType());
-        if (field.getTypeInfo().getSqlTypeName() != null) {
-            fieldPw.put(FieldsTags.FIELD_TYPENAME, field.getTypeInfo().getSqlTypeName());
-        }
-        if (field.getTypeInfo().getJavaClassName() != null) {
-            fieldPw.put(FieldsTags.FIELD_CLASSNAME, field.getTypeInfo().getJavaClassName());
+        if (field.getType() != null) {
+            fieldPw.put(FieldsTags.FIELD_TYPENAME, field.getType());
         }
         fieldPw.put(FieldsTags.FIELD_SIZE, field.getSize());
         fieldPw.put(FieldsTags.FIELD_SCALE, field.getScale());
