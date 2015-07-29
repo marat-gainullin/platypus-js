@@ -39,10 +39,6 @@ public abstract class Query {
     protected Set<String> writeRoles = new HashSet<>();
     protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
 
-    /**
-     * Creates an instance of Query with empty SQL query text and parameters
-     * map.
-     */
     protected Query() {
         super();
     }
