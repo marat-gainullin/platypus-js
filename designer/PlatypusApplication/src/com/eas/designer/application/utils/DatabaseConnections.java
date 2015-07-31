@@ -9,7 +9,6 @@ import com.eas.client.resourcepool.BearDatabaseConnection;
 import com.eas.client.resourcepool.GeneralResourceProvider;
 import com.eas.client.resourcepool.PlatypusNativeDataSource;
 import com.eas.util.ListenerRegistration;
-import java.awt.EventQueue;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashSet;
@@ -71,10 +70,8 @@ public class DatabaseConnections {
                 if (connected.contains(conn.getDisplayName())) {
                     connected.remove(conn.getDisplayName());
                     GeneralResourceProvider.getInstance().unregisterDatasource(conn.getDisplayName());
-                    EventQueue.invokeLater(() -> {
-                        listeners.stream().forEach((listener) -> {
-                            listener.disconnected(conn);
-                        });
+                    listeners.stream().forEach((listener) -> {
+                        listener.disconnected(conn);
                     });
                 }
             } else {
@@ -84,22 +81,19 @@ public class DatabaseConnections {
 
                         @Override
                         public Connection getConnection() throws SQLException {
-                            return new BearDatabaseConnection(25, conn.getJDBCConnection(), this){
+                            return new BearDatabaseConnection(25, conn.getJDBCConnection(), this) {
 
                                 @Override
                                 protected void shutdownDelegate() throws SQLException {
                                     // no op
                                 }
 
-                                
                             };
                         }
 
                     });
-                    EventQueue.invokeLater(() -> {
-                        listeners.stream().forEach((listener) -> {
-                            listener.connected(conn);
-                        });
+                    listeners.stream().forEach((listener) -> {
+                        listener.connected(conn);
                     });
                 }
             }

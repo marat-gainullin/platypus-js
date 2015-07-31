@@ -212,9 +212,9 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         return icoHeight;
     }
 
-    private void initComponents() throws Exception {
+    protected void initComponents() throws Exception {
         paramsFieldsPanel = new JPanel(new BorderLayout());
-        fieldsParamsRenderer = new FieldsParametersListCellRenderer<>(DatamodelDesignUtils.getFieldsFont(), DatamodelDesignUtils.getBindedFieldsFont(), entity);
+        initFieldsParamsRenderer();
         setDoubleBuffered(true);
         addMouseListener(viewMover);
         addMouseMotionListener(viewMover);
@@ -308,6 +308,10 @@ public abstract class EntityView<E extends Entity<?, ?, E>> extends JPanel {
         }
         setBorder(ordinaryBorder);
         setOpaque(false);
+    }
+
+    public void initFieldsParamsRenderer()throws Exception {
+        fieldsParamsRenderer = new FieldsParametersListCellRenderer<>(DatamodelDesignUtils.getFieldsFont(), DatamodelDesignUtils.getBindedFieldsFont(), entity);
     }
 
     protected void initAbsentLabel() {

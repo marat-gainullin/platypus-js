@@ -224,7 +224,7 @@ public class SqlQuery extends Query {
                 if (paramName != null) {
                     if (!forUniqueness.contains(paramName)) {
                         forUniqueness.add(paramName);
-                        Parameter spmdi = new Parameter(paramName, "", "String");
+                        Parameter spmdi = new Parameter(paramName, "", Scripts.STRING_TYPE_NAME);
                         params.add(spmdi);
                     }
                 }

@@ -57,15 +57,6 @@ public class AppQueryRequestHandler extends RequestHandler<AppQueryRequest, AppQ
                         throw new AccessControlException(String.format(ACCESS_DENIED_MSG, query.getEntityName(), principal.getName()), principal instanceof AnonymousPlatypusPrincipal ? new AuthPermission("*") : null);
                     }
                     assert query.getEntityName().equals(getRequest().getQueryName());
-                    /**
-                     * this code was moved to stored query factory in order to
-                     * code abstraction SqlDriver driver =
-                     * getServerCore().getDatabasesClient().getDbMetadataCache(query.getDbId()).getConnectionDriver();
-                     * Fields queryFields = query.getFields(); if (queryFields
-                     * != null) { for (Field field : queryFields.toCollection())
-                     * { driver.getTypesResolver().resolve2Application(field); }
-                     * }
-                     */
                     if (onSuccess != null) {
                         AppQueryRequest.Response resp = new AppQueryRequest.Response(null, null);
                         AppElementFiles files = getServerCore().getIndexer().nameToFiles(getRequest().getQueryName());
@@ -80,7 +71,7 @@ public class AppQueryRequestHandler extends RequestHandler<AppQueryRequest, AppQ
                             pQuery.setReadRoles(query.getReadRoles());
                             pQuery.setWriteRoles(query.getWriteRoles());
                             query.getParameters().toCollection().stream().forEach((p) -> {
-                                pQuery.putParameter(p.getName(), p.getTypeInfo(), ((Parameter) p).getValue());
+                                pQuery.putParameter(p.getName(), p.getType(), ((Parameter) p).getValue());
                             });
                             resp.setAppQueryJson(QueryJSONWriter.write(pQuery));
                             resp.setTimeStamp(serverQueryTime);

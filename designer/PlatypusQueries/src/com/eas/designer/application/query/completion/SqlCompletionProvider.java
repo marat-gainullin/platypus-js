@@ -5,7 +5,7 @@
 package com.eas.designer.application.query.completion;
 
 import com.eas.client.ClientConstants;
-import com.eas.client.DatabaseMdCache;
+import com.eas.client.MetadataCache;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SqlQuery;
 import com.eas.client.metadata.Field;
@@ -137,9 +137,9 @@ public class SqlCompletionProvider implements CompletionProvider {
             DatabasesClient basesProxy = dataObject.getBasesProxy();
             if (basesProxy != null) {
                 Insert iStatement = (Insert) dataObject.getStatement();
-                DatabaseMdCache mdCache = basesProxy.getDbMetadataCache(dataObject.getDatasourceName());
+                MetadataCache mdCache = basesProxy.getMetadataCache(dataObject.getDatasourceName());
                 String schema = iStatement.getTable().getSchemaName();
-                String defaultSchema = mdCache.getConnectionSchema();
+                String defaultSchema = mdCache.getDatasourceSchema();
                 Fields fields = mdCache.getTableMetadata(defaultSchema.equalsIgnoreCase(schema) ? iStatement.getTable().getName() : iStatement.getTable().getWholeTableName());
                 fillCompletionByFields(fields, dataObject, point, resultSet);
             }
@@ -151,9 +151,9 @@ public class SqlCompletionProvider implements CompletionProvider {
             DatabasesClient basesProxy = dataObject.getBasesProxy();
             if (basesProxy != null) {
                 Update uStatement = (Update) dataObject.getStatement();
-                DatabaseMdCache mdCache = basesProxy.getDbMetadataCache(dataObject.getDatasourceName());
+                MetadataCache mdCache = basesProxy.getMetadataCache(dataObject.getDatasourceName());
                 String schema = uStatement.getTable().getSchemaName();
-                String defaultSchema = mdCache.getConnectionSchema();
+                String defaultSchema = mdCache.getDatasourceSchema();
                 Fields fields = mdCache.getTableMetadata(defaultSchema.equalsIgnoreCase(schema) ? uStatement.getTable().getName() : uStatement.getTable().getWholeTableName());
                 fillCompletionByFields(fields, dataObject, point, resultSet);
             }
@@ -188,7 +188,7 @@ public class SqlCompletionProvider implements CompletionProvider {
         if (dataObject.getStatement() instanceof Select) {
             DatabasesClient basesProxy = dataObject.getBasesProxy();
             if (basesProxy != null) {
-                DatabaseMdCache mdCache = basesProxy.getDbMetadataCache(dataObject.getDatasourceName());
+                MetadataCache mdCache = basesProxy.getMetadataCache(dataObject.getDatasourceName());
                 if (point.atDot) {
                     if (point.prevContext != null) {
                         Set<String> schemas = dataObject.achieveSchemas();
@@ -197,7 +197,7 @@ public class SqlCompletionProvider implements CompletionProvider {
                             // Two times qualified
                             String schema = findName(point.prevPrevContext, schemas);
                             if (schema != null) {
-                                String defaultSchema = mdCache.getConnectionSchema();
+                                String defaultSchema = mdCache.getDatasourceSchema();
                                 Fields fields = mdCache.getTableMetadata(defaultSchema.equalsIgnoreCase(schema) ? point.prevContext : schema + "." + point.prevContext);
                                 fillCompletionByFields(fields, dataObject, point, resultSet);
                             }
@@ -261,7 +261,7 @@ public class SqlCompletionProvider implements CompletionProvider {
     public void fillCompletionWhereZone(PlatypusQueryDataObject dataObject, CompletionPoint point, CompletionResultSet resultSet) throws Exception {
         DatabasesClient basesProxy = dataObject.getBasesProxy();
         if (basesProxy != null) {
-            DatabaseMdCache mdCache = basesProxy.getDbMetadataCache(dataObject.getDatasourceName());
+            MetadataCache mdCache = basesProxy.getMetadataCache(dataObject.getDatasourceName());
             if (point.atDot) {
                 if (point.prevContext != null) {
                     Set<String> schemas = dataObject.achieveSchemas();
@@ -270,7 +270,7 @@ public class SqlCompletionProvider implements CompletionProvider {
                         // Two times qualified
                         String schema = findName(point.prevPrevContext, schemas);
                         if (schema != null) {
-                            String defaultSchema = mdCache.getConnectionSchema();
+                            String defaultSchema = mdCache.getDatasourceSchema();
                             Fields fields = mdCache.getTableMetadata(defaultSchema.equalsIgnoreCase(schema) ? point.prevContext : schema + "." + point.prevContext);
                             fillCompletionByFields(fields, dataObject, point, resultSet);
                         }

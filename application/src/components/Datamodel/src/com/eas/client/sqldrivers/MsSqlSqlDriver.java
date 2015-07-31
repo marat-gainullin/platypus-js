@@ -271,13 +271,12 @@ public class MsSqlSqlDriver extends SqlDriver {
                 }
             }
         }
-        return ex.getLocalizedMessage();
+        return ex != null ? ex.getLocalizedMessage() : null;
     }
 
     private String getFieldTypeDefinition(Field aField) {
-        resolver.resolve2RDBMS(aField);
         String typeDefine = "";
-        String sqlTypeName = aField.getTypeInfo().getSqlTypeName().toLowerCase();
+        String sqlTypeName = aField.getType().toLowerCase();
         typeDefine += sqlTypeName;
         // field length
         int size = aField.getSize();
@@ -333,11 +332,6 @@ public class MsSqlSqlDriver extends SqlDriver {
     }
 
     @Override
-    public Set<Integer> getSupportedJdbcDataTypes() {
-        return resolver.getSupportedJdbcDataTypes();
-    }
-
-    @Override
     public void applyContextToConnection(Connection aConnection, String aSchema) throws Exception {
         //no-op
     }
@@ -378,11 +372,6 @@ public class MsSqlSqlDriver extends SqlDriver {
             aDescription = "";
         }
         return String.format(ADD_TABLE_COMMENT_CLAUSE, unwrapName(aOwnerName), unwrapName(aTableName), aDescription, unwrapName(aOwnerName), unwrapName(aTableName));
-    }
-
-    @Override
-    public Integer getJdbcTypeByRDBMSTypename(String aLowLevelTypeName) {
-        return resolver.getJdbcTypeByRDBMSTypename(aLowLevelTypeName);
     }
 
     @Override

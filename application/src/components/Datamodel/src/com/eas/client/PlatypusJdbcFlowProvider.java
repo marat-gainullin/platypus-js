@@ -22,10 +22,10 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
 
     protected String entityName;
     protected DatabasesClient client;
-    protected DatabaseMdCache cache;
+    protected MetadataCache cache;
     protected ContextHost contextHost;
 
-    public PlatypusJdbcFlowProvider(DatabasesClient aClient, String aDataSourceName, String aEntityName, DataSource aDataSource, Consumer<Runnable> aDataPuller, DatabaseMdCache aCache, String aClause, Fields aExpectedFields, ContextHost aContextHost) throws Exception {
+    public PlatypusJdbcFlowProvider(DatabasesClient aClient, String aDataSourceName, String aEntityName, DataSource aDataSource, Consumer<Runnable> aDataPuller, MetadataCache aCache, String aClause, Fields aExpectedFields, ContextHost aContextHost) throws Exception {
         super(aDataSourceName, aDataSource, aDataPuller, aClause, aExpectedFields);
         entityName = aEntityName;
         client = aClient;
@@ -41,7 +41,7 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
     @Override
     protected void prepareConnection(Connection aConnection) throws Exception {
         if (contextHost != null && contextHost.preparationContext() != null && !contextHost.preparationContext().isEmpty()) {
-            cache.getConnectionDriver().applyContextToConnection(aConnection, contextHost.preparationContext());
+            cache.getDatasourceSqlDriver().applyContextToConnection(aConnection, contextHost.preparationContext());
         }
     }
 
@@ -51,7 +51,7 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
         // if it has been made. And so, condition checks a _PR_eparation context, but _UN_preparation context is applied.
         // If no preparation has been made, no unpreparation should occur!
         if (contextHost != null && contextHost.preparationContext() != null && !contextHost.preparationContext().isEmpty()) {
-            cache.getConnectionDriver().applyContextToConnection(aConnection, contextHost.unpreparationContext());
+            cache.getDatasourceSqlDriver().applyContextToConnection(aConnection, contextHost.unpreparationContext());
         }
     }
 }

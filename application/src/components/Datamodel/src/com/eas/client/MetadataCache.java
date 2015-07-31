@@ -33,7 +33,7 @@ import java.util.logging.Logger;
  *
  * @author mg
  */
-public class DatabaseMdCache {
+public class MetadataCache {
 
     protected class CaseInsesitiveMap<V> extends HashMap<String, V> {
 
@@ -69,27 +69,27 @@ public class DatabaseMdCache {
     protected Map<String, TablesFieldsCache> schemasTablesFields = new CaseInsesitiveMap<>();
     // Named tables indexes cache
     protected Map<String, TablesIndexesCache> schemasTablesIndexes = new CaseInsesitiveMap<>();
-    protected String connectionSchema;
-    protected SqlDriver connectionDriver;
+    protected String datasourceSchema;
+    protected SqlDriver datasourceDriver;
 
-    public DatabaseMdCache(DatabasesClient aClient, String aDatasourceName) throws Exception {
+    public MetadataCache(DatabasesClient aClient, String aDatasourceName) throws Exception {
         super();
         client = aClient;
         datasourceName = aDatasourceName;
     }
 
-    public String getConnectionSchema() throws Exception {
-        if (connectionSchema == null) {
-            connectionSchema = client.getConnectionSchema(datasourceName);
+    public String getDatasourceSchema() throws Exception {
+        if (datasourceSchema == null) {
+            datasourceSchema = client.getConnectionSchema(datasourceName);
         }
-        return connectionSchema;
+        return datasourceSchema;
     }
 
-    public SqlDriver getConnectionDriver() throws Exception {
-        if (connectionDriver == null) {
-            connectionDriver = client.getConnectionDriver(datasourceName);
+    public SqlDriver getDatasourceSqlDriver() throws Exception {
+        if (datasourceDriver == null) {
+            datasourceDriver = client.getConnectionDriver(datasourceName);
         }
-        return connectionDriver;
+        return datasourceDriver;
     }
 
     private String schemaFromTableName(String aTableName) {
@@ -171,10 +171,10 @@ public class DatabaseMdCache {
     public void fillTablesCacheBySchema(String aSchema, boolean aFullMetadata) throws Exception {
         String schema4Sql = aSchema;
         if (schema4Sql == null || schema4Sql.isEmpty()) {
-            schema4Sql = getConnectionSchema();
+            schema4Sql = getDatasourceSchema();
         }
         if (schema4Sql != null && !schema4Sql.isEmpty()) {
-            SqlDriver driver = getConnectionDriver();
+            SqlDriver driver = getDatasourceSqlDriver();
             String queryText = driver.getSql4TablesEnumeration(schema4Sql);
             SqlCompiledQuery query = new SqlCompiledQuery(client, datasourceName, queryText);
             Map<String, String> aTablesNames = query.<Map<String, String>>executeQuery((ResultSet r) -> {
@@ -202,7 +202,7 @@ public class DatabaseMdCache {
                         tablesFields.fill(aSchema, queried, tablesNames);
                         tablesNames.clear();
                     } catch (Exception ex) {
-                        Logger.getLogger(DatabaseMdCache.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(MetadataCache.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
             });
@@ -212,7 +212,7 @@ public class DatabaseMdCache {
                     tablesFields.fill(aSchema, queried, tablesNames);
                     tablesNames.clear();
                 } catch (Exception ex) {
-                    Logger.getLogger(DatabaseMdCache.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(MetadataCache.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
@@ -238,10 +238,10 @@ public class DatabaseMdCache {
     public void fillIndexesCacheBySchema(String aSchema) throws Exception {
         String schema4Sql = aSchema;
         if (schema4Sql == null || schema4Sql.isEmpty()) {
-            schema4Sql = getConnectionSchema();
+            schema4Sql = getDatasourceSchema();
         }
         if (schema4Sql != null && !schema4Sql.isEmpty()) {
-            SqlDriver driver = getConnectionDriver();
+            SqlDriver driver = getDatasourceSqlDriver();
             String queryText = driver.getSql4TablesEnumeration(schema4Sql);
             SqlCompiledQuery query = new SqlCompiledQuery(client, datasourceName, queryText);
             Map<String, String> aTablesNames = query.<Map<String, String>>executeQuery((ResultSet r) -> {
@@ -269,7 +269,7 @@ public class DatabaseMdCache {
                         tablesIndexes.fill(aSchema, queried);
                         tablesNames.clear();
                     } catch (Exception ex) {
-                        Logger.getLogger(DatabaseMdCache.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(MetadataCache.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
             });
@@ -279,7 +279,7 @@ public class DatabaseMdCache {
                     tablesIndexes.fill(aSchema, queried);
                     tablesNames.clear();
                 } catch (Exception ex) {
-                    Logger.getLogger(DatabaseMdCache.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(MetadataCache.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
@@ -292,8 +292,8 @@ public class DatabaseMdCache {
         if (schemasTablesIndexes != null) {
             schemasTablesIndexes.clear();
         }
-        connectionSchema = null;
-        connectionDriver = null;
+        datasourceSchema = null;
+        datasourceDriver = null;
     }
 
     public void removeSchema(String aSchema) {
@@ -345,7 +345,7 @@ public class DatabaseMdCache {
          @Override
          protected Fields getNewEntry(String aId) throws Exception {
          if (client != null && aId != null && !aId.isEmpty()) {
-         SqlDriver sqlDriver = getConnectionDriver();
+         SqlDriver sqlDriver = getDatasourceSqlDriver();
          assert sqlDriver != null;
          String lOwner = null;
          String lTable;
@@ -384,10 +384,10 @@ public class DatabaseMdCache {
 
         protected Map<String, Fields> query(String aSchema, Set<String> aTables, boolean aFullMetadata) throws Exception {
             if (aTables != null) {
-                SqlDriver sqlDriver = getConnectionDriver();
+                SqlDriver sqlDriver = getDatasourceSqlDriver();
                 String schema4Sql = aSchema;
                 if (schema4Sql == null || schema4Sql.isEmpty()) {
-                    schema4Sql = getConnectionSchema();
+                    schema4Sql = getDatasourceSchema();
                 }
                 if (!aTables.isEmpty()) {
                     String colsSql = sqlDriver.getSql4TableColumns(schema4Sql, aTables);
@@ -577,10 +577,10 @@ public class DatabaseMdCache {
 
         protected Map<String, DbTableIndexes> query(String aSchema, Set<String> aTables) throws Exception {
             if (aTables != null) {
-                SqlDriver sqlDriver = getConnectionDriver();
+                SqlDriver sqlDriver = getDatasourceSqlDriver();
                 String schema4Sql = aSchema;
                 if (schema4Sql == null || schema4Sql.isEmpty()) {
-                    schema4Sql = getConnectionSchema();
+                    schema4Sql = getDatasourceSchema();
                 }
                 if (!aTables.isEmpty()) {
                     String sql4IndexesText = sqlDriver.getSql4Indexes(schema4Sql, aTables);
@@ -686,7 +686,7 @@ public class DatabaseMdCache {
          @Override
          protected DbTableIndexes getNewEntry(String aTableName) throws Exception {
          if (client != null) {
-         SqlDriver sqlDriver = getConnectionDriver();
+         SqlDriver sqlDriver = getDatasourceSqlDriver();
          assert sqlDriver != null;
          String lOwner = null;
          String lTable;
@@ -708,7 +708,7 @@ public class DatabaseMdCache {
          lTableNames.add(lTable);
          String schema4Sql = lOwner;
          if (schema4Sql == null) {
-         schema4Sql = getConnectionSchema();
+         schema4Sql = getDatasourceSchema();
          }
          String sql4IndexesText = sqlDriver.getSql4Indexes(schema4Sql, lTableNames);
          if (sql4IndexesText != null && !sql4IndexesText.isEmpty()) {

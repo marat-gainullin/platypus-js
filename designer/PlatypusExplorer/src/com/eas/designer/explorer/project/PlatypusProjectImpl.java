@@ -5,7 +5,7 @@
 package com.eas.designer.explorer.project;
 
 import com.eas.client.AppElementFiles;
-import com.eas.client.DatabaseMdCache;
+import com.eas.client.MetadataCache;
 import com.eas.client.DatabasesClient;
 import com.eas.client.ScriptedDatabasesClient;
 import com.eas.client.cache.PlatypusFiles;
@@ -106,7 +106,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
             Object global = jsEngine.eval("load('classpath:com/eas/designer/explorer/designer-js.js', space);", bindings);
             space.setGlobal(global);
             Scripts.LocalContext context = Scripts.createContext(space);
-            EventQueue.invokeLater(()->{
+            EventQueue.invokeLater(() -> {
                 Scripts.setContext(context);
                 Forms.initContext(context);
             });
@@ -268,22 +268,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
         }
     }
 
-    public void disconnectedFromDatasource(final String aDatasourceName) throws Exception {
-        if (ModelInspector.isInstance()) {
-            ModelInspector mi = ModelInspector.getInstance();
-            mi.setNodesReflector(null);
-            mi.setViewData(null);
-        }
-        DatabaseMdCache mdCache = basesProxy.getDbMetadataCache(aDatasourceName);
-        if (mdCache != null) {
-            mdCache.clear();
-        }
-        if (aDatasourceName == null ? basesProxy.getDefaultDatasourceName() == null : aDatasourceName.equals(basesProxy.getDefaultDatasourceName())) {
-            mdCache = basesProxy.getDbMetadataCache(null);
-            if (mdCache != null) {
-                mdCache.clear();
-            }
-        }
+    public void disconnectedFromDatasource(final String aDatasourceName) {
         fireClientDisconnected(aDatasourceName);
         StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Connection_Lost", aDatasourceName)); // NOI18N
     }
@@ -293,11 +278,11 @@ public class PlatypusProjectImpl implements PlatypusProject {
         if (connecting2Db != null && !connecting2Db.isFinished()) {
             connecting2Db.waitFinished();
         }
-        String datasourceId = aDatasourceName;
-        if (datasourceId == null) {
-            datasourceId = settings.getDefaultDataSourceName();
+        String datasourceName = aDatasourceName;
+        if (datasourceName == null) {
+            datasourceName = settings.getDefaultDataSourceName();
         }
-        DatabaseConnection conn = DatabaseConnections.lookup(datasourceId);
+        DatabaseConnection conn = DatabaseConnections.lookup(datasourceName);
         if (conn != null) {
             ConnectionManager.getDefault().disconnect(conn);
         }
@@ -306,24 +291,49 @@ public class PlatypusProjectImpl implements PlatypusProject {
             mi.setNodesReflector(null);
             mi.setViewData(null);
         }
-        StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Connection_Lost", datasourceId)); // NOI18N                    
+        StatusDisplayer.getDefault().setStatusText(NbBundle.getMessage(PlatypusProjectActions.class, "LBL_Connection_Lost", datasourceName)); // NOI18N                    
     }
 
     private synchronized void fireClientConnected(final String aDatasourceName) {
-        clientListeners.stream().forEach((onChange) -> {
-            onChange.connected(aDatasourceName);
+        EventQueue.invokeLater(() -> {
+            clientListeners.stream().forEach((onChange) -> {
+                onChange.connected(aDatasourceName);
+            });
         });
     }
 
     private synchronized void fireClientDisconnected(final String aDatasourceName) {
-        clientListeners.stream().forEach((onChange) -> {
-            onChange.disconnected(aDatasourceName);
+        EventQueue.invokeLater(() -> {
+            try {
+                if (ModelInspector.isInstance()) {
+                    ModelInspector mi = ModelInspector.getInstance();
+                    mi.setNodesReflector(null);
+                    mi.setViewData(null);
+                }
+                MetadataCache mdCache = basesProxy.getMetadataCache(aDatasourceName);
+                if (mdCache != null) {
+                    mdCache.clear();
+                }
+                if (aDatasourceName == null ? basesProxy.getDefaultDatasourceName() == null : aDatasourceName.equals(basesProxy.getDefaultDatasourceName())) {
+                    mdCache = basesProxy.getMetadataCache(null);
+                    if (mdCache != null) {
+                        mdCache.clear();
+                    }
+                }
+                clientListeners.stream().forEach((onChange) -> {
+                    onChange.disconnected(aDatasourceName);
+                });
+            } catch (Exception ex) {
+                Exceptions.printStackTrace(ex);
+            }
         });
     }
 
     private synchronized void fireClientDefaultDatasourceChanged(final String aOldDatasourceName, final String aNewDatasourceName) {
-        clientListeners.stream().forEach((onChange) -> {
-            onChange.defaultDatasourceNameChanged(aOldDatasourceName, aNewDatasourceName);
+        EventQueue.invokeLater(() -> {
+            clientListeners.stream().forEach((onChange) -> {
+                onChange.defaultDatasourceNameChanged(aOldDatasourceName, aNewDatasourceName);
+            });
         });
     }
 
@@ -354,7 +364,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
         final DatabaseConnection conn = DatabaseConnections.lookup(aDatasourceName);
         assert conn != null : "Already connected datasource disappeared";
         String datasourceName = (aDatasourceName == null ? basesProxy.getDefaultDatasourceName() != null : !aDatasourceName.equals(basesProxy.getDefaultDatasourceName())) ? aDatasourceName : null;
-        DatabaseMdCache mdCache = basesProxy.getDbMetadataCache(datasourceName);
+        MetadataCache mdCache = basesProxy.getMetadataCache(datasourceName);
         if (mdCache != null) {
             mdCache.clear();
             mdCache.fillTablesCacheByConnectionSchema(true);

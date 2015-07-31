@@ -50,7 +50,7 @@ public class DatabasesClient {
     public static final String TYPES_INFO_TRACE_MSG = "Getting types info. DatasourceName %s";
     public static final String USER_MISSING_MSG = "No user found (%s)";
     // metadata
-    protected Map<String, DatabaseMdCache> mdCaches = new ConcurrentHashMap<>();
+    protected Map<String, MetadataCache> mdCaches = new ConcurrentHashMap<>();
     protected boolean autoFillMetadata = true;
     // callback interface for context
     protected ContextHost contextHost;
@@ -155,7 +155,7 @@ public class DatabasesClient {
     public PlatypusJdbcFlowProvider createFlowProvider(String aDatasourceName, String aEntityName, String aSqlClause, Fields aExpectedFields) throws Exception {
         return new PlatypusJdbcFlowProvider(this, aDatasourceName, aEntityName, obtainDataSource(aDatasourceName), (Runnable aTask) -> {
             startJdbcTask(aTask);
-        }, getDbMetadataCache(aDatasourceName), aSqlClause, aExpectedFields, contextHost);
+        }, getMetadataCache(aDatasourceName), aSqlClause, aExpectedFields, contextHost);
     }
 
     public String getSqlLogMessage(SqlCompiledQuery query) {
@@ -177,7 +177,7 @@ public class DatabasesClient {
     public static Map<String, String> getUserProperties(DatabasesClient aClient, String aUserName, Scripts.Space aSpace, Consumer<Map<String, String>> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (aUserName != null && aClient != null) {
             final SqlQuery q = new SqlQuery(aClient, USER_QUERY_TEXT);
-            q.putParameter(USERNAME_PARAMETER_NAME, "String", aUserName.toUpperCase());
+            q.putParameter(USERNAME_PARAMETER_NAME, Scripts.STRING_TYPE_NAME, aUserName.toUpperCase());
             SqlCompiledQuery compiled = q.compile();
             CallableConsumer<Map<String, String>, ResultSet> doWork = (ResultSet r) -> {
                 Map<String, String> properties = new HashMap<>();
@@ -346,13 +346,13 @@ public class DatabasesClient {
         }
     }
 
-    public DatabaseMdCache getDbMetadataCache(String aDatasourceName) throws Exception {
+    public MetadataCache getMetadataCache(String aDatasourceName) throws Exception {
         if (aDatasourceName == null) {
             aDatasourceName = defaultDatasourceName;
         }
         if (aDatasourceName != null) {
             if (!mdCaches.containsKey(aDatasourceName)) {
-                DatabaseMdCache cache = new DatabaseMdCache(this, aDatasourceName);
+                MetadataCache cache = new MetadataCache(this, aDatasourceName);
                 mdCaches.put(aDatasourceName, cache);
                 if (autoFillMetadata) {
                     try {
@@ -537,11 +537,11 @@ public class DatabasesClient {
     protected ApplyResult apply(final String aDatasourceName, List<Change> aLog, Scripts.Space aSpace, Consumer<ApplyResult> onSuccess, Consumer<Exception> onFailure) throws Exception {
         Callable<ApplyResult> doWork = () -> {
             int rowsAffected;
-            DatabaseMdCache mdCache = getDbMetadataCache(aDatasourceName);
+            MetadataCache mdCache = getMetadataCache(aDatasourceName);
             if (mdCache == null) {
                 throw new IllegalStateException(String.format(UNKNOWN_DATASOURCE_IN_COMMIT, aDatasourceName));
             }
-            SqlDriver driver = mdCache.getConnectionDriver();
+            SqlDriver driver = mdCache.getDatasourceSqlDriver();
             if (driver == null) {
                 throw new IllegalStateException(String.format(UNSUPPORTED_DATASOURCE_IN_COMMIT, aDatasourceName));
             }
@@ -657,7 +657,7 @@ public class DatabasesClient {
     protected static final String UNSUPPORTED_DATASOURCE_IN_COMMIT = "Unsupported datasource: %s. Can't commit to it.";
 
     public void dbTableChanged(String aDatasourceName, String aSchema, String aTable) throws Exception {
-        DatabaseMdCache cache = getDbMetadataCache(aDatasourceName);
+        MetadataCache cache = getMetadataCache(aDatasourceName);
         cache.removeSchema(aSchema);
     }
 
@@ -672,15 +672,15 @@ public class DatabasesClient {
         }
     }
 
-    public String getConnectionDialect(String aDatasourceId) throws Exception {
-        DataSource ds = obtainDataSource(aDatasourceId);
+    public String getConnectionDialect(String aDatasourceName) throws Exception {
+        DataSource ds = obtainDataSource(aDatasourceName);
         try (Connection conn = ds.getConnection()) {
             return dialectByConnection(conn);
         }
     }
 
-    public SqlDriver getConnectionDriver(String aDatasourceId) throws Exception {
-        DataSource ds = obtainDataSource(aDatasourceId);
+    public SqlDriver getConnectionDriver(String aDatasourceName) throws Exception {
+        DataSource ds = obtainDataSource(aDatasourceName);
         try (Connection conn = ds.getConnection()) {
             return SQLUtils.getSqlDriver(dialectByConnection(conn));
         }
@@ -697,7 +697,7 @@ public class DatabasesClient {
             return roles;
         };
         final SqlQuery q = new SqlQuery(aClient, USER_GROUPS_QUERY_TEXT);
-        q.putParameter(USERNAME_PARAMETER_NAME, "String", aUserName.toUpperCase());
+        q.putParameter(USERNAME_PARAMETER_NAME, Scripts.STRING_TYPE_NAME, aUserName.toUpperCase());
         SqlCompiledQuery compiled = q.compile();
         if (onSuccess != null) {
             compiled.<Set<String>>executeQuery(doWork, (Runnable aTask) -> {

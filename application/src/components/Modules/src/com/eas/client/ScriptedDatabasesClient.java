@@ -77,10 +77,10 @@ public class ScriptedDatabasesClient extends DatabasesClient {
     }
 
     @Override
-    public synchronized DatabaseMdCache getDbMetadataCache(String aDatasourceName) throws Exception {
+    public MetadataCache getMetadataCache(String aDatasourceName) throws Exception {
         AppElementFiles files = indexer.nameToFiles(aDatasourceName);
         if (files == null || !files.hasExtension(PlatypusFiles.JAVASCRIPT_EXTENSION)) {
-            return super.getDbMetadataCache(aDatasourceName);
+            return super.getMetadataCache(aDatasourceName);
         } else {
             return null;
         }

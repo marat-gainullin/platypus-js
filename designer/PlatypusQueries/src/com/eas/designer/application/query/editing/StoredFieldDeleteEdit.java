@@ -26,7 +26,7 @@ public class StoredFieldDeleteEdit extends StoredFieldEdit {
             dataObject.getOutputFieldsHints().add(storedField);
             Field field = dataObject.getOutputFields().get(storedField.getBindedColumn());
             if (field != null) {
-                field.getChangeSupport().firePropertyChange(Field.TYPE_INFO_PROPERTY, null, field.getTypeInfo());
+                field.getChangeSupport().firePropertyChange(Field.TYPE_PROPERTY, null, field.getType());
             }
             dataObject.setOutputFieldsHintsModified(true);
         } catch (Exception ex) {
@@ -47,7 +47,7 @@ public class StoredFieldDeleteEdit extends StoredFieldEdit {
             dataObject.getOutputFieldsHints().remove(storedField);
             Field field = dataObject.getOutputFields().get(storedField.getBindedColumn());
             if (field != null) {
-                field.getChangeSupport().firePropertyChange(Field.TYPE_INFO_PROPERTY, null, field.getTypeInfo());
+                field.getChangeSupport().firePropertyChange(Field.TYPE_PROPERTY, null, field.getType());
             }
             dataObject.setOutputFieldsHintsModified(true);
         } catch (Exception ex) {

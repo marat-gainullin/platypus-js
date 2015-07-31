@@ -24,6 +24,12 @@ import java.util.logging.Logger;
  */
 public class Converter {
 
+    // Ms sql non jdbc string types
+    public static final int NON_JDBC_LONG_STRING = 258;
+    public static final int NON_JDBC_MEDIUM_STRING = 259;
+    public static final int NON_JDBC_MEMO_STRING = 260;
+    public static final int NON_JDBC_SHORT_STRING = 261;
+
     public static BigDecimal number2BigDecimal(Number aNumber) {
         if (aNumber instanceof Float || aNumber instanceof Double) {
             return new BigDecimal(aNumber.doubleValue());
@@ -121,6 +127,10 @@ public class Converter {
                 case Types.NVARCHAR:
                 case Types.LONGVARCHAR:
                 case Types.LONGNVARCHAR:
+                case NON_JDBC_LONG_STRING:
+                case NON_JDBC_MEDIUM_STRING:
+                case NON_JDBC_MEMO_STRING:
+                case NON_JDBC_SHORT_STRING:
                     // target type - string
                     value = aRs instanceof ResultSet ? ((ResultSet) aRs).getString(aColumnIndex) : ((CallableStatement) aRs).getString(aColumnIndex);
                     break;

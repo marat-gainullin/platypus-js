@@ -255,14 +255,6 @@ public class H2SqlDriver extends SqlDriver {
      * @inheritDoc
      */
     @Override
-    public Set<Integer> getSupportedJdbcDataTypes() {
-        return resolver.getSupportedJdbcDataTypes();
-    }
-
-    /**
-     * @inheritDoc
-     */
-    @Override
     public void applyContextToConnection(Connection aConnection, String aSchema) throws Exception {
         if (aSchema != null && !aSchema.isEmpty()) {
             try (Statement stmt = aConnection.createStatement()) {
@@ -574,9 +566,8 @@ public class H2SqlDriver extends SqlDriver {
     }
 
     private String getFieldTypeDefinition(Field aField) {
-        resolver.resolve2RDBMS(aField);
         String typeDefine = "";
-        String sqlTypeName = aField.getTypeInfo().getSqlTypeName().toLowerCase();
+        String sqlTypeName = aField.getType().toLowerCase();
         typeDefine += sqlTypeName;
         // field length
         int size = aField.getSize();
@@ -619,18 +610,17 @@ public class H2SqlDriver extends SqlDriver {
         List<String> sql = new ArrayList<>();
 
         //Change data type
-        String lOldTypeName = aOldFieldMd.getTypeInfo().getSqlTypeName();
+        String lOldTypeName = aOldFieldMd.getType();
         if (lOldTypeName == null) {
             lOldTypeName = "";
         }
-        String lNewTypeName = aNewFieldMd.getTypeInfo().getSqlTypeName();
+        String lNewTypeName = aNewFieldMd.getType();
         if (lNewTypeName == null) {
             lNewTypeName = "";
         }
 
         String fullTableName = makeFullName(aSchemaName, aTableName);
-        if (aOldFieldMd.getTypeInfo().getSqlType() != aNewFieldMd.getTypeInfo().getSqlType()
-                || !lOldTypeName.equalsIgnoreCase(lNewTypeName)
+        if (!lOldTypeName.equalsIgnoreCase(lNewTypeName)
                 || aOldFieldMd.getSize() != aNewFieldMd.getSize()
                 || aOldFieldMd.getScale() != aNewFieldMd.getScale()) {
             sql.add(String.format(
@@ -664,14 +654,6 @@ public class H2SqlDriver extends SqlDriver {
         String fullTableName = makeFullName(aSchemaName, aTableName);
         String renameSQL = String.format(SQL_RENAME_COLUMN, fullTableName, wrapNameIfRequired(aOldFieldName), wrapNameIfRequired(aNewFieldMd.getName()));
         return new String[]{renameSQL};
-    }
-
-    /**
-     * @inheritDoc
-     */
-    @Override
-    public Integer getJdbcTypeByRDBMSTypename(String aLowLevelTypeName) {
-        return resolver.getJdbcTypeByRDBMSTypename(aLowLevelTypeName);
     }
 
     @Override

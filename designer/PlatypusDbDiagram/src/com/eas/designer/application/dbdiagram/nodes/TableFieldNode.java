@@ -4,15 +4,12 @@
  */
 package com.eas.designer.application.dbdiagram.nodes;
 
-import com.eas.client.DatabasesClient;
-import com.eas.client.SQLUtils;
 import com.eas.client.dbstructure.DbStructureUtils;
 import com.eas.client.dbstructure.SqlActionsController;
 import com.eas.client.dbstructure.gui.edits.CreateFkEdit;
 import com.eas.client.dbstructure.gui.edits.DropFkEdit;
 import com.eas.client.dbstructure.gui.edits.ModifyFieldEdit;
 import com.eas.client.dbstructure.gui.edits.NotSavableDbStructureCompoundEdit;
-import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.ForeignKeySpec;
 import com.eas.client.model.Relation;
@@ -20,9 +17,9 @@ import com.eas.client.model.dbscheme.DbSchemeModel;
 import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.client.model.gui.edits.DeleteRelationEdit;
 import com.eas.client.model.gui.edits.fields.ChangeFieldEdit;
-import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.designer.datamodel.nodes.FieldNode;
 import java.beans.PropertyChangeEvent;
+import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -128,18 +125,17 @@ public class TableFieldNode extends FieldNode {
     }
 
     @Override
-    protected UndoableEdit editType(Integer val) {
-        if (field.getTypeInfo().getSqlType() != val) {
+    protected UndoableEdit editType(String val) {
+        if (!Objects.equals(field.getType(), val)) {
             try {
                 Field oldContent = new Field(field);
                 Field newContent = new Field(field);
-                newContent.setTypeInfo(DataTypeInfo.valueOf(val));
+                newContent.setType(val);
                 //
                 DbSchemeModel model = (DbSchemeModel) getEntity().getModel();
-                DatabasesClient client = model.getBasesProxy();
-                String datasourceName = model.getDatasourceName();
-                SqlDriver driver = client.getDbMetadataCache(datasourceName).getConnectionDriver();
-                driver.getTypesResolver().resolve2RDBMS(newContent);
+                //DatabasesClient client = model.getBasesProxy();
+                //String datasourceName = model.getDatasourceName();
+                //SqlDriver driver = client.getMetadataCache(datasourceName).getConnectionDriver();
 
                 CompoundEdit section = new NotSavableDbStructureCompoundEdit();
                 Set<Relation<FieldsEntity>> rels = FieldsEntity.<FieldsEntity>getInOutRelationsByEntityField((FieldsEntity) getEntity(), field);
@@ -148,11 +144,13 @@ public class TableFieldNode extends FieldNode {
                 String promtMsg1 = "areYouSureReTypeFieldInRelationsPresent"; //NOI18N
                 String promtMsg2 = "areYouSureReTypeFieldDataPresent"; //NOI18N
                 String promtMsg3 = "areYouSureReTypeFieldInRelationsDataPresent"; //NOI18N
+                /*
                 if (SQLUtils.getTypeGroup(newContent.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.LOBS || SQLUtils.getTypeGroup(oldContent.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.LOBS) {
                     promtMsg1 = "areYouSureBlobFieldInRelationsPresent"; //NOI18N
                     promtMsg2 = "areYouSureBlobFieldDataPresent"; //NOI18N
                     promtMsg3 = "areYouSureBlobFieldInRelationsDataPresent"; //NOI18N
                 }
+                        */
                 if (rCount == 0 && !rels.isEmpty()) {
                     msg = NbBundle.getMessage(DbStructureUtils.class, promtMsg1, String.valueOf(rels.size()), null);
                 } else if (rCount > 0 && rels.isEmpty()) {

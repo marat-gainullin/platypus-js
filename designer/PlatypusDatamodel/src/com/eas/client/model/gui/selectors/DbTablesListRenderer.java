@@ -36,7 +36,7 @@ public class DbTablesListRenderer extends DefaultListCellRenderer {
                     value = tableName;
                     DbTablesListModel model = (DbTablesListModel) list.getModel();
                     try {
-                        if (!model.getMdCache().getConnectionSchema().equalsIgnoreCase(ownerName)) {
+                        if (!model.getMdCache().getDatasourceSchema().equalsIgnoreCase(ownerName)) {
                             cachedName = ownerName + "." + tableName;
                         }
                         if (model.getMdCache().containsTableMetadata(cachedName)) {

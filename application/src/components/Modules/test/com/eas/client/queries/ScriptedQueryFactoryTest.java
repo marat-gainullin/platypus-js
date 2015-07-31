@@ -29,7 +29,14 @@ public class ScriptedQueryFactoryTest {
     @BeforeClass
     public static void setUpClass() throws Exception {
         indexer = new ApplicationSourceIndexer("c:/projects/platypus-tests");
-        resource = new DatabasesClientWithResource(new DbConnectionSettings("jdbc:oracle:thin:@asvr/adb", "eas", "eas", "eas", 1));
+        DbConnectionSettings settings = new DbConnectionSettings();
+        settings.setUrl("jdbc:oracle:thin:@asvr/adb");
+        settings.setUser("eas");
+        settings.setPassword("eas");
+        settings.setSchema("eas");
+        settings.setMaxConnections(1);
+        settings.setMaxStatements(1);
+        resource = new DatabasesClientWithResource(settings);
     }
 
     @AfterClass

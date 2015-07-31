@@ -4,7 +4,6 @@
  */
 package com.eas.designer.application.query.nodes;
 
-import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.Field;
 import com.eas.client.model.QueryDocument;
 import com.eas.client.model.gui.view.FieldsTypeIconsCache;
@@ -119,7 +118,7 @@ public class OutputFieldNode extends AbstractNode implements PropertyChangeListe
             QueryDocument.StoredFieldMetadata storedField = getHint();
             if (storedField != null) {// Change or delete
                 if ((newDescription == null || newDescription.equals(field.getDescription()))
-                        && (storedField.getTypeInfo() == null || storedField.getTypeInfo().getSqlType() == field.getTypeInfo().getSqlType())) {
+                        && (storedField.getType() == null || storedField.getType().equals(field.getType()))) {
                     edit = new StoredFieldDeleteEdit(dataObject, storedField);
                     edit.redo();
                 } else {
@@ -155,13 +154,13 @@ public class OutputFieldNode extends AbstractNode implements PropertyChangeListe
         return colTable;
     }
 
-    public Integer getType() {
+    public String getType() {
         try {
             QueryDocument.StoredFieldMetadata addition = getHint();
-            if (addition != null && addition.getTypeInfo() != null) {
-                return addition.getTypeInfo().getSqlType();
+            if (addition != null && addition.getType() != null) {
+                return addition.getType();
             } else {
-                return field.getTypeInfo().getSqlType();
+                return field.getType();
             }
         } catch (Exception ex) {
             ErrorManager.getDefault().notify(ex);
@@ -169,18 +168,17 @@ public class OutputFieldNode extends AbstractNode implements PropertyChangeListe
         }
     }
 
-    public void setType(Integer val) {
+    public void setType(String newType) {
         try {
-            DataTypeInfo newTypeInfo = DataTypeInfo.valueOf(val);
             QueryDocument.StoredFieldMetadata addition = getHint();
             UndoableEdit edit;
             if (addition != null) {// Change or delete
                 if ((addition.getDescription() == null || addition.getDescription().equals(field.getDescription()))
-                        && (newTypeInfo == null || newTypeInfo.getSqlType() == field.getTypeInfo().getSqlType())) {
+                        && (newType == null || newType.equals(field.getType()))) {
                     edit = new StoredFieldDeleteEdit(dataObject, addition);
                     edit.redo();
                 } else {
-                    edit = new StoredFieldTypeEdit(dataObject, addition, addition.getTypeInfo(), newTypeInfo);
+                    edit = new StoredFieldTypeEdit(dataObject, addition, addition.getType(), newType);
                     edit.redo();
                 }
             } else {// Add and change
@@ -189,7 +187,7 @@ public class OutputFieldNode extends AbstractNode implements PropertyChangeListe
                 edit = new CompoundEdit();
 
                 StoredFieldAddEdit addEdit = new StoredFieldAddEdit(dataObject, addition);
-                StoredFieldTypeEdit changeEdit = new StoredFieldTypeEdit(dataObject, addition, addition.getTypeInfo(), newTypeInfo);
+                StoredFieldTypeEdit changeEdit = new StoredFieldTypeEdit(dataObject, addition, addition.getType(), newType);
 
                 addEdit.redo();
                 changeEdit.redo();
@@ -245,9 +243,8 @@ public class OutputFieldNode extends AbstractNode implements PropertyChangeListe
                 firePropertyChange(Field.DESCRIPTION_PROPERTY, evt.getOldValue(), evt.getNewValue());
                 fireDisplayNameChange(null, getDisplayName());
                 break;
-            case Field.TYPE_INFO_PROPERTY:
+            case Field.TYPE_PROPERTY:
                 firePropertyChange(FieldNode.TYPE_PROP_NAME, evt.getOldValue(), evt.getNewValue());
-                firePropertyChange(FieldNode.TYPE_NAME_PROP_NAME, evt.getOldValue(), evt.getNewValue());
                 fireIconChange();
                 break;
         }
@@ -327,10 +324,10 @@ public class OutputFieldNode extends AbstractNode implements PropertyChangeListe
         }
     }
 
-    protected class TypeProperty extends Property<Integer> {
+    protected class TypeProperty extends Property<String> {
 
         public TypeProperty() {
-            super(Integer.class);
+            super(String.class);
         }
 
         @Override
@@ -344,12 +341,12 @@ public class OutputFieldNode extends AbstractNode implements PropertyChangeListe
         }
 
         @Override
-        public Integer getValue() throws IllegalAccessException, InvocationTargetException {
+        public String getValue() throws IllegalAccessException, InvocationTargetException {
             return getType();
         }
 
         @Override
-        public void setValue(Integer val) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        public void setValue(String val) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
             setType(val);
         }
 

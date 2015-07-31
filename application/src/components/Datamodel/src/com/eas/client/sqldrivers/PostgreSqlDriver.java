@@ -5,7 +5,6 @@
 package com.eas.client.sqldrivers;
 
 import com.eas.client.ClientConstants;
-import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
 import com.eas.client.metadata.Field;
@@ -216,11 +215,6 @@ public class PostgreSqlDriver extends SqlDriver {
     }
 
     @Override
-    public Set<Integer> getSupportedJdbcDataTypes() {
-        return resolver.getSupportedJdbcDataTypes();
-    }
-
-    @Override
     public String getSql4GetConnectionContext() {
         return GET_SCHEMA_CLAUSE;
     }
@@ -338,7 +332,7 @@ public class PostgreSqlDriver extends SqlDriver {
 
     private String getFieldTypeDefinition(Field aField) {
         String typeDefine = "";
-        String sqlTypeName = aField.getTypeInfo().getSqlTypeName().toLowerCase();
+        String sqlTypeName = aField.getType().toLowerCase();
         // field length
         int size = aField.getSize();
         int scale = aField.getScale();
@@ -382,8 +376,7 @@ public class PostgreSqlDriver extends SqlDriver {
         String updateDefinition = String.format(MODIFY_FIELD_SQL_PREFIX, fullTableName) + fieldName + " ";
         String fieldDefination = getFieldTypeDefinition(newFieldMd);
 
-        DataTypeInfo newTypeInfo = newFieldMd.getTypeInfo();
-        String newSqlTypeName = newTypeInfo.getSqlTypeName();
+        String newSqlTypeName = newFieldMd.getType();
         if (newSqlTypeName == null) {
             newSqlTypeName = "";
         }
@@ -391,8 +384,7 @@ public class PostgreSqlDriver extends SqlDriver {
         int newSize = newFieldMd.getSize();
         boolean newNullable = newFieldMd.isNullable();
 
-        DataTypeInfo oldTypeInfo = aOldFieldMd.getTypeInfo();
-        String oldSqlTypeName = oldTypeInfo.getSqlTypeName();
+        String oldSqlTypeName = aOldFieldMd.getType();
         if (oldSqlTypeName == null) {
             oldSqlTypeName = "";
         }
@@ -423,11 +415,6 @@ public class PostgreSqlDriver extends SqlDriver {
     @Override
     public String parseException(Exception ex) {
         return ex.getMessage();
-    }
-
-    @Override
-    public Integer getJdbcTypeByRDBMSTypename(String aLowLevelTypeName) {
-        return resolver.getJdbcTypeByRDBMSTypename(aLowLevelTypeName);
     }
 
     @Override

@@ -5,7 +5,6 @@
 package com.eas.client.sqldrivers;
 
 import com.eas.client.ClientConstants;
-import com.eas.client.SQLUtils;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
 import com.eas.client.metadata.Field;
@@ -17,6 +16,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -207,7 +208,7 @@ public class MySqlSqlDriver extends SqlDriver {
             //            + "  c.constraint_name AS " + ClientConstants.JDBCPKS_CONSTRAINT_NAME + " "
             + "FROM  information_schema.table_constraints t, information_schema.key_column_usage c "
             + "WHERE"
-//            + "  t.constraint_catalog = c.constraint_catalog AND"
+            //            + "  t.constraint_catalog = c.constraint_catalog AND"
             + "  t.constraint_schema = c.constraint_schema AND"
             + "  t.constraint_name = c.constraint_name AND"
             + "  t.table_schema = c.table_schema AND"
@@ -271,11 +272,11 @@ public class MySqlSqlDriver extends SqlDriver {
             + "  information_schema.key_column_usage pkc,"
             + "  information_schema.key_column_usage fkc "
             + "WHERE"
-//            + "  r.unique_constraint_catalog = pkc.constraint_catalog AND"
+            //            + "  r.unique_constraint_catalog = pkc.constraint_catalog AND"
             + "  r.unique_constraint_schema = pkc.constraint_schema AND"
             + "  r.unique_constraint_name = pkc.constraint_name AND"
             + "  r.referenced_table_name = pkc.table_name AND"
-//            + "  r.constraint_catalog = fkc.constraint_catalog AND"
+            //            + "  r.constraint_catalog = fkc.constraint_catalog AND"
             + "  r.constraint_schema = fkc.constraint_schema AND"
             + "  r.constraint_name = fkc.constraint_name AND"
             + "  fkc.ordinal_position = pkc.ordinal_position AND"
@@ -301,11 +302,6 @@ public class MySqlSqlDriver extends SqlDriver {
     @Override
     public String getVersionInitResourceName() {
         return "/" + MySqlSqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/MySqlInitVersion.sql";
-    }
-
-    @Override
-    public Set<Integer> getSupportedJdbcDataTypes() {
-        return resolver.getSupportedJdbcDataTypes();
     }
 
     @Override
@@ -528,13 +524,12 @@ public class MySqlSqlDriver extends SqlDriver {
                 }
             }
         }
-        return ex.getLocalizedMessage();
+        return ex != null ? ex.getLocalizedMessage() : null;
     }
 
     private String getFieldTypeDefinition(Field aField) {
-        resolver.resolve2RDBMS(aField);
         String typeDefine = "";
-        String sqlTypeName = aField.getTypeInfo().getSqlTypeName().toLowerCase();
+        String sqlTypeName = aField.getType().toLowerCase();
         typeDefine += sqlTypeName;
         // field length
         int size = aField.getSize();
@@ -554,7 +549,7 @@ public class MySqlSqlDriver extends SqlDriver {
     @Override
     public String getSql4FieldDefinition(Field aField) {
         String fieldDefinition = wrapNameIfRequired(aField.getName()) + " " + getFieldTypeDefinition(aField);
-        if (!aField.isSigned() && SQLUtils.getTypeGroup(aField.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.NUMBERS) {
+        if (!aField.isSigned() && isNumeric(aField.getType())) {
             fieldDefinition += " UNSIGNED";
         }
         if (!aField.isNullable()) {
@@ -574,11 +569,6 @@ public class MySqlSqlDriver extends SqlDriver {
     public String[] getSqls4RenamingField(String aSchemaName, String aTableName, String aOldFieldName, Field aNewFieldMd) {
         String fullTableName = makeFullName(aSchemaName, aTableName);
         return new String[]{String.format("ALTER TABLE %s CHANGE %s %s", fullTableName, wrapNameIfRequired(aOldFieldName), getSql4FieldDefinition(aNewFieldMd))};
-    }
-
-    @Override
-    public Integer getJdbcTypeByRDBMSTypename(String aLowLevelTypeName) {
-        return resolver.getJdbcTypeByRDBMSTypename(aLowLevelTypeName);
     }
 
     @Override
@@ -673,5 +663,25 @@ public class MySqlSqlDriver extends SqlDriver {
 
     private String prepareName(String aName) {
         return (isWrappedName(aName) ? unwrapName(aName) : aName);
+    }
+
+    private static final Set<String> numericTypes = new HashSet<>(Arrays.asList(new String[]{
+        "TINYINT",
+        "SMALLINT",
+        "MEDIUMINT",
+        "INT",
+        "INTEGER",
+        "BIGINT",
+        "FLOAT",
+        "DOUBLE",
+        "DOUBLE PRECISION",
+        "REAL",
+        "DECIMAL",
+        "DEC",
+        "NUMERIC"
+    }));
+
+    private static boolean isNumeric(String aType) {
+        return numericTypes.contains(aType.toUpperCase());
     }
 }

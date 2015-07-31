@@ -10,7 +10,6 @@ import com.eas.client.changes.Command;
 import com.eas.client.changes.Delete;
 import com.eas.client.changes.Insert;
 import com.eas.client.changes.Update;
-import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.threetier.json.ChangesJSONReader;
 import com.eas.script.Scripts;
 import com.eas.util.RowsetJsonConstants;
@@ -45,16 +44,16 @@ public class PlatypusRequestHttpReaderTest {
         Scripts.Space space = Scripts.createSpace();
         List<Change> changes = ChangesJSONReader.read(WRITTEN_CHANGES, space);
 
-        ChangeValue key1 = new ChangeValue("key1", 78.9f, DataTypeInfo.FLOAT);
-        ChangeValue key2 = new ChangeValue("key2", "key2Value", DataTypeInfo.CHAR);
+        ChangeValue key1 = new ChangeValue("key1", 78.9f);
+        ChangeValue key2 = new ChangeValue("key2", "key2Value");
         ChangeValue[] keys = new ChangeValue[]{key1, key2};
 
         Date date = new Date(1346067735514L);
-        ChangeValue data1 = new ChangeValue("data\"\"1", 56, DataTypeInfo.INTEGER);
-        ChangeValue data2 = new ChangeValue("data2", "data2Value", DataTypeInfo.VARCHAR);
-        ChangeValue data3 = new ChangeValue("da\"ta3", true, DataTypeInfo.BOOLEAN);
-        ChangeValue data4 = new ChangeValue("data4", false, DataTypeInfo.BIT);
-        ChangeValue data5 = new ChangeValue("data5", date, DataTypeInfo.TIMESTAMP);
+        ChangeValue data1 = new ChangeValue("data\"\"1", 56);
+        ChangeValue data2 = new ChangeValue("data2", "data2Value");
+        ChangeValue data3 = new ChangeValue("da\"ta3", true);
+        ChangeValue data4 = new ChangeValue("data4", false);
+        ChangeValue data5 = new ChangeValue("data5", date);
         ChangeValue[] data = new ChangeValue[]{data1, data2, data3, data4, data5};
 
         assertNotNull(changes);
@@ -98,9 +97,6 @@ public class PlatypusRequestHttpReaderTest {
 
     protected static void compareValues(ChangeValue v1, ChangeValue v2) {
         assertEquals(v1.name, v2.name);
-        assertEquals(v1.type.getSqlType(), v2.type.getSqlType());
-        assertEquals(v1.type.getSqlTypeName(), v2.type.getSqlTypeName());
-        assertEquals(v1.type.getJavaClassName(), v2.type.getJavaClassName());
         if(v1.value != null && !v1.value.equals(v2.value)){
             int h = 0;
             h++;

@@ -5,7 +5,7 @@
 package com.eas.designer.application.query;
 
 import com.eas.client.ClientConstants;
-import com.eas.client.DatabaseMdCache;
+import com.eas.client.MetadataCache;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SqlCompiledQuery;
 import com.eas.client.SqlQuery;
@@ -708,8 +708,8 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         Set<String> schemas = new HashSet<>();
         DatabasesClient basesProxy = getBasesProxy();
         if (basesProxy != null) {
-            DatabaseMdCache mdCache = basesProxy.getDbMetadataCache(datasourceName);
-            SqlDriver driver = mdCache.getConnectionDriver();
+            MetadataCache mdCache = basesProxy.getMetadataCache(datasourceName);
+            SqlDriver driver = mdCache.getDatasourceSqlDriver();
             String sql4Schemas = driver.getSql4SchemasEnumeration();
             SqlCompiledQuery schemasQuery = new SqlCompiledQuery(basesProxy, datasourceName, sql4Schemas);
             schemasQuery.executeQuery((ResultSet r) -> {
@@ -729,13 +729,13 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         final Map<String, Fields> tables = new HashMap<>();
         DatabasesClient basesProxy = getBasesProxy();
         if (basesProxy != null) {
-            DatabaseMdCache mdCache = basesProxy.getDbMetadataCache(datasourceName);
-            final String schema = aSchema != null && aSchema.equalsIgnoreCase(mdCache.getConnectionSchema()) ? null : aSchema;
+            MetadataCache mdCache = basesProxy.getMetadataCache(datasourceName);
+            final String schema = aSchema != null && aSchema.equalsIgnoreCase(mdCache.getDatasourceSchema()) ? null : aSchema;
             if (schema != null) {
                 mdCache.fillTablesCacheBySchema(schema, true);
             }
-            SqlDriver driver = mdCache.getConnectionDriver();
-            String sql4Tables = driver.getSql4TablesEnumeration(schema != null ? schema : mdCache.getConnectionSchema());
+            SqlDriver driver = mdCache.getDatasourceSqlDriver();
+            String sql4Tables = driver.getSql4TablesEnumeration(schema != null ? schema : mdCache.getDatasourceSchema());
             SqlCompiledQuery tablesQuery = new SqlCompiledQuery(basesProxy, datasourceName, sql4Tables);
             tablesQuery.executeQuery((ResultSet r)->{
                 ColumnsIndicies idxs = new ColumnsIndicies(r.getMetaData());
@@ -750,18 +750,18 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         return tables;
     }
 
-    public DatabaseMdCache getMetadataCache() throws Exception {
+    public MetadataCache getMetadataCache() throws Exception {
         DatabasesClient basesProxy = getBasesProxy();
-        return basesProxy != null ? basesProxy.getDbMetadataCache(datasourceName) : null;
+        return basesProxy != null ? basesProxy.getMetadataCache(datasourceName) : null;
     }
 
     private void validateStatement() throws Exception {
-        DatabaseMdCache mdCache = getMetadataCache();
+        MetadataCache mdCache = getMetadataCache();
         if (mdCache != null) {
             Map<String, Table> tables = TablesFinder.getTablesMap(TO_CASE.LOWER, statement, true);
             for (Table table : tables.values()) {
                 String schema = table.getSchemaName();
-                if (schema != null && schema.equalsIgnoreCase(mdCache.getConnectionSchema())) {
+                if (schema != null && schema.equalsIgnoreCase(mdCache.getDatasourceSchema())) {
                     schema = null;
                 }
                 String cachedTablyName = (schema != null ? schema + "." : "") + table.getName();
@@ -845,7 +845,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
     }
 
     public boolean validateTableName(String aTablyName) throws Exception {
-        DatabaseMdCache mdCache = getMetadataCache();
+        MetadataCache mdCache = getMetadataCache();
         if (mdCache != null) {
             boolean containsTableMetadata;
             try {

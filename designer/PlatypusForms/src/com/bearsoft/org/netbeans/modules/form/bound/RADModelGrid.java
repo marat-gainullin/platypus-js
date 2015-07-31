@@ -21,6 +21,7 @@ import com.eas.client.metadata.Fields;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.designer.application.module.EntityJSObject;
+import com.eas.script.Scripts;
 import com.eas.util.StringUtils;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
@@ -228,32 +229,18 @@ public class RADModelGrid extends RADVisualComponent<ModelGrid> implements Compo
                                 column.setTitle(description);
                             }
                             column.setField(columnField.getName());
-                            switch (columnField.getTypeInfo().getSqlType()) {
-                                // Numbers
-                                case java.sql.Types.NUMERIC:
-                                case java.sql.Types.BIGINT:
-                                case java.sql.Types.DECIMAL:
-                                case java.sql.Types.DOUBLE:
-                                case java.sql.Types.FLOAT:
-                                case java.sql.Types.INTEGER:
-                                case java.sql.Types.REAL:
-                                case java.sql.Types.TINYINT:
-                                case java.sql.Types.SMALLINT: {
+                            switch (columnField.getType()) {
+                                case Scripts.NUMBER_TYPE_NAME: {
                                     ModelSpin editor = new ModelSpin();
                                     editor.setMin(-Double.MAX_VALUE);
                                     editor.setMax(Double.MAX_VALUE);
                                     radColumn.getViewControl().setInstance(editor);
                                 }
                                 break;
-                                // Logical
-                                case java.sql.Types.BOOLEAN:
-                                case java.sql.Types.BIT:
+                                case Scripts.BOOLEAN_TYPE_NAME:
                                     radColumn.getViewControl().setInstance(new ModelCheckBox());
                                     break;
-                                // Date and time
-                                case java.sql.Types.DATE:
-                                case java.sql.Types.TIME:
-                                case java.sql.Types.TIMESTAMP: {
+                                case Scripts.DATE_TYPE_NAME: {
                                     ModelDate editor = new ModelDate();
                                     editor.setDateFormat("dd.MM.yyyy HH:mm:ss.SSS");
                                     radColumn.getViewControl().setInstance(editor);

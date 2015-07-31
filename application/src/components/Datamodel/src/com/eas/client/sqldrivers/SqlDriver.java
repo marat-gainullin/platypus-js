@@ -126,15 +126,6 @@ public abstract class SqlDriver {
     public abstract String getVersionInitResourceName();
 
     /**
-     * Returns subset of jdbc types, supported by particular database. The trick
-     * is that database uses own identifiers for it's types and we need an extra
-     * abstraction level.
-     *
-     * @return Subset of jdbc types, supported by particular database.
-     */
-    public abstract Set<Integer> getSupportedJdbcDataTypes();
-
-    /**
      * *
      * Sets current schema for current session.
      *
@@ -422,14 +413,6 @@ public abstract class SqlDriver {
      * @return Sql array string for field modification.
      */
     public abstract String[] getSqls4RenamingField(String aSchemaName, String aTableName, String aOldFieldName, Field aNewFieldMd);
-
-    /**
-     * Converts JDBC type to specific database type
-     *
-     * @param aLowLevelTypeName Specific database name
-     * @return JDBC type
-     */
-    public abstract Integer getJdbcTypeByRDBMSTypename(String aLowLevelTypeName);
 
     public static void applyScript(String scriptText, Connection aConnection) throws Exception {
         String[] commandsTexts = scriptText.split(EAS_SQL_SCRIPT_DELIMITER);

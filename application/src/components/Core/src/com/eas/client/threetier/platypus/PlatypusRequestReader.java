@@ -23,6 +23,7 @@ import com.eas.proto.ProtoReader;
 import com.eas.proto.ProtoReaderException;
 import com.eas.proto.dom.ProtoDOMBuilder;
 import com.eas.proto.dom.ProtoNode;
+import com.eas.script.Scripts;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -195,16 +196,22 @@ public class PlatypusRequestReader implements PlatypusRequestVisitor {
         if (node.containsChild(RequestsTags.TAG_SQL_PARAMETER_VALUE)) {
             ProtoNode valueNode = node.getChild(RequestsTags.TAG_SQL_PARAMETER_VALUE);
             if (paramType != null) {
-                if ("String".equals(paramType)) {
-                    value = valueNode.getString();
-                } else if ("Number".equals(paramType)) {
-                    value = valueNode.getDouble();
-                } else if ("Date".equals(paramType)) {
-                    value = valueNode.getDate();
-                } else if ("Boolean".equals(paramType)) {
-                    value = valueNode.getBoolean();
-                } else if ("Geometry".equals(paramType)) {
-                    value = valueNode.getString();
+                switch (paramType) {
+                    case Scripts.STRING_TYPE_NAME:
+                        value = valueNode.getString();
+                        break;
+                    case Scripts.NUMBER_TYPE_NAME:
+                        value = valueNode.getDouble();
+                        break;
+                    case Scripts.DATE_TYPE_NAME:
+                        value = valueNode.getDate();
+                        break;
+                    case Scripts.BOOLEAN_TYPE_NAME:
+                        value = valueNode.getBoolean();
+                        break;
+                    case Scripts.GEOMETRY_TYPE_NAME:
+                        value = valueNode.getString();
+                        break;
                 }
             } else {
                 value = valueNode.getString();

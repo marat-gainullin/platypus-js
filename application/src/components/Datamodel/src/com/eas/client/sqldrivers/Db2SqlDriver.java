@@ -5,7 +5,6 @@
 package com.eas.client.sqldrivers;
 
 import com.eas.client.ClientConstants;
-import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
 import com.eas.client.metadata.Field;
@@ -319,30 +318,15 @@ public class Db2SqlDriver extends SqlDriver {
     }
 
     private String getFieldTypeDefinition(Field aField) {
-        resolver.resolve2RDBMS(aField);
-        DataTypeInfo typeInfo = aField.getTypeInfo();
-        String sqlTypeName = typeInfo.getSqlTypeName();
-
-        String leftPartNameType = resolver.getLeftPartNameType(sqlTypeName);
-        String rightPartNameType = resolver.getRightPartNameType(sqlTypeName);
-
-        String typeName = leftPartNameType;
-
+        String typeName = aField.getType();
         int size = aField.getSize();
         int scale = aField.getScale();
-
-        if ((resolver.isScaled(sqlTypeName)) && (resolver.isSized(sqlTypeName) && size > 0)) {
+        if (resolver.isScaled(typeName) && resolver.isSized(typeName) && size > 0) {
             typeName += "(" + String.valueOf(size) + "," + String.valueOf(scale) + ")";
-        } else {
-            if (resolver.isSized(sqlTypeName) && size > 0) {
-                typeName += "(" + String.valueOf(size) + ")";
-            }
-            if (resolver.isScaled(sqlTypeName) && scale > 0) {
-                typeName += "(" + String.valueOf(scale) + ")";
-            }
-        }
-        if (rightPartNameType != null) {
-            typeName += " " + rightPartNameType;
+        } else if (resolver.isSized(typeName) && size > 0) {
+            typeName += "(" + String.valueOf(size) + ")";
+        } else if (resolver.isScaled(typeName) && scale > 0) {
+            typeName += "(" + String.valueOf(scale) + ")";
         }
         return typeName;
     }
@@ -361,8 +345,7 @@ public class Db2SqlDriver extends SqlDriver {
         String updateDefinition = String.format(ALTER_FIELD_SQL_PREFIX, fullTableName) + wrapNameIfRequired(aOldFieldMd.getName()) + " ";
         String fieldDefination = getFieldTypeDefinition(newFieldMd);
 
-        DataTypeInfo newTypeInfo = newFieldMd.getTypeInfo();
-        String newSqlTypeName = newTypeInfo.getSqlTypeName();
+        String newSqlTypeName = newFieldMd.getType();
         if (newSqlTypeName == null) {
             newSqlTypeName = "";
         }
@@ -370,8 +353,7 @@ public class Db2SqlDriver extends SqlDriver {
         int newSize = newFieldMd.getSize();
         boolean newNullable = newFieldMd.isNullable();
 
-        DataTypeInfo oldTypeInfo = aOldFieldMd.getTypeInfo();
-        String oldSqlTypeName = oldTypeInfo.getSqlTypeName();
+        String oldSqlTypeName = aOldFieldMd.getType();
         if (oldSqlTypeName == null) {
             oldSqlTypeName = "";
         }
@@ -430,11 +412,6 @@ public class Db2SqlDriver extends SqlDriver {
     }
 
     @Override
-    public Integer getJdbcTypeByRDBMSTypename(String aLowLevelTypeName) {
-        return resolver.getJdbcTypeByRDBMSTypename(aLowLevelTypeName);
-    }
-
-    @Override
     public TypesResolver getTypesResolver() {
         return resolver;
     }
@@ -447,11 +424,6 @@ public class Db2SqlDriver extends SqlDriver {
     @Override
     public String getVersionInitResourceName() {
         return "/" + Db2SqlDriver.class.getPackage().getName().replace(".", "/") + "/sqlscripts/Db2InitVersion.sql";
-    }
-
-    @Override
-    public Set<Integer> getSupportedJdbcDataTypes() {
-        return resolver.getSupportedJdbcDataTypes();
     }
 
     @Override

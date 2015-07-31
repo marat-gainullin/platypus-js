@@ -10,8 +10,6 @@
 package com.eas.client.sqldrivers;
 
 import com.eas.client.ClientConstants;
-import com.eas.client.SQLUtils;
-import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
 import com.eas.client.metadata.Field;
@@ -252,18 +250,14 @@ public class OracleSqlDriver extends SqlDriver {
     }
 
     private String getFieldTypeDefinition(Field aField) {
-        resolver.resolve2RDBMS(aField);
         String typeDefine = "";
-        String sqlTypeName = aField.getTypeInfo().getSqlTypeName().toUpperCase();
+        String sqlTypeName = aField.getType().toUpperCase();
         typeDefine += sqlTypeName;
-        int sqlType = aField.getTypeInfo().getSqlType();
         // field length
         int size = aField.getSize();
         if (size > 0) {
             int scale = aField.getScale();
-            if (SQLUtils.getTypeGroup(sqlType) == SQLUtils.TypesGroup.NUMBERS && size > 38) {
-                typeDefine = " FLOAT (" + String.valueOf(size) + ")";
-            } else if (resolver.isScaled(sqlTypeName) && resolver.isSized(sqlTypeName)) {
+            if (resolver.isScaled(sqlTypeName) && resolver.isSized(sqlTypeName)) {
                 typeDefine += "(" + String.valueOf(size) + "," + String.valueOf(scale) + ")";
             } else if (resolver.isSized(sqlTypeName)) {
                 typeDefine += "(" + String.valueOf(size) + ")";
@@ -277,20 +271,12 @@ public class OracleSqlDriver extends SqlDriver {
      */
     @Override
     public String getSql4FieldDefinition(Field aField) {
-        return getSql4FieldDefinition(aField, true);
-    }
-
-    private String getSql4FieldDefinition(Field aField, boolean aCurrentNullable) {
         String fieldDefinition = wrapNameIfRequired(aField.getName()) + " " + getFieldTypeDefinition(aField);
 
         if (aField.isNullable()) {
-            if (!aCurrentNullable) {
-                fieldDefinition += " null";
-            }
+            fieldDefinition += " null";
         } else {
-            if (aCurrentNullable) {
-                fieldDefinition += " not null";
-            }
+            fieldDefinition += " not null";
         }
         return fieldDefinition;
     }
@@ -320,11 +306,6 @@ public class OracleSqlDriver extends SqlDriver {
     }
 
     @Override
-    public Set<Integer> getSupportedJdbcDataTypes() {
-        return resolver.getSupportedJdbcDataTypes();
-    }
-
-    @Override
     public void applyContextToConnection(Connection aConnection, String aSchema) throws Exception {
         if (aSchema != null && !aSchema.isEmpty()) {
             try (Statement stmt = aConnection.createStatement()) {
@@ -349,8 +330,7 @@ public class OracleSqlDriver extends SqlDriver {
         String updateDefinition = String.format(MODIFY_FIELD_SQL_PREFIX, fullTableName) + wrapNameIfRequired(aOldFieldMd.getName()) + " ";
         String fieldDefination = getFieldTypeDefinition(newFieldMd);
 
-        DataTypeInfo newTypeInfo = newFieldMd.getTypeInfo();
-        String newSqlTypeName = newTypeInfo.getSqlTypeName();
+        String newSqlTypeName = newFieldMd.getType();
         if (newSqlTypeName == null) {
             newSqlTypeName = "";
         }
@@ -358,8 +338,7 @@ public class OracleSqlDriver extends SqlDriver {
         int newSize = newFieldMd.getSize();
         boolean newNullable = newFieldMd.isNullable();
 
-        DataTypeInfo oldTypeInfo = aOldFieldMd.getTypeInfo();
-        String oldSqlTypeName = oldTypeInfo.getSqlTypeName();
+        String oldSqlTypeName = aOldFieldMd.getType();
         if (oldSqlTypeName == null) {
             oldSqlTypeName = "";
         }
@@ -406,11 +385,6 @@ public class OracleSqlDriver extends SqlDriver {
             aDescription = "";
         }
         return "comment on table " + sqlText + " is '" + aDescription.replaceAll("'", "''") + "'";
-    }
-
-    @Override
-    public Integer getJdbcTypeByRDBMSTypename(String aLowLevelTypeName) {
-        return resolver.getJdbcTypeByRDBMSTypename(aLowLevelTypeName);
     }
 
     @Override

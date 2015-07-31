@@ -4,7 +4,7 @@
  */
 package com.eas.client.dbstructure.gui.view;
 
-import com.eas.client.DatabaseMdCache;
+import com.eas.client.MetadataCache;
 import com.eas.client.SqlCompiledQuery;
 import com.eas.client.dbstructure.DbStructureUtils;
 import com.eas.client.dbstructure.IconCache;
@@ -82,7 +82,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                     entitiesByTableName.put(entity.getTableName().toLowerCase(), entity);
                 }
             }
-            DatabaseMdCache mdCache = model.getBasesProxy().getDbMetadataCache(model.getDatasourceName());
+            MetadataCache mdCache = model.getBasesProxy().getMetadataCache(model.getDatasourceName());
             String schema = model.getSchema();
             for (FieldsEntity entity : entities.values()) {
                 if (entity != null) {
@@ -1116,7 +1116,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
     }
 
     private boolean isEntityTableExists(FieldsEntity fEntity) throws Exception {
-        DatabaseMdCache cache = model.getBasesProxy().getDbMetadataCache(sqlController.getDatasourceName());
+        MetadataCache cache = model.getBasesProxy().getMetadataCache(sqlController.getDatasourceName());
         return cache.containsTableMetadata(fEntity.getFullTableName());
         /*
          try {

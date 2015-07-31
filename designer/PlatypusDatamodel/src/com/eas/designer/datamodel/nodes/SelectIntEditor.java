@@ -17,6 +17,7 @@ public class SelectIntEditor extends PropertyEditorSupport {
     private final int[] values;
 
     public SelectIntEditor(String[] aKeys, int[] aValues) {
+        super();
         if (aKeys == null || aValues == null) {
             throw new IllegalArgumentException("Keys or values arguments are null.");//NOI18N
         }
@@ -32,7 +33,7 @@ public class SelectIntEditor extends PropertyEditorSupport {
         Integer val = (Integer) getValue();
         String result;
         if (val != null) {
-            int intVal = val.intValue();
+            int intVal = val;
             int idx = -1;
             for (int j = 0; j < values.length; j++) {
                 if (values[j] == intVal) {
@@ -59,7 +60,7 @@ public class SelectIntEditor extends PropertyEditorSupport {
         if ((idx == -1) || (idx > values.length - 1)) {
             throw new IllegalArgumentException(String.format("Key %s is not found in keys array.", s));//NOI18N
         } else {
-            setValue(values[Integer.valueOf(idx)]);
+            setValue(values[idx]);
         }
 
     }

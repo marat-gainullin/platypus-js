@@ -4,7 +4,7 @@
  */
 package com.eas.client.model.dbscheme;
 
-import com.eas.client.DatabaseMdCache;
+import com.eas.client.MetadataCache;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SQLUtils;
 import com.eas.client.SqlQuery;
@@ -87,7 +87,7 @@ public class FieldsEntity extends Entity<DbSchemeModel, SqlQuery, FieldsEntity> 
         DatabasesClient basesProxy = getModel().getBasesProxy();
         if (basesProxy != null) {
             try {
-                DatabaseMdCache mdCache = basesProxy.getDbMetadataCache(getTableDatasourceName());
+                MetadataCache mdCache = basesProxy.getMetadataCache(getTableDatasourceName());
                 assert getTableName() != null;
                 String ltblName = getTableName();
                 if (getTableSchemaName() != null && !getTableSchemaName().isEmpty()) {

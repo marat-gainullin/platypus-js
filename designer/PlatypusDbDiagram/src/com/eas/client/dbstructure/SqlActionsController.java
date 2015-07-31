@@ -151,7 +151,7 @@ public class SqlActionsController {
         }
 
         protected SqlDriver achiveSqlDriver() throws Exception {
-            return basesProxy.getDbMetadataCache(datasourceName).getConnectionDriver();
+            return basesProxy.getMetadataCache(datasourceName).getDatasourceSqlDriver();
         }
     }
 
@@ -413,7 +413,7 @@ public class SqlActionsController {
         @Override
         protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
-            String lschema = basesProxy.getDbMetadataCache(datasourceName).getConnectionSchema();
+            String lschema = basesProxy.getMetadataCache(datasourceName).getDatasourceSchema();
             String[] sqlsText = driver.getSql4CreateColumnComment(schema != null ? schema : lschema, tableName, fieldName, newDescription);
             List<Change> commonLog = new ArrayList<>();
             for (String sqlsText1 : sqlsText) {
@@ -438,7 +438,7 @@ public class SqlActionsController {
         @Override
         protected List<Change> doSqlWork() throws Exception {
             SqlDriver driver = achiveSqlDriver();
-            String lschema = basesProxy.getDbMetadataCache(datasourceName).getConnectionSchema();
+            String lschema = basesProxy.getMetadataCache(datasourceName).getDatasourceSchema();
 
             String sqlText = driver.getSql4CreateTableComment(schema != null ? schema : lschema, tableName, newDescription);
             SqlCompiledQuery q = new SqlCompiledQuery(basesProxy, datasourceName, sqlText);

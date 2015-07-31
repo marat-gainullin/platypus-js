@@ -23,7 +23,6 @@ import com.eas.client.forms.components.model.grid.ModelGrid;
 import com.eas.client.forms.components.model.grid.columns.ModelColumn;
 import com.eas.client.forms.components.model.grid.header.ModelGridColumn;
 import com.eas.client.forms.components.model.grid.header.ServiceGridColumn;
-import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.Parameter;
@@ -114,7 +113,7 @@ public class QueryResultsView extends javax.swing.JPanel {
         for (Field sourceParam : aQueryDataObject.getModel().getParameters().toCollection()) {
             Parameter p = parameters.get(sourceParam.getName());
             if (p != null) {
-                p.setTypeInfo(sourceParam.getTypeInfo());
+                p.setType(sourceParam.getType());
                 p.setMode(((Parameter) sourceParam).getMode());
             }
         }
@@ -239,7 +238,7 @@ public class QueryResultsView extends javax.swing.JPanel {
         if (logger.isLoggable(Level.FINEST)) {
             for (int i = 1; i <= parameters.getParametersCount(); i++) {
                 Parameter p = parameters.get(i);
-                logger.log(Level.FINEST, "Parameter {0} of type {1} is assigned with value: {2}", new Object[]{p.getName(), p.getTypeInfo().getSqlTypeName(), p.getValue()});
+                logger.log(Level.FINEST, "Parameter {0} of type {1} is assigned with value: {2}", new Object[]{p.getName(), p.getType(), p.getValue()});
             }
         }
     }
@@ -468,7 +467,7 @@ public class QueryResultsView extends javax.swing.JPanel {
                     if (fieldName.equalsIgnoreCase(propName)) {
                         value = oldValue;
                     }
-                    aKeys.add(new ChangeValue(fieldName, value, field.getTypeInfo()));
+                    aKeys.add(new ChangeValue(fieldName, value));
                 }
             }
         }
@@ -482,11 +481,21 @@ public class QueryResultsView extends javax.swing.JPanel {
                 String fieldName = field.getName();
                 Object value = aSubject.getMember(fieldName);
                 if (JSType.nullOrUndefined(value) && field.isPk() && !field.isFk()) {
-                    value = field.getTypeInfo().generateValue();
+                    if (Scripts.NUMBER_TYPE_NAME.equals(field.getType())) {
+                        value = IDGenerator.genID();
+                    } else if (Scripts.STRING_TYPE_NAME.equals(field.getType())) {
+                        value = String.valueOf(IDGenerator.genID());
+                    } else if (Scripts.DATE_TYPE_NAME.equals(field.getType())) {
+                        value = new Date(IDGenerator.genID());
+                    } else if (Scripts.BOOLEAN_TYPE_NAME.equals(field.getType())) {
+                        value = false;
+                    } else {
+                        value = null;
+                    }
                     aSubject.setMember(fieldName, value);
                 }
                 if (!JSType.nullOrUndefined(value)) {
-                    aData.add(new ChangeValue(fieldName, value, field.getTypeInfo()));
+                    aData.add(new ChangeValue(fieldName, value));
                 }
             }
         }
@@ -528,14 +537,14 @@ public class QueryResultsView extends javax.swing.JPanel {
                         }
                     }
                     if (!met) {
-                        lastInsert.getData().add(new ChangeValue(name, value, field.getTypeInfo()));
+                        lastInsert.getData().add(new ChangeValue(name, value));
                         complemented = true;
                     }
                 }
                 if (!complemented) {
                     Update update = new Update("");
                     generateChangeLogKeys(update.getKeys(), getDelegate(), name, oldValue);
-                    update.getData().add(new ChangeValue(name, value, field.getTypeInfo()));
+                    update.getData().add(new ChangeValue(name, value));
                     changeLog.add(update);
                 }
             }
@@ -777,49 +786,43 @@ public class QueryResultsView extends javax.swing.JPanel {
                     columnNode.setTitle(columnField.getName());
                 }
                 columnNode.setField(columnField.getName());
-                switch (columnField.getTypeInfo().getSqlType()) {
-                    // Numbers
-                    case java.sql.Types.NUMERIC:
-                    case java.sql.Types.BIGINT:
-                    case java.sql.Types.DECIMAL:
-                    case java.sql.Types.DOUBLE:
-                    case java.sql.Types.FLOAT:
-                    case java.sql.Types.INTEGER:
-                    case java.sql.Types.REAL:
-                    case java.sql.Types.TINYINT:
-                    case java.sql.Types.SMALLINT: {
-                        ModelSpin editor = new ModelSpin();
-                        editor.setMin(-Double.MAX_VALUE);
-                        editor.setMax(Double.MAX_VALUE);
-                        ModelSpin view = new ModelSpin();
-                        view.setMin(-Double.MAX_VALUE);
-                        view.setMax(Double.MAX_VALUE);
-                        column.setEditor(editor);
-                        column.setView(view);
-                        break;
+                if (columnField.getType() != null) {
+                    switch (columnField.getType()) {
+                        // Numbers
+                        case Scripts.NUMBER_TYPE_NAME: {
+                            ModelSpin editor = new ModelSpin();
+                            editor.setMin(-Double.MAX_VALUE);
+                            editor.setMax(Double.MAX_VALUE);
+                            ModelSpin view = new ModelSpin();
+                            view.setMin(-Double.MAX_VALUE);
+                            view.setMax(Double.MAX_VALUE);
+                            column.setEditor(editor);
+                            column.setView(view);
+                            break;
+                        }
+                        // Logical
+                        case Scripts.BOOLEAN_TYPE_NAME:
+                            column.setEditor(new ModelCheckBox());
+                            column.setView(new ModelCheckBox());
+                            break;
+                        // Date and time
+                        case Scripts.DATE_TYPE_NAME: {
+                            ModelDate editor = new ModelDate();
+                            editor.setDateFormat("dd.MM.yyyy HH:mm:ss.SSS");
+                            ModelDate view = new ModelDate();
+                            view.setDateFormat("dd.MM.yyyy HH:mm:ss.SSS");
+                            column.setEditor(editor);
+                            column.setView(view);
+                            break;
+                        }
+                        default:
+                            column.setEditor(new ModelFormattedField());
+                            column.setView(new ModelFormattedField());
+                            break;
                     }
-                    // Logical
-                    case java.sql.Types.BOOLEAN:
-                    case java.sql.Types.BIT:
-                        column.setEditor(new ModelCheckBox());
-                        column.setView(new ModelCheckBox());
-                        break;
-                    // Date and time
-                    case java.sql.Types.DATE:
-                    case java.sql.Types.TIME:
-                    case java.sql.Types.TIMESTAMP: {
-                        ModelDate editor = new ModelDate();
-                        editor.setDateFormat("dd.MM.yyyy HH:mm:ss.SSS");
-                        ModelDate view = new ModelDate();
-                        view.setDateFormat("dd.MM.yyyy HH:mm:ss.SSS");
-                        column.setEditor(editor);
-                        column.setView(view);
-                        break;
-                    }
-                    default:
-                        column.setEditor(new ModelFormattedField());
-                        column.setView(new ModelFormattedField());
-                        break;
+                } else {
+                    column.setEditor(new ModelFormattedField());
+                    column.setView(new ModelFormattedField());
                 }
                 column.getEditor().setNullable(columnField.isNullable());
             }
@@ -846,7 +849,7 @@ public class QueryResultsView extends javax.swing.JPanel {
         parsedParameters.stream().forEach((NamedParameter parsedParameter) -> {
             Parameter newParameter = new Parameter(parsedParameter.getName());
             newParameter.setMode(1);
-            newParameter.setTypeInfo(DataTypeInfo.VARCHAR);
+            newParameter.setType(Scripts.STRING_TYPE_NAME);
             newParameter.setValue("");
             parameters.add(newParameter);
         });
@@ -893,16 +896,15 @@ public class QueryResultsView extends javax.swing.JPanel {
             Parameter parameter = (Parameter) pField;
             Preferences paramNode = paramsPreferences.node(parameter.getName());
             try {
-                int sqlType = parameter.getTypeInfo().getSqlType();
-                if (sqlType == java.sql.Types.DATE || sqlType == java.sql.Types.TIME || sqlType == java.sql.Types.TIME_WITH_TIMEZONE || sqlType == java.sql.Types.TIMESTAMP
-                        || sqlType == java.sql.Types.TIMESTAMP_WITH_TIMEZONE) {
+                String paramType = parameter.getType();
+                if (Scripts.DATE_TYPE_NAME.equals(paramType)) {
                     long lValue = paramNode.getLong(VALUE_PREF_KEY, -1);
                     if (lValue != -1) {
                         parameter.setValue(new Date(lValue));
                     }
-                } else if (SQLUtils.getTypeGroup(sqlType) == SQLUtils.TypesGroup.LOGICAL) {
+                } else if (Scripts.BOOLEAN_TYPE_NAME.equals(paramType)) {
                     paramNode.getBoolean(VALUE_PREF_KEY, false);
-                } else if (SQLUtils.getTypeGroup(sqlType) == SQLUtils.TypesGroup.NUMBERS) {
+                } else if (Scripts.NUMBER_TYPE_NAME.equals(paramType)) {
                     paramNode.getDouble(VALUE_PREF_KEY, 0d);
                 } else {
                     Object val = paramNode.get(VALUE_PREF_KEY, ""); //NOI18N
@@ -926,12 +928,12 @@ public class QueryResultsView extends javax.swing.JPanel {
                 if (parameter.getValue() != null) {
                     if (parameter.getValue() instanceof Date) {
                         paramNode.putLong(VALUE_PREF_KEY, ((Date) parameter.getValue()).getTime());
-                    } else if (SQLUtils.getTypeGroup(parameter.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.NUMBERS) {
+                    } else if (Scripts.NUMBER_TYPE_NAME.equals(parameter.getType())) {
                         paramNode.putDouble(VALUE_PREF_KEY, ((Number) parameter.getValue()).doubleValue());
-                    } else if (SQLUtils.getTypeGroup(parameter.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.LOGICAL) {
+                    } else if (Scripts.BOOLEAN_TYPE_NAME.equals(parameter.getType())) {
                         paramNode.putBoolean(VALUE_PREF_KEY, (Boolean) parameter.getValue());
-                    } else {
-                        String sVal = SQLUtils.sqlObject2stringRepresentation(parameter.getTypeInfo().getSqlType(), parameter.getValue());
+                    } else if (parameter.getValue() instanceof String) {
+                        String sVal = (String) parameter.getValue();
                         paramNode.put(VALUE_PREF_KEY, sVal);
                     }
                 } else {

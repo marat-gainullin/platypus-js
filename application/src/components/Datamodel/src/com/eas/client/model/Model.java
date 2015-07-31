@@ -314,8 +314,6 @@ public abstract class Model<E extends Entity<?, Q, E>, Q extends Query> {
         return false;
     }
 
-    public abstract boolean isTypeSupported(int type) throws Exception;
-
     public boolean isNamePresent(String aName, E toExclude, Field field2Exclude) {
         if (entities != null && aName != null) {
             for (E ent : entities.values()) {

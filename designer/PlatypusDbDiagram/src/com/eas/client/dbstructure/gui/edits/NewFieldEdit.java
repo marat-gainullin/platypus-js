@@ -4,8 +4,6 @@
  */
 package com.eas.client.dbstructure.gui.edits;
 
-import com.eas.client.DatabasesClient;
-import com.eas.client.SQLUtils;
 import com.eas.client.dbstructure.SqlActionsController;
 import com.eas.client.dbstructure.SqlActionsController.AddFieldAction;
 import com.eas.client.dbstructure.SqlActionsController.DescribeFieldAction;
@@ -13,7 +11,7 @@ import com.eas.client.dbstructure.SqlActionsController.DropFieldAction;
 import com.eas.client.dbstructure.exceptions.DbActionException;
 import com.eas.client.metadata.Field;
 import com.eas.client.model.dbscheme.FieldsEntity;
-import com.eas.client.sqldrivers.SqlDriver;
+import com.eas.client.sqldrivers.resolvers.TypesResolver;
 
 /**
  *
@@ -70,15 +68,11 @@ public class NewFieldEdit extends DbStructureEdit {
     public static Field createField(FieldsEntity aEntity) throws Exception {
         com.eas.client.model.gui.edits.fields.NewFieldEdit<FieldsEntity> substEdit = new com.eas.client.model.gui.edits.fields.NewFieldEdit<>(aEntity);
         Field rsmd = substEdit.getField();
-        if (SQLUtils.getTypeGroup(rsmd.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.STRINGS
-                && rsmd.getSize() == 0) {
-            rsmd.setSize(100);
-        }
+        TypesResolver resolver = aEntity.getModel().getBasesProxy().getMetadataCache(aEntity.getModel().getDatasourceName()).getDatasourceSqlDriver().getTypesResolver();
+        String defaultType = resolver.getSupportedTypes().iterator().next();
+        rsmd.setType(defaultType);
+        rsmd.setSize(200);
         rsmd.setTableName(aEntity.getTableName());
-        DatabasesClient client = aEntity.getModel().getBasesProxy();
-        String dbId = aEntity.getModel().getDatasourceName();
-        SqlDriver driver = client.getDbMetadataCache(dbId).getConnectionDriver();
-        driver.getTypesResolver().resolve2RDBMS(rsmd);
         return rsmd;
     }
     

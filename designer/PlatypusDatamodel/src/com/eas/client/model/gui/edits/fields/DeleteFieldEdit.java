@@ -12,6 +12,7 @@ package com.eas.client.model.gui.edits.fields;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
 import com.eas.client.model.Entity;
+import com.eas.script.Scripts;
 
 /**
  *
@@ -20,7 +21,7 @@ import com.eas.client.model.Entity;
 public class DeleteFieldEdit<E extends Entity<?, ?, E>> extends FieldsEdit<E> {
 
     protected Field field;
-    protected int fieldIndex = 0; // inoperable field index
+    protected int fieldIndex;// 0 - inoperable field index
 
     public DeleteFieldEdit(E aEntity, Field aField) {
         super(aEntity);
@@ -38,6 +39,7 @@ public class DeleteFieldEdit<E extends Entity<?, ?, E>> extends FieldsEdit<E> {
     public static Field createField(Entity anEntity) {
         Fields fields = anEntity.getFields();
         Field lfield = fields.createNewField();
+        lfield.setType(Scripts.STRING_TYPE_NAME);
         lfield.setSize(100);
         return lfield;
     }

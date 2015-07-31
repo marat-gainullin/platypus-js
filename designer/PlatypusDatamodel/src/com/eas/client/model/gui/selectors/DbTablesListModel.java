@@ -5,7 +5,7 @@
 package com.eas.client.model.gui.selectors;
 
 import com.eas.client.ClientConstants;
-import com.eas.client.DatabaseMdCache;
+import com.eas.client.MetadataCache;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SqlCompiledQuery;
 import com.eas.client.dataflow.ColumnsIndicies;
@@ -33,15 +33,15 @@ public class DbTablesListModel implements ListModel<String> {
     protected String datasourceName;
     protected DatabasesClient basesProxy;
     protected String schema;
-    protected DatabaseMdCache mdCache;
+    protected MetadataCache mdCache;
 
     public DbTablesListModel(DatabasesClient aBasesProxy, String aDatasourceName) {
         super();
         datasourceName = aDatasourceName;
         try {
             basesProxy = aBasesProxy;
-            mdCache = basesProxy.getDbMetadataCache(datasourceName);
-            schema = mdCache.getConnectionSchema();
+            mdCache = basesProxy.getMetadataCache(datasourceName);
+            schema = mdCache.getDatasourceSchema();
             setTablesRowset(fetchTables());
         } catch (Exception ex) {
             Logger.getLogger(DbTablesListModel.class.getName()).log(Level.WARNING, null, ex);
@@ -51,7 +51,7 @@ public class DbTablesListModel implements ListModel<String> {
     protected final List<String> fetchTables() {
         if (schema != null && !schema.isEmpty()) {
             try {
-                SqlDriver driver = mdCache.getConnectionDriver();
+                SqlDriver driver = mdCache.getDatasourceSqlDriver();
                 String sql4Tables = driver.getSql4TablesEnumeration(schema);
                 SqlCompiledQuery query = new SqlCompiledQuery(basesProxy, datasourceName, sql4Tables);
                 return query.executeQuery((ResultSet r) -> {
@@ -77,7 +77,7 @@ public class DbTablesListModel implements ListModel<String> {
         tables = aTablesRowset;
     }
 
-    public DatabaseMdCache getMdCache() {
+    public MetadataCache getMdCache() {
         return mdCache;
     }
 
