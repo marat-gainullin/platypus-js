@@ -4,10 +4,12 @@ import com.eas.client.changes.Change;
 import com.eas.client.changes.EntitiesHost;
 import com.eas.client.dataflow.ColumnsIndicies;
 import com.eas.client.dataflow.Converter;
+import com.eas.client.dataflow.JdbcFlowProvider;
 import com.eas.client.dataflow.StatementsGenerator;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.JdbcField;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.metadata.Parameters;
 import com.eas.client.queries.ContextHost;
@@ -311,7 +313,8 @@ public class DatabasesClient {
                     Parameters params = aQuery.getParameters();
                     for (int i = 1; i <= params.getParametersCount(); i++) {
                         Parameter param = params.get(i);
-                        Converter.convertAndAssign(param.getValue(), connection, i, stmt);
+                        int jdbcType = JdbcFlowProvider.assumeJdbcType(param.getValue());
+                        Converter.assign(param.getValue(), connection, i, stmt, jdbcType, null);
                     }
                     try {
                         rowsAffected += stmt.executeUpdate();
@@ -586,7 +589,7 @@ public class DatabasesClient {
                                 }
                                 if (fields != null) {
                                     Field resolved = fields.get(aFieldName);
-                                    String resolvedTableName = resolved != null ? resolved.getTableName() : null;
+                                    String resolvedTableName = resolved instanceof JdbcField ? ((JdbcField)resolved).getTableName() : null;
                                     resolvedTableName = resolvedTableName != null ? resolvedTableName.toLowerCase() : "";
                                     if (query != null && query.getWritable() != null && !query.getWritable().contains(resolvedTableName)) {
                                         return null;
@@ -617,7 +620,7 @@ public class DatabasesClient {
                             }
                             return query;
                         }
-                    }, ClientConstants.F_USR_CONTEXT, contextHost != null ? contextHost.preparationContext() : null);
+                    }, ClientConstants.F_USR_CONTEXT, contextHost != null ? contextHost.preparationContext() : null, mdCache);
                     change.accept(generator);
                     statements.addAll(generator.getLogEntries());
                 }

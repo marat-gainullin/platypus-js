@@ -83,21 +83,6 @@ public class QueryRootNode extends ModelNode<QueryEntity, QueryModel> implements
                 }
             });
             
-            pSet.put(new PropertySupport.ReadWrite<Boolean>(PlatypusQueryDataObject.MANUAL_PROP_NAME, Boolean.class, NbBundle.getMessage(QueryRootNode.class, PlatypusQueryDataObject.MANUAL_PROP_NAME), NbBundle.getMessage(QueryRootNode.class, "MSG_ManualPropertyShortDescription")) {
-                @Override
-                public void setValue(Boolean val) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-                    Boolean oldval = ((PlatypusQueryDataObject)dataObject).isManual();
-                    ((PlatypusQueryDataObject)dataObject).setManual(val);
-                    firePropertyChange(getName(), oldval, val);
-                }
-
-                @Override
-                public Boolean getValue() throws IllegalAccessException, InvocationTargetException {
-                    return ((PlatypusQueryDataObject)dataObject).isManual();
-                }
-                
-            });
-            
             pSet.put(new PropertySupport.ReadWrite<Boolean>(PlatypusQueryDataObject.READONLY_PROP_NAME, Boolean.class, NbBundle.getMessage(QueryRootNode.class, PlatypusQueryDataObject.READONLY_PROP_NAME), NbBundle.getMessage(QueryRootNode.class, "MSG_ReadonlyPropertyShortDescription")) {
                 @Override
                 public void setValue(Boolean val) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
@@ -142,7 +127,6 @@ public class QueryRootNode extends ModelNode<QueryEntity, QueryModel> implements
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if (PlatypusQueryDataObject.PROCEDURE_PROP_NAME.equals(evt.getPropertyName())
-                || PlatypusQueryDataObject.MANUAL_PROP_NAME.equals(evt.getPropertyName())
                 || PlatypusQueryDataObject.READONLY_PROP_NAME.equals(evt.getPropertyName())
                 || PlatypusQueryDataObject.CONN_PROP_NAME.equals(evt.getPropertyName())) {
             firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());

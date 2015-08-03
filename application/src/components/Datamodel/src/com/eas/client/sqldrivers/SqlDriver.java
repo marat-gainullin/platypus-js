@@ -11,12 +11,14 @@ package com.eas.client.sqldrivers;
 
 import com.eas.client.ClientConstants;
 import com.eas.client.SQLUtils;
+import com.eas.client.changes.JdbcChangeValue;
 import com.eas.client.metadata.DbTableIndexSpec;
-import com.eas.client.metadata.Field;
+import com.eas.client.metadata.JdbcField;
 import com.eas.client.metadata.ForeignKeySpec;
 import com.eas.client.metadata.PrimaryKeySpec;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
+import com.vividsolutions.jts.geom.Geometry;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.*;
@@ -353,7 +355,7 @@ public abstract class SqlDriver {
      * @param aField A field information to deal with.
      * @return Sql string for field definition
      */
-    public abstract String getSql4FieldDefinition(Field aField);
+    public abstract String getSql4FieldDefinition(JdbcField aField);
 
     /**
      * Generates Sql string to modify a field, according to specific features of
@@ -366,7 +368,7 @@ public abstract class SqlDriver {
      * @param aField A field information
      * @return Sql array string for field modification.
      */
-    public abstract String[] getSqls4AddingField(String aSchemaName, String aTableName, Field aField);
+    public abstract String[] getSqls4AddingField(String aSchemaName, String aTableName, JdbcField aField);
 
     /**
      * Generates sql texts array for dropping a field. Sql clauses from array
@@ -399,7 +401,7 @@ public abstract class SqlDriver {
      * @param aNewFieldMd A field information to migrate to.
      * @return Sql array string for field modification.
      */
-    public abstract String[] getSqls4ModifyingField(String aSchemaName, String aTableName, Field aOldFieldMd, Field aNewFieldMd);
+    public abstract String[] getSqls4ModifyingField(String aSchemaName, String aTableName, JdbcField aOldFieldMd, JdbcField aNewFieldMd);
 
     /**
      * *
@@ -412,7 +414,7 @@ public abstract class SqlDriver {
      * @param aNewFieldMd New field
      * @return Sql array string for field modification.
      */
-    public abstract String[] getSqls4RenamingField(String aSchemaName, String aTableName, String aOldFieldName, Field aNewFieldMd);
+    public abstract String[] getSqls4RenamingField(String aSchemaName, String aTableName, String aOldFieldName, JdbcField aNewFieldMd);
 
     public static void applyScript(String scriptText, Connection aConnection) throws Exception {
         String[] commandsTexts = scriptText.split(EAS_SQL_SCRIPT_DELIMITER);
@@ -509,6 +511,10 @@ public abstract class SqlDriver {
         return sb.toString();
     }
 
+    public abstract void convertGeometry(JdbcChangeValue aValue, Connection aConnection) throws SQLException;
+    
+    public abstract Geometry readGeometry(Wrapper aRs, int aColumnIndex, Connection aConnection) throws SQLException;
+    
     abstract public TwinString[] getCharsForWrap();
 
     abstract public char[] getRestrictedChars();

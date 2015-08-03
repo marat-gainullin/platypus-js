@@ -33,7 +33,6 @@ public abstract class Query {
     protected transient String title;
     protected String entityName;
     protected boolean procedure;
-    protected boolean manual;
     protected Set<String> readRoles = new HashSet<>();
     protected Set<String> writeRoles = new HashSet<>();
     protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
@@ -50,7 +49,6 @@ public abstract class Query {
     protected Query(Query aSource) {
         if (aSource != null) {
             procedure = aSource.isProcedure();
-            manual = aSource.isManual();
             entityName = aSource.getEntityName();
             String aTitle = aSource.getTitle();
             if (aTitle != null) {
@@ -161,28 +159,6 @@ public abstract class Query {
         boolean oldValue = procedure;
         procedure = aValue;
         changeSupport.firePropertyChange("procedure", oldValue, procedure);
-    }
-
-    /**
-     * Returns whether this query is executed manually. Such execution way
-     * effictive with data manipulation (INSERT, UPDATE, DELETE) queries and
-     * some others.
-     *
-     * @return True if this query is data manipulation query.
-     */
-    public boolean isManual() {
-        return manual;
-    }
-
-    /**
-     * Sets manual flag.
-     *
-     * @param aValue
-     */
-    public void setManual(boolean aValue) {
-        boolean oldValue = manual;
-        manual = aValue;
-        changeSupport.firePropertyChange("manual", oldValue, manual);
     }
 
     public Fields getFields() {

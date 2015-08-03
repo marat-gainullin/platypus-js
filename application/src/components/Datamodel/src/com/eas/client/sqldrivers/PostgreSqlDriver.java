@@ -5,16 +5,26 @@
 package com.eas.client.sqldrivers;
 
 import com.eas.client.ClientConstants;
+import com.eas.client.changes.JdbcChangeValue;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
-import com.eas.client.metadata.Field;
 import com.eas.client.metadata.ForeignKeySpec;
+import com.eas.client.metadata.JdbcField;
 import com.eas.client.metadata.PrimaryKeySpec;
 import com.eas.client.sqldrivers.resolvers.PostgreTypesResolver;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
 import com.eas.util.StringUtils;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKBReader;
+import com.vividsolutions.jts.io.WKBWriter;
+import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
+import java.sql.Wrapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -330,7 +340,7 @@ public class PostgreSqlDriver extends SqlDriver {
                 + "CONSTRAINT " + wrapNameIfRequired(generatePkName(aTableName, PKEY_NAME_SUFFIX)) + " PRIMARY KEY (" + pkFieldName + "))";
     }
 
-    private String getFieldTypeDefinition(Field aField) {
+    private String getFieldTypeDefinition(JdbcField aField) {
         String typeDefine = "";
         String sqlTypeName = aField.getType().toLowerCase();
         // field length
@@ -352,7 +362,7 @@ public class PostgreSqlDriver extends SqlDriver {
      * @inheritDoc
      */
     @Override
-    public String getSql4FieldDefinition(Field aField) {
+    public String getSql4FieldDefinition(JdbcField aField) {
         String fieldName = wrapNameIfRequired(aField.getName());
         String fieldDefinition = fieldName + " " + getFieldTypeDefinition(aField);
 
@@ -368,9 +378,9 @@ public class PostgreSqlDriver extends SqlDriver {
      * @inheritDoc
      */
     @Override
-    public String[] getSqls4ModifyingField(String aSchemaName, String aTableName, Field aOldFieldMd, Field aNewFieldMd) {
+    public String[] getSqls4ModifyingField(String aSchemaName, String aTableName, JdbcField aOldFieldMd, JdbcField aNewFieldMd) {
         List<String> sqls = new ArrayList<>();
-        Field newFieldMd = aNewFieldMd.copy();
+        JdbcField newFieldMd = aNewFieldMd.copy();
         String fullTableName = makeFullName(aSchemaName, aTableName);
         String fieldName = wrapNameIfRequired(aOldFieldMd.getName());
         String updateDefinition = String.format(MODIFY_FIELD_SQL_PREFIX, fullTableName) + fieldName + " ";
@@ -404,7 +414,7 @@ public class PostgreSqlDriver extends SqlDriver {
     }
 
     @Override
-    public String[] getSqls4RenamingField(String aSchemaName, String aTableName, String aOldFieldName, Field aNewFieldMd) {
+    public String[] getSqls4RenamingField(String aSchemaName, String aTableName, String aOldFieldName, JdbcField aNewFieldMd) {
         String fullTableName = makeFullName(aSchemaName, aTableName);
         String sqlText = String.format(RENAME_FIELD_SQL_PREFIX, fullTableName, wrapNameIfRequired(aOldFieldName), wrapNameIfRequired(aNewFieldMd.getName()));
         return new String[]{
@@ -530,7 +540,7 @@ public class PostgreSqlDriver extends SqlDriver {
     }
 
     @Override
-    public String[] getSqls4AddingField(String aSchemaName, String aTableName, Field aField) {
+    public String[] getSqls4AddingField(String aSchemaName, String aTableName, JdbcField aField) {
         String fullTableName = makeFullName(aSchemaName, aTableName);
         return new String[]{
             String.format(SqlDriver.ADD_FIELD_SQL_PREFIX, fullTableName) + getSql4FieldDefinition(aField)
@@ -566,4 +576,27 @@ public class PostgreSqlDriver extends SqlDriver {
     private String prepareName(String aName) {
         return (isWrappedName(aName) ? unwrapName(aName) : aName.toLowerCase());
     }
+
+    @Override
+    public void convertGeometry(JdbcChangeValue aValue, Connection aConnection) throws SQLException {
+        if (aValue.getValue() instanceof Geometry) {
+            WKBWriter writer = new WKBWriter();
+            byte[] written = writer.write((Geometry) aValue.getValue());
+            aValue.value = written;
+            aValue.jdbcType = Types.OTHER;
+            aValue.sqlTypeName = "geography";
+        }
+    }
+
+    @Override
+    public Geometry readGeometry(Wrapper aRs, int aColumnIndex, Connection aConnection) throws SQLException {
+        try {
+            byte[] read = aRs instanceof ResultSet ? ((ResultSet) aRs).getBytes(aColumnIndex) : ((CallableStatement) aRs).getBytes(aColumnIndex);
+            WKBReader reader = new WKBReader();
+            return reader.read(read);
+        } catch (ParseException ex) {
+            throw new SQLException(ex);
+        }
+    }
+
 }

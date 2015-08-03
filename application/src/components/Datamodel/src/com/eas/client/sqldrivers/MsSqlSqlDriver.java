@@ -5,15 +5,18 @@
 package com.eas.client.sqldrivers;
 
 import com.eas.client.ClientConstants;
+import com.eas.client.changes.JdbcChangeValue;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
-import com.eas.client.metadata.Field;
+import com.eas.client.metadata.JdbcField;
 import com.eas.client.metadata.ForeignKeySpec;
 import com.eas.client.metadata.PrimaryKeySpec;
 import com.eas.client.sqldrivers.resolvers.MsSqlTypesResolver;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
+import com.vividsolutions.jts.geom.Geometry;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Wrapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -274,7 +277,7 @@ public class MsSqlSqlDriver extends SqlDriver {
         return ex != null ? ex.getLocalizedMessage() : null;
     }
 
-    private String getFieldTypeDefinition(Field aField) {
+    private String getFieldTypeDefinition(JdbcField aField) {
         String typeDefine = "";
         String sqlTypeName = aField.getType().toLowerCase();
         typeDefine += sqlTypeName;
@@ -296,7 +299,7 @@ public class MsSqlSqlDriver extends SqlDriver {
      * @inheritDoc
      */
     @Override
-    public String getSql4FieldDefinition(Field aField) {
+    public String getSql4FieldDefinition(JdbcField aField) {
         String fieldName = wrapNameIfRequired(aField.getName());
         String fieldDefinition = fieldName + " " + getFieldTypeDefinition(aField);
 
@@ -345,14 +348,14 @@ public class MsSqlSqlDriver extends SqlDriver {
      * @inheritDoc
      */
     @Override
-    public String[] getSqls4ModifyingField(String aSchemaName, String aTableName, Field aOldFieldMd, Field aNewFieldMd) {
+    public String[] getSqls4ModifyingField(String aSchemaName, String aTableName, JdbcField aOldFieldMd, JdbcField aNewFieldMd) {
         String fullTableName = makeFullName(aSchemaName, aTableName);
         String alterFieldSql = String.format(ALTER_FIELD_SQL_PREFIX, fullTableName);
         return new String[]{alterFieldSql + getSql4FieldDefinition(aNewFieldMd)};
     }
 
     @Override
-    public String[] getSqls4RenamingField(String aSchemaName, String aTableName, String aOldFieldName, Field aNewFieldMd) {
+    public String[] getSqls4RenamingField(String aSchemaName, String aTableName, String aOldFieldName, JdbcField aNewFieldMd) {
         String fullTableName = makeFullName(aSchemaName, aTableName);
         String sql = String.format("EXEC sp_rename '%s.%s','%s','COLUMN'", fullTableName, aOldFieldName, aNewFieldMd.getName());
         return new String[]{sql};
@@ -522,7 +525,7 @@ public class MsSqlSqlDriver extends SqlDriver {
     }
 
     @Override
-    public String[] getSqls4AddingField(String aSchemaName, String aTableName, Field aField) {
+    public String[] getSqls4AddingField(String aSchemaName, String aTableName, JdbcField aField) {
         String fullTableName = makeFullName(aSchemaName, aTableName);
         return new String[]{
             String.format(SqlDriver.ADD_FIELD_SQL_PREFIX, fullTableName) + getSql4FieldDefinition(aField)
@@ -547,4 +550,14 @@ public class MsSqlSqlDriver extends SqlDriver {
     private String prepareName(String aName) {
         return (isWrappedName(aName) ? unwrapName(aName) : aName);
     }
+    
+    @Override
+    public void convertGeometry(JdbcChangeValue aValue, Connection aConnection) throws SQLException {
+    }
+    
+    @Override
+    public Geometry readGeometry(Wrapper aRs, int aColumnIndex, Connection aConnection) throws SQLException {
+        return null;
+    }
+
 }

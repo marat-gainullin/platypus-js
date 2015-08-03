@@ -13,8 +13,8 @@ import com.eas.client.dbstructure.SqlActionsController.DescribeFieldAction;
 import com.eas.client.dbstructure.SqlActionsController.DropConstraintAction;
 import com.eas.client.dbstructure.SqlActionsController.DropFieldAction;
 import com.eas.client.dbstructure.exceptions.DbActionException;
-import com.eas.client.metadata.Field;
 import com.eas.client.metadata.ForeignKeySpec;
+import com.eas.client.metadata.JdbcField;
 import com.eas.client.model.Relation;
 import com.eas.client.model.dbscheme.FieldsEntity;
 import java.util.ArrayList;
@@ -30,14 +30,14 @@ import java.util.logging.Logger;
 public class DropFieldEdit extends DbStructureEdit {
 
     protected String tableName;
-    protected Field field;
+    protected JdbcField field;
     protected List<ForeignKeySpec> inFks = new ArrayList<>();
     protected List<ForeignKeySpec> outFks = new ArrayList<>();
 
-    public DropFieldEdit(SqlActionsController aSqlController, Field aField, FieldsEntity tableEntity) {
+    public DropFieldEdit(SqlActionsController aSqlController, JdbcField aField, FieldsEntity tableEntity) {
         super(aSqlController);
         tableName = tableEntity.getTableName();
-        field = new Field(aField);
+        field = new JdbcField(aField);
         extractInFks(tableEntity);
         extractOutFks(tableEntity);
     }

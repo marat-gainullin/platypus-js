@@ -147,10 +147,6 @@ public class OutputFieldNode extends AbstractNode implements PropertyChangeListe
 
     public String getSource() {
         String colTable = field.getTableName();
-        String colSchema = field.getSchemaName();
-        if (colSchema != null && !colSchema.isEmpty()) {
-            colTable = colSchema + "." + colTable; //NOI18N
-        }
         return colTable;
     }
 

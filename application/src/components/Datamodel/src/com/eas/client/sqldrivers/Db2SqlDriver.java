@@ -5,17 +5,20 @@
 package com.eas.client.sqldrivers;
 
 import com.eas.client.ClientConstants;
+import com.eas.client.changes.JdbcChangeValue;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
-import com.eas.client.metadata.Field;
+import com.eas.client.metadata.JdbcField;
 import com.eas.client.metadata.ForeignKeySpec;
 import com.eas.client.metadata.PrimaryKeySpec;
 import com.eas.client.sqldrivers.resolvers.Db2TypesResolver;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
 import com.eas.util.StringUtils;
+import com.vividsolutions.jts.geom.Geometry;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Wrapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -317,7 +320,7 @@ public class Db2SqlDriver extends SqlDriver {
         return ex.getLocalizedMessage();
     }
 
-    private String getFieldTypeDefinition(Field aField) {
+    private String getFieldTypeDefinition(JdbcField aField) {
         String typeName = aField.getType();
         int size = aField.getSize();
         int scale = aField.getScale();
@@ -332,15 +335,15 @@ public class Db2SqlDriver extends SqlDriver {
     }
 
     @Override
-    public String getSql4FieldDefinition(Field aField) {
+    public String getSql4FieldDefinition(JdbcField aField) {
         String fieldDefinition = wrapNameIfRequired(aField.getName()) + " " + getFieldTypeDefinition(aField);
         return fieldDefinition;
     }
 
     @Override
-    public String[] getSqls4ModifyingField(String aSchemaName, String aTableName, Field aOldFieldMd, Field aNewFieldMd) {
+    public String[] getSqls4ModifyingField(String aSchemaName, String aTableName, JdbcField aOldFieldMd, JdbcField aNewFieldMd) {
         List<String> sqls = new ArrayList<>();
-        Field newFieldMd = aNewFieldMd.copy();
+        JdbcField newFieldMd = aNewFieldMd.copy();
         String fullTableName = makeFullName(aSchemaName, aTableName);
         String updateDefinition = String.format(ALTER_FIELD_SQL_PREFIX, fullTableName) + wrapNameIfRequired(aOldFieldMd.getName()) + " ";
         String fieldDefination = getFieldTypeDefinition(newFieldMd);
@@ -393,7 +396,7 @@ public class Db2SqlDriver extends SqlDriver {
      * DB2 9.7 or later
      */
     @Override
-    public String[] getSqls4RenamingField(String aSchemaName, String aTableName, String aOldFieldName, Field aNewFieldMd) {
+    public String[] getSqls4RenamingField(String aSchemaName, String aTableName, String aOldFieldName, JdbcField aNewFieldMd) {
         String fullTableName = makeFullName(aSchemaName, aTableName);
         String sqlText = String.format(SQL_RENAME_FIELD, fullTableName, wrapNameIfRequired(aOldFieldName), wrapNameIfRequired(aNewFieldMd.getName()));
         return new String[]{
@@ -517,7 +520,7 @@ public class Db2SqlDriver extends SqlDriver {
     }
 
     @Override
-    public String[] getSqls4AddingField(String aSchemaName, String aTableName, Field aField) {
+    public String[] getSqls4AddingField(String aSchemaName, String aTableName, JdbcField aField) {
         List<String> sqls = new ArrayList<>();
         String fullTableName = makeFullName(aSchemaName, aTableName);
         sqls.add(getSql4VolatileTable(fullTableName));
@@ -547,4 +550,14 @@ public class Db2SqlDriver extends SqlDriver {
     private String prepareName(String aName) {
         return (isWrappedName(aName) ? unwrapName(aName) : aName.toUpperCase());
     }
+    
+    @Override
+    public void convertGeometry(JdbcChangeValue aValue, Connection aConnection) throws SQLException {
+    }
+
+    @Override
+    public Geometry readGeometry(Wrapper aRs, int aColumnIndex, Connection aConnection) throws SQLException {
+        return null;
+    }
+
 }

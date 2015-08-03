@@ -171,7 +171,7 @@ public class QueryResultsView extends javax.swing.JPanel {
             query.getParameters().add(p.copy());
         });
         try {
-            StoredQueryFactory factory = new StoredQueryFactory(basesProxy, null, null, false);
+            StoredQueryFactory factory = new StoredQueryFactory(basesProxy, null, null);
             query.setCommand(!factory.putTableFieldsMetadata(query));
             flow = query.compile().getFlowProvider();
             changeLog = new ArrayList<>();

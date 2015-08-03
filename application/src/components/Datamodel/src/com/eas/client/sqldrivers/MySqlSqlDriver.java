@@ -5,16 +5,19 @@
 package com.eas.client.sqldrivers;
 
 import com.eas.client.ClientConstants;
+import com.eas.client.changes.JdbcChangeValue;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
-import com.eas.client.metadata.Field;
+import com.eas.client.metadata.JdbcField;
 import com.eas.client.metadata.ForeignKeySpec;
 import com.eas.client.metadata.PrimaryKeySpec;
 import com.eas.client.sqldrivers.resolvers.MySqlTypesResolver;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
+import com.vividsolutions.jts.geom.Geometry;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Wrapper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -527,7 +530,7 @@ public class MySqlSqlDriver extends SqlDriver {
         return ex != null ? ex.getLocalizedMessage() : null;
     }
 
-    private String getFieldTypeDefinition(Field aField) {
+    private String getFieldTypeDefinition(JdbcField aField) {
         String typeDefine = "";
         String sqlTypeName = aField.getType().toLowerCase();
         typeDefine += sqlTypeName;
@@ -547,7 +550,7 @@ public class MySqlSqlDriver extends SqlDriver {
     }
 
     @Override
-    public String getSql4FieldDefinition(Field aField) {
+    public String getSql4FieldDefinition(JdbcField aField) {
         String fieldDefinition = wrapNameIfRequired(aField.getName()) + " " + getFieldTypeDefinition(aField);
         if (!aField.isSigned() && isNumeric(aField.getType())) {
             fieldDefinition += " UNSIGNED";
@@ -561,12 +564,12 @@ public class MySqlSqlDriver extends SqlDriver {
     }
 
     @Override
-    public String[] getSqls4ModifyingField(String aSchemaName, String aTableName, Field aOldFieldMd, Field aNewFieldMd) {
+    public String[] getSqls4ModifyingField(String aSchemaName, String aTableName, JdbcField aOldFieldMd, JdbcField aNewFieldMd) {
         return getSqls4RenamingField(aSchemaName, aTableName, aOldFieldMd.getName(), aNewFieldMd);
     }
 
     @Override
-    public String[] getSqls4RenamingField(String aSchemaName, String aTableName, String aOldFieldName, Field aNewFieldMd) {
+    public String[] getSqls4RenamingField(String aSchemaName, String aTableName, String aOldFieldName, JdbcField aNewFieldMd) {
         String fullTableName = makeFullName(aSchemaName, aTableName);
         return new String[]{String.format("ALTER TABLE %s CHANGE %s %s", fullTableName, wrapNameIfRequired(aOldFieldName), getSql4FieldDefinition(aNewFieldMd))};
     }
@@ -639,7 +642,7 @@ public class MySqlSqlDriver extends SqlDriver {
     }
 
     @Override
-    public String[] getSqls4AddingField(String aSchemaName, String aTableName, Field aField) {
+    public String[] getSqls4AddingField(String aSchemaName, String aTableName, JdbcField aField) {
         String fullTableName = makeFullName(aSchemaName, aTableName);
         return new String[]{
             String.format(SqlDriver.ADD_FIELD_SQL_PREFIX, fullTableName) + getSql4FieldDefinition(aField)
@@ -684,4 +687,14 @@ public class MySqlSqlDriver extends SqlDriver {
     private static boolean isNumeric(String aType) {
         return numericTypes.contains(aType.toUpperCase());
     }
+
+    @Override
+    public void convertGeometry(JdbcChangeValue aValue, Connection aConnection) throws SQLException {
+    }
+    
+    @Override
+    public Geometry readGeometry(Wrapper aRs, int aColumnIndex, Connection aConnection) throws SQLException {
+        return null;
+    }
+
 }

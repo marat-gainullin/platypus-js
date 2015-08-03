@@ -6,6 +6,7 @@ package com.eas.client.dataflow;
 
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.JdbcField;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -78,13 +79,14 @@ public class JdbcReader {
     public static Fields readFields(ResultSetMetaData lowLevelJdbcFields) throws SQLException {
         Fields jdbcFields = new Fields();
         for (int i = 1; i <= lowLevelJdbcFields.getColumnCount(); i++) {
-            Field jdbcField = new Field();
+            JdbcField jdbcField = new JdbcField();
             String columnLabel = lowLevelJdbcFields.getColumnLabel(i);// Column label in jdbc is the name of platypus property
             String columnName = lowLevelJdbcFields.getColumnName(i);
             jdbcField.setName(columnLabel != null && !columnLabel.isEmpty() ? columnLabel : columnName);
             jdbcField.setOriginalName(columnName);
             
             jdbcField.setNullable(lowLevelJdbcFields.isNullable(i) == ResultSetMetaData.columnNullable);
+            jdbcField.setJdbcType(lowLevelJdbcFields.getColumnType(i));
             jdbcField.setType(lowLevelJdbcFields.getColumnTypeName(i));
             jdbcField.setSize(lowLevelJdbcFields.getColumnDisplaySize(i));
             jdbcField.setPrecision(lowLevelJdbcFields.getPrecision(i));

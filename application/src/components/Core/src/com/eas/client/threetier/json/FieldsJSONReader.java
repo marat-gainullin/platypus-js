@@ -18,7 +18,6 @@ public class FieldsJSONReader {
     // Field props
     private static final String NAME_PROP_NAME = "name";
     private static final String DESCRIPTION_PROP_NAME = "description";
-    private static final String SIZE_PROP_NAME = "size";
     private static final String TYPE_PROP_NAME = "type";
     private static final String PK_PROP_NAME = "pk";
     private static final String NULLABLE_PROP_NAME = "nullable";
@@ -30,14 +29,12 @@ public class FieldsJSONReader {
             assert po != null;
             String name = JSType.toString(po.getMember(NAME_PROP_NAME));
             String desc = JSType.toString(po.getMember(DESCRIPTION_PROP_NAME));
-            int size = JSType.toInteger(po.getMember(SIZE_PROP_NAME));
             
             String type = po.hasMember(TYPE_PROP_NAME) && po.getMember(TYPE_PROP_NAME) != null ? JSType.toString(po.getMember(TYPE_PROP_NAME)) : null;
             boolean pk = JSType.toBoolean(po.getMember(PK_PROP_NAME));
             boolean nullable = JSType.toBoolean(po.getMember(NULLABLE_PROP_NAME));
-            Field f = aFields.createNewField(name);
+            Field f = new Field(aFields.generateNewName(name)); 
             f.setDescription(desc);
-            f.setSize(size);
             f.setType(type);
             f.setPk(pk);
             f.setNullable(nullable);

@@ -16,6 +16,7 @@ import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.ForeignKeySpec;
 import com.eas.client.metadata.ForeignKeySpec.ForeignKeyRule;
+import com.eas.client.metadata.JdbcField;
 import com.eas.client.metadata.TableRef;
 import com.eas.client.model.*;
 import com.eas.client.model.dbscheme.DbSchemeModel;
@@ -315,7 +316,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                 DbSchemeModel model = entity.getModel();
                 if (model != null) {
                     try {
-                        Field field = NewFieldEdit.createField(entity);
+                        JdbcField field = NewFieldEdit.createField(entity);
                         PropertySheet ps = new PropertySheet();
                         // FieldNode is used here to avoid in database edits generation by TableFieldNode
                         FieldNode fieldNode = new FieldNode(field, Lookups.fixed(entity), true);
@@ -689,7 +690,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                 }
                 // act with fields    
                 for (SelectedField<FieldsEntity> etf : getSelectedFields()) {
-                    Field field = etf.field;
+                    JdbcField field = (JdbcField)etf.field;
                     if (!field.isPk()) {
                         try {
                             dropField(entity, section, field, e);
@@ -716,7 +717,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
             }
         }
 
-        private boolean dropField(FieldsEntity entity, CompoundEdit aEdit, Field field, ActionEvent e) {
+        private boolean dropField(FieldsEntity entity, CompoundEdit aEdit, JdbcField field, ActionEvent e) {
             if (entity != null) {
                 // act with field.
                 // Dropping foreign keys, table and removing theirs entities and relations
@@ -743,7 +744,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
             return true;
         }
 
-        private boolean doDropField(FieldsEntity entity, CompoundEdit aEdit, Field field, ActionEvent e) {
+        private boolean doDropField(FieldsEntity entity, CompoundEdit aEdit, JdbcField field, ActionEvent e) {
             DropFieldEdit edit = new DropFieldEdit(sqlController, field, entity);
             edit.redo();
             aEdit.addEdit(edit);

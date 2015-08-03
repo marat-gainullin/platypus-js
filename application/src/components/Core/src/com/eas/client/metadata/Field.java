@@ -29,42 +29,29 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class Field implements HasPublished {
 
-    public static int UNDEFINED_FILED_INDEX = -1;
-    // Our user-supplied information
+    public static final String NAME_PROPERTY = "name";
+    public static final String DESCRIPTION_PROPERTY = "description";
+    public static final String ORIGINAL_NAME_PROPERTY = "originalName";
+    public static final String TABLE_NAME_PROPERTY = "tableName";
+    public static final String TYPE_PROPERTY = "type";
+    public static final String READONLY_PROPERTY = "readonly";
+    public static final String NULLABLE_PROPERTY = "nullable";
+    public static final String PK_PROPERTY = "pk";
+    public static final String FK_PROPERTY = "fk";
+
     protected String name = "";
     // In queries, such as select t1.f1 as f11, t2.f1 as f21 to preserve output fields' names unique,
     // but be able to generate right update sql clauses for multiple tables.
     protected String originalName = "";
-    protected String description;// Such data is read from db, and so may be null
+    protected String tableName;
+    protected String description;
     protected String type;// Null value will be used as "unknown" type
-    protected int size;
-    protected int scale;
-    protected int precision;
-    protected boolean signed = true;
-    protected boolean nullable = true;
     protected boolean readonly;
+    protected boolean nullable = true;
     protected boolean pk;
     protected ForeignKeySpec fk;
-    protected String tableName;
-    protected String schemaName;
     protected PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
     protected JSObject published;
-
-    public static final String PK_PROPERTY = "pk";
-    public static final String STRONG4INSERT_PROPERTY = "strong4Insert";
-    public static final String FK_PROPERTY = "fk";
-    public static final String READONLY_PROPERTY = "readonly";
-    public static final String NAME_PROPERTY = "name";
-    public static final String ORIGINAL_NAME_PROPERTY = "originalName";
-    public static final String DESCRIPTION_PROPERTY = "description";
-    public static final String TYPE_PROPERTY = "type";
-    public static final String SCHEMA_NAME_PROPERTY = "schemaName";
-    public static final String TABLE_NAME_PROPERTY = "tableName";
-    public static final String SIZE_PROPERTY = "size";
-    public static final String SCALE_PROPERTY = "scale";
-    public static final String PRECISION_PROPERTY = "precision";
-    public static final String SIGNED_PROPERTY = "signed";
-    public static final String NULLABLE_PROPERTY = "nullable";
 
     /**
      * The default constructor.
@@ -114,6 +101,50 @@ public class Field implements HasPublished {
     public Field(Field aSourceField) {
         super();
         assignFrom(aSourceField);
+    }
+
+    private static final String ORIGINAL_NAME_JS_DOC = "/**\n"
+            + "* The original name of the field.\n"
+            + "* In queries, such as select t1.f1 as f11, t2.f1 as f21 to preserve output fields' names unique,\n"
+            + "* but be able to generate right update sql clauses for multiple tables.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = ORIGINAL_NAME_JS_DOC)
+    public String getOriginalName() {
+        return originalName;
+    }
+
+    @ScriptFunction
+    public void setOriginalName(String aValue) {
+        String oldValue = originalName;
+        originalName = aValue;
+        changeSupport.firePropertyChange(ORIGINAL_NAME_PROPERTY, oldValue, originalName);
+    }
+
+    private static final String TABLE_NAME_JS_DOC = "/**\n"
+            + "* This field table's name.\n"
+            + "*/";
+
+    /**
+     * Returns the field's table name.
+     *
+     * @return The field's table name.
+     */
+    @ScriptFunction(jsDoc = TABLE_NAME_JS_DOC)
+    public String getTableName() {
+        return tableName;
+    }
+
+    /**
+     * Sets table name.
+     *
+     * @param aValue The table name to be set.
+     */
+    @ScriptFunction
+    public void setTableName(String aValue) {
+        String oldValue = tableName;
+        tableName = aValue;
+        changeSupport.firePropertyChange(TABLE_NAME_PROPERTY, oldValue, aValue);
     }
 
     public PropertyChangeSupport getChangeSupport() {
@@ -219,53 +250,24 @@ public class Field implements HasPublished {
      */
     public boolean isEqual(Object obj) {
         if (obj != null && obj instanceof Field) {
-            Field rf = (Field) obj;
-            String rfDescription = rf.getDescription();
-            String rfName = rf.getName();
-            String rfOriginalName = rf.getOriginalName();
-            String rfTableName = rf.getTableName();
-            String rfSchemaName = rf.getSchemaName();
-            PrimaryKeySpec lfk = rf.getFk();
-            return nullable == rf.isNullable()
-                    && signed == rf.isSigned()
-                    && pk == rf.isPk()
-                    && readonly == rf.isReadonly()
-                    && precision == rf.getPrecision()
-                    && scale == rf.getScale()
-                    && size == rf.getSize()
-                    && ((fk == null && lfk == null) || (fk != null && fk.equals(lfk)))
-                    && ((description == null && rfDescription == null) || (description != null && description.equals(rfDescription)))
-                    && ((name == null && rfName == null) || (name != null && name.equals(rfName)))
-                    && ((type == null && rfName == null) || (type != null && type.equals(rfName)))
-                    && ((originalName == null && rfOriginalName == null) || (originalName != null && originalName.equals(rfOriginalName)))
-                    && ((tableName == null && rfTableName == null) || (tableName != null && tableName.equals(rfTableName)))
-                    && ((schemaName == null && rfSchemaName == null) || (schemaName != null && schemaName.equals(rfSchemaName)));
+            Field other = (Field) obj;
+            String rfDescription = other.getDescription();
+            String rfName = other.getName();
+            String rfTableName = other.getTableName();
+            String rfOriginalName = other.getOriginalName();
+            String rfType = other.getType();
+            return nullable == other.isNullable()
+                    && pk == other.isPk()
+                    && readonly == other.isReadonly()
+                    && (fk == null ? other.getFk() == null : fk.equals(other.getFk()))
+                    && (description == null ? rfDescription == null : description.equals(rfDescription))
+                    && (name == null ? rfName == null : name.equals(rfName))
+                    && (originalName == null ? rfOriginalName == null : originalName.equals(rfOriginalName))
+                    && (tableName == null ? rfTableName == null : tableName.equals(rfTableName))
+                    && (type == null ? rfType == null : type.equals(rfType));
         }
         return false;
     }
-    /*
-     @Override
-     public int hashCode() {
-     int hash = 3;
-     hash = 97 * hash + Objects.hashCode(this.name);
-     hash = 97 * hash + Objects.hashCode(this.originalName);
-     hash = 97 * hash + Objects.hashCode(this.description);
-     hash = 97 * hash + Objects.hashCode(this.typeInfo);
-     hash = 97 * hash + this.size;
-     hash = 97 * hash + this.scale;
-     hash = 97 * hash + this.precision;
-     hash = 97 * hash + (this.signed ? 1 : 0);
-     hash = 97 * hash + (this.nullable ? 1 : 0);
-     hash = 97 * hash + (this.readonly ? 1 : 0);
-     hash = 97 * hash + (this.pk ? 1 : 0);
-     hash = 97 * hash + (this.strong4Insert ? 1 : 0);
-     hash = 97 * hash + Objects.hashCode(this.fk);
-     hash = 97 * hash + Objects.hashCode(this.tableName);
-     hash = 97 * hash + Objects.hashCode(this.schemaName);
-     return hash;
-     }
-     */
-
     private static final String NAME_JS_DOC = "/**\n"
             + "* The name of the field.\n"
             + "*/";
@@ -290,24 +292,6 @@ public class Field implements HasPublished {
         String oldValue = name;
         name = aValue;
         changeSupport.firePropertyChange(NAME_PROPERTY, oldValue, aValue);
-    }
-
-    private static final String ORIGINAL_NAME_JS_DOC = "/**\n"
-            + "* The original name of the field.\n"
-            + "* In queries, such as select t1.f1 as f11, t2.f1 as f21 to preserve output fields' names unique,\n"
-            + "* but be able to generate right update sql clauses for multiple tables.\n"
-            + "*/";
-
-    @ScriptFunction(jsDoc = ORIGINAL_NAME_JS_DOC)
-    public String getOriginalName() {
-        return originalName;
-    }
-
-    @ScriptFunction
-    public void setOriginalName(String aValue) {
-        String oldValue = originalName;
-        originalName = aValue;
-        changeSupport.firePropertyChange(ORIGINAL_NAME_PROPERTY, oldValue, originalName);
     }
 
     private static final String DESCRIPTION_JS_DOC = "/**\n"
@@ -363,162 +347,6 @@ public class Field implements HasPublished {
         changeSupport.firePropertyChange(TYPE_PROPERTY, oldValue, type);
     }
 
-    private static final String SCHEMA_NAME_JS_DOC = "/**\n"
-            + "* This field schema name.\n"
-            + "*/";
-
-    /**
-     * Returns the field's schema name.
-     *
-     * @return The field's schema name.
-     */
-    @ScriptFunction(jsDoc = SCHEMA_NAME_JS_DOC)
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    /**
-     * Sets this field schema name.
-     *
-     * @param aValue This field schema name.
-     */
-    @ScriptFunction
-    public void setSchemaName(String aValue) {
-        String oldValue = schemaName;
-        schemaName = aValue;
-        changeSupport.firePropertyChange(SCHEMA_NAME_PROPERTY, oldValue, aValue);
-    }
-
-    private static final String TABLE_NAME_JS_DOC = "/**\n"
-            + "* This field table's name.\n"
-            + "*/";
-
-    /**
-     * Returns the field's table name.
-     *
-     * @return The field's table name.
-     */
-    @ScriptFunction(jsDoc = TABLE_NAME_JS_DOC)
-    public String getTableName() {
-        return tableName;
-    }
-
-    /**
-     * Sets table name.
-     *
-     * @param aValue The table name to be set.
-     */
-    @ScriptFunction
-    public void setTableName(String aValue) {
-        String oldValue = tableName;
-        tableName = aValue;
-        changeSupport.firePropertyChange(TABLE_NAME_PROPERTY, oldValue, aValue);
-    }
-
-    private static final String SIZE_JS_DOC = "/**\n"
-            + "* The size of the field.\n"
-            + "*/";
-
-    /**
-     * Returns the field size.
-     *
-     * @return The field size.
-     */
-    @ScriptFunction(jsDoc = SIZE_JS_DOC)
-    public int getSize() {
-        return size;
-    }
-
-    /**
-     * Sets the field size.
-     *
-     * @param aValue The field size to be set.
-     */
-    @ScriptFunction
-    public void setSize(int aValue) {
-        int oldValue = size;
-        size = aValue;
-        changeSupport.firePropertyChange(SIZE_PROPERTY, oldValue, aValue);
-    }
-
-    private static final String SCALE_JS_DOC = "/**\n"
-            + "* The scale of the field.\n"
-            + "*/";
-
-    /**
-     * Returns the field's scale.
-     *
-     * @return The field's scale.
-     */
-    @ScriptFunction(jsDoc = SCALE_JS_DOC)
-    public int getScale() {
-        return scale;
-    }
-
-    /**
-     * Sets the field's scale.
-     *
-     * @param aValue The field's scale to be set.
-     */
-    @ScriptFunction
-    public void setScale(int aValue) {
-        int oldValue = scale;
-        scale = aValue;
-        changeSupport.firePropertyChange(SCALE_PROPERTY, oldValue, aValue);
-    }
-
-    private static final String PRECISION_JS_DOC = "/**\n"
-            + "* The precision of the field.\n"
-            + "*/";
-
-    /**
-     * Returns the field's precision.
-     *
-     * @return The field's precision.
-     */
-    @ScriptFunction(jsDoc = PRECISION_JS_DOC)
-    public int getPrecision() {
-        return precision;
-    }
-
-    /**
-     * Sets the field's precision.
-     *
-     * @param aValue The field's precision.
-     */
-    @ScriptFunction
-    public void setPrecision(int aValue) {
-        int oldValue = precision;
-        precision = aValue;
-        changeSupport.firePropertyChange(PRECISION_PROPERTY, oldValue, aValue);
-    }
-
-    private static final String SIGNED_JS_DOC = "/**\n"
-            + "* Determines if the field is signed.\n"
-            + "*/";
-
-    /**
-     * Returns whether this field is signed.
-     *
-     * @return Whether this field is signed.
-     */
-    @ScriptFunction(jsDoc = SIGNED_JS_DOC)
-    public boolean isSigned() {
-        return signed;
-    }
-
-    /**
-     * Sets the field's signed state.
-     *
-     * @param aValue Field's signed flag.
-     */
-    @ScriptFunction
-    public void setSigned(boolean aValue) {
-        boolean oldValue = signed;
-        signed = aValue;
-        changeSupport.firePropertyChange(SIGNED_PROPERTY, oldValue, aValue);
-    }
-
     private static final String NULLABLE_JS_DOC = "/**\n"
             + "* Determines if field is nullable.\n"
             + "*/";
@@ -564,46 +392,15 @@ public class Field implements HasPublished {
      */
     public void assignFrom(Field aSourceField) {
         if (aSourceField != null) {
-            if (!equalsOrNulls(getName(), aSourceField.getName())) {
-                setName(aSourceField.getName());
-            }
-            if (!equalsOrNulls(getOriginalName(), aSourceField.getOriginalName())) {
-                setOriginalName(aSourceField.getOriginalName());
-            }
-            if (!equalsOrNulls(getDescription(), aSourceField.getDescription())) {
-                setDescription(aSourceField.getDescription());
-            }
-            if (!equalsOrNulls(getTableName(), aSourceField.getTableName())) {
-                setTableName(aSourceField.getTableName());
-            }
-            if (!equalsOrNulls(getSchemaName(), aSourceField.getSchemaName())) {
-                setSchemaName(aSourceField.getSchemaName());
-            }
+            setName(aSourceField.getName());
+            setOriginalName(aSourceField.getOriginalName());
+            setTableName(aSourceField.getTableName());
             setType(aSourceField.getType());
-            if (getSize() != aSourceField.getSize()) {
-                setSize(aSourceField.getSize());
-            }
-            if (getScale() != aSourceField.getScale()) {
-                setScale(aSourceField.getScale());
-            }
-            if (getPrecision() != aSourceField.getPrecision()) {
-                setPrecision(aSourceField.getPrecision());
-            }
-            if (isSigned() != aSourceField.isSigned()) {
-                setSigned(aSourceField.isSigned());
-            }
-            if (isNullable() != aSourceField.isNullable()) {
-                setNullable(aSourceField.isNullable());
-            }
-            if (isReadonly() != aSourceField.isReadonly()) {
-                setReadonly(aSourceField.isReadonly());
-            }
-            if (isPk() != aSourceField.isPk()) {
-                setPk(aSourceField.isPk());
-            }
-            if (!equalsOrNulls(getFk(), aSourceField.getFk())) {
-                setFk((ForeignKeySpec) aSourceField.getFk().copy());
-            }
+            setDescription(aSourceField.getDescription());
+            setNullable(aSourceField.isNullable());
+            setReadonly(aSourceField.isReadonly());
+            setPk(aSourceField.isPk());
+            setFk(aSourceField.getFk() != null ? (ForeignKeySpec) aSourceField.getFk().copy() : null);
         }
     }
 
@@ -617,9 +414,6 @@ public class Field implements HasPublished {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        if (schemaName != null && !schemaName.isEmpty()) {
-            sb.append(schemaName).append(".");
-        }
         if (tableName != null && !tableName.isEmpty()) {
             sb.append(tableName).append(".");
         }
@@ -646,10 +440,6 @@ public class Field implements HasPublished {
             sb.append(rf.field);
         }
         sb.append(", ").append(type);
-        sb.append(", size ").append(size).append(", precision ").append(precision).append(", scale ").append(scale);
-        if (signed) {
-            sb.append(", signed");
-        }
         if (nullable) {
             sb.append(", nullable");
         }

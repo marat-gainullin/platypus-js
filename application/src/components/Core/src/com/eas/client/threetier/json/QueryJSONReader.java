@@ -19,7 +19,6 @@ import jdk.nashorn.internal.runtime.JSType;
 public class QueryJSONReader {
 
     private static final String TITLE_PROP_NAME = "title";
-    private static final String MANUAL_PROP_NAME = "manual";
     private static final String APP_ELEMENT_PROP_NAME = "appelement";
     private static final String PARAMETERS_PROP_NAME = "parameters";
     private static final String FIELDS_PROP_NAME = "fields";
@@ -28,8 +27,6 @@ public class QueryJSONReader {
         PlatypusQuery query = new PlatypusQuery(null);
         String title = JSType.toString(o.getMember(TITLE_PROP_NAME));
         query.setTitle(title);
-        boolean manual = JSType.toBoolean(o.getMember(MANUAL_PROP_NAME));
-        query.setManual(manual);
         String entityName = JSType.toString(o.getMember(APP_ELEMENT_PROP_NAME));
         query.setEntityName(entityName);
         // parameters

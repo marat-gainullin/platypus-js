@@ -4,15 +4,9 @@
  */
 package com.eas.designer.datamodel.nodes;
 
-import com.eas.client.SQLUtils;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.model.Entity;
-import com.eas.client.model.Relation;
-import com.eas.client.model.application.ReferenceRelation;
-import com.eas.client.model.dbscheme.DbSchemeModel;
-import com.eas.client.model.gui.edits.AccessibleCompoundEdit;
-import com.eas.client.model.gui.edits.DeleteRelationEdit;
 import com.eas.client.model.gui.edits.fields.ChangeFieldEdit;
 import com.eas.client.model.gui.view.FieldsTypeIconsCache;
 import com.eas.client.model.query.QueryEntity;
@@ -30,9 +24,7 @@ import java.beans.PropertyEditor;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.event.UndoableEditEvent;
@@ -58,14 +50,7 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
 
     public static final String NAME_PROP_NAME = PROP_NAME;
     public static final String TABLE_NAME_PROP_NAME = "tableName"; //NOI18N
-    //public static final String DESCRIPTION_PROP_NAME = "description"; //NOI18N
-    //public static final String TYPE_INFO_PROP_NAME = "typeInfo"; //NOI18N
-    //public static final String PRECISION_PROP_NAME = "precision"; //NOI18N
-    //public static final String NULLABLE_PROP_NAME = "nullable"; //NOI18N
     public static final String TYPE_PROP_NAME = "type"; //NOI18N
-    //public static final String SIZE_PROP_NAME = "size"; //NOI18N
-    //public static final String SCALE_PROP_NAME = "scale"; //NOI18N
-    //public static final String REQUIRED_PROP_NAME = "required"; //NOI18N
     protected Field field;
     private boolean canChange;
     protected TypesResolver resolver;
@@ -82,8 +67,6 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
         try {
             if (getEntity().getModel() instanceof QueryModel) {
                 resolver = ((QueryModel) getEntity().getModel()).getBasesProxy().getMetadataCache(((QueryModel) getEntity().getModel()).getDatasourceName()).getDatasourceSqlDriver().getTypesResolver();
-            } else if (getEntity().getModel() instanceof DbSchemeModel) {
-                resolver = ((DbSchemeModel) getEntity().getModel()).getBasesProxy().getMetadataCache(((DbSchemeModel) getEntity().getModel()).getDatasourceName()).getDatasourceSqlDriver().getTypesResolver();
             }
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
@@ -201,28 +184,6 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
         }
     }
 
-    public Integer getSize() {
-        return field.getSize();
-    }
-
-    public void setSize(Integer val) {
-        UndoableEdit e = editSize(val);
-        if (e != null) {
-            getUndo().undoableEditHappened(new UndoableEditEvent(this, e));
-        }
-    }
-
-    public Integer getScale() {
-        return field.getScale();
-    }
-
-    public void setScale(Integer val) {
-        UndoableEdit e = editScale(val);
-        if (e != null) {
-            getUndo().undoableEditHappened(new UndoableEditEvent(this, e));
-        }
-    }
-
     public Boolean isNullable() {
         return field.isNullable();
     }
@@ -259,8 +220,6 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
             pSet.put(tableNameProp);
         }
         pSet.put(new TypeProperty());
-        pSet.put(new SizeProperty());
-        pSet.put(new ScaleProperty());
         pSet.put(new NullableProperty());
         sheet.put(pSet);
         return sheet;
@@ -305,13 +264,6 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
             case Field.TYPE_PROPERTY:
                 firePropertyChange(TYPE_PROP_NAME, evt.getOldValue(), evt.getNewValue());
                 fireIconChange();
-                break;
-            case Field.SIZE_PROPERTY:
-            case Field.PRECISION_PROPERTY:
-                firePropertyChange(Field.SIZE_PROPERTY, evt.getOldValue(), evt.getNewValue());
-                break;
-            case Field.SCALE_PROPERTY:
-                firePropertyChange(Field.SCALE_PROPERTY, evt.getOldValue(), evt.getNewValue());
                 break;
             case Field.NULLABLE_PROPERTY:
                 firePropertyChange(Field.NULLABLE_PROPERTY, evt.getOldValue(), evt.getNewValue());
@@ -364,26 +316,11 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
         Field newContent = new Field(field);
         newContent.setType(val);
         //checkTypedLengthScale(newContent);
-        AccessibleCompoundEdit section = new AccessibleCompoundEdit();
-        Set<Relation> relationsToDelete;
-        try {
-            relationsToDelete = getIncompatibleRelations(newContent);
-        } catch (CancelException ex) {
-            return null;
-        }
-        for (Relation rel : relationsToDelete) {
-            assert !(rel instanceof ReferenceRelation<?>);
-            DeleteRelationEdit drEdit = new DeleteRelationEdit(rel);
-            drEdit.redo();
-            section.addEdit(drEdit);
-        }
         ChangeFieldEdit edit = new ChangeFieldEdit(oldContent, newContent, field, getEntity());
         edit.redo();
-        section.addEdit(edit);
-        section.end();
-        return section;
+        return edit;
     }
-
+/*
     protected Set<Relation> getIncompatibleRelations(Field newFieldContent) throws CancelException {
         Set<Relation> toProcessRels = new HashSet<>();
         Set<Relation> rels = Entity.<Entity>getInOutRelationsByEntityField(getEntity(), field);
@@ -409,25 +346,7 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
         });
         return toProcessRels;
     }
-
-    protected UndoableEdit editSize(Integer val) {
-        Field oldContent = new Field(field);
-        Field content = new Field(field);
-        content.setSize(val);
-        ChangeFieldEdit edit = new ChangeFieldEdit(oldContent, content, field, getEntity());
-        edit.redo();
-        return edit;
-    }
-
-    protected UndoableEdit editScale(Integer val) {
-        Field oldContent = new Field(field);
-        Field content = new Field(field);
-        content.setScale(val);
-        ChangeFieldEdit edit = new ChangeFieldEdit(oldContent, content, field, getEntity());
-        edit.redo();
-        return edit;
-    }
-
+*/
     protected UndoableEdit editNullable(Boolean val) {
         Field oldContent = new Field(field);
         Field content = new Field(field);
@@ -542,80 +461,6 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
         @Override
         public PropertyEditor getPropertyEditor() {
             return CommonTypesEditor.getNewInstanceFor(getEntity().getModel());
-        }
-
-        @Override
-        public boolean canRead() {
-            return true;
-        }
-
-        @Override
-        public boolean canWrite() {
-            return canChange();
-        }
-    }
-
-    protected class SizeProperty extends Property<Integer> {
-
-        public SizeProperty() {
-            super(Integer.class);
-        }
-
-        @Override
-        public String getShortDescription() {
-            return NbBundle.getMessage(SizeProperty.class, "MSG_SizePropertyShortDescription"); //NOI18N
-        }
-
-        @Override
-        public String getName() {
-            return Field.SIZE_PROPERTY;
-        }
-
-        @Override
-        public Integer getValue() throws IllegalAccessException, InvocationTargetException {
-            return getSize();
-        }
-
-        @Override
-        public void setValue(Integer val) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-            setSize(val);
-        }
-
-        @Override
-        public boolean canRead() {
-            return true;
-        }
-
-        @Override
-        public boolean canWrite() {
-            return canChange();
-        }
-    }
-
-    protected class ScaleProperty extends Property<Integer> {
-
-        public ScaleProperty() {
-            super(Integer.class);
-        }
-
-        @Override
-        public String getName() {
-            return Field.SCALE_PROPERTY;
-        }
-
-        @Override
-        public String getShortDescription() {
-            return NbBundle.getMessage(ScaleProperty.class, "MSG_ScalePropertyShortDescription"); //NOI18N
-        }
-
-        @Override
-        public Integer getValue() throws IllegalAccessException, InvocationTargetException {
-            return getScale();
-        }
-
-        @Override
-        public void setValue(Integer val) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-            setScale(val);
         }
 
         @Override

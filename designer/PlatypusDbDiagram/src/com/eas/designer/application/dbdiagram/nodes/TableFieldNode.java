@@ -12,6 +12,7 @@ import com.eas.client.dbstructure.gui.edits.ModifyFieldEdit;
 import com.eas.client.dbstructure.gui.edits.NotSavableDbStructureCompoundEdit;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.ForeignKeySpec;
+import com.eas.client.metadata.JdbcField;
 import com.eas.client.model.Relation;
 import com.eas.client.model.dbscheme.DbSchemeModel;
 import com.eas.client.model.dbscheme.FieldsEntity;
@@ -19,14 +20,19 @@ import com.eas.client.model.gui.edits.DeleteRelationEdit;
 import com.eas.client.model.gui.edits.fields.ChangeFieldEdit;
 import com.eas.designer.datamodel.nodes.FieldNode;
 import java.beans.PropertyChangeEvent;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.event.UndoableEditEvent;
 import javax.swing.undo.CompoundEdit;
 import javax.swing.undo.UndoableEdit;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
+import static org.openide.nodes.Node.PROP_NAME;
+import org.openide.nodes.PropertySupport;
+import org.openide.nodes.Sheet;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 
@@ -41,6 +47,29 @@ public class TableFieldNode extends FieldNode {
     public TableFieldNode(Field aField, Lookup aLookup) throws Exception {
         super(aField, aLookup);
         sqlActionsController = new SqlActionsController((DbSchemeModel) getEntity().getModel());
+        resolver = ((DbSchemeModel) getEntity().getModel()).getBasesProxy().getMetadataCache(((DbSchemeModel) getEntity().getModel()).getDatasourceName()).getDatasourceSqlDriver().getTypesResolver();
+    }
+
+    public Integer getSize() {
+        return ((JdbcField) field).getSize();
+    }
+
+    public void setSize(Integer val) {
+        UndoableEdit e = editSize(val);
+        if (e != null) {
+            getUndo().undoableEditHappened(new UndoableEditEvent(this, e));
+        }
+    }
+
+    public Integer getScale() {
+        return ((JdbcField) field).getScale();
+    }
+
+    public void setScale(Integer val) {
+        UndoableEdit e = editScale(val);
+        if (e != null) {
+            getUndo().undoableEditHappened(new UndoableEditEvent(this, e));
+        }
     }
 
     @Override
@@ -53,8 +82,8 @@ public class TableFieldNode extends FieldNode {
         String oldVal = field.getName();
         if (oldVal == null ? val != null : !oldVal.equalsIgnoreCase(val)) {
             CompoundEdit section = new NotSavableDbStructureCompoundEdit();
-            Field oldContent = new Field(field);
-            Field newContent = new Field(field);
+            JdbcField oldContent = new JdbcField((JdbcField)field);
+            JdbcField newContent = new JdbcField((JdbcField)field);
             newContent.setName(val);
             Set<Relation<FieldsEntity>> toProcessRels = FieldsEntity.<FieldsEntity>getInOutRelationsByEntityField((FieldsEntity) getEntity(), field);
             Logger.getLogger(TableFieldNode.class.getName()).fine(String.format("Changing field from %s to %s\n", oldVal, val)); //NOI18N        
@@ -102,8 +131,8 @@ public class TableFieldNode extends FieldNode {
     @Override
     protected UndoableEdit editDescription(String val) {
         if (field.getDescription() == null ? val != null : !field.getDescription().equals(val)) {
-            Field oldContent = new Field(field);
-            Field content = new Field(field);
+            JdbcField oldContent = new JdbcField((JdbcField)field);
+            JdbcField content = new JdbcField((JdbcField)field);
             content.setDescription(val);
             try {
                 ModifyFieldEdit dbEdit = new ModifyFieldEdit(sqlActionsController, getEntity().getTableName(), getEntity().getFields(), oldContent, content);
@@ -128,11 +157,11 @@ public class TableFieldNode extends FieldNode {
     protected UndoableEdit editType(String val) {
         if (!Objects.equals(field.getType(), val)) {
             try {
-                Field oldContent = new Field(field);
-                Field newContent = new Field(field);
+                JdbcField oldContent = new JdbcField((JdbcField)field);
+                JdbcField newContent = new JdbcField((JdbcField)field);
                 newContent.setType(val);
                 //
-                DbSchemeModel model = (DbSchemeModel) getEntity().getModel();
+                //DbSchemeModel model = (DbSchemeModel) getEntity().getModel();
                 //DatabasesClient client = model.getBasesProxy();
                 //String datasourceName = model.getDatasourceName();
                 //SqlDriver driver = client.getMetadataCache(datasourceName).getConnectionDriver();
@@ -145,12 +174,12 @@ public class TableFieldNode extends FieldNode {
                 String promtMsg2 = "areYouSureReTypeFieldDataPresent"; //NOI18N
                 String promtMsg3 = "areYouSureReTypeFieldInRelationsDataPresent"; //NOI18N
                 /*
-                if (SQLUtils.getTypeGroup(newContent.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.LOBS || SQLUtils.getTypeGroup(oldContent.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.LOBS) {
-                    promtMsg1 = "areYouSureBlobFieldInRelationsPresent"; //NOI18N
-                    promtMsg2 = "areYouSureBlobFieldDataPresent"; //NOI18N
-                    promtMsg3 = "areYouSureBlobFieldInRelationsDataPresent"; //NOI18N
-                }
-                        */
+                 if (SQLUtils.getTypeGroup(newContent.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.LOBS || SQLUtils.getTypeGroup(oldContent.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.LOBS) {
+                 promtMsg1 = "areYouSureBlobFieldInRelationsPresent"; //NOI18N
+                 promtMsg2 = "areYouSureBlobFieldDataPresent"; //NOI18N
+                 promtMsg3 = "areYouSureBlobFieldInRelationsDataPresent"; //NOI18N
+                 }
+                 */
                 if (rCount == 0 && !rels.isEmpty()) {
                     msg = NbBundle.getMessage(DbStructureUtils.class, promtMsg1, String.valueOf(rels.size()), null);
                 } else if (rCount > 0 && rels.isEmpty()) {
@@ -209,17 +238,18 @@ public class TableFieldNode extends FieldNode {
         return NotifyDescriptor.OK_OPTION.equals(DialogDisplayer.getDefault().notify(d));
     }
 
-    @Override
     protected UndoableEdit editSize(Integer val) {
-        if (field.getSize() != val) {
-            Field oldContent = new Field(field);
-            Field content = new Field(field);
+        if (((JdbcField) field).getSize() != val) {
+            JdbcField oldContent = new JdbcField((JdbcField) field);
+            JdbcField content = new JdbcField((JdbcField) field);
             content.setSize(val);
             try {
-                ModifyFieldEdit dbEdit = new ModifyFieldEdit(sqlActionsController, getEntity().getTableName(), getEntity().getFields(), oldContent, content);
-                dbEdit.redo();
                 CompoundEdit section = new NotSavableDbStructureCompoundEdit();
-                section.addEdit(super.editSize(val));
+                ModifyFieldEdit dbEdit = new ModifyFieldEdit(sqlActionsController, getEntity().getTableName(), getEntity().getFields(), oldContent, content);
+                ChangeFieldEdit edit = new ChangeFieldEdit(oldContent, content, field, getEntity());
+                dbEdit.redo(); // Db edit goes first
+                edit.redo();
+                section.addEdit(edit);
                 section.addEdit(dbEdit);
                 section.end();
                 return section;
@@ -234,17 +264,18 @@ public class TableFieldNode extends FieldNode {
         }
     }
 
-    @Override
     protected UndoableEdit editScale(Integer val) {
-        if (field.getScale() != val) {
-            Field oldContent = new Field(field);
-            Field content = new Field(field);
+        if (((JdbcField) field).getScale() != val) {
+            JdbcField oldContent = new JdbcField((JdbcField) field);
+            JdbcField content = new JdbcField((JdbcField) field);
             content.setScale(val);
             try {
-                ModifyFieldEdit dbEdit = new ModifyFieldEdit(sqlActionsController, getEntity().getTableName(), getEntity().getFields(), oldContent, content);
-                dbEdit.redo();
                 CompoundEdit section = new NotSavableDbStructureCompoundEdit();
-                section.addEdit(super.editScale(val));
+                ModifyFieldEdit dbEdit = new ModifyFieldEdit(sqlActionsController, getEntity().getTableName(), getEntity().getFields(), oldContent, content);
+                ChangeFieldEdit edit = new ChangeFieldEdit(oldContent, content, field,  getEntity());
+                dbEdit.redo(); // Db edit goes first
+                edit.redo();
+                section.addEdit(edit);
                 section.addEdit(dbEdit);
                 section.end();
                 return section;
@@ -262,8 +293,8 @@ public class TableFieldNode extends FieldNode {
     @Override
     protected UndoableEdit editNullable(Boolean val) {
         if (field.isNullable() != val) {
-            Field oldContent = new Field(field);
-            Field content = new Field(field);
+            JdbcField oldContent = new JdbcField((JdbcField)field);
+            JdbcField content = new JdbcField((JdbcField)field);
             content.setNullable(val);
             try {
                 ModifyFieldEdit dbEdit = new ModifyFieldEdit(sqlActionsController, getEntity().getTableName(), getEntity().getFields(), oldContent, content);
@@ -285,11 +316,114 @@ public class TableFieldNode extends FieldNode {
     }
 
     @Override
+    protected Sheet createSheet() {
+        Sheet sheet = new Sheet();
+        Sheet.Set pSet = Sheet.createPropertiesSet();
+        PropertySupport.Name nameProp = new PropertySupport.Name(this, PROP_NAME, NbBundle.getMessage(FieldNode.class, "MSG_ModelParameterName"));
+        pSet.put(nameProp);
+        pSet.put(new DescriptionProperty());
+        if (field.getTableName() != null) {
+            Property<String> tableNameProp = new TableNameProperty();
+            pSet.put(tableNameProp);
+        }
+        pSet.put(new TypeProperty());
+        pSet.put(new SizeProperty());
+        pSet.put(new ScaleProperty());
+        pSet.put(new NullableProperty());
+        sheet.put(pSet);
+        return sheet;
+    }
+
+    @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        if (Field.FK_PROPERTY.equals(evt.getPropertyName())) {
-            fireIconChange();
-        } else {
-            super.propertyChange(evt);
+        switch (evt.getPropertyName()) {
+            case JdbcField.SIZE_PROPERTY:
+            case JdbcField.PRECISION_PROPERTY:
+                firePropertyChange(JdbcField.SIZE_PROPERTY, evt.getOldValue(), evt.getNewValue());
+                break;
+            case JdbcField.SCALE_PROPERTY:
+                firePropertyChange(JdbcField.SCALE_PROPERTY, evt.getOldValue(), evt.getNewValue());
+                break;
+            case Field.FK_PROPERTY:
+                fireIconChange();
+                break;
+            default:
+                super.propertyChange(evt);
         }
     }
+    
+    protected class SizeProperty extends Property<Integer> {
+
+        public SizeProperty() {
+            super(Integer.class);
+        }
+
+        @Override
+        public String getShortDescription() {
+            return NbBundle.getMessage(SizeProperty.class, "MSG_SizePropertyShortDescription"); //NOI18N
+        }
+
+        @Override
+        public String getName() {
+            return JdbcField.SIZE_PROPERTY;
+        }
+
+        @Override
+        public Integer getValue() throws IllegalAccessException, InvocationTargetException {
+            return getSize();
+        }
+
+        @Override
+        public void setValue(Integer val) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+            setSize(val);
+        }
+
+        @Override
+        public boolean canRead() {
+            return true;
+        }
+
+        @Override
+        public boolean canWrite() {
+            return canChange();
+        }
+    }
+
+    protected class ScaleProperty extends Property<Integer> {
+
+        public ScaleProperty() {
+            super(Integer.class);
+        }
+
+        @Override
+        public String getName() {
+            return JdbcField.SCALE_PROPERTY;
+        }
+
+        @Override
+        public String getShortDescription() {
+            return NbBundle.getMessage(ScaleProperty.class, "MSG_ScalePropertyShortDescription"); //NOI18N
+        }
+
+        @Override
+        public Integer getValue() throws IllegalAccessException, InvocationTargetException {
+            return getScale();
+        }
+
+        @Override
+        public void setValue(Integer val) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+            setScale(val);
+        }
+
+        @Override
+        public boolean canRead() {
+            return true;
+        }
+
+        @Override
+        public boolean canWrite() {
+            return canChange();
+        }
+    }
+
 }

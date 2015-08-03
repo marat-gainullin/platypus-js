@@ -66,7 +66,6 @@ public class AppQueryRequestHandler extends RequestHandler<AppQueryRequest, AppQ
                             PlatypusQuery pQuery = new PlatypusQuery(null);
                             pQuery.setEntityName(query.getEntityName());
                             pQuery.setFields(query.getFields());
-                            pQuery.setManual(query.isManual());
                             pQuery.setTitle(query.getTitle());
                             pQuery.setReadRoles(query.getReadRoles());
                             pQuery.setWriteRoles(query.getWriteRoles());

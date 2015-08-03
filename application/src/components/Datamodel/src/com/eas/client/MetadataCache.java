@@ -12,11 +12,13 @@ package com.eas.client;
 import com.eas.client.metadata.DbTableIndexes;
 import com.eas.client.metadata.DbTableKeys;
 import com.eas.client.dataflow.ColumnsIndicies;
+import com.eas.client.dataflow.StatementsGenerator;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.ForeignKeySpec;
+import com.eas.client.metadata.JdbcField;
 import com.eas.client.metadata.PrimaryKeySpec;
 import com.eas.client.sqldrivers.SqlDriver;
 import java.sql.DatabaseMetaData;
@@ -33,7 +35,7 @@ import java.util.logging.Logger;
  *
  * @author mg
  */
-public class MetadataCache {
+public class MetadataCache implements StatementsGenerator.TablesContainer {
 
     protected class CaseInsesitiveMap<V> extends HashMap<String, V> {
 
@@ -125,6 +127,7 @@ public class MetadataCache {
         }
     }
 
+    @Override
     public Fields getTableMetadata(String aTableName) throws Exception {
         checkSchemaFields(aTableName);
         TablesFieldsCache cache = lookupFieldsCache(aTableName);
@@ -437,10 +440,14 @@ public class MetadataCache {
                     }
                     String fName = r.getString(JDBCCOLS_COLUMN_INDEX);
                     String fDescription = r.getString(JDBCCOLS_REMARKS_INDEX);
-                    Field field = new Field(fName.toLowerCase(), fDescription);
+                    JdbcField field = new JdbcField();
+                    field.setName(fName.toLowerCase());
+                    field.setDescription(fDescription);
                     field.setOriginalName(fName);
                     String rdbmsTypeName = r.getString(JDBCCOLS_TYPE_NAME_INDEX);
                     field.setType(rdbmsTypeName);
+                    int jdbcType = r.getInt(JDBCCOLS_DATA_TYPE_INDEX);
+                    field.setJdbcType(jdbcType);
                     Object oSize = r.getObject(JDBCCOLS_COLUMN_SIZE_INDEX);
                     if (oSize instanceof Number) {
                         field.setSize(((Number) oSize).intValue());

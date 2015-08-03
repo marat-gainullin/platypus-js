@@ -138,7 +138,6 @@ public class JsDoc {
          * made on entity.
          */
         public static final String WRITABLE_TAG = "@writable";
-        public static final String MANUAL_TAG = "@manual";
         public static final String PROCEDURE_TAG = "@procedure";
         /**
          * Annotation marks module accessible for external execution (for

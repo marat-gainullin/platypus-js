@@ -30,7 +30,7 @@ public class Converter {
     public static final int NON_JDBC_MEMO_STRING = 260;
     public static final int NON_JDBC_SHORT_STRING = 261;
 
-    public static BigDecimal number2BigDecimal(Number aNumber) {
+    private static BigDecimal number2BigDecimal(Number aNumber) {
         if (aNumber instanceof Float || aNumber instanceof Double) {
             return new BigDecimal(aNumber.doubleValue());
         } else if (aNumber instanceof BigInteger) {
@@ -162,16 +162,14 @@ public class Converter {
         }
     }
 
-    public static void convertAndAssign(Object aValue, Connection aConn, int aParameterIndex, PreparedStatement aStmt) throws SQLException {
-        int parameterSqlType = aStmt.getParameterMetaData().getParameterType(aParameterIndex);
-        String parameterSqlTypeName = aStmt.getParameterMetaData().getParameterTypeName(aParameterIndex);
+    public static void assign(Object aValue, Connection aConn, int aParameterIndex, PreparedStatement aStmt, int aParameterSqlType, String aParameterSqlTypeName) throws SQLException {
         if (aValue != null) {
             /*
              if (aValue instanceof JSObject) {
              aValue = aSpace.toJava(aValue);
              }
              */
-            switch (parameterSqlType) {
+            switch (aParameterSqlType) {
                 // Some strange types. No one knows how to work with them.
                 case Types.JAVA_OBJECT:
                 case Types.DATALINK:
@@ -186,7 +184,7 @@ public class Converter {
                     try {
                         aStmt.setString(aParameterIndex, aValue.toString());
                     } catch (Exception ex) {
-                        aStmt.setNull(aParameterIndex, parameterSqlType, parameterSqlTypeName);
+                        aStmt.setNull(aParameterIndex, aParameterSqlType, aParameterSqlTypeName);
                         Logger.getLogger(Converter.class.getName()).log(Level.WARNING, FALLED_TO_NULL_MSG, aValue.getClass().getName());
                     }
                     break;
@@ -358,7 +356,7 @@ public class Converter {
                         castedString = ((Clob) aValue).getSubString(1, (int) ((Clob) aValue).length());
                     }
                     if (castedString != null) {
-                        if (parameterSqlType == Types.NCHAR || parameterSqlType == Types.NVARCHAR || parameterSqlType == Types.LONGNVARCHAR) {
+                        if (aParameterSqlType == Types.NCHAR || aParameterSqlType == Types.NVARCHAR || aParameterSqlType == Types.LONGNVARCHAR) {
                             aStmt.setNString(aParameterIndex, castedString);
                         } else {
                             aStmt.setString(aParameterIndex, castedString);
@@ -407,11 +405,11 @@ public class Converter {
                         castedDate = ((Date) aValue);
                     }
                     if (castedDate != null) {
-                        if (parameterSqlType == Types.DATE) {
+                        if (aParameterSqlType == Types.DATE) {
                             aStmt.setDate(aParameterIndex, new java.sql.Date(castedDate.getTime()));
-                        } else if (parameterSqlType == Types.TIMESTAMP) {
+                        } else if (aParameterSqlType == Types.TIMESTAMP) {
                             aStmt.setTimestamp(aParameterIndex, new java.sql.Timestamp(castedDate.getTime()));
-                        } else if (parameterSqlType == Types.TIME) {
+                        } else if (aParameterSqlType == Types.TIME) {
                             aStmt.setTime(aParameterIndex, new java.sql.Time(castedDate.getTime()));
                         } else {
                             assert false;
@@ -423,9 +421,9 @@ public class Converter {
             }
         } else {
             try {
-                aStmt.setNull(aParameterIndex, parameterSqlType);
+                aStmt.setNull(aParameterIndex, aParameterSqlType);
             } catch (SQLException ex) {
-                aStmt.setNull(aParameterIndex, parameterSqlType, parameterSqlTypeName);
+                aStmt.setNull(aParameterIndex, aParameterSqlType, aParameterSqlTypeName);
             }
         }
     }

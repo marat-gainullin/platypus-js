@@ -10,10 +10,17 @@ import com.eas.client.changes.Command;
 import com.eas.client.changes.Delete;
 import com.eas.client.changes.EntitiesHost;
 import com.eas.client.changes.Insert;
+import com.eas.client.changes.JdbcChangeValue;
 import com.eas.client.changes.Update;
 import com.eas.client.metadata.Field;
+import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.JdbcField;
+import com.vividsolutions.jts.geom.Geometry;
 import java.sql.Connection;
+import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,9 +38,18 @@ import java.util.logging.Logger;
  */
 public class StatementsGenerator implements ChangeVisitor {
 
+    public interface TablesContainer {
+        public Fields getTableMetadata(String aTableName) throws Exception;
+    }
+    
+    public interface GeometryConverter{
+        public void convertGeometry(JdbcChangeValue aValue, Connection aConnection) throws SQLException;
+    }
+
     /**
      * Stores short living information about statements, to be executed while
-     * jdbc update process. Performs parameterized statements execution.
+     * jdbc update process. Performs parameterized prepared statements
+     * execution.
      */
     public static class StatementsLogEntry {
 
@@ -41,17 +57,41 @@ public class StatementsGenerator implements ChangeVisitor {
         public String clause;
         public List<ChangeValue> parameters = new ArrayList<>();
         public boolean valid = true;
+        protected GeometryConverter gConverter;
 
-        public StatementsLogEntry() {
+        public StatementsLogEntry(GeometryConverter aGConverter) {
             super();
+            gConverter = aGConverter;
         }
 
         public int apply(Connection aConnection) throws Exception {
             if (valid) {
                 try (PreparedStatement stmt = aConnection.prepareStatement(clause)) {
+                    ParameterMetaData pMeta = stmt.getParameterMetaData();
                     for (int i = 1; i <= parameters.size(); i++) {
                         ChangeValue v = parameters.get(i - 1);
-                        Converter.convertAndAssign(v.value, aConnection, i, stmt);
+                        int jdbcType;
+                        String sqlTypeName;
+                        if(v.value instanceof Geometry){
+                            JdbcChangeValue jv = new JdbcChangeValue(v.name, v.value, Types.VARCHAR, null);
+                            gConverter.convertGeometry(jv, aConnection);
+                            v = jv;
+                        }
+                        if (v instanceof JdbcChangeValue) {
+                            JdbcChangeValue jv = (JdbcChangeValue) v;
+                            jdbcType = jv.getJdbcType();
+                            sqlTypeName = jv.getSqlTypeName();
+                        } else {
+                            try {
+                                jdbcType = pMeta.getParameterType(i);
+                                sqlTypeName = pMeta.getParameterTypeName(i);
+                            } catch (SQLException ex) {
+                                Logger.getLogger(StatementsGenerator.class.getName()).log(Level.WARNING, null, ex);
+                                jdbcType = JdbcFlowProvider.assumeJdbcType(v);
+                                sqlTypeName = null;
+                            }
+                        }
+                        Converter.assign(v.value, aConnection, i, stmt, jdbcType, sqlTypeName);
                     }
                     if (queriesLogger.isLoggable(Level.FINE)) {
                         queriesLogger.log(Level.FINE, "Executing sql with {0} parameters: {1}", new Object[]{parameters.size(), clause});
@@ -71,12 +111,16 @@ public class StatementsGenerator implements ChangeVisitor {
     protected EntitiesHost entitiesHost;
     protected String schemaContextFieldName;
     protected String schemaContext;
+    protected TablesContainer tables;
+    protected GeometryConverter gConverter;
 
-    public StatementsGenerator(EntitiesHost aEntitiesHost, String aSchemaContextFieldName, String aSchemaContext) {
+    public StatementsGenerator(EntitiesHost aEntitiesHost, String aSchemaContextFieldName, String aSchemaContext, TablesContainer aMdCache, GeometryConverter aGeometryConverter) {
         super();
         entitiesHost = aEntitiesHost;
         schemaContextFieldName = aSchemaContextFieldName;
         schemaContext = aSchemaContext;
+        tables = aMdCache;
+        gConverter = aGeometryConverter;
     }
 
     public List<StatementsLogEntry> getLogEntries() {
@@ -125,14 +169,14 @@ public class StatementsGenerator implements ChangeVisitor {
     public void visit(Insert aChange) throws Exception {
         if (!aChange.consumed) {
             Map<String, InsertChunk> inserts = new HashMap<>();
-            for (ChangeValue data : aChange.getData()) {
-                Field field = entitiesHost.resolveField(aChange.entityName, data.name);
+            for (ChangeValue datum : aChange.getData()) {
+                Field field = entitiesHost.resolveField(aChange.entityName, datum.name);
                 if (field != null) {
                     InsertChunk chunk = inserts.get(field.getTableName());
                     if (chunk == null) {
                         chunk = new InsertChunk();
                         inserts.put(field.getTableName(), chunk);
-                        chunk.insert = new StatementsLogEntry();
+                        chunk.insert = new StatementsLogEntry(gConverter);
                         // Adding here is strongly needed. Because of order in wich other and this statememts are added
                         // to the log and therefore applied into a database during a transaction.
                         logEntries.add(chunk.insert);
@@ -149,13 +193,18 @@ public class StatementsGenerator implements ChangeVisitor {
                             && schemaContextFieldName != null && schemaContextFieldName.isEmpty()
                             && dataColumnName.equalsIgnoreCase(schemaContextFieldName)) {
                         chunk.contexted = true;
-                        if (data.value == null) {
+                        if (datum.value == null) {
                             chunk.insert.parameters.add(new ChangeValue(schemaContextFieldName, schemaContext));
                         } else {
-                            chunk.insert.parameters.add(data);
+                            chunk.insert.parameters.add(datum);
                         }
                     } else {
-                        chunk.insert.parameters.add(data);
+                        Fields tableFileds = tables.getTableMetadata(field.getTableName());
+                        if (tableFileds != null && tableFileds.contains(dataColumnName)) {
+                            JdbcField jdbcField = (JdbcField) tableFileds.get(dataColumnName);
+                            datum = new JdbcChangeValue(datum.name, datum.value, jdbcField.getJdbcType(), jdbcField.getType());
+                        }
+                        chunk.insert.parameters.add(datum);
                     }
                     if (field.isPk()) {
                         chunk.keysColumnsNames.add(dataColumnName);
@@ -204,14 +253,14 @@ public class StatementsGenerator implements ChangeVisitor {
         if (!aChange.consumed) {
             Map<String, UpdateChunk> updates = new HashMap<>();
             // data
-            for (ChangeValue data : aChange.getData()) {
-                Field field = entitiesHost.resolveField(aChange.entityName, data.name);
+            for (ChangeValue datum : aChange.getData()) {
+                Field field = entitiesHost.resolveField(aChange.entityName, datum.name);
                 if (field != null) {
                     UpdateChunk chunk = updates.get(field.getTableName());
                     if (chunk == null) {
                         chunk = new UpdateChunk();
                         updates.put(field.getTableName(), chunk);
-                        chunk.update = new StatementsLogEntry();
+                        chunk.update = new StatementsLogEntry(gConverter);
                         // Adding here is strongly needed. Because of order in with other and this statememts are added
                         // to the log and therefore applied into a database during a transaction.
                         logEntries.add(chunk.update);
@@ -221,8 +270,14 @@ public class StatementsGenerator implements ChangeVisitor {
                     if (!chunk.data.isEmpty()) {
                         chunk.columnsClause.append(", ");
                     }
-                    chunk.columnsClause.append(field.getOriginalName() != null ? field.getOriginalName() : field.getName()).append(" = ?");
-                    chunk.data.add(data);
+                    String dataColumnName = field.getOriginalName() != null ? field.getOriginalName() : field.getName();
+                    chunk.columnsClause.append(dataColumnName).append(" = ?");
+                    Fields tableFileds = tables.getTableMetadata(field.getTableName());
+                    if (tableFileds != null && tableFileds.contains(dataColumnName)) {
+                        JdbcField jdbcField = (JdbcField) tableFileds.get(dataColumnName);
+                        datum = new JdbcChangeValue(datum.name, datum.value, jdbcField.getJdbcType(), jdbcField.getType());
+                    }
+                    chunk.data.add(datum);
                 }
             }
             // keys
@@ -234,7 +289,14 @@ public class StatementsGenerator implements ChangeVisitor {
                         if (chunk.keys == null) {
                             chunk.keys = new ArrayList<>();
                         }
-                        chunk.keys.add(new ChangeValue(field.getOriginalName() != null ? field.getOriginalName() : field.getName(), key.value));
+                        String dataColumnName = field.getOriginalName() != null ? field.getOriginalName() : field.getName();
+                        Fields tableFileds = tables.getTableMetadata(field.getTableName());
+                        if (tableFileds != null && tableFileds.contains(dataColumnName)) {
+                            JdbcField jdbcField = (JdbcField) tableFileds.get(dataColumnName);
+                            chunk.keys.add(new JdbcChangeValue(key.name, key.value, jdbcField.getJdbcType(), jdbcField.getType()));
+                        } else {
+                            chunk.keys.add(new ChangeValue(dataColumnName, key.value));
+                        }
                     }
                 }
             }
@@ -263,13 +325,20 @@ public class StatementsGenerator implements ChangeVisitor {
                 if (field != null) {
                     StatementsLogEntry delete = deletes.get(field.getTableName());
                     if (delete == null) {
-                        delete = new StatementsLogEntry();
+                        delete = new StatementsLogEntry(gConverter);
                         deletes.put(field.getTableName(), delete);
                         // Adding here is strongly needed. Because of order in with other and this statememts are added
                         // to the log and therefore applied into a database during a transaction.
                         logEntries.add(delete);
                     }
-                    delete.parameters.add(new ChangeValue(field.getOriginalName() != null ? field.getOriginalName() : field.getName(), key.value));
+                    String dataColumnName = field.getOriginalName() != null ? field.getOriginalName() : field.getName();
+                    Fields tableFileds = tables.getTableMetadata(field.getTableName());
+                    if (tableFileds != null && tableFileds.contains(dataColumnName)) {
+                        JdbcField jdbcField = (JdbcField) tableFileds.get(dataColumnName);
+                        delete.parameters.add(new JdbcChangeValue(dataColumnName, key.value, jdbcField.getJdbcType(), jdbcField.getType()));
+                    } else {
+                        delete.parameters.add(new ChangeValue(dataColumnName, key.value));
+                    }
                 }
             }
             deletes.entrySet().stream().forEach((Map.Entry<String, StatementsLogEntry> entry) -> {
@@ -284,7 +353,7 @@ public class StatementsGenerator implements ChangeVisitor {
     @Override
     public void visit(Command aChange) throws Exception {
         if (!aChange.consumed) {
-            StatementsLogEntry logEntry = new StatementsLogEntry();
+            StatementsLogEntry logEntry = new StatementsLogEntry(gConverter);
             logEntry.clause = aChange.command;
             logEntry.parameters.addAll(aChange.getParameters());
             logEntries.add(logEntry);

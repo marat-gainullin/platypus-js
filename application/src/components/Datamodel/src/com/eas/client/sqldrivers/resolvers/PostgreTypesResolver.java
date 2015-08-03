@@ -65,6 +65,7 @@ public class PostgreTypesResolver implements TypesResolver {
         rdbmsTypes2ApplicationTypes.put("timestamp without time zone", Scripts.DATE_TYPE_NAME);
         rdbmsTypes2ApplicationTypes.put("bytea", null);
         // gis types
+        rdbmsTypes2ApplicationTypes.put("geography", Scripts.GEOMETRY_TYPE_NAME);        
         rdbmsTypes2ApplicationTypes.put("point", Scripts.GEOMETRY_TYPE_NAME);
         rdbmsTypes2ApplicationTypes.put("line", Scripts.GEOMETRY_TYPE_NAME);
         rdbmsTypes2ApplicationTypes.put("lseg", Scripts.GEOMETRY_TYPE_NAME);

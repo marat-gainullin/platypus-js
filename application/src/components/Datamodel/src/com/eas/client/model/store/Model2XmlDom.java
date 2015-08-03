@@ -127,10 +127,6 @@ public abstract class Model2XmlDom<E extends Entity<M, ?, E>, M extends Model<E,
             node.setAttribute(NAME_ATTR_NAME, aField.getName());
             node.setAttribute(DESCRIPTION_ATTR_NAME, aField.getDescription());
             node.setAttribute(TYPE_ATTR_NAME, aField.getType());
-            node.setAttribute(SIZE_ATTR_NAME, String.valueOf(aField.getSize()));
-            node.setAttribute(SCALE_ATTR_NAME, String.valueOf(aField.getScale()));
-            node.setAttribute(PRECISION_ATTR_NAME, String.valueOf(aField.getPrecision()));
-            node.setAttribute(SIGNED_ATTR_NAME, String.valueOf(aField.isSigned()));
             node.setAttribute(NULLABLE_ATTR_NAME, String.valueOf(aField.isNullable()));
             if (aField instanceof Parameter) {
                 node.setAttribute(SELECTION_FORM_TAG_NAME, String.valueOf(((Parameter) aField).getSelectionForm()));

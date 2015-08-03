@@ -8,9 +8,9 @@ import com.eas.client.DatabasesClient;
 import com.eas.client.SqlCompiledQuery;
 import com.eas.client.changes.Change;
 import com.eas.client.metadata.DbTableIndexSpec;
-import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.ForeignKeySpec;
+import com.eas.client.metadata.JdbcField;
 import com.eas.client.model.dbscheme.DbSchemeModel;
 import com.eas.client.sqldrivers.SqlDriver;
 import java.util.ArrayList;
@@ -84,19 +84,19 @@ public class SqlActionsController {
         return new DropConstraintAction(fk);
     }
 
-    public AddFieldAction createAddFieldAction(String aTableName, Field aFieldMd) {
+    public AddFieldAction createAddFieldAction(String aTableName, JdbcField aFieldMd) {
         return new AddFieldAction(aTableName, aFieldMd);
     }
 
-    public DropFieldAction createDropFieldAction(String aTableName, Field aFieldMd) {
+    public DropFieldAction createDropFieldAction(String aTableName, JdbcField aFieldMd) {
         return new DropFieldAction(aTableName, aFieldMd);
     }
 
-    public ModifyFieldAction createModifyFieldAction(String aTableName, Field aOldFieldMd, Field aNewFieldMd) {
+    public ModifyFieldAction createModifyFieldAction(String aTableName, JdbcField aOldFieldMd, JdbcField aNewFieldMd) {
         return new ModifyFieldAction(aTableName, aOldFieldMd, aNewFieldMd);
     }
 
-    public RenameFieldAction createRenameFieldAction(String aTableName, String aOldFieldName, Field aNewField) {
+    public RenameFieldAction createRenameFieldAction(String aTableName, String aOldFieldName, JdbcField aNewField) {
         return new RenameFieldAction(aTableName, aOldFieldName, aNewField);
     }
 
@@ -269,7 +269,7 @@ public class SqlActionsController {
 
             String sqlCreateTableClause = "create table " + fullName + " (";
             for (int i = 1; i <= fields.getFieldsCount(); i++) {
-                Field fmd = fields.get(i);
+                JdbcField fmd = (JdbcField)fields.get(i);
                 sqlCreateTableClause += driver.getSql4FieldDefinition(fmd);
                 if (i < fields.getFieldsCount()) {
                     sqlCreateTableClause += " , ";
@@ -301,10 +301,10 @@ public class SqlActionsController {
 
     public abstract class FieldAction extends SqlAction {
 
-        protected String tableName = null;
-        protected Field fieldMd = null;
+        protected String tableName;
+        protected JdbcField fieldMd;
 
-        public FieldAction(String aTableName, Field aFieldMd) {
+        public FieldAction(String aTableName, JdbcField aFieldMd) {
             super();
             tableName = aTableName;
             fieldMd = aFieldMd;
@@ -313,7 +313,7 @@ public class SqlActionsController {
 
     public class AddFieldAction extends FieldAction {
 
-        public AddFieldAction(String aTableName, Field aFieldMd) {
+        public AddFieldAction(String aTableName, JdbcField aFieldMd) {
             super(aTableName, aFieldMd);
         }
 
@@ -332,7 +332,7 @@ public class SqlActionsController {
 
     public class DropFieldAction extends FieldAction {
 
-        public DropFieldAction(String aTableName, Field aFieldMd) {
+        public DropFieldAction(String aTableName, JdbcField aFieldMd) {
             super(aTableName, aFieldMd);
         }
 
@@ -351,9 +351,9 @@ public class SqlActionsController {
 
     public class ModifyFieldAction extends FieldAction {
 
-        protected Field newFieldMd = null;
+        protected JdbcField newFieldMd;
 
-        public ModifyFieldAction(String aTableName, Field aFieldMd, Field aNewFieldMd) {
+        public ModifyFieldAction(String aTableName, JdbcField aFieldMd, JdbcField aNewFieldMd) {
             super(aTableName, aFieldMd);
             newFieldMd = aNewFieldMd;
         }
@@ -375,9 +375,9 @@ public class SqlActionsController {
 
         protected String tableName;
         protected String oldFieldName;
-        protected Field newField;
+        protected JdbcField newField;
 
-        public RenameFieldAction(String aTableName, String aOldFieldName, Field aNewField) {
+        public RenameFieldAction(String aTableName, String aOldFieldName, JdbcField aNewField) {
             super();
             tableName = aTableName;
             oldFieldName = aOldFieldName;

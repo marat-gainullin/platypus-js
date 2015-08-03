@@ -133,15 +133,13 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
             });
         }
         for (E entity : toExecute) {
-            if (!entity.getQuery().isManual()) {
-                if (process == null) {
-                    entity.internalExecute((JSObject aData) -> {
-                    }, (Exception ex) -> {
-                        Logger.getLogger(ApplicationModel.class.getName()).log(Level.WARNING, ex.getMessage());
-                    });
-                } else {
-                    entity.internalExecute(null, null);
-                }
+            if (process == null) {
+                entity.internalExecute((JSObject aData) -> {
+                }, (Exception ex) -> {
+                    Logger.getLogger(ApplicationModel.class.getName()).log(Level.WARNING, ex.getMessage());
+                });
+            } else {
+                entity.internalExecute(null, null);
             }
         }
     }

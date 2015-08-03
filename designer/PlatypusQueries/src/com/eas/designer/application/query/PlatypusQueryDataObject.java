@@ -84,14 +84,12 @@ import org.w3c.dom.Document;
 
 public class PlatypusQueryDataObject extends PlatypusDataObject {
 
-    public void setQueryFlags(boolean aPublicQuery, boolean aProcedure, boolean aManual, boolean aReadonly) {
+    public void setQueryFlags(boolean aPublicQuery, boolean aProcedure, boolean aReadonly) {
         publicQuery = aPublicQuery;
         procedure = aProcedure;
-        manual = aManual;
         readonly = aReadonly;
         publicChanged(!publicQuery, publicQuery);
         procedureChanged(!procedure, procedure);
-        manualChanged(!manual, manual);
         readonlyChanged(!readonly, readonly);
     }
 
@@ -174,7 +172,6 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
     // reflectioned properties
     public static final String PUBLIC_PROP_NAME = "public";
     public static final String PROCEDURE_PROP_NAME = "procedure";
-    public static final String MANUAL_PROP_NAME = "manual";
     public static final String READONLY_PROP_NAME = "readonly";
     public static final String CONN_PROP_NAME = "datasourceName";
     //
@@ -191,7 +188,6 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
     protected String datasourceName;
     protected boolean publicQuery;
     protected boolean procedure;
-    protected boolean manual;
     protected boolean readonly;
     protected QueryModel model;
     protected List<StoredFieldMetadata> outputFieldsHints;
@@ -276,7 +272,6 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         datasourceName = model.getDatasourceName();
         publicQuery = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.PUBLIC_TAG) != null;
         procedure = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.PROCEDURE_TAG) != null;
-        manual = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.MANUAL_TAG) != null;
         readonly = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.READONLY_TAG) != null;
 
         //TODO set output fields in query document
@@ -430,29 +425,6 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
 
     public void procedureChanged(boolean aOldValue, boolean aNewValue) {
         firePropertyChange(PROCEDURE_PROP_NAME, aOldValue, aNewValue);
-    }
-
-    public boolean isManual() {
-        return manual;
-    }
-
-    public void setManual(boolean aValue) {
-        boolean oldValue = manual;
-        manual = aValue;
-        if (oldValue != manual) {
-            manualChanged(oldValue, aValue);
-            try {
-                String content = sqlTextDocument.getText(0, sqlTextDocument.getLength());
-                String newContent = PlatypusFilesSupport.replaceAnnotationValue(content, JsDoc.Tag.MANUAL_TAG, manual ? "" : null);
-                sqlTextDocument.replace(0, sqlTextDocument.getLength(), newContent, null);
-            } catch (BadLocationException ex) {
-                ErrorManager.getDefault().notify(ex);
-            }
-        }
-    }
-
-    public void manualChanged(boolean aOldValue, boolean aNewValue) {
-        firePropertyChange(MANUAL_PROP_NAME, aOldValue, aNewValue);
     }
 
     public boolean isReadonly() {
@@ -691,11 +663,6 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         if (oldProcedure != procedure) {
             firePropertyChange(PROCEDURE_PROP_NAME, oldProcedure, procedure);
         }
-        boolean oldManual = manual;
-        manual = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.MANUAL_TAG) != null;
-        if (oldManual != manual) {
-            firePropertyChange(MANUAL_PROP_NAME, oldManual, manual);
-        }
         boolean oldReadonly = readonly;
         readonly = PlatypusFilesSupport.getAnnotationValue(sqlText, JsDoc.Tag.READONLY_TAG) != null;
         if (oldReadonly != readonly) {
@@ -794,7 +761,8 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         }
         if (statementError == null && basesProxy != null && s != null && !s.isEmpty()) {
             try {
-                StoredQueryFactory factory = new ScriptedQueryFactory(basesProxy, getProject().getQueries(), getProject().getIndexer(), true);
+                StoredQueryFactory factory = new ScriptedQueryFactory(basesProxy, getProject().getQueries(), getProject().getIndexer());
+                factory.setAliasesToTableNames(true);
                 SqlQuery outQuery = new SqlQuery(basesProxy, datasourceName, s);
                 outQuery.setEntityName(String.valueOf(IDGenerator.genID()));
                 factory.putTableFieldsMetadata(outQuery);

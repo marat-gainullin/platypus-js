@@ -38,9 +38,8 @@ public class DeleteFieldEdit<E extends Entity<?, ?, E>> extends FieldsEdit<E> {
 
     public static Field createField(Entity anEntity) {
         Fields fields = anEntity.getFields();
-        Field lfield = fields.createNewField();
+        Field lfield = new Field(fields.generateNewName());
         lfield.setType(Scripts.STRING_TYPE_NAME);
-        lfield.setSize(100);
         return lfield;
     }
 

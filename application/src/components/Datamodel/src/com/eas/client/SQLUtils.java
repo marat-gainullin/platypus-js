@@ -9,9 +9,7 @@
  */
 package com.eas.client;
 
-import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
-import com.eas.client.metadata.PrimaryKeySpec;
 import com.eas.client.sqldrivers.*;
 import com.eas.script.Scripts;
 import java.sql.*;
@@ -154,91 +152,6 @@ public class SQLUtils {
         return DbLocalizations.getString("FOREIGN_KEY");
     }
 
-    public static boolean isKeysCompatible(Field aField1, Field aField2) {
-        if (aField1 != null && aField2 != null) {
-            PrimaryKeySpec[] lKeys = new PrimaryKeySpec[2];
-            int lKeysCount = 0;
-            if (aField1.isPk()) {
-                String lSchema = null;//aField1.getSchemaName();
-                if (lSchema != null) {
-                    lSchema = lSchema.toLowerCase();
-                }
-                String lTable = aField1.getTableName();
-                if (lTable != null) {
-                    lTable = lTable.toLowerCase();
-                }
-                String lField = aField1.getName();
-                if (lField != null) {
-                    lField = lField.toLowerCase();
-                }
-                lKeys[lKeysCount] = new PrimaryKeySpec(lSchema, lTable, lField, null);
-                lKeysCount++;
-            }
-            if (aField1.isFk()) {
-                PrimaryKeySpec lfoundFk = aField1.getFk().getReferee();
-                String lSchema = null;//lfoundFk.getSchema();
-                if (lSchema != null) {
-                    lSchema = lSchema.toLowerCase();
-                }
-                String lTable = lfoundFk.getTable();
-                if (lTable != null) {
-                    lTable = lTable.toLowerCase();
-                }
-                String lField = lfoundFk.getField();
-                if (lField != null) {
-                    lField = lField.toLowerCase();
-                }
-                lKeys[lKeysCount] = new PrimaryKeySpec(lSchema, lTable, lField, null);
-                lKeysCount++;
-            }
-
-            PrimaryKeySpec[] rKeys = new PrimaryKeySpec[2];
-            int rKeysCount = 0;
-            if (aField2.isPk()) {
-                String lSchema = null;//aField2.getSchemaName();
-                if (lSchema != null) {
-                    lSchema = lSchema.toLowerCase();
-                }
-                String lTable = aField2.getTableName();
-                if (lTable != null) {
-                    lTable = lTable.toLowerCase();
-                }
-                String lField = aField2.getName();
-                if (lField != null) {
-                    lField = lField.toLowerCase();
-                }
-                rKeys[rKeysCount] = new PrimaryKeySpec(lSchema, lTable, lField, null);
-                rKeysCount++;
-            }
-            if (aField2.isFk()) {
-                PrimaryKeySpec lfoundFk = aField2.getFk().getReferee();
-                String lSchema = null;//lfoundFk.getSchema();
-                if (lSchema != null) {
-                    lSchema = lSchema.toLowerCase();
-                }
-                String lTable = lfoundFk.getTable();
-                if (lTable != null) {
-                    lTable = lTable.toLowerCase();
-                }
-                String lField = lfoundFk.getField();
-                if (lField != null) {
-                    lField = lField.toLowerCase();
-                }
-                rKeys[rKeysCount] = new PrimaryKeySpec(lSchema, lTable, lField, null);
-                rKeysCount++;
-            }
-
-            for (int i = 0; i < lKeysCount; i++) {
-                for (int j = 0; j < rKeysCount; j++) {
-                    if (lKeys[i].equals(rKeys[j])) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
     public static String makeQueryByTableName(String aTableName) {
         return String.format(TABLE_NAME_2_SQL, aTableName);
     }
@@ -273,19 +186,6 @@ public class SQLUtils {
     }
 
     public static final ResourceBundle DbLocalizations = ResourceBundle.getBundle("com/eas/client/DbLocalizations");
-
-    public static boolean isSimpleTypesCompatible(String leftType, String rightType) {
-        if (leftType != null && rightType != null) {
-            return  leftType.equals(rightType)
-                    || // Dates to Strings are allowed
-                    (Scripts.DATE_TYPE_NAME.equals(leftType) && Scripts.STRING_TYPE_NAME.equals(rightType))
-                    || // Numbers to Strings are allowed
-                    (Scripts.NUMBER_TYPE_NAME.equals(leftType) && Scripts.STRING_TYPE_NAME.equals(rightType))
-                    || // Numbers to Booleans are allowed
-                    (Scripts.NUMBER_TYPE_NAME.equals(leftType) && Scripts.BOOLEAN_TYPE_NAME.equals(rightType));
-        }
-        return false;
-    }
 
     public static String clob2String(Clob source) {
         if (source != null) {

@@ -139,6 +139,22 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
         }
     }
 
+    public static int assumeJdbcType(Object aValue) {
+        int jdbcType;
+        if (aValue instanceof CharSequence) {
+            jdbcType = Types.VARCHAR;
+        } else if (aValue instanceof Number) {
+            jdbcType = Types.DOUBLE;
+        } else if (aValue instanceof java.util.Date) {
+            jdbcType = Types.TIMESTAMP;
+        } else if (aValue instanceof Boolean) {
+            jdbcType = Types.BOOLEAN;
+        } else {
+            jdbcType = Types.VARCHAR;
+        }
+        return jdbcType;
+    }
+
     /**
      * @inheritDoc
      */
@@ -173,7 +189,8 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                                 for (int i = 1; i <= aParams.getParametersCount(); i++) {
                                     Parameter param = aParams.get(i);
                                     Object paramValue = param.getValue();
-                                    Converter.convertAndAssign(paramValue, null, i, stmt);
+                                    int jdbcType = assumeJdbcType(paramValue);
+                                    Converter.assign(paramValue, null, i, stmt, jdbcType, null);
                                     if (procedure && (param.getMode() == ParameterMetaData.parameterModeOut
                                             || param.getMode() == ParameterMetaData.parameterModeInOut)) {
                                         assert stmt instanceof CallableStatement;

@@ -236,10 +236,6 @@ public abstract class XmlDom2Model<E extends Entity<M, ?, E>, M extends Model<E,
             aField.setName(currentNode.getAttribute(Model2XmlDom.NAME_ATTR_NAME));
             aField.setDescription(currentNode.getAttribute(Model2XmlDom.DESCRIPTION_ATTR_NAME));
             aField.setType(currentNode.getAttribute(Model2XmlDom.TYPE_ATTR_NAME));
-            aField.setSize(readIntegerAttribute(Model2XmlDom.SIZE_ATTR_NAME, 100));
-            aField.setScale(readIntegerAttribute(Model2XmlDom.SCALE_ATTR_NAME, 0));
-            aField.setPrecision(readIntegerAttribute(Model2XmlDom.PRECISION_ATTR_NAME, 0));
-            aField.setSigned(readBooleanAttribute(Model2XmlDom.SIGNED_ATTR_NAME, true));
             aField.setNullable(readBooleanAttribute(Model2XmlDom.NULLABLE_ATTR_NAME, true));
             aField.setPk(readBooleanAttribute(Model2XmlDom.IS_PK_ATTR_NAME, false));
 

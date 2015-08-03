@@ -10,20 +10,29 @@
 package com.eas.client.sqldrivers;
 
 import com.eas.client.ClientConstants;
+import com.eas.client.changes.JdbcChangeValue;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
-import com.eas.client.metadata.Field;
+import com.eas.client.metadata.JdbcField;
 import com.eas.client.metadata.ForeignKeySpec;
 import com.eas.client.metadata.PrimaryKeySpec;
 import com.eas.client.sqldrivers.resolvers.OracleTypesResolver;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
 import com.eas.util.StringUtils;
+import com.vividsolutions.jts.geom.Geometry;
+import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
+import java.sql.Wrapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import oracle.jdbc.OracleConnection;
+import oracle.sql.STRUCT;
+import org.geotools.data.oracle.sdo.GeometryConverter;
 
 /**
  *
@@ -249,7 +258,7 @@ public class OracleSqlDriver extends SqlDriver {
         return ex.getLocalizedMessage();
     }
 
-    private String getFieldTypeDefinition(Field aField) {
+    private String getFieldTypeDefinition(JdbcField aField) {
         String typeDefine = "";
         String sqlTypeName = aField.getType().toUpperCase();
         typeDefine += sqlTypeName;
@@ -270,7 +279,7 @@ public class OracleSqlDriver extends SqlDriver {
      * @inheritDoc
      */
     @Override
-    public String getSql4FieldDefinition(Field aField) {
+    public String getSql4FieldDefinition(JdbcField aField) {
         String fieldDefinition = wrapNameIfRequired(aField.getName()) + " " + getFieldTypeDefinition(aField);
 
         if (aField.isNullable()) {
@@ -323,9 +332,9 @@ public class OracleSqlDriver extends SqlDriver {
      * @inheritDoc
      */
     @Override
-    public String[] getSqls4ModifyingField(String aSchemaName, String aTableName, Field aOldFieldMd, Field aNewFieldMd) {
+    public String[] getSqls4ModifyingField(String aSchemaName, String aTableName, JdbcField aOldFieldMd, JdbcField aNewFieldMd) {
         List<String> sqls = new ArrayList<>();
-        Field newFieldMd = aNewFieldMd.copy();
+        JdbcField newFieldMd = aNewFieldMd.copy();
         String fullTableName = makeFullName(aSchemaName, aTableName);
         String updateDefinition = String.format(MODIFY_FIELD_SQL_PREFIX, fullTableName) + wrapNameIfRequired(aOldFieldMd.getName()) + " ";
         String fieldDefination = getFieldTypeDefinition(newFieldMd);
@@ -358,7 +367,7 @@ public class OracleSqlDriver extends SqlDriver {
     }
 
     @Override
-    public String[] getSqls4RenamingField(String aSchemaName, String aTableName, String aOldFieldName, Field aNewFieldMd) {
+    public String[] getSqls4RenamingField(String aSchemaName, String aTableName, String aOldFieldName, JdbcField aNewFieldMd) {
         String fullTableName = makeFullName(aSchemaName, aTableName);
         String sqlText = String.format(RENAME_FIELD_SQL_PREFIX, fullTableName, wrapNameIfRequired(aOldFieldName), wrapNameIfRequired(aNewFieldMd.getName()));
         return new String[]{
@@ -521,7 +530,7 @@ public class OracleSqlDriver extends SqlDriver {
     }
 
     @Override
-    public String[] getSqls4AddingField(String aSchemaName, String aTableName, Field aField) {
+    public String[] getSqls4AddingField(String aSchemaName, String aTableName, JdbcField aField) {
         String fullTableName = makeFullName(aSchemaName, aTableName);
         return new String[]{
             String.format(SqlDriver.ADD_FIELD_SQL_PREFIX, fullTableName) + getSql4FieldDefinition(aField)
@@ -546,4 +555,33 @@ public class OracleSqlDriver extends SqlDriver {
     private String prepareName(String aName) {
         return (isWrappedName(aName) ? unwrapName(aName) : aName.toUpperCase());
     }
+
+    @Override
+    public void convertGeometry(JdbcChangeValue aValue, Connection aConnection) throws SQLException {
+        if (aValue.value instanceof Geometry) {
+            if (!(aConnection instanceof OracleConnection)) {
+                aConnection = aConnection.unwrap(OracleConnection.class);
+            }
+            if (aConnection instanceof OracleConnection) {
+                GeometryConverter gc = new GeometryConverter((OracleConnection) aConnection);
+                aValue.value = gc.toSDO((Geometry) aValue.value);
+                aValue.jdbcType = Types.STRUCT;
+                aValue.sqlTypeName = "MDSYS.SDO_GEOMETRY";
+            }
+        }
+    }
+
+    @Override
+    public Geometry readGeometry(Wrapper aRs, int aColumnIndex, Connection aConnection) throws SQLException {
+        Object read = aRs instanceof ResultSet ? ((ResultSet) aRs).getObject(aColumnIndex) : ((CallableStatement) aRs).getObject(aColumnIndex);
+        if (!(aConnection instanceof OracleConnection)) {
+            aConnection = aConnection.unwrap(OracleConnection.class);
+        }
+        if(aConnection instanceof OracleConnection && read instanceof STRUCT){
+            GeometryConverter reader = new GeometryConverter((OracleConnection)aConnection);
+            return reader.asGeometry((STRUCT)read);
+        }else
+            return null;
+    }
+
 }

@@ -17,7 +17,6 @@ public class FieldsJSONWriter {
     // Field props
     private static final String NAME_PROP_NAME = "name";
     private static final String DESCRIPTION_PROP_NAME = "description";
-    private static final String SIZE_PROP_NAME = "size";
     private static final String TYPE_PROP_NAME = "type";
     private static final String PK_PROP_NAME = "pk";
     private static final String NULLABLE_PROP_NAME = "nullable";
@@ -34,7 +33,6 @@ public class FieldsJSONWriter {
         StringBuilder sb = JSONUtils.o(
                 new StringBuilder(NAME_PROP_NAME), JSONUtils.s(aField.getName()),
                 new StringBuilder(DESCRIPTION_PROP_NAME), JSONUtils.s(aField.getDescription()),
-                new StringBuilder(SIZE_PROP_NAME), new StringBuilder(String.valueOf(aField.getSize())),
                 new StringBuilder(TYPE_PROP_NAME), JSONUtils.s(aField.getType()),
                 new StringBuilder(PK_PROP_NAME), new StringBuilder(String.valueOf(aField.isPk())),
                 new StringBuilder(NULLABLE_PROP_NAME), new StringBuilder(String.valueOf(aField.isNullable())));

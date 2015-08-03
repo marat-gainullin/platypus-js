@@ -139,7 +139,7 @@ public class RelationsFieldsDragHandler<E extends Entity<?, SqlQuery, E>> extend
                                                 if (modelView.getModel() instanceof DbSchemeModel) {
                                                     return Objects.equals(leftField.getType(), rightField.getType()) && rightField.isPk() && !leftField.isFk();
                                                 } else { // dmv.getModel() instanceof DbSchemeModel
-                                                    return SQLUtils.isSimpleTypesCompatible(leftField.getType(), rightField.getType());
+                                                    return true;
                                                     /*
                                                      if ((leftField.isPk() || leftField.isFk()) && (rightField.isPk() || rightField.isFk())) {
                                                      return SQLUtils.isKeysCompatible(leftField, rightField);

@@ -9,7 +9,7 @@ import com.eas.client.dbstructure.SqlActionsController.AddFieldAction;
 import com.eas.client.dbstructure.SqlActionsController.DescribeFieldAction;
 import com.eas.client.dbstructure.SqlActionsController.DropFieldAction;
 import com.eas.client.dbstructure.exceptions.DbActionException;
-import com.eas.client.metadata.Field;
+import com.eas.client.metadata.JdbcField;
 import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
 
@@ -19,10 +19,10 @@ import com.eas.client.sqldrivers.resolvers.TypesResolver;
  */
 public class NewFieldEdit extends DbStructureEdit {
 
-    protected Field field;
+    protected JdbcField field;
     protected FieldsEntity entity;
 
-    public NewFieldEdit(SqlActionsController aSqlController, FieldsEntity aFieldsEntity, Field aField) throws Exception {
+    public NewFieldEdit(SqlActionsController aSqlController, FieldsEntity aFieldsEntity, JdbcField aField) throws Exception {
         super(aSqlController);
         field = aField;
         entity = aFieldsEntity;
@@ -61,19 +61,18 @@ public class NewFieldEdit extends DbStructureEdit {
         }
     }
 
-    public Field getField() {
+    public JdbcField getField() {
         return field;
     }
 
-    public static Field createField(FieldsEntity aEntity) throws Exception {
-        com.eas.client.model.gui.edits.fields.NewFieldEdit<FieldsEntity> substEdit = new com.eas.client.model.gui.edits.fields.NewFieldEdit<>(aEntity);
-        Field rsmd = substEdit.getField();
+    public static JdbcField createField(FieldsEntity aEntity) throws Exception {
+        JdbcField field = new JdbcField(aEntity.getFields().generateNewName());
         TypesResolver resolver = aEntity.getModel().getBasesProxy().getMetadataCache(aEntity.getModel().getDatasourceName()).getDatasourceSqlDriver().getTypesResolver();
         String defaultType = resolver.getSupportedTypes().iterator().next();
-        rsmd.setType(defaultType);
-        rsmd.setSize(200);
-        rsmd.setTableName(aEntity.getTableName());
-        return rsmd;
+        field.setType(defaultType);
+        field.setSize(200);
+        field.setTableName(aEntity.getTableName());
+        return field;
     }
     
     @Override
