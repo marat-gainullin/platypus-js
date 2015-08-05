@@ -91,8 +91,9 @@ public class SqlCompletionProvider implements CompletionProvider {
     }
 
     public void fillCompletionByTablesBySchema(String aSchema, PlatypusQueryDataObject dataObject, CompletionPoint point, CompletionResultSet resultSet) throws Exception {
-        Map<String, Fields> tables = dataObject.achieveTables(aSchema);
-        fillCompletionByTables(tables, dataObject, point, resultSet);
+        final String schema = aSchema != null && aSchema.equalsIgnoreCase(dataObject.getMetadataCache().getDatasourceSchema()) ? null : aSchema;
+        Map<String, Fields> tablesFields = dataObject.getMetadataCache().lookupFieldsCache(schema);
+        fillCompletionByTables(tablesFields, dataObject, point, resultSet);
     }
 
     public void fillCompletionByTables(Map<String, Fields> tables, PlatypusQueryDataObject dataObject, CompletionPoint point, CompletionResultSet resultSet) throws Exception {

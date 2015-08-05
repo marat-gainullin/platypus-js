@@ -250,7 +250,7 @@ public class SqlQuery extends Query {
      * @throws Exception
      */
     public SqlCompiledQuery compile() throws UnboundSqlParameterException, Exception {
-        Parameters ps = new Parameters();
+        Parameters compiledParams = new Parameters();
         if (sqlText == null || sqlText.isEmpty()) {
             throw new Exception("Empty sql-query strings are not supported");
         }
@@ -270,7 +270,7 @@ public class SqlQuery extends Query {
                     p = new Parameter(paramName);
                     p.setValue(null);
                 }
-                ps.add(p.copy());
+                compiledParams.add(p.copy());
             }
             withoutStrings[i] = m.replaceAll("?");
             compiledSb.append(withoutStrings[i]);
@@ -278,52 +278,9 @@ public class SqlQuery extends Query {
                 compiledSb.append(sm.group(0));
             }
         }
-        SqlCompiledQuery compiled = new SqlCompiledQuery(basesProxy, datasourceName, compiledSb.toString(), ps, fields);
+        SqlCompiledQuery compiled = new SqlCompiledQuery(basesProxy, datasourceName, compiledSb.toString(), compiledParams, fields);
         compiled.setEntityName(entityName);
         compiled.setProcedure(procedure);
-        compiled.setPageSize(pageSize);
-        return compiled;
-    }
-
-    /**
-     * Compiles the SQL query for achiving metadata.
-     *
-     * <p>
-     * This method achives simple metadata, returned from query execution with
-     * sql text metadata translation. </p>
-     * <p>
-     * The compilation process includes replacing named parameters binding like
-     * ":param1" in SQL query text with JDBC "?" placeholders and filling the
-     * vector of parameters values according to each parameter occurence in the
-     * query.</p>
-     *
-     * <p>
-     * The returned object is able to assign parameters values stored in it to
-     * any PreparedStatement object.</p>
-     *
-     * @return compiled metadata SQL query object.
-     * @throws UnboundSqlParameterException
-     * @throws Exception
-     */
-    public SqlCompiledQuery compileMetadataQuery() throws UnboundSqlParameterException, Exception {
-        Parameters ps = new Parameters();
-        Matcher m = PARAMETER_NAME_PATTERN.matcher(sqlText);
-        while (m.find()) {
-            String paramName = m.group(1);
-            if (params == null) {
-                throw new UnboundSqlParameterException(paramName, sqlText);
-            }
-            Parameter p = params.get(paramName);
-            if (p == null) {
-                throw new UnboundSqlParameterException(paramName, sqlText);
-            }
-            Parameter nulledUndefined = p.copy();
-            nulledUndefined.setValue(null);
-            ps.add(nulledUndefined);
-        }
-        String sqlCompiledText = m.replaceAll("?");
-        sqlCompiledText = SQLUtils.makeQueryMetadataQuery(sqlCompiledText);
-        SqlCompiledQuery compiled = new SqlCompiledQuery(basesProxy, datasourceName, sqlCompiledText, ps);
         compiled.setPageSize(pageSize);
         return compiled;
     }

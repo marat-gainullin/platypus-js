@@ -14,7 +14,9 @@ import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.script.Scripts;
+import com.eas.util.IDGenerator;
 import java.beans.PropertyChangeSupport;
+import java.util.Date;
 import jdk.nashorn.api.scripting.JSObject;
 
 /**
@@ -345,6 +347,32 @@ public class Field implements HasPublished {
         String oldValue = type;
         type = aValue;
         changeSupport.firePropertyChange(TYPE_PROPERTY, oldValue, type);
+    }
+
+    public Object generateValue() {
+        Object value;
+        if (type != null) {
+            switch (type) {
+                case Scripts.NUMBER_TYPE_NAME:
+                    value = IDGenerator.genID();
+                    break;
+                case Scripts.STRING_TYPE_NAME:
+                    value = String.valueOf(IDGenerator.genID());
+                    break;
+                case Scripts.DATE_TYPE_NAME:
+                    value = new Date(IDGenerator.genID());
+                    break;
+                case Scripts.BOOLEAN_TYPE_NAME:
+                    value = false;
+                    break;
+                default:
+                    value = null;
+                    break;
+            }
+        } else {
+            value = null;
+        }
+        return value;
     }
 
     private static final String NULLABLE_JS_DOC = "/**\n"

@@ -66,6 +66,7 @@ public class PostgreTypesResolver implements TypesResolver {
         rdbmsTypes2ApplicationTypes.put("bytea", null);
         // gis types
         rdbmsTypes2ApplicationTypes.put("geography", Scripts.GEOMETRY_TYPE_NAME);        
+        rdbmsTypes2ApplicationTypes.put("geometry", Scripts.GEOMETRY_TYPE_NAME);        
         rdbmsTypes2ApplicationTypes.put("point", Scripts.GEOMETRY_TYPE_NAME);
         rdbmsTypes2ApplicationTypes.put("line", Scripts.GEOMETRY_TYPE_NAME);
         rdbmsTypes2ApplicationTypes.put("lseg", Scripts.GEOMETRY_TYPE_NAME);
@@ -105,7 +106,7 @@ public class PostgreTypesResolver implements TypesResolver {
 
     @Override
     public String toApplicationType(String aRDBMSType) {
-        return aRDBMSType != null ? rdbmsTypes2ApplicationTypes.get(aRDBMSType.toUpperCase()) : null;
+        return aRDBMSType != null ? rdbmsTypes2ApplicationTypes.get(aRDBMSType.toLowerCase()) : null;
     }
 
     @Override

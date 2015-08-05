@@ -53,6 +53,7 @@ public class OracleTypesResolver implements TypesResolver {
         rdbmsTypes2ApplicationTypes.put("LINESTRING", Scripts.GEOMETRY_TYPE_NAME);
         rdbmsTypes2ApplicationTypes.put("POINT", Scripts.GEOMETRY_TYPE_NAME);
         rdbmsTypes2ApplicationTypes.put("SURFACE", Scripts.GEOMETRY_TYPE_NAME);
+        rdbmsTypes2ApplicationTypes.put("SDO_GEOMETRY", Scripts.GEOMETRY_TYPE_NAME); 
         rdbmsTypes2ApplicationTypes.put("BLOB", null);
 
         //typeName(M,D)

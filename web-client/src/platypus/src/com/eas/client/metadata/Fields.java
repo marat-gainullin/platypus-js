@@ -314,7 +314,7 @@ public class Fields {
 			aName = generateNewName();
 		}
 		Field lfield = new Field(aName, null);
-		lfield.setTypeInfo(DataTypeInfo.VARCHAR);
+		lfield.setType("String");
 		return lfield;
 	}
 

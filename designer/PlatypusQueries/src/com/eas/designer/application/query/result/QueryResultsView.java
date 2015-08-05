@@ -481,17 +481,7 @@ public class QueryResultsView extends javax.swing.JPanel {
                 String fieldName = field.getName();
                 Object value = aSubject.getMember(fieldName);
                 if (JSType.nullOrUndefined(value) && field.isPk() && !field.isFk()) {
-                    if (Scripts.NUMBER_TYPE_NAME.equals(field.getType())) {
-                        value = IDGenerator.genID();
-                    } else if (Scripts.STRING_TYPE_NAME.equals(field.getType())) {
-                        value = String.valueOf(IDGenerator.genID());
-                    } else if (Scripts.DATE_TYPE_NAME.equals(field.getType())) {
-                        value = new Date(IDGenerator.genID());
-                    } else if (Scripts.BOOLEAN_TYPE_NAME.equals(field.getType())) {
-                        value = false;
-                    } else {
-                        value = null;
-                    }
+                    value = field.generateValue();
                     aSubject.setMember(fieldName, value);
                 }
                 if (!JSType.nullOrUndefined(value)) {

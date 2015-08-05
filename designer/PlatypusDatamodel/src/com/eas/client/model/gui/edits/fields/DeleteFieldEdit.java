@@ -11,6 +11,7 @@ package com.eas.client.model.gui.edits.fields;
 
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.Parameter;
 import com.eas.client.model.Entity;
 import com.eas.script.Scripts;
 
@@ -38,7 +39,7 @@ public class DeleteFieldEdit<E extends Entity<?, ?, E>> extends FieldsEdit<E> {
 
     public static Field createField(Entity anEntity) {
         Fields fields = anEntity.getFields();
-        Field lfield = new Field(fields.generateNewName());
+        Field lfield = new Parameter(fields.generateNewName());
         lfield.setType(Scripts.STRING_TYPE_NAME);
         return lfield;
     }

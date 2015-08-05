@@ -65,7 +65,7 @@ public class Parameters extends Fields {
 		if (aName == null || aName.isEmpty())
 			aName = generateNewName();
 		Parameter param = new Parameter(aName, null);
-		param.setTypeInfo(DataTypeInfo.VARCHAR);
+		param.setType("String");
 		return param;
 	}
 

@@ -9,9 +9,14 @@
  */
 package com.eas.client;
 
+import com.eas.client.sqldrivers.SqlDriver;
+import com.eas.client.sqldrivers.H2SqlDriver;
+import com.eas.client.sqldrivers.Db2SqlDriver;
+import com.eas.client.sqldrivers.MySqlSqlDriver;
+import com.eas.client.sqldrivers.MsSqlSqlDriver;
+import com.eas.client.sqldrivers.OracleSqlDriver;
+import com.eas.client.sqldrivers.PostgreSqlDriver;
 import com.eas.client.metadata.Fields;
-import com.eas.client.sqldrivers.*;
-import com.eas.script.Scripts;
 import java.sql.*;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -36,12 +41,12 @@ public class SQLUtils {
     public static final String SQL_DELETE_COMMON_WHERE_BY_FIELD = "delete from %s where %s.%s = :" + SQL_PARAMETER_FIELD_VALUE;
     public static final String SQL_INSERT_COMMON_ID_FIELD = "insert into %s columns = (%s) values = ( :" + SQL_PARAMETER_FIELD_VALUE + ")";
     public static final String SQL_MAX_COMMON_BY_FIELD = "select max(%s) %s from %s";
-    protected static final OracleSqlDriver easOraDriver = new OracleSqlDriver();
-    protected static final MsSqlSqlDriver easMsSqlDriver = new MsSqlSqlDriver();
-    protected static final PostgreSqlDriver easPostgreSqlDriver = new PostgreSqlDriver();
-    protected static final MySqlSqlDriver easMySqlSqlDriver = new MySqlSqlDriver();
-    protected static final Db2SqlDriver easDb2Driver = new Db2SqlDriver();
-    protected static final H2SqlDriver easH2Driver = new H2SqlDriver();
+    protected static final SqlDriver easOraDriver = new OracleSqlDriver();
+    protected static final SqlDriver easMsSqlDriver = new MsSqlSqlDriver();
+    protected static final SqlDriver easPostgreSqlDriver = new PostgreSqlDriver();
+    protected static final SqlDriver easMySqlSqlDriver = new MySqlSqlDriver();
+    protected static final SqlDriver easDb2Driver = new Db2SqlDriver();
+    protected static final SqlDriver easH2Driver = new H2SqlDriver();
     
     public static String dialectByUrl(String aJdbcUrl) {
         String dialect = null;
@@ -155,7 +160,7 @@ public class SQLUtils {
     public static String makeQueryByTableName(String aTableName) {
         return String.format(TABLE_NAME_2_SQL, aTableName);
     }
-
+/*
     public static String makeTableNameMetadataQuery(String aTableName) {
         return makeQueryMetadataQuery(makeQueryByTableName(aTableName));
     }
@@ -184,7 +189,7 @@ public class SQLUtils {
         }
         return "";
     }
-
+*/
     public static final ResourceBundle DbLocalizations = ResourceBundle.getBundle("com/eas/client/DbLocalizations");
 
     public static String clob2String(Clob source) {

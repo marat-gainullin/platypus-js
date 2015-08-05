@@ -7,9 +7,8 @@ package com.eas.client.model.gui.selectors;
 import com.eas.client.ClientConstants;
 import com.eas.client.MetadataCache;
 import com.eas.client.DatabasesClient;
-import com.eas.client.SqlCompiledQuery;
 import com.eas.client.dataflow.ColumnsIndicies;
-import com.eas.client.sqldrivers.SqlDriver;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -18,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.sql.DataSource;
 import javax.swing.ListModel;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
@@ -51,21 +51,29 @@ public class DbTablesListModel implements ListModel<String> {
     protected final List<String> fetchTables() {
         if (schema != null && !schema.isEmpty()) {
             try {
-                SqlDriver driver = mdCache.getDatasourceSqlDriver();
-                String sql4Tables = driver.getSql4TablesEnumeration(schema);
-                SqlCompiledQuery query = new SqlCompiledQuery(basesProxy, datasourceName, sql4Tables);
-                return query.executeQuery((ResultSet r) -> {
-                    List<String> _tables = new ArrayList<>();
-                    ColumnsIndicies idxs = new ColumnsIndicies(r.getMetaData());
-                    int schemaColIndex = idxs.find(ClientConstants.JDBCCOLS_TABLE_SCHEM);
-                    int tableColIndex = idxs.find(ClientConstants.JDBCCOLS_TABLE_NAME);
-                    while (r.next()) {
-                        String schemaName = r.getString(schemaColIndex);
-                        String tableName = r.getString(tableColIndex);
-                        _tables.add(schemaName != null && !schemaName.isEmpty() ? schemaName + "." + tableName : tableName);
+                DataSource ds = basesProxy.obtainDataSource(datasourceName);
+                try (Connection conn = ds.getConnection()) {
+                    /*
+                    Set<String> tablesTypes = new HashSet<>();
+                    try (ResultSet r = conn.getMetaData().getTableTypes()) {
+                        while (r.next()) {
+                            tablesTypes.add(r.getString(ClientConstants.JDBCCOLS_TABLE_TYPE));
+                        }
                     }
-                    return _tables;
-                }, null, null, null);
+                    */
+                    try (ResultSet r = conn.getMetaData().getTables(null, schema, null, new String[]{"TABLE", "VIEW"})) {
+                        List<String> _tables = new ArrayList<>();
+                        ColumnsIndicies idxs = new ColumnsIndicies(r.getMetaData());
+                        int schemaColIndex = idxs.find(ClientConstants.JDBCCOLS_TABLE_SCHEM);
+                        int tableColIndex = idxs.find(ClientConstants.JDBCCOLS_TABLE_NAME);
+                        while (r.next()) {
+                            String schemaName = r.getString(schemaColIndex);
+                            String tableName = r.getString(tableColIndex);
+                            _tables.add(schemaName != null && !schemaName.isEmpty() ? schemaName + "." + tableName : tableName);
+                        }
+                        return _tables;
+                    }
+                }
             } catch (Exception ex) {
                 Logger.getLogger(DbTablesListModel.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -130,22 +138,22 @@ public class DbTablesListModel implements ListModel<String> {
             }
         }
     }
-/*
-    public int findTable(String aScheme, String aTable) {
-        String pattern = "";
-        if (aScheme != null && !aScheme.isEmpty()) {
-            pattern = aScheme + ".";
-        }
-        pattern += aTable;
-        if (tables != null && pattern != null && !pattern.isEmpty()) {
-            int i = -1;
-            for (String r : tables) {
-                if (pattern.toLowerCase().equalsIgnoreCase(r)) {
-                    return i;
-                }
-            }
-        }
-        return -1;
-    }
-    */
+    /*
+     public int findTable(String aScheme, String aTable) {
+     String pattern = "";
+     if (aScheme != null && !aScheme.isEmpty()) {
+     pattern = aScheme + ".";
+     }
+     pattern += aTable;
+     if (tables != null && pattern != null && !pattern.isEmpty()) {
+     int i = -1;
+     for (String r : tables) {
+     if (pattern.toLowerCase().equalsIgnoreCase(r)) {
+     return i;
+     }
+     }
+     }
+     return -1;
+     }
+     */
 }

@@ -1119,52 +1119,5 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
     private boolean isEntityTableExists(FieldsEntity fEntity) throws Exception {
         MetadataCache cache = model.getBasesProxy().getMetadataCache(sqlController.getDatasourceName());
         return cache.containsTableMetadata(fEntity.getFullTableName());
-        /*
-         try {
-         DbMetadataCache cache = model.getClient().getDbMetadataCache(sqlController.getDbId());
-         String schema = fEntity.getTableSchemaName();
-         if (schema == null) {
-         schema = cache.getConnectionSchema();
-         }
-         String qtn = schema + "." + fEntity.getTableName();
-         SqlCompiledQuery query = new SqlCompiledQuery(model.getClient(), sqlController.getDbId(), SQLUtils.makeTableNameMetadataQuery(qtn));
-         Rowset rs = query.executeQuery();
-         return rs != null;
-         } catch (Exception ex) {
-         return false;
-         }
-         */
     }
-/*
-    private void resolveFields() throws Exception {
-        Map<Long, FieldsEntity> entities = model.getEntities();
-        if (entities != null) {
-            for (FieldsEntity entity : entities.values()) {
-                model.getBasesProxy().dbTableChanged(entity.getTableDatasourceName(), entity.getTableSchemaName(), entity.getTableName());
-            }
-        }
-    }
-
-    private void resolveIndexes() {
-        Map<Long, FieldsEntity> entities = model.getEntities();
-        if (entities != null) {
-            entities.values().stream().forEach((entity) -> {
-                entity.achiveIndexes();
-            });
-        }
-    }
-
-    public void entireSynchronizeWithDb() throws Exception {
-        model.removeEditingListener(modelListener);
-        try {
-            resolveTables();
-            resolveFields();
-            resolveIndexes();
-            resolveRelations();
-        } finally {
-            model.addEditingListener(modelListener);
-        }
-        refreshView();
-    }
-*/
 }

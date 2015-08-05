@@ -7,7 +7,6 @@ package com.eas.designer.application.query;
 import com.eas.client.ClientConstants;
 import com.eas.client.MetadataCache;
 import com.eas.client.DatabasesClient;
-import com.eas.client.SqlCompiledQuery;
 import com.eas.client.SqlQuery;
 import com.eas.client.StoredQueryFactory;
 import com.eas.client.cache.PlatypusFiles;
@@ -25,7 +24,6 @@ import com.eas.client.model.store.QueryDocument2XmlDom;
 import com.eas.client.model.store.QueryModel2XmlDom;
 import com.eas.client.model.store.XmlDom2QueryModel;
 import com.eas.client.queries.ScriptedQueryFactory;
-import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.application.indexer.IndexerQuery;
 import com.eas.designer.application.project.PlatypusProject;
@@ -50,8 +48,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringReader;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.*;
+import javax.sql.DataSource;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
@@ -675,23 +675,21 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
         Set<String> schemas = new HashSet<>();
         DatabasesClient basesProxy = getBasesProxy();
         if (basesProxy != null) {
-            MetadataCache mdCache = basesProxy.getMetadataCache(datasourceName);
-            SqlDriver driver = mdCache.getDatasourceSqlDriver();
-            String sql4Schemas = driver.getSql4SchemasEnumeration();
-            SqlCompiledQuery schemasQuery = new SqlCompiledQuery(basesProxy, datasourceName, sql4Schemas);
-            schemasQuery.executeQuery((ResultSet r) -> {
-                ColumnsIndicies idxs = new ColumnsIndicies(r.getMetaData());
-                int schemaColIndex = idxs.find(ClientConstants.JDBCCOLS_TABLE_SCHEM);
-                while (r.next()) {
-                    String schemaName = r.getString(schemaColIndex);
-                    schemas.add(schemaName);
+            DataSource ds = basesProxy.obtainDataSource(datasourceName);
+            try (Connection conn = ds.getConnection()) {
+                try (ResultSet r = conn.getMetaData().getSchemas()) {
+                    ColumnsIndicies idxs = new ColumnsIndicies(r.getMetaData());
+                    int schemaColIndex = idxs.find(ClientConstants.JDBCCOLS_TABLE_SCHEM);
+                    while (r.next()) {
+                        String schemaName = r.getString(schemaColIndex);
+                        schemas.add(schemaName);
+                    }
                 }
-                return null;
-            }, null, null, null);
+            }
         }
         return schemas;
     }
-
+/*
     public Map<String, Fields> achieveTables(final String aSchema) throws Exception {
         final Map<String, Fields> tables = new HashMap<>();
         DatabasesClient basesProxy = getBasesProxy();
@@ -704,19 +702,21 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
             SqlDriver driver = mdCache.getDatasourceSqlDriver();
             String sql4Tables = driver.getSql4TablesEnumeration(schema != null ? schema : mdCache.getDatasourceSchema());
             SqlCompiledQuery tablesQuery = new SqlCompiledQuery(basesProxy, datasourceName, sql4Tables);
-            tablesQuery.executeQuery((ResultSet r)->{
+            tablesQuery.executeQuery((ResultSet r) -> {
                 ColumnsIndicies idxs = new ColumnsIndicies(r.getMetaData());
                 int tableColIndex = idxs.find(ClientConstants.JDBCCOLS_TABLE_NAME);
                 while (r.next()) {
                     String cachedTableName = (schema != null ? schema + "." : "") + r.getString(tableColIndex);
                     Fields fields = mdCache.getTableMetadata(cachedTableName);
-                    tables.put(cachedTableName/*.toLowerCase()*/, fields);
+                    //tables.put(cachedTableName.toLowerCase(), fields);
+                    tables.put(cachedTableName, fields);
                 }
-                return null;}, null, null, null);
+                return null;
+            }, null, null, null);
         }
         return tables;
     }
-
+*/
     public MetadataCache getMetadataCache() throws Exception {
         DatabasesClient basesProxy = getBasesProxy();
         return basesProxy != null ? basesProxy.getMetadataCache(datasourceName) : null;

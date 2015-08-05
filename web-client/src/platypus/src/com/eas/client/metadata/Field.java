@@ -9,6 +9,10 @@
  */
 package com.eas.client.metadata;
 
+import java.util.Date;
+
+import com.eas.client.IDGenerator;
+import com.eas.client.Utils;
 import com.google.gwt.core.client.JavaScriptObject;
 
 /**
@@ -23,16 +27,8 @@ import com.google.gwt.core.client.JavaScriptObject;
  */
 public class Field {
 
-	public static int UNDEFINED_FILED_INDEX = -1;
-	// Our user-supplied information
 	protected String name = "";
-	protected String description;// Such data is read from db, and so may
-										// be null
-    protected DataTypeInfo typeInfo = DataTypeInfo.JAVA_OBJECT.copy();
-	protected int size;
-	protected int scale;
-	protected int precision;
-	protected boolean signed = true;
+	protected String description;// May be null
 	protected boolean nullable = true;
 	protected boolean readonly;
 	protected boolean pk;
@@ -40,7 +36,7 @@ public class Field {
 	protected boolean strong4Insert;
 	protected ForeignKeySpec fk;
 	protected String tableName;
-	protected String schemaName;
+	protected String type;
 	protected Fields owner;
 
 	/**
@@ -85,15 +81,9 @@ public class Field {
 	 *            Type info of the created field.
 	 * @see DataTypeInfo
 	 */
-	public Field(String aName, String aDescription, DataTypeInfo aTypeInfo) {
+	public Field(String aName, String aDescription, String aType) {
 		this(aName, aDescription);
-		typeInfo = aTypeInfo;
-	}
-
-	public Field(String aName, String aDescription, int aSize, DataTypeInfo aTypeInfo) {
-		this(aName, aDescription);
-		typeInfo = aTypeInfo;
-		size = aSize;
+		type = aType;
 	}
 
 	/**
@@ -208,21 +198,22 @@ public class Field {
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		if (obj != null && obj instanceof Field) {
-			Field rf = (Field) obj;
-			String rfDescription = rf.getDescription();
-			String rfName = rf.getName();
-			String rfTableName = rf.getTableName();
-			String rfSchemaName = rf.getSchemaName();
-			PrimaryKeySpec lfk = rf.getFk();
-			return nullable == rf.isNullable() && signed == rf.isSigned() && pk == rf.isPk() && readonly == rf.isReadonly() && strong4Insert == rf.isStrong4Insert() && precision == rf.getPrecision()
-			        && scale == rf.getScale() && size == rf.getSize() && typeInfo.equals(rf.getTypeInfo()) && ((fk == null && lfk == null) || (fk != null && fk.equals(lfk)))
-			        && ((description == null && rfDescription == null) || (description != null && description.equals(rfDescription)))
-			        && ((name == null && rfName == null) || (name != null && name.equals(rfName)))
-			        && ((tableName == null && rfTableName == null) || (tableName != null && tableName.equals(rfTableName)))
-			        && ((schemaName == null && rfSchemaName == null) || (schemaName != null && schemaName.equals(rfSchemaName)));
-		}
-		return false;
+        if (obj != null && obj instanceof Field) {
+            Field other = (Field) obj;
+            String rfDescription = other.getDescription();
+            String rfName = other.getName();
+            String rfTableName = other.getTableName();
+            String rfType = other.getType();
+            return nullable == other.isNullable()
+                    && pk == other.isPk()
+                    && readonly == other.isReadonly()
+                    && (fk == null ? other.getFk() == null : fk.equals(other.getFk()))
+                    && (description == null ? rfDescription == null : description.equals(rfDescription))
+                    && (name == null ? rfName == null : name.equals(rfName))
+                    && (tableName == null ? rfTableName == null : tableName.equals(rfTableName))
+                    && (type == null ? rfType == null : type.equals(rfType));
+        }
+        return false;
 	}
 
 	@Override
@@ -230,11 +221,7 @@ public class Field {
 		int hash = 3;
 		hash = 47 * hash + (this.name != null ? this.name.hashCode() : 0);
 		hash = 47 * hash + (this.description != null ? this.description.hashCode() : 0);
-		hash = 47 * hash + this.typeInfo.hashCode();
-		hash = 47 * hash + this.size;
-		hash = 47 * hash + this.scale;
-		hash = 47 * hash + this.precision;
-		hash = 47 * hash + (this.signed ? 1 : 0);
+		hash = 47 * hash + (this.type != null ? this.type.hashCode() : 0);
 		hash = 47 * hash + (this.nullable ? 1 : 0);
 		hash = 47 * hash + (this.readonly ? 1 : 0);
 		hash = 47 * hash + (this.tableName != null ? this.tableName.hashCode() : 0);
@@ -284,8 +271,8 @@ public class Field {
 	 * 
 	 * @return The field's type description
 	 */
-	public DataTypeInfo getTypeInfo() {
-		return typeInfo;
+	public String getType() {
+		return type;
 	}
 
 	/**
@@ -295,19 +282,35 @@ public class Field {
 	 *            The filed's type description
 	 * @see DataTypeInfo
 	 */
-	public void setTypeInfo(DataTypeInfo aValue) {
-		typeInfo = aValue != null ? aValue.copy() : null;
+	public void setType(String aValue) {
+		type = aValue;
 	}
 
-	/**
-	 * Sets this field schema name.
-	 * 
-	 * @param aValue
-	 *            This field schema name.
-	 */
-	public void setSchemaName(String aValue) {
-		schemaName = aValue;
-	}
+    public Object generateValue() {
+        Object value;
+        if (type != null) {
+            switch (type) {
+                case "Number":
+                    value = IDGenerator.genId();
+                    break;
+                case "String":
+                    value = String.valueOf(IDGenerator.genId());
+                    break;
+                case "Date":
+                    value = new Date((long)IDGenerator.genId());
+                    break;
+                case "Boolean":
+                    value = false;
+                    break;
+                default:
+                    value = null;
+                    break;
+            }
+        } else {
+            value = null;
+        }
+        return Utils.toJs(value);
+    }
 
 	/**
 	 * Sets table name.
@@ -317,82 +320,6 @@ public class Field {
 	 */
 	public void setTableName(String aValue) {
 		tableName = aValue;
-	}
-
-	/**
-	 * Returns the field size.
-	 * 
-	 * @return The field size.
-	 */
-	public int getSize() {
-		return size;
-	}
-
-	/**
-	 * Sets the field size.
-	 * 
-	 * @param aValue
-	 *            The field size to be set.
-	 */
-	public void setSize(int aValue) {
-		size = aValue;
-	}
-
-	/**
-	 * Returns the field's scale.
-	 * 
-	 * @return The field's scale.
-	 */
-	public int getScale() {
-		return scale;
-	}
-
-	/**
-	 * Sets the field's scale.
-	 * 
-	 * @param aValue
-	 *            The field's scale to be set.
-	 */
-	public void setScale(int aValue) {
-		scale = aValue;
-	}
-
-	/**
-	 * Returns the field's precision.
-	 * 
-	 * @return The field's precision.
-	 */
-	public int getPrecision() {
-		return precision;
-	}
-
-	/**
-	 * Sets the field's precision.
-	 * 
-	 * @param aValue
-	 *            The field's precision.
-	 */
-	public void setPrecision(int aValue) {
-		precision = aValue;
-	}
-
-	/**
-	 * Returns whether this field is signed.
-	 * 
-	 * @return Whether this field is signed.
-	 */
-	public boolean isSigned() {
-		return signed;
-	}
-
-	/**
-	 * Sets the field's signed state.
-	 * 
-	 * @param signed
-	 *            Field's signed flag.
-	 */
-	public void setSigned(boolean aValue) {
-		signed = aValue;
 	}
 
 	/**
@@ -421,15 +348,6 @@ public class Field {
 	 */
 	public String getTableName() {
 		return tableName;
-	}
-
-	/**
-	 * Returns the field's schema name.
-	 * 
-	 * @return The field's schema name.
-	 */
-	public String getSchemaName() {
-		return schemaName;
 	}
 
 	/**
@@ -469,17 +387,7 @@ public class Field {
 			} else {
 				setTableName(null);
 			}
-			lSourceString = aSourceField.getSchemaName();
-			if (lSourceString != null) {
-				setSchemaName(new String(lSourceString.toCharArray()));
-			} else {
-				setSchemaName(null);
-			}
-			setTypeInfo(aSourceField.getTypeInfo().copy());
-			setSize(aSourceField.getSize());
-			setScale(aSourceField.getScale());
-			setPrecision(aSourceField.getPrecision());
-			setSigned(aSourceField.isSigned());
+			setType(aSourceField.getType());
 			setNullable(aSourceField.isNullable());
 			setReadonly(aSourceField.isReadonly());
 			setPk(aSourceField.isPk());
@@ -499,9 +407,6 @@ public class Field {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		if (schemaName != null && !schemaName.isEmpty()) {
-			sb.append(schemaName).append(".");
-		}
 		if (tableName != null && !tableName.isEmpty()) {
 			sb.append(tableName).append(".");
 		}
@@ -526,11 +431,7 @@ public class Field {
 		if (strong4Insert) {
 			sb.append(", strong4Insert");
 		}
-		sb.append(", ").append(typeInfo.toString());
-		sb.append(", size ").append(size).append(", precision ").append(precision).append(", scale ").append(scale);
-		if (signed) {
-			sb.append(", signed");
-		}
+		sb.append(", ").append(type);
 		if (nullable) {
 			sb.append(", nullable");
 		}
@@ -568,11 +469,6 @@ public class Field {
 					return aField.@com.eas.client.metadata.Field::getDescription()();
 				}
 			});
-			Object.defineProperty(published, "size", {
-				get : function() {
-					return aField.@com.eas.client.metadata.Field::getSize()();
-				}
-			});
 			Object.defineProperty(published, "pk", {
 				get : function() {
 					return aField.@com.eas.client.metadata.Field::isPk()();
@@ -597,6 +493,11 @@ public class Field {
 			Object.defineProperty(published, "readonly", {
 				get : function() {
 					return aField.@com.eas.client.metadata.Field::isReadonly()();
+				}
+			});
+			Object.defineProperty(published, "type", {
+				get : function() {
+					return aField.@com.eas.client.metadata.Field::getType()();
 				}
 			});
 			aField.@com.eas.client.metadata.Field::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);

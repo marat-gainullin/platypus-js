@@ -15,12 +15,12 @@ import com.eas.client.changes.Update;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.JdbcField;
-import com.vividsolutions.jts.geom.Geometry;
+import com.eas.client.metadata.Parameter;
+import com.eas.script.Scripts;
 import java.sql.Connection;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,17 +33,19 @@ import java.util.logging.Logger;
  * logging of statemnents to be executed with parameters values. In log mode no
  * execution is performed.
  *
- * @see Converter
+ * @see Jdbc
  * @author mg
  */
 public class StatementsGenerator implements ChangeVisitor {
 
     public interface TablesContainer {
+
         public Fields getTableMetadata(String aTableName) throws Exception;
     }
-    
-    public interface GeometryConverter{
-        public void convertGeometry(JdbcChangeValue aValue, Connection aConnection) throws SQLException;
+
+    public interface GeometryConverter {
+
+        public JdbcChangeValue convertGeometry(String aValue, Connection aConnection) throws SQLException;
     }
 
     /**
@@ -70,28 +72,31 @@ public class StatementsGenerator implements ChangeVisitor {
                     ParameterMetaData pMeta = stmt.getParameterMetaData();
                     for (int i = 1; i <= parameters.size(); i++) {
                         ChangeValue v = parameters.get(i - 1);
+                        Object value;
                         int jdbcType;
                         String sqlTypeName;
-                        if(v.value instanceof Geometry){
-                            JdbcChangeValue jv = new JdbcChangeValue(v.name, v.value, Types.VARCHAR, null);
-                            gConverter.convertGeometry(jv, aConnection);
-                            v = jv;
-                        }
                         if (v instanceof JdbcChangeValue) {
                             JdbcChangeValue jv = (JdbcChangeValue) v;
-                            jdbcType = jv.getJdbcType();
-                            sqlTypeName = jv.getSqlTypeName();
+                            value = jv.value;
+                            jdbcType = jv.jdbcType;
+                            sqlTypeName = jv.sqlTypeName;
+                        } else if(v instanceof GeometryChangeValue) {
+                            JdbcChangeValue jv = gConverter.convertGeometry(v.value.toString(), aConnection);
+                            value = jv.value;
+                            jdbcType = jv.jdbcType;
+                            sqlTypeName = jv.sqlTypeName;
                         } else {
+                            value = v.value;
                             try {
                                 jdbcType = pMeta.getParameterType(i);
                                 sqlTypeName = pMeta.getParameterTypeName(i);
                             } catch (SQLException ex) {
                                 Logger.getLogger(StatementsGenerator.class.getName()).log(Level.WARNING, null, ex);
-                                jdbcType = JdbcFlowProvider.assumeJdbcType(v);
+                                jdbcType = JdbcFlowProvider.assumeJdbcType(v.value);
                                 sqlTypeName = null;
                             }
                         }
-                        Converter.assign(v.value, aConnection, i, stmt, jdbcType, sqlTypeName);
+                        JdbcFlowProvider.assign(value, i, stmt, jdbcType, sqlTypeName);
                     }
                     if (queriesLogger.isLoggable(Level.FINE)) {
                         queriesLogger.log(Level.FINE, "Executing sql with {0} parameters: {1}", new Object[]{parameters.size(), clause});
@@ -114,17 +119,27 @@ public class StatementsGenerator implements ChangeVisitor {
     protected TablesContainer tables;
     protected GeometryConverter gConverter;
 
-    public StatementsGenerator(EntitiesHost aEntitiesHost, String aSchemaContextFieldName, String aSchemaContext, TablesContainer aMdCache, GeometryConverter aGeometryConverter) {
+    public StatementsGenerator(EntitiesHost aEntitiesHost, String aSchemaContextFieldName, String aSchemaContext, TablesContainer aTables, GeometryConverter aGeometryConverter) {
         super();
         entitiesHost = aEntitiesHost;
         schemaContextFieldName = aSchemaContextFieldName;
         schemaContext = aSchemaContext;
-        tables = aMdCache;
+        tables = aTables;
         gConverter = aGeometryConverter;
     }
 
     public List<StatementsLogEntry> getLogEntries() {
         return logEntries;
+    }
+
+    public ChangeValue checkTableChange(String aTableName, String aColumnName, Object aValue) throws Exception {
+        Fields tableFileds = tables.getTableMetadata(aTableName);
+        if (tableFileds != null && tableFileds.contains(aColumnName)) {
+            JdbcField tableField = (JdbcField) tableFileds.get(aColumnName);
+            return new JdbcChangeValue(aColumnName, aValue, tableField.getJdbcType(), tableField.getType());
+        } else {
+            return new ChangeValue(aColumnName, aValue);
+        }
     }
 
     protected String generatePlaceholders(int count) {
@@ -198,13 +213,9 @@ public class StatementsGenerator implements ChangeVisitor {
                         } else {
                             chunk.insert.parameters.add(datum);
                         }
-                    } else {
-                        Fields tableFileds = tables.getTableMetadata(field.getTableName());
-                        if (tableFileds != null && tableFileds.contains(dataColumnName)) {
-                            JdbcField jdbcField = (JdbcField) tableFileds.get(dataColumnName);
-                            datum = new JdbcChangeValue(datum.name, datum.value, jdbcField.getJdbcType(), jdbcField.getType());
-                        }
-                        chunk.insert.parameters.add(datum);
+                    } else {                        
+                        ChangeValue checked = Scripts.GEOMETRY_TYPE_NAME.equals(field.getType()) ? new GeometryChangeValue(dataColumnName, datum.value) : checkTableChange(field.getTableName(), dataColumnName, datum.value);
+                        chunk.insert.parameters.add(checked);
                     }
                     if (field.isPk()) {
                         chunk.keysColumnsNames.add(dataColumnName);
@@ -272,12 +283,8 @@ public class StatementsGenerator implements ChangeVisitor {
                     }
                     String dataColumnName = field.getOriginalName() != null ? field.getOriginalName() : field.getName();
                     chunk.columnsClause.append(dataColumnName).append(" = ?");
-                    Fields tableFileds = tables.getTableMetadata(field.getTableName());
-                    if (tableFileds != null && tableFileds.contains(dataColumnName)) {
-                        JdbcField jdbcField = (JdbcField) tableFileds.get(dataColumnName);
-                        datum = new JdbcChangeValue(datum.name, datum.value, jdbcField.getJdbcType(), jdbcField.getType());
-                    }
-                    chunk.data.add(datum);
+                    ChangeValue checked = Scripts.GEOMETRY_TYPE_NAME.equals(field.getType()) ? new GeometryChangeValue(dataColumnName, datum.value) : checkTableChange(field.getTableName(), dataColumnName, datum.value);
+                    chunk.data.add(checked);
                 }
             }
             // keys
@@ -289,14 +296,9 @@ public class StatementsGenerator implements ChangeVisitor {
                         if (chunk.keys == null) {
                             chunk.keys = new ArrayList<>();
                         }
-                        String dataColumnName = field.getOriginalName() != null ? field.getOriginalName() : field.getName();
-                        Fields tableFileds = tables.getTableMetadata(field.getTableName());
-                        if (tableFileds != null && tableFileds.contains(dataColumnName)) {
-                            JdbcField jdbcField = (JdbcField) tableFileds.get(dataColumnName);
-                            chunk.keys.add(new JdbcChangeValue(key.name, key.value, jdbcField.getJdbcType(), jdbcField.getType()));
-                        } else {
-                            chunk.keys.add(new ChangeValue(dataColumnName, key.value));
-                        }
+                        String keyColumnName = field.getOriginalName() != null ? field.getOriginalName() : field.getName();
+                        ChangeValue checked = Scripts.GEOMETRY_TYPE_NAME.equals(field.getType()) ? new GeometryChangeValue(keyColumnName, key.value) : checkTableChange(field.getTableName(), keyColumnName, key.value);
+                        chunk.keys.add(checked);
                     }
                 }
             }
@@ -331,14 +333,9 @@ public class StatementsGenerator implements ChangeVisitor {
                         // to the log and therefore applied into a database during a transaction.
                         logEntries.add(delete);
                     }
-                    String dataColumnName = field.getOriginalName() != null ? field.getOriginalName() : field.getName();
-                    Fields tableFileds = tables.getTableMetadata(field.getTableName());
-                    if (tableFileds != null && tableFileds.contains(dataColumnName)) {
-                        JdbcField jdbcField = (JdbcField) tableFileds.get(dataColumnName);
-                        delete.parameters.add(new JdbcChangeValue(dataColumnName, key.value, jdbcField.getJdbcType(), jdbcField.getType()));
-                    } else {
-                        delete.parameters.add(new ChangeValue(dataColumnName, key.value));
-                    }
+                    String keyColumnName = field.getOriginalName() != null ? field.getOriginalName() : field.getName();
+                    ChangeValue checked = Scripts.GEOMETRY_TYPE_NAME.equals(field.getType()) ? new GeometryChangeValue(keyColumnName, key.value) : checkTableChange(field.getTableName(), keyColumnName, key.value);
+                    delete.parameters.add(checked);
                 }
             }
             deletes.entrySet().stream().forEach((Map.Entry<String, StatementsLogEntry> entry) -> {
@@ -350,12 +347,27 @@ public class StatementsGenerator implements ChangeVisitor {
         }
     }
 
+    protected static class GeometryChangeValue extends ChangeValue{
+
+        public GeometryChangeValue(String aName, Object aValue) {
+            super(aName, aValue);
+        }
+    }
+    
     @Override
     public void visit(Command aChange) throws Exception {
         if (!aChange.consumed) {
             StatementsLogEntry logEntry = new StatementsLogEntry(gConverter);
             logEntry.clause = aChange.command;
-            logEntry.parameters.addAll(aChange.getParameters());
+            for (ChangeValue v : aChange.getParameters()) {
+                Parameter p = entitiesHost.resolveParameter(aChange.entityName, v.name);
+                if (v.value != null && Scripts.GEOMETRY_TYPE_NAME.equals(p.getType())) {
+                    GeometryChangeValue g = new GeometryChangeValue(v.name, v.value);
+                    logEntry.parameters.add(g);
+                } else {
+                    logEntry.parameters.add(v);
+                }
+            }
             logEntries.add(logEntry);
         }
     }

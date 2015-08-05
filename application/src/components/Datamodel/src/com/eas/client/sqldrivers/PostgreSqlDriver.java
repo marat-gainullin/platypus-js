@@ -4,7 +4,6 @@
  */
 package com.eas.client.sqldrivers;
 
-import com.eas.client.ClientConstants;
 import com.eas.client.changes.JdbcChangeValue;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
@@ -14,10 +13,6 @@ import com.eas.client.metadata.PrimaryKeySpec;
 import com.eas.client.sqldrivers.resolvers.PostgreTypesResolver;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
 import com.eas.util.StringUtils;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKBReader;
-import com.vividsolutions.jts.io.WKBWriter;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -27,7 +22,7 @@ import java.sql.Types;
 import java.sql.Wrapper;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import org.postgis.PGgeometry;
 
 /**
  *
@@ -46,169 +41,7 @@ public class PostgreSqlDriver extends SqlDriver {
     protected static final String DEF_OTHER_TYPE_NAME = "point";
     protected static final String RENAME_FIELD_SQL_PREFIX = "alter table %s rename column %s to %s";
     protected static final String MODIFY_FIELD_SQL_PREFIX = "alter table %s alter ";
-    public static final String SQL_TABLES = ""
-            + "select"
-            + " cl.relname TABLE_NAME,"
-            + " nsp.nspname TABLE_SCHEM,"
-            + " (case cl.relkind when 'v' then '" + ClientConstants.JDBCPKS_TABLE_TYPE_VIEW + "' else '" + ClientConstants.JDBCPKS_TABLE_TYPE_TABLE + "' end) " + ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME + ","
-            + " d.description as " + ClientConstants.JDBCCOLS_REMARKS + " "
-            + "from pg_catalog.pg_namespace nsp"
-            + " inner join pg_catalog.pg_class cl on (cl.relnamespace = nsp.oid)"
-            + " left outer join pg_catalog.pg_am am on (cl.relam = am.oid) "
-            + " left outer join pg_description d on (d.ObjOID = cl.OID and ObjSubID = 0)" //(cl.oid = d.objoid) " 
-            + "where am.amname is null "
-            + " and cl.relkind in ('v','r') ";
-
-    public static final String SQL_SCHEMA_TABLES = ""
-            + SQL_TABLES
-            + "and nsp.nspname = '%s' "
-            + "order by " + ClientConstants.JDBCCOLS_TABLE_SCHEM + "," + ClientConstants.JDBCCOLS_TABLE_NAME;
-    public static final String SQL_SCHEMAS = ""
-            + "select nsp.nspname as " + ClientConstants.JDBCCOLS_TABLE_SCHEM + " from pg_catalog.pg_namespace nsp "
-            + "order by " + ClientConstants.JDBCCOLS_TABLE_SCHEM;
-    protected static final String SQL_COLUMNS = ""
-            + "SELECT"
-            + " table_catalog,"
-            + " table_schema AS " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
-            + " table_name AS " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
-            + " column_name AS " + ClientConstants.JDBCCOLS_COLUMN_NAME + ","
-            + " udt_name AS " + ClientConstants.JDBCCOLS_TYPE_NAME + ","
-            + " NULL AS " + ClientConstants.JDBCCOLS_DATA_TYPE + ","
-            + " (CASE WHEN numeric_precision IS NOT NULL THEN numeric_precision ELSE character_maximum_length END) AS " + ClientConstants.JDBCCOLS_COLUMN_SIZE + ","
-            + " (CASE WHEN is_nullable = 'YES' THEN 1 ELSE 0 END) AS " + ClientConstants.JDBCCOLS_NULLABLE + ","
-            + " numeric_scale AS " + ClientConstants.JDBCCOLS_DECIMAL_DIGITS + ","
-            + " 10 AS " + ClientConstants.JDBCCOLS_NUM_PREC_RADIX + ","
-            + " ordinal_position AS " + ClientConstants.JDBCIDX_ORDINAL_POSITION + ","
-            + " dsc.description as " + ClientConstants.JDBCCOLS_REMARKS + ","
-            + " column_default "
-            + "FROM information_schema.COLUMNS clmns"
-            + " JOIN pg_catalog.pg_namespace n ON (n.nspname = clmns.table_schema)"
-            + " JOIN pg_catalog.pg_class c ON (c.relnamespace = n.oid AND c.relname = table_name)"
-            + " JOIN pg_catalog.pg_attribute a ON (a.attrelid=c.oid AND a.attnum > 0 AND NOT a.attisdropped AND a.attname = column_name)"
-            + " JOIN pg_catalog.pg_type t ON (a.atttypid = t.oid)"
-            + " LEFT JOIN pg_catalog.pg_attrdef def ON (a.attrelid=def.adrelid AND a.attnum = def.adnum)"
-            + " LEFT JOIN pg_catalog.pg_description dsc ON (c.oid=dsc.objoid AND a.attnum = dsc.objsubid)"
-            //            + " LEFT JOIN pg_catalog.pg_class dc ON (dc.oid=dsc.classoid AND dc.relname='pg_class')"
-            //            + " LEFT JOIN pg_catalog.pg_namespace dn ON (dc.relnamespace=dn.oid AND dn.nspname='pg_catalog') "
-            + "WHERE table_schema = '%s' AND Lower(table_name) IN (%s) "
-            + "ORDER BY table_schema, table_name, ordinal_position";
-    protected static final String SQL_PRIMARY_KEYS = ""
-            + "SELECT"
-            + " NULL AS TABLE_CAT,"
-            + " n.nspname AS " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
-            + " ct.relname AS " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
-            + " a.attname AS " + ClientConstants.JDBCCOLS_COLUMN_NAME + ","
-            + " a.attnum AS KEY_SEQ,"
-            + " ci.relname AS " + ClientConstants.JDBCPKS_CONSTRAINT_NAME + " "
-            + "FROM pg_catalog.pg_namespace n, pg_catalog.pg_class ct, pg_catalog.pg_class ci, pg_catalog.pg_attribute a, pg_catalog.pg_index i "
-            + "WHERE ct.oid=i.indrelid AND ci.oid=i.indexrelid  AND a.attrelid=ci.oid AND i.indisprimary"
-            + " AND ct.relnamespace = n.oid"
-            + " AND n.nspname = '%s'"
-            + " AND Lower(ct.relname) in (%s) "
-            + "ORDER BY table_name, pk_name, key_seq";
-    protected static final String SQL_FOREIGN_KEYS = "SELECT"
-            + " NULL::text AS PKTABLE_CAT,"
-            + " pkn.nspname AS " + ClientConstants.JDBCFKS_FKPKTABLE_SCHEM + ","
-            + " pkc.relname AS " + ClientConstants.JDBCFKS_FKPKTABLE_NAME + ","
-            + " pka.attname AS " + ClientConstants.JDBCFKS_FKPKCOLUMN_NAME + ","
-            + " NULL::text AS FKTABLE_CAT,"
-            + " fkn.nspname AS " + ClientConstants.JDBCFKS_FKTABLE_SCHEM + ","
-            + " fkc.relname AS " + ClientConstants.JDBCFKS_FKTABLE_NAME + ","
-            + " fka.attname AS " + ClientConstants.JDBCFKS_FKCOLUMN_NAME + ","
-            + " pos.n AS KEY_SEQ,"
-            + " CASE con.confupdtype WHEN 'c' THEN 0 WHEN 'n' THEN 2 WHEN 'd' THEN 4 WHEN 'r' THEN 1 WHEN 'a' THEN 3 ELSE NULL END AS " + ClientConstants.JDBCFKS_FKUPDATE_RULE + ","
-            + " CASE con.confdeltype  WHEN 'c' THEN 0 WHEN 'n' THEN 2 WHEN 'd' THEN 4 WHEN 'r' THEN 1 WHEN 'a' THEN 3 ELSE NULL END AS " + ClientConstants.JDBCFKS_FKDELETE_RULE + ","
-            + " con.conname AS " + ClientConstants.JDBCFKS_FK_NAME + ","
-            + " pkic.relname AS " + ClientConstants.JDBCFKS_FKPK_NAME + ","
-            + " CASE  WHEN con.condeferrable AND con.condeferred THEN 5 WHEN con.condeferrable THEN 6 ELSE 7 END AS " + ClientConstants.JDBCFKS_FKDEFERRABILITY + " "
-            + "FROM  pg_catalog.pg_namespace pkn, pg_catalog.pg_class pkc, pg_catalog.pg_attribute pka,"
-            + " pg_catalog.pg_namespace fkn, pg_catalog.pg_class fkc, pg_catalog.pg_attribute fka,  pg_catalog.pg_constraint con,"
-            + " pg_catalog.generate_series(1, 32) pos(n),  pg_catalog.pg_depend dep, pg_catalog.pg_class pkic "
-            + "WHERE pkn.oid = pkc.relnamespace AND pkc.oid = pka.attrelid AND pka.attnum = con.confkey[pos.n]"
-            + " AND con.confrelid = pkc.oid  AND fkn.oid = fkc.relnamespace AND fkc.oid = fka.attrelid AND fka.attnum = con.conkey[pos.n]"
-            + " AND con.conrelid = fkc.oid  AND con.contype = 'f' AND con.oid = dep.objid AND pkic.oid = dep.refobjid"
-            + " AND pkic.relkind = 'i' AND dep.classid = 'pg_constraint'::regclass::oid AND dep.refclassid = 'pg_class'::regclass::oid"
-            + " AND fkn.nspname = '%s'  AND Lower(fkc.relname) in (%s) "
-            + "ORDER BY pkn.nspname,pkc.relname,pos.n";
-    protected static final String SQL_INDEX_KEYS = ""
-            + "SELECT"
-            + " NULL AS TABLE_CAT,"
-            + " n.nspname AS " + ClientConstants.JDBCIDX_TABLE_SCHEM + ","
-            + " ct.relname AS " + ClientConstants.JDBCIDX_TABLE_NAME + ","
-            + " CASE WHEN i.indisunique = true then 0 else 1 end AS " + ClientConstants.JDBCIDX_NON_UNIQUE + ","
-            + " NULL AS " + ClientConstants.JDBCIDX_INDEX_QUALIFIER + ","
-            + " ci.relname AS " + ClientConstants.JDBCIDX_INDEX_NAME + ","
-            + " CASE i.indisclustered  WHEN true THEN 1 ELSE CASE am.amname WHEN 'hash' THEN 2 ELSE 3 END  END AS " + ClientConstants.JDBCIDX_TYPE + ","
-            + " a.attnum AS " + ClientConstants.JDBCIDX_ORDINAL_POSITION + ","
-            + " CASE WHEN i.indexprs IS NULL THEN a.attname ELSE pg_get_indexdef(ci.oid,a.attnum,false) END AS " + ClientConstants.JDBCIDX_COLUMN_NAME + ","
-            + " NULL AS " + ClientConstants.JDBCIDX_ASC_OR_DESC + ","
-            + " ci.reltuples AS CARDINALITY,"
-            + " ci.relpages AS PAGES,"
-            + " NULL AS FILTER_CONDITION,"
-            + " (CASE WHEN i.indisprimary = 't' THEN 0 ELSE 1 END) AS " + ClientConstants.JDBCIDX_PRIMARY_KEY + ","
-            + " NULL AS " + ClientConstants.JDBCIDX_FOREIGN_KEY + " "
-            + "FROM pg_catalog.pg_namespace n, pg_catalog.pg_class ct, pg_catalog.pg_class ci,"
-            + " pg_catalog.pg_attribute a, pg_catalog.pg_am am, pg_catalog.pg_index i "
-            + "WHERE ct.oid=i.indrelid AND ci.oid=i.indexrelid AND a.attrelid=ci.oid AND ci.relam=am.oid"
-            + " AND n.oid = ct.relnamespace AND n.nspname = '%s' AND Lower(ct.relname) in (%s) "
-            + "ORDER BY NON_UNIQUE, TYPE, INDEX_NAME, ORDINAL_POSITION";
-    protected static final String SQL_TABLE_COMMENTS = ""
-            + "SELECT"
-            + " n.nspname as  " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
-            + " c.relname as  " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
-            + " d.description as " + ClientConstants.JDBCCOLS_TABLE_DESC + " "
-            + "from pg_class c"
-            + " left outer join pg_namespace n on (c.relowner = n.nspowner)"
-            + " left outer join pg_description d on (c.oid = d.objoid)"
-            + "where d.objsubid = 0 and Lower(n.nspname) = Lower('%s') and Lower(relname) in (%s)";
-    protected static final String SQL_ALL_OWNER_TABLES_COMMENTS = ""
-            + "SELECT"
-            + " n.nspname as  " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
-            + " c.relname as  " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
-            + " d.description as " + ClientConstants.JDBCCOLS_TABLE_DESC + " "
-            + "from pg_class c"
-            + " inner join pg_catalog.pg_namespace n on (n.oid = c.relnamespace  and relam = 0)"
-            + " left outer join pg_description d on (c.oid = d.objoid)"
-            + "where n.nspname = '%s'";
-    protected static final String SQL_PARENTS_LIST = ""
-            + "with recursive parents(mdent_id,"
-            + " mdent_name,"
-            + " mdent_type,"
-            + " mdent_content_txt,"
-            + " mdent_content_data,"
-            + " tag1,"
-            + " tag2,"
-            + " tag3,"
-            + " mdent_parent_id,"
-            + " mdent_order,"
-            + " mdent_content_txt_size,"
-            + " mdent_content_txt_crc32) as "
-            + "( "
-            + "select m1.* from mtd_entities m1 where m1.mdent_id = :%s "
-            + "    union all "
-            + "select m2.* from parents p, mtd_entities m2 where m2.mdent_id = p.mdent_parent_id "
-            + ") "
-            + "select * from parents ";
-    protected static final String SQL_CHILDREN_LIST = ""
-            + "with recursive children(mdent_id,"
-            + " mdent_name,"
-            + " mdent_type,"
-            + " mdent_content_txt,"
-            + " mdent_content_data,"
-            + " tag1,"
-            + " tag2,"
-            + " tag3,"
-            + " mdent_parent_id,"
-            + " mdent_order,"
-            + " mdent_content_txt_size,"
-            + " mdent_content_txt_crc32) as "
-            + "( "
-            + "select m1.* from mtd_entities m1 where m1.mdent_id = :%s "
-            + "    union all "
-            + "select m2.* from children c, mtd_entities m2 where c.mdent_id = m2.mdent_parent_id "
-            + ") "
-            + "select * from children ";
-
+    
     @Override
     public TypesResolver getTypesResolver() {
         return resolver;
@@ -235,30 +68,6 @@ public class PostgreSqlDriver extends SqlDriver {
             try (Statement stmt = aConnection.createStatement()) {
                 stmt.execute(String.format(SET_SCHEMA_CLAUSE, wrapNameIfRequired(aSchema)));
             }
-        }
-    }
-
-    @Override
-    public String getSql4TableColumns(String aOwnerName, Set<String> aTableNames) {
-        return String.format(SQL_COLUMNS, prepareName(aOwnerName), constructIn(aTableNames).toLowerCase());
-    }
-
-    @Override
-    public String getSql4TablePrimaryKeys(String aOwnerName, Set<String> aTableNames) {
-        return String.format(SQL_PRIMARY_KEYS, prepareName(aOwnerName), constructIn(aTableNames).toLowerCase());
-    }
-
-    @Override
-    public String getSql4TableForeignKeys(String aOwnerName, Set<String> aTableNames) {
-        return String.format(SQL_FOREIGN_KEYS, prepareName(aOwnerName), constructIn(aTableNames).toLowerCase());
-    }
-
-    @Override
-    public String getSql4Indexes(String aOwnerName, Set<String> aTableNames) {
-        if (aTableNames != null && !aTableNames.isEmpty()) {
-            return String.format(SQL_INDEX_KEYS, prepareName(aOwnerName), constructIn(aTableNames).toLowerCase());
-        } else {
-            return null;
         }
     }
 
@@ -428,21 +237,6 @@ public class PostgreSqlDriver extends SqlDriver {
     }
 
     @Override
-    public String getSql4TablesEnumeration(String schema4Sql) {
-        if (schema4Sql == null || schema4Sql.isEmpty()) {
-            return SQL_TABLES
-                    + "order by " + ClientConstants.JDBCCOLS_TABLE_SCHEM + "," + ClientConstants.JDBCCOLS_TABLE_NAME;
-        } else {
-            return String.format(SQL_SCHEMA_TABLES, prepareName(schema4Sql));
-        }
-    }
-
-    @Override
-    public String getSql4SchemasEnumeration() {
-        return SQL_SCHEMAS;
-    }
-
-    @Override
     public String getSql4CreateSchema(String aSchemaName, String aPassword) {
         if (aSchemaName != null && !aSchemaName.isEmpty()) {
             return String.format(CREATE_SCHEMA_CLAUSE, aSchemaName);
@@ -573,30 +367,37 @@ public class PostgreSqlDriver extends SqlDriver {
         return isHaveUpperCase(aName);
     }
 
-    private String prepareName(String aName) {
-        return (isWrappedName(aName) ? unwrapName(aName) : aName.toLowerCase());
+    @Override
+    public JdbcChangeValue convertGeometry(String aValue, Connection aConnection) throws SQLException {
+        JdbcChangeValue jdbcValue = new JdbcChangeValue(null, null, 0, null);
+        PGgeometry pgg = new PGgeometry(aValue);
+        jdbcValue.value = pgg;
+        jdbcValue.jdbcType = Types.OTHER;
+        jdbcValue.sqlTypeName = "geometry";
+        return jdbcValue;
     }
 
     @Override
-    public void convertGeometry(JdbcChangeValue aValue, Connection aConnection) throws SQLException {
-        if (aValue.getValue() instanceof Geometry) {
-            WKBWriter writer = new WKBWriter();
-            byte[] written = writer.write((Geometry) aValue.getValue());
-            aValue.value = written;
-            aValue.jdbcType = Types.OTHER;
-            aValue.sqlTypeName = "geography";
+    public String readGeometry(Wrapper aRs, int aColumnIndex, Connection aConnection) throws SQLException {
+        Object read = aRs instanceof ResultSet ? ((ResultSet) aRs).getObject(aColumnIndex) : ((CallableStatement) aRs).getObject(aColumnIndex);
+        boolean wasNull = aRs instanceof ResultSet ? ((ResultSet) aRs).wasNull() : ((CallableStatement) aRs).wasNull();
+        if (wasNull) {
+            return null;
+        } else {
+            if (read instanceof PGgeometry) {
+                PGgeometry pgg = (PGgeometry) read;
+                read = pgg.getGeometry();
+            }else if(read.getClass().getName().equals(PGgeometry.class.getName())){// Crazy netbeans designer!
+                return read.toString();
+            }
+            if (read instanceof org.postgis.Geometry) {
+                org.postgis.Geometry g = (org.postgis.Geometry) read;
+                StringBuffer sb = new StringBuffer();
+                g.outerWKT(sb);
+                return sb.toString();
+            } else {
+                return null;
+            }
         }
     }
-
-    @Override
-    public Geometry readGeometry(Wrapper aRs, int aColumnIndex, Connection aConnection) throws SQLException {
-        try {
-            byte[] read = aRs instanceof ResultSet ? ((ResultSet) aRs).getBytes(aColumnIndex) : ((CallableStatement) aRs).getBytes(aColumnIndex);
-            WKBReader reader = new WKBReader();
-            return reader.read(read);
-        } catch (ParseException ex) {
-            throw new SQLException(ex);
-        }
-    }
-
 }

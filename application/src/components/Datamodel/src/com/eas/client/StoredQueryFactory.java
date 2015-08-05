@@ -67,10 +67,9 @@ public class StoredQueryFactory {
 
     protected void addTableFieldsToSelectResults(SqlQuery aQuery, Table aFieldsSource) throws Exception {
         FieldsResult fieldsRes = getTablyFields(aQuery.getDatasourceName(), aFieldsSource.getWholeTableName());
-        Fields fields = fieldsRes.result;
-        if (fields != null) {
+        if (fieldsRes != null && fieldsRes.fields != null) {
             TypesResolver resolver = basesProxy.getMetadataCache(aQuery.getDatasourceName()).getDatasourceSqlDriver().getTypesResolver();
-            fields.toCollection().stream().forEach((Field field) -> {
+            fieldsRes.fields.toCollection().stream().forEach((Field field) -> {
                 Field copied = new Field();
                 copied.assignFrom(field);
                 if (fieldsRes.fromRealTable) {
@@ -369,12 +368,12 @@ public class StoredQueryFactory {
 
     protected class FieldsResult {
 
-        public Fields result;
+        public Fields fields;
         public boolean fromRealTable;
 
         public FieldsResult(Fields aResult, boolean aFromRealTable) {
             super();
-            result = aResult;
+            fields = aResult;
             fromRealTable = aFromRealTable;
         }
     }
@@ -429,9 +428,8 @@ public class StoredQueryFactory {
                      * самостоятельно. Такая вот особенность парсера.
                      */
                     FieldsResult tableFieldsResult = getTablyFields(aQuery.getDatasourceName(), ((Table) namedSource).getWholeTableName());
-                    Fields tableFields = tableFieldsResult.result;
-                    if (tableFields != null && tableFields.contains(column.getColumnName())) {
-                        field = tableFields.get(column.getColumnName());
+                    if (tableFieldsResult != null && tableFieldsResult.fields != null && tableFieldsResult.fields.contains(column.getColumnName())) {
+                        field = tableFieldsResult.fields.get(column.getColumnName());
                         fieldSource = namedSource;
                         fieldFromRealTable = tableFieldsResult.fromRealTable;
                     }
@@ -455,9 +453,8 @@ public class StoredQueryFactory {
             for (FromItem anySource : aSources.values()) {
                 if (anySource instanceof Table) {
                     FieldsResult fieldsResult = getTablyFields(aQuery.getDatasourceName(), ((Table) anySource).getWholeTableName());
-                    Fields fields = fieldsResult.result;
-                    if (fields != null && fields.contains(column.getColumnName())) {
-                        field = fields.get(column.getColumnName());
+                    if (fieldsResult != null && fieldsResult.fields != null && fieldsResult.fields.contains(column.getColumnName())) {
+                        field = fieldsResult.fields.get(column.getColumnName());
                         fieldSource = anySource;
                         fieldFromRealTable = fieldsResult.fromRealTable;
                         break;

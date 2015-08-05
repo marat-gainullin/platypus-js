@@ -4,18 +4,31 @@
  */
 package com.eas.client;
 
+import com.eas.client.changes.JdbcChangeValue;
 import com.eas.client.dataflow.JdbcFlowProvider;
+import com.eas.client.dataflow.JdbcReader;
 import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.Parameter;
 import com.eas.client.queries.ContextHost;
+import com.eas.client.sqldrivers.SqlDriver;
+import com.eas.script.Scripts;
+import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Wrapper;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.sql.DataSource;
 
 /**
- * This flow provider implements transaction capability for standard JdbcFlowProvider.
- * It enqueues changes in transactional queue instead of actual writing
- * to underlying database. It relies on transactional assumption: all enqueued changes
- * will be actually applied at commmit or reverted at rollback.
+ * This flow provider implements transaction capability for standard
+ * JdbcFlowProvider. It enqueues changes in transactional queue instead of
+ * actual writing to underlying database. It relies on transactional assumption:
+ * all enqueued changes will be actually applied at commmit or reverted at
+ * rollback.
+ *
  * @author mg
  */
 public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
@@ -23,6 +36,7 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
     protected String entityName;
     protected DatabasesClient client;
     protected MetadataCache cache;
+    protected SqlDriver sqlDriver;
     protected ContextHost contextHost;
 
     public PlatypusJdbcFlowProvider(DatabasesClient aClient, String aDataSourceName, String aEntityName, DataSource aDataSource, Consumer<Runnable> aDataPuller, MetadataCache aCache, String aClause, Fields aExpectedFields, ContextHost aContextHost) throws Exception {
@@ -30,12 +44,54 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
         entityName = aEntityName;
         client = aClient;
         cache = aCache;
+        sqlDriver = cache.getDatasourceSqlDriver();
         contextHost = aContextHost;
     }
 
     @Override
     public String getEntityName() {
         return entityName;
+    }
+
+    @Override
+    protected JdbcReader obtainJdbcReader() {
+        return new JdbcReader(expectedFields, (Wrapper aRsultSetOrCallableStatement, int aColumnIndex, Connection aConnection) -> {
+            return sqlDriver.readGeometry(aRsultSetOrCallableStatement, aColumnIndex, aConnection);
+        }, (String aRDBMSType) -> {
+            return sqlDriver.getTypesResolver().toApplicationType(aRDBMSType);
+        });
+    }
+    
+    @Override
+    protected void assignParameter(Parameter aParameter, PreparedStatement aStatement, int aParameterIndex, Connection aConnection) throws SQLException {
+        if (aParameter.getValue() != null && Scripts.GEOMETRY_TYPE_NAME.equals(aParameter.getType())) {
+            try {
+                JdbcChangeValue jv = cache.getDatasourceSqlDriver().convertGeometry(aParameter.getValue().toString(), aConnection);
+                Object paramValue = jv.value;
+                int jdbcType = jv.jdbcType;
+                String sqlTypeName = jv.sqlTypeName;
+                assign(paramValue, aParameterIndex, aStatement, jdbcType, sqlTypeName);
+                checkOutParameter(aParameter, aStatement, aParameterIndex, jdbcType);
+            } catch (Exception ex) {
+                throw new SQLException(ex);
+            }
+        } else {
+            super.assignParameter(aParameter, aStatement, aParameterIndex, aConnection);
+        }
+    }
+
+    @Override
+    protected void acceptOutParameter(Parameter aParameter, CallableStatement aStatement, int aParameterIndex, Connection aConnection) throws SQLException {
+        if (Scripts.GEOMETRY_TYPE_NAME.equals(aParameter.getType())) {
+            try {
+                String sGeometry = cache.getDatasourceSqlDriver().readGeometry(aStatement, aParameterIndex, aConnection);
+                aParameter.setValue(sGeometry);
+            } catch (Exception ex) {
+                Logger.getLogger(PlatypusJdbcFlowProvider.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else {
+            super.acceptOutParameter(aParameter, aStatement, aParameterIndex, aConnection);
+        }
     }
 
     @Override

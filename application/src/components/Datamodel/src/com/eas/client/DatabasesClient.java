@@ -3,7 +3,6 @@ package com.eas.client;
 import com.eas.client.changes.Change;
 import com.eas.client.changes.EntitiesHost;
 import com.eas.client.dataflow.ColumnsIndicies;
-import com.eas.client.dataflow.Converter;
 import com.eas.client.dataflow.JdbcFlowProvider;
 import com.eas.client.dataflow.StatementsGenerator;
 import com.eas.client.login.PlatypusPrincipal;
@@ -314,7 +313,7 @@ public class DatabasesClient {
                     for (int i = 1; i <= params.getParametersCount(); i++) {
                         Parameter param = params.get(i);
                         int jdbcType = JdbcFlowProvider.assumeJdbcType(param.getValue());
-                        Converter.assign(param.getValue(), connection, i, stmt, jdbcType, null);
+                        JdbcFlowProvider.assign(param.getValue(), i, stmt, jdbcType, null);
                     }
                     try {
                         rowsAffected += stmt.executeUpdate();
@@ -620,7 +619,7 @@ public class DatabasesClient {
                             }
                             return query;
                         }
-                    }, ClientConstants.F_USR_CONTEXT, contextHost != null ? contextHost.preparationContext() : null, mdCache);
+                    }, ClientConstants.F_USR_CONTEXT, contextHost != null ? contextHost.preparationContext() : null, mdCache, driver);
                     change.accept(generator);
                     statements.addAll(generator.getLogEntries());
                 }
