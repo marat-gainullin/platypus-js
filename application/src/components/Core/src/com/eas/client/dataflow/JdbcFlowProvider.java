@@ -9,6 +9,7 @@ import com.eas.client.metadata.Parameter;
 import com.eas.client.metadata.Parameters;
 import com.eas.client.resourcepool.BearDatabaseConnection;
 import com.eas.concurrent.CallableConsumer;
+import com.eas.script.Scripts;
 import com.eas.util.BinaryUtils;
 import com.eas.util.StringUtils;
 import java.io.IOException;
@@ -184,7 +185,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
 
     public static Object get(Wrapper aRs, int aColumnIndex) throws SQLException {
         try {
-            int sqlType = aRs instanceof ResultSet ? ((ResultSet) aRs).getMetaData().getColumnType(aColumnIndex) : ((CallableStatement) aRs).getMetaData().getColumnType(aColumnIndex);
+            int sqlType = aRs instanceof ResultSet ? ((ResultSet) aRs).getMetaData().getColumnType(aColumnIndex) : ((CallableStatement) aRs).getParameterMetaData().getParameterType(aColumnIndex);
             Object value = null;
             switch (sqlType) {
                 case Types.JAVA_OBJECT:
@@ -705,15 +706,46 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
     protected void acceptOutParameter(Parameter aParameter, CallableStatement aStatement, int aParameterIndex, Connection aConnection) throws SQLException {
         if (aParameter.getMode() == ParameterMetaData.parameterModeOut
                 || aParameter.getMode() == ParameterMetaData.parameterModeInOut) {
-            Object outedParamValue = get(aStatement, aParameterIndex);
-            aParameter.setValue(outedParamValue);
+            try {
+                Object outedParamValue = get(aStatement, aParameterIndex);
+                aParameter.setValue(outedParamValue);
+            } catch (SQLException ex) {
+                String pType = aParameter.getType();
+                if (pType != null) {
+                    switch (pType) {
+                        case Scripts.STRING_TYPE_NAME:
+                            aParameter.setValue(aStatement.getString(aParameterIndex));
+                            break;
+                        case Scripts.NUMBER_TYPE_NAME:
+                            aParameter.setValue(aStatement.getDouble(aParameterIndex));
+                            break;
+                        case Scripts.DATE_TYPE_NAME:
+                            aParameter.setValue(aStatement.getDate(aParameterIndex));
+                            break;
+                        case Scripts.BOOLEAN_TYPE_NAME:
+                            aParameter.setValue(aStatement.getBoolean(aParameterIndex));
+                            break;
+                        default:
+                            aParameter.setValue(aStatement.getObject(aParameterIndex));
+                    }
+                } else {
+                    aParameter.setValue(aStatement.getObject(aParameterIndex));
+                }
+            }
         }
     }
 
     protected void assignParameter(Parameter aParameter, PreparedStatement aStatement, int aParameterIndex, Connection aConnection) throws SQLException {
         Object paramValue = aParameter.getValue();
-        int jdbcType = assumeJdbcType(paramValue);
-        String sqlTypeName = null;
+        int jdbcType;
+        String sqlTypeName;
+        try {
+            jdbcType = aStatement.getParameterMetaData().getParameterType(aParameterIndex);
+            sqlTypeName = aStatement.getParameterMetaData().getParameterTypeName(aParameterIndex);
+        } catch (SQLException ex) {
+            jdbcType = assumeJdbcType(paramValue);
+            sqlTypeName = null;
+        }
         assign(paramValue, aParameterIndex, aStatement, jdbcType, sqlTypeName);
         checkOutParameter(aParameter, aStatement, aParameterIndex, jdbcType);
     }

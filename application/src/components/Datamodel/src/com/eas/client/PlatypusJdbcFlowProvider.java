@@ -66,7 +66,7 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
     protected void assignParameter(Parameter aParameter, PreparedStatement aStatement, int aParameterIndex, Connection aConnection) throws SQLException {
         if (aParameter.getValue() != null && Scripts.GEOMETRY_TYPE_NAME.equals(aParameter.getType())) {
             try {
-                JdbcChangeValue jv = cache.getDatasourceSqlDriver().convertGeometry(aParameter.getValue().toString(), aConnection);
+                JdbcChangeValue jv = sqlDriver.convertGeometry(aParameter.getValue().toString(), aConnection);
                 Object paramValue = jv.value;
                 int jdbcType = jv.jdbcType;
                 String sqlTypeName = jv.sqlTypeName;
@@ -84,7 +84,7 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
     protected void acceptOutParameter(Parameter aParameter, CallableStatement aStatement, int aParameterIndex, Connection aConnection) throws SQLException {
         if (Scripts.GEOMETRY_TYPE_NAME.equals(aParameter.getType())) {
             try {
-                String sGeometry = cache.getDatasourceSqlDriver().readGeometry(aStatement, aParameterIndex, aConnection);
+                String sGeometry = sqlDriver.readGeometry(aStatement, aParameterIndex, aConnection);
                 aParameter.setValue(sGeometry);
             } catch (Exception ex) {
                 Logger.getLogger(PlatypusJdbcFlowProvider.class.getName()).log(Level.SEVERE, null, ex);

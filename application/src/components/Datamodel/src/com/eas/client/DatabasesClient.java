@@ -8,7 +8,6 @@ import com.eas.client.dataflow.StatementsGenerator;
 import com.eas.client.login.PlatypusPrincipal;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
-import com.eas.client.metadata.JdbcField;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.metadata.Parameters;
 import com.eas.client.queries.ContextHost;
@@ -588,7 +587,7 @@ public class DatabasesClient {
                                 }
                                 if (fields != null) {
                                     Field resolved = fields.get(aFieldName);
-                                    String resolvedTableName = resolved instanceof JdbcField ? ((JdbcField)resolved).getTableName() : null;
+                                    String resolvedTableName = resolved.getTableName();
                                     resolvedTableName = resolvedTableName != null ? resolvedTableName.toLowerCase() : "";
                                     if (query != null && query.getWritable() != null && !query.getWritable().contains(resolvedTableName)) {
                                         return null;
