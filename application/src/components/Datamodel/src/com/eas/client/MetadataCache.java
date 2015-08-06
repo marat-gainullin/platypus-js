@@ -21,6 +21,8 @@ import com.eas.client.metadata.ForeignKeySpec;
 import com.eas.client.metadata.JdbcField;
 import com.eas.client.metadata.PrimaryKeySpec;
 import com.eas.client.sqldrivers.SqlDriver;
+import com.eas.concurrent.CallableConsumer;
+import com.eas.util.IDGenerator;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -30,7 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
@@ -69,12 +71,42 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
 
     }
 
+    protected class ConcurrentCaseInsesitiveMap<V> extends ConcurrentHashMap<String, V> {
+
+        protected final String nullKey = "null-" + IDGenerator.genID();
+
+        protected String transformKey(String aKey) {
+            return aKey != null ? aKey.toLowerCase() : nullKey;
+        }
+
+        @Override
+        public V get(Object key) {
+            return super.get(transformKey((String) key));
+        }
+
+        @Override
+        public V put(String key, V value) {
+            return super.put(transformKey(key), value);
+        }
+
+        @Override
+        public V remove(Object key) {
+            return super.remove(transformKey((String) key));
+        }
+
+        @Override
+        public boolean containsKey(Object key) {
+            return super.containsKey(transformKey((String) key));
+        }
+
+    }
+
     protected String datasourceName;
     protected DatabasesClient client;
     // Named tables fields cache
-    protected Map<String, TablesFieldsCache> schemasTablesFields = new CaseInsesitiveMap<>();
+    protected Map<String, TablesFieldsCache> schemasTablesFields = new ConcurrentCaseInsesitiveMap<>();
     // Named tables indexes cache
-    protected Map<String, TablesIndexesCache> schemasTablesIndexes = new CaseInsesitiveMap<>();
+    protected Map<String, TablesIndexesCache> schemasTablesIndexes = new ConcurrentCaseInsesitiveMap<>();
     protected String datasourceSchema;
     protected SqlDriver datasourceDriver;
 
@@ -169,7 +201,6 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
      * Fills tables cache with fields, comments, keys (pk and fk) by connection
      * default schema.
      *
-     * @param aFullMetadata
      * @throws Exception
      */
     public final void fillTablesCacheByConnectionSchema() throws Exception {
@@ -186,10 +217,10 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
     public void fillTablesCacheBySchema(String aSchema) throws Exception {
         String schema4Sql = aSchema != null && !aSchema.isEmpty() ? aSchema : getDatasourceSchema();
         if (schema4Sql != null && !schema4Sql.isEmpty()) {
-            Callable<Map<String, String>> tablesReader = () -> {
+            CallableConsumer<Map<String, String>, String> tablesReader = (aSchema4Sql) -> {
                 DataSource ds = client.obtainDataSource(datasourceName);
                 try (Connection conn = ds.getConnection()) {
-                    try (ResultSet r = conn.getMetaData().getTables(null, schema4Sql, null, new String[]{"TABLE", "VIEW"})) {
+                    try (ResultSet r = conn.getMetaData().getTables(null, aSchema4Sql, null, new String[]{"TABLE", "VIEW"})) {
                         ColumnsIndicies idxs = new ColumnsIndicies(r.getMetaData());
                         int colIndex = idxs.find(ClientConstants.JDBCCOLS_TABLE_NAME);
                         int colRemarks = idxs.find(ClientConstants.JDBCCOLS_REMARKS);
@@ -205,11 +236,17 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
                     }
                 }
             };
-            Map<String, String> tablesNames = tablesReader.call();
+            Map<String, String> tablesNames = tablesReader.call(schema4Sql);
+            if (tablesNames.isEmpty()) {
+                tablesNames = tablesReader.call(schema4Sql.toLowerCase());
+            }
+            if (tablesNames.isEmpty()) {
+                tablesNames = tablesReader.call(schema4Sql.toUpperCase());
+            }
             TablesFieldsCache tablesFields = new TablesFieldsCache();
-            schemasTablesFields.put(aSchema, tablesFields);
             Map<String, Fields> queried = tablesFields.query(aSchema, tablesNames.keySet());
             tablesFields.fill(aSchema, queried, tablesNames);
+            schemasTablesFields.put(aSchema, tablesFields);
         }
     }
 
@@ -235,12 +272,8 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
     }
 
     public void clear() throws Exception {
-        if (schemasTablesFields != null) {
-            schemasTablesFields.clear();
-        }
-        if (schemasTablesIndexes != null) {
-            schemasTablesIndexes.clear();
-        }
+        schemasTablesFields.clear();
+        schemasTablesIndexes.clear();
         datasourceSchema = null;
         datasourceDriver = null;
     }
@@ -293,7 +326,7 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
 
         protected Map<String, Fields> query(String aSchema, Set<String> aTables) throws Exception {
             SqlDriver sqlDriver = getDatasourceSqlDriver();
-            final String schema4Sql = aSchema != null && !aSchema.isEmpty() ? aSchema : getDatasourceSchema();
+            String schema4Sql = aSchema != null && !aSchema.isEmpty() ? aSchema : getDatasourceSchema();
             Map<String, Fields> columns;
             DataSource ds = client.obtainDataSource(datasourceName);
             try (Connection conn = ds.getConnection()) {
@@ -301,7 +334,19 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
                 try (ResultSet r = meta.getColumns(null, schema4Sql, null, null)) {
                     columns = readTablesColumns(r, aSchema, sqlDriver);
                 }
-                Map<String, DbTableKeys> keys = new HashMap<>();
+                if (columns.isEmpty()) {
+                    schema4Sql = schema4Sql.toLowerCase();
+                    try (ResultSet r = meta.getColumns(null, schema4Sql, null, null)) {
+                        columns = readTablesColumns(r, aSchema, sqlDriver);
+                    }
+                }
+                if (columns.isEmpty()) {
+                    schema4Sql = schema4Sql.toUpperCase();
+                    try (ResultSet r = meta.getColumns(null, schema4Sql, null, null)) {
+                        columns = readTablesColumns(r, aSchema, sqlDriver);
+                    }
+                }
+                Map<String, DbTableKeys> keys = new CaseInsesitiveMap<>();
                 for (String aTable : aTables) {
                     try (ResultSet r = meta.getPrimaryKeys(null, schema4Sql, aTable)) {
                         DbTableKeys tableKeys = readTablesPrimaryKeys(r);
@@ -317,7 +362,7 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
         }
 
         protected Map<String, Fields> readTablesColumns(ResultSet r, String aSchema, SqlDriver sqlDriver) throws Exception {
-            Map<String, Fields> tabledFields = new HashMap<>();
+            Map<String, Fields> tabledFields = new CaseInsesitiveMap<>();
             if (r != null) {
                 ColumnsIndicies colIndicies = new ColumnsIndicies(r.getMetaData());
                 int JDBCCOLS_TABLE_INDEX = colIndicies.find(ClientConstants.JDBCCOLS_TABLE_NAME);
@@ -403,9 +448,9 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
                     String lfkTableName = r.getString(JDBCFKS_FKTABLE_NAME_INDEX);
                     String lfkField = r.getString(JDBCFKS_FKCOLUMN_NAME_INDEX);
                     String lfkName = r.getString(JDBCFKS_FK_NAME_INDEX);
-                    Short lfkUpdateRule = r.getShort(JDBCFKS_FKUPDATE_RULE_INDEX);
-                    Short lfkDeleteRule = r.getShort(JDBCFKS_FKDELETE_RULE_INDEX);
-                    Short lfkDeferability = r.getShort(JDBCFKS_FKDEFERRABILITY_INDEX);
+                    short lfkUpdateRule = r.getShort(JDBCFKS_FKUPDATE_RULE_INDEX);
+                    short lfkDeleteRule = r.getShort(JDBCFKS_FKDELETE_RULE_INDEX);
+                    short lfkDeferability = r.getShort(JDBCFKS_FKDEFERRABILITY_INDEX);
                     //
                     String lpkSchema = r.getString(JDBCFKS_FKPKTABLE_SCHEM_INDEX);
                     String lpkTableName = r.getString(JDBCFKS_FKPKTABLE_NAME_INDEX);
@@ -417,7 +462,7 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
                         dbPksFks = new DbTableKeys();
                         tabledKeys.put(lfkTableName, dbPksFks);
                     }
-                    dbPksFks.addForeignKey(lfkSchema, lfkTableName, lfkField, lfkName, ForeignKeySpec.ForeignKeyRule.valueOf(lfkUpdateRule != null ? lfkUpdateRule : 0/*DatabaseMetaData.importedKeyCascade*/), ForeignKeySpec.ForeignKeyRule.valueOf(lfkDeleteRule != null ? lfkDeleteRule : 0/*DatabaseMetaData.importedKeyCascade*/), lfkDeferability != null && lfkDeferability == 5, lpkSchema, lpkTableName, lpkField, lpkName);
+                    dbPksFks.addForeignKey(lfkSchema, lfkTableName, lfkField, lfkName, ForeignKeySpec.ForeignKeyRule.valueOf(lfkUpdateRule), ForeignKeySpec.ForeignKeyRule.valueOf(lfkDeleteRule), lfkDeferability == 5, lpkSchema, lpkTableName, lpkField, lpkName);
                 }
             }
         }

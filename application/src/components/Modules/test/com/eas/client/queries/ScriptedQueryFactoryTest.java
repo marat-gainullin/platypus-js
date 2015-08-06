@@ -28,7 +28,7 @@ public class ScriptedQueryFactoryTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        indexer = new ApplicationSourceIndexer("c:/projects/platypus-tests");
+        indexer = new ApplicationSourceIndexer("c:/projects/PlatypusTests");
         DbConnectionSettings settings = new DbConnectionSettings();
         settings.setUrl("jdbc:oracle:thin:@asvr/adb");
         settings.setUser("eas");
@@ -269,11 +269,13 @@ public class ScriptedQueryFactoryTest {
         for (int i = 0; i < testQuery.getFields().getFieldsCount(); i++) {
             Field fieldMtd = testQuery.getFields().get(i + 1);
             assertNotNull(fieldMtd);
+            /* Jdbc friver of oracle <= ojdbc6 does not support remarks for tables and for columns
             if (i == 0 || i == 5) {
                 assertNotNull(fieldMtd.getDescription());
             } else {
                 assertNull(fieldMtd.getDescription());
             }
+            */
         }
         assertEquals(4, testQuery.getParameters().getParametersCount());
     }
@@ -300,11 +302,13 @@ public class ScriptedQueryFactoryTest {
         for (int i = 0; i < testQuery.getFields().getFieldsCount(); i++) {
             Field fieldMtd = testQuery.getFields().get(i + 1);
             assertNotNull(fieldMtd);
+            /* Jdbc friver of oracle <= ojdbc6 does not support remarks for tables and for columns
             if (i == 0 || i == 5) {
                 assertNotNull(fieldMtd.getDescription());
             } else {
                 assertNull(fieldMtd.getDescription());
             }
+            */
         }
         assertEquals(4, testQuery.getParameters().getParametersCount());
     }
@@ -372,6 +376,27 @@ public class ScriptedQueryFactoryTest {
     }
 
     @Test
+    public void testPrimaryKey() throws Exception {
+        LocalQueriesProxy queriesProxy = new LocalQueriesProxy(resource.getClient(), indexer);
+        SqlQuery testQuery = queriesProxy.getQuery("primary_key", null, null, null);
+        Fields fields = testQuery.getFields();
+        assertNotNull(fields);
+        assertTrue(fields.getFieldsCount() > 0);
+        assertTrue(fields.get(1).isPk());
+    }
+
+    @Test
+    public void testMultiplePrimaryKeys() throws Exception {
+        LocalQueriesProxy queriesProxy = new LocalQueriesProxy(resource.getClient(), indexer);
+        SqlQuery testQuery = queriesProxy.getQuery("multiple_primary_keys", null, null, null);
+        Fields fields = testQuery.getFields();
+        assertNotNull(fields);
+        assertTrue(fields.getFieldsCount() == 2);
+        assertTrue(fields.get(1).isPk());
+        assertTrue(fields.get(2).isPk());
+    }
+
+    @Test
     public void testWithoutAliases_Schema_NonSchema_Schema_Columns() throws Exception {
         LocalQueriesProxy queriesProxy = new LocalQueriesProxy(resource.getClient(), indexer);
         SqlQuery testQuery = queriesProxy.getQuery("without_aliases_with_schema_without_schema_columns_from_single_table", null, null, null);
@@ -388,27 +413,6 @@ public class ScriptedQueryFactoryTest {
             assertNotNull(fieldMtd);
         }
         assertEquals(0, testQuery.getParameters().getParametersCount());
-    }
-
-    @Test
-    public void testPrimaryKey() throws Exception {
-        LocalQueriesProxy queriesProxy = new LocalQueriesProxy(resource.getClient(), indexer);
-        SqlQuery testQuery = queriesProxy.getQuery("primary_key", null, null, null);
-        Fields schema = testQuery.getFields();
-        assertNotNull(schema);
-        assertTrue(schema.getFieldsCount() > 0);
-        assertTrue(schema.get(1).isPk());
-    }
-
-    @Test
-    public void testMultiplePrimaryKeys() throws Exception {
-        LocalQueriesProxy queriesProxy = new LocalQueriesProxy(resource.getClient(), indexer);
-        SqlQuery testQuery = queriesProxy.getQuery("multiple_primary_keys", null, null, null);
-        Fields fields = testQuery.getFields();
-        assertNotNull(fields);
-        assertTrue(fields.getFieldsCount() == 2);
-        assertTrue(fields.get(1).isPk());
-        assertTrue(fields.get(2).isPk());
     }
 
     @Test

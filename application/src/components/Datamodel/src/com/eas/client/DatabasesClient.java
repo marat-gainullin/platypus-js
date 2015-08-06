@@ -355,7 +355,6 @@ public class DatabasesClient {
         if (aDatasourceName != null) {
             if (!mdCaches.containsKey(aDatasourceName)) {
                 MetadataCache cache = new MetadataCache(this, aDatasourceName);
-                mdCaches.put(aDatasourceName, cache);
                 if (autoFillMetadata) {
                     try {
                         cache.fillTablesCacheByConnectionSchema();
@@ -363,6 +362,7 @@ public class DatabasesClient {
                         Logger.getLogger(DatabasesClient.class.getName()).log(Level.WARNING, ex.getMessage());
                     }
                 }
+                mdCaches.put(aDatasourceName, cache);
             }
             return mdCaches.get(aDatasourceName);
         } else {
