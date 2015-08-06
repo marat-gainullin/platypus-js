@@ -30,8 +30,8 @@ import java.util.Set;
 public class MySqlSqlDriver extends SqlDriver {
 
     // настройка экранирования наименования объектов БД
-    private final TwinString[] charsForWrap = {new TwinString("`", "`")};
-    private final char[] restrictedChars = {' ', ',', '\'', '"'};
+    private static final TwinString[] charsForWrap = {new TwinString("`", "`")};
+    private static final char[] restrictedChars = {' ', ',', '\'', '"'};
 
     protected static final int[] mySqlErrorCodes = {};
     protected static final String[] platypusErrorMessages = {};

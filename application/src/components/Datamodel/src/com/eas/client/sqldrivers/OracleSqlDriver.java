@@ -37,13 +37,13 @@ import org.geotools.data.oracle.sdo.GeometryConverter;
 
 /**
  *
- * @author Marat
+ * @author mg
  */
 public class OracleSqlDriver extends SqlDriver {
 
     // настройка экранирования наименования объектов БД
-    private final TwinString[] charsForWrap = {new TwinString("\"", "\"")};
-    private final char[] restrictedChars = {' ', ',', '\'', '"'};
+    private static final TwinString[] charsForWrap = {new TwinString("\"", "\"")};
+    private static final char[] restrictedChars = {' ', ',', '\'', '"'};
 
     protected static final OracleTypesResolver resolver = new OracleTypesResolver();
     protected static final String SET_SCHEMA_CLAUSE = "alter session set current_schema = %s";

@@ -4,7 +4,6 @@
  */
 package com.eas.client.sqldrivers;
 
-import com.eas.client.ClientConstants;
 import com.eas.client.changes.JdbcChangeValue;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
@@ -18,7 +17,6 @@ import java.sql.SQLException;
 import java.sql.Wrapper;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  *
@@ -27,8 +25,8 @@ import java.util.Set;
 public class MsSqlSqlDriver extends SqlDriver {
 
     // настройка экранирования наименования объектов БД
-    private final TwinString[] charsForWrap = {new TwinString("\"", "\""), new TwinString("[", "]")};
-    private final char[] restrictedChars = {' ', ',', '\'', '"'};
+    private static final TwinString[] charsForWrap = {new TwinString("\"", "\""), new TwinString("[", "]")};
+    private static final char[] restrictedChars = {' ', ',', '\'', '"'};
 
     protected static final String GET_SCHEMA_CLAUSE = "SELECT SCHEMA_NAME()";
     protected static final String CREATE_SCHEMA_CLAUSE = "CREATE SCHEMA %s";
