@@ -31,8 +31,8 @@ import org.postgis.PGgeometry;
 public class PostgreSqlDriver extends SqlDriver {
 
     // настройка экранирования наименования объектов БД
-    private final TwinString[] charsForWrap = {new TwinString("\"", "\"")};
-    private final char[] restrictedChars = {' ', ',', '\'', '"'};
+    private static final TwinString[] charsForWrap = {new TwinString("\"", "\"")};
+    private static final char[] restrictedChars = {' ', ',', '\'', '"'};
 
     protected static final PostgreTypesResolver resolver = new PostgreTypesResolver();
     protected static final String SET_SCHEMA_CLAUSE = "set search_path = %s,public";

@@ -38,7 +38,7 @@ import java.util.logging.Logger;
  */
 public abstract class SqlDriver implements StatementsGenerator.GeometryConverter {
 
-    protected class TwinString {
+    protected static class TwinString {
 
         private final String left;
         private final String right;

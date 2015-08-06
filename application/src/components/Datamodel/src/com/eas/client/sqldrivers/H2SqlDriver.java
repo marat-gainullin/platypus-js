@@ -1,6 +1,5 @@
 package com.eas.client.sqldrivers;
 
-import com.eas.client.ClientConstants;
 import com.eas.client.changes.JdbcChangeValue;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
@@ -15,7 +14,6 @@ import java.sql.Statement;
 import java.sql.Wrapper;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  *
@@ -24,8 +22,8 @@ import java.util.Set;
 public class H2SqlDriver extends SqlDriver {
 
     // настройка экранирования наименования объектов БД
-    private final TwinString[] charsForWrap = {new TwinString("\"", "\""), new TwinString("`", "`")};
-    private final char[] restrictedChars = {' ', ',', '\'', '"'};
+    private static final TwinString[] charsForWrap = {new TwinString("\"", "\""), new TwinString("`", "`")};
+    private static final char[] restrictedChars = {' ', ',', '\'', '"'};
 
     protected TypesResolver resolver = new H2TypesResolver();
     protected static final int[] h2ErrorCodes = {};

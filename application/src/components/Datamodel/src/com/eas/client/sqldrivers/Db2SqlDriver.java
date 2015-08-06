@@ -27,8 +27,8 @@ import java.util.List;
 public class Db2SqlDriver extends SqlDriver {
 
     // настройка экранирования наименования объектов БД
-    private final TwinString[] charsForWrap = {new TwinString("\"", "\"")};
-    private final char[] restrictedChars = {' ', ',', '\'', '"'};
+    private static final TwinString[] charsForWrap = {new TwinString("\"", "\"")};
+    private static final char[] restrictedChars = {' ', ',', '\'', '"'};
 
     protected static final String SET_SCHEMA_CLAUSE = "SET SCHEMA %s";
     protected static final String GET_SCHEMA_CLAUSE = "VALUES CURRENT SCHEMA";
