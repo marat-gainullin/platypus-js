@@ -367,7 +367,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
         MetadataCache mdCache = basesProxy.getMetadataCache(datasourceName);
         if (mdCache != null) {
             mdCache.clear();
-            mdCache.fillTablesCacheByConnectionSchema(true);
+            mdCache.fillTablesCacheByConnectionSchema();
         }
         String dbConnectingCompleteMsg = NbBundle.getMessage(PlatypusProjectImpl.class, "LBL_Connecting_Complete", aDatasourceName); // NOI18N
         StatusDisplayer.getDefault().setStatusText(dbConnectingCompleteMsg);

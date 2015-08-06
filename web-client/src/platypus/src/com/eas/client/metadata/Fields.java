@@ -80,7 +80,6 @@ public class Fields {
 				if (aSource.get(i + 1) != null) {
 					Field copied = aSource.get(i + 1).copy();
 					fields.add(i, copied);
-					copied.setOwner(this);
 				} else {
 					fields.add(i, null);
 				}
@@ -398,7 +397,6 @@ public class Fields {
 	public boolean add(Field aField) {
 		if (aField != null && fields != null) {
 			boolean res = fields.add(aField);
-			aField.setOwner(this);
 			invalidateFieldsHash();
 			return res;
 		}
@@ -417,7 +415,6 @@ public class Fields {
 	public void add(int index, Field aField) {
 		if (aField != null && fields != null) {
 			fields.add(index - 1, aField);
-			aField.setOwner(this);
 			invalidateFieldsHash();
 		}
 	}
@@ -427,10 +424,9 @@ public class Fields {
 	 * 
 	 * @param aField
 	 *            <code>Field</code> instance to remove.
-	 * @return <code>True</code> if removing succeded.
+	 * @return <code>True</code> if removing succeeded.
 	 */
 	public boolean remove(Field aField) {
-		aField.setOwner(null);
 		int oldSize = fields.size();
 		fields.remove(aField);
 		invalidateFieldsHash();

@@ -28,16 +28,13 @@ import com.google.gwt.core.client.JavaScriptObject;
 public class Field {
 
 	protected String name = "";
-	protected String description;// May be null
-	protected boolean nullable = true;
-	protected boolean readonly;
-	protected boolean pk;
-	// Data is always inserted
-	protected boolean strong4Insert;
-	protected ForeignKeySpec fk;
 	protected String tableName;
+	protected String description;// May be null
 	protected String type;
-	protected Fields owner;
+	protected boolean readonly;
+	protected boolean nullable = true;
+	protected boolean pk;
+	protected ForeignKeySpec fk;
 
 	/**
 	 * The default constructor.
@@ -97,14 +94,6 @@ public class Field {
 		assignFrom(aSourceField);
 	}
 
-	public Fields getOwner() {
-		return owner;
-	}
-
-	public void setOwner(Fields aOwner) {
-		owner = aOwner;
-	}
-
 	/**
 	 * Returns if this field is foreign key to another table or it is
 	 * self-reference key.
@@ -133,19 +122,6 @@ public class Field {
 	 */
 	public void setPk(boolean aValue) {
 		pk = aValue;
-	}
-
-	/**
-	 * Indicates that this field will be allways present in insert statements.
-	 * 
-	 * @return Whether this field is allways present in insert statements.
-	 */
-	public boolean isStrong4Insert() {
-		return strong4Insert;
-	}
-
-	public void setStrong4Insert(boolean aValue) {
-		strong4Insert = aValue;
 	}
 
 	/**
@@ -391,7 +367,6 @@ public class Field {
 			setNullable(aSourceField.isNullable());
 			setReadonly(aSourceField.isReadonly());
 			setPk(aSourceField.isPk());
-			setStrong4Insert(aSourceField.isStrong4Insert());
 			ForeignKeySpec lfk = aSourceField.getFk();
 			if (lfk != null) {
 				setFk((ForeignKeySpec) lfk.copy());
@@ -427,9 +402,6 @@ public class Field {
 				sb.append(rf.table).append(".");
 			}
 			sb.append(rf.field);
-		}
-		if (strong4Insert) {
-			sb.append(", strong4Insert");
 		}
 		sb.append(", ").append(type);
 		if (nullable) {
@@ -475,14 +447,6 @@ public class Field {
 				},
 				set : function(aValue) {
 					aField.@com.eas.client.metadata.Field::setPk(Z)(!!aValue);
-				}
-			});
-			Object.defineProperty(published, "strong4Insert", {
-				get : function() {
-					return aField.@com.eas.client.metadata.Field::isStrong4Insert()();
-				},
-				set : function(aValue) {
-					aField.@com.eas.client.metadata.Field::setStrong4Insert(Z)(!!aValue);
 				}
 			});
 			Object.defineProperty(published, "nullable", {

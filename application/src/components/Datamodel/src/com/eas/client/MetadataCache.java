@@ -125,7 +125,7 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
     private void checkSchemaFields(String aTableName) throws Exception {
         String schema = schemaFromTableName(aTableName);
         if (!schemasTablesFields.containsKey(schema)) {
-            fillTablesCacheBySchema(schema, true);
+            fillTablesCacheBySchema(schema);
         }
     }
 
@@ -169,8 +169,8 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
      * @param aFullMetadata
      * @throws Exception
      */
-    public final void fillTablesCacheByConnectionSchema(boolean aFullMetadata) throws Exception {
-        fillTablesCacheBySchema(null, aFullMetadata);
+    public final void fillTablesCacheByConnectionSchema() throws Exception {
+        fillTablesCacheBySchema(null);
     }
 
     /**
@@ -178,23 +178,14 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
      *
      * @param aSchema A schema for witch we should achieve metadata information.
      * If it is null, connection default schema is used
-     * @param aFullMetadata Indicated that full metadata is to be archieved.
      * @throws Exception
      */
-    public void fillTablesCacheBySchema(String aSchema, boolean aFullMetadata) throws Exception {
+    public void fillTablesCacheBySchema(String aSchema) throws Exception {
         String schema4Sql = aSchema != null && !aSchema.isEmpty() ? aSchema : getDatasourceSchema();
         if (schema4Sql != null && !schema4Sql.isEmpty()) {
             Callable<Map<String, String>> tablesReader = () -> {
                 DataSource ds = client.obtainDataSource(datasourceName);
                 try (Connection conn = ds.getConnection()) {
-                    /*
-                     Set<String> tablesTypes = new HashSet<>();
-                     try (ResultSet r = conn.getMetaData().getTableTypes()) {
-                     while (r.next()) {
-                     tablesTypes.add(r.getString(ClientConstants.JDBCCOLS_TABLE_TYPE));
-                     }
-                     }
-                     */
                     try (ResultSet r = conn.getMetaData().getTables(null, schema4Sql, null, new String[]{"TABLE", "VIEW"})) {
                         ColumnsIndicies idxs = new ColumnsIndicies(r.getMetaData());
                         int colIndex = idxs.find(ClientConstants.JDBCCOLS_TABLE_NAME);
@@ -214,7 +205,7 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
             Map<String, String> tablesNames = tablesReader.call();
             TablesFieldsCache tablesFields = new TablesFieldsCache();
             schemasTablesFields.put(aSchema, tablesFields);
-            Map<String, Fields> queried = tablesFields.query(aSchema, tablesNames.keySet(), aFullMetadata);
+            Map<String, Fields> queried = tablesFields.query(aSchema, tablesNames.keySet());
             tablesFields.fill(aSchema, queried, tablesNames);
         }
     }
@@ -262,7 +253,7 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
             super();
         }
 
-        protected void merge(String aSchema, Map<String, Fields> aTablesFields, Map<String, DbTableKeys> aTablesKeys) throws Exception {
+        protected void resolveKeys(String aSchema, Map<String, Fields> aTablesFields, Map<String, DbTableKeys> aTablesKeys) throws Exception {
             aTablesFields.keySet().stream().forEach((String lTableName) -> {
                 Fields fields = aTablesFields.get(lTableName);
                 DbTableKeys keys = aTablesKeys.get(lTableName);
@@ -297,39 +288,29 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
             }
         }
 
-        protected Map<String, Fields> query(String aSchema, Set<String> aTables, boolean aFullMetadata) throws Exception {
+        protected Map<String, Fields> query(String aSchema, Set<String> aTables) throws Exception {
             SqlDriver sqlDriver = getDatasourceSqlDriver();
             final String schema4Sql = aSchema != null && !aSchema.isEmpty() ? aSchema : getDatasourceSchema();
-            Callable<Map<String, Fields>> columnsReader = () -> {
-                DataSource ds = client.obtainDataSource(datasourceName);
-                try (Connection conn = ds.getConnection()) {
-                    try (ResultSet r = conn.getMetaData().getColumns(null, schema4Sql, null, null)) {
-                        return readTablesColumns(r, aSchema, sqlDriver);
-                    }
-                }
-            };
-            Map<String, Fields> columns = columnsReader.call();
-            Map<String, DbTableKeys> keys = new HashMap<>();
+            Map<String, Fields> columns;
             DataSource ds = client.obtainDataSource(datasourceName);
             try (Connection conn = ds.getConnection()) {
+                DatabaseMetaData meta = conn.getMetaData();
+                try (ResultSet r = meta.getColumns(null, schema4Sql, null, null)) {
+                    columns = readTablesColumns(r, aSchema, sqlDriver);
+                }
+                Map<String, DbTableKeys> keys = new HashMap<>();
                 for (String aTable : aTables) {
-                    try (ResultSet r = conn.getMetaData().getPrimaryKeys(null, schema4Sql, aTable)) {
+                    try (ResultSet r = meta.getPrimaryKeys(null, schema4Sql, aTable)) {
                         DbTableKeys tableKeys = readTablesPrimaryKeys(r);
                         keys.put(aTable, tableKeys);
                     }
-                }
-            }
-            if (aFullMetadata) {
-                try (Connection conn = ds.getConnection()) {
-                    for (String aTable : aTables) {
-                        try (ResultSet r = conn.getMetaData().getImportedKeys(null, schema4Sql, aTable)) {
-                            readTablesForeignKeys(r, aSchema, sqlDriver, keys);
-                        }
+                    try (ResultSet r = meta.getImportedKeys(null, schema4Sql, aTable)) {
+                        readTablesForeignKeys(r, aSchema, sqlDriver, keys);
                     }
                 }
+                resolveKeys(aSchema, columns, keys);
+                return columns;
             }
-            merge(aSchema, columns, keys);
-            return columns;
         }
 
         protected Map<String, Fields> readTablesColumns(ResultSet r, String aSchema, SqlDriver sqlDriver) throws Exception {
@@ -472,39 +453,45 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
                     while (r.next()) {
                         //String tableName = r.getString(JDBCIDX_TABLE_NAME);
                         String idxName = r.getString(JDBCIDX_INDEX_NAME);
-                        DbTableIndexSpec idxSpec = tableIndexes.getIndexes().get(idxName);
-                        if (idxSpec == null) {
-                            idxSpec = new DbTableIndexSpec();
-                            idxSpec.setName(idxName);
-                            tableIndexes.getIndexes().put(idxName, idxSpec);
+                        if (!r.wasNull()) {
+                            DbTableIndexSpec idxSpec = tableIndexes.getIndexes().get(idxName);
+                            if (idxSpec == null) {
+                                idxSpec = new DbTableIndexSpec();
+                                idxSpec.setName(idxName);
+                                tableIndexes.getIndexes().put(idxName, idxSpec);
+                            }
+                            boolean isUnique = r.getBoolean(JDBCIDX_NON_UNIQUE);
+                            idxSpec.setUnique(isUnique);
+                            short type = r.getShort(JDBCIDX_TYPE);
+                            idxSpec.setClustered(false);
+                            idxSpec.setHashed(false);
+                            switch (type) {
+                                case DatabaseMetaData.tableIndexClustered:
+                                    idxSpec.setClustered(true);
+                                    break;
+                                case DatabaseMetaData.tableIndexHashed:
+                                    idxSpec.setHashed(true);
+                                    break;
+                                case DatabaseMetaData.tableIndexStatistic:
+                                    break;
+                                case DatabaseMetaData.tableIndexOther:
+                                    break;
+                            }
+                            String sColumnName = r.getString(JDBCIDX_COLUMN_NAME);
+                            if (!r.wasNull()) {
+                                DbTableIndexColumnSpec column = idxSpec.getColumn(sColumnName);
+                                if (column == null) {
+                                    column = new DbTableIndexColumnSpec(sColumnName, true);
+                                    idxSpec.addColumn(column);
+                                }
+                                String sAsc = r.getString(JDBCIDX_ASC_OR_DESC);
+                                if (!r.wasNull()) {
+                                    column.setAscending(sAsc.toLowerCase().equals("a"));
+                                }
+                                short sPosition = r.getShort(JDBCIDX_ORDINAL_POSITION);
+                                column.setOrdinalPosition((int) sPosition);
+                            }
                         }
-                        boolean isUnique = r.getBoolean(JDBCIDX_NON_UNIQUE);
-                        idxSpec.setUnique(isUnique);
-                        short type = r.getShort(JDBCIDX_TYPE);
-                        idxSpec.setClustered(false);
-                        idxSpec.setHashed(false);
-                        switch (type) {
-                            case DatabaseMetaData.tableIndexClustered:
-                                idxSpec.setClustered(true);
-                                break;
-                            case DatabaseMetaData.tableIndexHashed:
-                                idxSpec.setHashed(true);
-                                break;
-                            case DatabaseMetaData.tableIndexStatistic:
-                                break;
-                            case DatabaseMetaData.tableIndexOther:
-                                break;
-                        }
-                        String sColumnName = r.getString(JDBCIDX_COLUMN_NAME);
-                        DbTableIndexColumnSpec column = idxSpec.getColumn(sColumnName);
-                        if (column == null) {
-                            column = new DbTableIndexColumnSpec(sColumnName, true);
-                            idxSpec.addColumn(column);
-                        }
-                        String sAsc = r.getString(JDBCIDX_ASC_OR_DESC);
-                        column.setAscending(sAsc.toLowerCase().equals("a"));
-                        short sPosition = r.getShort(JDBCIDX_ORDINAL_POSITION);
-                        column.setOrdinalPosition((int) sPosition);
                     }
                 }
             }

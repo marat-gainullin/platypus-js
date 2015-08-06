@@ -358,7 +358,7 @@ public class DatabasesClient {
                 mdCaches.put(aDatasourceName, cache);
                 if (autoFillMetadata) {
                     try {
-                        cache.fillTablesCacheByConnectionSchema(true);
+                        cache.fillTablesCacheByConnectionSchema();
                     } catch (ResourceUnavalableException ex) {
                         Logger.getLogger(DatabasesClient.class.getName()).log(Level.WARNING, ex.getMessage());
                     }

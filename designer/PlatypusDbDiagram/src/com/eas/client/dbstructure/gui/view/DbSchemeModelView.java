@@ -34,6 +34,7 @@ import com.eas.client.model.gui.view.entities.EntityView;
 import com.eas.client.model.gui.view.model.ModelView;
 import com.eas.client.model.store.DbSchemeModel2XmlDom;
 import com.eas.client.model.store.XmlDom2DbSchemeModel;
+import com.eas.designer.application.dbdiagram.nodes.TableFieldNode;
 import com.eas.designer.datamodel.nodes.FieldNode;
 import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
@@ -51,6 +52,7 @@ import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CompoundEdit;
+import javax.swing.undo.UndoableEdit;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
 import org.openide.explorer.propertysheet.PropertySheet;
@@ -318,8 +320,40 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                     try {
                         JdbcField field = NewFieldEdit.createField(entity);
                         PropertySheet ps = new PropertySheet();
-                        // FieldNode is used here to avoid in database edits generation by TableFieldNode
-                        FieldNode fieldNode = new FieldNode(field, Lookups.fixed(entity), true);
+                        TableFieldNode fieldNode = new TableFieldNode(field, Lookups.fixed(entity)){
+
+                            // setXXX() methods are overrided here to avoid in database edits generation by TableFieldNode
+                            @Override
+                            public void setName(String val) {
+                                field.setName(val);
+                            }
+
+                            @Override
+                            public void setType(String val) {
+                                field.setType(val);
+                            }
+
+                            @Override
+                            public void setDescription(String val) {
+                                field.setDescription(val);
+                            }
+
+                            @Override
+                            public void setSize(Integer val) {
+                                ((JdbcField)field).setSize(val);
+                            }
+
+                            @Override
+                            public void setScale(Integer val) {
+                                ((JdbcField)field).setScale(val);
+                            }
+
+                            @Override
+                            public void setNullable(Boolean val) {
+                                ((JdbcField)field).setNullable(val);
+                            }
+                            
+                        };
                         ps.setNodes(new Node[]{fieldNode});
                         DialogDescriptor dd = new DialogDescriptor(ps, NbBundle.getMessage(DbSchemeModelView.class, "MSG_NewSchemeFieldDialogTitle"));
                         if (DialogDescriptor.OK_OPTION.equals(DialogDisplayer.getDefault().notify(dd))) {
