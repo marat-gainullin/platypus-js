@@ -4,6 +4,7 @@
  */
 package com.eas.client.sqldrivers.resolvers;
 
+import com.eas.client.metadata.JdbcField;
 import java.util.Set;
 
 /**
@@ -21,5 +22,7 @@ public interface TypesResolver {
     public boolean isSized(String aTypeName);
 
     public boolean isScaled(String aTypeName);
+    
+    public void resolveSize(JdbcField aField);
 
 }

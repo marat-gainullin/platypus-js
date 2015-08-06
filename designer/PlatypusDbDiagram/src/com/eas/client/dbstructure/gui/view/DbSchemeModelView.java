@@ -4,6 +4,7 @@
  */
 package com.eas.client.dbstructure.gui.view;
 
+import com.eas.client.DatabasesClient;
 import com.eas.client.MetadataCache;
 import com.eas.client.SqlCompiledQuery;
 import com.eas.client.dbstructure.DbStructureUtils;
@@ -34,8 +35,8 @@ import com.eas.client.model.gui.view.entities.EntityView;
 import com.eas.client.model.gui.view.model.ModelView;
 import com.eas.client.model.store.DbSchemeModel2XmlDom;
 import com.eas.client.model.store.XmlDom2DbSchemeModel;
+import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.designer.application.dbdiagram.nodes.TableFieldNode;
-import com.eas.designer.datamodel.nodes.FieldNode;
 import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
 import java.awt.*;
@@ -52,11 +53,11 @@ import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CompoundEdit;
-import javax.swing.undo.UndoableEdit;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
 import org.openide.explorer.propertysheet.PropertySheet;
 import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.util.lookup.Lookups;
 import org.w3c.dom.Document;
@@ -320,7 +321,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                     try {
                         JdbcField field = NewFieldEdit.createField(entity);
                         PropertySheet ps = new PropertySheet();
-                        TableFieldNode fieldNode = new TableFieldNode(field, Lookups.fixed(entity)){
+                        TableFieldNode fieldNode = new TableFieldNode(field, Lookups.fixed(entity)) {
 
                             // setXXX() methods are overrided here to avoid in database edits generation by TableFieldNode
                             @Override
@@ -330,7 +331,15 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
 
                             @Override
                             public void setType(String val) {
-                                field.setType(val);
+                                try {
+                                    field.setType(val);
+                                    DatabasesClient client = model.getBasesProxy();
+                                    String datasourceName = model.getDatasourceName();
+                                    SqlDriver driver = client.getMetadataCache(datasourceName).getDatasourceSqlDriver();
+                                    driver.getTypesResolver().resolveSize((JdbcField) field);
+                                } catch (Exception ex) {
+                                    Exceptions.printStackTrace(ex);
+                                }
                             }
 
                             @Override
@@ -340,19 +349,19 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
 
                             @Override
                             public void setSize(Integer val) {
-                                ((JdbcField)field).setSize(val);
+                                ((JdbcField) field).setSize(val);
                             }
 
                             @Override
                             public void setScale(Integer val) {
-                                ((JdbcField)field).setScale(val);
+                                ((JdbcField) field).setScale(val);
                             }
 
                             @Override
                             public void setNullable(Boolean val) {
-                                ((JdbcField)field).setNullable(val);
+                                ((JdbcField) field).setNullable(val);
                             }
-                            
+
                         };
                         ps.setNodes(new Node[]{fieldNode});
                         DialogDescriptor dd = new DialogDescriptor(ps, NbBundle.getMessage(DbSchemeModelView.class, "MSG_NewSchemeFieldDialogTitle"));
@@ -724,7 +733,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                 }
                 // act with fields    
                 for (SelectedField<FieldsEntity> etf : getSelectedFields()) {
-                    JdbcField field = (JdbcField)etf.field;
+                    JdbcField field = (JdbcField) etf.field;
                     if (!field.isPk()) {
                         try {
                             dropField(entity, section, field, e);
@@ -1123,7 +1132,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
         String content = XmlDom2String.transform(doc);
         string2SystemClipboard(content);
     }
-    
+
     public void resolveTables() throws Exception {
         Map<Long, FieldsEntity> entities = model.getEntities();
         if (entities != null && !entities.isEmpty()) {

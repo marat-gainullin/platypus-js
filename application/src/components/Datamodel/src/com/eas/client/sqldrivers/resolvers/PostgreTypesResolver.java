@@ -4,6 +4,7 @@
  */
 package com.eas.client.sqldrivers.resolvers;
 
+import com.eas.client.metadata.JdbcField;
 import com.eas.script.Scripts;
 import java.util.Collections;
 import java.util.HashMap;
@@ -65,8 +66,8 @@ public class PostgreTypesResolver implements TypesResolver {
         rdbmsTypes2ApplicationTypes.put("timestamp without time zone", Scripts.DATE_TYPE_NAME);
         rdbmsTypes2ApplicationTypes.put("bytea", null);
         // gis types
-        rdbmsTypes2ApplicationTypes.put("geography", Scripts.GEOMETRY_TYPE_NAME);        
-        rdbmsTypes2ApplicationTypes.put("geometry", Scripts.GEOMETRY_TYPE_NAME);        
+        rdbmsTypes2ApplicationTypes.put("geography", Scripts.GEOMETRY_TYPE_NAME);
+        rdbmsTypes2ApplicationTypes.put("geometry", Scripts.GEOMETRY_TYPE_NAME);
         rdbmsTypes2ApplicationTypes.put("point", Scripts.GEOMETRY_TYPE_NAME);
         rdbmsTypes2ApplicationTypes.put("line", Scripts.GEOMETRY_TYPE_NAME);
         rdbmsTypes2ApplicationTypes.put("lseg", Scripts.GEOMETRY_TYPE_NAME);
@@ -122,5 +123,23 @@ public class PostgreTypesResolver implements TypesResolver {
     @Override
     public boolean isScaled(String aRDBMSType) {
         return jdbcTypesWithScale.contains(aRDBMSType.toLowerCase());
+    }
+
+    @Override
+    public void resolveSize(JdbcField aField) {
+        String sqlTypeName = aField.getType();
+        if (sqlTypeName != null) {
+            sqlTypeName = sqlTypeName.toLowerCase();
+            // check on max size
+            int fieldSize = aField.getSize();
+            Integer maxSize = jdbcTypesMaxSize.get(sqlTypeName);
+            if (maxSize != null && maxSize < fieldSize) {
+                aField.setSize(maxSize);
+            }
+            // check on default size
+            if (fieldSize <= 0 && jdbcTypesDefaultSize.containsKey(sqlTypeName)) {
+                aField.setSize(jdbcTypesDefaultSize.get(sqlTypeName));
+            }
+        }
     }
 }

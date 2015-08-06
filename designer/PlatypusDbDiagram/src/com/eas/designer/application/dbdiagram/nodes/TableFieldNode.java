@@ -4,6 +4,7 @@
  */
 package com.eas.designer.application.dbdiagram.nodes;
 
+import com.eas.client.DatabasesClient;
 import com.eas.client.dbstructure.DbStructureUtils;
 import com.eas.client.dbstructure.SqlActionsController;
 import com.eas.client.dbstructure.gui.edits.CreateFkEdit;
@@ -18,6 +19,7 @@ import com.eas.client.model.dbscheme.DbSchemeModel;
 import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.client.model.gui.edits.DeleteRelationEdit;
 import com.eas.client.model.gui.edits.fields.ChangeFieldEdit;
+import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.designer.datamodel.nodes.FieldNode;
 import java.beans.PropertyChangeEvent;
 import java.lang.reflect.InvocationTargetException;
@@ -160,11 +162,11 @@ public class TableFieldNode extends FieldNode {
                 JdbcField oldContent = new JdbcField((JdbcField)field);
                 JdbcField newContent = new JdbcField((JdbcField)field);
                 newContent.setType(val);
-                //
-                //DbSchemeModel model = (DbSchemeModel) getEntity().getModel();
-                //DatabasesClient client = model.getBasesProxy();
-                //String datasourceName = model.getDatasourceName();
-                //SqlDriver driver = client.getMetadataCache(datasourceName).getConnectionDriver();
+                DbSchemeModel model = (DbSchemeModel) getEntity().getModel();
+                DatabasesClient client = model.getBasesProxy();
+                String datasourceName = model.getDatasourceName();
+                SqlDriver driver = client.getMetadataCache(datasourceName).getDatasourceSqlDriver();
+                driver.getTypesResolver().resolveSize(newContent);
 
                 CompoundEdit section = new NotSavableDbStructureCompoundEdit();
                 Set<Relation<FieldsEntity>> rels = FieldsEntity.<FieldsEntity>getInOutRelationsByEntityField((FieldsEntity) getEntity(), field);

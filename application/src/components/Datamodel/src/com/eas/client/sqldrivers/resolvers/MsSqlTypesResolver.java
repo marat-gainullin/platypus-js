@@ -4,6 +4,7 @@
  */
 package com.eas.client.sqldrivers.resolvers;
 
+import com.eas.client.metadata.JdbcField;
 import com.eas.script.Scripts;
 import java.util.Collections;
 import java.util.HashMap;
@@ -109,5 +110,23 @@ public class MsSqlTypesResolver implements TypesResolver {
     @Override
     public boolean isScaled(String aRDBMSType) {
         return jdbcTypesWithScale.contains(aRDBMSType.toLowerCase());
+    }
+
+    @Override
+    public void resolveSize(JdbcField aField) {
+        String sqlTypeName = aField.getType();
+        if (sqlTypeName != null) {
+            sqlTypeName = sqlTypeName.toLowerCase();
+            // check on max size
+            int fieldSize = aField.getSize();
+            Integer maxSize = jdbcTypesMaxSize.get(sqlTypeName);
+            if (maxSize != null && maxSize < fieldSize) {
+                aField.setSize(maxSize);
+            }
+            // check on default size
+            if (fieldSize <= 0 && jdbcTypesDefaultSize.containsKey(sqlTypeName)) {
+                aField.setSize(jdbcTypesDefaultSize.get(sqlTypeName));
+            }
+        }
     }
 }
