@@ -25,11 +25,14 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.sql.DataSource;
 
 /**
@@ -441,58 +444,62 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
             String schema4Sql = aSchema != null && !aSchema.isEmpty() ? aSchema : getDatasourceSchema();
             DataSource ds = client.obtainDataSource(datasourceName);
             try (Connection conn = ds.getConnection()) {
-                try (ResultSet r = conn.getMetaData().getIndexInfo(null, schema4Sql, aTable, false, false)) {
-                    ColumnsIndicies idxs = new ColumnsIndicies(r.getMetaData());
-                    int JDBCIDX_INDEX_NAME = idxs.find(ClientConstants.JDBCIDX_INDEX_NAME);
-                    int JDBCIDX_NON_UNIQUE = idxs.find(ClientConstants.JDBCIDX_NON_UNIQUE);
-                    int JDBCIDX_TYPE = idxs.find(ClientConstants.JDBCIDX_TYPE);
-                    //int JDBCIDX_TABLE_NAME = idxs.find(ClientConstants.JDBCIDX_TABLE_NAME);
-                    int JDBCIDX_COLUMN_NAME = idxs.find(ClientConstants.JDBCIDX_COLUMN_NAME);
-                    int JDBCIDX_ASC_OR_DESC = idxs.find(ClientConstants.JDBCIDX_ASC_OR_DESC);
-                    int JDBCIDX_ORDINAL_POSITION = idxs.find(ClientConstants.JDBCIDX_ORDINAL_POSITION);
-                    while (r.next()) {
-                        //String tableName = r.getString(JDBCIDX_TABLE_NAME);
-                        String idxName = r.getString(JDBCIDX_INDEX_NAME);
-                        if (!r.wasNull()) {
-                            DbTableIndexSpec idxSpec = tableIndexes.getIndexes().get(idxName);
-                            if (idxSpec == null) {
-                                idxSpec = new DbTableIndexSpec();
-                                idxSpec.setName(idxName);
-                                tableIndexes.getIndexes().put(idxName, idxSpec);
-                            }
-                            boolean isUnique = r.getBoolean(JDBCIDX_NON_UNIQUE);
-                            idxSpec.setUnique(isUnique);
-                            short type = r.getShort(JDBCIDX_TYPE);
-                            idxSpec.setClustered(false);
-                            idxSpec.setHashed(false);
-                            switch (type) {
-                                case DatabaseMetaData.tableIndexClustered:
-                                    idxSpec.setClustered(true);
-                                    break;
-                                case DatabaseMetaData.tableIndexHashed:
-                                    idxSpec.setHashed(true);
-                                    break;
-                                case DatabaseMetaData.tableIndexStatistic:
-                                    break;
-                                case DatabaseMetaData.tableIndexOther:
-                                    break;
-                            }
-                            String sColumnName = r.getString(JDBCIDX_COLUMN_NAME);
+                try {
+                    try (ResultSet r = conn.getMetaData().getIndexInfo(null, schema4Sql, aTable, false, false)) {
+                        ColumnsIndicies idxs = new ColumnsIndicies(r.getMetaData());
+                        int JDBCIDX_INDEX_NAME = idxs.find(ClientConstants.JDBCIDX_INDEX_NAME);
+                        int JDBCIDX_NON_UNIQUE = idxs.find(ClientConstants.JDBCIDX_NON_UNIQUE);
+                        int JDBCIDX_TYPE = idxs.find(ClientConstants.JDBCIDX_TYPE);
+                        //int JDBCIDX_TABLE_NAME = idxs.find(ClientConstants.JDBCIDX_TABLE_NAME);
+                        int JDBCIDX_COLUMN_NAME = idxs.find(ClientConstants.JDBCIDX_COLUMN_NAME);
+                        int JDBCIDX_ASC_OR_DESC = idxs.find(ClientConstants.JDBCIDX_ASC_OR_DESC);
+                        int JDBCIDX_ORDINAL_POSITION = idxs.find(ClientConstants.JDBCIDX_ORDINAL_POSITION);
+                        while (r.next()) {
+                            //String tableName = r.getString(JDBCIDX_TABLE_NAME);
+                            String idxName = r.getString(JDBCIDX_INDEX_NAME);
                             if (!r.wasNull()) {
-                                DbTableIndexColumnSpec column = idxSpec.getColumn(sColumnName);
-                                if (column == null) {
-                                    column = new DbTableIndexColumnSpec(sColumnName, true);
-                                    idxSpec.addColumn(column);
+                                DbTableIndexSpec idxSpec = tableIndexes.getIndexes().get(idxName);
+                                if (idxSpec == null) {
+                                    idxSpec = new DbTableIndexSpec();
+                                    idxSpec.setName(idxName);
+                                    tableIndexes.getIndexes().put(idxName, idxSpec);
                                 }
-                                String sAsc = r.getString(JDBCIDX_ASC_OR_DESC);
+                                boolean isUnique = r.getBoolean(JDBCIDX_NON_UNIQUE);
+                                idxSpec.setUnique(isUnique);
+                                short type = r.getShort(JDBCIDX_TYPE);
+                                idxSpec.setClustered(false);
+                                idxSpec.setHashed(false);
+                                switch (type) {
+                                    case DatabaseMetaData.tableIndexClustered:
+                                        idxSpec.setClustered(true);
+                                        break;
+                                    case DatabaseMetaData.tableIndexHashed:
+                                        idxSpec.setHashed(true);
+                                        break;
+                                    case DatabaseMetaData.tableIndexStatistic:
+                                        break;
+                                    case DatabaseMetaData.tableIndexOther:
+                                        break;
+                                }
+                                String sColumnName = r.getString(JDBCIDX_COLUMN_NAME);
                                 if (!r.wasNull()) {
-                                    column.setAscending(sAsc.toLowerCase().equals("a"));
+                                    DbTableIndexColumnSpec column = idxSpec.getColumn(sColumnName);
+                                    if (column == null) {
+                                        column = new DbTableIndexColumnSpec(sColumnName, true);
+                                        idxSpec.addColumn(column);
+                                    }
+                                    String sAsc = r.getString(JDBCIDX_ASC_OR_DESC);
+                                    if (!r.wasNull()) {
+                                        column.setAscending(sAsc.toLowerCase().equals("a"));
+                                    }
+                                    short sPosition = r.getShort(JDBCIDX_ORDINAL_POSITION);
+                                    column.setOrdinalPosition((int) sPosition);
                                 }
-                                short sPosition = r.getShort(JDBCIDX_ORDINAL_POSITION);
-                                column.setOrdinalPosition((int) sPosition);
                             }
                         }
                     }
+                } catch (SQLException ex) {
+                    Logger.getLogger(MetadataCache.class.getName()).log(Level.WARNING, ex.toString());
                 }
             }
             tableIndexes.sortIndexesColumns();
