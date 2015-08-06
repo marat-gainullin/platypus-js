@@ -141,8 +141,7 @@ public class DocumentTextCompiler implements DocumentListener {
         }
         boolean publicQuery = PlatypusFilesSupport.getAnnotationValue(docText, JsDoc.Tag.PUBLIC_TAG) != null;
         boolean procedure = PlatypusFilesSupport.getAnnotationValue(docText, JsDoc.Tag.PROCEDURE_TAG) != null;
-        boolean manual = PlatypusFilesSupport.getAnnotationValue(docText, JsDoc.Tag.MANUAL_TAG) != null;
         boolean readonly = PlatypusFilesSupport.getAnnotationValue(docText, JsDoc.Tag.READONLY_TAG) != null;
-        dataObject.setQueryFlags(publicQuery, procedure, manual, readonly);
+        dataObject.setQueryFlags(publicQuery, procedure, readonly);
     }
 }

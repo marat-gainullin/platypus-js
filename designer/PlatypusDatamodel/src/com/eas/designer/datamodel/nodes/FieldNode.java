@@ -4,19 +4,15 @@
  */
 package com.eas.designer.datamodel.nodes;
 
-import com.eas.client.SQLUtils;
-import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.model.Entity;
-import com.eas.client.model.Relation;
-import com.eas.client.model.application.ReferenceRelation;
-import com.eas.client.model.gui.edits.AccessibleCompoundEdit;
-import com.eas.client.model.gui.edits.DeleteRelationEdit;
 import com.eas.client.model.gui.edits.fields.ChangeFieldEdit;
 import com.eas.client.model.gui.view.FieldsTypeIconsCache;
 import com.eas.client.model.query.QueryEntity;
+import com.eas.client.model.query.QueryModel;
 import com.eas.client.model.query.QueryParametersEntity;
+import com.eas.client.sqldrivers.resolvers.TypesResolver;
 import com.eas.designer.application.utils.CompoundIcon;
 import com.eas.designer.datamodel.ModelUndoProvider;
 import java.awt.Image;
@@ -28,9 +24,7 @@ import java.beans.PropertyEditor;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.event.UndoableEditEvent;
@@ -43,6 +37,7 @@ import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
+import org.openide.util.Exceptions;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
@@ -55,17 +50,10 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
 
     public static final String NAME_PROP_NAME = PROP_NAME;
     public static final String TABLE_NAME_PROP_NAME = "tableName"; //NOI18N
-    //public static final String DESCRIPTION_PROP_NAME = "description"; //NOI18N
-    //public static final String TYPE_INFO_PROP_NAME = "typeInfo"; //NOI18N
-    //public static final String PRECISION_PROP_NAME = "precision"; //NOI18N
-    //public static final String NULLABLE_PROP_NAME = "nullable"; //NOI18N
     public static final String TYPE_PROP_NAME = "type"; //NOI18N
-    public static final String TYPE_NAME_PROP_NAME = "typeName"; //NOI18N
-    //public static final String SIZE_PROP_NAME = "size"; //NOI18N
-    //public static final String SCALE_PROP_NAME = "scale"; //NOI18N
-    //public static final String REQUIRED_PROP_NAME = "required"; //NOI18N
     protected Field field;
     private boolean canChange;
+    protected TypesResolver resolver;
 
     public FieldNode(Field aField, Lookup aLookup, boolean aCanChange) {
         this(aField, aLookup);
@@ -76,11 +64,18 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
         super(Children.LEAF, aLookup);
         field = aField;
         field.getChangeSupport().addPropertyChangeListener(this);
+        try {
+            if (getEntity().getModel() instanceof QueryModel) {
+                resolver = ((QueryModel) getEntity().getModel()).getBasesProxy().getMetadataCache(((QueryModel) getEntity().getModel()).getDatasourceName()).getDatasourceSqlDriver().getTypesResolver();
+            }
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 
     @Override
     public void destroy() throws IOException {
-        field.getChangeSupport().removePropertyChangeListener(this);        
+        field.getChangeSupport().removePropertyChangeListener(this);
         super.destroy();
     }
 
@@ -97,21 +92,19 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
 
     @Override
     public Image getIcon(int type) {
-        return getIcon(field, type);
+        return getIcon(type, field, resolver);
     }
-
-    public static Image getIcon(Field aField, int aType) {
+    
+    public static Image getIcon(int type, Field aField, TypesResolver aResolver) {
         List<Icon> icons = new ArrayList<>();
-        Icon icon;
-        if (isStructSqlType(aField)) {
-            icon = FieldsTypeIconsCache.getIcon16(aField.getTypeInfo().getSqlTypeName());
-            if (icon == null) {
-                icon = FieldsTypeIconsCache.getIcon16(DataTypeInfo.OTHER.getSqlType());
-            }
-        } else {
-            icon = FieldsTypeIconsCache.getIcon16(aField.getTypeInfo().getSqlType());
+        Icon icon = FieldsTypeIconsCache.getIcon16(aField.getType());
+        if (icon == null && aResolver != null) {
+            String appType = aResolver.toApplicationType(aField.getType());
+            icon = FieldsTypeIconsCache.getIcon16(appType);
         }
-        icons.add(icon);
+        if (icon != null) {
+            icons.add(icon);
+        }
         if (aField.isPk()) {
             icons.add(FieldsTypeIconsCache.getPkIcon16());
         }
@@ -121,7 +114,7 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
         if (aField instanceof Parameter) {
             return ImageUtilities.icon2Image(new CompoundIcon(new CompoundIcon(CompoundIcon.Axis.Z_AXIS, 0, CompoundIcon.CENTER, CompoundIcon.CENTER, icons.toArray(new Icon[0])), FieldsTypeIconsCache.getParameterIcon16()));
         }
-        return ImageUtilities.icon2Image(new CompoundIcon(CompoundIcon.Axis.Z_AXIS, 0, CompoundIcon.CENTER, CompoundIcon.CENTER, icons.toArray(new Icon[0])));
+        return icons.isEmpty() ? null : ImageUtilities.icon2Image(new CompoundIcon(CompoundIcon.Axis.Z_AXIS, 0, CompoundIcon.CENTER, CompoundIcon.CENTER, icons.toArray(new Icon[0])));
     }
 
     @Override
@@ -180,45 +173,12 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
         return field.getTableName();
     }
 
-    public Integer getType() {
-        return field.getTypeInfo().getSqlType();
+    public String getType() {
+        return field.getType();
     }
 
-    public void setType(Integer val) {
+    public void setType(String val) {
         UndoableEdit e = editType(val);
-        if (e != null) {
-            getUndo().undoableEditHappened(new UndoableEditEvent(this, e));
-        }
-    }
-
-    public String getTypeName() {
-        return field.getTypeInfo().getSqlTypeName();
-    }
-
-    public void setTypeName(String val) {
-        UndoableEdit e = editTypeName(val);
-        if (e != null) {
-            getUndo().undoableEditHappened(new UndoableEditEvent(this, e));
-        }
-    }
-
-    public Integer getSize() {
-        return field.getSize();
-    }
-
-    public void setSize(Integer val) {
-        UndoableEdit e = editSize(val);
-        if (e != null) {
-            getUndo().undoableEditHappened(new UndoableEditEvent(this, e));
-        }
-    }
-
-    public Integer getScale() {
-        return field.getScale();
-    }
-
-    public void setScale(Integer val) {
-        UndoableEdit e = editScale(val);
         if (e != null) {
             getUndo().undoableEditHappened(new UndoableEditEvent(this, e));
         }
@@ -260,36 +220,34 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
             pSet.put(tableNameProp);
         }
         pSet.put(new TypeProperty());
-        pSet.put(new TypeNameProperty());
-        pSet.put(new SizeProperty());
-        pSet.put(new ScaleProperty());
         pSet.put(new NullableProperty());
         sheet.put(pSet);
         return sheet;
     }
-
-    protected void checkTypedLengthScale(Field after) {
-        if (after != null) {
-            if (SQLUtils.getTypeGroup(after.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.STRINGS) {
-                if (after.getPrecision() <= 0 || after.getSize() <= 0) {
-                    after.setPrecision(1);
-                    after.setSize(100);
-                }
-            } else if (SQLUtils.getTypeGroup(after.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.NUMBERS) {
-                if (after.getPrecision() <= 0 || after.getSize() <= 0) {
-                    after.setPrecision(0);
-                    after.setSize(0);
-                }
-                if (after.getPrecision() > 15 || after.getSize() > 15) {
-                    after.setPrecision(0);
-                    after.setSize(0);
-                }
-            } else if (SQLUtils.getTypeGroup(after.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.LOGICAL) {//TODO: how to handle these types?
-            } else if (SQLUtils.getTypeGroup(after.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.DATES) {
-            } else if (SQLUtils.getTypeGroup(after.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.LOBS) {
-            }
-        }
-    }
+    /*
+     protected void checkTypedLengthScale(Field after) {
+     if (after != null) {
+     if (SQLUtils.getTypeGroup(after.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.STRINGS) {
+     if (after.getPrecision() <= 0 || after.getSize() <= 0) {
+     after.setPrecision(1);
+     after.setSize(100);
+     }
+     } else if (SQLUtils.getTypeGroup(after.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.NUMBERS) {
+     if (after.getPrecision() <= 0 || after.getSize() <= 0) {
+     after.setPrecision(0);
+     after.setSize(0);
+     }
+     if (after.getPrecision() > 15 || after.getSize() > 15) {
+     after.setPrecision(0);
+     after.setSize(0);
+     }
+     } else if (SQLUtils.getTypeGroup(after.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.LOGICAL) {//TODO: how to handle these types?
+     } else if (SQLUtils.getTypeGroup(after.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.DATES) {
+     } else if (SQLUtils.getTypeGroup(after.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.LOBS) {
+     }
+     }
+     }
+     */
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
@@ -303,17 +261,9 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
                 fireDisplayNameChange(null, getDisplayName());
                 firePropertyChange(Field.DESCRIPTION_PROPERTY, evt.getOldValue(), evt.getNewValue());
                 break;
-            case Field.TYPE_INFO_PROPERTY:
+            case Field.TYPE_PROPERTY:
                 firePropertyChange(TYPE_PROP_NAME, evt.getOldValue(), evt.getNewValue());
-                firePropertyChange(TYPE_NAME_PROP_NAME, evt.getOldValue(), evt.getNewValue());
                 fireIconChange();
-                break;
-            case Field.SIZE_PROPERTY:
-            case Field.PRECISION_PROPERTY:
-                firePropertyChange(Field.SIZE_PROPERTY, evt.getOldValue(), evt.getNewValue());
-                break;
-            case Field.SCALE_PROPERTY:
-                firePropertyChange(Field.SCALE_PROPERTY, evt.getOldValue(), evt.getNewValue());
                 break;
             case Field.NULLABLE_PROPERTY:
                 firePropertyChange(Field.NULLABLE_PROPERTY, evt.getOldValue(), evt.getNewValue());
@@ -324,10 +274,6 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
     @Override
     public Transferable drag() throws IOException {
         return getTransferable();
-    }
-
-    private static boolean isStructSqlType(Field aField) {
-        return DataTypeInfo.STRUCT.getSqlType() == aField.getTypeInfo().getSqlType() || DataTypeInfo.OTHER.getSqlType() == aField.getTypeInfo().getSqlType();
     }
 
     private Transferable getTransferable() {
@@ -365,31 +311,16 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
         return edit;
     }
 
-    protected UndoableEdit editType(Integer val) {
+    protected UndoableEdit editType(String val) {
         Field oldContent = new Field(field);
         Field newContent = new Field(field);
-        newContent.setTypeInfo(DataTypeInfo.valueOf((Integer) val));
-        checkTypedLengthScale(newContent);
-        AccessibleCompoundEdit section = new AccessibleCompoundEdit();
-        Set<Relation> relationsToDelete;
-        try {
-            relationsToDelete = getIncompatibleRelations(newContent);
-        } catch (CancelException ex) {
-            return null;
-        }
-        for (Relation rel : relationsToDelete) {
-            assert !(rel instanceof ReferenceRelation<?>);
-            DeleteRelationEdit drEdit = new DeleteRelationEdit(rel);
-            drEdit.redo();
-            section.addEdit(drEdit);
-        }
+        newContent.setType(val);
+        //checkTypedLengthScale(newContent);
         ChangeFieldEdit edit = new ChangeFieldEdit(oldContent, newContent, field, getEntity());
         edit.redo();
-        section.addEdit(edit);
-        section.end();
-        return section;
+        return edit;
     }
-
+/*
     protected Set<Relation> getIncompatibleRelations(Field newFieldContent) throws CancelException {
         Set<Relation> toProcessRels = new HashSet<>();
         Set<Relation> rels = Entity.<Entity>getInOutRelationsByEntityField(getEntity(), field);
@@ -409,46 +340,13 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
                 if (!SQLUtils.isKeysCompatible(lfield, rfield)) {
                     toProcessRels.add(rel);
                 }
-            } else if (!SQLUtils.isSimpleTypesCompatible(lfield.getTypeInfo().getSqlType(), rfield.getTypeInfo().getSqlType())) {
+            } else if (!SQLUtils.isSimpleTypesCompatible(lfield.getType(), rfield.getType())) {
                 toProcessRels.add(rel);
             }
         });
         return toProcessRels;
     }
-
-    protected UndoableEdit editTypeName(String val) {
-        if (isStructSqlType(field)) {
-            Field oldContent = new Field(field);
-            Field content = new Field(field);
-            DataTypeInfo dti = field.getTypeInfo().copy();
-            dti.setSqlTypeName(val);
-            content.setTypeInfo(dti);
-            ChangeFieldEdit edit = new ChangeFieldEdit(oldContent, content, field, getEntity());
-            edit.redo();
-            return edit;
-        } else {
-            return null;
-        }
-    }
-
-    protected UndoableEdit editSize(Integer val) {
-        Field oldContent = new Field(field);
-        Field content = new Field(field);
-        content.setSize(val);
-        ChangeFieldEdit edit = new ChangeFieldEdit(oldContent, content, field, getEntity());
-        edit.redo();
-        return edit;
-    }
-
-    protected UndoableEdit editScale(Integer val) {
-        Field oldContent = new Field(field);
-        Field content = new Field(field);
-        content.setScale(val);
-        ChangeFieldEdit edit = new ChangeFieldEdit(oldContent, content, field, getEntity());
-        edit.redo();
-        return edit;
-    }
-
+*/
     protected UndoableEdit editNullable(Boolean val) {
         Field oldContent = new Field(field);
         Field content = new Field(field);
@@ -534,10 +432,10 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
         }
     }
 
-    protected class TypeProperty extends Property<Integer> {
+    protected class TypeProperty extends Property<String> {
 
         public TypeProperty() {
-            super(Integer.class);
+            super(String.class);
         }
 
         @Override
@@ -551,12 +449,12 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
         }
 
         @Override
-        public Integer getValue() throws IllegalAccessException, InvocationTargetException {
+        public String getValue() throws IllegalAccessException, InvocationTargetException {
             return getType();
         }
 
         @Override
-        public void setValue(Integer val) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        public void setValue(String val) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
             setType(val);
         }
 
@@ -573,122 +471,6 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
         @Override
         public boolean canWrite() {
             return canChange();
-        }
-    }
-
-    protected class TypeNameProperty extends Property<String> {
-
-        public TypeNameProperty() {
-            super(String.class);
-        }
-
-        @Override
-        public String getName() {
-            return TYPE_NAME_PROP_NAME;
-        }
-
-        @Override
-        public String getShortDescription() {
-            return NbBundle.getMessage(TypeNameProperty.class, "MSG_TypeNamePropertyShortDescription"); //NOI18N
-        }
-
-        @Override
-        public String getValue() throws IllegalAccessException, InvocationTargetException {
-            return getTypeName();
-        }
-
-        @Override
-        public void setValue(String val) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-            setTypeName(val);
-        }
-
-        @Override
-        public boolean canRead() {
-            return true;
-        }
-
-        @Override
-        public boolean canWrite() {
-            return canChange() && isStructSqlType(field);
-        }
-    }
-
-    protected class SizeProperty extends Property<Integer> {
-
-        public SizeProperty() {
-            super(Integer.class);
-        }
-
-        @Override
-        public String getShortDescription() {
-            return NbBundle.getMessage(SizeProperty.class, "MSG_SizePropertyShortDescription"); //NOI18N
-        }
-
-        @Override
-        public String getName() {
-            return Field.SIZE_PROPERTY;
-        }
-
-        @Override
-        public Integer getValue() throws IllegalAccessException, InvocationTargetException {
-            return getSize();
-        }
-
-        @Override
-        public void setValue(Integer val) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-            setSize(val);
-        }
-
-        @Override
-        public boolean canRead() {
-            return true;
-        }
-
-        @Override
-        public boolean canWrite() {
-            return canChange() && SQLUtils.getTypeGroup(field.getTypeInfo().getSqlType()) != SQLUtils.TypesGroup.LOBS
-                    && SQLUtils.getTypeGroup(field.getTypeInfo().getSqlType()) != SQLUtils.TypesGroup.DATES
-                    && field.getTypeInfo().getSqlType() != java.sql.Types.STRUCT
-                    && field.getTypeInfo().getSqlType() != java.sql.Types.OTHER
-                    && field.getTypeInfo().getSqlType() != java.sql.Types.LONGVARCHAR
-                    && field.getTypeInfo().getSqlType() != java.sql.Types.LONGNVARCHAR;
-        }
-    }
-
-    protected class ScaleProperty extends Property<Integer> {
-
-        public ScaleProperty() {
-            super(Integer.class);
-        }
-
-        @Override
-        public String getName() {
-            return Field.SCALE_PROPERTY;
-        }
-
-        @Override
-        public String getShortDescription() {
-            return NbBundle.getMessage(ScaleProperty.class, "MSG_ScalePropertyShortDescription"); //NOI18N
-        }
-
-        @Override
-        public Integer getValue() throws IllegalAccessException, InvocationTargetException {
-            return getScale();
-        }
-
-        @Override
-        public void setValue(Integer val) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-            setScale(val);
-        }
-
-        @Override
-        public boolean canRead() {
-            return true;
-        }
-
-        @Override
-        public boolean canWrite() {
-            return canChange() && SQLUtils.isSimpleTypesCompatible(field.getTypeInfo().getSqlType(), java.sql.Types.NUMERIC);
         }
     }
 

@@ -4,12 +4,12 @@
  */
 package com.eas.client.sqldrivers.resolvers;
 
-import com.eas.client.metadata.DataTypeInfo;
-import com.eas.client.metadata.Field;
-import java.sql.Types;
+import com.eas.client.metadata.JdbcField;
+import com.eas.script.Scripts;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,72 +17,41 @@ import java.util.Set;
  *
  * @author vv
  */
-public class H2TypesResolver extends TypesResolver {
+public class H2TypesResolver implements TypesResolver {
 
-    protected static final Map<Integer, String> jdbcTypes2RdbmsTypes = new HashMap<>();
-    protected static final Map<String, Integer> rdbmsTypes2JdbcTypes = new HashMap<>();
+    protected static final Map<String, String> rdbmsTypes2ApplicationTypes = new LinkedHashMap<>();
     protected static final Set<String> jdbcTypesWithSize = new HashSet<>();
     protected static final Set<String> jdbcTypesWithScale = new HashSet<>();
     private static final Map<String, Integer> jdbcTypesMaxSize = new HashMap<>();
     private static final Map<String, Integer> jdbcTypesDefaultSize = new HashMap<>();
 
     static {
-        // rdbms -> jdbc
-        rdbmsTypes2JdbcTypes.put("TINYINT", Types.TINYINT);
-        rdbmsTypes2JdbcTypes.put("BIGINT", Types.BIGINT);
-        rdbmsTypes2JdbcTypes.put("IDENTITY", Types.BIGINT);
-        rdbmsTypes2JdbcTypes.put("LONGVARBINARY", Types.LONGVARBINARY);
-        rdbmsTypes2JdbcTypes.put("VARBINARY", Types.VARBINARY);
-        rdbmsTypes2JdbcTypes.put("BINARY", Types.BINARY);
-        rdbmsTypes2JdbcTypes.put("UUID", Types.BINARY);
-        rdbmsTypes2JdbcTypes.put("LONGVARCHAR", Types.LONGVARCHAR);
-        rdbmsTypes2JdbcTypes.put("CHAR", Types.CHAR);
-        rdbmsTypes2JdbcTypes.put("NUMERIC", Types.NUMERIC);
-        rdbmsTypes2JdbcTypes.put("DECIMAL", Types.DECIMAL);
-        rdbmsTypes2JdbcTypes.put("INTEGER", Types.INTEGER);
-        rdbmsTypes2JdbcTypes.put("SMALLINT", Types.SMALLINT);
-        rdbmsTypes2JdbcTypes.put("FLOAT", Types.FLOAT);
-        rdbmsTypes2JdbcTypes.put("REAL", Types.REAL);
-        rdbmsTypes2JdbcTypes.put("DOUBLE", Types.DOUBLE);
-        rdbmsTypes2JdbcTypes.put("VARCHAR", Types.VARCHAR);
-        rdbmsTypes2JdbcTypes.put("VARCHAR_IGNORECASE", Types.VARCHAR);
-        rdbmsTypes2JdbcTypes.put("BOOLEAN", Types.BOOLEAN);
-        rdbmsTypes2JdbcTypes.put("DATE", Types.DATE);
-        rdbmsTypes2JdbcTypes.put("TIME", Types.TIME);
-        rdbmsTypes2JdbcTypes.put("TIMESTAMP", Types.TIMESTAMP);
-        rdbmsTypes2JdbcTypes.put("OTHER", Types.OTHER);
-        rdbmsTypes2JdbcTypes.put("ARRAY", Types.ARRAY);
-        rdbmsTypes2JdbcTypes.put("BLOB", Types.BLOB);
-        rdbmsTypes2JdbcTypes.put("CLOB", Types.CLOB);
-
-        // jdbc -> rdbms
-        jdbcTypes2RdbmsTypes.put(Types.BIT, "INTEGER");
-        jdbcTypes2RdbmsTypes.put(Types.TINYINT, "TINYINT");
-        jdbcTypes2RdbmsTypes.put(Types.SMALLINT, "SMALLINT");
-        jdbcTypes2RdbmsTypes.put(Types.INTEGER, "INTEGER");
-        jdbcTypes2RdbmsTypes.put(Types.BIGINT, "BIGINT");
-        jdbcTypes2RdbmsTypes.put(Types.FLOAT, "FLOAT");
-        jdbcTypes2RdbmsTypes.put(Types.REAL, "REAL");
-        jdbcTypes2RdbmsTypes.put(Types.DOUBLE, "DOUBLE");
-        jdbcTypes2RdbmsTypes.put(Types.NUMERIC, "NUMERIC");
-        jdbcTypes2RdbmsTypes.put(Types.DECIMAL, "DECIMAL");
-        jdbcTypes2RdbmsTypes.put(Types.CHAR, "CHAR");
-        jdbcTypes2RdbmsTypes.put(Types.VARCHAR, "VARCHAR");
-        jdbcTypes2RdbmsTypes.put(Types.LONGVARCHAR, "LONGVARCHAR");//???VARCHAR"); //?CLOB
-        jdbcTypes2RdbmsTypes.put(Types.DATE, "DATE");
-        jdbcTypes2RdbmsTypes.put(Types.TIME, "TIME");
-        jdbcTypes2RdbmsTypes.put(Types.TIMESTAMP, "TIMESTAMP");
-        jdbcTypes2RdbmsTypes.put(Types.BINARY, "BINARY");
-        jdbcTypes2RdbmsTypes.put(Types.VARBINARY, "VARBINARY");
-        jdbcTypes2RdbmsTypes.put(Types.LONGVARBINARY, "LONGVARBINARY");
-        jdbcTypes2RdbmsTypes.put(Types.BLOB, "BLOB");
-        jdbcTypes2RdbmsTypes.put(Types.CLOB, "CLOB");
-        jdbcTypes2RdbmsTypes.put(Types.BOOLEAN, "INTEGER");
-        jdbcTypes2RdbmsTypes.put(Types.NCHAR, "CHAR");
-        jdbcTypes2RdbmsTypes.put(Types.NVARCHAR, "VARCHAR");
-        jdbcTypes2RdbmsTypes.put(Types.LONGNVARCHAR, "CLOB");
-        jdbcTypes2RdbmsTypes.put(Types.NCLOB, "CLOB");
-        jdbcTypes2RdbmsTypes.put(Types.SQLXML, "CLOB");
+        rdbmsTypes2ApplicationTypes.put("VARCHAR", Scripts.STRING_TYPE_NAME);
+        rdbmsTypes2ApplicationTypes.put("NUMERIC", Scripts.NUMBER_TYPE_NAME);
+        rdbmsTypes2ApplicationTypes.put("DECIMAL", Scripts.NUMBER_TYPE_NAME);
+        rdbmsTypes2ApplicationTypes.put("BOOLEAN", Scripts.BOOLEAN_TYPE_NAME);
+        rdbmsTypes2ApplicationTypes.put("TIMESTAMP", Scripts.DATE_TYPE_NAME);
+        rdbmsTypes2ApplicationTypes.put("TINYINT", Scripts.NUMBER_TYPE_NAME);
+        rdbmsTypes2ApplicationTypes.put("BIGINT", Scripts.NUMBER_TYPE_NAME);
+        rdbmsTypes2ApplicationTypes.put("IDENTITY", Scripts.NUMBER_TYPE_NAME);
+        rdbmsTypes2ApplicationTypes.put("INTEGER", Scripts.NUMBER_TYPE_NAME);
+        rdbmsTypes2ApplicationTypes.put("SMALLINT", Scripts.NUMBER_TYPE_NAME);
+        rdbmsTypes2ApplicationTypes.put("FLOAT", Scripts.NUMBER_TYPE_NAME);
+        rdbmsTypes2ApplicationTypes.put("REAL", Scripts.NUMBER_TYPE_NAME);
+        rdbmsTypes2ApplicationTypes.put("DOUBLE", Scripts.NUMBER_TYPE_NAME);
+        rdbmsTypes2ApplicationTypes.put("LONGVARCHAR", Scripts.STRING_TYPE_NAME);
+        rdbmsTypes2ApplicationTypes.put("CHAR", Scripts.STRING_TYPE_NAME);
+        rdbmsTypes2ApplicationTypes.put("VARCHAR_IGNORECASE", Scripts.STRING_TYPE_NAME);
+        rdbmsTypes2ApplicationTypes.put("DATE", Scripts.DATE_TYPE_NAME);
+        rdbmsTypes2ApplicationTypes.put("TIME", Scripts.DATE_TYPE_NAME);
+        rdbmsTypes2ApplicationTypes.put("CLOB", Scripts.STRING_TYPE_NAME);
+        rdbmsTypes2ApplicationTypes.put("LONGVARBINARY", null);
+        rdbmsTypes2ApplicationTypes.put("VARBINARY", null);
+        rdbmsTypes2ApplicationTypes.put("BINARY", null);
+        rdbmsTypes2ApplicationTypes.put("UUID", null);
+        rdbmsTypes2ApplicationTypes.put("OTHER", null);
+        rdbmsTypes2ApplicationTypes.put("ARRAY", null);
+        rdbmsTypes2ApplicationTypes.put("BLOB", null);
 
         //typeName(M,D)
         jdbcTypesWithScale.add("NUMERIC");
@@ -120,87 +89,40 @@ public class H2TypesResolver extends TypesResolver {
     }
 
     @Override
-    public void resolve2Application(Field aField) {
-        if (isGeometryTypeName(aField.getTypeInfo().getSqlTypeName())) {
-            aField.setTypeInfo(DataTypeInfo.GEOMETRY.copy());
-        } else {
-            super.resolve2Application(aField);
-        }
+    public String toApplicationType(String aRDBMSType) {
+        return aRDBMSType != null ? rdbmsTypes2ApplicationTypes.get(aRDBMSType.toUpperCase()) : null;
+    }
+    
+    @Override
+    public Set<String> getSupportedTypes() {
+        return Collections.unmodifiableSet(rdbmsTypes2ApplicationTypes.keySet());
     }
 
     @Override
-    public boolean isGeometryTypeName(String aTypeName) {
-        return false;
+    public boolean isSized(String aRDBMSType) {
+        return jdbcTypesWithSize.contains(aRDBMSType.toUpperCase());
     }
 
     @Override
-    public int getJdbcTypeByRDBMSTypename(String aTypeName) {
-        Integer jdbcType = (aTypeName != null ? rdbmsTypes2JdbcTypes.get(aTypeName.toUpperCase()) : null);
-        if (jdbcType == null) {
-            jdbcType = Types.OTHER;
-        }
-        return jdbcType;
+    public boolean isScaled(String aRDBMSType) {
+        return jdbcTypesWithScale.contains(aRDBMSType.toUpperCase());
     }
 
     @Override
-    public Set<Integer> getSupportedJdbcDataTypes() {
-        Set<Integer> supportedTypes = new HashSet<>();
-        supportedTypes.addAll(rdbmsTypes2JdbcTypes.values());
-        return supportedTypes;
-    }
-
-    @Override
-    public boolean isSized(String aSqlTypeName) {
-        String sqlTypeName = aSqlTypeName.toUpperCase();
-        return jdbcTypesWithSize.contains(sqlTypeName);
-    }
-
-    @Override
-    public boolean isScaled(String aSqlTypeName) {
-        String sqlTypeName = aSqlTypeName.toUpperCase();
-        return jdbcTypesWithScale.contains(sqlTypeName);
-    }
-
-    @Override
-    public Map<Integer, String> getJdbcTypes2RdbmsTypes() {
-        return jdbcTypes2RdbmsTypes;
-    }
-
-    @Override
-    public boolean containsRDBMSTypename(String aTypeName) {
-        assert aTypeName != null;
-        return rdbmsTypes2JdbcTypes.containsKey(aTypeName.toUpperCase());
-    }
-
-    @Override
-    public void resolveFieldSize(Field aField) {
-        DataTypeInfo typeInfo = aField.getTypeInfo();
-        int sqlType = typeInfo.getSqlType();
-        String sqlTypeName = typeInfo.getSqlTypeName();
-        sqlTypeName = sqlTypeName.toUpperCase();
-        // check on max size
-        int fieldSize = aField.getSize();
-        Integer maxSize = jdbcTypesMaxSize.get(sqlTypeName);
-        if (maxSize != null && maxSize < fieldSize) {
-            List<Integer> typesOrder = getTypesOrder(sqlType);
-            if (typesOrder != null) {
-                for (int i = typesOrder.indexOf(sqlType); i < typesOrder.size(); i++) {
-                    sqlType = typesOrder.get(i);
-                    sqlTypeName = jdbcTypes2RdbmsTypes.get(sqlType);
-                    maxSize = jdbcTypesMaxSize.get(sqlTypeName);
-                    if (maxSize != null && maxSize >= fieldSize) {
-                        break;
-                    }
-                }
-            }
+    public void resolveSize(JdbcField aField) {
+        String sqlTypeName = aField.getType();
+        if (sqlTypeName != null) {
+            sqlTypeName = sqlTypeName.toUpperCase();
+            // check on max size
+            int fieldSize = aField.getSize();
+            Integer maxSize = jdbcTypesMaxSize.get(sqlTypeName);
             if (maxSize != null && maxSize < fieldSize) {
                 aField.setSize(maxSize);
             }
-        }
-        aField.setTypeInfo(new DataTypeInfo(sqlType, sqlTypeName, typeInfo.getJavaClassName()));
-        // check on default size
-        if (fieldSize <= 0 && jdbcTypesDefaultSize.containsKey(sqlTypeName)) {
-            aField.setSize(jdbcTypesDefaultSize.get(sqlTypeName));
+            // check on default size
+            if (fieldSize <= 0 && jdbcTypesDefaultSize.containsKey(sqlTypeName)) {
+                aField.setSize(jdbcTypesDefaultSize.get(sqlTypeName));
+            }
         }
     }
 }

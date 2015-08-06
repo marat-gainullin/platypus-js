@@ -5,7 +5,6 @@
  */
 package com.eas.client.changes;
 
-import com.eas.client.metadata.DataTypeInfo;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
@@ -21,14 +20,12 @@ public class ChangeValue implements HasPublished {
 
     public String name;
     public Object value;
-    public DataTypeInfo type;
 
     private JSObject published;
 
-    public ChangeValue(String aName, Object aValue, DataTypeInfo aType) {
+    public ChangeValue(String aName, Object aValue) {
         name = aName;
         value = Scripts.getSpace() != null ? Scripts.getSpace().toJava(aValue) : aValue;
-        type = aType;
     }
 
     @ScriptFunction(jsDoc = "Name of changed property.")

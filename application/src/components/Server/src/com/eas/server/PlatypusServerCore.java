@@ -421,6 +421,6 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
 
     @Override
     public String unpreparationContext() throws Exception {
-        return basesProxy.getDbMetadataCache(null).getConnectionSchema();
+        return basesProxy.getMetadataCache(null).getDatasourceSchema();
     }
 }

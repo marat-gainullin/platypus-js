@@ -4,7 +4,6 @@
  */
 package com.eas.client.model.application;
 
-import com.eas.client.SQLUtils;
 import com.eas.client.changes.Change;
 import com.eas.client.events.PublishedSourcedEvent;
 import com.eas.client.metadata.Field;
@@ -550,7 +549,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
                         Parameter selfPm = relation.getRightParameter();
                         if (selfPm != null) {
                             Object selfValue = selfPm.getValue();
-                            if (!SQLUtils.isJdbcEqual(selfValue, pValue)) {
+                            if (!Objects.equals(selfValue, pValue)) {
                                 selfPm.setValue(pValue);
                             }
                         }

@@ -294,7 +294,7 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
     protected ApplicationDbModel readModel() throws Exception {
         String modelContent = getModelFile().asText(PlatypusUtils.COMMON_ENCODING_NAME);
         org.w3c.dom.Document doc = Source2XmlDom.transform(modelContent);
-        ApplicationDbModel modelRead = new ApplicationDbModel(getProject().getQueries());
+        ApplicationDbModel modelRead = new ApplicationDbModel(getProject().getBasesProxy(), getProject().getQueries());
         modelRead.accept(new XmlDom2ApplicationModel<>(doc));
         modelRead.getEntities().values().stream().forEach((ApplicationDbEntity aEntity) -> {
             aEntity.setPublished(new EntityJSObject(aEntity));

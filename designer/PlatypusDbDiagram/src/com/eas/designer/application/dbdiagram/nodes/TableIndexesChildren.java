@@ -40,7 +40,7 @@ public class TableIndexesChildren extends Children.Keys<DbTableIndexSpec> {
             public void propertyChange(PropertyChangeEvent evt) {
                 setKeys(getKeys());
             }
-            
+
         };
         entity.getChangeSupport().addPropertyChangeListener(FieldsEntity.INDEXES_PROPERTY, entityListener);
     }
@@ -59,16 +59,12 @@ public class TableIndexesChildren extends Children.Keys<DbTableIndexSpec> {
 
     protected List<DbTableIndexSpec> getKeys() {
         List<DbTableIndexSpec> sortedKeys = new ArrayList(entity.getIndexes());
-        Collections.sort(sortedKeys, new Comparator<DbTableIndexSpec>() {
-
-            @Override
-            public int compare(DbTableIndexSpec o1, DbTableIndexSpec o2) {
-                return o1.getName().compareTo(o2.getName());
-            }
+        Collections.sort(sortedKeys, (DbTableIndexSpec o1, DbTableIndexSpec o2) -> {
+            return o1.getName().compareTo(o2.getName());
         });
         return sortedKeys;
     }
-    
+
     public void update() {
         setKeys(getKeys());
     }
@@ -79,7 +75,7 @@ public class TableIndexesChildren extends Children.Keys<DbTableIndexSpec> {
             ColumnsOrderSupport cso = new ColumnsOrderSupport();
             TableIndexNode node = new TableIndexNode(key, entity, new ProxyLookup(lookup, Lookups.fixed(cso)));
             cso.setTableIndexNode(node);
-            return new Node[]{ node };
+            return new Node[]{node};
         } catch (Exception ex) {
             ErrorManager.getDefault().notify(ex);
             return null;

@@ -17,7 +17,6 @@ import com.google.gwt.core.client.JavaScriptObject;
 public class QueryJSONReader {
 
 	private static final String TITLE_PROP_NAME = "title";
-	private static final String MANUAL_PROP_NAME = "manual";
 	private static final String APP_ELEMENT_PROP_NAME = "appelement";
 	private static final String PARAMETERS_PROP_NAME = "parameters";
 	private static final String FIELDS_PROP_NAME = "fields";
@@ -27,9 +26,6 @@ public class QueryJSONReader {
 		assert o != null;
 		Query query = new Query();
 		query.setTitle(o.getString(TITLE_PROP_NAME));
-		if(o.has(MANUAL_PROP_NAME)){
-			query.setManual(o.getBoolean(MANUAL_PROP_NAME));
-		}
 		query.setEntityName(o.getString(APP_ELEMENT_PROP_NAME));
 		// parameters
 		assert o.has(PARAMETERS_PROP_NAME);

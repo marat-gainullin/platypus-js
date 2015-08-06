@@ -46,7 +46,7 @@ public class ChangesJSONReader implements ChangeVisitor {
             sValue.keySet().stream().forEach((sValueName) -> {
                 Object oValueValue = sValue.getMember(sValueName);
                 Object convertedValueValue = space.toJava(oValueValue);
-                data.add(new ChangeValue(sValueName, convertedValueValue, null));
+                data.add(new ChangeValue(sValueName, convertedValueValue));
             });
         }
         return data;

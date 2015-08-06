@@ -4,7 +4,6 @@
  */
 package com.eas.designer.application.query.editing;
 
-import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
 import com.eas.client.model.QueryDocument.StoredFieldMetadata;
@@ -18,10 +17,10 @@ import javax.swing.undo.CannotUndoException;
  */
 public class StoredFieldTypeEdit extends StoredFieldEdit {
 
-    protected DataTypeInfo oldTypeInfo;
-    protected DataTypeInfo newTypeInfo;
+    protected String oldTypeInfo;
+    protected String newTypeInfo;
 
-    public StoredFieldTypeEdit(PlatypusQueryDataObject aDataObject, StoredFieldMetadata aStoredField, DataTypeInfo aOldTypeInfo, DataTypeInfo aNewTypeInfo) {
+    public StoredFieldTypeEdit(PlatypusQueryDataObject aDataObject, StoredFieldMetadata aStoredField, String aOldTypeInfo, String aNewTypeInfo) {
         super(aDataObject, aStoredField);
         oldTypeInfo = aOldTypeInfo;
         newTypeInfo = aNewTypeInfo;
@@ -33,9 +32,9 @@ public class StoredFieldTypeEdit extends StoredFieldEdit {
             Fields fields = dataObject.getOutputFields();
             if (fields.contains(storedField.getBindedColumn())) {
                 Field field = fields.get(storedField.getBindedColumn());
-                DataTypeInfo oldValue = storedField.getTypeInfo();
-                storedField.setTypeInfo(oldTypeInfo);
-                field.getChangeSupport().firePropertyChange(Field.TYPE_INFO_PROPERTY, oldValue, storedField.getTypeInfo());
+                String oldValue = storedField.getType();
+                storedField.setType(oldTypeInfo);
+                field.getChangeSupport().firePropertyChange(Field.TYPE_PROPERTY, oldValue, storedField.getType());
             }
         } catch (Exception ex) {
             CannotUndoException lex = new CannotUndoException();
@@ -50,9 +49,9 @@ public class StoredFieldTypeEdit extends StoredFieldEdit {
             Fields fields = dataObject.getOutputFields();
             if (fields.contains(storedField.getBindedColumn())) {
                 Field field = fields.get(storedField.getBindedColumn());
-                DataTypeInfo oldValue = storedField.getTypeInfo();
-                storedField.setTypeInfo(newTypeInfo);
-                field.getChangeSupport().firePropertyChange(Field.TYPE_INFO_PROPERTY, oldValue, storedField.getTypeInfo());
+                String oldValue = storedField.getType();
+                storedField.setType(newTypeInfo);
+                field.getChangeSupport().firePropertyChange(Field.TYPE_PROPERTY, oldValue, storedField.getType());
             }
         } catch (Exception ex) {
             CannotUndoException lex = new CannotUndoException();

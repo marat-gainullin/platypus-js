@@ -9,23 +9,31 @@
  */
 package com.eas.client.sqldrivers;
 
-import com.eas.client.ClientConstants;
-import com.eas.client.SQLUtils;
-import com.eas.client.metadata.DataTypeInfo;
+import com.eas.client.changes.JdbcChangeValue;
 import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
-import com.eas.client.metadata.Field;
+import com.eas.client.metadata.JdbcField;
 import com.eas.client.metadata.ForeignKeySpec;
 import com.eas.client.metadata.PrimaryKeySpec;
 import com.eas.client.sqldrivers.resolvers.OracleTypesResolver;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
 import com.eas.util.StringUtils;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKTReader;
+import com.vividsolutions.jts.io.WKTWriter;
+import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
+import java.sql.Wrapper;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import oracle.jdbc.OracleConnection;
+import oracle.sql.STRUCT;
+import org.geotools.data.oracle.sdo.GeometryConverter;
 
 /**
  *
@@ -51,177 +59,6 @@ public class OracleSqlDriver extends SqlDriver {
         EAS_TABLE_ALREADY_EXISTS,
         EAS_TABLE_DOESNT_EXISTS
     };
-    public static final String SQL_ALL_TABLES_VIEWS = ""
-            + "select "
-            + " OWNER as " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
-            + " TABLE_NAME as " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
-            + " TABLE_TYPE as " + ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME + ","
-            + " COMMENTS as " + ClientConstants.JDBCCOLS_REMARKS + " "
-            + "from all_tab_comments "
-            + "order by " + ClientConstants.JDBCCOLS_TABLE_SCHEM + "," + ClientConstants.JDBCCOLS_TABLE_NAME;
-    public static final String SQL_SCHEMA_TABLES_VIEWS = ""
-            + "select "
-            + " OWNER as " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
-            + " TABLE_NAME as " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
-            + " TABLE_TYPE as " + ClientConstants.JDBCPKS_TABLE_TYPE_FIELD_NAME + ","
-            + " COMMENTS as " + ClientConstants.JDBCCOLS_REMARKS + " "
-            + "from all_tab_comments "
-            + "where OWNER = '%s' "
-            + "order by " + ClientConstants.JDBCCOLS_TABLE_SCHEM + "," + ClientConstants.JDBCCOLS_TABLE_NAME;
-    public static final String SQL_SCHEMAS = ""
-            + "select u.USERNAME as " + ClientConstants.JDBCCOLS_TABLE_SCHEM + " from sys.ALL_USERS u "
-            + "order by " + ClientConstants.JDBCCOLS_TABLE_SCHEM;
-    protected static final String SQL_COLUMNS = ""
-            + "SELECT"
-            + " NULL table_cat,"
-            + " t.owner " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
-            + " t.table_name " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
-            + " t.column_name column_name,"
-            + " decode(t.data_type, 'CHAR', 1, 'VARCHAR2', 12, 'NUMBER', 3, 'LONG', -1, 'DATE', 91, 'RAW', -3, 'LONG RAW', -4, 'BLOB', "
-            + "        2004, 'CLOB', 2005, 'BFILE', -13, 'FLOAT', 6, 'TIMESTAMP(6)', 93, 'TIMESTAMP(6) WITH TIME ZONE',"
-            + "       -101, 'TIMESTAMP(6) WITH LOCAL TIME ZONE', -102, 'INTERVAL YEAR(2) TO MONTH', -103, 'INTERVAL DAY(2) TO SECOND(6)', "
-            + "       -104, 'BINARY_FLOAT', 100, 'BINARY_DOUBLE', 101, 1111) AS data_type,"
-            + " (case when t.data_type_owner is null then t.data_type else t.data_type_owner || '.' || t.data_type end) type_name,"
-            + " (case when t.char_length > 0 then t.char_length else nvl(t.data_precision,t.data_length) end) AS column_size,"
-            + " 0 AS buffer_length,"
-            + " t.data_scale decimal_digits,"
-            + " 10 AS num_prec_radix,"
-            + " decode(t.nullable, 'N', 0, 1) AS nullable,"
-            + " c.comments " + ClientConstants.JDBCCOLS_REMARKS + ", "
-            + " t.data_default column_def,"
-            + " 0 AS sql_data_type,"
-            + " 0 AS sql_datetime_sub,"
-            + " t.data_length char_octet_length,"
-            + " t.column_id ordinal_position,"
-            + " decode(t.nullable, 'N', 'NO', 'YES') AS is_nullable "
-            + "FROM all_tab_columns t, sys.all_col_comments c "
-            + "WHERE t.owner = '%s' and t.owner = c.owner and t.table_name = c.table_name and t.column_name = c.column_name "
-            + "AND Upper(t.table_name) in (%s) "
-            + "ORDER BY table_schem, table_name, ordinal_position";
-    protected static final String SQL_PRIMARY_KEYS = ""
-            + "SELECT"
-            + " NULL table_cat,"
-            + " c.owner " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
-            + " c.table_name " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
-            + " c.column_name " + ClientConstants.JDBCCOLS_COLUMN_NAME + ","
-            + " c.position key_seq,"
-            + " c.constraint_name pk_name "
-            + "FROM all_cons_columns c, all_constraints k "
-            + "WHERE k.constraint_type = 'P'"
-            + " AND k.constraint_name = c.constraint_name"
-            + " AND k.table_name = c.table_name"
-            + " AND k.owner = c.owner"
-            + " AND k.owner = '%s'"
-            + " AND Upper(k.table_name) in (%s) "
-            + "ORDER BY c.owner,c.table_name,c.position";
-    protected static final String SQL_FOREIGN_KEYS = ""
-            + "with"
-            + " fkey as (select"
-            + "             r_owner,"
-            + "             r_constraint_name,"
-            + "             owner fktable_schem,"
-            + "             constraint_name fk_name,"
-            + "             table_name fktable_name,"
-            + "             delete_rule,deferrable,deferred"
-            + "          from all_constraints t"
-            + "          where constraint_type = 'R' and owner = '%s' and Upper(table_name) in (%s)),"
-            + " fpkey as (select"
-            + "              fktable_schem,"
-            + "              fk_name,"
-            + "              fktable_name,"
-            + "              t2.delete_rule,"
-            + "              t2.deferrable,"
-            + "              t2.deferred,"
-            + "              owner pktable_schem,"
-            + "              constraint_name pk_name,"
-            + "              table_name pktable_name"
-            + "          from all_constraints t1 inner join fkey t2 on (t1.owner = t2.r_owner and t1.constraint_name = t2.r_constraint_name)"
-            + "          where t1.constraint_type = 'P')"
-            + " select"
-            + "   fpkey.fktable_schem,"
-            + "   fpkey.fk_name,"
-            + "   fpkey.fktable_name,"
-            + "   null update_rule,"
-            + "   decode(fpkey.delete_rule, 'CASCADE', 0, 'SET NULL', 2, 1) as delete_rule,"
-            + "   decode(fpkey.DEFERRABLE, 'DEFERRABLE', 5, 'NOT DEFERRABLE', 7, 'DEFERRED', 6) deferrability,"
-            + "   fpkey.deferred,"
-            + "   fpkey.pktable_schem,"
-            + "   fpkey.pk_name,"
-            + "   fpkey.pktable_name,"
-            + "   fcol.column_name fkcolumn_name,"
-            + "   pcol.column_name pkcolumn_name,"
-            + "   fcol.position as key_seq"
-            + " from fpkey"
-            + "   inner join all_cons_columns fcol on fpkey.fktable_schem = fcol.owner and  fpkey.fk_name = fcol.constraint_name"
-            + "   inner join all_cons_columns pcol on fpkey.pktable_schem = pcol.owner and  fpkey.pk_name = pcol.constraint_name"
-            + " where fcol.position = pcol.position "
-            + " order by pktable_schem, pktable_name, key_seq";
-    protected static final String SQL_INDEX_KEYS = ""
-            + "SELECT"
-            + " null table_cat,"
-            + " i.owner " + ClientConstants.JDBCCOLS_TABLE_SCHEM + ","
-            + " i.table_name " + ClientConstants.JDBCCOLS_TABLE_NAME + ","
-            + " decode(i.uniqueness, 'UNIQUE', 0, 1) AS non_unique,"
-            + " null index_qualifier,"
-            + " i.index_name,"
-            + " (case when index_type = 'BITMAP' then 2 else 1 end) AS " + ClientConstants.JDBCIDX_TYPE + ","
-            + " c.column_position ordinal_position,"
-            + " c.column_name,"
-            + " null asc_or_desc,"
-            + " i.distinct_keys cardinality,"
-            + " i.leaf_blocks pages,"
-            + " null filter_condition,"
-            + " (case when (select count(*) from all_constraints k where k.owner = i.owner and k.table_name = i.table_name"
-            + "  and k.constraint_type = 'P' AND k.constraint_name = i.index_name) > 0 then 0 else 1 end) " + ClientConstants.JDBCIDX_PRIMARY_KEY + ","
-            + " null " + ClientConstants.JDBCIDX_FOREIGN_KEY + " "
-            + "FROM all_indexes i, all_ind_columns c "
-            + "WHERE i.owner = '%s'"
-            + " AND Upper(i.table_name) in (%s)"
-            + " AND i.index_name = c.index_name"
-            + " AND i.table_owner = c.table_owner"
-            + " AND i.table_name = c.table_name"
-            + " AND i.owner = c.index_owner "
-            + "ORDER BY non_unique, type, index_name, ordinal_position ";
-
-    @Override
-    public String getSql4TableColumns(String aOwnerName, Set<String> aTableNames) {
-        if (aTableNames != null && !aTableNames.isEmpty()) {
-            String tablesIn = constructIn(aTableNames);
-            return String.format(SQL_COLUMNS, prepareName(aOwnerName), tablesIn.toUpperCase());
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public String getSql4Indexes(String aOwnerName, Set<String> aTableNames) {
-        if (aTableNames != null && !aTableNames.isEmpty()) {
-            String tablesIn = constructIn(aTableNames);
-            return String.format(SQL_INDEX_KEYS, prepareName(aOwnerName), tablesIn.toUpperCase());
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public String getSql4TablePrimaryKeys(String aOwnerName, Set<String> aTableNames) {
-        if (aTableNames != null && !aTableNames.isEmpty()) {
-            String tablesIn = constructIn(aTableNames);
-            return String.format(SQL_PRIMARY_KEYS, prepareName(aOwnerName), tablesIn.toUpperCase());
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public String getSql4TableForeignKeys(String aOwnerName, Set<String> aTableNames) {
-        if (aTableNames != null && !aTableNames.isEmpty()) {
-            String tablesList = constructIn(aTableNames).toUpperCase();
-            return String.format(SQL_FOREIGN_KEYS, prepareName(aOwnerName), tablesList);
-        } else {
-            return null;
-        }
-    }
 
     @Override
     public String getSql4DropTable(String aSchemaName, String aTableName) {
@@ -251,19 +88,15 @@ public class OracleSqlDriver extends SqlDriver {
         return ex.getLocalizedMessage();
     }
 
-    private String getFieldTypeDefinition(Field aField) {
-        resolver.resolve2RDBMS(aField);
+    private String getFieldTypeDefinition(JdbcField aField) {
         String typeDefine = "";
-        String sqlTypeName = aField.getTypeInfo().getSqlTypeName().toUpperCase();
+        String sqlTypeName = aField.getType().toUpperCase();
         typeDefine += sqlTypeName;
-        int sqlType = aField.getTypeInfo().getSqlType();
         // field length
         int size = aField.getSize();
         if (size > 0) {
             int scale = aField.getScale();
-            if (SQLUtils.getTypeGroup(sqlType) == SQLUtils.TypesGroup.NUMBERS && size > 38) {
-                typeDefine = " FLOAT (" + String.valueOf(size) + ")";
-            } else if (resolver.isScaled(sqlTypeName) && resolver.isSized(sqlTypeName)) {
+            if (resolver.isScaled(sqlTypeName) && resolver.isSized(sqlTypeName)) {
                 typeDefine += "(" + String.valueOf(size) + "," + String.valueOf(scale) + ")";
             } else if (resolver.isSized(sqlTypeName)) {
                 typeDefine += "(" + String.valueOf(size) + ")";
@@ -276,21 +109,13 @@ public class OracleSqlDriver extends SqlDriver {
      * @inheritDoc
      */
     @Override
-    public String getSql4FieldDefinition(Field aField) {
-        return getSql4FieldDefinition(aField, true);
-    }
-
-    private String getSql4FieldDefinition(Field aField, boolean aCurrentNullable) {
+    public String getSql4FieldDefinition(JdbcField aField) {
         String fieldDefinition = wrapNameIfRequired(aField.getName()) + " " + getFieldTypeDefinition(aField);
 
         if (aField.isNullable()) {
-            if (!aCurrentNullable) {
-                fieldDefinition += " null";
-            }
+            fieldDefinition += " null";
         } else {
-            if (aCurrentNullable) {
-                fieldDefinition += " not null";
-            }
+            fieldDefinition += " not null";
         }
         return fieldDefinition;
     }
@@ -320,11 +145,6 @@ public class OracleSqlDriver extends SqlDriver {
     }
 
     @Override
-    public Set<Integer> getSupportedJdbcDataTypes() {
-        return resolver.getSupportedJdbcDataTypes();
-    }
-
-    @Override
     public void applyContextToConnection(Connection aConnection, String aSchema) throws Exception {
         if (aSchema != null && !aSchema.isEmpty()) {
             try (Statement stmt = aConnection.createStatement()) {
@@ -342,15 +162,14 @@ public class OracleSqlDriver extends SqlDriver {
      * @inheritDoc
      */
     @Override
-    public String[] getSqls4ModifyingField(String aSchemaName, String aTableName, Field aOldFieldMd, Field aNewFieldMd) {
+    public String[] getSqls4ModifyingField(String aSchemaName, String aTableName, JdbcField aOldFieldMd, JdbcField aNewFieldMd) {
         List<String> sqls = new ArrayList<>();
-        Field newFieldMd = aNewFieldMd.copy();
+        JdbcField newFieldMd = aNewFieldMd.copy();
         String fullTableName = makeFullName(aSchemaName, aTableName);
         String updateDefinition = String.format(MODIFY_FIELD_SQL_PREFIX, fullTableName) + wrapNameIfRequired(aOldFieldMd.getName()) + " ";
         String fieldDefination = getFieldTypeDefinition(newFieldMd);
 
-        DataTypeInfo newTypeInfo = newFieldMd.getTypeInfo();
-        String newSqlTypeName = newTypeInfo.getSqlTypeName();
+        String newSqlTypeName = newFieldMd.getType();
         if (newSqlTypeName == null) {
             newSqlTypeName = "";
         }
@@ -358,8 +177,7 @@ public class OracleSqlDriver extends SqlDriver {
         int newSize = newFieldMd.getSize();
         boolean newNullable = newFieldMd.isNullable();
 
-        DataTypeInfo oldTypeInfo = aOldFieldMd.getTypeInfo();
-        String oldSqlTypeName = oldTypeInfo.getSqlTypeName();
+        String oldSqlTypeName = aOldFieldMd.getType();
         if (oldSqlTypeName == null) {
             oldSqlTypeName = "";
         }
@@ -379,7 +197,7 @@ public class OracleSqlDriver extends SqlDriver {
     }
 
     @Override
-    public String[] getSqls4RenamingField(String aSchemaName, String aTableName, String aOldFieldName, Field aNewFieldMd) {
+    public String[] getSqls4RenamingField(String aSchemaName, String aTableName, String aOldFieldName, JdbcField aNewFieldMd) {
         String fullTableName = makeFullName(aSchemaName, aTableName);
         String sqlText = String.format(RENAME_FIELD_SQL_PREFIX, fullTableName, wrapNameIfRequired(aOldFieldName), wrapNameIfRequired(aNewFieldMd.getName()));
         return new String[]{
@@ -406,11 +224,6 @@ public class OracleSqlDriver extends SqlDriver {
             aDescription = "";
         }
         return "comment on table " + sqlText + " is '" + aDescription.replaceAll("'", "''") + "'";
-    }
-
-    @Override
-    public Integer getJdbcTypeByRDBMSTypename(String aLowLevelTypeName) {
-        return resolver.getJdbcTypeByRDBMSTypename(aLowLevelTypeName);
     }
 
     @Override
@@ -449,20 +262,6 @@ public class OracleSqlDriver extends SqlDriver {
     }
 
     @Override
-    public String getSql4TablesEnumeration(String schema4Sql) {
-        if (schema4Sql == null || schema4Sql.isEmpty()) {
-            return SQL_ALL_TABLES_VIEWS;
-        } else {
-            return String.format(SQL_SCHEMA_TABLES_VIEWS, prepareName(schema4Sql));
-        }
-    }
-
-    @Override
-    public String getSql4SchemasEnumeration() {
-        return SQL_SCHEMAS;
-    }
-
-    @Override
     public String getSql4CreateSchema(String aSchemaName, String aPassword) {
         if (aSchemaName == null || aSchemaName.isEmpty()) {
             throw new IllegalArgumentException("Schema name is null or empty.");
@@ -470,7 +269,7 @@ public class OracleSqlDriver extends SqlDriver {
         if (aPassword == null || aPassword.isEmpty()) {
             throw new IllegalArgumentException("Schema owner password is null or empty.");
         }
-        return String.format(CREATE_SCHEMA_CLAUSE, aSchemaName);
+        return String.format(CREATE_SCHEMA_CLAUSE, aSchemaName, "");
     }
 
     @Override
@@ -547,7 +346,7 @@ public class OracleSqlDriver extends SqlDriver {
     }
 
     @Override
-    public String[] getSqls4AddingField(String aSchemaName, String aTableName, Field aField) {
+    public String[] getSqls4AddingField(String aSchemaName, String aTableName, JdbcField aField) {
         String fullTableName = makeFullName(aSchemaName, aTableName);
         return new String[]{
             String.format(SqlDriver.ADD_FIELD_SQL_PREFIX, fullTableName) + getSql4FieldDefinition(aField)
@@ -571,5 +370,43 @@ public class OracleSqlDriver extends SqlDriver {
 
     private String prepareName(String aName) {
         return (isWrappedName(aName) ? unwrapName(aName) : aName.toUpperCase());
+    }
+
+    @Override
+    public JdbcChangeValue convertGeometry(String aValue, Connection aConnection) throws SQLException {
+        if (!(aConnection instanceof OracleConnection)) {
+            aConnection = aConnection.unwrap(OracleConnection.class);
+        }
+        try {
+            GeometryConverter gc = new GeometryConverter((OracleConnection) aConnection);
+            WKTReader reader = new WKTReader();
+            Geometry geometry = reader.read(aValue);
+            JdbcChangeValue jdbcValue = new JdbcChangeValue(null, null, 0, null);
+            jdbcValue.value = gc.toSDO(geometry);
+            jdbcValue.jdbcType = Types.STRUCT;
+            jdbcValue.sqlTypeName = "MDSYS.SDO_GEOMETRY";
+            return jdbcValue;
+        } catch (ParseException ex) {
+            throw new SQLException(ex);
+        }
+    }
+
+    @Override
+    public String readGeometry(Wrapper aRs, int aColumnIndex, Connection aConnection) throws SQLException {
+        Object read = aRs instanceof ResultSet ? ((ResultSet) aRs).getObject(aColumnIndex) : ((CallableStatement) aRs).getObject(aColumnIndex);
+        boolean wasNull = aRs instanceof ResultSet ? ((ResultSet) aRs).wasNull() : ((CallableStatement) aRs).wasNull();
+        if (wasNull) {
+            return null;
+        } else {
+            if (read instanceof STRUCT) {
+                STRUCT struct = (STRUCT) read;
+                GeometryConverter reader = new GeometryConverter(struct.getInternalConnection());
+                Geometry geometry = reader.asGeometry(struct);
+                WKTWriter writer = new WKTWriter();
+                return writer.write(geometry);
+            } else {
+                return null;
+            }
+        }
     }
 }

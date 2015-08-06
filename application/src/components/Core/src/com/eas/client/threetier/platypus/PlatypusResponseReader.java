@@ -193,46 +193,6 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
             String text = dom.getChild(RequestsTags.TAG_RESULT_VALUE).getString();
             rsp.setAppQueryJson(text);
         }
-        /*
-         if (dom.containsChild(RequestsTags.TAG_QUERY_ID)) {
-         if (!dom.containsChild(RequestsTags.TAG_TIMESTAMP)) {
-         throw new NullPointerException("No query time-stamp specified");
-         }
-         rsp.setTimeStamp(dom.getChild(RequestsTags.TAG_TIMESTAMP).getDate());
-         PlatypusQuery appQuery = new PlatypusQuery(null);
-         if (!dom.containsChild(RequestsTags.TAG_FIELDS)) {
-         throw new ProtoReaderException("Query fields are not specified");
-         }
-         appQuery.setEntityName(dom.getChild(RequestsTags.TAG_QUERY_ID).getString());
-         if (dom.containsChild(RequestsTags.TAG_DML)) {
-         appQuery.setManual(dom.getChild(RequestsTags.TAG_DML).getInt() == 1);
-         }
-         ProtoNode titleNode = dom.getChild(RequestsTags.TAG_TITLE);
-         if (titleNode != null) {
-         appQuery.setTitle(titleNode.getString());
-         }
-
-         Fields fields = BinaryFields.read(dom.getChild(RequestsTags.TAG_FIELDS));
-         appQuery.setFields(fields);
-         List<ProtoNode> paramsNodes = dom.getChildren(RequestsTags.TAG_QUERY_SQL_PARAMETER);
-         for (ProtoNode node : paramsNodes) {
-         appQuery.getParameters().add(PlatypusRequestReader.readParameter(node));
-         }
-         List<ProtoNode> rolesNodes = dom.getChildren(RequestsTags.TAG_READ_ROLE);
-         if (rolesNodes != null) {
-         for (ProtoNode node : rolesNodes) {
-         appQuery.getReadRoles().add(node.getString());
-         }
-         }
-         rolesNodes = dom.getChildren(RequestsTags.TAG_WRITE_ROLE);
-         if (rolesNodes != null) {
-         for (ProtoNode node : rolesNodes) {
-         appQuery.getWriteRoles().add(node.getString());
-         }
-         }
-         rsp.setAppQuery(appQuery);
-         }
-         */
     }
 
     @Override
@@ -260,25 +220,6 @@ public class PlatypusResponseReader implements PlatypusResponseVisitor {
             rsp.setTimeStamp(dom.getChild(RequestsTags.TAG_TIMESTAMP).getDate());
             rsp.setInfoJson(dom.getChild(RequestsTags.TAG_RESULT_VALUE).getString());
         }
-        /*
-         if (dom.containsChild(RequestsTags.TAG_MODULE_NAME)) {
-         if (!dom.containsChild(RequestsTags.TAG_TIMESTAMP)) {
-         throw new NullPointerException("No server module info time-stamp specified");
-         }
-         rsp.setTimeStamp(dom.getChild(RequestsTags.TAG_TIMESTAMP).getDate());
-         String moduleName = dom.getChild(RequestsTags.TAG_MODULE_NAME).getString();
-         boolean permitted = dom.containsChild(RequestsTags.TAG_MODULE_PERMITTED);
-         Set<String> functionNames = new HashSet<>();
-         if (dom.containsChild(RequestsTags.TAG_MODULE_FUNCTION_NAMES)) {
-         List<ProtoNode> functionNodes = dom.getChild(RequestsTags.TAG_MODULE_FUNCTION_NAMES).getChildren(RequestsTags.TAG_MODULE_FUNCTION_NAME);
-         for (ProtoNode functionNode : functionNodes) {
-         assert functionNode != null;
-         functionNames.add(functionNode.getString());
-         }
-         }
-         rsp.setInfo(new ServerModuleInfo(moduleName, functionNames, permitted));
-         }
-         */
     }
 
 }

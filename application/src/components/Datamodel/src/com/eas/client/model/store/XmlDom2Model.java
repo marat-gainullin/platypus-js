@@ -14,13 +14,13 @@ import com.eas.client.model.Model;
 import com.eas.client.model.Relation;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.queries.Query;
+import com.eas.script.Scripts;
 import com.eas.xml.dom.XmlDomUtils;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Date;
 import java.sql.ParameterMetaData;
 import java.sql.Time;
-import java.sql.Types;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -191,7 +191,7 @@ public abstract class XmlDom2Model<E extends Entity<M, ?, E>, M extends Model<E,
                 relation.setLeftEntity(lEntity);
                 lEntity.addOutRelation(relation);
             }
-            
+
             E rEntity = aModel.getEntityById(rightEntityId);
             if (rEntity != null) {
                 if (rightParameterName != null && !rightParameterName.isEmpty()) {
@@ -231,17 +231,31 @@ public abstract class XmlDom2Model<E extends Entity<M, ?, E>, M extends Model<E,
         }
     }
 
+    private static final Set<String> legacyStringTypes = new HashSet<>(Arrays.asList(new String[]{"1", "12", "2005"}));
+    private static final Set<String> legacyNumberTypes = new HashSet<>(Arrays.asList(new String[]{"2", "3", "-5", "4", "5", "7", "8"}));
+    private static final Set<String> legacyDateTypes = new HashSet<>(Arrays.asList(new String[]{"91", "92", "93"}));
+    private static final Set<String> legacyBooleanTypes = new HashSet<>(Arrays.asList(new String[]{"-7", "16"}));
+    private static final Set<String> legacyNullTypes = new HashSet<>(Arrays.asList(new String[]{"2004", "1111"}));
+
     @Override
     public void visit(Field aField) {
         try {
             aField.setName(currentNode.getAttribute(Model2XmlDom.NAME_ATTR_NAME));
             aField.setDescription(currentNode.getAttribute(Model2XmlDom.DESCRIPTION_ATTR_NAME));
-            aField.getTypeInfo().setSqlType(readIntegerAttribute(Model2XmlDom.TYPE_ATTR_NAME, Types.LONGVARCHAR));
-            aField.getTypeInfo().setSqlTypeName(currentNode.getAttribute(Model2XmlDom.TYPE_NAME_ATTR_NAME));
-            aField.setSize(readIntegerAttribute(Model2XmlDom.SIZE_ATTR_NAME, 100));
-            aField.setScale(readIntegerAttribute(Model2XmlDom.SCALE_ATTR_NAME, 0));
-            aField.setPrecision(readIntegerAttribute(Model2XmlDom.PRECISION_ATTR_NAME, 0));
-            aField.setSigned(readBooleanAttribute(Model2XmlDom.SIGNED_ATTR_NAME, true));
+            String fieldType = currentNode.getAttribute(Model2XmlDom.TYPE_ATTR_NAME);
+            if (legacyStringTypes.contains(fieldType)) {
+                aField.setType(Scripts.STRING_TYPE_NAME);
+            } else if (legacyNumberTypes.contains(fieldType)) {
+                aField.setType(Scripts.NUMBER_TYPE_NAME);
+            } else if (legacyDateTypes.contains(fieldType)) {
+                aField.setType(Scripts.DATE_TYPE_NAME);
+            } else if (legacyBooleanTypes.contains(fieldType)) {
+                aField.setType(Scripts.BOOLEAN_TYPE_NAME);
+            } else if (legacyNullTypes.contains(fieldType)) {
+                aField.setType(null);
+            } else {
+                aField.setType(fieldType);// modern code :-)
+            }
             aField.setNullable(readBooleanAttribute(Model2XmlDom.NULLABLE_ATTR_NAME, true));
             aField.setPk(readBooleanAttribute(Model2XmlDom.IS_PK_ATTR_NAME, false));
 

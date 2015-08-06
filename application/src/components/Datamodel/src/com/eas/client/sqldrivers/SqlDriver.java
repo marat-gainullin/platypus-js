@@ -11,15 +11,22 @@ package com.eas.client.sqldrivers;
 
 import com.eas.client.ClientConstants;
 import com.eas.client.SQLUtils;
+import com.eas.client.changes.JdbcChangeValue;
+import com.eas.client.dataflow.StatementsGenerator;
 import com.eas.client.metadata.DbTableIndexSpec;
-import com.eas.client.metadata.Field;
+import com.eas.client.metadata.JdbcField;
 import com.eas.client.metadata.ForeignKeySpec;
 import com.eas.client.metadata.PrimaryKeySpec;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Wrapper;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -29,7 +36,7 @@ import java.util.logging.Logger;
  *
  * @author mg
  */
-public abstract class SqlDriver {
+public abstract class SqlDriver implements StatementsGenerator.GeometryConverter {
 
     protected class TwinString {
 
@@ -126,15 +133,6 @@ public abstract class SqlDriver {
     public abstract String getVersionInitResourceName();
 
     /**
-     * Returns subset of jdbc types, supported by particular database. The trick
-     * is that database uses own identifiers for it's types and we need an extra
-     * abstraction level.
-     *
-     * @return Subset of jdbc types, supported by particular database.
-     */
-    public abstract Set<Integer> getSupportedJdbcDataTypes();
-
-    /**
      * *
      * Sets current schema for current session.
      *
@@ -162,23 +160,6 @@ public abstract class SqlDriver {
     public abstract String getSql4GetConnectionContext();
 
     /**
-     * Returns sql query text, usable for enumerating tables in particular
-     * schema
-     *
-     * @param schema4Sql Schema name. If this parameter is null sql for all
-     * tables in all schemas will be returned.
-     * @return Sql query text
-     */
-    public abstract String getSql4TablesEnumeration(String schema4Sql);
-
-    /**
-     * Returns sql text for retriving schemas list.
-     *
-     * @return Sql text.
-     */
-    public abstract String getSql4SchemasEnumeration();
-
-    /**
      * Returns sql text for create new schema.
      *
      * @param aSchemaName schema name
@@ -186,46 +167,6 @@ public abstract class SqlDriver {
      * @return Sql text.
      */
     public abstract String getSql4CreateSchema(String aSchemaName, String aPassword);
-
-    /**
-     * Returns sql query text for getting columns metadata for tables. TODO:
-     * Implement result set fields description.
-     *
-     * @param aOwnerName Schema name
-     * @param aTableNames Tables names set
-     * @return
-     */
-    public abstract String getSql4TableColumns(String aOwnerName, Set<String> aTableNames);
-
-    /**
-     * *
-     * Returns sql query text for getting primary keys metadata for tables.
-     *
-     * @param aOwnerName Schema name
-     * @param aTableNames Tables names set
-     * @return
-     */
-    public abstract String getSql4TablePrimaryKeys(String aOwnerName, Set<String> aTableNames);
-
-    /**
-     * *
-     * Returns sql query text for getting foreign keys metadata for tables.
-     *
-     * @param aOwnerName Schema name
-     * @param aTableNames Tables names set
-     * @return
-     */
-    public abstract String getSql4TableForeignKeys(String aOwnerName, Set<String> aTableNames);
-
-    /**
-     * *
-     * Returns sql query text for getting indexes metadata for tables.
-     *
-     * @param aOwnerName Schema name
-     * @param aTableNames Tables names set
-     * @return
-     */
-    public abstract String getSql4Indexes(String aOwnerName, Set<String> aTableNames);
 
     /**
      * *
@@ -362,7 +303,7 @@ public abstract class SqlDriver {
      * @param aField A field information to deal with.
      * @return Sql string for field definition
      */
-    public abstract String getSql4FieldDefinition(Field aField);
+    public abstract String getSql4FieldDefinition(JdbcField aField);
 
     /**
      * Generates Sql string to modify a field, according to specific features of
@@ -375,7 +316,7 @@ public abstract class SqlDriver {
      * @param aField A field information
      * @return Sql array string for field modification.
      */
-    public abstract String[] getSqls4AddingField(String aSchemaName, String aTableName, Field aField);
+    public abstract String[] getSqls4AddingField(String aSchemaName, String aTableName, JdbcField aField);
 
     /**
      * Generates sql texts array for dropping a field. Sql clauses from array
@@ -408,7 +349,7 @@ public abstract class SqlDriver {
      * @param aNewFieldMd A field information to migrate to.
      * @return Sql array string for field modification.
      */
-    public abstract String[] getSqls4ModifyingField(String aSchemaName, String aTableName, Field aOldFieldMd, Field aNewFieldMd);
+    public abstract String[] getSqls4ModifyingField(String aSchemaName, String aTableName, JdbcField aOldFieldMd, JdbcField aNewFieldMd);
 
     /**
      * *
@@ -421,15 +362,7 @@ public abstract class SqlDriver {
      * @param aNewFieldMd New field
      * @return Sql array string for field modification.
      */
-    public abstract String[] getSqls4RenamingField(String aSchemaName, String aTableName, String aOldFieldName, Field aNewFieldMd);
-
-    /**
-     * Converts JDBC type to specific database type
-     *
-     * @param aLowLevelTypeName Specific database name
-     * @return JDBC type
-     */
-    public abstract Integer getJdbcTypeByRDBMSTypename(String aLowLevelTypeName);
+    public abstract String[] getSqls4RenamingField(String aSchemaName, String aTableName, String aOldFieldName, JdbcField aNewFieldMd);
 
     public static void applyScript(String scriptText, Connection aConnection) throws Exception {
         String[] commandsTexts = scriptText.split(EAS_SQL_SCRIPT_DELIMITER);
@@ -526,6 +459,26 @@ public abstract class SqlDriver {
         return sb.toString();
     }
 
+    @Override
+    public abstract JdbcChangeValue convertGeometry(String aValue, Connection aConnection) throws SQLException;
+/*
+    @Override
+    public JdbcChangeValue checkGeometry(JdbcChangeValue aValue, Connection aConnection) throws SQLException {
+        if (Scripts.GEOMETRY_TYPE_NAME.equals(getTypesResolver().toApplicationType(aValue.getSqlTypeName())) && aValue.value instanceof CharSequence) {
+            JdbcChangeValue converted = convertGeometry(((CharSequence) aValue.value).toString(), aConnection);
+            if (converted != null) {
+                converted.name = aValue.name;
+                return converted;
+            } else {
+                return aValue;
+            }
+        } else {
+            return aValue;
+        }
+    }
+*/
+    public abstract String readGeometry(Wrapper aRs, int aColumnIndex, Connection aConnection) throws SQLException;
+
     abstract public TwinString[] getCharsForWrap();
 
     abstract public char[] getRestrictedChars();
@@ -555,7 +508,7 @@ public abstract class SqlDriver {
     }
 
     /**
-     * 
+     *
      * Wrapping names containing restricted symbols.
      *
      * @param aName Name to wrap

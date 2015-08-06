@@ -1,7 +1,5 @@
 package com.eas.client.changes;
 
-import com.eas.client.metadata.DataTypeInfo;
-
 public abstract class Change {
 
 	private String entityName;
@@ -10,12 +8,10 @@ public abstract class Change {
 
 		private String name;
 		private Object value;
-		private DataTypeInfo type;
 
-		public Value(String aName, Object aValue, DataTypeInfo aType) {
+		public Value(String aName, Object aValue) {
 			name = aName;
 			value = aValue;
-			type = aType;
 		}
 
 		public String getName() {
@@ -24,10 +20,6 @@ public abstract class Change {
 
 		public Object getValue() {
 			return value;
-		}
-
-		public DataTypeInfo getType() {
-			return type;
 		}
 	}
 

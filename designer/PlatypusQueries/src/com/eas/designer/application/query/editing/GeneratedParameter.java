@@ -4,7 +4,6 @@
  */
 package com.eas.designer.application.query.editing;
 
-import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Parameter;
 
@@ -43,11 +42,10 @@ public class GeneratedParameter extends Parameter {
      * Constructor with name, description and typeInfo.
      * @param aName Name of the created parameter.
      * @param aDescription Description of the created parameter.
-     * @param aTypeInfo Type info of the created parameter.
-     * @see DataTypeInfo
+     * @param aType Type info of the created parameter.
      */
-    public GeneratedParameter(String aName, String aDescription, DataTypeInfo aTypeInfo) {
-        super(aName, aDescription, aTypeInfo);
+    public GeneratedParameter(String aName, String aDescription, String aType) {
+        super(aName, aDescription, aType);
     }
 
     /**

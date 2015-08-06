@@ -4,8 +4,6 @@
  */
 package com.eas.designer.application.query.completion;
 
-import com.eas.client.SQLUtils;
-import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
 import com.eas.client.model.QueryDocument.StoredFieldMetadata;
@@ -39,7 +37,7 @@ public class FieldTypeRenderer extends DefaultTableCellRenderer {
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         try {
             Component rComp = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            int sqlType = ((DataTypeInfo) value).getSqlType();
+            String fieldType = (String) value;
             Color defaultColor = Color.lightGray;
             Color editedColor = testLabel.getForeground();
             Fields fields = dataObject.getOutputFields();
@@ -47,16 +45,16 @@ public class FieldTypeRenderer extends DefaultTableCellRenderer {
                 Field field = fields.get(row + 1);
                 StoredFieldMetadata addition = getCorrespondingAddition(field);
                 if (addition != null) {
-                    if (addition.getTypeInfo() != null && addition.getTypeInfo().getSqlType() != field.getTypeInfo().getSqlType()) {
+                    if (addition.getType() != null && !addition.getType().equals(field.getType())) {
                         defaultColor = editedColor;
-                        sqlType = addition.getTypeInfo().getSqlType();
+                        fieldType = addition.getType();
                     }
                 }
                 rComp.setForeground(defaultColor);
                 if (rComp instanceof JLabel) {
-                    Icon icon = calcFieldIcon(sqlType, field);
+                    Icon icon = calcFieldIcon(fieldType, field);
                     ((JLabel) rComp).setIcon(icon);
-                    String typeDisplayName = SQLUtils.getLocalizedTypeName(sqlType);
+                    String typeDisplayName = fieldType;
                     if (typeDisplayName != null) {
                         ((JLabel) rComp).setText(typeDisplayName);
                     }
@@ -69,8 +67,8 @@ public class FieldTypeRenderer extends DefaultTableCellRenderer {
         }
     }
 
-    public static Icon calcFieldIcon(int sqlType, Field field) {
-        Icon icon = FieldsTypeIconsCache.getIcon16(sqlType);
+    public static Icon calcFieldIcon(String aFieldType, Field field) {
+        Icon icon = FieldsTypeIconsCache.getIcon16(aFieldType);
         if (field.isPk() || field.isFk()) {
             Image res = ImageUtilities.icon2Image(icon);
             if (field.isPk()) {

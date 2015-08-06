@@ -5,7 +5,6 @@
 package com.eas.designer.application.query.editing;
 
 import com.eas.client.ClientConstants;
-import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.Field;
 import com.eas.client.model.dbscheme.FieldsEntity;
 import com.eas.client.model.gui.edits.DeleteEntityEdit;
@@ -22,6 +21,7 @@ import com.eas.designer.application.query.PlatypusQueryDataObject;
 import com.eas.designer.application.query.editing.riddle.ExpressionRiddler;
 import com.eas.designer.application.query.editing.riddle.SelectRiddler;
 import com.eas.designer.application.query.editing.riddle.StatementRiddler;
+import com.eas.script.Scripts;
 import java.awt.Rectangle;
 import java.util.*;
 import javax.swing.undo.CompoundEdit;
@@ -278,7 +278,7 @@ public class SqlTextEditsComplementor {
         // Let's add yet absent parameters
         for (NamedParameter np : parsedParameters) {
             if (!paramNames.contains(np.getName().toLowerCase())) {
-                GeneratedParameter param = new GeneratedParameter(np.getName(), null, DataTypeInfo.VARCHAR);
+                GeneratedParameter param = new GeneratedParameter(np.getName(), null, Scripts.STRING_TYPE_NAME);
                 NewFieldEdit<QueryEntity> edit = new NewFieldEdit<QueryEntity>(model.getParametersEntity(), param);
                 edits.add(edit);
                 section.addEdit(edit);
@@ -357,7 +357,7 @@ public class SqlTextEditsComplementor {
                     toAdd.setQueryName(table.getName().substring(1));
                 } else {
                     String schema = table.getSchemaName();
-                    if (schema != null && schema.equalsIgnoreCase(dataObject.getMetadataCache().getConnectionSchema())) {
+                    if (schema != null && schema.equalsIgnoreCase(dataObject.getMetadataCache().getDatasourceSchema())) {
                         schema = null;
                     }
                     String cachedTablyName = (schema != null ? schema + "." : "") + table.getName();

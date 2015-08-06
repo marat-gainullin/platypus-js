@@ -30,7 +30,7 @@ public class QueryModel extends Model<QueryEntity, SqlQuery> {
     protected QueriesProxy<SqlQuery> queries;
     protected DatabasesClient basesProxy;
     protected String datasourceName;
-    private Set<Integer> supportedTypes;
+    private Set<String> supportedTypes;
 
     public QueryModel(QueriesProxy<SqlQuery> aQueries) {
         super();
@@ -133,18 +133,12 @@ public class QueryModel extends Model<QueryEntity, SqlQuery> {
         }
     }
 
-    @Override
-    public boolean isTypeSupported(int type) {
-        checkSupportedTypes();
-        return supportedTypes != null ? supportedTypes.contains(type) : true;
-    }
-
     protected void checkSupportedTypes() {
         if (supportedTypes == null && basesProxy != null) {
             try {
-                SqlDriver driver = basesProxy.getDbMetadataCache(datasourceName).getConnectionDriver();
+                SqlDriver driver = basesProxy.getMetadataCache(datasourceName).getDatasourceSqlDriver();
                 assert driver != null;
-                supportedTypes = driver.getSupportedJdbcDataTypes();
+                supportedTypes = driver.getTypesResolver().getSupportedTypes();
             } catch (Exception ex) {
                 Logger.getLogger(QueryModel.class.getName()).log(Level.SEVERE, null, ex);
             }

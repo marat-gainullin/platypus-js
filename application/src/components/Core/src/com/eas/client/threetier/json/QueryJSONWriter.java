@@ -14,7 +14,6 @@ import com.eas.util.JSONUtils;
 public class QueryJSONWriter extends FieldsJSONWriter{
 
     private static final String TITLE_PROP_NAME = "title";
-    private static final String MANUAL_PROP_NAME = "manual";
     private static final String APP_ELEMENT_PROP_NAME = "appelement";
     private static final String PARAMETERS_PROP_NAME = "parameters";
     private static final String FIELDS_PROP_NAME = "fields";
@@ -33,7 +32,6 @@ public class QueryJSONWriter extends FieldsJSONWriter{
     public String write() {
         StringBuilder sb = JSONUtils.o(
                 TITLE_PROP_NAME, JSONUtils.s(query.getTitle()).toString(),
-                MANUAL_PROP_NAME, String.valueOf(query.isManual()),
                 APP_ELEMENT_PROP_NAME, JSONUtils.s(query.getEntityName()).toString(),
                 PARAMETERS_PROP_NAME, fields2a(query.getParameters()).toString(),
                 FIELDS_PROP_NAME, fields2a(query.getFields()).toString()
