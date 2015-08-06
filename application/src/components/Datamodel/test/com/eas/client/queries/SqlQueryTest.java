@@ -7,7 +7,7 @@ package com.eas.client.queries;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SqlCompiledQuery;
 import com.eas.client.SqlQuery;
-import com.eas.client.metadata.DataTypeInfo;
+import com.eas.script.Scripts;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.*;
@@ -46,8 +46,8 @@ public class SqlQueryTest {
         b.setSqlText(TWO_PARAMS_QUERY);
         assertEquals(b.getSqlText(), TWO_PARAMS_QUERY);
         assertTrue(b.getParametersBinds().isEmpty());
-        b.putParameter("param1", DataTypeInfo.INTEGER, 1);
-        b.putParameter("param2", DataTypeInfo.VARCHAR, PARAM2_VALUE);
+        b.putParameter("param1", Scripts.NUMBER_TYPE_NAME, 1);
+        b.putParameter("param2", Scripts.STRING_TYPE_NAME, PARAM2_VALUE);
         assertEquals(2, b.getParameters().getParametersCount());
     }
 
@@ -55,16 +55,16 @@ public class SqlQueryTest {
     public void testCompiling() throws Exception {
         SqlQuery b = new SqlQuery((DatabasesClient)null);
         b.setSqlText(TWO_PARAMS_QUERY);
-        b.putParameter("param1", DataTypeInfo.INTEGER, 1);
-        b.putParameter("param2", DataTypeInfo.VARCHAR, PARAM2_VALUE);
+        b.putParameter("param1", Scripts.NUMBER_TYPE_NAME, 1);
+        b.putParameter("param2", Scripts.STRING_TYPE_NAME, PARAM2_VALUE);
         SqlCompiledQuery q = b.compile();
         assertEquals(q.getSqlClause(), "select * from ATABLE where FIELD1 > ? and FIELD2 = ? or FIELD1 < ?");
         assertEquals(3, q.getParameters().getParametersCount());
-        assertEquals(java.sql.Types.INTEGER, q.getParameters().get(1).getTypeInfo().getSqlType());
+        assertEquals(Scripts.NUMBER_TYPE_NAME, q.getParameters().get(1).getType());
         assertEquals(1, q.getParameters().get(1).getValue());
-        assertEquals(java.sql.Types.VARCHAR, q.getParameters().get(2).getTypeInfo().getSqlType());
+        assertEquals(Scripts.STRING_TYPE_NAME, q.getParameters().get(2).getType());
         assertEquals(PARAM2_VALUE, q.getParameters().get(2).getValue());
-        assertEquals(java.sql.Types.INTEGER, q.getParameters().get(3).getTypeInfo().getSqlType());
+        assertEquals(Scripts.NUMBER_TYPE_NAME, q.getParameters().get(3).getType());
         assertEquals(1, q.getParameters().get(3).getValue());
     }
 }

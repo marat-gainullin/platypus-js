@@ -8,6 +8,7 @@ import com.eas.client.metadata.DbTableIndexColumnSpec;
 import com.eas.client.metadata.DbTableIndexSpec;
 import com.eas.client.metadata.Field;
 import com.eas.client.model.dbscheme.FieldsEntity;
+import com.eas.client.sqldrivers.resolvers.TypesResolver;
 import com.eas.designer.datamodel.nodes.FieldNode;
 import java.awt.Image;
 import java.beans.PropertyChangeEvent;
@@ -23,6 +24,7 @@ import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 /**
@@ -33,21 +35,24 @@ public class TableIndexColumnNode extends AbstractNode {
 
     DbTableIndexColumnSpec columnSpec;
     FieldsEntity tableEntity;
-    private PropertyChangeListener columnspecListener;
+    private final PropertyChangeListener columnspecListener;
+    protected TypesResolver resolver;
 
     public TableIndexColumnNode(DbTableIndexColumnSpec aColumnSpec, FieldsEntity aTableEntity) {
         super(Children.LEAF);
         columnSpec = aColumnSpec;
         tableEntity = aTableEntity;
-        columnspecListener = new PropertyChangeListener() {
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                if (DbTableIndexColumnSpec.ASCENDING_PROPERTY.equals(evt.getPropertyName())) {
-                    firePropertyChange(DbTableIndexColumnSpec.ASCENDING_PROPERTY, evt.getOldValue(), evt.getNewValue());
-                }
+        columnspecListener = (PropertyChangeEvent evt) -> {
+            if (DbTableIndexColumnSpec.ASCENDING_PROPERTY.equals(evt.getPropertyName())) {
+                firePropertyChange(DbTableIndexColumnSpec.ASCENDING_PROPERTY, evt.getOldValue(), evt.getNewValue());
             }
         };
         columnSpec.getChangeSupport().addPropertyChangeListener(columnspecListener);
+        try {
+            resolver = tableEntity.getModel().getBasesProxy().getMetadataCache(tableEntity.getModel().getDatasourceName()).getDatasourceSqlDriver().getTypesResolver();
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 
     @Override
@@ -66,7 +71,7 @@ public class TableIndexColumnNode extends AbstractNode {
 
     @Override
     public Image getIcon(int type) {
-        return FieldNode.getIcon(getField(), type);
+        return FieldNode.getIcon(type, getField(), resolver);
     }
 
     public Boolean isAscending() {

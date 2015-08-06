@@ -17,7 +17,6 @@ import com.eas.script.HasPublished;
 import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.script.Scripts;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -134,15 +133,13 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
             });
         }
         for (E entity : toExecute) {
-            if (!entity.getQuery().isManual()) {
-                if (process == null) {
-                    entity.internalExecute((JSObject aData) -> {
-                    }, (Exception ex) -> {
-                        Logger.getLogger(ApplicationModel.class.getName()).log(Level.WARNING, ex.getMessage());
-                    });
-                } else {
-                    entity.internalExecute(null, null);
-                }
+            if (process == null) {
+                entity.internalExecute((JSObject aData) -> {
+                }, (Exception ex) -> {
+                    Logger.getLogger(ApplicationModel.class.getName()).log(Level.WARNING, ex.getMessage());
+                });
+            } else {
+                entity.internalExecute(null, null);
             }
         }
     }
@@ -287,27 +284,6 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
         toDel.stream().forEach((rel) -> {
             removeReferenceRelation(rel);
         });
-    }
-
-    /**
-     * Method checks if the type is supported for datamodel's internal usage.
-     * The types are fields or parameters types. If the type is reported as
-     * unsupported by this method, it doesn't mean that the type is unsupported
-     * in our pltypus system at all. It means only that platypus application
-     * designer will not be able to add fields or parameters of such types.
-     *
-     * @param type - the type to check.
-     * @return true if the type is supported for datamodel's internal usage.
-     */
-    @Override
-    public boolean isTypeSupported(int type) {
-        return type == Types.NUMERIC
-                || type == Types.DECIMAL
-                || type == Types.VARCHAR
-                || type == Types.DATE
-                || type == Types.BOOLEAN
-                || type == Types.BLOB
-                || type == Types.CLOB;
     }
 
     public abstract boolean isModified() throws Exception;

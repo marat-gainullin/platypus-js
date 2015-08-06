@@ -533,8 +533,7 @@ public class Model implements HasPublished {
                         var nField = nnFields.@java.util.List::get(I)(nf);
                         var nFieldName = nField.@com.eas.client.metadata.Field::getName()();
                         if (!aAdded[nFieldName] && nField.@com.eas.client.metadata.Field::isPk()()) {
-                        	var nTypeInfo = nField.@com.eas.client.metadata.Field::getTypeInfo()();
-                            aAdded[nFieldName] = $wnd.P.boxAsJs(nTypeInfo.@com.eas.client.metadata.DataTypeInfo::generateValue()());
+                        	aAdded[nFieldName] = $wnd.P.boxAsJs(nField.@com.eas.client.metadata.Field::generateValue()());
                         }
                     }
                     for (var na in aAdded) {

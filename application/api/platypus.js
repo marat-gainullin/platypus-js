@@ -983,7 +983,7 @@
                     if (fieldName === propName) {
                         value = oldValue;
                     }
-                    keys.add(new ValueClass(fieldName, value, field.getTypeInfo()));
+                    keys.add(new ValueClass(fieldName, value));
                 }
             }
         }
@@ -1070,7 +1070,7 @@
                     if (!tryToComplementInsert(aSubject, aChange)) {
                         var updateChange = new UpdateClass(nEntity.getQueryName());
                         generateChangeLogKeys(updateChange.keys, nFields, aChange.propertyName, aSubject, aChange.oldValue);
-                        updateChange.data.add(new ValueClass(aChange.propertyName, aChange.newValue, noFields[aChange.propertyName].getTypeInfo()));
+                        updateChange.data.add(new ValueClass(aChange.propertyName, aChange.newValue));
                         nEntity.getChangeLog().add(updateChange);
                     }
                     Object.keys(orderers).forEach(function (aOrdererKey) {
@@ -1109,7 +1109,7 @@
                             }
                         }
                         if (!met) {
-                            justInsertedChange.getData().add(new ValueClass(aChange.propertyName, aChange.newValue, noFields[aChange.propertyName].getTypeInfo()));
+                            justInsertedChange.getData().add(new ValueClass(aChange.propertyName, aChange.newValue));
                             complemented = true;
                         }
                     }
@@ -1144,14 +1144,14 @@
                             for (var nf = 0; nf < nnFields.size(); nf++) {
                                 var nField = nnFields[nf];
                                 if (!aAdded[nField.name] && nField.pk) {
-                                    aAdded[nField.name] = nField.getTypeInfo().generateValue();
+                                    aAdded[nField.name] = nField.generateValue();
                                 }
                             }
                             for (var na in aAdded) {
                                 var nField = noFields[na];
                                 if (nField) {
                                     var v = aAdded[na];
-                                    var cv = new ValueClass(nField.name, v, nField.getTypeInfo());
+                                    var cv = new ValueClass(nField.name, v);
                                     justInsertedChange.data.add(cv);
                                 }
                             }

@@ -106,7 +106,6 @@ public abstract class Model2XmlDom<E extends Entity<M, ?, E>, M extends Model<E,
     public static final String NAME_ATTR_NAME = "name";
     public static final String DESCRIPTION_ATTR_NAME = "description";
     public static final String TYPE_ATTR_NAME = "type";
-    public static final String TYPE_NAME_ATTR_NAME = "typeName";
     public static final String SIZE_ATTR_NAME = "size";
     public static final String SCALE_ATTR_NAME = "scale";
     public static final String PRECISION_ATTR_NAME = "precision";
@@ -127,12 +126,7 @@ public abstract class Model2XmlDom<E extends Entity<M, ?, E>, M extends Model<E,
 
             node.setAttribute(NAME_ATTR_NAME, aField.getName());
             node.setAttribute(DESCRIPTION_ATTR_NAME, aField.getDescription());
-            node.setAttribute(TYPE_ATTR_NAME, String.valueOf(aField.getTypeInfo().getSqlType()));
-            node.setAttribute(TYPE_NAME_ATTR_NAME, aField.getTypeInfo().getSqlTypeName());
-            node.setAttribute(SIZE_ATTR_NAME, String.valueOf(aField.getSize()));
-            node.setAttribute(SCALE_ATTR_NAME, String.valueOf(aField.getScale()));
-            node.setAttribute(PRECISION_ATTR_NAME, String.valueOf(aField.getPrecision()));
-            node.setAttribute(SIGNED_ATTR_NAME, String.valueOf(aField.isSigned()));
+            node.setAttribute(TYPE_ATTR_NAME, aField.getType());
             node.setAttribute(NULLABLE_ATTR_NAME, String.valueOf(aField.isNullable()));
             if (aField instanceof Parameter) {
                 node.setAttribute(SELECTION_FORM_TAG_NAME, String.valueOf(((Parameter) aField).getSelectionForm()));

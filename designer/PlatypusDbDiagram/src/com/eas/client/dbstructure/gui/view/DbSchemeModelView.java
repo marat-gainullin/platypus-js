@@ -4,7 +4,8 @@
  */
 package com.eas.client.dbstructure.gui.view;
 
-import com.eas.client.DatabaseMdCache;
+import com.eas.client.DatabasesClient;
+import com.eas.client.MetadataCache;
 import com.eas.client.SqlCompiledQuery;
 import com.eas.client.dbstructure.DbStructureUtils;
 import com.eas.client.dbstructure.IconCache;
@@ -16,6 +17,7 @@ import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.ForeignKeySpec;
 import com.eas.client.metadata.ForeignKeySpec.ForeignKeyRule;
+import com.eas.client.metadata.JdbcField;
 import com.eas.client.metadata.TableRef;
 import com.eas.client.model.*;
 import com.eas.client.model.dbscheme.DbSchemeModel;
@@ -33,7 +35,8 @@ import com.eas.client.model.gui.view.entities.EntityView;
 import com.eas.client.model.gui.view.model.ModelView;
 import com.eas.client.model.store.DbSchemeModel2XmlDom;
 import com.eas.client.model.store.XmlDom2DbSchemeModel;
-import com.eas.designer.datamodel.nodes.FieldNode;
+import com.eas.client.sqldrivers.SqlDriver;
+import com.eas.designer.application.dbdiagram.nodes.TableFieldNode;
 import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
 import java.awt.*;
@@ -54,6 +57,7 @@ import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
 import org.openide.explorer.propertysheet.PropertySheet;
 import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.util.lookup.Lookups;
 import org.w3c.dom.Document;
@@ -82,7 +86,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                     entitiesByTableName.put(entity.getTableName().toLowerCase(), entity);
                 }
             }
-            DatabaseMdCache mdCache = model.getBasesProxy().getDbMetadataCache(model.getDatasourceName());
+            MetadataCache mdCache = model.getBasesProxy().getMetadataCache(model.getDatasourceName());
             String schema = model.getSchema();
             for (FieldsEntity entity : entities.values()) {
                 if (entity != null) {
@@ -315,10 +319,50 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                 DbSchemeModel model = entity.getModel();
                 if (model != null) {
                     try {
-                        Field field = NewFieldEdit.createField(entity);
+                        JdbcField field = NewFieldEdit.createField(entity);
                         PropertySheet ps = new PropertySheet();
-                        // FieldNode is used here to avoid in database edits generation by TableFieldNode
-                        FieldNode fieldNode = new FieldNode(field, Lookups.fixed(entity), true);
+                        TableFieldNode fieldNode = new TableFieldNode(field, Lookups.fixed(entity)) {
+
+                            // setXXX() methods are overrided here to avoid in database edits generation by TableFieldNode
+                            @Override
+                            public void setName(String val) {
+                                field.setName(val);
+                            }
+
+                            @Override
+                            public void setType(String val) {
+                                try {
+                                    field.setType(val);
+                                    DatabasesClient client = model.getBasesProxy();
+                                    String datasourceName = model.getDatasourceName();
+                                    SqlDriver driver = client.getMetadataCache(datasourceName).getDatasourceSqlDriver();
+                                    driver.getTypesResolver().resolveSize((JdbcField) field);
+                                } catch (Exception ex) {
+                                    Exceptions.printStackTrace(ex);
+                                }
+                            }
+
+                            @Override
+                            public void setDescription(String val) {
+                                field.setDescription(val);
+                            }
+
+                            @Override
+                            public void setSize(Integer val) {
+                                ((JdbcField) field).setSize(val);
+                            }
+
+                            @Override
+                            public void setScale(Integer val) {
+                                ((JdbcField) field).setScale(val);
+                            }
+
+                            @Override
+                            public void setNullable(Boolean val) {
+                                ((JdbcField) field).setNullable(val);
+                            }
+
+                        };
                         ps.setNodes(new Node[]{fieldNode});
                         DialogDescriptor dd = new DialogDescriptor(ps, NbBundle.getMessage(DbSchemeModelView.class, "MSG_NewSchemeFieldDialogTitle"));
                         if (DialogDescriptor.OK_OPTION.equals(DialogDisplayer.getDefault().notify(dd))) {
@@ -689,7 +733,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                 }
                 // act with fields    
                 for (SelectedField<FieldsEntity> etf : getSelectedFields()) {
-                    Field field = etf.field;
+                    JdbcField field = (JdbcField) etf.field;
                     if (!field.isPk()) {
                         try {
                             dropField(entity, section, field, e);
@@ -716,7 +760,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
             }
         }
 
-        private boolean dropField(FieldsEntity entity, CompoundEdit aEdit, Field field, ActionEvent e) {
+        private boolean dropField(FieldsEntity entity, CompoundEdit aEdit, JdbcField field, ActionEvent e) {
             if (entity != null) {
                 // act with field.
                 // Dropping foreign keys, table and removing theirs entities and relations
@@ -743,7 +787,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
             return true;
         }
 
-        private boolean doDropField(FieldsEntity entity, CompoundEdit aEdit, Field field, ActionEvent e) {
+        private boolean doDropField(FieldsEntity entity, CompoundEdit aEdit, JdbcField field, ActionEvent e) {
             DropFieldEdit edit = new DropFieldEdit(sqlController, field, entity);
             edit.redo();
             aEdit.addEdit(edit);
@@ -1088,7 +1132,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
         String content = XmlDom2String.transform(doc);
         string2SystemClipboard(content);
     }
-    
+
     public void resolveTables() throws Exception {
         Map<Long, FieldsEntity> entities = model.getEntities();
         if (entities != null && !entities.isEmpty()) {
@@ -1116,54 +1160,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
     }
 
     private boolean isEntityTableExists(FieldsEntity fEntity) throws Exception {
-        DatabaseMdCache cache = model.getBasesProxy().getDbMetadataCache(sqlController.getDatasourceName());
+        MetadataCache cache = model.getBasesProxy().getMetadataCache(sqlController.getDatasourceName());
         return cache.containsTableMetadata(fEntity.getFullTableName());
-        /*
-         try {
-         DbMetadataCache cache = model.getClient().getDbMetadataCache(sqlController.getDbId());
-         String schema = fEntity.getTableSchemaName();
-         if (schema == null) {
-         schema = cache.getConnectionSchema();
-         }
-         String qtn = schema + "." + fEntity.getTableName();
-         SqlCompiledQuery query = new SqlCompiledQuery(model.getClient(), sqlController.getDbId(), SQLUtils.makeTableNameMetadataQuery(qtn));
-         Rowset rs = query.executeQuery();
-         return rs != null;
-         } catch (Exception ex) {
-         return false;
-         }
-         */
     }
-/*
-    private void resolveFields() throws Exception {
-        Map<Long, FieldsEntity> entities = model.getEntities();
-        if (entities != null) {
-            for (FieldsEntity entity : entities.values()) {
-                model.getBasesProxy().dbTableChanged(entity.getTableDatasourceName(), entity.getTableSchemaName(), entity.getTableName());
-            }
-        }
-    }
-
-    private void resolveIndexes() {
-        Map<Long, FieldsEntity> entities = model.getEntities();
-        if (entities != null) {
-            entities.values().stream().forEach((entity) -> {
-                entity.achiveIndexes();
-            });
-        }
-    }
-
-    public void entireSynchronizeWithDb() throws Exception {
-        model.removeEditingListener(modelListener);
-        try {
-            resolveTables();
-            resolveFields();
-            resolveIndexes();
-            resolveRelations();
-        } finally {
-            model.addEditingListener(modelListener);
-        }
-        refreshView();
-    }
-*/
 }

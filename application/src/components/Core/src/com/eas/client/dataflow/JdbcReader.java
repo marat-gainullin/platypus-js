@@ -4,12 +4,15 @@
  */
 package com.eas.client.dataflow;
 
-import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.JdbcField;
+import com.eas.script.Scripts;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Wrapper;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -20,31 +23,42 @@ import java.util.Map;
  * particular subset of rows for the rowset. Reading utilizes converters to
  * produce application-specific data while reading.
  *
- * @see Converter
  * @author mg
  */
 public class JdbcReader {
 
+    public interface GeometryReader {
+
+        public String readGeometry(Wrapper aRs, int aColumnIndex, Connection aConnection) throws SQLException;
+    }
+
+    public interface TypesResolver {
+
+        public String toApplicationType(String aRDBMSType);
+    }
+
     protected static final String RESULTSET_MISSING_EXCEPTION_MSG = "aResultSet argument must be non null";
     protected Fields expectedFields;
+    protected GeometryReader gReader;
+    protected TypesResolver resolver;
 
     /**
-     * Default constructor. Uses RowsetConverter as a converter.
      *
      * @see RowsetConverter
      */
-    public JdbcReader() {
+    protected JdbcReader(GeometryReader aReader, TypesResolver aResolver) {
         super();
+        gReader = aReader;
+        resolver = aResolver;
     }
 
     /**
-     * Constructs a reader for rowset, using specified converter.
      *
-     * @param aExpectedFields Fields expexted to be in read rowset
-     * @see Converter
+     * @param aExpectedFields Fields expected to be in read rowset
+     * @see Jdbc
      */
-    public JdbcReader(Fields aExpectedFields) {
-        super();
+    public JdbcReader(Fields aExpectedFields, GeometryReader aReader, TypesResolver aResolver) {
+        this(aReader, aResolver);
         expectedFields = aExpectedFields;
     }
 
@@ -62,8 +76,8 @@ public class JdbcReader {
         try {
             if (aResultSet != null) {
                 ResultSetMetaData lowLevelJdbcFields = aResultSet.getMetaData();
-                Fields jdbcFields = readFields(lowLevelJdbcFields);
-                return readRows(expectedFields != null && !expectedFields.isEmpty() ? expectedFields : jdbcFields, jdbcFields, aResultSet, aPageSize);
+                Fields readFields = readFields(lowLevelJdbcFields);
+                return readRows(expectedFields != null && !expectedFields.isEmpty() ? expectedFields : readFields, readFields, aResultSet, aPageSize, aResultSet.getStatement().getConnection());
             } else {
                 throw new SQLException(RESULTSET_MISSING_EXCEPTION_MSG);
             }
@@ -76,33 +90,27 @@ public class JdbcReader {
         }
     }
 
-    public static Fields readFields(ResultSetMetaData lowLevelJdbcFields) throws SQLException {
-        Fields jdbcFields = new Fields();
-        for (int i = 1; i <= lowLevelJdbcFields.getColumnCount(); i++) {
-            Field field = new Field();
-            String columnLabel = lowLevelJdbcFields.getColumnLabel(i);// Column label in jdbc is the name of platypus property
-            String columnName = lowLevelJdbcFields.getColumnName(i);
-            field.setName(columnLabel != null && !columnLabel.isEmpty() ? columnLabel : columnName);
-            field.setOriginalName(columnName);
+    public Fields readFields(ResultSetMetaData jdbcFields) throws SQLException {
+        Fields appFields = new Fields();
+        for (int i = 1; i <= jdbcFields.getColumnCount(); i++) {
+            Field appField = new JdbcField();
+            String columnLabel = jdbcFields.getColumnLabel(i);// Column label in jdbc is the name of platypus property
+            String columnName = jdbcFields.getColumnName(i);
+            appField.setName(columnLabel != null && !columnLabel.isEmpty() ? columnLabel : columnName);
+            appField.setOriginalName(columnName);
 
-            field.setNullable(lowLevelJdbcFields.isNullable(i) == ResultSetMetaData.columnNullable);
+            appField.setNullable(jdbcFields.isNullable(i) == ResultSetMetaData.columnNullable);
+            appField.setType(resolver.toApplicationType(jdbcFields.getColumnTypeName(i)));
 
-            DataTypeInfo typeInfo = new DataTypeInfo();
-            typeInfo.setSqlType(lowLevelJdbcFields.getColumnType(i));
-            typeInfo.setSqlTypeName(lowLevelJdbcFields.getColumnTypeName(i));
-            typeInfo.setJavaClassName(lowLevelJdbcFields.getColumnClassName(i));
-            field.setTypeInfo(typeInfo);
-
-            field.setSize(lowLevelJdbcFields.getColumnDisplaySize(i));
-            field.setPrecision(lowLevelJdbcFields.getPrecision(i));
-            field.setScale(lowLevelJdbcFields.getScale(i));
-            field.setSigned(lowLevelJdbcFields.isSigned(i));
-
-            field.setTableName(lowLevelJdbcFields.getTableName(i));
-            field.setSchemaName(lowLevelJdbcFields.getSchemaName(i));
-            jdbcFields.add(field);
+            String schemaName = jdbcFields.getSchemaName(i);
+            String tableName = jdbcFields.getTableName(i);
+            if (schemaName != null && !schemaName.isEmpty()) {
+                tableName = schemaName + "." + tableName;
+            }
+            appField.setTableName(tableName);
+            appFields.add(appField);
         }
-        return jdbcFields;
+        return appFields;
     }
 
     /**
@@ -110,19 +118,19 @@ public class JdbcReader {
      * collection.
      *
      * @param aExpectedFields
-     * @param aJdbcFields Fields instance to be used as rowset's metadata.
+     * @param aReadFields Fields instance to be used as rowset's metadata.
      * @param aResultSet A result set to read from.
      * @param aPageSize Page size of reading process. May be less then zero to
      * indicate that whole data should be fetched.
      * @return Array of rows had been read.
      * @throws SQLException
      */
-    protected static Collection<Map<String, Object>> readRows(Fields aExpectedFields, Fields aJdbcFields, ResultSet aResultSet, int aPageSize) throws SQLException {
+    protected Collection<Map<String, Object>> readRows(Fields aExpectedFields, Fields aReadFields, ResultSet aResultSet, int aPageSize, Connection aConnection) throws SQLException {
         try {
             if (aResultSet != null) {
                 Collection<Map<String, Object>> oRows = new ArrayList<>();
                 while ((aPageSize <= 0 || oRows.size() < aPageSize) && aResultSet.next()) {
-                    Map<String, Object> jsRow = readRow(aExpectedFields, aJdbcFields, aResultSet);
+                    Map<String, Object> jsRow = readRow(aExpectedFields, aReadFields, aResultSet, aConnection);
                     oRows.add(jsRow);
                 }
                 return oRows;
@@ -142,27 +150,26 @@ public class JdbcReader {
      * Reads single row from result set, returning it as a result.
      *
      * @param aExpectedFields
-     * @param aJdbcFields
+     * @param aReadFields
      * @param aResultSet Result set to read from.
      * @return The row had been read.
      * @throws SQLException
      */
-    protected static Map<String, Object> readRow(Fields aExpectedFields, Fields aJdbcFields, ResultSet aResultSet) throws SQLException {
+    protected Map<String, Object> readRow(Fields aExpectedFields, Fields aReadFields, ResultSet aResultSet, Connection aConnection) throws SQLException {
         if (aResultSet != null) {
             assert aExpectedFields != null;
             Map<String, Object> row = new HashMap<>();
-            for (int i = 1; i <= aJdbcFields.getFieldsCount(); i++) {
-                Field jdbcField = aJdbcFields.get(i);
-                Field expectedField = aExpectedFields.get(jdbcField.getName());
-                if (expectedField != null) {
-                    Object appObject = Converter.get(aResultSet, i, expectedField.getTypeInfo());
-                    //appObject = Scripts.toJs(appObject);
-                    row.put(expectedField.getName(), appObject);
+            for (int i = 1; i <= aReadFields.getFieldsCount(); i++) {
+                Field readField = aReadFields.get(i);
+                Field expectedField = aExpectedFields.get(readField.getName());
+                Field field = expectedField != null ? expectedField : readField;
+                Object appObject;
+                if (Scripts.GEOMETRY_TYPE_NAME.equals(field.getType())) {
+                    appObject = gReader.readGeometry(aResultSet, i, aConnection);
                 } else {
-                    Object appObject = Converter.get(aResultSet, i, jdbcField.getTypeInfo());
-                    //appObject = Scripts.toJs(appObject);
-                    row.put(jdbcField.getName(), appObject);
+                    appObject = JdbcFlowProvider.get(aResultSet, i);
                 }
+                row.put(field.getName(), appObject);
             }
             return row;
         }

@@ -4,7 +4,7 @@
  */
 package com.eas.client.model.dbscheme;
 
-import com.eas.client.DatabaseMdCache;
+import com.eas.client.MetadataCache;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SQLUtils;
 import com.eas.client.SqlQuery;
@@ -26,7 +26,7 @@ public class FieldsEntity extends Entity<DbSchemeModel, SqlQuery, FieldsEntity> 
 
     public static final String INDEXES_PROPERTY = "indexes"; //NOI18N
     public static final String FIELDS_PROPERTY = "fields"; //NOI18N
-    protected List<DbTableIndexSpec> grabedIndexes;
+    protected List<DbTableIndexSpec> grabedIndexes = new ArrayList<>();
 
     public FieldsEntity() {
         super();
@@ -87,7 +87,7 @@ public class FieldsEntity extends Entity<DbSchemeModel, SqlQuery, FieldsEntity> 
         DatabasesClient basesProxy = getModel().getBasesProxy();
         if (basesProxy != null) {
             try {
-                DatabaseMdCache mdCache = basesProxy.getDbMetadataCache(getTableDatasourceName());
+                MetadataCache mdCache = basesProxy.getMetadataCache(getTableDatasourceName());
                 assert getTableName() != null;
                 String ltblName = getTableName();
                 if (getTableSchemaName() != null && !getTableSchemaName().isEmpty()) {

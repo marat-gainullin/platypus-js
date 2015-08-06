@@ -7,7 +7,6 @@
  * author.
  * All rights reserved.
  */
-
 package com.eas.client.queries;
 
 /**
@@ -15,16 +14,15 @@ package com.eas.client.queries;
  * @author mg
  */
 public class ParameterBindSpec {
-    protected String datasourceName = null;// null means that parameter is binded to query parameter
-    protected String datasourecField = null; 
 
-    public ParameterBindSpec()
-    {
+    protected String datasourceName;// null means that parameter is binded to query parameter
+    protected String datasourecField;
+
+    public ParameterBindSpec() {
         super();
     }
-    
-    public ParameterBindSpec(String aDatasourceName, String aDatasourecField)
-    {
+
+    public ParameterBindSpec(String aDatasourceName, String aDatasourecField) {
         super();
         datasourceName = aDatasourceName;
         datasourecField = aDatasourecField;

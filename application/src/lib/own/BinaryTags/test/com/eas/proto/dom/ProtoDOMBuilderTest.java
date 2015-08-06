@@ -11,7 +11,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.sql.Types;
 import java.util.Iterator;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -71,14 +70,14 @@ public class ProtoDOMBuilderTest {
             writer.put(CoreTags.TAG_STREAM, subStream.toByteArray());
         }
         BigDecimal entityID = new BigDecimal(124349290914389600L);
-        writer.putJDBCCompatible(101, Types.NUMERIC, entityID);
-        writer.putJDBCCompatible(102, Types.BIGINT, entityID);
+        writer.put(101, entityID);
+        writer.put(102, entityID);
         writer.flush();
         ProtoNode result = ProtoDOMBuilder.buildDOM(outStream.toByteArray());
         assertEquals("select * from dual.dummy", result.getChild(TAG_SQL_QUERY).getString());
         assertEquals(28348934723984L, result.getChild(TAG_DATABASE_ID).getLong());
-        assertEquals(entityID, result.getChild(101).getJDBCCompatible(Types.NUMERIC));
-        assertEquals(BigInteger.valueOf(entityID.longValue()), result.getChild(102).getJDBCCompatible(Types.BIGINT));
+        assertEquals(entityID, result.getChild(101).getBigDecimal());
+        assertEquals(BigInteger.valueOf(entityID.longValue()), result.getChild(102).getBigDecimal());
         Iterator<ProtoNode> iterator = result.iterator();
         int paramCount = 0;
         while (iterator.hasNext()) {

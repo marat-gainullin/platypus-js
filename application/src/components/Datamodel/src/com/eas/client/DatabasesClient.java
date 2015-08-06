@@ -3,10 +3,9 @@ package com.eas.client;
 import com.eas.client.changes.Change;
 import com.eas.client.changes.EntitiesHost;
 import com.eas.client.dataflow.ColumnsIndicies;
-import com.eas.client.dataflow.Converter;
+import com.eas.client.dataflow.JdbcFlowProvider;
 import com.eas.client.dataflow.StatementsGenerator;
 import com.eas.client.login.PlatypusPrincipal;
-import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.Parameter;
@@ -51,7 +50,7 @@ public class DatabasesClient {
     public static final String TYPES_INFO_TRACE_MSG = "Getting types info. DatasourceName %s";
     public static final String USER_MISSING_MSG = "No user found (%s)";
     // metadata
-    protected Map<String, DatabaseMdCache> mdCaches = new ConcurrentHashMap<>();
+    protected Map<String, MetadataCache> mdCaches = new ConcurrentHashMap<>();
     protected boolean autoFillMetadata = true;
     // callback interface for context
     protected ContextHost contextHost;
@@ -156,7 +155,7 @@ public class DatabasesClient {
     public PlatypusJdbcFlowProvider createFlowProvider(String aDatasourceName, String aEntityName, String aSqlClause, Fields aExpectedFields) throws Exception {
         return new PlatypusJdbcFlowProvider(this, aDatasourceName, aEntityName, obtainDataSource(aDatasourceName), (Runnable aTask) -> {
             startJdbcTask(aTask);
-        }, getDbMetadataCache(aDatasourceName), aSqlClause, aExpectedFields, contextHost);
+        }, getMetadataCache(aDatasourceName), aSqlClause, aExpectedFields, contextHost);
     }
 
     public String getSqlLogMessage(SqlCompiledQuery query) {
@@ -178,7 +177,7 @@ public class DatabasesClient {
     public static Map<String, String> getUserProperties(DatabasesClient aClient, String aUserName, Scripts.Space aSpace, Consumer<Map<String, String>> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (aUserName != null && aClient != null) {
             final SqlQuery q = new SqlQuery(aClient, USER_QUERY_TEXT);
-            q.putParameter(USERNAME_PARAMETER_NAME, DataTypeInfo.VARCHAR, aUserName.toUpperCase());
+            q.putParameter(USERNAME_PARAMETER_NAME, Scripts.STRING_TYPE_NAME, aUserName.toUpperCase());
             SqlCompiledQuery compiled = q.compile();
             CallableConsumer<Map<String, String>, ResultSet> doWork = (ResultSet r) -> {
                 Map<String, String> properties = new HashMap<>();
@@ -312,7 +311,8 @@ public class DatabasesClient {
                     Parameters params = aQuery.getParameters();
                     for (int i = 1; i <= params.getParametersCount(); i++) {
                         Parameter param = params.get(i);
-                        Converter.convertAndAssign(param.getValue(), param.getTypeInfo(), connection, i, stmt);
+                        int jdbcType = JdbcFlowProvider.assumeJdbcType(param.getValue());
+                        JdbcFlowProvider.assign(param.getValue(), i, stmt, jdbcType, null);
                     }
                     try {
                         rowsAffected += stmt.executeUpdate();
@@ -347,21 +347,21 @@ public class DatabasesClient {
         }
     }
 
-    public DatabaseMdCache getDbMetadataCache(String aDatasourceName) throws Exception {
+    public MetadataCache getMetadataCache(String aDatasourceName) throws Exception {
         if (aDatasourceName == null) {
             aDatasourceName = defaultDatasourceName;
         }
         if (aDatasourceName != null) {
             if (!mdCaches.containsKey(aDatasourceName)) {
-                DatabaseMdCache cache = new DatabaseMdCache(this, aDatasourceName);
-                mdCaches.put(aDatasourceName, cache);
+                MetadataCache cache = new MetadataCache(this, aDatasourceName);
                 if (autoFillMetadata) {
                     try {
-                        cache.fillTablesCacheByConnectionSchema(true);
+                        cache.fillTablesCacheByConnectionSchema();
                     } catch (ResourceUnavalableException ex) {
                         Logger.getLogger(DatabasesClient.class.getName()).log(Level.WARNING, ex.getMessage());
                     }
                 }
+                mdCaches.put(aDatasourceName, cache);
             }
             return mdCaches.get(aDatasourceName);
         } else {
@@ -538,11 +538,11 @@ public class DatabasesClient {
     protected ApplyResult apply(final String aDatasourceName, List<Change> aLog, Scripts.Space aSpace, Consumer<ApplyResult> onSuccess, Consumer<Exception> onFailure) throws Exception {
         Callable<ApplyResult> doWork = () -> {
             int rowsAffected;
-            DatabaseMdCache mdCache = getDbMetadataCache(aDatasourceName);
+            MetadataCache mdCache = getMetadataCache(aDatasourceName);
             if (mdCache == null) {
                 throw new IllegalStateException(String.format(UNKNOWN_DATASOURCE_IN_COMMIT, aDatasourceName));
             }
-            SqlDriver driver = mdCache.getConnectionDriver();
+            SqlDriver driver = mdCache.getDatasourceSqlDriver();
             if (driver == null) {
                 throw new IllegalStateException(String.format(UNSUPPORTED_DATASOURCE_IN_COMMIT, aDatasourceName));
             }
@@ -587,7 +587,7 @@ public class DatabasesClient {
                                 }
                                 if (fields != null) {
                                     Field resolved = fields.get(aFieldName);
-                                    String resolvedTableName = resolved != null ? resolved.getTableName() : null;
+                                    String resolvedTableName = resolved.getTableName();
                                     resolvedTableName = resolvedTableName != null ? resolvedTableName.toLowerCase() : "";
                                     if (query != null && query.getWritable() != null && !query.getWritable().contains(resolvedTableName)) {
                                         return null;
@@ -618,7 +618,7 @@ public class DatabasesClient {
                             }
                             return query;
                         }
-                    }, ClientConstants.F_USR_CONTEXT, contextHost != null ? contextHost.preparationContext() : null);
+                    }, ClientConstants.F_USR_CONTEXT, contextHost != null ? contextHost.preparationContext() : null, mdCache, driver);
                     change.accept(generator);
                     statements.addAll(generator.getLogEntries());
                 }
@@ -658,7 +658,7 @@ public class DatabasesClient {
     protected static final String UNSUPPORTED_DATASOURCE_IN_COMMIT = "Unsupported datasource: %s. Can't commit to it.";
 
     public void dbTableChanged(String aDatasourceName, String aSchema, String aTable) throws Exception {
-        DatabaseMdCache cache = getDbMetadataCache(aDatasourceName);
+        MetadataCache cache = getMetadataCache(aDatasourceName);
         cache.removeSchema(aSchema);
     }
 
@@ -673,15 +673,15 @@ public class DatabasesClient {
         }
     }
 
-    public String getConnectionDialect(String aDatasourceId) throws Exception {
-        DataSource ds = obtainDataSource(aDatasourceId);
+    public String getConnectionDialect(String aDatasourceName) throws Exception {
+        DataSource ds = obtainDataSource(aDatasourceName);
         try (Connection conn = ds.getConnection()) {
             return dialectByConnection(conn);
         }
     }
 
-    public SqlDriver getConnectionDriver(String aDatasourceId) throws Exception {
-        DataSource ds = obtainDataSource(aDatasourceId);
+    public SqlDriver getConnectionDriver(String aDatasourceName) throws Exception {
+        DataSource ds = obtainDataSource(aDatasourceName);
         try (Connection conn = ds.getConnection()) {
             return SQLUtils.getSqlDriver(dialectByConnection(conn));
         }
@@ -698,7 +698,7 @@ public class DatabasesClient {
             return roles;
         };
         final SqlQuery q = new SqlQuery(aClient, USER_GROUPS_QUERY_TEXT);
-        q.putParameter(USERNAME_PARAMETER_NAME, DataTypeInfo.VARCHAR, aUserName.toUpperCase());
+        q.putParameter(USERNAME_PARAMETER_NAME, Scripts.STRING_TYPE_NAME, aUserName.toUpperCase());
         SqlCompiledQuery compiled = q.compile();
         if (onSuccess != null) {
             compiled.<Set<String>>executeQuery(doWork, (Runnable aTask) -> {

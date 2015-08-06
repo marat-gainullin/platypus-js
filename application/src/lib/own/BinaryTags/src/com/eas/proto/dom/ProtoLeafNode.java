@@ -4,21 +4,16 @@
  */
 package com.eas.proto.dom;
 
-import com.eas.proto.ProtoReader;
 import com.eas.proto.ProtoReaderException;
 import com.eas.proto.ProtoUtil;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.sql.rowset.serial.SerialBlob;
-import javax.sql.rowset.serial.SerialClob;
-import javax.sql.rowset.serial.SerialException;
 
 /**
  *
@@ -141,86 +136,6 @@ class ProtoLeafNode implements ProtoNode {
         BigInteger unscaledVal = new BigInteger(unscaled);
         BigDecimal val = new BigDecimal(unscaledVal, scaleVal);
         return val;
-    }
-
-    @Override
-    public Object getJDBCCompatible(int sqlType) throws ProtoReaderException {
-        if (size == 0) {
-            return null;
-        }
-        switch (sqlType) {
-            case java.sql.Types.BIGINT:
-                return BigInteger.valueOf(getLong());
-            case java.sql.Types.FLOAT:
-                return getFloat();
-            case java.sql.Types.DOUBLE:
-            case java.sql.Types.REAL:
-                return getDouble();
-            case java.sql.Types.NUMERIC:
-            case java.sql.Types.DECIMAL:
-                return getBigDecimal();
-            case java.sql.Types.TINYINT:
-            case java.sql.Types.INTEGER:
-                return getInt();
-            case java.sql.Types.SMALLINT:
-                return getShort();
-            case java.sql.Types.BOOLEAN:
-            case java.sql.Types.BIT:
-                return getInt() != 0;
-            case java.sql.Types.VARBINARY:
-            case java.sql.Types.BINARY:
-            case java.sql.Types.LONGVARBINARY: {
-                byte[] val = new byte[size];
-                System.arraycopy(data, offset, val, 0, size);
-                return val;
-            }
-            case java.sql.Types.BLOB: {
-                byte[] val = new byte[size];
-                System.arraycopy(data, offset, val, 0, size);
-                SerialBlob blob;
-                try {
-                    blob = new SerialBlob(val);
-                } catch (SerialException ex) {
-                    Logger.getLogger(ProtoReader.class.getName()).log(Level.SEVERE, null, ex);
-                    throw new ProtoReaderException(ex.getMessage());
-                } catch (SQLException ex) {
-                    Logger.getLogger(ProtoReader.class.getName()).log(Level.SEVERE, null, ex);
-                    throw new ProtoReaderException(ex.getMessage());
-                }
-                return blob;
-            }
-            case java.sql.Types.CLOB: {
-                char[] val = getString().toCharArray();
-                SerialClob clob;
-                try {
-                    clob = new SerialClob(val);
-                } catch (SerialException ex) {
-                    Logger.getLogger(ProtoReader.class.getName()).log(Level.SEVERE, null, ex);
-                    throw new ProtoReaderException(ex.getMessage());
-                } catch (SQLException ex) {
-                    Logger.getLogger(ProtoReader.class.getName()).log(Level.SEVERE, null, ex);
-                    throw new ProtoReaderException(ex.getMessage());
-                }
-                return clob;
-            }
-            case java.sql.Types.CHAR:
-            case java.sql.Types.LONGNVARCHAR:
-            case java.sql.Types.LONGVARCHAR:
-            case java.sql.Types.NCHAR:
-            case java.sql.Types.NCLOB:
-            case java.sql.Types.NVARCHAR:
-            case java.sql.Types.VARCHAR:
-            case java.sql.Types.SQLXML:
-                return getString();
-            case java.sql.Types.DATE:
-                return new java.sql.Date(getDate().getTime());
-            case java.sql.Types.TIME:
-                return new java.sql.Time(getDate().getTime());
-            case java.sql.Types.TIMESTAMP:
-                return new java.sql.Timestamp(getDate().getTime());
-            default:
-                throw new ProtoReaderException("Unsupported SQL type " + sqlType);
-        }
     }
 
     @Override

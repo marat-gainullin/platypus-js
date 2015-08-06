@@ -52,9 +52,9 @@ public class ChangesJSONWriter implements ChangeVisitor {
     @Override
     public void visit(Insert aChange) throws Exception {
         List<String> data = new ArrayList<>();
-        for (ChangeValue data1 : aChange.getData()) {
-            data.add(data1.name);
-            data.add(JSONUtils.v(data1.value));
+        for (ChangeValue datum : aChange.getData()) {
+            data.add(datum.name);
+            data.add(JSONUtils.v(datum.value));
         }
         written = JSONUtils.o(
                 CHANGE_KIND_NAME, JSONUtils.s("insert").toString(),

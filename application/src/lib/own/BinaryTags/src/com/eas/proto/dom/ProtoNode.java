@@ -37,8 +37,6 @@ public interface ProtoNode
 
     public BigDecimal getBigDecimal() throws ProtoReaderException;
 
-    public Object getJDBCCompatible(int sqlType) throws ProtoReaderException;
-
     public String getString() throws ProtoReaderException;
 
     public ProtoNode getChild(int tag) throws ProtoReaderException;

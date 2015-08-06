@@ -65,11 +65,4 @@ public class TransferableRelation<E extends Entity<?, ?, E>> implements Transfer
     public Field getField() {
         return field;
     }
-
-    public int getFieldType() {
-        if (field != null) {
-            return field.getTypeInfo().getSqlType();
-        }
-        return 0;
-    }
 }

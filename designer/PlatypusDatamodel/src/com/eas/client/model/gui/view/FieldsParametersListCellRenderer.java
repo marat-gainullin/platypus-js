@@ -9,7 +9,6 @@ import com.eas.client.model.gui.DatamodelDesignUtils;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
-import java.sql.Types;
 import java.util.Set;
 import javax.swing.Icon;
 import javax.swing.JList;
@@ -55,17 +54,15 @@ public class FieldsParametersListCellRenderer<E extends Entity<?, ?, E>> impleme
             if (entity.getModel().isFieldInRelations(entity, lrelations, field)) {
                 fieldsFont = bindedFieldFont;
             }
-            /*
-             if (field instanceof Parameter && !(entity instanceof ApplicationParametersEntity) && !(entity instanceof QueryParametersEntity)) {
-             if (entity.getModel().isParameterInRelations(entity, lrelations, (Parameter)field)) {
-             fieldsFont = bindedFieldFont;
-             }
-             } else {
-             if (entity.getModel().isFieldInRelations(entity, lrelations, field)) {
-             fieldsFont = bindedFieldFont;
-             }
-             }
-             */
+//             if (field instanceof Parameter && !(entity instanceof ApplicationParametersEntity) && !(entity instanceof QueryParametersEntity)) {
+//             if (entity.getModel().isParameterInRelations(entity, lrelations, (Parameter)field)) {
+//             fieldsFont = bindedFieldFont;
+//             }
+//             } else {
+//             if (entity.getModel().isFieldInRelations(entity, lrelations, field)) {
+//             fieldsFont = bindedFieldFont;
+//             }
+//             }
             String fieldDescription = field.getDescription();
             if (StoredQueryFactory.ABSENT_QUERY_MSG.equals(fieldDescription)) {
                 fieldDescription = String.format(DatamodelDesignUtils.localizeString(StoredQueryFactory.ABSENT_QUERY_MSG), entity.getQueryName());
@@ -73,37 +70,20 @@ public class FieldsParametersListCellRenderer<E extends Entity<?, ?, E>> impleme
             if (StoredQueryFactory.CONTENT_EMPTY_MSG.equals(fieldDescription)) {
                 fieldDescription = String.format(DatamodelDesignUtils.localizeString(StoredQueryFactory.CONTENT_EMPTY_MSG), entity.getQueryName());
             }
-            String typeName = SQLUtils.getLocalizedTypeName(field.getTypeInfo().getSqlType());
-            if (typeName == null) {
-                typeName = field.getTypeInfo().getSqlTypeName();
-            }
+            String typeName = field.getType();
             Icon pkIcon = null;
             Icon fkIcon = null;
-            Icon typeIcon = FieldsTypeIconsCache.getIcon16(field.getTypeInfo().getSqlType());
-            if (field.getTypeInfo().getSqlType() == Types.STRUCT || field.getTypeInfo().getSqlType() == Types.OTHER) {
-                String ltext = SQLUtils.getLocalizedTypeName(field.getTypeInfo().getSqlTypeName());
-                if (ltext != null && !ltext.isEmpty()) {
-                    typeName = ltext;
-                }
-                String fTypeName = field.getTypeInfo().getSqlTypeName();
-                if (fTypeName != null) {
-                    fTypeName = fTypeName.toUpperCase();
-                }
-                Icon licon = FieldsTypeIconsCache.getIcon16(fTypeName);
-                if (licon != null) {
-                    typeIcon = licon;
-                }
-            }
+            Icon typeIcon = calcIcon(typeName);
             boolean lisPk = field.isPk();
             boolean lisFk = field.isFk();
             int iconTextGap = 4;
             if (lisPk) {
-                typeName = SQLUtils.getLocalizedPkName() + "." + typeName;
+                typeName = typeName + "." + SQLUtils.getLocalizedPkName();
                 pkIcon = FieldsTypeIconsCache.getPkIcon16();
                 //iconTextGap += pkIcon.getIconWidth() + 2;
             }
             if (lisFk) {
-                typeName = SQLUtils.getLocalizedFkName() + "." + typeName;
+                typeName = typeName + "." + SQLUtils.getLocalizedFkName();
                 fkIcon = FieldsTypeIconsCache.getFkIcon16();
                 //iconTextGap += fkIcon.getIconWidth() + 2;
             }
@@ -117,6 +97,10 @@ public class FieldsParametersListCellRenderer<E extends Entity<?, ?, E>> impleme
             return iconsRenderer;
         }
         return null;
+    }
+
+    protected Icon calcIcon(String typeName) {
+        return FieldsTypeIconsCache.getIcon16(typeName);
     }
 
     protected void prepareIconsRenderer(Icon aPkIcon, Icon aFkIcon, Icon aTypeIcon, String aDescription, String aName, String aTypeName, int aIconTextGap, Font aFont) {//, JList aList) {
@@ -133,7 +117,7 @@ public class FieldsParametersListCellRenderer<E extends Entity<?, ?, E>> impleme
         } else {
             iconsRenderer.setIcon(aTypeIcon);
         }
-        iconsRenderer.setText(aName + (aDescription != null && !aDescription.isEmpty() ? ("  [ " + aDescription + " ]") : "") + " : " + aTypeName);
+        iconsRenderer.setText(aName + (aDescription != null && !aDescription.isEmpty() ? ("  [ " + aDescription + " ]") : "") + (aTypeName != null && !aTypeName.isEmpty() ? " : " + aTypeName : ""));
         iconsRenderer.setIconTextGap(aIconTextGap);
         iconsRenderer.setFont(aFont);
         iconsRenderer.setBorder(new MatteBorder(0, 0, 1, 0, interFieldsColor));
