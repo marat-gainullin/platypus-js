@@ -114,7 +114,14 @@ public class GenericSqlDriver extends SqlDriver {
 
     @Override
     public String parseException(Exception ex) {
-        return null;
+        String res = ex.getLocalizedMessage();
+        if (res == null) {
+            res = ex.getMessage();
+        }
+        if (res == null) {
+            res = ex.toString();
+        }
+        return res;
     }
 
     @Override
@@ -161,5 +168,5 @@ public class GenericSqlDriver extends SqlDriver {
     public boolean isHadWrapped(String aName) {
         return true;
     }
-    
+
 }

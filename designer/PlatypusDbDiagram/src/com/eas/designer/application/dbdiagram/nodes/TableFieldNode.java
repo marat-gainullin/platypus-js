@@ -170,22 +170,12 @@ public class TableFieldNode extends FieldNode {
                 Set<Relation<FieldsEntity>> rels = FieldsEntity.<FieldsEntity>getInOutRelationsByEntityField((FieldsEntity) getEntity(), field);
                 int rCount = DbStructureUtils.getRecordsCountByField((FieldsEntity) getEntity(), oldContent.getName());
                 String msg = null;
-                String promtMsg1 = "areYouSureReTypeFieldInRelationsPresent"; //NOI18N
-                String promtMsg2 = "areYouSureReTypeFieldDataPresent"; //NOI18N
-                String promtMsg3 = "areYouSureReTypeFieldInRelationsDataPresent"; //NOI18N
-                /*
-                 if (SQLUtils.getTypeGroup(newContent.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.LOBS || SQLUtils.getTypeGroup(oldContent.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.LOBS) {
-                 promtMsg1 = "areYouSureBlobFieldInRelationsPresent"; //NOI18N
-                 promtMsg2 = "areYouSureBlobFieldDataPresent"; //NOI18N
-                 promtMsg3 = "areYouSureBlobFieldInRelationsDataPresent"; //NOI18N
-                 }
-                 */
                 if (rCount == 0 && !rels.isEmpty()) {
-                    msg = NbBundle.getMessage(DbStructureUtils.class, promtMsg1, String.valueOf(rels.size()), null);
+                    msg = NbBundle.getMessage(DbStructureUtils.class, "areYouSureReTypeFieldInRelationsPresent", String.valueOf(rels.size()));
                 } else if (rCount > 0 && rels.isEmpty()) {
-                    msg = NbBundle.getMessage(DbStructureUtils.class, promtMsg2, String.valueOf(rCount), null);
+                    msg = NbBundle.getMessage(DbStructureUtils.class, "areYouSureReTypeFieldDataPresent", String.valueOf(rCount));
                 } else if (rCount > 0 && !rels.isEmpty()) {
-                    msg = NbBundle.getMessage(DbStructureUtils.class, promtMsg3, String.valueOf(rels.size()), String.valueOf(rCount));
+                    msg = NbBundle.getMessage(DbStructureUtils.class, "areYouSureReTypeFieldInRelationsDataPresent", String.valueOf(rels.size()), String.valueOf(rCount));
                 }
                 if (msg == null || confirm(msg)) {
                     // we have to remove foreign keys because of types incompatibility

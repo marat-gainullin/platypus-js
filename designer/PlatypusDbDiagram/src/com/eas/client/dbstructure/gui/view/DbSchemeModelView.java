@@ -35,6 +35,7 @@ import com.eas.client.model.gui.view.entities.EntityView;
 import com.eas.client.model.gui.view.model.ModelView;
 import com.eas.client.model.store.DbSchemeModel2XmlDom;
 import com.eas.client.model.store.XmlDom2DbSchemeModel;
+import com.eas.client.sqldrivers.GenericSqlDriver;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.designer.application.dbdiagram.nodes.TableFieldNode;
 import com.eas.xml.dom.Source2XmlDom;
@@ -309,7 +310,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
 
         @Override
         public boolean isEnabled() {
-            return getSelectedEntities().size() == 1 || isSelectedFieldsOnOneEntity();
+            return editable && (getSelectedEntities().size() == 1 || isSelectedFieldsOnOneEntity());
         }
 
         @Override
@@ -405,6 +406,11 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
     public class AddTableAction extends ModelView<FieldsEntity, DbSchemeModel>.AddTable {
 
         @Override
+        public boolean isEnabled() {
+            return editable && super.isEnabled();
+        }
+        
+        @Override
         public void actionPerformed(ActionEvent e) {
             undoSupport.beginUpdate();
             try {
@@ -439,7 +445,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
 
         @Override
         public boolean isEnabled() {
-            return isShowing();
+            return editable && isShowing();
         }
 
         @Override
@@ -510,7 +516,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
 
         @Override
         public boolean isEnabled() {
-            return isShowing() && isAnySelectedEntities();
+            return editable && isShowing() && isAnySelectedEntities();
         }
 
         @Override
@@ -576,11 +582,11 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                     int rCount = getRecordsCount(tableEntity);
                     String msg = null;
                     if (rCount == 0 && !inRels.isEmpty()) {
-                        msg = NbBundle.getMessage(DbStructureUtils.class, "areYouSureInRelationsPresent", String.valueOf(inRels.size()), null);
+                        msg = NbBundle.getMessage(DbStructureUtils.class, "areYouSureInRelationsPresent", tableEntity.getTableName(), String.valueOf(inRels.size()));
                     } else if (rCount > 0 && inRels.isEmpty()) {
-                        msg = NbBundle.getMessage(DbStructureUtils.class, "areYouSureDataPresent", String.valueOf(rCount), null);
+                        msg = NbBundle.getMessage(DbStructureUtils.class, "areYouSureDataPresent", tableEntity.getTableName(), String.valueOf(rCount));
                     } else if (rCount > 0 && !inRels.isEmpty()) {
-                        msg = NbBundle.getMessage(DbStructureUtils.class, "areYouSureInRelationsDataPresent", String.valueOf(inRels.size()), String.valueOf(rCount));
+                        msg = NbBundle.getMessage(DbStructureUtils.class, "areYouSureInRelationsDataPresent", tableEntity.getTableName(), String.valueOf(inRels.size()), String.valueOf(rCount));
                     }
                     if (msg == null || JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(DbSchemeModelView.this, msg, NbBundle.getMessage(DbStructureUtils.class, "dbSchemeEditor"), JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)) {
                         editDbDiagram(tableEntity, sqlController, e);
@@ -616,6 +622,11 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
     }
 
     public class DropFkRemoveTableAction extends ModelView<FieldsEntity, DbSchemeModel>.Delete {
+
+        @Override
+        public boolean isEnabled() {
+            return editable && super.isEnabled();
+        }
 
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -804,13 +815,13 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
                     int rCount = getRecordsCount(tableEntity);
                     String msg = null;
                     if (rCount == 0 && !inRels.isEmpty()) {
-                        msg = NbBundle.getMessage(DbStructureUtils.class, "areYouSureInRelationsPresent", String.valueOf(inRels.size()), null);
+                        msg = NbBundle.getMessage(DbStructureUtils.class, "areYouSureInRelationsPresent", tableEntity.getTableName(), String.valueOf(inRels.size()), null);
                     } else if (rCount > 0 && inRels.isEmpty()) {
-                        msg = NbBundle.getMessage(DbStructureUtils.class, "areYouSureDataPresent", String.valueOf(rCount), null);
+                        msg = NbBundle.getMessage(DbStructureUtils.class, "areYouSureDataPresent", tableEntity.getTableName(), String.valueOf(rCount), null);
                     } else if (rCount > 0 && !inRels.isEmpty()) {
-                        msg = NbBundle.getMessage(DbStructureUtils.class, "areYouSureInRelationsDataPresent", String.valueOf(inRels.size()), String.valueOf(rCount));
+                        msg = NbBundle.getMessage(DbStructureUtils.class, "areYouSureInRelationsDataPresent", tableEntity.getTableName(), String.valueOf(inRels.size()), String.valueOf(rCount));
                     }
-                    if (msg == null || JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(DbSchemeModelView.this, tableEntity.getTableName() + ". " + msg, NbBundle.getMessage(DbStructureUtils.class, "dbSchemeEditor"), JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)) {
+                    if (msg == null || JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(DbSchemeModelView.this, msg, NbBundle.getMessage(DbStructureUtils.class, "dbSchemeEditor"), JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)) {
                         tableEntities.add(tableEntity);
                     }
                 }
@@ -874,6 +885,11 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
 
     public class PasteTablesAction extends ModelView<FieldsEntity, DbSchemeModel>.Paste {
 
+        @Override
+        public boolean isEnabled() {
+            return editable && super.isEnabled();
+        }
+        
         @Override
         public void actionPerformed(ActionEvent e) {
             if (isEnabled()) {
@@ -1109,6 +1125,18 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
             setSqlActionsController(aSqlActionsController);
         } catch (Exception ex) {
             Logger.getLogger(DbSchemeModelView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    protected boolean editable;
+    
+    @Override
+    public void setModel(DbSchemeModel aModel) {
+        super.setModel(aModel);
+        try {
+            editable = model != null && !(model.getBasesProxy().getMetadataCache(model.getDatasourceName()).getDatasourceSqlDriver() instanceof GenericSqlDriver);
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
         }
     }
 
