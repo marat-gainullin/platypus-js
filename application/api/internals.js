@@ -130,7 +130,15 @@
             }
         }
     }
+    var ReportClass = Java.type("com.eas.client.report.Report");
     aSpace.setCopyObjectFunc(function (aValue, aConsumer) {
-        aConsumer(copy(aValue));
+        if (aValue instanceof P.Report) {
+            var nReport = aValue.unwrap();
+            aConsumer(nReport);
+        }else if(aValue instanceof ReportClass){
+            aConsumer(aValue);
+        } else {
+            aConsumer(copy(aValue));
+        }
     });
 });

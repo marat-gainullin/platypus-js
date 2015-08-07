@@ -12,7 +12,6 @@ import com.eas.client.cache.ReportConfig;
 import com.eas.client.model.application.ApplicationModel;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
-import com.eas.script.NoPublisherException;
 import com.eas.script.ScriptFunction;
 import com.eas.script.Scripts;
 import jdk.nashorn.api.scripting.JSObject;
