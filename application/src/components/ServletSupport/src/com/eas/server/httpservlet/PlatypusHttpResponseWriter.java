@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URISyntaxException;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -53,6 +54,7 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
         servletRequest = aServletRequest;
         servletResponse = aServletResponse;
         space = aSpace;
+        userName = aUserName;
         async = aAsync;
     }
 
@@ -99,7 +101,9 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
         final Object result = ((RPCRequest.Response) resp).getResult();
         makeResponseNotCacheable(servletResponse);
         if (result instanceof String) {
-            writeJsonResponse((String)result, servletResponse, async);
+            writeJsonResponse((String) result, servletResponse, async);
+        } else if (result instanceof Report) {
+            writeReportResponse((Report) result);
         } else if (result instanceof JSObject) {
             JSObject jsResult = (JSObject) result;
             JSObject p = space.lookupInGlobal("P");
@@ -107,24 +111,7 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
                 Object reportClass = p.getMember("Report");
                 if (jsResult.isInstanceOf(reportClass)) {
                     Report report = (Report) ((JSObject) jsResult.getMember("unwrap")).call(null, new Object[]{});
-                    String docsRoot = servletRequest.getServletContext().getRealPath("/");
-                    String userHomeInApplication = "/reports/" + userName + "/";
-                    File userDir = new File(docsRoot + userHomeInApplication);
-                    if (!userDir.exists()) {
-                        userDir.mkdirs();
-                    }
-                    String reportName = report.getName() + IDGenerator.genID() + "." + report.getFormat();
-                    File rep = new File(docsRoot + userHomeInApplication + reportName);
-                    try (FileOutputStream out = new FileOutputStream(rep)) {
-                        out.write(report.getBody());
-                        out.flush();
-                    }
-                    String reportLocation = userHomeInApplication + reportName;
-                    if (!"/".equals(servletRequest.getContextPath())) {
-                        reportLocation = servletRequest.getContextPath() + reportLocation;
-                    }
-                    reportLocation = new URI(null, null, reportLocation, null).toASCIIString();
-                    writeResponse(reportLocation, servletResponse, PlatypusHttpResponseReader.REPORT_LOCATION_CONTENT_TYPE, async);
+                    writeReportResponse(report);
                 } else {
                     writeJsonResponse(space.toJson(result), servletResponse, async);
                 }
@@ -134,6 +121,32 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
         } else {// including null result
             writeJsonResponse(space.toJson(space.toJs(result)), servletResponse, async);
         }
+    }
+
+    protected void writeReportResponse(Report report) throws URISyntaxException, IOException {
+        String docsRoot = servletRequest.getServletContext().getRealPath("/");
+        String userHomeInApplication = "/reports/" + userName + "/";
+        File userDir = new File(docsRoot + userHomeInApplication);
+        if (!userDir.exists()) {
+            userDir.mkdirs();
+        }
+        String suffix = "." + report.getFormat();
+        String reportName = report.getName();
+        if (reportName.endsWith(suffix)) {
+            reportName = reportName.substring(0, reportName.length() - suffix.length());
+        }
+        reportName += "-"+IDGenerator.genID() + suffix;
+        File rep = new File(docsRoot + userHomeInApplication + reportName);
+        try (FileOutputStream out = new FileOutputStream(rep)) {
+            out.write(report.getBody());
+            out.flush();
+        }
+        String reportLocation = userHomeInApplication + reportName;
+        if (!"/".equals(servletRequest.getContextPath())) {
+            reportLocation = servletRequest.getContextPath() + reportLocation;
+        }
+        reportLocation = new URI(null, null, reportLocation, null).toASCIIString();
+        writeResponse(reportLocation, servletResponse, PlatypusHttpResponseReader.REPORT_LOCATION_CONTENT_TYPE, async);
     }
 
     @Override

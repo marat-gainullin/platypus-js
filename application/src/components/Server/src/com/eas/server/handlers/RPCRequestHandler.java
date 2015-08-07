@@ -4,6 +4,7 @@
  */
 package com.eas.server.handlers;
 
+import com.eas.client.report.Report;
 import com.eas.server.RequestHandler;
 import com.eas.client.threetier.requests.RPCRequest;
 import com.eas.script.Scripts;
@@ -39,7 +40,7 @@ public class RPCRequestHandler extends RequestHandler<RPCRequest, RPCRequest.Res
             arguments[i] = Scripts.getSpace().parseJsonWithDates(jsons[i]);
         }
         serverCore.executeMethod(getRequest().getModuleName(), getRequest().getMethodName(), arguments, true, (Object result) -> {
-            onSuccess.accept(new RPCRequest.Response(Scripts.getSpace().toJson(result)));
+            onSuccess.accept(new RPCRequest.Response(result instanceof Report ? result : Scripts.getSpace().toJson(result)));
         }, onFailure);
     }
 
