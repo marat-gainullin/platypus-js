@@ -132,7 +132,7 @@ public class PlatypusHttpResponseWriter implements PlatypusResponseVisitor {
         }
         String suffix = "." + report.getFormat();
         String reportName = report.getName();
-        if (reportName.endsWith(suffix)) {
+        if (reportName.toLowerCase().endsWith(suffix.toLowerCase())) {
             reportName = reportName.substring(0, reportName.length() - suffix.length());
         }
         reportName += "-"+IDGenerator.genID() + suffix;
