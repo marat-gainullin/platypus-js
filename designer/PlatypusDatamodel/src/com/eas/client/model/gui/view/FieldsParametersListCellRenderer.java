@@ -3,6 +3,7 @@ package com.eas.client.model.gui.view;
 import com.eas.client.SQLUtils;
 import com.eas.client.StoredQueryFactory;
 import com.eas.client.metadata.Field;
+import com.eas.client.metadata.JdbcField;
 import com.eas.client.model.Entity;
 import com.eas.client.model.Relation;
 import com.eas.client.model.gui.DatamodelDesignUtils;
@@ -73,7 +74,7 @@ public class FieldsParametersListCellRenderer<E extends Entity<?, ?, E>> impleme
             String typeName = field.getType();
             Icon pkIcon = null;
             Icon fkIcon = null;
-            Icon typeIcon = calcIcon(typeName);
+            Icon typeIcon = calcIcon(field instanceof JdbcField ? ((JdbcField) field).getJdbcType() : 0, typeName);
             boolean lisPk = field.isPk();
             boolean lisFk = field.isFk();
             int iconTextGap = 4;
@@ -99,7 +100,7 @@ public class FieldsParametersListCellRenderer<E extends Entity<?, ?, E>> impleme
         return null;
     }
 
-    protected Icon calcIcon(String typeName) {
+    protected Icon calcIcon(int aJdbcType, String typeName) {
         return FieldsTypeIconsCache.getIcon16(typeName);
     }
 

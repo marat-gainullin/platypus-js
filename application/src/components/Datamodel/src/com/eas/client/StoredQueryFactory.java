@@ -73,8 +73,8 @@ public class StoredQueryFactory {
                 Field copied = new Field();
                 copied.assignFrom(field);
                 if (fieldsRes.fromRealTable) {
-                    copied.setType(resolver.toApplicationType(field.getType()));
                     JdbcField jField = (JdbcField) field;
+                    copied.setType(resolver.toApplicationType(jField.getJdbcType(), jField.getType()));
                     if (jField.getSchemaName() != null && !jField.getSchemaName().isEmpty()) {
                         copied.setTableName(jField.getSchemaName() + "." + copied.getTableName());
                     }
@@ -479,8 +479,8 @@ public class StoredQueryFactory {
             copied.assignFrom(field);
             if (fieldFromRealTable) {
                 TypesResolver resolver = basesProxy.getMetadataCache(aQuery.getDatasourceName()).getDatasourceSqlDriver().getTypesResolver();
-                copied.setType(resolver.toApplicationType(field.getType()));
                 JdbcField jField = (JdbcField) field;
+                copied.setType(resolver.toApplicationType(jField.getJdbcType(), jField.getType()));
                 if (jField.getSchemaName() != null && !jField.getSchemaName().isEmpty()) {
                     copied.setTableName(jField.getSchemaName() + "." + copied.getTableName());
                 }

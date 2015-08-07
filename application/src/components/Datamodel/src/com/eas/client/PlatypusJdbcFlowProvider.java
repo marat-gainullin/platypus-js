@@ -57,8 +57,8 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
     protected JdbcReader obtainJdbcReader() {
         return new JdbcReader(expectedFields, (Wrapper aRsultSetOrCallableStatement, int aColumnIndex, Connection aConnection) -> {
             return sqlDriver.readGeometry(aRsultSetOrCallableStatement, aColumnIndex, aConnection);
-        }, (String aRDBMSType) -> {
-            return sqlDriver.getTypesResolver().toApplicationType(aRDBMSType);
+        }, (int aJdbcType, String aRDBMSType) -> {
+            return sqlDriver.getTypesResolver().toApplicationType(aJdbcType, aRDBMSType);
         });
     }
     

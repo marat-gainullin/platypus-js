@@ -9,6 +9,7 @@ import com.eas.client.SQLUtils;
 import com.eas.client.SqlQuery;
 import com.eas.client.changes.Change;
 import com.eas.client.changes.Command;
+import com.eas.client.metadata.JdbcField;
 import com.eas.client.model.visitors.ModelVisitor;
 import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
@@ -90,7 +91,7 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
                     SqlDriver driver = mdCache.getDatasourceSqlDriver();
                     TypesResolver resolver = driver.getTypesResolver();
                     query.getFields().toCollection().stream().forEach((field) -> {
-                        field.setType(resolver.toApplicationType(field.getType()));
+                        field.setType(resolver.toApplicationType(((JdbcField)field).getJdbcType(), field.getType()));
                     });
                 } catch (Exception ex) {
                     query = null;
