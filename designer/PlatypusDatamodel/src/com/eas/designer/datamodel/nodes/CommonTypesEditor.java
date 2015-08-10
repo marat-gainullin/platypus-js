@@ -4,95 +4,58 @@
  */
 package com.eas.designer.datamodel.nodes;
 
-import com.eas.client.SQLUtils;
 import com.eas.client.model.Model;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.openide.ErrorManager;
+import com.eas.client.model.dbscheme.DbSchemeModel;
+import com.eas.client.sqldrivers.resolvers.TypesResolver;
+import com.eas.script.Scripts;
+import java.beans.PropertyEditorSupport;
+import org.openide.util.Exceptions;
 
 /**
  *
  * @author vv
  */
-public class CommonTypesEditor extends SelectIntEditor {
+public class CommonTypesEditor extends PropertyEditorSupport {
 
-    private static final Map<Integer, String> typesNames = new HashMap<>();
+    private final String[] values;
 
-    static {
-        typesNames.put(java.sql.Types.ARRAY, "ARRAY");
-        typesNames.put(java.sql.Types.BIGINT, "BIGINT");
-        typesNames.put(java.sql.Types.BINARY, "BINARY");
-        typesNames.put(java.sql.Types.BIT, "BIT");
-        typesNames.put(java.sql.Types.BLOB, "BLOB");
-        typesNames.put(java.sql.Types.BOOLEAN, "BOOLEAN");
-        typesNames.put(java.sql.Types.CHAR, "CHAR");
-        typesNames.put(java.sql.Types.CLOB, "CLOB");
-        typesNames.put(java.sql.Types.DATALINK, "DATALINK");
-        typesNames.put(java.sql.Types.DATE, "DATE");
-        typesNames.put(java.sql.Types.DECIMAL, "DECIMAL");
-        typesNames.put(java.sql.Types.DISTINCT, "DISTINCT");
-        typesNames.put(java.sql.Types.DOUBLE, "DOUBLE");
-        typesNames.put(java.sql.Types.FLOAT, "FLOAT");
-        typesNames.put(java.sql.Types.INTEGER, "INTEGER");
-        typesNames.put(java.sql.Types.JAVA_OBJECT, "JAVA_OBJECT");
-        typesNames.put(java.sql.Types.LONGNVARCHAR, "LONGNVARCHAR");
-        typesNames.put(java.sql.Types.LONGVARBINARY, "LONGVARBINARY");
-        typesNames.put(java.sql.Types.LONGVARCHAR, "LONGVARCHAR");
-        typesNames.put(java.sql.Types.NCHAR, "NCHAR");
-        typesNames.put(java.sql.Types.NCLOB, "NCLOB");
-        typesNames.put(java.sql.Types.NULL, "NULL");
-        typesNames.put(java.sql.Types.NUMERIC, "NUMERIC");
-        typesNames.put(java.sql.Types.NVARCHAR, "NVARCHAR");
-        typesNames.put(java.sql.Types.OTHER, "OTHER");
-        typesNames.put(java.sql.Types.REAL, "REAL");
-        typesNames.put(java.sql.Types.REF, "REF");
-        typesNames.put(java.sql.Types.ROWID, "ROWID");
-        typesNames.put(java.sql.Types.SMALLINT, "SMALLINT");
-        typesNames.put(java.sql.Types.SQLXML, "SQLXML");
-        typesNames.put(java.sql.Types.STRUCT, "STRUCT");
-        typesNames.put(java.sql.Types.TIME, "TIME");
-        typesNames.put(java.sql.Types.TIMESTAMP, "TIMESTAMP");
-        typesNames.put(java.sql.Types.TINYINT, "TINYINT");
-        typesNames.put(java.sql.Types.VARBINARY, "VARBINARY");
-        typesNames.put(java.sql.Types.VARCHAR, "VARCHAR");
-    }
-
-    private CommonTypesEditor(String[] aKeys, int[] aValues) {
-        super(aKeys, aValues);
+    private CommonTypesEditor(String[] aValues) {
+        super();
+        values = aValues;
     }
 
     public static synchronized CommonTypesEditor getNewInstanceFor(Model model) {
-        List<Integer> typeIndexesList = new ArrayList<>();
-        for (Integer e : typesNames.keySet()) {
-            try {
-                if (model.isTypeSupported(e)) {
-                    typeIndexesList.add(e);
-                }
-            } catch (Exception ex) {
-                ErrorManager.getDefault().notify(ex);
+        try {
+            if (model instanceof DbSchemeModel) {
+                TypesResolver resolver = ((DbSchemeModel) model).getBasesProxy().getMetadataCache(((DbSchemeModel) model).getDatasourceName()).getDatasourceSqlDriver().getTypesResolver();
+                return new CommonTypesEditor(resolver.getSupportedTypes().toArray(new String[]{}));
+            } else {
+                return new CommonTypesEditor(new String[]{
+                    Scripts.STRING_TYPE_NAME,
+                    Scripts.NUMBER_TYPE_NAME,
+                    Scripts.BOOLEAN_TYPE_NAME,
+                    Scripts.DATE_TYPE_NAME,
+                    Scripts.GEOMETRY_TYPE_NAME, ""});
             }
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+            return new CommonTypesEditor(new String[]{ex.toString()});
         }
-        int[] types = new int[typeIndexesList.size()];
-        int i = 0;
-        for (Integer e : typeIndexesList) {
-            types[i++] = e.intValue();
-        }
-        String[] typeNames = new String[types.length];
-        for (int j = 0; j < typeNames.length; j++) {
-            typeNames[j] = SQLUtils.getLocalizedTypeName(types[j]);
-        }
-        return new CommonTypesEditor(typeNames, types);
     }
 
     @Override
     public String getAsText() {
-        Integer val = (Integer) getValue();
-        if (val != null) {
-            return SQLUtils.getLocalizedTypeName(val);
-        } else {
-            return "";//NOI18N
-        }
+        return (String) (getValue() != null ? getValue() : "");
     }
+
+    @Override
+    public void setAsText(String text) throws IllegalArgumentException {
+        super.setValue(text == null || text.isEmpty() ? null : text);
+    }
+
+    @Override
+    public String[] getTags() {
+        return values;
+    }
+
 }

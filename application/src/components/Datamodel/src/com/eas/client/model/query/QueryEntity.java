@@ -81,7 +81,7 @@ public class QueryEntity extends Entity<QueryModel, SqlQuery, QueryEntity> {
                     query = SQLUtils.validateTableSqlQuery(getTableDatasourceName(), getTableName(), getTableSchemaName(), model.getBasesProxy());
                 } catch (Exception ex) {
                     query = null;
-                    Logger.getLogger(QueryEntity.class.getName()).log(Level.WARNING, ex.getMessage());
+                    Logger.getLogger(QueryEntity.class.getName()).log(Level.WARNING, ex.toString());
                 }
             } else {
                 assert false : "Entity must have queryName or tableName to validate it's query";

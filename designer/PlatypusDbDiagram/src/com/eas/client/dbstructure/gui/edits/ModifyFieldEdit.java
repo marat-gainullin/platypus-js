@@ -11,6 +11,7 @@ import com.eas.client.dbstructure.SqlActionsController.RenameFieldAction;
 import com.eas.client.dbstructure.exceptions.DbActionException;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.JdbcField;
 
 /**
  *
@@ -19,14 +20,14 @@ import com.eas.client.metadata.Fields;
 public class ModifyFieldEdit extends DbStructureEdit {
 
     protected Fields fields;
-    protected Field oldFieldSpec;
-    protected Field newFieldSpec;
+    protected JdbcField oldFieldSpec;
+    protected JdbcField newFieldSpec;
     protected String tableName;
     protected boolean namesAreDifferent;
     protected boolean contentsAreDifferent;
     protected boolean commentsAreDifferent;
 
-    public ModifyFieldEdit(SqlActionsController aSqlController, String aTableName, Fields aFields, Field aOldFieldSpec, Field aNewFieldSpec) {
+    public ModifyFieldEdit(SqlActionsController aSqlController, String aTableName, Fields aFields, JdbcField aOldFieldSpec, JdbcField aNewFieldSpec) {
         super(aSqlController);
         fields = aFields;
         oldFieldSpec = aOldFieldSpec;

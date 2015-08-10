@@ -128,7 +128,7 @@ public class FieldsTest {
         System.out.println("createNewField");
         Fields instance = new Fields();
         Field unexpResult = null;
-        Field result = instance.createNewField();
+        Field result = new Field(instance.generateNewName());
         assertNotSame(unexpResult, result);
     }
 
@@ -141,7 +141,7 @@ public class FieldsTest {
         String aName = "sampleName";
         Fields instance = new Fields();
         Field unexpResult = null;
-        Field result = instance.createNewField(aName);
+        Field result = new Field(instance.generateNewName(aName));
         instance.add(result);
         assertNotSame(unexpResult, result);
         assertEquals(result.getName(), aName);
@@ -154,7 +154,7 @@ public class FieldsTest {
     public void testGetFieldsCount() {
         System.out.println("getFieldsCount");
         Fields instance = new Fields();
-        Field field = instance.createNewField();
+        Field field = new Field(instance.generateNewName());
         int expResult = 0;
         int result = instance.getFieldsCount();
         assertEquals(expResult, result);
@@ -170,7 +170,7 @@ public class FieldsTest {
     public void testClear() {
         System.out.println("clear");
         Fields instance = new Fields();
-        Field field = instance.createNewField();
+        Field field = new Field(instance.generateNewName());
         int expResult = 0;
         int result = instance.getFieldsCount();
         assertEquals(expResult, result);
@@ -189,7 +189,7 @@ public class FieldsTest {
     public void testRemove() {
         System.out.println("remove");
         Fields instance = new Fields();
-        Field field = instance.createNewField();
+        Field field = new Field(instance.generateNewName());
         int expResult = 0;
         int result = instance.getFieldsCount();
         assertEquals(expResult, result);
@@ -208,7 +208,7 @@ public class FieldsTest {
     public void testIndexOf() {
         System.out.println("indexOf");
         Fields instance = new Fields();
-        Field field = instance.createNewField();
+        Field field = new Field(instance.generateNewName());
         int expResult = 0;
         int result = instance.getFieldsCount();
         assertEquals(expResult, result);
@@ -228,7 +228,7 @@ public class FieldsTest {
     public void testGet_int() {
         System.out.println("get");
         Fields instance = new Fields();
-        Field field = instance.createNewField();
+        Field field = new Field(instance.generateNewName());
         int expResult = 0;
         int result = instance.getFieldsCount();
         assertEquals(expResult, result);
@@ -245,7 +245,7 @@ public class FieldsTest {
     public void testGet_String() {
         System.out.println("get");
         Fields instance = new Fields();
-        Field field = instance.createNewField("sample");
+        Field field = new Field(instance.generateNewName("sample"));
         int expResult = 0;
         int result = instance.getFieldsCount();
         assertEquals(expResult, result);
@@ -285,12 +285,13 @@ public class FieldsTest {
 
     /**
      * Test of getColumnCount method, of class FieldsMetaDataImpl.
+     * @throws java.sql.SQLException
      */
     @Test
-    public void testGetColumnCount() throws Exception {
+    public void testGetColumnCount() throws SQLException {
         System.out.println("getColumnCount");
         Fields instance = new Fields();
-        Field field = instance.createNewField("sample");
+        Field field = new Field(instance.generateNewName("sample"));
         int expResult = 0;
         int result = instance.getFieldsCount();
         assertEquals(expResult, result);
@@ -302,12 +303,13 @@ public class FieldsTest {
 
     /**
      * Test of findColumn method, of class FieldsMetaDataImpl.
+     * @throws java.sql.SQLException
      */
     @Test
     public void testFindColumn() throws SQLException {
         System.out.println("findColumn");
         Fields instance = new Fields();
-        Field field = instance.createNewField("sample");
+        Field field = new Field(instance.generateNewName("sample"));
         int expResult = 0;
         int result = instance.getFieldsCount();
         assertEquals(expResult, result);

@@ -19,10 +19,7 @@ import java.util.Set;
 import com.eas.client.Cancellable;
 import com.eas.client.application.AppClient;
 import com.eas.client.application.WebFlowProvider;
-import com.eas.client.changes.Change;
-import com.eas.client.changes.Command;
 import com.eas.client.dataflow.FlowProvider;
-import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.metadata.Parameters;
@@ -207,7 +204,7 @@ public class Query {
         return params;
     }
 
-    public void putParameter(String aName, DataTypeInfo aTypeInfo, Object aValue) {
+    public void putParameter(String aName, String aType, Object aValue) {
         if (params == null) {
             params = new Parameters();
         }
@@ -217,12 +214,12 @@ public class Query {
             params.add(param);
         }
         param.setName(aName.toUpperCase());
-        param.setTypeInfo(aTypeInfo.copy());
+        param.setType(aType);
         param.setDefaultValue(aValue);
         param.setValue(aValue);
     }
 
-    public void putParameter(String aName, int aType, Object aDefaultValue, Object aValue) {
+    public void putParameter(String aName, String aType, Object aDefaultValue, Object aValue) {
         if (params == null) {
             params = new Parameters();
         }
@@ -232,7 +229,7 @@ public class Query {
             params.add(param);
         }
         param.setName(aName);
-        param.getTypeInfo().setType(aType);
+        param.setType(aType);
         param.setDefaultValue(aDefaultValue);
         param.setValue(aValue);
     }

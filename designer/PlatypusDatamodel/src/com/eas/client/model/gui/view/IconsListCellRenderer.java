@@ -34,8 +34,8 @@ public class IconsListCellRenderer extends DefaultListCellRenderer {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        for (Icon icon : extraIcons) {
+        extraIcons.stream().forEach((icon) -> {
             icon.paintIcon(this, g, 2, 0);
-        }
+        });
     }
 }

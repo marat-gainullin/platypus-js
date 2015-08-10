@@ -7,7 +7,6 @@ package com.eas.client.model.gui;
 
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Parameter;
-import com.eas.store.Serial;
 
 /**
  *
@@ -43,7 +42,7 @@ public class ModelElementRef {
     }
 
     public final void assign(ModelElementRef aSource) {
-        entityId = aSource.entityId != null ? new Long(aSource.entityId) : null;
+        entityId = aSource.entityId != null ? aSource.entityId : null;
         isField = aSource.isField;
         field = aSource.field != null ? (aSource.isField() ? new Field(aSource.getField()) : new Parameter(aSource.getField())) : null;
     }
@@ -57,13 +56,13 @@ public class ModelElementRef {
             return false;
         }
         final ModelElementRef other = (ModelElementRef) obj;
-        if (this.entityId != other.entityId && (this.entityId == null || !this.entityId.equals(other.entityId))) {
+        if (entityId == null ? other.entityId != null : !entityId.equals(other.entityId)) {
             return false;
         }
         if (this.isField != other.isField) {
             return false;
         }
-        if (this.field != other.field && (this.field == null || !this.field.isEqual(other.field))) {
+        if (field == null ? other.field != null : !field.isEqual(other.field)) {
             return false;
         }
         return true;
@@ -82,12 +81,10 @@ public class ModelElementRef {
         return new ModelElementRef(this);
     }
 
-    @Serial
     public Long getEntityId() {
         return entityId;
     }
 
-    @Serial
     public void setEntityId(Long aValue) {
         entityId = aValue;
     }
@@ -100,23 +97,19 @@ public class ModelElementRef {
         field = aFieldMd;
     }
 
-    @Serial
     public String getFieldName() {
         return field != null ? field.getName() : null;
     }
 
-    @Serial
     public void setFieldName(String aName) {
         field = isField() ? new Field() : new Parameter();
         field.setName(aName);
     }
 
-    @Serial
     public boolean isField() {
         return isField;
     }
 
-    @Serial
     public void setField(boolean aField) {
         boolean oldValue = isField;
         isField = aField;

@@ -41,36 +41,6 @@ public class Parameters extends Fields {
     }
 
     /**
-     * Creates new parameter
-     *
-     * @return New <code>Parameter</code> instance.
-     */
-    @Override
-    public Parameter createNewField() {
-        return (Parameter) super.createNewField();
-    }
-
-    /**
-     * Creates new parameter with the specified name.
-     *
-     * @return New <code>Parameter</code> instance.
-     * @see #createNewField()
-     * @see #getDefaultNamePrefix()
-     * @see #generateNewName()
-     * @see #generateNewName(String)
-     * @see #isNameAlreadyPresent(String aName, Field aField2Skip)
-     */
-    @Override
-    public Parameter createNewField(String aName) {
-        if (aName == null || aName.isEmpty()) {
-            aName = generateNewName();
-        }
-        Parameter param = new Parameter(aName, null);
-        param.setTypeInfo(DataTypeInfo.VARCHAR);
-        return param;
-    }
-
-    /**
      * Returns <code>Parameter</code> instance at the specified index. Index is
      * 1 based.
      *

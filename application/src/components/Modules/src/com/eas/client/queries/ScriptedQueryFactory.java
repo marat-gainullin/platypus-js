@@ -24,10 +24,6 @@ import java.util.regex.Pattern;
  */
 public class ScriptedQueryFactory extends StoredQueryFactory{
 
-    public ScriptedQueryFactory(DatabasesClient aBasesProxy, LocalQueriesProxy aQueriesProxy, PlatypusIndexer aIndexer, boolean aPreserveDatasources) throws Exception {
-        super(aBasesProxy, aQueriesProxy, aIndexer, aPreserveDatasources);
-    }
-
     public ScriptedQueryFactory(DatabasesClient aBasesProxy, LocalQueriesProxy aQueriesProxy, PlatypusIndexer aIndexer) throws Exception {
         super(aBasesProxy, aQueriesProxy, aIndexer);
     }

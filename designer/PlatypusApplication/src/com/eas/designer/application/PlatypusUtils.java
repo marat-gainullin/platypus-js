@@ -24,24 +24,20 @@ public class PlatypusUtils {
     public static final String ELEMENTS_SOURCES_GROUP = "applicationElements";
 
     public static List<String> achieveSchemas(String aUrl, String aUser, String aPassword) throws Exception {
-        String dialect = SQLUtils.dialectByUrl(aUrl);
-        SqlDriver driver = SQLUtils.getSqlDriver(dialect);
         List<String> schemas = new ArrayList<>();
         try (java.sql.Connection conn = DriverManager.getConnection(aUrl, aUser, aPassword)) {
-            try (Statement stmt = conn.createStatement()) {
-                try (ResultSet rs = stmt.executeQuery(driver.getSql4SchemasEnumeration())) {
-                    while (rs.next()) {
-                        String schema = rs.getString(ClientConstants.JDBCCOLS_TABLE_SCHEM);
-                        if (schema != null) {
-                            schemas.add(schema);
-                        }
+            try (ResultSet rs = conn.getMetaData().getSchemas()) {
+                while (rs.next()) {
+                    String schema = rs.getString(ClientConstants.JDBCCOLS_TABLE_SCHEM);
+                    if (schema != null) {
+                        schemas.add(schema);
                     }
-                    return schemas;
                 }
+                return schemas;
             }
-        }  
+        }
     }
-    
+
     public static void createSchema(String aUrl, String aUser, String aPassword, String aSchema) throws Exception {
         String dialect = SQLUtils.dialectByUrl(aUrl);
         SqlDriver driver = SQLUtils.getSqlDriver(dialect);
@@ -51,5 +47,5 @@ public class PlatypusUtils {
             }
         }
     }
-    
+
 }

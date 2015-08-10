@@ -63,25 +63,6 @@ public class Parameter extends Field {
 	}
 
 	/**
-	 * Constructor with name, description and typeInfo.
-	 * 
-	 * @param aName
-	 *            Name of the created parameter.
-	 * @param aDescription
-	 *            Description of the created parameter.
-	 * @param aTypeInfo
-	 *            Type info of the created parameter.
-	 * @see DataTypeInfo
-	 */
-	public Parameter(String aName, String aDescription, DataTypeInfo aTypeInfo) {
-		super(aName, aDescription, aTypeInfo);
-	}
-
-	public Parameter(String aName, String aDescription, int aSize, DataTypeInfo aTypeInfo) {
-		super(aName, aDescription, aSize, aTypeInfo);
-	}
-
-	/**
 	 * Copy constructor of parameter using base field information.
 	 * 
 	 * @param aSourceParam

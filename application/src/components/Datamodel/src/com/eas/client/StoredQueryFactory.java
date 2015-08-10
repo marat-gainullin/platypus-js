@@ -5,18 +5,17 @@
 package com.eas.client;
 
 import com.eas.client.cache.PlatypusIndexer;
-import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.JdbcField;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.model.QueryDocument;
 import com.eas.client.model.QueryDocument.StoredFieldMetadata;
 import com.eas.client.model.query.QueryModel;
 import com.eas.client.queries.QueriesProxy;
-import com.eas.client.sqldrivers.SqlDriver;
+import com.eas.client.sqldrivers.resolvers.TypesResolver;
 import com.eas.script.JsDoc;
 import java.io.StringReader;
-import java.sql.Types;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,7 +30,7 @@ import net.sf.jsqlparser.statement.select.*;
 
 /**
  *
- * @author pk begining. mg full refactoring inside second version.
+ * @author mg.
  */
 public class StoredQueryFactory {
 
@@ -54,41 +53,43 @@ public class StoredQueryFactory {
     public static final String INEER_JOIN_CONSTRUCTING_MSG = "Constructing query with left Query %s and right table %s";
     public static final String LOADING_QUERY_MSG = "Loading stored query %s";
     protected QueriesProxy<SqlQuery> subQueriesProxy;
-    private DatabasesClient basesProxy;
-    private PlatypusIndexer indexer;
-    private boolean preserveDatasources;
+    private final DatabasesClient basesProxy;
+    private final PlatypusIndexer indexer;
+    private boolean aliasesToTableNames;
 
-    protected void addTableFieldsToSelectResults(SqlQuery aQuery, Table table) throws Exception {
-        Fields fields = getTableFields(aQuery.getDatasourceName(), table);
-        if (fields != null) {
-            fields.toCollection().stream().forEach((Field field) -> {
-                Field copied = field.copy();
-                /*
-                 * if (copied.isPk()) { checkPrimaryKey(aQuery, copied); }
-                 */
-                /**
-                 * Заменим имя оригинальной таблицы на алиас если это возможно,
-                 * чтобы в редакторе запросов было хорошо видно откуда взялось
-                 * поле.
-                 */
-                if (preserveDatasources) {
-                    boolean aliasPresent = table.getAlias() != null && !table.getAlias().getName().isEmpty();
-                    if (aliasPresent) {
-                        copied.setTableName(table.getAlias().getName());
-                        copied.setSchemaName(null);
-                    } else {
-                        copied.setTableName(table.getName());
-                        copied.setSchemaName(table.getSchemaName());
+    public boolean isAliasesToTableNames() {
+        return aliasesToTableNames;
+    }
+
+    public void setAliasesToTableNames(boolean aValue) {
+        aliasesToTableNames = aValue;
+    }
+
+    protected void addTableFieldsToSelectResults(SqlQuery aQuery, Table aFieldsSource) throws Exception {
+        FieldsResult fieldsRes = getTablyFields(aQuery.getDatasourceName(), aFieldsSource.getWholeTableName());
+        if (fieldsRes != null && fieldsRes.fields != null) {
+            TypesResolver resolver = basesProxy.getMetadataCache(aQuery.getDatasourceName()).getDatasourceSqlDriver().getTypesResolver();
+            fieldsRes.fields.toCollection().stream().forEach((Field field) -> {
+                Field copied = new Field();
+                copied.assignFrom(field);
+                if (fieldsRes.fromRealTable) {
+                    copied.setType(resolver.toApplicationType(field.getType()));
+                    JdbcField jField = (JdbcField) field;
+                    if (jField.getSchemaName() != null && !jField.getSchemaName().isEmpty()) {
+                        copied.setTableName(jField.getSchemaName() + "." + copied.getTableName());
                     }
-                    /**
-                     * Заменять имя оригинальной таблицы нельзя, особенно если
-                     * это поле ключевое т.к. при установления связи по этим
-                     * полям будут проблемы. ORM-у придется "разматывать"
-                     * источник поля до таблицы чтобы проверить совместимость
-                     * ключей. } else {
-                     * copied.setTableName(ClientConstants.QUERY_ID_PREFIX +
-                     * aQuery.getEntityId().toString());
-                     */
+                }
+                /**
+                 * Заменять имя оригинальной таблицы нельзя, особенно если это
+                 * поле ключевое т.к. при установлении связи по этим полям будут
+                 * проблемы. ORM-у придется "разматывать" источник поля до
+                 * таблицы чтобы восстановиит связи по ключам.
+                 * Здесь это делается исключительно ради очень специального
+                 * использования фабрики в дизайнере запросов.
+                 */
+                if(aliasesToTableNames &&
+                        aFieldsSource.getAlias() != null && !aFieldsSource.getAlias().getName().isEmpty()){
+                     copied.setTableName(aFieldsSource.getAlias().getName());
                 }
                 aQuery.getFields().add(copied);
             });
@@ -107,7 +108,7 @@ public class StoredQueryFactory {
         return uniqueTables;
     }
 
-    public synchronized SqlQuery loadQuery(String aAppElementName) throws Exception {
+    public SqlQuery loadQuery(String aAppElementName) throws Exception {
         if (aAppElementName == null) {
             throw new NullPointerException(CANT_LOAD_NULL_MSG);
         }
@@ -164,24 +165,6 @@ public class StoredQueryFactory {
         indexer = aIndexer;
     }
 
-    /**
-     * Constructs factory for stored in appliction database queries;
-     *
-     * @param aBasesProxy ClientIntf instance, responsible for interacting with
-     * appliction database.
-     * @param subQueriesProxy
-     * @param aIndexer
-     * @param aPreserveDatasources If true, aliased names of tables
-     * (datasources) are setted to resulting fields in query compilation
-     * process. If false, query's virtual table name (e.g. q76067e72752) is
-     * setted to resulting fields.
-     * @throws java.lang.Exception
-     */
-    public StoredQueryFactory(DatabasesClient aBasesProxy, QueriesProxy<SqlQuery> subQueriesProxy, PlatypusIndexer aIndexer, boolean aPreserveDatasources) throws Exception {
-        this(aBasesProxy, subQueriesProxy, aIndexer);
-        preserveDatasources = aPreserveDatasources;
-    }
-
     public String compileSubqueries(String aSqlText, QueryModel aModel) throws Exception {
         return aSqlText;
     }
@@ -189,13 +172,6 @@ public class StoredQueryFactory {
     private void putParametersMetadata(SqlQuery aQuery, QueryModel aModel) {
         for (int i = 1; i <= aModel.getParameters().getParametersCount(); i++) {
             Parameter p = aModel.getParameters().get(i);
-            if (p.getTypeInfo().getSqlTypeName() == null || p.getTypeInfo().getSqlTypeName().isEmpty()) {
-                DataTypeInfo dt = DataTypeInfo.valueOf(p.getTypeInfo().getSqlType());
-                if (dt != null) {
-                    p.getTypeInfo().setJavaClassName(dt.getJavaClassName());
-                    p.getTypeInfo().setSqlTypeName(dt.getSqlTypeName());
-                }
-            }
             aQuery.getParameters().add(p);
         }
     }
@@ -209,8 +185,8 @@ public class StoredQueryFactory {
                     if (addition.description != null && !addition.description.isEmpty()) {
                         queryField.setDescription(addition.description);
                     }
-                    if (addition.getTypeInfo() != null && !addition.getTypeInfo().equals(queryField.getTypeInfo())) {
-                        queryField.setTypeInfo(addition.getTypeInfo());
+                    if (addition.getType() != null && !addition.getType().equals(queryField.getType())) {
+                        queryField.setType(addition.getType());
                     }
                 }
             });
@@ -266,9 +242,6 @@ public class StoredQueryFactory {
                         }
                         aQuery.setWritable(writables);
                         break;
-                    case JsDoc.Tag.MANUAL_TAG:
-                        aQuery.setManual(true);
-                        break;
                     case JsDoc.Tag.PROCEDURE_TAG:
                         aQuery.setProcedure(true);
                         break;
@@ -295,16 +268,6 @@ public class StoredQueryFactory {
             if (parsedQuery instanceof Select) {
                 Select select = (Select) parsedQuery;
                 resolveOutputFieldsFromTables(aQuery, select.getSelectBody());
-                DatabaseMdCache mdCache = basesProxy.getDbMetadataCache(aQuery.getDatasourceName());
-                if (mdCache != null) {
-                    SqlDriver driver = mdCache.getConnectionDriver();
-                    Fields queryFields = aQuery.getFields();
-                    if (queryFields != null) {
-                        queryFields.toCollection().stream().forEach((field) -> {
-                            driver.getTypesResolver().resolve2Application(field);
-                        });
-                    }
-                }
                 return true;
             }
         } catch (JSQLParserException ex) {
@@ -351,7 +314,7 @@ public class StoredQueryFactory {
                 SelectExpressionItem col = (SelectExpressionItem) sItem;
                 Field field = null;
                 /* Если пользоваться этим приемом, то будет введение разработчика в заблуждение
-                 * т.к. в дизайнере и автозавершении кода поле результата будет поименовано
+                 * т.к. в дизайнере и автозавершении кода, поле результата будет поименовано
                  * так же как и поле-агрумент функции, а из скрипта оно будет недоступно.
                  if (col.getExpression() instanceof Function) {
                  Function func = (Function) col.getExpression();
@@ -383,8 +346,8 @@ public class StoredQueryFactory {
                 }
                 if (field == null) {
                     // Absent alias generation is parser's work.
-                    //Безымянные поля, получающиеся когда нет алиаса, будут
-                    //замещены полями полученными из базы во время исполнения запроса.
+                    // Безымянные поля, получающиеся когда нет алиаса, будут
+                    // замещены полями полученными из базы во время исполнения запроса.
 
                     field = new Field(col.getAlias() != null ? col.getAlias().getName()
                             : (col.getExpression() instanceof Column ? ((Column) col.getExpression()).getColumnName() : ""));
@@ -396,10 +359,22 @@ public class StoredQueryFactory {
                      * field's type and description information during
                      * "putStoredTableFieldsMetadata(...)" call.
                      */
-                    field.getTypeInfo().setSqlType(Types.OTHER);
+                    field.setType(null);
                 }
                 aQuery.getFields().add(field);
             }
+        }
+    }
+
+    protected class FieldsResult {
+
+        public Fields fields;
+        public boolean fromRealTable;
+
+        public FieldsResult(Fields aResult, boolean aFromRealTable) {
+            super();
+            fields = aResult;
+            fromRealTable = aFromRealTable;
         }
     }
 
@@ -415,51 +390,56 @@ public class StoredQueryFactory {
      * @return Fields instance.
      * @throws Exception
      */
-    protected Fields getTablyFields(String aDatasourceName, String aTablyName) throws Exception {
+    protected FieldsResult getTablyFields(String aDatasourceName, String aTablyName) throws Exception {
         Fields tableFields;
         if (aTablyName.startsWith(ClientConstants.STORED_QUERY_REF_PREFIX)) {// strong reference to stored subquery
             tableFields = null;
             aTablyName = aTablyName.substring(ClientConstants.STORED_QUERY_REF_PREFIX.length());
         } else {// soft reference to table or a stored subquery.
             try {
-                tableFields = basesProxy.getDbMetadataCache(aDatasourceName).getTableMetadata(aTablyName);
+                tableFields = basesProxy.getMetadataCache(aDatasourceName).getTableMetadata(aTablyName);
             } catch (Exception ex) {
                 tableFields = null;
             }
         }
         if (tableFields != null) {// Tables have a higher priority in soft reference case
-            return tableFields;
+            return new FieldsResult(tableFields, true);
         } else {
             SqlQuery query = subQueriesProxy.getQuery(aTablyName, null, null, null);
             if (query != null) {
-                return query.getFields();
+                return new FieldsResult(query.getFields(), false);
             } else {
                 return null;
             }
         }
     }
 
-    private Fields getTableFields(String aDbId, Table aTable) throws Exception {
-        return getTablyFields(aDbId, aTable.getWholeTableName());
-    }
-
     private Field resolveFieldByColumn(SqlQuery aQuery, Column column, SelectExpressionItem selectItem, Map<String, FromItem> aSources) throws Exception {
-        FromItem source = null;// Это таблица парсера - источник данных в составе запроса.
         Field field = null;
+        FromItem fieldSource = null;// Это таблица парсера - источник данных в составе запроса.
+        boolean fieldFromRealTable = false;
         if (column.getTable() != null && column.getTable().getWholeTableName() != null) {
-            source = aSources.get(column.getTable().getWholeTableName().toLowerCase());
-            if (source != null) {
-                if (source instanceof Table) {
+            FromItem namedSource = aSources.get(column.getTable().getWholeTableName().toLowerCase());
+            if (namedSource != null) {
+                if (namedSource instanceof Table) {
                     /**
                      * Таблица поля, предоставляемая парсером никак не связана с
                      * таблицей из списка from. Поэтому мы должны связать их
                      * самостоятельно. Такая вот особенность парсера.
                      */
-                    Fields tableFields = getTableFields(aQuery.getDatasourceName(), (Table) source);
-                    field = tableFields != null ? tableFields.get(column.getColumnName()) : null;
-                } else if (source instanceof SubSelect) {
-                    Fields subFields = processSubQuery(aQuery, (SubSelect) source);
-                    field = subFields.get(column.getColumnName());
+                    FieldsResult tableFieldsResult = getTablyFields(aQuery.getDatasourceName(), ((Table) namedSource).getWholeTableName());
+                    if (tableFieldsResult != null && tableFieldsResult.fields != null && tableFieldsResult.fields.contains(column.getColumnName())) {
+                        field = tableFieldsResult.fields.get(column.getColumnName());
+                        fieldSource = namedSource;
+                        fieldFromRealTable = tableFieldsResult.fromRealTable;
+                    }
+                } else if (namedSource instanceof SubSelect) {
+                    Fields subFields = processSubQuery(aQuery, (SubSelect) namedSource);
+                    if (subFields.contains(column.getColumnName())) {
+                        field = subFields.get(column.getColumnName());
+                        fieldSource = namedSource;
+                        fieldFromRealTable = false;
+                    }
                 }
             }
         }
@@ -471,16 +451,20 @@ public class StoredQueryFactory {
              * таким именем.
              */
             for (FromItem anySource : aSources.values()) {
-                Fields fields = null;
                 if (anySource instanceof Table) {
-                    fields = getTableFields(aQuery.getDatasourceName(), (Table) anySource);
+                    FieldsResult fieldsResult = getTablyFields(aQuery.getDatasourceName(), ((Table) anySource).getWholeTableName());
+                    if (fieldsResult != null && fieldsResult.fields != null && fieldsResult.fields.contains(column.getColumnName())) {
+                        field = fieldsResult.fields.get(column.getColumnName());
+                        fieldSource = anySource;
+                        fieldFromRealTable = fieldsResult.fromRealTable;
+                        break;
+                    }
                 } else if (anySource instanceof SubSelect) {
-                    fields = processSubQuery(aQuery, (SubSelect) anySource);
-                }
-                if (fields != null) {
-                    field = fields.get(column.getColumnName());
-                    if (field != null) {
-                        source = anySource;
+                    Fields fields = processSubQuery(aQuery, (SubSelect) anySource);
+                    if (fields != null && fields.contains(column.getColumnName())) {
+                        field = fields.get(column.getColumnName());
+                        fieldSource = anySource;
+                        fieldFromRealTable = false;
                         break;
                     }
                 }
@@ -491,13 +475,22 @@ public class StoredQueryFactory {
              * Скопируем поле, чтобы избежать пересечения информации о полях
              * таблицы из-за её участия в разных запросах.
              */
-            Field copied = field.copy();
+            Field copied = new Field();
+            copied.assignFrom(field);
+            if (fieldFromRealTable) {
+                TypesResolver resolver = basesProxy.getMetadataCache(aQuery.getDatasourceName()).getDatasourceSqlDriver().getTypesResolver();
+                copied.setType(resolver.toApplicationType(field.getType()));
+                JdbcField jField = (JdbcField) field;
+                if (jField.getSchemaName() != null && !jField.getSchemaName().isEmpty()) {
+                    copied.setTableName(jField.getSchemaName() + "." + copied.getTableName());
+                }
+            }
             /**
              * Заменим отметку о первичном ключе из оригинальной таблицы на
              * отметку о внешнем ключе, указывающем на ту же таблицу. Замена
              * производится с учетом "главной" таблицы. Теперь эта обработка не
              * нужна, т.к. все таблицы "главные", т.е. изменения могут попасть в
-             * несколько таблиц одновременно, с учетом их ключей, конечно,.
+             * несколько таблиц одновременно, с учетом их ключей, конечно.
              */
             //checkPrimaryKey(aQuery, copied);
             /**
@@ -509,27 +502,16 @@ public class StoredQueryFactory {
             copied.setName(selectItem.getAlias() != null ? selectItem.getAlias().getName() : column.getColumnName());
             copied.setOriginalName(column.getColumnName() != null ? column.getColumnName() : copied.getName());
             /**
-             * Заменим имя оригинальной таблицы на алиас если это возможно,
-             * чтобы в редакторе запросов было хорошо видно откуда взялось поле.
+             * Заменять имя оригинальной таблицы нельзя, особенно если это поле
+             * ключевое т.к. при установлении связи по этим полям будут
+             * проблемы. ORM-у и дизайнеру придется "разматывать" источник поля
+             * сквозь все запросы до таблицы чтобы восстановить связи по ключам.
+             * Здесь это делается исключительно ради очень специального
+             * использования фабрики в дизайнере запросов.
              */
-            if (source != null && preserveDatasources) {
-                boolean aliasPresent = source.getAlias() != null && !source.getAlias().getName().isEmpty();
-                if (aliasPresent) {
-                    copied.setTableName(source.getAlias().getName());
-                    copied.setSchemaName(null);
-                } else if (source instanceof Table) {
-                    copied.setTableName(((Table) source).getName());
-                    copied.setSchemaName(((Table) source).getSchemaName());
-                }
-                /**
-                 * Заменять имя оригинальной таблицы нельзя, особенно если это
-                 * поле ключевое т.к. при установления связи по этим полям будут
-                 * проблемы. Дизайнеру придется "разматывать" источник поля
-                 * сквозь все запросы до таблицы чтобы проверить совместимость
-                 * ключей. } else {
-                 * copied.setTableName(ClientConstants.QUERY_ID_PREFIX +
-                 * aQuery.getEntityId().toString());
-                 */
+            if (aliasesToTableNames &&
+                    fieldSource != null && fieldSource.getAlias() != null && !fieldSource.getAlias().getName().isEmpty()) {
+                copied.setTableName(fieldSource.getAlias().getName());
             }
             return copied;
         } else {

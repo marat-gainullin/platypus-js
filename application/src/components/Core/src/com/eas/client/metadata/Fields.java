@@ -318,36 +318,7 @@ public class Fields implements HasPublished {
     }
 
     /**
-     * Creates new field
-     *
-     * @return New <code>Field</code> instance.
-     */
-    public Field createNewField() {
-        return createNewField(null);
-    }
-
-    /**
-     * Creates new field with the specified name.
-     *
-     * @param aName
-     * @return New <code>Field</code> instance.
-     * @see #createNewField()
-     * @see #getDefaultNamePrefix()
-     * @see #generateNewName()
-     * @see #generateNewName(String)
-     * @see #isNameAlreadyPresent(String aName, Field aField2Skip)
-     */
-    public Field createNewField(String aName) {
-        if (aName == null || aName.isEmpty()) {
-            aName = generateNewName();
-        }
-        Field lfield = new Field(aName, null);
-        lfield.setTypeInfo(DataTypeInfo.VARCHAR);
-        return lfield;
-    }
-
-    /**
-     * Yet another apip method to retrive fields count. Intended for collections
+     * Yet another method to retrive fields count. Intended for collections
      * like syntax, in script for example.
      *
      * @return Fields count.

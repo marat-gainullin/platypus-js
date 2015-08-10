@@ -47,6 +47,7 @@ public class ClientConstants {
     public static final String JDBCCOLS_REMARKS = "REMARKS";
     public static final String JDBCCOLS_DATA_TYPE = "DATA_TYPE";
     public static final String JDBCCOLS_TYPE_NAME = "TYPE_NAME";
+    public static final String JDBCCOLS_TABLE_TYPE = "TABLE_TYPE";
     public static final String JDBCCOLS_COLUMN_SIZE = "COLUMN_SIZE";
     public static final String JDBCCOLS_DECIMAL_DIGITS = "DECIMAL_DIGITS";
     public static final String JDBCCOLS_NUM_PREC_RADIX = "NUM_PREC_RADIX";

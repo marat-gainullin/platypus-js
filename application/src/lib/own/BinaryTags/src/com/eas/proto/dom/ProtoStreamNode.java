@@ -176,19 +176,16 @@ class ProtoStreamNode implements ProtoNode {
     }
 
     @Override
-    public Object getJDBCCompatible(int sqlType) throws ProtoReaderException {
-        throw new UnsupportedOperationException("Unsupported on a stream node");
-    }
-
-    @Override
     public int getOffset() {
         return startOffset;
     }
 
+    @Override
     public int getSize() {
         return dataSize;
     }
 
+    @Override
     public byte[] getData() {
         return data;
     }

@@ -6,11 +6,9 @@ package com.eas.client.model.store;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.sql.Date;
-import java.sql.Time;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -59,17 +57,11 @@ public class XmlDom2Model implements ModelVisitor {
 	public static final String NAME_ATTR_NAME = "name";
 	public static final String DESCRIPTION_ATTR_NAME = "description";
 	public static final String TYPE_ATTR_NAME = "type";
-	public static final String TYPE_NAME_ATTR_NAME = "typeName";
-	public static final String SIZE_ATTR_NAME = "size";
-	public static final String SCALE_ATTR_NAME = "scale";
-	public static final String PRECISION_ATTR_NAME = "precision";
-	public static final String SIGNED_ATTR_NAME = "signed";
 	public static final String NULLABLE_ATTR_NAME = "nullable";
 	public static final String MODE_ATTR_NAME = "parameterMode";
 	public static final String IS_PK_ATTR_NAME = "isPk";
 	public static final String FK_TAG_NAME = "fk";
 	public static final String SELECTION_FORM_TAG_NAME = "selectionForm";
-	public static final String DEFAULT_VALUE_TAG_NAME = "defaultValue";
 	public static final String CLASS_HINT_TAG_NAME = "classHint";
 	public static final String ENTITY_ID_ATTR_NAME = "entityId";
 	public static final String QUERY_ID_ATTR_NAME = "queryId";
@@ -267,41 +259,21 @@ public class XmlDom2Model implements ModelVisitor {
 			if (a != null) {
 				aField.setDescription(a.getNodeValue());
 			}
-			aField.getTypeInfo().setType(readIntegerAttribute(TYPE_ATTR_NAME, Types.LONGVARCHAR));
-			a = attrs.getNamedItem(TYPE_NAME_ATTR_NAME);
+			a = attrs.getNamedItem(TYPE_ATTR_NAME);
 			if (a != null) {
-				aField.getTypeInfo().setTypeName(a.getNodeValue());
+				aField.setType(a.getNodeValue());
 			}
-			aField.setSize(readIntegerAttribute(SIZE_ATTR_NAME, 100));
-			aField.setScale(readIntegerAttribute(SCALE_ATTR_NAME, 0));
-			aField.setPrecision(readIntegerAttribute(PRECISION_ATTR_NAME, 0));
-			aField.setSigned(readBooleanAttribute(SIGNED_ATTR_NAME, true));
 			aField.setNullable(readBooleanAttribute(NULLABLE_ATTR_NAME, true));
 			aField.setPk(readBooleanAttribute(IS_PK_ATTR_NAME, false));
 
 			if (aField instanceof Parameter) {
 				((Parameter) aField).setMode(readIntegerAttribute(MODE_ATTR_NAME, 0/*
-																					 * ParameterMetaData
-																					 * .
+																					 * ParameterMetaData.
 																					 * parameterModeUnknown
 																					 */));
 				if (currentTag.getAttributes().getNamedItem(SELECTION_FORM_TAG_NAME) != null && !"null".equals(currentTag.getAttributes().getNamedItem(SELECTION_FORM_TAG_NAME).getNodeValue()))
 					((Parameter) aField).setSelectionForm(readDoubleAttribute(SELECTION_FORM_TAG_NAME, null));
 
-				Node dvTag = Utils.getElementByTagName(currentTag, DEFAULT_VALUE_TAG_NAME);
-				if (dvTag != null) {
-					Node classHintA = dvTag.getAttributes().getNamedItem(CLASS_HINT_TAG_NAME);
-					if (classHintA != null) {
-						String simpleClassName = classHintA.getNodeValue();
-						if (simpleClassName != null && !simpleClassName.isEmpty() && !simpleClassName.toLowerCase().equals("null")) {
-							String val = dvTag.getFirstChild().getNodeValue();
-							if (val != null && !val.isEmpty() && !val.toLowerCase().equals("null")) {
-								Object dvO = readTypedValueFromString(simpleClassName.toLowerCase(), val);
-								((Parameter) aField).setDefaultValue(dvO);
-							}
-						}
-					}
-				}
 			}
 			Element lcurrentTag = currentTag;
 			try {
@@ -341,77 +313,6 @@ public class XmlDom2Model implements ModelVisitor {
 				pk.setField(a.getNodeValue());
 			}
 		}
-	}
-
-	protected Object readTypedValueFromString(String typeName, String aValue) {
-		Object resO = null;
-		if (typeName != null && !typeName.isEmpty() && aValue != null && !aValue.isEmpty()) {
-			aValue = aValue.trim();
-			if (!aValue.isEmpty() && !aValue.toLowerCase().equals("null")) {
-				try {
-					if (typeName.equalsIgnoreCase("Long")) {
-						resO = Long.valueOf(aValue);
-					} else if (typeName.equalsIgnoreCase("Integer")) {
-						resO = Integer.valueOf(aValue);
-					} else if (typeName.equalsIgnoreCase("Boolean")) {
-						resO = Boolean.valueOf(aValue);
-					} else if (typeName.equalsIgnoreCase("Short")) {
-						resO = Short.valueOf(aValue);
-					} else if (typeName.equalsIgnoreCase("Double")) {
-						resO = Double.valueOf(aValue);
-					} else if (typeName.equalsIgnoreCase("Float")) {
-						resO = Float.valueOf(aValue);
-					} else if (typeName.equalsIgnoreCase("Byte")) {
-						resO = Byte.valueOf(aValue);
-					} else if (typeName.equalsIgnoreCase("BigDecimal")) {
-						resO = BigDecimal.valueOf(Double.valueOf(aValue));
-					} else if (typeName.equalsIgnoreCase("BigInteger")) {
-						resO = BigInteger.valueOf(Long.valueOf(aValue));
-					} else if (typeName.equalsIgnoreCase("Date")) {
-						resO = Date.valueOf(aValue);
-					} else if (typeName.equalsIgnoreCase("Time")) {
-						resO = Time.valueOf(aValue);
-					} else if (typeName.equalsIgnoreCase("String")) {
-						resO = aValue;
-					}
-				} catch (NumberFormatException ex) {
-					Logger.getLogger(XmlDom2Model.class.getName()).log(Level.SEVERE, null, ex);
-				} catch (IllegalArgumentException ex) {
-					Logger.getLogger(XmlDom2Model.class.getName()).log(Level.SEVERE, null, ex);
-				}
-			}
-		}
-		return resO;
-	}
-
-	protected Object readTypedAttribute(String aTypeName, String aAttrName, Node aAttrNode) {
-		Object resO = null;
-		if (aTypeName.equalsIgnoreCase("Long")) {
-			resO = readDoubleAttribute(aAttrName, null);
-		} else if (aTypeName.equalsIgnoreCase("Integer")) {
-			resO = readIntegerAttribute(aAttrName, null);
-		} else if (aTypeName.equalsIgnoreCase("Boolean")) {
-			resO = readBooleanAttribute(aAttrName, null);
-		} else if (aTypeName.equalsIgnoreCase("Short")) {
-			resO = readShortAttribute(aAttrName, null);
-		} else if (aTypeName.equalsIgnoreCase("Double")) {
-			resO = readDoubleAttribute(aAttrName, null);
-		} else if (aTypeName.equalsIgnoreCase("Float")) {
-			resO = readFloatAttribute(aAttrName, null);
-		} else if (aTypeName.equalsIgnoreCase("Byte")) {
-			resO = readByteAttribute(aAttrName, null);
-		} else if (aTypeName.equalsIgnoreCase("BigDecimal")) {
-			resO = readBigDecimalAttribute(aAttrName, null);
-		} else if (aTypeName.equalsIgnoreCase("BigInteger")) {
-			resO = readBigIntegerAttribute(aAttrName, null);
-		} else if (aTypeName.equalsIgnoreCase("Date")) {
-			resO = readDateAttribute(aAttrName, null);
-		} else if (aTypeName.equalsIgnoreCase("Time")) {
-			resO = readTimeAttribute(aAttrName, null);
-		} else if (aTypeName.equalsIgnoreCase("String")) {
-			resO = aAttrNode.getNodeValue();
-		}
-		return resO;
 	}
 
 	protected Integer readIntegerAttribute(String attributeName, Integer defaultValue) {
@@ -499,14 +400,6 @@ public class XmlDom2Model implements ModelVisitor {
 		Node a = currentTag.getAttributes().getNamedItem(attributeName);
 		if (a != null) {
 			return new Date(Long.valueOf(a.getNodeValue()));
-		}
-		return defaultValue;
-	}
-
-	protected Time readTimeAttribute(String attributeName, Time defaultValue) {
-		Node a = currentTag.getAttributes().getNamedItem(attributeName);
-		if (a != null) {
-			return new Time(Long.valueOf(a.getNodeValue()));
 		}
 		return defaultValue;
 	}

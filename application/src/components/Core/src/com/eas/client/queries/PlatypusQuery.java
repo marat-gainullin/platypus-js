@@ -53,7 +53,7 @@ public class PlatypusQuery extends Query {
         Command command = new Command(entityName);
         for (int i = 0; i < params.getParametersCount(); i++) {
             Parameter p = params.get(i + 1);
-            command.getParameters().add(new ChangeValue(p.getName(), p.getValue(), p.getTypeInfo()));
+            command.getParameters().add(new ChangeValue(p.getName(), p.getValue()));
         }
         return command;
     }

@@ -4,7 +4,7 @@
  */
 package com.eas.client.model.application;
 
-import com.eas.client.DatabaseMdCache;
+import com.eas.client.MetadataCache;
 import com.eas.client.SQLUtils;
 import com.eas.client.SqlQuery;
 import com.eas.client.changes.Change;
@@ -86,11 +86,11 @@ public class ApplicationDbEntity extends ApplicationEntity<ApplicationDbModel, S
                 try {
                     query = SQLUtils.validateTableSqlQuery(getTableDatasourceName(), getTableName(), getTableSchemaName(), model.getBasesProxy());
                     // such resolving is needed here because table queries are not processed by StoredQueryFactory
-                    DatabaseMdCache mdCache = model.getBasesProxy().getDbMetadataCache(query.getDatasourceName());
-                    SqlDriver driver = mdCache.getConnectionDriver();
+                    MetadataCache mdCache = model.getBasesProxy().getMetadataCache(query.getDatasourceName());
+                    SqlDriver driver = mdCache.getDatasourceSqlDriver();
                     TypesResolver resolver = driver.getTypesResolver();
                     query.getFields().toCollection().stream().forEach((field) -> {
-                        resolver.resolve2Application(field);
+                        field.setType(resolver.toApplicationType(field.getType()));
                     });
                 } catch (Exception ex) {
                     query = null;

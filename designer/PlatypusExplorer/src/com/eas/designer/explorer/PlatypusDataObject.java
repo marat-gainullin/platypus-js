@@ -114,11 +114,8 @@ public abstract class PlatypusDataObject extends MultiDataObject {
 
     public ListenerRegistration addClientChangeListener(final PlatypusProject.ClientChangeListener onChange) {
         clientListeners.add(onChange);
-        return new ListenerRegistration() {
-            @Override
-            public void remove() {
-                clientListeners.remove(onChange);
-            }
+        return () -> {
+            clientListeners.remove(onChange);
         };
     }
 
@@ -173,11 +170,8 @@ public abstract class PlatypusDataObject extends MultiDataObject {
 
     public ListenerRegistration addModelValidChangeListener(final Runnable onChange) {
         modelValidListeners.add(onChange);
-        return new ListenerRegistration() {
-            @Override
-            public void remove() {
-                modelValidListeners.remove(onChange);
-            }
+        return () -> {
+            modelValidListeners.remove(onChange);
         };
     }
 

@@ -13,7 +13,6 @@ import com.eas.client.cache.ActualCacheEntry;
 import com.eas.client.cache.ApplicationSourceIndexer;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusIndexer;
-import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.ForeignKeySpec;
@@ -123,7 +122,7 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
                     if (oFieldName instanceof String && !((String) oFieldName).isEmpty()) {
                         String sFieldName = (String) oFieldName;
                         Field field = fields instanceof Parameters ? new Parameter() : new Field();
-                        field.setTypeInfo(DataTypeInfo.OTHER);
+                        field.setType(Scripts.STRING_TYPE_NAME);
                         fields.add(field);
                         field.setName(sFieldName);
                         field.setOriginalName(sFieldName);
@@ -142,14 +141,16 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
                             Object ofName = aSpace.toJava(((JSObject) oType).getMember("name"));
                             if (ofName instanceof String) {
                                 String fName = (String) ofName;
-                                if (String.class.getSimpleName().equals(fName)) {
-                                    field.setTypeInfo(DataTypeInfo.VARCHAR.copy());
-                                } else if (Number.class.getSimpleName().equals(fName)) {
-                                    field.setTypeInfo(DataTypeInfo.DECIMAL.copy());
-                                } else if (Boolean.class.getSimpleName().equals(fName)) {
-                                    field.setTypeInfo(DataTypeInfo.BOOLEAN.copy());
-                                } else if (Date.class.getSimpleName().equals(fName)) {
-                                    field.setTypeInfo(DataTypeInfo.TIMESTAMP.copy());
+                                if (Scripts.STRING_TYPE_NAME.equals(fName)) {
+                                    field.setType(Scripts.STRING_TYPE_NAME);
+                                } else if (Scripts.NUMBER_TYPE_NAME.equals(fName)) {
+                                    field.setType(Scripts.NUMBER_TYPE_NAME);
+                                } else if (Scripts.BOOLEAN_TYPE_NAME.equals(fName)) {
+                                    field.setType(Scripts.BOOLEAN_TYPE_NAME);
+                                } else if (Scripts.DATE_TYPE_NAME.equals(fName)) {
+                                    field.setType(Scripts.DATE_TYPE_NAME);
+                                } else if (Scripts.GEOMETRY_TYPE_NAME.equals(fName)) {
+                                    field.setType(Scripts.GEOMETRY_TYPE_NAME);
                                 }
                             }
                         }
@@ -208,7 +209,7 @@ public class LocalQueriesProxy implements QueriesProxy<SqlQuery> {
                     params = new Parameters();
                     readScriptFields(aModuleName, (JSObject) oParams, params, aSpace);
                     params.toCollection().stream().forEach((p) -> {
-                        query.putParameter(p.getName(), p.getTypeInfo(), null);
+                        query.putParameter(p.getName(), p.getType(), null);
                     });
                 }
                 return query;

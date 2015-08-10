@@ -11,7 +11,6 @@ import com.eas.client.forms.components.model.ModelFormattedField;
 import com.eas.client.forms.components.model.ModelSpin;
 import com.eas.client.forms.components.model.ModelTextArea;
 import com.eas.client.forms.components.model.ModelWidget;
-import com.eas.client.metadata.DataTypeInfo;
 import com.eas.script.HasPublished;
 import com.eas.script.Scripts;
 import java.util.ResourceBundle;
@@ -41,35 +40,18 @@ public class Forms {
         return aKey;
     }
 
-    public static ModelWidget chooseWidgetByType(DataTypeInfo aType) {
-        switch (aType.getSqlType()) {
-            // numbers
-            case java.sql.Types.BIGINT:
-            case java.sql.Types.DECIMAL:
-            case java.sql.Types.DOUBLE:
-            case java.sql.Types.FLOAT:
-            case java.sql.Types.INTEGER:
-            case java.sql.Types.NUMERIC:
-            case java.sql.Types.SMALLINT:
+    public static ModelWidget chooseWidgetByType(String aType) {
+        switch (aType) {
+            case Scripts.NUMBER_TYPE_NAME:
                 return new ModelSpin();
             // booleans
-            case java.sql.Types.BOOLEAN:
-            case java.sql.Types.BIT:
+            case Scripts.BOOLEAN_TYPE_NAME:
                 return new ModelCheckBox();
             // strings
-            case java.sql.Types.CHAR:
-            case java.sql.Types.CLOB:
-            case java.sql.Types.LONGNVARCHAR:
-            case java.sql.Types.LONGVARCHAR:
-            case java.sql.Types.NCHAR:
-            case java.sql.Types.NCLOB:
-            case java.sql.Types.NVARCHAR:
-            case java.sql.Types.VARCHAR:
+            case Scripts.STRING_TYPE_NAME:
                 return new ModelFormattedField();
             // dates
-            case java.sql.Types.DATE:
-            case java.sql.Types.TIME:
-            case java.sql.Types.TIMESTAMP:
+            case Scripts.DATE_TYPE_NAME:
                 return new ModelDate();
             default:
                 return new ModelTextArea();

@@ -13,12 +13,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
-import java.sql.Blob;
-import java.sql.Clob;
-import java.sql.SQLException;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Provides a writer for Platypus protocol.
@@ -132,82 +127,5 @@ public class ProtoWriter {
 
     public void flush() throws java.io.IOException {
         stream.flush();
-    }
-
-    public void putJDBCCompatible(int tag, int sqlType, Object value) throws IOException {
-        if (value == null) {
-            put(tag);
-        } else {
-            switch (sqlType) {
-                case java.sql.Types.BIGINT:
-                    put(tag, ((Number) value).longValue());
-                    break;
-                case java.sql.Types.FLOAT:
-                    put(tag, ((Number) value).floatValue());
-                    break;
-                case java.sql.Types.DOUBLE:
-                case java.sql.Types.REAL:
-                    put(tag, ((Number) value).doubleValue());
-                    break;
-                case java.sql.Types.NUMERIC:
-                case java.sql.Types.DECIMAL:
-                    put(tag, ProtoUtil.number2BigDecimal((Number) value));
-                    break;
-                case java.sql.Types.TINYINT:
-                case java.sql.Types.INTEGER:
-                    put(tag, ((Number) value).intValue());
-                    break;
-                case java.sql.Types.SMALLINT:
-                    put(tag, ((Number) value).shortValue());
-                    break;
-                case java.sql.Types.BOOLEAN:
-                case java.sql.Types.BIT:
-                    put(tag, (int) (((Boolean) value).booleanValue() ? 1 : 0));
-                    break;
-                case java.sql.Types.VARBINARY:
-                case java.sql.Types.BINARY:
-                case java.sql.Types.LONGVARBINARY:
-                    put(tag, (byte[]) value);
-                    break;
-                case java.sql.Types.BLOB: {
-                    Blob blob = (Blob) value;
-                    try {
-                        byte[] bytes = blob.getBytes(0, (int) blob.length());
-                        put(tag, bytes);
-                    } catch (SQLException ex) {
-                        Logger.getLogger(ProtoWriter.class.getName()).log(Level.SEVERE, "Serializing BLOB value for " + value, ex);
-                    }
-                    break;
-                }
-                case java.sql.Types.CLOB: {
-                    Clob clob = (Clob) value;
-                    try {
-                        String strng = clob.getSubString(1, (int) clob.length());
-                        put(tag, strng);
-                    } catch (SQLException ex) {
-                        Logger.getLogger(ProtoWriter.class.getName()).log(Level.SEVERE, "Serializing CLOB value for param " + value, ex);
-                    }
-                    break;
-                }
-                case java.sql.Types.CHAR:
-                case java.sql.Types.LONGNVARCHAR:
-                case java.sql.Types.LONGVARCHAR:
-                case java.sql.Types.NCHAR:
-                case java.sql.Types.NCLOB:
-                case java.sql.Types.NVARCHAR:
-                case java.sql.Types.VARCHAR:
-                case java.sql.Types.SQLXML:
-                    put(tag, (String) value);
-                    break;
-                case java.sql.Types.DATE:
-                case java.sql.Types.TIME:
-                case java.sql.Types.TIMESTAMP:
-                    put(tag, (Date) value);
-                    break;
-                default:// Values of unknown types will be transformed to nulls
-                    put(tag);
-                    break;
-            }
-        }
     }
 }

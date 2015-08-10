@@ -4,7 +4,7 @@
  */
 package com.eas.client.model.gui.selectors;
 
-import com.eas.client.DatabaseMdCache;
+import com.eas.client.MetadataCache;
 import com.eas.client.DatabasesClient;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.model.store.Model2XmlDom;
@@ -24,22 +24,22 @@ public class TableSchemeDbValidator extends DefaultMtdSelectionValidator {
 
     // flag, indicating that dbId verification is needed
     protected boolean isOnlyDb;
-    protected String onlyDbId;
+    protected String onlyDatasource;
     // flag, indicating that schema verification is needed
     protected boolean isOnlySchema;
     protected String onlySchema;
-    protected DatabaseMdCache dbCache;
+    protected MetadataCache dbCache;
 
-    public TableSchemeDbValidator(boolean aIsOnlyDb, String aOnlyDbId, boolean aIsOnlySchema, String aOnlySchema, DatabasesClient aBasesProxy) throws Exception {
+    public TableSchemeDbValidator(boolean aIsOnlyDatasource, String aOnlyDatasource, boolean aIsOnlySchema, String aOnlySchema, DatabasesClient aBasesProxy) throws Exception {
         super(null);
-        isOnlyDb = aIsOnlyDb;
-        onlyDbId = aOnlyDbId;
+        isOnlyDb = aIsOnlyDatasource;
+        onlyDatasource = aOnlyDatasource;
         isOnlySchema = aIsOnlySchema;
         onlySchema = aOnlySchema;
         assert !isOnlySchema || (isOnlySchema && isOnlyDb) : "Fixed schema validation is impossible without fixed dbId validation.";
         if (aBasesProxy != null) {
-            dbCache = aBasesProxy.getDbMetadataCache(null);
-            if (onlySchema != null && !onlySchema.isEmpty() && onlySchema.equalsIgnoreCase(dbCache.getConnectionSchema())) {
+            dbCache = aBasesProxy.getMetadataCache(null);
+            if (onlySchema != null && !onlySchema.isEmpty() && onlySchema.equalsIgnoreCase(dbCache.getDatasourceSchema())) {
                 onlySchema = "";
             }
         }
@@ -61,7 +61,7 @@ public class TableSchemeDbValidator extends DefaultMtdSelectionValidator {
                         if (content != null) {
                             Element datamodelElement = content.getDocumentElement();
                             String dbIdAttribute = datamodelElement.getAttribute(Model2XmlDom.DATAMODEL_DB_ID);
-                            if (String.valueOf(onlyDbId).equalsIgnoreCase(dbIdAttribute) || (dbIdAttribute == null && onlyDbId == null)) {
+                            if (String.valueOf(onlyDatasource).equalsIgnoreCase(dbIdAttribute) || (dbIdAttribute == null && onlyDatasource == null)) {
                                 // db id is verificated
                                 if (isOnlySchema) {
                                     String schemaAttribute = datamodelElement.getAttribute(Model2XmlDom.DATAMODEL_DB_SCHEMA_NAME);
@@ -71,7 +71,7 @@ public class TableSchemeDbValidator extends DefaultMtdSelectionValidator {
                                     } else {
                                         if (onlySchema == null || onlySchema.isEmpty()) {
                                             // schema might be valid if it contains explicit application schema name
-                                            return String.valueOf(dbCache.getConnectionSchema()).equalsIgnoreCase(schemaAttribute);
+                                            return String.valueOf(dbCache.getDatasourceSchema()).equalsIgnoreCase(schemaAttribute);
                                         } else {
                                             // schema is invalid
                                             return false;

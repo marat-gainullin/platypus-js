@@ -5,12 +5,11 @@
 package com.eas.designer.application.query.result;
 
 import com.eas.client.forms.components.rt.HasValue;
-import com.eas.client.metadata.DataTypeInfo;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.metadata.Parameters;
 import com.eas.designer.application.query.editing.SqlTextEditsComplementor;
 import com.eas.designer.application.query.lexer.SqlLanguageHierarchy;
-import com.eas.designer.application.query.result.QueryResultsView.PageSizeItem;
+import com.eas.script.Scripts;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dialog;
@@ -85,7 +84,7 @@ public class QuerySetupView extends javax.swing.JPanel {
 
         toolBar = new javax.swing.JToolBar();
         toolbarRunButton = new javax.swing.JButton();
-        pageSizeComboBox = new javax.swing.JComboBox<PageSizeItem>();
+        pageSizeComboBox = new javax.swing.JComboBox<QueryResultsView.PageSizeItem>();
         saveParamsCheckBox = new javax.swing.JCheckBox();
         mainPane = new javax.swing.JSplitPane();
         topPanel = new javax.swing.JPanel();
@@ -158,7 +157,7 @@ public class QuerySetupView extends javax.swing.JPanel {
 
     private void pageSizeComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_pageSizeComboBoxItemStateChanged
         if (evt.getStateChange() == ItemEvent.SELECTED) {
-            parentView.setPageSize(((PageSizeItem) evt.getItem()).getValue());
+            parentView.setPageSize(((QueryResultsView.PageSizeItem) evt.getItem()).getValue());
         }
     }//GEN-LAST:event_pageSizeComboBoxItemStateChanged
 
@@ -185,7 +184,7 @@ public class QuerySetupView extends javax.swing.JPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel bottomPanel;
     private javax.swing.JSplitPane mainPane;
-    private javax.swing.JComboBox<PageSizeItem> pageSizeComboBox;
+    private javax.swing.JComboBox<QueryResultsView.PageSizeItem> pageSizeComboBox;
     private javax.swing.JCheckBox saveParamsCheckBox;
     private javax.swing.JScrollPane scrollSqlPane;
     private javax.swing.JPanel sqlSourcePanel;
@@ -292,7 +291,7 @@ public class QuerySetupView extends javax.swing.JPanel {
             if (parameters.get(parsedParameter.getName()) == null) {
                 Parameter newParameter = new Parameter(parsedParameter.getName());
                 newParameter.setMode(1);
-                newParameter.setTypeInfo(DataTypeInfo.VARCHAR);
+                newParameter.setType(Scripts.STRING_TYPE_NAME);
                 newParameter.setValue("");
                 parameters.add(newParameter);
             }

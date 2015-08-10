@@ -245,7 +245,6 @@ public class QueryDocumentEditsComplementor {
             String authorAnnotationValue = PlatypusFilesSupport.getAnnotationValue(factText, JsDoc.Tag.AUTHOR_TAG);
             String nameAnnotationValue = PlatypusFilesSupport.getAnnotationValue(factText, JsDoc.Tag.NAME_TAG);
             String procedureAnnotationValue = PlatypusFilesSupport.getAnnotationValue(factText, JsDoc.Tag.PROCEDURE_TAG);
-            String manualAnnotationValue = PlatypusFilesSupport.getAnnotationValue(factText, JsDoc.Tag.MANUAL_TAG);
             StringBuilder factTextBuilder = new StringBuilder();
             factTextBuilder.append("/**\n");
             factTextBuilder.append(" *\n");
@@ -257,9 +256,6 @@ public class QueryDocumentEditsComplementor {
             }
             if (procedureAnnotationValue != null) {
                 factTextBuilder.append(" * ").append(JsDoc.Tag.PROCEDURE_TAG).append(" ").append(procedureAnnotationValue).append("\n");
-            }
-            if (manualAnnotationValue != null) {
-                factTextBuilder.append(" * ").append(JsDoc.Tag.MANUAL_TAG).append(" ").append(manualAnnotationValue).append("\n");
             }
             factTextBuilder.append(" */\n");
             factText = factTextBuilder.toString();
