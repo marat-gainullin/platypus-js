@@ -8,6 +8,7 @@ import com.eas.client.model.gui.DatamodelDesignUtils;
 import com.eas.client.model.gui.view.EntityViewsManager;
 import com.eas.client.model.gui.view.FieldsParametersListCellRenderer;
 import com.eas.client.model.query.QueryEntity;
+import com.eas.client.sqldrivers.SqlDriver;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
 import java.beans.PropertyChangeEvent;
 import javax.swing.Icon;
@@ -35,15 +36,16 @@ public class QueryEntityView extends EntityView<QueryEntity> {
         fieldsParamsRenderer = new FieldsParametersListCellRenderer<QueryEntity>(DatamodelDesignUtils.getFieldsFont(), DatamodelDesignUtils.getBindedFieldsFont(), entity) {
 
             @Override
-            protected Icon calcIcon(String typeName) {
+            protected Icon calcIcon(int aJdbcType, String typeName) {
                 try {
                     if (resolver == null) {
-                        resolver = getEntity().getModel().getBasesProxy().getConnectionDriver(getEntity().getModel().getDatasourceName()).getTypesResolver();
+                        SqlDriver sqlDriver = getEntity().getModel().getBasesProxy().getConnectionDriver(getEntity().getModel().getDatasourceName());
+                        resolver = sqlDriver.getTypesResolver();
                     }
-                    Icon res = super.calcIcon(typeName);
+                    Icon res = super.calcIcon(aJdbcType, typeName);
                     if (res == null) {
-                        String appTypeName = resolver.toApplicationType(typeName);
-                        return super.calcIcon(appTypeName);
+                        String appTypeName = resolver.toApplicationType(aJdbcType, typeName);
+                        return super.calcIcon(aJdbcType, appTypeName);
                     } else {
                         return res;
                     }

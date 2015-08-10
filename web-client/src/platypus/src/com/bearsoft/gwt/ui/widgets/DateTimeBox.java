@@ -46,6 +46,7 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.CalendarUtil;
 import com.google.gwt.user.datepicker.client.DateBox;
 
@@ -74,6 +75,8 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 
 	protected boolean isDateShow = true;
 	protected boolean isTimeShow = true;
+	
+	protected AutoCloseBox autoCloseParent = null;
 
 	public DateTimeBox() {
 		this(new DateTimePicker(), null, DEFAULT_FORMAT);
@@ -213,6 +216,7 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 				}
 			}
 		}, ClickEvent.getType());
+		
 		organizeFieldWrapperRight();
 		getElement().<XElement> cast().addResizingTransitionEnd(this);
 		if (field.getTextBox() instanceof HasKeyDownHandlers) {
@@ -445,10 +449,22 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 	protected void onAttach() {
 		super.onAttach();
 		organizeFieldWrapperRight();
+		Widget lParent = getParent();
+		while(lParent != null && !(lParent instanceof AutoCloseBox)){
+			lParent = lParent.getParent();
+		}
+		if(lParent instanceof AutoCloseBox)
+			autoCloseParent = (AutoCloseBox)lParent;
+		if(autoCloseParent != null){
+			autoCloseParent.addAutoHidePartner(popup.getElement());
+		}
 	}
 
 	@Override
 	protected void onDetach() {
+		if(autoCloseParent != null){
+			autoCloseParent.removeAutoHidePartner(popup.getElement());
+		}
 		super.onDetach();
 	}
 

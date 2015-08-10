@@ -226,8 +226,8 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	public void show(boolean aModal, final JavaScriptObject aCallback, DesktopPane aDesktop) {
 		popup = new WindowPopupPanel(this, autoHide, aModal);
 		popup.setWidget(view);
-		double actualWidth = view instanceof HasPublished ? ((HasPublished)view).getPublished().<PublishedComponent>cast().getWidth() : 0;
-		double actualHeight = view instanceof HasPublished ? ((HasPublished)view).getPublished().<PublishedComponent>cast().getHeight() : 0;
+		double actualWidth = view instanceof HasPublished ? ((HasPublished) view).getPublished().<PublishedComponent> cast().getWidth() : 0;
+		double actualHeight = view instanceof HasPublished ? ((HasPublished) view).getPublished().<PublishedComponent> cast().getHeight() : 0;
 		popup.setSize(actualWidth, actualHeight);
 		if (locationByPlatform) {
 			if (aDesktop != null) {
@@ -237,25 +237,28 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 				int left = (Document.get().getClientWidth() - (int) actualWidth) / 2;
 				int top = (Document.get().getClientHeight() - (int) actualHeight) / 2;
 				setPosition(left, top);
+				popup.show();
 			}
 		} else {
-			if (location != null) {
-				setPosition(location.getX(), location.getY());
-			} else {
-				if (aDesktop != null) {
+			if (aDesktop != null) {
+				aDesktop.add(this);
+				if (location != null)
+					setPosition(location.getX(), location.getY());
+				else {
 					int left = (aDesktop.getElement().getClientWidth() - (int) actualWidth) / 2;
 					int top = (aDesktop.getElement().getClientHeight() - (int) actualHeight) / 2;
-					aDesktop.add(this);
 					setPosition(left, top);
-				} else {
+				}
+			} else {
+				if (location != null)
+					setPosition(location.getX(), location.getY());
+				else {
 					int left = (Document.get().getClientWidth() - (int) actualWidth) / 2;
 					int top = (Document.get().getClientHeight() - (int) actualHeight) / 2;
 					setPosition(left, top);
 				}
+				popup.show();
 			}
-		}
-		if (aDesktop == null) {
-			popup.show();
 		}
 	}
 
@@ -396,10 +399,13 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 		if (isOpened()) {
 			if (popup != null) {
 				boolean wasModal = popup.isModal();
-				popup.close();// popup became null and view has been detached
+				if(getParent() instanceof DesktopPane)
+					close();
+				else
+					popup.close();// popup became null and view has been detached
 				// someone can discard the window closing, check !isOpened()
 				if (!isOpened() && wasModal && aCallback != null)
-					aCallback.<JsObject>cast().call(published, Utils.toJs(aSelected));
+					aCallback.<JsObject> cast().call(published, Utils.toJs(aSelected));
 			} else {
 				if (view.isAttached()) {
 					view.removeFromParent();

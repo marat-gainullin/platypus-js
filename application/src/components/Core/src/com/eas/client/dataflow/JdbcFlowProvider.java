@@ -303,14 +303,14 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
         }
     }
 
-    public static void assign(Object aValue, int aParameterIndex, PreparedStatement aStmt, int aParameterSqlType, String aParameterSqlTypeName) throws SQLException {
+    public static void assign(Object aValue, int aParameterIndex, PreparedStatement aStmt, int aParameterJdbcType, String aParameterSqlTypeName) throws SQLException {
         if (aValue != null) {
             /*
              if (aValue instanceof JSObject) {
              aValue = aSpace.toJava(aValue);
              }
              */
-            switch (aParameterSqlType) {
+            switch (aParameterJdbcType) {
                 // Some strange types. No one knows how to work with them.
                 case Types.JAVA_OBJECT:
                 case Types.DATALINK:
@@ -322,9 +322,9 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                 case Types.ARRAY:
                 case Types.OTHER:
                     try {
-                        aStmt.setObject(aParameterIndex, aValue, aParameterSqlType);
+                        aStmt.setObject(aParameterIndex, aValue, aParameterJdbcType);
                     } catch (Exception ex) {
-                        aStmt.setNull(aParameterIndex, aParameterSqlType, aParameterSqlTypeName);
+                        aStmt.setNull(aParameterIndex, aParameterJdbcType, aParameterSqlTypeName);
                         Logger.getLogger(JdbcFlowProvider.class.getName()).log(Level.WARNING, FALLED_TO_NULL_MSG, aValue.getClass().getName());
                     }
                     break;
@@ -332,7 +332,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                     try {
                         aStmt.setObject(aParameterIndex, aValue, Types.STRUCT);
                     } catch (Exception ex) {
-                        aStmt.setNull(aParameterIndex, aParameterSqlType, aParameterSqlTypeName);
+                        aStmt.setNull(aParameterIndex, aParameterJdbcType, aParameterSqlTypeName);
                         Logger.getLogger(JdbcFlowProvider.class.getName()).log(Level.WARNING, FALLED_TO_NULL_MSG, aValue.getClass().getName());
                     }
                     break;
@@ -504,7 +504,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                         castedString = ((Clob) aValue).getSubString(1, (int) ((Clob) aValue).length());
                     }
                     if (castedString != null) {
-                        if (aParameterSqlType == Types.NCHAR || aParameterSqlType == Types.NVARCHAR || aParameterSqlType == Types.LONGNVARCHAR) {
+                        if (aParameterJdbcType == Types.NCHAR || aParameterJdbcType == Types.NVARCHAR || aParameterJdbcType == Types.LONGNVARCHAR) {
                             aStmt.setNString(aParameterIndex, castedString);
                         } else {
                             aStmt.setString(aParameterIndex, castedString);
@@ -513,8 +513,8 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                         Logger.getLogger(JdbcFlowProvider.class.getName()).log(Level.WARNING, FALLED_TO_NULL_MSG, aValue.getClass().getName());
                     }
                     break;
-                case Types.BOOLEAN:
                 case Types.BIT:
+                case Types.BOOLEAN:
                     // target type - Boolean
                     Boolean castedBoolean = null;
                     if (aValue instanceof Number) {
@@ -553,11 +553,11 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                         castedDate = ((java.util.Date) aValue);
                     }
                     if (castedDate != null) {
-                        if (aParameterSqlType == Types.DATE) {
+                        if (aParameterJdbcType == Types.DATE) {
                             aStmt.setDate(aParameterIndex, new java.sql.Date(castedDate.getTime()));
-                        } else if (aParameterSqlType == Types.TIMESTAMP) {
+                        } else if (aParameterJdbcType == Types.TIMESTAMP) {
                             aStmt.setTimestamp(aParameterIndex, new java.sql.Timestamp(castedDate.getTime()));
-                        } else if (aParameterSqlType == Types.TIME) {
+                        } else if (aParameterJdbcType == Types.TIME) {
                             aStmt.setTime(aParameterIndex, new java.sql.Time(castedDate.getTime()));
                         } else {
                             assert false;
@@ -569,9 +569,9 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
             }
         } else {
             try {
-                aStmt.setNull(aParameterIndex, aParameterSqlType);
+                aStmt.setNull(aParameterIndex, aParameterJdbcType);
             } catch (SQLException ex) {
-                aStmt.setNull(aParameterIndex, aParameterSqlType, aParameterSqlTypeName);
+                aStmt.setNull(aParameterIndex, aParameterJdbcType, aParameterSqlTypeName);
             }
         }
     }
@@ -743,8 +743,28 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
             jdbcType = aStatement.getParameterMetaData().getParameterType(aParameterIndex);
             sqlTypeName = aStatement.getParameterMetaData().getParameterTypeName(aParameterIndex);
         } catch (SQLException ex) {
-            jdbcType = assumeJdbcType(paramValue);
-            sqlTypeName = null;
+            if (paramValue != null || aParameter.getType() == null) {
+                jdbcType = assumeJdbcType(paramValue);
+                sqlTypeName = null;
+            } else {
+                sqlTypeName = null;
+                switch (aParameter.getType()) {
+                    case Scripts.STRING_TYPE_NAME:
+                        jdbcType = java.sql.Types.VARCHAR;
+                        break;
+                    case Scripts.NUMBER_TYPE_NAME:
+                        jdbcType = java.sql.Types.DOUBLE;
+                        break;
+                    case Scripts.DATE_TYPE_NAME:
+                        jdbcType = java.sql.Types.TIMESTAMP;
+                        break;
+                    case Scripts.BOOLEAN_TYPE_NAME:
+                        jdbcType = java.sql.Types.BOOLEAN;
+                        break;
+                    default:
+                        jdbcType = assumeJdbcType(paramValue);
+                }
+            }
         }
         assign(paramValue, aParameterIndex, aStatement, jdbcType, sqlTypeName);
         checkOutParameter(aParameter, aStatement, aParameterIndex, jdbcType);

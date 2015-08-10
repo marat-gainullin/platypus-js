@@ -7,17 +7,17 @@ package com.eas.client.dbstructure;
 import com.eas.client.DatabasesClient;
 import com.eas.client.SqlCompiledQuery;
 import com.eas.client.changes.Change;
+import com.eas.client.changes.Command;
 import com.eas.client.metadata.DbTableIndexSpec;
 import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.ForeignKeySpec;
 import com.eas.client.metadata.JdbcField;
 import com.eas.client.model.dbscheme.DbSchemeModel;
 import com.eas.client.sqldrivers.SqlDriver;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -140,9 +140,16 @@ public class SqlActionsController {
 
         public boolean execute() {
             try {
-                Map<String, List<Change>> logs = new HashMap<>();
-                logs.put(datasourceName, doSqlWork());
-                basesProxy.commit(logs, null, null);
+                List<Change> changes = doSqlWork();
+                for(Change change : changes){
+                    if(change instanceof Command){
+                        Command command = (Command)change;
+                        if(command.getCommand() == null){
+                            throw new SQLException("Unsupported operation. No Platypus sql driver found.");
+                        }
+                    }
+                }
+                basesProxy.commit(Collections.singletonMap(datasourceName, changes), null, null);
             } catch (Exception ex) {
                 parseException(ex);
                 return false;

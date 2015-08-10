@@ -89,15 +89,20 @@ public class TableNameSelector {
                 List<String> sSelectedList = tablesView.lstTables.getSelectedValuesList();
                 for (String sSelected : sSelectedList) {
                     int indexOfDot = sSelected.indexOf(".");
+                    String schemaName;
+                    String tableName;
                     if (indexOfDot != -1) {
-                        String schemaName = sSelected.substring(0, indexOfDot);
-                        String tableName = sSelected.substring(indexOfDot + 1);
-                        TableRef lselected = new TableRef();
-                        lselected.datasourceName = tablesView.datasourceName;
-                        lselected.schema = schemaName;
-                        lselected.tableName = tableName;
-                        aSelected.add(lselected);
+                        schemaName = sSelected.substring(0, indexOfDot);
+                        tableName = sSelected.substring(indexOfDot + 1);
+                    } else {
+                        schemaName = null;
+                        tableName = sSelected;
                     }
+                    TableRef lselected = new TableRef();
+                    lselected.datasourceName = tablesView.datasourceName;
+                    lselected.schema = schemaName;
+                    lselected.tableName = tableName;
+                    aSelected.add(lselected);
                 }
                 selected = aSelected.toArray(new TableRef[aSelected.size()]);
                 checkTableRefDefaultDatasourceAndSchema(aProject, selected);

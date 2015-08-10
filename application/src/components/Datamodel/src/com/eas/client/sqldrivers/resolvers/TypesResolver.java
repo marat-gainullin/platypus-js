@@ -15,7 +15,7 @@ import java.util.Set;
  */
 public interface TypesResolver {
 
-    public String toApplicationType(String aRDBMSType);
+    public String toApplicationType(int aJdbcType, String aRDBMSType);
     
     public Set<String> getSupportedTypes();
     

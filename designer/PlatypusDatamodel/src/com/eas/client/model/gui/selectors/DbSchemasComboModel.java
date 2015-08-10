@@ -4,9 +4,10 @@
  */
 package com.eas.client.model.gui.selectors;
 
+import com.eas.client.ClientConstants;
 import com.eas.client.DatabasesClient;
-import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.application.utils.DatabaseConnections;
+import java.sql.ResultSet;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,7 +22,7 @@ import org.netbeans.api.db.explorer.DatabaseConnection;
 public class DbSchemasComboModel implements ComboBoxModel<String> {
 
     protected DatabasesClient basesProxy;
-    protected String dbId;
+    protected String datasourceName;
     protected String[] schemas = new String[]{};
     protected DbTablesListModel tablesModel;
     protected Set<ListDataListener> listeners = new HashSet<>();
@@ -29,18 +30,24 @@ public class DbSchemasComboModel implements ComboBoxModel<String> {
     public DbSchemasComboModel(DatabasesClient aBasesProxy, String aDatasourceName, DbTablesListModel aTablesModel) {
         super();
         basesProxy = aBasesProxy;
-        dbId = aDatasourceName;
+        datasourceName = aDatasourceName;
         tablesModel = aTablesModel;
         achieveSchemas();
     }
 
     protected final void achieveSchemas() {
         try {
-            DatabaseConnection conn = DatabaseConnections.lookup(dbId);
+            DatabaseConnection conn = DatabaseConnections.lookup(datasourceName);
             if (conn != null && conn.getJDBCConnection() != null) {
-                List<String> lschemas = PlatypusUtils.achieveSchemas(conn.getDatabaseURL(), conn.getUser(), conn.getPassword());
-                if (lschemas != null) {
-                    schemas = lschemas.toArray(new String[]{});
+                try (ResultSet rs = conn.getJDBCConnection().getMetaData().getSchemas()) {
+                    List<String> schemasList = new ArrayList<>();
+                    while (rs.next()) {
+                        String schema = rs.getString(ClientConstants.JDBCCOLS_TABLE_SCHEM);
+                        if (schema != null) {
+                            schemasList.add(schema);
+                        }
+                    }
+                    schemas = schemasList.toArray(new String[]{});
                 }
             }
         } catch (Exception ex) {

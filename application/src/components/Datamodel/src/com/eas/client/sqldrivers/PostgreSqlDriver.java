@@ -370,8 +370,7 @@ public class PostgreSqlDriver extends SqlDriver {
     @Override
     public JdbcChangeValue convertGeometry(String aValue, Connection aConnection) throws SQLException {
         JdbcChangeValue jdbcValue = new JdbcChangeValue(null, null, 0, null);
-        PGgeometry pgg = new PGgeometry(aValue);
-        jdbcValue.value = pgg;
+        jdbcValue.value = aValue != null ? new PGgeometry(aValue) : null;
         jdbcValue.jdbcType = Types.OTHER;
         jdbcValue.sqlTypeName = "geometry";
         return jdbcValue;

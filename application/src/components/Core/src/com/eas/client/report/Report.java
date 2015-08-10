@@ -5,7 +5,6 @@
  */
 package com.eas.client.report;
 
-
 import com.eas.client.ClientConstants;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.settings.SettingsConstants;
@@ -32,7 +31,7 @@ public class Report implements HasPublished {
     protected JSObject scriptData;
     private final String format;
     private final String name;
-    protected JSObject published; 
+    protected JSObject published;
 
     @ScriptFunction(jsDoc = ""
             + "/**\n"
@@ -114,12 +113,12 @@ public class Report implements HasPublished {
     }
 
     private String save() throws IOException {
-        String path = generateReportPath(getFormat());
+        String path = generateReportPath(name, format);
         saveReport(getBody(), path);
         return path;
     }
 
-    protected static String generateReportPath(String aFormat) {
+    protected static String generateReportPath(String aFileName, String aFormat) {
         String reportPath = System.getProperty(ClientConstants.USER_HOME_PROP_NAME);
         if (!reportPath.endsWith(File.separator)) {
             reportPath += File.separator;
@@ -134,7 +133,13 @@ public class Report implements HasPublished {
         if (!newDir.exists()) {
             newDir.mkdir();
         }
-        reportPath += File.separator + String.valueOf(IDGenerator.genID()) + "." + (aFormat != null ? aFormat : PlatypusFiles.REPORT_LAYOUT_EXTENSION_X);
+        String suffix = "." + (aFormat != null ? aFormat : PlatypusFiles.REPORT_LAYOUT_EXTENSION_X);
+        String reportName = aFileName;
+        if (reportName.toLowerCase().endsWith(suffix.toLowerCase())) {
+            reportName = reportName.substring(0, reportName.length() - suffix.length());
+        }
+        reportName += "-" + IDGenerator.genID() + suffix;
+        reportPath += File.separator + reportName;
         return reportPath;
     }
 
