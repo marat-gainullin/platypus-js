@@ -49,34 +49,32 @@ public class DbTablesListModel implements ListModel<String> {
     }
 
     protected final List<String> fetchTables() {
-        if (schema != null && !schema.isEmpty()) {
-            try {
-                DataSource ds = basesProxy.obtainDataSource(datasourceName);
-                try (Connection conn = ds.getConnection()) {
-                    /*
-                    Set<String> tablesTypes = new HashSet<>();
-                    try (ResultSet r = conn.getMetaData().getTableTypes()) {
-                        while (r.next()) {
-                            tablesTypes.add(r.getString(ClientConstants.JDBCCOLS_TABLE_TYPE));
-                        }
+        try {
+            DataSource ds = basesProxy.obtainDataSource(datasourceName);
+            try (Connection conn = ds.getConnection()) {
+                /*
+                 Set<String> tablesTypes = new HashSet<>();
+                 try (ResultSet r = conn.getMetaData().getTableTypes()) {
+                 while (r.next()) {
+                 tablesTypes.add(r.getString(ClientConstants.JDBCCOLS_TABLE_TYPE));
+                 }
+                 }
+                 */
+                try (ResultSet r = conn.getMetaData().getTables(null, schema/*may be null due to particular RDBMSes*/, null, new String[]{"TABLE", "VIEW"})) {
+                    List<String> _tables = new ArrayList<>();
+                    ColumnsIndicies idxs = new ColumnsIndicies(r.getMetaData());
+                    int schemaColIndex = idxs.find(ClientConstants.JDBCCOLS_TABLE_SCHEM);
+                    int tableColIndex = idxs.find(ClientConstants.JDBCCOLS_TABLE_NAME);
+                    while (r.next()) {
+                        String schemaName = r.getString(schemaColIndex);
+                        String tableName = r.getString(tableColIndex);
+                        _tables.add(schemaName != null && !schemaName.isEmpty() ? schemaName + "." + tableName : tableName);
                     }
-                    */
-                    try (ResultSet r = conn.getMetaData().getTables(null, schema, null, new String[]{"TABLE", "VIEW"})) {
-                        List<String> _tables = new ArrayList<>();
-                        ColumnsIndicies idxs = new ColumnsIndicies(r.getMetaData());
-                        int schemaColIndex = idxs.find(ClientConstants.JDBCCOLS_TABLE_SCHEM);
-                        int tableColIndex = idxs.find(ClientConstants.JDBCCOLS_TABLE_NAME);
-                        while (r.next()) {
-                            String schemaName = r.getString(schemaColIndex);
-                            String tableName = r.getString(tableColIndex);
-                            _tables.add(schemaName != null && !schemaName.isEmpty() ? schemaName + "." + tableName : tableName);
-                        }
-                        return _tables;
-                    }
+                    return _tables;
                 }
-            } catch (Exception ex) {
-                Logger.getLogger(DbTablesListModel.class.getName()).log(Level.SEVERE, null, ex);
             }
+        } catch (Exception ex) {
+            Logger.getLogger(DbTablesListModel.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }

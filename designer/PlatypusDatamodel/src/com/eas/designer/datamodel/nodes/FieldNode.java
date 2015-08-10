@@ -5,6 +5,7 @@
 package com.eas.designer.datamodel.nodes;
 
 import com.eas.client.metadata.Field;
+import com.eas.client.metadata.JdbcField;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.model.Entity;
 import com.eas.client.model.gui.edits.fields.ChangeFieldEdit;
@@ -94,12 +95,12 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
     public Image getIcon(int type) {
         return getIcon(type, field, resolver);
     }
-    
+
     public static Image getIcon(int type, Field aField, TypesResolver aResolver) {
         List<Icon> icons = new ArrayList<>();
         Icon icon = FieldsTypeIconsCache.getIcon16(aField.getType());
         if (icon == null && aResolver != null) {
-            String appType = aResolver.toApplicationType(aField.getType());
+            String appType = aResolver.toApplicationType(aField instanceof JdbcField ? ((JdbcField) aField).getJdbcType() : 0, aField.getType());
             icon = FieldsTypeIconsCache.getIcon16(appType);
         }
         if (icon != null) {
@@ -320,33 +321,34 @@ public class FieldNode extends AbstractNode implements PropertyChangeListener {
         edit.redo();
         return edit;
     }
-/*
-    protected Set<Relation> getIncompatibleRelations(Field newFieldContent) throws CancelException {
-        Set<Relation> toProcessRels = new HashSet<>();
-        Set<Relation> rels = Entity.<Entity>getInOutRelationsByEntityField(getEntity(), field);
-        rels.stream().forEach((rel) -> {
-            Field lfield = rel.getLeftField();
-            Field rfield = rel.getRightField();
-            if (lfield == field) {
-                lfield = newFieldContent;
-            }
-            if (rfield == field) {
-                rfield = newFieldContent;
-            }
-            if (lfield == null || rfield == null) {
-                toProcessRels.add(rel);
-            } else if ((lfield.isPk() || lfield.isFk())
-                    && (rfield.isPk() || rfield.isFk())) {
-                if (!SQLUtils.isKeysCompatible(lfield, rfield)) {
-                    toProcessRels.add(rel);
-                }
-            } else if (!SQLUtils.isSimpleTypesCompatible(lfield.getType(), rfield.getType())) {
-                toProcessRels.add(rel);
-            }
-        });
-        return toProcessRels;
-    }
-*/
+    /*
+     protected Set<Relation> getIncompatibleRelations(Field newFieldContent) throws CancelException {
+     Set<Relation> toProcessRels = new HashSet<>();
+     Set<Relation> rels = Entity.<Entity>getInOutRelationsByEntityField(getEntity(), field);
+     rels.stream().forEach((rel) -> {
+     Field lfield = rel.getLeftField();
+     Field rfield = rel.getRightField();
+     if (lfield == field) {
+     lfield = newFieldContent;
+     }
+     if (rfield == field) {
+     rfield = newFieldContent;
+     }
+     if (lfield == null || rfield == null) {
+     toProcessRels.add(rel);
+     } else if ((lfield.isPk() || lfield.isFk())
+     && (rfield.isPk() || rfield.isFk())) {
+     if (!SQLUtils.isKeysCompatible(lfield, rfield)) {
+     toProcessRels.add(rel);
+     }
+     } else if (!SQLUtils.isSimpleTypesCompatible(lfield.getType(), rfield.getType())) {
+     toProcessRels.add(rel);
+     }
+     });
+     return toProcessRels;
+     }
+     */
+
     protected UndoableEdit editNullable(Boolean val) {
         Field oldContent = new Field(field);
         Field content = new Field(field);

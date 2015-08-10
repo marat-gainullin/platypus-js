@@ -4,7 +4,6 @@
  */
 package com.eas.designer.application.dbdiagram.nodes;
 
-import com.eas.client.DatabasesClient;
 import com.eas.client.dbstructure.DbStructureUtils;
 import com.eas.client.dbstructure.SqlActionsController;
 import com.eas.client.dbstructure.gui.edits.CreateFkEdit;
@@ -49,7 +48,8 @@ public class TableFieldNode extends FieldNode {
     public TableFieldNode(Field aField, Lookup aLookup) throws Exception {
         super(aField, aLookup);
         sqlActionsController = new SqlActionsController((DbSchemeModel) getEntity().getModel());
-        resolver = ((DbSchemeModel) getEntity().getModel()).getBasesProxy().getMetadataCache(((DbSchemeModel) getEntity().getModel()).getDatasourceName()).getDatasourceSqlDriver().getTypesResolver();
+        SqlDriver sqlDriver = ((DbSchemeModel) getEntity().getModel()).getBasesProxy().getMetadataCache(((DbSchemeModel) getEntity().getModel()).getDatasourceName()).getDatasourceSqlDriver();
+        resolver = sqlDriver.getTypesResolver();
     }
 
     public Integer getSize() {
@@ -84,8 +84,8 @@ public class TableFieldNode extends FieldNode {
         String oldVal = field.getName();
         if (oldVal == null ? val != null : !oldVal.equalsIgnoreCase(val)) {
             CompoundEdit section = new NotSavableDbStructureCompoundEdit();
-            JdbcField oldContent = new JdbcField((JdbcField)field);
-            JdbcField newContent = new JdbcField((JdbcField)field);
+            JdbcField oldContent = new JdbcField((JdbcField) field);
+            JdbcField newContent = new JdbcField((JdbcField) field);
             newContent.setName(val);
             Set<Relation<FieldsEntity>> toProcessRels = FieldsEntity.<FieldsEntity>getInOutRelationsByEntityField((FieldsEntity) getEntity(), field);
             Logger.getLogger(TableFieldNode.class.getName()).fine(String.format("Changing field from %s to %s\n", oldVal, val)); //NOI18N        
@@ -133,8 +133,8 @@ public class TableFieldNode extends FieldNode {
     @Override
     protected UndoableEdit editDescription(String val) {
         if (field.getDescription() == null ? val != null : !field.getDescription().equals(val)) {
-            JdbcField oldContent = new JdbcField((JdbcField)field);
-            JdbcField content = new JdbcField((JdbcField)field);
+            JdbcField oldContent = new JdbcField((JdbcField) field);
+            JdbcField content = new JdbcField((JdbcField) field);
             content.setDescription(val);
             try {
                 ModifyFieldEdit dbEdit = new ModifyFieldEdit(sqlActionsController, getEntity().getTableName(), getEntity().getFields(), oldContent, content);
@@ -159,35 +159,23 @@ public class TableFieldNode extends FieldNode {
     protected UndoableEdit editType(String val) {
         if (!Objects.equals(field.getType(), val)) {
             try {
-                JdbcField oldContent = new JdbcField((JdbcField)field);
-                JdbcField newContent = new JdbcField((JdbcField)field);
+                JdbcField oldContent = new JdbcField((JdbcField) field);
+                JdbcField newContent = new JdbcField((JdbcField) field);
                 newContent.setType(val);
-                DbSchemeModel model = (DbSchemeModel) getEntity().getModel();
-                DatabasesClient client = model.getBasesProxy();
-                String datasourceName = model.getDatasourceName();
-                SqlDriver driver = client.getMetadataCache(datasourceName).getDatasourceSqlDriver();
-                driver.getTypesResolver().resolveSize(newContent);
+                if (resolver != null) {
+                    resolver.resolveSize(newContent);
+                }
 
                 CompoundEdit section = new NotSavableDbStructureCompoundEdit();
                 Set<Relation<FieldsEntity>> rels = FieldsEntity.<FieldsEntity>getInOutRelationsByEntityField((FieldsEntity) getEntity(), field);
                 int rCount = DbStructureUtils.getRecordsCountByField((FieldsEntity) getEntity(), oldContent.getName());
                 String msg = null;
-                String promtMsg1 = "areYouSureReTypeFieldInRelationsPresent"; //NOI18N
-                String promtMsg2 = "areYouSureReTypeFieldDataPresent"; //NOI18N
-                String promtMsg3 = "areYouSureReTypeFieldInRelationsDataPresent"; //NOI18N
-                /*
-                 if (SQLUtils.getTypeGroup(newContent.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.LOBS || SQLUtils.getTypeGroup(oldContent.getTypeInfo().getSqlType()) == SQLUtils.TypesGroup.LOBS) {
-                 promtMsg1 = "areYouSureBlobFieldInRelationsPresent"; //NOI18N
-                 promtMsg2 = "areYouSureBlobFieldDataPresent"; //NOI18N
-                 promtMsg3 = "areYouSureBlobFieldInRelationsDataPresent"; //NOI18N
-                 }
-                 */
                 if (rCount == 0 && !rels.isEmpty()) {
-                    msg = NbBundle.getMessage(DbStructureUtils.class, promtMsg1, String.valueOf(rels.size()), null);
+                    msg = NbBundle.getMessage(DbStructureUtils.class, "areYouSureReTypeFieldInRelationsPresent", String.valueOf(rels.size()));
                 } else if (rCount > 0 && rels.isEmpty()) {
-                    msg = NbBundle.getMessage(DbStructureUtils.class, promtMsg2, String.valueOf(rCount), null);
+                    msg = NbBundle.getMessage(DbStructureUtils.class, "areYouSureReTypeFieldDataPresent", String.valueOf(rCount));
                 } else if (rCount > 0 && !rels.isEmpty()) {
-                    msg = NbBundle.getMessage(DbStructureUtils.class, promtMsg3, String.valueOf(rels.size()), String.valueOf(rCount));
+                    msg = NbBundle.getMessage(DbStructureUtils.class, "areYouSureReTypeFieldInRelationsDataPresent", String.valueOf(rels.size()), String.valueOf(rCount));
                 }
                 if (msg == null || confirm(msg)) {
                     // we have to remove foreign keys because of types incompatibility
@@ -274,7 +262,7 @@ public class TableFieldNode extends FieldNode {
             try {
                 CompoundEdit section = new NotSavableDbStructureCompoundEdit();
                 ModifyFieldEdit dbEdit = new ModifyFieldEdit(sqlActionsController, getEntity().getTableName(), getEntity().getFields(), oldContent, content);
-                ChangeFieldEdit edit = new ChangeFieldEdit(oldContent, content, field,  getEntity());
+                ChangeFieldEdit edit = new ChangeFieldEdit(oldContent, content, field, getEntity());
                 dbEdit.redo(); // Db edit goes first
                 edit.redo();
                 section.addEdit(edit);
@@ -295,8 +283,8 @@ public class TableFieldNode extends FieldNode {
     @Override
     protected UndoableEdit editNullable(Boolean val) {
         if (field.isNullable() != val) {
-            JdbcField oldContent = new JdbcField((JdbcField)field);
-            JdbcField content = new JdbcField((JdbcField)field);
+            JdbcField oldContent = new JdbcField((JdbcField) field);
+            JdbcField content = new JdbcField((JdbcField) field);
             content.setNullable(val);
             try {
                 ModifyFieldEdit dbEdit = new ModifyFieldEdit(sqlActionsController, getEntity().getTableName(), getEntity().getFields(), oldContent, content);
@@ -353,7 +341,7 @@ public class TableFieldNode extends FieldNode {
                 super.propertyChange(evt);
         }
     }
-    
+
     protected class SizeProperty extends Property<Integer> {
 
         public SizeProperty() {

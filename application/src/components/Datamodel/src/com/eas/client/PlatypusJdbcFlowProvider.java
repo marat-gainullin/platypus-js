@@ -57,14 +57,14 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
     protected JdbcReader obtainJdbcReader() {
         return new JdbcReader(expectedFields, (Wrapper aRsultSetOrCallableStatement, int aColumnIndex, Connection aConnection) -> {
             return sqlDriver.readGeometry(aRsultSetOrCallableStatement, aColumnIndex, aConnection);
-        }, (String aRDBMSType) -> {
-            return sqlDriver.getTypesResolver().toApplicationType(aRDBMSType);
+        }, (int aJdbcType, String aRDBMSType) -> {
+            return sqlDriver.getTypesResolver().toApplicationType(aJdbcType, aRDBMSType);
         });
     }
     
     @Override
     protected void assignParameter(Parameter aParameter, PreparedStatement aStatement, int aParameterIndex, Connection aConnection) throws SQLException {
-        if (aParameter.getValue() != null && Scripts.GEOMETRY_TYPE_NAME.equals(aParameter.getType())) {
+        if (Scripts.GEOMETRY_TYPE_NAME.equals(aParameter.getType())) {
             try {
                 JdbcChangeValue jv = sqlDriver.convertGeometry(aParameter.getValue().toString(), aConnection);
                 Object paramValue = jv.value;

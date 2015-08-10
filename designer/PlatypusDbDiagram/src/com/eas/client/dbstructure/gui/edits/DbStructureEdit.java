@@ -67,7 +67,7 @@ public abstract class DbStructureEdit implements UndoableEdit {
 
     protected class DbStructureCannotRedoException extends CannotRedoException {
 
-        protected DbActionException course = null;
+        protected DbActionException course;
 
         public DbStructureCannotRedoException(DbActionException ex) {
             super();

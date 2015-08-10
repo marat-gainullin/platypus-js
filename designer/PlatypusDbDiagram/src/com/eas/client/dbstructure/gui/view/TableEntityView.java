@@ -9,6 +9,8 @@ import com.eas.client.model.gui.DatamodelDesignUtils;
 import com.eas.client.model.gui.view.EntityViewsManager;
 import com.eas.client.model.gui.view.FieldsParametersListCellRenderer;
 import com.eas.client.model.gui.view.entities.EntityView;
+import com.eas.client.sqldrivers.SqlDriver;
+import com.eas.client.sqldrivers.resolvers.GenericTypesResolver;
 import com.eas.client.sqldrivers.resolvers.TypesResolver;
 import javax.swing.Icon;
 import org.openide.util.Exceptions;
@@ -30,13 +32,14 @@ public class TableEntityView extends EntityView<FieldsEntity> {
         fieldsParamsRenderer = new FieldsParametersListCellRenderer<FieldsEntity>(DatamodelDesignUtils.getFieldsFont(), DatamodelDesignUtils.getBindedFieldsFont(), entity) {
 
             @Override
-            protected Icon calcIcon(String typeName) {
+            protected Icon calcIcon(int aJdbsType, String typeName) {
                 try {
                     if (resolver == null) {
-                        resolver = getEntity().getModel().getBasesProxy().getConnectionDriver(getEntity().getModel().getDatasourceName()).getTypesResolver();
+                        SqlDriver sqlDriver = getEntity().getModel().getBasesProxy().getConnectionDriver(getEntity().getModel().getDatasourceName());
+                        resolver = sqlDriver.getTypesResolver();
                     }
-                    String appTypeName = resolver.toApplicationType(typeName);
-                    return super.calcIcon(appTypeName);
+                    String appTypeName = resolver.toApplicationType(aJdbsType, typeName);
+                    return super.calcIcon(aJdbsType, appTypeName);
                 } catch (Exception ex) {
                     Exceptions.printStackTrace(ex);
                     return null;
