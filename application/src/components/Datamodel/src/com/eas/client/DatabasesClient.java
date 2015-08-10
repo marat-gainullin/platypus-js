@@ -748,12 +748,16 @@ public class DatabasesClient {
         SqlDriver driver = SQLUtils.getSqlDriver(dialect);
         if (driver != null) {
             String getSchemaClause = driver.getSql4GetConnectionContext();
-            try (Statement stmt = aConnection.createStatement()) {
-                try (ResultSet rs = stmt.executeQuery(getSchemaClause)) {
-                    if (rs.next() && rs.getMetaData().getColumnCount() > 0) {
-                        return rs.getString(1);
+            if (getSchemaClause != null) {
+                try (Statement stmt = aConnection.createStatement()) {
+                    try (ResultSet rs = stmt.executeQuery(getSchemaClause)) {
+                        if (rs.next() && rs.getMetaData().getColumnCount() > 0) {
+                            return rs.getString(1);
+                        }
                     }
                 }
+            } else {
+                return null;
             }
         } else {
             Logger.getLogger(GeneralResourceProvider.class.getName()).log(Level.SEVERE, String.format("Can't obtain sql driver for %s", aConnection.toString()));

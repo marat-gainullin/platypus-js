@@ -81,7 +81,7 @@ public class StatementsGenerator implements ChangeVisitor {
                             jdbcType = jv.jdbcType;
                             sqlTypeName = jv.sqlTypeName;
                         } else if(v instanceof GeometryChangeValue) {
-                            JdbcChangeValue jv = gConverter.convertGeometry(v.value.toString(), aConnection);
+                            JdbcChangeValue jv = gConverter.convertGeometry(v.value != null ? v.value.toString() : null, aConnection);
                             value = jv.value;
                             jdbcType = jv.jdbcType;
                             sqlTypeName = jv.sqlTypeName;

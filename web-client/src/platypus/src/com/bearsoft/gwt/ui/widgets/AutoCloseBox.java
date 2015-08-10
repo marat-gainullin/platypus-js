@@ -1,5 +1,8 @@
 package com.bearsoft.gwt.ui.widgets;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.NativeEvent;
@@ -27,6 +30,7 @@ public class AutoCloseBox extends SimplePanel implements HasOpenHandlers<AutoClo
 
 	protected HandlerRegistration nativePreviewHandlerRegistration;
 	protected HandlerRegistration historyHandlerRegistration;
+	private List<Element> autoHidePartners;
 
 	public AutoCloseBox() {
 		super();
@@ -35,6 +39,34 @@ public class AutoCloseBox extends SimplePanel implements HasOpenHandlers<AutoClo
 	public AutoCloseBox(Widget aContent) {
 		this();
 		setWidget(aContent);
+	}
+
+	/**
+	 * Mouse events that occur within an autoHide partner will not hide a panel
+	 * set to autoHide.
+	 * 
+	 * @param partner
+	 *            the auto hide partner to add
+	 */
+	public void addAutoHidePartner(Element partner) {
+		assert partner != null : "partner cannot be null";
+		if (autoHidePartners == null) {
+			autoHidePartners = new ArrayList<Element>();
+		}
+		autoHidePartners.add(partner);
+	}
+
+	/**
+	 * Remove an autoHide partner.
+	 * 
+	 * @param partner
+	 *            the auto hide partner to remove
+	 */
+	public void removeAutoHidePartner(Element partner) {
+		assert partner != null : "partner cannot be null";
+		if (autoHidePartners != null) {
+			autoHidePartners.remove(partner);
+		}
 	}
 
 	public void show(Element aParentElement) {
@@ -98,6 +130,29 @@ public class AutoCloseBox extends SimplePanel implements HasOpenHandlers<AutoClo
 	}
 
 	/**
+	 * Does the event target one of the partner elements?
+	 * 
+	 * @param event
+	 *            the native event
+	 * @return true if the event targets a partner
+	 */
+	private boolean eventTargetsPartner(NativeEvent event) {
+		if (autoHidePartners == null) {
+			return false;
+		}
+
+		EventTarget target = event.getEventTarget();
+		if (Element.is(target)) {
+			for (Element elem : autoHidePartners) {
+				if (elem.isOrHasChild(Element.as(target))) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Preview the {@link NativePreviewEvent}.
 	 * 
 	 * @param event
@@ -106,12 +161,13 @@ public class AutoCloseBox extends SimplePanel implements HasOpenHandlers<AutoClo
 	private void previewNativeEvent(NativePreviewEvent event) {
 		// If the event has been canceled or consumed, ignore it
 		if (!event.isCanceled()) {
-			// If the event targets the popup or the partner, consume it
+			// If the event targets the auto close or the partner, consume it.
 			Event nativeEvent = Event.as(event.getNativeEvent());
-			boolean eventTargetsPopup = eventTargetsPopup(nativeEvent);
-			if (eventTargetsPopup) {
+			boolean eventTargetsPopupOrPartner = eventTargetsPopup(nativeEvent) || eventTargetsPartner(nativeEvent);
+			if (eventTargetsPopupOrPartner) {
 				event.consume();
 			}
+
 			// Switch on the event type
 			int type = nativeEvent.getTypeInt();
 			switch (type) {
@@ -123,7 +179,7 @@ public class AutoCloseBox extends SimplePanel implements HasOpenHandlers<AutoClo
 					event.consume();
 					return;
 				}
-				if (!eventTargetsPopup) {
+				if (!eventTargetsPopupOrPartner) {
 					close();
 					return;
 				}
@@ -146,7 +202,7 @@ public class AutoCloseBox extends SimplePanel implements HasOpenHandlers<AutoClo
 				EventTarget evTarget = nativeEvent.getEventTarget();
 				if (Element.is(evTarget)) {
 					Element target = Element.as(evTarget);
-					if (!eventTargetsPopup && (target != null)) {
+					if (!eventTargetsPopupOrPartner && (target != null)) {
 						blur(target);
 						event.cancel();
 						return;

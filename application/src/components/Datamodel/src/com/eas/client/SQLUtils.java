@@ -17,6 +17,7 @@ import com.eas.client.sqldrivers.MsSqlSqlDriver;
 import com.eas.client.sqldrivers.OracleSqlDriver;
 import com.eas.client.sqldrivers.PostgreSqlDriver;
 import com.eas.client.metadata.Fields;
+import com.eas.client.sqldrivers.GenericSqlDriver;
 import java.sql.*;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -41,7 +42,7 @@ public class SQLUtils {
     public static final String SQL_DELETE_COMMON_WHERE_BY_FIELD = "delete from %s where %s.%s = :" + SQL_PARAMETER_FIELD_VALUE;
     public static final String SQL_INSERT_COMMON_ID_FIELD = "insert into %s columns = (%s) values = ( :" + SQL_PARAMETER_FIELD_VALUE + ")";
     public static final String SQL_MAX_COMMON_BY_FIELD = "select max(%s) %s from %s";
-    
+
     public static String dialectByUrl(String aJdbcUrl) {
         String dialect = null;
         if (aJdbcUrl != null) {
@@ -97,10 +98,9 @@ public class SQLUtils {
             return new Db2SqlDriver();
         } else if (ClientConstants.SERVER_PROPERTY_H2_DIALECT.equalsIgnoreCase(aDialect)) {
             return new H2SqlDriver();
+        } else {
+            return new GenericSqlDriver();
         }
-            //else if (connectionString.indexOf("Derby") != -1)
-        //...
-        return null;
     }
 
     public static SqlQuery validateTableSqlQuery(String aTableDatasource, String tableName, String tableSchemaName, DatabasesClient aClient) throws Exception {

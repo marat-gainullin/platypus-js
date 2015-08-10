@@ -34,7 +34,7 @@ public class JdbcReader {
 
     public interface TypesResolver {
 
-        public String toApplicationType(String aRDBMSType);
+        public String toApplicationType(int aJdbcType, String aRDBMSType);
     }
 
     protected static final String RESULTSET_MISSING_EXCEPTION_MSG = "aResultSet argument must be non null";
@@ -100,7 +100,7 @@ public class JdbcReader {
             appField.setOriginalName(columnName);
 
             appField.setNullable(jdbcFields.isNullable(i) == ResultSetMetaData.columnNullable);
-            appField.setType(resolver.toApplicationType(jdbcFields.getColumnTypeName(i)));
+            appField.setType(resolver.toApplicationType(jdbcFields.getColumnType(i), jdbcFields.getColumnTypeName(i)));
 
             String schemaName = jdbcFields.getSchemaName(i);
             String tableName = jdbcFields.getTableName(i);

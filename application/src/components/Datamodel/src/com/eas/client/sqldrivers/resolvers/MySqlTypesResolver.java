@@ -128,7 +128,7 @@ public class MySqlTypesResolver implements TypesResolver {
     }
     
     @Override
-    public String toApplicationType(String aRDBMSType) {
+    public String toApplicationType(int aJdbcType, String aRDBMSType) {
         return aRDBMSType != null ? rdbmsTypes2ApplicationTypes.get(aRDBMSType.toLowerCase()) : null;
     }
 

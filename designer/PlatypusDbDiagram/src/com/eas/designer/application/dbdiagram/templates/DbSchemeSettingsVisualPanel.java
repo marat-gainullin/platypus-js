@@ -5,10 +5,10 @@
  */
 package com.eas.designer.application.dbdiagram.templates;
 
-import com.eas.designer.application.PlatypusUtils;
+import com.eas.client.ClientConstants;
 import com.eas.designer.application.utils.DatabaseConnectionRenderer;
 import com.eas.designer.application.utils.DatabaseConnections;
-import java.util.List;
+import java.sql.ResultSet;
 import javax.swing.DefaultComboBoxModel;
 import org.netbeans.api.db.explorer.ConnectionManager;
 import org.netbeans.api.db.explorer.DatabaseConnection;
@@ -72,9 +72,13 @@ public class DbSchemeSettingsVisualPanel extends javax.swing.JPanel {
     protected void refreshSchemas(DatabaseConnection conn) throws Exception {
         schemasModel.removeAllElements();
         if (conn != null && conn.getJDBCConnection() != null) {
-            List<String> schemas = PlatypusUtils.achieveSchemas(conn.getDatabaseURL(), conn.getUser(), conn.getPassword());
-            for (String schemaName : schemas) {
-                schemasModel.addElement(schemaName);
+            try (ResultSet rs = conn.getJDBCConnection().getMetaData().getSchemas()) {
+                while (rs.next()) {
+                    String schema = rs.getString(ClientConstants.JDBCCOLS_TABLE_SCHEM);
+                    if (schema != null) {
+                        schemasModel.addElement(schema);
+                    }
+                }
             }
         }
     }

@@ -216,38 +216,36 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
      */
     public void fillTablesCacheBySchema(String aSchema) throws Exception {
         String schema4Sql = aSchema != null && !aSchema.isEmpty() ? aSchema : getDatasourceSchema();
-        if (schema4Sql != null && !schema4Sql.isEmpty()) {
-            CallableConsumer<Map<String, String>, String> tablesReader = (aSchema4Sql) -> {
-                DataSource ds = client.obtainDataSource(datasourceName);
-                try (Connection conn = ds.getConnection()) {
-                    try (ResultSet r = conn.getMetaData().getTables(null, aSchema4Sql, null, new String[]{"TABLE", "VIEW"})) {
-                        ColumnsIndicies idxs = new ColumnsIndicies(r.getMetaData());
-                        int colIndex = idxs.find(ClientConstants.JDBCCOLS_TABLE_NAME);
-                        int colRemarks = idxs.find(ClientConstants.JDBCCOLS_REMARKS);
-                        assert colIndex > 0;
-                        assert colRemarks > 0;
-                        Map<String, String> tNames = new HashMap<>();
-                        while (r.next()) {
-                            String lTableName = r.getString(colIndex);
-                            String lRemarks = r.getString(colRemarks);
-                            tNames.put(lTableName, lRemarks);
-                        }
-                        return tNames;
+        CallableConsumer<Map<String, String>, String> tablesReader = (aSchema4Sql) -> {
+            DataSource ds = client.obtainDataSource(datasourceName);
+            try (Connection conn = ds.getConnection()) {
+                try (ResultSet r = conn.getMetaData().getTables(null, aSchema4Sql, null, new String[]{"TABLE", "VIEW"})) {
+                    ColumnsIndicies idxs = new ColumnsIndicies(r.getMetaData());
+                    int colIndex = idxs.find(ClientConstants.JDBCCOLS_TABLE_NAME);
+                    int colRemarks = idxs.find(ClientConstants.JDBCCOLS_REMARKS);
+                    assert colIndex > 0;
+                    assert colRemarks > 0;
+                    Map<String, String> tNames = new HashMap<>();
+                    while (r.next()) {
+                        String lTableName = r.getString(colIndex);
+                        String lRemarks = r.getString(colRemarks);
+                        tNames.put(lTableName, lRemarks);
                     }
+                    return tNames;
                 }
-            };
-            Map<String, String> tablesNames = tablesReader.call(schema4Sql);
-            if (tablesNames.isEmpty()) {
-                tablesNames = tablesReader.call(schema4Sql.toLowerCase());
             }
-            if (tablesNames.isEmpty()) {
-                tablesNames = tablesReader.call(schema4Sql.toUpperCase());
-            }
-            TablesFieldsCache tablesFields = new TablesFieldsCache();
-            Map<String, Fields> queried = tablesFields.query(aSchema, tablesNames.keySet());
-            tablesFields.fill(aSchema, queried, tablesNames);
-            schemasTablesFields.put(aSchema, tablesFields);
+        };
+        Map<String, String> tablesNames = tablesReader.call(schema4Sql);
+        if (schema4Sql != null && !schema4Sql.isEmpty() && tablesNames.isEmpty()) {
+            tablesNames = tablesReader.call(schema4Sql.toLowerCase());
         }
+        if (schema4Sql != null && !schema4Sql.isEmpty() && tablesNames.isEmpty()) {
+            tablesNames = tablesReader.call(schema4Sql.toUpperCase());
+        }
+        TablesFieldsCache tablesFields = new TablesFieldsCache();
+        Map<String, Fields> queried = tablesFields.query(aSchema, tablesNames.keySet());
+        tablesFields.fill(aSchema, queried, tablesNames);
+        schemasTablesFields.put(aSchema, tablesFields);
     }
 
     /**
@@ -334,13 +332,13 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
                 try (ResultSet r = meta.getColumns(null, schema4Sql, null, null)) {
                     columns = readTablesColumns(r, aSchema, sqlDriver);
                 }
-                if (columns.isEmpty()) {
+                if (schema4Sql != null && !schema4Sql.isEmpty() && columns.isEmpty()) {
                     schema4Sql = schema4Sql.toLowerCase();
                     try (ResultSet r = meta.getColumns(null, schema4Sql, null, null)) {
                         columns = readTablesColumns(r, aSchema, sqlDriver);
                     }
                 }
-                if (columns.isEmpty()) {
+                if (schema4Sql != null && !schema4Sql.isEmpty() && columns.isEmpty()) {
                     schema4Sql = schema4Sql.toUpperCase();
                     try (ResultSet r = meta.getColumns(null, schema4Sql, null, null)) {
                         columns = readTablesColumns(r, aSchema, sqlDriver);

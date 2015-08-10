@@ -368,10 +368,6 @@ public class OracleSqlDriver extends SqlDriver {
         return isHaveLowerCase(aName);
     }
 
-    private String prepareName(String aName) {
-        return (isWrappedName(aName) ? unwrapName(aName) : aName.toUpperCase());
-    }
-
     @Override
     public JdbcChangeValue convertGeometry(String aValue, Connection aConnection) throws SQLException {
         if (!(aConnection instanceof OracleConnection)) {
@@ -379,10 +375,9 @@ public class OracleSqlDriver extends SqlDriver {
         }
         try {
             GeometryConverter gc = new GeometryConverter((OracleConnection) aConnection);
-            WKTReader reader = new WKTReader();
-            Geometry geometry = reader.read(aValue);
             JdbcChangeValue jdbcValue = new JdbcChangeValue(null, null, 0, null);
-            jdbcValue.value = gc.toSDO(geometry);
+            WKTReader reader = new WKTReader();
+            jdbcValue.value = aValue != null ? gc.toSDO(reader.read(aValue)) : null;
             jdbcValue.jdbcType = Types.STRUCT;
             jdbcValue.sqlTypeName = "MDSYS.SDO_GEOMETRY";
             return jdbcValue;
