@@ -407,7 +407,7 @@ public class DbSchemeModelView extends ModelView<FieldsEntity, DbSchemeModel> {
 
         @Override
         public boolean isEnabled() {
-            return editable && super.isEnabled();
+            return super.isEnabled();
         }
         
         @Override
