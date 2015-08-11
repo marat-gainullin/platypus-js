@@ -88,6 +88,7 @@ public class QueryResultsView extends javax.swing.JPanel {
     private String queryText;
     private Parameters parameters;
     private SqlQuery query;
+    private String parsableQueryText;
     private FlowProvider flow;
     private List<Change> changeLog;
     private Insert lastInsert;
@@ -110,6 +111,10 @@ public class QueryResultsView extends javax.swing.JPanel {
 
     public QueryResultsView(PlatypusQueryDataObject aQueryDataObject) throws Exception {
         this(aQueryDataObject.getBasesProxy(), aQueryDataObject.getDatasourceName(), extractText(aQueryDataObject));
+        if (parameters == null) {
+            parsableQueryText = aQueryDataObject.getSqlTextDocument().getText(0, aQueryDataObject.getSqlTextDocument().getLength());
+            tryToParseParameters(parsableQueryText);
+        }
         for (Field sourceParam : aQueryDataObject.getModel().getParameters().toCollection()) {
             Parameter p = parameters.get(sourceParam.getName());
             if (p != null) {
@@ -159,7 +164,7 @@ public class QueryResultsView extends javax.swing.JPanel {
 
     /**
      *
-     * @return True if underlying suery is a select, false if it a insert,
+     * @return True if underlying query is a select, false if it a insert,
      * delete, update or stored procedure call
      * @throws Exception
      */
@@ -172,7 +177,17 @@ public class QueryResultsView extends javax.swing.JPanel {
         });
         try {
             StoredQueryFactory factory = new StoredQueryFactory(basesProxy, null, null);
-            query.setCommand(!factory.putTableFieldsMetadata(query));
+            try {
+                query.setCommand(!factory.putTableFieldsMetadata(query));
+            } catch (JSQLParserException ex) {
+                if (parsableQueryText != null) {
+                    query.setSqlText(parsableQueryText);
+                    query.setCommand(!factory.putTableFieldsMetadata(query));
+                    query.setSqlText(queryText);
+                } else {
+                    throw ex;
+                }
+            }
             flow = query.compile().getFlowProvider();
             changeLog = new ArrayList<>();
             commitButton.setEnabled(!query.isCommand());
@@ -832,8 +847,16 @@ public class QueryResultsView extends javax.swing.JPanel {
         return parameters;
     }
 
-    private void parseParameters() throws JSQLParserException {
-        Statement statement = parserManager.parse(new StringReader(queryText));
+    private void parseParameters() {
+        try {
+            tryToParseParameters(queryText);
+        } catch (JSQLParserException ex) {
+            Logger.getLogger(QueryResultsView.class.getName()).log(Level.WARNING, ex.toString());
+        }
+    }
+
+    private void tryToParseParameters(String aQueryText) throws JSQLParserException {
+        Statement statement = parserManager.parse(new StringReader(aQueryText));
         parameters = new Parameters();
         Set<NamedParameter> parsedParameters = SqlTextEditsComplementor.extractParameters(statement);
         parsedParameters.stream().forEach((NamedParameter parsedParameter) -> {
