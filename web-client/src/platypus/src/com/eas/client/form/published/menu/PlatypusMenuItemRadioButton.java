@@ -115,14 +115,9 @@ public class PlatypusMenuItemRadioButton extends MenuItemRadioButton implements 
 	}
 
 	public void setPlainValue(boolean value) {
-		super.setValue(value, true);
-	}
-
-	@Override
-	public void setValue(Boolean aValue, boolean fireEvents) {
 		settingValue = true;
 		try {
-			super.setValue(aValue, fireEvents);
+			super.setValue(value, true);
 		} finally {
 			settingValue = false;
 		}

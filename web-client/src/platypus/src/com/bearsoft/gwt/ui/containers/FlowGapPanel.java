@@ -23,6 +23,7 @@ public class FlowGapPanel extends FlowPanel implements RequiresResize {
 	public FlowGapPanel() {
 		super();
 		getElement().<XElement>cast().addResizingTransitionEnd(this);
+		getElement().getStyle().setLineHeight(0, Style.Unit.PX);
 	}
 
 	public int getHgap() {
@@ -53,6 +54,7 @@ public class FlowGapPanel extends FlowPanel implements RequiresResize {
 	public void add(Widget w) {
 		w.getElement().getStyle().setMarginLeft(hgap, Style.Unit.PX);
 		w.getElement().getStyle().setMarginTop(vgap, Style.Unit.PX);
+		w.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 		super.add(w);
 	}
 
