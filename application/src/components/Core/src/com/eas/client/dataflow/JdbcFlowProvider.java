@@ -7,7 +7,6 @@ package com.eas.client.dataflow;
 import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.metadata.Parameters;
-import com.eas.client.resourcepool.BearDatabaseConnection;
 import com.eas.concurrent.CallableConsumer;
 import com.eas.script.Scripts;
 import com.eas.util.BinaryUtils;
@@ -19,8 +18,10 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -97,7 +98,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                 } catch (SQLException ex) {
                     throw new FlowProviderFailedException(ex);
                 } finally {
-                    if (lowLevelResults.isAfterLast()) {
+                    if (lowLevelResults.isClosed() || lowLevelResults.isAfterLast()) {
                         endPaging();
                     }
                 }
@@ -556,7 +557,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                         if (aParameterJdbcType == Types.DATE) {
                             aStmt.setDate(aParameterIndex, new java.sql.Date(castedDate.getTime()));
                         } else if (aParameterJdbcType == Types.TIMESTAMP) {
-                            aStmt.setTimestamp(aParameterIndex, new java.sql.Timestamp(castedDate.getTime()));
+                            aStmt.setTimestamp(aParameterIndex, new java.sql.Timestamp(castedDate.getTime()), Calendar.getInstance(TimeZone.getTimeZone("UTC")));
                         } else if (aParameterJdbcType == Types.TIME) {
                             aStmt.setTime(aParameterIndex, new java.sql.Time(castedDate.getTime()));
                         } else {
@@ -569,7 +570,18 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
             }
         } else {
             try {
-                aStmt.setNull(aParameterIndex, aParameterJdbcType);
+                if (aParameterJdbcType == Types.TIME
+                        || aParameterJdbcType == Types.TIME_WITH_TIMEZONE
+                        || aParameterJdbcType == Types.TIMESTAMP
+                        || aParameterJdbcType == Types.TIMESTAMP_WITH_TIMEZONE) {// Crazy jdbc drivers of some databases (PostgreSQL for example) ignore such types, while setting nulls
+                    aParameterJdbcType = Types.DATE;
+                    aParameterSqlTypeName = null;
+                }
+                if (aParameterSqlTypeName != null && !aParameterSqlTypeName.isEmpty()) {
+                    aStmt.setNull(aParameterIndex, aParameterJdbcType, aParameterSqlTypeName);
+                } else {
+                    aStmt.setNull(aParameterIndex, aParameterJdbcType);
+                }
             } catch (SQLException ex) {
                 aStmt.setNull(aParameterIndex, aParameterJdbcType, aParameterSqlTypeName);
             }
@@ -637,8 +649,6 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                                     } finally {
                                         if (isPaged()) {
                                             lowLevelResults = rs;
-                                            lowLevelStatement = stmt;
-                                            lowLevelConnection = connection;
                                         } else {
                                             rs.close();
                                         }
@@ -658,24 +668,22 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                                 unprepareConnection(connection);
                             }
                         } finally {
-                            stmt.close();
+                            if (isPaged()) {
+                                // Paged statements can't be closed, because of ResultSet existance.
+                                lowLevelStatement = stmt;
+                            } else {
+                                stmt.close();
+                            }
                         }
                     } else {
                         return null;
                     }
                 } finally {
-                    if (!isPaged()) {
-                        // Paged connections can't be closed, because of ResultSet-s existance.
+                    if (isPaged()) {
+                        // Paged connections can't be closed, because of ResultSet existance.
+                        lowLevelConnection = connection;
+                    } else {
                         connection.close();
-                    } else if (connection instanceof BearDatabaseConnection) {// Paged case
-                        // We no, that BearDatabaseConnection pool's underlying native jdbc connection
-                        // is never closed and so we know, that in the case we can safely close bear connection,
-                        // returning the resource into the resource pool.
-                        // Unfortunately, we can't do like this with J2EE pools.
-                        // A little hacky, but it's needed by paging process in designer.
-                        lowLevelStatement = null;
-                        connection.close();
-                        lowLevelConnection = null;
                     }
                 }
             } else {

@@ -46,7 +46,7 @@ public class StoredQueryFactory {
 
     public static final String INNER_JOIN_CONSTRUCTION = "select %s from %s %s inner join %s on (%s.%s = %s.%s)";
     public static final String ABSENT_QUERY_MSG = "Query %s is not found";
-    public static final String CANT_LOAD_NULL_MSG = "Query Id is null.";
+    public static final String CANT_LOAD_NULL_MSG = "Query name is null.";
     public static final String COLON = ":";
     public static final String CONTENT_EMPTY_MSG = "Content of %s is empty";
     public static final String DUMMY_FIELD_NAME = "dummy";

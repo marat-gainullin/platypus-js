@@ -167,14 +167,9 @@ public class PlatypusFormattedTextField extends FormattedObjectBox implements Ha
 	}
 
 	public void setJsValue(Object aValue) throws Exception {
-		setValue(Utils.toJava(aValue), true);
-	}
-
-	@Override
-	public void setValue(Object aValue, boolean fireEvents) {
 		settingValue = true;
 		try {
-			super.setValue(aValue, fireEvents);
+			setValue(Utils.toJava(aValue), true);
 		} finally {
 			settingValue = false;
 		}
