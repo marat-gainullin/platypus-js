@@ -6,8 +6,6 @@ package com.eas.client.dbstructure.gui.edits;
 
 import com.eas.client.dbstructure.SqlActionsController;
 import com.eas.client.dbstructure.exceptions.DbActionException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoableEdit;
@@ -19,14 +17,6 @@ import javax.swing.undo.UndoableEdit;
 public abstract class DbStructureEdit implements UndoableEdit {
 
     protected SqlActionsController sqlController;
-
-    protected void clearTablesCache() {
-        try {
-            sqlController.getBasesProxy().dbTableChanged(sqlController.getDatasourceName(), sqlController.getSchema(), getChangingTableName());
-        } catch (Exception ex) {
-            Logger.getLogger(DbStructureEdit.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
 
     /**
      * Retrives name of the table, subclasses redos/undos dealing with
@@ -102,7 +92,6 @@ public abstract class DbStructureEdit implements UndoableEdit {
     public void undo() throws CannotUndoException {
         try {
             doUndoWork();
-            clearTablesCache();
         } catch (Exception ex) {
             if (ex instanceof DbActionException) {
                 throw new DbStructureCannotUndoException((DbActionException) ex);
@@ -125,7 +114,6 @@ public abstract class DbStructureEdit implements UndoableEdit {
     public void redo() throws CannotRedoException {
         try {
             doRedoWork();
-            clearTablesCache();
         } catch (Exception ex) {
             if (ex instanceof DbActionException) {
                 throw new DbStructureCannotRedoException((DbActionException) ex);

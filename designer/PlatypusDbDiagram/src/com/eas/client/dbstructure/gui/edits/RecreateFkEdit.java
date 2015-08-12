@@ -4,14 +4,11 @@
  */
 package com.eas.client.dbstructure.gui.edits;
 
-import com.eas.client.DatabasesClient;
 import com.eas.client.dbstructure.SqlActionsController;
 import com.eas.client.dbstructure.SqlActionsController.CreateConstraintAction;
 import com.eas.client.dbstructure.SqlActionsController.DropConstraintAction;
 import com.eas.client.dbstructure.exceptions.DbActionException;
 import com.eas.client.metadata.ForeignKeySpec;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -19,8 +16,8 @@ import java.util.logging.Logger;
  */
 public class RecreateFkEdit extends DbStructureEdit {
 
-    protected ForeignKeySpec oldFkSpec = null;
-    protected ForeignKeySpec newFkSpec = null;
+    protected ForeignKeySpec oldFkSpec;
+    protected ForeignKeySpec newFkSpec;
 
     public RecreateFkEdit(SqlActionsController aSqlController, ForeignKeySpec aOldFkSpec, ForeignKeySpec aNewFkSpec) {
         super(aSqlController);
@@ -32,12 +29,14 @@ public class RecreateFkEdit extends DbStructureEdit {
     protected void doUndoWork() throws Exception {
         dropBySpec(newFkSpec);
         createBySpec(oldFkSpec);
+        sqlController.tableChanged(newFkSpec.getTable());
     }
 
     @Override
     protected void doRedoWork() throws Exception {
         dropBySpec(oldFkSpec);
         createBySpec(newFkSpec);
+        sqlController.tableChanged(newFkSpec.getTable());
     }
 
     private void createBySpec(ForeignKeySpec aFk) throws DbActionException {
@@ -59,16 +58,4 @@ public class RecreateFkEdit extends DbStructureEdit {
             throw ex;
         }
     }
-
-    @Override
-    protected void clearTablesCache() {
-        try {
-            DatabasesClient client = sqlController.getBasesProxy();
-            client.dbTableChanged(sqlController.getDatasourceName(), sqlController.getSchema(), oldFkSpec.getTable());
-            client.dbTableChanged(sqlController.getDatasourceName(), sqlController.getSchema(), newFkSpec.getTable());
-        } catch (Exception ex) {
-            Logger.getLogger(RecreateFkEdit.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
 }

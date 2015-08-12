@@ -657,9 +657,19 @@ public class DatabasesClient {
     protected static final String UNKNOWN_DATASOURCE_IN_COMMIT = "Unknown datasource: %s. Can't commit to it.";
     protected static final String UNSUPPORTED_DATASOURCE_IN_COMMIT = "Unsupported datasource: %s. Can't commit to it.";
 
-    public void dbTableChanged(String aDatasourceName, String aSchema, String aTable) throws Exception {
+    public void tableChanged(String aDatasourceName, String aTable) throws Exception {
         MetadataCache cache = getMetadataCache(aDatasourceName);
-        cache.removeSchema(aSchema);
+        cache.refreshTableMetadata(aTable);
+    }
+
+    public void tableRemoved(String aDatasourceName, String aTable) throws Exception {
+        MetadataCache cache = getMetadataCache(aDatasourceName);
+        cache.removeTableMetadata(aTable);
+    }
+
+    public void tableAdded(String aDatasourceName, String aTable) throws Exception {
+        MetadataCache cache = getMetadataCache(aDatasourceName);
+        cache.refreshTableMetadata(aTable);
     }
 
     public String getConnectionSchema(String aDatasourceName) throws Exception {

@@ -28,6 +28,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -178,11 +179,31 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
         return cache != null ? cache.get(aTableName) : null;
     }
 
+    public void refreshTableMetadata(String aTable) throws Exception {
+        String schemaName = schemaFromTableName(aTable);
+        TablesFieldsCache fieldsCache = schemasTablesFields.get(schemaName);
+        if (fieldsCache == null) {
+            fieldsCache = new TablesFieldsCache();
+            schemasTablesFields.put(schemaName, fieldsCache);
+        }
+        String tableName = schemaName != null && !schemaName.isEmpty() ? aTable.substring(schemaName.length() + 1) : aTable;
+        Map<String, Fields> queried = fieldsCache.query(schemaName, tableName);
+        fieldsCache.fill(schemaName, queried, Collections.singletonMap(tableName, null));
+    }
+
     public void removeTableMetadata(String aTableName) throws Exception {
         String schema = schemaFromTableName(aTableName);
         TablesFieldsCache cache = lookupFieldsCache(schema);
         if (cache != null) {
             cache.remove(aTableName);
+        }
+    }
+
+    public void putTableMetadata(String aTableName, Fields aFields) throws Exception {
+        String schema = schemaFromTableName(aTableName);
+        TablesFieldsCache cache = lookupFieldsCache(schema);
+        if (cache != null) {
+            cache.put(aTableName, aFields);
         }
     }
 
@@ -359,6 +380,41 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
             }
         }
 
+        protected Map<String, Fields> query(String aSchema, String aTable) throws Exception {
+            SqlDriver sqlDriver = getDatasourceSqlDriver();
+            String schema4Sql = aSchema != null && !aSchema.isEmpty() ? aSchema : getDatasourceSchema();
+            Map<String, Fields> columns;
+            DataSource ds = client.obtainDataSource(datasourceName);
+            try (Connection conn = ds.getConnection()) {
+                DatabaseMetaData meta = conn.getMetaData();
+                try (ResultSet r = meta.getColumns(null, schema4Sql, aTable, null)) {
+                    columns = readTablesColumns(r, aSchema, sqlDriver);
+                }
+                if (schema4Sql != null && !schema4Sql.isEmpty() && columns.isEmpty()) {
+                    schema4Sql = schema4Sql.toLowerCase();
+                    try (ResultSet r = meta.getColumns(null, schema4Sql, aTable, null)) {
+                        columns = readTablesColumns(r, aSchema, sqlDriver);
+                    }
+                }
+                if (schema4Sql != null && !schema4Sql.isEmpty() && columns.isEmpty()) {
+                    schema4Sql = schema4Sql.toUpperCase();
+                    try (ResultSet r = meta.getColumns(null, schema4Sql, aTable, null)) {
+                        columns = readTablesColumns(r, aSchema, sqlDriver);
+                    }
+                }
+                Map<String, DbTableKeys> keys = new CaseInsesitiveMap<>();
+                try (ResultSet r = meta.getPrimaryKeys(null, schema4Sql, aTable)) {
+                    DbTableKeys tableKeys = readTablesPrimaryKeys(r);
+                    keys.put(aTable, tableKeys);
+                }
+                try (ResultSet r = meta.getImportedKeys(null, schema4Sql, aTable)) {
+                    readTablesForeignKeys(r, aSchema, sqlDriver, keys);
+                }
+                resolveKeys(aSchema, columns, keys);
+                return columns;
+            }
+        }
+
         protected Map<String, Fields> readTablesColumns(ResultSet r, String aSchema, SqlDriver sqlDriver) throws Exception {
             Map<String, Fields> tabledFields = new CaseInsesitiveMap<>();
             if (r != null) {
@@ -400,6 +456,7 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
                     field.setSchemaName(aSchema);
                     field.setTableName(fTableName);
                     //
+                    sqlDriver.getTypesResolver().resolveSize(field);
                     fields.add(field);
                 }
             }

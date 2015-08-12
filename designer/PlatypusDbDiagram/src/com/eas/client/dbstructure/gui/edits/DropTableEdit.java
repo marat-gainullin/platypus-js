@@ -4,7 +4,6 @@
  */
 package com.eas.client.dbstructure.gui.edits;
 
-import com.eas.client.DatabasesClient;
 import com.eas.client.dbstructure.DbStructureUtils;
 import com.eas.client.dbstructure.SqlActionsController;
 import com.eas.client.dbstructure.SqlActionsController.CreateConstraintAction;
@@ -19,8 +18,6 @@ import com.eas.client.model.dbscheme.FieldsEntity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -36,7 +33,7 @@ public class DropTableEdit extends DbStructureEdit {
     public DropTableEdit(SqlActionsController aSqlController, String aTableName, Fields aFields, FieldsEntity tableEntity) {
         super(aSqlController);
         tableName = aTableName;
-        fields = new Fields(aFields);
+        fields = aFields;
         extractInFks(tableEntity);
         extractOutFks(tableEntity);
     }
@@ -46,6 +43,7 @@ public class DropTableEdit extends DbStructureEdit {
         createTable();
         createConstraints(inFks);
         createConstraints(outFks);
+        sqlController.tableAdded(tableName);
     }
 
     @Override
@@ -53,6 +51,7 @@ public class DropTableEdit extends DbStructureEdit {
         dropConstraints(inFks);
         dropConstraints(outFks);
         dropTable();
+        sqlController.tableRemoved(tableName);
     }
 
     protected void dropTable() throws Exception {
@@ -118,19 +117,6 @@ public class DropTableEdit extends DbStructureEdit {
             Set<Relation<FieldsEntity>> rels = aEntity.getOutRelations();
             List<ForeignKeySpec> fks = outFks;
             extractFks(rels, fks, true);
-        }
-    }
-
-    @Override
-    protected void clearTablesCache() {
-        try {
-            DatabasesClient client = sqlController.getBasesProxy();
-            client.dbTableChanged(sqlController.getDatasourceName(), sqlController.getSchema(), tableName);
-            for (ForeignKeySpec fk : inFks) {
-                client.dbTableChanged(sqlController.getDatasourceName(), sqlController.getSchema(), fk.getTable());
-            }
-        } catch (Exception ex) {
-            Logger.getLogger(DropTableEdit.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }

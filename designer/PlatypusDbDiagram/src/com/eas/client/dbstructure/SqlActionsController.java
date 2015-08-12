@@ -56,6 +56,18 @@ public class SqlActionsController {
         schema = aSchema;
     }
 
+    public void tableChanged(String aTable) throws Exception{
+        basesProxy.tableChanged(datasourceName, schema != null && !schema.isEmpty() ? schema + "." + aTable : aTable);
+    }
+    
+    public void tableAdded(String aTable) throws Exception{
+        basesProxy.tableAdded(datasourceName, schema != null && !schema.isEmpty() ? schema + "." + aTable : aTable);
+    }
+    
+    public void tableRemoved(String aTable) throws Exception{
+        basesProxy.tableRemoved(datasourceName, schema != null && !schema.isEmpty() ? schema + "." + aTable : aTable);
+    }
+    
     public CreateTableAction createCreateTableAction(String aTableName, String aPkFieldName) {
         return new CreateTableAction(aTableName, aPkFieldName);
     }

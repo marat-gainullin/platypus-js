@@ -38,6 +38,7 @@ public class NewFieldEdit extends DbStructureEdit {
             ex.setParam2(field.getName());
             throw ex;
         }
+        sqlController.tableChanged(field.getTableName());
     }
 
     @Override
@@ -59,6 +60,7 @@ public class NewFieldEdit extends DbStructureEdit {
                 throw ex;
             }
         }
+        sqlController.tableChanged(field.getTableName());
     }
 
     public JdbcField getField() {

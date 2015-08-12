@@ -4,7 +4,6 @@
  */
 package com.eas.client.dbstructure.gui.edits;
 
-import com.eas.client.DatabasesClient;
 import com.eas.client.dbstructure.DbStructureUtils;
 import com.eas.client.dbstructure.SqlActionsController;
 import com.eas.client.dbstructure.SqlActionsController.AddFieldAction;
@@ -20,8 +19,6 @@ import com.eas.client.model.dbscheme.FieldsEntity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -47,6 +44,7 @@ public class DropFieldEdit extends DbStructureEdit {
         createField();
         createConstraints(inFks);
         createConstraints(outFks);
+        sqlController.tableChanged(field.getTableName());
     }
 
     @Override
@@ -54,6 +52,7 @@ public class DropFieldEdit extends DbStructureEdit {
         dropConstraints(inFks);
         dropConstraints(outFks);
         dropField();
+        sqlController.tableChanged(field.getTableName());
     }
 
     protected void dropField() throws Exception {
@@ -126,19 +125,6 @@ public class DropFieldEdit extends DbStructureEdit {
                     outFks.add(DbStructureUtils.constructFkSpecByRelation(rel));
                 }
             }
-        }
-    }
-
-    @Override
-    protected void clearTablesCache() {
-        try {
-            DatabasesClient client = sqlController.getBasesProxy();
-            client.dbTableChanged(sqlController.getDatasourceName(), sqlController.getSchema(), tableName);
-            for (ForeignKeySpec fk : inFks) {
-                client.dbTableChanged(sqlController.getDatasourceName(), sqlController.getSchema(), fk.getTable());
-            }
-        } catch (Exception ex) {
-            Logger.getLogger(DropFieldEdit.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }

@@ -39,6 +39,7 @@ public class CreateFkEdit extends DbStructureEdit {
                 fmd.setFk(null);
             }
         }
+        sqlController.tableChanged(fmd.getTableName());
     }
 
     @Override
@@ -54,6 +55,7 @@ public class CreateFkEdit extends DbStructureEdit {
                 fmd.setFk(fk);
             }
         }
+        sqlController.tableChanged(fmd.getTableName());
     }
 
     @Override
