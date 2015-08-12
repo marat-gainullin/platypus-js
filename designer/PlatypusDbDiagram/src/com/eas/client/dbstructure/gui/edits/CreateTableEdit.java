@@ -30,6 +30,7 @@ public class CreateTableEdit extends DbStructureEdit {
             ex.setParam1(tableName);
             throw ex;
         }
+        sqlController.tableRemoved(tableName);
     }
 
     @Override
@@ -40,6 +41,7 @@ public class CreateTableEdit extends DbStructureEdit {
             ex.setParam1(tableName);
             throw ex;
         }
+        sqlController.tableAdded(tableName);
     }
 
     @Override

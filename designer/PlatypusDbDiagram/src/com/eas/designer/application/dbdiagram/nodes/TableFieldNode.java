@@ -203,11 +203,6 @@ public class TableFieldNode extends FieldNode {
                     diagramEdit.redo();
                     section.addEdit(diagramEdit);
                     section.end();
-                    try {
-                        sqlActionsController.getBasesProxy().dbTableChanged(getEntity().getTableDatasourceName(), getEntity().getTableSchemaName(), getEntity().getTableName());
-                    } catch (Exception ex) {
-                        Logger.getLogger(TableFieldNode.class.getName()).log(Level.SEVERE, null, ex); //NOI18N
-                    }
                     return section;
                 } else {
                     return null;

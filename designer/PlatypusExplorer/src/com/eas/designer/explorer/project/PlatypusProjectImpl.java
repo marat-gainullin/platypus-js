@@ -198,6 +198,25 @@ public class PlatypusProjectImpl implements PlatypusProject {
             protected JSObject createModule(String aModuleName, Scripts.Space aSpace) throws Exception {
                 return createLocalEngineModule(aModuleName);
             }
+
+            @Override
+            public void tableAdded(String aDatasourceName, String aTable) throws Exception {
+                super.tableAdded(aDatasourceName, aTable);
+                fireQueriesChanged();
+            }
+
+            @Override
+            public void tableChanged(String aDatasourceName, String aTable) throws Exception {
+                super.tableChanged(aDatasourceName, aTable);
+                fireQueriesChanged();
+            }
+
+            @Override
+            public void tableRemoved(String aDatasourceName, String aTable) throws Exception {
+                super.tableRemoved(aDatasourceName, aTable);
+                fireQueriesChanged();
+        }
+            
         };
         queries = new LocalQueriesProxy(basesProxy, indexer) {
 

@@ -74,6 +74,7 @@ public class ModifyFieldEdit extends DbStructureEdit {
                 throw ex;
             }
         }
+        sqlController.tableChanged(tableName);
     }
 
     @Override
@@ -106,6 +107,7 @@ public class ModifyFieldEdit extends DbStructureEdit {
                 throw ex;
             }
         }
+        sqlController.tableChanged(tableName);
     }
 
     @Override
