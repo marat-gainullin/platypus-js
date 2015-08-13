@@ -1,6 +1,7 @@
 try{
     P.require([
-          './field.js'
+          './jdbc-change-value.js'
+        , './field.js'
         , './report.js'
         , './command.js'
         , './update.js'
@@ -9,6 +10,7 @@ try{
         , './insert.js'
         , './published-sourced-event.js'
         , './change-value.js'
+        , './jdbc-field.js'
     ]);
 }catch(e){
     print(e);

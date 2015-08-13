@@ -30,7 +30,6 @@ import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasEnabled;
-import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 
 public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers, HasAddHandlers,
@@ -330,6 +329,22 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 	}
 
 	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
+		Object.defineProperty(published, "hgap", {
+			get : function(){
+				return aWidget.@com.eas.client.form.published.containers.BorderPane::getHgap()();
+			},
+			set : function(aValue){
+				aWidget.@com.eas.client.form.published.containers.BorderPane::setHgap(I)(aValue);
+			}
+		});
+		Object.defineProperty(published, "vgap", {
+			get : function(){
+				return aWidget.@com.eas.client.form.published.containers.BorderPane::getVgap()();
+			},
+			set : function(aValue){
+				aWidget.@com.eas.client.form.published.containers.BorderPane::setVgap(I)(aValue);
+			}
+		});
 		Object.defineProperty(published, "leftComponent", {
 			get : function() {
 				var comp = aWidget.@com.eas.client.form.published.containers.BorderPane::getLeftComponent()();

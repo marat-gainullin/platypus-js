@@ -5,8 +5,6 @@
  */
 package com.eas.client.metadata;
 
-import com.eas.script.ScriptFunction;
-
 /**
  *
  * @author mg
@@ -49,7 +47,6 @@ public class JdbcField extends Field {
      *
      * @return The field's schema name.
      */
-    @ScriptFunction(jsDoc = SCHEMA_NAME_JS_DOC)
     public String getSchemaName() {
         return schemaName;
     }
@@ -59,23 +56,17 @@ public class JdbcField extends Field {
      *
      * @param aValue This field schema name.
      */
-    @ScriptFunction
     public void setSchemaName(String aValue) {
         String oldValue = schemaName;
         schemaName = aValue;
         changeSupport.firePropertyChange(SCHEMA_NAME_PROPERTY, oldValue, aValue);
     }
 
-    private static final String SIZE_JS_DOC = "/**\n"
-            + "* The size of the field.\n"
-            + "*/";
-
     /**
      * Returns the field size.
      *
      * @return The field size.
      */
-    @ScriptFunction(jsDoc = SIZE_JS_DOC)
     public int getSize() {
         return size;
     }
@@ -85,23 +76,17 @@ public class JdbcField extends Field {
      *
      * @param aValue The field size to be set.
      */
-    @ScriptFunction
     public void setSize(int aValue) {
         int oldValue = size;
         size = aValue;
         changeSupport.firePropertyChange(SIZE_PROPERTY, oldValue, aValue);
     }
 
-    private static final String SCALE_JS_DOC = "/**\n"
-            + "* The scale of the field.\n"
-            + "*/";
-
     /**
      * Returns the field's scale.
      *
      * @return The field's scale.
      */
-    @ScriptFunction(jsDoc = SCALE_JS_DOC)
     public int getScale() {
         return scale;
     }
@@ -111,23 +96,17 @@ public class JdbcField extends Field {
      *
      * @param aValue The field's scale to be set.
      */
-    @ScriptFunction
     public void setScale(int aValue) {
         int oldValue = scale;
         scale = aValue;
         changeSupport.firePropertyChange(SCALE_PROPERTY, oldValue, aValue);
     }
 
-    private static final String PRECISION_JS_DOC = "/**\n"
-            + "* The precision of the field.\n"
-            + "*/";
-
     /**
      * Returns the field's precision.
      *
      * @return The field's precision.
      */
-    @ScriptFunction(jsDoc = PRECISION_JS_DOC)
     public int getPrecision() {
         return precision;
     }
@@ -137,23 +116,17 @@ public class JdbcField extends Field {
      *
      * @param aValue The field's precision.
      */
-    @ScriptFunction
     public void setPrecision(int aValue) {
         int oldValue = precision;
         precision = aValue;
         changeSupport.firePropertyChange(PRECISION_PROPERTY, oldValue, aValue);
     }
 
-    private static final String SIGNED_JS_DOC = "/**\n"
-            + "* Determines if the field is signed.\n"
-            + "*/";
-
     /**
      * Returns whether this field is signed.
      *
      * @return Whether this field is signed.
      */
-    @ScriptFunction(jsDoc = SIGNED_JS_DOC)
     public boolean isSigned() {
         return signed;
     }
@@ -163,23 +136,17 @@ public class JdbcField extends Field {
      *
      * @param aValue Field's signed flag.
      */
-    @ScriptFunction
     public void setSigned(boolean aValue) {
         boolean oldValue = signed;
         signed = aValue;
         changeSupport.firePropertyChange(SIGNED_PROPERTY, oldValue, aValue);
     }
 
-    private static final String JDBC_TYPE_JS_DOC = "/**\n"
-            + "* The jdbc type of the field.\n"
-            + "*/";
-
     /**
      * Returns the field size.
      *
      * @return The field size.
      */
-    @ScriptFunction(jsDoc = JDBC_TYPE_JS_DOC)
     public int getJdbcType() {
         return jdbcType;
     }
@@ -189,7 +156,6 @@ public class JdbcField extends Field {
      *
      * @param aValue The field size to be set.
      */
-    @ScriptFunction
     public void setJdbcType(int aValue) {
         int oldValue = jdbcType;
         jdbcType = aValue;

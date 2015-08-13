@@ -251,6 +251,23 @@
              */
             P.CardPane.prototype.onComponentResized = {};
         }
+        Object.defineProperty(this, "vgap", {
+            get: function() {
+                var value = delegate.vgap;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.vgap = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.CardPane){
+            /**
+             * Vertical gap between card and container's edge.
+             * @property vgap
+             * @memberOf CardPane
+             */
+            P.CardPane.prototype.vgap = 0;
+        }
         Object.defineProperty(this, "parent", {
             get: function() {
                 var value = delegate.parentWidget;
@@ -281,6 +298,23 @@
              * @memberOf CardPane
              */
             P.CardPane.prototype.onMouseEntered = {};
+        }
+        Object.defineProperty(this, "hgap", {
+            get: function() {
+                var value = delegate.hgap;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.hgap = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.CardPane){
+            /**
+             * Horizontal gap between card and container's edge.
+             * @property hgap
+             * @memberOf CardPane
+             */
+            P.CardPane.prototype.hgap = 0;
         }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
@@ -668,6 +702,9 @@
             get: function() {
                 var value = delegate.name;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.name = P.boxAsJava(aValue);
             }
         });
         if(!P.CardPane){

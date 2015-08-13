@@ -460,10 +460,14 @@ public class FormFactory {
 			boolean insertable = Utils.getBooleanAttribute(anElement, "insertable", Boolean.TRUE);
 			boolean deletable = Utils.getBooleanAttribute(anElement, "deletable", Boolean.TRUE);
 			boolean editable = Utils.getBooleanAttribute(anElement, "editable", Boolean.TRUE);
+			boolean headerVisible = Utils.getBooleanAttribute(anElement, "headerVisible", Boolean.TRUE);
+			boolean draggableRows = Utils.getBooleanAttribute(anElement, "draggableRows", Boolean.FALSE);
 			boolean showHorizontalLines = Utils.getBooleanAttribute(anElement, "showHorizontalLines", Boolean.TRUE);
 			boolean showVerticalLines = Utils.getBooleanAttribute(anElement, "showVerticalLines", Boolean.TRUE);
 			boolean showOddRowsInOtherColor = Utils.getBooleanAttribute(anElement, "showOddRowsInOtherColor", Boolean.TRUE);
 			int rowsHeight = Utils.getIntegerAttribute(anElement, "rowsHeight", 20);
+			grid.setHeaderVisible(headerVisible);
+			grid.setDraggableRows(draggableRows);
 			grid.setRowsHeight(rowsHeight);
 			grid.setShowOddRowsInOtherColor(showOddRowsInOtherColor);
 			grid.setShowVerticalLines(showVerticalLines);

@@ -87,6 +87,7 @@ public class BorderPanel extends DockLayoutPanel {
 			centerContainer.getStyle().setMarginTop(vgap, Style.Unit.PX);
 			centerContainer.getStyle().setMarginBottom(vgap, Style.Unit.PX);
 		}
+		/*
 		if (!north.isEmpty()) {
 			for (Widget w : north) {
 				Element northContainer = getWidgetContainerElement(w);
@@ -101,6 +102,7 @@ public class BorderPanel extends DockLayoutPanel {
 				southContainer.getStyle().setMarginRight(hgap, Style.Unit.PX);
 			}
 		}
+		*/
 	}
 
 	@Override

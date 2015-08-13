@@ -223,6 +223,22 @@ public class GridPane extends GridPanel implements HasJsFacade, HasEnabled, HasC
 			}else
 				return null;
 		};
+		Object.defineProperty(published, "hgap", {
+			get : function(){
+				return aWidget.@com.eas.client.form.published.containers.GridPane::getHgap()();
+			},
+			set : function(aValue){
+				aWidget.@com.eas.client.form.published.containers.GridPane::setHgap(I)(aValue);
+			}
+		});
+		Object.defineProperty(published, "vgap", {
+			get : function(){
+				return aWidget.@com.eas.client.form.published.containers.GridPane::getVgap()();
+			},
+			set : function(aValue){
+				aWidget.@com.eas.client.form.published.containers.GridPane::setVgap(I)(aValue);
+			}
+		});
 		Object.defineProperty(published, "rows", {
 			get : function(){
 				return aWidget.@com.eas.client.form.published.containers.GridPane::getRowCount()();

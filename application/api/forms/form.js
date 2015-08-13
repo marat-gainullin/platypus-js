@@ -279,23 +279,6 @@
              */
             P.Form.prototype.resizable = true;
         }
-        Object.defineProperty(this, "formKey", {
-            get: function() {
-                var value = delegate.formKey;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.formKey = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.Form){
-            /**
-             * The form key. Used to identify a form instance. Initialy set to the form's application element name.
-             * @property formKey
-             * @memberOf Form
-             */
-            P.Form.prototype.formKey = '';
-        }
         Object.defineProperty(this, "onWindowRestored", {
             get: function() {
                 var value = delegate.onWindowRestored;
@@ -312,6 +295,23 @@
              * @memberOf Form
              */
             P.Form.prototype.onWindowRestored = {};
+        }
+        Object.defineProperty(this, "formKey", {
+            get: function() {
+                var value = delegate.formKey;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.formKey = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.Form){
+            /**
+             * The form key. Used to identify a form instance. Initialy set to the form's application element name.
+             * @property formKey
+             * @memberOf Form
+             */
+            P.Form.prototype.formKey = '';
         }
         Object.defineProperty(this, "maximized", {
             get: function() {

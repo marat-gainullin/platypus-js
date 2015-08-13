@@ -11,7 +11,6 @@ import java.util.List;
 import com.bearsoft.gwt.ui.XElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.IndexedPanel;
 import com.google.gwt.user.client.ui.ProvidesResize;
@@ -96,52 +95,29 @@ public class GridPanel extends Grid implements RequiresResize, ProvidesResize, I
 
 	protected void formatCell(int aRow, int aColumn) {
 		Widget w = getWidget(aRow, aColumn);
-		if (w != null/*
-					 * && getElement().getClientWidth() > 0 &&
-					 * getElement().getClientHeight() > 0
-					 */) {
-			/*
-			 * Element td = getCellFormatter().getElement(aRow, aColumn); double
-			 * tdWidth = Math.round((double)numColumns /
-			 * (double)getElement().getClientWidth() * 100); double tdHeight =
-			 * Math.round((double)numRows /
-			 * (double)getElement().getClientHeight() * 100);
-			 * td.getStyle().setWidth(tdWidth, Style.Unit.PCT);
-			 * td.getStyle().setHeight(tdHeight, Style.Unit.PCT);
-			 */
+		if (w != null) {
 			Element we = w.getElement();
 			Element wpe = we.getParentElement();
-			wpe.getStyle().setPosition(Style.Position.RELATIVE);
-			wpe.getStyle().setWidth(100, Style.Unit.PCT);
-			wpe.getStyle().setHeight(100, Style.Unit.PCT);
+			Element tde = wpe.getParentElement();
+			tde.getStyle().setPosition(Style.Position.RELATIVE);
+
+			wpe.getStyle().setPosition(Style.Position.ABSOLUTE);
+			wpe.getStyle().setLeft(hgap / 2, Style.Unit.PX);
+			wpe.getStyle().setRight(hgap / 2, Style.Unit.PX);
+			wpe.getStyle().setTop(vgap / 2, Style.Unit.PX);
+			wpe.getStyle().setBottom(vgap / 2, Style.Unit.PX);
 			wpe.getStyle().setPadding(0, Style.Unit.PX);
 			wpe.getStyle().setMargin(0, Style.Unit.PX);
 
 			we.getStyle().setPosition(Style.Position.ABSOLUTE);
 			we.getStyle().setLeft(0, Style.Unit.PX);
-			we.getStyle().setRight(0, Style.Unit.PX);
 			we.getStyle().setTop(0, Style.Unit.PX);
-			we.getStyle().setBottom(0, Style.Unit.PX);
-			we.getStyle().setMarginLeft(aColumn > 0 ? hgap : 0, Style.Unit.PX);
-			we.getStyle().setMarginTop(aRow > 0 ? vgap : 0, Style.Unit.PX);
-			we.getStyle().setMarginRight(0, Style.Unit.PX);
-			we.getStyle().setMarginBottom(0, Style.Unit.PX);
-			checkFocusWidgetWidthHeight(w);
-		}
-	}
-
-	protected void checkFocusWidgetWidthHeight(Widget child) {
-		if (child != null) {
-			Element we = child.getElement();
-			Element wpe = we.getParentElement();
 			we.getStyle().clearRight();
 			we.getStyle().clearBottom();
-			//we.getStyle().setWidth(wpe.getClientWidth() - hgap, Style.Unit.PX);
-			//we.getStyle().setHeight(wpe.getClientHeight() - vgap, Style.Unit.PX);
 			we.getStyle().setWidth(100, Style.Unit.PCT);
 			we.getStyle().setHeight(100, Style.Unit.PCT);
 			com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().ensureInjected();
-			child.getElement().addClassName(com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().borderSized());
+			we.addClassName(com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().borderSized());
 		}
 	}
 
@@ -187,14 +163,14 @@ public class GridPanel extends Grid implements RequiresResize, ProvidesResize, I
 		for (int i = 0; i < numRows; i++) {
 			for (int j = 0; j < numColumns; j++) {
 				Element td = getCellFormatter().getElement(i, j);
-				td.getStyle().setWidth(0, Style.Unit.PCT);
-				td.getStyle().setHeight(0, Style.Unit.PCT);
+				td.getStyle().setWidth(100 / numColumns, Style.Unit.PCT);
+				td.getStyle().setHeight(100 / numRows, Style.Unit.PCT);
 			}
 		}
 		for (int i = 0; i < numRows; i++) {
 			for (int j = 0; j < numColumns; j++) {
 				Widget w = getWidget(i, j);
-				//checkFocusWidgetWidthHeight(w);
+				// checkFocusWidgetWidthHeight(w);
 				if (w instanceof RequiresResize) {
 					((RequiresResize) w).onResize();
 				}

@@ -18,7 +18,6 @@ import com.bearsoft.gwt.ui.widgets.grid.builders.ThemedCellTableBuilder;
 import com.bearsoft.gwt.ui.widgets.grid.builders.ThemedHeaderOrFooterBuilder;
 import com.bearsoft.gwt.ui.widgets.grid.header.HasSortList;
 import com.bearsoft.gwt.ui.widgets.grid.header.HeaderNode;
-import com.eas.client.Utils;
 import com.eas.client.form.grid.columns.ModelColumn;
 import com.eas.client.form.published.PublishedColor;
 import com.google.gwt.cell.client.Cell;
@@ -386,8 +385,6 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 						}
 					} else {
 					}
-				} else {
-					event.getDataTransfer().<XDataTransfer> cast().setDropEffect("none");
 				}
 			}
 		}, DragEnterEvent.getType());
@@ -397,14 +394,6 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 			public void onDrag(DragEvent event) {
 				if (DraggedColumn.instance != null && DraggedColumn.instance.isResize()) {
 					event.stopPropagation();
-					/*
-					int newWidth = event.getNativeEvent().getClientX() - DraggedColumn.instance.getCellElement().getAbsoluteLeft();
-					if (newWidth > MINIMUM_COLUMN_WIDTH) {
-						event.getDataTransfer().<XDataTransfer> cast().setDropEffect("move");
-					} else {
-						event.getDataTransfer().<XDataTransfer> cast().setDropEffect("none");
-					}
-					*/
 				}
 			}
 		}, DragEvent.getType());
@@ -457,9 +446,11 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 
 			@Override
 			public void onDragEnd(DragEndEvent event) {
-				event.stopPropagation();
-				hideColumnDecorations();
-				DraggedColumn.instance = null;
+				if(DraggedColumn.instance != null){
+					event.stopPropagation();
+					hideColumnDecorations();
+					DraggedColumn.instance = null;
+				}
 			}
 		}, DragEndEvent.getType());
 		addDomHandler(new DropHandler() {
@@ -865,17 +856,22 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 	}
 
 	public boolean isHeaderVisible() {
-		return Style.Display.NONE.equals(headerLeft.getElement().getStyle().getDisplay()) || Style.Display.NONE.equals(headerRight.getElement().getStyle().getDisplay());
+		return !Style.Display.NONE.equals(headerLeft.getElement().getStyle().getDisplay()) && !Style.Display.NONE.equals(headerRight.getElement().getStyle().getDisplay());
 	}
 
 	public void setHeaderVisible(boolean aValue) {
+		hive.getRowFormatter().setVisible(0, aValue);
 		if (aValue) {
+			columnsChevron.getElement().getStyle().clearDisplay();
 			headerLeftContainer.getElement().getStyle().clearDisplay();
 			headerRightContainer.getElement().getStyle().clearDisplay();
 		} else {
+			columnsChevron.getElement().getStyle().setDisplay(Style.Display.NONE);
 			headerLeftContainer.getElement().getStyle().setDisplay(Style.Display.NONE);
 			headerRightContainer.getElement().getStyle().setDisplay(Style.Display.NONE);
 		}
+		if(isAttached())
+			onResize();
 	}
 
 	public int getFrozenColumns() {

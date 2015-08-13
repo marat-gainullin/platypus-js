@@ -186,6 +186,10 @@ public class Utils {
 		public static native String writeJSON(JavaScriptObject changeLog)/*-{
 			return JSON.stringify(changeLog);
 		}-*/;
+
+		public native final int indexOf(JavaScriptObject anElement)/*-{
+	        return this.indexOf(anElement);
+        }-*/;
 	}
 
 	private static final String addListenerName = "-platypus-listener-add-func";

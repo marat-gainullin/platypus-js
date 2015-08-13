@@ -241,6 +241,22 @@ public class CardPane extends CardsPanel implements HasJsFacade, HasEnabled, Has
 	}
 
 	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
+		Object.defineProperty(published, "hgap", {
+			get : function(){
+				return aWidget.@com.eas.client.form.published.containers.CardPane::getHgap()();
+			},
+			set : function(aValue){
+				aWidget.@com.eas.client.form.published.containers.CardPane::setHgap(I)(aValue);
+			}
+		});
+		Object.defineProperty(published, "vgap", {
+			get : function(){
+				return aWidget.@com.eas.client.form.published.containers.CardPane::getVgap()();
+			},
+			set : function(aValue){
+				aWidget.@com.eas.client.form.published.containers.CardPane::setVgap(I)(aValue);
+			}
+		});
 		published.add = function(toAdd, aCardName){
 			if(toAdd && toAdd.unwrap){
 				if(toAdd.parent == published)

@@ -1,16 +1,16 @@
 (function() {
-    var className = "com.eas.client.metadata.Field";
+    var className = "com.eas.client.metadata.JdbcField";
     var javaClass = Java.type(className);
     var space = this['-platypus-scripts-space'];
     space.putPublisher(className, function(aDelegate) {
-        return new P.Field(aDelegate);
+        return new P.JdbcField(aDelegate);
     });
     
     /**
      * Generated constructor.
-     * @constructor Field Field
+     * @constructor JdbcField JdbcField
      */
-    P.Field = function () {
+    P.JdbcField = function () {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -22,8 +22,8 @@
                 return delegate;
             }
         });
-        if(P.Field.superclass)
-            P.Field.superclass.constructor.apply(this, arguments);
+        if(P.JdbcField.superclass)
+            P.JdbcField.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
         Object.defineProperty(this, "originalName", {
             get: function() {
@@ -34,15 +34,15 @@
                 delegate.originalName = P.boxAsJava(aValue);
             }
         });
-        if(!P.Field){
+        if(!P.JdbcField){
             /**
              * The original name of the field.
              * In queries, such as select t1.f1 as f11, t2.f1 as f21 to preserve output fields' names unique,
              * but be able to generate right update sql clauses for multiple tables.
              * @property originalName
-             * @memberOf Field
+             * @memberOf JdbcField
              */
-            P.Field.prototype.originalName = '';
+            P.JdbcField.prototype.originalName = '';
         }
         Object.defineProperty(this, "readonly", {
             get: function() {
@@ -53,13 +53,13 @@
                 delegate.readonly = P.boxAsJava(aValue);
             }
         });
-        if(!P.Field){
+        if(!P.JdbcField){
             /**
              * Determines if this field is readonly.
              * @property readonly
-             * @memberOf Field
+             * @memberOf JdbcField
              */
-            P.Field.prototype.readonly = true;
+            P.JdbcField.prototype.readonly = true;
         }
         Object.defineProperty(this, "nullable", {
             get: function() {
@@ -70,13 +70,13 @@
                 delegate.nullable = P.boxAsJava(aValue);
             }
         });
-        if(!P.Field){
+        if(!P.JdbcField){
             /**
              * Determines if field is nullable.
              * @property nullable
-             * @memberOf Field
+             * @memberOf JdbcField
              */
-            P.Field.prototype.nullable = true;
+            P.JdbcField.prototype.nullable = true;
         }
         Object.defineProperty(this, "fk", {
             get: function() {
@@ -84,13 +84,13 @@
                 return P.boxAsJs(value);
             }
         });
-        if(!P.Field){
+        if(!P.JdbcField){
             /**
              * Indicates that this field is a foreign key to another table or it is a self-reference key.
              * @property fk
-             * @memberOf Field
+             * @memberOf JdbcField
              */
-            P.Field.prototype.fk = true;
+            P.JdbcField.prototype.fk = true;
         }
         Object.defineProperty(this, "name", {
             get: function() {
@@ -101,13 +101,13 @@
                 delegate.name = P.boxAsJava(aValue);
             }
         });
-        if(!P.Field){
+        if(!P.JdbcField){
             /**
              * The name of the field.
              * @property name
-             * @memberOf Field
+             * @memberOf JdbcField
              */
-            P.Field.prototype.name = '';
+            P.JdbcField.prototype.name = '';
         }
         Object.defineProperty(this, "description", {
             get: function() {
@@ -118,13 +118,13 @@
                 delegate.description = P.boxAsJava(aValue);
             }
         });
-        if(!P.Field){
+        if(!P.JdbcField){
             /**
              * The description of the field.
              * @property description
-             * @memberOf Field
+             * @memberOf JdbcField
              */
-            P.Field.prototype.description = '';
+            P.JdbcField.prototype.description = '';
         }
         Object.defineProperty(this, "pk", {
             get: function() {
@@ -135,13 +135,13 @@
                 delegate.pk = P.boxAsJava(aValue);
             }
         });
-        if(!P.Field){
+        if(!P.JdbcField){
             /**
              * Determines that this field is a primary key.
              * @property pk
-             * @memberOf Field
+             * @memberOf JdbcField
              */
-            P.Field.prototype.pk = true;
+            P.JdbcField.prototype.pk = true;
         }
         Object.defineProperty(this, "type", {
             get: function() {
@@ -152,13 +152,13 @@
                 delegate.type = P.boxAsJava(aValue);
             }
         });
-        if(!P.Field){
+        if(!P.JdbcField){
             /**
              * The field's type information.
              * @property type
-             * @memberOf Field
+             * @memberOf JdbcField
              */
-            P.Field.prototype.type = '';
+            P.JdbcField.prototype.type = '';
         }
         Object.defineProperty(this, "tableName", {
             get: function() {
@@ -169,13 +169,13 @@
                 delegate.tableName = P.boxAsJava(aValue);
             }
         });
-        if(!P.Field){
+        if(!P.JdbcField){
             /**
              * This field table's name.
              * @property tableName
-             * @memberOf Field
+             * @memberOf JdbcField
              */
-            P.Field.prototype.tableName = '';
+            P.JdbcField.prototype.tableName = '';
         }
     };
 })();

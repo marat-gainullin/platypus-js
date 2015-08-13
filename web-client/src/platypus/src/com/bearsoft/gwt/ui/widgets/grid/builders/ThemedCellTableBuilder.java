@@ -5,6 +5,7 @@
  */
 package com.bearsoft.gwt.ui.widgets.grid.builders;
 
+import com.bearsoft.gwt.ui.widgets.grid.GridSection;
 import com.bearsoft.gwt.ui.widgets.grid.ThemedGridResources;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.dom.builder.shared.DivBuilder;
@@ -32,11 +33,11 @@ public class ThemedCellTableBuilder<T> extends AbstractCellTableBuilder<T> {
     protected String dynamicOddRowsClassName;
     protected String dynamicEvenRowsClassName;
 
-    public ThemedCellTableBuilder(AbstractCellTable<T> cellTable) {
+    public ThemedCellTableBuilder(GridSection<T> cellTable) {
         this(cellTable, "", "", "", "");
     }
     
-    public ThemedCellTableBuilder(AbstractCellTable<T> cellTable, String aDynamicTDClassName, String aDynamicCellClassName, String aDynamicOddRowsClassName, String aDynamicEvenRowsClassName) {
+    public ThemedCellTableBuilder(GridSection<T> cellTable, String aDynamicTDClassName, String aDynamicCellClassName, String aDynamicOddRowsClassName, String aDynamicEvenRowsClassName) {
     	super(cellTable);
         dynamicTDClassName = aDynamicTDClassName;
         dynamicCellClassName = aDynamicCellClassName;
@@ -78,6 +79,8 @@ public class ThemedCellTableBuilder<T> extends AbstractCellTableBuilder<T> {
 
         // Build the row.
         TableRowBuilder tr = startRow();
+        if(((GridSection<T>)cellTable).isDraggableRows())
+        	tr.attribute("draggable", "true");
         tr.className(trClasses.toString());
 
         // Build the columns.

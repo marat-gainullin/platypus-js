@@ -206,6 +206,22 @@ public class FlowPane extends FlowGapPanel implements HasJsFacade, HasEnabled, H
 	}
 
 	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
+		Object.defineProperty(published, "hgap", {
+			get : function(){
+				return aWidget.@com.eas.client.form.published.containers.FlowPane::getHgap()();
+			},
+			set : function(aValue){
+				aWidget.@com.eas.client.form.published.containers.FlowPane::setHgap(I)(aValue);
+			}
+		});
+		Object.defineProperty(published, "vgap", {
+			get : function(){
+				return aWidget.@com.eas.client.form.published.containers.FlowPane::getVgap()();
+			},
+			set : function(aValue){
+				aWidget.@com.eas.client.form.published.containers.FlowPane::setVgap(I)(aValue);
+			}
+		});
 		published.add = function(toAdd){
 			if(toAdd && toAdd.unwrap){
 				if(toAdd.parent == published)

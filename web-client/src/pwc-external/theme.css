@@ -330,6 +330,8 @@
 .toolbar-chevron{
     right: 0px;
     width: 10px;
+    background-image: url(tabs-chevron-list.png);
+    background-repeat: no-repeat;
 }
 
 .toolbar-chevron-menu{

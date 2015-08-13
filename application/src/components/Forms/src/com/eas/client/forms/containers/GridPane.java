@@ -79,11 +79,51 @@ public class GridPane extends JPanel implements HasPublished, HasContainerEvents
             }
         }
     }
+    
+    private static final String HGAP_JSDOC = ""
+            + "/**\n"
+            + "* Box horizontal gap between cell components.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = HGAP_JSDOC)
+    public int getHgap(){
+        return ((GridLayout)getLayout()).getHgap();
+    }
+    
+    @ScriptFunction
+    public void setHgap(int aValue){
+        ((GridLayout)getLayout()).setHgap(aValue);
+        super.revalidate();
+        super.repaint();
+    }
+    
+    private static final String VGAP_JSDOC = ""
+            + "/**\n"
+            + "* Vertical gap between cell components.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = VGAP_JSDOC)
+    public int getVgap() {
+        return ((GridLayout) super.getLayout()).getVgap();
+    }
+
+    @ScriptFunction
+    public void setVgap(int aValue) {
+        ((GridLayout) super.getLayout()).setVgap(aValue);
+        super.revalidate();
+        super.repaint();
+    }
 
     @ScriptFunction(jsDoc = JS_NAME_DOC)
     @Override
     public String getName() {
         return super.getName();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setName(String name) {
+        super.setName(name);
     }
 
     @ScriptFunction(jsDoc = GET_NEXT_FOCUSABLE_COMPONENT_JSDOC)

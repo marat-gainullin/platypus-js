@@ -707,6 +707,9 @@
             get: function() {
                 var value = delegate.name;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.name = P.boxAsJava(aValue);
             }
         });
         if(!P.RadioButton){
