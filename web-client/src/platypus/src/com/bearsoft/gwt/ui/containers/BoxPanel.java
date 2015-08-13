@@ -45,17 +45,21 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 			for (int i = 0; i < getWidgetCount(); i++) {
 				Widget w = getWidget(i);
 				formatWidget(w);
+				Style es = w.getElement().getStyle();
+				es.setMarginLeft(0, Style.Unit.PX);
+				es.setMarginRight(0, Style.Unit.PX);
+				es.setMarginTop(0, Style.Unit.PX);
 				if (i > 0) {
 					if (orientation == Orientation.HORIZONTAL) {
 						if (direction == Direction.LTR) {
-							w.getElement().getStyle().setMarginLeft(hgap, Style.Unit.PX);
-							w.getElement().getStyle().setMarginRight(0, Style.Unit.PX);
+							es.setMarginLeft(hgap, Style.Unit.PX);
+							es.setMarginRight(0, Style.Unit.PX);
 						} else {
-							w.getElement().getStyle().setMarginLeft(0, Style.Unit.PX);
-							w.getElement().getStyle().setMarginRight(hgap, Style.Unit.PX);
+							es.setMarginLeft(0, Style.Unit.PX);
+							es.setMarginRight(hgap, Style.Unit.PX);
 						}
 					} else {
-						w.getElement().getStyle().setMarginTop(vgap, Style.Unit.PX);
+						es.setMarginTop(vgap, Style.Unit.PX);
 					}
 				}
 			}
@@ -106,9 +110,6 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 		boolean visible = !child.getElement().hasAttribute("aria-hidden");
 		CommonResources.INSTANCE.commons().ensureInjected();
 		Style es = child.getElement().getStyle();
-		es.setMarginLeft(0, Style.Unit.PX);
-		es.setMarginRight(0, Style.Unit.PX);
-		es.setMarginTop(0, Style.Unit.PX);
 		if (orientation == Orientation.HORIZONTAL) {
 			es.clearTop();
 			es.clearBottom();
@@ -152,7 +153,7 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 				}
 			}
 			super.add(child, getElement().<Element> cast());
-			formatWidget(child);// Don't move this call fron here because of
+			formatWidget(child);// Don't move this call from here because of
 			                    // crazy GWT. It clears position style property!
 			if (isAttached()) {
 				ajustWidth();
@@ -162,7 +163,7 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 				child.getElement().getStyle().setMarginTop(vgap, Style.Unit.PX);
 			}
 			super.add(child, getElement().<Element> cast());
-			formatWidget(child);// Don't move this call fron here because of
+			formatWidget(child);// Don't move this call from here because of
 			                    // crazy GWT. It clears position style property!
 			if (isAttached()) {
 				ajustHeight();
