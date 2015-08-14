@@ -827,11 +827,9 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 	@Override
 	public void setFrozenColumns(int aValue) {
 		if (aValue >= 0 && frozenColumns != aValue) {
-			if (aValue >= 0) {
-				frozenColumns = aValue;
-				if (autoRefreshHeader && getDataColumnCount() > 0 && aValue <= getDataColumnCount()) {
-					applyColumns();
-				}
+			frozenColumns = aValue;
+			if (autoRefreshHeader && getDataColumnCount() > 0 && aValue <= getDataColumnCount()) {
+				applyColumns();
 			}
 		}
 	}
@@ -846,10 +844,27 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		autoRefreshHeader = aValue;
 	}
 
-	public void applyColumns() {
+	protected void clearColumns(){
 		for (int i = getDataColumnCount() - 1; i >= 0; i--) {
-			removeColumn(i);
+			Column<JavaScriptObject, ?> toDel = getDataColumn(i);
+			ModelColumn mCol = (ModelColumn) toDel;
+			if (mCol == treeIndicatorColumn) {
+				TreeExpandableCell<JavaScriptObject, ?> treeCell = (TreeExpandableCell<JavaScriptObject, ?>) mCol.getCell();
+				treeCell.setDataProvider(null);
+				treeIndicatorColumn = null;
+			}
+			mCol.setGrid(null);
 		}
+		for (int i = headerRight.getColumnCount() - 1; i >= 0; i--){
+			headerRight.removeColumn(i);
+		}
+		for (int i = headerRight.getColumnCount() - 1; i >= 0; i--){
+			headerLeft.removeColumn(i);
+		}
+	}
+	
+	public void applyColumns() {
+		clearColumns();
 		List<HeaderNode<JavaScriptObject>> leaves = new ArrayList<>();
 		HeaderAnalyzer.achieveLeaves(header, leaves);
 		for (HeaderNode<JavaScriptObject> leaf : leaves) {
