@@ -208,7 +208,7 @@ public class FormFactory {
         if (aIconName != null && !aIconName.isEmpty()) {
             Scripts.Space space = Scripts.getSpace();
             try {
-                IconResources.load(aIconName, space, onLoad, onFailure);
+                IconResources.load(aIconName, null, space, onLoad, onFailure);
             } catch (Exception ex) {
                 Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -579,10 +579,14 @@ public class FormFactory {
                 boolean insertable = XmlDomUtils.readBooleanAttribute(anElement, "insertable", Boolean.TRUE);
                 boolean deletable = XmlDomUtils.readBooleanAttribute(anElement, "deletable", Boolean.TRUE);
                 boolean editable = XmlDomUtils.readBooleanAttribute(anElement, "editable", Boolean.TRUE);
+                boolean headerVisible = XmlDomUtils.readBooleanAttribute(anElement, "headerVisible", Boolean.TRUE);
+                boolean draggableRows = XmlDomUtils.readBooleanAttribute(anElement, "draggableRows", Boolean.FALSE);
                 boolean showHorizontalLines = XmlDomUtils.readBooleanAttribute(anElement, "showHorizontalLines", Boolean.TRUE);
                 boolean showVerticalLines = XmlDomUtils.readBooleanAttribute(anElement, "showVerticalLines", Boolean.TRUE);
                 boolean showOddRowsInOtherColor = XmlDomUtils.readBooleanAttribute(anElement, "showOddRowsInOtherColor", Boolean.TRUE);
                 int rowsHeight = XmlDomUtils.readIntegerAttribute(anElement, "rowsHeight", 20);
+                grid.setHeaderVisible(headerVisible);
+                grid.setDraggableRows(draggableRows);
                 grid.setRowsHeight(rowsHeight);
                 grid.setShowOddRowsInOtherColor(showOddRowsInOtherColor);
                 grid.setShowVerticalLines(showVerticalLines);

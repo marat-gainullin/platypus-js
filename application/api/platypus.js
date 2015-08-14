@@ -47,6 +47,7 @@
     var ModelLoaderClass = Java.type('com.eas.client.scripts.ApplicationModelLoader');
     var TwoTierModelClass = Java.type('com.eas.client.model.application.ApplicationDbModel');
     var ThreeTierModelClass = Java.type('com.eas.client.model.application.ApplicationPlatypusModel');
+    var Source2XmlDom = Java.type('com.eas.xml.dom.Source2XmlDom');
 
     //
     Object.defineProperty(P, "HTML5", {value: "HTML5 client"});
@@ -145,6 +146,23 @@
     Object.defineProperty(P, "invokeLater", {get: function () {
             return invokeLater;
         }});
+    
+    function lookupCallerFile(){
+        var calledFromFile = null;
+        var error = new Error('path test error');
+        if (error.stack) {
+            var stack = error.stack.split('\n');
+            if (stack.length > 1) {
+                var sourceCall = stack[3];
+                var stackFrameParsed = /\((.+):\d+\)/.exec(sourceCall);
+                if (stackFrameParsed && stackFrameParsed.length > 1) {
+                    calledFromFile = stackFrameParsed[1];
+                }
+            }
+        }
+        return calledFromFile;
+    }
+    
     /**
      * @static
      * @param {type} deps
@@ -158,20 +176,7 @@
         var strArray = new JavaStringArrayClass(deps.length);
         for (var i = 0; i < deps.length; i++)
             strArray[i] = deps[i] ? deps[i] + '' : null;
-        //////////////////
-        var calledFromFile = null;
-        var error = new Error('path test error');
-        if (error.stack) {
-            var stack = error.stack.split('\n');
-            if (stack.length > 1) {
-                var sourceCall = stack[2];
-                var stackFrameParsed = /\((.+):\d+\)/.exec(sourceCall);
-                if (stackFrameParsed && stackFrameParsed.length > 1) {
-                    calledFromFile = stackFrameParsed[1];
-                }
-            }
-        }
-        //////////////////
+        var calledFromFile = lookupCallerFile();
         if (aOnSuccess) {
             ScriptedResourceClass.require(strArray, calledFromFile, P.boxAsJava(aOnSuccess), P.boxAsJava(aOnFailure));
         } else {
@@ -267,7 +272,8 @@
         Object.defineProperty(P, "Icon", {value: Icon});
         Object.defineProperty(Icon, "load", {
             value: function (aResName, onSuccess, onFailure) {
-                return IconResourcesClass.load(P.boxAsJava(aResName), P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
+                var calledFromFile = lookupCallerFile();
+                return IconResourcesClass.load(P.boxAsJava(aResName), P.boxAsJava(calledFromFile), P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
             }
         });
         P.Icons = P.Icon;
@@ -642,27 +648,15 @@
         Object.defineProperty(P, "FontStyle", {
             value: FontStyle
         });
-        /**
-         * @static
-         * @param {type} aName
-         * @param {type} aModel
-         * @param {type} aTarget
-         * @returns {P.loadForm.publishTo}
-         */
-        function loadForm(aName, aModel, aTarget) {
-            P.require(['forms/index.js', 'grid/index.js']);
-            var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
-            var formDocument = ScriptedResourceClass.getApp().getForms().get(aName, files);
-            var formFactory = FormLoaderClass.load(formDocument, ScriptedResourceClass.getApp(), arguments.length > 1 ? aModel : null);
+        function loadFormDocument(aDocument, aModel, aTarget){
+            var formFactory = FormLoaderClass.load(aDocument, ScriptedResourceClass.getApp(), arguments[1] ? aModel : null);
             var form = formFactory.form;
             if (aTarget) {
-                P.Form.call(aTarget, null, aName, form);
+                P.Form.call(aTarget, null, null, form);
             } else {
-                aTarget = new P.Form(null, aName, form);
+                aTarget = new P.Form(null, null, form);
             }
             form.injectPublished(aTarget);
-            if (!form.title)
-                form.title = aName;
             var comps = formFactory.getWidgetsList();
             for (var c = 0; c < comps.length; c++) {
                 (function () {
@@ -678,7 +672,32 @@
             }
             return aTarget;
         }
+        /**
+         * @static
+         * @param {type} aName
+         * @param {type} aModel
+         * @param {type} aTarget
+         * @returns {P.loadForm.publishTo}
+         */
+        function loadForm(aName, aModel, aTarget) {
+            P.require(['forms/index.js', 'grid/index.js']);
+            var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
+            var document = ScriptedResourceClass.getApp().getForms().get(aName, files);
+            var form = loadFormDocument(document, aModel, aTarget);
+            if (!form.title)
+                form.title = aName;
+            form.formKey = aName;
+            return form;
+        }
+        
+        function readForm(aContent, aModel, aTarget){
+            P.require(['forms/index.js', 'grid/index.js']);
+            var document = Source2XmlDom.transform(aContent);
+            return loadFormDocument(document, aModel, aTarget);
+        }
+        
         Object.defineProperty(P, "loadForm", {value: loadForm});
+        Object.defineProperty(P, "readForm", {value: readForm});
     }
 
     function extend(Child, Parent) {
@@ -1496,12 +1515,14 @@
     var Resource = {};
     Object.defineProperty(Resource, "load", {
         value: function (aResName, onSuccess, onFailure) {
-            return boxAsJs(ScriptedResourceClass.load(boxAsJava(aResName), boxAsJava(onSuccess), boxAsJava(onFailure)));
+            var calledFromFile = lookupCallerFile();
+            return boxAsJs(ScriptedResourceClass.load(boxAsJava(aResName), boxAsJava(calledFromFile), boxAsJava(onSuccess), boxAsJava(onFailure)));
         }
     });
     Object.defineProperty(Resource, "loadText", {
         value: function (aResName, onSuccess, onFailure) {
-            return boxAsJs(ScriptedResourceClass.load(boxAsJava(aResName), boxAsJava(onSuccess), boxAsJava(onFailure)));
+            var calledFromFile = lookupCallerFile();
+            return boxAsJs(ScriptedResourceClass.load(boxAsJava(aResName), boxAsJava(calledFromFile), boxAsJava(onSuccess), boxAsJava(onFailure)));
         }
     });
     Object.defineProperty(Resource, "upload", {

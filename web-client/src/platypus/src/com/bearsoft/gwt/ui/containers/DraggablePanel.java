@@ -5,7 +5,6 @@
  */
 package com.bearsoft.gwt.ui.containers;
 
-import com.bearsoft.gwt.ui.containers.window.events.MoveEvent;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
@@ -61,6 +60,8 @@ public class DraggablePanel extends SimplePanel implements RequiresResize, Provi
 
 	protected abstract class DraggableWidgetDecoration extends DraggableDecoration {
 
+		private boolean mouseDragged;
+		
 		public DraggableWidgetDecoration(String... aClasses) {
 			super(aClasses);
 		}
@@ -68,11 +69,19 @@ public class DraggablePanel extends SimplePanel implements RequiresResize, Provi
 		@Override
 		protected void mousePressed() {
 			focus();
-			beginResizing();
+		}
+		
+		@Override
+		protected void mouseDragged() {
+			if(!mouseDragged){
+				mouseDragged = true;
+				beginResizing();
+			}
 		}
 
 		@Override
 		protected void mouseReleased() {
+			mouseDragged = false;
 			endResizing();
 		}
 
@@ -96,9 +105,11 @@ public class DraggablePanel extends SimplePanel implements RequiresResize, Provi
 				aMovableTarget.getElement().getStyle().setTop(newTop >= 0 ? newTop : 0, Style.Unit.PX);
 				if (newTop >= 0) {
 					aResizableTarget.getElement().getStyle().setHeight(targetHeight - dy, Style.Unit.PX);
+					/*
 					if (aResizableTarget instanceof RequiresResize) {
 						((RequiresResize) aResizableTarget).onResize();
 					}
+					*/
 				}
 				return true;
 			} else {
@@ -113,9 +124,11 @@ public class DraggablePanel extends SimplePanel implements RequiresResize, Provi
 		protected boolean changeTarget(Widget aMovableTarget, Widget aResizableTarget, int dx, int dy, MouseEvent<?> aEvent) {
 			if (isSresizable()) {
 				aResizableTarget.getElement().getStyle().setHeight(targetHeight + dy, Style.Unit.PX);
+				/*
 				if (aResizableTarget instanceof RequiresResize) {
 					((RequiresResize) aResizableTarget).onResize();
 				}
+				*/
 				return true;
 			} else {
 				return false;
@@ -132,9 +145,11 @@ public class DraggablePanel extends SimplePanel implements RequiresResize, Provi
 				aMovableTarget.getElement().getStyle().setLeft(newLeft >= 0 ? newLeft : 0, Style.Unit.PX);
 				if (newLeft >= 0) {
 					aResizableTarget.getElement().getStyle().setWidth(targetWidth - dx, Style.Unit.PX);
+					/*
 					if (aResizableTarget instanceof RequiresResize) {
 						((RequiresResize) aResizableTarget).onResize();
 					}
+					*/
 				}
 				return true;
 			} else {
@@ -148,9 +163,11 @@ public class DraggablePanel extends SimplePanel implements RequiresResize, Provi
 		protected boolean changeTarget(Widget aMovableTarget, Widget aResizableTarget, int dx, int dy, MouseEvent<?> aEvent) {
 			if (isEresizable()) {
 				aResizableTarget.getElement().getStyle().setWidth(targetWidth + dx, Style.Unit.PX);
+				/*
 				if (aResizableTarget instanceof RequiresResize) {
 					((RequiresResize) aResizableTarget).onResize();
 				}
+				*/
 				return true;
 			} else {
 				return false;
@@ -219,11 +236,12 @@ public class DraggablePanel extends SimplePanel implements RequiresResize, Provi
 		styles.ensureInjected();
 		super.setWidget(content);
 	}
-
+	
 	protected void beginResizing() {
 	}
 
 	protected void endResizing() {
+		onResize();
 	}
 
 	@Override

@@ -34,8 +34,10 @@ public class PlatypusImageResource implements ImageResource {
 		height = aHeight;
 	}
 
-	public static void jsLoad(final String aName, final JavaScriptObject aOnSuccess, final JavaScriptObject aOnFailure) {
-		load(aName, new CallbackAdapter<ImageResource, String>() {
+	public static void jsLoad(final String aResourceName, final JavaScriptObject aOnSuccess, final JavaScriptObject aOnFailure) {
+		final String callerDir = Utils.lookupCallerJsDir();
+		String normalizedResourceName = aResourceName.startsWith("./") || aResourceName.startsWith("../") ? AppClient.toAppModuleId(aResourceName, callerDir) : aResourceName; 
+		load(normalizedResourceName, new CallbackAdapter<ImageResource, String>() {
 
 			@Override
 			public void onFailure(String reason) {

@@ -84,6 +84,12 @@ public class CardPane extends JPanel implements HasPublished, HasContainerEvents
         return super.getName();
     }
 
+    @ScriptFunction
+    @Override
+    public void setName(String name) {
+        super.setName(name);
+    }
+
     @ScriptFunction(jsDoc = GET_NEXT_FOCUSABLE_COMPONENT_JSDOC)
     @Override
     public JComponent getNextFocusableComponent() {
@@ -321,6 +327,40 @@ public class CardPane extends JPanel implements HasPublished, HasContainerEvents
         }
     }
 
+    private static final String HGAP_JSDOC = ""
+            + "/**\n"
+            + "* Horizontal gap between card and container's edge.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = HGAP_JSDOC)
+    public int getHgap() {
+        return ((CardLayout) super.getLayout()).getHgap();
+    }
+
+    @ScriptFunction
+    public void setHgap(int aValue) {
+        ((CardLayout) super.getLayout()).setHgap(aValue);
+        super.revalidate();
+        super.repaint();
+    }
+
+    private static final String VGAP_JSDOC = ""
+            + "/**\n"
+            + "* Vertical gap between card and container's edge.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = VGAP_JSDOC)
+    public int getVgap() {
+        return ((CardLayout) super.getLayout()).getVgap();
+    }
+
+    @ScriptFunction
+    public void setVgap(int aValue) {
+        ((CardLayout) super.getLayout()).setVgap(aValue);
+        super.revalidate();
+        super.repaint();
+    }
+    
     private static final String ADD_JSDOC = ""
             + "/**\n"
             + "* Appends the component to this container with the specified name.\n"

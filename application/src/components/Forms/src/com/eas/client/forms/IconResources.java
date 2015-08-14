@@ -6,6 +6,7 @@ package com.eas.client.forms;
 
 import com.eas.client.scripts.ScriptedResource;
 import com.eas.script.Scripts;
+import java.net.URL;
 import java.util.function.Consumer;
 import javax.swing.ImageIcon;
 import jdk.nashorn.api.scripting.JSObject;
@@ -16,18 +17,18 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class IconResources {
 
-    public static ImageIcon load(String aResourceName, JSObject onSuccess, JSObject onFailure) throws Exception {
+    public static ImageIcon load(String aResourceName, String aCalledFromFile, JSObject onSuccess, JSObject onFailure) throws Exception {
         Scripts.Space space = Scripts.getSpace();
-        return load(aResourceName, space, onSuccess != null ? (ImageIcon aLoaded) -> {
+        return load(aResourceName, aCalledFromFile, space, onSuccess != null ? (ImageIcon aLoaded) -> {
             onSuccess.call(null, new Object[]{aLoaded});
         } : null, onSuccess != null ? (Exception ex) -> {
             onFailure.call(null, new Object[]{space.toJs(ex.getMessage())});
         } : null);
     }
 
-    public static ImageIcon load(String aResourceName, Scripts.Space aSpace, Consumer<ImageIcon> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public static ImageIcon load(String aResourceName, String aCalledFromFile, Scripts.Space aSpace, Consumer<ImageIcon> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (onSuccess != null) {
-            ScriptedResource.load(aResourceName, aSpace, (Object aLoaded) -> {
+            ScriptedResource.load(aResourceName, aCalledFromFile != null ? new URL(aCalledFromFile).toURI() : null, aSpace, (Object aLoaded) -> {
                 if (aLoaded instanceof byte[]) {
                     byte[] content = (byte[]) aLoaded;
                     onSuccess.accept(new ImageIcon(content));
@@ -43,7 +44,7 @@ public class IconResources {
             });
             return null;
         } else {
-            Object loaded = ScriptedResource.load(aResourceName);
+            Object loaded = ScriptedResource.load(aResourceName, aCalledFromFile);
             if (loaded instanceof byte[]) {
                 byte[] content = (byte[]) loaded;
                 return new ImageIcon(content);

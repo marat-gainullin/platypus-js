@@ -121,36 +121,6 @@ public class JsContainers {
 					return aComponent.@com.bearsoft.gwt.ui.containers.BoxPanel::getOrientation()();
 				}
 			});
-			var _hgap = 0;
-			Object.defineProperty(published, "hgap", {
-				get : function(){
-					if(published.orientation == $wnd.P.Orientation.HORIZONTAL)
-						return aComponent.@com.eas.client.form.published.containers.BoxPane::getHgap()();
-					else
-						return _hgap;
-				},
-				set : function(aValue){
-					if(published.orientation == $wnd.P.Orientation.HORIZONTAL)
-						aComponent.@com.eas.client.form.published.containers.BoxPane::setHgap(I)(aValue * 1);
-					else
-						_hgap = aValue * 1;
-				}
-			});
-			var _vgap = 0;
-			Object.defineProperty(published, "vgap", {
-				get : function(){
-					if(published.orientation == $wnd.P.Orientation.VERTICAL)
-						return aComponent.@com.eas.client.form.published.containers.BoxPane::getVgap()();
-					else
-						return _vgap;
-				},
-				set : function(aValue){
-					if(published.orientation == $wnd.P.Orientation.VERTICAL)
-						aComponent.@com.eas.client.form.published.containers.BoxPane::setVgap(I)(aValue * 1);
-					else
-						_vgap = aValue * 1;
-				}
-			});
 		};		
 
 		// ***************************************************

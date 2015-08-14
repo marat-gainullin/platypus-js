@@ -80,6 +80,7 @@ public class Toolbar extends SimplePanel implements IndexedPanel, ProvidesResize
                         widths.put(iw, iw.getElement().getStyle().getWidth());
                         positions.put(iw, iw.getElement().getStyle().getPosition());
                         margins.put(iw, iw.getElement().getStyle().getMarginLeft());
+                        iw.getElement().getStyle().setHeight(parentHeight, Style.Unit.PX);
 
                         SimplePanel sp = new SimplePanel();
                         sp.getElement().addClassName("toolbar-chevron-menu-item");
@@ -137,12 +138,14 @@ public class Toolbar extends SimplePanel implements IndexedPanel, ProvidesResize
                                 } else {
                                     iw.getElement().getStyle().clearMarginLeft();
                                 }
+                                iw.getElement().getStyle().setHeight(100, Style.Unit.PCT);
                                 content.add(iw);
                             }
                             content.onResize();
                         }
 
                     });
+    				pp.setPopupPosition(chevron.getAbsoluteLeft(), chevron.getAbsoluteTop());
                     pp.showRelativeTo(chevron);
                     Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 

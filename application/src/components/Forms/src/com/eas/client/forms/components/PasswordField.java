@@ -61,6 +61,12 @@ public class PasswordField extends VPasswordField implements HasOnValueChange, H
         return super.getName();
     }
 
+    @ScriptFunction
+    @Override
+    public void setName(String name) {
+        super.setName(name);
+    }
+
     @ScriptFunction(jsDoc = GET_NEXT_FOCUSABLE_COMPONENT_JSDOC)
     @Override
     public JComponent getNextFocusableComponent() {

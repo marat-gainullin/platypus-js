@@ -18,7 +18,6 @@ import com.bearsoft.gwt.ui.widgets.grid.builders.ThemedCellTableBuilder;
 import com.bearsoft.gwt.ui.widgets.grid.builders.ThemedHeaderOrFooterBuilder;
 import com.bearsoft.gwt.ui.widgets.grid.header.HasSortList;
 import com.bearsoft.gwt.ui.widgets.grid.header.HeaderNode;
-import com.eas.client.Utils;
 import com.eas.client.form.grid.columns.ModelColumn;
 import com.eas.client.form.published.PublishedColor;
 import com.google.gwt.cell.client.Cell;
@@ -327,36 +326,38 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 
 			@Override
 			public void onScroll(ScrollEvent event) {
-				int aimTop = scrollableRightContainer.getElement().getScrollTop();
-				int aimLeft = scrollableRightContainer.getElement().getScrollLeft();
-
-				scrollableLeftContainer.getElement().setScrollTop(aimTop);
-				int factTopDelta = aimTop - scrollableLeftContainer.getElement().getScrollTop();
-				if (factTopDelta > 0) {
-					scrollableLeftContainer.getElement().getStyle().setBottom(factTopDelta, Style.Unit.PX);
-				} else {
-					scrollableLeftContainer.getElement().getStyle().clearBottom();
-				}
-				headerRightContainer.getElement().setScrollLeft(aimLeft);
-				int factLeftDelta0 = aimLeft - headerRightContainer.getElement().getScrollLeft();
-				if (factLeftDelta0 > 0) {
-					headerRightContainer.getElement().getStyle().setRight(factLeftDelta0, Style.Unit.PX);
-				} else {
-					headerRightContainer.getElement().getStyle().clearRight();
-				}
-				frozenRightContainer.getElement().setScrollLeft(aimLeft);
-				int factLeftDelta1 = aimLeft - frozenRightContainer.getElement().getScrollLeft();
-				if (factLeftDelta1 > 0) {
-					frozenRightContainer.getElement().getStyle().setRight(factLeftDelta1, Style.Unit.PX);
-				} else {
-					frozenRightContainer.getElement().getStyle().clearRight();
-				}
-				footerRightContainer.getElement().setScrollLeft(scrollableRightContainer.getElement().getScrollLeft());
-				int factLeftDelta2 = aimLeft - footerRightContainer.getElement().getScrollLeft();
-				if (factLeftDelta2 > 0) {
-					footerRightContainer.getElement().getStyle().setRight(factLeftDelta2, Style.Unit.PX);
-				} else {
-					footerRightContainer.getElement().getStyle().clearRight();
+				if(frozenColumns > 0 || frozenRows > 0){
+					int aimTop = scrollableRightContainer.getElement().getScrollTop();
+					int aimLeft = scrollableRightContainer.getElement().getScrollLeft();
+	
+					scrollableLeftContainer.getElement().setScrollTop(aimTop);
+					int factTopDelta = aimTop - scrollableLeftContainer.getElement().getScrollTop();
+					if (factTopDelta > 0) {
+						scrollableLeftContainer.getElement().getStyle().setBottom(factTopDelta, Style.Unit.PX);
+					} else {
+						scrollableLeftContainer.getElement().getStyle().clearBottom();
+					}
+					headerRightContainer.getElement().setScrollLeft(aimLeft);
+					int factLeftDelta0 = aimLeft - headerRightContainer.getElement().getScrollLeft();
+					if (factLeftDelta0 > 0) {
+						headerRightContainer.getElement().getStyle().setRight(factLeftDelta0, Style.Unit.PX);
+					} else {
+						headerRightContainer.getElement().getStyle().clearRight();
+					}
+					frozenRightContainer.getElement().setScrollLeft(aimLeft);
+					int factLeftDelta1 = aimLeft - frozenRightContainer.getElement().getScrollLeft();
+					if (factLeftDelta1 > 0) {
+						frozenRightContainer.getElement().getStyle().setRight(factLeftDelta1, Style.Unit.PX);
+					} else {
+						frozenRightContainer.getElement().getStyle().clearRight();
+					}
+					footerRightContainer.getElement().setScrollLeft(scrollableRightContainer.getElement().getScrollLeft());
+					int factLeftDelta2 = aimLeft - footerRightContainer.getElement().getScrollLeft();
+					if (factLeftDelta2 > 0) {
+						footerRightContainer.getElement().getStyle().setRight(factLeftDelta2, Style.Unit.PX);
+					} else {
+						footerRightContainer.getElement().getStyle().clearRight();
+					}
 				}
 			}
 
@@ -386,8 +387,6 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 						}
 					} else {
 					}
-				} else {
-					event.getDataTransfer().<XDataTransfer> cast().setDropEffect("none");
 				}
 			}
 		}, DragEnterEvent.getType());
@@ -397,14 +396,6 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 			public void onDrag(DragEvent event) {
 				if (DraggedColumn.instance != null && DraggedColumn.instance.isResize()) {
 					event.stopPropagation();
-					/*
-					int newWidth = event.getNativeEvent().getClientX() - DraggedColumn.instance.getCellElement().getAbsoluteLeft();
-					if (newWidth > MINIMUM_COLUMN_WIDTH) {
-						event.getDataTransfer().<XDataTransfer> cast().setDropEffect("move");
-					} else {
-						event.getDataTransfer().<XDataTransfer> cast().setDropEffect("none");
-					}
-					*/
 				}
 			}
 		}, DragEvent.getType());
@@ -457,9 +448,11 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 
 			@Override
 			public void onDragEnd(DragEndEvent event) {
-				event.stopPropagation();
-				hideColumnDecorations();
-				DraggedColumn.instance = null;
+				if(DraggedColumn.instance != null){
+					event.stopPropagation();
+					hideColumnDecorations();
+					DraggedColumn.instance = null;
+				}
 			}
 		}, DragEndEvent.getType());
 		addDomHandler(new DropHandler() {
@@ -865,17 +858,22 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 	}
 
 	public boolean isHeaderVisible() {
-		return Style.Display.NONE.equals(headerLeft.getElement().getStyle().getDisplay()) || Style.Display.NONE.equals(headerRight.getElement().getStyle().getDisplay());
+		return !Style.Display.NONE.equals(headerLeft.getElement().getStyle().getDisplay()) && !Style.Display.NONE.equals(headerRight.getElement().getStyle().getDisplay());
 	}
 
 	public void setHeaderVisible(boolean aValue) {
+		hive.getRowFormatter().setVisible(0, aValue);
 		if (aValue) {
+			columnsChevron.getElement().getStyle().clearDisplay();
 			headerLeftContainer.getElement().getStyle().clearDisplay();
 			headerRightContainer.getElement().getStyle().clearDisplay();
 		} else {
+			columnsChevron.getElement().getStyle().setDisplay(Style.Display.NONE);
 			headerLeftContainer.getElement().getStyle().setDisplay(Style.Display.NONE);
 			headerRightContainer.getElement().getStyle().setDisplay(Style.Display.NONE);
 		}
+		if(isAttached())
+			onResize();
 	}
 
 	public int getFrozenColumns() {

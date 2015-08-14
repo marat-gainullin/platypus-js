@@ -197,8 +197,8 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     }
 
     /**
-     * Returns row for particular Index. Index is in model's coordinates. Index
-     * is 0-based.
+     * Returns row for particular Index. Index is in model's coordinates.
+     * Index is 0-based.
      *
      * @param aIdx Index the row is to be calculated for.
      * @return Row's index;
@@ -571,6 +571,30 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
         }
     }
 
+    protected boolean headerVisible = true;
+    
+    @ScriptFunction
+    public boolean isHeaderVisible(){
+        return headerVisible;
+    }
+    
+    @ScriptFunction
+    public void setHeaderVisible(boolean aValue){
+        headerVisible = aValue;
+    }
+    
+    protected boolean draggableRows;
+    
+    @ScriptFunction
+    protected boolean isDraggableRows(){
+        return draggableRows;
+    }
+
+    @ScriptFunction
+    public void setDraggableRows(boolean aValue) {
+        draggableRows = aValue;
+    }
+    
     private static final String ON_RENDER_JSDOC = ""
             + "/**\n"
             + " * General render event handler.\n"
@@ -838,6 +862,12 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     @Override
     public String getName() {
         return super.getName();
+    }
+
+    @ScriptFunction
+    @Override
+    public void setName(String name) {
+        super.setName(name);
     }
 
     @ScriptFunction(jsDoc = GET_NEXT_FOCUSABLE_COMPONENT_JSDOC)

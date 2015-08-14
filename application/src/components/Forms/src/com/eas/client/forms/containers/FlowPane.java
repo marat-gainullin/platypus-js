@@ -67,6 +67,12 @@ public class FlowPane extends JPanel implements HasPublished, HasContainerEvents
         return super.getName();
     }
 
+    @ScriptFunction
+    @Override
+    public void setName(String name) {
+        super.setName(name);
+    }
+
     @ScriptFunction(jsDoc = GET_NEXT_FOCUSABLE_COMPONENT_JSDOC)
     @Override
     public JComponent getNextFocusableComponent() {
@@ -288,6 +294,40 @@ public class FlowPane extends JPanel implements HasPublished, HasContainerEvents
         return null;
     }
 
+    private static final String HGAP_JSDOC = ""
+            + "/**\n"
+            + "* Horizontal gap between components.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = HGAP_JSDOC)
+    public int getHgap() {
+        return ((FlowLayout) super.getLayout()).getHgap();
+    }
+
+    @ScriptFunction
+    public void setHgap(int aValue) {
+        ((FlowLayout) super.getLayout()).setHgap(aValue);
+        super.revalidate();
+        super.repaint();
+    }
+
+    private static final String VGAP_JSDOC = ""
+            + "/**\n"
+            + "* Vertical gap between components.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = VGAP_JSDOC)
+    public int getVgap() {
+        return ((FlowLayout) super.getLayout()).getVgap();
+    }
+
+    @ScriptFunction
+    public void setVgap(int aValue) {
+        ((FlowLayout) super.getLayout()).setVgap(aValue);
+        super.revalidate();
+        super.repaint();
+    }
+    
     private static final String ADD_JSDOC = ""
             + "/**\n"
             + "* Appends the specified component to the end of this container.\n"

@@ -39,12 +39,13 @@ import com.google.gwt.view.client.ProvidesKey;
 public class GridSection<T> extends CellTable<T> {
 
 	protected static final String HIDDEN_COLUMN_WIDTH = "0.00000000000000000001px";
-	
+
 	protected AbstractCellTable<T>[] columnsPartners;
 	protected WidthCallback widthPropagator;
 	protected ColumnsRemover columnsRemover;
 	protected AbstractCellTable<T> headerSource;
 	protected AbstractCellTable<T> footerSource;
+	protected boolean draggableRows;
 
 	public GridSection(ProvidesKey<T> keyProvider) {
 		super(15, ThemedGridResources.instance, keyProvider, null, true, false);
@@ -87,6 +88,18 @@ public class GridSection<T> extends CellTable<T> {
 					super.onCellPreview(event);
 			}
 		});
+	}
+
+	public boolean isDraggableRows() {
+		return draggableRows;
+	}
+
+	public void setDraggableRows(boolean aValue) {
+		if(draggableRows != aValue){
+			draggableRows = aValue;
+			if(isAttached())
+				redraw();
+		}
 	}
 
 	protected boolean ctrlKey;

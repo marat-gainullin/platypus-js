@@ -27,9 +27,6 @@ import com.eas.client.model.js.JsOrderer;
 import com.eas.client.queries.Query;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
-import com.google.gwt.dom.client.AnchorElement;
-import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.logging.client.LogConfiguration;
 
 /**
@@ -583,16 +580,13 @@ public class Application {
 			nativeModel.@com.eas.client.model.Model::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(aTarget);			
 			return aTarget;
 		};
-		$wnd.P.loadForm = function(appElementName, aModel, aTarget) {
-			var appElementDoc = aClient.@com.eas.client.application.AppClient::getFormDocument(Ljava/lang/String;)(appElementName);
-			var factory = @com.eas.client.form.store.XmlDom2Form::transform(Lcom/google/gwt/xml/client/Document;Lcom/google/gwt/core/client/JavaScriptObject;)(appElementDoc, aModel);
+		function readFormDocument(aDocumnet, aModel, aTarget){
+			var factory = @com.eas.client.form.store.XmlDom2Form::transform(Lcom/google/gwt/xml/client/Document;Lcom/google/gwt/core/client/JavaScriptObject;)(aDocumnet, aModel);
 			var nativeForm = factory.@com.eas.client.form.FormFactory::getForm()(); 
 			if(aTarget)
-				$wnd.P.Form.call(aTarget, null, appElementName, nativeForm);
+				$wnd.P.Form.call(aTarget, null, null, nativeForm);
 			else
-				aTarget = new $wnd.P.Form(null, appElementName, nativeForm);
-			if(!aTarget.title)
-				aTarget.title = appElementName;
+				aTarget = new $wnd.P.Form(null, null, nativeForm);
 			var nwList = factory.@com.eas.client.form.FormFactory::getWidgetsList()();
 			for(var i = 0; i < nwList.@java.util.List::size()(); i++){
 				var nWidget = nwList.@java.util.List::get(I)(i);
@@ -601,6 +595,18 @@ public class Application {
 					aTarget[pWidget.name] = pWidget;
 			}
 			return aTarget;
+		};
+		$wnd.P.loadForm = function(appElementName, aModel, aTarget) {
+			var appElementDoc = aClient.@com.eas.client.application.AppClient::getFormDocument(Ljava/lang/String;)(appElementName);
+			var form = readFormDocument(appElementDoc, aModel, aTarget);
+            if (!form.title)
+                form.title = appElementName;
+            form.formKey = appElementName;
+            return form;
+		};
+		$wnd.P.readForm = function(aFormContent, aModel, aTarget){
+			var doc = @com.google.gwt.xml.client.XMLParser::parse(Ljava/lang/String;)(aFormContent + "");
+			return readFormDocument(doc, aModel, aTarget);
 		};
 		$wnd.P.HTML5 = "Html5 client";
 		$wnd.P.J2SE = "Java SE client";
@@ -946,56 +952,14 @@ public class Application {
 			$wnd.P.onError(aMessage);
 	}-*/;
 
-	private static String toAppModuleId(String aRelative, String aStartPoint) {
-		Element div = Document.get().createDivElement();
-		div.setInnerHTML("<a href=\"" + aStartPoint + "/" + aRelative + "\">o</a>");
-		String absolute = div.getFirstChildElement().<AnchorElement> cast().getHref();
-		String hostContextPrefix = AppClient.relativeUri() + AppClient.APP_RESOURCE_PREFIX;
-		String appModuleId = absolute.substring(hostContextPrefix.length());
-		return appModuleId;
-	}
-
-	private static String extractFileName(StackTraceElement aFrame) {
-		String fileName = aFrame.getFileName();
-		if (fileName != null) {
-			int atIndex = fileName.indexOf("@");
-			if (atIndex != -1) {
-				fileName = fileName.substring(0, atIndex);
-			}
-			return fileName;
-		} else {
-			return null;
-		}
-	}
-
 	public static void require(final JavaScriptObject aDeps, final JavaScriptObject aOnSuccess, final JavaScriptObject aOnFailure) {
-		String calledFromDir = null;
-		try {
-			throw new Exception("test");
-		} catch (Exception ex) {
-			String calledFromFile = null;
-			StackTraceElement[] stackFrames = ex.getStackTrace();
-			String firstFileName = extractFileName(stackFrames[0]);
-			if (firstFileName != null) {
-				for (int frameIdx = 1; frameIdx < stackFrames.length; frameIdx++) {
-					String fileName = extractFileName(stackFrames[frameIdx]);
-					if (fileName != null && !fileName.equals(firstFileName)) {
-						calledFromFile = fileName;
-						break;
-					}
-				}
-			}
-			if (calledFromFile != null) {
-				int lastSlashIndex = calledFromFile.lastIndexOf('/');
-				calledFromDir = calledFromFile.substring(0, lastSlashIndex);
-			}
-		}
+		String calledFromDir = Utils.lookupCallerJsDir();
 		final Set<String> deps = new HashSet<String>();
 		JsArrayString depsValues = aDeps.<JsArrayString> cast();
 		for (int i = 0; i < depsValues.length(); i++) {
 			String dep = depsValues.get(i);
 			if (calledFromDir != null && dep.startsWith("./") || dep.startsWith("../")) {
-				String normalized = toAppModuleId(dep, calledFromDir);
+				String normalized = AppClient.toAppModuleId(dep, calledFromDir);
 				deps.add(normalized);
 			} else {
 				deps.add(dep);

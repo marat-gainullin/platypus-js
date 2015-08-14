@@ -104,6 +104,12 @@ public class ScrollPane extends JScrollPane implements HasPublished, HasContaine
         return super.getName();
     }
 
+    @ScriptFunction
+    @Override
+    public void setName(String name) {
+        super.setName(name);
+    }
+
     @ScriptFunction(jsDoc = GET_NEXT_FOCUSABLE_COMPONENT_JSDOC)
     @Override
     public JComponent getNextFocusableComponent() {

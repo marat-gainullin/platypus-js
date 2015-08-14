@@ -551,6 +551,9 @@ public class JsWidgets {
 	    Object.defineProperty(aPublished, "name", {
 		    get : function() {
 		    	return comp.@com.eas.client.form.published.HasJsName::getJsName()();
+		    },
+		    set : function(aValue){
+		    	comp.@com.eas.client.form.published.HasJsName::setJsName(Ljava/lang/String;)("" + aValue);
 		    }
  	    });
 	    Object.defineProperty(aPublished, "focus", {

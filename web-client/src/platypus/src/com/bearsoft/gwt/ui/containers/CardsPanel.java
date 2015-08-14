@@ -65,6 +65,9 @@ public class CardsPanel extends ComplexPanel implements InsertPanel.ForIsWidget,
             we.getStyle().setMarginTop(vgap, Style.Unit.PX);
             we.getStyle().setMarginBottom(vgap, Style.Unit.PX);
         }
+        if (isAttached()) {
+            onResize();
+        }
     }
 
     @Override

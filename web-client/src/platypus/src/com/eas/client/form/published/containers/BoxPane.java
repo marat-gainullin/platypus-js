@@ -213,6 +213,22 @@ public class BoxPane extends BoxPanel implements HasJsFacade, HasEnabled, HasCom
 	}
 
 	private native static void publish(HasPublished aWidget, JavaScriptObject aPublished)/*-{
+		Object.defineProperty(aPublished, "hgap", {
+			get : function(){
+				return aWidget.@com.eas.client.form.published.containers.CardPane::getHgap()();
+			},
+			set : function(aValue){
+				aWidget.@com.eas.client.form.published.containers.CardPane::setHgap(I)(aValue);
+			}
+		});
+		Object.defineProperty(aPublished, "vgap", {
+			get : function(){
+				return aWidget.@com.eas.client.form.published.containers.CardPane::getVgap()();
+			},
+			set : function(aValue){
+				aWidget.@com.eas.client.form.published.containers.CardPane::setVgap(I)(aValue);
+			}
+		});
 	}-*/;
 
 	@Override

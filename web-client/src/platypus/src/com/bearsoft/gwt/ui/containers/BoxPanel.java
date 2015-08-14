@@ -45,17 +45,21 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 			for (int i = 0; i < getWidgetCount(); i++) {
 				Widget w = getWidget(i);
 				formatWidget(w);
+				Style es = w.getElement().getStyle();
+				es.setMarginLeft(0, Style.Unit.PX);
+				es.setMarginRight(0, Style.Unit.PX);
+				es.setMarginTop(0, Style.Unit.PX);
 				if (i > 0) {
 					if (orientation == Orientation.HORIZONTAL) {
 						if (direction == Direction.LTR) {
-							w.getElement().getStyle().setMarginLeft(hgap, Style.Unit.PX);
-							w.getElement().getStyle().setMarginRight(0, Style.Unit.PX);
+							es.setMarginLeft(hgap, Style.Unit.PX);
+							es.setMarginRight(0, Style.Unit.PX);
 						} else {
-							w.getElement().getStyle().setMarginLeft(0, Style.Unit.PX);
-							w.getElement().getStyle().setMarginRight(hgap, Style.Unit.PX);
+							es.setMarginLeft(0, Style.Unit.PX);
+							es.setMarginRight(hgap, Style.Unit.PX);
 						}
 					} else {
-						w.getElement().getStyle().setMarginTop(vgap, Style.Unit.PX);
+						es.setMarginTop(vgap, Style.Unit.PX);
 					}
 				}
 			}
@@ -75,11 +79,13 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 	public void setHgap(int aValue) {
 		if (aValue >= 0) {
 			hgap = aValue;
-			for (int i = 1; i < getWidgetCount(); i++) {
-				Widget w = getWidget(i);
-				w.getElement().getStyle().setMarginLeft(aValue, Style.Unit.PX);
+			if (orientation == Orientation.HORIZONTAL) {
+				for (int i = 1; i < getWidgetCount(); i++) {
+					Widget w = getWidget(i);
+					w.getElement().getStyle().setMarginLeft(aValue, Style.Unit.PX);
+				}
+				ajustWidth();
 			}
-			ajustWidth();
 		}
 	}
 
@@ -90,11 +96,13 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 	public void setVgap(int aValue) {
 		if (aValue >= 0) {
 			vgap = aValue;
-			for (int i = 1; i < getWidgetCount(); i++) {
-				Widget w = getWidget(i);
-				w.getElement().getStyle().setMarginTop(aValue, Style.Unit.PX);
+			if (orientation == Orientation.VERTICAL) {
+				for (int i = 1; i < getWidgetCount(); i++) {
+					Widget w = getWidget(i);
+					w.getElement().getStyle().setMarginTop(aValue, Style.Unit.PX);
+				}
+				ajustHeight();
 			}
-			ajustHeight();
 		}
 	}
 
@@ -119,19 +127,19 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 		child.getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
 	}
 
-	public void ajustDisplay(Widget child){
-		if(child.getParent() == this){
+	public void ajustDisplay(Widget child) {
+		if (child.getParent() == this) {
 			boolean visible = !child.getElement().hasAttribute("aria-hidden");
 			if (orientation == Orientation.HORIZONTAL) {
 				child.getElement().getStyle().setDisplay(visible ? Style.Display.INLINE_BLOCK : Style.Display.NONE);
 			} else {
 				child.getElement().getStyle().setDisplay(visible ? Style.Display.BLOCK : Style.Display.NONE);
 			}
-			if(child instanceof RequiresResize)
-				((RequiresResize)child).onResize();
+			if (child instanceof RequiresResize)
+				((RequiresResize) child).onResize();
 		}
 	}
-	
+
 	@Override
 	public void add(Widget child) {
 		if (orientation == Orientation.HORIZONTAL) {
@@ -145,7 +153,8 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 				}
 			}
 			super.add(child, getElement().<Element> cast());
-			formatWidget(child);// Don't move this call fron here because of crazy GWT. It clears position style property!
+			formatWidget(child);// Don't move this call from here because of
+			                    // crazy GWT. It clears position style property!
 			if (isAttached()) {
 				ajustWidth();
 			}
@@ -154,7 +163,8 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 				child.getElement().getStyle().setMarginTop(vgap, Style.Unit.PX);
 			}
 			super.add(child, getElement().<Element> cast());
-			formatWidget(child);// Don't move this call fron here because of crazy GWT. It clears position style property!
+			formatWidget(child);// Don't move this call from here because of
+			                    // crazy GWT. It clears position style property!
 			if (isAttached()) {
 				ajustHeight();
 			}

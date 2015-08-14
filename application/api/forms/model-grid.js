@@ -463,6 +463,9 @@
             get: function() {
                 var value = delegate.name;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.name = P.boxAsJava(aValue);
             }
         });
         if(!P.ModelGrid){
@@ -711,6 +714,23 @@
              * @memberOf ModelGrid
              */
             P.ModelGrid.prototype.oddRowsColor = {};
+        }
+        Object.defineProperty(this, "headerVisible", {
+            get: function() {
+                var value = delegate.headerVisible;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.headerVisible = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * Generated property jsDoc.
+             * @property headerVisible
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.headerVisible = true;
         }
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
@@ -964,6 +984,23 @@
              */
             P.ModelGrid.prototype.showOddRowsInOtherColor = true;
         }
+        Object.defineProperty(this, "draggableRows", {
+            get: function() {
+                var value = delegate.draggableRows;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.draggableRows = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * Generated property jsDoc.
+             * @property draggableRows
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.draggableRows = {};
+        }
         Object.defineProperty(this, "font", {
             get: function() {
                 var value = delegate.font;
@@ -1093,6 +1130,39 @@
 
         /**
          *
+         * @method elementByModelIndex
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.elementByModelIndex = function(arg0) {
+            var delegate = this.unwrap();
+            var value = delegate.elementByModelIndex(P.boxAsJava(arg0));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
+         * @method try2StopAnyEditing
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.try2StopAnyEditing = function() {
+            var delegate = this.unwrap();
+            var value = delegate.try2StopAnyEditing();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
+         * @method try2CancelAnyEditing
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.try2CancelAnyEditing = function() {
+            var delegate = this.unwrap();
+            var value = delegate.try2CancelAnyEditing();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
          * @method addColumnNode
          * @memberOf ModelGrid
          */
@@ -1132,39 +1202,6 @@
         P.ModelGrid.prototype.insertColumnNode = function(arg0, arg1) {
             var delegate = this.unwrap();
             var value = delegate.insertColumnNode(P.boxAsJava(arg0), P.boxAsJava(arg1));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         *
-         * @method elementByModelIndex
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.elementByModelIndex = function(arg0) {
-            var delegate = this.unwrap();
-            var value = delegate.elementByModelIndex(P.boxAsJava(arg0));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         *
-         * @method try2StopAnyEditing
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.try2StopAnyEditing = function() {
-            var delegate = this.unwrap();
-            var value = delegate.try2StopAnyEditing();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         *
-         * @method try2CancelAnyEditing
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.try2CancelAnyEditing = function() {
-            var delegate = this.unwrap();
-            var value = delegate.try2CancelAnyEditing();
             return P.boxAsJs(value);
         };
 

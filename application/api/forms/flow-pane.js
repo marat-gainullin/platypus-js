@@ -251,6 +251,23 @@
              */
             P.FlowPane.prototype.onComponentResized = {};
         }
+        Object.defineProperty(this, "vgap", {
+            get: function() {
+                var value = delegate.vgap;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.vgap = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.FlowPane){
+            /**
+             * Vertical gap between components.
+             * @property vgap
+             * @memberOf FlowPane
+             */
+            P.FlowPane.prototype.vgap = 0;
+        }
         Object.defineProperty(this, "parent", {
             get: function() {
                 var value = delegate.parentWidget;
@@ -281,6 +298,23 @@
              * @memberOf FlowPane
              */
             P.FlowPane.prototype.onMouseEntered = {};
+        }
+        Object.defineProperty(this, "hgap", {
+            get: function() {
+                var value = delegate.hgap;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.hgap = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.FlowPane){
+            /**
+             * Horizontal gap between components.
+             * @property hgap
+             * @memberOf FlowPane
+             */
+            P.FlowPane.prototype.hgap = 0;
         }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
@@ -651,6 +685,9 @@
             get: function() {
                 var value = delegate.name;
                 return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.name = P.boxAsJava(aValue);
             }
         });
         if(!P.FlowPane){

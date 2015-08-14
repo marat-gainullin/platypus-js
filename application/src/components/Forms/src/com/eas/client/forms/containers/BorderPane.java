@@ -69,6 +69,12 @@ public class BorderPane extends JPanel implements HasPublished, HasContainerEven
         return super.getName();
     }
 
+    @ScriptFunction
+    @Override
+    public void setName(String name) {
+        super.setName(name);
+    }
+
     @ScriptFunction(jsDoc = GET_NEXT_FOCUSABLE_COMPONENT_JSDOC)
     @Override
     public JComponent getNextFocusableComponent() {
@@ -290,6 +296,40 @@ public class BorderPane extends JPanel implements HasPublished, HasContainerEven
         return null;
     }
 
+    private static final String HGAP_JSDOC = ""
+            + "/**\n"
+            + "* Horizontal gap between center and border components.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = HGAP_JSDOC)
+    public int getHgap() {
+        return ((BorderLayout) super.getLayout()).getHgap();
+    }
+
+    @ScriptFunction
+    public void setHgap(int aValue) {
+        ((BorderLayout) super.getLayout()).setHgap(aValue);
+        super.revalidate();
+        super.repaint();
+    }
+
+    private static final String VGAP_JSDOC = ""
+            + "/**\n"
+            + "* Vertical gap between center and border components.\n"
+            + "*/";
+
+    @ScriptFunction(jsDoc = VGAP_JSDOC)
+    public int getVgap() {
+        return ((BorderLayout) super.getLayout()).getVgap();
+    }
+
+    @ScriptFunction
+    public void setVgap(int aValue) {
+        ((BorderLayout) super.getLayout()).setVgap(aValue);
+        super.revalidate();
+        super.repaint();
+    }
+    
     public void add(JComponent aComp, int aPlace) {
         if (aComp != null) {
             checkCenterComponent();

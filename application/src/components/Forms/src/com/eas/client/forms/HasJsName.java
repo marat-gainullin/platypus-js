@@ -9,7 +9,7 @@ import com.eas.script.ScriptFunction;
 
 /**
  *
- * @author Марат
+ * @author mg
  */
 public interface HasJsName {
 
@@ -20,4 +20,7 @@ public interface HasJsName {
 
     @ScriptFunction(jsDoc = JS_NAME_DOC)
     public String getName();
+    
+    @ScriptFunction
+    public void setName(String aValue);
 }

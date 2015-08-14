@@ -1,14 +1,14 @@
 package com.eas.client.form.grid;
 
+import com.bearsoft.gwt.ui.widgets.grid.GridSection;
 import com.bearsoft.gwt.ui.widgets.grid.builders.ThemedCellTableBuilder;
 import com.eas.client.form.published.PublishedCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.dom.builder.shared.TableCellBuilder;
-import com.google.gwt.user.cellview.client.AbstractCellTable;
 
 public class RenderedTableCellBuilder<T> extends ThemedCellTableBuilder<T> {
 
-	public RenderedTableCellBuilder(AbstractCellTable<T> cellTable, String aDynamicTDClassName, String aDynamicCellClassName, String aDynamicOddRowsClassName, String aDynamicEvenRowsClassName) {
+	public RenderedTableCellBuilder(GridSection<T> cellTable, String aDynamicTDClassName, String aDynamicCellClassName, String aDynamicOddRowsClassName, String aDynamicEvenRowsClassName) {
 		super(cellTable, aDynamicTDClassName, aDynamicCellClassName, aDynamicOddRowsClassName, aDynamicEvenRowsClassName);
 	}
 

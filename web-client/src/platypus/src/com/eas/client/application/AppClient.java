@@ -37,6 +37,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.AnchorElement;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
@@ -158,6 +160,15 @@ public class AppClient {
 		};
 	}
 
+	public static String toAppModuleId(String aRelative, String aStartPoint) {
+		Element div = com.google.gwt.dom.client.Document.get().createDivElement();
+		div.setInnerHTML("<a href=\"" + aStartPoint + "/" + aRelative + "\">o</a>");
+		String absolute = div.getFirstChildElement().<AnchorElement> cast().getHref();
+		String hostContextPrefix = AppClient.relativeUri() + AppClient.APP_RESOURCE_PREFIX;
+		String appModuleId = absolute.substring(hostContextPrefix.length());
+		return appModuleId;
+	}
+
 	public static Object jsLoad(String aResourceName, final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
 		return _jsLoad(aResourceName, true, onSuccess, onFailure);
 	}
@@ -166,8 +177,9 @@ public class AppClient {
 		return _jsLoad(aResourceName, false, onSuccess, onFailure);
 	}
 
-	public static Object _jsLoad(String aResourceName, boolean aBinary, final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
-		SafeUri uri = AppClient.getInstance().getResourceUri(aResourceName);
+	public static Object _jsLoad(final String aResourceName, boolean aBinary, final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
+		final String callerDir = Utils.lookupCallerJsDir();
+		SafeUri uri = AppClient.getInstance().getResourceUri(aResourceName.startsWith("./") || aResourceName.startsWith("../") ? toAppModuleId(aResourceName, callerDir) : aResourceName);
 		if (onSuccess != null) {
 			AppClient.getInstance().startRequest(uri, aBinary ? ResponseType.ArrayBuffer : ResponseType.Default, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
@@ -443,7 +455,7 @@ public class AppClient {
 		}
 		return null;
 	}
-
+	
 	private String params(Parameters parameters) {
 		String[] res = new String[parameters.getParametersCount()];
 		for (int i = 0; i < parameters.getParametersCount(); i++) {
@@ -492,11 +504,12 @@ public class AppClient {
 		});
 	}
 
-	public Cancellable startApiRequest(String aUrlPrefix, final String aUrlQuery, String aBody, RequestBuilder.Method aMethod, String aContentType, Callback<XMLHttpRequest, XMLHttpRequest> aCallback) throws Exception {
+	public Cancellable startApiRequest(String aUrlPrefix, final String aUrlQuery, String aBody, RequestBuilder.Method aMethod, String aContentType, Callback<XMLHttpRequest, XMLHttpRequest> aCallback)
+	        throws Exception {
 		String url = apiUrl + (aUrlPrefix != null ? aUrlPrefix : "") + (aUrlQuery != null ? "?" + aUrlQuery : "");
 		final XMLHttpRequest req = XMLHttpRequest.create();
 		req.open(aMethod.toString(), url);
-		if(aContentType != null && !aContentType.isEmpty()){
+		if (aContentType != null && !aContentType.isEmpty()) {
 			req.setRequestHeader("Content-Type", aContentType);
 		}
 		interceptRequest(req);
@@ -693,7 +706,7 @@ public class AppClient {
 
 	public Cancellable requestModuleStructure(final String aModuleName, final Callback<ModuleStructure, XMLHttpRequest> aCallback) throws Exception {
 		if (modulesStructures.containsKey(aModuleName)) {
-			if (aCallback != null){
+			if (aCallback != null) {
 				Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 
 					@Override

@@ -55,6 +55,7 @@ public class FlowGapPanel extends FlowPanel implements RequiresResize {
 		w.getElement().getStyle().setMarginLeft(hgap, Style.Unit.PX);
 		w.getElement().getStyle().setMarginTop(vgap, Style.Unit.PX);
 		w.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+		w.getElement().getStyle().setVerticalAlign(Style.VerticalAlign.BOTTOM);
 		super.add(w);
 	}
 
