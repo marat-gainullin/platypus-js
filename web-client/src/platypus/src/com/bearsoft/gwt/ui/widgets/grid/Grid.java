@@ -326,36 +326,38 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 
 			@Override
 			public void onScroll(ScrollEvent event) {
-				int aimTop = scrollableRightContainer.getElement().getScrollTop();
-				int aimLeft = scrollableRightContainer.getElement().getScrollLeft();
-
-				scrollableLeftContainer.getElement().setScrollTop(aimTop);
-				int factTopDelta = aimTop - scrollableLeftContainer.getElement().getScrollTop();
-				if (factTopDelta > 0) {
-					scrollableLeftContainer.getElement().getStyle().setBottom(factTopDelta, Style.Unit.PX);
-				} else {
-					scrollableLeftContainer.getElement().getStyle().clearBottom();
-				}
-				headerRightContainer.getElement().setScrollLeft(aimLeft);
-				int factLeftDelta0 = aimLeft - headerRightContainer.getElement().getScrollLeft();
-				if (factLeftDelta0 > 0) {
-					headerRightContainer.getElement().getStyle().setRight(factLeftDelta0, Style.Unit.PX);
-				} else {
-					headerRightContainer.getElement().getStyle().clearRight();
-				}
-				frozenRightContainer.getElement().setScrollLeft(aimLeft);
-				int factLeftDelta1 = aimLeft - frozenRightContainer.getElement().getScrollLeft();
-				if (factLeftDelta1 > 0) {
-					frozenRightContainer.getElement().getStyle().setRight(factLeftDelta1, Style.Unit.PX);
-				} else {
-					frozenRightContainer.getElement().getStyle().clearRight();
-				}
-				footerRightContainer.getElement().setScrollLeft(scrollableRightContainer.getElement().getScrollLeft());
-				int factLeftDelta2 = aimLeft - footerRightContainer.getElement().getScrollLeft();
-				if (factLeftDelta2 > 0) {
-					footerRightContainer.getElement().getStyle().setRight(factLeftDelta2, Style.Unit.PX);
-				} else {
-					footerRightContainer.getElement().getStyle().clearRight();
+				if(frozenColumns > 0 || frozenRows > 0){
+					int aimTop = scrollableRightContainer.getElement().getScrollTop();
+					int aimLeft = scrollableRightContainer.getElement().getScrollLeft();
+	
+					scrollableLeftContainer.getElement().setScrollTop(aimTop);
+					int factTopDelta = aimTop - scrollableLeftContainer.getElement().getScrollTop();
+					if (factTopDelta > 0) {
+						scrollableLeftContainer.getElement().getStyle().setBottom(factTopDelta, Style.Unit.PX);
+					} else {
+						scrollableLeftContainer.getElement().getStyle().clearBottom();
+					}
+					headerRightContainer.getElement().setScrollLeft(aimLeft);
+					int factLeftDelta0 = aimLeft - headerRightContainer.getElement().getScrollLeft();
+					if (factLeftDelta0 > 0) {
+						headerRightContainer.getElement().getStyle().setRight(factLeftDelta0, Style.Unit.PX);
+					} else {
+						headerRightContainer.getElement().getStyle().clearRight();
+					}
+					frozenRightContainer.getElement().setScrollLeft(aimLeft);
+					int factLeftDelta1 = aimLeft - frozenRightContainer.getElement().getScrollLeft();
+					if (factLeftDelta1 > 0) {
+						frozenRightContainer.getElement().getStyle().setRight(factLeftDelta1, Style.Unit.PX);
+					} else {
+						frozenRightContainer.getElement().getStyle().clearRight();
+					}
+					footerRightContainer.getElement().setScrollLeft(scrollableRightContainer.getElement().getScrollLeft());
+					int factLeftDelta2 = aimLeft - footerRightContainer.getElement().getScrollLeft();
+					if (factLeftDelta2 > 0) {
+						footerRightContainer.getElement().getStyle().setRight(factLeftDelta2, Style.Unit.PX);
+					} else {
+						footerRightContainer.getElement().getStyle().clearRight();
+					}
 				}
 			}
 

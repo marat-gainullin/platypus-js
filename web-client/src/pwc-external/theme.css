@@ -579,8 +579,6 @@
     background-image:-moz-linear-gradient(top, #fef5bd,#faeca4);
     background-image:-o-linear-gradient(top, #fef5bd,#faeca4);
     background-image:linear-gradient(to bottom, #fef5bd,#faeca4);
-    -webkit-box-shadow:inset 0 1px rgba(255,255,255,0.4),inset 0 0 0 1px rgba(255,255,255,0.3),0 1px 1px rgba(0,0,0,0.04);
-    box-shadow:inset 0 1px rgba(255,255,255,0.4),inset 0 0 0 1px rgba(255,255,255,0.3),0 1px 1px rgba(0,0,0,0.04)
 }
 
 .window-caption-active{
@@ -596,8 +594,6 @@
     background-image:-moz-linear-gradient(top, #cef4d0,#b2eeaa);
     background-image:-o-linear-gradient(top, #cef4d0,#b2eeaa);
     background-image:linear-gradient(to bottom, #cef4d0,#b2eeaa);
-    -webkit-box-shadow:inset 0 1px rgba(255,255,255,0.4),inset 0 0 0 1px rgba(255,255,255,0.3),0 1px 1px rgba(0,0,0,0.04);
-    box-shadow:inset 0 1px rgba(255,255,255,0.4),inset 0 0 0 1px rgba(255,255,255,0.3),0 1px 1px rgba(0,0,0,0.04)
 }
 
 .window-tool{
@@ -648,7 +644,7 @@
     border-style: solid;
     border-color: #98cf9f #98cf9f #8ec397 #8ec397;
     border-radius: 3px;
-    box-shadow: -1px -1px 10px 1px #a5e0ac, 1px 2px 4px #8ec397;
+/*    box-shadow: -1px -1px 10px 1px #a5e0ac, 1px 2px 4px #8ec397;*/
 }
 
 .vertical-decor{

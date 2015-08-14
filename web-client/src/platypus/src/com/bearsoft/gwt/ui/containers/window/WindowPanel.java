@@ -109,6 +109,8 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 	protected int mouseScreenY;
 	protected int targetScrollLeft;
 	protected int targetScrollTop;
+	
+	protected boolean dragged;
 
 	@Override
 	public final void setCaptionWidget(HasHTML aCaptionWidget) {
@@ -146,7 +148,6 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 							targetScrollLeft = Integer.parseInt(tLeft.substring(0, tLeft.length() - 2));
 							String tTop = getMovableTarget().getElement().getStyle().getTop();
 							targetScrollTop = Integer.parseInt(tTop.substring(0, tTop.length() - 2));
-							beginMoving();
 						}
 					}
 
@@ -155,6 +156,7 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 
 					@Override
 					public void onMouseUp(MouseUpEvent event) {
+						dragged = false;
 						event.preventDefault();
 						event.stopPropagation();
 						if (movable && !maximized) {
@@ -174,6 +176,10 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 								event.stopPropagation();
 								int dx = event.getScreenX() - mouseScreenX;
 								int dy = event.getScreenY() - mouseScreenY;
+								if(!dragged && (dx != 0 || dy != 0)){
+									dragged = true;
+									beginMoving();
+								}
 								setPosition(targetScrollLeft + dx >= 0 ? targetScrollLeft + dx : 0, targetScrollTop + dy >= 0 ? targetScrollTop + dy : 0);
 							}
 						}
@@ -555,12 +561,16 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 
 	@Override
 	protected void beginResizing() {
+		super.beginResizing();
 		verticalPanelContent.getElement().getStyle().setProperty("transition", "none");
 		getMovableTarget().getElement().getStyle().setProperty("transition", "none");
+		getWidget().getElement().getStyle().setVisibility(Style.Visibility.HIDDEN);
 	}
 
 	@Override
 	protected void endResizing() {
+		super.endResizing();
+		getWidget().getElement().getStyle().clearVisibility();
 		if (animationEnabled) {
 			verticalPanelContent.getElement().getStyle().clearProperty("transition");
 			getMovableTarget().getElement().getStyle().clearProperty("transition");
@@ -569,9 +579,11 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 
 	protected void beginMoving() {
 		getMovableTarget().getElement().getStyle().setProperty("transition", "none");
+		getWidget().getElement().getStyle().setVisibility(Style.Visibility.HIDDEN);
 	}
 
 	protected void endMoving() {
+		getWidget().getElement().getStyle().clearVisibility();
 		if (animationEnabled) {
 			getMovableTarget().getElement().getStyle().clearProperty("transition");
 		}
