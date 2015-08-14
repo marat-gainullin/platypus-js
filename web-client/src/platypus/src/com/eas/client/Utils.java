@@ -723,4 +723,42 @@ public class Utils {
 			}
 		};
 	}
+
+	private static String extractFileName(StackTraceElement aFrame) {
+		String fileName = aFrame.getFileName();
+		if (fileName != null) {
+			int atIndex = fileName.indexOf("@");
+			if (atIndex != -1) {
+				fileName = fileName.substring(0, atIndex);
+			}
+			return fileName;
+		} else {
+			return null;
+		}
+	}
+
+	public static String lookupCallerJsDir(){
+		String calledFromDir = null;
+		try {
+			throw new Exception("current file test");
+		} catch (Exception ex) {
+			String calledFromFile = null;
+			StackTraceElement[] stackFrames = ex.getStackTrace();
+			String firstFileName = extractFileName(stackFrames[0]);
+			if (firstFileName != null) {
+				for (int frameIdx = 1; frameIdx < stackFrames.length; frameIdx++) {
+					String fileName = extractFileName(stackFrames[frameIdx]);
+					if (fileName != null && !fileName.equals(firstFileName)) {
+						calledFromFile = fileName;
+						break;
+					}
+				}
+			}
+			if (calledFromFile != null) {
+				int lastSlashIndex = calledFromFile.lastIndexOf('/');
+				calledFromDir = calledFromFile.substring(0, lastSlashIndex);
+			}
+		}
+		return calledFromDir;
+	}
 }

@@ -208,7 +208,7 @@ public class FormFactory {
         if (aIconName != null && !aIconName.isEmpty()) {
             Scripts.Space space = Scripts.getSpace();
             try {
-                IconResources.load(aIconName, space, onLoad, onFailure);
+                IconResources.load(aIconName, null, space, onLoad, onFailure);
             } catch (Exception ex) {
                 Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
             }
