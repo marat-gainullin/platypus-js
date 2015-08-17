@@ -215,7 +215,7 @@ public class Entity implements HasPublished {
 	}
 
 	public Query getQuery() throws Exception {
-		assert query != null : "Query must present (getQuery)";
+		assert query != null : "Entity definition missing ( " + queryName + " )";
 		return query;
 	}
 

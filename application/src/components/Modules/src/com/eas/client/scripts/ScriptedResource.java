@@ -139,16 +139,16 @@ public class ScriptedResource {
         return load(aResourceName, aCalledFromFile, (JSObject) null, (JSObject) null);
     }
 
-    public static Object load(final String aResourceName, String aCalledFromFile, JSObject onSuccess) throws Exception {
-        return load(aResourceName, aCalledFromFile, onSuccess, (JSObject) null);
+    public static Object load(final String aResourceName, String aCalledFromFile, JSObject aOnSuccess) throws Exception {
+        return load(aResourceName, aCalledFromFile, aOnSuccess, (JSObject) null);
     }
 
-    public static Object load(final String aResourceName, String aCalledFromFile, JSObject onSuccess, JSObject onFailure) throws Exception {
+    public static Object load(final String aResourceName, String aCalledFromFile, JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
         Scripts.Space space = Scripts.getSpace();
-        return _load(aResourceName, aCalledFromFile != null ? new URL(aCalledFromFile).toURI() : null, space, onSuccess != null ? (Object aLoaded) -> {
-            onSuccess.call(null, new Object[]{space.toJs(aLoaded)});
-        } : null, onSuccess != null ? (Exception ex) -> {
-            onFailure.call(null, new Object[]{space.toJs(ex.getMessage())});
+        return _load(aResourceName, aCalledFromFile != null ? new URL(aCalledFromFile).toURI() : null, space, aOnSuccess != null ? (Object aLoaded) -> {
+            aOnSuccess.call(null, new Object[]{space.toJs(aLoaded)});
+        } : null, aOnFailure != null ? (Exception ex) -> {
+            aOnFailure.call(null, new Object[]{space.toJs(ex.getMessage())});
         } : null);
     }
 
@@ -177,9 +177,9 @@ public class ScriptedResource {
                     }
                 });
             } else {
-                app.getModules().getModule(aResourceName, aSpace, (ModuleStructure s) -> {
+                String resourceName = normalizeResourcePath(aResourceName, aCalledFromFile);
+                app.getModules().getModule(resourceName, aSpace, (ModuleStructure s) -> {
                     try {
-                        String resourceName = normalizeResourcePath(aResourceName, aCalledFromFile);
                         String sourcesPath = app.getModules().getLocalPath();
                         File resourceFile = new File(sourcesPath + File.separator + resourceName);
                         if (resourceFile.exists() && !resourceFile.isDirectory()) {
@@ -198,7 +198,7 @@ public class ScriptedResource {
                             }
                             onSuccess.accept(encoding != null ? new String(data, encoding) : data);
                         } else {
-                            Exception ex = new IllegalArgumentException(String.format("Resource %s not found", aResourceName));
+                            Exception ex = new IllegalArgumentException(String.format("Resource %s not found", resourceName));
                             if (onFailure != null) {
                                 onFailure.accept(ex);
                             } else {
@@ -237,8 +237,8 @@ public class ScriptedResource {
             SEHttpResponse httpResponse = requestHttpResource(aResourceName, null, null, null);
             return httpResponse.getBody() != null ? httpResponse.getBody() : httpResponse.getBodyBuffer();
         } else {
-            app.getModules().getModule(aResourceName, aSpace, null, null);
             String resourceName = normalizeResourcePath(aResourceName, aCalledFromFile);
+            app.getModules().getModule(resourceName, aSpace, null, null);
             String sourcesPath = app.getModules().getLocalPath();
             File resourceFile = new File(sourcesPath + File.separator + resourceName);
             if (resourceFile.exists() && !resourceFile.isDirectory()) {
@@ -255,7 +255,7 @@ public class ScriptedResource {
                     }
                 }
             } else {
-                throw new IllegalArgumentException(String.format("Resource %s not found", aResourceName));
+                throw new IllegalArgumentException(String.format("Resource %s not found", resourceName));
             }
             return encoding != null ? new String(data, encoding) : data;
         }
@@ -556,7 +556,7 @@ public class ScriptedResource {
         if (aPath.startsWith("/")) {
             throw new IllegalStateException("Platypus resource path can't begin with /. Platypus resource paths must point somewhere in application, but not in filesystem.");
         }
-        if (aPath.startsWith("..") || aPath.startsWith(".")) {
+        if (aPath.startsWith("./") || aPath.startsWith("../")) {
             if (aCalledFromFile != null) {
                 Path apiPath = Scripts.getAbsoluteApiPath();
                 Path appPath = Paths.get(new File(app.getModules().getLocalPath()).toURI());

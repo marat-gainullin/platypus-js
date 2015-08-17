@@ -28,7 +28,7 @@ public class IconResources {
 
     public static ImageIcon load(String aResourceName, String aCalledFromFile, Scripts.Space aSpace, Consumer<ImageIcon> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (onSuccess != null) {
-            ScriptedResource.load(aResourceName, aCalledFromFile != null ? new URL(aCalledFromFile).toURI() : null, aSpace, (Object aLoaded) -> {
+            ScriptedResource._load(aResourceName, aCalledFromFile != null ? new URL(aCalledFromFile).toURI() : null, aSpace, (Object aLoaded) -> {
                 if (aLoaded instanceof byte[]) {
                     byte[] content = (byte[]) aLoaded;
                     onSuccess.accept(new ImageIcon(content));

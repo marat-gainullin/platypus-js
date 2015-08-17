@@ -600,11 +600,13 @@ public class Application {
 			if(!Array.isArray(aEntities)){
 				aEntities = aEntities + "";
 				if(aEntities.length > 5 && aEntities.trim().substring(0, 5).toLowerCase() === "<?xml"){
-					var groups = /entityId="(.+)"/ig.exec(aEntities);
-					if(groups && groups.length > 1){
-						entities = groups.slice(1, groups.length);
-					}else{
-						entities = [];
+					entities = [];
+					var pattern = /queryId="(.+?)"/ig;
+					var groups;
+					while((groups = pattern.exec(aEntities)) != null){
+						if(groups.length > 1){
+							entities.push(groups[1]);
+						}
 					}
 				}else{
 					entities = [aEntities];

@@ -1447,11 +1447,13 @@
         if (!Array.isArray(aEntities)) {
             aEntities = aEntities + "";
             if (aEntities.length > 5 && aEntities.trim().substring(0, 5).toLowerCase() === "<?xml") {
-                var groups = /entityId="(.+)"/ig.exec(aEntities);
-                if (groups && groups.length > 1) {
-                    entities = groups.slice(1, groups.length);
-                } else {
-                    entities = [];
+                entities = [];
+                var pattern = /queryId="(.+?)"/ig;
+                var groups;
+                while ((groups = pattern.exec(aEntities)) != null) {
+                    if (groups.length > 1) {
+                        entities.push(groups[1]);
+                    }
                 }
             } else {
                 entities = [aEntities];
@@ -1462,7 +1464,7 @@
         ScriptedResourceClass.loadEntities(Java.to(entities, JavaStringArrayClass), aOnSuccess ? aOnSuccess : null, aOnFailure ? aOnFailure : null);
     }
     Object.defineProperty(P, "loadEntities", {value: loadEntities});
-    
+
     function loadRemotes(aRemotesNames, aOnSuccess, aOnFailure) {
         var remotesNames = Array.isArray(aRemotesNames) ? aRemotesNames : [aRemotesNames];
         ScriptedResourceClass.loadRemotes(Java.to(remotesNames, JavaStringArrayClass), aOnSuccess ? aOnSuccess : null, aOnFailure ? aOnFailure : null);
@@ -1699,11 +1701,13 @@ if (!P) {
      * while dependencies resolution process, initiated with P.require() function,
      * They will be accessible and there is no necessity to load them manually.
      * @param {type} aEntities Names of entities, definitions will be loaded for.
+     * It may be a single entity name or an array of entities names or a model definition xml string.
+     * If it will be a model definition xml string, P.loadEntities() will find entities names automatically.
      * @param {type} aOnSuccess Success callback. If omitted, than in JavaSE environment, synchrionous call will be performed.
      * @param {type} aOnFailure Failure callback. Accepts information about any problem occured while loading.
      * @returns {undefined}
      */
-    P.loadEntities = function(aEntities, aOnSuccess, aOnFailure) {
+    P.loadEntities = function (aEntities, aOnSuccess, aOnFailure) {
     };
     /**
      * Loads sever modules methods lists from server.
@@ -1717,7 +1721,7 @@ if (!P) {
      * @param {type} aOnFailure Failure callback. Accepts information about any problem occured while loading.
      * @returns {undefined} 
      */
-    P.loadRemotes = function(aRemotesNames, aOnSuccess, aOnFailure) {
+    P.loadRemotes = function (aRemotesNames, aOnSuccess, aOnFailure) {
     };
     /**
      * Parses *.model files and creates data model (entity manager) of a module.

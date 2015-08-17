@@ -7,6 +7,8 @@ package com.eas.client.threetier.json;
 
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
+import com.eas.client.metadata.Parameter;
+import com.eas.client.metadata.Parameters;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.internal.runtime.JSType;
 
@@ -33,7 +35,7 @@ public class FieldsJSONReader {
             String type = po.hasMember(TYPE_PROP_NAME) && po.getMember(TYPE_PROP_NAME) != null ? JSType.toString(po.getMember(TYPE_PROP_NAME)) : null;
             boolean pk = JSType.toBoolean(po.getMember(PK_PROP_NAME));
             boolean nullable = JSType.toBoolean(po.getMember(NULLABLE_PROP_NAME));
-            Field f = new Field(aFields.generateNewName(name)); 
+            Field f = aFields instanceof Parameters ? new Parameter(aFields.generateNewName(name)) : new Field(aFields.generateNewName(name)); 
             f.setDescription(desc);
             f.setType(type);
             f.setPk(pk);
