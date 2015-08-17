@@ -272,7 +272,7 @@ public class Loader {
 		}
 	}
 
-	private void loadServerModules(Collection<String> aServerModulesNames, final Callback<Void, String> aCallback) throws Exception {
+	public void loadServerModules(Collection<String> aServerModulesNames, final Callback<Void, String> aCallback) throws Exception {
 		if (!aServerModulesNames.isEmpty()) {
 			final CumulativeCallbackAdapter<String> process = new CumulativeCallbackAdapter<String>(aServerModulesNames.size()) {
 

@@ -146,8 +146,8 @@
     Object.defineProperty(P, "invokeLater", {get: function () {
             return invokeLater;
         }});
-    
-    function lookupCallerFile(){
+
+    function lookupCallerFile() {
         var calledFromFile = null;
         var error = new Error('path test error');
         if (error.stack) {
@@ -162,7 +162,7 @@
         }
         return calledFromFile;
     }
-    
+
     /**
      * @static
      * @param {type} deps
@@ -648,7 +648,7 @@
         Object.defineProperty(P, "FontStyle", {
             value: FontStyle
         });
-        function loadFormDocument(aDocument, aModel, aTarget){
+        function loadFormDocument(aDocument, aModel, aTarget) {
             var formFactory = FormLoaderClass.load(aDocument, ScriptedResourceClass.getApp(), arguments[1] ? aModel : null);
             var form = formFactory.form;
             if (aTarget) {
@@ -689,13 +689,13 @@
             form.formKey = aName;
             return form;
         }
-        
-        function readForm(aContent, aModel, aTarget){
+
+        function readForm(aContent, aModel, aTarget) {
             P.require(['forms/index.js', 'grid/index.js']);
             var document = Source2XmlDom.transform(aContent);
             return loadFormDocument(document, aModel, aTarget);
         }
-        
+
         Object.defineProperty(P, "loadForm", {value: loadForm});
         Object.defineProperty(P, "readForm", {value: readForm});
     }
@@ -747,8 +747,8 @@
             (function () {
                 var nField = nnFields[n];
                 var pField = EngineUtilsClass.unwrap(nField.getPublished());
-                if('length' == nField.name)
-                  lengthMet = true;  
+                if ('length' == nField.name)
+                    lengthMet = true;
                 Object.defineProperty(target, nField.name, {
                     value: pField
                 });
@@ -757,7 +757,7 @@
                 });
             })();
         }
-        if(!lengthMet)
+        if (!lengthMet)
             Object.defineProperty(target, 'length', {
                 value: nnFields.size()
             });
@@ -1042,6 +1042,383 @@
     var UpdateClass = Java.type('com.eas.client.changes.Update');
     var ValueClass = Java.type('com.eas.client.changes.ChangeValue');
 
+    function loadModelDocument(aDocument, aTarget) {
+        P.require(['core/index.js'
+                    , 'datamodel/index.js'
+                    , 'managed.js'
+                    , 'orderer.js'
+        ]);
+        var model = ModelLoaderClass.load(aDocument, ScriptedResourceClass.getApp());
+        var modelCTor;
+        if (model instanceof TwoTierModelClass) {
+            modelCTor = P.ApplicationDbModel;
+        } else if (model instanceof ThreeTierModelClass) {
+            modelCTor = P.ApplicationPlatypusModel;
+        } else {
+            throw "Can't determine model's type.";
+        }
+        if (aTarget) {
+            modelCTor.call(aTarget, model);
+        } else {
+            aTarget = new modelCTor(model);
+        }
+        function publishEntity(nEntity) {
+            var entityCTor;
+            if (model instanceof TwoTierModelClass) {
+                entityCTor = P.ApplicationDbEntity;
+            } else if (model instanceof ThreeTierModelClass) {
+                entityCTor = P.ApplicationPlatypusEntity;
+            } else {
+                throw "Can't determine model's type.";
+            }
+            var justInserted = null;
+            var justInsertedChange = null;
+            var orderers = {};
+            var published = [];
+
+            function managedOnChange(aSubject, aChange) {
+                if (!tryToComplementInsert(aSubject, aChange)) {
+                    var updateChange = new UpdateClass(nEntity.getQueryName());
+                    generateChangeLogKeys(updateChange.keys, nFields, aChange.propertyName, aSubject, aChange.oldValue);
+                    updateChange.data.add(new ValueClass(aChange.propertyName, aChange.newValue));
+                    nEntity.getChangeLog().add(updateChange);
+                }
+                Object.keys(orderers).forEach(function (aOrdererKey) {
+                    var aOrderer = orderers[aOrdererKey];
+                    if (aOrderer.inKeys(aChange.propertyName)) {
+                        aOrderer.add(aChange.source);
+                    }
+                });
+                fire(aSubject, aChange);
+                fireSelfScalarsOppositeCollectionsChanges(aSubject, aChange, nFields);// Expanding change
+                var field = noFields[aChange.propertyName];
+                if (field && field.pk) {
+                    fireOppositeScalarsSelfCollectionsChanges(aSubject, aChange, nFields);
+                }
+            }
+            function managedBeforeChange(aSubject, aChange) {
+                var oldScalars = prepareSelfScalarsChanges(aSubject, aChange, nFields);
+                var oppositeScalarsFirerers = prepareOppositeScalarsChanges(aSubject, nFields);
+                Object.keys(orderers).forEach(function (aOrdererKey) {
+                    var aOrderer = orderers[aOrdererKey];
+                    if (aOrderer.inKeys(aChange.propertyName)) {
+                        aOrderer.delete(aChange.source);
+                    }
+                });
+                return {selfScalarsOldValues: oldScalars, oppositeScalarsFirerers: oppositeScalarsFirerers};
+            }
+            function tryToComplementInsert(aSubject, aChange) {
+                var complemented = false;
+                if (aSubject === justInserted && !noFields[aChange.propertyName].nullable) {
+                    var met = false;
+                    for (var d = 0; d < justInsertedChange.data.length; d++) {
+                        var iv = justInsertedChange.data[d];
+                        if (iv.name == aChange.propertyName) {
+                            met = true;
+                            break;
+                        }
+                    }
+                    if (!met) {
+                        justInsertedChange.getData().add(new ValueClass(aChange.propertyName, aChange.newValue));
+                        complemented = true;
+                    }
+                }
+                return complemented;
+            }
+            function acceptInstance(aSubject) {
+                Object.keys(noFields).forEach(function (aFieldName) {
+                    if (typeof aSubject[aFieldName] === 'undefined')
+                        aSubject[aFieldName] = null;
+                });
+                P.manageObject(aSubject, managedOnChange, managedBeforeChange);
+                listenable(aSubject);
+                // ORM mutable scalar and collection properties
+                var define = function (aOrmDefs) {
+                    for each (var defsEntry in aOrmDefs.entrySet()) {
+                        var jsDef = EngineUtilsClass.unwrap(defsEntry.getValue().getJsDef());
+                        Object.defineProperty(aSubject, defsEntry.getKey(), jsDef);
+                    }
+                };
+                define(nFields.getOrmScalarDefinitions());
+                define(nFields.getOrmCollectionsDefinitions());
+            }
+
+            var _onInserted = null;
+            var _onDeleted = null;
+            var _onScrolled = null;
+            P.manageArray(published, {
+                spliced: function (added, deleted) {
+                    added.forEach(function (aAdded) {
+                        justInserted = aAdded;
+                        justInsertedChange = new InsertClass(nEntity.getQueryName());
+                        for (var nf = 0; nf < nnFields.size(); nf++) {
+                            var nField = nnFields[nf];
+                            if (!aAdded[nField.name] && nField.pk) {
+                                aAdded[nField.name] = nField.generateValue();
+                            }
+                        }
+                        for (var na in aAdded) {
+                            var nField = noFields[na];
+                            if (nField) {
+                                var v = aAdded[na];
+                                var cv = new ValueClass(nField.name, v);
+                                justInsertedChange.data.add(cv);
+                            }
+                        }
+                        nEntity.getChangeLog().add(justInsertedChange);
+                        for (var aOrdererKey in orderers) {
+                            var aOrderer = orderers[aOrdererKey];
+                            aOrderer.add(aAdded);
+                        }
+                        acceptInstance(aAdded);
+                        fireOppositeScalarsChanges(aAdded, nFields);
+                        fireOppositeCollectionsChanges(aAdded, nFields);
+                    });
+                    deleted.forEach(function (aDeleted) {
+                        if (aDeleted === justInserted) {
+                            justInserted = null;
+                            justInsertedChange = null;
+                        }
+                        var deleteChange = new DeleteClass(nEntity.getQueryName());
+                        generateChangeLogKeys(deleteChange.keys, nFields, null, aDeleted, null);
+                        nEntity.getChangeLog().add(deleteChange);
+                        for (var aOrdererKey in orderers) {
+                            var aOrderer = orderers[aOrdererKey];
+                            aOrderer.delete(aDeleted);
+                        }
+                        fireOppositeScalarsChanges(aDeleted, nFields);
+                        fireOppositeCollectionsChanges(aDeleted, nFields);
+                        unlistenable(aDeleted);
+                        P.unmanageObject(aDeleted);
+                    });
+                    if (_onInserted && added.length > 0) {
+                        try {
+                            _onInserted({source: published, items: added});
+                        } catch (e) {
+                            Logger.severe(e);
+                        }
+                    }
+                    if (_onDeleted && deleted.length > 0) {
+                        try {
+                            _onDeleted({source: published, items: deleted});
+                        } catch (e) {
+                            Logger.severe(e);
+                        }
+                    }
+                    fire(published, {source: published, propertyName: 'length'});
+                },
+                scrolled: function (aSubject, oldCursor, newCursor) {
+                    if (_onScrolled) {
+                        try {
+                            _onScrolled({source: published, propertyName: 'cursor', oldValue: oldCursor, newValue: newCursor});
+                        } catch (e) {
+                            Logger.severe(e);
+                        }
+                    }
+                    fire(published, {source: published, propertyName: 'cursor', oldValue: oldCursor, newValue: newCursor});
+                }
+            });
+            var pSchema = {};
+            Object.defineProperty(published, "schema", {
+                value: pSchema
+            });
+            var pkFieldName = '';
+            var nFields = nEntity.getFields();
+            var nnFields = nFields.toCollection();
+            var noFields = {};
+            // schema
+            var pSchemaLengthMet = false;
+            for (var n = 0; n < nnFields.size(); n++) {
+                (function () {
+                    var nField = nnFields[n];
+                    noFields[nField.name] = nField;
+                    if (nField.isPk())
+                        pkFieldName = nField.name;
+                    var schemaDesc = {
+                        value: nField.getPublished()
+                    };
+                    if ('length' == nField.name)
+                        pSchemaLengthMet = true;
+                    if (!pSchema[nField.name]) {
+                        Object.defineProperty(pSchema, nField.name, schemaDesc);
+                    } else {
+                        var eTitle = nEntity.title ? " [" + nEntity.title + "]" : "";
+                        throw "Duplicated field name found: " + nField.name + " in entity " + nEntity.name + eTitle;
+                    }
+                    Object.defineProperty(pSchema, n, schemaDesc);
+                })();
+            }
+            if (!pSchemaLengthMet) {
+                Object.defineProperty(pSchema, 'length', {value: nnFields.size()});
+            }
+            // entity.params.p1 syntax
+            var nParameters = nEntity.getQuery().getParameters();
+            var ncParameters = nParameters.toCollection();
+            var pParams = {};
+            for (var p = 0; p < ncParameters.size(); p++) {
+                (function () {
+                    var nParameter = ncParameters[p];
+                    var pDesc = {
+                        get: function () {
+                            return nParameter.jsValue;
+                        },
+                        set: function (aValue) {
+                            nParameter.jsValue = aValue;
+                        }
+                    };
+                    Object.defineProperty(pParams, nParameter.name, pDesc);
+                    Object.defineProperty(pParams, p, pDesc);
+                })();
+            }
+            Object.defineProperty(published, 'params', {value: pParams});
+            // entity.params.schema.p1 syntax
+            var pParamsSchema = EngineUtilsClass.unwrap(nParameters.getPublished());
+            if (!pParams.schema)
+                Object.defineProperty(pParams, 'schema', {value: pParamsSchema});
+            Object.defineProperty(published, 'find', {value: function (aCriteria) {
+                    var keys = Object.keys(aCriteria);
+                    keys = keys.sort();
+                    var ordererKey = keys.join(' | ');
+                    var orderer = orderers[ordererKey];
+                    if (!orderer) {
+                        orderer = new P.Orderer(keys);
+                        published.forEach(function (item) {
+                            orderer.add(item);
+                        });
+                        orderers[ordererKey] = orderer;
+                    }
+                    var found = orderer.find(aCriteria);
+                    return found;
+                }});
+            Object.defineProperty(published, 'findByKey', {value: function (aKeyValue) {
+                    var criteria = {};
+                    criteria[pkFieldName] = aKeyValue;
+                    var found = published.find(criteria);
+                    return found.length > 0 ? found[0] : null;
+                }});
+            Object.defineProperty(published, 'findById', {value: function (aKeyValue) {
+                    P.Logger.warning('findById() is deprecated. Use findByKey() instead.');
+                    return published.findByKey(aKeyValue);
+                }});
+            var toBeDeletedMark = '-platypus-to-be-deleted-mark';
+            Object.defineProperty(published, 'remove', {value: function (toBeDeleted) {
+                    toBeDeleted = toBeDeleted.forEach ? toBeDeleted : [toBeDeleted];
+                    toBeDeleted.forEach(function (anInstance) {
+                        anInstance[toBeDeletedMark] = true;
+                    });
+                    for (var d = published.length - 1; d >= 0; d--) {
+                        if (published[d][toBeDeletedMark]) {
+                            published.splice(d, 1);
+                        }
+                    }
+                    toBeDeleted.forEach(function (anInstance) {
+                        delete anInstance[toBeDeletedMark];
+                    });
+                }});
+            Object.defineProperty(published, 'onScrolled', {
+                get: function () {
+                    return _onScrolled;
+                },
+                set: function (aValue) {
+                    _onScrolled = aValue;
+                }
+            });
+            Object.defineProperty(published, 'onInserted', {
+                get: function () {
+                    return _onInserted;
+                },
+                set: function (aValue) {
+                    _onInserted = aValue;
+                }
+            });
+            Object.defineProperty(published, 'onDeleted', {
+                get: function () {
+                    return _onDeleted;
+                },
+                set: function (aValue) {
+                    _onDeleted = aValue;
+                }
+            });
+            nEntity.setSnapshotConsumer(function (aSnapshot, aFreshData) {
+                if (aFreshData) {
+                    Array.prototype.splice.call(published, 0, published.length);
+                }
+                for (var s = 0; s < aSnapshot.length; s++) {
+                    var snapshotInstance = aSnapshot[s];
+                    var accepted;
+                    if (nEntity.getElementClass()) {
+                        var instanceCtor = EngineUtilsClass.unwrap(nEntity.getElementClass());
+                        accepted = new instanceCtor();
+                    } else {
+                        accepted = {};
+                    }
+                    for (var sp in snapshotInstance) {
+                        accepted[sp] = snapshotInstance[sp];
+                    }
+                    Array.prototype.push.call(published, accepted);
+                    acceptInstance(accepted);
+                }
+                orderers = {};
+                published.cursor = published.length > 0 ? published[0] : null;
+                fire(published, {source: published, propertyName: 'length'});
+                published.forEach(function (aItem) {
+                    fireOppositeScalarsChanges(aItem, nFields);
+                    fireOppositeCollectionsChanges(aItem, nFields);
+                });
+            });
+            nEntity.setSnapshotProducer(function () {
+                var snapshot = [];
+                var snapshotFields = Object.keys(noFields);
+                published.forEach(function (aItem) {
+                    var cloned = {};
+                    snapshotFields.forEach(function (aFieldName) {
+                        var typeOfField = typeof aItem[aFieldName];
+                        if (typeOfField === 'undefined' || typeOfField === 'function')
+                            cloned[aFieldName] = null;
+                        else
+                            cloned[aFieldName] = aItem[aFieldName];
+                    });
+                    snapshot.push(cloned);
+                });
+                return snapshot;
+            });
+            listenable(published);
+            entityCTor.call(published, nEntity);
+            //WARNING Don't delete unwrap, due to it is used in methods bodies.
+            for (var protoEntryName in entityCTor.prototype) {
+                if (!published[protoEntryName]) {
+                    var protoEntry = entityCTor.prototype[protoEntryName];
+                    if (protoEntry instanceof Function) {
+                        Object.defineProperty(published, protoEntryName, {value: protoEntry});
+                    }
+                }
+            }
+            return published;
+        }
+        var entities = model.entities();
+        for each (var enEntity in entities) {
+            enEntity.validateQuery();
+            if (enEntity.name) {
+                (function () {
+                    var ppEntity = publishEntity(enEntity);
+                    Object.defineProperty(aTarget, enEntity.name, {
+                        value: ppEntity,
+                        enumerable: true
+                    });
+                })();
+            }
+        }
+        model.createORMDefinitions();
+        aTarget.loadEntity = function (queryName) {
+            var lnEntity = model.loadEntity(P.boxAsJava(queryName));
+            return publishEntity(lnEntity);
+        };
+        aTarget.createEntity = function (sqlText, datasourceName) {
+            var lnEntity = model.createEntity(P.boxAsJava(sqlText), P.boxAsJava(datasourceName));
+            return publishEntity(lnEntity);
+        };
+        return aTarget;
+    }
     /**
      * @static
      * @param {type} aName
@@ -1049,389 +1426,48 @@
      * @returns {P.loadModel.publishTo}
      */
     function loadModel(aName, aTarget) {
-        P.require(['core/index.js'
-                    , 'datamodel/index.js'
-                    , 'managed.js'
-                    , 'orderer.js'
-        ]);
         var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
         if (files) {
             var modelDocument = ScriptedResourceClass.getApp().getModels().get(aName, files);
-            var model = ModelLoaderClass.load(modelDocument, ScriptedResourceClass.getApp());
-            var modelCTor;
-            if (model instanceof TwoTierModelClass) {
-                modelCTor = P.ApplicationDbModel;
-            } else if (model instanceof ThreeTierModelClass) {
-                modelCTor = P.ApplicationPlatypusModel;
-            } else {
-                throw "Can't determine model's type.";
-            }
-            if (aTarget) {
-                modelCTor.call(aTarget, model);
-            } else {
-                aTarget = new modelCTor(model);
-            }
-            function publishEntity(nEntity) {
-                var entityCTor;
-                if (model instanceof TwoTierModelClass) {
-                    entityCTor = P.ApplicationDbEntity;
-                } else if (model instanceof ThreeTierModelClass) {
-                    entityCTor = P.ApplicationPlatypusEntity;
-                } else {
-                    throw "Can't determine model's type.";
-                }
-                var justInserted = null;
-                var justInsertedChange = null;
-                var orderers = {};
-                var published = [];
-
-                function managedOnChange(aSubject, aChange) {
-                    if (!tryToComplementInsert(aSubject, aChange)) {
-                        var updateChange = new UpdateClass(nEntity.getQueryName());
-                        generateChangeLogKeys(updateChange.keys, nFields, aChange.propertyName, aSubject, aChange.oldValue);
-                        updateChange.data.add(new ValueClass(aChange.propertyName, aChange.newValue));
-                        nEntity.getChangeLog().add(updateChange);
-                    }
-                    Object.keys(orderers).forEach(function (aOrdererKey) {
-                        var aOrderer = orderers[aOrdererKey];
-                        if (aOrderer.inKeys(aChange.propertyName)) {
-                            aOrderer.add(aChange.source);
-                        }
-                    });
-                    fire(aSubject, aChange);
-                    fireSelfScalarsOppositeCollectionsChanges(aSubject, aChange, nFields);// Expanding change
-                    var field = noFields[aChange.propertyName];
-                    if (field && field.pk) {
-                        fireOppositeScalarsSelfCollectionsChanges(aSubject, aChange, nFields);
-                    }
-                }
-                function managedBeforeChange(aSubject, aChange) {
-                    var oldScalars = prepareSelfScalarsChanges(aSubject, aChange, nFields);
-                    var oppositeScalarsFirerers = prepareOppositeScalarsChanges(aSubject, nFields);
-                    Object.keys(orderers).forEach(function (aOrdererKey) {
-                        var aOrderer = orderers[aOrdererKey];
-                        if (aOrderer.inKeys(aChange.propertyName)) {
-                            aOrderer.delete(aChange.source);
-                        }
-                    });
-                    return {selfScalarsOldValues: oldScalars, oppositeScalarsFirerers: oppositeScalarsFirerers};
-                }
-                function tryToComplementInsert(aSubject, aChange) {
-                    var complemented = false;
-                    if (aSubject === justInserted && !noFields[aChange.propertyName].nullable) {
-                        var met = false;
-                        for (var d = 0; d < justInsertedChange.data.length; d++) {
-                            var iv = justInsertedChange.data[d];
-                            if (iv.name == aChange.propertyName) {
-                                met = true;
-                                break;
-                            }
-                        }
-                        if (!met) {
-                            justInsertedChange.getData().add(new ValueClass(aChange.propertyName, aChange.newValue));
-                            complemented = true;
-                        }
-                    }
-                    return complemented;
-                }
-                function acceptInstance(aSubject) {
-                    Object.keys(noFields).forEach(function (aFieldName) {
-                        if (typeof aSubject[aFieldName] === 'undefined')
-                            aSubject[aFieldName] = null;
-                    });
-                    P.manageObject(aSubject, managedOnChange, managedBeforeChange);
-                    listenable(aSubject);
-                    // ORM mutable scalar and collection properties
-                    var define = function (aOrmDefs) {
-                        for each (var defsEntry in aOrmDefs.entrySet()) {
-                            var jsDef = EngineUtilsClass.unwrap(defsEntry.getValue().getJsDef());
-                            Object.defineProperty(aSubject, defsEntry.getKey(), jsDef);
-                        }
-                    };
-                    define(nFields.getOrmScalarDefinitions());
-                    define(nFields.getOrmCollectionsDefinitions());
-                }
-
-                var _onInserted = null;
-                var _onDeleted = null;
-                var _onScrolled = null;
-                P.manageArray(published, {
-                    spliced: function (added, deleted) {
-                        added.forEach(function (aAdded) {
-                            justInserted = aAdded;
-                            justInsertedChange = new InsertClass(nEntity.getQueryName());
-                            for (var nf = 0; nf < nnFields.size(); nf++) {
-                                var nField = nnFields[nf];
-                                if (!aAdded[nField.name] && nField.pk) {
-                                    aAdded[nField.name] = nField.generateValue();
-                                }
-                            }
-                            for (var na in aAdded) {
-                                var nField = noFields[na];
-                                if (nField) {
-                                    var v = aAdded[na];
-                                    var cv = new ValueClass(nField.name, v);
-                                    justInsertedChange.data.add(cv);
-                                }
-                            }
-                            nEntity.getChangeLog().add(justInsertedChange);
-                            for (var aOrdererKey in orderers) {
-                                var aOrderer = orderers[aOrdererKey];
-                                aOrderer.add(aAdded);
-                            }
-                            acceptInstance(aAdded);
-                            fireOppositeScalarsChanges(aAdded, nFields);
-                            fireOppositeCollectionsChanges(aAdded, nFields);
-                        });
-                        deleted.forEach(function (aDeleted) {
-                            if (aDeleted === justInserted) {
-                                justInserted = null;
-                                justInsertedChange = null;
-                            }
-                            var deleteChange = new DeleteClass(nEntity.getQueryName());
-                            generateChangeLogKeys(deleteChange.keys, nFields, null, aDeleted, null);
-                            nEntity.getChangeLog().add(deleteChange);
-                            for (var aOrdererKey in orderers) {
-                                var aOrderer = orderers[aOrdererKey];
-                                aOrderer.delete(aDeleted);
-                            }
-                            fireOppositeScalarsChanges(aDeleted, nFields);
-                            fireOppositeCollectionsChanges(aDeleted, nFields);
-                            unlistenable(aDeleted);
-                            P.unmanageObject(aDeleted);
-                        });
-                        if (_onInserted && added.length > 0) {
-                            try {
-                                _onInserted({source: published, items: added});
-                            } catch (e) {
-                                Logger.severe(e);
-                            }
-                        }
-                        if (_onDeleted && deleted.length > 0) {
-                            try {
-                                _onDeleted({source: published, items: deleted});
-                            } catch (e) {
-                                Logger.severe(e);
-                            }
-                        }
-                        fire(published, {source: published, propertyName: 'length'});
-                    },
-                    scrolled: function (aSubject, oldCursor, newCursor) {
-                        if (_onScrolled) {
-                            try {
-                                _onScrolled({source: published, propertyName: 'cursor', oldValue: oldCursor, newValue: newCursor});
-                            } catch (e) {
-                                Logger.severe(e);
-                            }
-                        }
-                        fire(published, {source: published, propertyName: 'cursor', oldValue: oldCursor, newValue: newCursor});
-                    }
-                });
-                var pSchema = {};
-                Object.defineProperty(published, "schema", {
-                    value: pSchema
-                });
-                var pkFieldName = '';
-                var nFields = nEntity.getFields();
-                var nnFields = nFields.toCollection();
-                var noFields = {};
-                // schema
-                var pSchemaLengthMet = false;
-                for (var n = 0; n < nnFields.size(); n++) {
-                    (function () {
-                        var nField = nnFields[n];
-                        noFields[nField.name] = nField;
-                        if (nField.isPk())
-                            pkFieldName = nField.name;
-                        var schemaDesc = {
-                            value: nField.getPublished()
-                        };
-                        if('length' == nField.name)
-                            pSchemaLengthMet = true;
-                        if (!pSchema[nField.name]) {
-                            Object.defineProperty(pSchema, nField.name, schemaDesc);
-                        } else {
-                            var eTitle = nEntity.title ? " [" + nEntity.title + "]" : "";
-                            throw "Duplicated field name found: " + nField.name + " in entity " + nEntity.name + eTitle;
-                        }
-                        Object.defineProperty(pSchema, n, schemaDesc);
-                    })();
-                }
-                if(!pSchemaLengthMet){
-                    Object.defineProperty(pSchema, 'length', {value: nnFields.size()});
-                }
-                // entity.params.p1 syntax
-                var nParameters = nEntity.getQuery().getParameters();
-                var ncParameters = nParameters.toCollection();
-                var pParams = {};
-                for (var p = 0; p < ncParameters.size(); p++) {
-                    (function () {
-                        var nParameter = ncParameters[p];
-                        var pDesc = {
-                            get: function () {
-                                return nParameter.jsValue;
-                            },
-                            set: function (aValue) {
-                                nParameter.jsValue = aValue;
-                            }
-                        };
-                        Object.defineProperty(pParams, nParameter.name, pDesc);
-                        Object.defineProperty(pParams, p, pDesc);
-                    })();
-                }
-                Object.defineProperty(published, 'params', {value: pParams});
-                // entity.params.schema.p1 syntax
-                var pParamsSchema = EngineUtilsClass.unwrap(nParameters.getPublished());
-                if (!pParams.schema)
-                    Object.defineProperty(pParams, 'schema', {value: pParamsSchema});
-                Object.defineProperty(published, 'find', {value: function (aCriteria) {
-                        var keys = Object.keys(aCriteria);
-                        keys = keys.sort();
-                        var ordererKey = keys.join(' | ');
-                        var orderer = orderers[ordererKey];
-                        if (!orderer) {
-                            orderer = new P.Orderer(keys);
-                            published.forEach(function (item) {
-                                orderer.add(item);
-                            });
-                            orderers[ordererKey] = orderer;
-                        }
-                        var found = orderer.find(aCriteria);
-                        return found;
-                    }});
-                Object.defineProperty(published, 'findByKey', {value: function (aKeyValue) {
-                        var criteria = {};
-                        criteria[pkFieldName] = aKeyValue;
-                        var found = published.find(criteria);
-                        return found.length > 0 ? found[0] : null;
-                    }});
-                Object.defineProperty(published, 'findById', {value: function (aKeyValue) {
-                        P.Logger.warning('findById() is deprecated. Use findByKey() instead.');
-                        return published.findByKey(aKeyValue);
-                    }});
-                var toBeDeletedMark = '-platypus-to-be-deleted-mark';
-                Object.defineProperty(published, 'remove', {value: function (toBeDeleted) {
-                        toBeDeleted = toBeDeleted.forEach ? toBeDeleted : [toBeDeleted];
-                        toBeDeleted.forEach(function (anInstance) {
-                            anInstance[toBeDeletedMark] = true;
-                        });
-                        for (var d = published.length - 1; d >= 0; d--) {
-                            if (published[d][toBeDeletedMark]) {
-                                published.splice(d, 1);
-                            }
-                        }
-                        toBeDeleted.forEach(function (anInstance) {
-                            delete anInstance[toBeDeletedMark];
-                        });
-                    }});
-                Object.defineProperty(published, 'onScrolled', {
-                    get: function () {
-                        return _onScrolled;
-                    },
-                    set: function (aValue) {
-                        _onScrolled = aValue;
-                    }
-                });
-                Object.defineProperty(published, 'onInserted', {
-                    get: function () {
-                        return _onInserted;
-                    },
-                    set: function (aValue) {
-                        _onInserted = aValue;
-                    }
-                });
-                Object.defineProperty(published, 'onDeleted', {
-                    get: function () {
-                        return _onDeleted;
-                    },
-                    set: function (aValue) {
-                        _onDeleted = aValue;
-                    }
-                });
-                nEntity.setSnapshotConsumer(function (aSnapshot, aFreshData) {
-                    if (aFreshData) {
-                        Array.prototype.splice.call(published, 0, published.length);
-                    }
-                    for (var s = 0; s < aSnapshot.length; s++) {
-                        var snapshotInstance = aSnapshot[s];
-                        var accepted;
-                        if (nEntity.getElementClass()) {
-                            var instanceCtor = EngineUtilsClass.unwrap(nEntity.getElementClass());
-                            accepted = new instanceCtor();
-                        } else {
-                            accepted = {};
-                        }
-                        for (var sp in snapshotInstance) {
-                            accepted[sp] = snapshotInstance[sp];
-                        }
-                        Array.prototype.push.call(published, accepted);
-                        acceptInstance(accepted);
-                    }
-                    orderers = {};
-                    published.cursor = published.length > 0 ? published[0] : null;
-                    fire(published, {source: published, propertyName: 'length'});
-                    published.forEach(function (aItem) {
-                        fireOppositeScalarsChanges(aItem, nFields);
-                        fireOppositeCollectionsChanges(aItem, nFields);
-                    });
-                });
-                nEntity.setSnapshotProducer(function () {
-                    var snapshot = [];
-                    var snapshotFields = Object.keys(noFields);
-                    published.forEach(function (aItem) {
-                        var cloned = {};
-                        snapshotFields.forEach(function (aFieldName) {
-                            var typeOfField = typeof aItem[aFieldName];
-                            if (typeOfField === 'undefined' || typeOfField === 'function')
-                                cloned[aFieldName] = null;
-                            else
-                                cloned[aFieldName] = aItem[aFieldName];
-                        });
-                        snapshot.push(cloned);
-                    });
-                    return snapshot;
-                });
-                listenable(published);
-                entityCTor.call(published, nEntity);
-                //WARNING Don't delete unwrap, due to it is used in methods bodies.
-                for (var protoEntryName in entityCTor.prototype) {
-                    if (!published[protoEntryName]) {
-                        var protoEntry = entityCTor.prototype[protoEntryName];
-                        if (protoEntry instanceof Function) {
-                            Object.defineProperty(published, protoEntryName, {value: protoEntry});
-                        }
-                    }
-                }
-                return published;
-            }
-            var entities = model.entities();
-            for each (var enEntity in entities) {
-                enEntity.validateQuery();
-                if (enEntity.name) {
-                    (function () {
-                        var ppEntity = publishEntity(enEntity);
-                        Object.defineProperty(aTarget, enEntity.name, {
-                            value: ppEntity,
-                            enumerable: true
-                        });
-                    })();
-                }
-            }
-            model.createORMDefinitions();
-            aTarget.loadEntity = function (queryName) {
-                var lnEntity = model.loadEntity(P.boxAsJava(queryName));
-                return publishEntity(lnEntity);
-            };
-            aTarget.createEntity = function (sqlText, datasourceName) {
-                var lnEntity = model.createEntity(P.boxAsJava(sqlText), P.boxAsJava(datasourceName));
-                return publishEntity(lnEntity);
-            };
-            return aTarget;
+            return loadModelDocument(modelDocument, aTarget);
         } else {
             throw "Model definition '" + aName + "' missing.";
         }
     }
     Object.defineProperty(P, "loadModel", {value: loadModel});
+
+    function readModel(aContent, aTarget) {
+        var modelDocument = Source2XmlDom.transform(aContent);
+        return loadModelDocument(modelDocument, aTarget);
+    }
+    Object.defineProperty(P, "readModel", {value: readModel});
+
+    function loadEntities(aEntities, aOnSuccess, aOnFailure) {
+        var entities;
+        if (!Array.isArray(aEntities)) {
+            aEntities = aEntities + "";
+            if (aEntities.length > 5 && aEntities.trim().substring(0, 5).toLowerCase() === "<?xml") {
+                var groups = /entityId="(.+)"/ig.exec(aEntities);
+                if (groups && groups.length > 1) {
+                    entities = groups.slice(1, groups.length);
+                } else {
+                    entities = [];
+                }
+            } else {
+                entities = [aEntities];
+            }
+        } else {
+            entities = aEntities;
+        }
+        ScriptedResourceClass.loadEntities(Java.to(entities, JavaStringArrayClass), aOnSuccess ? aOnSuccess : null, aOnFailure ? aOnFailure : null);
+    }
+    Object.defineProperty(P, "loadEntities", {value: loadEntities});
+    
+    function loadRemotes(aRemotesNames, aOnSuccess, aOnFailure) {
+        var remotesNames = Array.isArray(aRemotesNames) ? aRemotesNames : [aRemotesNames];
+        ScriptedResourceClass.loadRemotes(Java.to(remotesNames, JavaStringArrayClass), aOnSuccess ? aOnSuccess : null, aOnFailure ? aOnFailure : null);
+    }
+    Object.defineProperty(P, "loadRemotes", {value: loadRemotes});
     /**
      * @static
      * @param {type} aName
@@ -1655,23 +1691,34 @@ if (!P) {
      */
     P.extend = function (aChild, aParent) {
     };
+
     /**
-     * Global modules array available in server environment.
-     * Theese modules are inaccessible via a network.
-     * @type Array
+     * Loads entities definitions for ORM parts of a data model (entity manager) from server.
+     * Caches loaded information. No additional network activity will take place, if definitions of
+     * entities were already loaded. If entities already were loaded
+     * while dependencies resolution process, initiated with P.require() function,
+     * They will be accessible and there is no necessity to load them manually.
+     * @param {type} aEntities Names of entities, definitions will be loaded for.
+     * @param {type} aOnSuccess Success callback. If omitted, than in JavaSE environment, synchrionous call will be performed.
+     * @param {type} aOnFailure Failure callback. Accepts information about any problem occured while loading.
+     * @returns {undefined}
      */
-    P.modules = [];
+    P.loadEntities = function(aEntities, aOnSuccess, aOnFailure) {
+    };
     /**
-     * Session object available in server environment.
-     * It is inaccessible via a network.
+     * Loads sever modules methods lists from server.
+     * Such information is used while RPC proxy generation by P.ServerModule constructor.
+     * It caches loaded information, and so, no additional network activity will take place, if methods lists were already loaded.
+     * @param {type} aRemotesNames Names of server modules, methods lists will be loaded for.
+     * If methods lists already were loaded while dependencies resolution process, initiated with P.require() function,
+     * They will be accessible and there is no necessity to load them manually.
+     * It mey be a single string or an array of strings.
+     * @param {type} aOnSuccess Success callback. If omitted, than in JavaSE environment, synchrionous call will be performed.
+     * @param {type} aOnFailure Failure callback. Accepts information about any problem occured while loading.
+     * @returns {undefined} 
      */
-    P.session = {};
-    /**
-     * Modules array of session available in server environment.
-     * Theese modules are accessible to network clients
-     * @type Array
-     */
-    P.session.modules = [];
+    P.loadRemotes = function(aRemotesNames, aOnSuccess, aOnFailure) {
+    };
     /**
      * Parses *.model files and creates data model (entity manager) of a module.
      * @param aModuleName Name of the module, the data model will be loaded for.
@@ -1681,12 +1728,33 @@ if (!P) {
         return {};
     };
     /**
-     * Parses *.layout files and creates view of a module if it is a form module.
+     * Parses a string with xml definition of data model (entity manager).
+     * Returns data model instance ready for use as entity manager.
+     * Note! It does not resolve entities dependencies. For entities resolution
+     * use <code>P.loadEntities()</code> function please. If entities already were loaded
+     * while dependencies resolution process, initiated with P.require() function,
+     * They will be accessible and there is no necessity to load them manually.
+     * @param aContent String with xml definition of data model (entity manager).
+     * @returns Model instance.
+     */
+    P.readModel = function (aContent) {
+        return {};
+    };
+    /**
+     * Parses *.layout files and creates a view of a form module.
      * @param aModuleName Name of the module, the form will be loaded for.
      * @param aData Script data object, model widgets to be bound to. Currently is may be only data model.
      * @returns P.Form instance.
      */
     P.loadForm = function (aModuleName, aData) {
+    };
+    /**
+     * Parses a string with xml definition of a form and creates a view .
+     * @param aContent String with xml definition of a form.
+     * @param aData Script data object, model widgets to be bound to. Currently is may be only data model.
+     * @returns P.Form instance.
+     */
+    P.readForm = function (aContent, aData) {
     };
     /**
      * Parses *.xlsx files and creates report template of a module if it is a report module.

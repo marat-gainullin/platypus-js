@@ -37,6 +37,11 @@ public class Utils {
 			return v != null ? v + '' : null;
 		}-*/;
 
+		public final native String getString(int aIndex)/*-{
+			var v = this[aIndex];
+			return v != null ? v + '' : null;
+		}-*/;
+
 		public final native int getInteger(String aName)/*-{
 			return +this[aName];
 		}-*/;

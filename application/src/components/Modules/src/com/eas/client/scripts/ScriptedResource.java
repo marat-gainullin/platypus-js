@@ -104,6 +104,37 @@ public class ScriptedResource {
         return app.getModules().getLocalPath();
     }
 
+    /**
+     * Part of manual dependencies resolving process
+     *
+     * @param aRemotesNames
+     * @param aOnSuccess
+     * @param aOnFailure
+     * @throws java.lang.Exception
+     */
+    public static void loadRemotes(String[] aRemotesNames, JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
+        sRequire(aRemotesNames, Scripts.getSpace(), aOnSuccess != null ? (Void v) -> {
+            aOnSuccess.call(null, new Object[]{});
+        } : null, aOnFailure != null ? (Exception aReason) -> {
+            aOnFailure.call(null, new Object[]{aReason.getMessage()});
+        } : null);
+    }
+
+    /**
+     * Part of manual dependencies resolving process
+     * @param aQueriesNames
+     * @param aOnSuccess
+     * @param aOnFailure
+     * @throws java.lang.Exception
+     */
+    public static void loadEntities(String[] aQueriesNames, JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
+        qRequire(aQueriesNames, Scripts.getSpace(), aOnSuccess != null ? (Void v) -> {
+            aOnSuccess.call(null, new Object[]{});
+        } : null, aOnFailure != null ? (Exception aReason) -> {
+            aOnFailure.call(null, new Object[]{aReason.getMessage()});
+        } : null);
+    }
+
     public static Object load(final String aResourceName, String aCalledFromFile) throws Exception {
         return load(aResourceName, aCalledFromFile, (JSObject) null, (JSObject) null);
     }
@@ -114,14 +145,14 @@ public class ScriptedResource {
 
     public static Object load(final String aResourceName, String aCalledFromFile, JSObject onSuccess, JSObject onFailure) throws Exception {
         Scripts.Space space = Scripts.getSpace();
-        return load(aResourceName, aCalledFromFile != null ? new URL(aCalledFromFile).toURI() : null, space, onSuccess != null ? (Object aLoaded) -> {
+        return _load(aResourceName, aCalledFromFile != null ? new URL(aCalledFromFile).toURI() : null, space, onSuccess != null ? (Object aLoaded) -> {
             onSuccess.call(null, new Object[]{space.toJs(aLoaded)});
         } : null, onSuccess != null ? (Exception ex) -> {
             onFailure.call(null, new Object[]{space.toJs(ex.getMessage())});
         } : null);
     }
 
-    public static Object load(final String aResourceName, URI aCalledFromFile, Scripts.Space aSpace, Consumer<Object> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public static Object _load(final String aResourceName, URI aCalledFromFile, Scripts.Space aSpace, Consumer<Object> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (onSuccess != null) {
             Matcher htppMatcher = httpPattern.matcher(aResourceName);
             if (htppMatcher.matches()) {

@@ -4,8 +4,10 @@
  */
 package com.eas.client.application;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Formatter;
@@ -25,6 +27,7 @@ import com.eas.client.form.js.JsWidgets;
 import com.eas.client.model.js.JsManaged;
 import com.eas.client.model.js.JsOrderer;
 import com.eas.client.queries.Query;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.logging.client.LogConfiguration;
@@ -71,6 +74,54 @@ public class Application {
 
 	public static Query putAppQuery(Query aQuery) {
 		return appQueries.put(aQuery.getEntityName(), aQuery);
+	}
+	
+	public static void jsLoadQueries(JavaScriptObject aQueries, final JavaScriptObject aOnSuccess, final JavaScriptObject aOnFailure) throws Exception {
+		List<String> queries = new ArrayList<>();
+		Utils.JsObject jsQueries = aQueries.cast();
+		for(int i = 0; i < jsQueries.length(); i++){
+			queries.add(jsQueries.getString(i));
+		}
+		loader.loadQueries(queries, new Callback<Void, String>(){
+
+			@Override
+            public void onSuccess(Void result) {
+				if(aOnSuccess != null){
+					aOnSuccess.<Utils.JsObject>cast().apply(null, null);
+				}
+            }
+
+			@Override
+            public void onFailure(String aReason) {
+				if(aOnFailure != null){
+					aOnFailure.<Utils.JsObject>cast().call(null, aReason);
+				}
+            }
+		});
+	}
+	
+	public static void jsLoadServerModules(JavaScriptObject aModulesNames, final JavaScriptObject aOnSuccess, final JavaScriptObject aOnFailure) throws Exception {
+		List<String> modulesNames = new ArrayList<>();
+		Utils.JsObject jsModulesNames = aModulesNames.cast();
+		for(int i = 0; i < jsModulesNames.length(); i++){
+			modulesNames.add(jsModulesNames.getString(i));
+		}
+		loader.loadServerModules(modulesNames, new Callback<Void, String>(){
+
+			@Override
+            public void onSuccess(Void result) {
+				if(aOnSuccess != null){
+					aOnSuccess.<Utils.JsObject>cast().apply(null, null);
+				}
+            }
+
+			@Override
+            public void onFailure(String aReason) {
+				if(aOnFailure != null){
+					aOnFailure.<Utils.JsObject>cast().call(null, aReason);
+				}
+            }
+		});
 	}
 	
 	public static native boolean isCacheBustEnabled() /*-{
@@ -254,40 +305,33 @@ public class Application {
         function b64_md5(s)    {
             return rstr2b64(rstr_md5(str2rstr_utf8(s)));
         }
-        function any_md5(s, e) {
+        function any_md5(s, e){
             return rstr2any(rstr_md5(str2rstr_utf8(s)), e);
         }
-        function hex_hmac_md5(k, d)
-        {
+        function hex_hmac_md5(k, d){
             return rstr2hex(rstr_hmac_md5(str2rstr_utf8(k), str2rstr_utf8(d)));
         }
-        function b64_hmac_md5(k, d)
-        {
+        function b64_hmac_md5(k, d){
             return rstr2b64(rstr_hmac_md5(str2rstr_utf8(k), str2rstr_utf8(d)));
         }
-        function any_hmac_md5(k, d, e)
-        {
+        function any_hmac_md5(k, d, e){
             return rstr2any(rstr_hmac_md5(str2rstr_utf8(k), str2rstr_utf8(d)), e);
         }
 
-        function md5_vm_test()
-        {
+        function md5_vm_test(){
             return hex_md5("abc").toLowerCase() == "900150983cd24fb0d6963f7d28e17f72";
         }
 
-        function rstr_md5(s)
-        {
+        function rstr_md5(s){
             return binl2rstr(binl_md5(rstr2binl(s), s.length * 8));
         }
 
-        function rstr_hmac_md5(key, data)
-        {
+        function rstr_hmac_md5(key, data){
             var bkey = rstr2binl(key);
             if(bkey.length > 16) bkey = binl_md5(bkey, key.length * 8);
 
             var ipad = Array(16), opad = Array(16);
-            for(var i = 0; i < 16; i++)
-            {
+            for(var i = 0; i < 16; i++){
                 ipad[i] = bkey[i] ^ 0x36363636;
                 opad[i] = bkey[i] ^ 0x5C5C5C5C;
             }
@@ -296,8 +340,7 @@ public class Application {
             return binl2rstr(binl_md5(opad.concat(hash), 512 + 128));
         }
 
-        function rstr2hex(input)
-        {
+        function rstr2hex(input){
             try {
                 hexcase
             } catch(e) {
@@ -306,8 +349,7 @@ public class Application {
             var hex_tab = hexcase ? "0123456789ABCDEF" : "0123456789abcdef";
             var output = "";
             var x;
-            for(var i = 0; i < input.length; i++)
-            {
+            for(var i = 0; i < input.length; i++){
                 x = input.charCodeAt(i);
                 output += hex_tab.charAt((x >>> 4) & 0x0F)
                 +  hex_tab.charAt( x        & 0x0F);
@@ -315,8 +357,7 @@ public class Application {
             return output;
         }
 
-        function rstr2b64(input)
-        {
+        function rstr2b64(input){
             try {
                 b64pad
             } catch(e) {
@@ -325,13 +366,11 @@ public class Application {
             var tab = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
             var output = "";
             var len = input.length;
-            for(var i = 0; i < len; i += 3)
-            {
+            for(var i = 0; i < len; i += 3){
                 var triplet = (input.charCodeAt(i) << 16)
                 | (i + 1 < len ? input.charCodeAt(i+1) << 8 : 0)
                 | (i + 2 < len ? input.charCodeAt(i+2)      : 0);
-                for(var j = 0; j < 4; j++)
-                {
+                for(var j = 0; j < 4; j++){
                     if(i * 8 + j * 6 > input.length * 8) output += b64pad;
                     else output += tab.charAt((triplet >>> 6*(3-j)) & 0x3F);
                 }
@@ -339,26 +378,22 @@ public class Application {
             return output;
         }
 
-        function rstr2any(input, encoding)
-        {
+        function rstr2any(input, encoding){
             var divisor = encoding.length;
             var i, j, q, x, quotient;
 
             var dividend = Array(Math.ceil(input.length / 2));
-            for(i = 0; i < dividend.length; i++)
-            {
+            for(i = 0; i < dividend.length; i++){
                 dividend[i] = (input.charCodeAt(i * 2) << 8) | input.charCodeAt(i * 2 + 1);
             }
 
             var full_length = Math.ceil(input.length * 8 /
                 (Math.log(encoding.length) / Math.log(2)));
             var remainders = Array(full_length);
-            for(j = 0; j < full_length; j++)
-            {
+            for(j = 0; j < full_length; j++){
                 quotient = Array();
                 x = 0;
-                for(i = 0; i < dividend.length; i++)
-                {
+                for(i = 0; i < dividend.length; i++){
                     x = (x << 16) + dividend[i];
                     q = Math.floor(x / divisor);
                     x -= q * divisor;
@@ -376,18 +411,15 @@ public class Application {
             return output;
         }
 
-        function str2rstr_utf8(input)
-        {
+        function str2rstr_utf8(input){
             var output = "";
             var i = -1;
             var x, y;
 
-            while(++i < input.length)
-            {
+            while(++i < input.length){
                 x = input.charCodeAt(i);
                 y = i + 1 < input.length ? input.charCodeAt(i + 1) : 0;
-                if(0xD800 <= x && x <= 0xDBFF && 0xDC00 <= y && y <= 0xDFFF)
-                {
+                if(0xD800 <= x && x <= 0xDBFF && 0xDC00 <= y && y <= 0xDFFF){
                     x = 0x10000 + ((x & 0x03FF) << 10) + (y & 0x03FF);
                     i++;
                 }
@@ -410,8 +442,7 @@ public class Application {
             return output;
         }
 
-        function str2rstr_utf16le(input)
-        {
+        function str2rstr_utf16le(input){
             var output = "";
             for(var i = 0; i < input.length; i++)
                 output += String.fromCharCode( input.charCodeAt(i)        & 0xFF,
@@ -419,8 +450,7 @@ public class Application {
             return output;
         }
 
-        function str2rstr_utf16be(input)
-        {
+        function str2rstr_utf16be(input){
             var output = "";
             for(var i = 0; i < input.length; i++)
                 output += String.fromCharCode((input.charCodeAt(i) >>> 8) & 0xFF,
@@ -428,8 +458,7 @@ public class Application {
             return output;
         }
 
-        function rstr2binl(input)
-        {
+        function rstr2binl(input){
             var output = Array(input.length >> 2);
             for(var i = 0; i < output.length; i++)
                 output[i] = 0;
@@ -438,16 +467,14 @@ public class Application {
             return output;
         }
 
-        function binl2rstr(input)
-        {
+        function binl2rstr(input){
             var output = "";
             for(var i = 0; i < input.length * 32; i += 8)
                 output += String.fromCharCode((input[i>>5] >>> (i % 32)) & 0xFF);
             return output;
         }
 
-        function binl_md5(x, len)
-        {
+        function binl_md5(x, len){
             x[len >> 5] |= 0x80 << ((len) % 32);
             x[(((len + 64) >>> 9) << 4) + 14] = len;
 
@@ -456,8 +483,7 @@ public class Application {
             var c = -1732584194;
             var d =  271733878;
 
-            for(var i = 0; i < x.length; i += 16)
-            {
+            for(var i = 0; i < x.length; i += 16){
                 var olda = a;
                 var oldb = b;
                 var oldc = c;
@@ -539,46 +565,69 @@ public class Application {
             return Array(a, b, c, d);
         }
 
-        function md5_cmn(q, a, b, x, s, t)
-        {
+        function md5_cmn(q, a, b, x, s, t){
             return safe_add(bit_rol(safe_add(safe_add(a, q), safe_add(x, t)), s),b);
         }
-        function md5_ff(a, b, c, d, x, s, t)
-        {
+        function md5_ff(a, b, c, d, x, s, t){
             return md5_cmn((b & c) | ((~b) & d), a, b, x, s, t);
         }
-        function md5_gg(a, b, c, d, x, s, t)
-        {
+        function md5_gg(a, b, c, d, x, s, t){
             return md5_cmn((b & d) | (c & (~d)), a, b, x, s, t);
         }
-        function md5_hh(a, b, c, d, x, s, t)
-        {
+        function md5_hh(a, b, c, d, x, s, t){
             return md5_cmn(b ^ c ^ d, a, b, x, s, t);
         }
-        function md5_ii(a, b, c, d, x, s, t)
-        {
+        function md5_ii(a, b, c, d, x, s, t){
             return md5_cmn(c ^ (b | (~d)), a, b, x, s, t);
         }
 
-        function safe_add(x, y)
-        {
+        function safe_add(x, y){
             var lsw = (x & 0xFFFF) + (y & 0xFFFF);
             var msw = (x >> 16) + (y >> 16) + (lsw >> 16);
             return (msw << 16) | (lsw & 0xFFFF);
         }
 
-        function bit_rol(num, cnt)
-        {
+        function bit_rol(num, cnt){
             return (num << cnt) | (num >>> (32 - cnt));
         }
 
-		$wnd.P.loadModel = function(appElementName, aTarget) {
+		$wnd.P.loadRemotes = function(aRemotesNames, aOnSuccess, aOnFailure){
+			var remotesNames = Array.isArray(aRemotesNames) ? aRemotesNames : [aRemotesNames];
+			@com.eas.client.application.Application::jsLoadServerModules(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(remotesNames, aOnSuccess, aOnFailure);
+		}		
+		$wnd.P.loadEntities = function(aEntities, aOnSuccess, aOnFailure){
+			var entities;
+			if(!Array.isArray(aEntities)){
+				aEntities = aEntities + "";
+				if(aEntities.length > 5 && aEntities.trim().substring(0, 5).toLowerCase() === "<?xml"){
+					var groups = /entityId="(.+)"/ig.exec(aEntities);
+					if(groups && groups.length > 1){
+						entities = groups.slice(1, groups.length);
+					}else{
+						entities = [];
+					}
+				}else{
+					entities = [aEntities];
+				}
+			}else{
+				entities = aEntities;
+			}
+			@com.eas.client.application.Application::jsLoadQueries(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(entities, aOnSuccess, aOnFailure);
+		};
+		function readModelDocument(aDocument, aTarget){
 			if(!aTarget)
 				aTarget = {};
-			var appElementDoc = aClient.@com.eas.client.application.AppClient::getModelDocument(Ljava/lang/String;)(appElementName);
-			var nativeModel = @com.eas.client.model.store.XmlDom2Model::transform(Lcom/google/gwt/xml/client/Document;Lcom/google/gwt/core/client/JavaScriptObject;)(appElementDoc, aTarget);
+			var nativeModel = @com.eas.client.model.store.XmlDom2Model::transform(Lcom/google/gwt/xml/client/Document;Lcom/google/gwt/core/client/JavaScriptObject;)(aDocument, aTarget);
 			nativeModel.@com.eas.client.model.Model::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(aTarget);			
 			return aTarget;
+		}
+		$wnd.P.readModel = function(aModelContent, aTarget){
+			var doc = @com.google.gwt.xml.client.XMLParser::parse(Ljava/lang/String;)(aModelContent ? aModelContent + "" : "");
+			return readModelDocument(doc, aTarget);
+		}
+		$wnd.P.loadModel = function(appElementName, aTarget) {
+			var appElementDoc = aClient.@com.eas.client.application.AppClient::getModelDocument(Ljava/lang/String;)(appElementName);
+			return readModelDocument(appElementDoc, aTarget);
 		};
 		function readFormDocument(aDocumnet, aModel, aTarget){
 			var factory = @com.eas.client.form.store.XmlDom2Form::transform(Lcom/google/gwt/xml/client/Document;Lcom/google/gwt/core/client/JavaScriptObject;)(aDocumnet, aModel);
