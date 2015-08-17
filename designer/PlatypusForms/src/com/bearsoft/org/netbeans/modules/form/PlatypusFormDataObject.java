@@ -46,13 +46,8 @@ package com.bearsoft.org.netbeans.modules.form;
 import com.bearsoft.org.netbeans.modules.form.completion.FormModuleCompletionContext;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.forms.Form;
-import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.designer.application.module.PlatypusModuleDataObject;
-import com.eas.designer.application.module.PlatypusModuleSupport;
 import com.eas.designer.application.module.completion.ModuleCompletionContext;
-import com.eas.designer.application.module.nodes.ApplicationEntityNode;
-import com.eas.designer.application.module.nodes.ApplicationModelNodeChildren;
-import com.eas.designer.datamodel.nodes.ModelNode;
 import java.io.IOException;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
@@ -64,16 +59,12 @@ import org.openide.loaders.FileEntry;
 import org.openide.loaders.MultiFileLoader;
 import org.openide.nodes.Node;
 import org.openide.nodes.Node.Cookie;
-import org.openide.util.Lookup;
-import org.openide.util.lookup.Lookups;
-import org.openide.util.lookup.ProxyLookup;
 
 /**
  * The DataObject for forms.
  *
  * @author Ian Formanek, Petr Hamernik, mg
  */
-@MIMEResolver.ExtensionRegistration(displayName = "#LBL_Form_Layout_Files", extension = "layout", mimeType = "text/layout+xml")
 public class PlatypusFormDataObject extends PlatypusModuleDataObject {
 
     /**

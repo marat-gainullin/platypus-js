@@ -41,7 +41,6 @@ import org.netbeans.api.project.Project;
 import org.openide.cookies.EditorCookie;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
-import org.openide.filesystems.MIMEResolver;
 import org.openide.loaders.DataFolder;
 import org.openide.loaders.DataObject;
 import org.openide.loaders.MultiFileLoader;
@@ -51,7 +50,6 @@ import org.openide.nodes.Node;
 import org.openide.nodes.Node.Cookie;
 import org.openide.util.Exceptions;
 
-@MIMEResolver.ExtensionRegistration(displayName = "#LBL_Platypus_Model_file", extension = "model", mimeType = "text/model+xml")
 public class PlatypusModuleDataObject extends PlatypusDataObject implements AstProvider {
 
     protected class ApplicationDbModelModifiedObserver implements ModelEditingListener<ApplicationDbEntity>, PropertyChangeListener, CollectionListener<Fields, Field> {
