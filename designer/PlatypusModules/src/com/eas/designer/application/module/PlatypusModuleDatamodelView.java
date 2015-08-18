@@ -61,7 +61,9 @@ import org.openide.nodes.Node;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 import org.openide.util.Utilities;
+import org.openide.util.lookup.Lookups;
 import org.openide.util.lookup.ProxyLookup;
+import org.openide.windows.CloneableTopComponent;
 import org.openide.windows.TopComponent;
 import org.openide.windows.TopComponentGroup;
 import org.openide.windows.WindowManager;
@@ -69,7 +71,8 @@ import org.openide.windows.WindowManager;
 /**
  * Top component which displays model
  */
-public final class PlatypusModuleDatamodelView extends TopComponent implements MultiViewElement {
+@TopComponent.Description(preferredID = "platypus-model-view", persistenceType = TopComponent.PERSISTENCE_ONLY_OPENED)
+public final class PlatypusModuleDatamodelView extends CloneableTopComponent implements MultiViewElement {
 
     protected class NodeSelectionListener implements PropertyChangeListener {
 
@@ -157,7 +160,9 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
         // to produce satisfactory events.
         explorerManager = new ExplorerManager();
         associateLookup(new ProxyLookup(new Lookup[]{
-            ExplorerUtils.createLookup(explorerManager, getActionMap())}));
+            ExplorerUtils.createLookup(explorerManager, getActionMap()),
+            Lookups.singleton(aDataObject)
+        }));
         initDbRelatedViews();
         modelValidChangeListener = dataObject.addModelValidChangeListener(() -> {
             try {
@@ -373,7 +378,7 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
         // XXX nicer to use MimeLookup for type-specific actions, but not easy; see org.netbeans.modules.editor.impl.EditorActionsProvider
         actions.add(null);
         actions.addAll(Utilities.actionsForPath("Editors/TabActions")); //NOI18N
-        return actions.toArray(new Action[actions.size()]);
+        return actions.toArray(new Action[]{});
     }
 
     public void updateName() {
@@ -489,15 +494,5 @@ public final class PlatypusModuleDatamodelView extends TopComponent implements M
     @Override
     public UndoRedo getUndoRedo() {
         return dataObject.getLookup().lookup(PlatypusModuleSupport.class).getModelUndo();
-    }
-
-    @Override
-    protected String preferredID() {
-        return PlatypusModuleDatamodelDescription.MODULE_DATAMODEL_VIEW_NAME;
-    }
-
-    @Override
-    public int getPersistenceType() {
-        return TopComponent.PERSISTENCE_ONLY_OPENED;
     }
 }

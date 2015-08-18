@@ -12,16 +12,15 @@ import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectExistsException;
-import org.openide.loaders.FileEntry;
 import org.openide.loaders.MultiDataObject;
-import org.openide.loaders.MultiFileLoader;
+import org.openide.loaders.UniFileLoader;
 
 /**
  *
  * @author mg
  */
 @DataObject.Registration(position = 200, displayName = "com.bearsoft.org.netbeans.modules.form.resources.Bundle#Loaders/text/layout+xml/Factories/com-bearsoft-org-netbeans-modules-form-PlatypusFormDataLoader.instance", mimeType = "text/layout+xml")
-public class PlatypusLayoutDataLoader extends MultiFileLoader {
+public class PlatypusLayoutDataLoader extends UniFileLoader {
     
     public PlatypusLayoutDataLoader(){
         super(PlatypusLayoutDataObject.class.getName());
@@ -52,15 +51,4 @@ public class PlatypusLayoutDataLoader extends MultiFileLoader {
             }
         }
     }
-
-    @Override
-    protected MultiDataObject.Entry createPrimaryEntry(MultiDataObject obj, FileObject primaryFile) {
-        return new FileEntry(obj, primaryFile);
-    }
-
-    @Override
-    protected MultiDataObject.Entry createSecondaryEntry(MultiDataObject obj, FileObject secondaryFile) {
-        return null;
-    }
-    
 }

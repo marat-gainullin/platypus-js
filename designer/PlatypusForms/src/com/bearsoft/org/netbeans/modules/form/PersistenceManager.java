@@ -60,7 +60,6 @@ import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.SplitPaneS
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.TabbedPaneSupport;
 import com.eas.client.forms.Form;
 import com.eas.client.forms.FormFactory;
-import com.eas.client.forms.Forms;
 import com.eas.client.forms.HasChildren;
 import com.eas.client.forms.HorizontalPosition;
 import com.eas.client.forms.Orientation;
@@ -83,8 +82,8 @@ import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.designer.application.PlatypusUtils;
 import com.eas.designer.application.module.EntityJSObject;
+import com.eas.designer.explorer.PlatypusDataObject;
 import com.eas.gui.ScriptColor;
-import com.eas.script.Scripts;
 import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
 import java.awt.BorderLayout;
@@ -105,6 +104,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import jdk.nashorn.api.scripting.JSObject;
+import org.openide.filesystems.FileObject;
 import org.openide.util.Exceptions;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
@@ -122,17 +122,12 @@ import org.w3c.dom.Element;
 public class PersistenceManager {
 
     protected static DocumentBuilderFactory docsBuidlersFactory = DocumentBuilderFactory.newInstance();
-    static final String XML_FORM = "layout"; // NOI18N
 
-    public boolean canLoadForm(PlatypusFormDataObject formObject) throws PersistenceException {
-        return false;
-    }
-
-    public FormModel loadForm(PlatypusFormDataObject formDataObject, List<Throwable> nonfatalErrors) throws PersistenceException {
+    public FormModel loadForm(FileObject formFileObject, PlatypusDataObject formDataObject, List<Throwable> nonfatalErrors) throws PersistenceException {
         try {
-            String formContent = formDataObject.getFormFile().asText(PlatypusUtils.COMMON_ENCODING_NAME);
+            String formContent = formFileObject.asText(PlatypusUtils.COMMON_ENCODING_NAME);
             Document doc = Source2XmlDom.transform(formContent);
-            FormFactory formFactory = new FormFactory(doc.getDocumentElement(), formDataObject.getModel().getPublished()) {
+            FormFactory formFactory = new FormFactory(doc.getDocumentElement(), formDataObject instanceof PlatypusFormDataObject ? ((PlatypusFormDataObject) formDataObject).getModel().getPublished() : null) {
 
                 @Override
                 protected void resolveIcon(String aIconName, Consumer<ImageIcon> onLoad, Consumer<Exception> onFailure) {
@@ -146,14 +141,22 @@ public class PersistenceManager {
 
                 @Override
                 protected JSObject resolveEntity(String aEntityName) throws Exception {
-                    ApplicationDbEntity entity = formDataObject.getModel().getEntityByName(aEntityName);
-                    return entity != null ? entity.getPublished() : null;
+                    if (formDataObject instanceof PlatypusFormDataObject) {
+                        ApplicationDbEntity entity = ((PlatypusFormDataObject) formDataObject).getModel().getEntityByName(aEntityName);
+                        return entity != null ? entity.getPublished() : null;
+                    } else {
+                        return new EntityJSObject(aEntityName);
+                    }
                 }
 
                 @Override
                 protected JSObject resolveEntity(long aEntityId) throws Exception {
-                    ApplicationDbEntity entity = formDataObject.getModel().getEntityById(aEntityId);
-                    return entity != null ? entity.getPublished() : null;
+                    if (formDataObject instanceof PlatypusFormDataObject) {
+                        ApplicationDbEntity entity = ((PlatypusFormDataObject) formDataObject).getModel().getEntityById(aEntityId);
+                        return entity != null ? entity.getPublished() : null;
+                    } else {
+                        return null;
+                    }
                 }
 
                 @Override
@@ -347,12 +350,12 @@ public class PersistenceManager {
         }
     }
 
-    public void saveForm(PlatypusFormDataObject formObject, FormEditor formEditor, List<Throwable> nonfatalErrors) throws PersistenceException {
+    public void saveForm(FileObject formFileObject, FormEditor formEditor, List<Throwable> nonfatalErrors) throws PersistenceException {
         try {
             DocumentBuilder builder = docsBuidlersFactory.newDocumentBuilder();
             Document doc = builder.newDocument();
             doc.setXmlStandalone(true);
-            Element root = doc.createElement(XML_FORM);
+            Element root = doc.createElement("layout");
             doc.appendChild(root);
             writeProperties(formEditor.getFormRootNode().getFormProperties(), doc, root, true);
             root.setAttribute(Form.VIEW_SCRIPT_NAME, formEditor.getFormModel().getTopRADComponent().getName());
@@ -443,7 +446,7 @@ public class PersistenceManager {
                 }
             });
             String content = XmlDom2String.transform(doc);
-            try (OutputStream out = formObject.getFormEntry().getFile().getOutputStream()) {
+            try (OutputStream out = formFileObject.getOutputStream()) {
                 out.write(content.getBytes(SettingsConstants.COMMON_ENCODING));
             }
         } catch (ParserConfigurationException | DOMException | IOException ex) {
@@ -532,7 +535,7 @@ public class PersistenceManager {
                                 targetElement.setAttribute(radProp.getName(), compRef.getComponent().getName());
                             }
                         } else if (propValue instanceof EntityJSObject) {
-                            targetElement.setAttribute(radProp.getName(), ((EntityJSObject) propValue).getEntity().getName());
+                            targetElement.setAttribute(radProp.getName(), ((EntityJSObject) propValue).getName());
                         } else if (propValue instanceof IconEditor.NbImageIcon) {
                             targetElement.setAttribute(radProp.getName(), ((IconEditor.NbImageIcon) propValue).getName());
                         } else if (propValue instanceof java.awt.Cursor) {

@@ -44,9 +44,9 @@
 package com.bearsoft.org.netbeans.modules.form.editors;
 
 import com.bearsoft.org.netbeans.modules.form.FormCookie;
-import com.bearsoft.org.netbeans.modules.form.FormModel;
 import com.bearsoft.org.netbeans.modules.form.FormProperty;
 import com.bearsoft.org.netbeans.modules.form.PlatypusFormDataObject;
+import com.eas.designer.explorer.PlatypusDataObject;
 import java.awt.Component;
 import java.awt.Image;
 import java.beans.*;
@@ -88,7 +88,7 @@ public class IconEditor extends PropertyEditorSupport implements ExPropertyEdito
     public static final String RESOURCES_IMAGES_ANCHOR = "thumbs.cp";
     //
     private static String[] currentFiles;
-    private PlatypusFormDataObject dataObject;
+    private PlatypusDataObject dataObject;
 
     protected static class ImageNode extends AbstractNode {
 
@@ -150,7 +150,6 @@ public class IconEditor extends PropertyEditorSupport implements ExPropertyEdito
             FormCookie formCookie = node.getLookup().lookup(FormCookie.class);
             if (formCookie != null && aEnv.getFeatureDescriptor() instanceof FormProperty<?>) {
                 dataObject = formCookie.getFormModel().getDataObject();
-                //(FormProperty<?>) aEnv.getFeatureDescriptor());
             }
         }
     }
@@ -276,7 +275,7 @@ public class IconEditor extends PropertyEditorSupport implements ExPropertyEdito
     }
     private static final Pattern pattern = Pattern.compile("https?://.*");
 
-    public static NbImageIcon iconFromResourceName(PlatypusFormDataObject dataObject, String resName) throws Exception {
+    public static NbImageIcon iconFromResourceName(PlatypusDataObject dataObject, String resName) throws Exception {
         if (resName != null && !resName.isEmpty()) {
             Matcher htppMatcher = pattern.matcher(resName);
             if (htppMatcher.matches()) {
@@ -302,9 +301,9 @@ public class IconEditor extends PropertyEditorSupport implements ExPropertyEdito
          * Name of the icon in icon library.
          */
         private final String name;
-        protected PlatypusFormDataObject dataObject;
+        protected PlatypusDataObject dataObject;
 
-        public NbImageIcon(PlatypusFormDataObject aDataObject, URL aURL, int aType, String aName) {
+        public NbImageIcon(PlatypusDataObject aDataObject, URL aURL, int aType, String aName) {
             super(aURL);
             dataObject = aDataObject;
             type = aType;

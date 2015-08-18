@@ -125,7 +125,7 @@ public class PlatypusDbDiagramSupport extends CloneableOpenSupport implements Op
                     if (!(editToBeUndone() instanceof NotSavable)) {
                         env.markModified();
                     }
-                    super.undo();     
+                    super.undo();
                 } catch (IOException ex) {
                     ErrorManager.getDefault().notify(ex);
                 }
@@ -182,26 +182,28 @@ public class PlatypusDbDiagramSupport extends CloneableOpenSupport implements Op
     @Override
     protected boolean canClose() {
         if (dataObject.isModified()) {
-            String confirmationString = MessageFormat.format(NbBundle.getMessage(PlatypusDbDiagramSupport.class, "saveConfirmation"), dataObject.getPrimaryFile().getName());
+            String confirmationString = NbBundle.getMessage(PlatypusDbDiagramSupport.class, "saveConfirmation", dataObject.getPrimaryFile().getName());
             NotifyDescriptor.Confirmation confirm = new NotifyDescriptor.Confirmation(confirmationString, NotifyDescriptor.Confirmation.YES_NO_CANCEL_OPTION, NotifyDescriptor.Confirmation.QUESTION_MESSAGE);
             Object res = DialogDisplayer.getDefault().notify(confirm);
             if (NotifyDescriptor.YES_OPTION.equals(res)) {
                 try {
                     save();
-                    return true;
                 } catch (IOException ex) {
                     ErrorManager.getDefault().notify(ex);
                 }
+                return true;
             } else if (NotifyDescriptor.NO_OPTION.equals(res)) {
                 env.unmarkModified();
                 return true;
             } else {
                 return false;
             }
+        } else {
+            return super.canClose();
         }
-        return super.canClose();
     }
 
+    @Override
     public UndoRedo.Manager getModelUndo() {
         return modelUndo;
     }

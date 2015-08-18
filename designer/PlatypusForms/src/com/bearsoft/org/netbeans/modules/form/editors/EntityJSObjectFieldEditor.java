@@ -7,6 +7,7 @@ package com.bearsoft.org.netbeans.modules.form.editors;
 import com.bearsoft.org.netbeans.modules.form.FormCookie;
 import com.bearsoft.org.netbeans.modules.form.FormModel;
 import com.bearsoft.org.netbeans.modules.form.FormProperty;
+import com.bearsoft.org.netbeans.modules.form.PlatypusFormDataObject;
 import com.bearsoft.org.netbeans.modules.form.RADComponent;
 import com.bearsoft.org.netbeans.modules.form.RADComponentNode;
 import com.bearsoft.org.netbeans.modules.form.RADProperty;
@@ -123,13 +124,13 @@ public class EntityJSObjectFieldEditor extends PropertyEditorSupport implements 
     // Elipsis button section
     @Override
     public boolean supportsCustomEditor() {
-        return true;
+        return formModel.getDataObject() instanceof PlatypusFormDataObject;
     }
 
     @Override
     public Component getCustomEditor() {
         try {
-            ApplicationDbModel model = formModel.getDataObject().getModel();
+            ApplicationDbModel model = ((PlatypusFormDataObject) formModel.getDataObject()).getModel();
             if (model != null) {
                 ApplicationDbEntity dataEntity = lookupDataEntity();
                 String oldValue = (String) getValue();

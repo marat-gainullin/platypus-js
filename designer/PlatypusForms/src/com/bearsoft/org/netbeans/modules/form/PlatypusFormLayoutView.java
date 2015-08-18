@@ -54,6 +54,7 @@ import com.bearsoft.org.netbeans.modules.form.layoutsupport.delegates.MarginLayo
 import com.bearsoft.org.netbeans.modules.form.menu.MenuEditLayer;
 import com.bearsoft.org.netbeans.modules.form.palette.PaletteUtils;
 import com.eas.client.forms.layouts.MarginConstraints;
+import com.eas.designer.explorer.PlatypusDataObject;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -80,7 +81,6 @@ import org.netbeans.spi.palette.PaletteController;
 import org.openide.DialogDisplayer;
 import org.openide.ErrorManager;
 import org.openide.NotifyDescriptor;
-import org.openide.actions.FileSystemAction;
 import org.openide.awt.UndoRedo;
 import org.openide.cookies.SaveCookie;
 import org.openide.explorer.ExplorerManager;
@@ -93,8 +93,9 @@ import org.openide.util.HelpCtx;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.Mutex;
-import org.openide.util.actions.SystemAction;
+import org.openide.util.Utilities;
 import org.openide.util.lookup.ProxyLookup;
+import org.openide.windows.CloneableTopComponent;
 import org.openide.windows.TopComponent;
 
 /**
@@ -107,13 +108,14 @@ import org.openide.windows.TopComponent;
  *
  * @author Tran Duc Trung, Tomas Pavek, Josef Kozak
  */
-public class PlatypusFormLayoutView extends TopComponent implements MultiViewElement {
+@TopComponent.Description(preferredID = "platypus-layout-view", persistenceType = TopComponent.PERSISTENCE_NEVER)
+public class PlatypusFormLayoutView extends CloneableTopComponent implements MultiViewElement {
 
     // UI components composition
     private JLayeredPane layeredPane;
     private ComponentLayer componentLayer;
     private HandleLayer handleLayer;
-    private FormToolBar formToolBar;
+    private final FormToolBar formToolBar;
     // in-place editing
     private InPlaceEditLayer textEditLayer;
     private FormProperty<String> editedProperty;
@@ -138,21 +140,17 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
     public static final int MODE_ADD = 2;
     private boolean initialized = false;
     MultiViewElementCallback multiViewObserver;
-    private ExplorerManager explorerManager;
+    private final ExplorerManager explorerManager;
     private AssistantView assistantView;
     private PreferenceChangeListener settingsListener;
     private PropertyChangeListener paletteListener;
-    /**
-     * The icons for PlatypusFormLayoutView
-     */
-    private static final String iconURL
-            = "com/bearsoft/org/netbeans/modules/form/resources/formDesigner.gif"; // NOI18N
-    
+
     private static final String SAVE_ACTION_KEY = "save";
 
-    // constructors and setup
     PlatypusFormLayoutView(FormEditor aFormEditor) {
-        setIcon(ImageUtilities.loadImage(iconURL));
+        super();
+        setIcon(aFormEditor.getFormDataObject().getNodeDelegate().getIcon(java.beans.BeanInfo.ICON_COLOR_16x16));
+        setDisplayName(aFormEditor.getFormDataObject().getPrimaryFile().getName());
         setLayout(new BorderLayout());
 
         FormLoaderSettings settings = FormLoaderSettings.getInstance();
@@ -172,18 +170,16 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
 
         formEditor = aFormEditor;
 
-        if (formEditor != null) { // Issue 67879
-            // add PlatypusFormDataObject to lookup so it can be obtained from multiview TopComponent
-            final PlatypusFormDataObject formDataObject = formEditor.getFormDataObject();
-            ActionMap map = FormInspector.getInstance().setupActionMap(getActionMap());
-            explorerManager = new ExplorerManager();
-            associateLookup(new ProxyLookup(new Lookup[]{
-                ExplorerUtils.createLookup(explorerManager, map),
-                PaletteUtils.getPaletteLookup(formDataObject.getPrimaryFile())}));
-            formToolBar = new FormToolBar(this);
-        }
+        // add PlatypusFormDataObject to lookup so it can be obtained from multiview TopComponent
+        final PlatypusDataObject formDataObject = formEditor.getFormDataObject();
+        ActionMap map = FormInspector.getInstance().setupActionMap(getActionMap());
+        explorerManager = new ExplorerManager();
+        associateLookup(new ProxyLookup(new Lookup[]{
+            ExplorerUtils.createLookup(explorerManager, map),
+            PaletteUtils.getPaletteLookup(formDataObject.getPrimaryFile())}));
+        formToolBar = new FormToolBar(this);
         setMinimumSize(new Dimension(10, 10));
-        
+
         InputMap iMap = getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         ActionMap aMap = getActionMap();
         iMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK), SAVE_ACTION_KEY);
@@ -231,6 +227,9 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
             scrollPane.getVerticalScrollBar().setUnitIncrement(5); // Issue 50054
             scrollPane.getHorizontalScrollBar().setUnitIncrement(5);
             add(scrollPane, BorderLayout.CENTER);
+            if (formEditor.getFormDataObject() instanceof PlatypusLayoutDataObject) {
+                add(formToolBar, BorderLayout.NORTH);
+            }
             explorerManager.setRootContext(formEditor.getFormRootNode());
             if (formModelListener == null) {
                 formModelListener = new FormListener();
@@ -303,18 +302,20 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
     }
 
     private void updateAssistant() {
-        if (FormLoaderSettings.getInstance().getAssistantShown()) {
-            AssistantModel assistant = formModel.getAssistantModel();
-            assistantView = new AssistantView(assistant);
-            assistant.setContext("select"); // NOI18N
-            add(assistantView, BorderLayout.NORTH);
-        } else {
-            if (assistantView != null) {
-                remove(assistantView);
-                assistantView = null;
+        if (formEditor.getFormDataObject() instanceof PlatypusFormDataObject) {
+            if (FormLoaderSettings.getInstance().getAssistantShown()) {
+                AssistantModel assistant = formModel.getAssistantModel();
+                assistantView = new AssistantView(assistant);
+                assistant.setContext("select"); // NOI18N
+                add(assistantView, BorderLayout.NORTH);
+            } else {
+                if (assistantView != null) {
+                    remove(assistantView);
+                    assistantView = null;
+                }
             }
+            revalidate();
         }
-        revalidate();
     }
 
     // ------
@@ -341,15 +342,10 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
 
     @Override
     public javax.swing.Action[] getActions() {
-        Action[] actions = super.getActions();
-        SystemAction fsAction = SystemAction.get(FileSystemAction.class);
-        if (!Arrays.asList(actions).contains(fsAction)) {
-            Action[] newActions = new Action[actions.length + 1];
-            System.arraycopy(actions, 0, newActions, 0, actions.length);
-            newActions[actions.length] = fsAction;
-            actions = newActions;
-        }
-        return actions;
+        List<Action> actions = new ArrayList<>(Arrays.asList(super.getActions()));
+        actions.add(null);
+        actions.addAll(Utilities.actionsForPath("Editors/TabActions"));
+        return actions.toArray(new javax.swing.Action[]{});
     }
 
     // ------------
@@ -382,9 +378,8 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
         // TODO need to remove bindings of the current cloned view (or clone bound components as well)
         topDesignComponent = component;
         highlightTopDesignComponentName(!isTopRADComponent());
-        PlatypusFormDataObject formDO = formEditor.getFormDataObject();
-        if (formDO != null) {
-            formDO.getLookup().lookup(PlatypusFormSupport.class).updateTitles();
+        if (formEditor.getFormDataObject() instanceof PlatypusFormDataObject) {
+            formEditor.getFormDataObject().getLookup().lookup(PlatypusFormSupport.class).updateTitles();
         }
         if (update) {
             setSelectedComponent(topDesignComponent);
@@ -1280,13 +1275,6 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
         formModel.fireContainerLayoutChanged((RADVisualContainer<?>) parent, null, null, null);
     }
 
-    /**
-     * Returns designer actions (they will be displayed in toolbar).
-     *
-     * @param forToolbar determines whether the method should return all
-     * designer actions or just the subset for the form toolbar.
-     * @return <code>Collection</code> of <code>Action</code> objects.
-     */
     public Collection<Action> getAlignActions() {
         if (alignActions == null) {
             alignActions = new ArrayList<>();
@@ -1543,14 +1531,6 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
         lmenuEditLayer.openAndShowMenu(radComp, comp);
     }
 
-    // --------
-    // methods of TopComponent
-    // only MultiViewDescriptor is stored, not MultiViewElement
-    @Override
-    public int getPersistenceType() {
-        return TopComponent.PERSISTENCE_NEVER;
-    }
-
     @Override
     public HelpCtx getHelpCtx() {
         return new HelpCtx("gui.formeditor"); // NOI18N
@@ -1588,12 +1568,6 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
         return ur != null ? ur : super.getUndoRedo();
     }
 
-    @Override
-    protected String preferredID() {
-        return formEditor.getFormDataObject().getName();
-    }
-
-    // ------
     // multiview stuff
     @Override
     public JComponent getToolbarRepresentation() {
@@ -1634,7 +1608,9 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
         // Closed PlatypusFormLayoutView is not going to be reused.
         // Clear all references to prevent memory leaks - even if PlatypusFormLayoutView
         // is kept for some reason, make sure FormModel is not held from it.
-        formEditor.getFormDataObject().getLookup().lookup(PlatypusFormSupport.class).shrink();
+        if (formEditor.getFormDataObject() instanceof PlatypusFormDataObject) {
+            formEditor.getFormDataObject().getLookup().lookup(PlatypusFormSupport.class).shrink();
+        }
         reset(null);
     }
 
@@ -1684,6 +1660,23 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
             EventQueue.invokeLater(() -> {
                 PlatypusFormSupport.checkFormGroupVisibility();
             });
+        }
+    }
+
+    @Override
+    protected CloneableTopComponent createClonedObject() {
+        return new PlatypusFormLayoutView(formEditor);
+    }
+
+    @Override
+    protected boolean closeLast() {
+        if (multiViewObserver != null) {
+            return true;
+        } else if (formEditor.getFormDataObject().isModified()) {
+            PlatypusLayoutSupport singleLayoutSupport = formEditor.getFormDataObject().getLookup().lookup(PlatypusLayoutSupport.class);
+            return singleLayoutSupport.canClose();
+        } else {
+            return true;
         }
     }
 
@@ -1820,7 +1813,7 @@ public class PlatypusFormLayoutView extends TopComponent implements MultiViewEle
                 for (int i = 0; i < levents.length; i++) {
                     FormModelEvent ev = levents[i];
                     if (ev.isModifying()) {
-                        formEditor.getFormDataObject().getLookup().lookup(PlatypusFormSupport.class).markFormModified();
+                        formEditor.getFormDataObject().getLookup().lookup(ModifiedProvider.class).notifyModified();
                     }
                     int type = ev.getChangeType();
                     ComponentContainer radContainer = ev.getContainer();

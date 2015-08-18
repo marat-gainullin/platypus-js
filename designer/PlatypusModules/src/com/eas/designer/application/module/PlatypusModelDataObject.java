@@ -5,11 +5,14 @@
  */
 package com.eas.designer.application.module;
 
+import com.eas.designer.application.module.nodes.ApplicationModelNodeChildren;
+import com.eas.designer.datamodel.nodes.ModelNode;
 import com.eas.designer.explorer.PlatypusDataObject;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.MIMEResolver;
 import org.openide.loaders.DataObjectExistsException;
 import org.openide.loaders.MultiFileLoader;
+import org.openide.nodes.Node;
 
 /**
  *
@@ -22,8 +25,23 @@ public class PlatypusModelDataObject extends PlatypusDataObject {
         super(pf, loader);
     }
 
+    // Serialization
+    static final long serialVersionUID = -975322023627853968L;
+    
+    private void readObject(java.io.ObjectInputStream is)
+            throws java.io.IOException, ClassNotFoundException {
+        is.defaultReadObject();
+    }
+
     @Override
     protected void validateModel() throws Exception {
     }
-
+/*
+    @Override
+    protected Node createNodeDelegate() {
+        return new ModelNode<>(new ApplicationModelNodeChildren(model,
+                getLookup().lookup(PlatypusModuleSupport.class).getModelUndo(),
+                getLookup()), this);
+    }
+*/
 }

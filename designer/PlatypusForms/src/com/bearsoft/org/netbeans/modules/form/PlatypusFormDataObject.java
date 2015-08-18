@@ -51,7 +51,6 @@ import com.eas.designer.application.module.completion.ModuleCompletionContext;
 import java.io.IOException;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
-import org.openide.filesystems.MIMEResolver;
 import org.openide.loaders.DataFolder;
 import org.openide.loaders.DataNode;
 import org.openide.loaders.DataObject;
@@ -71,9 +70,6 @@ public class PlatypusFormDataObject extends PlatypusModuleDataObject {
      * The entry for the .layout file
      */
     protected FileEntry formEntry;
-    //--------------------------------------------------------------------
-    // Constructors
-    static final long serialVersionUID = -975322113627854168L;
 
     public PlatypusFormDataObject(FileObject aJsFile, MultiFileLoader loader) throws Exception {
         super(aJsFile, loader);
@@ -101,10 +97,6 @@ public class PlatypusFormDataObject extends PlatypusModuleDataObject {
         return !javaFO.canWrite() || !formFO.canWrite();
     }
 
-    public boolean formFileReadOnly() {
-        return !formEntry.getFile().canWrite();
-    }
-
     public FileEntry getFormEntry() {
         return formEntry;
     }
@@ -126,8 +118,9 @@ public class PlatypusFormDataObject extends PlatypusModuleDataObject {
         return node;
     }
 
-    //--------------------------------------------------------------------
     // Serialization
+    static final long serialVersionUID = -975322113627854168L;
+    
     private void readObject(java.io.ObjectInputStream is)
             throws java.io.IOException, ClassNotFoundException {
         is.defaultReadObject();

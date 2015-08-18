@@ -7,6 +7,7 @@ package com.bearsoft.org.netbeans.modules.form.editors;
 import com.bearsoft.org.netbeans.modules.form.FormCookie;
 import com.bearsoft.org.netbeans.modules.form.FormModel;
 import com.bearsoft.org.netbeans.modules.form.FormProperty;
+import com.bearsoft.org.netbeans.modules.form.PlatypusFormDataObject;
 import com.eas.designer.application.module.EntityJSObject;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
@@ -46,13 +47,13 @@ public class EntityJSObjectEditor extends PropertyEditorSupport implements ExPro
     // Elipsis button section
     @Override
     public boolean supportsCustomEditor() {
-        return true;
+        return formModel.getDataObject() instanceof PlatypusFormDataObject;
     }
 
     @Override
     public Component getCustomEditor() {
         try {
-            ApplicationDbModel model = formModel.getDataObject().getModel();
+            ApplicationDbModel model = ((PlatypusFormDataObject) formModel.getDataObject()).getModel();
             if (model != null) {
                 ModelElementRef oldRef = new ModelElementRef();
                 EntityJSObject oldModelObject = (EntityJSObject) getValue();
@@ -95,7 +96,7 @@ public class EntityJSObjectEditor extends PropertyEditorSupport implements ExPro
         Object oObject = getValue();
         if (oObject instanceof EntityJSObject) {
             EntityJSObject obj = (EntityJSObject) oObject;
-            return obj.getEntity().getName();
+            return obj.getName();
         } else {
             return super.getAsText();
         }
@@ -104,15 +105,19 @@ public class EntityJSObjectEditor extends PropertyEditorSupport implements ExPro
     @Override
     public void setAsText(String aEntityName) throws IllegalArgumentException {
         if (aEntityName != null && !aEntityName.isEmpty()) {
-            try {
-                ApplicationDbModel model = formModel.getDataObject().getModel();
-                model.getEntities().values().stream().filter((ApplicationDbEntity aEntity) -> {
-                    return aEntityName.equals(aEntity.getName());
-                }).findAny().ifPresent((ApplicationDbEntity aEntity) -> {
-                    setValue(aEntity.getPublished());
-                });
-            } catch (Exception ex) {
-                Exceptions.printStackTrace(ex);
+            if (formModel.getDataObject() instanceof PlatypusFormDataObject) {
+                try {
+                    ApplicationDbModel model = ((PlatypusFormDataObject) formModel.getDataObject()).getModel();
+                    model.getEntities().values().stream().filter((ApplicationDbEntity aEntity) -> {
+                        return aEntityName.equals(aEntity.getName());
+                    }).findAny().ifPresent((ApplicationDbEntity aEntity) -> {
+                        setValue(aEntity.getPublished());
+                    });
+                } catch (Exception ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            } else {
+                setValue(new EntityJSObject(aEntityName));
             }
         } else {
             setValue(null);
@@ -121,16 +126,20 @@ public class EntityJSObjectEditor extends PropertyEditorSupport implements ExPro
 
     @Override
     public String[] getTags() {
-        try {
-            List<String> tags = new ArrayList<>();
-            tags.add("");
-            ApplicationDbModel model = formModel.getDataObject().getModel();
-            model.getEntities().values().stream().forEach((ApplicationDbEntity aEntity) -> {
-                tags.add(aEntity.getName());
-            });
-            return tags.toArray(new String[]{});
-        } catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
+        if (formModel.getDataObject() instanceof PlatypusFormDataObject) {
+            try {
+                List<String> tags = new ArrayList<>();
+                tags.add("");
+                ApplicationDbModel model = ((PlatypusFormDataObject) formModel.getDataObject()).getModel();
+                model.getEntities().values().stream().forEach((ApplicationDbEntity aEntity) -> {
+                    tags.add(aEntity.getName());
+                });
+                return tags.toArray(new String[]{});
+            } catch (Exception ex) {
+                Exceptions.printStackTrace(ex);
+                return null;
+            }
+        } else {
             return null;
         }
     }
