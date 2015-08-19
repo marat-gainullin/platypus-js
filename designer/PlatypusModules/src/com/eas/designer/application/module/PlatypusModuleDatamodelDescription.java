@@ -57,7 +57,7 @@ public class PlatypusModuleDatamodelDescription implements MultiViewDescription,
     @Override
     public MultiViewElement createElement() {
         try {
-            return new PlatypusModuleDatamodelView(dataObject);
+            return new PlatypusDatamodelView(dataObject);
         } catch (Exception ex) {
             ErrorManager.getDefault().notify(ex);
             return null;

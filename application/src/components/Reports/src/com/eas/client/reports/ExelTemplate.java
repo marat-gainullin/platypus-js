@@ -1,10 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- *//*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.eas.client.reports;
 
 import java.io.*;
@@ -50,7 +43,7 @@ public class ExelTemplate {
     }
 
     public byte[] getTemplate() throws Exception {
-        return template.getConfig().getTemplateContent();
+        return template.getContent();
     }
 
     public byte[] create() throws Exception {
@@ -61,8 +54,8 @@ public class ExelTemplate {
     }
 
     protected Workbook executeReport() throws Exception {
-        if (template.getConfig() != null) {
-            try (InputStream is = new ByteArrayInputStream(template.getConfig().getTemplateContent())) {
+        if (template.getContent() != null) {
+            try (InputStream is = new ByteArrayInputStream(template.getContent())) {
                 XLSTransformer transformer = new XLSTransformer();
                 transformer.registerRowProcessor(new ExcelRowProcessor());
                 generateDataNamedMap(transformer);

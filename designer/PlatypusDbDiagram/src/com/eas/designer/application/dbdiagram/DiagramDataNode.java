@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.bearsoft.org.netbeans.modules.form;
+package com.eas.designer.application.dbdiagram;
 
 import com.eas.designer.explorer.PlatypusDataObject;
 import javax.swing.Action;
@@ -15,17 +15,17 @@ import org.openide.util.actions.SystemAction;
  *
  * @author mg
  */
-public class LayoutDataNode extends FilterNode {
-    
-    private static final String LAYOUT_ICON_BASE = "com/bearsoft/org/netbeans/modules/form/resources/layout.gif"; // NOI18N
-    
-    public LayoutDataNode(PlatypusDataObject fdo) {
-        this(new DataNode(fdo, Children.LEAF));
+public class DiagramDataNode extends FilterNode {
+
+    private static final String DIAGRAM_ICON_BASE = DiagramDataNode.class.getPackage().getName().replace('.', '/') + "/dbScheme.png"; // NOI18N
+
+    public DiagramDataNode(PlatypusDataObject fdo) {
+        this(new DataNode(fdo, FilterNode.Children.LEAF));
     }
 
-    private LayoutDataNode(DataNode orig) {
+    private DiagramDataNode(DataNode orig) {
         super(orig);
-        orig.setIconBaseWithExtension(LAYOUT_ICON_BASE);
+        orig.setIconBaseWithExtension(DIAGRAM_ICON_BASE);
     }
 
     @Override
@@ -33,7 +33,7 @@ public class LayoutDataNode extends FilterNode {
         return new javax.swing.AbstractAction() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent e) {
-                PlatypusLayoutSupport supp = getLookup().lookup(PlatypusLayoutSupport.class);
+                PlatypusDbDiagramSupport supp = getLookup().lookup(PlatypusDbDiagramSupport.class);
                 supp.open();
             }
         };

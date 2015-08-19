@@ -23,7 +23,7 @@ import jdk.nashorn.api.scripting.JSObject;
 public interface ModelWidget<V> extends TableCellRenderer, TableCellEditor, HasValue<V>, HasJsValue {
 
     public static Object getPathData(JSObject anElement, String aPath) {
-        if (aPath != null && !aPath.isEmpty()) {
+        if (aPath != null && !aPath.isEmpty() && Scripts.getSpace() != null/*Crazy designer :(*/) {
             JSObject target = anElement;
             String[] path = aPath.split("\\.");
             String propName = path[0];

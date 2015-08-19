@@ -614,9 +614,10 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
             if (project != null && project.getQueries().getCachedQuery(queryName) != null) {
                 if (queriesReg != null) {
                     queriesReg.remove();
+                    queriesReg = null;
                 }
                 project.fireQueriesChanged();
-                project.addQueriesChangeListener(modelValidator);
+                queriesReg = project.addQueriesChangeListener(modelValidator);
             }
         }
     }
@@ -633,6 +634,7 @@ public class PlatypusQueryDataObject extends PlatypusDataObject {
     protected void handleDelete() throws IOException {
         if (queriesReg != null) {
             queriesReg.remove();
+            queriesReg = null;
         }
         if (sqlText == null) {
             sqlText = getPrimaryFile().asText(PlatypusUtils.COMMON_ENCODING_NAME);

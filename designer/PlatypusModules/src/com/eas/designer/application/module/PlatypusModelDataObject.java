@@ -5,9 +5,10 @@
  */
 package com.eas.designer.application.module;
 
-import com.eas.designer.application.module.nodes.ApplicationModelNodeChildren;
-import com.eas.designer.datamodel.nodes.ModelNode;
+import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.explorer.PlatypusDataObject;
+import com.eas.util.ListenerRegistration;
+import java.io.IOException;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.MIMEResolver;
 import org.openide.loaders.DataObjectExistsException;
@@ -21,13 +22,24 @@ import org.openide.nodes.Node;
 @MIMEResolver.ExtensionRegistration(displayName = "#LBL_Platypus_Model_file", extension = "model", mimeType = "text/model+xml")
 public class PlatypusModelDataObject extends PlatypusDataObject {
 
+    private transient ListenerRegistration queriesReg;
+    protected transient PlatypusProject.QueriesChangeListener modelValidator = () -> {
+        setModelValid(false);
+        startModelValidating();
+    };
+    
     public PlatypusModelDataObject(FileObject pf, MultiFileLoader loader) throws DataObjectExistsException {
         super(pf, loader);
+        getCookieSet().add(new PlatypusModelSupport(this));
+        PlatypusProject project = getProject();
+        if (project != null) {
+            queriesReg = project.addQueriesChangeListener(modelValidator);
+        }
     }
 
     // Serialization
     static final long serialVersionUID = -975322023627853968L;
-    
+
     private void readObject(java.io.ObjectInputStream is)
             throws java.io.IOException, ClassNotFoundException {
         is.defaultReadObject();
@@ -35,13 +47,23 @@ public class PlatypusModelDataObject extends PlatypusDataObject {
 
     @Override
     protected void validateModel() throws Exception {
+        if (getLookup().lookup(ModelProvider.class).getModel() != null) {
+            getLookup().lookup(ModelProvider.class).getModel().validate();
+        }
     }
-/*
+
     @Override
     protected Node createNodeDelegate() {
-        return new ModelNode<>(new ApplicationModelNodeChildren(model,
-                getLookup().lookup(PlatypusModuleSupport.class).getModelUndo(),
-                getLookup()), this);
+        return new ModelDataNode(this);
     }
-*/
+
+    @Override
+    protected void handleDelete() throws IOException {
+        if (queriesReg != null) {
+            queriesReg.remove();
+            queriesReg = null;
+        }
+        super.handleDelete();
+    }
+
 }

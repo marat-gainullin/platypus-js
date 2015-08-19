@@ -76,7 +76,7 @@ import org.openide.windows.*;
  *
  * @author Ian Formanek, Tomas Pavek
  */
-public class PlatypusFormSupport extends PlatypusModuleSupport implements LayoutFileProvider, ModifiedProvider{
+public class PlatypusFormSupport extends PlatypusModuleSupport implements LayoutFileProvider, ModifiedProvider, FormEditorProvider{
 
     /**
      * ID of the form designer (in the multiview)
@@ -276,6 +276,7 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Layout
     }
     // END of PENDING
 
+    @Override
     public FormEditor getFormEditor() {
         return getFormEditor(false);
     }
@@ -474,15 +475,15 @@ public class PlatypusFormSupport extends PlatypusModuleSupport implements Layout
             dataObject = formDO;
         }
 
-        private PlatypusFormSupport getFormEditor() {
+        private PlatypusFormSupport getFormSupport() {
             return dataObject instanceof PlatypusFormDataObject
                     ? ((PlatypusFormDataObject) dataObject).getLookup().lookup(PlatypusFormSupport.class) : null;
         }
 
         @Override
         public MultiViewElement createElement() {
-            PlatypusFormSupport formEditor = getFormEditor();
-            return new PlatypusFormLayoutView((formEditor == null) ? null : formEditor.getFormEditor(true));
+            PlatypusFormSupport formSupport = getFormSupport();
+            return new PlatypusFormLayoutView((formSupport == null) ? null : formSupport.getFormEditor(true));
         }
 
         @Override

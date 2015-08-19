@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.bearsoft.org.netbeans.modules.form;
+package com.eas.designer.application.module;
 
 import com.eas.designer.explorer.PlatypusDataObject;
 import javax.swing.Action;
@@ -12,20 +12,20 @@ import org.openide.nodes.FilterNode;
 import org.openide.util.actions.SystemAction;
 
 /**
- *
+ * Node of projects view of designer
  * @author mg
  */
-public class LayoutDataNode extends FilterNode {
-    
-    private static final String LAYOUT_ICON_BASE = "com/bearsoft/org/netbeans/modules/form/resources/layout.gif"; // NOI18N
-    
-    public LayoutDataNode(PlatypusDataObject fdo) {
+public class ModelDataNode extends FilterNode {
+
+    private static final String MODEL_ICON_BASE = ModelDataNode.class.getPackage().getName().replace('.', '/') + "/model.png"; // NOI18N
+
+    public ModelDataNode(PlatypusDataObject fdo) {
         this(new DataNode(fdo, Children.LEAF));
     }
 
-    private LayoutDataNode(DataNode orig) {
+    private ModelDataNode(DataNode orig) {
         super(orig);
-        orig.setIconBaseWithExtension(LAYOUT_ICON_BASE);
+        orig.setIconBaseWithExtension(MODEL_ICON_BASE);
     }
 
     @Override
@@ -33,7 +33,7 @@ public class LayoutDataNode extends FilterNode {
         return new javax.swing.AbstractAction() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent e) {
-                PlatypusLayoutSupport supp = getLookup().lookup(PlatypusLayoutSupport.class);
+                PlatypusModelSupport supp = getLookup().lookup(PlatypusModelSupport.class);
                 supp.open();
             }
         };

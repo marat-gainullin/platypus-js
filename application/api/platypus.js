@@ -1463,13 +1463,13 @@
         }
         ScriptedResourceClass.loadEntities(Java.to(entities, JavaStringArrayClass), aOnSuccess ? aOnSuccess : null, aOnFailure ? aOnFailure : null);
     }
-    Object.defineProperty(P, "loadEntities", {value: loadEntities});
+    Object.defineProperty(P, "requireEntities", {value: loadEntities});
 
     function loadRemotes(aRemotesNames, aOnSuccess, aOnFailure) {
         var remotesNames = Array.isArray(aRemotesNames) ? aRemotesNames : [aRemotesNames];
         ScriptedResourceClass.loadRemotes(Java.to(remotesNames, JavaStringArrayClass), aOnSuccess ? aOnSuccess : null, aOnFailure ? aOnFailure : null);
     }
-    Object.defineProperty(P, "loadRemotes", {value: loadRemotes});
+    Object.defineProperty(P, "requireRemotes", {value: loadRemotes});
     /**
      * @static
      * @param {type} aName
@@ -1483,9 +1483,9 @@
         if (files) {
             var reportConfig = ScriptedResourceClass.getApp().getReports().get(aName, files);
             if (aTarget) {
-                P.ReportTemplate.call(aTarget, reportConfig, aData);
+                P.ReportTemplate.call(aTarget, reportConfig.getTemplateContent(), reportConfig.getNameTemplate(), reportConfig.getFormat(), aData);
             } else {
-                aTarget = new P.ReportTemplate(reportConfig, aData);
+                aTarget = new P.ReportTemplate(reportConfig.getTemplateContent(), reportConfig.getNameTemplate(), reportConfig.getFormat(), aData);
             }
             return aTarget;
         } else {
@@ -1707,7 +1707,7 @@ if (!P) {
      * @param {type} aOnFailure Failure callback. Accepts information about any problem occured while loading.
      * @returns {undefined}
      */
-    P.loadEntities = function (aEntities, aOnSuccess, aOnFailure) {
+    P.requireEntities = function (aEntities, aOnSuccess, aOnFailure) {
     };
     /**
      * Loads sever modules methods lists from server.
@@ -1721,7 +1721,7 @@ if (!P) {
      * @param {type} aOnFailure Failure callback. Accepts information about any problem occured while loading.
      * @returns {undefined} 
      */
-    P.loadRemotes = function (aRemotesNames, aOnSuccess, aOnFailure) {
+    P.requireRemotes = function (aRemotesNames, aOnSuccess, aOnFailure) {
     };
     /**
      * Parses *.model files and creates data model (entity manager) of a module.

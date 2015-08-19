@@ -6,10 +6,6 @@ package com.eas.designer.application.dbdiagram;
 
 import com.eas.client.model.gui.edits.NotSavable;
 import com.eas.designer.datamodel.ModelUndoProvider;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-import java.beans.VetoableChangeListener;
-import java.beans.VetoableChangeSupport;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -28,16 +24,17 @@ import org.openide.cookies.EditCookie;
 import org.openide.cookies.OpenCookie;
 import org.openide.cookies.SaveCookie;
 import org.openide.cookies.ViewCookie;
+import org.openide.loaders.OpenSupport;
 import org.openide.util.NbBundle;
-import org.openide.windows.CloneableOpenSupport;
 import org.openide.windows.CloneableTopComponent;
 
 /**
  *
  * @author mg
  */
-public class PlatypusDbDiagramSupport extends CloneableOpenSupport implements OpenCookie, ViewCookie, EditCookie, CloseCookie, SaveCookie, ModelUndoProvider {
+public class PlatypusDbDiagramSupport extends OpenSupport implements OpenCookie, ViewCookie, EditCookie, CloseCookie, SaveCookie, ModelUndoProvider {
 
+    /*
     protected static class Env implements CloneableOpenSupport.Env {
 
         static final long serialVersionUID = 8453753008783256201L;
@@ -99,11 +96,12 @@ public class PlatypusDbDiagramSupport extends CloneableOpenSupport implements Op
             return dataObject.getLookup().lookup(PlatypusDbDiagramSupport.class);
         }
     }
+    */
     protected UndoRedo.Manager modelUndo;
     protected PlatypusDbDiagramDataObject dataObject;
 
     public PlatypusDbDiagramSupport(PlatypusDbDiagramDataObject aDataObject) {
-        super(new Env(aDataObject));
+        super(aDataObject.getPrimaryEntry());
         dataObject = aDataObject;
         modelUndo = new UndoRedo.Manager() {
             @Override
@@ -228,17 +226,14 @@ public class PlatypusDbDiagramSupport extends CloneableOpenSupport implements Op
     }
 
     public void closeAllViews() {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                modelUndo.discardAllEdits();
-                List<CloneableTopComponent> views = getAllViews();
-                for (CloneableTopComponent view : views) {
-                    view.close();
-                }
-                // Take care of memory consumption.
-                dataObject.shrink();
-            }
+        SwingUtilities.invokeLater(() -> {
+            modelUndo.discardAllEdits();
+            List<CloneableTopComponent> views = getAllViews();
+            views.stream().forEach((view) -> {
+                view.close();
+            });
+            // Take care of memory consumption.
+            dataObject.shrink();
         });
     }
 }

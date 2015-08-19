@@ -26,7 +26,7 @@ import org.openide.windows.CloneableTopComponent;
  * @author mg
  */
 public class PlatypusLayoutSupport extends OpenSupport implements
-        OpenCookie, EditCookie, SaveCookie, CloseCookie, DataObjectProvider, LayoutFileProvider, ModifiedProvider {
+        OpenCookie, EditCookie, SaveCookie, CloseCookie, DataObjectProvider, LayoutFileProvider, ModifiedProvider, FormEditorProvider {
 
     protected PlatypusLayoutDataObject dataObject;
     protected FormEditor formEditor;
@@ -47,11 +47,16 @@ public class PlatypusLayoutSupport extends OpenSupport implements
     }
 
     @Override
-    protected CloneableTopComponent createCloneableTopComponent() {
+    public FormEditor getFormEditor(){
         if (formEditor == null) {
             formEditor = new FormEditor(dataObject);
         }
-        return new PlatypusFormLayoutView(formEditor);
+        return formEditor;
+    }
+    
+    @Override
+    protected CloneableTopComponent createCloneableTopComponent() {
+        return new PlatypusFormLayoutView(getFormEditor());
     }
 
     @Override

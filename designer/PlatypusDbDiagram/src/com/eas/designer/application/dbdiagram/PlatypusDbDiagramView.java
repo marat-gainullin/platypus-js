@@ -57,6 +57,8 @@ import org.openide.windows.WindowManager;
  *
  * @author mg
  */
+@TopComponent.Description(preferredID = "platypus-db-diagram-view", persistenceType = TopComponent.PERSISTENCE_ONLY_OPENED,
+        iconBase = "com/eas/designer/application/dbdiagram/dbScheme.png")
 public class PlatypusDbDiagramView extends CloneableTopComponent {
 
     protected class DataObjectListener implements PropertyChangeListener {
@@ -119,8 +121,6 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
     /**
      * path to the icon used by the component and its open action
      */
-    static final String ICON_PATH = "com/eas/designer/application/dbdiagram/dbScheme.png";
-    private static final String PREFERRED_ID = "PlatypusDbDiagramTopComponent";
     protected PlatypusDbDiagramDataObject dataObject;
     protected transient DbSchemeEditorView editor;
     protected transient DataObjectListener dataObjectListener;
@@ -130,12 +130,11 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
 
     public PlatypusDbDiagramView() throws Exception {
         super();
-        setIcon(ImageUtilities.loadImage(ICON_PATH, true));
     }
 
     @Override
     public Lookup getLookup() {
-        return new ProxyLookup(super.getLookup(), Lookups.fixed(getDataObject()));
+        return new ProxyLookup(super.getLookup(), Lookups.singleton(getDataObject()));
     }
 
     public PlatypusDbDiagramDataObject getDataObject() {
@@ -308,11 +307,6 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
     }
 
     @Override
-    public int getPersistenceType() {
-        return TopComponent.PERSISTENCE_ONLY_OPENED;
-    }
-
-    @Override
     public boolean canClose() {
         PlatypusDbDiagramSupport support = dataObject.getLookup().lookup(PlatypusDbDiagramSupport.class);
         List<CloneableTopComponent> views = support.getAllViews();
@@ -386,10 +380,5 @@ public class PlatypusDbDiagramView extends CloneableTopComponent {
             group.close();
         }
         super.componentHidden();
-    }
-
-    @Override
-    protected String preferredID() {
-        return PREFERRED_ID;
     }
 }

@@ -591,11 +591,11 @@ public class Application {
             return (num << cnt) | (num >>> (32 - cnt));
         }
 
-		$wnd.P.loadRemotes = function(aRemotesNames, aOnSuccess, aOnFailure){
+		$wnd.P.requireRemotes = function(aRemotesNames, aOnSuccess, aOnFailure){
 			var remotesNames = Array.isArray(aRemotesNames) ? aRemotesNames : [aRemotesNames];
 			@com.eas.client.application.Application::jsLoadServerModules(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(remotesNames, aOnSuccess, aOnFailure);
 		}		
-		$wnd.P.loadEntities = function(aEntities, aOnSuccess, aOnFailure){
+		$wnd.P.requireEntities = function(aEntities, aOnSuccess, aOnFailure){
 			var entities;
 			if(!Array.isArray(aEntities)){
 				aEntities = aEntities + "";

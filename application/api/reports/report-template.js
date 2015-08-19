@@ -3,21 +3,25 @@
     var javaClass = Java.type(className);
     var space = this['-platypus-scripts-space'];
     space.putPublisher(className, function(aDelegate) {
-        return new P.ReportTemplate(null, null, aDelegate);
+        return new P.ReportTemplate(null, null, null, null, aDelegate);
     });
     
     /**
      * Creates report template.
-     * @param config The report binary body (array of byte) and some options.
+     * @param content The report binary body (array of byte).
+     * @param name The generated report default.
+     * @param format The generated report format hint (used by runtime while report generation).
      * @param data Object that propeties can be added to the report.
      * @constructor ReportTemplate ReportTemplate
      */
-    P.ReportTemplate = function (config, data) {
-        var maxArgs = 2;
+    P.ReportTemplate = function (content, name, format, data) {
+        var maxArgs = 4;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
-            : arguments.length === 2 ? new javaClass(P.boxAsJava(config), P.boxAsJava(data))
-            : arguments.length === 1 ? new javaClass(P.boxAsJava(config))
+            : arguments.length === 4 ? new javaClass(P.boxAsJava(content), P.boxAsJava(name), P.boxAsJava(format), P.boxAsJava(data))
+            : arguments.length === 3 ? new javaClass(P.boxAsJava(content), P.boxAsJava(name), P.boxAsJava(format))
+            : arguments.length === 2 ? new javaClass(P.boxAsJava(content), P.boxAsJava(name))
+            : arguments.length === 1 ? new javaClass(P.boxAsJava(content))
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {

@@ -26,6 +26,7 @@ import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectExistsException;
 import org.openide.loaders.MultiFileLoader;
 import org.openide.nodes.CookieSet;
+import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 import org.openide.util.lookup.Lookups;
 import org.openide.util.lookup.ProxyLookup;
@@ -128,4 +129,10 @@ public class PlatypusDbDiagramDataObject extends PlatypusDataObject {
             out.flush();
         }
     }
+
+    @Override
+    protected Node createNodeDelegate() {
+        return new DiagramDataNode(this);
+    }
+    
 }

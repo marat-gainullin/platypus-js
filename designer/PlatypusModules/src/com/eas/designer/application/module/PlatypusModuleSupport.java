@@ -61,7 +61,8 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
         SaveCookie,
         DocumentListener,
         DataObjectProvider,
-        ModelUndoProvider {
+        ModelUndoProvider,
+        ModelModifiedProvider {
 
     protected PlatypusModuleDataObject dataObject;
     protected UndoRedo.Manager modelUndo;
@@ -77,6 +78,7 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
                 try {
                     if (anEdit.isSignificant()) {
                         notifyModified();
+                        modelModified = true;
                     }
                     return super.addEdit(anEdit);
                 } catch (Exception ex) {
@@ -100,10 +102,12 @@ public class PlatypusModuleSupport extends DataEditorSupport implements OpenCook
         };
     }
 
+    @Override
     public boolean isModelModified() {
         return modelModified;
     }
 
+    @Override
     public void setModelModified(boolean aValue) {
         modelModified = aValue;
         // Undoable edits will mark whole dataobject as modified.

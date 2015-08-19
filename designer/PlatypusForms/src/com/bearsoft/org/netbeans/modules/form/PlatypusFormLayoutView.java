@@ -62,6 +62,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyVetoException;
 import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.List;
@@ -108,47 +110,55 @@ import org.openide.windows.TopComponent;
  *
  * @author Tran Duc Trung, Tomas Pavek, Josef Kozak
  */
-@TopComponent.Description(preferredID = "platypus-layout-view", persistenceType = TopComponent.PERSISTENCE_NEVER)
+@TopComponent.Description(preferredID = "platypus-layout-view", persistenceType = TopComponent.PERSISTENCE_ONLY_OPENED)
 public class PlatypusFormLayoutView extends CloneableTopComponent implements MultiViewElement {
 
     // UI components composition
-    private JLayeredPane layeredPane;
-    private ComponentLayer componentLayer;
-    private HandleLayer handleLayer;
-    private final FormToolBar formToolBar;
+    private transient JLayeredPane layeredPane;
+    private transient ComponentLayer componentLayer;
+    private transient HandleLayer handleLayer;
+    private transient FormToolBar formToolBar;
     // in-place editing
-    private InPlaceEditLayer textEditLayer;
-    private FormProperty<String> editedProperty;
-    private InPlaceEditLayer.FinishListener finnishListener;
-    private MenuEditLayer menuEditLayer;
+    private transient InPlaceEditLayer textEditLayer;
+    private transient FormProperty<String> editedProperty;
+    private transient InPlaceEditLayer.FinishListener finnishListener;
+    private transient MenuEditLayer menuEditLayer;
     // metadata
-    private FormModel formModel;
-    private FormModelListener formModelListener;
-    private RADVisualContainer<?> topDesignComponent;
-    private FormEditor formEditor;
+    private transient FormModel formModel;
+    private transient FormModelListener formModelListener;
+    private transient RADVisualContainer<?> topDesignComponent;
+    private transient FormEditor formEditor;
     // layout visualization and interaction
-    private final List<RADComponent<?>> selectedComponents = new ArrayList<>();
-    private final List<RADVisualComponent<?>> selectedLayoutComponents = new ArrayList<>();
-    private VisualReplicator replicator;
-    private List<Action> alignActions;
-    private List<Action> resizabilityActions;
-    private JToggleButton[] resizabilityButtons;
-    private List<Action> anchorActions;
-    private JToggleButton[] anchorButtons;
-    private int designerMode;
+    private transient final List<RADComponent<?>> selectedComponents = new ArrayList<>();
+    private transient final List<RADVisualComponent<?>> selectedLayoutComponents = new ArrayList<>();
+    private transient VisualReplicator replicator;
+    private transient List<Action> alignActions;
+    private transient List<Action> resizabilityActions;
+    private transient JToggleButton[] resizabilityButtons;
+    private transient List<Action> anchorActions;
+    private transient JToggleButton[] anchorButtons;
+    private transient int designerMode;
     public static final int MODE_SELECT = 0;
     public static final int MODE_ADD = 2;
-    private boolean initialized = false;
-    MultiViewElementCallback multiViewObserver;
-    private final ExplorerManager explorerManager;
-    private AssistantView assistantView;
-    private PreferenceChangeListener settingsListener;
-    private PropertyChangeListener paletteListener;
+    private transient boolean initialized = false;
+    transient MultiViewElementCallback multiViewObserver;
+    private transient ExplorerManager explorerManager;
+    private transient AssistantView assistantView;
+    private transient PreferenceChangeListener settingsListener;
+    private transient PropertyChangeListener paletteListener;
 
     private static final String SAVE_ACTION_KEY = "save";
 
-    PlatypusFormLayoutView(FormEditor aFormEditor) {
+    public PlatypusFormLayoutView() {
         super();
+    }
+
+    PlatypusFormLayoutView(FormEditor aFormEditor) {
+        this();
+        setFormEditor(aFormEditor);
+    }
+
+    protected final void setFormEditor(FormEditor aFormEditor) {
         setIcon(aFormEditor.getFormDataObject().getNodeDelegate().getIcon(java.beans.BeanInfo.ICON_COLOR_16x16));
         setDisplayName(aFormEditor.getFormDataObject().getPrimaryFile().getName());
         setLayout(new BorderLayout());
@@ -2173,4 +2183,24 @@ public class PlatypusFormLayoutView extends CloneableTopComponent implements Mul
             }
         }
     }
+
+    static final long serialVersionUID = 23142032923497120L;
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws java.io.IOException {
+        super.writeExternal(out);
+        out.writeObject(formEditor.getFormDataObject());
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        super.readExternal(in);
+        try {
+            PlatypusDataObject dataObject = (PlatypusDataObject) in.readObject();
+            setFormEditor(dataObject.getLookup().lookup(FormEditorProvider.class).getFormEditor());
+        } catch (Exception ex) {
+            throw new IOException(ex);
+        }
+    }
+
 }

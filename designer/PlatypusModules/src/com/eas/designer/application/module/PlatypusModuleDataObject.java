@@ -7,10 +7,6 @@ package com.eas.designer.application.module;
 import com.eas.client.SqlQuery;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusFilesSupport;
-import com.eas.client.metadata.Field;
-import com.eas.client.metadata.Fields;
-import com.eas.client.model.ModelEditingListener;
-import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.model.store.ApplicationModel2XmlDom;
@@ -23,15 +19,11 @@ import com.eas.designer.datamodel.nodes.ModelNode;
 import com.eas.designer.explorer.PlatypusDataObject;
 import com.eas.designer.explorer.files.wizard.NewApplicationElementWizardIterator;
 import com.eas.script.Scripts;
-import com.eas.util.CollectionListener;
 import com.eas.util.ListenerRegistration;
 import com.eas.xml.dom.Source2XmlDom;
 import com.eas.xml.dom.XmlDom2String;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Collection;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import jdk.nashorn.internal.ir.FunctionNode;
@@ -50,95 +42,10 @@ import org.openide.nodes.Node;
 import org.openide.nodes.Node.Cookie;
 import org.openide.util.Exceptions;
 
-public class PlatypusModuleDataObject extends PlatypusDataObject implements AstProvider {
-
-    protected class ApplicationDbModelModifiedObserver implements ModelEditingListener<ApplicationDbEntity>, PropertyChangeListener, CollectionListener<Fields, Field> {
-
-        @Override
-        public void entityAdded(ApplicationDbEntity e) {
-            e.setPublished(new EntityJSObject(e));
-            markModelModified();
-            e.getChangeSupport().addPropertyChangeListener(this);
-        }
-
-        @Override
-        public void entityRemoved(ApplicationDbEntity e) {
-            e.setPublished(null);
-            markModelModified();
-            e.getChangeSupport().removePropertyChangeListener(this);
-        }
-
-        @Override
-        public void relationAdded(Relation<ApplicationDbEntity> rel) {
-            markModelModified();
-            rel.getChangeSupport().addPropertyChangeListener(this);
-        }
-
-        @Override
-        public void relationRemoved(Relation<ApplicationDbEntity> rel) {
-            markModelModified();
-            rel.getChangeSupport().removePropertyChangeListener(this);
-        }
-
-        @Override
-        public void entityIndexesChanged(ApplicationDbEntity e) {
-            markModelModified();
-        }
-
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-            markModelModified();
-        }
-
-        private void markModelModified() {
-            getLookup().lookup(PlatypusModuleSupport.class).setModelModified(true);
-            // Undoable edits will mark whole dataobject as modified.
-            // Only specific modified status is setted here.
-            // Model's modified staus is the case.
-        }
-
-        @Override
-        public void added(Fields c, Field v) {
-            markModelModified();
-            v.getChangeSupport().addPropertyChangeListener(this);
-        }
-
-        @Override
-        public void added(Fields c, Collection<Field> clctn) {
-            markModelModified();
-            for (Field v : clctn) {
-                v.getChangeSupport().addPropertyChangeListener(this);
-            }
-        }
-
-        @Override
-        public void removed(Fields c, Field v) {
-            markModelModified();
-            v.getChangeSupport().removePropertyChangeListener(this);
-        }
-
-        @Override
-        public void removed(Fields c, Collection<Field> clctn) {
-            markModelModified();
-            for (Field v : clctn) {
-                v.getChangeSupport().removePropertyChangeListener(this);
-            }
-        }
-
-        @Override
-        public void reodered(Fields c) {
-            markModelModified();
-        }
-
-        @Override
-        public void cleared(Fields c) {
-            markModelModified();
-        }
-    }
+public class PlatypusModuleDataObject extends PlatypusDataObject implements AstProvider, ModelProvider {
 
     public final static Object DATAOBJECT_DOC_PROPERTY = "dataObject";
     protected transient Entry modelEntry;
-    protected transient ApplicationDbModelModifiedObserver modelChangesObserver = new ApplicationDbModelModifiedObserver();
     protected transient ApplicationDbModel model;
     protected transient ModelNode<ApplicationDbEntity, ApplicationDbModel> modelNode;
     private transient boolean astIsValid;
@@ -242,6 +149,7 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
         return modelEntry.getFile();
     }
 
+    @Override
     public ApplicationDbModel getModel() throws Exception {
         checkModelRead();
         return model;
@@ -265,16 +173,6 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
         if (model == null) {
             model = readModel();
             modelNode = createModelNode();
-            model.addEditingListener(modelChangesObserver);
-            model.getEntities().values().stream().forEach((entity) -> {
-                entity.getChangeSupport().addPropertyChangeListener(modelChangesObserver);
-            });
-            model.getRelations().stream().forEach((rel) -> {
-                rel.getChangeSupport().addPropertyChangeListener(modelChangesObserver);
-            });
-            model.getReferenceRelations().stream().forEach((rel) -> {
-                rel.getChangeSupport().addPropertyChangeListener(modelChangesObserver);
-            });
         }
     }
 
@@ -284,6 +182,7 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
                 getLookup()), this);
     }
 
+    @Override
     public ModelNode<ApplicationDbEntity, ApplicationDbModel> getModelNode() throws Exception {
         checkModelRead();
         return modelNode;
@@ -323,6 +222,7 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
     protected void handleDelete() throws IOException {
         if (queriesReg != null) {
             queriesReg.remove();
+            queriesReg = null;
         }
         FunctionNode constr = getConstructor();
         PlatypusProject project = getProject();
@@ -341,9 +241,10 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
                 if (moduleQuery != null) {
                     if (queriesReg != null) {
                         queriesReg.remove();
+                        queriesReg = null;
                     }
                     project.fireQueryChanged(constr.getName());
-                    project.addQueriesChangeListener(modelValidator);
+                    queriesReg = project.addQueriesChangeListener(modelValidator);
                 }
             }
         }
