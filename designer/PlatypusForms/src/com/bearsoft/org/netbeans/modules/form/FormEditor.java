@@ -43,17 +43,18 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
+import com.eas.designer.explorer.PlatypusDataObject;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
-import javax.swing.JEditorPane;
 import org.openide.DialogDisplayer;
 import org.openide.ErrorManager;
 import org.openide.NotifyDescriptor;
 import org.openide.awt.UndoRedo;
+import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
 import org.openide.nodes.Node;
 
@@ -92,11 +93,11 @@ public class FormEditor {
     /**
      * The DataObject of the form
      */
-    private final PlatypusFormDataObject formDataObject;
+    private final PlatypusDataObject formDataObject;
     private PropertyChangeListener dataObjectListener;
 
     // -----
-    FormEditor(PlatypusFormDataObject aDataObject) {
+    FormEditor(PlatypusDataObject aDataObject) {
         formDataObject = aDataObject;
     }
 
@@ -119,7 +120,7 @@ public class FormEditor {
         return formModel;
     }
 
-    public final PlatypusFormDataObject getFormDataObject() {
+    public final PlatypusDataObject getFormDataObject() {
         return formDataObject;
     }
 
@@ -148,7 +149,7 @@ public class FormEditor {
             Logger.getLogger("TIMER").log(Level.FINE, "FormModel", new Object[]{formDataObject.getPrimaryFile(), formModel}); // NOI18N
             // load the form data (FormModel) and report errors
             try {
-                formModel = persistenceManager.loadForm(formDataObject, persistenceErrors);
+                formModel = persistenceManager.loadForm(formDataObject.getLookup().lookup(LayoutFileProvider.class).getLayoutFile(), formDataObject, persistenceErrors);
                 formModel.setModified(false);
                 // form is successfully loaded...
                 formLoaded = true;
@@ -184,10 +185,11 @@ public class FormEditor {
     }
 
     void saveFormData() throws PersistenceException {
-        if (formLoaded && !formDataObject.formFileReadOnly() && !formModel.isReadOnly() && formModel.isModified()) {
+        FileObject targetFile = formDataObject.getLookup().lookup(LayoutFileProvider.class).getLayoutFile();
+        if (formLoaded && targetFile.canWrite() && !formModel.isReadOnly() && formModel.isModified()) {
             formModel.fireFormToBeSaved();
             resetPersistenceErrorLog();
-            persistenceManager.saveForm(formDataObject, this, persistenceErrors);
+            persistenceManager.saveForm(targetFile, this, persistenceErrors);
             formModel.setModified(false);
         }
     }
@@ -330,7 +332,7 @@ public class FormEditor {
      */
     private void setFormReadOnly() {
         formModel.setReadOnly(true);
-        getFormDataObject().getLookup().lookup(PlatypusFormSupport.class).updateTitles();
+        //getFormDataObject().getLookup().lookup(PlatypusFormSupport.class).updateTitles();
     }
 
     /**
@@ -396,13 +398,13 @@ public class FormEditor {
      *
      * @param formModel form model.
      * @return JEditorPane set up with the actuall forms java source
-     */
     public static JEditorPane createCodeEditorPane(FormModel formModel) {
         PlatypusFormDataObject dobj = formModel.getDataObject();
         JEditorPane codePane = new JEditorPane();
         FormUtils.setupEditorPane(codePane, dobj.getPrimaryFile(), 0);
         return codePane;
     }
+     */
 
     UndoRedo.Manager getFormUndoRedoManager() {
         return formModel != null ? formModel.getUndoRedoManager() : null;

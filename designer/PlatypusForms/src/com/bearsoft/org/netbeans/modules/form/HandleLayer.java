@@ -1332,22 +1332,19 @@ public class HandleLayer extends JPanel {
     }
 
     private void showContextMenu(Point popupPos) {
-        TopComponent activated = TopComponent.getRegistry().getActivated();
-        if (activated == formDesigner.multiViewObserver.getTopComponent()) {
-            Node[] selectedNodes = formDesigner.getSelectedComponentNodes();
-            Action[] selectedNodesActions = NodeOp.findActions(selectedNodes);
-            java.util.List<Lookup> selectedNodesLookups = new ArrayList<>();
-            for (Node n : selectedNodes) {
-                selectedNodesLookups.add(n.getLookup());
-            }
+        Node[] selectedNodes = formDesigner.getSelectedComponentNodes();
+        Action[] selectedNodesActions = NodeOp.findActions(selectedNodes);
+        java.util.List<Lookup> selectedNodesLookups = new ArrayList<>();
+        for (Node n : selectedNodes) {
+            selectedNodesLookups.add(n.getLookup());
+        }
             // Some actions need TopComponent's action map to be in context lookup
-            // PasteAction for example. MVC pattern is preserved because
-            // we construct ProxyLookup here and than in will be lost and collected.
-            selectedNodesLookups.add(Lookups.singleton(formDesigner.getActionMap()));
-            JPopupMenu popup = Utilities.actionsToPopup(selectedNodesActions, new ProxyLookup(selectedNodesLookups.toArray(new Lookup[]{})));
-            if (popup != null) {
-                popup.show(HandleLayer.this, popupPos.x, popupPos.y);
-            }
+        // PasteAction for example. MVC pattern is preserved because
+        // we construct ProxyLookup here and than in will be lost and collected.
+        selectedNodesLookups.add(Lookups.singleton(formDesigner.getActionMap()));
+        JPopupMenu popup = Utilities.actionsToPopup(selectedNodesActions, new ProxyLookup(selectedNodesLookups.toArray(new Lookup[]{})));
+        if (popup != null) {
+            popup.show(HandleLayer.this, popupPos.x, popupPos.y);
         }
     }
 

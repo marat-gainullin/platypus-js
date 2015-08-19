@@ -11,5 +11,6 @@ import org.openide.loaders.DataObject;
  * @author vv
  */
 public interface DataObjectProvider {
+
     DataObject getDataObject();
 }

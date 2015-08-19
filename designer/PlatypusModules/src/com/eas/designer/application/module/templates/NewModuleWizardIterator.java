@@ -27,6 +27,13 @@ public class NewModuleWizardIterator extends NewApplicationElementWizardIterator
                 description = "Module.html",
                 scriptEngine = "freemarker"),
         @TemplateRegistration(
+                folder = "Platypus application elements/Resources",
+                position = 300,
+                content = {"PlatypusModelTemplate.model"},
+                displayName = "#Templates/Other/PlatypusModelTemplate",
+                description = "Model.html",
+                scriptEngine = "freemarker"),
+        @TemplateRegistration(
                 folder = "Platypus application elements/Specific modules",
                 position = 300,
                 content = {"PlatypusModuleDatasourceTemplate.js", "PlatypusModuleDatasourceTemplate.model"},

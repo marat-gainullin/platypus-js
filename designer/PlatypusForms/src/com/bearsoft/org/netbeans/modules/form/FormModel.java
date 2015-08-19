@@ -51,6 +51,7 @@ import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutSupportDelegat
 import com.bearsoft.org.netbeans.modules.form.layoutsupport.LayoutSupportManager;
 import com.eas.client.forms.Form;
 import com.eas.client.forms.components.model.ModelComponentDecorator;
+import com.eas.designer.explorer.PlatypusDataObject;
 import java.beans.Introspector;
 import java.util.*;
 import java.util.logging.Level;
@@ -63,6 +64,7 @@ import javax.swing.undo.CompoundEdit;
 import javax.swing.undo.UndoableEdit;
 import org.openide.ErrorManager;
 import org.openide.awt.UndoRedo;
+import org.openide.filesystems.FileObject;
 import org.openide.util.Mutex;
 import org.openide.util.MutexException;
 
@@ -74,26 +76,27 @@ import org.openide.util.MutexException;
 public class FormModel {
 
     // name of the form is name of the DataObject
-    private final PlatypusFormDataObject dataObject;
+    private final PlatypusDataObject dataObject;
     private final Form form;
     private RADVisualContainer<?> topDesignComponent;
     private final AssistantModel assistantModel = new AssistantModel();
     private String formName;
     private boolean readOnly;
 
-    public FormModel(PlatypusFormDataObject aDataObject, Form aForm) {
+    public FormModel(PlatypusDataObject aDataObject, Form aForm) {
         super();
         dataObject = aDataObject;
         form = aForm;
         setName(aDataObject.getName());
-        setReadOnly(aDataObject.isReadOnly());
+        FileObject targetFile = dataObject.getLookup().lookup(LayoutFileProvider.class).getLayoutFile();
+        setReadOnly(!targetFile.canWrite());
     }
 
     public Form getForm() {
         return form;
     }
 
-    public PlatypusFormDataObject getDataObject() {
+    public PlatypusDataObject getDataObject() {
         return dataObject;
     }
 
@@ -222,17 +225,6 @@ public class FormModel {
     public Collection<RADComponent<?>> getAllComponents() {
         return Collections.unmodifiableCollection(namesToComponents.values());
     }
-    /*
-     public List<RADComponent<?>> getNonVisualComponents() {
-     List<RADComponent<?>> list = new ArrayList<>(otherComponents.size());
-     for (RADComponent<?> radComp : otherComponents) {
-     if (!(radComp instanceof RADVisualComponent<?>)) {
-     list.add(radComp);
-     }
-     }
-     return list;
-     }
-     */
 
     public List<RADComponent<?>> getVisualComponents() {
         List<RADComponent<?>> list = new ArrayList<>(namesToComponents.size());
@@ -505,28 +497,18 @@ public class FormModel {
     class UndoRedoManager extends UndoRedo.Manager {
 
         private final Mutex.ExceptionAction<Object> runUndo = () -> {
-            superUndo();
+            super.undo();
             return null;
         };
         private final Mutex.ExceptionAction<Object> runRedo = () -> {
-            superRedo();
+            super.redo();
             return null;
         };
-
-        public void superUndo() throws CannotUndoException {
-            super.undo();
-            dataObject.getLookup().lookup(PlatypusFormSupport.class).notifyModified();
-        }
-
-        public void superRedo() throws CannotRedoException {
-            super.redo();
-            dataObject.getLookup().lookup(PlatypusFormSupport.class).notifyModified();
-        }
 
         @Override
         public void undo() throws CannotUndoException {
             if (java.awt.EventQueue.isDispatchThread()) {
-                superUndo();
+                super.undo();
             } else {
                 try {
                     Mutex.EVENT.readAccess(runUndo);
@@ -545,7 +527,7 @@ public class FormModel {
         @Override
         public void redo() throws CannotRedoException {
             if (java.awt.EventQueue.isDispatchThread()) {
-                superRedo();
+                super.redo();
             } else {
                 try {
                     Mutex.EVENT.readAccess(runRedo);

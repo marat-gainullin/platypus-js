@@ -43,6 +43,7 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
+import com.eas.designer.explorer.PlatypusDataObject;
 import org.openide.nodes.*;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.CookieAction;
@@ -131,8 +132,10 @@ public class DefaultRADAction extends CookieAction {
             RADComponentCookie radCookie = activatedNodes[0].getLookup().lookup(RADComponentCookie.class);
             if (radCookie != null) {
                 Class<?> scriptClass = radCookie.getRADComponent().getBeanClass();
-                PlatypusFormDataObject dataObject = radCookie.getRADComponent().getFormModel().getDataObject();
-                JsCodeGenerator.getInstance().generateEventHandler(radCookie.getRADComponent().getName(), scriptClass, dataObject);
+                PlatypusDataObject dataObject = radCookie.getRADComponent().getFormModel().getDataObject();
+                if (dataObject instanceof PlatypusFormDataObject) {
+                    JsCodeGenerator.getInstance().generateEventHandler(radCookie.getRADComponent().getName(), scriptClass, (PlatypusFormDataObject) dataObject);
+                }
             }
         }
     }

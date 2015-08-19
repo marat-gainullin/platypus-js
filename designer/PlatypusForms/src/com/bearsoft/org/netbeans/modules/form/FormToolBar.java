@@ -66,13 +66,13 @@ import org.openide.util.actions.SystemAction;
  */
 class FormToolBar extends ToolbarWithOverflow {
 
-    private PlatypusFormLayoutView formDesigner;
-    private JToggleButton selectionButton;
+    private final PlatypusFormLayoutView formDesigner;
+    private final JToggleButton selectionButton;
     //private JToggleButton connectionButton;
-    private JToggleButton paletteButton;
-    private JLabel addLabel;
+    private final JToggleButton paletteButton;
+    private final JLabel addLabel;
     private PaletteMenuView paletteMenuView;
-    private Listener listener;
+    private final Listener listener;
 
     public FormToolBar(PlatypusFormLayoutView designer) {
         // Proper initialization of aqua toolbar ui, see commit dbd66075827a
@@ -99,20 +99,6 @@ class FormToolBar extends ToolbarWithOverflow {
         selectionButton.setSelected(true);
         initButton(selectionButton);
 
-        // connection button
-        /*
-         connectionButton = new JToggleButton(
-         new ImageIcon(getClass().getResource(
-         "/com/bearsoft/org/netbeans/modules/form/resources/connection_mode.png")), // NOI18N
-         false);
-         connectionButton.addActionListener(listener);
-         connectionButton.addMouseListener(listener);
-         connectionButton.setToolTipText(
-         FormUtils.getBundleString("CTL_ConnectionButtonHint")); // NOI18N
-         HelpCtx.setHelpIDString(connectionButton, "gui.connecting.intro"); // NOI18N
-         initButton(connectionButton);
-         * 
-         */
         // palette button
         paletteButton = new JToggleButton(
                 new ImageIcon(getClass().getResource(
@@ -132,11 +118,8 @@ class FormToolBar extends ToolbarWithOverflow {
         // popup menu
         addMouseListener(listener);
 
-        // a11y
-        //connectionButton.getAccessibleContext().setAccessibleName(connectionButton.getToolTipText());
         selectionButton.getAccessibleContext().setAccessibleName(selectionButton.getToolTipText());
         paletteButton.getAccessibleContext().setAccessibleName(paletteButton.getToolTipText());
-        //connectionButton.getAccessibleContext().setAccessibleDescription(FormUtils.getBundleString("ACSD_ConnectionMode")); // NOI18N
         selectionButton.getAccessibleContext().setAccessibleDescription(FormUtils.getBundleString("ACSD_SelectionMode")); // NOI18N
         paletteButton.getAccessibleContext().setAccessibleDescription(FormUtils.getBundleString("ACSD_AddMode")); // NOI18N
 
@@ -155,9 +138,11 @@ class FormToolBar extends ToolbarWithOverflow {
         testButton.addMouseListener(listener);
         initButton(testButton);
 
+        /*
         add(Box.createHorizontalStrut(4));
         add(separator1);
         add(Box.createHorizontalStrut(6));
+        */
         add(selectionButton);
         //add(connectionButton);
         add(paletteButton);

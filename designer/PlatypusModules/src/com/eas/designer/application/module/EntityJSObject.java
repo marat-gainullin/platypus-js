@@ -16,20 +16,34 @@ import jdk.nashorn.api.scripting.JSObject;
 public class EntityJSObject extends AbstractJSObject {
 
     protected ApplicationDbEntity entity;
+    protected String name;
     protected JSObject cursor;
     protected JSObject[] elements = new JSObject[20];
 
-    public EntityJSObject(ApplicationDbEntity aEntity) {
+    protected EntityJSObject() {
         super();
-        entity = aEntity;
         for (int i = 0; i < elements.length; i++) {
             elements[i] = new InstanceJSObject();
         }
         cursor = elements[0];
     }
 
+    public EntityJSObject(ApplicationDbEntity aEntity) {
+        this();
+        entity = aEntity;
+    }
+
+    public EntityJSObject(String aName) {
+        this();
+        name = aName;
+    }
+
     public ApplicationDbEntity getEntity() {
         return entity;
+    }
+    
+    public String getName(){
+        return entity != null ? entity.getName() : name;
     }
 
     @Override

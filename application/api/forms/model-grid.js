@@ -1108,27 +1108,6 @@
         };
 
         /**
-         * Redraw the component.
-         * @method redraw
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.redraw = function() {
-            var delegate = this.unwrap();
-            var value = delegate.redraw();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * @method unsort
-         * @memberOf ModelGrid
-         * Clears sort on all columns, works only in HTML5 */
-        P.ModelGrid.prototype.unsort = function() {
-            var delegate = this.unwrap();
-            var value = delegate.unsort();
-            return P.boxAsJs(value);
-        };
-
-        /**
          *
          * @method elementByModelIndex
          * @memberOf ModelGrid
@@ -1202,6 +1181,27 @@
         P.ModelGrid.prototype.insertColumnNode = function(arg0, arg1) {
             var delegate = this.unwrap();
             var value = delegate.insertColumnNode(P.boxAsJava(arg0), P.boxAsJava(arg1));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Redraw the component.
+         * @method redraw
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.redraw = function() {
+            var delegate = this.unwrap();
+            var value = delegate.redraw();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * @method unsort
+         * @memberOf ModelGrid
+         * Clears sort on all columns, works only in HTML5 */
+        P.ModelGrid.prototype.unsort = function() {
+            var delegate = this.unwrap();
+            var value = delegate.unsort();
             return P.boxAsJs(value);
         };
 

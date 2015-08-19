@@ -43,11 +43,10 @@
  */
 package com.bearsoft.org.netbeans.modules.form;
 
+import com.eas.designer.explorer.PlatypusDataObject;
 import javax.swing.Action;
 import org.openide.loaders.DataNode;
-import org.openide.nodes.AbstractNode;
 import org.openide.nodes.FilterNode;
-import org.openide.nodes.Node;
 import org.openide.util.actions.SystemAction;
 
 /**
@@ -64,20 +63,20 @@ public class FormDataNode extends FilterNode {
     /**
      * Icon base for form data objects.
      */
-    private static final String FORM_ICON_BASE = "com/bearsoft/org/netbeans/modules/form/resources/form.gif"; // NOI18N
+    private static final String FORM_ICON_BASE = "com/bearsoft/org/netbeans/modules/form/resources/form.png"; // NOI18N
 
     /**
      * Constructs a new PlatypusFormDataObject for specified primary file
      *
      * @param fdo form data object
      */
-    public FormDataNode(PlatypusFormDataObject fdo) {
+    public FormDataNode(PlatypusDataObject fdo) {
         this(new DataNode(fdo, Children.LEAF));
     }
 
-    private FormDataNode(Node orig) {
+    private FormDataNode(DataNode orig) {
         super(orig);
-        ((AbstractNode) orig).setIconBaseWithExtension(FORM_ICON_BASE);
+        orig.setIconBaseWithExtension(FORM_ICON_BASE);
     }
 
     @Override

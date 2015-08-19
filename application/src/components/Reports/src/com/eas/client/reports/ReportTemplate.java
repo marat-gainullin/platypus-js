@@ -8,7 +8,6 @@
 package com.eas.client.reports;
 
 import com.eas.client.report.Report;
-import com.eas.client.cache.ReportConfig;
 import com.eas.client.model.application.ApplicationModel;
 import com.eas.script.AlreadyPublishedException;
 import com.eas.script.HasPublished;
@@ -24,9 +23,10 @@ import jdk.nashorn.api.scripting.JSObject;
  */
 public class ReportTemplate implements HasPublished {
 
-    protected ReportConfig config;
     protected int timezoneOffset = 0;
+    protected byte[] content;
     protected String name;
+    protected String format;
     protected JSObject scriptData;
     protected JSObject fixed;
     protected JSObject published;
@@ -34,23 +34,36 @@ public class ReportTemplate implements HasPublished {
     @ScriptFunction(jsDoc = ""
             + "/**\n"
             + " * Creates report template.\n"
-            + " * @param config The report binary body (array of byte) and some options.\n"
+            + " * @param content The report binary body (array of byte).\n"
+            + " * @param name The generated report default.\n"
+            + " * @param format The generated report format hint (used by runtime while report generation).\n"
             + " * @param data Object that propeties can be added to the report.\n"
             + " */"
-            + "", params = {"config", "data"})
-    public ReportTemplate(ReportConfig aConfig, JSObject aData) {
+            + "", params = {"content", "name", "format", "data"})
+    public ReportTemplate(byte[] aContent, String aNameTemplate, String aFormat, JSObject aData) {
         super();
         fixed = Scripts.getSpace().makeArray();
-        config = aConfig;
+        content = aContent;
+        name = aNameTemplate;
+        format = aFormat;
         scriptData = aData;
-        name = config.getNameTemplate();
     }
 
-    public ReportTemplate(ReportConfig aConfig, ApplicationModel<?, ?> aData) {
+    public ReportTemplate(byte[] aContent, String aNameTemplate, String aFormat, ApplicationModel<?, ?> aData) {
         super();
-        config = aConfig;
+        fixed = Scripts.getSpace().makeArray();
+        content = aContent;
+        name = aNameTemplate;
+        format = aFormat;
         scriptData = aData.getPublished();
-        name = config.getNameTemplate();
+    }
+
+    public byte[] getContent() {
+        return content;
+    }
+
+    public String getFormat() {
+        return format;
     }
 
     public JSObject getScriptData() {
@@ -68,10 +81,10 @@ public class ReportTemplate implements HasPublished {
 
     @ScriptFunction(jsDoc = GENERATEREPORT_JSDOC)
     public Report generateReport() throws Exception {
-        if (config != null) {
-            ExelTemplate reportTemplate = new ExelTemplate(scriptData, config.getFormat(), this);
+        if (format != null) {
+            ExelTemplate reportTemplate = new ExelTemplate(scriptData, format, this);
             byte[] generated = reportTemplate.create();
-            return new Report(generated, config.getFormat(), name);
+            return new Report(generated, format, name);
         }
         return null;
     }
@@ -122,11 +135,7 @@ public class ReportTemplate implements HasPublished {
     public void setFixed(JSObject aValue) {
         fixed = aValue;
     }
-
-    public ReportConfig getConfig() {
-        return config;
-    }
-
+    
     private static final String TIMEZONE_OFFSET_JSDOC = ""
             + "/**\n"
             + " * Array of name collections, that will fixed.\n"
