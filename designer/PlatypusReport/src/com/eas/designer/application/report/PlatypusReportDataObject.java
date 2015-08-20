@@ -16,11 +16,11 @@ import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Node;
 import org.openide.nodes.Node.Cookie;
 
-@MIMEResolver.ExtensionRegistration(displayName = "#LBL_PlatypusReport_layout_file", extension = "xlsx", mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 public class PlatypusReportDataObject extends PlatypusModuleDataObject {
 
     protected Entry layoutEntry;
 
+    @MIMEResolver.ExtensionRegistration(displayName = "#LBL_PlatypusReport_layout_file", extension = "xlsx", mimeType = "application/ms-excel-x")
     public PlatypusReportDataObject(FileObject aJsFile, MultiFileLoader aLoader) throws Exception {
         super(aJsFile, aLoader);
         FileObject aLayoutFile = FileUtil.findBrother(aJsFile, PlatypusFiles.REPORT_LAYOUT_EXTENSION_X);

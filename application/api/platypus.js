@@ -194,6 +194,7 @@
 
         P.require([
             'core/index.js'
+                    , 'reports/index.js'
                     , 'server/index.js']);
         try {
             Java.type('com.eas.server.httpservlet.PlatypusHttpServlet');
