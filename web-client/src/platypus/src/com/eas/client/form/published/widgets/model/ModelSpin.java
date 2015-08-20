@@ -1,7 +1,6 @@
 package com.eas.client.form.published.widgets.model;
 
 import com.bearsoft.gwt.ui.widgets.ExplicitDoubleBox;
-import com.bearsoft.gwt.ui.widgets.FormattedObjectBox;
 import com.eas.client.Utils;
 import com.eas.client.converters.DoubleValueConverter;
 import com.eas.client.form.ControlsUtils;

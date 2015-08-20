@@ -186,7 +186,7 @@ public class PlatypusProgressBar extends ProgressBar implements HasJsFacade, Has
 			},
 			set : function(aValue) {
 				if (aValue != null) {
-					var v = aValue * 1;
+					var v = +aValue;
 					var d = @java.lang.Double::new(D)(v);
 					aWidget.@com.eas.client.form.published.widgets.PlatypusProgressBar::setValue(Ljava/lang/Double;Z)(d, true);
 				} else {

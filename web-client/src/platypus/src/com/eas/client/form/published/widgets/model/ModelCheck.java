@@ -19,6 +19,16 @@ public class ModelCheck extends ModelDecoratorBox<Boolean> implements HasActionH
 		container.getElement().removeClassName("decorator");
 	}
 
+	@Override
+	protected void focused() {
+		// no op since check boxes even model check does not need a focus border
+	}
+
+	@Override
+	protected void blurred() {
+		// no op since check boxes even model check does not need a focus border
+	}
+
 	protected int actionHandlers;
 	protected HandlerRegistration clickReg;
 
@@ -91,12 +101,12 @@ public class ModelCheck extends ModelDecoratorBox<Boolean> implements HasActionH
 
 	@Override
 	public String getText() {
-		return ((NullableCheckBox)decorated).getText();
+		return ((NullableCheckBox) decorated).getText();
 	}
 
 	@Override
 	public void setText(String aText) {
-		((NullableCheckBox)decorated).setText(aText);
+		((NullableCheckBox) decorated).setText(aText);
 	}
 
 	@Override
@@ -133,11 +143,11 @@ public class ModelCheck extends ModelDecoratorBox<Boolean> implements HasActionH
 	}
 
 	@Override
-    protected void setReadonly(boolean aValue) {
-    }
+	protected void setReadonly(boolean aValue) {
+	}
 
 	@Override
-    protected boolean isReadonly() {
-	    return false;
-    }	
+	protected boolean isReadonly() {
+		return false;
+	}
 }

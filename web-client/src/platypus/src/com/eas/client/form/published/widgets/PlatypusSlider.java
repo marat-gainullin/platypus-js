@@ -17,8 +17,6 @@ import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPublished;
 import com.eas.client.form.published.menu.PlatypusPopupMenu;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
@@ -45,11 +43,11 @@ public class PlatypusSlider extends SliderBar implements HasJsFacade, HasCompone
 	public PlatypusSlider(double aMinValue, double aMaxValue) {
 		super(aMinValue, aMaxValue);
 	}
-	
+
 	public PlatypusSlider() {
 		super(0, 100);
 	}
-	
+
 	@Override
 	public HandlerRegistration addResizeHandler(ResizeHandler handler) {
 		return addHandler(handler, ResizeEvent.getType());
@@ -58,7 +56,7 @@ public class PlatypusSlider extends SliderBar implements HasJsFacade, HasCompone
 	@Override
 	public void onResize() {
 		super.onResize();
-		if(isAttached()){
+		if (isAttached()) {
 			ResizeEvent.fire(this, getElement().getOffsetWidth(), getElement().getOffsetHeight());
 		}
 	}
@@ -97,9 +95,9 @@ public class PlatypusSlider extends SliderBar implements HasJsFacade, HasCompone
 	}
 
 	@Override
-    public PlatypusPopupMenu getPlatypusPopupMenu() {
-		return menu; 
-    }
+	public PlatypusPopupMenu getPlatypusPopupMenu() {
+		return menu;
+	}
 
 	protected HandlerRegistration menuTriggerReg;
 
@@ -111,7 +109,7 @@ public class PlatypusSlider extends SliderBar implements HasJsFacade, HasCompone
 			menu = aMenu;
 			if (menu != null) {
 				menuTriggerReg = super.addDomHandler(new ContextMenuHandler() {
-					
+
 					@Override
 					public void onContextMenu(ContextMenuEvent event) {
 						event.preventDefault();
@@ -132,6 +130,15 @@ public class PlatypusSlider extends SliderBar implements HasJsFacade, HasCompone
 	@Override
 	public void setJsName(String aValue) {
 		name = aValue;
+	}
+
+	public void setJsValue(Double aValue) {
+		settingValue = true;
+		try {
+			super.setValue(aValue, true);
+		} finally {
+			settingValue = false;
+		}
 	}
 
 	public JavaScriptObject getPublished() {
@@ -171,7 +178,7 @@ public class PlatypusSlider extends SliderBar implements HasJsFacade, HasCompone
 				return (value == null ? 0 :	value.@java.lang.Double::doubleValue()());
 			},
 			set : function(aValue) {
-				aWidget.@com.eas.client.form.published.widgets.PlatypusSlider::setValue(Ljava/lang/Double;)(aValue != null ? @java.lang.Double::new(D)(1 * aValue) : null);
+				aWidget.@com.eas.client.form.published.widgets.PlatypusSlider::setJsValue(Ljava/lang/Double;)(aValue != null ? @java.lang.Double::new(D)(+aValue) : null);
 			}
 		});
 		Object.defineProperty(published, "text", {
@@ -189,6 +196,7 @@ public class PlatypusSlider extends SliderBar implements HasJsFacade, HasCompone
 
 	protected int actionHandlers;
 	protected HandlerRegistration valueChangeReg;
+
 	@Override
 	public HandlerRegistration addActionHandler(ActionHandler handler) {
 		final HandlerRegistration superReg = super.addHandler(handler, ActionEvent.getType());

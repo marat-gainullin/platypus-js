@@ -326,23 +326,25 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 
 			@Override
 			public void onScroll(ScrollEvent event) {
-				if(frozenColumns > 0 || frozenRows > 0){
-					int aimTop = scrollableRightContainer.getElement().getScrollTop();
-					int aimLeft = scrollableRightContainer.getElement().getScrollLeft();
-	
-					scrollableLeftContainer.getElement().setScrollTop(aimTop);
-					int factTopDelta = aimTop - scrollableLeftContainer.getElement().getScrollTop();
-					if (factTopDelta > 0) {
-						scrollableLeftContainer.getElement().getStyle().setBottom(factTopDelta, Style.Unit.PX);
-					} else {
-						scrollableLeftContainer.getElement().getStyle().clearBottom();
-					}
+				int aimLeft = scrollableRightContainer.getElement().getScrollLeft();
+				if (isHeaderVisible()) {
 					headerRightContainer.getElement().setScrollLeft(aimLeft);
 					int factLeftDelta0 = aimLeft - headerRightContainer.getElement().getScrollLeft();
 					if (factLeftDelta0 > 0) {
 						headerRightContainer.getElement().getStyle().setRight(factLeftDelta0, Style.Unit.PX);
 					} else {
 						headerRightContainer.getElement().getStyle().clearRight();
+					}
+				}
+				if (frozenColumns > 0 || frozenRows > 0) {
+					int aimTop = scrollableRightContainer.getElement().getScrollTop();
+
+					scrollableLeftContainer.getElement().setScrollTop(aimTop);
+					int factTopDelta = aimTop - scrollableLeftContainer.getElement().getScrollTop();
+					if (factTopDelta > 0) {
+						scrollableLeftContainer.getElement().getStyle().setBottom(factTopDelta, Style.Unit.PX);
+					} else {
+						scrollableLeftContainer.getElement().getStyle().clearBottom();
 					}
 					frozenRightContainer.getElement().setScrollLeft(aimLeft);
 					int factLeftDelta1 = aimLeft - frozenRightContainer.getElement().getScrollLeft();
@@ -448,7 +450,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 
 			@Override
 			public void onDragEnd(DragEndEvent event) {
-				if(DraggedColumn.instance != null){
+				if (DraggedColumn.instance != null) {
 					event.stopPropagation();
 					hideColumnDecorations();
 					DraggedColumn.instance = null;
@@ -872,7 +874,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 			headerLeftContainer.getElement().getStyle().setDisplay(Style.Display.NONE);
 			headerRightContainer.getElement().getStyle().setDisplay(Style.Display.NONE);
 		}
-		if(isAttached())
+		if (isAttached())
 			onResize();
 	}
 
@@ -1046,8 +1048,8 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 		addColumn(aToIndex, column, width, header, footer, false);
 		headerLeft.getWidthPropagator().changed();
 	}
-	
-	public void moveColumnNode(HeaderNode<T> aSubject, HeaderNode<T> aInsertBefore){		
+
+	public void moveColumnNode(HeaderNode<T> aSubject, HeaderNode<T> aInsertBefore) {
 	}
 
 	public void hideColumn(Column<T, ?> aColumn) {
@@ -1285,13 +1287,13 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 		}
 		targetSection.focusCell(aRow, aCol);
 	}
-	
-	public void unsort(){
+
+	public void unsort() {
 		sortList.clear();
 		ColumnSortEvent.fire(Grid.this, sortList);
 		redrawHeaders();
 	}
-	
+
 	public void addSort(ModelColumn aColumn, boolean isAscending) {
 		if (aColumn.isSortable()) {
 			boolean contains = false;
@@ -1310,13 +1312,12 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 				}
 
 			}
-			sortList.insert(sortList.size(), new ColumnSortList.ColumnSortInfo(
-					aColumn, isAscending));
+			sortList.insert(sortList.size(), new ColumnSortList.ColumnSortInfo(aColumn, isAscending));
 			ColumnSortEvent.fire(Grid.this, sortList);
 			redrawHeaders();
 		}
 	}
-	
+
 	public void unsortColumn(ModelColumn aColumn) {
 		if (aColumn.isSortable()) {
 			boolean contains = false;
