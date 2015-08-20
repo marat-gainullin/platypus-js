@@ -267,7 +267,7 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 
 						@Override
 						public void onFocus(FocusEvent event) {
-							DecoratorBox.this.getElement().addClassName(DECORATOR_FOCUSED_CLASS_NAME);
+							focused();
 							FocusEvent.fireNativeEvent(event.getNativeEvent(), DecoratorBox.this);
 						}
 
@@ -278,7 +278,7 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 
 						@Override
 						public void onBlur(BlurEvent event) {
-							DecoratorBox.this.getElement().removeClassName(DECORATOR_FOCUSED_CLASS_NAME);
+							blurred();
 							BlurEvent.fireNativeEvent(event.getNativeEvent(), DecoratorBox.this);
 						}
 
@@ -288,6 +288,14 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 		}
 	}
 
+	protected void focused(){
+		DecoratorBox.this.getElement().addClassName(DECORATOR_FOCUSED_CLASS_NAME);
+	}
+	
+	protected void blurred(){
+		DecoratorBox.this.getElement().removeClassName(DECORATOR_FOCUSED_CLASS_NAME);
+	}
+	
 	protected void fireValueChangeEvent() {
 		ValueChangeEvent.fire(DecoratorBox.this, getValue());
 	}

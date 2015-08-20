@@ -25,6 +25,7 @@ import org.openide.windows.TopComponent;
  *
  * @author mg
  */
+@TopComponent.Description(preferredID = PlatypusReportLayoutDescription.REPORT_LAYOUT_VIEW_NAME, persistenceType = TopComponent.PERSISTENCE_ONLY_OPENED)
 public class PlatypusReportLayoutView extends TopComponent implements MultiViewElement {
 
     static final long serialVersionUID = 23142032223494428L;
@@ -166,15 +167,5 @@ public class PlatypusReportLayoutView extends TopComponent implements MultiViewE
     @Override
     public CloseOperationState canCloseElement() {
         return CloseOperationState.STATE_OK;
-    }
-
-    @Override
-    protected String preferredID() {
-        return PlatypusReportLayoutDescription.REPORT_LAYOUT_VIEW_NAME;
-    }
-
-    @Override
-    public int getPersistenceType() {
-        return TopComponent.PERSISTENCE_ONLY_OPENED;
     }
 }

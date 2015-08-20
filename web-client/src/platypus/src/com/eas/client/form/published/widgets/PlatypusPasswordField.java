@@ -162,11 +162,10 @@ public class PlatypusPasswordField extends PasswordTextBox implements HasJsFacad
 		name = aValue;
 	}
 
-	@Override
-	public void setValue(String value, boolean fireEvents) {
+	public void setJsValue(String value) {
 		settingValue = true;
 		try {
-			super.setValue(value, fireEvents);
+			super.setValue(value, true);
 		} finally {
 			settingValue = false;
 		}
@@ -208,10 +207,10 @@ public class PlatypusPasswordField extends PasswordTextBox implements HasJsFacad
 		});
 		Object.defineProperty(published, "value", {
 			get : function() {
-				return aWidget.@com.eas.client.form.published.widgets.PlatypusPasswordField::getText()();
+				return aWidget.@com.eas.client.form.published.widgets.PlatypusPasswordField::getValue()();
 			},
 			set : function(aValue) {
-				aWidget.@com.eas.client.form.published.widgets.PlatypusPasswordField::setText(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
+				aWidget.@com.eas.client.form.published.widgets.PlatypusPasswordField::setJsValue(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
 			}
 		});
 		Object.defineProperty(published, "emptyText", {

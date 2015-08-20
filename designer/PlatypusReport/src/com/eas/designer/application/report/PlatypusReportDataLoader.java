@@ -19,8 +19,8 @@ import org.openide.loaders.MultiFileLoader;
  * @author mg
  */
 @DataObject.Registrations(value = {
-    @DataObject.Registration(position = 200, displayName = "#LBL_PlatypusReport_loader_name", mimeType = "application/vnd.ms-excel"),
-    @DataObject.Registration(position = 200, displayName = "#LBL_PlatypusReport_loader_name", mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+    @DataObject.Registration(position = 200, displayName = "#LBL_PlatypusReport_loader_name", mimeType = "application/ms-excel"),
+    @DataObject.Registration(position = 200, displayName = "#LBL_PlatypusReport_loader_name", mimeType = "application/ms-excel-x"),
     @DataObject.Registration(position = 200, displayName = "#LBL_PlatypusReport_loader_name", mimeType = "text/javascript"),
     @DataObject.Registration(position = 200, displayName = "#LBL_PlatypusReport_loader_name", mimeType = "text/model+xml")
 })

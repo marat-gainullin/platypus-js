@@ -11,7 +11,7 @@ import org.openide.loaders.MultiFileLoader;
 
 public class PlatypusReportDataObjectXLS extends PlatypusReportDataObject {
 
-    @MIMEResolver.ExtensionRegistration(displayName="#LBL_PlatypusReport_layout_file", extension="xls", mimeType="application/vnd.ms-excel")
+    @MIMEResolver.ExtensionRegistration(displayName="#LBL_PlatypusReport_layout_file", extension="xls", mimeType="application/ms-excel")
     public PlatypusReportDataObjectXLS(FileObject aJsFile, MultiFileLoader aLoader) throws Exception {
         super(aJsFile, aLoader);
     }
