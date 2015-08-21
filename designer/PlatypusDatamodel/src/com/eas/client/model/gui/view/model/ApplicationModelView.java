@@ -31,6 +31,7 @@ import static com.eas.client.model.gui.view.model.ModelView.connectorsStroke;
 import static com.eas.client.model.gui.view.model.ModelView.hittedConnectorsStroke;
 import com.eas.client.model.store.ApplicationModel2XmlDom;
 import com.eas.client.model.store.XmlDom2ApplicationModel;
+import com.eas.script.Scripts;
 import com.eas.xml.dom.XmlDom2String;
 import java.awt.BasicStroke;
 import java.awt.Dimension;
@@ -105,7 +106,7 @@ public class ApplicationModelView extends ModelView<ApplicationDbEntity, Applica
     protected EntityView<ApplicationDbEntity> createGenericEntityView(ApplicationDbEntity aEntity) throws Exception {
         if (aEntity.getQueryName() != null && !aEntity.getQueryName().isEmpty()) {
             try {
-                model.getQueries().getQuery(aEntity.getQueryName(), null, null, null);
+                model.getQueries().getQuery(aEntity.getQueryName(), Scripts.getSpace(), null, null);
             } catch (Exception ex) {
                 Logger.getLogger(ApplicationModelView.class.getName()).log(Level.WARNING, ex.getMessage());
             }

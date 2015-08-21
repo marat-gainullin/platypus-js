@@ -42,8 +42,8 @@ import java.util.logging.Logger;
 import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import javax.script.SimpleScriptContext;
 import javax.swing.JEditorPane;
 import javax.swing.JScrollPane;
 import javax.swing.event.HyperlinkEvent;
@@ -99,11 +99,15 @@ public class PlatypusProjectImpl implements PlatypusProject {
 
     static Scripts.Space initScriptSpace() {
         try {
-            ScriptEngine jsEngine = new ScriptEngineManager().getEngineByName("nashorn");
-            Bindings bindings = jsEngine.getBindings(ScriptContext.ENGINE_SCOPE);
-            Scripts.Space space = new Scripts.Space(jsEngine);
+            ScriptEngine jsEngine = Scripts.Space.getEngine();
+            ScriptContext jsContext = new SimpleScriptContext();
+            Bindings bindings = jsEngine.createBindings();
+            jsContext.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
+            Scripts.Space space = new Scripts.Space(jsContext);
             bindings.put("space", space);
-            Object global = jsEngine.eval("load('classpath:com/eas/designer/explorer/designer-js.js', space);", bindings);
+            
+            Object global = jsEngine.eval("load('classpath:com/eas/designer/explorer/designer-js.js', space);", jsContext);
+            
             space.setGlobal(global);
             Scripts.LocalContext context = Scripts.createContext(space);
             EventQueue.invokeLater(() -> {
