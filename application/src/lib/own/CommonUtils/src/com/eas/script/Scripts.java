@@ -180,7 +180,7 @@ public class Scripts {
 
     public static class Space {
         private static final NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
-        private static final NashornScriptEngine engine = (NashornScriptEngine)factory.getScriptEngine("--optimistic-types=true");
+        private static final NashornScriptEngine engine = (NashornScriptEngine)factory.getScriptEngine();
 
         public static NashornScriptEngine getEngine() {
             return engine;
