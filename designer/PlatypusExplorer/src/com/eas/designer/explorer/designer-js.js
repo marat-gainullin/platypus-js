@@ -19,7 +19,7 @@
             } else if (cName === 'String') {
                 return aValue + '';
             } else if (cName === 'Number') {
-                return aValue * 1;
+                return +aValue;
             } else if (cName === 'Boolean') {
                 return !!aValue;
             }

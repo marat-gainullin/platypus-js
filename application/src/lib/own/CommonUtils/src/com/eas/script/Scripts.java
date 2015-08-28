@@ -26,10 +26,12 @@ import java.util.logging.Logger;
 import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import javax.script.SimpleScriptContext;
 import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.api.scripting.NashornScriptEngine;
+import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import jdk.nashorn.api.scripting.ScriptUtils;
 import jdk.nashorn.api.scripting.URLReader;
 import jdk.nashorn.internal.ir.FunctionNode;
@@ -177,8 +179,14 @@ public class Scripts {
     }
 
     public static class Space {
+        private static final NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
+        private static final NashornScriptEngine engine = (NashornScriptEngine)factory.getScriptEngine();
 
-        protected ScriptEngine engine;
+        public static NashornScriptEngine getEngine() {
+            return engine;
+        }
+
+        protected ScriptContext scriptContext;
         protected Object global;
         protected Object session;
         protected Map<String, JSObject> publishers = new HashMap<>();
@@ -191,9 +199,9 @@ public class Scripts {
             global = new Object();
         }
 
-        public Space(ScriptEngine aEngine) {
+        public Space(ScriptContext aScriptContext) {
             super();
-            engine = aEngine;
+            scriptContext = aScriptContext;
         }
 
         public Object getSession() {
@@ -497,13 +505,13 @@ public class Scripts {
         }
 
         public Object exec(URL aSourcePlace) throws ScriptException, URISyntaxException {
-            engine.getContext().setAttribute(ScriptEngine.FILENAME, aSourcePlace, ScriptContext.ENGINE_SCOPE);
-            return engine.eval(new URLReader(aSourcePlace));
+            scriptContext.setAttribute(ScriptEngine.FILENAME, aSourcePlace, ScriptContext.ENGINE_SCOPE);
+            return engine.eval(new URLReader(aSourcePlace), scriptContext);
         }
 
         public Object exec(String aSource) throws ScriptException, URISyntaxException {
-            assert engine != null : SCRIPT_NOT_INITIALIZED;
-            return engine.eval(aSource);
+            assert scriptContext != null : SCRIPT_NOT_INITIALIZED;
+            return engine.eval(aSource, scriptContext);
         }
 
         public void schedule(JSObject aJsTask, long aTimeout) {
@@ -559,11 +567,11 @@ public class Scripts {
                         newVersion = 0;
                     }
                     /* moved to top of body
-                    if (processedTask != null) {//Single attempt to offer aTask.
-                        queue.offer(processedTask); 
-                        processedTask = null;
-                    }
-                    */
+                     if (processedTask != null) {//Single attempt to offer aTask.
+                     queue.offer(processedTask); 
+                     processedTask = null;
+                     }
+                     */
                     if (worker.compareAndSet(null, thisThread)) {// Worker electing.
                         try {
                             // already single threaded environment
@@ -588,14 +596,15 @@ public class Scripts {
         }
 
         public void initSpaceGlobal() {
-            Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
+            Bindings bindings = engine.createBindings();
+            scriptContext.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
             bindings.put("space", this);
             try {
                 Scripts.LocalContext ctx = Scripts.createContext(Scripts.Space.this);
                 Scripts.setContext(ctx);
                 try {
-                    engine.getContext().setAttribute(ScriptEngine.FILENAME, platypusJsUrl, ScriptContext.ENGINE_SCOPE);
-                    engine.eval(new URLReader(platypusJsUrl));
+                    scriptContext.setAttribute(ScriptEngine.FILENAME, platypusJsUrl, ScriptContext.ENGINE_SCOPE);
+                    engine.eval(new URLReader(platypusJsUrl), scriptContext);
                 } finally {
                     Scripts.setContext(null);
                 }
@@ -622,7 +631,7 @@ public class Scripts {
     // bio thread pool
     protected static ThreadPoolExecutor bio;
 
-    public static void init(Path aAbsoluteApiPath) throws MalformedURLException{
+    public static void init(Path aAbsoluteApiPath) throws MalformedURLException {
         absoluteApiPath = aAbsoluteApiPath;
         platypusJsUrl = absoluteApiPath.resolve("platypus.js").toUri().toURL();
     }
@@ -630,7 +639,7 @@ public class Scripts {
     public static Path getAbsoluteApiPath() {
         return absoluteApiPath;
     }
-    
+
     public static void initTasks(Consumer<Runnable> aTasks) {
         assert tasks == null : "Scripts tasks are already initialized";
         tasks = aTasks;
@@ -670,8 +679,7 @@ public class Scripts {
     }
 
     public static Space createSpace() throws ScriptException {
-        ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
-        Space space = new Space(engine);
+        Space space = new Space(new SimpleScriptContext());
         return space;
     }
 

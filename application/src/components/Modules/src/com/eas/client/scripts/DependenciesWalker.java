@@ -86,7 +86,7 @@ public class DependenciesWalker {
                         if (REQUIRE_FUNCTION_NAME.equals(funcName)) {
                             if (arrayAtFirstArg) {
                                 LiteralNode.ArrayLiteralNode a = (LiteralNode.ArrayLiteralNode) lastCall.getArgs().get(0);
-                                if (Arrays.asList(a.getArray()).contains(literalNode)) {
+                                if (a.getElementExpressions().contains(literalNode)) {
                                     dynamicDependencies.add(value);
                                 }
                             }
