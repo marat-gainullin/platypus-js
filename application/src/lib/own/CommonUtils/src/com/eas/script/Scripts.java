@@ -61,6 +61,8 @@ import jdk.nashorn.internal.runtime.options.Options;
  */
 public class Scripts {
 
+    private static final NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
+    private static final NashornScriptEngine engine = (NashornScriptEngine)factory.getScriptEngine();
     public static final String STRING_TYPE_NAME = "String";//NOI18N
     public static final String NUMBER_TYPE_NAME = "Number";//NOI18N
     public static final String DATE_TYPE_NAME = "Date";//NOI18N
@@ -69,7 +71,11 @@ public class Scripts {
     public static final String THIS_KEYWORD = "this";//NOI18N
     protected static volatile Path absoluteApiPath;
     protected static volatile URL platypusJsUrl;
-
+    
+    public static NashornScriptEngine getEngine(){
+        return engine;
+    }
+    
     private static final ThreadLocal<LocalContext> contextRef = new ThreadLocal<>();
 
     public static Space getSpace() {
@@ -92,10 +98,20 @@ public class Scripts {
 
         protected Object request;
         protected Object response;
-        protected Object async;
         protected Object principal;
+        protected Object session;
+        
         protected Integer asyncsCount;
+
         protected Scripts.Space space;
+
+        public Object getSession() {
+            return session;
+        }
+
+        public void setSession(Object aValue) {
+            session = aValue;
+        }
 
         public Object getRequest() {
             return request;
@@ -111,14 +127,6 @@ public class Scripts {
 
         public void setResponse(Object aResponse) {
             response = aResponse;
-        }
-
-        public Object getAsync() {
-            return async;
-        }
-
-        public void setAsync(Object aValue) {
-            async = aValue;
         }
 
         public Object getPrincipal() {
@@ -179,21 +187,14 @@ public class Scripts {
     }
 
     public static class Space {
-        private static final NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
-        private static final NashornScriptEngine engine = (NashornScriptEngine)factory.getScriptEngine();
-
-        public static NashornScriptEngine getEngine() {
-            return engine;
-        }
-
+        
         protected ScriptContext scriptContext;
         protected Object global;
-        protected Object session;
         protected Map<String, JSObject> publishers = new HashMap<>();
         protected Set<String> required = new HashSet<>();
         protected Set<String> executed = new HashSet<>();
         protected Map<String, List<Pending>> pending = new HashMap<>();
-
+        
         protected Space() {
             this(null);
             global = new Object();
@@ -202,14 +203,6 @@ public class Scripts {
         public Space(ScriptContext aScriptContext) {
             super();
             scriptContext = aScriptContext;
-        }
-
-        public Object getSession() {
-            return session;
-        }
-
-        public void setSession(Object aValue) {
-            session = aValue;
         }
 
         public Set<String> getRequired() {

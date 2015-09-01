@@ -52,7 +52,7 @@ public class Classes2Scripts {
     private static final String JAVA_CLASS_FILE_EXT = ".class";//NOI18N
     private static final String CONSTRUCTOR_TEMPLATE = getStringResource("constructorTemplate.js");//NOI18N
     private static final Set<String> preservedFilesNames = new HashSet<>(Arrays.asList(new String[]{
-        "platypus.js", "internals.js", "http-context.js", "managed.js", "orderer.js"
+        "platypus.js", "platypus-jsdoc.js", "internals.js", "http-context.js", "managed.js", "orderer.js", "ui.js", "orm.js"
     }));
 
     private static final int DEFAULT_IDENTATION_WIDTH = 4;
@@ -265,7 +265,7 @@ public class Classes2Scripts {
                 }
                 jarApiDeps.append(getIndentStr(1)).append("]);\n");
                 jarApiDeps.append("}catch(e){\n");
-                jarApiDeps.append(getIndentStr(1)).append("print(e);\n");
+                jarApiDeps.append(getIndentStr(1)).append("P.Logger.severe(e);\n");
                 jarApiDeps.append("}\n");
                 File depsFile = Paths.get(subDir.toURI()).resolve("index.js").toFile();
                 FileUtils.writeString(depsFile, jarApiDeps.toString(), SettingsConstants.COMMON_ENCODING);

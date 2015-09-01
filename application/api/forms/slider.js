@@ -468,23 +468,6 @@
              */
             P.Slider.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = aValue;
-            }
-        });
-        if(!P.Slider){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf Slider
-             */
-            P.Slider.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -501,6 +484,23 @@
              * @memberOf Slider
              */
             P.Slider.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = aValue;
+            }
+        });
+        if(!P.Slider){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf Slider
+             */
+            P.Slider.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

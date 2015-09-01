@@ -442,23 +442,6 @@
              */
             P.PopupMenu.prototype.count = 0;
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = aValue;
-            }
-        });
-        if(!P.PopupMenu){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf PopupMenu
-             */
-            P.PopupMenu.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -475,6 +458,23 @@
              * @memberOf PopupMenu
              */
             P.PopupMenu.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = aValue;
+            }
+        });
+        if(!P.PopupMenu){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf PopupMenu
+             */
+            P.PopupMenu.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

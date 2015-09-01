@@ -99,7 +99,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
 
     static Scripts.Space initScriptSpace() {
         try {
-            ScriptEngine jsEngine = Scripts.Space.getEngine();
+            ScriptEngine jsEngine = Scripts.getEngine();
             ScriptContext jsContext = new SimpleScriptContext();
             Bindings bindings = jsEngine.createBindings();
             jsContext.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
@@ -580,6 +580,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
                 Logger.getLogger(PlatypusProjectImpl.class.getName()).log(Level.INFO, "Project opened");
                 sourceRoot = ClassPath.getClassPath(getSrcRoot(), PlatypusPathRecognizer.SOURCE_CP);
                 GlobalPathRegistry.getDefault().register(PlatypusPathRecognizer.SOURCE_CP, new ClassPath[]{sourceRoot});
+                GlobalPathRegistry.getDefault().register(ClassPath.SOURCE, new ClassPath[]{sourceRoot});
                 startConnecting2db(getSettings().getDefaultDataSourceName());
             } catch (Exception ex) {
                 Logger.getLogger(PlatypusProjectImpl.class.getName()).log(Level.SEVERE, null, ex);

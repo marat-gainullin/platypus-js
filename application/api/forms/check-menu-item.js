@@ -462,23 +462,6 @@
              */
             P.CheckMenuItem.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = aValue;
-            }
-        });
-        if(!P.CheckMenuItem){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf CheckMenuItem
-             */
-            P.CheckMenuItem.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -495,6 +478,23 @@
              * @memberOf CheckMenuItem
              */
             P.CheckMenuItem.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = aValue;
+            }
+        });
+        if(!P.CheckMenuItem){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf CheckMenuItem
+             */
+            P.CheckMenuItem.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

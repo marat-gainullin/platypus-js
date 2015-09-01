@@ -512,23 +512,6 @@
              */
             P.SplitPane.prototype.count = 0;
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = aValue;
-            }
-        });
-        if(!P.SplitPane){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf SplitPane
-             */
-            P.SplitPane.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -545,6 +528,23 @@
              * @memberOf SplitPane
              */
             P.SplitPane.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = aValue;
+            }
+        });
+        if(!P.SplitPane){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf SplitPane
+             */
+            P.SplitPane.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

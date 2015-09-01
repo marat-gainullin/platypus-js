@@ -55,10 +55,10 @@ public class JsServerModuleEndPoint {
         Consumer<com.eas.server.Session> withPlatypusSession = (com.eas.server.Session aSession) -> {
             // websocket executor thread or sessions accounting thread
             Scripts.LocalContext context = Scripts.createContext(aSession.getSpace());
-            context.setAsync(null);
             context.setRequest(null);
             context.setResponse(null);
             context.setPrincipal(platypusPrincipal(handshake, websocketSession));
+            context.setSession(aSession);
             Scripts.setContext(context);
             try {
                 aSession.getSpace().process(() -> {

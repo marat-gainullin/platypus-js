@@ -112,7 +112,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                     ScriptedDatabasesClient basesProxy = new ScriptedDatabasesClient(platypusConfig.getDefaultDatasourceName(), indexer, true, tasksScanner.getValidators(), platypusConfig.getMaximumJdbcThreads());
                     QueriesProxy<SqlQuery> queries = new LocalQueriesProxy(basesProxy, indexer);
                     basesProxy.setQueries(queries);
-                    platypusCore = new PlatypusServerCore(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), platypusConfig.getAppElementName()), queries, basesProxy, lsecurityConfigs, platypusConfig.getAppElementName(), SessionManager.Singleton.instance);
+                    platypusCore = new PlatypusServerCore(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), platypusConfig.getAppElementName()), queries, basesProxy, lsecurityConfigs, platypusConfig.getAppElementName(), SessionManager.Singleton.instance, platypusConfig.getMaximumSpaces());
                     basesProxy.setContextHost(platypusCore);
                     Scripts.initBIO(platypusConfig.getMaximumBIOTreads());
                     ScriptedResource.init(platypusCore, Paths.get(realRoot.toURI()).resolve("WEB-INF").resolve("classes"));
@@ -236,10 +236,10 @@ public class PlatypusHttpServlet extends HttpServlet {
                     Consumer<Session> withPlatypusSession = (Session aSession) -> {
                         // http executor thread or sessions accounting thread
                         Scripts.LocalContext context = Scripts.createContext(aSession.getSpace());
-                        context.setAsync(async);
                         context.setRequest(request);
                         context.setResponse(response);
                         context.setPrincipal(httpRequestPrincipal(request));
+                        context.setSession(aSession);
                         Scripts.setContext(context);
                         try {
                             aSession.getSpace().process(() -> {

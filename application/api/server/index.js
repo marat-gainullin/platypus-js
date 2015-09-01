@@ -3,5 +3,5 @@ try{
           './session.js'
     ]);
 }catch(e){
-    print(e);
+    P.Logger.severe(e);
 }
