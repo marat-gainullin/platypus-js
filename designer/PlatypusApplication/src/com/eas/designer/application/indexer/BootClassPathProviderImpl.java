@@ -8,8 +8,6 @@ package com.eas.designer.application.indexer;
 import com.eas.designer.application.platform.PlatformHomePathException;
 import com.eas.designer.application.platform.PlatypusPlatform;
 import com.eas.designer.application.utils.LifecycleSupport;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -23,11 +21,7 @@ import org.netbeans.spi.java.classpath.ClassPathProvider;
 import org.netbeans.spi.java.classpath.support.ClassPathSupport;
 import org.netbeans.spi.java.classpath.support.PathResourceBase;
 import org.openide.ErrorManager;
-import org.openide.LifecycleManager;
-import org.openide.awt.NotificationDisplayer;
 import org.openide.filesystems.FileObject;
-import org.openide.util.ImageUtilities;
-import org.openide.util.NbBundle;
 import org.openide.util.Utilities;
 import org.openide.util.lookup.ServiceProvider;
 
@@ -44,7 +38,7 @@ public class BootClassPathProviderImpl implements ClassPathProvider {
     @Override
     public ClassPath findClassPath(FileObject file, String type) {
         if (type.equals(PlatypusPathRecognizer.BOOT_CP)) {
-                validateBootClassPath();
+            validateBootClassPath();
             return bootClassPath;
         }
         return null;
@@ -52,7 +46,7 @@ public class BootClassPathProviderImpl implements ClassPathProvider {
 
     public synchronized void registerJsClassPath() {
         if (bootClassPath != null) {
-           GlobalPathRegistry.getDefault().unregister(PlatypusPathRecognizer.BOOT_CP, new ClassPath[]{bootClassPath});
+            GlobalPathRegistry.getDefault().unregister(PlatypusPathRecognizer.BOOT_CP, new ClassPath[]{bootClassPath});
         }
         bootClassPath = null;
         validateBootClassPath();
@@ -63,6 +57,7 @@ public class BootClassPathProviderImpl implements ClassPathProvider {
         if (bootClassPath == null) {
             bootClassPath = ClassPathSupport.createClassPath(Collections.singletonList(new BootResourceImpl()));
             GlobalPathRegistry.getDefault().register(PlatypusPathRecognizer.BOOT_CP, new ClassPath[]{bootClassPath});
+            GlobalPathRegistry.getDefault().register(ClassPath.BOOT, new ClassPath[]{bootClassPath});
         }
     }
 

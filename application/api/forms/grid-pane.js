@@ -317,23 +317,6 @@
              */
             P.GridPane.prototype.onMouseEntered = {};
         }
-        Object.defineProperty(this, "hgap", {
-            get: function() {
-                var value = delegate.hgap;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.hgap = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.GridPane){
-            /**
-             * Box horizontal gap between cell components.
-             * @property hgap
-             * @memberOf GridPane
-             */
-            P.GridPane.prototype.hgap = 0;
-        }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
                 var value = delegate.toolTipText;
@@ -350,6 +333,23 @@
              * @memberOf GridPane
              */
             P.GridPane.prototype.toolTipText = '';
+        }
+        Object.defineProperty(this, "hgap", {
+            get: function() {
+                var value = delegate.hgap;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.hgap = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.GridPane){
+            /**
+             * Box horizontal gap between cell components.
+             * @property hgap
+             * @memberOf GridPane
+             */
+            P.GridPane.prototype.hgap = 0;
         }
         Object.defineProperty(this, "height", {
             get: function() {
@@ -498,23 +498,6 @@
              */
             P.GridPane.prototype.count = 0;
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = aValue;
-            }
-        });
-        if(!P.GridPane){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf GridPane
-             */
-            P.GridPane.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -531,6 +514,23 @@
              * @memberOf GridPane
              */
             P.GridPane.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = aValue;
+            }
+        });
+        if(!P.GridPane){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf GridPane
+             */
+            P.GridPane.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

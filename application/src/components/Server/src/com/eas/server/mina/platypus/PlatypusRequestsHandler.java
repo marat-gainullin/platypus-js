@@ -125,6 +125,7 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
                             // of platypus session in callback body is safe.
                             ioSession.setAttribute(SESSION_ID, session.getId());
                             Scripts.LocalContext context = Scripts.createContext(session.getSpace());
+                            context.setSession(session);
                             Scripts.setContext(context);
                             try {
                                 DatabaseAuthorizer.authorize(server, requestEnv.userName, requestEnv.password, Scripts.getSpace(), (PlatypusPrincipal aPrincipal) -> {
@@ -152,6 +153,7 @@ public class PlatypusRequestsHandler extends IoHandlerAdapter {
                             // The only place to use this getter.
                             // See its javadoc please.
                             context.setPrincipal(session.getPrincipal());
+                            context.setSession(session);
                             Scripts.setContext(context);
                             try {
                                 Scripts.getSpace().process(() -> {

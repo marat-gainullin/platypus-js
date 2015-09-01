@@ -57,5 +57,5 @@ try{
         , './focus-event.js'
     ]);
 }catch(e){
-    print(e);
+    P.Logger.severe(e);
 }

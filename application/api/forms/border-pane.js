@@ -299,23 +299,6 @@
              */
             P.BorderPane.prototype.onMouseEntered = {};
         }
-        Object.defineProperty(this, "hgap", {
-            get: function() {
-                var value = delegate.hgap;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.hgap = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.BorderPane){
-            /**
-             * Horizontal gap between center and border components.
-             * @property hgap
-             * @memberOf BorderPane
-             */
-            P.BorderPane.prototype.hgap = 0;
-        }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
                 var value = delegate.toolTipText;
@@ -332,6 +315,23 @@
              * @memberOf BorderPane
              */
             P.BorderPane.prototype.toolTipText = '';
+        }
+        Object.defineProperty(this, "hgap", {
+            get: function() {
+                var value = delegate.hgap;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.hgap = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.BorderPane){
+            /**
+             * Horizontal gap between center and border components.
+             * @property hgap
+             * @memberOf BorderPane
+             */
+            P.BorderPane.prototype.hgap = 0;
         }
         Object.defineProperty(this, "height", {
             get: function() {
@@ -513,23 +513,6 @@
              */
             P.BorderPane.prototype.count = 0;
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = aValue;
-            }
-        });
-        if(!P.BorderPane){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf BorderPane
-             */
-            P.BorderPane.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -546,6 +529,23 @@
              * @memberOf BorderPane
              */
             P.BorderPane.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = aValue;
+            }
+        });
+        if(!P.BorderPane){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf BorderPane
+             */
+            P.BorderPane.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

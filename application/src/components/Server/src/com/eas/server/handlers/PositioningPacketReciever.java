@@ -36,8 +36,8 @@ public class PositioningPacketReciever implements PacketReciever {
         Session session = serverCore.getSessionManager().getSystemSession();
         Scripts.Space space = session.getSpace();
         Scripts.LocalContext context = Scripts.createContext(space);
-        context.setAsync(null);
         context.setPrincipal(session.getPrincipal());
+        context.setSession(session);
         context.setRequest(null);
         context.setResponse(null);
         Scripts.setContext(context);

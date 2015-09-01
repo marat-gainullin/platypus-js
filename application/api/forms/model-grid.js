@@ -306,23 +306,6 @@
              */
             P.ModelGrid.prototype.onComponentHidden = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = aValue;
-            }
-        });
-        if(!P.ModelGrid){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf ModelGrid
-             */
-            P.ModelGrid.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -339,6 +322,23 @@
              * @memberOf ModelGrid
              */
             P.ModelGrid.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = aValue;
+            }
+        });
+        if(!P.ModelGrid){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf ModelGrid
+             */
+            P.ModelGrid.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -1060,6 +1060,29 @@
         };
 
         /**
+         * Clears current selection.
+         * @method clearSelection
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.clearSelection = function() {
+            var delegate = this.unwrap();
+            var value = delegate.clearSelection();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Unselects the specified element.
+         * @param instance Entity's instance to be unselected
+         * @method unselect
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.unselect = function(instance) {
+            var delegate = this.unwrap();
+            var value = delegate.unselect(P.boxAsJava(instance));
+            return P.boxAsJs(value);
+        };
+
+        /**
          * Selects the specified element.
          * @param instance Entity's instance to be selected.
          * @method select
@@ -1068,17 +1091,6 @@
         P.ModelGrid.prototype.select = function(instance) {
             var delegate = this.unwrap();
             var value = delegate.select(P.boxAsJava(instance));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Clears current selection.
-         * @method clearSelection
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.clearSelection = function() {
-            var delegate = this.unwrap();
-            var value = delegate.clearSelection();
             return P.boxAsJs(value);
         };
 
@@ -1096,47 +1108,23 @@
         };
 
         /**
-         * Unselects the specified element.
-         * @param instance Entity's instance to be unselected
-         * @method unselect
+         * Redraw the component.
+         * @method redraw
          * @memberOf ModelGrid
          */
-        P.ModelGrid.prototype.unselect = function(instance) {
+        P.ModelGrid.prototype.redraw = function() {
             var delegate = this.unwrap();
-            var value = delegate.unselect(P.boxAsJava(instance));
+            var value = delegate.redraw();
             return P.boxAsJs(value);
         };
 
         /**
-         *
-         * @method elementByModelIndex
+         * @method unsort
          * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.elementByModelIndex = function(arg0) {
+         * Clears sort on all columns, works only in HTML5 */
+        P.ModelGrid.prototype.unsort = function() {
             var delegate = this.unwrap();
-            var value = delegate.elementByModelIndex(P.boxAsJava(arg0));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         *
-         * @method try2StopAnyEditing
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.try2StopAnyEditing = function() {
-            var delegate = this.unwrap();
-            var value = delegate.try2StopAnyEditing();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         *
-         * @method try2CancelAnyEditing
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.try2CancelAnyEditing = function() {
-            var delegate = this.unwrap();
-            var value = delegate.try2CancelAnyEditing();
+            var value = delegate.unsort();
             return P.boxAsJs(value);
         };
 
@@ -1185,23 +1173,35 @@
         };
 
         /**
-         * Redraw the component.
-         * @method redraw
+         *
+         * @method elementByModelIndex
          * @memberOf ModelGrid
          */
-        P.ModelGrid.prototype.redraw = function() {
+        P.ModelGrid.prototype.elementByModelIndex = function(arg0) {
             var delegate = this.unwrap();
-            var value = delegate.redraw();
+            var value = delegate.elementByModelIndex(P.boxAsJava(arg0));
             return P.boxAsJs(value);
         };
 
         /**
-         * @method unsort
+         *
+         * @method try2StopAnyEditing
          * @memberOf ModelGrid
-         * Clears sort on all columns, works only in HTML5 */
-        P.ModelGrid.prototype.unsort = function() {
+         */
+        P.ModelGrid.prototype.try2StopAnyEditing = function() {
             var delegate = this.unwrap();
-            var value = delegate.unsort();
+            var value = delegate.try2StopAnyEditing();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         *
+         * @method try2CancelAnyEditing
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.try2CancelAnyEditing = function() {
+            var delegate = this.unwrap();
+            var value = delegate.try2CancelAnyEditing();
             return P.boxAsJs(value);
         };
 

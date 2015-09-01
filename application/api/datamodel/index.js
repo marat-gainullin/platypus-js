@@ -11,5 +11,5 @@ try{
         , './cursor-position-will-change-event.js'
     ]);
 }catch(e){
-    print(e);
+    P.Logger.severe(e);
 }

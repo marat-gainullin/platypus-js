@@ -481,23 +481,6 @@
              */
             P.PasswordField.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = aValue;
-            }
-        });
-        if(!P.PasswordField){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf PasswordField
-             */
-            P.PasswordField.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -514,6 +497,23 @@
              * @memberOf PasswordField
              */
             P.PasswordField.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = aValue;
+            }
+        });
+        if(!P.PasswordField){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf PasswordField
+             */
+            P.PasswordField.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

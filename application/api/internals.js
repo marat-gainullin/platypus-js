@@ -2,6 +2,12 @@
  * Platypus.js internals initialization.
  * Don't edit unless you are a Platypus.js contributor.
  */
+/* global P, Java*/
+/**
+ * 
+ * @param {type} aSpace
+ * @returns {undefined}
+ */
 (function (aSpace) {
     aSpace.setLookupInGlobalFunc(
             function (aPropertyName) {
@@ -132,7 +138,7 @@
     }
     var ReportClass = Java.type("com.eas.client.report.Report");
     aSpace.setCopyObjectFunc(function (aValue, aConsumer) {
-        if (aValue instanceof P.Report) {
+        if (aValue && aValue.unwrap) {
             var nReport = aValue.unwrap();
             aConsumer(nReport);
         }else if(aValue instanceof ReportClass){

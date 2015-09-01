@@ -299,23 +299,6 @@
              */
             P.CardPane.prototype.onMouseEntered = {};
         }
-        Object.defineProperty(this, "hgap", {
-            get: function() {
-                var value = delegate.hgap;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.hgap = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.CardPane){
-            /**
-             * Horizontal gap between card and container's edge.
-             * @property hgap
-             * @memberOf CardPane
-             */
-            P.CardPane.prototype.hgap = 0;
-        }
         Object.defineProperty(this, "toolTipText", {
             get: function() {
                 var value = delegate.toolTipText;
@@ -332,6 +315,23 @@
              * @memberOf CardPane
              */
             P.CardPane.prototype.toolTipText = '';
+        }
+        Object.defineProperty(this, "hgap", {
+            get: function() {
+                var value = delegate.hgap;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.hgap = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.CardPane){
+            /**
+             * Horizontal gap between card and container's edge.
+             * @property hgap
+             * @memberOf CardPane
+             */
+            P.CardPane.prototype.hgap = 0;
         }
         Object.defineProperty(this, "height", {
             get: function() {
@@ -480,23 +480,6 @@
              */
             P.CardPane.prototype.count = 0;
         }
-        Object.defineProperty(this, "onActionPerformed", {
-            get: function() {
-                var value = delegate.onActionPerformed;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onActionPerformed = aValue;
-            }
-        });
-        if(!P.CardPane){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf CardPane
-             */
-            P.CardPane.prototype.onActionPerformed = {};
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -513,6 +496,23 @@
              * @memberOf CardPane
              */
             P.CardPane.prototype.onKeyReleased = {};
+        }
+        Object.defineProperty(this, "onActionPerformed", {
+            get: function() {
+                var value = delegate.onActionPerformed;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onActionPerformed = aValue;
+            }
+        });
+        if(!P.CardPane){
+            /**
+             * Main action performed event handler function.
+             * @property onActionPerformed
+             * @memberOf CardPane
+             */
+            P.CardPane.prototype.onActionPerformed = {};
         }
         Object.defineProperty(this, "focusable", {
             get: function() {

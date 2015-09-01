@@ -59,13 +59,7 @@ public class Session implements HasPublished {
     }
 
     public void setSpace(Scripts.Space aValue) {
-        if (space != null) {
-            space.setSession(null);
-        }
         space = aValue;
-        if (space != null) {
-            space.setSession(this);
-        }
     }
 
     /**

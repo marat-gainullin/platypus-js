@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Queue;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -51,6 +51,7 @@ import jdk.nashorn.internal.runtime.Undefined;
 public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
 
     protected String defaultAppElement;
+    protected final int maxStatelessSpaces;
     protected SessionManager sessionManager;
     protected ScriptedDatabasesClient basesProxy;
     protected ApplicationSourceIndexer indexer;
@@ -62,13 +63,13 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
     protected ModelsDocuments models = new ModelsDocuments();
     protected ServerModulesProxy localServerModules = new LocalServerModulesProxy(this);
     protected Scripts.Space queueSpace;
-    protected Queue<Scripts.Space> spacesPool = new ConcurrentLinkedQueue<>();
+    protected ConcurrentLinkedQueue<Scripts.Space> spacesPool = new ConcurrentLinkedQueue<>();
 
     public PlatypusServerCore(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, ScriptsConfigs aSecurityConfigs, String aDefaultAppElement) throws Exception {
-        this(aIndexer, aModules, aQueries, aDatabasesClient, aSecurityConfigs, aDefaultAppElement, new SessionManager());
+        this(aIndexer, aModules, aQueries, aDatabasesClient, aSecurityConfigs, aDefaultAppElement, new SessionManager(), (Runtime.getRuntime().availableProcessors() + 1) * 10);
     }
 
-    public PlatypusServerCore(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, ScriptsConfigs aSecurityConfigs, String aDefaultAppElement, SessionManager aSessionManager) throws Exception {
+    public PlatypusServerCore(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, ScriptsConfigs aSecurityConfigs, String aDefaultAppElement, SessionManager aSessionManager, int aMaxStatelessSpaces) throws Exception {
         super();
         indexer = aIndexer;
         modules = aModules;
@@ -78,6 +79,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
         defaultAppElement = aDefaultAppElement;
         scriptsConfigs = aSecurityConfigs;
         queueSpace = Scripts.createQueue();
+        maxStatelessSpaces = Math.max(1, aMaxStatelessSpaces);
     }
 
     public Scripts.Space getQueueSpace() {
@@ -135,6 +137,10 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
         return defaultAppElement;
     }
 
+    public int getMaxStatelessSpaces() {
+        return maxStatelessSpaces;
+    }
+
     /**
      * Executes a script module according to all rules defimed within
      * Platypus.js Such as @stateless and @rezident annotations, async-io
@@ -190,35 +196,34 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                             Session targetSession;
                             if (config.hasModuleAnnotation(JsDoc.Tag.RESIDENT_TAG)) {
                                 targetSession = sessionManager.getSystemSession();
-                                targetSpace = sessionManager.getSystemSession().getSpace();
+                                targetSpace = targetSession.getSpace();
                             } else if (config.hasModuleAnnotation(JsDoc.Tag.STATELESS_TAG)) {
-                                Scripts.Space pooledSpace = spacesPool.poll();
-                                if (pooledSpace == null) {
-                                    targetSpace = Scripts.createSpace();
-                                    targetSpace.initSpaceGlobal();
-                                } else {
-                                    targetSpace = pooledSpace;
-                                }
-                                targetSpace.setSession(callingContext.getSpace().getSession());
                                 targetSession = null;
-                            } else {// statefull session module
-                                targetSpace = Scripts.getSpace();
-                                targetSession = (Session) targetSpace.getSession();
+                                Scripts.Space[] spaces = spacesPool.toArray(new Scripts.Space[]{});
+                                if (spaces.length < maxStatelessSpaces) {
+                                    targetSpace = Scripts.createSpace();
+                                    spacesPool.offer(targetSpace);
+                                } else {
+                                    int rnd = new Random().nextInt(spaces.length);
+                                    targetSpace = spaces[rnd];
+                                }
+                            } else {// Statefull session module
+                                targetSession = (Session) callingContext.getSession();
+                                targetSpace = targetSession.getSpace();
                             }
                             Scripts.LocalContext targetContext = Scripts.createContext(targetSpace);
-                            targetContext.setAsync(callingContext.getAsync());
                             targetContext.setPrincipal(callingContext.getPrincipal());
                             targetContext.setRequest(callingContext.getRequest());
                             targetContext.setResponse(callingContext.getResponse());
+                            targetContext.setSession(callingContext.getSession());
                             Scripts.setContext(targetContext);
                             try {
                                 targetSpace.process(() -> {
                                     try {
-                                        ScriptedResource._require(new String[]{aModuleName}, null, Scripts.getSpace(), new HashSet<>(), (Void v) -> {
+                                        Consumer<JSObject> withModuleConstructor = (JSObject constr) -> {
                                             try {
                                                 JSObject moduleInstance;
                                                 if (targetSession == null || !targetSession.containsModule(aModuleName)) {
-                                                    JSObject constr = Scripts.getSpace().lookupInGlobal(aModuleName);
                                                     if (constr != null) {
                                                         moduleInstance = (JSObject) constr.newObject(new Object[]{});
                                                         if (targetSession != null) {
@@ -243,14 +248,19 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                                                     executed.set(true);
                                                                     Object returned = largs.length > 0 ? largs[0] : null;
                                                                     onSuccess.accept(returned);// WARNING! Don't insert .toJava() because of RPC handler
-                                                                    if (targetSession == null) {// stateless module called
-                                                                        targetSpace.setSession(null);
-                                                                        spacesPool.offer(targetSpace);
-                                                                    }
                                                                 } else {
                                                                     Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
                                                                 }
                                                                 return null;
+                                                            }
+
+                                                            @Override
+                                                            public Object getDefaultValue(Class<?> hint) {
+                                                                if (String.class.isAssignableFrom(hint)) {
+                                                                    return super.toString();
+                                                                } else {
+                                                                    return null;
+                                                                }
                                                             }
 
                                                         });
@@ -265,14 +275,19 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                                                     } else {
                                                                         onFailure.accept(new Exception(String.valueOf(reason)));
                                                                     }
-                                                                    if (targetSession == null) {// stateless module called
-                                                                        targetSpace.setSession(null);
-                                                                        spacesPool.offer(targetSpace);
-                                                                    }
                                                                 } else {
                                                                     Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
                                                                 }
                                                                 return null;
+                                                            }
+
+                                                            @Override
+                                                            public Object getDefaultValue(Class<?> hint) {
+                                                                if (String.class.isAssignableFrom(hint)) {
+                                                                    return super.toString();
+                                                                } else {
+                                                                    return null;
+                                                                }
                                                             }
 
                                                         });
@@ -285,10 +300,6 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                                                 if (!executed.get()) {
                                                                     executed.set(true);
                                                                     onSuccess.accept(result);// WARNING! Don't insert .toJava() because of RPC handler
-                                                                    if (targetSession == null) {// stateless module called
-                                                                        targetSpace.setSession(null);
-                                                                        spacesPool.offer(targetSpace);
-                                                                    }
                                                                 } else {
                                                                     Logger.getLogger(RPCRequestHandler.class.getName()).log(Level.WARNING, RPCRequestHandler.BOTH_IO_MODELS_MSG, new Object[]{aMethodName, aModuleName});
                                                                 }
@@ -304,24 +315,20 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                                 }
                                             } catch (Exception ex) {
                                                 onFailure.accept(ex);
-                                                if (targetSession == null) {// stateless module called
-                                                    targetSpace.setSession(null);
-                                                    spacesPool.offer(targetSpace);
-                                                }
                                             }
-                                        }, (Exception ex) -> {
-                                            onFailure.accept(ex);
-                                            if (targetSession == null) {// stateless module called
-                                                targetSpace.setSession(null);
-                                                spacesPool.offer(targetSpace);
-                                            }
-                                        });
+                                        };
+                                        JSObject moduleConstructor = Scripts.getSpace().lookupInGlobal(aModuleName);
+                                        if (moduleConstructor != null) {
+                                            withModuleConstructor.accept(moduleConstructor);
+                                        } else {
+                                            ScriptedResource._require(new String[]{aModuleName}, null, Scripts.getSpace(), new HashSet<>(), (Void v) -> {
+                                                withModuleConstructor.accept(Scripts.getSpace().lookupInGlobal(aModuleName));
+                                            }, (Exception ex) -> {
+                                                onFailure.accept(ex);
+                                            });
+                                        }
                                     } catch (Exception ex) {
                                         onFailure.accept(ex);
-                                        if (targetSession == null) {// stateless module called
-                                            targetSpace.setSession(null);
-                                            spacesPool.offer(targetSpace);
-                                        }
                                     }
                                 });
                             } finally {
@@ -353,10 +360,11 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
     }
 
     public void startResidents(Set<String> aRezidents) throws Exception {
-        Scripts.Space space = sessionManager.getSystemSession().getSpace();
+        Session session = sessionManager.getSystemSession();
+        Scripts.Space space = session.getSpace();
         Scripts.LocalContext context = Scripts.createContext(space);
-        context.setAsync(null);
-        context.setPrincipal(sessionManager.getSystemSession().getPrincipal());
+        context.setPrincipal(session.getPrincipal());
+        context.setSession(session);
         context.setRequest(null);
         context.setResponse(null);
         Scripts.setContext(context);
