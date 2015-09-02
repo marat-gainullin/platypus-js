@@ -5,10 +5,13 @@
 /* global P, Java*/
 /**
  * 
- * @param {type} aSpace
  * @returns {undefined}
  */
-(function (aSpace) {
+(function () {
+    P.require('core/report.js');
+    var global = this;
+    var aSpace = global['-platypus-scripts-space'];
+    var ReportClass = Java.type("com.eas.client.report.Report");
     aSpace.setLookupInGlobalFunc(
             function (aPropertyName) {
                 return this[aPropertyName];
@@ -136,15 +139,14 @@
             }
         }
     }
-    var ReportClass = Java.type("com.eas.client.report.Report");
     aSpace.setCopyObjectFunc(function (aValue, aConsumer) {
-        if (aValue && aValue.unwrap) {
-            var nReport = aValue.unwrap();
-            aConsumer(nReport);
-        }else if(aValue instanceof ReportClass){
+        if (aValue instanceof P.Report) {
+            aValue = aValue.unwrap();
+        }
+        if(aValue instanceof ReportClass){
             aConsumer(aValue);
         } else {
             aConsumer(copy(aValue));
         }
     });
-});
+})();

@@ -202,8 +202,7 @@
     }
     Object.defineProperty(P, "require", {value: require});
 
-    load('classpath:internals.js')(aSpace);
-
+    P.require('internals.js');
     P.require('orm.js');
     var serverCoreClass;
     try {

@@ -15,21 +15,16 @@ import org.netbeans.api.debugger.DebuggerManager;
 import org.netbeans.api.debugger.DebuggerManagerAdapter;
 import org.netbeans.api.debugger.LazyDebuggerManagerListener;
 import org.netbeans.api.debugger.jpda.JPDADebugger;
-import org.netbeans.api.debugger.jpda.MethodBreakpoint;
 import org.netbeans.spi.debugger.DebuggerServiceRegistration;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import org.netbeans.api.debugger.DebuggerEngine;
-import org.netbeans.api.debugger.jpda.CallStackFrame;
 import org.netbeans.api.debugger.jpda.ClassLoadUnloadBreakpoint;
 import org.netbeans.api.debugger.jpda.ClassVariable;
 import org.netbeans.api.debugger.jpda.JPDABreakpoint;
 import org.netbeans.api.debugger.jpda.JPDAClassType;
-import org.netbeans.api.debugger.jpda.JPDAThread;
 import org.netbeans.api.debugger.jpda.LineBreakpoint;
 import org.netbeans.api.debugger.jpda.Variable;
 import org.netbeans.api.debugger.jpda.event.JPDABreakpointEvent;
@@ -141,10 +136,9 @@ public class PlatypusJSBreakpointsManager extends DebuggerManagerAdapter {
         private volatile Set<String> scriptClassesTrack;
 
         private final ClassLoadUnloadBreakpoint newClassesInternalBreakpoint;
-        private final Map<String, List<MethodBreakpoint>> internalBreakpoints = new HashMap<>();
         private final Map<String, Set<Breakpoint>> pendingBreakpoints = new HashMap<>();
 
-        private final Map<Breakpoint, TargetBreakpointHandler> acceptedBreakpoints = new HashMap<>();
+        private final Map<Breakpoint, Map<String, TargetBreakpointHandler>> acceptedBreakpoints = new HashMap<>();
 
         ScriptsHandler(JPDADebugger aDebugger) {
             super();
@@ -156,6 +150,14 @@ public class PlatypusJSBreakpointsManager extends DebuggerManagerAdapter {
             newClassesInternalBreakpoint.setSuspend(EventRequest.SUSPEND_ALL);
             newClassesInternalBreakpoint.addJPDABreakpointListener(this);
             DebuggerManager.getDebuggerManager().addBreakpoint(newClassesInternalBreakpoint);
+        }
+
+        private String[] classesByName(String aName) {
+            return track().stream().filter((String aClassName) -> {
+                return aClassName.contains(aName);
+            }).toArray((int aSize) -> {
+                return new String[aSize];
+            });
         }
 
         private Set<String> track() {
@@ -179,7 +181,9 @@ public class PlatypusJSBreakpointsManager extends DebuggerManagerAdapter {
                 pendingBreakpoints.put(fileName, pendingUnderFile);
             }
             pendingUnderFile.add(aSourceBreakpoint);
-            updateInternalBreakpoint(fileName);
+            for (String scriptClassName : classesByName(fileName)) {
+                checkSourceBreakpoint(aSourceBreakpoint, scriptClassName);
+            }
         }
 
         synchronized void removeBreakpoint(Breakpoint aSourceBreakpoint) throws Exception {
@@ -190,33 +194,25 @@ public class PlatypusJSBreakpointsManager extends DebuggerManagerAdapter {
                 pendingUnderFile.remove(aSourceBreakpoint);
                 if (pendingUnderFile.isEmpty()) {
                     pendingBreakpoints.remove(fileName);
-                    List<MethodBreakpoint> internalBPs = internalBreakpoints.remove(fileName);
-                    internalBPs.stream().forEach((MethodBreakpoint internalBreakpoint) -> {
-                        internalBreakpoint.removeJPDABreakpointListener(this);
-                        DebuggerManager.getDebuggerManager().removeBreakpoint(internalBreakpoint);
-                    });
                 }
             }
-            TargetBreakpointHandler handler = acceptedBreakpoints.remove(aSourceBreakpoint);
-            if (handler != null) {
-                handler.destroy();
+            Map<String, TargetBreakpointHandler> handlers = acceptedBreakpoints.remove(aSourceBreakpoint);
+            if (handlers != null) {
+                handlers.values().stream().forEach((handler) -> {
+                    handler.destroy();
+                });
             }
         }
 
         synchronized void destroy() {
             newClassesInternalBreakpoint.removeJPDABreakpointListener(this);
             DebuggerManager.getDebuggerManager().removeBreakpoint(newClassesInternalBreakpoint);
-            for (List<MethodBreakpoint> internalBPs : internalBreakpoints.values()) {
-                internalBPs.stream().forEach((MethodBreakpoint internalBreakpoint) -> {
-                    internalBreakpoint.removeJPDABreakpointListener(this);
-                    DebuggerManager.getDebuggerManager().removeBreakpoint(internalBreakpoint);
-                });
-            }
-            internalBreakpoints.clear();
             pendingBreakpoints.clear();
-            for (TargetBreakpointHandler handler : acceptedBreakpoints.values()) {
-                handler.destroy();
-            }
+            acceptedBreakpoints.values().stream().forEach((handlers) -> {
+                handlers.values().stream().forEach((handler) -> {
+                    handler.destroy();
+                });
+            });
             acceptedBreakpoints.clear();
         }
 
@@ -233,21 +229,9 @@ public class PlatypusJSBreakpointsManager extends DebuggerManagerAdapter {
                         if (scriptClass instanceof ClassVariable) {
                             JPDAClassType scriptType = (JPDAClassType) scriptClass.getClass().getMethod("getReflectedType").invoke(scriptClass);
                             track().add(scriptType.getName());
-                            for (String fileName : internalBreakpoints.keySet().toArray(new String[]{})) {
+                            for (String fileName : pendingBreakpoints.keySet().toArray(new String[]{})) {
                                 if (scriptType.getName().contains(fileName)) {
-                                    updateInternalBreakpoint(fileName);
-                                }
-                            }
-                        }
-                    } else if (event.getSource() instanceof MethodBreakpoint) {
-                        MethodBreakpoint internalBreakpoint = (MethodBreakpoint) event.getSource();
-                        if ("*".equals(internalBreakpoint.getMethodName())) {
-                            JPDAThread thread = event.getThread();
-                            CallStackFrame topFrame = thread.getCallStack(0, 1)[0];
-                            String currentClassName = topFrame.getClassName();
-                            for (String fileName : internalBreakpoints.keySet().toArray(new String[]{})) {
-                                if (currentClassName.contains(fileName)) {
-                                    checkSourceBreakpoints(currentClassName, fileName);
+                                    checkSourceBreakpoints(scriptType.getName(), fileName);
                                 }
                             }
                         }
@@ -259,43 +243,30 @@ public class PlatypusJSBreakpointsManager extends DebuggerManagerAdapter {
             }
         }
 
-        protected void updateInternalBreakpoint(String fileName) {
-            List<MethodBreakpoint> internalBPs = internalBreakpoints.remove(fileName);
-            if (internalBPs != null) {
-                internalBPs.stream().forEach((MethodBreakpoint internalBreakpoint) -> {
-                    internalBreakpoint.removeJPDABreakpointListener(this);
-                    DebuggerManager.getDebuggerManager().removeBreakpoint(internalBreakpoint);
-                });
-            }
-            //
-            internalBPs = new ArrayList<>();
-            for (String aClassName : track()) {
-                if (aClassName.contains(fileName)) {
-                    MethodBreakpoint maskedInternalBreakpoint = MethodBreakpoint.create(aClassName, "*");
-                    maskedInternalBreakpoint.setHidden(true);
-                    maskedInternalBreakpoint.setSuspend(EventRequest.SUSPEND_NONE);
-                    maskedInternalBreakpoint.addJPDABreakpointListener(this);
-                    internalBPs.add(maskedInternalBreakpoint);
-                    DebuggerManager.getDebuggerManager().addBreakpoint(maskedInternalBreakpoint);
-                }
-            }
-            internalBreakpoints.put(fileName, internalBPs);
-        }
-
         protected void checkSourceBreakpoints(String aScriptClassName, String aFileName) throws Exception, AbsentInformationException {
             if (aScriptClassName.startsWith(SCRIPTS_CLASS_PREFIX)) {
                 Set<Breakpoint> breakpointsToSend = pendingBreakpoints.get(aFileName);
                 for (Breakpoint breakpointToSend : breakpointsToSend) {
-                    if (!acceptedBreakpoints.containsKey(breakpointToSend)) {
-                        TargetBreakpointHandler handler = new TargetBreakpointHandler(debugger, breakpointToSend, aScriptClassName);
-                        boolean accepted = handler.send();
-                        if (accepted) {
-                            acceptedBreakpoints.put(breakpointToSend, handler);
-                        } else {
-                            handler.destroy();
-                        }
-                    }
+                    checkSourceBreakpoint(breakpointToSend, aScriptClassName);
                 }
+            }
+        }
+
+        protected void checkSourceBreakpoint(Breakpoint breakpointToSend, String aScriptClassName) throws Exception {
+            TargetBreakpointHandler handler = new TargetBreakpointHandler(debugger, breakpointToSend, aScriptClassName);
+            boolean accepted = handler.send();
+            if (accepted) {
+                Map<String, TargetBreakpointHandler> handlers = acceptedBreakpoints.get(breakpointToSend);
+                if (handlers == null) {
+                    handlers = new HashMap<>();
+                    acceptedBreakpoints.put(breakpointToSend, handlers);
+                }
+                TargetBreakpointHandler oldHandler = handlers.put(aScriptClassName, handler);
+                if (oldHandler != null) {
+                    oldHandler.destroy();
+                }
+            } else {
+                handler.destroy();
             }
         }
 

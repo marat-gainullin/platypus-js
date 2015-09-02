@@ -63,6 +63,7 @@ public class Scripts {
 
     private static final NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
     private static final NashornScriptEngine engine = (NashornScriptEngine)factory.getScriptEngine();
+    protected static final String PLATYPUS_JS_FILENAME = "platypus.js";
     public static final String STRING_TYPE_NAME = "String";//NOI18N
     public static final String NUMBER_TYPE_NAME = "Number";//NOI18N
     public static final String DATE_TYPE_NAME = "Date";//NOI18N
@@ -497,8 +498,8 @@ public class Scripts {
             putInGlobalFunc.call(null, new Object[]{aName, aValue});
         }
 
-        public Object exec(URL aSourcePlace) throws ScriptException, URISyntaxException {
-            scriptContext.setAttribute(ScriptEngine.FILENAME, aSourcePlace, ScriptContext.ENGINE_SCOPE);
+        public Object exec(String aSourceName, URL aSourcePlace) throws ScriptException, URISyntaxException {
+            scriptContext.setAttribute(ScriptEngine.FILENAME, aSourceName, ScriptContext.ENGINE_SCOPE);
             return engine.eval(new URLReader(aSourcePlace), scriptContext);
         }
 
@@ -596,7 +597,7 @@ public class Scripts {
                 Scripts.LocalContext ctx = Scripts.createContext(Scripts.Space.this);
                 Scripts.setContext(ctx);
                 try {
-                    scriptContext.setAttribute(ScriptEngine.FILENAME, platypusJsUrl, ScriptContext.ENGINE_SCOPE);
+                    scriptContext.setAttribute(ScriptEngine.FILENAME, PLATYPUS_JS_FILENAME, ScriptContext.ENGINE_SCOPE);
                     engine.eval(new URLReader(platypusJsUrl), scriptContext);
                 } finally {
                     Scripts.setContext(null);
@@ -626,7 +627,7 @@ public class Scripts {
 
     public static void init(Path aAbsoluteApiPath) throws MalformedURLException {
         absoluteApiPath = aAbsoluteApiPath;
-        platypusJsUrl = absoluteApiPath.resolve("platypus.js").toUri().toURL();
+        platypusJsUrl = absoluteApiPath.resolve(PLATYPUS_JS_FILENAME).toUri().toURL();
     }
 
     public static Path getAbsoluteApiPath() {

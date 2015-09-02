@@ -38,6 +38,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.script.ScriptException;
 import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.internal.runtime.Undefined;
@@ -185,10 +186,8 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
             if (aMethodName == null || aMethodName.isEmpty()) {
                 onFailure.accept(new Exception("Module's method name is missing."));
             } else {
-                try {
-                    AppElementFiles files = indexer.nameToFiles(aModuleName);
-                    if (files != null && files.isModule()) {
-                        ScriptDocument config = scriptsConfigs.get(aModuleName, files);
+                Consumer<ScriptDocument> withConfig = (ScriptDocument config) -> {
+                    try {
                         if (!aNetworkRPC || config.hasModuleAnnotation(JsDoc.Tag.PUBLIC_TAG)) {
                             // Let's perform security checks
                             ServerModuleStructureRequestHandler.checkPrincipalPermission(config.getModuleAllowedRoles(), aModuleName);
@@ -337,11 +336,25 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                         } else {
                             throw new AccessControlException(String.format("Public access to module %s is denied.", aModuleName));//NOI18N
                         }
-                    } else {
-                        throw new IllegalArgumentException(String.format(RPCRequestHandler.MODULE_MISSING_OR_NOT_A_MODULE, aModuleName));
+                    } catch (AccessControlException | ScriptException ex) {
+                        onFailure.accept(ex);
                     }
-                } catch (Exception ex) {
-                    onFailure.accept(ex);
+                };
+                ScriptDocument cachedConfig = scriptsConfigs.getCachedConfig(aModuleName);
+                if (cachedConfig != null) {
+                    withConfig.accept(cachedConfig);
+                } else {
+                    try {
+                        AppElementFiles files = indexer.nameToFiles(aModuleName);
+                        if (files != null && files.isModule()) {
+                            cachedConfig = scriptsConfigs.get(aModuleName, files);
+                            withConfig.accept(cachedConfig);
+                        } else {
+                            throw new IllegalArgumentException(String.format(RPCRequestHandler.MODULE_MISSING_OR_NOT_A_MODULE, aModuleName));
+                        }
+                    } catch (Exception ex) {
+                        onFailure.accept(ex);
+                    }
                 }
             }
         }

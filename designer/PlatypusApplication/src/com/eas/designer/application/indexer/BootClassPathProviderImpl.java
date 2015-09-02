@@ -47,6 +47,7 @@ public class BootClassPathProviderImpl implements ClassPathProvider {
     public synchronized void registerJsClassPath() {
         if (bootClassPath != null) {
             GlobalPathRegistry.getDefault().unregister(PlatypusPathRecognizer.BOOT_CP, new ClassPath[]{bootClassPath});
+            GlobalPathRegistry.getDefault().unregister(ClassPath.BOOT, new ClassPath[]{bootClassPath});
         }
         bootClassPath = null;
         validateBootClassPath();

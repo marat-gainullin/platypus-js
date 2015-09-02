@@ -236,7 +236,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
     protected JSObject createLocalEngineModule(String aModuleName) throws Exception {
         FileObject jsFo = IndexerQuery.appElementId2File(PlatypusProjectImpl.this, aModuleName);
         if (jsFo != null) {
-            jsSpace.exec(jsFo.toURL());
+            jsSpace.exec(aModuleName, jsFo.toURL());
             return jsSpace.createModule(aModuleName);
         } else {
             return null;
@@ -595,6 +595,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
                 }
                 Logger.getLogger(PlatypusProjectImpl.class.getName()).log(Level.INFO, "Project closed");
                 GlobalPathRegistry.getDefault().unregister(PlatypusPathRecognizer.SOURCE_CP, new ClassPath[]{sourceRoot});
+                GlobalPathRegistry.getDefault().unregister(ClassPath.SOURCE, new ClassPath[]{sourceRoot});
             } catch (Exception ex) {
                 Logger.getLogger(PlatypusProjectImpl.class.getName()).log(Level.SEVERE, null, ex);
             }

@@ -21,6 +21,11 @@ public class ScriptsConfigs extends ActualCache<ScriptDocument> {
         super();
     }
 
+    public ScriptDocument getCachedConfig(String aName) {
+        ActualCacheEntry<ScriptDocument> docEntry = entries.get(aName);
+        return docEntry != null ? docEntry.getValue() : null;
+    }
+
     @Override
     public ScriptDocument get(String aName, AppElementFiles aFiles) throws Exception {
         AppElementFiles files = new AppElementFiles();

@@ -122,6 +122,7 @@ public class ScriptedResource {
 
     /**
      * Part of manual dependencies resolving process
+     *
      * @param aQueriesNames
      * @param aOnSuccess
      * @param aOnFailure
@@ -145,14 +146,14 @@ public class ScriptedResource {
 
     public static Object load(final String aResourceName, String aCalledFromFile, JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
         Scripts.Space space = Scripts.getSpace();
-        return _load(aResourceName, aCalledFromFile != null ? new URL(aCalledFromFile).toURI() : null, space, aOnSuccess != null ? (Object aLoaded) -> {
+        return _load(aResourceName, aCalledFromFile, space, aOnSuccess != null ? (Object aLoaded) -> {
             aOnSuccess.call(null, new Object[]{space.toJs(aLoaded)});
         } : null, aOnFailure != null ? (Exception ex) -> {
             aOnFailure.call(null, new Object[]{space.toJs(ex.getMessage())});
         } : null);
     }
 
-    public static Object _load(final String aResourceName, URI aCalledFromFile, Scripts.Space aSpace, Consumer<Object> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public static Object _load(final String aResourceName, String aCalledFromFile, Scripts.Space aSpace, Consumer<Object> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (onSuccess != null) {
             Matcher htppMatcher = httpPattern.matcher(aResourceName);
             if (htppMatcher.matches()) {
@@ -177,7 +178,10 @@ public class ScriptedResource {
                     }
                 });
             } else {
-                String resourceName = normalizeResourcePath(aResourceName, aCalledFromFile);
+                Path apiPath = Scripts.getAbsoluteApiPath();
+                Path appPath = Paths.get(new File(app.getModules().getLocalPath()).toURI());
+                Path calledFromFile = resolveApiApp(aCalledFromFile, apiPath, appPath);
+                String resourceName = relativizeApiApp(aResourceName, calledFromFile, apiPath, calledFromFile.getParent(), appPath);
                 app.getModules().getModule(resourceName, aSpace, (ModuleStructure s) -> {
                     try {
                         String sourcesPath = app.getModules().getLocalPath();
@@ -229,7 +233,7 @@ public class ScriptedResource {
      * @return Resource's text
      * @throws Exception If some error occurs when reading the resource
      */
-    protected static Object loadSync(String aResourceName, URI aCalledFromFile, Scripts.Space aSpace) throws Exception {
+    protected static Object loadSync(String aResourceName, String aCalledFromFile, Scripts.Space aSpace) throws Exception {
         byte[] data = null;
         String encoding;
         Matcher htppMatcher = httpPattern.matcher(aResourceName);
@@ -237,7 +241,11 @@ public class ScriptedResource {
             SEHttpResponse httpResponse = requestHttpResource(aResourceName, null, null, null);
             return httpResponse.getBody() != null ? httpResponse.getBody() : httpResponse.getBodyBuffer();
         } else {
-            String resourceName = normalizeResourcePath(aResourceName, aCalledFromFile);
+            Path apiPath = Scripts.getAbsoluteApiPath();
+            Path appPath = Paths.get(new File(app.getModules().getLocalPath()).toURI());
+            Path calledFromFile = resolveApiApp(aCalledFromFile, apiPath, appPath);
+            String resourceName = relativizeApiApp(aResourceName, calledFromFile, apiPath, calledFromFile.getParent(), appPath);
+
             app.getModules().getModule(resourceName, aSpace, null, null);
             String sourcesPath = app.getModules().getLocalPath();
             File resourceFile = new File(sourcesPath + File.separator + resourceName);
@@ -294,32 +302,48 @@ public class ScriptedResource {
         }
     }
 
-    private static String[] absoluteAppPaths(Path apiPath, String[] aScriptsNames, URI aCalledFromFile) throws URISyntaxException {
+    private static String[] apiAppPaths(Path apiPath, Path appPath, String[] aScriptsNames, String aCalledFromFile) throws URISyntaxException {
         if (aScriptsNames.length > 0 && aCalledFromFile != null) {
-            String[] absolute = new String[aScriptsNames.length];
-            Path appPath = Paths.get(new File(app.getModules().getLocalPath()).toURI());
-            Path calledFromFile = Paths.get(aCalledFromFile);
+            String[] absolutes = new String[aScriptsNames.length];
+            Path calledFromFile = resolveApiApp(aCalledFromFile, apiPath, appPath);
             Path calledFromDir = calledFromFile.getParent();
             for (int i = 0; i < aScriptsNames.length; i++) {
-                String relative = aScriptsNames[i];
-                if (relative.startsWith("./") || relative.startsWith("../")) {
-                    if (calledFromFile.startsWith(apiPath)) {// api relative
-                        Path apiFile = calledFromDir.resolve(relative).normalize();
-                        absolute[i] = apiFile.toString().substring((apiPath.toString().length() + 1)).replace(File.separator, "/");
-                    } else if (calledFromFile.startsWith(appPath)) {// application relative
-                        Path appFile = calledFromDir.resolve(relative).normalize();
-                        absolute[i] = appFile.toString().substring((appPath.toString().length() + 1)).replace(File.separator, "/");
-                    } else {
-                        absolute[i] = relative;
-                    }
-                } else {
-                    absolute[i] = relative;
-                }
+                absolutes[i] = relativizeApiApp(aScriptsNames[i], calledFromFile, apiPath, calledFromDir, appPath);
             }
-            return absolute;
+            return absolutes;
         } else {
             return aScriptsNames;
         }
+    }
+
+    protected static String relativizeApiApp(String relative, Path calledFromFile, Path apiPath, Path calledFromDir, Path appPath) {
+        String absolute;
+        if (relative.startsWith("./") || relative.startsWith("../")) {
+            if (calledFromFile.startsWith(apiPath)) {// api relative
+                Path apiFile = calledFromDir.resolve(relative).normalize();
+                absolute = apiPath.relativize(apiFile).toString().replace(File.separator, "/");
+            } else if (calledFromFile.startsWith(appPath)) {// application relative
+                Path appFile = calledFromDir.resolve(relative).normalize();
+                absolute = appPath.relativize(appFile).toString().replace(File.separator, "/");
+            } else {
+                absolute = relative;
+            }
+        } else {
+            absolute = relative;
+        }
+        return absolute;
+    }
+
+    protected static Path resolveApiApp(String aCalledFromFile, Path apiPath, Path appPath) {
+        Path calledFromFile = Paths.get(aCalledFromFile.replace("/", File.separator));
+        Path apiResolvedCallPoint = apiPath.resolve(calledFromFile);
+        Path appResolvedCallPoint = appPath.resolve(calledFromFile);
+        if (apiResolvedCallPoint.toFile().exists()) {
+            calledFromFile = apiResolvedCallPoint.normalize();
+        } else if (appResolvedCallPoint.toFile().exists()) {
+            calledFromFile = appResolvedCallPoint.normalize();
+        }
+        return calledFromFile;
     }
 
     public static Path lookupPlatypusJs() throws URISyntaxException {
@@ -552,31 +576,6 @@ public class ScriptedResource {
     }
     public static final String CHARSET_MISSING_MSG = "Charset missing in http response. Falling back to " + SettingsConstants.COMMON_ENCODING;
 
-    protected static String normalizeResourcePath(String aPath, URI aCalledFromFile) throws Exception {
-        if (aPath.startsWith("/")) {
-            throw new IllegalStateException("Platypus resource path can't begin with /. Platypus resource paths must point somewhere in application, but not in filesystem.");
-        }
-        if (aPath.startsWith("./") || aPath.startsWith("../")) {
-            if (aCalledFromFile != null) {
-                Path apiPath = Scripts.getAbsoluteApiPath();
-                Path appPath = Paths.get(new File(app.getModules().getLocalPath()).toURI());
-                Path calledFromFile = Paths.get(aCalledFromFile);
-                Path calledFromDir = calledFromFile.getParent();
-                if (calledFromFile.startsWith(apiPath)) {// api relative
-                    Path apiFile = calledFromDir.resolve(aPath).normalize();
-                    aPath = apiFile.toString().substring((apiPath.toString().length() + 1)).replace(File.separator, "/");
-                } else if (calledFromFile.startsWith(appPath)) {// application relative
-                    Path appFile = calledFromDir.resolve(aPath).normalize();
-                    aPath = appFile.toString().substring((appPath.toString().length() + 1)).replace(File.separator, "/");
-                }
-            } else {
-                throw new IllegalStateException("Platypus resource paths must be application-absolute. \"" + aPath + "\" is not application-absolute");
-            }
-        }
-        URI uri = new URI(null, null, aPath, null);
-        return uri.normalize().getPath();
-    }
-
     private static URL encodeUrl(URL url) throws URISyntaxException, MalformedURLException {
         String file = "";
         if (url.getPath() != null && !url.getPath().isEmpty()) {
@@ -610,17 +609,12 @@ public class ScriptedResource {
 
     }
 
-    private static void loadModule(Path apiPath, String scriptOrModuleName, URI aCalledFromFile, Scripts.Space aSpace, Set<String> aCyclic, Consumer<URL> onSuccess, Consumer<Exception> onFailure) {
+    private static void loadModule(Path apiPath, String scriptOrModuleName, String aCalledFromFile, Scripts.Space aSpace, Set<String> aCyclic, Consumer<Path> onSuccess, Consumer<Exception> onFailure) {
         Path apiLocalPath = apiPath.resolve(scriptOrModuleName);
         if (apiLocalPath != null && apiLocalPath.toFile().exists() && !apiLocalPath.toFile().isDirectory()) {
             // network activity simulation
             aSpace.process(() -> {
-                try {
-                    URL toLoad = apiLocalPath.toUri().toURL();
-                    onSuccess.accept(toLoad);
-                } catch (MalformedURLException ex) {
-                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, "{0} - Failed {1}", new Object[]{checkedScriptOrModuleName(scriptOrModuleName), ex.toString()});
-                }
+                onSuccess.accept(apiLocalPath.normalize());
             });
         } else {
             try {
@@ -631,12 +625,7 @@ public class ScriptedResource {
                             File sourceFile = files.findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION);
 
                             RequireProcess moduleProcess = new RequireProcess(3, (Void v) -> {
-                                try {
-                                    URL toLoad = sourceFile.toURI().toURL();
-                                    onSuccess.accept(toLoad);
-                                } catch (MalformedURLException ex) {
-                                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, "{0} - Failed {1}", new Object[]{checkedScriptOrModuleName(scriptOrModuleName), ex.toString()});
-                                }
+                                onSuccess.accept(Paths.get(sourceFile.toURI()));
                             }, (Exception ex) -> {
                                 onFailure.accept(ex);
                             });
@@ -691,7 +680,7 @@ public class ScriptedResource {
 
     public static void require(String[] aScriptsNames, String aCalledFromFile, JSObject onSuccess, JSObject onFailure) throws Exception {
         Scripts.Space space = Scripts.getSpace();
-        _require(aScriptsNames, aCalledFromFile != null ? new URL(aCalledFromFile).toURI() : null, space, new HashSet<>(), (Void v) -> {
+        _require(aScriptsNames, aCalledFromFile, space, new HashSet<>(), (Void v) -> {
             if (onSuccess != null) {
                 onSuccess.call(null, new Object[]{});
             }
@@ -702,10 +691,11 @@ public class ScriptedResource {
         });
     }
 
-    public static void _require(String[] aScriptsNames, URI aCalledFromFile, Scripts.Space aSpace, Set<String> aCyclic, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
+    public static void _require(String[] aScriptsNames, String aCalledFromFile, Scripts.Space aSpace, Set<String> aCyclic, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (aScriptsNames != null && aScriptsNames.length > 0) {
             Path apiPath = Scripts.getAbsoluteApiPath();
-            aScriptsNames = absoluteAppPaths(apiPath, aScriptsNames, aCalledFromFile);
+            Path appPath = Paths.get(new File(app.getModules().getLocalPath()).toURI());
+            aScriptsNames = apiAppPaths(apiPath, appPath, aScriptsNames, aCalledFromFile);
             RequireProcess process = new RequireProcess(aScriptsNames.length, (Void v) -> {
                 aSpace.process(() -> {
                     onSuccess.accept(v);
@@ -733,20 +723,28 @@ public class ScriptedResource {
                     if (!aSpace.getRequired().contains(scriptOrModuleName)) {
                         Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "Loading {0} ...", checkedScriptOrModuleName(scriptOrModuleName));
                         aSpace.getRequired().add(scriptOrModuleName);
-                        loadModule(apiPath, scriptOrModuleName, aCalledFromFile, aSpace, aCyclic, (URL aLocalURL) -> {
+                        loadModule(apiPath, scriptOrModuleName, aCalledFromFile, aSpace, aCyclic, (Path aLocalFile) -> {
                             try {
                                 // sync require may occur while pending
                                 if (!aSpace.getExecuted().contains(scriptOrModuleName)) {
                                     aSpace.getExecuted().add(scriptOrModuleName);
                                     Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Loaded", checkedScriptOrModuleName(scriptOrModuleName));
-                                    aSpace.exec(aLocalURL);
+                                    Path relativeLocalPath;
+                                    if (aLocalFile.startsWith(apiPath)) {
+                                        relativeLocalPath = apiPath.relativize(aLocalFile);
+                                    } else if (aLocalFile.startsWith(appPath)) {
+                                        relativeLocalPath = appPath.relativize(aLocalFile);
+                                    } else {
+                                        relativeLocalPath = aLocalFile;
+                                    }
+                                    aSpace.exec(relativeLocalPath.toString().replace(File.separator, "/"), aLocalFile.toUri().toURL());
                                 }
                                 Scripts.Pending[] pend = pending.toArray(new Scripts.Pending[]{});
                                 pending.clear();
                                 for (Scripts.Pending p : pend) {
                                     p.loaded();
                                 }
-                            } catch (ScriptException | URISyntaxException ex) {
+                            } catch (ScriptException | URISyntaxException | MalformedURLException ex) {
                                 Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, null, ex);
                             }
                         }, (Exception ex) -> {
@@ -769,19 +767,20 @@ public class ScriptedResource {
 
     public static void require(String[] aScriptsNames, String aCalledFromFile) throws Exception {
         Scripts.Space space = Scripts.getSpace();
-        _require(aScriptsNames, aCalledFromFile != null ? new URL(aCalledFromFile).toURI() : null, space);
+        _require(aScriptsNames, aCalledFromFile, space);
     }
 
-    public static void _require(String[] aScriptsNames, URI aCalledFromFile, Scripts.Space aSpace) throws Exception {
+    public static void _require(String[] aScriptsNames, String aCalledFromFile, Scripts.Space aSpace) throws Exception {
         Path apiPath = Scripts.getAbsoluteApiPath();
-        aScriptsNames = absoluteAppPaths(apiPath, aScriptsNames, aCalledFromFile);
+        Path appPath = Paths.get(new File(app.getModules().getLocalPath()).toURI());
+        aScriptsNames = apiAppPaths(apiPath, appPath, aScriptsNames, aCalledFromFile);
         for (String scriptOrModuleName : aScriptsNames) {
             if (!aSpace.getExecuted().contains(scriptOrModuleName)) {
                 aSpace.getExecuted().add(scriptOrModuleName);
                 Path apiLocalPath = apiPath.resolve(scriptOrModuleName);
                 if (apiLocalPath != null && apiLocalPath.toFile().exists() && !apiLocalPath.toFile().isDirectory()) {
                     URL toLoad = apiLocalPath.toUri().toURL();
-                    aSpace.exec(toLoad);
+                    aSpace.exec(scriptOrModuleName, toLoad);
                 } else {
                     ModuleStructure structure = app.getModules().getModule(scriptOrModuleName, null, null, null);
                     if (structure != null) {
@@ -793,7 +792,9 @@ public class ScriptedResource {
                             sRequire(structure.getServerDependencies().toArray(new String[]{}), null, null, null);
                         }
                         _require(structure.getClientDependencies().toArray(new String[]{}), null, aSpace);
-                        aSpace.exec(toLoad);
+                        Path fileToLoad = Paths.get(toLoad.toURI());
+                        Path appRelative = appPath.relativize(fileToLoad);
+                        aSpace.exec(appRelative.toString().replace(File.separator, "/"), toLoad);
                     } else {
                         throw new FileNotFoundException(scriptOrModuleName);
                     }
