@@ -39,6 +39,8 @@ import org.openide.util.Exceptions;
 @DebuggerServiceRegistration(types = LazyDebuggerManagerListener.class)
 public class PlatypusJSBreakpointsManager extends DebuggerManagerAdapter {
 
+    public static final String SCRIPTS_CLASS_PREFIX = "jdk.nashorn.internal.scripts.Script$";
+
     private final Map<JPDADebugger, ScriptsHandler> scriptHandlers = new HashMap<>();
 
     public PlatypusJSBreakpointsManager() {
@@ -152,9 +154,9 @@ public class PlatypusJSBreakpointsManager extends DebuggerManagerAdapter {
             DebuggerManager.getDebuggerManager().addBreakpoint(newClassesInternalBreakpoint);
         }
 
-        private String[] classesByName(String aName) {
+        private String[] classesByName(String aPattern) {
             return track().stream().filter((String aClassName) -> {
-                return aClassName.contains(aName);
+                return aClassName.contains(aPattern);
             }).toArray((int aSize) -> {
                 return new String[aSize];
             });
@@ -224,14 +226,15 @@ public class PlatypusJSBreakpointsManager extends DebuggerManagerAdapter {
             if (debugger == event.getDebugger()) {
                 try {
                     if (event.getSource() == newClassesInternalBreakpoint) {
-                        // A new script class is loaded.
+                        // A new script class has been loaded.
                         Variable scriptClass = event.getVariable();
                         if (scriptClass instanceof ClassVariable) {
                             JPDAClassType scriptType = (JPDAClassType) scriptClass.getClass().getMethod("getReflectedType").invoke(scriptClass);
-                            track().add(scriptType.getName());
+                            String scriptClassName = scriptType.getName();
+                            track().add(scriptClassName);
                             for (String fileName : pendingBreakpoints.keySet().toArray(new String[]{})) {
-                                if (scriptType.getName().contains(fileName)) {
-                                    checkSourceBreakpoints(scriptType.getName(), fileName);
+                                if (scriptClassName.contains(fileName)) {
+                                    checkSourceBreakpoints(scriptClassName, fileName);
                                 }
                             }
                         }
@@ -269,9 +272,6 @@ public class PlatypusJSBreakpointsManager extends DebuggerManagerAdapter {
                 handler.destroy();
             }
         }
-
-        protected static final String SCRIPTS_CLASS_PREFIX = "jdk.nashorn.internal.scripts.Script$";
-
     }
 
     private static final class TargetBreakpointHandler {
@@ -301,7 +301,7 @@ public class PlatypusJSBreakpointsManager extends DebuggerManagerAdapter {
 
         boolean send() {
             DebuggerManager.getDebuggerManager().addBreakpoint(targetBreakpoint);
-            return targetBreakpoint.getValidity() == Breakpoint.VALIDITY.VALID;
+            return targetBreakpoint.getValidity() != Breakpoint.VALIDITY.INVALID;
         }
 
         void destroy() {
