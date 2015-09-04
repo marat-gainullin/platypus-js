@@ -476,7 +476,7 @@
         var comps = formFactory.getWidgetsList();
         for (var c = 0; c < comps.length; c++) {
             (function () {
-                var comp = EngineUtilsClass.unwrap(boxAsJs(comps[c]));
+                var comp = EngineUtilsClass.unwrap(P.boxAsJs(comps[c]));
                 if (comp.name) {
                     Object.defineProperty(aTarget, comp.name, {
                         get: function () {

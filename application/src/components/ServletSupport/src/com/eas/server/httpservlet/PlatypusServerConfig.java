@@ -20,6 +20,7 @@ public class PlatypusServerConfig {
     public static final String MAX_JDBC_THREADS_CONF_PARAM = "max-jdbc-threads";
     public static final String MAX_BIO_THREADS_CONF_PARAM = "max-bio-threads";
     public static final String MAX_SPACES_CONF_PARAM = "max-script-contexts";
+    public static final String LPC_QUEUE_SIZE_CONF_PARAM = "lpc-queue-size";
     public static final String WATCH_CONF_PARAM = "watch";
     //
     protected String appElementName;
@@ -27,6 +28,7 @@ public class PlatypusServerConfig {
     protected int maximumJdbcThreads = 25;
     protected int maximumBIOTreads = 25;
     protected int maximumSpaces = (Runtime.getRuntime().availableProcessors() + 1) * 10;
+    protected int maximumLpcQueueSize = Integer.MAX_VALUE;
     protected boolean watch = false;
 
     public static PlatypusServerConfig parse(ServletConfig aConfig) throws Exception {
@@ -46,6 +48,8 @@ public class PlatypusServerConfig {
                         maximumBIOTreads = Double.valueOf(paramValue).intValue();
                     } else if (MAX_SPACES_CONF_PARAM.equalsIgnoreCase(paramName)) {
                         maximumSpaces = Double.valueOf(paramValue).intValue();
+                    } else if (LPC_QUEUE_SIZE_CONF_PARAM.equalsIgnoreCase(paramName)) {
+                        maximumLpcQueueSize = Double.valueOf(paramValue).intValue();
                     } else if (DEF_DATASOURCE_CONF_PARAM.equalsIgnoreCase(paramName)) {
                         defaultDatasourceName = paramValue;
                     } else if (APPELEMENT_CONF_PARAM.equalsIgnoreCase(paramName)) {
@@ -76,6 +80,10 @@ public class PlatypusServerConfig {
 
     public int getMaximumSpaces() {
         return maximumSpaces;
+    }
+
+    public int getMaximumLpcQueueSize() {
+        return maximumLpcQueueSize;
     }
 
     public boolean isWatch() {

@@ -383,7 +383,7 @@
             }
             function tryToComplementInsert(aSubject, aChange) {
                 var complemented = false;
-                if (aSubject === justInserted && !noFields[aChange.propertyName].nullable) {
+                if (aSubject === justInserted && noFields[aChange.propertyName] && !noFields[aChange.propertyName].nullable) {
                     var met = false;
                     for (var d = 0; d < justInsertedChange.data.length; d++) {
                         var iv = justInsertedChange.data[d];

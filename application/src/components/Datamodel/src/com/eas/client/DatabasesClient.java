@@ -587,7 +587,7 @@ public class DatabasesClient {
                                 }
                                 if (fields != null) {
                                     Field resolved = fields.get(aFieldName);
-                                    String resolvedTableName = resolved.getTableName();
+                                    String resolvedTableName = resolved != null ? resolved.getTableName() : null;
                                     resolvedTableName = resolvedTableName != null ? resolvedTableName.toLowerCase() : "";
                                     if (query != null && query.getWritable() != null && !query.getWritable().contains(resolvedTableName)) {
                                         return null;

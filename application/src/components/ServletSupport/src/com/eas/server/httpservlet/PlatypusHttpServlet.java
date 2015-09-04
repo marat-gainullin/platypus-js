@@ -79,12 +79,14 @@ public class PlatypusHttpServlet extends HttpServlet {
     private String realRootPath;
     private PlatypusServerConfig platypusConfig;
     private ExecutorService containerExecutor;
-    private ThreadPoolExecutor selfExecutor;
+    private ExecutorService selfExecutor;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         try {
             super.init(config);
+            realRootPath = config.getServletContext().getRealPath("/");
+            platypusConfig = PlatypusServerConfig.parse(config);
             try {
                 containerExecutor = (ExecutorService) InitialContext.doLookup("java:comp/DefaultManagedExecutorService");
             } catch (NamingException ex) {
@@ -94,13 +96,11 @@ public class PlatypusHttpServlet extends HttpServlet {
                     int maxSelfThreads = Runtime.getRuntime().availableProcessors() + 1;
                     selfExecutor = new ThreadPoolExecutor(maxSelfThreads, maxSelfThreads,
                             1L, TimeUnit.SECONDS,
-                            new LinkedBlockingQueue<>(),
+                            new LinkedBlockingQueue<>(platypusConfig.getMaximumLpcQueueSize()),
                             new DeamonThreadFactory("platypus-worker-", false));
-                    selfExecutor.allowCoreThreadTimeOut(true);
+                    ((ThreadPoolExecutor)selfExecutor).allowCoreThreadTimeOut(true);
                 }
             }
-            realRootPath = config.getServletContext().getRealPath("/");
-            platypusConfig = PlatypusServerConfig.parse(config);
             File realRoot = new File(realRootPath);
             String realRootUrl = realRoot.toURI().toURL().toString();
             if (realRootUrl.toLowerCase().startsWith("file")) {

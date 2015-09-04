@@ -33,12 +33,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.script.ScriptException;
 import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.internal.runtime.Undefined;
@@ -52,7 +50,7 @@ import jdk.nashorn.internal.runtime.Undefined;
 public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
 
     protected String defaultAppElement;
-    protected final int maxStatelessSpaces;
+    protected final Scripts.Space[] statelessSpaces;
     protected SessionManager sessionManager;
     protected ScriptedDatabasesClient basesProxy;
     protected ApplicationSourceIndexer indexer;
@@ -64,7 +62,6 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
     protected ModelsDocuments models = new ModelsDocuments();
     protected ServerModulesProxy localServerModules = new LocalServerModulesProxy(this);
     protected Scripts.Space queueSpace;
-    protected ConcurrentLinkedQueue<Scripts.Space> spacesPool = new ConcurrentLinkedQueue<>();
 
     public PlatypusServerCore(ApplicationSourceIndexer aIndexer, ModulesProxy aModules, QueriesProxy<SqlQuery> aQueries, ScriptedDatabasesClient aDatabasesClient, ScriptsConfigs aSecurityConfigs, String aDefaultAppElement) throws Exception {
         this(aIndexer, aModules, aQueries, aDatabasesClient, aSecurityConfigs, aDefaultAppElement, new SessionManager(), (Runtime.getRuntime().availableProcessors() + 1) * 10);
@@ -80,7 +77,10 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
         defaultAppElement = aDefaultAppElement;
         scriptsConfigs = aSecurityConfigs;
         queueSpace = Scripts.createQueue();
-        maxStatelessSpaces = Math.max(1, aMaxStatelessSpaces);
+        statelessSpaces = new Scripts.Space[Math.max(1, aMaxStatelessSpaces)];
+        for (int s = 0; s < statelessSpaces.length; s++) {
+            statelessSpaces[s] = Scripts.createSpace();
+        }
     }
 
     public Scripts.Space getQueueSpace() {
@@ -139,7 +139,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
     }
 
     public int getMaxStatelessSpaces() {
-        return maxStatelessSpaces;
+        return statelessSpaces.length;
     }
 
     /**
@@ -158,26 +158,30 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
         Scripts.LocalContext callingContext = Scripts.getContext();
         Object[] copiedArguments = copyArgumnets(aArguments, callingContext);
         Consumer<Object> onSuccess = (Object res) -> {
-            Scripts.LocalContext oldContext = Scripts.getContext();
-            Object copiedRes = oldContext.getSpace().makeCopy(res);
-            Scripts.setContext(callingContext);
-            try {
-                Scripts.getSpace().process(() -> {
-                    aOnSuccess.accept(copiedRes);
-                });
-            } finally {
-                Scripts.setContext(oldContext);
+            if (aOnSuccess != null) {
+                Scripts.LocalContext oldContext = Scripts.getContext();
+                Object copiedRes = oldContext.getSpace().makeCopy(res);
+                Scripts.setContext(callingContext);
+                try {
+                    Scripts.getSpace().process(() -> {
+                        aOnSuccess.accept(copiedRes);
+                    });
+                } finally {
+                    Scripts.setContext(oldContext);
+                }
             }
         };
         Consumer<Exception> onFailure = (Exception ex) -> {
-            Scripts.LocalContext oldContext = Scripts.getContext();
-            Scripts.setContext(callingContext);
-            try {
-                Scripts.getSpace().process(() -> {
-                    aOnFailure.accept(ex);
-                });
-            } finally {
-                Scripts.setContext(oldContext);
+            if (aOnFailure != null) {
+                Scripts.LocalContext oldContext = Scripts.getContext();
+                Scripts.setContext(callingContext);
+                try {
+                    Scripts.getSpace().process(() -> {
+                        aOnFailure.accept(ex);
+                    });
+                } finally {
+                    Scripts.setContext(oldContext);
+                }
             }
         };
         if (aModuleName == null || aModuleName.isEmpty()) {
@@ -198,14 +202,8 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                                 targetSpace = targetSession.getSpace();
                             } else if (config.hasModuleAnnotation(JsDoc.Tag.STATELESS_TAG)) {
                                 targetSession = null;
-                                Scripts.Space[] spaces = spacesPool.toArray(new Scripts.Space[]{});
-                                if (spaces.length < maxStatelessSpaces) {
-                                    targetSpace = Scripts.createSpace();
-                                    spacesPool.offer(targetSpace);
-                                } else {
-                                    int rnd = new Random().nextInt(spaces.length);
-                                    targetSpace = spaces[rnd];
-                                }
+                                int rnd = new Random().nextInt(statelessSpaces.length);
+                                targetSpace = statelessSpaces[rnd];
                             } else {// Statefull session module
                                 targetSession = (Session) callingContext.getSession();
                                 targetSpace = targetSession.getSpace();
@@ -336,7 +334,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
                         } else {
                             throw new AccessControlException(String.format("Public access to module %s is denied.", aModuleName));//NOI18N
                         }
-                    } catch (AccessControlException | ScriptException ex) {
+                    } catch (AccessControlException ex) {
                         onFailure.accept(ex);
                     }
                 };
