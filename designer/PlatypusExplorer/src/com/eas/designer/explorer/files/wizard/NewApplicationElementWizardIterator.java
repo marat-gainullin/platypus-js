@@ -117,7 +117,7 @@ public class NewApplicationElementWizardIterator implements WizardDescriptor.Ins
     @Override
     public String name() {
         return MessageFormat.format("{0} of {1}",
-                new Object[]{new Integer(index + 1), new Integer(panels.length)});
+                new Object[]{index + 1, panels.length});
     }
 
     @Override

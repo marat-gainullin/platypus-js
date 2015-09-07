@@ -5,6 +5,7 @@
  */
 package com.eas.designer.application.module.breakpoints;
 
+import com.eas.util.StringUtils;
 import com.sun.jdi.AbsentInformationException;
 import com.sun.jdi.request.EventRequest;
 import java.util.HashMap;
@@ -183,7 +184,7 @@ public class PlatypusJSBreakpointsManager extends DebuggerManagerAdapter {
                 pendingBreakpoints.put(fileName, pendingUnderFile);
             }
             pendingUnderFile.add(aSourceBreakpoint);
-            for (String scriptClassName : classesByName(fileName)) {
+            for (String scriptClassName : classesByName(StringUtils.replaceUnsupportedSymbols(fileName))) {
                 checkSourceBreakpoint(aSourceBreakpoint, scriptClassName);
             }
         }
@@ -233,7 +234,7 @@ public class PlatypusJSBreakpointsManager extends DebuggerManagerAdapter {
                             String scriptClassName = scriptType.getName();
                             track().add(scriptClassName);
                             for (String fileName : pendingBreakpoints.keySet().toArray(new String[]{})) {
-                                if (scriptClassName.contains(fileName)) {
+                                if (scriptClassName.contains(StringUtils.replaceUnsupportedSymbols(fileName))) {
                                     checkSourceBreakpoints(scriptClassName, fileName);
                                 }
                             }
