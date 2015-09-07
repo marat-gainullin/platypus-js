@@ -771,23 +771,9 @@ public class FormFactory {
 				pComp.setToolTipText(anElement.getAttribute("toolTipText"));
 			}
 		}
-		/*
-		 * int cursorId = Utils.getIntegerAttribute(anElement, "cursor",
-		 * com.eas.gui.Cursor.DEFAULT_CURSOR); aTarget.setCursor(new
-		 * com.eas.gui.Cursor(cursorId));
-		 */
 		if (anElement.hasAttribute("visible")) {
 			aTarget.setVisible(Utils.getBooleanAttribute(anElement, "visible", Boolean.TRUE));
 		}
-		/*
-		 * if (anElement.hasAttribute("nextFocusableComponent")) { final String
-		 * nextFocusableName = anElement.getAttribute("nextFocusableComponent");
-		 * if (!nextFocusableName.isEmpty()) { resolvers.add(new Runnable() {
-		 * 
-		 * @Override public void run() { UIObject nextFocusable =
-		 * widgets.get(nextFocusableName);
-		 * aTarget.setNextFocusableComponent(nextFocusable); } }); } }
-		 */
 		if (anElement.hasAttribute("componentPopupMenu") && aTarget instanceof HasComponentPopupMenu) {
 			final String popupName = anElement.getAttribute("componentPopupMenu");
 			if (!popupName.isEmpty()) {

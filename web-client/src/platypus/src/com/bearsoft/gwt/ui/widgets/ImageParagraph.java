@@ -47,7 +47,6 @@ public class ImageParagraph extends FocusWidget implements HasText, HasHTML, Has
 		container = aContainer;
 		container.getStyle().setPosition(Style.Position.RELATIVE);
 		container.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-		container.getStyle().setCursor(Cursor.DEFAULT);
 		container.getStyle().setPadding(0, Unit.PX);
 		//
 		content = Document.get().createPElement();

@@ -440,15 +440,9 @@ public class JsWidgets {
 	    Object.defineProperty(aPublished, "fontSet", { get : function(){return _font != null;}});
  	    Object.defineProperty(aPublished, "cursor", {
  	    	get : function(){
- 	    		if(_cursor == null)
- 	    		{
-		    		var style = $wnd.P.getElementComputedStyle(comp.@com.google.gwt.user.client.ui.UIObject::getElement()());
-		    		return style.cursor;
- 	    		}
  	    		return _cursor;
  	    	},
- 	    	set : function(aValue)
- 	    	{
+ 	    	set : function(aValue){
  	    		_cursor = aValue; 
  	    		// apply	
 		    	@com.eas.client.form.ControlsUtils::applyCursor(Lcom/google/gwt/user/client/ui/UIObject;Ljava/lang/String;)(comp, _cursor); 
