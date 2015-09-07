@@ -90,6 +90,15 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 				child.getElement().addClassName(com.bearsoft.gwt.ui.CommonResources.INSTANCE.commons().borderSized());
 				// }
 				super.insert(child, tab, beforeIndex);
+				tabsList.setEnabled(true);
+			}
+
+			@Override
+			public boolean remove(int index) {
+				boolean res = super.remove(index);
+				if (tabs.getWidgetCount() == 0)
+					tabsList.setEnabled(false);
+				return res;
 			}
 
 			@Override
@@ -204,6 +213,7 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 				pp.showRelativeTo(lastWidget);
 			}
 		});
+		tabsList.setEnabled(false);
 		getElement().getStyle().setPosition(Style.Position.RELATIVE);
 		tabs.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
 		tabs.getElement().getStyle().setWidth(100, Style.Unit.PCT);
@@ -279,7 +289,7 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 	@Override
 	public void onResize() {
 		tabs.onResize();
-		Scheduler.get().scheduleDeferred(new ScheduledCommand(){
+		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 			@Override
 			public void execute() {
 				updateScrolls();
@@ -288,8 +298,8 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 	}
 
 	protected int calcNewScrollRightPosition() {
-		Widget lastTab = tabs.getTabWidget(tabs.getWidgetCount() - 1);
-		int rightMostX = lastTab.getParent().getElement().getOffsetLeft() + lastTab.getParent().getElement().getOffsetWidth();
+		Widget lastTab = tabs.getWidgetCount() > 0 ? tabs.getTabWidget(tabs.getWidgetCount() - 1) : null;
+		int rightMostX = lastTab != null ? lastTab.getParent().getElement().getOffsetLeft() + lastTab.getParent().getElement().getOffsetWidth() : tabBar.getElement().getOffsetLeft();
 		int tabBarParentWidth = tabBar.getElement().getParentElement().getOffsetWidth() - chevron.getElement().getOffsetWidth();
 		int tabBarMostLeft = Math.min(tabBarParentWidth - rightMostX, 0);
 		int nextTabBarLeft = tabBar.getElement().getOffsetLeft() - 100;
