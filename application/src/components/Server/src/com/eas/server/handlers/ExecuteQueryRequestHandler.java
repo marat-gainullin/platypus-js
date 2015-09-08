@@ -75,7 +75,7 @@ public class ExecuteQueryRequestHandler extends RequestHandler<ExecuteQueryReque
         for (int i = 1; i <= queryParams.getParametersCount(); i++) {
             Parameter p = queryParams.get(i);
             String pJson = getRequest().getParamsJsons().get(p.getName());
-            p.setValue(aSpace.parseJsonWithDates(pJson));
+            p.setValue(aSpace.toJava(aSpace.parseJsonWithDates(pJson)));
         }
         aQuery.execute(aSpace, onSuccess, onFailure);
         // SqlCompiledQuery.executeUpdate/Client.enqueueUpdate is prohibited here, because no security check is performed in it.
