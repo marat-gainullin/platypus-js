@@ -1,5 +1,5 @@
 /* global P, Java, Function */
-(function(){
+(function () {
     P.require('core/index.js');
     var global = this;
     var aSpace = global['-platypus-scripts-space'];
@@ -12,7 +12,7 @@
     var ModelLoaderClass = Java.type('com.eas.client.scripts.ApplicationModelLoader');
     var TwoTierModelClass = Java.type('com.eas.client.model.application.ApplicationDbModel');
     var ThreeTierModelClass = Java.type('com.eas.client.model.application.ApplicationPlatypusModel');
-    
+
     function fieldsAndParametersPublisher(aDelegate) {
         var target = {};
         var nnFields = aDelegate.toCollection();
@@ -399,22 +399,53 @@
                 }
                 return complemented;
             }
-            function acceptInstance(aSubject) {
+            function acceptInstance(aSubject, aReassignOrmValues) {
                 Object.keys(noFields).forEach(function (aFieldName) {
                     if (typeof aSubject[aFieldName] === 'undefined')
                         aSubject[aFieldName] = null;
                 });
+                if (aReassignOrmValues) {
+                    var scalarsContainer = {};
+                    for each (var defsEntry in nFields.getOrmScalarDefinitions().entrySet()) {
+                        var sd = defsEntry.getKey();
+                        if (typeof aSubject[sd] !== 'undefined') {
+                            scalarsContainer[sd] = aSubject[sd];
+                            aSubject[sd] = null;
+                        }
+                    }
+                    var collectionsContainer = {};
+                    for each (var defsEntry in nFields.getOrmCollectionsDefinitions().entrySet()) {
+                        var cd = defsEntry.getKey();
+                        if (typeof aSubject[cd] !== 'undefined') {
+                            collectionsContainer[cd] = aSubject[cd];
+                            aSubject[cd] = null;
+                        }
+                    }
+                }
                 P.manageObject(aSubject, managedOnChange, managedBeforeChange);
                 listenable(aSubject);
                 // ORM mutable scalar and collection properties
-                var define = function (aOrmDefs) {
-                    for each (var defsEntry in aOrmDefs.entrySet()) {
-                        var jsDef = EngineUtilsClass.unwrap(defsEntry.getValue().getJsDef());
-                        Object.defineProperty(aSubject, defsEntry.getKey(), jsDef);
+                for each (var defsEntry in nFields.getOrmScalarDefinitions().entrySet()) {
+                    var jsDef = EngineUtilsClass.unwrap(defsEntry.getValue().getJsDef());
+                    var sd = defsEntry.getKey();
+                    Object.defineProperty(aSubject, sd, jsDef);
+                    if (aReassignOrmValues && typeof scalarsContainer[sd] !== 'undefined') {
+                        aSubject[sd] = scalarsContainer[sd];
                     }
-                };
-                define(nFields.getOrmScalarDefinitions());
-                define(nFields.getOrmCollectionsDefinitions());
+                }
+                for each (var defsEntry in nFields.getOrmCollectionsDefinitions().entrySet()) {
+                    var jsDef = EngineUtilsClass.unwrap(defsEntry.getValue().getJsDef());
+                    var cd = defsEntry.getKey();
+                    Object.defineProperty(aSubject, cd, jsDef);
+                    if (aReassignOrmValues && typeof collectionsContainer[cd] !== 'undefined') {
+                        var definedCollection = aSubject[cd];
+                        var savedCollection = collectionsContainer[cd];
+                        if (definedCollection && savedCollection && savedCollection.length > 0) {
+                            for (var pi = 0; pi < savedCollection.length; pi++)
+                                definedCollection.push(savedCollection[pi]);
+                        }
+                    }
+                }
             }
 
             var _onInserted = null;
@@ -444,7 +475,7 @@
                             var aOrderer = orderers[aOrdererKey];
                             aOrderer.add(aAdded);
                         }
-                        acceptInstance(aAdded);
+                        acceptInstance(aAdded, true);
                         fireOppositeScalarsChanges(aAdded, nFields);
                         fireOppositeCollectionsChanges(aAdded, nFields);
                     });
@@ -630,7 +661,7 @@
                         accepted[sp] = snapshotInstance[sp];
                     }
                     Array.prototype.push.call(published, accepted);
-                    acceptInstance(accepted);
+                    acceptInstance(accepted, false);
                 }
                 orderers = {};
                 published.cursor = published.length > 0 ? published[0] : null;

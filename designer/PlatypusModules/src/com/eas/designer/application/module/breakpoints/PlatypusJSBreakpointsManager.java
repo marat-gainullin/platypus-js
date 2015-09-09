@@ -5,7 +5,6 @@
  */
 package com.eas.designer.application.module.breakpoints;
 
-import com.eas.util.StringUtils;
 import com.sun.jdi.AbsentInformationException;
 import com.sun.jdi.request.EventRequest;
 import java.util.HashMap;
@@ -21,6 +20,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.URL;
 import java.util.HashSet;
+import jdk.internal.dynalink.support.NameCodec;
 import org.netbeans.api.debugger.DebuggerEngine;
 import org.netbeans.api.debugger.jpda.ClassLoadUnloadBreakpoint;
 import org.netbeans.api.debugger.jpda.ClassVariable;
@@ -132,6 +132,32 @@ public class PlatypusJSBreakpointsManager extends DebuggerManagerAdapter {
         }
     }
 
+    private static String fileNameToClassNameFragment(String aFileName) {
+        final int index = aFileName.lastIndexOf(".js");
+        if (index != -1) {
+            aFileName = aFileName.substring(0, index);
+        }
+
+        aFileName = aFileName.replace('.', '_').replace('-', '_');
+        return NameCodec.encode(aFileName);
+    }
+/*
+    private static final String DANGEROUS_CHARS = "\\/.;:$[]<>";
+
+    private static String replaceDangerChars(final String name) {
+        final int len = name.length();
+        final StringBuilder buf = new StringBuilder();
+        for (int i = 0; i < len; i++) {
+            final char ch = name.charAt(i);
+            if (DANGEROUS_CHARS.indexOf(ch) != -1) {
+                buf.append('_');
+            } else {
+                buf.append(ch);
+            }
+        }
+        return buf.toString();
+    }
+*/
     private final class ScriptsHandler implements JPDABreakpointListener {
 
         private final JPDADebugger debugger;
@@ -184,7 +210,8 @@ public class PlatypusJSBreakpointsManager extends DebuggerManagerAdapter {
                 pendingBreakpoints.put(fileName, pendingUnderFile);
             }
             pendingUnderFile.add(aSourceBreakpoint);
-            for (String scriptClassName : classesByName(StringUtils.replaceUnsupportedSymbols(fileName))) {
+
+            for (String scriptClassName : classesByName(fileNameToClassNameFragment(fileName))) {
                 checkSourceBreakpoint(aSourceBreakpoint, scriptClassName);
             }
         }
@@ -234,7 +261,7 @@ public class PlatypusJSBreakpointsManager extends DebuggerManagerAdapter {
                             String scriptClassName = scriptType.getName();
                             track().add(scriptClassName);
                             for (String fileName : pendingBreakpoints.keySet().toArray(new String[]{})) {
-                                if (scriptClassName.contains(StringUtils.replaceUnsupportedSymbols(fileName))) {
+                                if (scriptClassName.contains(fileNameToClassNameFragment(fileName))) {
                                     checkSourceBreakpoints(scriptClassName, fileName);
                                 }
                             }

@@ -48,6 +48,7 @@ public class BootClassPathProviderImpl implements ClassPathProvider {
         if (bootClassPath != null) {
             GlobalPathRegistry.getDefault().unregister(PlatypusPathRecognizer.BOOT_CP, new ClassPath[]{bootClassPath});
             GlobalPathRegistry.getDefault().unregister(ClassPath.BOOT, new ClassPath[]{bootClassPath});
+            GlobalPathRegistry.getDefault().unregister(ClassPath.SOURCE, new ClassPath[]{bootClassPath});
         }
         bootClassPath = null;
         validateBootClassPath();
@@ -59,6 +60,7 @@ public class BootClassPathProviderImpl implements ClassPathProvider {
             bootClassPath = ClassPathSupport.createClassPath(Collections.singletonList(new BootResourceImpl()));
             GlobalPathRegistry.getDefault().register(PlatypusPathRecognizer.BOOT_CP, new ClassPath[]{bootClassPath});
             GlobalPathRegistry.getDefault().register(ClassPath.BOOT, new ClassPath[]{bootClassPath});
+            GlobalPathRegistry.getDefault().register(ClassPath.SOURCE, new ClassPath[]{bootClassPath});
         }
     }
 

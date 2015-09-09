@@ -180,8 +180,8 @@ public class ScriptedResource {
             } else {
                 Path apiPath = Scripts.getAbsoluteApiPath();
                 Path appPath = Paths.get(new File(app.getModules().getLocalPath()).toURI());
-                Path calledFromFile = resolveApiApp(aCalledFromFile, apiPath, appPath);
-                String resourceName = relativizeApiApp(aResourceName, calledFromFile, apiPath, calledFromFile.getParent(), appPath);
+                Path calledFromFile = aCalledFromFile != null ? resolveApiApp(aCalledFromFile, apiPath, appPath) : null;
+                String resourceName = calledFromFile != null ? relativizeApiApp(aResourceName, calledFromFile, apiPath, calledFromFile.getParent(), appPath) : aResourceName;
                 app.getModules().getModule(resourceName, aSpace, (ModuleStructure s) -> {
                     try {
                         String sourcesPath = app.getModules().getLocalPath();
@@ -243,8 +243,8 @@ public class ScriptedResource {
         } else {
             Path apiPath = Scripts.getAbsoluteApiPath();
             Path appPath = Paths.get(new File(app.getModules().getLocalPath()).toURI());
-            Path calledFromFile = resolveApiApp(aCalledFromFile, apiPath, appPath);
-            String resourceName = relativizeApiApp(aResourceName, calledFromFile, apiPath, calledFromFile.getParent(), appPath);
+            Path calledFromFile = aCalledFromFile != null ? resolveApiApp(aCalledFromFile, apiPath, appPath) : null;
+            String resourceName = calledFromFile != null ? relativizeApiApp(aResourceName, calledFromFile, apiPath, calledFromFile.getParent(), appPath) : aResourceName;
 
             app.getModules().getModule(resourceName, aSpace, null, null);
             String sourcesPath = app.getModules().getLocalPath();

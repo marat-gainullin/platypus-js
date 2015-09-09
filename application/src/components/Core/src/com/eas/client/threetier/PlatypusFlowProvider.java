@@ -42,7 +42,7 @@ public class PlatypusFlowProvider {
         Map<String, String> params = new HashMap<>();
         for(int p = 1; p <= aParams.getParametersCount(); p++){
             Parameter param = aParams.get(p);
-            params.put(param.getName(), aSpace.toJson(param.getValue()));
+            params.put(param.getName(), aSpace.toJson(aSpace.toJs(param.getValue())));
         }
         ExecuteQueryRequest request = new ExecuteQueryRequest(entityName, params, expectedFields);
         if (onSuccess != null) {

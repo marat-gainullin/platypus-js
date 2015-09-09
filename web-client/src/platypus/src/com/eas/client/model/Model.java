@@ -550,7 +550,7 @@ public class Model implements HasPublished {
 	    	}
 	    	for(cd in collectionsJsDefs){
 	        	Object.defineProperty(aSubject, cd, collectionsJsDefs[cd]);
-        		if(aReassignOrmValues && typeof collectionsContainer[cd] != 'undefined'){
+        		if(aReassignOrmValues && typeof collectionsContainer[cd] !== 'undefined'){
 		        	var definedCollection = aSubject[cd];
 		        	var savedCollection = collectionsContainer[cd];
 		        	if(definedCollection && savedCollection && savedCollection.length > 0){
