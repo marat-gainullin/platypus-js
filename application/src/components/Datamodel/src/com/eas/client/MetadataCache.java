@@ -392,12 +392,14 @@ public class MetadataCache implements StatementsGenerator.TablesContainer {
                 }
                 if (schema4Sql != null && !schema4Sql.isEmpty() && columns.isEmpty()) {
                     schema4Sql = schema4Sql.toLowerCase();
+                    aTable = aTable.toLowerCase();
                     try (ResultSet r = meta.getColumns(null, schema4Sql, aTable, null)) {
                         columns = readTablesColumns(r, aSchema, sqlDriver);
                     }
                 }
                 if (schema4Sql != null && !schema4Sql.isEmpty() && columns.isEmpty()) {
                     schema4Sql = schema4Sql.toUpperCase();
+                    aTable = aTable.toUpperCase();
                     try (ResultSet r = meta.getColumns(null, schema4Sql, aTable, null)) {
                         columns = readTablesColumns(r, aSchema, sqlDriver);
                     }

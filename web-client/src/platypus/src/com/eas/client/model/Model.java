@@ -500,25 +500,65 @@ public class Model implements HasPublished {
             }
             return complemented;
         }
-        function acceptInstance(aSubject) {
+        function javaOrmDefsToJs(aOrmDefs){
+        	var jsDefs = {};
+        	var aOrmDefsIt = aOrmDefs.@java.util.Map::entrySet()().@java.util.Set::iterator()();
+            while(aOrmDefsIt.@java.util.Iterator::hasNext()()) {
+            	var defsEntry = aOrmDefsIt.@java.util.Iterator::next()();
+                var ormDef = defsEntry.@java.util.Map.Entry::getValue()();
+                var jsDef = ormDef.@com.eas.client.metadata.Fields.OrmDef::getJsDef()();
+                jsDefs[defsEntry.@java.util.Map.Entry::getKey()()] = jsDef;
+            }
+            return jsDefs;
+        }
+        function acceptInstance(aSubject, aReassignOrmValues) {
             Object.keys(noFields).forEach(function(aFieldName){
                 if(typeof aSubject[aFieldName] === 'undefined')
                     aSubject[aFieldName] = null;
             });
+            var scalarJsDefs = javaOrmDefsToJs(nFields.@com.eas.client.metadata.Fields::getOrmScalarDefinitions()());
+            var sd;            
+  			if(aReassignOrmValues){ 
+	            var scalarsContainer = {};
+		    	for(sd in scalarJsDefs){
+		    		if(typeof aSubject[sd] !== 'undefined'){
+		    			scalarsContainer[sd] = aSubject[sd];
+    					aSubject[sd] = null;
+		    		}
+		    	}
+  			}
+            var collectionsJsDefs = javaOrmDefsToJs(nFields.@com.eas.client.metadata.Fields::getOrmCollectionsDefinitions()());
+            var cd;
+  			if(aReassignOrmValues){ 
+	            var collectionsContainer = {};
+		    	for(cd in collectionsJsDefs){
+		    		if(typeof aSubject[cd] !== 'undefined'){
+		    			collectionsContainer[cd] = aSubject[cd];
+		    			aSubject[cd] = null;
+		    		}
+		    	}
+  			}
+	    	
             $wnd.P.manageObject(aSubject, managedOnChange, managedBeforeChange);
             @com.eas.client.Utils::listenable(Lcom/google/gwt/core/client/JavaScriptObject;)(aSubject);
             // ORM mutable scalar and collection properties
-            var define = function (aOrmDefs) {
-            	var aOrmDefsIt = aOrmDefs.@java.util.Map::entrySet()().@java.util.Set::iterator()();
-                while(aOrmDefsIt.@java.util.Iterator::hasNext()()) {
-                	var defsEntry = aOrmDefsIt.@java.util.Iterator::next()();
-                    var ormDef = defsEntry.@java.util.Map.Entry::getValue()();
-                    var jsDef = ormDef.@com.eas.client.metadata.Fields.OrmDef::getJsDef()();
-                    Object.defineProperty(aSubject, defsEntry.@java.util.Map.Entry::getKey()(), jsDef);
-                }
-            };
-            define(nFields.@com.eas.client.metadata.Fields::getOrmScalarDefinitions()());
-            define(nFields.@com.eas.client.metadata.Fields::getOrmCollectionsDefinitions()());
+	    	for(sd in scalarJsDefs){
+	        	Object.defineProperty(aSubject, sd, scalarJsDefs[sd]);
+        		if(aReassignOrmValues && typeof scalarsContainer[sd] !== 'undefined'){
+	    			aSubject[sd] = scalarsContainer[sd];
+        		} 
+	    	}
+	    	for(cd in collectionsJsDefs){
+	        	Object.defineProperty(aSubject, cd, collectionsJsDefs[cd]);
+        		if(aReassignOrmValues && typeof collectionsContainer[cd] != 'undefined'){
+		        	var definedCollection = aSubject[cd];
+		        	var savedCollection = collectionsContainer[cd];
+		        	if(definedCollection && savedCollection && savedCollection.length > 0){
+		        		for(var pi = 0; pi < savedCollection.length; pi++)
+		    				definedCollection.push(savedCollection[pi]); 
+		        	}
+        		}
+	    	}
         }
 
         var _onInserted = null;
@@ -548,7 +588,7 @@ public class Model implements HasPublished {
                         var aOrderer = orderers[aOrdererKey];
                         aOrderer.add(aAdded);
                     }
-                    acceptInstance(aAdded);
+                    acceptInstance(aAdded, true);
                     fireOppositeScalarsChanges(aAdded, nFields);
                     fireOppositeCollectionsChanges(aAdded, nFields);
                 });
@@ -739,7 +779,7 @@ public class Model implements HasPublished {
                     accepted[sp] = snapshotInstance[sp];
                 }
                 Array.prototype.push.call(published, accepted);
-                acceptInstance(accepted);
+                acceptInstance(accepted, false);
             }
             orderers = {};
             published.cursor = published.length > 0 ? published[0] : null;

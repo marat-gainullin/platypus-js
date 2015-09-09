@@ -589,7 +589,7 @@ public class Scripts {
             });
         }
 
-        public void initSpaceGlobal() {
+        void initSpaceGlobal() {
             Bindings bindings = engine.createBindings();
             scriptContext.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
             bindings.put("space", this);
