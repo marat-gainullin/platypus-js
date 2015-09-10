@@ -558,15 +558,21 @@
              * @param aDefaultValue the header value
              */
             this.add = function (aName, aDefaultValue) {
-                Object.defineProperty(self, aName, {
-                    get: function () {
-                        return aHttpResponse.getHeader(aName);
-                    },
-                    set: function (aValue) {
-                        aHttpResponse.setHeader(aName, aValue);
-                    }
-                });
-                aHttpResponse.addHeader(aName, aDefaultValue);
+                if(aDefaultValue instanceof Date)
+                    aHttpResponse.addDateHeader(aName, aDefaultValue.getTime());
+                else
+                    aHttpResponse.addHeader(aName, aDefaultValue);
+            };
+            /**
+             * Sets the new header to the response.
+             * @param aName the header name
+             * @param aValue the header value
+             */
+            this.set = function (aName, aValue) {
+                if(aValue instanceof Date)
+                    aHttpResponse.setDateHeader(aName, aValue.getTime());
+                else
+                    aHttpResponse.setHeader(aName, aValue);
             };
         }
     };
