@@ -88,21 +88,57 @@ public class BorderPanel extends DockLayoutPanel {
 			centerContainer.getStyle().setMarginBottom(vgap, Style.Unit.PX);
 		}
 		/*
-		if (!north.isEmpty()) {
-			for (Widget w : north) {
-				Element northContainer = getWidgetContainerElement(w);
-				northContainer.getStyle().setMarginLeft(hgap, Style.Unit.PX);
-				northContainer.getStyle().setMarginRight(hgap, Style.Unit.PX);
-			}
+		 * if (!north.isEmpty()) { for (Widget w : north) { Element
+		 * northContainer = getWidgetContainerElement(w);
+		 * northContainer.getStyle().setMarginLeft(hgap, Style.Unit.PX);
+		 * northContainer.getStyle().setMarginRight(hgap, Style.Unit.PX); } } if
+		 * (!south.isEmpty()) { for (Widget w : south) { Element southContainer
+		 * = getWidgetContainerElement(w);
+		 * southContainer.getStyle().setMarginLeft(hgap, Style.Unit.PX);
+		 * southContainer.getStyle().setMarginRight(hgap, Style.Unit.PX); } }
+		 */
+	}
+
+	public void ajustWidth(Widget aWidget, int aWidth) {
+		Direction direction = getWidgetDirection(aWidget);
+		if (direction == Direction.WEST) {
+			remove(aWidget);
+			Widget centerWidget = getCenter();
+			if (centerWidget != null)
+				remove(centerWidget);
+			addWest(aWidget, aWidth);
+			if (centerWidget != null)
+				add(centerWidget);
+		} else if (direction == Direction.EAST) {
+			remove(aWidget);
+			Widget centerWidget = getCenter();
+			if (centerWidget != null)
+				remove(centerWidget);
+			addEast(aWidget, aWidth);
+			if (centerWidget != null)
+				add(centerWidget);
 		}
-		if (!south.isEmpty()) {
-			for (Widget w : south) {
-				Element southContainer = getWidgetContainerElement(w);
-				southContainer.getStyle().setMarginLeft(hgap, Style.Unit.PX);
-				southContainer.getStyle().setMarginRight(hgap, Style.Unit.PX);
-			}
+	}
+
+	public void ajustHeight(Widget aWidget, int aWidth) {
+		Direction direction = getWidgetDirection(aWidget);
+		if (direction == Direction.NORTH) {
+			remove(aWidget);
+			Widget centerWidget = getCenter();
+			if (centerWidget != null)
+				remove(centerWidget);
+			addNorth(aWidget, aWidth);
+			if (centerWidget != null)
+				add(centerWidget);
+		} else if (direction == Direction.SOUTH) {
+			remove(aWidget);
+			Widget centerWidget = getCenter();
+			if (centerWidget != null)
+				remove(centerWidget);
+			addSouth(aWidget, aWidth);
+			if (centerWidget != null)
+				add(centerWidget);
 		}
-		*/
 	}
 
 	@Override

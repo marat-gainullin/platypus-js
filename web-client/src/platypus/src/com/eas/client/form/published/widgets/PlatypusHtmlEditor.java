@@ -537,6 +537,7 @@ HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHan
 	@Override
 	public void onResize() {
 		if(isAttached()){
+			toolBar.onResize();
 			ResizeEvent.fire(this, getElement().getOffsetWidth(), getElement().getOffsetHeight());
 		}
 	}

@@ -247,7 +247,7 @@ public class ParametersGrid extends JTable {
             tc.setMaxWidth(15);
             tc.setWidth(15);
         }
-        setRowHeight(20);
+        setRowHeight(24);
     }
     /*
      public ParametersGrid(String... aHidingFields) {

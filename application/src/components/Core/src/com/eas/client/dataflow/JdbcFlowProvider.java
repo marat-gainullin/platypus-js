@@ -18,10 +18,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -555,11 +553,11 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                     }
                     if (castedDate != null) {
                         if (aParameterJdbcType == Types.DATE) {
-                            aStmt.setDate(aParameterIndex, new java.sql.Date(castedDate.getTime()));
+                            aStmt.setDate(aParameterIndex, new java.sql.Date(castedDate.getTime()));//, Calendar.getInstance(TimeZone.getTimeZone("UTC")));
                         } else if (aParameterJdbcType == Types.TIMESTAMP) {
-                            aStmt.setTimestamp(aParameterIndex, new java.sql.Timestamp(castedDate.getTime()), Calendar.getInstance(TimeZone.getTimeZone("UTC")));
+                            aStmt.setTimestamp(aParameterIndex, new java.sql.Timestamp(castedDate.getTime()));//, Calendar.getInstance(TimeZone.getTimeZone("UTC")));
                         } else if (aParameterJdbcType == Types.TIME) {
-                            aStmt.setTime(aParameterIndex, new java.sql.Time(castedDate.getTime()));
+                            aStmt.setTime(aParameterIndex, new java.sql.Time(castedDate.getTime()));//, Calendar.getInstance(TimeZone.getTimeZone("UTC")));
                         } else {
                             assert false;
                         }
