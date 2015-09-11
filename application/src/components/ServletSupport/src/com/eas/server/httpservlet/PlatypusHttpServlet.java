@@ -78,6 +78,7 @@ public class PlatypusHttpServlet extends HttpServlet {
     private static volatile PlatypusServerCore platypusCore;
     private String realRootPath;
     private PlatypusServerConfig platypusConfig;
+    private RestPointsScanner restScanner;
     private ExecutorService containerExecutor;
     private ExecutorService selfExecutor;
 
@@ -98,7 +99,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                             1L, TimeUnit.SECONDS,
                             new LinkedBlockingQueue<>(platypusConfig.getMaximumLpcQueueSize()),
                             new DeamonThreadFactory("platypus-worker-", false));
-                    ((ThreadPoolExecutor)selfExecutor).allowCoreThreadTimeOut(true);
+                    ((ThreadPoolExecutor) selfExecutor).allowCoreThreadTimeOut(true);
                 }
             }
             File realRoot = new File(realRootPath);
@@ -107,8 +108,12 @@ public class PlatypusHttpServlet extends HttpServlet {
                 File f = new File(new URI(realRootUrl));
                 if (f.exists() && f.isDirectory()) {
                     ScriptsConfigs lsecurityConfigs = new ScriptsConfigs();
-                    ServerTasksScanner tasksScanner = new ServerTasksScanner(lsecurityConfigs);
-                    ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), tasksScanner);
+                    final ServerTasksScanner tasksScanner = new ServerTasksScanner(lsecurityConfigs);
+                    restScanner = new RestPointsScanner(lsecurityConfigs);
+                    ApplicationSourceIndexer indexer = new ApplicationSourceIndexer(f.getPath(), (String aAppElementName, File aFile) -> {
+                        tasksScanner.fileScanned(aAppElementName, aFile);
+                        restScanner.fileScanned(aAppElementName, aFile);
+                    });
                     ScriptedDatabasesClient basesProxy = new ScriptedDatabasesClient(platypusConfig.getDefaultDatasourceName(), indexer, true, tasksScanner.getValidators(), platypusConfig.getMaximumJdbcThreads());
                     QueriesProxy<SqlQuery> queries = new LocalQueriesProxy(basesProxy, indexer);
                     basesProxy.setQueries(queries);
@@ -424,14 +429,6 @@ public class PlatypusHttpServlet extends HttpServlet {
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -442,19 +439,29 @@ public class PlatypusHttpServlet extends HttpServlet {
         }
     }
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        try {
+            processRequest(req, resp);
+        } catch (Exception ex) {
+            throw new ServletException(ex);
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         try {
-            processRequest(request, response);
+            processRequest(req, resp);
+        } catch (Exception ex) {
+            throw new ServletException(ex);
+        }
+    }
+
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        try {
+            processRequest(req, resp);
         } catch (Exception ex) {
             throw new ServletException(ex);
         }
@@ -467,24 +474,31 @@ public class PlatypusHttpServlet extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Platypus servlet provides platypus server functionality within J2EE/Servlet containers";
+        return "Platypus servlet provides platypus server functionality within a J2EE/Servlet container";
     }// </editor-fold>
 
     protected Request readPlatypusRequest(HttpServletRequest aHttpRequest, HttpServletResponse aResponse) throws Exception {
-        String sType = aHttpRequest.getParameter(PlatypusHttpRequestParams.TYPE);
-        if (sType != null) {
-            int rqType = Integer.valueOf(sType);
-            Request rq = PlatypusRequestsFactory.create(rqType);
-            if (rq != null) {
-                PlatypusHttpRequestReader reader = new PlatypusHttpRequestReader(platypusCore, aHttpRequest);
-                rq.accept(reader);
-                return rq;
-            } else {
-                throw new Exception(String.format(UNKNOWN_REQUEST_MSG, rqType));
-            }
+        String contextedUri = aHttpRequest.getPathInfo();
+        Map<String, RPCPoint> methoded = contextedUri != null ? restScanner.getMethoded().get(aHttpRequest.getMethod().toLowerCase()) : null;
+        if (methoded != null && methoded.containsKey(contextedUri)) {
+            RPCPoint rpcPoint = methoded.get(contextedUri);
+            return new RPCRequest(rpcPoint.getModuleName(), rpcPoint.getMethodName(), new String[]{});
         } else {
-            Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, REQUEST_PARAMETER_MISSING_MSG, PlatypusHttpRequestParams.TYPE);
-            throw new Exception(String.format("Platypus http requset parameter '%s' is missing", PlatypusHttpRequestParams.TYPE));
+            String sType = aHttpRequest.getParameter(PlatypusHttpRequestParams.TYPE);
+            if (sType != null) {
+                int rqType = Integer.valueOf(sType);
+                Request rq = PlatypusRequestsFactory.create(rqType);
+                if (rq != null) {
+                    PlatypusHttpRequestReader reader = new PlatypusHttpRequestReader(platypusCore, aHttpRequest);
+                    rq.accept(reader);
+                    return rq;
+                } else {
+                    throw new Exception(String.format(UNKNOWN_REQUEST_MSG, rqType));
+                }
+            } else {
+                Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, REQUEST_PARAMETER_MISSING_MSG, PlatypusHttpRequestParams.TYPE);
+                throw new Exception(String.format("Platypus http requset parameter '%s' is missing", PlatypusHttpRequestParams.TYPE));
+            }
         }
     }
 }

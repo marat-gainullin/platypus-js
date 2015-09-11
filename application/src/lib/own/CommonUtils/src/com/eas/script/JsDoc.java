@@ -43,7 +43,7 @@ public class JsDoc {
     public boolean containsTagWithName(String name) {
         return Tag.containsTagWithName(tags, name);
     }
-    
+
     public boolean containsModuleAnnotation() {
         for (String line : lines) {
             if (line.startsWith(Tag.MODULE_TAG)) {
@@ -89,12 +89,12 @@ public class JsDoc {
          * Author tag
          */
         public static final String AUTHOR_TAG = "@author";
-        
+
         /**
          * Marker for a module's constructor.
          */
         public static final String MODULE_TAG = "@constructor";
-        
+
         /**
          * Annotation for defining application element's name.
          */
@@ -106,7 +106,7 @@ public class JsDoc {
          */
         public static final String ACCEPTOR_TAG = "@acceptor";
         public static final String ACCEPTED_PROTOCOL_TAG = "@protocol";
-        
+
         /**
          * Annotation marks a module as an extra rols mapper
          */
@@ -115,10 +115,6 @@ public class JsDoc {
          * Annotation marks a module as resident server task of system session
          */
         public static final String RESIDENT_TAG = "@resident";
-        /**
-         * Annotation puts a module on a specific level of parallelism
-         */
-        public static final String WAIT_TAG = "@wait";
         /**
          * Annotation marks a module or top level function access restrictions
          * for specific roles example:
@@ -149,11 +145,12 @@ public class JsDoc {
          */
         public static final String STATELESS_TAG = "@stateless";
         /**
-         * Annotation marks module as a WebSocket endpoint. Incompatible with @stateless and @resident
-         * WebSocket endpoint are session modules by Java EE design.
+         * Annotation marks module as a WebSocket endpoint. Incompatible with
+         * @stateless and @resident WebSocket endpoint are session modules by
+         * Java EE design.
          */
         public static final String WEBSOCKET_TAG = "@websocket";
-        
+
         private String name;
         private String text;
         private List<String> params;
@@ -172,14 +169,10 @@ public class JsDoc {
         }
 
         public List<String> getParams() {
-            if (isParametrized()) {
-                if (params == null) {
-                    params = parseParams();
-                }
-                return Collections.unmodifiableList(params);
-            } else {
-                return null;
+            if (params == null) {
+                params = parseParams();
             }
+            return Collections.unmodifiableList(params);
         }
 
         /**
@@ -204,17 +197,6 @@ public class JsDoc {
         @Override
         public String toString() {
             return name + (text != null ? " " + text : "");
-        }
-
-        private boolean isParametrized() {
-            return ROLES_ALLOWED_TAG.equalsIgnoreCase(name)
-                    || ROLES_ALLOWED_READ_TAG.equalsIgnoreCase(name)
-                    || ROLES_ALLOWED_WRITE_TAG.equalsIgnoreCase(name)
-                    || READONLY_TAG.equalsIgnoreCase(name)
-                    || WRITABLE_TAG.equalsIgnoreCase(name)
-                    || ACCEPTED_PROTOCOL_TAG.equalsIgnoreCase(name)
-                    || WAIT_TAG.equalsIgnoreCase(name)
-                    || VALIDATOR_TAG.equalsIgnoreCase(name);
         }
 
         private List<String> parseParams() {

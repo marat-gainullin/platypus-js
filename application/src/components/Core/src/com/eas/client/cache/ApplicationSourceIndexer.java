@@ -32,7 +32,7 @@ public class ApplicationSourceIndexer implements PlatypusIndexer {
 
     public interface ScanCallback {
 
-        public void fileScanned(String aAppElementId, File aFile);
+        public void fileScanned(String aAppElementName, File aFile);
     }
 
     protected class FilesWatchDog implements Runnable {

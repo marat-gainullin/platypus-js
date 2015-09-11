@@ -5,7 +5,6 @@
 package com.eas.client.cache;
 
 import com.eas.script.JsDoc;
-import com.eas.script.JsDoc.Tag;
 import com.eas.script.PropertiesAnnotationsMiner;
 import com.eas.script.Scripts;
 import java.util.*;
@@ -22,7 +21,7 @@ import jdk.nashorn.internal.runtime.Source;
  */
 public class ScriptDocument {
 
-    private List<Tag> moduleAnnotations;
+    private List<JsDoc.Tag> moduleAnnotations;
     /**
      * User roles that have access to all module's functions, if empty all users
      * allowed
@@ -33,6 +32,8 @@ public class ScriptDocument {
      * allowed
      */
     private Map<String, Set<String>> propertyAllowedRoles = new HashMap<>();
+    
+    private final Map<String, Set<JsDoc.Tag>> propertyAnnotations = new HashMap<>();
     /**
      * Functions that may be accessed over network via RPC
      */
@@ -65,18 +66,22 @@ public class ScriptDocument {
         propertyAllowedRoles = aAllowedRoles;
     }
 
-    public List<Tag> getModuleAnnotations() {
+    public List<JsDoc.Tag> getModuleAnnotations() {
         return moduleAnnotations != null ? Collections.unmodifiableList(moduleAnnotations) : null;
     }
 
+    public Map<String, Set<JsDoc.Tag>> getPropertyAnnotations() {
+        return Collections.unmodifiableMap(propertyAnnotations);
+    }
+
     public boolean hasModuleAnnotation(String anAnnotation) {
-        return moduleAnnotations != null && moduleAnnotations.stream().anyMatch((Tag aTag) -> {
+        return moduleAnnotations != null && moduleAnnotations.stream().anyMatch((JsDoc.Tag aTag) -> {
             return aTag.getName().equalsIgnoreCase(anAnnotation);
         });
     }
 
-    public Tag getModuleAnnotation(String anAnnotation) {
-        return moduleAnnotations != null ? moduleAnnotations.stream().filter((Tag aTag) -> {
+    public JsDoc.Tag getModuleAnnotation(String anAnnotation) {
+        return moduleAnnotations != null ? moduleAnnotations.stream().filter((JsDoc.Tag aTag) -> {
             return aTag.getName().equalsIgnoreCase(anAnnotation);
         }).findAny().get() : null;
     }
@@ -107,7 +112,7 @@ public class ScriptDocument {
                 if (scopeLevel == TOP_CONSTRUCTORS_SCOPE_LEVEL) {
                     JsDoc jsDoc = new JsDoc(aComment);
                     jsDoc.parseAnnotations();
-                    jsDoc.getAnnotations().stream().forEach((Tag tag) -> {
+                    jsDoc.getAnnotations().stream().forEach((JsDoc.Tag tag) -> {
                         moduleAnnotations.add(tag);
                         if (tag.getName().equalsIgnoreCase(JsDoc.Tag.ROLES_ALLOWED_TAG)) {
                             tag.getParams().stream().forEach((role) -> {
@@ -137,7 +142,13 @@ public class ScriptDocument {
         if (aJsDocBody != null) {
             JsDoc jsDoc = new JsDoc(aJsDocBody);
             jsDoc.parseAnnotations();
-            jsDoc.getAnnotations().stream().forEach((Tag tag) -> {
+            jsDoc.getAnnotations().stream().forEach((JsDoc.Tag tag) -> {
+                Set<JsDoc.Tag> tags = propertyAnnotations.get(aPropertyName);
+                if(tags == null){
+                    tags = new HashSet<>();
+                    propertyAnnotations.put(aPropertyName, tags);
+                }
+                tags.add(tag);
                 if (tag.getName().equalsIgnoreCase(JsDoc.Tag.ROLES_ALLOWED_TAG)) {
                     Set<String> roles = propertyAllowedRoles.get(aPropertyName);
                     if (roles == null) {

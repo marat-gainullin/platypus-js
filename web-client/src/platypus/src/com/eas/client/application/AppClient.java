@@ -853,8 +853,10 @@ public class AppClient {
 
 				@Override
 				public void onFailure(XMLHttpRequest aResponse) {
-					if (aCallback != null)
-						aCallback.onFailure(aResponse.getResponseText() != null ? aResponse.getResponseText() : aResponse.getStatusText());
+					if (aCallback != null){
+						String responseText = aResponse.getResponseText(); 
+						aCallback.onFailure(responseText != null && !responseText.isEmpty() ? responseText : aResponse.getStatusText());
+					}
 				}
 
 			});
@@ -900,7 +902,8 @@ public class AppClient {
 				public void onFailure(XMLHttpRequest aResponse) {
 					if (onFailure != null) {
 						try {
-							Utils.executeScriptEventVoid(onSuccess, onFailure, Utils.toJs(aResponse.getStatusText()));
+							String responseText = aResponse.getResponseText();
+							Utils.executeScriptEventVoid(onSuccess, onFailure, Utils.toJs(responseText != null && !responseText.isEmpty() ? responseText : aResponse.getStatusText()));
 						} catch (Exception ex) {
 							Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, null, ex);
 						}
@@ -926,8 +929,10 @@ public class AppClient {
 					} else {
 						return Utils.toJs(executed.getResponseText());
 					}
-				} else
-					throw new Exception(executed.getStatusText());
+				} else{
+					String responseText = executed.getResponseText();
+					throw new Exception(responseText != null && !responseText.isEmpty() ? responseText : executed.getStatusText());
+				}
 			} else {
 				return null;
 			}
@@ -1001,7 +1006,7 @@ public class AppClient {
 					if (statusText == null || statusText.isEmpty())
 						statusText = null;
 					if (status == 0)
-						Logger.getLogger(AppClient.class.getName()).log(Level.WARNING, "Rowset recieving is aborted");
+						Logger.getLogger(AppClient.class.getName()).log(Level.WARNING, "Data recieving is aborted");
 					aCallback.onFailure(statusText);
 				}
 			}
