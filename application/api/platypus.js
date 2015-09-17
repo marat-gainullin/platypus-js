@@ -190,9 +190,7 @@
     function require(deps, aOnSuccess, aOnFailure) {
         if (!Array.isArray(deps))
             deps = [deps];
-        var strArray = new JavaStringArrayClass(deps.length);
-        for (var i = 0; i < deps.length; i++)
-            strArray[i] = deps[i] ? deps[i] + '' : null;
+        var strArray = Java.to(deps, JavaStringArrayClass);
         var calledFromFile = lookupCallerFile();
         if (aOnSuccess) {
             ScriptedResourceClass.require(strArray, calledFromFile, P.boxAsJava(aOnSuccess), P.boxAsJava(aOnFailure));
@@ -202,6 +200,21 @@
     }
     Object.defineProperty(P, "require", {value: require});
 
+    /**
+     * @static
+     * @param {type} aDeps
+     * @param {type} aModuleDefiner
+     * @param {type} aOnDepsFailure
+     * @returns {undefined}
+     */
+    function define(aDeps, aModuleDefiner, aOnDepsFailure) {
+        if (!Array.isArray(aDeps))
+            aDeps = [aDeps];
+        var strArray = Java.to(aDeps, JavaStringArrayClass);
+        aSpace.setManualDependencies(strArray);
+    }
+    Object.defineProperty(P, "define", {value: define});
+    
     P.require('internals.js');
     P.require('orm.js');
     var serverCoreClass;

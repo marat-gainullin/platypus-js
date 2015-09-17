@@ -610,7 +610,7 @@ public class ScriptedResource {
     }
 
     private static void loadModule(Path apiPath, String scriptOrModuleName, String aCalledFromFile, Scripts.Space aSpace, Set<String> aCyclic, Consumer<Path> onSuccess, Consumer<Exception> onFailure) {
-        Path apiLocalPath = apiPath.resolve(scriptOrModuleName);
+        Path apiLocalPath = apiPath.resolve(scriptOrModuleName + ".js");
         if (apiLocalPath != null && apiLocalPath.toFile().exists() && !apiLocalPath.toFile().isDirectory()) {
             // network activity simulation
             aSpace.process(() -> {
@@ -653,7 +653,9 @@ public class ScriptedResource {
                                 moduleProcess.complete(scriptOrModuleName + ".s", null);// instead of sRequire
                             }
                             // 3
-                            _require(structure.getClientDependencies().toArray(new String[]{}), aCalledFromFile, aSpace, aCyclic, (Void v) -> {
+                            String[] moduleDefinedDependencies = aSpace.consumeManualDependencies();
+                            String[] autoDiscoveredDependencies = structure.getClientDependencies().toArray(new String[]{});
+                            _require(moduleDefinedDependencies != null ? moduleDefinedDependencies : autoDiscoveredDependencies, aCalledFromFile, aSpace, aCyclic, (Void v) -> {
                                 moduleProcess.complete(null, null);
                             }, (Exception ex) -> {
                                 moduleProcess.complete(null, ex);
@@ -680,7 +682,8 @@ public class ScriptedResource {
 
     public static void require(String[] aScriptsNames, String aCalledFromFile, JSObject onSuccess, JSObject onFailure) throws Exception {
         Scripts.Space space = Scripts.getSpace();
-        _require(aScriptsNames, aCalledFromFile, space, new HashSet<>(), (Void v) -> {
+        String[] scriptsIds = removeJsExtension(aScriptsNames);
+        _require(scriptsIds, aCalledFromFile, space, new HashSet<>(), (Void v) -> {
             if (onSuccess != null) {
                 onSuccess.call(null, new Object[]{});
             }
@@ -689,6 +692,15 @@ public class ScriptedResource {
                 onFailure.call(null, new Object[]{ex.getMessage()});
             }
         });
+    }
+
+    protected static String[] removeJsExtension(String[] aScriptsNames) {
+        String[] aScriptsIds = new String[aScriptsNames.length];
+        for (int i = 0; i < aScriptsNames.length; i++) {
+            String scriptName = aScriptsNames[i];
+            aScriptsIds[i] = scriptName.toLowerCase().endsWith(".js") ? scriptName.substring(0, scriptName.length() - 3) : scriptName;
+        }
+        return aScriptsIds;
     }
 
     public static void _require(String[] aScriptsNames, String aCalledFromFile, Scripts.Space aSpace, Set<String> aCyclic, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
@@ -767,7 +779,8 @@ public class ScriptedResource {
 
     public static void require(String[] aScriptsNames, String aCalledFromFile) throws Exception {
         Scripts.Space space = Scripts.getSpace();
-        _require(aScriptsNames, aCalledFromFile, space);
+        String[] scriptsIds = removeJsExtension(aScriptsNames);
+        _require(scriptsIds, aCalledFromFile, space);
     }
 
     public static void _require(String[] aScriptsNames, String aCalledFromFile, Scripts.Space aSpace) throws Exception {
@@ -777,7 +790,7 @@ public class ScriptedResource {
         for (String scriptOrModuleName : aScriptsNames) {
             if (!aSpace.getExecuted().contains(scriptOrModuleName)) {
                 aSpace.getExecuted().add(scriptOrModuleName);
-                Path apiLocalPath = apiPath.resolve(scriptOrModuleName);
+                Path apiLocalPath = apiPath.resolve(scriptOrModuleName + ".js");
                 if (apiLocalPath != null && apiLocalPath.toFile().exists() && !apiLocalPath.toFile().isDirectory()) {
                     URL toLoad = apiLocalPath.toUri().toURL();
                     aSpace.exec(scriptOrModuleName, toLoad);
@@ -791,7 +804,9 @@ public class ScriptedResource {
                             qRequire(structure.getQueryDependencies().toArray(new String[]{}), null, null, null);
                             sRequire(structure.getServerDependencies().toArray(new String[]{}), null, null, null);
                         }
-                        _require(structure.getClientDependencies().toArray(new String[]{}), null, aSpace);
+                        String[] moduleDefinedDependencies = aSpace.consumeManualDependencies();
+                        String[] autoDiscoveredDependencies = structure.getClientDependencies().toArray(new String[]{});
+                        _require(moduleDefinedDependencies != null ? moduleDefinedDependencies : autoDiscoveredDependencies, null, aSpace);
                         Path fileToLoad = Paths.get(toLoad.toURI());
                         Path appRelative = appPath.relativize(fileToLoad);
                         aSpace.exec(appRelative.toString().replace(File.separator, "/"), toLoad);

@@ -62,7 +62,7 @@ import jdk.nashorn.internal.runtime.options.Options;
 public class Scripts {
 
     private static final NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
-    private static final NashornScriptEngine engine = (NashornScriptEngine)factory.getScriptEngine();
+    private static final NashornScriptEngine engine = (NashornScriptEngine) factory.getScriptEngine();
     protected static final String PLATYPUS_JS_FILENAME = "platypus.js";
     public static final String STRING_TYPE_NAME = "String";//NOI18N
     public static final String NUMBER_TYPE_NAME = "Number";//NOI18N
@@ -72,11 +72,11 @@ public class Scripts {
     public static final String THIS_KEYWORD = "this";//NOI18N
     protected static volatile Path absoluteApiPath;
     protected static volatile URL platypusJsUrl;
-    
-    public static NashornScriptEngine getEngine(){
+
+    public static NashornScriptEngine getEngine() {
         return engine;
     }
-    
+
     private static final ThreadLocal<LocalContext> contextRef = new ThreadLocal<>();
 
     public static Space getSpace() {
@@ -101,7 +101,7 @@ public class Scripts {
         protected Object response;
         protected Object principal;
         protected Object session;
-        
+
         protected Integer asyncsCount;
 
         protected Scripts.Space space;
@@ -188,14 +188,16 @@ public class Scripts {
     }
 
     public static class Space {
-        
+
         protected ScriptContext scriptContext;
         protected Object global;
         protected Map<String, JSObject> publishers = new HashMap<>();
         protected Set<String> required = new HashSet<>();
         protected Set<String> executed = new HashSet<>();
         protected Map<String, List<Pending>> pending = new HashMap<>();
-        
+        protected String[] manualDependencies;
+        protected Map<String, JSObject> defined = new HashMap<>();
+
         protected Space() {
             this(null);
             global = new Object();
@@ -216,6 +218,20 @@ public class Scripts {
 
         public Map<String, List<Pending>> getPending() {
             return pending;
+        }
+
+        public Map<String, JSObject> getDefined() {
+            return defined;
+        }
+
+        public void setManualDependencies(String[] aValue) {
+            manualDependencies = aValue;
+        }
+
+        public String[] consumeManualDependencies() {
+            String[] res = manualDependencies;
+            manualDependencies = null;
+            return res;
         }
 
         protected JSObject loadFunc;
