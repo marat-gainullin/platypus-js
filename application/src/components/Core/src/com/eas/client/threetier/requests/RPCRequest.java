@@ -21,14 +21,14 @@ public class RPCRequest extends Request {
         super(Requests.rqExecuteServerModuleMethod);
     }
 
-    public RPCRequest(String aModuleName, String aMethodName, String[] aArguments) {
+    public RPCRequest(String aModuleName, String aMethodName, String[] aArgumentsJsons) {
         this();
         moduleName = aModuleName;
         methodName = aMethodName;
-        if (aArguments == null) {
+        if (aArgumentsJsons == null) {
             throw new NullPointerException("No arguments.");
         }
-        argumentsJsons = aArguments;
+        argumentsJsons = aArgumentsJsons;
     }
 
     public String[] getArgumentsJsons() {

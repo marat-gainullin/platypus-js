@@ -478,27 +478,44 @@ public class PlatypusHttpServlet extends HttpServlet {
     }// </editor-fold>
 
     protected Request readPlatypusRequest(HttpServletRequest aHttpRequest, HttpServletResponse aResponse) throws Exception {
-        String contextedUri = aHttpRequest.getPathInfo();
-        Map<String, RPCPoint> methoded = contextedUri != null ? restScanner.getMethoded().get(aHttpRequest.getMethod().toLowerCase()) : null;
-        if (methoded != null && methoded.containsKey(contextedUri)) {
-            RPCPoint rpcPoint = methoded.get(contextedUri);
-            return new RPCRequest(rpcPoint.getModuleName(), rpcPoint.getMethodName(), new String[]{});
-        } else {
-            String sType = aHttpRequest.getParameter(PlatypusHttpRequestParams.TYPE);
-            if (sType != null) {
-                int rqType = Integer.valueOf(sType);
-                Request rq = PlatypusRequestsFactory.create(rqType);
-                if (rq != null) {
-                    PlatypusHttpRequestReader reader = new PlatypusHttpRequestReader(platypusCore, aHttpRequest);
-                    rq.accept(reader);
-                    return rq;
-                } else {
-                    throw new Exception(String.format(UNKNOWN_REQUEST_MSG, rqType));
-                }
+        String sType = aHttpRequest.getParameter(PlatypusHttpRequestParams.TYPE);
+        if(sType == null && aHttpRequest.getParameter(PlatypusHttpRequestParams.MODULE_NAME) != null && aHttpRequest.getParameter(PlatypusHttpRequestParams.METHOD_NAME) != null){
+            sType = "" + Requests.rqExecuteServerModuleMethod;
+        }
+        if (sType != null) {
+            int rqType = Integer.valueOf(sType);
+            Request rq = PlatypusRequestsFactory.create(rqType);
+            if (rq != null) {
+                PlatypusHttpRequestReader reader = new PlatypusHttpRequestReader(platypusCore, aHttpRequest);
+                rq.accept(reader);
+                return rq;
             } else {
-                Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, REQUEST_PARAMETER_MISSING_MSG, PlatypusHttpRequestParams.TYPE);
-                throw new Exception(String.format("Platypus http requset parameter '%s' is missing", PlatypusHttpRequestParams.TYPE));
+                throw new Exception(String.format(UNKNOWN_REQUEST_MSG, rqType));
             }
+        } else {
+            String contextedUri = aHttpRequest.getPathInfo();
+            if (contextedUri != null) {
+                Map<String, RPCPoint> methoded = restScanner.getMethoded().get(aHttpRequest.getMethod().toLowerCase());
+                if (methoded != null) {
+                    String contextedUriHead = contextedUri;
+                    while (!contextedUriHead.isEmpty() && !methoded.containsKey(contextedUriHead)) {
+                        contextedUriHead = contextedUriHead.substring(0, contextedUriHead.lastIndexOf("/"));
+                    }
+                    if (methoded.containsKey(contextedUriHead)) {
+                        RPCPoint rpcPoint = methoded.get(contextedUriHead);
+                        String tail = contextedUri.substring(contextedUriHead.length());
+                        if (tail.startsWith("/")) {
+                            tail = tail.substring(1);
+                        }
+                        if (tail.endsWith("/")) {
+                            tail = tail.substring(0, tail.length() - 1);
+                        }
+                        return new RPCRequest(rpcPoint.getModuleName(), rpcPoint.getMethodName(), new String[]{JSONUtils.s(!tail.isEmpty() ? tail : "").toString()});
+                    }
+                }
+            }
+            Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, REQUEST_PARAMETER_MISSING_MSG, PlatypusHttpRequestParams.TYPE);
+            throw new Exception(String.format("Platypus http requset parameter '%s' is missing", PlatypusHttpRequestParams.TYPE));
         }
     }
 }
