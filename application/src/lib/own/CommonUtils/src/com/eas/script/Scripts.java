@@ -209,7 +209,11 @@ public class Scripts {
             super();
             scriptContext = aScriptContext;
         }
-
+        
+        public String getFileNameFromContext(){
+            return (String)scriptContext.getAttribute(ScriptEngine.FILENAME);
+        }
+        
         public Set<String> getRequired() {
             return required;
         }
@@ -504,9 +508,8 @@ public class Scripts {
 
         public JSObject createModule(String aModuleName) {
             assert lookupInGlobalFunc != null : SCRIPT_NOT_INITIALIZED;
-            Object oConstructor = lookupInGlobalFunc.call(null, new Object[]{aModuleName});
-            if (oConstructor instanceof JSObject && ((JSObject) oConstructor).isFunction()) {
-                JSObject jsConstructor = (JSObject) oConstructor;
+            JSObject jsConstructor = lookupInGlobal(aModuleName);
+            if (jsConstructor != null && jsConstructor.isFunction()) {
                 return (JSObject) jsConstructor.newObject(new Object[]{});
             } else {
                 return null;
@@ -515,8 +518,13 @@ public class Scripts {
 
         public JSObject lookupInGlobal(String aName) {
             assert lookupInGlobalFunc != null : SCRIPT_NOT_INITIALIZED;
-            Object res = lookupInGlobalFunc.call(null, new Object[]{aName});
-            return res instanceof JSObject ? (JSObject) res : null;
+            JSObject amd = defined.get(aName);
+            if (amd != null) {
+                return amd;
+            } else {
+                Object res = lookupInGlobalFunc.call(null, new Object[]{aName});
+                return res instanceof JSObject ? (JSObject) res : null;
+            }
         }
 
         public void putInGlobal(String aName, JSObject aValue) {

@@ -1,10 +1,20 @@
 /**
  * Platypus.js's designer internals initialization.
  */
-(function(aSpace) {
+(function (aSpace) {
     var global = this;
-    this.P = {loadModel: function() {
-        }};
+    this.P = {
+        loadModel: function () {
+        },
+        define: function () {
+            var moduleDefiner = arguments.length === 1 ? arguments[0] : arguments.length === 2 ? arguments[1] : null;
+            if (moduleDefiner){
+                var moduleName = aSpace.getFileNameFromContext();
+                var module = moduleDefiner.call(null, moduleName);
+                aSpace.getDefined().put(moduleName, module);
+            }
+        }
+    };
     aSpace.setLookupInGlobalFunc(
             function (aPropertyName) {
                 return global[aPropertyName];
