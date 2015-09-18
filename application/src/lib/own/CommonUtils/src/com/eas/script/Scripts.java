@@ -63,7 +63,8 @@ public class Scripts {
 
     private static final NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
     private static final NashornScriptEngine engine = (NashornScriptEngine) factory.getScriptEngine();
-    protected static final String PLATYPUS_JS_FILENAME = "platypus.js";
+    protected static final String PLATYPUS_JS_MODULENAME = "platypus";
+    protected static final String PLATYPUS_JS_FILENAME = PLATYPUS_JS_MODULENAME + ".js";
     public static final String STRING_TYPE_NAME = "String";//NOI18N
     public static final String NUMBER_TYPE_NAME = "Number";//NOI18N
     public static final String DATE_TYPE_NAME = "Date";//NOI18N
@@ -195,7 +196,8 @@ public class Scripts {
         protected Set<String> required = new HashSet<>();
         protected Set<String> executed = new HashSet<>();
         protected Map<String, List<Pending>> pending = new HashMap<>();
-        protected String[] manualDependencies;
+        protected String[] amdDependencies;
+        protected JSObject amdDefineCallback;
         protected Map<String, JSObject> defined = new HashMap<>();
 
         protected Space() {
@@ -224,14 +226,22 @@ public class Scripts {
             return defined;
         }
 
-        public void setManualDependencies(String[] aValue) {
-            manualDependencies = aValue;
+        public void setAmdDependencies(String[] aValue) {
+            amdDependencies = aValue;
         }
 
-        public String[] consumeManualDependencies() {
-            String[] res = manualDependencies;
-            manualDependencies = null;
+        public String[] consumeAmdDependencies() {
+            String[] res = amdDependencies;
+            amdDependencies = null;
             return res;
+        }
+
+        public void setAmdDefineCallback(JSObject aValue) {
+            amdDefineCallback = aValue;
+        }
+
+        public JSObject consumeAmdDefineCallback() {
+            return amdDefineCallback;
         }
 
         protected JSObject loadFunc;
@@ -515,7 +525,7 @@ public class Scripts {
         }
 
         public Object exec(String aSourceName, URL aSourcePlace) throws ScriptException, URISyntaxException {
-            scriptContext.setAttribute(ScriptEngine.FILENAME, aSourceName, ScriptContext.ENGINE_SCOPE);
+            scriptContext.setAttribute(ScriptEngine.FILENAME, aSourceName.toLowerCase().endsWith(".js") ? aSourceName.substring(0, aSourceName.length() - 3) : aSourceName, ScriptContext.ENGINE_SCOPE);
             return engine.eval(new URLReader(aSourcePlace), scriptContext);
         }
 
@@ -613,7 +623,7 @@ public class Scripts {
                 Scripts.LocalContext ctx = Scripts.createContext(Scripts.Space.this);
                 Scripts.setContext(ctx);
                 try {
-                    scriptContext.setAttribute(ScriptEngine.FILENAME, PLATYPUS_JS_FILENAME, ScriptContext.ENGINE_SCOPE);
+                    scriptContext.setAttribute(ScriptEngine.FILENAME, PLATYPUS_JS_MODULENAME, ScriptContext.ENGINE_SCOPE);
                     engine.eval(new URLReader(platypusJsUrl), scriptContext);
                 } finally {
                     Scripts.setContext(null);

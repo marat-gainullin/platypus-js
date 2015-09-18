@@ -1049,13 +1049,14 @@
         };
 
         /**
-         * Tries to acquire focus for this component.
-         * @method focus
+         * Selects the specified element.
+         * @param instance Entity's instance to be selected.
+         * @method select
          * @memberOf ModelGrid
          */
-        P.ModelGrid.prototype.focus = function() {
+        P.ModelGrid.prototype.select = function(instance) {
             var delegate = this.unwrap();
-            var value = delegate.focus();
+            var value = delegate.select(P.boxAsJava(instance));
             return P.boxAsJs(value);
         };
 
@@ -1071,39 +1072,13 @@
         };
 
         /**
-         * Unselects the specified element.
-         * @param instance Entity's instance to be unselected
-         * @method unselect
+         * Tries to acquire focus for this component.
+         * @method focus
          * @memberOf ModelGrid
          */
-        P.ModelGrid.prototype.unselect = function(instance) {
+        P.ModelGrid.prototype.focus = function() {
             var delegate = this.unwrap();
-            var value = delegate.unselect(P.boxAsJava(instance));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Selects the specified element.
-         * @param instance Entity's instance to be selected.
-         * @method select
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.select = function(instance) {
-            var delegate = this.unwrap();
-            var value = delegate.select(P.boxAsJava(instance));
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * Makes specified instance visible.
-         * @param instance Entity's instance to make visible.
-         * @param need2select true to select the instance (optional).
-         * @method makeVisible
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.makeVisible = function(instance, need2select) {
-            var delegate = this.unwrap();
-            var value = delegate.makeVisible(P.boxAsJava(instance), P.boxAsJava(need2select));
+            var value = delegate.focus();
             return P.boxAsJs(value);
         };
 
@@ -1115,16 +1090,6 @@
         P.ModelGrid.prototype.redraw = function() {
             var delegate = this.unwrap();
             var value = delegate.redraw();
-            return P.boxAsJs(value);
-        };
-
-        /**
-         * @method unsort
-         * @memberOf ModelGrid
-         * Clears sort on all columns, works only in HTML5 */
-        P.ModelGrid.prototype.unsort = function() {
-            var delegate = this.unwrap();
-            var value = delegate.unsort();
             return P.boxAsJs(value);
         };
 
@@ -1169,6 +1134,41 @@
         P.ModelGrid.prototype.insertColumnNode = function(arg0, arg1) {
             var delegate = this.unwrap();
             var value = delegate.insertColumnNode(P.boxAsJava(arg0), P.boxAsJava(arg1));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Makes specified instance visible.
+         * @param instance Entity's instance to make visible.
+         * @param need2select true to select the instance (optional).
+         * @method makeVisible
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.makeVisible = function(instance, need2select) {
+            var delegate = this.unwrap();
+            var value = delegate.makeVisible(P.boxAsJava(instance), P.boxAsJava(need2select));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Unselects the specified element.
+         * @param instance Entity's instance to be unselected
+         * @method unselect
+         * @memberOf ModelGrid
+         */
+        P.ModelGrid.prototype.unselect = function(instance) {
+            var delegate = this.unwrap();
+            var value = delegate.unselect(P.boxAsJava(instance));
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * @method unsort
+         * @memberOf ModelGrid
+         * Clears sort on all columns, works only in HTML5 */
+        P.ModelGrid.prototype.unsort = function() {
+            var delegate = this.unwrap();
+            var value = delegate.unsort();
             return P.boxAsJs(value);
         };
 

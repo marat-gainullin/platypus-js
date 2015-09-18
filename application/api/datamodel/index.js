@@ -1,14 +1,14 @@
 try{
     P.require([
-          './application-platypus-entity.js'
-        , './entity-instance-delete-event.js'
-        , './entity-instance-insert-event.js'
-        , './cursor-position-changed-event.js'
-        , './application-db-model.js'
-        , './entity-instance-change-event.js'
-        , './application-platypus-model.js'
-        , './application-db-entity.js'
-        , './cursor-position-will-change-event.js'
+          './application-platypus-entity'
+        , './entity-instance-delete-event'
+        , './entity-instance-insert-event'
+        , './cursor-position-changed-event'
+        , './application-db-model'
+        , './entity-instance-change-event'
+        , './application-platypus-model'
+        , './application-db-entity'
+        , './cursor-position-will-change-event'
     ]);
 }catch(e){
     P.Logger.severe(e);

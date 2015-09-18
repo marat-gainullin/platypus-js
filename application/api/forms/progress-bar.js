@@ -398,23 +398,6 @@
              */
             P.ProgressBar.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "opaque", {
-            get: function() {
-                var value = delegate.opaque;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.opaque = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ProgressBar){
-            /**
-             * True if this component is completely opaque.
-             * @property opaque
-             * @memberOf ProgressBar
-             */
-            P.ProgressBar.prototype.opaque = true;
-        }
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
@@ -431,6 +414,23 @@
              * @memberOf ProgressBar
              */
             P.ProgressBar.prototype.visible = true;
+        }
+        Object.defineProperty(this, "opaque", {
+            get: function() {
+                var value = delegate.opaque;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.opaque = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ProgressBar){
+            /**
+             * True if this component is completely opaque.
+             * @property opaque
+             * @memberOf ProgressBar
+             */
+            P.ProgressBar.prototype.opaque = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {

@@ -8,7 +8,7 @@
  * @returns {undefined}
  */
 (function () {
-    P.require('core/report.js');
+    P.require('core/report');
     var global = this;
     var aSpace = global['-platypus-scripts-space'];
     var ReportClass = Java.type("com.eas.client.report.Report");

@@ -25,20 +25,6 @@
         if(P.MouseEvent.superclass)
             P.MouseEvent.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        Object.defineProperty(this, "altDown", {
-            get: function() {
-                var value = delegate.altDown;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.MouseEvent){
-            /**
-             * Alt key is down on this event.
-             * @property altDown
-             * @memberOf MouseEvent
-             */
-            P.MouseEvent.prototype.altDown = true;
-        }
         Object.defineProperty(this, "button", {
             get: function() {
                 var value = delegate.button;
@@ -54,19 +40,19 @@
              */
             P.MouseEvent.prototype.button = 0;
         }
-        Object.defineProperty(this, "clickCount", {
+        Object.defineProperty(this, "altDown", {
             get: function() {
-                var value = delegate.clickCount;
+                var value = delegate.altDown;
                 return P.boxAsJs(value);
             }
         });
         if(!P.MouseEvent){
             /**
-             * The number of mouse clicks associated with this event.
-             * @property clickCount
+             * Alt key is down on this event.
+             * @property altDown
              * @memberOf MouseEvent
              */
-            P.MouseEvent.prototype.clickCount = 0;
+            P.MouseEvent.prototype.altDown = true;
         }
         Object.defineProperty(this, "controlDown", {
             get: function() {
@@ -95,6 +81,20 @@
              * @memberOf MouseEvent
              */
             P.MouseEvent.prototype.shiftDown = true;
+        }
+        Object.defineProperty(this, "clickCount", {
+            get: function() {
+                var value = delegate.clickCount;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.MouseEvent){
+            /**
+             * The number of mouse clicks associated with this event.
+             * @property clickCount
+             * @memberOf MouseEvent
+             */
+            P.MouseEvent.prototype.clickCount = 0;
         }
         Object.defineProperty(this, "x", {
             get: function() {

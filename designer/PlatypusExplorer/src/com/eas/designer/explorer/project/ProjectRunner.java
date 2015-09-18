@@ -181,10 +181,19 @@ public class ProjectRunner {
             AppElementFiles startFiles = project.getIndexer().nameToFiles(appElementName);
             if (startFiles != null) {
                 String startMethod = startFiles.hasExtension(PlatypusFiles.FORM_EXTENSION) ? "show" : "execute";
-                String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, appElementName, "        var m = new " + appElementName+"();\n", "        m." + startMethod+"();\n", appElementName);
+                String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, appElementName, appElementName, "        var m = new " + appElementName + "();\n", "        m." + startMethod + "();\n", appElementName);
                 FileUtils.writeString(FileUtil.toFile(startJs), starupScript, PlatypusUtils.COMMON_ENCODING_NAME);
-            } else if (appElementName.toLowerCase().endsWith("." + PlatypusFiles.JAVASCRIPT_EXTENSION)) {
-                String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, appElementName, "", "", appElementName);
+            } else if (appElementName.toLowerCase().endsWith(PlatypusFiles.JAVASCRIPT_FILE_END)) {
+                String requireCallabckArg = appElementName.substring(0, appElementName.length() - PlatypusFiles.JAVASCRIPT_FILE_END.length());
+                int lastFileSepIndex = requireCallabckArg.lastIndexOf(File.separator);
+                if (lastFileSepIndex != -1) {
+                    requireCallabckArg = requireCallabckArg.substring(lastFileSepIndex + 1);
+                }
+                lastFileSepIndex = requireCallabckArg.lastIndexOf("/");
+                if (lastFileSepIndex != -1) {
+                    requireCallabckArg = requireCallabckArg.substring(lastFileSepIndex + 1);
+                }
+                String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, appElementName, requireCallabckArg, "", "    //...\n", appElementName);
                 FileUtils.writeString(FileUtil.toFile(startJs), starupScript, PlatypusUtils.COMMON_ENCODING_NAME);
             }
         } else {
@@ -295,7 +304,7 @@ public class ProjectRunner {
                             arguments.add(connection.getDatabaseURL());
                             arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_USERNAME_CONF_PARAM);
                             arguments.add(connection.getUser());
-                            if(connection.getPassword() != null && !connection.getPassword().isEmpty()){
+                            if (connection.getPassword() != null && !connection.getPassword().isEmpty()) {
                                 arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_PASSWORD_CONF_PARAM);
                                 arguments.add(connection.getPassword());
                             }
@@ -448,11 +457,11 @@ public class ProjectRunner {
                 + EQUALS_SIGN
                 + logLevel.getName());
         /*
-        arguments.add(OPTION_PREFIX
-                + JS_APPLICATION_LOG_LEVEL_OPTION_NAME
-                + EQUALS_SIGN
-                + logLevel.getName());
-        */        
+         arguments.add(OPTION_PREFIX
+         + JS_APPLICATION_LOG_LEVEL_OPTION_NAME
+         + EQUALS_SIGN
+         + logLevel.getName());
+         */
         arguments.add(OPTION_PREFIX
                 + CONSOLE_LOG_FORMATTER_OPTION_NAME
                 + EQUALS_SIGN

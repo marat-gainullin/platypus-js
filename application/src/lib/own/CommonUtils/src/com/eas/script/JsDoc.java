@@ -40,17 +40,12 @@ public class JsDoc {
         return Collections.unmodifiableList(tags);
     }
 
-    public boolean containsTagWithName(String name) {
-        return Tag.containsTagWithName(tags, name);
+    public boolean containsTag(String name) {
+        return Tag.getTagWithName(tags, name) != null;
     }
 
-    public boolean containsModuleAnnotation() {
-        for (String line : lines) {
-            if (line.startsWith(Tag.MODULE_TAG)) {
-                return true;
-            }
-        }
-        return false;
+    public Tag getTag(String name) {
+        return Tag.getTagWithName(tags, name);
     }
 
     public void parseAnnotations() {
@@ -93,7 +88,12 @@ public class JsDoc {
         /**
          * Marker for a module's constructor.
          */
-        public static final String MODULE_TAG = "@constructor";
+        public static final String CONSTRUCTOR_TAG = "@constructor";
+
+        /**
+         * module's description.
+         */
+        public static final String MODULE_TAG = "@module";
 
         /**
          * Annotation for defining application element's name.
@@ -146,13 +146,14 @@ public class JsDoc {
         public static final String STATELESS_TAG = "@stateless";
         /**
          * Annotation marks module as a WebSocket endpoint. Incompatible with
+         *
          * @stateless and @resident WebSocket endpoint are session modules by
          * Java EE design.
          */
         public static final String WEBSOCKET_TAG = "@websocket";
 
-        private String name;
-        private String text;
+        private final String name;
+        private final String text;
         private List<String> params;
 
         public Tag(String aName, String aText) {
@@ -182,16 +183,17 @@ public class JsDoc {
          * @param aTagName Tag's name
          * @return True if there is a tag with provided name
          */
-        public static boolean containsTagWithName(List<Tag> aTags, String aTagName) {
-            if (aTags == null) {
+        public static Tag getTagWithName(List<Tag> aTags, String aTagName) {
+            if (aTags != null) {
+                for (Tag tag : aTags) {
+                    if (tag.getName().equals(aTagName)) {
+                        return tag;
+                    }
+                }
+                return null;
+            } else {
                 throw new NullPointerException("Tag list is null.");
             }
-            for (Tag tag : aTags) {
-                if (tag.getName().equals(aTagName)) {
-                    return true;
-                }
-            }
-            return false;
         }
 
         @Override

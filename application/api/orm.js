@@ -1,6 +1,6 @@
 /* global P, Java, Function */
 (function () {
-    P.require('core/index.js');
+    P.require('core/index');
     var global = this;
     var aSpace = global['-platypus-scripts-space'];
     // core imports
@@ -317,10 +317,10 @@
     var ValueClass = Java.type('com.eas.client.changes.ChangeValue');
 
     function loadModelDocument(aDocument, aTarget) {
-        P.require(['core/index.js'
-                    , 'datamodel/index.js'
-                    , 'managed.js'
-                    , 'orderer.js'
+        P.require(['core/index'
+                    , 'datamodel/index'
+                    , 'managed'
+                    , 'orderer'
         ]);
         var model = ModelLoaderClass.load(aDocument, ScriptedResourceClass.getApp());
         var modelCTor;

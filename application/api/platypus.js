@@ -177,7 +177,7 @@
                 }
             }
         }
-        return calledFromFile;
+        return calledFromFile + '.js';
     }
 
     /**
@@ -190,50 +190,85 @@
     function require(deps, aOnSuccess, aOnFailure) {
         if (!Array.isArray(deps))
             deps = [deps];
-        var strArray = Java.to(deps, JavaStringArrayClass);
+        var sDeps = Java.to(deps, JavaStringArrayClass);
+        for (var s = 0; s < sDeps.length; s++) {
+            var sDep = sDeps[s];
+            if (sDep.toLowerCase().endsWith('.js')) {
+                sDeps[s] = sDep.substring(0, sDep.length - 3);
+            }
+        }
         var calledFromFile = lookupCallerFile();
         if (aOnSuccess) {
-            ScriptedResourceClass.require(strArray, calledFromFile, P.boxAsJava(aOnSuccess), P.boxAsJava(aOnFailure));
+            ScriptedResourceClass.require(sDeps, calledFromFile, P.boxAsJava(function () {
+                var resolved = [];
+                var defined = aSpace.getDefined();
+                for (var r = 0; r < sDeps.length; r++) {
+                    var rDep = sDeps[r];
+                    var depModule = defined[rDep] ? defined[rDep] : global[rDep];
+                    resolved.push(depModule);
+                }
+                aOnSuccess.apply(null, resolved);
+            }), P.boxAsJava(aOnFailure));
         } else {
-            ScriptedResourceClass.require(strArray, calledFromFile);
+            ScriptedResourceClass.require(sDeps, calledFromFile);
         }
     }
     Object.defineProperty(P, "require", {value: require});
 
     /**
      * @static
-     * @param {type} aDeps
-     * @param {type} aModuleDefiner
-     * @param {type} aOnDepsFailure
      * @returns {undefined}
      */
-    function define(aDeps, aModuleDefiner, aOnDepsFailure) {
-        if (!Array.isArray(aDeps))
-            aDeps = [aDeps];
-        var strArray = Java.to(aDeps, JavaStringArrayClass);
-        aSpace.setManualDependencies(strArray);
+    function define() {
+        if (arguments.length === 1 ||
+                arguments.length === 2) {
+            var aDeps = arguments.length > 1 ? arguments[0] : [];
+            var aModuleDefiner = arguments.length > 1 ? arguments[1] : arguments[0];
+            if (!Array.isArray(aDeps))
+                aDeps = [aDeps];
+            var sDeps = Java.to(aDeps, JavaStringArrayClass);
+            for (var s = 0; s < sDeps.length; s++) {
+                var sDep = sDeps[s];
+                if (sDep.toLowerCase().endsWith('.js')) {
+                    sDeps[s] = sDep.substring(0, sDep.length - 3);
+                }
+            }
+            aSpace.setAmdDependencies(sDeps);
+            aSpace.setAmdDefineCallback(function (aModuleName) {
+                var defined = aSpace.getDefined();
+                var resolved = [];
+                for (var d = 0; d < sDeps.length; d++) {
+                    resolved.push(defined.get(sDeps[d]));
+                }
+                resolved.push(aModuleName);
+                var module = typeof aModuleDefiner === 'function' ? aModuleDefiner.apply(null, resolved) : aModuleDefiner;
+                defined.put(aModuleName, module);
+            });
+        } else {
+            throw 'Module definition arguments mismatch';
+        }
     }
     Object.defineProperty(P, "define", {value: define});
-    
-    P.require('internals.js');
-    P.require('orm.js');
+
+    P.require('internals');
+    P.require('orm');
     var serverCoreClass;
     try {
         serverCoreClass = Java.type('com.eas.server.PlatypusServerCore');
         // in server (EE or standalone)
 
-        P.require(['reports/index.js', 'server/index.js']);
+        P.require(['reports/index', 'server/index']);
         try {
             Java.type('com.eas.server.httpservlet.PlatypusHttpServlet');
             // EE server
-            P.require(['servlet-support/index.js', 'http-context.js']);
+            P.require(['servlet-support/index', 'http-context']);
         } catch (se) {
             // TSA server
         }
     } catch (e) {
         serverCoreClass = null;
         // in client
-        P.require('ui.js');
+        P.require('ui');
     }
     function extend(Child, Parent) {
         var prevChildProto = {};
@@ -298,7 +333,7 @@
      * @returns {P.loadTemplate.publishTo}
      */
     function loadTemplate(aName, aData, aTarget) {
-        P.require(['core/index.js', 'reports/index.js']);
+        P.require(['core/index', 'reports/index']);
         var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
         if (files) {
             var reportConfig = ScriptedResourceClass.getApp().getReports().get(aName, files);

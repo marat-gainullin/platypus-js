@@ -56,6 +56,42 @@ public class DependenciesWalkerTest {
     }
     
     @Test
+    public void testParseAmdDependencies1() {
+        String va1 = ""
+                + "P.define(['AnyModule'], function(AnyModule){"
+                + "    return function(){"
+                + "        var self = this;"
+                + "        var am = new AnyModule();"
+                + "        var sm = P.ServerModule('ServerCalc');"
+                + "    };"
+                + "});";
+        DependenciesWalker walker = new DependenciesWalker(va1, (aIfDependency)->{
+            return "AnyModule".equals(aIfDependency);
+        });
+        walker.walk();
+        assertTrue(walker.getDependencies().isEmpty());
+        assertFalse(walker.getServerDependencies().isEmpty());
+    }
+    
+    @Test
+    public void testParseAmdDependencies2() {
+        String va1 = ""
+                + "define(['AnyModule'], function(AnyModule){"
+                + "    return function(){"
+                + "        var self = this;"
+                + "        var am = new AnyModule();"
+                + "        var sm = P.ServerModule('ServerCalc');"
+                + "    };"
+                + "});";
+        DependenciesWalker walker = new DependenciesWalker(va1, (aIfDependency)->{
+            return "AnyModule".equals(aIfDependency);
+        });
+        walker.walk();
+        assertTrue(walker.getDependencies().isEmpty());
+        assertFalse(walker.getServerDependencies().isEmpty());
+    }
+    
+    @Test
     public void testParseDependencies9() {
         String va1 = "var q = model.loadEntity('someQuery');";
         DependenciesWalker walker = new DependenciesWalker(va1);

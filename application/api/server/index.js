@@ -1,6 +1,6 @@
 try{
     P.require([
-          './session.js'
+          './session'
     ]);
 }catch(e){
     P.Logger.severe(e);

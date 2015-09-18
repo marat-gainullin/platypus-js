@@ -18,6 +18,7 @@ public class PlatypusFiles {
 
     public static final String PLATYPUS_PROJECT_APP_ROOT = "app";
     public static final String JAVASCRIPT_EXTENSION = "js"; // NOI18N
+    public static final String JAVASCRIPT_FILE_END = "." + JAVASCRIPT_EXTENSION; // NOI18N
     public static final String FORM_EXTENSION = "layout"; // NOI18N
     public static final String MODEL_EXTENSION = "model"; // NOI18N
     public static final String OUT_EXTENSION = "out"; // NOI18N

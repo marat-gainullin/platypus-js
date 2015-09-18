@@ -378,23 +378,6 @@
              */
             P.TabbedPane.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "opaque", {
-            get: function() {
-                var value = delegate.opaque;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.opaque = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.TabbedPane){
-            /**
-             * True if this component is completely opaque.
-             * @property opaque
-             * @memberOf TabbedPane
-             */
-            P.TabbedPane.prototype.opaque = true;
-        }
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
@@ -411,6 +394,23 @@
              * @memberOf TabbedPane
              */
             P.TabbedPane.prototype.visible = true;
+        }
+        Object.defineProperty(this, "opaque", {
+            get: function() {
+                var value = delegate.opaque;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.opaque = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.TabbedPane){
+            /**
+             * True if this component is completely opaque.
+             * @property opaque
+             * @memberOf TabbedPane
+             */
+            P.TabbedPane.prototype.opaque = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
@@ -446,20 +446,6 @@
              */
             P.TabbedPane.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "count", {
-            get: function() {
-                var value = delegate.count;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.TabbedPane){
-            /**
-             * Gets the number of components in this panel.
-             * @property count
-             * @memberOf TabbedPane
-             */
-            P.TabbedPane.prototype.count = 0;
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -493,6 +479,20 @@
              * @memberOf TabbedPane
              */
             P.TabbedPane.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "count", {
+            get: function() {
+                var value = delegate.count;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.TabbedPane){
+            /**
+             * Gets the number of components in this panel.
+             * @property count
+             * @memberOf TabbedPane
+             */
+            P.TabbedPane.prototype.count = 0;
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -802,17 +802,6 @@
         };
 
         /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf TabbedPane
-         */
-        P.TabbedPane.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Gets the container's children components.
          * @method children
          * @memberOf TabbedPane
@@ -820,6 +809,17 @@
         P.TabbedPane.prototype.children = function() {
             var delegate = this.unwrap();
             var value = delegate.children();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Tries to acquire focus for this component.
+         * @method focus
+         * @memberOf TabbedPane
+         */
+        P.TabbedPane.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
             return P.boxAsJs(value);
         };
 

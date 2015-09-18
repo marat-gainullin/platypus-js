@@ -497,23 +497,6 @@
              */
             P.ModelCheckBox.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "opaque", {
-            get: function() {
-                var value = delegate.opaque;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.opaque = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ModelCheckBox){
-            /**
-             * True if this component is completely opaque.
-             * @property opaque
-             * @memberOf ModelCheckBox
-             */
-            P.ModelCheckBox.prototype.opaque = true;
-        }
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
@@ -530,6 +513,23 @@
              * @memberOf ModelCheckBox
              */
             P.ModelCheckBox.prototype.visible = true;
+        }
+        Object.defineProperty(this, "opaque", {
+            get: function() {
+                var value = delegate.opaque;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.opaque = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.ModelCheckBox){
+            /**
+             * True if this component is completely opaque.
+             * @property opaque
+             * @memberOf ModelCheckBox
+             */
+            P.ModelCheckBox.prototype.opaque = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {

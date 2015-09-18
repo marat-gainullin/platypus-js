@@ -1,6 +1,6 @@
 try{
     P.require([
-          './cell-data.js'
+          './cell-data'
     ]);
 }catch(e){
     P.Logger.severe(e);

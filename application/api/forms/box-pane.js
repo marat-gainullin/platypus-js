@@ -414,23 +414,6 @@
              */
             P.BoxPane.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "opaque", {
-            get: function() {
-                var value = delegate.opaque;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.opaque = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.BoxPane){
-            /**
-             * True if this component is completely opaque.
-             * @property opaque
-             * @memberOf BoxPane
-             */
-            P.BoxPane.prototype.opaque = true;
-        }
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
@@ -447,6 +430,23 @@
              * @memberOf BoxPane
              */
             P.BoxPane.prototype.visible = true;
+        }
+        Object.defineProperty(this, "opaque", {
+            get: function() {
+                var value = delegate.opaque;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.opaque = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.BoxPane){
+            /**
+             * True if this component is completely opaque.
+             * @property opaque
+             * @memberOf BoxPane
+             */
+            P.BoxPane.prototype.opaque = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
@@ -482,20 +482,6 @@
              */
             P.BoxPane.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "count", {
-            get: function() {
-                var value = delegate.count;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.BoxPane){
-            /**
-             * Gets the number of components in this panel.
-             * @property count
-             * @memberOf BoxPane
-             */
-            P.BoxPane.prototype.count = 0;
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -529,6 +515,20 @@
              * @memberOf BoxPane
              */
             P.BoxPane.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "count", {
+            get: function() {
+                var value = delegate.count;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.BoxPane){
+            /**
+             * Gets the number of components in this panel.
+             * @property count
+             * @memberOf BoxPane
+             */
+            P.BoxPane.prototype.count = 0;
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -802,17 +802,6 @@
         };
 
         /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf BoxPane
-         */
-        P.BoxPane.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Gets the container's children components.
          * @method children
          * @memberOf BoxPane
@@ -820,6 +809,17 @@
         P.BoxPane.prototype.children = function() {
             var delegate = this.unwrap();
             var value = delegate.children();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Tries to acquire focus for this component.
+         * @method focus
+         * @memberOf BoxPane
+         */
+        P.BoxPane.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
             return P.boxAsJs(value);
         };
 

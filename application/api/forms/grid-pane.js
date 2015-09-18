@@ -416,23 +416,6 @@
              */
             P.GridPane.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "opaque", {
-            get: function() {
-                var value = delegate.opaque;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.opaque = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.GridPane){
-            /**
-             * True if this component is completely opaque.
-             * @property opaque
-             * @memberOf GridPane
-             */
-            P.GridPane.prototype.opaque = true;
-        }
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
@@ -449,6 +432,23 @@
              * @memberOf GridPane
              */
             P.GridPane.prototype.visible = true;
+        }
+        Object.defineProperty(this, "opaque", {
+            get: function() {
+                var value = delegate.opaque;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.opaque = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.GridPane){
+            /**
+             * True if this component is completely opaque.
+             * @property opaque
+             * @memberOf GridPane
+             */
+            P.GridPane.prototype.opaque = true;
         }
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
@@ -484,20 +484,6 @@
              */
             P.GridPane.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "count", {
-            get: function() {
-                var value = delegate.count;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.GridPane){
-            /**
-             * Generated property jsDoc.
-             * @property count
-             * @memberOf GridPane
-             */
-            P.GridPane.prototype.count = 0;
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -531,6 +517,20 @@
              * @memberOf GridPane
              */
             P.GridPane.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "count", {
+            get: function() {
+                var value = delegate.count;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.GridPane){
+            /**
+             * Generated property jsDoc.
+             * @property count
+             * @memberOf GridPane
+             */
+            P.GridPane.prototype.count = 0;
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -820,17 +820,6 @@
         };
 
         /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf GridPane
-         */
-        P.GridPane.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
-
-        /**
          *
          * @method children
          * @memberOf GridPane
@@ -838,6 +827,17 @@
         P.GridPane.prototype.children = function() {
             var delegate = this.unwrap();
             var value = delegate.children();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Tries to acquire focus for this component.
+         * @method focus
+         * @memberOf GridPane
+         */
+        P.GridPane.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
             return P.boxAsJs(value);
         };
 

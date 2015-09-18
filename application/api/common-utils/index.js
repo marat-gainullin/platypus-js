@@ -1,8 +1,8 @@
 try{
     P.require([
-          './cursor.js'
-        , './color.js'
-        , './font.js'
+          './cursor'
+        , './color'
+        , './font'
     ]);
 }catch(e){
     P.Logger.severe(e);

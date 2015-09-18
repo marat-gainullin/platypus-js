@@ -4,10 +4,12 @@
  */
 package com.eas.client.cache;
 
+import com.eas.script.AmdDefineAnnotationsMiner;
 import com.eas.script.JsDoc;
 import com.eas.script.PropertiesAnnotationsMiner;
 import com.eas.script.Scripts;
 import java.util.*;
+import jdk.nashorn.internal.ir.CallNode;
 import jdk.nashorn.internal.ir.Expression;
 import jdk.nashorn.internal.ir.FunctionNode;
 import jdk.nashorn.internal.runtime.Source;
@@ -32,13 +34,12 @@ public class ScriptDocument {
      * allowed
      */
     private Map<String, Set<String>> propertyAllowedRoles = new HashMap<>();
-    
+
     private final Map<String, Set<JsDoc.Tag>> propertyAnnotations = new HashMap<>();
     /**
      * Functions that may be accessed over network via RPC
      */
     private final Set<String> functionProperties = new HashSet<>();
-    
 
     protected ScriptDocument() {
         super();
@@ -89,7 +90,7 @@ public class ScriptDocument {
     public Set<String> getFunctionProperties() {
         return functionProperties;
     }
-    
+
     /**
      * Reads script annotations. Annotations, accompanied with
      *
@@ -104,6 +105,21 @@ public class ScriptDocument {
         propertyAllowedRoles.clear();
         Source source = Source.sourceFor(aName, aSource);
         FunctionNode ast = Scripts.parseJs(aSource);
+        ast.accept(new AmdDefineAnnotationsMiner(source) {
+
+            @Override
+            protected void commentedDefineCall(CallNode aCallNode, JsDoc aJsDoc) {
+                aJsDoc.parseAnnotations();
+                aJsDoc.getAnnotations().stream().forEach((JsDoc.Tag tag) -> {
+                    moduleAnnotations.add(tag);
+                    if (tag.getName().equalsIgnoreCase(JsDoc.Tag.ROLES_ALLOWED_TAG)) {
+                        tag.getParams().stream().forEach((role) -> {
+                            moduleAllowedRoles.add(role);
+                        });
+                    }
+                });
+            }
+        });
         FunctionNode moduleConstructor = PlatypusFilesSupport.extractModuleConstructor(ast, aName);
         ast.accept(new PropertiesAnnotationsMiner(source, Scripts.getThisAliases(moduleConstructor)) {
 
@@ -130,7 +146,7 @@ public class ScriptDocument {
 
             @Override
             protected void property(String aPropertyName, Expression aValue) {
-                if(!aPropertyName.contains(".") && aValue instanceof FunctionNode){
+                if (!aPropertyName.contains(".") && aValue instanceof FunctionNode) {
                     functionProperties.add(aPropertyName);
                 }
             }
@@ -144,7 +160,7 @@ public class ScriptDocument {
             jsDoc.parseAnnotations();
             jsDoc.getAnnotations().stream().forEach((JsDoc.Tag tag) -> {
                 Set<JsDoc.Tag> tags = propertyAnnotations.get(aPropertyName);
-                if(tags == null){
+                if (tags == null) {
                     tags = new HashSet<>();
                     propertyAnnotations.put(aPropertyName, tags);
                 }

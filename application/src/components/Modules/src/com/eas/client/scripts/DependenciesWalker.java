@@ -22,6 +22,7 @@ import jdk.nashorn.internal.ir.visitor.NodeVisitor;
 public class DependenciesWalker {
 
     public static final String REQUIRE_FUNCTION_NAME = "require";
+    public static final String DEFINE_FUNCTION_NAME = "define";
     public static final String MODEL = "model";
     public static final String LOAD_ENTITY = "loadEntity";
     public static final String SERVER_MODULE = "ServerModule";
@@ -80,10 +81,24 @@ public class DependenciesWalker {
                     boolean arrayAtFirstArg = lastCall.getArgs().size() >= 1 && lastCall.getArgs().get(0) instanceof LiteralNode.ArrayLiteralNode;
                     boolean atFirstArg = lastCall.getArgs().size() >= 1 && lastCall.getArgs().get(0) == literalNode;
                     Expression fe = lastCall.getFunction();
-                    if (fe instanceof AccessNode) {
+                    if(fe instanceof IdentNode){
+                        IdentNode defineCall = (IdentNode) fe;
+                        String funcName = defineCall.getName();
+                        if (REQUIRE_FUNCTION_NAME.equals(funcName) || DEFINE_FUNCTION_NAME.equals(funcName)) {
+                            if (arrayAtFirstArg) {
+                                LiteralNode.ArrayLiteralNode a = (LiteralNode.ArrayLiteralNode) lastCall.getArgs().get(0);
+                                if (a.getElementExpressions().contains(literalNode)) {
+                                    dynamicDependencies.add(value);
+                                }
+                            }
+                            if (atFirstArg) {
+                                dynamicDependencies.add(value);
+                            }
+                        }
+                    }else if (fe instanceof AccessNode) {
                         AccessNode lastAccess = (AccessNode) fe;
                         String funcName = lastAccess.getProperty();
-                        if (REQUIRE_FUNCTION_NAME.equals(funcName)) {
+                        if (REQUIRE_FUNCTION_NAME.equals(funcName) || DEFINE_FUNCTION_NAME.equals(funcName)) {
                             if (arrayAtFirstArg) {
                                 LiteralNode.ArrayLiteralNode a = (LiteralNode.ArrayLiteralNode) lastCall.getArgs().get(0);
                                 if (a.getElementExpressions().contains(literalNode)) {

@@ -5,6 +5,7 @@
  */
 package com.eas.script;
 
+import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.util.FileUtils;
 import com.eas.util.PropertiesUtils;
@@ -239,7 +240,7 @@ public class Classes2Scripts {
                                 }
                                 Logger.getLogger(Classes2Scripts.class.getName())
                                         .log(Level.FINE, "\tClass name: {0}", new String[]{className});
-                                File resultFile = new File(subDir, FileNameSupport.getFileName(jsConstructor.name) + ".js"); //NOI18N
+                                File resultFile = new File(subDir, FileNameSupport.getFileName(jsConstructor.name) + PlatypusFiles.JAVASCRIPT_FILE_END); //NOI18N
                                 FileUtils.writeString(resultFile, js, SettingsConstants.COMMON_ENCODING);
                                 jarApiFiles.add(resultFile);
                             }
@@ -261,7 +262,11 @@ public class Classes2Scripts {
                     } else {
                         jarApiDeps.append(getIndentStr(2)).append(", ");
                     }
-                    jarApiDeps.append("'./").append(jarApiFile.getName()).append("'\n");
+                    String includeName = jarApiFile.getName();
+                    if (includeName.toLowerCase().endsWith(PlatypusFiles.JAVASCRIPT_FILE_END)) {
+                        includeName = includeName.substring(0, includeName.length() - PlatypusFiles.JAVASCRIPT_FILE_END.length());
+                    }
+                    jarApiDeps.append("'./").append(includeName).append("'\n");
                 }
                 jarApiDeps.append(getIndentStr(1)).append("]);\n");
                 jarApiDeps.append("}catch(e){\n");

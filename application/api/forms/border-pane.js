@@ -398,23 +398,6 @@
              */
             P.BorderPane.prototype.onMouseMoved = {};
         }
-        Object.defineProperty(this, "opaque", {
-            get: function() {
-                var value = delegate.opaque;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.opaque = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.BorderPane){
-            /**
-             * True if this component is completely opaque.
-             * @property opaque
-             * @memberOf BorderPane
-             */
-            P.BorderPane.prototype.opaque = true;
-        }
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
@@ -431,6 +414,23 @@
              * @memberOf BorderPane
              */
             P.BorderPane.prototype.visible = true;
+        }
+        Object.defineProperty(this, "opaque", {
+            get: function() {
+                var value = delegate.opaque;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.opaque = P.boxAsJava(aValue);
+            }
+        });
+        if(!P.BorderPane){
+            /**
+             * True if this component is completely opaque.
+             * @property opaque
+             * @memberOf BorderPane
+             */
+            P.BorderPane.prototype.opaque = true;
         }
         Object.defineProperty(this, "topComponent", {
             get: function() {
@@ -499,20 +499,6 @@
              */
             P.BorderPane.prototype.nextFocusableComponent = {};
         }
-        Object.defineProperty(this, "count", {
-            get: function() {
-                var value = delegate.count;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.BorderPane){
-            /**
-             * Gets the number of components in this panel.
-             * @property count
-             * @memberOf BorderPane
-             */
-            P.BorderPane.prototype.count = 0;
-        }
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -546,6 +532,20 @@
              * @memberOf BorderPane
              */
             P.BorderPane.prototype.onActionPerformed = {};
+        }
+        Object.defineProperty(this, "count", {
+            get: function() {
+                var value = delegate.count;
+                return P.boxAsJs(value);
+            }
+        });
+        if(!P.BorderPane){
+            /**
+             * Gets the number of components in this panel.
+             * @property count
+             * @memberOf BorderPane
+             */
+            P.BorderPane.prototype.count = 0;
         }
         Object.defineProperty(this, "focusable", {
             get: function() {
@@ -581,6 +581,23 @@
              */
             P.BorderPane.prototype.onKeyTyped = {};
         }
+        Object.defineProperty(this, "onMouseWheelMoved", {
+            get: function() {
+                var value = delegate.onMouseWheelMoved;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onMouseWheelMoved = aValue;
+            }
+        });
+        if(!P.BorderPane){
+            /**
+             * Mouse wheel moved event handler function.
+             * @property onMouseWheelMoved
+             * @memberOf BorderPane
+             */
+            P.BorderPane.prototype.onMouseWheelMoved = {};
+        }
         Object.defineProperty(this, "rightComponent", {
             get: function() {
                 var value = delegate.rightComponent;
@@ -598,23 +615,6 @@
              * @memberOf BorderPane
              */
             P.BorderPane.prototype.rightComponent = {};
-        }
-        Object.defineProperty(this, "onMouseWheelMoved", {
-            get: function() {
-                var value = delegate.onMouseWheelMoved;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onMouseWheelMoved = aValue;
-            }
-        });
-        if(!P.BorderPane){
-            /**
-             * Mouse wheel moved event handler function.
-             * @property onMouseWheelMoved
-             * @memberOf BorderPane
-             */
-            P.BorderPane.prototype.onMouseWheelMoved = {};
         }
         Object.defineProperty(this, "onComponentRemoved", {
             get: function() {
@@ -875,17 +875,6 @@
         };
 
         /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf BorderPane
-         */
-        P.BorderPane.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Gets the container's children components.
          * @method children
          * @memberOf BorderPane
@@ -893,6 +882,17 @@
         P.BorderPane.prototype.children = function() {
             var delegate = this.unwrap();
             var value = delegate.children();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Tries to acquire focus for this component.
+         * @method focus
+         * @memberOf BorderPane
+         */
+        P.BorderPane.prototype.focus = function() {
+            var delegate = this.unwrap();
+            var value = delegate.focus();
             return P.boxAsJs(value);
         };
 

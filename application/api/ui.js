@@ -20,7 +20,7 @@
     var OrientationClass = Java.type("com.eas.client.forms.Orientation");
 
     //
-    P.require('common-utils/color.js');
+    P.require('common-utils/color');
     Object.defineProperty(P.Color, "black", {value: new P.Color(0, 0, 0)});
     Object.defineProperty(P.Color, "BLACK", {value: new P.Color(0, 0, 0)});
     Object.defineProperty(P.Color, "blue", {value: new P.Color(0, 0, 0xff)});
@@ -49,7 +49,7 @@
     Object.defineProperty(P.Color, "YELLOW", {value: new P.Color(0xFF, 0xff, 0)});
     P.Colors = P.Color;
 
-    P.require('common-utils/cursor.js');
+    P.require('common-utils/cursor');
     Object.defineProperty(P.Cursor, "CROSSHAIR", {value: new P.Cursor(1)});
     Object.defineProperty(P.Cursor, "DEFAULT", {value: new P.Cursor(0)});
     Object.defineProperty(P.Cursor, "AUTO", {value: new P.Cursor(0)});
@@ -250,7 +250,7 @@
         value: selectColor
     });
 
-    P.require('forms/form.js');
+    P.require('forms/form');
     Object.defineProperty(P.Form, "shown", {
         get: function () {
             var nativeArray = FormClass.getShownForms();
@@ -496,7 +496,7 @@
      * @returns {P.loadForm.publishTo}
      */
     function loadForm(aName, aModel, aTarget) {
-        P.require(['forms/index.js', 'grid/index.js']);
+        P.require(['forms/index', 'grid/index']);
         var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
         var document = ScriptedResourceClass.getApp().getForms().get(aName, files);
         var form = loadFormDocument(document, aModel, aTarget);
@@ -507,7 +507,7 @@
     }
 
     function readForm(aContent, aModel, aTarget) {
-        P.require(['forms/index.js', 'grid/index.js']);
+        P.require(['forms/index', 'grid/index']);
         var document = Source2XmlDom.transform(aContent);
         return loadFormDocument(document, aModel, aTarget);
     }
