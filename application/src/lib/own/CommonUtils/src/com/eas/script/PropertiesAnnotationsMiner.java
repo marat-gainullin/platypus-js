@@ -30,7 +30,7 @@ public abstract class PropertiesAnnotationsMiner extends BaseAnnotationsMiner {
 
     @Override
     public boolean enterBinaryNode(BinaryNode binaryNode) {
-        if (scopeLevel == TOP_CONSTRUCTORS_SCOPE_LEVEL && binaryNode.isAssignment() && !binaryNode.isSelfModifying()) {
+        if ((scopeLevel == TOP_CONSTRUCTORS_SCOPE_LEVEL || scopeLevel == AMD_CONSTRUCTORS_SCOPE_LEVEL) && binaryNode.isAssignment() && !binaryNode.isSelfModifying()) {
             if (binaryNode.getAssignmentDest() instanceof AccessNode) {
                 AccessNode left = (AccessNode) binaryNode.getAssignmentDest();
                 if (left.getBase() instanceof IdentNode && thisAliases.contains(((IdentNode) left.getBase()).getName())) {
