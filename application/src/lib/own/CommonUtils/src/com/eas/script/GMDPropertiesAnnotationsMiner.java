@@ -19,18 +19,23 @@ import jdk.nashorn.internal.runtime.Source;
  * Important! The visitor's <code>accept</code> method must be invoked on an AST root.
  * @author vv
  */
-public abstract class PropertiesAnnotationsMiner extends BaseAnnotationsMiner {
+public abstract class GMDPropertiesAnnotationsMiner extends BaseAnnotationsMiner {
 
     protected final Set<String> thisAliases;
 
-    public PropertiesAnnotationsMiner(Source aSource, Set<String> aThisAliases) {
+    /**
+     * For global scope modules
+     * @param aSource
+     * @param aThisAliases 
+     */
+    public GMDPropertiesAnnotationsMiner(Source aSource, Set<String> aThisAliases) {
         super(aSource);
         thisAliases = aThisAliases;
     }
 
     @Override
     public boolean enterBinaryNode(BinaryNode binaryNode) {
-        if ((scopeLevel == TOP_CONSTRUCTORS_SCOPE_LEVEL || scopeLevel == AMD_CONSTRUCTORS_SCOPE_LEVEL) && binaryNode.isAssignment() && !binaryNode.isSelfModifying()) {
+        if (scopeLevel == TOP_CONSTRUCTORS_SCOPE_LEVEL && binaryNode.isAssignment() && !binaryNode.isSelfModifying()) {
             if (binaryNode.getAssignmentDest() instanceof AccessNode) {
                 AccessNode left = (AccessNode) binaryNode.getAssignmentDest();
                 if (left.getBase() instanceof IdentNode && thisAliases.contains(((IdentNode) left.getBase()).getName())) {

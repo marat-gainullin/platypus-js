@@ -4,9 +4,9 @@
  */
 package com.eas.client.cache;
 
-import com.eas.script.AmdDefineAnnotationsMiner;
+import com.eas.script.AmdPropertiesAnnotationsMiner;
 import com.eas.script.JsDoc;
-import com.eas.script.PropertiesAnnotationsMiner;
+import com.eas.script.GMDPropertiesAnnotationsMiner;
 import com.eas.script.Scripts;
 import java.util.*;
 import jdk.nashorn.internal.ir.CallNode;
@@ -105,7 +105,8 @@ public class ScriptDocument {
         propertyAllowedRoles.clear();
         Source source = Source.sourceFor(aName, aSource);
         FunctionNode ast = Scripts.parseJs(aSource);
-        ast.accept(new AmdDefineAnnotationsMiner(source) {
+        // For AMD modules
+        ast.accept(new AmdPropertiesAnnotationsMiner(source) {
 
             @Override
             protected void commentedDefineCall(CallNode aCallNode, JsDoc aJsDoc) {
@@ -119,25 +120,6 @@ public class ScriptDocument {
                     }
                 });
             }
-        });
-        FunctionNode moduleConstructor = PlatypusFilesSupport.extractModuleConstructor(ast, aName);
-        ast.accept(new PropertiesAnnotationsMiner(source, Scripts.getThisAliases(moduleConstructor)) {
-
-            @Override
-            protected void commentedFunction(FunctionNode aFunction, String aComment) {
-                if (scopeLevel == TOP_CONSTRUCTORS_SCOPE_LEVEL) {
-                    JsDoc jsDoc = new JsDoc(aComment);
-                    jsDoc.parseAnnotations();
-                    jsDoc.getAnnotations().stream().forEach((JsDoc.Tag tag) -> {
-                        moduleAnnotations.add(tag);
-                        if (tag.getName().equalsIgnoreCase(JsDoc.Tag.ROLES_ALLOWED_TAG)) {
-                            tag.getParams().stream().forEach((role) -> {
-                                moduleAllowedRoles.add(role);
-                            });
-                        }
-                    });
-                }
-            }
 
             @Override
             protected void commentedProperty(String aPropertyName, String aComment) {
@@ -150,8 +132,42 @@ public class ScriptDocument {
                     functionProperties.add(aPropertyName);
                 }
             }
-
         });
+        // For global scope modules
+        Set<String> aliases = Scripts.getThisAliases(PlatypusFilesSupport.extractModuleConstructor(ast, aName));
+        if (aliases != null) {
+            ast.accept(new GMDPropertiesAnnotationsMiner(source, aliases) {
+
+                @Override
+                protected void commentedFunction(FunctionNode aFunction, String aComment) {
+                    if (scopeLevel == TOP_CONSTRUCTORS_SCOPE_LEVEL) {
+                        JsDoc jsDoc = new JsDoc(aComment);
+                        jsDoc.parseAnnotations();
+                        jsDoc.getAnnotations().stream().forEach((JsDoc.Tag tag) -> {
+                            moduleAnnotations.add(tag);
+                            if (tag.getName().equalsIgnoreCase(JsDoc.Tag.ROLES_ALLOWED_TAG)) {
+                                tag.getParams().stream().forEach((role) -> {
+                                    moduleAllowedRoles.add(role);
+                                });
+                            }
+                        });
+                    }
+                }
+
+                @Override
+                protected void commentedProperty(String aPropertyName, String aComment) {
+                    readPropertyRoles(aPropertyName, aComment);
+                }
+
+                @Override
+                protected void property(String aPropertyName, Expression aValue) {
+                    if (!aPropertyName.contains(".") && aValue instanceof FunctionNode) {
+                        functionProperties.add(aPropertyName);
+                    }
+                }
+
+            });
+        }
     }
 
     private void readPropertyRoles(String aPropertyName, String aJsDocBody) {

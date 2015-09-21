@@ -5,7 +5,7 @@
  */
 package com.eas.designer.application.module.completion;
 
-import com.eas.script.PropertiesAnnotationsMiner;
+import com.eas.script.GMDPropertiesAnnotationsMiner;
 import com.eas.script.Scripts;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -70,7 +70,7 @@ public class ModuleInstanceCompletionContext extends CompletionContext {
             if (moduleConstructor.getBody() != null) {
 
                 final Map<String, String> propertiesComments = new HashMap<>();
-                astRoot.accept(new PropertiesAnnotationsMiner(moduleConstructor.getSource(), thisAliases) {
+                astRoot.accept(new GMDPropertiesAnnotationsMiner(moduleConstructor.getSource(), thisAliases) {
 
                     @Override
                     protected void commentedProperty(String aPropertyName, String aComment) {

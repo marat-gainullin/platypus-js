@@ -5,7 +5,7 @@
 package com.eas.client.cache;
 
 import com.eas.client.ClientConstants;
-import com.eas.script.AmdDefineAnnotationsMiner;
+import com.eas.script.AmdPropertiesAnnotationsMiner;
 import com.eas.script.BaseAnnotationsMiner;
 import com.eas.script.JsDoc;
 import com.eas.script.Scripts;
@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import jdk.nashorn.internal.ir.CallNode;
+import jdk.nashorn.internal.ir.Expression;
 import jdk.nashorn.internal.ir.FunctionNode;
 
 /**
@@ -51,7 +52,7 @@ public class PlatypusFilesSupport {
     public static String extractAmdDefineAnnotation(FunctionNode jsRoot, String aFileName) {
         if (jsRoot != null) {
             NodesContext cx = new NodesContext();
-            jsRoot.accept(new AmdDefineAnnotationsMiner(jsRoot.getSource()) {
+            jsRoot.accept(new AmdPropertiesAnnotationsMiner(jsRoot.getSource()) {
 
                 @Override
                 protected void commentedDefineCall(CallNode aCallNode, JsDoc aJsDoc) {
@@ -59,6 +60,14 @@ public class PlatypusFilesSupport {
                     if (moduleAnnotation != null && !moduleAnnotation.getParams().isEmpty()) {
                         cx.amdName = moduleAnnotation.getParams().get(0);
                     }
+                }
+
+                @Override
+                protected void commentedProperty(String aPropertyName, String aComment) {
+                }
+
+                @Override
+                protected void property(String aPropertyName, Expression aValueExpression) {
                 }
 
             });
