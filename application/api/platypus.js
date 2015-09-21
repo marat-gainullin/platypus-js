@@ -198,19 +198,24 @@
             }
         }
         var calledFromFile = lookupCallerFile();
+        function gatherDefined(){
+            var resolved = [];
+            var defined = aSpace.getDefined();
+            for (var r = 0; r < sDeps.length; r++) {
+                var rDep = sDeps[r];
+                var depModule = defined[rDep] ? defined[rDep] : global[rDep];
+                resolved.push(depModule);
+            }
+            return resolved;
+        }
         if (aOnSuccess) {
             ScriptedResourceClass.require(sDeps, calledFromFile, P.boxAsJava(function () {
-                var resolved = [];
-                var defined = aSpace.getDefined();
-                for (var r = 0; r < sDeps.length; r++) {
-                    var rDep = sDeps[r];
-                    var depModule = defined[rDep] ? defined[rDep] : global[rDep];
-                    resolved.push(depModule);
-                }
-                aOnSuccess.apply(null, resolved);
+                aOnSuccess.apply(null, gatherDefined());
             }), P.boxAsJava(aOnFailure));
         } else {
             ScriptedResourceClass.require(sDeps, calledFromFile);
+            var def = gatherDefined();
+            return def.length === 1 ? def[0] : def;
         }
     }
     Object.defineProperty(P, "require", {value: require});

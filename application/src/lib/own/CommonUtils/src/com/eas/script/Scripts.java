@@ -210,6 +210,10 @@ public class Scripts {
             scriptContext = aScriptContext;
         }
         
+        /**
+         * This method is used by crazy designer only
+         * @return 
+         */
         public String getFileNameFromContext(){
             return (String)scriptContext.getAttribute(ScriptEngine.FILENAME);
         }
