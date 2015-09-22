@@ -178,7 +178,7 @@ public class ScriptedResource {
                 });
             } else {
                 Path apiPath = Scripts.getAbsoluteApiPath();
-                Path appPath = Paths.get(new File(app.getModules().getLocalPath()).toURI());
+                Path appPath = getAbsoluteAppPath();
                 Path calledFromFile = aCalledFromFile != null ? resolveApiApp(aCalledFromFile, apiPath, appPath) : null;
                 String resourceName = calledFromFile != null ? relativizeApiApp(aResourceName, calledFromFile, apiPath, calledFromFile.getParent(), appPath) : aResourceName;
                 app.getModules().getModule(resourceName, aSpace, (ModuleStructure s) -> {
@@ -241,7 +241,7 @@ public class ScriptedResource {
             return httpResponse.getBody() != null ? httpResponse.getBody() : httpResponse.getBodyBuffer();
         } else {
             Path apiPath = Scripts.getAbsoluteApiPath();
-            Path appPath = Paths.get(new File(app.getModules().getLocalPath()).toURI());
+            Path appPath = getAbsoluteAppPath();
             Path calledFromFile = aCalledFromFile != null ? resolveApiApp(aCalledFromFile, apiPath, appPath) : null;
             String resourceName = calledFromFile != null ? relativizeApiApp(aResourceName, calledFromFile, apiPath, calledFromFile.getParent(), appPath) : aResourceName;
 
@@ -300,18 +300,14 @@ public class ScriptedResource {
             return httResponse.toJs(space);
         }
     }
-
-    private static String[] apiAppPaths(Path apiPath, Path appPath, String[] aScriptsNames, String aCalledFromFile) throws URISyntaxException {
-        if (aScriptsNames.length > 0 && aCalledFromFile != null) {
-            String[] absolutes = new String[aScriptsNames.length];
+    
+    public static String toModuleId(Path apiPath, Path appPath, String aScriptName, String aCalledFromFile) throws URISyntaxException {
+        if (aScriptName != null && !aScriptName.isEmpty()) {
             Path calledFromFile = resolveApiApp(aCalledFromFile, apiPath, appPath);
             Path calledFromDir = calledFromFile.getParent();
-            for (int i = 0; i < aScriptsNames.length; i++) {
-                absolutes[i] = relativizeApiApp(aScriptsNames[i], calledFromFile, apiPath, calledFromDir, appPath);
-            }
-            return absolutes;
+            return relativizeApiApp(aScriptName, calledFromFile, apiPath, calledFromDir, appPath);
         } else {
-            return aScriptsNames;
+            return aScriptName;
         }
     }
 
@@ -693,8 +689,7 @@ public class ScriptedResource {
     public static void _require(String[] aScriptsNames, String aCalledFromFile, Scripts.Space aSpace, Set<String> aCyclic, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (aScriptsNames != null && aScriptsNames.length > 0) {
             Path apiPath = Scripts.getAbsoluteApiPath();
-            Path appPath = Paths.get(new File(app.getModules().getLocalPath()).toURI());
-            aScriptsNames = apiAppPaths(apiPath, appPath, aScriptsNames, aCalledFromFile);
+            Path appPath = getAbsoluteAppPath();
             RequireProcess process = new RequireProcess(aScriptsNames.length, (Void v) -> {
                 aSpace.process(() -> {
                     onSuccess.accept(v);
@@ -790,8 +785,7 @@ public class ScriptedResource {
 
     public static void _require(String[] aScriptsNames, String aCalledFromFile, Scripts.Space aSpace) throws Exception {
         Path apiPath = Scripts.getAbsoluteApiPath();
-        Path appPath = Paths.get(new File(app.getModules().getLocalPath()).toURI());
-        aScriptsNames = apiAppPaths(apiPath, appPath, aScriptsNames, aCalledFromFile);
+        Path appPath = getAbsoluteAppPath();
         for (String scriptOrModuleName : aScriptsNames) {
             if (!aSpace.getExecuted().contains(scriptOrModuleName)) {
                 aSpace.getExecuted().add(scriptOrModuleName);
@@ -828,6 +822,10 @@ public class ScriptedResource {
                 }
             }
         }
+    }
+
+    public static Path getAbsoluteAppPath() {
+        return Paths.get(new File(app.getModules().getLocalPath()).toURI());
     }
 
     protected static void qRequire(String[] aQueriesNames, Scripts.Space aSpace, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {

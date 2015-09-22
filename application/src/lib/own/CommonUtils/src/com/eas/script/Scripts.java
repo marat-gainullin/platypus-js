@@ -234,22 +234,21 @@ public class Scripts {
             return defined;
         }
 
-        public void setAmdDependencies(String[] aValue) {
-            amdDependencies = aValue;
-        }
-
         public String[] consumeAmdDependencies() {
             String[] res = amdDependencies;
             amdDependencies = null;
             return res;
         }
 
-        public void setAmdDefineCallback(JSObject aValue) {
-            amdDefineCallback = aValue;
+        public void setAmdDefine(String[] aAmdDependencies, JSObject aModuleDefiner) {
+            amdDependencies = aAmdDependencies;
+            amdDefineCallback = aModuleDefiner;
         }
 
         public JSObject consumeAmdDefineCallback() {
-            return amdDefineCallback;
+            JSObject res = amdDefineCallback;
+            amdDefineCallback = null;
+            return res;
         }
 
         protected JSObject loadFunc;

@@ -5,6 +5,7 @@
 package com.eas.client.application;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,7 +22,9 @@ import com.eas.client.queries.Query;
 import com.eas.client.xhr.UrlQueryProcessor;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.core.client.ScriptInjector;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.xhr.client.XMLHttpRequest;
@@ -83,6 +86,9 @@ public class Loader {
 	protected Set<LoadHandler> handlers = new HashSet<LoadHandler>();
 	protected Set<String> started = new HashSet<>();
 	protected Set<String> executed = new HashSet<>();
+	protected Map<String, JavaScriptObject> defined = new HashMap<>();
+	protected List<String> amdDependencies;
+	protected Callback<String, Void> amdDefineCallback;
 	protected Map<String, List<Callback<Void, String>>> pending = new HashMap<>();
 
 	public Loader(AppClient aClient) {
@@ -111,9 +117,30 @@ public class Loader {
 		};
 	}
 
-	public void load(final Collection<String> aModulesNames, final Callback<Void, String> aCallback, final Set<String> aCyclic) throws Exception {		
+	public Map<String, JavaScriptObject> getDefined() {
+		return defined;
+	}
+
+	public void setAmdDefine(List<String> aDependencies, Callback<String, Void> aModuleDefiner) {
+		amdDependencies = aDependencies;
+		amdDefineCallback = aModuleDefiner;
+	}
+
+	public List<String> consumeAmdDependencies() {
+		List<String> res = amdDependencies;
+		amdDependencies = null;
+		return res;
+	}
+
+	public Callback<String, Void> consumeAmdDefineCallback() {
+		Callback<String, Void> res = amdDefineCallback;
+		amdDefineCallback = null;
+		return res;
+	}
+
+	public void load(final Collection<String> aModulesNames, final Callback<Void, String> aCallback, final Set<String> aCyclic) throws Exception {
 		if (!aModulesNames.isEmpty()) {
-			final CumulativeCallbackAdapter<String> process = new CumulativeCallbackAdapter<String>(aModulesNames.size()) {
+			final CumulativeCallbackAdapter<Void, String> process = new CumulativeCallbackAdapter<Void, String>(aModulesNames.size()) {
 
 				@Override
 				protected void failed(List<String> aReasons) {
@@ -151,7 +178,7 @@ public class Loader {
 
 							@Override
 							protected void doWork(AppClient.ModuleStructure aStructure) throws Exception {
-								final CumulativeCallbackAdapter<String> moduleProcess = new CumulativeCallbackAdapter<String>(2) {
+								final CumulativeCallbackAdapter<String, String> moduleProcess = new CumulativeCallbackAdapter<String, String>(2) {
 
 									@Override
 									protected void failed(final List<String> aReasons) {
@@ -167,11 +194,8 @@ public class Loader {
 											});
 										}
 									}
-
-									@Override
-									protected void doWork(Void aResult) throws Exception {
-										executed.add(moduleName);
-										fireLoaded(moduleName);
+									
+									private void succeded(){
 										List<Callback<Void, String>> interestedPendings = new ArrayList<>(pending.get(moduleName));
 										pending.get(moduleName).clear();
 										for (final Callback<Void, String> interestedPending : interestedPendings) {
@@ -185,8 +209,52 @@ public class Loader {
 										}
 									}
 
+									@Override
+									protected void doWork(String aJsPart) throws Exception {
+										final String jsURL = AppClient.checkedCacheBust(AppClient.relativeUri() + AppClient.APP_RESOURCE_PREFIX + aJsPart);
+										ScriptInjector.fromUrl(jsURL).setCallback(new Callback<Void, Exception>() {
+
+											@Override
+											public void onSuccess(Void result) {
+												executed.add(moduleName);
+												fireLoaded(moduleName);
+												final Callback<String, Void> amdDefineCallback = Loader.this.consumeAmdDefineCallback();
+												List<String> amdDependencies = Loader.this.consumeAmdDependencies();
+												if (amdDefineCallback != null) {
+													try {
+														Loader.this.load(amdDependencies, new Callback<Void, String>() {
+
+															@Override
+															public void onFailure(String reason) {
+																failed(Arrays.asList(new String[]{reason}));
+															}
+
+															@Override
+															public void onSuccess(Void result) {
+																amdDefineCallback.onSuccess(moduleName);
+																succeded();
+															}
+
+														}, aCyclic);
+													} catch (Exception ex) {
+														Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
+													}
+												} else {
+													succeded();
+												}
+											}
+
+											@Override
+											public void onFailure(Exception reason) {
+												failed(Arrays.asList(new String[] { reason.getMessage() }));
+												Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, "Script [" + moduleName + "] is not loaded. Cause is: " + reason.getMessage());
+											}
+
+										}).setWindow(ScriptInjector.TOP_WINDOW).setRemoveTag(true).inject();
+									}
+
 								};
-								final CumulativeCallbackAdapter<String> structureProcess = new CumulativeCallbackAdapter<String>(aStructure.getStructure().size()) {
+								final CumulativeCallbackAdapter<String, String> structureProcess = new CumulativeCallbackAdapter<String, String>(aStructure.getStructure().size()) {
 
 									@Override
 									protected void failed(List<String> aReasons) {
@@ -194,29 +262,20 @@ public class Loader {
 									}
 
 									@Override
-									protected void doWork(Void aResult) throws Exception {
-										moduleProcess.onSuccess(null);
+									protected void doWork(String aResult) throws Exception {
+										moduleProcess.onSuccess(aResult);
 									}
 
 								};
 								assert !aStructure.getStructure().isEmpty() : "Module [" + moduleName + "] structure should contain at least one element.";
 								for (final String part : aStructure.getStructure()) {
 									if (part.toLowerCase().endsWith(".js")) {
-										final String jsURL = AppClient.checkedCacheBust(AppClient.relativeUri() + AppClient.APP_RESOURCE_PREFIX + part);
-										ScriptInjector.fromUrl(jsURL).setCallback(new Callback<Void, Exception>() {
-
+										Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 											@Override
-											public void onSuccess(Void result) {
-												structureProcess.onSuccess(result);
+											public void execute() {
+												structureProcess.onSuccess(part);
 											}
-
-											@Override
-											public void onFailure(Exception reason) {
-												Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, "Script [" + moduleName + "] is not loaded. Cause is: " + reason.getMessage());
-												structureProcess.onFailure(reason.getMessage());
-											}
-
-										}).setWindow(ScriptInjector.TOP_WINDOW).setRemoveTag(true).inject();
+										});
 									} else {
 										client.requestDocument(part, new CallbackAdapter<Document, XMLHttpRequest>() {
 
@@ -233,7 +292,7 @@ public class Loader {
 										});
 									}
 								}
-								final CumulativeCallbackAdapter<String> dependenciesProcess = new CumulativeCallbackAdapter<String>(3) {
+								final CumulativeCallbackAdapter<Void, String> dependenciesProcess = new CumulativeCallbackAdapter<Void, String>(3) {
 
 									@Override
 									protected void failed(List<String> aReasons) {
@@ -274,7 +333,7 @@ public class Loader {
 
 	public void loadServerModules(Collection<String> aServerModulesNames, final Callback<Void, String> aCallback) throws Exception {
 		if (!aServerModulesNames.isEmpty()) {
-			final CumulativeCallbackAdapter<String> process = new CumulativeCallbackAdapter<String>(aServerModulesNames.size()) {
+			final CumulativeCallbackAdapter<Void, String> process = new CumulativeCallbackAdapter<Void, String>(aServerModulesNames.size()) {
 
 				@Override
 				protected void failed(List<String> aReasons) {
@@ -325,7 +384,7 @@ public class Loader {
 	 */
 	public void loadQueries(Collection<String> aQueriesNames, final Callback<Void, String> aCallback) throws Exception {
 		if (!aQueriesNames.isEmpty()) {
-			final CumulativeCallbackAdapter<String> process = new CumulativeCallbackAdapter<String>(aQueriesNames.size()) {
+			final CumulativeCallbackAdapter<Void, String> process = new CumulativeCallbackAdapter<Void, String>(aQueriesNames.size()) {
 
 				@Override
 				protected void failed(List<String> aReasons) {

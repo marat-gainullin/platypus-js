@@ -11,9 +11,10 @@ import java.util.List;
  * 
  * @author mg
  */
-public abstract class CumulativeCallbackAdapter<F> extends CallbackAdapter<Void, F> {
+public abstract class CumulativeCallbackAdapter<R, F> extends CallbackAdapter<R, F> {
 
 	protected List<F> reasons = new ArrayList<>();
+	protected R singleResult;
 	protected int exepectedCallsCount;
 	protected int calls;
 
@@ -25,14 +26,21 @@ public abstract class CumulativeCallbackAdapter<F> extends CallbackAdapter<Void,
 	protected void complete() {
 		if (++calls == exepectedCallsCount) {
 			if (reasons.isEmpty()) {
-				super.onSuccess(null);
+				super.onSuccess(singleResult);
 			} else {
 				failed(reasons);
 			}
 		}
 	}
 
-	public void onSuccess(Void result) {
+	public void onSuccess(R result) {
+		if (result != null) {
+			if (singleResult == null) {
+				singleResult = result;
+			} else {
+				throw new IllegalStateException("CumulativeCallbackAdapter supports only one result");
+			}
+		}
 		complete();
 	}
 

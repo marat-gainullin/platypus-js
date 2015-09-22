@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -29,7 +28,6 @@ import com.eas.client.model.js.JsOrderer;
 import com.eas.client.queries.Query;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.logging.client.LogConfiguration;
 
 /**
@@ -784,9 +782,24 @@ public class Application {
 			}
 		});
 		$wnd.P.require = function (aDeps, aOnSuccess, aOnFailure) {
-			var deps = Array.isArray(aDeps) ? aDeps : [aDeps];
-			@com.eas.client.application.Application::require(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(deps, aOnSuccess, aOnFailure);
-		} 
+            if (!Array.isArray(aDeps))
+                aDeps = [aDeps];
+			@com.eas.client.application.Application::require(Lcom/eas/client/Utils$JsObject;Lcom/eas/client/Utils$JsObject;Lcom/eas/client/Utils$JsObject;)(aDeps, aOnSuccess, aOnFailure);
+		}; 
+		$wnd.P.define = function () {
+	        if (arguments.length === 1 ||
+	                arguments.length === 2) {
+	            var aDeps = arguments.length > 1 ? arguments[0] : [];
+	            var aModuleDefiner = arguments.length > 1 ? arguments[1] : arguments[0];
+	            if (!Array.isArray(aDeps))
+	                aDeps = [aDeps];
+	            @com.eas.client.application.Application::define(Lcom/eas/client/Utils$JsObject;Lcom/eas/client/Utils$JsObject;)(aDeps, function(){
+                	return typeof aModuleDefiner === 'function' ? aModuleDefiner.apply(null, arguments) : aModuleDefiner;
+	            });
+	        } else {
+	            throw 'Module definition arguments mismatch';
+	        }
+		};
 		function _Icons() {
 			var _self = this;
 			Object.defineProperty(_self, "load", { 
@@ -1003,18 +1016,18 @@ public class Application {
 			$wnd.P.onError(aMessage);
 	}-*/;
 
-	public static void require(final JavaScriptObject aDeps, final JavaScriptObject aOnSuccess, final JavaScriptObject aOnFailure) {
+	public static void require(final Utils.JsObject aDeps, final Utils.JsObject aOnSuccess, final Utils.JsObject aOnFailure) {
 		String calledFromDir = Utils.lookupCallerJsDir();
-		final Set<String> deps = new HashSet<String>();
-		JsArrayString depsValues = aDeps.<JsArrayString> cast();
-		for (int i = 0; i < depsValues.length(); i++) {
-			String dep = depsValues.get(i);
+		final List<String> deps = new ArrayList<String>();
+		for (int i = 0; i < aDeps.length(); i++) {
+			String dep = aDeps.getString(i);
 			if (calledFromDir != null && dep.startsWith("./") || dep.startsWith("../")) {
-				String normalized = AppClient.toAppModuleId(dep, calledFromDir);
-				deps.add(normalized);
-			} else {
-				deps.add(dep);
+				dep = AppClient.toAppModuleId(dep, calledFromDir);
 			}
+			if(dep.endsWith(".js")){
+				dep = dep.substring(0, dep.length() - 3);
+			}
+			deps.add(dep);
 		}
 		try {
 			loader.load(deps, new CallbackAdapter<Void, String>() {
@@ -1032,11 +1045,22 @@ public class Application {
 					}
 				}
 
+	        	protected final native JavaScriptObject lookupInGlobal(String aModuleName)/*-{
+        			return $wnd[aModuleName];
+        		}-*/;
+        	
 				@Override
 				protected void doWork(Void aResult) throws Exception {
-					if (aOnSuccess != null)
-						Utils.invokeJsFunction(aOnSuccess);
-					else
+					if (aOnSuccess != null){
+		                Map<String, JavaScriptObject> defined = loader.getDefined();
+		                Utils.JsObject resolved = JavaScriptObject.createArray().cast();
+		                for (int d = 0; d < deps.size(); d++) {
+		                	String mName = deps.get(d);
+		                	JavaScriptObject m = defined.get(mName);
+		                    resolved.setSlot(d, m != null ? m : lookupInGlobal(mName));
+		                }
+						aOnSuccess.apply(null, resolved);
+					} else
 						Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require succeded, but callback is missing. Required modules are: " + aDeps.toString());
 				}
 			}, new HashSet<String>());
@@ -1044,4 +1068,45 @@ public class Application {
 			Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
+	
+	public static void define(final Utils.JsObject aDeps, final Utils.JsObject aModuleDefiner) {
+		String calledFromDir = Utils.lookupCallerJsDir();
+		final List<String> deps = new ArrayList<String>();
+		for (int i = 0; i < aDeps.length(); i++) {
+			String dep = aDeps.getString(i);
+			if (calledFromDir != null && dep.startsWith("./") || dep.startsWith("../")) {
+				dep = AppClient.toAppModuleId(dep, calledFromDir);
+			}
+			if(dep.endsWith(".js")){
+				dep = dep.substring(0, dep.length() - 3);
+			}
+			deps.add(dep);
+		}
+        loader.setAmdDefine(deps, new Callback<String, Void> () {
+        	
+        	protected final native JavaScriptObject lookupInGlobal(String aModuleName)/*-{
+        		return $wnd[aModuleName];
+        	}-*/;
+        	
+        	@Override
+        	public void onSuccess(String aModuleName) {
+                Map<String, JavaScriptObject> defined = loader.getDefined();
+                Utils.JsObject resolved = JavaScriptObject.createArray().cast();
+                for (int d = 0; d < deps.size(); d++) {
+                	String mName = deps.get(d);
+                	JavaScriptObject m = defined.get(mName);
+                    resolved.setSlot(d, m != null ? m : lookupInGlobal(mName));
+                }
+                resolved.setSlot(deps.size(), aModuleName);
+                JavaScriptObject module = (JavaScriptObject)aModuleDefiner.apply(null, resolved);
+                defined.put(aModuleName, module);
+        	}
+        	
+        	@Override
+        	public void onFailure(Void reason) {
+        		// no op
+        	}
+        	
+        });
+	}	
 }

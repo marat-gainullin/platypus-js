@@ -40,6 +40,8 @@
     var PlatypusPrincipalClass = Java.type("com.eas.client.login.PlatypusPrincipal");
     var FileUtilsClass = Java.type("com.eas.util.FileUtils");
     var MD5GeneratorClass = Java.type("com.eas.client.login.MD5Generator");
+    var apiPath = ScriptsClass.getAbsoluteApiPath();
+    var appPath = ScriptedResourceClass.getAbsoluteAppPath();
 
     //
     Object.defineProperty(P, "HTML5", {value: "HTML5 client"});
@@ -182,22 +184,24 @@
 
     /**
      * @static
-     * @param {type} deps
+     * @param {type} aDeps
      * @param {type} aOnSuccess
      * @param {type} aOnFailure
      * @returns {undefined}
      */
-    function require(deps, aOnSuccess, aOnFailure) {
-        if (!Array.isArray(deps))
-            deps = [deps];
-        var sDeps = Java.to(deps, JavaStringArrayClass);
-        for (var s = 0; s < sDeps.length; s++) {
-            var sDep = sDeps[s];
-            if (sDep.toLowerCase().endsWith('.js')) {
-                sDeps[s] = sDep.substring(0, sDep.length - 3);
-            }
-        }
+    function require(aDeps, aOnSuccess, aOnFailure) {
         var calledFromFile = lookupCallerFile();
+        if (!Array.isArray(aDeps))
+            aDeps = [aDeps];
+        var sDeps = new JavaStringArrayClass(aDeps.length);
+        for (var s = 0; s < aDeps.length; s++) {
+            var sDep = aDeps[s];
+            if (sDep.toLowerCase().endsWith('.js')) {
+                sDeps = sDep.substring(0, sDep.length - 3);
+            }
+            sDep = ScriptedResourceClass.toModuleId(apiPath, appPath, sDep, calledFromFile);
+            sDeps[s] = sDep;
+        }
         function gatherDefined(){
             var resolved = [];
             var defined = aSpace.getDefined();
@@ -227,23 +231,27 @@
     function define() {
         if (arguments.length === 1 ||
                 arguments.length === 2) {
+            var calledFromFile = lookupCallerFile();
             var aDeps = arguments.length > 1 ? arguments[0] : [];
             var aModuleDefiner = arguments.length > 1 ? arguments[1] : arguments[0];
             if (!Array.isArray(aDeps))
                 aDeps = [aDeps];
-            var sDeps = Java.to(aDeps, JavaStringArrayClass);
-            for (var s = 0; s < sDeps.length; s++) {
-                var sDep = sDeps[s];
+            var sDeps = new JavaStringArrayClass(aDeps.length);
+            for (var s = 0; s < aDeps.length; s++) {
+                var sDep = aDeps[s];
                 if (sDep.toLowerCase().endsWith('.js')) {
-                    sDeps[s] = sDep.substring(0, sDep.length - 3);
+                    sDeps = sDep.substring(0, sDep.length - 3);
                 }
+                sDep = ScriptedResourceClass.toModuleId(apiPath, appPath, sDep, calledFromFile);
+                sDeps[s] = sDep;
             }
-            aSpace.setAmdDependencies(sDeps);
-            aSpace.setAmdDefineCallback(function (aModuleName) {
+            aSpace.setAmdDefine(sDeps, function (aModuleName) {
                 var defined = aSpace.getDefined();
                 var resolved = [];
                 for (var d = 0; d < sDeps.length; d++) {
-                    resolved.push(defined.get(sDeps[d]));
+                    var rDep = sDeps[d]
+                    var depModule = defined[rDep] ? defined[rDep] : global[rDep];
+                    resolved.push(depModule);
                 }
                 resolved.push(aModuleName);
                 var module = typeof aModuleDefiner === 'function' ? aModuleDefiner.apply(null, resolved) : aModuleDefiner;
