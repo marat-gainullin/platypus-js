@@ -48,6 +48,7 @@ import com.google.gwt.http.client.URL;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -165,6 +166,7 @@ public class AppClient {
 		div.setInnerHTML("<a href=\"" + aStartPoint + "/" + aRelative + "\">o</a>");
 		String absolute = div.getFirstChildElement().<AnchorElement> cast().getHref();
 		String hostContextPrefix = AppClient.relativeUri() + AppClient.APP_RESOURCE_PREFIX;
+		absolute = URL.decode(absolute);
 		String appModuleId = absolute.substring(hostContextPrefix.length());
 		return appModuleId;
 	}
