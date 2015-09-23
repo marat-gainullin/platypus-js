@@ -655,12 +655,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                                     return aResultSetProcessor.call(null);
                                 }
                             } catch (SQLException ex) {
-                                try {
-                                    connection.rollback();
-                                    throw new FlowProviderFailedException(ex);
-                                } catch (SQLException ex1) {
-                                    throw new FlowProviderFailedException(ex);
-                                }
+                                throw new FlowProviderFailedException(ex);
                             } finally {
                                 assert dataSource != null; // since we've got a statement, dataSource must present.
                                 unprepareConnection(connection);

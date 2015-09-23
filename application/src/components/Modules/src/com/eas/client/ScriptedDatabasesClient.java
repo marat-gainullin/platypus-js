@@ -110,7 +110,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                                                     affected = ((Number) oAffected).intValue();
                                                 }
                                             }
-                                            onSuccess.accept(new ApplyResult(affected, new DummySqlConnection()));
+                                            onSuccess.accept(new ApplyResult(affected, new DummySqlConnection(), true));
                                             return null;
                                         }
 
@@ -162,7 +162,7 @@ public class ScriptedDatabasesClient extends DatabasesClient {
                         if (oAffected instanceof Number) {
                             affectedInModules = ((Number) oAffected).intValue();
                         }
-                        return new ApplyResult(affectedInModules, new DummySqlConnection());
+                        return new ApplyResult(affectedInModules, new DummySqlConnection(), true);
                     } else {
                         throw new IllegalStateException(String.format(APPLY_MISSING_MSG, aDatasourceName));
                     }

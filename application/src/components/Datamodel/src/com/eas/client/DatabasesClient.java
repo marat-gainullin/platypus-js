@@ -306,20 +306,27 @@ public class DatabasesClient {
             int rowsAffected = 0;
             DataSource dataSource = obtainDataSource(aQuery.getDatasourceName());
             if (dataSource != null) {
-                try (Connection connection = dataSource.getConnection(); PreparedStatement stmt = connection.prepareStatement(aQuery.getSqlClause())) {
-                    connection.setAutoCommit(false);
-                    Parameters params = aQuery.getParameters();
-                    for (int i = 1; i <= params.getParametersCount(); i++) {
-                        Parameter param = params.get(i);
-                        int jdbcType = JdbcFlowProvider.assumeJdbcType(param.getValue());
-                        JdbcFlowProvider.assign(param.getValue(), i, stmt, jdbcType, null);
-                    }
+                try (Connection connection = dataSource.getConnection()) {
+                    boolean autoCommit = connection.getAutoCommit();
                     try {
-                        rowsAffected += stmt.executeUpdate();
-                        connection.commit();
-                    } catch (SQLException ex) {
-                        connection.rollback();
-                        throw ex;
+                        connection.setAutoCommit(false);
+                        try (PreparedStatement stmt = connection.prepareStatement(aQuery.getSqlClause())) {
+                            Parameters params = aQuery.getParameters();
+                            for (int i = 1; i <= params.getParametersCount(); i++) {
+                                Parameter param = params.get(i);
+                                int jdbcType = JdbcFlowProvider.assumeJdbcType(param.getValue());
+                                JdbcFlowProvider.assign(param.getValue(), i, stmt, jdbcType, null);
+                            }
+                            try {
+                                rowsAffected += stmt.executeUpdate();
+                                connection.commit();
+                            } catch (SQLException ex) {
+                                connection.rollback();
+                                throw ex;
+                            }
+                        }
+                    } finally {
+                        connection.setAutoCommit(autoCommit);
                     }
                 }
             }
@@ -518,6 +525,7 @@ public class DatabasesClient {
                 throw ex;
             } finally {
                 for (ApplyResult r : results) {
+                    r.connection.setAutoCommit(r.autoCommit);
                     r.connection.close();
                 }
             }
@@ -526,12 +534,15 @@ public class DatabasesClient {
 
     protected static class ApplyResult {
 
-        public int rowsAffected;
-        public Connection connection;
+        public final int rowsAffected;
+        public final Connection connection;
+        public final boolean autoCommit;
 
-        public ApplyResult(int rowsAffected, Connection connection) {
-            this.rowsAffected = rowsAffected;
-            this.connection = connection;
+        public ApplyResult(int aRowsAffected, Connection aConnection, boolean aAutoCommit) {
+            super();
+            rowsAffected = aRowsAffected;
+            connection = aConnection;
+            autoCommit = aAutoCommit;
         }
     }
 
@@ -549,6 +560,7 @@ public class DatabasesClient {
             assert aLog != null;
             DataSource dataSource = obtainDataSource(aDatasourceName);
             Connection connection = dataSource.getConnection();
+            boolean autoCommit = connection.getAutoCommit();
             try {
                 connection.setAutoCommit(false);
                 List<StatementsGenerator.StatementsLogEntry> statements = new ArrayList<>();
@@ -623,9 +635,10 @@ public class DatabasesClient {
                     statements.addAll(generator.getLogEntries());
                 }
                 rowsAffected = riddleStatements(statements, connection);
-                return new ApplyResult(rowsAffected, connection);
+                return new ApplyResult(rowsAffected, connection, autoCommit);
             } catch (Exception ex) {
                 connection.rollback();
+                connection.setAutoCommit(autoCommit);
                 connection.close();
                 throw ex;
             }
@@ -784,19 +797,29 @@ public class DatabasesClient {
 
     public static void initUsersSpace(DataSource aSource) throws Exception {
         try (Connection lconn = aSource.getConnection()) {
-            lconn.setAutoCommit(false);
-            String dialect = dialectByConnection(lconn);
-            SqlDriver driver = SQLUtils.getSqlDriver(dialect);
-            driver.initializeUsersSpace(lconn);
+            boolean autoCommit = lconn.getAutoCommit();
+            try {
+                lconn.setAutoCommit(false);
+                String dialect = dialectByConnection(lconn);
+                SqlDriver driver = SQLUtils.getSqlDriver(dialect);
+                driver.initializeUsersSpace(lconn);
+            } finally {
+                lconn.setAutoCommit(autoCommit);
+            }
         }
     }
 
     public static void initVersioning(DataSource aSource) throws Exception {
         try (Connection lconn = aSource.getConnection()) {
-            lconn.setAutoCommit(false);
-            String dialect = dialectByConnection(lconn);
-            SqlDriver driver = SQLUtils.getSqlDriver(dialect);
-            driver.initializeVersion(lconn);
+            boolean autoCommit = lconn.getAutoCommit();
+            try {
+                lconn.setAutoCommit(false);
+                String dialect = dialectByConnection(lconn);
+                SqlDriver driver = SQLUtils.getSqlDriver(dialect);
+                driver.initializeVersion(lconn);
+            } finally {
+                lconn.setAutoCommit(autoCommit);
+            }
         }
     }
 }

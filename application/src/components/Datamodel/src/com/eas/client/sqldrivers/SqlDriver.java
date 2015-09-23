@@ -366,23 +366,28 @@ public abstract class SqlDriver implements StatementsGenerator.GeometryConverter
 
     public static void applyScript(String scriptText, Connection aConnection) throws Exception {
         String[] commandsTexts = scriptText.split(EAS_SQL_SCRIPT_DELIMITER);
-        aConnection.setAutoCommit(false);
         if (commandsTexts != null) {
-            try (Statement stmt = aConnection.createStatement()) {
-                for (int i = 0; i < commandsTexts.length; i++) {
-                    try {
-                        String queryText = commandsTexts[i];
+            boolean autoCommit = aConnection.getAutoCommit();
+            try {
+                aConnection.setAutoCommit(false);
+                try (Statement stmt = aConnection.createStatement()) {
+                    for (String commandText : commandsTexts) {
+                        String queryText = commandText;
                         queryText = queryText.replace('\r', ' ');
                         queryText = queryText.replace('\n', ' ');
                         if (!queryText.isEmpty()) {
-                            stmt.execute(queryText);
-                            aConnection.commit();
+                            try {
+                                stmt.execute(queryText);
+                                aConnection.commit();
+                            } catch (Exception ex) {
+                                aConnection.rollback();
+                                Logger.getLogger(SqlDriver.class.getName()).log(Level.WARNING, "Error applying SQL script. {0}", ex.getMessage());
+                            }
                         }
-                    } catch (Exception ex) {
-                        aConnection.rollback();
-                        Logger.getLogger(SqlDriver.class.getName()).log(Level.WARNING, "Error applying SQL script. {0}", ex.getMessage());
                     }
                 }
+            } finally {
+                aConnection.setAutoCommit(autoCommit);
             }
         }
     }
@@ -461,22 +466,7 @@ public abstract class SqlDriver implements StatementsGenerator.GeometryConverter
 
     @Override
     public abstract JdbcChangeValue convertGeometry(String aValue, Connection aConnection) throws SQLException;
-/*
-    @Override
-    public JdbcChangeValue checkGeometry(JdbcChangeValue aValue, Connection aConnection) throws SQLException {
-        if (Scripts.GEOMETRY_TYPE_NAME.equals(getTypesResolver().toApplicationType(aValue.getSqlTypeName())) && aValue.value instanceof CharSequence) {
-            JdbcChangeValue converted = convertGeometry(((CharSequence) aValue.value).toString(), aConnection);
-            if (converted != null) {
-                converted.name = aValue.name;
-                return converted;
-            } else {
-                return aValue;
-            }
-        } else {
-            return aValue;
-        }
-    }
-*/
+
     public abstract String readGeometry(Wrapper aRs, int aColumnIndex, Connection aConnection) throws SQLException;
 
     abstract public TwinString[] getCharsForWrap();
