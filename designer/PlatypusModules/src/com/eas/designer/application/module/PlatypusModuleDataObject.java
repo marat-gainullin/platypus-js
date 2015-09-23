@@ -7,6 +7,9 @@ package com.eas.designer.application.module;
 import com.eas.client.SqlQuery;
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusFilesSupport;
+import com.eas.client.model.Entity;
+import com.eas.client.model.ModelEditingListener;
+import com.eas.client.model.Relation;
 import com.eas.client.model.application.ApplicationDbEntity;
 import com.eas.client.model.application.ApplicationDbModel;
 import com.eas.client.model.store.ApplicationModel2XmlDom;
@@ -48,6 +51,7 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
     protected transient Entry modelEntry;
     protected transient ApplicationDbModel model;
     protected transient ModelNode<ApplicationDbEntity, ApplicationDbModel> modelNode;
+    protected transient ModelEditingListener<ApplicationDbEntity> entitiesPublisher;
     private transient boolean astIsValid;
     private transient FunctionNode astRoot;
     private transient FunctionNode constructor;
@@ -139,7 +143,10 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
     }
 
     public void shrink() {
-        model = null;
+        if (model != null) {
+            model.removeEditingListener(entitiesPublisher);
+            model = null;
+        }
         modelNode = null;
         astIsValid = false;
         astRoot = null;
@@ -172,6 +179,34 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
         assert project != null : "Project is null.";
         if (model == null) {
             model = readModel();
+            model.getEntities().values().stream().forEach((ApplicationDbEntity aEntity) -> {
+                aEntity.setPublished(new EntityJSObject(aEntity));
+            });
+            model.setPublished(new ModelJSObject(model));
+            entitiesPublisher = new ModelEditingListener<ApplicationDbEntity>() {
+
+                @Override
+                public void entityAdded(ApplicationDbEntity aEntity) {
+                    aEntity.setPublished(new EntityJSObject(aEntity));
+                }
+
+                @Override
+                public void entityRemoved(ApplicationDbEntity e) {
+                }
+
+                @Override
+                public void relationAdded(Relation<ApplicationDbEntity> rltn) {
+                }
+
+                @Override
+                public void relationRemoved(Relation<ApplicationDbEntity> rltn) {
+                }
+
+                @Override
+                public void entityIndexesChanged(ApplicationDbEntity e) {
+                }
+            };
+            model.addEditingListener(entitiesPublisher);
             modelNode = createModelNode();
         }
     }
@@ -193,10 +228,6 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
         org.w3c.dom.Document doc = Source2XmlDom.transform(modelContent);
         ApplicationDbModel modelRead = new ApplicationDbModel(getProject().getBasesProxy(), getProject().getQueries());
         modelRead.accept(new XmlDom2ApplicationModel<>(doc));
-        modelRead.getEntities().values().stream().forEach((ApplicationDbEntity aEntity) -> {
-            aEntity.setPublished(new EntityJSObject(aEntity));
-        });
-        modelRead.setPublished(new ModelJSObject(modelRead));
         return modelRead;
     }
 

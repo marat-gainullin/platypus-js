@@ -47,17 +47,18 @@ public class EntityJSObjectEditor extends PropertyEditorSupport implements ExPro
     // Elipsis button section
     @Override
     public boolean supportsCustomEditor() {
-        return formModel.getDataObject() instanceof PlatypusFormDataObject;
+        return formModel!= null && formModel.getDataObject() instanceof PlatypusFormDataObject;
     }
 
     @Override
     public Component getCustomEditor() {
         try {
-            ApplicationDbModel model = ((PlatypusFormDataObject) formModel.getDataObject()).getModel();
+            ApplicationDbModel model = formModel != null ? ((PlatypusFormDataObject) formModel.getDataObject()).getModel() : null;
             if (model != null) {
                 ModelElementRef oldRef = new ModelElementRef();
                 EntityJSObject oldModelObject = (EntityJSObject) getValue();
-                oldRef.setEntityId(oldModelObject.getEntity().getEntityId());
+                if(oldModelObject != null)
+                    oldRef.setEntityId(oldModelObject.getEntity().getEntityId());
                 final ModelElementRef selected = new ModelElementRef();
                 return ModelElementSelector.prepareDialog(model,
                         dialogTitle,
@@ -105,7 +106,7 @@ public class EntityJSObjectEditor extends PropertyEditorSupport implements ExPro
     @Override
     public void setAsText(String aEntityName) throws IllegalArgumentException {
         if (aEntityName != null && !aEntityName.isEmpty()) {
-            if (formModel.getDataObject() instanceof PlatypusFormDataObject) {
+            if (formModel != null && formModel.getDataObject() instanceof PlatypusFormDataObject) {
                 try {
                     ApplicationDbModel model = ((PlatypusFormDataObject) formModel.getDataObject()).getModel();
                     model.getEntities().values().stream().filter((ApplicationDbEntity aEntity) -> {
@@ -126,7 +127,7 @@ public class EntityJSObjectEditor extends PropertyEditorSupport implements ExPro
 
     @Override
     public String[] getTags() {
-        if (formModel.getDataObject() instanceof PlatypusFormDataObject) {
+        if (formModel != null && formModel.getDataObject() instanceof PlatypusFormDataObject) {
             try {
                 List<String> tags = new ArrayList<>();
                 tags.add("");
