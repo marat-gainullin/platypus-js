@@ -355,12 +355,12 @@
 
         function Params(aHttpRequest) {
             var self = this;
-            var paramNames = aHttpRequest.getParameterMap().keySet();
+            var paramNames = aHttpRequest.getParameterMap().keySet().toArray();
             if (paramNames) {
                 for (var i = 0; i < paramNames.length; i++) {
                     var aParamName = paramNames[i];
                     var paramValues = aHttpRequest.getParameterValues(aParamName);
-                    if (paramValues.length == 1) {
+                    if (paramValues.length === 1) {
                         Object.defineProperty(self, aParamName, {
                             value: aHttpRequest.getParameter(aParamName)
                         });
@@ -377,10 +377,10 @@
             var self = this;
             var headerNames = aHttpRequest.getHeaderNames();
             if (headerNames) {
-                for (var i = 0; i < headerNames.length; i++) {
-                    var aHeaderName = headerNames[i];
-                    Object.defineProperty(self, aHeaderName, {
-                        value: aHttpRequest.getHeader(aHeaderName)
+                while (headerNames.hasMoreElements()) {
+                    var headerName = headerNames.nextElement();
+                    Object.defineProperty(self, headerName, {
+                        value: aHttpRequest.getHeader(headerName)
                     });
                 }
             }
@@ -547,7 +547,10 @@
                         return aHttpResponse.getHeader(aHeaderName);
                     },
                     set: function (aValue) {
-                        aHttpResponse.setHeader(aHeaderName, aValue);
+                        if(aValue instanceof Date)
+                            aHttpResponse.setDateHeader(aHeaderName, aValue.getTime());
+                        else
+                            aHttpResponse.setHeader(aHeaderName, aValue);
                     }
                 });
             });
