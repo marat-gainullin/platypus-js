@@ -581,19 +581,23 @@
             if (!pParams.schema)
                 Object.defineProperty(pParams, 'schema', {value: pParamsSchema});
             Object.defineProperty(published, 'find', {value: function (aCriteria) {
-                    var keys = Object.keys(aCriteria);
-                    keys = keys.sort();
-                    var ordererKey = keys.join(' | ');
-                    var orderer = orderers[ordererKey];
-                    if (!orderer) {
-                        orderer = new P.Orderer(keys);
-                        published.forEach(function (item) {
-                            orderer.add(item);
-                        });
-                        orderers[ordererKey] = orderer;
+                    if(typeof aCriteria === 'function' && Array.prototype.find)
+                        return Array.prototype.find.call(published, aCriteria);
+                    else{
+                        var keys = Object.keys(aCriteria);
+                        keys = keys.sort();
+                        var ordererKey = keys.join(' | ');
+                        var orderer = orderers[ordererKey];
+                        if (!orderer) {
+                            orderer = new P.Orderer(keys);
+                            published.forEach(function (item) {
+                                orderer.add(item);
+                            });
+                            orderers[ordererKey] = orderer;
+                        }
+                        var found = orderer.find(aCriteria);
+                        return found;
                     }
-                    var found = orderer.find(aCriteria);
-                    return found;
                 }});
             Object.defineProperty(published, 'findByKey', {value: function (aKeyValue) {
                     var criteria = {};
