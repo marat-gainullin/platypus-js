@@ -1,4 +1,4 @@
-(function () {
+define(function () {
     /**
      * Orderer constructor
      * @constructor
@@ -58,5 +58,5 @@
             }
         };
     }
-    Object.defineProperty(this.P, 'Orderer', {value: Orderer});
-})();
+    return Orderer;
+});

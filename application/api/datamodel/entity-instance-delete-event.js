@@ -1,16 +1,11 @@
-(function() {
-    var className = "com.eas.client.model.application.EntityInstanceDeleteEvent";
-    var javaClass = Java.type(className);
-    var space = this['-platypus-scripts-space'];
-    space.putPublisher(className, function(aDelegate) {
-        return new P.EntityInstanceDeleteEvent(aDelegate);
-    });
-    
+/* global Java */
+
+define(['boxing'], function(P) {
     /**
      * Generated constructor.
      * @constructor EntityInstanceDeleteEvent EntityInstanceDeleteEvent
      */
-    P.EntityInstanceDeleteEvent = function () {
+    function EntityInstanceDeleteEvent() {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -22,8 +17,8 @@
                 return delegate;
             }
         });
-        if(P.EntityInstanceDeleteEvent.superclass)
-            P.EntityInstanceDeleteEvent.superclass.constructor.apply(this, arguments);
+        if(EntityInstanceDeleteEvent.superclass)
+            EntityInstanceDeleteEvent.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
         Object.defineProperty(this, "deleted", {
             get: function() {
@@ -31,27 +26,22 @@
                 return value;
             }
         });
-        if(!P.EntityInstanceDeleteEvent){
-            /**
-             * The deleted element.
-             * @property deleted
-             * @memberOf EntityInstanceDeleteEvent
-             */
-            P.EntityInstanceDeleteEvent.prototype.deleted = {};
-        }
+
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;
                 return P.boxAsJs(value);
             }
         });
-        if(!P.EntityInstanceDeleteEvent){
-            /**
-             * The source object of the event.
-             * @property source
-             * @memberOf EntityInstanceDeleteEvent
-             */
-            P.EntityInstanceDeleteEvent.prototype.source = {};
-        }
+
     };
-})();
+
+    var className = "com.eas.client.model.application.EntityInstanceDeleteEvent";
+    var javaClass = Java.type(className);
+    var ScriptsClass = Java.type("com.eas.script.Scripts");
+    var space = ScriptsClass.getSpace();
+    space.putPublisher(className, function(aDelegate) {
+        return new EntityInstanceDeleteEvent(aDelegate);
+    });
+    return EntityInstanceDeleteEvent;
+});

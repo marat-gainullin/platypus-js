@@ -1,13 +1,8 @@
-(function() {
-    var className = "${Type}";
-    var javaClass = Java.type(className);
-    var space = this['-platypus-scripts-space'];
-    space.putPublisher(className, function(aDelegate) {
-        return new P.${Name}(${NullParams}aDelegate);
-    });
-    
+/* global Java */
+
+define(['boxing'], function(P) {
 ${JsDoc}
-    P.${Name} = function (${Params}) {
+    function ${Name}(${Params}) {
         var maxArgs = ${MaxArgs};
         var ${Delegate} = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -19,8 +14,17 @@ ${JsDoc}
                 return ${Delegate};
             }
         });
-        if(P.${Name}.superclass)
-            P.${Name}.superclass.constructor.apply(this, arguments);
+        if(${Name}.superclass)
+            ${Name}.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
 ${Props}${Body}    };
-${Methods}})();
+${Methods}
+    var className = "${Type}";
+    var javaClass = Java.type(className);
+    var ScriptsClass = Java.type("com.eas.script.Scripts");
+    var space = ScriptsClass.getSpace();
+    space.putPublisher(className, function(aDelegate) {
+        return new ${Name}(${NullParams}aDelegate);
+    });
+    return ${Name};
+});

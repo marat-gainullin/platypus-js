@@ -1,17 +1,12 @@
-(function() {
-    var className = "com.eas.gui.Cursor";
-    var javaClass = Java.type(className);
-    var space = this['-platypus-scripts-space'];
-    space.putPublisher(className, function(aDelegate) {
-        return new P.Cursor(null, aDelegate);
-    });
-    
+/* global Java */
+
+define(['boxing'], function(P) {
     /**
      * Constructs new cursor object.
      * @param type Type of new cursor.
      * @constructor Cursor Cursor
      */
-    P.Cursor = function (type) {
+    function Cursor(type) {
         var maxArgs = 1;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -24,8 +19,17 @@
                 return delegate;
             }
         });
-        if(P.Cursor.superclass)
-            P.Cursor.superclass.constructor.apply(this, arguments);
+        if(Cursor.superclass)
+            Cursor.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
     };
-})();
+
+    var className = "com.eas.gui.Cursor";
+    var javaClass = Java.type(className);
+    var ScriptsClass = Java.type("com.eas.script.Scripts");
+    var space = ScriptsClass.getSpace();
+    space.putPublisher(className, function(aDelegate) {
+        return new Cursor(null, aDelegate);
+    });
+    return Cursor;
+});

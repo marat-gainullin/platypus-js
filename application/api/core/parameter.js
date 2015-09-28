@@ -1,16 +1,11 @@
-(function() {
-    var className = "com.eas.client.metadata.Parameter";
-    var javaClass = Java.type(className);
-    var space = this['-platypus-scripts-space'];
-    space.putPublisher(className, function(aDelegate) {
-        return new P.Parameter(aDelegate);
-    });
-    
+/* global Java */
+
+define(['boxing'], function(P) {
     /**
      * Generated constructor.
      * @constructor Parameter Parameter
      */
-    P.Parameter = function () {
+    function Parameter() {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -22,8 +17,8 @@
                 return delegate;
             }
         });
-        if(P.Parameter.superclass)
-            P.Parameter.superclass.constructor.apply(this, arguments);
+        if(Parameter.superclass)
+            Parameter.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
         Object.defineProperty(this, "nullable", {
             get: function() {
@@ -34,28 +29,14 @@
                 delegate.nullable = P.boxAsJava(aValue);
             }
         });
-        if(!P.Parameter){
-            /**
-             * Determines if field is nullable.
-             * @property nullable
-             * @memberOf Parameter
-             */
-            P.Parameter.prototype.nullable = true;
-        }
+
         Object.defineProperty(this, "fk", {
             get: function() {
                 var value = delegate.fk;
                 return P.boxAsJs(value);
             }
         });
-        if(!P.Parameter){
-            /**
-             * Indicates that this field is a foreign key to another table or it is a self-reference key.
-             * @property fk
-             * @memberOf Parameter
-             */
-            P.Parameter.prototype.fk = true;
-        }
+
         Object.defineProperty(this, "defaultValue", {
             get: function() {
                 var value = delegate.defaultValue;
@@ -65,14 +46,7 @@
                 delegate.defaultValue = P.boxAsJava(aValue);
             }
         });
-        if(!P.Parameter){
-            /**
-             * The default value of the parameter.
-             * @property defaultValue
-             * @memberOf Parameter
-             */
-            P.Parameter.prototype.defaultValue = {};
-        }
+
         Object.defineProperty(this, "description", {
             get: function() {
                 var value = delegate.description;
@@ -82,14 +56,7 @@
                 delegate.description = P.boxAsJava(aValue);
             }
         });
-        if(!P.Parameter){
-            /**
-             * The description of the field.
-             * @property description
-             * @memberOf Parameter
-             */
-            P.Parameter.prototype.description = '';
-        }
+
         Object.defineProperty(this, "type", {
             get: function() {
                 var value = delegate.type;
@@ -99,14 +66,7 @@
                 delegate.type = P.boxAsJava(aValue);
             }
         });
-        if(!P.Parameter){
-            /**
-             * The field's type information.
-             * @property type
-             * @memberOf Parameter
-             */
-            P.Parameter.prototype.type = '';
-        }
+
         Object.defineProperty(this, "tableName", {
             get: function() {
                 var value = delegate.tableName;
@@ -116,14 +76,7 @@
                 delegate.tableName = P.boxAsJava(aValue);
             }
         });
-        if(!P.Parameter){
-            /**
-             * This field table's name.
-             * @property tableName
-             * @memberOf Parameter
-             */
-            P.Parameter.prototype.tableName = '';
-        }
+
         Object.defineProperty(this, "mode", {
             get: function() {
                 var value = delegate.mode;
@@ -133,14 +86,7 @@
                 delegate.mode = P.boxAsJava(aValue);
             }
         });
-        if(!P.Parameter){
-            /**
-             * Parameter's mode (in, out, in/out).
-             * @property mode
-             * @memberOf Parameter
-             */
-            P.Parameter.prototype.mode = 0;
-        }
+
         Object.defineProperty(this, "originalName", {
             get: function() {
                 var value = delegate.originalName;
@@ -150,16 +96,7 @@
                 delegate.originalName = P.boxAsJava(aValue);
             }
         });
-        if(!P.Parameter){
-            /**
-             * The original name of the field.
-             * In queries, such as select t1.f1 as f11, t2.f1 as f21 to preserve output fields' names unique,
-             * but be able to generate right update sql clauses for multiple tables.
-             * @property originalName
-             * @memberOf Parameter
-             */
-            P.Parameter.prototype.originalName = '';
-        }
+
         Object.defineProperty(this, "value", {
             get: function() {
                 var value = delegate.jsValue;
@@ -169,14 +106,7 @@
                 delegate.jsValue = P.boxAsJava(aValue);
             }
         });
-        if(!P.Parameter){
-            /**
-             * The value of the parameter.
-             * @property jsValue
-             * @memberOf Parameter
-             */
-            P.Parameter.prototype.value = {};
-        }
+
         Object.defineProperty(this, "readonly", {
             get: function() {
                 var value = delegate.readonly;
@@ -186,14 +116,7 @@
                 delegate.readonly = P.boxAsJava(aValue);
             }
         });
-        if(!P.Parameter){
-            /**
-             * Determines if this field is readonly.
-             * @property readonly
-             * @memberOf Parameter
-             */
-            P.Parameter.prototype.readonly = true;
-        }
+
         Object.defineProperty(this, "name", {
             get: function() {
                 var value = delegate.name;
@@ -203,14 +126,7 @@
                 delegate.name = P.boxAsJava(aValue);
             }
         });
-        if(!P.Parameter){
-            /**
-             * The name of the field.
-             * @property name
-             * @memberOf Parameter
-             */
-            P.Parameter.prototype.name = '';
-        }
+
         Object.defineProperty(this, "modified", {
             get: function() {
                 var value = delegate.modified;
@@ -220,14 +136,7 @@
                 delegate.modified = P.boxAsJava(aValue);
             }
         });
-        if(!P.Parameter){
-            /**
-             * Determines if parameter was modified.
-             * @property modified
-             * @memberOf Parameter
-             */
-            P.Parameter.prototype.modified = true;
-        }
+
         Object.defineProperty(this, "pk", {
             get: function() {
                 var value = delegate.pk;
@@ -237,14 +146,7 @@
                 delegate.pk = P.boxAsJava(aValue);
             }
         });
-        if(!P.Parameter){
-            /**
-             * Determines that this field is a primary key.
-             * @property pk
-             * @memberOf Parameter
-             */
-            P.Parameter.prototype.pk = true;
-        }
+
     };
         /**
          * Assigning method of field/parameter information using specified source.
@@ -258,4 +160,13 @@
             return P.boxAsJs(value);
         };
 
-})();
+
+    var className = "com.eas.client.metadata.Parameter";
+    var javaClass = Java.type(className);
+    var ScriptsClass = Java.type("com.eas.script.Scripts");
+    var space = ScriptsClass.getSpace();
+    space.putPublisher(className, function(aDelegate) {
+        return new Parameter(aDelegate);
+    });
+    return Parameter;
+});

@@ -1,7 +1,9 @@
-try{
-    P.require([
-          './cell-data'
-    ]);
-}catch(e){
-    P.Logger.severe(e);
-}
+define([
+      './cell-data'
+], function(
+      CellData
+    ){
+    return {
+          CellData: CellData
+    };
+});

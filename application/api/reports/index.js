@@ -1,7 +1,9 @@
-try{
-    P.require([
-          './report-template'
-    ]);
-}catch(e){
-    P.Logger.severe(e);
-}
+define([
+      './report-template'
+], function(
+      ReportTemplate
+    ){
+    return {
+          ReportTemplate: ReportTemplate
+    };
+});

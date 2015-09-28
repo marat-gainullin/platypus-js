@@ -2,33 +2,153 @@
  * Platypus.js internals initialization.
  * Don't edit unless you are a Platypus.js contributor.
  */
-/* global P, Java*/
+/* global Java*/
 /**
  * 
  * @returns {undefined}
  */
 (function () {
-    P.require('core/report');
     var global = this;
-    var aSpace = global['-platypus-scripts-space'];
+    if (typeof Set === 'undefined') {
+        var LinkedHashSetClass = Java.type('java.util.LinkedHashSet');
+        Set = function () {
+            var container = new LinkedHashSetClass();
+            this.add = function (aValue) {
+                container.add(aValue);
+            };
+            this.delete = function (aValue) {
+                container.remove(aValue);
+            };
+            Object.defineProperty(this, 'size', {get: function () {
+                    return container.size();
+                }});
+            this.forEach = function (aCallback) {
+                container.forEach(aCallback);
+            };
+        };
+    }
     var ReportClass = Java.type("com.eas.client.report.Report");
-    aSpace.setLookupInGlobalFunc(
+    var ScriptsClass = Java.type("com.eas.script.Scripts");
+    var ScriptedResourceClass = Java.type("com.eas.client.scripts.ScriptedResource");
+    var apiPath = ScriptsClass.getAbsoluteApiPath();
+    var appPath = ScriptedResourceClass.getAbsoluteAppPath();
+
+    function lookupCallerFile() {
+        var calledFromFile = null;
+        var error = new Error('path test error');
+        if (error.stack) {
+            var stack = error.stack.split('\n');
+            if (stack.length > 1) {
+                var sourceCall = stack[3];
+                var stackFrameParsed = /\((.+):\d+\)/.exec(sourceCall);
+                if (stackFrameParsed && stackFrameParsed.length > 1) {
+                    calledFromFile = stackFrameParsed[1];
+                }
+            }
+        }
+        return calledFromFile + '.js';
+    }
+
+    /**
+     * @static
+     * @param {type} aDeps
+     * @param {type} aOnSuccess
+     * @param {type} aOnFailure
+     * @returns {undefined}
+     */
+    function require(aDeps, aOnSuccess, aOnFailure) {
+        var calledFromFile = lookupCallerFile();
+        if (!Array.isArray(aDeps))
+            aDeps = [aDeps];
+        var sDeps = new JavaStringArrayClass(aDeps.length);
+        for (var s = 0; s < aDeps.length; s++) {
+            var sDep = aDeps[s];
+            if (sDep.toLowerCase().endsWith('.js')) {
+                sDeps = sDep.substring(0, sDep.length - 3);
+            }
+            sDep = ScriptedResourceClass.toModuleId(apiPath, appPath, sDep, calledFromFile);
+            sDeps[s] = sDep;
+        }
+        function gatherDefined() {
+            var resolved = [];
+            var defined = space.getDefined();
+            for (var r = 0; r < sDeps.length; r++) {
+                var rDep = sDeps[r];
+                var depModule = defined[rDep] ? defined[rDep] : global[rDep];
+                resolved.push(depModule);
+            }
+            return resolved;
+        }
+        if (aOnSuccess) {
+            ScriptedResourceClass.require(sDeps, calledFromFile, function () {
+                aOnSuccess.apply(null, gatherDefined());
+            }, aOnFailure);
+        } else {
+            ScriptedResourceClass.require(sDeps, calledFromFile);
+            var def = gatherDefined();
+            return def.length === 1 ? def[0] : def;
+        }
+    }
+
+    /**
+     * @static
+     * @returns {undefined}
+     */
+    function define() {
+        if (arguments.length === 1 ||
+                arguments.length === 2) {
+            var calledFromFile = lookupCallerFile();
+            var aDeps = arguments.length > 1 ? arguments[0] : [];
+            var aModuleDefiner = arguments.length > 1 ? arguments[1] : arguments[0];
+            if (!Array.isArray(aDeps))
+                aDeps = [aDeps];
+            var sDeps = new JavaStringArrayClass(aDeps.length);
+            for (var s = 0; s < aDeps.length; s++) {
+                var sDep = aDeps[s];
+                if (sDep.toLowerCase().endsWith('.js')) {
+                    sDeps = sDep.substring(0, sDep.length - 3);
+                }
+                sDep = ScriptedResourceClass.toModuleId(apiPath, appPath, sDep, calledFromFile);
+                sDeps[s] = sDep;
+            }
+            space.setAmdDefine(sDeps, function (aModuleName) {
+                var defined = space.getDefined();
+                var resolved = [];
+                for (var d = 0; d < sDeps.length; d++) {
+                    var rDep = sDeps[d];
+                    var depModule = defined[rDep] ? defined[rDep] : global[rDep];
+                    resolved.push(depModule);
+                }
+                resolved.push(aModuleName);
+                var module = typeof aModuleDefiner === 'function' ? aModuleDefiner.apply(null, resolved) : aModuleDefiner;
+                defined.put(aModuleName, module);
+            });
+        } else {
+            throw 'Module definition arguments mismatch';
+        }
+    }
+    Object.defineProperty(global, 'define', {value: define});
+    Object.defineProperty(global, 'require', {value: require});
+    var Report = require('core/report');
+    var space = ScriptsClass.getSpace();
+    space.setGlobal(global);
+    space.setLookupInGlobalFunc(
             function (aPropertyName) {
-                return this[aPropertyName];
+                return global[aPropertyName];
             });
-    aSpace.setPutInGlobalFunc(
+    space.setPutInGlobalFunc(
             function (aPropertyName, aValue) {
-                this[aPropertyName] = aValue;
+                global[aPropertyName] = aValue;
             });
-    aSpace.setToDateFunc(
+    space.setToDateFunc(
             function (aJavaDate) {
                 return aJavaDate !== null ? new Date(aJavaDate.time) : null;
             });
-    aSpace.setParseJsonFunc(
+    space.setParseJsonFunc(
             function (str) {
                 return JSON.parse(str);
             });
-    aSpace.setParseJsonWithDatesFunc(
+    space.setParseJsonWithDatesFunc(
             function (str) {
                 return JSON.parse(str, function (k, v) {
                     if (typeof v === 'string' && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/.test(v)) {
@@ -39,11 +159,11 @@
                 });
             });
 
-    aSpace.setWriteJsonFunc(
+    space.setWriteJsonFunc(
             function (aObj) {
                 return JSON.stringify(aObj);
             });
-    aSpace.setExtendFunc(
+    space.setExtendFunc(
             function (Child, Parent) {
                 var prevChildProto = {};
                 for (var m in Child.prototype) {
@@ -61,7 +181,7 @@
                 Child.prototype.constructor = Child;
                 Child.superclass = Parent.prototype;
             });
-    aSpace.setScalarDefFunc(
+    space.setScalarDefFunc(
             function (targetPublishedEntity, targetFieldName, sourceFieldName) {
                 var _self = this;
                 _self.enumerable = false;
@@ -76,16 +196,16 @@
                     this[sourceFieldName] = aValue ? aValue[targetFieldName] : null;
                 };
             });
-    aSpace.setIsArrayFunc(function (aInstance) {
+    space.setIsArrayFunc(function (aInstance) {
         return aInstance instanceof Array;
     });
-    aSpace.setMakeObjFunc(function () {
+    space.setMakeObjFunc(function () {
         return {};
     });
-    aSpace.setMakeArrayFunc(function () {
+    space.setMakeArrayFunc(function () {
         return [];
     });
-    aSpace.setLoadFunc(function (aSourceLocation) {
+    space.setLoadFunc(function (aSourceLocation) {
         return load(aSourceLocation);
     });
     var EngineUtilsClass = Java.type("jdk.nashorn.api.scripting.ScriptUtils");
@@ -139,11 +259,11 @@
             }
         }
     }
-    aSpace.setCopyObjectFunc(function (aValue, aConsumer) {
-        if (aValue instanceof P.Report) {
+    space.setCopyObjectFunc(function (aValue, aConsumer) {
+        if (aValue instanceof Report) {
             aValue = aValue.unwrap();
         }
-        if(aValue instanceof ReportClass){
+        if (aValue instanceof ReportClass) {
             aConsumer(aValue);
         } else {
             aConsumer(copy(aValue));

@@ -1,16 +1,11 @@
-(function() {
-    var className = "com.eas.client.forms.components.model.grid.header.ModelGridColumn";
-    var javaClass = Java.type(className);
-    var space = this['-platypus-scripts-space'];
-    space.putPublisher(className, function(aDelegate) {
-        return new P.ModelGridColumn(aDelegate);
-    });
-    
+/* global Java */
+
+define(['boxing'], function(P) {
     /**
      *
      * @constructor ModelGridColumn ModelGridColumn
      */
-    P.ModelGridColumn = function () {
+    function ModelGridColumn() {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -22,8 +17,8 @@
                 return delegate;
             }
         });
-        if(P.ModelGridColumn.superclass)
-            P.ModelGridColumn.superclass.constructor.apply(this, arguments);
+        if(ModelGridColumn.superclass)
+            ModelGridColumn.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
         Object.defineProperty(this, "preferredWidth", {
             get: function() {
@@ -34,14 +29,7 @@
                 delegate.preferredWidth = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property preferredWidth
-             * @memberOf ModelGridColumn
-             */
-            P.ModelGridColumn.prototype.preferredWidth = 0;
-        }
+
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
@@ -51,14 +39,7 @@
                 delegate.visible = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property visible
-             * @memberOf ModelGridColumn
-             */
-            P.ModelGridColumn.prototype.visible = true;
-        }
+
         Object.defineProperty(this, "resizable", {
             get: function() {
                 var value = delegate.resizable;
@@ -68,14 +49,7 @@
                 delegate.resizable = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property resizable
-             * @memberOf ModelGridColumn
-             */
-            P.ModelGridColumn.prototype.resizable = true;
-        }
+
         Object.defineProperty(this, "minWidth", {
             get: function() {
                 var value = delegate.minWidth;
@@ -85,14 +59,7 @@
                 delegate.minWidth = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property minWidth
-             * @memberOf ModelGridColumn
-             */
-            P.ModelGridColumn.prototype.minWidth = 0;
-        }
+
         Object.defineProperty(this, "foreground", {
             get: function() {
                 var value = delegate.foreground;
@@ -102,14 +69,7 @@
                 delegate.foreground = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property foreground
-             * @memberOf ModelGridColumn
-             */
-            P.ModelGridColumn.prototype.foreground = {};
-        }
+
         Object.defineProperty(this, "sortable", {
             get: function() {
                 var value = delegate.sortable;
@@ -119,14 +79,7 @@
                 delegate.sortable = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property sortable
-             * @memberOf ModelGridColumn
-             */
-            P.ModelGridColumn.prototype.sortable = true;
-        }
+
         Object.defineProperty(this, "title", {
             get: function() {
                 var value = delegate.title;
@@ -136,14 +89,7 @@
                 delegate.title = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property title
-             * @memberOf ModelGridColumn
-             */
-            P.ModelGridColumn.prototype.title = '';
-        }
+
         Object.defineProperty(this, "onSelect", {
             get: function() {
                 var value = delegate.onSelect;
@@ -153,14 +99,7 @@
                 delegate.onSelect = aValue;
             }
         });
-        if(!P.ModelGridColumn){
-            /**
-             * Returns script handler, used for select a value of the cell.
-             * @property onSelect
-             * @memberOf ModelGridColumn
-             */
-            P.ModelGridColumn.prototype.onSelect = {};
-        }
+
         Object.defineProperty(this, "movable", {
             get: function() {
                 var value = delegate.movable;
@@ -170,14 +109,7 @@
                 delegate.movable = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property movable
-             * @memberOf ModelGridColumn
-             */
-            P.ModelGridColumn.prototype.movable = true;
-        }
+
         Object.defineProperty(this, "field", {
             get: function() {
                 var value = delegate.field;
@@ -187,14 +119,7 @@
                 delegate.field = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property field
-             * @memberOf ModelGridColumn
-             */
-            P.ModelGridColumn.prototype.field = '';
-        }
+
         Object.defineProperty(this, "readonly", {
             get: function() {
                 var value = delegate.readonly;
@@ -204,14 +129,7 @@
                 delegate.readonly = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property readonly
-             * @memberOf ModelGridColumn
-             */
-            P.ModelGridColumn.prototype.readonly = true;
-        }
+
         Object.defineProperty(this, "onRender", {
             get: function() {
                 var value = delegate.onRender;
@@ -221,14 +139,7 @@
                 delegate.onRender = aValue;
             }
         });
-        if(!P.ModelGridColumn){
-            /**
-             * Returns script handler, used for calculate cell's data, display value and style attributes.
-             * @property onRender
-             * @memberOf ModelGridColumn
-             */
-            P.ModelGridColumn.prototype.onRender = {};
-        }
+
         Object.defineProperty(this, "background", {
             get: function() {
                 var value = delegate.background;
@@ -238,28 +149,14 @@
                 delegate.background = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property background
-             * @memberOf ModelGridColumn
-             */
-            P.ModelGridColumn.prototype.background = {};
-        }
+
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
                 return P.boxAsJs(value);
             }
         });
-        if(!P.ModelGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property width
-             * @memberOf ModelGridColumn
-             */
-            P.ModelGridColumn.prototype.width = 0;
-        }
+
         Object.defineProperty(this, "sortField", {
             get: function() {
                 var value = delegate.sortField;
@@ -269,14 +166,7 @@
                 delegate.sortField = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property sortField
-             * @memberOf ModelGridColumn
-             */
-            P.ModelGridColumn.prototype.sortField = '';
-        }
+
         Object.defineProperty(this, "font", {
             get: function() {
                 var value = delegate.font;
@@ -286,14 +176,7 @@
                 delegate.font = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property font
-             * @memberOf ModelGridColumn
-             */
-            P.ModelGridColumn.prototype.font = {};
-        }
+
         Object.defineProperty(this, "maxWidth", {
             get: function() {
                 var value = delegate.maxWidth;
@@ -303,14 +186,7 @@
                 delegate.maxWidth = P.boxAsJava(aValue);
             }
         });
-        if(!P.ModelGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property maxWidth
-             * @memberOf ModelGridColumn
-             */
-            P.ModelGridColumn.prototype.maxWidth = 0;
-        }
+
     };
         /**
          * @method sort
@@ -386,4 +262,13 @@
             return P.boxAsJs(value);
         };
 
-})();
+
+    var className = "com.eas.client.forms.components.model.grid.header.ModelGridColumn";
+    var javaClass = Java.type(className);
+    var ScriptsClass = Java.type("com.eas.script.Scripts");
+    var space = ScriptsClass.getSpace();
+    space.putPublisher(className, function(aDelegate) {
+        return new ModelGridColumn(aDelegate);
+    });
+    return ModelGridColumn;
+});

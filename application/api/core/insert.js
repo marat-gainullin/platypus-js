@@ -1,16 +1,11 @@
-(function() {
-    var className = "com.eas.client.changes.Insert";
-    var javaClass = Java.type(className);
-    var space = this['-platypus-scripts-space'];
-    space.putPublisher(className, function(aDelegate) {
-        return new P.Insert(aDelegate);
-    });
-    
+/* global Java */
+
+define(['boxing'], function(P) {
     /**
      * Generated constructor.
      * @constructor Insert Insert
      */
-    P.Insert = function () {
+    function Insert() {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -22,8 +17,8 @@
                 return delegate;
             }
         });
-        if(P.Insert.superclass)
-            P.Insert.superclass.constructor.apply(this, arguments);
+        if(Insert.superclass)
+            Insert.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
         Object.defineProperty(this, "data", {
             get: function() {
@@ -31,41 +26,29 @@
                 return P.boxAsJs(value);
             }
         });
-        if(!P.Insert){
-            /**
-             * Data that will be inserted.
-             * @property data
-             * @memberOf Insert
-             */
-            P.Insert.prototype.data = {};
-        }
+
         Object.defineProperty(this, "type", {
             get: function() {
                 var value = delegate.type;
                 return P.boxAsJs(value);
             }
         });
-        if(!P.Insert){
-            /**
-             * Indicates the change's type (Insert, Update, Delete or Command).
-             * @property type
-             * @memberOf Insert
-             */
-            P.Insert.prototype.type = '';
-        }
+
         Object.defineProperty(this, "entity", {
             get: function() {
                 var value = delegate.entity;
                 return P.boxAsJs(value);
             }
         });
-        if(!P.Insert){
-            /**
-             * Indicates the change's destination entity.
-             * @property entity
-             * @memberOf Insert
-             */
-            P.Insert.prototype.entity = '';
-        }
+
     };
-})();
+
+    var className = "com.eas.client.changes.Insert";
+    var javaClass = Java.type(className);
+    var ScriptsClass = Java.type("com.eas.script.Scripts");
+    var space = ScriptsClass.getSpace();
+    space.putPublisher(className, function(aDelegate) {
+        return new Insert(aDelegate);
+    });
+    return Insert;
+});

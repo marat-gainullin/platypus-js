@@ -1,17 +1,12 @@
-(function() {
-    var className = "com.eas.client.forms.containers.ToolBar";
-    var javaClass = Java.type(className);
-    var space = this['-platypus-scripts-space'];
-    space.putPublisher(className, function(aDelegate) {
-        return new P.ToolBar(null, aDelegate);
-    });
-    
+/* global Java */
+
+define(['boxing'], function(P) {
     /**
      * <code>ToolBar</code> provides a component that is useful for displaying commonly used actions or controls.
      * @param floatable if <code>true</code>, the tool bar can be moved; <code>false</code> otherwise (optional).
      * @constructor ToolBar ToolBar
      */
-    P.ToolBar = function (floatable) {
+    function ToolBar(floatable) {
         var maxArgs = 1;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -24,8 +19,8 @@
                 return delegate;
             }
         });
-        if(P.ToolBar.superclass)
-            P.ToolBar.superclass.constructor.apply(this, arguments);
+        if(ToolBar.superclass)
+            ToolBar.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
         Object.defineProperty(this, "cursor", {
             get: function() {
@@ -36,14 +31,7 @@
                 delegate.cursor = P.boxAsJava(aValue);
             }
         });
-        if(!P.ToolBar){
-            /**
-             * The mouse <code>Cursor</code> over this component.
-             * @property cursor
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.cursor = {};
-        }
+
         Object.defineProperty(this, "onMouseDragged", {
             get: function() {
                 var value = delegate.onMouseDragged;
@@ -53,14 +41,7 @@
                 delegate.onMouseDragged = aValue;
             }
         });
-        if(!P.ToolBar){
-            /**
-             * Mouse dragged event handler function.
-             * @property onMouseDragged
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.onMouseDragged = {};
-        }
+
         Object.defineProperty(this, "onMouseReleased", {
             get: function() {
                 var value = delegate.onMouseReleased;
@@ -70,14 +51,7 @@
                 delegate.onMouseReleased = aValue;
             }
         });
-        if(!P.ToolBar){
-            /**
-             * Mouse released event handler function.
-             * @property onMouseReleased
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.onMouseReleased = {};
-        }
+
         Object.defineProperty(this, "onFocusLost", {
             get: function() {
                 var value = delegate.onFocusLost;
@@ -87,14 +61,7 @@
                 delegate.onFocusLost = aValue;
             }
         });
-        if(!P.ToolBar){
-            /**
-             * Keyboard focus lost by the component event handler function.
-             * @property onFocusLost
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.onFocusLost = {};
-        }
+
         Object.defineProperty(this, "onMousePressed", {
             get: function() {
                 var value = delegate.onMousePressed;
@@ -104,14 +71,7 @@
                 delegate.onMousePressed = aValue;
             }
         });
-        if(!P.ToolBar){
-            /**
-             * Mouse pressed event handler function.
-             * @property onMousePressed
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.onMousePressed = {};
-        }
+
         Object.defineProperty(this, "foreground", {
             get: function() {
                 var value = delegate.foreground;
@@ -121,14 +81,7 @@
                 delegate.foreground = P.boxAsJava(aValue);
             }
         });
-        if(!P.ToolBar){
-            /**
-             * The foreground color of this component.
-             * @property foreground
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.foreground = {};
-        }
+
         Object.defineProperty(this, "error", {
             get: function() {
                 var value = delegate.error;
@@ -138,15 +91,7 @@
                 delegate.error = P.boxAsJava(aValue);
             }
         });
-        if(!P.ToolBar){
-            /**
-             * An error message of this component.
-             * Validation procedure may set this property and subsequent focus lost event will clear it.
-             * @property error
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.error = '';
-        }
+
         Object.defineProperty(this, "enabled", {
             get: function() {
                 var value = delegate.enabled;
@@ -156,14 +101,7 @@
                 delegate.enabled = P.boxAsJava(aValue);
             }
         });
-        if(!P.ToolBar){
-            /**
-             * Determines whether this component is enabled. An enabled component can respond to user input and generate events. Components are enabled initially by default.
-             * @property enabled
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.enabled = true;
-        }
+
         Object.defineProperty(this, "onComponentMoved", {
             get: function() {
                 var value = delegate.onComponentMoved;
@@ -173,14 +111,7 @@
                 delegate.onComponentMoved = aValue;
             }
         });
-        if(!P.ToolBar){
-            /**
-             * Component moved event handler function.
-             * @property onComponentMoved
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.onComponentMoved = {};
-        }
+
         Object.defineProperty(this, "onComponentAdded", {
             get: function() {
                 var value = delegate.onComponentAdded;
@@ -190,14 +121,7 @@
                 delegate.onComponentAdded = aValue;
             }
         });
-        if(!P.ToolBar){
-            /**
-             * Component added event hanler function.
-             * @property onComponentAdded
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.onComponentAdded = {};
-        }
+
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {
                 var value = delegate.componentPopupMenu;
@@ -207,14 +131,7 @@
                 delegate.componentPopupMenu = P.boxAsJava(aValue);
             }
         });
-        if(!P.ToolBar){
-            /**
-             * <code>PopupMenu</code> that assigned for this component.
-             * @property componentPopupMenu
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.componentPopupMenu = {};
-        }
+
         Object.defineProperty(this, "top", {
             get: function() {
                 var value = delegate.top;
@@ -224,14 +141,7 @@
                 delegate.top = P.boxAsJava(aValue);
             }
         });
-        if(!P.ToolBar){
-            /**
-             * Vertical coordinate of the component.
-             * @property top
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.top = 0;
-        }
+
         Object.defineProperty(this, "onComponentResized", {
             get: function() {
                 var value = delegate.onComponentResized;
@@ -241,28 +151,14 @@
                 delegate.onComponentResized = aValue;
             }
         });
-        if(!P.ToolBar){
-            /**
-             * Component resized event handler function.
-             * @property onComponentResized
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.onComponentResized = {};
-        }
+
         Object.defineProperty(this, "parent", {
             get: function() {
                 var value = delegate.parentWidget;
                 return P.boxAsJs(value);
             }
         });
-        if(!P.ToolBar){
-            /**
-             * Parent container of this widget.
-             * @property parentWidget
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.parent = {};
-        }
+
         Object.defineProperty(this, "onMouseEntered", {
             get: function() {
                 var value = delegate.onMouseEntered;
@@ -272,14 +168,7 @@
                 delegate.onMouseEntered = aValue;
             }
         });
-        if(!P.ToolBar){
-            /**
-             * Mouse entered over the component event handler function.
-             * @property onMouseEntered
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.onMouseEntered = {};
-        }
+
         Object.defineProperty(this, "toolTipText", {
             get: function() {
                 var value = delegate.toolTipText;
@@ -289,14 +178,7 @@
                 delegate.toolTipText = P.boxAsJava(aValue);
             }
         });
-        if(!P.ToolBar){
-            /**
-             * The tooltip string that has been set with.
-             * @property toolTipText
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.toolTipText = '';
-        }
+
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
@@ -306,28 +188,14 @@
                 delegate.height = P.boxAsJava(aValue);
             }
         });
-        if(!P.ToolBar){
-            /**
-             * Height of the component.
-             * @property height
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.height = 0;
-        }
+
         Object.defineProperty(this, "element", {
             get: function() {
                 var value = delegate.element;
                 return P.boxAsJs(value);
             }
         });
-        if(!P.ToolBar){
-            /**
-             * Native API. Returns low level html element. Applicable only in HTML5 client.
-             * @property element
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.element = {};
-        }
+
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -337,14 +205,7 @@
                 delegate.onComponentShown = aValue;
             }
         });
-        if(!P.ToolBar){
-            /**
-             * Component shown event handler function.
-             * @property onComponentShown
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.onComponentShown = {};
-        }
+
         Object.defineProperty(this, "onMouseMoved", {
             get: function() {
                 var value = delegate.onMouseMoved;
@@ -354,31 +215,7 @@
                 delegate.onMouseMoved = aValue;
             }
         });
-        if(!P.ToolBar){
-            /**
-             * Mouse moved event handler function.
-             * @property onMouseMoved
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.onMouseMoved = {};
-        }
-        Object.defineProperty(this, "visible", {
-            get: function() {
-                var value = delegate.visible;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.visible = P.boxAsJava(aValue);
-            }
-        });
-        if(!P.ToolBar){
-            /**
-             * Determines whether this component should be visible when its parent is visible.
-             * @property visible
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.visible = true;
-        }
+
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
@@ -388,14 +225,17 @@
                 delegate.opaque = P.boxAsJava(aValue);
             }
         });
-        if(!P.ToolBar){
-            /**
-             * True if this component is completely opaque.
-             * @property opaque
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.opaque = true;
-        }
+
+        Object.defineProperty(this, "visible", {
+            get: function() {
+                var value = delegate.visible;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.visible = P.boxAsJava(aValue);
+            }
+        });
+
         Object.defineProperty(this, "onComponentHidden", {
             get: function() {
                 var value = delegate.onComponentHidden;
@@ -405,14 +245,7 @@
                 delegate.onComponentHidden = aValue;
             }
         });
-        if(!P.ToolBar){
-            /**
-             * Component hidden event handler function.
-             * @property onComponentHidden
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.onComponentHidden = {};
-        }
+
         Object.defineProperty(this, "nextFocusableComponent", {
             get: function() {
                 var value = delegate.nextFocusableComponent;
@@ -422,14 +255,14 @@
                 delegate.nextFocusableComponent = P.boxAsJava(aValue);
             }
         });
-        if(!P.ToolBar){
-            /**
-             * Overrides the default focus traversal policy for this component's focus traversal cycle by unconditionally setting the specified component as the next component in the cycle, and this component as the specified component's previous component.
-             * @property nextFocusableComponent
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.nextFocusableComponent = {};
-        }
+
+        Object.defineProperty(this, "count", {
+            get: function() {
+                var value = delegate.count;
+                return P.boxAsJs(value);
+            }
+        });
+
         Object.defineProperty(this, "onKeyReleased", {
             get: function() {
                 var value = delegate.onKeyReleased;
@@ -439,14 +272,7 @@
                 delegate.onKeyReleased = aValue;
             }
         });
-        if(!P.ToolBar){
-            /**
-             * Key released event handler function.
-             * @property onKeyReleased
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.onKeyReleased = {};
-        }
+
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -456,28 +282,7 @@
                 delegate.onActionPerformed = aValue;
             }
         });
-        if(!P.ToolBar){
-            /**
-             * Main action performed event handler function.
-             * @property onActionPerformed
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.onActionPerformed = {};
-        }
-        Object.defineProperty(this, "count", {
-            get: function() {
-                var value = delegate.count;
-                return P.boxAsJs(value);
-            }
-        });
-        if(!P.ToolBar){
-            /**
-             * Gets the number of components in this panel.
-             * @property count
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.count = 0;
-        }
+
         Object.defineProperty(this, "focusable", {
             get: function() {
                 var value = delegate.focusable;
@@ -487,14 +292,7 @@
                 delegate.focusable = P.boxAsJava(aValue);
             }
         });
-        if(!P.ToolBar){
-            /**
-             * Determines whether this component may be focused.
-             * @property focusable
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.focusable = true;
-        }
+
         Object.defineProperty(this, "onKeyTyped", {
             get: function() {
                 var value = delegate.onKeyTyped;
@@ -504,14 +302,7 @@
                 delegate.onKeyTyped = aValue;
             }
         });
-        if(!P.ToolBar){
-            /**
-             * Key typed event handler function.
-             * @property onKeyTyped
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.onKeyTyped = {};
-        }
+
         Object.defineProperty(this, "onMouseWheelMoved", {
             get: function() {
                 var value = delegate.onMouseWheelMoved;
@@ -521,14 +312,7 @@
                 delegate.onMouseWheelMoved = aValue;
             }
         });
-        if(!P.ToolBar){
-            /**
-             * Mouse wheel moved event handler function.
-             * @property onMouseWheelMoved
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.onMouseWheelMoved = {};
-        }
+
         Object.defineProperty(this, "onComponentRemoved", {
             get: function() {
                 var value = delegate.onComponentRemoved;
@@ -538,28 +322,14 @@
                 delegate.onComponentRemoved = aValue;
             }
         });
-        if(!P.ToolBar){
-            /**
-             * Component removed event handler function.
-             * @property onComponentRemoved
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.onComponentRemoved = {};
-        }
+
         Object.defineProperty(this, "component", {
             get: function() {
                 var value = delegate.component;
                 return P.boxAsJs(value);
             }
         });
-        if(!P.ToolBar){
-            /**
-             * Native API. Returns low level swing component. Applicable only in J2SE swing client.
-             * @property component
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.component = {};
-        }
+
         Object.defineProperty(this, "onFocusGained", {
             get: function() {
                 var value = delegate.onFocusGained;
@@ -569,14 +339,7 @@
                 delegate.onFocusGained = aValue;
             }
         });
-        if(!P.ToolBar){
-            /**
-             * Keyboard focus gained by the component event.
-             * @property onFocusGained
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.onFocusGained = {};
-        }
+
         Object.defineProperty(this, "left", {
             get: function() {
                 var value = delegate.left;
@@ -586,14 +349,7 @@
                 delegate.left = P.boxAsJava(aValue);
             }
         });
-        if(!P.ToolBar){
-            /**
-             * Horizontal coordinate of the component.
-             * @property left
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.left = 0;
-        }
+
         Object.defineProperty(this, "background", {
             get: function() {
                 var value = delegate.background;
@@ -603,14 +359,7 @@
                 delegate.background = P.boxAsJava(aValue);
             }
         });
-        if(!P.ToolBar){
-            /**
-             * The background color of this component.
-             * @property background
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.background = {};
-        }
+
         Object.defineProperty(this, "onMouseClicked", {
             get: function() {
                 var value = delegate.onMouseClicked;
@@ -620,14 +369,7 @@
                 delegate.onMouseClicked = aValue;
             }
         });
-        if(!P.ToolBar){
-            /**
-             * Mouse clicked event handler function.
-             * @property onMouseClicked
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.onMouseClicked = {};
-        }
+
         Object.defineProperty(this, "onMouseExited", {
             get: function() {
                 var value = delegate.onMouseExited;
@@ -637,14 +379,7 @@
                 delegate.onMouseExited = aValue;
             }
         });
-        if(!P.ToolBar){
-            /**
-             * Mouse exited over the component event handler function.
-             * @property onMouseExited
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.onMouseExited = {};
-        }
+
         Object.defineProperty(this, "name", {
             get: function() {
                 var value = delegate.name;
@@ -654,14 +389,7 @@
                 delegate.name = P.boxAsJava(aValue);
             }
         });
-        if(!P.ToolBar){
-            /**
-             * Gets name of this component.
-             * @property name
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.name = '';
-        }
+
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
@@ -671,14 +399,7 @@
                 delegate.width = P.boxAsJava(aValue);
             }
         });
-        if(!P.ToolBar){
-            /**
-             * Width of the component.
-             * @property width
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.width = 0;
-        }
+
         Object.defineProperty(this, "font", {
             get: function() {
                 var value = delegate.font;
@@ -688,14 +409,7 @@
                 delegate.font = P.boxAsJava(aValue);
             }
         });
-        if(!P.ToolBar){
-            /**
-             * The font of this component.
-             * @property font
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.font = {};
-        }
+
         Object.defineProperty(this, "onKeyPressed", {
             get: function() {
                 var value = delegate.onKeyPressed;
@@ -705,14 +419,7 @@
                 delegate.onKeyPressed = aValue;
             }
         });
-        if(!P.ToolBar){
-            /**
-             * Key pressed event handler function.
-             * @property onKeyPressed
-             * @memberOf ToolBar
-             */
-            P.ToolBar.prototype.onKeyPressed = {};
-        }
+
     };
         /**
          * Appends the specified component to the end of this container.
@@ -750,17 +457,6 @@
         };
 
         /**
-         * Gets the container's children components.
-         * @method children
-         * @memberOf ToolBar
-         */
-        P.ToolBar.prototype.children = function() {
-            var delegate = this.unwrap();
-            var value = delegate.children();
-            return P.boxAsJs(value);
-        };
-
-        /**
          * Tries to acquire focus for this component.
          * @method focus
          * @memberOf ToolBar
@@ -768,6 +464,17 @@
         P.ToolBar.prototype.focus = function() {
             var delegate = this.unwrap();
             var value = delegate.focus();
+            return P.boxAsJs(value);
+        };
+
+        /**
+         * Gets the container's children components.
+         * @method children
+         * @memberOf ToolBar
+         */
+        P.ToolBar.prototype.children = function() {
+            var delegate = this.unwrap();
+            var value = delegate.children();
             return P.boxAsJs(value);
         };
 
@@ -784,4 +491,13 @@
             return P.boxAsJs(value);
         };
 
-})();
+
+    var className = "com.eas.client.forms.containers.ToolBar";
+    var javaClass = Java.type(className);
+    var ScriptsClass = Java.type("com.eas.script.Scripts");
+    var space = ScriptsClass.getSpace();
+    space.putPublisher(className, function(aDelegate) {
+        return new ToolBar(null, aDelegate);
+    });
+    return ToolBar;
+});

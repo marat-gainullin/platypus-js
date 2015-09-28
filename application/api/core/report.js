@@ -1,11 +1,6 @@
-(function() {
-    var className = "com.eas.client.report.Report";
-    var javaClass = Java.type(className);
-    var space = this['-platypus-scripts-space'];
-    space.putPublisher(className, function(aDelegate) {
-        return new P.Report(null, null, null, aDelegate);
-    });
-    
+/* global Java */
+
+define(['boxing'], function(P) {
     /**
      * Creates report, generated with template.
      * @param body The report binary body (array of byte).
@@ -13,7 +8,7 @@
      * @param name Name of the report. May be used as output file name.
      * @constructor Report Report
      */
-    P.Report = function (body, format, name) {
+    function Report(body, format, name) {
         var maxArgs = 3;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -28,8 +23,8 @@
                 return delegate;
             }
         });
-        if(P.Report.superclass)
-            P.Report.superclass.constructor.apply(this, arguments);
+        if(Report.superclass)
+            Report.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
     };
         /**
@@ -65,4 +60,13 @@
             return P.boxAsJs(value);
         };
 
-})();
+
+    var className = "com.eas.client.report.Report";
+    var javaClass = Java.type(className);
+    var ScriptsClass = Java.type("com.eas.script.Scripts");
+    var space = ScriptsClass.getSpace();
+    space.putPublisher(className, function(aDelegate) {
+        return new Report(null, null, null, aDelegate);
+    });
+    return Report;
+});

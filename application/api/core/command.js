@@ -1,16 +1,11 @@
-(function() {
-    var className = "com.eas.client.changes.Command";
-    var javaClass = Java.type(className);
-    var space = this['-platypus-scripts-space'];
-    space.putPublisher(className, function(aDelegate) {
-        return new P.Command(aDelegate);
-    });
-    
+/* global Java */
+
+define(['boxing'], function(P) {
     /**
      * Generated constructor.
      * @constructor Command Command
      */
-    P.Command = function () {
+    function Command() {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -22,8 +17,8 @@
                 return delegate;
             }
         });
-        if(P.Command.superclass)
-            P.Command.superclass.constructor.apply(this, arguments);
+        if(Command.superclass)
+            Command.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
         Object.defineProperty(this, "type", {
             get: function() {
@@ -31,55 +26,36 @@
                 return P.boxAsJs(value);
             }
         });
-        if(!P.Command){
-            /**
-             * Indicates the change's type (Insert, Update, Delete or Command).
-             * @property type
-             * @memberOf Command
-             */
-            P.Command.prototype.type = '';
-        }
+
         Object.defineProperty(this, "parameters", {
             get: function() {
                 var value = delegate.parameters;
                 return P.boxAsJs(value);
             }
         });
-        if(!P.Command){
-            /**
-             * Parameters of command.
-             * @property parameters
-             * @memberOf Command
-             */
-            P.Command.prototype.parameters = {};
-        }
+
         Object.defineProperty(this, "command", {
             get: function() {
                 var value = delegate.command;
                 return P.boxAsJs(value);
             }
         });
-        if(!P.Command){
-            /**
-             * Command sql text to be applied in a database.
-             * @property command
-             * @memberOf Command
-             */
-            P.Command.prototype.command = '';
-        }
+
         Object.defineProperty(this, "entity", {
             get: function() {
                 var value = delegate.entity;
                 return P.boxAsJs(value);
             }
         });
-        if(!P.Command){
-            /**
-             * Indicates the change's destination entity.
-             * @property entity
-             * @memberOf Command
-             */
-            P.Command.prototype.entity = '';
-        }
+
     };
-})();
+
+    var className = "com.eas.client.changes.Command";
+    var javaClass = Java.type(className);
+    var ScriptsClass = Java.type("com.eas.script.Scripts");
+    var space = ScriptsClass.getSpace();
+    space.putPublisher(className, function(aDelegate) {
+        return new Command(aDelegate);
+    });
+    return Command;
+});

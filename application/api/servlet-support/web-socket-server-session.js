@@ -1,16 +1,11 @@
-(function() {
-    var className = "com.eas.server.websocket.WebSocketServerSession";
-    var javaClass = Java.type(className);
-    var space = this['-platypus-scripts-space'];
-    space.putPublisher(className, function(aDelegate) {
-        return new P.WebSocketServerSession(aDelegate);
-    });
-    
+/* global Java */
+
+define(['boxing'], function(P) {
     /**
      * Generated constructor.
      * @constructor WebSocketServerSession WebSocketServerSession
      */
-    P.WebSocketServerSession = function () {
+    function WebSocketServerSession() {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -22,8 +17,8 @@
                 return delegate;
             }
         });
-        if(P.WebSocketServerSession.superclass)
-            P.WebSocketServerSession.superclass.constructor.apply(this, arguments);
+        if(WebSocketServerSession.superclass)
+            WebSocketServerSession.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
         Object.defineProperty(this, "query", {
             get: function() {
@@ -31,56 +26,28 @@
                 return P.boxAsJs(value);
             }
         });
-        if(!P.WebSocketServerSession){
-            /**
-             * Generated property jsDoc.
-             * @property query
-             * @memberOf WebSocketServerSession
-             */
-            P.WebSocketServerSession.prototype.query = '';
-        }
+
         Object.defineProperty(this, "protocolVersion", {
             get: function() {
                 var value = delegate.protocolVersion;
                 return P.boxAsJs(value);
             }
         });
-        if(!P.WebSocketServerSession){
-            /**
-             * Generated property jsDoc.
-             * @property protocolVersion
-             * @memberOf WebSocketServerSession
-             */
-            P.WebSocketServerSession.prototype.protocolVersion = '';
-        }
+
         Object.defineProperty(this, "id", {
             get: function() {
                 var value = delegate.id;
                 return P.boxAsJs(value);
             }
         });
-        if(!P.WebSocketServerSession){
-            /**
-             * Generated property jsDoc.
-             * @property id
-             * @memberOf WebSocketServerSession
-             */
-            P.WebSocketServerSession.prototype.id = '';
-        }
+
         Object.defineProperty(this, "uri", {
             get: function() {
                 var value = delegate.uri;
                 return P.boxAsJs(value);
             }
         });
-        if(!P.WebSocketServerSession){
-            /**
-             * Generated property jsDoc.
-             * @property uri
-             * @memberOf WebSocketServerSession
-             */
-            P.WebSocketServerSession.prototype.uri = '';
-        }
+
     };
         /**
          *
@@ -104,4 +71,13 @@
             return P.boxAsJs(value);
         };
 
-})();
+
+    var className = "com.eas.server.websocket.WebSocketServerSession";
+    var javaClass = Java.type(className);
+    var ScriptsClass = Java.type("com.eas.script.Scripts");
+    var space = ScriptsClass.getSpace();
+    space.putPublisher(className, function(aDelegate) {
+        return new WebSocketServerSession(aDelegate);
+    });
+    return WebSocketServerSession;
+});

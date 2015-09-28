@@ -1,16 +1,11 @@
-(function() {
-    var className = "com.eas.client.events.PublishedSourcedEvent";
-    var javaClass = Java.type(className);
-    var space = this['-platypus-scripts-space'];
-    space.putPublisher(className, function(aDelegate) {
-        return new P.PublishedSourcedEvent(aDelegate);
-    });
-    
+/* global Java */
+
+define(['boxing'], function(P) {
     /**
      * Generated constructor.
      * @constructor PublishedSourcedEvent PublishedSourcedEvent
      */
-    P.PublishedSourcedEvent = function () {
+    function PublishedSourcedEvent() {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -22,8 +17,8 @@
                 return delegate;
             }
         });
-        if(P.PublishedSourcedEvent.superclass)
-            P.PublishedSourcedEvent.superclass.constructor.apply(this, arguments);
+        if(PublishedSourcedEvent.superclass)
+            PublishedSourcedEvent.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
         Object.defineProperty(this, "source", {
             get: function() {
@@ -31,13 +26,15 @@
                 return P.boxAsJs(value);
             }
         });
-        if(!P.PublishedSourcedEvent){
-            /**
-             * The source object of the event.
-             * @property source
-             * @memberOf PublishedSourcedEvent
-             */
-            P.PublishedSourcedEvent.prototype.source = {};
-        }
+
     };
-})();
+
+    var className = "com.eas.client.events.PublishedSourcedEvent";
+    var javaClass = Java.type(className);
+    var ScriptsClass = Java.type("com.eas.script.Scripts");
+    var space = ScriptsClass.getSpace();
+    space.putPublisher(className, function(aDelegate) {
+        return new PublishedSourcedEvent(aDelegate);
+    });
+    return PublishedSourcedEvent;
+});

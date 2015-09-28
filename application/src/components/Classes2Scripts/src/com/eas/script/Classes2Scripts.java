@@ -53,7 +53,9 @@ public class Classes2Scripts {
     private static final String JAVA_CLASS_FILE_EXT = ".class";//NOI18N
     private static final String CONSTRUCTOR_TEMPLATE = getStringResource("constructorTemplate.js");//NOI18N
     private static final Set<String> preservedFilesNames = new HashSet<>(Arrays.asList(new String[]{
-        "platypus.js", "platypus-jsdoc.js", "internals.js", "http-context.js", "managed.js", "orderer.js", "ui.js", "orm.js"
+        "platypus.js", "platypus-jsdoc.js", "internals.js"
+            , "http-context.js", "managed.js", "orderer.js"
+            , "ui.js", "orm.js", "boxing.js", "logger.js"
     }));
 
     private static final int DEFAULT_IDENTATION_WIDTH = 4;
@@ -222,7 +224,8 @@ public class Classes2Scripts {
             Logger.getLogger(Classes2Scripts.class.getName())
                     .log(Level.FINE, "Processing jar: {0}", new String[]{jarFile.getAbsolutePath()});
             URLClassLoader cl = new URLClassLoader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
-            Set<File> jarApiFiles = new HashSet<>();
+            List<File> jarApiFiles = new ArrayList<>();
+            List<String> jarApiClasses = new ArrayList<>();
             File subDir = new File(destDirectory, FileNameSupport.getFileName(FileUtils.removeExtension(jarFile.getName())));
             Enumeration<JarEntry> e = jar.entries();
             while (e.hasMoreElements()) {
@@ -243,6 +246,7 @@ public class Classes2Scripts {
                                 File resultFile = new File(subDir, FileNameSupport.getFileName(jsConstructor.name) + PlatypusFiles.JAVASCRIPT_FILE_END); //NOI18N
                                 FileUtils.writeString(resultFile, js, SettingsConstants.COMMON_ENCODING);
                                 jarApiFiles.add(resultFile);
+                                jarApiClasses.add(jsConstructor.name);
                             }
                         }
                     }
@@ -251,29 +255,37 @@ public class Classes2Scripts {
                 }
             }
             if (!jarApiFiles.isEmpty()) {
-                StringBuilder jarApiDeps = new StringBuilder();
-                jarApiDeps.append("try{\n");
-                jarApiDeps.append(getIndentStr(1)).append("P.require([\n");
-                File[] f = jarApiFiles.toArray(new File[]{});
-                for (int i = 0; i < f.length; i++) {
-                    File jarApiFile = f[i];
+                StringBuilder apiDeps = new StringBuilder();
+                apiDeps.append("define([\n");
+                StringBuilder deps = new StringBuilder();
+                StringBuilder depsRes = new StringBuilder();
+                StringBuilder moduleItems = new StringBuilder();
+                for (int i = 0; i < jarApiFiles.size(); i++) {
+                    File jarApiFile = jarApiFiles.get(i);
+                    String apiClass = jarApiClasses.get(i);
                     if (i == 0) {
-                        jarApiDeps.append(getIndentStr(2)).append("  ");
+                        deps.append(getIndentStr(1)).append("  ");
+                        depsRes.append(getIndentStr(1)).append("  ");
+                        moduleItems.append(getIndentStr(2)).append("  ");
                     } else {
-                        jarApiDeps.append(getIndentStr(2)).append(", ");
+                        deps.append(getIndentStr(1)).append(", ");
+                        depsRes.append(getIndentStr(1)).append(", ");
+                        moduleItems.append(getIndentStr(2)).append(", ");
                     }
                     String includeName = jarApiFile.getName();
                     if (includeName.toLowerCase().endsWith(PlatypusFiles.JAVASCRIPT_FILE_END)) {
                         includeName = includeName.substring(0, includeName.length() - PlatypusFiles.JAVASCRIPT_FILE_END.length());
                     }
-                    jarApiDeps.append("'./").append(includeName).append("'\n");
+                    deps.append("'./").append(includeName).append("'\n");
+                    depsRes.append(apiClass).append("\n");
+                    moduleItems.append(apiClass).append(": ").append(apiClass).append("\n");
                 }
-                jarApiDeps.append(getIndentStr(1)).append("]);\n");
-                jarApiDeps.append("}catch(e){\n");
-                jarApiDeps.append(getIndentStr(1)).append("P.Logger.severe(e);\n");
-                jarApiDeps.append("}\n");
+                apiDeps.append(deps).append("]").append(", function(\n");
+                apiDeps.append(depsRes).append(getIndentStr(1)).append("){\n").append(getIndentStr(1)).append("return {\n");
+                apiDeps.append(moduleItems).append(getIndentStr(1)).append("};\n");
+                apiDeps.append("});\n");
                 File depsFile = Paths.get(subDir.toURI()).resolve("index.js").toFile();
-                FileUtils.writeString(depsFile, jarApiDeps.toString(), SettingsConstants.COMMON_ENCODING);
+                FileUtils.writeString(depsFile, apiDeps.toString(), SettingsConstants.COMMON_ENCODING);
             }
         }
     }
@@ -466,13 +478,16 @@ public class Classes2Scripts {
         }
         sb.append(getIndentStr(--i));
         sb.append("});\n");
+        /*
+        TODO: 
         sb.append(getIndentStr(i)).append("if(!P.").append(namespace).append("){\n");
         sb.append(getPropertyJsDoc(namespace, property, ++i)).append("\n");
         sb.append(getIndentStr(i)).append("P.").append(namespace).append(".prototype.").append(apiPropName).append(" = ").append(getDefaultLiteralOfType(property.typeName)).append(";\n");
         sb.append(getIndentStr(--i)).append("}");
+        */
         return sb.toString();
     }
-
+/*
     private String getDefaultLiteralOfType(String aTypeName) {
         if ("Number".equals(aTypeName)) {
             return "0";
@@ -488,7 +503,7 @@ public class Classes2Scripts {
             return "{}";
         }
     }
-
+*/
     private String getMethodPart(String namespace, Method method, int ident) {
         FunctionInfo fi = getFunctionInfo(method.getName(), method);
         StringBuilder sb = new StringBuilder();

@@ -1,11 +1,6 @@
-(function() {
-    var className = "com.eas.client.reports.ReportTemplate";
-    var javaClass = Java.type(className);
-    var space = this['-platypus-scripts-space'];
-    space.putPublisher(className, function(aDelegate) {
-        return new P.ReportTemplate(null, null, null, null, aDelegate);
-    });
-    
+/* global Java */
+
+define(['boxing'], function(P) {
     /**
      * Creates report template.
      * @param content The report binary body (array of byte).
@@ -14,7 +9,7 @@
      * @param data Object that propeties can be added to the report.
      * @constructor ReportTemplate ReportTemplate
      */
-    P.ReportTemplate = function (content, name, format, data) {
+    function ReportTemplate(content, name, format, data) {
         var maxArgs = 4;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -30,8 +25,8 @@
                 return delegate;
             }
         });
-        if(P.ReportTemplate.superclass)
-            P.ReportTemplate.superclass.constructor.apply(this, arguments);
+        if(ReportTemplate.superclass)
+            ReportTemplate.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
         Object.defineProperty(this, "timezoneOffset", {
             get: function() {
@@ -42,14 +37,7 @@
                 delegate.timezoneOffset = P.boxAsJava(aValue);
             }
         });
-        if(!P.ReportTemplate){
-            /**
-             * Array of name collections, that will fixed.
-             * @property timezoneOffset
-             * @memberOf ReportTemplate
-             */
-            P.ReportTemplate.prototype.timezoneOffset = 0;
-        }
+
         Object.defineProperty(this, "name", {
             get: function() {
                 var value = delegate.name;
@@ -59,14 +47,7 @@
                 delegate.name = P.boxAsJava(aValue);
             }
         });
-        if(!P.ReportTemplate){
-            /**
-             * Name of the generated report's file.
-             * @property name
-             * @memberOf ReportTemplate
-             */
-            P.ReportTemplate.prototype.name = '';
-        }
+
         Object.defineProperty(this, "fixed", {
             get: function() {
                 var value = delegate.fixed;
@@ -76,14 +57,7 @@
                 delegate.fixed = aValue;
             }
         });
-        if(!P.ReportTemplate){
-            /**
-             * Array of name collections, that will fixed.
-             * @property fixed
-             * @memberOf ReportTemplate
-             */
-            P.ReportTemplate.prototype.fixed = {};
-        }
+
     };
         /**
          * Generate report from template.
@@ -96,4 +70,13 @@
             return P.boxAsJs(value);
         };
 
-})();
+
+    var className = "com.eas.client.reports.ReportTemplate";
+    var javaClass = Java.type(className);
+    var ScriptsClass = Java.type("com.eas.script.Scripts");
+    var space = ScriptsClass.getSpace();
+    space.putPublisher(className, function(aDelegate) {
+        return new ReportTemplate(null, null, null, null, aDelegate);
+    });
+    return ReportTemplate;
+});

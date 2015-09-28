@@ -1,7 +1,9 @@
-try{
-    P.require([
-          './session'
-    ]);
-}catch(e){
-    P.Logger.severe(e);
-}
+define([
+      './session'
+], function(
+      Session
+    ){
+    return {
+          Session: Session
+    };
+});

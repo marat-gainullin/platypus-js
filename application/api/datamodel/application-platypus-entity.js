@@ -1,16 +1,11 @@
-(function() {
-    var className = "com.eas.client.model.application.ApplicationPlatypusEntity";
-    var javaClass = Java.type(className);
-    var space = this['-platypus-scripts-space'];
-    space.putPublisher(className, function(aDelegate) {
-        return new P.ApplicationPlatypusEntity(aDelegate);
-    });
-    
+/* global Java */
+
+define(['boxing'], function(P) {
     /**
      * Generated constructor.
      * @constructor ApplicationPlatypusEntity ApplicationPlatypusEntity
      */
-    P.ApplicationPlatypusEntity = function () {
+    function ApplicationPlatypusEntity() {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -22,8 +17,8 @@
                 return delegate;
             }
         });
-        if(P.ApplicationPlatypusEntity.superclass)
-            P.ApplicationPlatypusEntity.superclass.constructor.apply(this, arguments);
+        if(ApplicationPlatypusEntity.superclass)
+            ApplicationPlatypusEntity.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
         Object.defineProperty(this, "onRequeried", {
             get: function() {
@@ -34,14 +29,7 @@
                 delegate.onRequeried = aValue;
             }
         });
-        if(!P.ApplicationPlatypusEntity){
-            /**
-             * The handler function for the event occured after the entity's data have been requeried.
-             * @property onRequeried
-             * @memberOf ApplicationPlatypusEntity
-             */
-            P.ApplicationPlatypusEntity.prototype.onRequeried = {};
-        }
+
         Object.defineProperty(this, "elementClass", {
             get: function() {
                 var value = delegate.elementClass;
@@ -51,14 +39,7 @@
                 delegate.elementClass = aValue;
             }
         });
-        if(!P.ApplicationPlatypusEntity){
-            /**
-             * Experimental. The constructor funciton for the entity's data array elements.
-             * @property elementClass
-             * @memberOf ApplicationPlatypusEntity
-             */
-            P.ApplicationPlatypusEntity.prototype.elementClass = {};
-        }
+
     };
         /**
          * Applies the updates into the database and commits the transaction.
@@ -136,4 +117,13 @@
             return P.boxAsJs(value);
         };
 
-})();
+
+    var className = "com.eas.client.model.application.ApplicationPlatypusEntity";
+    var javaClass = Java.type(className);
+    var ScriptsClass = Java.type("com.eas.script.Scripts");
+    var space = ScriptsClass.getSpace();
+    space.putPublisher(className, function(aDelegate) {
+        return new ApplicationPlatypusEntity(aDelegate);
+    });
+    return ApplicationPlatypusEntity;
+});

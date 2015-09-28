@@ -1,11 +1,6 @@
-(function() {
-    var className = "com.eas.client.forms.Anchors";
-    var javaClass = Java.type(className);
-    var space = this['-platypus-scripts-space'];
-    space.putPublisher(className, function(aDelegate) {
-        return new P.Anchors(null, null, null, null, null, null, aDelegate);
-    });
-    
+/* global Java */
+
+define(['boxing'], function(P) {
     /**
      * Component's layout anchors for AnchorsPane.
      * Two constraint values of three possible must be provided for X and Y axis, other constraints must be set to <code>null</code>.* Parameters values can be provided in pixels, per cents or numbers, e.g. '30px', '30' or 10%.
@@ -17,7 +12,7 @@
      * @param bottom a bottom anchor
      * @constructor Anchors Anchors
      */
-    P.Anchors = function (left, width, right, top, height, bottom) {
+    function Anchors(left, width, right, top, height, bottom) {
         var maxArgs = 6;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -35,8 +30,17 @@
                 return delegate;
             }
         });
-        if(P.Anchors.superclass)
-            P.Anchors.superclass.constructor.apply(this, arguments);
+        if(Anchors.superclass)
+            Anchors.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
     };
-})();
+
+    var className = "com.eas.client.forms.Anchors";
+    var javaClass = Java.type(className);
+    var ScriptsClass = Java.type("com.eas.script.Scripts");
+    var space = ScriptsClass.getSpace();
+    space.putPublisher(className, function(aDelegate) {
+        return new Anchors(null, null, null, null, null, null, aDelegate);
+    });
+    return Anchors;
+});

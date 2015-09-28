@@ -1,16 +1,11 @@
-(function() {
-    var className = "com.eas.client.changes.ChangeValue";
-    var javaClass = Java.type(className);
-    var space = this['-platypus-scripts-space'];
-    space.putPublisher(className, function(aDelegate) {
-        return new P.ChangeValue(aDelegate);
-    });
-    
+/* global Java */
+
+define(['boxing'], function(P) {
     /**
      * Generated constructor.
      * @constructor ChangeValue ChangeValue
      */
-    P.ChangeValue = function () {
+    function ChangeValue() {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -22,8 +17,8 @@
                 return delegate;
             }
         });
-        if(P.ChangeValue.superclass)
-            P.ChangeValue.superclass.constructor.apply(this, arguments);
+        if(ChangeValue.superclass)
+            ChangeValue.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
         Object.defineProperty(this, "name", {
             get: function() {
@@ -31,27 +26,22 @@
                 return P.boxAsJs(value);
             }
         });
-        if(!P.ChangeValue){
-            /**
-             * Name of changed property.
-             * @property name
-             * @memberOf ChangeValue
-             */
-            P.ChangeValue.prototype.name = '';
-        }
+
         Object.defineProperty(this, "value", {
             get: function() {
                 var value = delegate.value;
                 return P.boxAsJs(value);
             }
         });
-        if(!P.ChangeValue){
-            /**
-             * Value of changed property.
-             * @property value
-             * @memberOf ChangeValue
-             */
-            P.ChangeValue.prototype.value = {};
-        }
+
     };
-})();
+
+    var className = "com.eas.client.changes.ChangeValue";
+    var javaClass = Java.type(className);
+    var ScriptsClass = Java.type("com.eas.script.Scripts");
+    var space = ScriptsClass.getSpace();
+    space.putPublisher(className, function(aDelegate) {
+        return new ChangeValue(aDelegate);
+    });
+    return ChangeValue;
+});

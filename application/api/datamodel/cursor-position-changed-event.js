@@ -1,16 +1,11 @@
-(function() {
-    var className = "com.eas.client.model.application.CursorPositionChangedEvent";
-    var javaClass = Java.type(className);
-    var space = this['-platypus-scripts-space'];
-    space.putPublisher(className, function(aDelegate) {
-        return new P.CursorPositionChangedEvent(aDelegate);
-    });
-    
+/* global Java */
+
+define(['boxing'], function(P) {
     /**
      * Generated constructor.
      * @constructor CursorPositionChangedEvent CursorPositionChangedEvent
      */
-    P.CursorPositionChangedEvent = function () {
+    function CursorPositionChangedEvent() {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -22,8 +17,8 @@
                 return delegate;
             }
         });
-        if(P.CursorPositionChangedEvent.superclass)
-            P.CursorPositionChangedEvent.superclass.constructor.apply(this, arguments);
+        if(CursorPositionChangedEvent.superclass)
+            CursorPositionChangedEvent.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
         Object.defineProperty(this, "oldIndex", {
             get: function() {
@@ -31,41 +26,29 @@
                 return P.boxAsJs(value);
             }
         });
-        if(!P.CursorPositionChangedEvent){
-            /**
-             * Cursor position the cursor was on.
-             * @property oldIndex
-             * @memberOf CursorPositionChangedEvent
-             */
-            P.CursorPositionChangedEvent.prototype.oldIndex = 0;
-        }
+
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;
                 return P.boxAsJs(value);
             }
         });
-        if(!P.CursorPositionChangedEvent){
-            /**
-             * The source object of the event.
-             * @property source
-             * @memberOf CursorPositionChangedEvent
-             */
-            P.CursorPositionChangedEvent.prototype.source = {};
-        }
+
         Object.defineProperty(this, "newIndex", {
             get: function() {
                 var value = delegate.newIndex;
                 return P.boxAsJs(value);
             }
         });
-        if(!P.CursorPositionChangedEvent){
-            /**
-             * Cursor position the cursor has been set on.
-             * @property newIndex
-             * @memberOf CursorPositionChangedEvent
-             */
-            P.CursorPositionChangedEvent.prototype.newIndex = 0;
-        }
+
     };
-})();
+
+    var className = "com.eas.client.model.application.CursorPositionChangedEvent";
+    var javaClass = Java.type(className);
+    var ScriptsClass = Java.type("com.eas.script.Scripts");
+    var space = ScriptsClass.getSpace();
+    space.putPublisher(className, function(aDelegate) {
+        return new CursorPositionChangedEvent(aDelegate);
+    });
+    return CursorPositionChangedEvent;
+});

@@ -1,16 +1,11 @@
-(function() {
-    var className = "com.eas.client.model.application.ApplicationDbEntity";
-    var javaClass = Java.type(className);
-    var space = this['-platypus-scripts-space'];
-    space.putPublisher(className, function(aDelegate) {
-        return new P.ApplicationDbEntity(aDelegate);
-    });
-    
+/* global Java */
+
+define(['boxing'], function(P) {
     /**
      * Generated constructor.
      * @constructor ApplicationDbEntity ApplicationDbEntity
      */
-    P.ApplicationDbEntity = function () {
+    function ApplicationDbEntity() {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -22,8 +17,8 @@
                 return delegate;
             }
         });
-        if(P.ApplicationDbEntity.superclass)
-            P.ApplicationDbEntity.superclass.constructor.apply(this, arguments);
+        if(ApplicationDbEntity.superclass)
+            ApplicationDbEntity.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
         Object.defineProperty(this, "onRequeried", {
             get: function() {
@@ -34,14 +29,7 @@
                 delegate.onRequeried = aValue;
             }
         });
-        if(!P.ApplicationDbEntity){
-            /**
-             * The handler function for the event occured after the entity's data have been requeried.
-             * @property onRequeried
-             * @memberOf ApplicationDbEntity
-             */
-            P.ApplicationDbEntity.prototype.onRequeried = {};
-        }
+
         Object.defineProperty(this, "elementClass", {
             get: function() {
                 var value = delegate.elementClass;
@@ -51,14 +39,7 @@
                 delegate.elementClass = aValue;
             }
         });
-        if(!P.ApplicationDbEntity){
-            /**
-             * Experimental. The constructor funciton for the entity's data array elements.
-             * @property elementClass
-             * @memberOf ApplicationDbEntity
-             */
-            P.ApplicationDbEntity.prototype.elementClass = {};
-        }
+
     };
         /**
          * Applies the updates into the database and commits the transaction.
@@ -136,4 +117,13 @@
             return P.boxAsJs(value);
         };
 
-})();
+
+    var className = "com.eas.client.model.application.ApplicationDbEntity";
+    var javaClass = Java.type(className);
+    var ScriptsClass = Java.type("com.eas.script.Scripts");
+    var space = ScriptsClass.getSpace();
+    space.putPublisher(className, function(aDelegate) {
+        return new ApplicationDbEntity(aDelegate);
+    });
+    return ApplicationDbEntity;
+});

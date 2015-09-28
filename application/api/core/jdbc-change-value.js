@@ -1,16 +1,11 @@
-(function() {
-    var className = "com.eas.client.changes.JdbcChangeValue";
-    var javaClass = Java.type(className);
-    var space = this['-platypus-scripts-space'];
-    space.putPublisher(className, function(aDelegate) {
-        return new P.JdbcChangeValue(aDelegate);
-    });
-    
+/* global Java */
+
+define(['boxing'], function(P) {
     /**
      * Generated constructor.
      * @constructor JdbcChangeValue JdbcChangeValue
      */
-    P.JdbcChangeValue = function () {
+    function JdbcChangeValue() {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -22,8 +17,8 @@
                 return delegate;
             }
         });
-        if(P.JdbcChangeValue.superclass)
-            P.JdbcChangeValue.superclass.constructor.apply(this, arguments);
+        if(JdbcChangeValue.superclass)
+            JdbcChangeValue.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
         Object.defineProperty(this, "name", {
             get: function() {
@@ -31,27 +26,22 @@
                 return P.boxAsJs(value);
             }
         });
-        if(!P.JdbcChangeValue){
-            /**
-             * Name of changed property.
-             * @property name
-             * @memberOf JdbcChangeValue
-             */
-            P.JdbcChangeValue.prototype.name = '';
-        }
+
         Object.defineProperty(this, "value", {
             get: function() {
                 var value = delegate.value;
                 return P.boxAsJs(value);
             }
         });
-        if(!P.JdbcChangeValue){
-            /**
-             * Value of changed property.
-             * @property value
-             * @memberOf JdbcChangeValue
-             */
-            P.JdbcChangeValue.prototype.value = {};
-        }
+
     };
-})();
+
+    var className = "com.eas.client.changes.JdbcChangeValue";
+    var javaClass = Java.type(className);
+    var ScriptsClass = Java.type("com.eas.script.Scripts");
+    var space = ScriptsClass.getSpace();
+    space.putPublisher(className, function(aDelegate) {
+        return new JdbcChangeValue(aDelegate);
+    });
+    return JdbcChangeValue;
+});

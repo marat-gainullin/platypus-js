@@ -1,4 +1,4 @@
-(function () {
+define(function () {
     var releaseName = '-platypus-orm-release-func';
     /**
      * Substitutes properties of anObject with observable properties using Object.defineProperty().
@@ -24,7 +24,7 @@
                         set: function (aValue) {
                             var _oldValue = container[_p];
                             var _beforeState = null;
-                            if(aOnBeforeChange)
+                            if (aOnBeforeChange)
                                 _beforeState = aOnBeforeChange(anObject, {source: anObject, propertyName: _p, oldValue: _oldValue, newValue: aValue});
                             container[_p] = aValue;
                             aOnChange(anObject, {source: anObject, propertyName: _p, oldValue: _oldValue, newValue: aValue, beforeState: _beforeState});
@@ -125,7 +125,7 @@
         Object.defineProperty(aTarget, "splice", {
             value: function () {
                 var beginDeleteAt = arguments[0];
-                if(beginDeleteAt < 0)
+                if (beginDeleteAt < 0)
                     beginDeleteAt = aTarget.length - beginDeleteAt;
                 var deleted = Array.prototype.splice.apply(aTarget, arguments);
                 var added = [];
@@ -137,10 +137,10 @@
                 if (added.length > 0) {
                     aTarget.cursor = added[added.length - 1];
                 } else {
-                    if (deleted.indexOf(cursor) !== -1){
-                        if(beginDeleteAt >= 0 && beginDeleteAt < aTarget.length)
+                    if (deleted.indexOf(cursor) !== -1) {
+                        if (beginDeleteAt >= 0 && beginDeleteAt < aTarget.length)
                             aTarget.cursor = aTarget[beginDeleteAt];
-                        else if(beginDeleteAt - 1 >= 0 && beginDeleteAt - 1 < aTarget.length)
+                        else if (beginDeleteAt - 1 >= 0 && beginDeleteAt - 1 < aTarget.length)
                             aTarget.cursor = aTarget[beginDeleteAt - 1];
                         else
                             aTarget.cursor = null;
@@ -164,7 +164,9 @@
         });
         return aTarget;
     }
-    Object.defineProperty(this.P, 'manageObject', {value: manageObject});
-    Object.defineProperty(this.P, 'unmanageObject', {value: unmanageObject});
-    Object.defineProperty(this.P, 'manageArray', {value: manageArray});
-})();
+    return {
+        manageObject: manageObject,
+        unmanageObject: unmanageObject,
+        manageArray: manageArray
+    };
+});

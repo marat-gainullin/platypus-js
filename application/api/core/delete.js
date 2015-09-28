@@ -1,16 +1,11 @@
-(function() {
-    var className = "com.eas.client.changes.Delete";
-    var javaClass = Java.type(className);
-    var space = this['-platypus-scripts-space'];
-    space.putPublisher(className, function(aDelegate) {
-        return new P.Delete(aDelegate);
-    });
-    
+/* global Java */
+
+define(['boxing'], function(P) {
     /**
      * Generated constructor.
      * @constructor Delete Delete
      */
-    P.Delete = function () {
+    function Delete() {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -22,8 +17,8 @@
                 return delegate;
             }
         });
-        if(P.Delete.superclass)
-            P.Delete.superclass.constructor.apply(this, arguments);
+        if(Delete.superclass)
+            Delete.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
         Object.defineProperty(this, "keys", {
             get: function() {
@@ -31,41 +26,29 @@
                 return P.boxAsJs(value);
             }
         });
-        if(!P.Delete){
-            /**
-             * Keys values used for identification of deleted data.
-             * @property keys
-             * @memberOf Delete
-             */
-            P.Delete.prototype.keys = {};
-        }
+
         Object.defineProperty(this, "type", {
             get: function() {
                 var value = delegate.type;
                 return P.boxAsJs(value);
             }
         });
-        if(!P.Delete){
-            /**
-             * Indicates the change's type (Insert, Update, Delete or Command).
-             * @property type
-             * @memberOf Delete
-             */
-            P.Delete.prototype.type = '';
-        }
+
         Object.defineProperty(this, "entity", {
             get: function() {
                 var value = delegate.entity;
                 return P.boxAsJs(value);
             }
         });
-        if(!P.Delete){
-            /**
-             * Indicates the change's destination entity.
-             * @property entity
-             * @memberOf Delete
-             */
-            P.Delete.prototype.entity = '';
-        }
+
     };
-})();
+
+    var className = "com.eas.client.changes.Delete";
+    var javaClass = Java.type(className);
+    var ScriptsClass = Java.type("com.eas.script.Scripts");
+    var space = ScriptsClass.getSpace();
+    space.putPublisher(className, function(aDelegate) {
+        return new Delete(aDelegate);
+    });
+    return Delete;
+});
