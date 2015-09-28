@@ -81,22 +81,22 @@ public class RestPointsScanner implements ApplicationSourceIndexer.ScanCallback 
                         RPCPoint rpcPoint = new RPCPoint(aAppElementName, propName);
                         Set<JsDoc.Tag> tags = tagsEntry.getValue();
                         tags.stream().forEach((JsDoc.Tag aTag) -> {
-                            if (GET_ANNOTATION.equals(aTag.getName())) {
+                            if (GET_ANNOTATION.equalsIgnoreCase(aTag.getName())) {
                                 extractUri(rpcPoint, aTag, (String aUri) -> {
                                     gets.put(aUri, rpcPoint);
                                 });
                             }
-                            if (PUT_ANNOTATION.equals(aTag.getName())) {
+                            if (PUT_ANNOTATION.equalsIgnoreCase(aTag.getName())) {
                                 extractUri(rpcPoint, aTag, (String aUri) -> {
                                     puts.put(aUri, rpcPoint);
                                 });
                             }
-                            if (POST_ANNOTATION.equals(aTag.getName())) {
+                            if (POST_ANNOTATION.equalsIgnoreCase(aTag.getName())) {
                                 extractUri(rpcPoint, aTag, (String aUri) -> {
                                     posts.put(aUri, rpcPoint);
                                 });
                             }
-                            if (DELETE_ANNOTATION.equals(aTag.getName())) {
+                            if (DELETE_ANNOTATION.equalsIgnoreCase(aTag.getName())) {
                                 extractUri(rpcPoint, aTag, (String aUri) -> {
                                     deletes.put(aUri, rpcPoint);
                                 });
