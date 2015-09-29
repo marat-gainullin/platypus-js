@@ -362,10 +362,12 @@
                     var paramValues = aHttpRequest.getParameterValues(aParamName);
                     if (paramValues.length === 1) {
                         Object.defineProperty(self, aParamName, {
-                            value: aHttpRequest.getParameter(aParamName)
+                            enumerable: true,
+                            value: P.boxAsJs(aHttpRequest.getParameter(aParamName))
                         });
                     } else {
                         Object.defineProperty(self, aParamName, {
+                            enumerable: true,
                             value: P.boxAsJs(paramValues)
                         });
                     }
@@ -380,7 +382,8 @@
                 while (headerNames.hasMoreElements()) {
                     var headerName = headerNames.nextElement();
                     Object.defineProperty(self, headerName, {
-                        value: aHttpRequest.getHeader(headerName)
+                        enumerable: true,
+                        value: P.boxAsJs(aHttpRequest.getHeader(headerName))
                     });
                 }
             }
@@ -543,6 +546,7 @@
             var headerNames = aHttpResponse.getHeaderNames();
             headerNames.forEach(function (aHeaderName) {
                 Object.defineProperty(self, aHeaderName, {
+                    enumerable: true,
                     get: function () {
                         return aHttpResponse.getHeader(aHeaderName);
                     },
