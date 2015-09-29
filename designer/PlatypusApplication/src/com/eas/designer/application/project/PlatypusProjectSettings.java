@@ -103,6 +103,10 @@ public interface PlatypusProjectSettings {
      */
     int getDebugClientPort();
 
+    boolean getBrowserCacheBusting();
+    
+    boolean getGlobalAPI();
+    
     /**
      * Gets JMX debugging port for Platypus Application Server on local computer
      * on development if null or empty, use default value.
@@ -232,13 +236,17 @@ public interface PlatypusProjectSettings {
     void setClientVmOptions(String aValue);
 
     /**
-     * Sets JMX debugging port for Platypus Client on local computer on
+     * Sets JPDA debugging port for Platypus Client on local computer on
      * development.
      *
-     * @param aValue JMX debugging port
+     * @param aValue JPDA debugging port
      */
     void setDebugClientPort(int aValue);
 
+    void setBrowserCacheBusting(boolean aValue);
+    
+    void setGlobalAPI(boolean aValue);
+    
     /**
      * Sets JMX debugging port for Platypus Application Server on local computer
      * on development.

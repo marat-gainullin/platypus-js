@@ -163,7 +163,7 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
                 arguments.add(connection.getDatabaseURL());
                 arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_USERNAME_CONF_PARAM);
                 arguments.add(connection.getUser());
-                if(connection.getPassword() != null && !connection.getPassword().isEmpty()){
+                if (connection.getPassword() != null && !connection.getPassword().isEmpty()) {
                     arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_PASSWORD_CONF_PARAM);
                     arguments.add(connection.getPassword());
                 }
@@ -182,6 +182,10 @@ public final class PlatypusServerInstance implements Server, ServerInstanceImple
         } else if (pps.getDefaultDataSourceName() != null && !pps.getDefaultDataSourceName().isEmpty()) {
             io.getErr().println(NbBundle.getMessage(PlatypusServerInstance.class, "MSG_Missing_App_Database"));
         }
+        if (project.getSettings().getGlobalAPI()) {
+            arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.GLOBAL_API_CONF_PARAM);
+        }
+
         arguments.add(ProjectRunner.OPTION_PREFIX + ServerMain.APP_ELEMENT_CONF_PARAM);
         arguments.add(PlatypusProjectSettings.START_JS_FILE_NAME);
 

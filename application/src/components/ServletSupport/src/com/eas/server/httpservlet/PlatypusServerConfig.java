@@ -17,6 +17,7 @@ public class PlatypusServerConfig {
     // configuration parameters
     public static final String APPELEMENT_CONF_PARAM = "appelement";
     public static final String DEF_DATASOURCE_CONF_PARAM = "default-datasource";
+    public static final String GLOBAL_API_CONF_PARAM = "global-api";
     public static final String MAX_JDBC_THREADS_CONF_PARAM = "max-jdbc-threads";
     public static final String MAX_BIO_THREADS_CONF_PARAM = "max-bio-threads";
     public static final String MAX_SPACES_CONF_PARAM = "max-script-contexts";
@@ -25,6 +26,7 @@ public class PlatypusServerConfig {
     //
     protected String appElementName;
     protected String defaultDatasourceName;
+    protected boolean globalAPI;
     protected int maximumJdbcThreads = 25;
     protected int maximumBIOTreads = 25;
     protected int maximumSpaces = (Runtime.getRuntime().availableProcessors() + 1) * 10;
@@ -52,6 +54,8 @@ public class PlatypusServerConfig {
                         maximumLpcQueueSize = Double.valueOf(paramValue).intValue();
                     } else if (DEF_DATASOURCE_CONF_PARAM.equalsIgnoreCase(paramName)) {
                         defaultDatasourceName = paramValue;
+                    } else if (GLOBAL_API_CONF_PARAM.equalsIgnoreCase(paramName)) {
+                        globalAPI = Boolean.valueOf(paramValue);
                     } else if (APPELEMENT_CONF_PARAM.equalsIgnoreCase(paramName)) {
                         appElementName = paramValue;
                     } else if (WATCH_CONF_PARAM.equalsIgnoreCase(paramName)) {
@@ -68,6 +72,10 @@ public class PlatypusServerConfig {
 
     public String getDefaultDatasourceName() {
         return defaultDatasourceName;
+    }
+
+    public boolean isGlobalAPI() {
+        return globalAPI;
     }
 
     public int getMaximumJdbcThreads() {

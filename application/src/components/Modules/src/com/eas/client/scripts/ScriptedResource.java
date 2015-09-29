@@ -64,10 +64,10 @@ public class ScriptedResource {
      * @param aAbsoluteApiPath
      * @throws Exception If something goes wrong
      */
-    public static void init(Application<?> aApp, Path aAbsoluteApiPath) throws Exception {
+    public static void init(Application<?> aApp, Path aAbsoluteApiPath, boolean aGlobalAPI) throws Exception {
         assert app == null : "Platypus application resource may be initialized only once.";
         app = aApp;
-        Scripts.init(aAbsoluteApiPath);
+        Scripts.init(aAbsoluteApiPath, aGlobalAPI);
     }
 
     public static Application<?> getApp() {

@@ -44,6 +44,7 @@ public class ServerMain {
     // configuration parameters
     public static final String APP_URL_CONF_PARAM = "url";
     public static final String DEF_DATASOURCE_CONF_PARAM = "default-datasource";
+    public static final String GLOBAL_API_CONF_PARAM = "global-api";
 
     public static final String IFACE_CONF_PARAM = "iface";
     public static final String PROTOCOLS_CONF_PARAM = "protocols";
@@ -83,6 +84,7 @@ public class ServerMain {
     private static String numWorkerThreads;
     private static String sessionIdleTimeout;
     private static String sessionIdleCheckInterval;
+    private static boolean globalAPI;
     private static ThreadsArgsConsumer threadsConfig;
     private static String appElement;
 
@@ -121,6 +123,9 @@ public class ServerMain {
                 } else {
                     printHelp(BAD_DEF_DATASOURCE_MSG);
                 }
+            } else if ((CMD_SWITCHS_PREFIX + GLOBAL_API_CONF_PARAM).equalsIgnoreCase(args[i])) {
+                globalAPI = true;
+                i += 1;
             } else if ((CMD_SWITCHS_PREFIX + IFACE_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
                     iface = args[i + 1];
@@ -223,7 +228,7 @@ public class ServerMain {
                 serverCoreDbClient.setQueries(queries);
                 PlatypusServer server = new PlatypusServer(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), appElement), queries, serverCoreDbClient, sslContext, parseListenAddresses(), parsePortsProtocols(), parsePortsSessionIdleTimeouts(), parsePortsSessionIdleCheckIntervals(), serverProcessor, scriptsConfigs, appElement);
                 serverCoreDbClient.setContextHost(server);
-                ScriptedResource.init(server, ScriptedResource.lookupPlatypusJs());
+                ScriptedResource.init(server, ScriptedResource.lookupPlatypusJs(), globalAPI);
                 SensorsFactory.init(server.getAcceptorsFactory());
                 RetranslateFactory.init(server.getRetranslateFactory());
                 //

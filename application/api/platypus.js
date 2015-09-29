@@ -372,6 +372,12 @@
             return module.principal.logout(onSuccess, onFailure);
         }
     });
+    Object.defineProperty(module, "export", {
+        value: function (aTarget) {
+            module.require = aTarget.require;
+            aTarget.P = module;
+        }
+    });
     return module;
 }
 ));

@@ -2,6 +2,7 @@ package com.eas.script;
 
 import com.eas.concurrent.DeamonThreadFactory;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -65,14 +66,18 @@ public class Scripts {
     private static final NashornScriptEngine engine = (NashornScriptEngine) factory.getScriptEngine();
     protected static final String PLATYPUS_JS_MODULENAME = "platypus";
     protected static final String PLATYPUS_JS_FILENAME = PLATYPUS_JS_MODULENAME + ".js";
+    protected static final String INTERNALS_MODULENAME = "internals";
+    protected static final String INTERNALS_JS_FILENAME = INTERNALS_MODULENAME + ".js";
     public static final String STRING_TYPE_NAME = "String";//NOI18N
     public static final String NUMBER_TYPE_NAME = "Number";//NOI18N
     public static final String DATE_TYPE_NAME = "Date";//NOI18N
     public static final String BOOLEAN_TYPE_NAME = "Boolean";//NOI18N
     public static final String GEOMETRY_TYPE_NAME = "Geometry";//NOI18N
     public static final String THIS_KEYWORD = "this";//NOI18N
-    protected static volatile Path absoluteApiPath;
-    protected static volatile URL platypusJsUrl;
+    public static /*final*/ URL internalsUrl;
+    public static /*final*/ URL platypusJsUrl;
+    public static /*final*/ boolean globalAPI;
+    public static volatile Path absoluteApiPath;
 
     public static NashornScriptEngine getEngine() {
         return engine;
@@ -82,6 +87,10 @@ public class Scripts {
 
     public static Space getSpace() {
         return getContext() != null ? getContext().getSpace() : null;
+    }
+
+    public static boolean isGlobalAPI() {
+        return globalAPI;
     }
 
     public static LocalContext getContext() {
@@ -209,15 +218,16 @@ public class Scripts {
             super();
             scriptContext = aScriptContext;
         }
-        
+
         /**
          * This method is used by crazy designer only
-         * @return 
+         *
+         * @return
          */
-        public String getFileNameFromContext(){
-            return (String)scriptContext.getAttribute(ScriptEngine.FILENAME);
+        public String getFileNameFromContext() {
+            return (String) scriptContext.getAttribute(ScriptEngine.FILENAME);
         }
-        
+
         public Set<String> getRequired() {
             return required;
         }
@@ -629,13 +639,12 @@ public class Scripts {
         void initSpaceGlobal() {
             Bindings bindings = engine.createBindings();
             scriptContext.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
-            bindings.put("space", this);
             try {
                 Scripts.LocalContext ctx = Scripts.createContext(Scripts.Space.this);
                 Scripts.setContext(ctx);
                 try {
-                    scriptContext.setAttribute(ScriptEngine.FILENAME, PLATYPUS_JS_MODULENAME, ScriptContext.ENGINE_SCOPE);
-                    engine.eval(new URLReader(platypusJsUrl), scriptContext);
+                    scriptContext.setAttribute(ScriptEngine.FILENAME, INTERNALS_MODULENAME, ScriptContext.ENGINE_SCOPE);
+                    engine.eval(new URLReader(internalsUrl), scriptContext);
                 } finally {
                     Scripts.setContext(null);
                 }
@@ -662,9 +671,11 @@ public class Scripts {
     // bio thread pool
     protected static ThreadPoolExecutor bio;
 
-    public static void init(Path aAbsoluteApiPath) throws MalformedURLException {
+    public static void init(Path aAbsoluteApiPath, boolean aGlobalAPI) throws MalformedURLException {
+        globalAPI = aGlobalAPI;
+        platypusJsUrl = aAbsoluteApiPath.resolve(PLATYPUS_JS_FILENAME).toUri().toURL();
+        internalsUrl = aAbsoluteApiPath.resolve(INTERNALS_JS_FILENAME).toUri().toURL();
         absoluteApiPath = aAbsoluteApiPath;
-        platypusJsUrl = absoluteApiPath.resolve(PLATYPUS_JS_FILENAME).toUri().toURL();
     }
 
     public static Path getAbsoluteApiPath() {

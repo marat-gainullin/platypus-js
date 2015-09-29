@@ -269,4 +269,8 @@
             aConsumer(copy(aValue));
         }
     });
+    if(ScriptsClass.isGlobalAPI()){
+        var P = require('platypus');
+        P.export(global);
+    }
 })();

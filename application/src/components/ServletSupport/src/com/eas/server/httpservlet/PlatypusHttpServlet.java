@@ -120,7 +120,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                     platypusCore = new PlatypusServerCore(indexer, new LocalModulesProxy(indexer, new ModelsDocuments(), platypusConfig.getAppElementName()), queries, basesProxy, lsecurityConfigs, platypusConfig.getAppElementName(), SessionManager.Singleton.instance, platypusConfig.getMaximumSpaces());
                     basesProxy.setContextHost(platypusCore);
                     Scripts.initBIO(platypusConfig.getMaximumBIOTreads());
-                    ScriptedResource.init(platypusCore, Paths.get(realRoot.toURI()).resolve("WEB-INF").resolve("classes"));
+                    ScriptedResource.init(platypusCore, Paths.get(realRoot.toURI()).resolve("WEB-INF").resolve("classes"), platypusConfig.isGlobalAPI());
                     Scripts.initTasks((Runnable aTask) -> {
                         if (containerExecutor != null) {// J2EE 7+
                             containerExecutor.submit(aTask);

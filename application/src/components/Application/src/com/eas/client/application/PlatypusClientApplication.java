@@ -291,7 +291,7 @@ public class PlatypusClientApplication {
                 } else {
                     throw new Exception("Unknown protocol in url: " + config.url);
                 }
-                ScriptedResource.init(app, ScriptedResource.lookupPlatypusJs());
+                ScriptedResource.init(app, ScriptedResource.lookupPlatypusJs(), false);
                 Scripts.LocalContext context = Scripts.createContext(Scripts.createSpace());
                 Forms.initContext(context);
                 Scripts.setContext(context);
