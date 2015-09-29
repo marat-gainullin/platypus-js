@@ -1,0 +1,219 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>Задача по сборке дистрибутива Platypus 5 версии</description>
+  <project-properties class="concurrent-hash-map">
+    <entry>
+      <string>builders</string>
+      <describable-list-property>
+        <originalValue class="hudson.util.DescribableList">
+          <hudson.tasks.Ant>
+            <disabled>false</disabled>
+            <description>Building web-client</description>
+            <targets>clean build copy-dest</targets>
+            <antName>ant1.9</antName>
+            <buildFile>web-client/src/platypus/build.xml</buildFile>
+            <properties>destdir=./application/bin
+gwt.sdk=/home/hudson/gwt-2.7.0</properties>
+          </hudson.tasks.Ant>
+          <hudson.tasks.Ant>
+            <disabled>false</disabled>
+            <description>Building groups</description>
+            <targets>clean jar buildupdates</targets>
+            <antName>ant1.9</antName>
+            <buildFile>application/src/group/build.xml</buildFile>
+            <properties>libs.javaee-web-api-7.0.classpath=/home/hudson/netbeans8.0.2/enterprise/modules/ext/javaee-web-api-7.0.jar 
+libs.CopyLibs.classpath=/home/hudson/netbeans8.0.2/java/ant/extra/org-netbeans-modules-java-j2seproject-copylibstask.jar 
+j2ee.server.home=/home/hudson/tomcat/apache-tomcat-8.0.24</properties>
+          </hudson.tasks.Ant>
+          <hudson.tasks.Shell>
+            <disabled>false</disabled>
+            <description>Preparing files for installer</description>
+            <command>rm -rf /home/hudson/netbeans8.0.2/harness/nbi/stub/*
+cp -r /home/hudson/netbeans8.0.2-harness-nbi-stub-ext/ext /home/hudson/netbeans8.0.2/harness/nbi/stub/
+cp -r ./installer/* /home/hudson/netbeans8.0.2/harness/nbi/stub/</command>
+          </hudson.tasks.Shell>
+          <hudson.tasks.Ant>
+            <disabled>false</disabled>
+            <description>Building designer</description>
+            <targets>clean nbms</targets>
+            <antName>ant1.9</antName>
+            <buildFile>./designer/build.xml</buildFile>
+            <properties>nbplatform.default.harness.dir=/home/hudson/netbeans8.0.2/harness/
+nbplatform.default.netbeans.dest.dir=/home/hudson/netbeans8.0.2/</properties>
+          </hudson.tasks.Ant>
+          <hudson.tasks.Ant>
+            <disabled>false</disabled>
+            <description>Building installer</description>
+            <targets>build</targets>
+            <antName>ant1.9</antName>
+            <buildFile>/home/hudson/netbeans8.0.2/harness/nbi/stub/template.xml</buildFile>
+            <properties>nbi.stub.common.location=/home/hudson/netbeans8.0.2/harness/nbi/.common
+pack200.enabled=false
+nbplatform.default.harness.dir=/home/hudson/netbeans8.0.2/harness
+suite.nbi.product.uid=designer
+generator-jdk-location-forward-slashes=/usr/lib/jvm/jdk1.8.0_60/
+nbi.dock.icon.file=/home/hudson/netbeans8.0.2/harness/etc/applicationIcon.icns
+nbi.engine.jar=/home/hudson/netbeans8.0.2/harness/modules/ext/nbi-engine.jar
+nbi.registries.management.jar=/home/hudson/netbeans8.0.2/harness/modules/ext/nbi-registries-management.jar
+generate.installer.for.platforms=windows linux macosx
+suite.location=/home/hudson/jobs/BuildPlatypusRelease5Fix/workspace/designer
+nbi.stub.location=/home/hudson/netbeans8.0.2/harness/nbi/stub
+nbi.icon.file=./designer/branding/core/core.jar/org/netbeans/core/startup/frame48.gif
+nbplatform.default.netbeans.dest.dir=/home/hudson/netbeans8.0.2/
+nbi.ant.tasks.jar=/home/hudson/netbeans8.0.2/harness/modules/ext/nbi-ant-tasks.jar
+nbi.license.file=/home/hudson/jobs/BuildPlatypusRelease5Fix/workspace/designer/license.txt</properties>
+          </hudson.tasks.Ant>
+          <hudson.tasks.Shell>
+            <disabled>false</disabled>
+            <description>Incrementing build number</description>
+            <command>cp ./application/updates/version.xml /home/hudson/release_version.xml
+git checkout -- application/bin/.gitignore
+git checkout -- application/updates/version.xml
+git checkout -- &apos;*&apos;
+git checkout master
+git pull origin master
+mv /home/hudson/release_version.xml ./application/updates/version.xml
+git add ./application/updates/version.xml
+git commit -m &apos;build number changed in version.xml by Hudson&apos;
+git pull -q origin master
+git push origin master</command>
+          </hudson.tasks.Shell>
+        </originalValue>
+        <propertyOverridden>false</propertyOverridden>
+      </describable-list-property>
+    </entry>
+    <entry>
+      <string>be-certipost-hudson-plugin-SCPRepositoryPublisher</string>
+      <external-property>
+        <originalValue class="be.certipost.hudson.plugin.SCPRepositoryPublisher">
+          <siteName>78.24.222.87</siteName>
+          <entries>
+            <be.certipost.hudson.plugin.Entry>
+              <filePath>platform/distr/5.0/designer/Release/</filePath>
+              <sourceFile>designer/dist/platypusdesigner-linux.sh</sourceFile>
+              <keepHierarchy>false</keepHierarchy>
+            </be.certipost.hudson.plugin.Entry>
+            <be.certipost.hudson.plugin.Entry>
+              <filePath>platform/distr/5.0/designer/Release/</filePath>
+              <sourceFile>designer/dist/platypusdesigner-windows.exe</sourceFile>
+              <keepHierarchy>false</keepHierarchy>
+            </be.certipost.hudson.plugin.Entry>
+            <be.certipost.hudson.plugin.Entry>
+              <filePath>platform/distr/5.0/designer/Release/</filePath>
+              <sourceFile>designer/dist/platypusdesigner-macosx.tgz</sourceFile>
+              <keepHierarchy>false</keepHierarchy>
+            </be.certipost.hudson.plugin.Entry>
+            <be.certipost.hudson.plugin.Entry>
+              <filePath>platform/updates/5.0/designer/Release/</filePath>
+              <sourceFile>designer/build/updates/</sourceFile>
+              <keepHierarchy>false</keepHierarchy>
+            </be.certipost.hudson.plugin.Entry>
+            <be.certipost.hudson.plugin.Entry>
+              <filePath>platform/updates/5.0/client/Release/</filePath>
+              <sourceFile>application/updates/</sourceFile>
+              <keepHierarchy>false</keepHierarchy>
+            </be.certipost.hudson.plugin.Entry>
+          </entries>
+        </originalValue>
+        <propertyOverridden>false</propertyOverridden>
+        <modified>true</modified>
+      </external-property>
+    </entry>
+    <entry>
+      <string>scm</string>
+      <scm-property>
+        <originalValue class="hudson.plugins.git.GitSCM">
+          <configVersion>1</configVersion>
+          <remoteRepositories>
+            <RemoteConfig>
+              <name>origin</name>
+              <uris>
+                <org.eclipse.jgit.transport.URIish>
+                  <scheme>https</scheme>
+                  <path>/altsoft/PlatypusJS.git</path>
+                  <rawPath>/altsoft/PlatypusJS.git</rawPath>
+                  <user></user>
+                  <pass></pass>
+                  <port>-1</port>
+                  <host>github.com</host>
+                </org.eclipse.jgit.transport.URIish>
+              </uris>
+              <pushURIs/>
+              <fetch>
+                <org.eclipse.jgit.transport.RefSpec>
+                  <force>true</force>
+                  <wildcard>true</wildcard>
+                  <srcName>refs/heads/*</srcName>
+                  <dstName>refs/remotes/origin/*</dstName>
+                </org.eclipse.jgit.transport.RefSpec>
+              </fetch>
+              <push/>
+              <uploadpack>git-upload-pack</uploadpack>
+              <receivepack>git-receive-pack</receivepack>
+              <tagopt>AUTO_FOLLOW</tagopt>
+              <mirror>false</mirror>
+              <timeout>0</timeout>
+              <relativeTargetDir></relativeTargetDir>
+            </RemoteConfig>
+          </remoteRepositories>
+          <branches>
+            <hudson.plugins.git.BranchSpec>
+              <name>master</name>
+            </hudson.plugins.git.BranchSpec>
+          </branches>
+          <mergeOptions/>
+          <recursiveSubmodules>false</recursiveSubmodules>
+          <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+          <authorOrCommitter>false</authorOrCommitter>
+          <clean>false</clean>
+          <wipeOutWorkspace>false</wipeOutWorkspace>
+          <pruneBranches>false</pruneBranches>
+          <remotePoll>false</remotePoll>
+          <ignoreNotifyCommit>false</ignoreNotifyCommit>
+          <buildChooser class="hudson.plugins.git.util.DefaultBuildChooser"/>
+          <gitTool>Default</gitTool>
+          <submoduleCfg class="list"/>
+          <includedRegions></includedRegions>
+          <excludedRegions></excludedRegions>
+          <excludedUsers></excludedUsers>
+          <excludedCommits/>
+          <gitConfigName></gitConfigName>
+          <gitConfigEmail></gitConfigEmail>
+          <skipTag>false</skipTag>
+          <useCgitClone>false</useCgitClone>
+        </originalValue>
+        <propertyOverridden>false</propertyOverridden>
+      </scm-property>
+    </entry>
+    <entry>
+      <string>hudson-plugins-disk_usage-DiskUsageProperty</string>
+      <base-property>
+        <originalValue class="hudson.plugins.disk_usage.DiskUsageProperty"/>
+        <propertyOverridden>false</propertyOverridden>
+      </base-property>
+    </entry>
+    <entry>
+      <string>jdk</string>
+      <string-property>
+        <originalValue class="string">java8</originalValue>
+        <propertyOverridden>false</propertyOverridden>
+      </string-property>
+    </entry>
+  </project-properties>
+  <keepDependencies>false</keepDependencies>
+  <createdBy>jskonst</createdBy>
+  <creationTime>1425042942302</creationTime>
+  <properties/>
+  <cascadingChildrenNames class="java.util.concurrent.CopyOnWriteArraySet"/>
+  <cascading-job-properties class="java.util.concurrent.CopyOnWriteArraySet">
+    <string>hudson-plugins-disk_usage-DiskUsageProperty</string>
+  </cascading-job-properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>false</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <concurrentBuild>false</concurrentBuild>
+  <cleanWorkspaceRequired>false</cleanWorkspaceRequired>
+</project>
