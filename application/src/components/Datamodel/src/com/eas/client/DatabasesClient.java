@@ -463,6 +463,7 @@ public class DatabasesClient {
                                         commitProcess.complete(null, ex);
                                     });
                                 } finally {
+                                    aResult.connection.setAutoCommit(aResult.autoCommit);
                                     aResult.connection.close();
                                 }
                             } catch (Exception ex) {
@@ -478,6 +479,7 @@ public class DatabasesClient {
                                 try {
                                     aResult.connection.rollback();
                                 } finally {
+                                    aResult.connection.setAutoCommit(aResult.autoCommit);
                                     aResult.connection.close();
                                 }
                             } catch (SQLException ex1) {
