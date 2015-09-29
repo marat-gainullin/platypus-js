@@ -419,75 +419,75 @@ define(['boxing'], function(P) {
         });
 
     };
-        /**
-         * Adds the item to the menu.
-         * @param menu the menu component to add.
-         * @method add
-         * @memberOf PopupMenu
-         */
-        P.PopupMenu.prototype.add = function(menu) {
-            var delegate = this.unwrap();
-            var value = delegate.add(P.boxAsJava(menu));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Adds the item to the menu.
+     * @param menu the menu component to add.
+     * @method add
+     * @memberOf PopupMenu
+     */
+    PopupMenu.prototype.add = function(menu) {
+        var delegate = this.unwrap();
+        var value = delegate.add(P.boxAsJava(menu));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Removes the specified component from this container.
-         * @param component the component to remove
-         * @method remove
-         * @memberOf PopupMenu
-         */
-        P.PopupMenu.prototype.remove = function(component) {
-            var delegate = this.unwrap();
-            var value = delegate.remove(P.boxAsJava(component));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Removes the specified component from this container.
+     * @param component the component to remove
+     * @method remove
+     * @memberOf PopupMenu
+     */
+    PopupMenu.prototype.remove = function(component) {
+        var delegate = this.unwrap();
+        var value = delegate.remove(P.boxAsJava(component));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Removes all the components from this container.
-         * @method clear
-         * @memberOf PopupMenu
-         */
-        P.PopupMenu.prototype.clear = function() {
-            var delegate = this.unwrap();
-            var value = delegate.clear();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Removes all the components from this container.
+     * @method clear
+     * @memberOf PopupMenu
+     */
+    PopupMenu.prototype.clear = function() {
+        var delegate = this.unwrap();
+        var value = delegate.clear();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf PopupMenu
-         */
-        P.PopupMenu.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Gets the container's children components.
+     * @method children
+     * @memberOf PopupMenu
+     */
+    PopupMenu.prototype.children = function() {
+        var delegate = this.unwrap();
+        var value = delegate.children();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Gets the container's children components.
-         * @method children
-         * @memberOf PopupMenu
-         */
-        P.PopupMenu.prototype.children = function() {
-            var delegate = this.unwrap();
-            var value = delegate.children();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Tries to acquire focus for this component.
+     * @method focus
+     * @memberOf PopupMenu
+     */
+    PopupMenu.prototype.focus = function() {
+        var delegate = this.unwrap();
+        var value = delegate.focus();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Gets the container's n-th component.
-         * @param index the component's index in the container
-         * @return the child component
-         * @method child
-         * @memberOf PopupMenu
-         */
-        P.PopupMenu.prototype.child = function(index) {
-            var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(index));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Gets the container's n-th component.
+     * @param index the component's index in the container
+     * @return the child component
+     * @method child
+     * @memberOf PopupMenu
+     */
+    PopupMenu.prototype.child = function(index) {
+        var delegate = this.unwrap();
+        var value = delegate.child(P.boxAsJava(index));
+        return P.boxAsJs(value);
+    };
 
 
     var className = "com.eas.client.forms.menu.PopupMenu";

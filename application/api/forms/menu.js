@@ -433,75 +433,75 @@ define(['boxing'], function(P) {
         });
 
     };
-        /**
-         * Adds an item to the menu.
-         * @param component the component to add
-         * @method add
-         * @memberOf Menu
-         */
-        P.Menu.prototype.add = function(component) {
-            var delegate = this.unwrap();
-            var value = delegate.add(P.boxAsJava(component));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Adds an item to the menu.
+     * @param component the component to add
+     * @method add
+     * @memberOf Menu
+     */
+    Menu.prototype.add = function(component) {
+        var delegate = this.unwrap();
+        var value = delegate.add(P.boxAsJava(component));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Removes the specified component from this container.
-         * @param component the component to remove
-         * @method remove
-         * @memberOf Menu
-         */
-        P.Menu.prototype.remove = function(component) {
-            var delegate = this.unwrap();
-            var value = delegate.remove(P.boxAsJava(component));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Removes the specified component from this container.
+     * @param component the component to remove
+     * @method remove
+     * @memberOf Menu
+     */
+    Menu.prototype.remove = function(component) {
+        var delegate = this.unwrap();
+        var value = delegate.remove(P.boxAsJava(component));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Removes all the components from this container.
-         * @method clear
-         * @memberOf Menu
-         */
-        P.Menu.prototype.clear = function() {
-            var delegate = this.unwrap();
-            var value = delegate.clear();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Removes all the components from this container.
+     * @method clear
+     * @memberOf Menu
+     */
+    Menu.prototype.clear = function() {
+        var delegate = this.unwrap();
+        var value = delegate.clear();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf Menu
-         */
-        P.Menu.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Gets the container's children components.
+     * @method children
+     * @memberOf Menu
+     */
+    Menu.prototype.children = function() {
+        var delegate = this.unwrap();
+        var value = delegate.children();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Gets the container's children components.
-         * @method children
-         * @memberOf Menu
-         */
-        P.Menu.prototype.children = function() {
-            var delegate = this.unwrap();
-            var value = delegate.children();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Tries to acquire focus for this component.
+     * @method focus
+     * @memberOf Menu
+     */
+    Menu.prototype.focus = function() {
+        var delegate = this.unwrap();
+        var value = delegate.focus();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Gets the container's n-th component.
-         * @param index the component's index in the container
-         * @return the child component
-         * @method child
-         * @memberOf Menu
-         */
-        P.Menu.prototype.child = function(index) {
-            var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(index));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Gets the container's n-th component.
+     * @param index the component's index in the container
+     * @return the child component
+     * @method child
+     * @memberOf Menu
+     */
+    Menu.prototype.child = function(index) {
+        var delegate = this.unwrap();
+        var value = delegate.child(P.boxAsJava(index));
+        return P.boxAsJs(value);
+    };
 
 
     var className = "com.eas.client.forms.menu.Menu";

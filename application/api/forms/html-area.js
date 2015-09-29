@@ -434,16 +434,16 @@ define(['boxing'], function(P) {
         });
 
     };
-        /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf HtmlArea
-         */
-        P.HtmlArea.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Tries to acquire focus for this component.
+     * @method focus
+     * @memberOf HtmlArea
+     */
+    HtmlArea.prototype.focus = function() {
+        var delegate = this.unwrap();
+        var value = delegate.focus();
+        return P.boxAsJs(value);
+    };
 
 
     var className = "com.eas.client.forms.components.HtmlArea";

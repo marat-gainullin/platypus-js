@@ -262,16 +262,6 @@ define(['boxing'], function(P) {
             }
         });
 
-        Object.defineProperty(this, "iconTextGap", {
-            get: function() {
-                var value = delegate.iconTextGap;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.iconTextGap = P.boxAsJava(aValue);
-            }
-        });
-
         Object.defineProperty(this, "nextFocusableComponent", {
             get: function() {
                 var value = delegate.nextFocusableComponent;
@@ -279,6 +269,16 @@ define(['boxing'], function(P) {
             },
             set: function(aValue) {
                 delegate.nextFocusableComponent = P.boxAsJava(aValue);
+            }
+        });
+
+        Object.defineProperty(this, "iconTextGap", {
+            get: function() {
+                var value = delegate.iconTextGap;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.iconTextGap = P.boxAsJava(aValue);
             }
         });
 
@@ -450,16 +450,16 @@ define(['boxing'], function(P) {
         });
 
     };
-        /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf Button
-         */
-        P.Button.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Tries to acquire focus for this component.
+     * @method focus
+     * @memberOf Button
+     */
+    Button.prototype.focus = function() {
+        var delegate = this.unwrap();
+        var value = delegate.focus();
+        return P.boxAsJs(value);
+    };
 
 
     var className = "com.eas.client.forms.components.Button";

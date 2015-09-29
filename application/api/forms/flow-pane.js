@@ -443,75 +443,75 @@ define(['boxing'], function(P) {
         });
 
     };
-        /**
-         * Appends the specified component to the end of this container.
-         * @param component the component to add
-         * @method add
-         * @memberOf FlowPane
-         */
-        P.FlowPane.prototype.add = function(component) {
-            var delegate = this.unwrap();
-            var value = delegate.add(P.boxAsJava(component));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Appends the specified component to the end of this container.
+     * @param component the component to add
+     * @method add
+     * @memberOf FlowPane
+     */
+    FlowPane.prototype.add = function(component) {
+        var delegate = this.unwrap();
+        var value = delegate.add(P.boxAsJava(component));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Removes the specified component from this container.
-         * @param component the component to remove
-         * @method remove
-         * @memberOf FlowPane
-         */
-        P.FlowPane.prototype.remove = function(component) {
-            var delegate = this.unwrap();
-            var value = delegate.remove(P.boxAsJava(component));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Removes the specified component from this container.
+     * @param component the component to remove
+     * @method remove
+     * @memberOf FlowPane
+     */
+    FlowPane.prototype.remove = function(component) {
+        var delegate = this.unwrap();
+        var value = delegate.remove(P.boxAsJava(component));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Removes all the components from this container.
-         * @method clear
-         * @memberOf FlowPane
-         */
-        P.FlowPane.prototype.clear = function() {
-            var delegate = this.unwrap();
-            var value = delegate.clear();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Removes all the components from this container.
+     * @method clear
+     * @memberOf FlowPane
+     */
+    FlowPane.prototype.clear = function() {
+        var delegate = this.unwrap();
+        var value = delegate.clear();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf FlowPane
-         */
-        P.FlowPane.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Gets the container's children components.
+     * @method children
+     * @memberOf FlowPane
+     */
+    FlowPane.prototype.children = function() {
+        var delegate = this.unwrap();
+        var value = delegate.children();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Gets the container's children components.
-         * @method children
-         * @memberOf FlowPane
-         */
-        P.FlowPane.prototype.children = function() {
-            var delegate = this.unwrap();
-            var value = delegate.children();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Tries to acquire focus for this component.
+     * @method focus
+     * @memberOf FlowPane
+     */
+    FlowPane.prototype.focus = function() {
+        var delegate = this.unwrap();
+        var value = delegate.focus();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Gets the container's n-th component.
-         * @param index the component's index in the container
-         * @return the child component
-         * @method child
-         * @memberOf FlowPane
-         */
-        P.FlowPane.prototype.child = function(index) {
-            var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(index));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Gets the container's n-th component.
+     * @param index the component's index in the container
+     * @return the child component
+     * @method child
+     * @memberOf FlowPane
+     */
+    FlowPane.prototype.child = function(index) {
+        var delegate = this.unwrap();
+        var value = delegate.child(P.boxAsJava(index));
+        return P.boxAsJs(value);
+    };
 
 
     var className = "com.eas.client.forms.containers.FlowPane";

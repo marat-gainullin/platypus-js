@@ -59,16 +59,16 @@ define(['boxing'], function(P) {
         });
 
     };
-        /**
-         * Generate report from template.
-         * @method generateReport
-         * @memberOf ReportTemplate
-         */
-        P.ReportTemplate.prototype.generateReport = function() {
-            var delegate = this.unwrap();
-            var value = delegate.generateReport();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Generate report from template.
+     * @method generateReport
+     * @memberOf ReportTemplate
+     */
+    ReportTemplate.prototype.generateReport = function() {
+        var delegate = this.unwrap();
+        var value = delegate.generateReport();
+        return P.boxAsJs(value);
+    };
 
 
     var className = "com.eas.client.reports.ReportTemplate";

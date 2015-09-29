@@ -452,62 +452,62 @@ define(['boxing'], function(P) {
         });
 
     };
-        /**
-         * Appends the specified component to the end of this container.
-         * @param component the component to add
-         * @method add
-         * @memberOf BoxPane
-         */
-        P.BoxPane.prototype.add = function(component) {
-            var delegate = this.unwrap();
-            var value = delegate.add(P.boxAsJava(component));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Appends the specified component to the end of this container.
+     * @param component the component to add
+     * @method add
+     * @memberOf BoxPane
+     */
+    BoxPane.prototype.add = function(component) {
+        var delegate = this.unwrap();
+        var value = delegate.add(P.boxAsJava(component));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Removes the specified component from this container.
-         * @param component the component to remove
-         * @method remove
-         * @memberOf BoxPane
-         */
-        P.BoxPane.prototype.remove = function(component) {
-            var delegate = this.unwrap();
-            var value = delegate.remove(P.boxAsJava(component));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Removes the specified component from this container.
+     * @param component the component to remove
+     * @method remove
+     * @memberOf BoxPane
+     */
+    BoxPane.prototype.remove = function(component) {
+        var delegate = this.unwrap();
+        var value = delegate.remove(P.boxAsJava(component));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Removes all the components from this container.
-         * @method clear
-         * @memberOf BoxPane
-         */
-        P.BoxPane.prototype.clear = function() {
-            var delegate = this.unwrap();
-            var value = delegate.clear();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Removes all the components from this container.
+     * @method clear
+     * @memberOf BoxPane
+     */
+    BoxPane.prototype.clear = function() {
+        var delegate = this.unwrap();
+        var value = delegate.clear();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf BoxPane
-         */
-        P.BoxPane.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Gets the container's children components.
+     * @method children
+     * @memberOf BoxPane
+     */
+    BoxPane.prototype.children = function() {
+        var delegate = this.unwrap();
+        var value = delegate.children();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Gets the container's children components.
-         * @method children
-         * @memberOf BoxPane
-         */
-        P.BoxPane.prototype.children = function() {
-            var delegate = this.unwrap();
-            var value = delegate.children();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Tries to acquire focus for this component.
+     * @method focus
+     * @memberOf BoxPane
+     */
+    BoxPane.prototype.focus = function() {
+        var delegate = this.unwrap();
+        var value = delegate.focus();
+        return P.boxAsJs(value);
+    };
 
 
     var className = "com.eas.client.forms.containers.BoxPane";

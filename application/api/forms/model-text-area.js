@@ -509,27 +509,27 @@ define(['boxing'], function(P) {
         });
 
     };
-        /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf ModelTextArea
-         */
-        P.ModelTextArea.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Tries to acquire focus for this component.
+     * @method focus
+     * @memberOf ModelTextArea
+     */
+    ModelTextArea.prototype.focus = function() {
+        var delegate = this.unwrap();
+        var value = delegate.focus();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Redraw the component.
-         * @method redraw
-         * @memberOf ModelTextArea
-         */
-        P.ModelTextArea.prototype.redraw = function() {
-            var delegate = this.unwrap();
-            var value = delegate.redraw();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Redraw the component.
+     * @method redraw
+     * @memberOf ModelTextArea
+     */
+    ModelTextArea.prototype.redraw = function() {
+        var delegate = this.unwrap();
+        var value = delegate.redraw();
+        return P.boxAsJs(value);
+    };
 
 
     var className = "com.eas.client.forms.components.model.ModelTextArea";

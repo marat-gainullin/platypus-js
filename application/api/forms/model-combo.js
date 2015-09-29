@@ -539,27 +539,27 @@ define(['boxing'], function(P) {
         });
 
     };
-        /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf ModelCombo
-         */
-        P.ModelCombo.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Tries to acquire focus for this component.
+     * @method focus
+     * @memberOf ModelCombo
+     */
+    ModelCombo.prototype.focus = function() {
+        var delegate = this.unwrap();
+        var value = delegate.focus();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Redraw the component.
-         * @method redraw
-         * @memberOf ModelCombo
-         */
-        P.ModelCombo.prototype.redraw = function() {
-            var delegate = this.unwrap();
-            var value = delegate.redraw();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Redraw the component.
+     * @method redraw
+     * @memberOf ModelCombo
+     */
+    ModelCombo.prototype.redraw = function() {
+        var delegate = this.unwrap();
+        var value = delegate.redraw();
+        return P.boxAsJs(value);
+    };
 
 
     var className = "com.eas.client.forms.components.model.ModelCombo";

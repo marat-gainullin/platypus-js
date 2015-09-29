@@ -453,88 +453,88 @@ define(['boxing'], function(P) {
         });
 
     };
-        /**
-         * Appends the component to this container with the specified name.
-         * @param component the component to add.
-         * @param cardName the name of the card.
-         * @method add
-         * @memberOf CardPane
-         */
-        P.CardPane.prototype.add = function(component, cardName) {
-            var delegate = this.unwrap();
-            var value = delegate.add(P.boxAsJava(component), P.boxAsJava(cardName));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Appends the component to this container with the specified name.
+     * @param component the component to add.
+     * @param cardName the name of the card.
+     * @method add
+     * @memberOf CardPane
+     */
+    CardPane.prototype.add = function(component, cardName) {
+        var delegate = this.unwrap();
+        var value = delegate.add(P.boxAsJava(component), P.boxAsJava(cardName));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Removes the specified component from this container.
-         * @param component the component to remove
-         * @method remove
-         * @memberOf CardPane
-         */
-        P.CardPane.prototype.remove = function(component) {
-            var delegate = this.unwrap();
-            var value = delegate.remove(P.boxAsJava(component));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Removes the specified component from this container.
+     * @param component the component to remove
+     * @method remove
+     * @memberOf CardPane
+     */
+    CardPane.prototype.remove = function(component) {
+        var delegate = this.unwrap();
+        var value = delegate.remove(P.boxAsJava(component));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Removes all the components from this container.
-         * @method clear
-         * @memberOf CardPane
-         */
-        P.CardPane.prototype.clear = function() {
-            var delegate = this.unwrap();
-            var value = delegate.clear();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Removes all the components from this container.
+     * @method clear
+     * @memberOf CardPane
+     */
+    CardPane.prototype.clear = function() {
+        var delegate = this.unwrap();
+        var value = delegate.clear();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Flips to the component that was added to this layout with the specified name.
-         * @param name the card name
-         * @method show
-         * @memberOf CardPane
-         */
-        P.CardPane.prototype.show = function(name) {
-            var delegate = this.unwrap();
-            var value = delegate.show(P.boxAsJava(name));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Gets the container's children components.
+     * @method children
+     * @memberOf CardPane
+     */
+    CardPane.prototype.children = function() {
+        var delegate = this.unwrap();
+        var value = delegate.children();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf CardPane
-         */
-        P.CardPane.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Flips to the component that was added to this layout with the specified name.
+     * @param name the card name
+     * @method show
+     * @memberOf CardPane
+     */
+    CardPane.prototype.show = function(name) {
+        var delegate = this.unwrap();
+        var value = delegate.show(P.boxAsJava(name));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Gets the container's children components.
-         * @method children
-         * @memberOf CardPane
-         */
-        P.CardPane.prototype.children = function() {
-            var delegate = this.unwrap();
-            var value = delegate.children();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Tries to acquire focus for this component.
+     * @method focus
+     * @memberOf CardPane
+     */
+    CardPane.prototype.focus = function() {
+        var delegate = this.unwrap();
+        var value = delegate.focus();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Gets child component, associated with the specified card.
-         * @param cardName Name of the card.
-         * @return the child component.
-         * @method child
-         * @memberOf CardPane
-         */
-        P.CardPane.prototype.child = function(cardName) {
-            var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(cardName));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Gets child component, associated with the specified card.
+     * @param cardName Name of the card.
+     * @return the child component.
+     * @method child
+     * @memberOf CardPane
+     */
+    CardPane.prototype.child = function(cardName) {
+        var delegate = this.unwrap();
+        var value = delegate.child(P.boxAsJava(cardName));
+        return P.boxAsJs(value);
+    };
 
 
     var className = "com.eas.client.forms.containers.CardPane";

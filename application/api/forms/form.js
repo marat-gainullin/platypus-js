@@ -266,96 +266,96 @@ define(['boxing'], function(P) {
         });
 
     };
-        /**
-         * Closes this form.
-         * @param obj an object to be passed as a result of a selection into <code>showModal</code> callback handler function.
-         * @method close
-         * @memberOf Form
-         */
-        P.Form.prototype.close = function(obj) {
-            var delegate = this.unwrap();
-            var value = delegate.close(P.boxAsJava(obj));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Closes this form.
+     * @param obj an object to be passed as a result of a selection into <code>showModal</code> callback handler function.
+     * @method close
+     * @memberOf Form
+     */
+    Form.prototype.close = function(obj) {
+        var delegate = this.unwrap();
+        var value = delegate.close(P.boxAsJava(obj));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Shows the form as an ordinary window.
-         * @method show
-         * @memberOf Form
-         */
-        P.Form.prototype.show = function() {
-            var delegate = this.unwrap();
-            var value = delegate.show();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Moves form to the front position.
+     * @method toFront
+     * @memberOf Form
+     */
+    Form.prototype.toFront = function() {
+        var delegate = this.unwrap();
+        var value = delegate.toFront();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Moves form to the front position.
-         * @method toFront
-         * @memberOf Form
-         */
-        P.Form.prototype.toFront = function() {
-            var delegate = this.unwrap();
-            var value = delegate.toFront();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Shows the form as a dialog (modal window).
+     * @param callback a callback handler function
+     * @method showModal
+     * @memberOf Form
+     */
+    Form.prototype.showModal = function(callback) {
+        var delegate = this.unwrap();
+        var value = delegate.showModal(P.boxAsJava(callback));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Maximizes this form.
-         * @method maximize
-         * @memberOf Form
-         */
-        P.Form.prototype.maximize = function() {
-            var delegate = this.unwrap();
-            var value = delegate.maximize();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Shows the form as an ordinary window.
+     * @method show
+     * @memberOf Form
+     */
+    Form.prototype.show = function() {
+        var delegate = this.unwrap();
+        var value = delegate.show();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Minimizes this form.
-         * @method minimize
-         * @memberOf Form
-         */
-        P.Form.prototype.minimize = function() {
-            var delegate = this.unwrap();
-            var value = delegate.minimize();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Minimizes this form.
+     * @method minimize
+     * @memberOf Form
+     */
+    Form.prototype.minimize = function() {
+        var delegate = this.unwrap();
+        var value = delegate.minimize();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Restores this form state.
-         * @method restore
-         * @memberOf Form
-         */
-        P.Form.prototype.restore = function() {
-            var delegate = this.unwrap();
-            var value = delegate.restore();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Maximizes this form.
+     * @method maximize
+     * @memberOf Form
+     */
+    Form.prototype.maximize = function() {
+        var delegate = this.unwrap();
+        var value = delegate.maximize();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Shows the form as a dialog (modal window).
-         * @param callback a callback handler function
-         * @method showModal
-         * @memberOf Form
-         */
-        P.Form.prototype.showModal = function(callback) {
-            var delegate = this.unwrap();
-            var value = delegate.showModal(P.boxAsJava(callback));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Restores this form state.
+     * @method restore
+     * @memberOf Form
+     */
+    Form.prototype.restore = function() {
+        var delegate = this.unwrap();
+        var value = delegate.restore();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Shows the form as an internal window in a desktop.
-         * @param desktop the parent desktop object
-         * @method showInternalFrame
-         * @memberOf Form
-         */
-        P.Form.prototype.showInternalFrame = function(desktop) {
-            var delegate = this.unwrap();
-            var value = delegate.showInternalFrame(P.boxAsJava(desktop));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Shows the form as an internal window in a desktop.
+     * @param desktop the parent desktop object
+     * @method showInternalFrame
+     * @memberOf Form
+     */
+    Form.prototype.showInternalFrame = function(desktop) {
+        var delegate = this.unwrap();
+        var value = delegate.showInternalFrame(P.boxAsJava(desktop));
+        return P.boxAsJs(value);
+    };
 
 
     var className = "com.eas.client.forms.Form";

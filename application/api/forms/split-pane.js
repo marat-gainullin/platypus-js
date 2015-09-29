@@ -112,16 +112,6 @@ define(['boxing'], function(P) {
             }
         });
 
-        Object.defineProperty(this, "dividerLocation", {
-            get: function() {
-                var value = delegate.dividerLocation;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.dividerLocation = P.boxAsJava(aValue);
-            }
-        });
-
         Object.defineProperty(this, "onComponentAdded", {
             get: function() {
                 var value = delegate.onComponentAdded;
@@ -129,6 +119,16 @@ define(['boxing'], function(P) {
             },
             set: function(aValue) {
                 delegate.onComponentAdded = aValue;
+            }
+        });
+
+        Object.defineProperty(this, "dividerLocation", {
+            get: function() {
+                var value = delegate.dividerLocation;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.dividerLocation = P.boxAsJava(aValue);
             }
         });
 
@@ -471,52 +471,52 @@ define(['boxing'], function(P) {
         });
 
     };
-        /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf SplitPane
-         */
-        P.SplitPane.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Gets the container's children components.
+     * @method children
+     * @memberOf SplitPane
+     */
+    SplitPane.prototype.children = function() {
+        var delegate = this.unwrap();
+        var value = delegate.children();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Gets the container's children components.
-         * @method children
-         * @memberOf SplitPane
-         */
-        P.SplitPane.prototype.children = function() {
-            var delegate = this.unwrap();
-            var value = delegate.children();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Tries to acquire focus for this component.
+     * @method focus
+     * @memberOf SplitPane
+     */
+    SplitPane.prototype.focus = function() {
+        var delegate = this.unwrap();
+        var value = delegate.focus();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Gets the container's n-th component.
-         * @param index the component's index in the container
-         * @return the child component
-         * @method child
-         * @memberOf SplitPane
-         */
-        P.SplitPane.prototype.child = function(index) {
-            var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(index));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Gets the container's n-th component.
+     * @param index the component's index in the container
+     * @return the child component
+     * @method child
+     * @memberOf SplitPane
+     */
+    SplitPane.prototype.child = function(index) {
+        var delegate = this.unwrap();
+        var value = delegate.child(P.boxAsJava(index));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Appends the specified component to the end of this container.
-         * @param component the component to add.
-         * @method add
-         * @memberOf SplitPane
-         */
-        P.SplitPane.prototype.add = function(component) {
-            var delegate = this.unwrap();
-            var value = delegate.jsAdd(P.boxAsJava(component));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Appends the specified component to the end of this container.
+     * @param component the component to add.
+     * @method add
+     * @memberOf SplitPane
+     */
+    SplitPane.prototype.add = function(component) {
+        var delegate = this.unwrap();
+        var value = delegate.jsAdd(P.boxAsJava(component));
+        return P.boxAsJs(value);
+    };
 
 
     var className = "com.eas.client.forms.containers.SplitPane";

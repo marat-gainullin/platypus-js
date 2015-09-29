@@ -450,77 +450,77 @@ define(['boxing'], function(P) {
         });
 
     };
-        /**
-         * Appends the component whith specified text to the end of this container.
-         * @param component the component to add.
-         * @param text the text for the tab.
-         * @param icon the icon for the tab (optional).
-         * @method add
-         * @memberOf TabbedPane
-         */
-        P.TabbedPane.prototype.add = function(component, text, icon) {
-            var delegate = this.unwrap();
-            var value = delegate.add(P.boxAsJava(component), P.boxAsJava(text), P.boxAsJava(icon));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Appends the component whith specified text to the end of this container.
+     * @param component the component to add.
+     * @param text the text for the tab.
+     * @param icon the icon for the tab (optional).
+     * @method add
+     * @memberOf TabbedPane
+     */
+    TabbedPane.prototype.add = function(component, text, icon) {
+        var delegate = this.unwrap();
+        var value = delegate.add(P.boxAsJava(component), P.boxAsJava(text), P.boxAsJava(icon));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Removes the specified component from this container.
-         * @param component the component to remove
-         * @method remove
-         * @memberOf TabbedPane
-         */
-        P.TabbedPane.prototype.remove = function(component) {
-            var delegate = this.unwrap();
-            var value = delegate.remove(P.boxAsJava(component));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Removes the specified component from this container.
+     * @param component the component to remove
+     * @method remove
+     * @memberOf TabbedPane
+     */
+    TabbedPane.prototype.remove = function(component) {
+        var delegate = this.unwrap();
+        var value = delegate.remove(P.boxAsJava(component));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Removes all the components from this container.
-         * @method clear
-         * @memberOf TabbedPane
-         */
-        P.TabbedPane.prototype.clear = function() {
-            var delegate = this.unwrap();
-            var value = delegate.clear();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Removes all the components from this container.
+     * @method clear
+     * @memberOf TabbedPane
+     */
+    TabbedPane.prototype.clear = function() {
+        var delegate = this.unwrap();
+        var value = delegate.clear();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf TabbedPane
-         */
-        P.TabbedPane.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Gets the container's children components.
+     * @method children
+     * @memberOf TabbedPane
+     */
+    TabbedPane.prototype.children = function() {
+        var delegate = this.unwrap();
+        var value = delegate.children();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Gets the container's children components.
-         * @method children
-         * @memberOf TabbedPane
-         */
-        P.TabbedPane.prototype.children = function() {
-            var delegate = this.unwrap();
-            var value = delegate.children();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Tries to acquire focus for this component.
+     * @method focus
+     * @memberOf TabbedPane
+     */
+    TabbedPane.prototype.focus = function() {
+        var delegate = this.unwrap();
+        var value = delegate.focus();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Gets the container's n-th component.
-         * @param index the component's index in the container
-         * @return the child component
-         * @method child
-         * @memberOf TabbedPane
-         */
-        P.TabbedPane.prototype.child = function(index) {
-            var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(index));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Gets the container's n-th component.
+     * @param index the component's index in the container
+     * @return the child component
+     * @method child
+     * @memberOf TabbedPane
+     */
+    TabbedPane.prototype.child = function(index) {
+        var delegate = this.unwrap();
+        var value = delegate.child(P.boxAsJava(index));
+        return P.boxAsJs(value);
+    };
 
 
     var className = "com.eas.client.forms.containers.TabbedPane";

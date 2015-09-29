@@ -164,9 +164,9 @@ define(function () {
         });
         return aTarget;
     }
-    return {
-        manageObject: manageObject,
-        unmanageObject: unmanageObject,
-        manageArray: manageArray
-    };
+    var module = {};
+    Object.defineProperty(module, 'manageObject', {value : manageObject});
+    Object.defineProperty(module, 'unmanageObject', {value : unmanageObject});
+    Object.defineProperty(module, 'manageArray', {value : manageArray});
+    return module;
 });

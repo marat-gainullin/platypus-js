@@ -3,10 +3,6 @@
  * Don't edit unless you are a Platypus.js contributor.
  */
 /* global Java*/
-/**
- * 
- * @returns {undefined}
- */
 (function () {
     var global = this;
     if (typeof Set === 'undefined') {
@@ -30,8 +26,10 @@
     var ReportClass = Java.type("com.eas.client.report.Report");
     var ScriptsClass = Java.type("com.eas.script.Scripts");
     var ScriptedResourceClass = Java.type("com.eas.client.scripts.ScriptedResource");
+    var JavaStringArrayClass = Java.type("java.lang.String[]");
     var apiPath = ScriptsClass.getAbsoluteApiPath();
     var appPath = ScriptedResourceClass.getAbsoluteAppPath();
+    var space = ScriptsClass.getSpace();
 
     function lookupCallerFile() {
         var calledFromFile = null;
@@ -82,7 +80,7 @@
         if (aOnSuccess) {
             ScriptedResourceClass.require(sDeps, calledFromFile, function () {
                 aOnSuccess.apply(null, gatherDefined());
-            }, aOnFailure);
+            }, aOnFailure ? aOnFailure : null);
         } else {
             ScriptedResourceClass.require(sDeps, calledFromFile);
             var def = gatherDefined();
@@ -130,7 +128,6 @@
     Object.defineProperty(global, 'define', {value: define});
     Object.defineProperty(global, 'require', {value: require});
     var Report = require('core/report');
-    var space = ScriptsClass.getSpace();
     space.setGlobal(global);
     space.setLookupInGlobalFunc(
             function (aPropertyName) {

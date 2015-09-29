@@ -491,27 +491,27 @@ define(['boxing'], function(P) {
         });
 
     };
-        /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf ModelCheckBox
-         */
-        P.ModelCheckBox.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Tries to acquire focus for this component.
+     * @method focus
+     * @memberOf ModelCheckBox
+     */
+    ModelCheckBox.prototype.focus = function() {
+        var delegate = this.unwrap();
+        var value = delegate.focus();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Redraw the component.
-         * @method redraw
-         * @memberOf ModelCheckBox
-         */
-        P.ModelCheckBox.prototype.redraw = function() {
-            var delegate = this.unwrap();
-            var value = delegate.redraw();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Redraw the component.
+     * @method redraw
+     * @memberOf ModelCheckBox
+     */
+    ModelCheckBox.prototype.redraw = function() {
+        var delegate = this.unwrap();
+        var value = delegate.redraw();
+        return P.boxAsJs(value);
+    };
 
 
     var className = "com.eas.client.forms.components.model.ModelCheckBox";

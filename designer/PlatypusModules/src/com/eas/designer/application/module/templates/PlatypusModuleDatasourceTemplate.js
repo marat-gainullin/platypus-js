@@ -1,5 +1,3 @@
-/* global P */
-
 /**
  * Datasource module is stateless data fetch/apply provider.
  * @author ${user}

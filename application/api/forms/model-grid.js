@@ -609,174 +609,174 @@ define(['boxing'], function(P) {
         });
 
     };
-        /**
-         * Shows find dialog.
-         * @deprecated Use find() instead.
-         * @method find
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.find = function() {
-            var delegate = this.unwrap();
-            var value = delegate.find();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Shows find dialog.
+     * @deprecated Use find() instead.
+     * @method find
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.find = function() {
+        var delegate = this.unwrap();
+        var value = delegate.find();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Selects the specified element.
+     * @param instance Entity's instance to be selected.
+     * @method select
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.select = function(instance) {
+        var delegate = this.unwrap();
+        var value = delegate.select(P.boxAsJava(instance));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Clears current selection.
-         * @method clearSelection
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.clearSelection = function() {
-            var delegate = this.unwrap();
-            var value = delegate.clearSelection();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Clears current selection.
+     * @method clearSelection
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.clearSelection = function() {
+        var delegate = this.unwrap();
+        var value = delegate.clearSelection();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Unselects the specified element.
-         * @param instance Entity's instance to be unselected
-         * @method unselect
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.unselect = function(instance) {
-            var delegate = this.unwrap();
-            var value = delegate.unselect(P.boxAsJava(instance));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Tries to acquire focus for this component.
+     * @method focus
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.focus = function() {
+        var delegate = this.unwrap();
+        var value = delegate.focus();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Selects the specified element.
-         * @param instance Entity's instance to be selected.
-         * @method select
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.select = function(instance) {
-            var delegate = this.unwrap();
-            var value = delegate.select(P.boxAsJava(instance));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Redraw the component.
+     * @method redraw
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.redraw = function() {
+        var delegate = this.unwrap();
+        var value = delegate.redraw();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Makes specified instance visible.
-         * @param instance Entity's instance to make visible.
-         * @param need2select true to select the instance (optional).
-         * @method makeVisible
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.makeVisible = function(instance, need2select) {
-            var delegate = this.unwrap();
-            var value = delegate.makeVisible(P.boxAsJava(instance), P.boxAsJava(need2select));
-            return P.boxAsJs(value);
-        };
+    /**
+     *
+     * @method addColumnNode
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.addColumnNode = function(arg0) {
+        var delegate = this.unwrap();
+        var value = delegate.addColumnNode(P.boxAsJava(arg0));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         *
-         * @method elementByModelIndex
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.elementByModelIndex = function(arg0) {
-            var delegate = this.unwrap();
-            var value = delegate.elementByModelIndex(P.boxAsJava(arg0));
-            return P.boxAsJs(value);
-        };
+    /**
+     *
+     * @method columnNodes
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.columnNodes = function() {
+        var delegate = this.unwrap();
+        var value = delegate.columnNodes();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         *
-         * @method try2StopAnyEditing
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.try2StopAnyEditing = function() {
-            var delegate = this.unwrap();
-            var value = delegate.try2StopAnyEditing();
-            return P.boxAsJs(value);
-        };
+    /**
+     *
+     * @method removeColumnNode
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.removeColumnNode = function(arg0) {
+        var delegate = this.unwrap();
+        var value = delegate.removeColumnNode(P.boxAsJava(arg0));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         *
-         * @method try2CancelAnyEditing
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.try2CancelAnyEditing = function() {
-            var delegate = this.unwrap();
-            var value = delegate.try2CancelAnyEditing();
-            return P.boxAsJs(value);
-        };
+    /**
+     *
+     * @method insertColumnNode
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.insertColumnNode = function(arg0, arg1) {
+        var delegate = this.unwrap();
+        var value = delegate.insertColumnNode(P.boxAsJava(arg0), P.boxAsJava(arg1));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         *
-         * @method addColumnNode
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.addColumnNode = function(arg0) {
-            var delegate = this.unwrap();
-            var value = delegate.addColumnNode(P.boxAsJava(arg0));
-            return P.boxAsJs(value);
-        };
+    /**
+     *
+     * @method elementByModelIndex
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.elementByModelIndex = function(arg0) {
+        var delegate = this.unwrap();
+        var value = delegate.elementByModelIndex(P.boxAsJava(arg0));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         *
-         * @method columnNodes
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.columnNodes = function() {
-            var delegate = this.unwrap();
-            var value = delegate.columnNodes();
-            return P.boxAsJs(value);
-        };
+    /**
+     *
+     * @method try2StopAnyEditing
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.try2StopAnyEditing = function() {
+        var delegate = this.unwrap();
+        var value = delegate.try2StopAnyEditing();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         *
-         * @method removeColumnNode
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.removeColumnNode = function(arg0) {
-            var delegate = this.unwrap();
-            var value = delegate.removeColumnNode(P.boxAsJava(arg0));
-            return P.boxAsJs(value);
-        };
+    /**
+     *
+     * @method try2CancelAnyEditing
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.try2CancelAnyEditing = function() {
+        var delegate = this.unwrap();
+        var value = delegate.try2CancelAnyEditing();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         *
-         * @method insertColumnNode
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.insertColumnNode = function(arg0, arg1) {
-            var delegate = this.unwrap();
-            var value = delegate.insertColumnNode(P.boxAsJava(arg0), P.boxAsJava(arg1));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Unselects the specified element.
+     * @param instance Entity's instance to be unselected
+     * @method unselect
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.unselect = function(instance) {
+        var delegate = this.unwrap();
+        var value = delegate.unselect(P.boxAsJava(instance));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Redraw the component.
-         * @method redraw
-         * @memberOf ModelGrid
-         */
-        P.ModelGrid.prototype.redraw = function() {
-            var delegate = this.unwrap();
-            var value = delegate.redraw();
-            return P.boxAsJs(value);
-        };
+    /**
+     * @method unsort
+     * @memberOf ModelGrid
+     * Clears sort on all columns, works only in HTML5 */
+    ModelGrid.prototype.unsort = function() {
+        var delegate = this.unwrap();
+        var value = delegate.unsort();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * @method unsort
-         * @memberOf ModelGrid
-         * Clears sort on all columns, works only in HTML5 */
-        P.ModelGrid.prototype.unsort = function() {
-            var delegate = this.unwrap();
-            var value = delegate.unsort();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Makes specified instance visible.
+     * @param instance Entity's instance to make visible.
+     * @param need2select true to select the instance (optional).
+     * @method makeVisible
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.makeVisible = function(instance, need2select) {
+        var delegate = this.unwrap();
+        var value = delegate.makeVisible(P.boxAsJava(instance), P.boxAsJava(need2select));
+        return P.boxAsJs(value);
+    };
 
 
     var className = "com.eas.client.forms.components.model.grid.ModelGrid";

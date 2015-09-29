@@ -148,17 +148,17 @@ define(['boxing'], function(P) {
         });
 
     };
-        /**
-         * Assigning method of field/parameter information using specified source.
-         * @params sourceField
-         * @method assignFrom
-         * @memberOf Parameter
-         */
-        P.Parameter.prototype.assignFrom = function(sourceField) {
-            var delegate = this.unwrap();
-            var value = delegate.assignFrom(P.boxAsJava(sourceField));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Assigning method of field/parameter information using specified source.
+     * @params sourceField
+     * @method assignFrom
+     * @memberOf Parameter
+     */
+    Parameter.prototype.assignFrom = function(sourceField) {
+        var delegate = this.unwrap();
+        var value = delegate.assignFrom(P.boxAsJava(sourceField));
+        return P.boxAsJs(value);
+    };
 
 
     var className = "com.eas.client.metadata.Parameter";

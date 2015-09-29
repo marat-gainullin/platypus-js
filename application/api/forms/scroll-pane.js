@@ -451,62 +451,62 @@ define(['boxing'], function(P) {
         });
 
     };
-        /**
-         * Sets the specified component as the scroll's view, replacing old view component.
-         * @param component the component to add
-         * @method add
-         * @memberOf ScrollPane
-         */
-        P.ScrollPane.prototype.add = function(component) {
-            var delegate = this.unwrap();
-            var value = delegate.add(P.boxAsJava(component));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Sets the specified component as the scroll's view, replacing old view component.
+     * @param component the component to add
+     * @method add
+     * @memberOf ScrollPane
+     */
+    ScrollPane.prototype.add = function(component) {
+        var delegate = this.unwrap();
+        var value = delegate.add(P.boxAsJava(component));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Removes the specified component from this container.
-         * @param component the component to remove
-         * @method remove
-         * @memberOf ScrollPane
-         */
-        P.ScrollPane.prototype.remove = function(component) {
-            var delegate = this.unwrap();
-            var value = delegate.remove(P.boxAsJava(component));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Removes the specified component from this container.
+     * @param component the component to remove
+     * @method remove
+     * @memberOf ScrollPane
+     */
+    ScrollPane.prototype.remove = function(component) {
+        var delegate = this.unwrap();
+        var value = delegate.remove(P.boxAsJava(component));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf ScrollPane
-         */
-        P.ScrollPane.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
+    /**
+     *
+     * @method children
+     * @memberOf ScrollPane
+     */
+    ScrollPane.prototype.children = function() {
+        var delegate = this.unwrap();
+        var value = delegate.children();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         *
-         * @method children
-         * @memberOf ScrollPane
-         */
-        P.ScrollPane.prototype.children = function() {
-            var delegate = this.unwrap();
-            var value = delegate.children();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Tries to acquire focus for this component.
+     * @method focus
+     * @memberOf ScrollPane
+     */
+    ScrollPane.prototype.focus = function() {
+        var delegate = this.unwrap();
+        var value = delegate.focus();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Returns child component by index. For the ScrollPane allways returns view component
-         * @method child
-         * @memberOf ScrollPane
-         * @param index Index of compoentnt to return. Ignored. */
-        P.ScrollPane.prototype.child = function(index) {
-            var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(index));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Returns child component by index. For the ScrollPane allways returns view component
+     * @method child
+     * @memberOf ScrollPane
+     * @param index Index of compoentnt to return. Ignored. */
+    ScrollPane.prototype.child = function(index) {
+        var delegate = this.unwrap();
+        var value = delegate.child(P.boxAsJava(index));
+        return P.boxAsJs(value);
+    };
 
 
     var className = "com.eas.client.forms.containers.ScrollPane";

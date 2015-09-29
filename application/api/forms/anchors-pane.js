@@ -419,89 +419,89 @@ define(['boxing'], function(P) {
         });
 
     };
-        /**
-         * Appends the specified component to the container with specified placement.
-         * @param component the component to add.
-         * @param anchors the anchors object for the component, can contain the following properties: left, width, right, top, height, bottom.
-         * @method add
-         * @memberOf AnchorsPane
-         */
-        P.AnchorsPane.prototype.add = function(component, anchors) {
-            var delegate = this.unwrap();
-            var value = delegate.add(P.boxAsJava(component), P.boxAsJava(anchors));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Appends the specified component to the container with specified placement.
+     * @param component the component to add.
+     * @param anchors the anchors object for the component, can contain the following properties: left, width, right, top, height, bottom.
+     * @method add
+     * @memberOf AnchorsPane
+     */
+    AnchorsPane.prototype.add = function(component, anchors) {
+        var delegate = this.unwrap();
+        var value = delegate.add(P.boxAsJava(component), P.boxAsJava(anchors));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Removes the specified component from this container.
-         * @param component the component to remove
-         * @method remove
-         * @memberOf AnchorsPane
-         */
-        P.AnchorsPane.prototype.remove = function(component) {
-            var delegate = this.unwrap();
-            var value = delegate.remove(P.boxAsJava(component));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Removes the specified component from this container.
+     * @param component the component to remove
+     * @method remove
+     * @memberOf AnchorsPane
+     */
+    AnchorsPane.prototype.remove = function(component) {
+        var delegate = this.unwrap();
+        var value = delegate.remove(P.boxAsJava(component));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Removes all the components from this container.
-         * @method clear
-         * @memberOf AnchorsPane
-         */
-        P.AnchorsPane.prototype.clear = function() {
-            var delegate = this.unwrap();
-            var value = delegate.clear();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Removes all the components from this container.
+     * @method clear
+     * @memberOf AnchorsPane
+     */
+    AnchorsPane.prototype.clear = function() {
+        var delegate = this.unwrap();
+        var value = delegate.clear();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Brings the specified component to back on this panel.
-         * @param component the component.
-         * @param count steps to move the component (optional).
-         * @method toBack
-         * @memberOf AnchorsPane
-         */
-        P.AnchorsPane.prototype.toBack = function(arg0, arg1) {
-            var delegate = this.unwrap();
-            var value = delegate.toBack(P.boxAsJava(arg0), P.boxAsJava(arg1));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Gets the container's children components.
+     * @method children
+     * @memberOf AnchorsPane
+     */
+    AnchorsPane.prototype.children = function() {
+        var delegate = this.unwrap();
+        var value = delegate.children();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Brings the specified component to front on this panel.
-         * @param component the component.
-         * @param count steps to move the component (optional).
-         * @method toFront
-         * @memberOf AnchorsPane
-         */
-        P.AnchorsPane.prototype.toFront = function(component, count) {
-            var delegate = this.unwrap();
-            var value = delegate.toFront(P.boxAsJava(component), P.boxAsJava(count));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Brings the specified component to back on this panel.
+     * @param component the component.
+     * @param count steps to move the component (optional).
+     * @method toBack
+     * @memberOf AnchorsPane
+     */
+    AnchorsPane.prototype.toBack = function(arg0, arg1) {
+        var delegate = this.unwrap();
+        var value = delegate.toBack(P.boxAsJava(arg0), P.boxAsJava(arg1));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf AnchorsPane
-         */
-        P.AnchorsPane.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Brings the specified component to front on this panel.
+     * @param component the component.
+     * @param count steps to move the component (optional).
+     * @method toFront
+     * @memberOf AnchorsPane
+     */
+    AnchorsPane.prototype.toFront = function(component, count) {
+        var delegate = this.unwrap();
+        var value = delegate.toFront(P.boxAsJava(component), P.boxAsJava(count));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Gets the container's children components.
-         * @method children
-         * @memberOf AnchorsPane
-         */
-        P.AnchorsPane.prototype.children = function() {
-            var delegate = this.unwrap();
-            var value = delegate.children();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Tries to acquire focus for this component.
+     * @method focus
+     * @memberOf AnchorsPane
+     */
+    AnchorsPane.prototype.focus = function() {
+        var delegate = this.unwrap();
+        var value = delegate.focus();
+        return P.boxAsJs(value);
+    };
 
 
     var className = "com.eas.client.forms.containers.AnchorsPane";

@@ -49,27 +49,27 @@ define(['boxing'], function(P) {
         });
 
     };
-        /**
-         *
-         * @method close
-         * @memberOf WebSocketServerSession
-         */
-        P.WebSocketServerSession.prototype.close = function(arg0, arg1) {
-            var delegate = this.unwrap();
-            var value = delegate.close(P.boxAsJava(arg0), P.boxAsJava(arg1));
-            return P.boxAsJs(value);
-        };
+    /**
+     *
+     * @method close
+     * @memberOf WebSocketServerSession
+     */
+    WebSocketServerSession.prototype.close = function(arg0, arg1) {
+        var delegate = this.unwrap();
+        var value = delegate.close(P.boxAsJava(arg0), P.boxAsJava(arg1));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         *
-         * @method send
-         * @memberOf WebSocketServerSession
-         */
-        P.WebSocketServerSession.prototype.send = function(data) {
-            var delegate = this.unwrap();
-            var value = delegate.send(P.boxAsJava(data));
-            return P.boxAsJs(value);
-        };
+    /**
+     *
+     * @method send
+     * @memberOf WebSocketServerSession
+     */
+    WebSocketServerSession.prototype.send = function(data) {
+        var delegate = this.unwrap();
+        var value = delegate.send(P.boxAsJava(data));
+        return P.boxAsJs(value);
+    };
 
 
     var className = "com.eas.server.websocket.WebSocketServerSession";

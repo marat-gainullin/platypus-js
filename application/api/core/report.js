@@ -27,38 +27,38 @@ define(['boxing'], function(P) {
             Report.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
     };
-        /**
-         * Runs printing.
-         * @method print
-         * @memberOf Report
-         */
-        P.Report.prototype.print = function() {
-            var delegate = this.unwrap();
-            var value = delegate.print();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Runs printing.
+     * @method print
+     * @memberOf Report
+     */
+    Report.prototype.print = function() {
+        var delegate = this.unwrap();
+        var value = delegate.print();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Saves the report at a specified location.
-         * @method save
-         * @memberOf Report
-         * @param aFileName Name of a file, the generated report should be save in. */
-        P.Report.prototype.save = function(aFileName) {
-            var delegate = this.unwrap();
-            var value = delegate.save(P.boxAsJava(aFileName));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Saves the report at a specified location.
+     * @method save
+     * @memberOf Report
+     * @param aFileName Name of a file, the generated report should be save in. */
+    Report.prototype.save = function(aFileName) {
+        var delegate = this.unwrap();
+        var value = delegate.save(P.boxAsJava(aFileName));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Shows report as Excel application.
-         * @method show
-         * @memberOf Report
-         */
-        P.Report.prototype.show = function() {
-            var delegate = this.unwrap();
-            var value = delegate.show();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Shows report as Excel application.
+     * @method show
+     * @memberOf Report
+     */
+    Report.prototype.show = function() {
+        var delegate = this.unwrap();
+        var value = delegate.show();
+        return P.boxAsJs(value);
+    };
 
 
     var className = "com.eas.client.report.Report";

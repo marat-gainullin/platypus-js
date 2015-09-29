@@ -461,77 +461,77 @@ define(['boxing'], function(P) {
         });
 
     };
-        /**
-         * Appends the specified component to the end of this container.
-         * @param component the component to add
-         * @param row the row of the component
-         * @param column the column of the component
-         * @method add
-         * @memberOf GridPane
-         */
-        P.GridPane.prototype.add = function(component, row, column) {
-            var delegate = this.unwrap();
-            var value = delegate.add(P.boxAsJava(component), P.boxAsJava(row), P.boxAsJava(column));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Appends the specified component to the end of this container.
+     * @param component the component to add
+     * @param row the row of the component
+     * @param column the column of the component
+     * @method add
+     * @memberOf GridPane
+     */
+    GridPane.prototype.add = function(component, row, column) {
+        var delegate = this.unwrap();
+        var value = delegate.add(P.boxAsJava(component), P.boxAsJava(row), P.boxAsJava(column));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Removes the specified component from this container.
-         * @param component the component to remove
-         * @method remove
-         * @memberOf GridPane
-         */
-        P.GridPane.prototype.remove = function(component) {
-            var delegate = this.unwrap();
-            var value = delegate.remove(P.boxAsJava(component));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Removes the specified component from this container.
+     * @param component the component to remove
+     * @method remove
+     * @memberOf GridPane
+     */
+    GridPane.prototype.remove = function(component) {
+        var delegate = this.unwrap();
+        var value = delegate.remove(P.boxAsJava(component));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Removes all the components from this container.
-         * @method clear
-         * @memberOf GridPane
-         */
-        P.GridPane.prototype.clear = function() {
-            var delegate = this.unwrap();
-            var value = delegate.clear();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Removes all the components from this container.
+     * @method clear
+     * @memberOf GridPane
+     */
+    GridPane.prototype.clear = function() {
+        var delegate = this.unwrap();
+        var value = delegate.clear();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf GridPane
-         */
-        P.GridPane.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
+    /**
+     *
+     * @method children
+     * @memberOf GridPane
+     */
+    GridPane.prototype.children = function() {
+        var delegate = this.unwrap();
+        var value = delegate.children();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         *
-         * @method children
-         * @memberOf GridPane
-         */
-        P.GridPane.prototype.children = function() {
-            var delegate = this.unwrap();
-            var value = delegate.children();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Tries to acquire focus for this component.
+     * @method focus
+     * @memberOf GridPane
+     */
+    GridPane.prototype.focus = function() {
+        var delegate = this.unwrap();
+        var value = delegate.focus();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Gets the component with the specified row and column.
-         * @param row the row of the component
-         * @param column the column of the component
-         * @method child
-         * @memberOf GridPane
-         */
-        P.GridPane.prototype.child = function(row, column) {
-            var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(row), P.boxAsJava(column));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Gets the component with the specified row and column.
+     * @param row the row of the component
+     * @param column the column of the component
+     * @method child
+     * @memberOf GridPane
+     */
+    GridPane.prototype.child = function(row, column) {
+        var delegate = this.unwrap();
+        var value = delegate.child(P.boxAsJava(row), P.boxAsJava(column));
+        return P.boxAsJs(value);
+    };
 
 
     var className = "com.eas.client.forms.containers.GridPane";

@@ -75,8 +75,8 @@ define(function () {
         }
         return aValue;
     }
-    return {
-        boxAsJs: boxAsJs,
-        boxAsJava: boxAsJava
-    };
+    var module = {};
+    Object.defineProperty(module, 'boxAsJs', {value: boxAsJs});
+    Object.defineProperty(module, 'boxAsJava', {value: boxAsJava});
+    return module;
 });

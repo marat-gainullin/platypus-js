@@ -342,16 +342,6 @@ define(['boxing'], function(P) {
             }
         });
 
-        Object.defineProperty(this, "rightComponent", {
-            get: function() {
-                var value = delegate.rightComponent;
-                return P.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.rightComponent = P.boxAsJava(aValue);
-            }
-        });
-
         Object.defineProperty(this, "onMouseWheelMoved", {
             get: function() {
                 var value = delegate.onMouseWheelMoved;
@@ -359,6 +349,16 @@ define(['boxing'], function(P) {
             },
             set: function(aValue) {
                 delegate.onMouseWheelMoved = aValue;
+            }
+        });
+
+        Object.defineProperty(this, "rightComponent", {
+            get: function() {
+                var value = delegate.rightComponent;
+                return P.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.rightComponent = P.boxAsJava(aValue);
             }
         });
 
@@ -490,64 +490,64 @@ define(['boxing'], function(P) {
         });
 
     };
-        /**
-         * Appends the specified component to this container on the specified placement.
-         * @param component the component to add.
-         * @param place the placement in the container: <code>HorizontalPosition.LEFT</code>, <code>HorizontalPosition.CENTER</code>, <code>HorizontalPosition.RIGHT</code>, <code>VerticalPosition.TOP</code> or <code>VerticalPosition.BOTTOM</code> (optional).
-         * @param size the size of the component by the provided place direction (optional).
-         * @method add
-         * @memberOf BorderPane
-         */
-        P.BorderPane.prototype.add = function(component, place, size) {
-            var delegate = this.unwrap();
-            var value = delegate.add(P.boxAsJava(component), P.boxAsJava(place), P.boxAsJava(size));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Appends the specified component to this container on the specified placement.
+     * @param component the component to add.
+     * @param place the placement in the container: <code>HorizontalPosition.LEFT</code>, <code>HorizontalPosition.CENTER</code>, <code>HorizontalPosition.RIGHT</code>, <code>VerticalPosition.TOP</code> or <code>VerticalPosition.BOTTOM</code> (optional).
+     * @param size the size of the component by the provided place direction (optional).
+     * @method add
+     * @memberOf BorderPane
+     */
+    BorderPane.prototype.add = function(component, place, size) {
+        var delegate = this.unwrap();
+        var value = delegate.add(P.boxAsJava(component), P.boxAsJava(place), P.boxAsJava(size));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Removes the specified component from this container.
-         * @param component the component to remove
-         * @method remove
-         * @memberOf BorderPane
-         */
-        P.BorderPane.prototype.remove = function(component) {
-            var delegate = this.unwrap();
-            var value = delegate.remove(P.boxAsJava(component));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Removes the specified component from this container.
+     * @param component the component to remove
+     * @method remove
+     * @memberOf BorderPane
+     */
+    BorderPane.prototype.remove = function(component) {
+        var delegate = this.unwrap();
+        var value = delegate.remove(P.boxAsJava(component));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Removes all the components from this container.
-         * @method clear
-         * @memberOf BorderPane
-         */
-        P.BorderPane.prototype.clear = function() {
-            var delegate = this.unwrap();
-            var value = delegate.clear();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Removes all the components from this container.
+     * @method clear
+     * @memberOf BorderPane
+     */
+    BorderPane.prototype.clear = function() {
+        var delegate = this.unwrap();
+        var value = delegate.clear();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf BorderPane
-         */
-        P.BorderPane.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Gets the container's children components.
+     * @method children
+     * @memberOf BorderPane
+     */
+    BorderPane.prototype.children = function() {
+        var delegate = this.unwrap();
+        var value = delegate.children();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Gets the container's children components.
-         * @method children
-         * @memberOf BorderPane
-         */
-        P.BorderPane.prototype.children = function() {
-            var delegate = this.unwrap();
-            var value = delegate.children();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Tries to acquire focus for this component.
+     * @method focus
+     * @memberOf BorderPane
+     */
+    BorderPane.prototype.focus = function() {
+        var delegate = this.unwrap();
+        var value = delegate.focus();
+        return P.boxAsJs(value);
+    };
 
 
     var className = "com.eas.client.forms.containers.BorderPane";

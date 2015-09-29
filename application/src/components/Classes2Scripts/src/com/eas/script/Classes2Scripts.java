@@ -56,6 +56,8 @@ public class Classes2Scripts {
         "platypus.js", "platypus-jsdoc.js", "internals.js"
             , "http-context.js", "managed.js", "orderer.js"
             , "ui.js", "orm.js", "boxing.js", "logger.js"
+            , "rpc.js", "resource.js", "md5.js", "id.js", "files.js"
+            , "template.js", "invoke.js", "environment.js", "extend.js"
     }));
 
     private static final int DEFAULT_IDENTATION_WIDTH = 4;
@@ -504,17 +506,17 @@ public class Classes2Scripts {
         }
     }
 */
-    private String getMethodPart(String namespace, Method method, int ident) {
+    private String getMethodPart(String namespace, Method method, int indent) {
         FunctionInfo fi = getFunctionInfo(method.getName(), method);
         StringBuilder sb = new StringBuilder();
-        int i = ident;
+        int i = indent;
         String methodName = fi.name;
         if (fi.apiName != null && !fi.apiName.isEmpty()) {
             methodName = fi.apiName;
         }
-        sb.append(getMethodJsDoc(namespace, methodName, fi.jsDoc, ++i)).append("\n");
+        sb.append(getMethodJsDoc(namespace, methodName, fi.jsDoc, i)).append("\n");
         sb.append(getIndentStr(i));
-        sb.append("P.").append(namespace).append(".prototype.").append(methodName).append(" = ")
+        sb.append(namespace).append(".prototype.").append(methodName).append(" = ")
                 .append("function(");
         StringBuilder paramsInCall = new StringBuilder();
         StringBuilder formalParams = new StringBuilder();

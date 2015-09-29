@@ -456,50 +456,153 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         return loadFormDocument(document, aModel, aTarget);
     }
 
-    var module = {
-        Colors: Color,
-        Color: Color,
-        Cursor: Cursor,
-        Icon: Icon,
-        Icons: Icon,
-        Font: Font,
-        VK_ALT: KeyEventClass.VK_ALT,
-        VK_BACKSPACE: KeyEventClass.VK_BACK_SPACE,
-        VK_DELETE: KeyEventClass.VK_DELETE,
-        VK_DOWN: KeyEventClass.VK_DOWN,
-        VK_END: KeyEventClass.VK_END,
-        VK_ENTER: KeyEventClass.VK_ENTER,
-        VK_ESCAPE: KeyEventClass.VK_ESCAPE,
-        VK_HOME: KeyEventClass.VK_HOME,
-        VK_LEFT: KeyEventClass.VK_LEFT,
-        VK_PAGEDOWN: KeyEventClass.VK_PAGE_DOWN,
-        VK_PAGEUP: KeyEventClass.VK_PAGE_UP,
-        VK_RIGHT: KeyEventClass.VK_RIGHT,
-        VK_SHIFT: KeyEventClass.VK_SHIFT,
-        VK_TAB: KeyEventClass.VK_TAB,
-        VK_UP: KeyEventClass.VK_UP,
-        selectFile: selectFile,
-        selectDirectory: selectDirectory,
-        selectColor: selectColor,
-        msgBox: msgBox,
-        error: error,
-        warn: warn,
-        HorizontalPosition: HorizontalPosition,
-        VerticalPosition: VerticalPosition,
-        Orientation: Orientation,
-        ScrollBarPolicy: ScrollBarPolicy,
-        FontStyle: FontStyle,
-        loadForm: loadForm,
-        readForm: readForm
-    };
-    for(var f in Forms){
+    var module = {};
+    Object.defineProperty(module, 'Colors', {
+        enumerable: true,
+        value: Color
+    });
+    Object.defineProperty(module, 'Color', {
+        enumerable: true,
+        value: Color
+    });
+    Object.defineProperty(module, 'Cursor', {
+        enumerable: true,
+        value: Cursor
+    });
+    Object.defineProperty(module, 'Icon', {
+        enumerable: true,
+        value: Icon
+    });
+    Object.defineProperty(module, 'Icons', {
+        enumerable: true,
+        value: Icon
+    });
+    Object.defineProperty(module, 'Font', {
+        enumerable: true,
+        value: Font
+    });
+    Object.defineProperty(module, 'VK_ALT', {
+        enumerable: true,
+        value: KeyEventClass.VK_ALT
+    });
+    Object.defineProperty(module, 'VK_BACKSPACE', {
+        enumerable: true,
+        value: KeyEventClass.VK_BACK_SPACE
+    });
+    Object.defineProperty(module, 'VK_DELETE', {
+        enumerable: true,
+        value: KeyEventClass.VK_DELETE
+    });
+    Object.defineProperty(module, 'VK_DOWN', {
+        enumerable: true,
+        value: KeyEventClass.VK_DOWN
+    });
+    Object.defineProperty(module, 'VK_END', {
+        enumerable: true,
+        value: KeyEventClass.VK_END
+    });
+    Object.defineProperty(module, 'VK_ENTER', {
+        enumerable: true,
+        value: KeyEventClass.VK_ENTER
+    });
+    Object.defineProperty(module, 'VK_ESCAPE', {
+        enumerable: true,
+        value: KeyEventClass.VK_ESCAPE
+    });
+    Object.defineProperty(module, 'VK_HOME', {
+        enumerable: true,
+        value: KeyEventClass.VK_HOME
+    });
+    Object.defineProperty(module, 'VK_LEFT', {
+        enumerable: true,
+        value: KeyEventClass.VK_LEFT
+    });
+    Object.defineProperty(module, 'VK_PAGEDOWN', {
+        enumerable: true,
+        value: KeyEventClass.VK_PAGE_DOWN
+    });
+    Object.defineProperty(module, 'VK_PAGEUP', {
+        enumerable: true,
+        value: KeyEventClass.VK_PAGE_UP
+    });
+    Object.defineProperty(module, 'VK_RIGHT', {
+        enumerable: true,
+        value: KeyEventClass.VK_RIGHT
+    });
+    Object.defineProperty(module, 'VK_SHIFT', {
+        enumerable: true,
+        value: KeyEventClass.VK_SHIFT
+    });
+    Object.defineProperty(module, 'VK_TAB', {
+        enumerable: true,
+        value: KeyEventClass.VK_TAB
+    });
+    Object.defineProperty(module, 'VK_UP', {
+        enumerable: true,
+        value: KeyEventClass.VK_UP
+    });
+    Object.defineProperty(module, 'selectFile', {
+        enumerable: true,
+        value: selectFile
+    });
+    Object.defineProperty(module, 'selectDirectory', {
+        enumerable: true,
+        value: selectDirectory
+    });
+    Object.defineProperty(module, 'selectColor', {
+        enumerable: true,
+        value: selectColor
+    });
+    Object.defineProperty(module, 'msgBox', {
+        enumerable: true,
+        value: msgBox
+    });
+    Object.defineProperty(module, 'error', {
+        enumerable: true,
+        value: error
+    });
+    Object.defineProperty(module, 'warn', {
+        enumerable: true,
+        value: warn
+    });
+    Object.defineProperty(module, 'HorizontalPosition', {
+        enumerable: true,
+        value: HorizontalPosition
+    });
+    Object.defineProperty(module, 'VerticalPosition', {
+        enumerable: true,
+        value: VerticalPosition
+    });
+    Object.defineProperty(module, 'Orientation', {
+        enumerable: true,
+        value: Orientation
+    });
+    Object.defineProperty(module, 'ScrollBarPolicy', {
+        enumerable: true,
+        value: ScrollBarPolicy
+    });
+    Object.defineProperty(module, 'FontStyle', {
+        enumerable: true,
+        value: FontStyle
+    });
+    Object.defineProperty(module, 'loadForm', {
+        enumerable: true,
+        value: loadForm
+    });
+    Object.defineProperty(module, 'readForm', {
+        enumerable: true,
+        value: readForm
+    });
+    for (var f in Forms) {
         Object.defineProperty(module, f, {
-            value : Forms[f]
+            enumerable: true,
+            value: Forms[f]
         });
     }
-    for(var g in Grid){
+    for (var g in Grid) {
         Object.defineProperty(module, g, {
-            value : Grid[g]
+            enumerable: true,
+            value: Grid[g]
         });
     }
     return module;

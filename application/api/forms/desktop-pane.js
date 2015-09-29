@@ -400,60 +400,60 @@ define(['boxing'], function(P) {
         });
 
     };
-        /**
-         * Closes all frames on the pane.
-         * @method closeAll
-         * @memberOf DesktopPane
-         */
-        P.DesktopPane.prototype.closeAll = function() {
-            var delegate = this.unwrap();
-            var value = delegate.closeAll();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Closes all frames on the pane.
+     * @method closeAll
+     * @memberOf DesktopPane
+     */
+    DesktopPane.prototype.closeAll = function() {
+        var delegate = this.unwrap();
+        var value = delegate.closeAll();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf DesktopPane
-         */
-        P.DesktopPane.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Tries to acquire focus for this component.
+     * @method focus
+     * @memberOf DesktopPane
+     */
+    DesktopPane.prototype.focus = function() {
+        var delegate = this.unwrap();
+        var value = delegate.focus();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Minimizes all frames on the pane.
-         * @method minimizeAll
-         * @memberOf DesktopPane
-         */
-        P.DesktopPane.prototype.minimizeAll = function() {
-            var delegate = this.unwrap();
-            var value = delegate.minimizeAll();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Minimizes all frames on the pane.
+     * @method minimizeAll
+     * @memberOf DesktopPane
+     */
+    DesktopPane.prototype.minimizeAll = function() {
+        var delegate = this.unwrap();
+        var value = delegate.minimizeAll();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Restores frames original state and location.
-         * @method restoreAll
-         * @memberOf DesktopPane
-         */
-        P.DesktopPane.prototype.restoreAll = function() {
-            var delegate = this.unwrap();
-            var value = delegate.restoreAll();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Restores frames original state and location.
+     * @method restoreAll
+     * @memberOf DesktopPane
+     */
+    DesktopPane.prototype.restoreAll = function() {
+        var delegate = this.unwrap();
+        var value = delegate.restoreAll();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Maximizes all frames on the pane.
-         * @method maximizeAll
-         * @memberOf DesktopPane
-         */
-        P.DesktopPane.prototype.maximizeAll = function() {
-            var delegate = this.unwrap();
-            var value = delegate.maximizeAll();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Maximizes all frames on the pane.
+     * @method maximizeAll
+     * @memberOf DesktopPane
+     */
+    DesktopPane.prototype.maximizeAll = function() {
+        var delegate = this.unwrap();
+        var value = delegate.maximizeAll();
+        return P.boxAsJs(value);
+    };
 
 
     var className = "com.eas.client.forms.components.DesktopPane";

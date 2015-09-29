@@ -20,16 +20,16 @@ define(['boxing'], function(P) {
         if(MouseEvent.superclass)
             MouseEvent.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        Object.defineProperty(this, "altDown", {
+        Object.defineProperty(this, "button", {
             get: function() {
-                var value = delegate.altDown;
+                var value = delegate.button;
                 return P.boxAsJs(value);
             }
         });
 
-        Object.defineProperty(this, "button", {
+        Object.defineProperty(this, "altDown", {
             get: function() {
-                var value = delegate.button;
+                var value = delegate.altDown;
                 return P.boxAsJs(value);
             }
         });
@@ -55,16 +55,16 @@ define(['boxing'], function(P) {
             }
         });
 
-        Object.defineProperty(this, "x", {
+        Object.defineProperty(this, "metaDown", {
             get: function() {
-                var value = delegate.x;
+                var value = delegate.metaDown;
                 return P.boxAsJs(value);
             }
         });
 
-        Object.defineProperty(this, "metaDown", {
+        Object.defineProperty(this, "x", {
             get: function() {
-                var value = delegate.metaDown;
+                var value = delegate.x;
                 return P.boxAsJs(value);
             }
         });

@@ -430,75 +430,75 @@ define(['boxing'], function(P) {
         });
 
     };
-        /**
-         * Removes the specified component from the group.
-         * @param component Component to remove from the group.
-         * @method remove
-         * @memberOf ButtonGroup
-         */
-        P.ButtonGroup.prototype.remove = function(component) {
-            var delegate = this.unwrap();
-            var value = delegate.remove(P.boxAsJava(component));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Removes the specified component from the group.
+     * @param component Component to remove from the group.
+     * @method remove
+     * @memberOf ButtonGroup
+     */
+    ButtonGroup.prototype.remove = function(component) {
+        var delegate = this.unwrap();
+        var value = delegate.remove(P.boxAsJava(component));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Removes all the components from this container.
-         * @method clear
-         * @memberOf ButtonGroup
-         */
-        P.ButtonGroup.prototype.clear = function() {
-            var delegate = this.unwrap();
-            var value = delegate.clear();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Removes all the components from this container.
+     * @method clear
+     * @memberOf ButtonGroup
+     */
+    ButtonGroup.prototype.clear = function() {
+        var delegate = this.unwrap();
+        var value = delegate.clear();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Tries to acquire focus for this component.
-         * @method focus
-         * @memberOf ButtonGroup
-         */
-        P.ButtonGroup.prototype.focus = function() {
-            var delegate = this.unwrap();
-            var value = delegate.focus();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Gets the container's children components.
+     * @method children
+     * @memberOf ButtonGroup
+     */
+    ButtonGroup.prototype.children = function() {
+        var delegate = this.unwrap();
+        var value = delegate.children();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Gets the container's children components.
-         * @method children
-         * @memberOf ButtonGroup
-         */
-        P.ButtonGroup.prototype.children = function() {
-            var delegate = this.unwrap();
-            var value = delegate.children();
-            return P.boxAsJs(value);
-        };
+    /**
+     * Tries to acquire focus for this component.
+     * @method focus
+     * @memberOf ButtonGroup
+     */
+    ButtonGroup.prototype.focus = function() {
+        var delegate = this.unwrap();
+        var value = delegate.focus();
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Gets the container's n-th component.
-         * @param index the component's index in the container
-         * @return the child component
-         * @method child
-         * @memberOf ButtonGroup
-         */
-        P.ButtonGroup.prototype.child = function(index) {
-            var delegate = this.unwrap();
-            var value = delegate.child(P.boxAsJava(index));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Gets the container's n-th component.
+     * @param index the component's index in the container
+     * @return the child component
+     * @method child
+     * @memberOf ButtonGroup
+     */
+    ButtonGroup.prototype.child = function(index) {
+        var delegate = this.unwrap();
+        var value = delegate.child(P.boxAsJava(index));
+        return P.boxAsJs(value);
+    };
 
-        /**
-         * Appends the specified component to the end of this group.
-         * @param component Component to add to the group.
-         * @method add
-         * @memberOf ButtonGroup
-         */
-        P.ButtonGroup.prototype.add = function(component) {
-            var delegate = this.unwrap();
-            var value = delegate.jsAdd(P.boxAsJava(component));
-            return P.boxAsJs(value);
-        };
+    /**
+     * Appends the specified component to the end of this group.
+     * @param component Component to add to the group.
+     * @method add
+     * @memberOf ButtonGroup
+     */
+    ButtonGroup.prototype.add = function(component) {
+        var delegate = this.unwrap();
+        var value = delegate.jsAdd(P.boxAsJava(component));
+        return P.boxAsJs(value);
+    };
 
 
     var className = "com.eas.client.forms.containers.ButtonGroup";
