@@ -1,6 +1,6 @@
 /* global Java */
 
-define(['boxing'], function(P) {
+define(['boxing'], function(B) {
     /**
      * A model component that shows a date.
      * @constructor ModelDate ModelDate
@@ -23,10 +23,10 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "selectOnly", {
             get: function() {
                 var value = delegate.selectOnly;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.selectOnly = P.boxAsJava(aValue);
+                delegate.selectOnly = B.boxAsJava(aValue);
             }
         });
 
@@ -53,10 +53,10 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "nullable", {
             get: function() {
                 var value = delegate.nullable;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.nullable = P.boxAsJava(aValue);
+                delegate.nullable = B.boxAsJava(aValue);
             }
         });
 
@@ -73,20 +73,20 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "dateFormat", {
             get: function() {
                 var value = delegate.dateFormat;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.dateFormat = P.boxAsJava(aValue);
+                delegate.dateFormat = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "foreground", {
             get: function() {
                 var value = delegate.foreground;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.foreground = P.boxAsJava(aValue);
+                delegate.foreground = B.boxAsJava(aValue);
             }
         });
 
@@ -113,17 +113,17 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "parent", {
             get: function() {
                 var value = delegate.parentWidget;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
         Object.defineProperty(this, "text", {
             get: function() {
                 var value = delegate.text;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.text = P.boxAsJava(aValue);
+                delegate.text = B.boxAsJava(aValue);
             }
         });
 
@@ -140,27 +140,27 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "toolTipText", {
             get: function() {
                 var value = delegate.toolTipText;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.toolTipText = P.boxAsJava(aValue);
+                delegate.toolTipText = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.height = P.boxAsJava(aValue);
+                delegate.height = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "element", {
             get: function() {
                 var value = delegate.element;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
@@ -177,10 +177,10 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.visible = P.boxAsJava(aValue);
+                delegate.visible = B.boxAsJava(aValue);
             }
         });
 
@@ -217,20 +217,20 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "datePicker", {
             get: function() {
                 var value = delegate.datePicker;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.datePicker = P.boxAsJava(aValue);
+                delegate.datePicker = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "focusable", {
             get: function() {
                 var value = delegate.focusable;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.focusable = P.boxAsJava(aValue);
+                delegate.focusable = B.boxAsJava(aValue);
             }
         });
 
@@ -257,57 +257,57 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "timePicker", {
             get: function() {
                 var value = delegate.timePicker;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.timePicker = P.boxAsJava(aValue);
+                delegate.timePicker = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "field", {
             get: function() {
                 var value = delegate.field;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.field = P.boxAsJava(aValue);
+                delegate.field = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "left", {
             get: function() {
                 var value = delegate.left;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.left = P.boxAsJava(aValue);
+                delegate.left = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "background", {
             get: function() {
                 var value = delegate.background;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.background = P.boxAsJava(aValue);
+                delegate.background = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "name", {
             get: function() {
                 var value = delegate.name;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
         Object.defineProperty(this, "cursor", {
             get: function() {
                 var value = delegate.cursor;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.cursor = P.boxAsJava(aValue);
+                delegate.cursor = B.boxAsJava(aValue);
             }
         });
 
@@ -334,20 +334,20 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "emptyText", {
             get: function() {
                 var value = delegate.emptyText;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.emptyText = P.boxAsJava(aValue);
+                delegate.emptyText = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "icon", {
             get: function() {
                 var value = delegate.icon;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.icon = P.boxAsJava(aValue);
+                delegate.icon = B.boxAsJava(aValue);
             }
         });
 
@@ -364,20 +364,20 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "error", {
             get: function() {
                 var value = delegate.error;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.error = P.boxAsJava(aValue);
+                delegate.error = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "enabled", {
             get: function() {
                 var value = delegate.enabled;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.enabled = P.boxAsJava(aValue);
+                delegate.enabled = B.boxAsJava(aValue);
             }
         });
 
@@ -394,30 +394,30 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "value", {
             get: function() {
                 var value = delegate.jsValue;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.jsValue = P.boxAsJava(aValue);
+                delegate.jsValue = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {
                 var value = delegate.componentPopupMenu;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.componentPopupMenu = P.boxAsJava(aValue);
+                delegate.componentPopupMenu = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "top", {
             get: function() {
                 var value = delegate.top;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.top = P.boxAsJava(aValue);
+                delegate.top = B.boxAsJava(aValue);
             }
         });
 
@@ -444,37 +444,37 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.opaque = P.boxAsJava(aValue);
+                delegate.opaque = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "editable", {
             get: function() {
                 var value = delegate.editable;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.editable = P.boxAsJava(aValue);
+                delegate.editable = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "nextFocusableComponent", {
             get: function() {
                 var value = delegate.nextFocusableComponent;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.nextFocusableComponent = P.boxAsJava(aValue);
+                delegate.nextFocusableComponent = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "component", {
             get: function() {
                 var value = delegate.component;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
@@ -511,20 +511,20 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.width = P.boxAsJava(aValue);
+                delegate.width = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "font", {
             get: function() {
                 var value = delegate.font;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.font = P.boxAsJava(aValue);
+                delegate.font = B.boxAsJava(aValue);
             }
         });
 
@@ -547,7 +547,7 @@ define(['boxing'], function(P) {
     ModelDate.prototype.focus = function() {
         var delegate = this.unwrap();
         var value = delegate.focus();
-        return P.boxAsJs(value);
+        return B.boxAsJs(value);
     };
 
     /**
@@ -558,7 +558,7 @@ define(['boxing'], function(P) {
     ModelDate.prototype.redraw = function() {
         var delegate = this.unwrap();
         var value = delegate.redraw();
-        return P.boxAsJs(value);
+        return B.boxAsJs(value);
     };
 
 

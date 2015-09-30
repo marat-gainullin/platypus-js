@@ -1,6 +1,6 @@
 /* global Java */
 
-define(['boxing'], function(P) {
+define(['boxing'], function(B) {
     /**
      * Generated constructor.
      * @constructor Command Command
@@ -23,28 +23,28 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "type", {
             get: function() {
                 var value = delegate.type;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
         Object.defineProperty(this, "parameters", {
             get: function() {
                 var value = delegate.parameters;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
         Object.defineProperty(this, "command", {
             get: function() {
                 var value = delegate.command;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
         Object.defineProperty(this, "entity", {
             get: function() {
                 var value = delegate.entity;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 

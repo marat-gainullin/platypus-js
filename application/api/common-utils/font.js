@@ -1,6 +1,6 @@
 /* global Java */
 
-define(['boxing'], function(P) {
+define(['boxing'], function(B) {
     /**
      * Font object, which is used to render text in a visible way.
      * @param family a font family name, e.g. 'SansSerif'
@@ -12,9 +12,9 @@ define(['boxing'], function(P) {
         var maxArgs = 3;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
-            : arguments.length === 3 ? new javaClass(P.boxAsJava(family), P.boxAsJava(style), P.boxAsJava(size))
-            : arguments.length === 2 ? new javaClass(P.boxAsJava(family), P.boxAsJava(style))
-            : arguments.length === 1 ? new javaClass(P.boxAsJava(family))
+            : arguments.length === 3 ? new javaClass(B.boxAsJava(family), B.boxAsJava(style), B.boxAsJava(size))
+            : arguments.length === 2 ? new javaClass(B.boxAsJava(family), B.boxAsJava(style))
+            : arguments.length === 1 ? new javaClass(B.boxAsJava(family))
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {

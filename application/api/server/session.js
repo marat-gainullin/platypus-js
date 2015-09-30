@@ -1,6 +1,6 @@
 /* global Java */
 
-define(['boxing'], function(P) {
+define(['boxing'], function(B) {
     /**
      * Generated constructor.
      * @constructor Session Session

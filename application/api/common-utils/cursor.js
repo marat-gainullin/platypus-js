@@ -1,6 +1,6 @@
 /* global Java */
 
-define(['boxing'], function(P) {
+define(['boxing'], function(B) {
     /**
      * Constructs new cursor object.
      * @param type Type of new cursor.
@@ -10,7 +10,7 @@ define(['boxing'], function(P) {
         var maxArgs = 1;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
-            : arguments.length === 1 ? new javaClass(P.boxAsJava(type))
+            : arguments.length === 1 ? new javaClass(B.boxAsJava(type))
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {

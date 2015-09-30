@@ -1,6 +1,6 @@
 /* global Java */
 
-define(['boxing'], function(P) {
+define(['boxing'], function(B) {
     /**
      * Generated constructor.
      * @constructor JdbcChangeValue JdbcChangeValue
@@ -23,14 +23,14 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "name", {
             get: function() {
                 var value = delegate.name;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
         Object.defineProperty(this, "value", {
             get: function() {
                 var value = delegate.value;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 

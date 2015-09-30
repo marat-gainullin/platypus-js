@@ -1,6 +1,6 @@
 /* global Java */
 
-define(['boxing'], function(P) {
+define(['boxing'], function(B) {
     /**
      * Generated constructor.
      * @constructor ApplicationPlatypusModel ApplicationPlatypusModel
@@ -33,8 +33,8 @@ define(['boxing'], function(P) {
      */
     ApplicationPlatypusModel.prototype.save = function(onSuccess, onFailure) {
         var delegate = this.unwrap();
-        var value = delegate.save(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
-        return P.boxAsJs(value);
+        var value = delegate.save(B.boxAsJava(onSuccess), B.boxAsJava(onFailure));
+        return B.boxAsJs(value);
     };
 
     /**
@@ -46,8 +46,8 @@ define(['boxing'], function(P) {
      */
     ApplicationPlatypusModel.prototype.requery = function(onSuccess, onFailure) {
         var delegate = this.unwrap();
-        var value = delegate.requery(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
-        return P.boxAsJs(value);
+        var value = delegate.requery(B.boxAsJava(onSuccess), B.boxAsJava(onFailure));
+        return B.boxAsJs(value);
     };
 
     /**
@@ -59,7 +59,7 @@ define(['boxing'], function(P) {
     ApplicationPlatypusModel.prototype.revert = function() {
         var delegate = this.unwrap();
         var value = delegate.revert();
-        return P.boxAsJs(value);
+        return B.boxAsJs(value);
     };
 
     /**
@@ -71,8 +71,8 @@ define(['boxing'], function(P) {
      */
     ApplicationPlatypusModel.prototype.execute = function(onSuccess, onFailure) {
         var delegate = this.unwrap();
-        var value = delegate.execute(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
-        return P.boxAsJs(value);
+        var value = delegate.execute(B.boxAsJava(onSuccess), B.boxAsJava(onFailure));
+        return B.boxAsJs(value);
     };
 
     /**
@@ -84,8 +84,8 @@ define(['boxing'], function(P) {
      */
     ApplicationPlatypusModel.prototype.loadEntity = function(queryId) {
         var delegate = this.unwrap();
-        var value = delegate.loadEntity(P.boxAsJava(queryId));
-        return P.boxAsJs(value);
+        var value = delegate.loadEntity(B.boxAsJava(queryId));
+        return B.boxAsJs(value);
     };
 
 

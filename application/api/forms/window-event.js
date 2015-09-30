@@ -1,6 +1,6 @@
 /* global Java */
 
-define(['boxing'], function(P) {
+define(['boxing'], function(B) {
     /**
      * Generated constructor.
      * @constructor WindowEvent WindowEvent
@@ -23,7 +23,7 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 

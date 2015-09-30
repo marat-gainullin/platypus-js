@@ -27,7 +27,7 @@ public class DependenciesWalkerTest {
 
     @Test
     public void testParseDependencies6() {
-        String va1 = "P.require([\"ANY_REPORT_NAME\", \"ANY_MODULE_NAME\"], function(){var report = new P.ServerModule(\"ANY_REPORT_NAME\"); var module = new ANY_MODULE1_NAME(); var servModule = new P.ServerModule(\"ANY_MODULE_NAME\");});";
+        String va1 = "P.require([\"ANY_REPORT_NAME\", \"ANY_MODULE_NAME\"], function(){var report = new RPC.Proxy(\"ANY_REPORT_NAME\"); var module = new ANY_MODULE1_NAME(); var servModule = new P.ServerModule(\"ANY_MODULE_NAME\");});";
         DependenciesWalker walker = new DependenciesWalker(va1, (aIfDependency)->{
             return "ANY_MODULE1_NAME".equals(aIfDependency);
         });
@@ -80,7 +80,7 @@ public class DependenciesWalkerTest {
                 + "    return function(){"
                 + "        var self = this;"
                 + "        var am = new AnyModule();"
-                + "        var sm = P.ServerModule('ServerCalc');"
+                + "        var sm = RPC.Proxy('ServerCalc');"
                 + "    };"
                 + "});";
         DependenciesWalker walker = new DependenciesWalker(va1, (aIfDependency)->{

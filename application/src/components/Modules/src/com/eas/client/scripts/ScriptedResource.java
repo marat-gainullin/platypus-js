@@ -342,7 +342,7 @@ public class ScriptedResource {
     }
 
     public static Path lookupPlatypusJs() throws URISyntaxException {
-        URL platypusURL = Thread.currentThread().getContextClassLoader().getResource("platypus.js");
+        URL platypusURL = Thread.currentThread().getContextClassLoader().getResource(Scripts.PLATYPUS_JS_FILENAME);
         Path apiPath = Paths.get(platypusURL.toURI());
         apiPath = apiPath.getParent();
         return apiPath;

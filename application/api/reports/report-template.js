@@ -1,6 +1,6 @@
 /* global Java */
 
-define(['boxing'], function(P) {
+define(['boxing'], function(B) {
     /**
      * Creates report template.
      * @param content The report binary body (array of byte).
@@ -13,10 +13,10 @@ define(['boxing'], function(P) {
         var maxArgs = 4;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
-            : arguments.length === 4 ? new javaClass(P.boxAsJava(content), P.boxAsJava(name), P.boxAsJava(format), P.boxAsJava(data))
-            : arguments.length === 3 ? new javaClass(P.boxAsJava(content), P.boxAsJava(name), P.boxAsJava(format))
-            : arguments.length === 2 ? new javaClass(P.boxAsJava(content), P.boxAsJava(name))
-            : arguments.length === 1 ? new javaClass(P.boxAsJava(content))
+            : arguments.length === 4 ? new javaClass(B.boxAsJava(content), B.boxAsJava(name), B.boxAsJava(format), B.boxAsJava(data))
+            : arguments.length === 3 ? new javaClass(B.boxAsJava(content), B.boxAsJava(name), B.boxAsJava(format))
+            : arguments.length === 2 ? new javaClass(B.boxAsJava(content), B.boxAsJava(name))
+            : arguments.length === 1 ? new javaClass(B.boxAsJava(content))
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
@@ -31,20 +31,20 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "timezoneOffset", {
             get: function() {
                 var value = delegate.timezoneOffset;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.timezoneOffset = P.boxAsJava(aValue);
+                delegate.timezoneOffset = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "name", {
             get: function() {
                 var value = delegate.name;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.name = P.boxAsJava(aValue);
+                delegate.name = B.boxAsJava(aValue);
             }
         });
 
@@ -67,7 +67,7 @@ define(['boxing'], function(P) {
     ReportTemplate.prototype.generateReport = function() {
         var delegate = this.unwrap();
         var value = delegate.generateReport();
-        return P.boxAsJs(value);
+        return B.boxAsJs(value);
     };
 
 

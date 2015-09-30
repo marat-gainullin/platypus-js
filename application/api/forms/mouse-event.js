@@ -1,6 +1,6 @@
 /* global Java */
 
-define(['boxing'], function(P) {
+define(['boxing'], function(B) {
     /**
      * Generated constructor.
      * @constructor MouseEvent MouseEvent
@@ -20,66 +20,66 @@ define(['boxing'], function(P) {
         if(MouseEvent.superclass)
             MouseEvent.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        Object.defineProperty(this, "button", {
-            get: function() {
-                var value = delegate.button;
-                return P.boxAsJs(value);
-            }
-        });
-
         Object.defineProperty(this, "altDown", {
             get: function() {
                 var value = delegate.altDown;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
+            }
+        });
+
+        Object.defineProperty(this, "button", {
+            get: function() {
+                var value = delegate.button;
+                return B.boxAsJs(value);
             }
         });
 
         Object.defineProperty(this, "clickCount", {
             get: function() {
                 var value = delegate.clickCount;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
         Object.defineProperty(this, "controlDown", {
             get: function() {
                 var value = delegate.controlDown;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
         Object.defineProperty(this, "shiftDown", {
             get: function() {
                 var value = delegate.shiftDown;
-                return P.boxAsJs(value);
-            }
-        });
-
-        Object.defineProperty(this, "metaDown", {
-            get: function() {
-                var value = delegate.metaDown;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
         Object.defineProperty(this, "x", {
             get: function() {
                 var value = delegate.x;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
+            }
+        });
+
+        Object.defineProperty(this, "metaDown", {
+            get: function() {
+                var value = delegate.metaDown;
+                return B.boxAsJs(value);
             }
         });
 
         Object.defineProperty(this, "y", {
             get: function() {
                 var value = delegate.y;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 

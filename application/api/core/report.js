@@ -1,6 +1,6 @@
 /* global Java */
 
-define(['boxing'], function(P) {
+define(['boxing'], function(B) {
     /**
      * Creates report, generated with template.
      * @param body The report binary body (array of byte).
@@ -12,9 +12,9 @@ define(['boxing'], function(P) {
         var maxArgs = 3;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
-            : arguments.length === 3 ? new javaClass(P.boxAsJava(body), P.boxAsJava(format), P.boxAsJava(name))
-            : arguments.length === 2 ? new javaClass(P.boxAsJava(body), P.boxAsJava(format))
-            : arguments.length === 1 ? new javaClass(P.boxAsJava(body))
+            : arguments.length === 3 ? new javaClass(B.boxAsJava(body), B.boxAsJava(format), B.boxAsJava(name))
+            : arguments.length === 2 ? new javaClass(B.boxAsJava(body), B.boxAsJava(format))
+            : arguments.length === 1 ? new javaClass(B.boxAsJava(body))
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
@@ -35,7 +35,7 @@ define(['boxing'], function(P) {
     Report.prototype.print = function() {
         var delegate = this.unwrap();
         var value = delegate.print();
-        return P.boxAsJs(value);
+        return B.boxAsJs(value);
     };
 
     /**
@@ -45,8 +45,8 @@ define(['boxing'], function(P) {
      * @param aFileName Name of a file, the generated report should be save in. */
     Report.prototype.save = function(aFileName) {
         var delegate = this.unwrap();
-        var value = delegate.save(P.boxAsJava(aFileName));
-        return P.boxAsJs(value);
+        var value = delegate.save(B.boxAsJava(aFileName));
+        return B.boxAsJs(value);
     };
 
     /**
@@ -57,7 +57,7 @@ define(['boxing'], function(P) {
     Report.prototype.show = function() {
         var delegate = this.unwrap();
         var value = delegate.show();
-        return P.boxAsJs(value);
+        return B.boxAsJs(value);
     };
 
 

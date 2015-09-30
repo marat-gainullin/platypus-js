@@ -1,6 +1,6 @@
 /* global Java */
 
-define(['boxing'], function(P) {
+define(['boxing'], function(B) {
 ${JsDoc}
     function ${Name}(${Params}) {
         var maxArgs = ${MaxArgs};

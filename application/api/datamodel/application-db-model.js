@@ -1,6 +1,6 @@
 /* global Java */
 
-define(['boxing'], function(P) {
+define(['boxing'], function(B) {
     /**
      * Generated constructor.
      * @constructor ApplicationDbModel ApplicationDbModel
@@ -23,7 +23,7 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "modified", {
             get: function() {
                 var value = delegate.modified;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
@@ -37,8 +37,8 @@ define(['boxing'], function(P) {
      */
     ApplicationDbModel.prototype.requery = function(onSuccess, onFailure) {
         var delegate = this.unwrap();
-        var value = delegate.requery(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
-        return P.boxAsJs(value);
+        var value = delegate.requery(B.boxAsJava(onSuccess), B.boxAsJava(onFailure));
+        return B.boxAsJs(value);
     };
 
     /**
@@ -50,7 +50,7 @@ define(['boxing'], function(P) {
     ApplicationDbModel.prototype.revert = function() {
         var delegate = this.unwrap();
         var value = delegate.revert();
-        return P.boxAsJs(value);
+        return B.boxAsJs(value);
     };
 
     /**
@@ -63,8 +63,8 @@ define(['boxing'], function(P) {
      */
     ApplicationDbModel.prototype.createEntity = function(sqlText, datasourceName) {
         var delegate = this.unwrap();
-        var value = delegate.createEntity(P.boxAsJava(sqlText), P.boxAsJava(datasourceName));
-        return P.boxAsJs(value);
+        var value = delegate.createEntity(B.boxAsJava(sqlText), B.boxAsJava(datasourceName));
+        return B.boxAsJs(value);
     };
 
     /**
@@ -79,8 +79,8 @@ define(['boxing'], function(P) {
      */
     ApplicationDbModel.prototype.executeSql = function(sqlText, datasourceName, arg2, arg3) {
         var delegate = this.unwrap();
-        var value = delegate.executeSql(P.boxAsJava(sqlText), P.boxAsJava(datasourceName), P.boxAsJava(arg2), P.boxAsJava(arg3));
-        return P.boxAsJs(value);
+        var value = delegate.executeSql(B.boxAsJava(sqlText), B.boxAsJava(datasourceName), B.boxAsJava(arg2), B.boxAsJava(arg3));
+        return B.boxAsJs(value);
     };
 
     /**
@@ -92,8 +92,8 @@ define(['boxing'], function(P) {
      */
     ApplicationDbModel.prototype.execute = function(onSuccess, onFailure) {
         var delegate = this.unwrap();
-        var value = delegate.execute(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
-        return P.boxAsJs(value);
+        var value = delegate.execute(B.boxAsJava(onSuccess), B.boxAsJava(onFailure));
+        return B.boxAsJs(value);
     };
 
     /**
@@ -108,8 +108,8 @@ define(['boxing'], function(P) {
      */
     ApplicationDbModel.prototype.save = function(onSuccess, onFailure) {
         var delegate = this.unwrap();
-        var value = delegate.save(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
-        return P.boxAsJs(value);
+        var value = delegate.save(B.boxAsJava(onSuccess), B.boxAsJava(onFailure));
+        return B.boxAsJs(value);
     };
 
     /**
@@ -121,8 +121,8 @@ define(['boxing'], function(P) {
      */
     ApplicationDbModel.prototype.loadEntity = function(queryId) {
         var delegate = this.unwrap();
-        var value = delegate.loadEntity(P.boxAsJava(queryId));
-        return P.boxAsJs(value);
+        var value = delegate.loadEntity(B.boxAsJava(queryId));
+        return B.boxAsJs(value);
     };
 
 

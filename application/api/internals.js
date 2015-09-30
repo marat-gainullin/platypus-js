@@ -267,7 +267,7 @@
         }
     });
     if(ScriptsClass.isGlobalAPI()){
-        var P = require('platypus');
-        P.export(global);
+        var F = require('facade');
+        F.export(global);
     }
 })();

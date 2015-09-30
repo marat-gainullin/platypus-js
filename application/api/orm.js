@@ -721,12 +721,6 @@ define(['logger', 'boxing', 'managed', 'orderer', 'datamodel/application-db-mode
                 };
                 return aTarget;
             }
-            /**
-             * @static
-             * @param {type} aName
-             * @param {type} aTarget
-             * @returns {P.loadModel.publishTo}
-             */
             function loadModel(aName, aTarget) {
                 var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
                 if (files) {

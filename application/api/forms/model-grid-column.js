@@ -1,6 +1,6 @@
 /* global Java */
 
-define(['boxing'], function(P) {
+define(['boxing'], function(B) {
     /**
      *
      * @constructor ModelGridColumn ModelGridColumn
@@ -23,70 +23,70 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "preferredWidth", {
             get: function() {
                 var value = delegate.preferredWidth;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.preferredWidth = P.boxAsJava(aValue);
+                delegate.preferredWidth = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.visible = P.boxAsJava(aValue);
+                delegate.visible = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "resizable", {
             get: function() {
                 var value = delegate.resizable;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.resizable = P.boxAsJava(aValue);
+                delegate.resizable = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "minWidth", {
             get: function() {
                 var value = delegate.minWidth;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.minWidth = P.boxAsJava(aValue);
+                delegate.minWidth = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "foreground", {
             get: function() {
                 var value = delegate.foreground;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.foreground = P.boxAsJava(aValue);
+                delegate.foreground = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "sortable", {
             get: function() {
                 var value = delegate.sortable;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.sortable = P.boxAsJava(aValue);
+                delegate.sortable = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "title", {
             get: function() {
                 var value = delegate.title;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.title = P.boxAsJava(aValue);
+                delegate.title = B.boxAsJava(aValue);
             }
         });
 
@@ -103,30 +103,30 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "movable", {
             get: function() {
                 var value = delegate.movable;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.movable = P.boxAsJava(aValue);
+                delegate.movable = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "field", {
             get: function() {
                 var value = delegate.field;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.field = P.boxAsJava(aValue);
+                delegate.field = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "readonly", {
             get: function() {
                 var value = delegate.readonly;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.readonly = P.boxAsJava(aValue);
+                delegate.readonly = B.boxAsJava(aValue);
             }
         });
 
@@ -143,47 +143,47 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "background", {
             get: function() {
                 var value = delegate.background;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.background = P.boxAsJava(aValue);
+                delegate.background = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
         Object.defineProperty(this, "sortField", {
             get: function() {
                 var value = delegate.sortField;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.sortField = P.boxAsJava(aValue);
+                delegate.sortField = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "font", {
             get: function() {
                 var value = delegate.font;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.font = P.boxAsJava(aValue);
+                delegate.font = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "maxWidth", {
             get: function() {
                 var value = delegate.maxWidth;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.maxWidth = P.boxAsJava(aValue);
+                delegate.maxWidth = B.boxAsJava(aValue);
             }
         });
 
@@ -195,7 +195,7 @@ define(['boxing'], function(P) {
     ModelGridColumn.prototype.sort = function() {
         var delegate = this.unwrap();
         var value = delegate.sort();
-        return P.boxAsJs(value);
+        return B.boxAsJs(value);
     };
 
     /**
@@ -205,8 +205,8 @@ define(['boxing'], function(P) {
      */
     ModelGridColumn.prototype.addColumnNode = function(node) {
         var delegate = this.unwrap();
-        var value = delegate.addColumnNode(P.boxAsJava(node));
-        return P.boxAsJs(value);
+        var value = delegate.addColumnNode(B.boxAsJava(node));
+        return B.boxAsJs(value);
     };
 
     /**
@@ -217,7 +217,7 @@ define(['boxing'], function(P) {
     ModelGridColumn.prototype.columnNodes = function() {
         var delegate = this.unwrap();
         var value = delegate.columnNodes();
-        return P.boxAsJs(value);
+        return B.boxAsJs(value);
     };
 
     /**
@@ -227,8 +227,8 @@ define(['boxing'], function(P) {
      */
     ModelGridColumn.prototype.removeColumnNode = function(node) {
         var delegate = this.unwrap();
-        var value = delegate.removeColumnNode(P.boxAsJava(node));
-        return P.boxAsJs(value);
+        var value = delegate.removeColumnNode(B.boxAsJava(node));
+        return B.boxAsJs(value);
     };
 
     /**
@@ -238,8 +238,8 @@ define(['boxing'], function(P) {
      */
     ModelGridColumn.prototype.insertColumnNode = function(position, node) {
         var delegate = this.unwrap();
-        var value = delegate.insertColumnNode(P.boxAsJava(position), P.boxAsJava(node));
-        return P.boxAsJs(value);
+        var value = delegate.insertColumnNode(B.boxAsJava(position), B.boxAsJava(node));
+        return B.boxAsJs(value);
     };
 
     /**
@@ -249,7 +249,7 @@ define(['boxing'], function(P) {
     ModelGridColumn.prototype.unsort = function() {
         var delegate = this.unwrap();
         var value = delegate.unsort();
-        return P.boxAsJs(value);
+        return B.boxAsJs(value);
     };
 
     /**
@@ -259,7 +259,7 @@ define(['boxing'], function(P) {
     ModelGridColumn.prototype.sortDesc = function() {
         var delegate = this.unwrap();
         var value = delegate.sortDesc();
-        return P.boxAsJs(value);
+        return B.boxAsJs(value);
     };
 
 

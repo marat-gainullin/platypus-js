@@ -1,9 +1,9 @@
 /* global Java */
 
-define(['boxing'], function(P) {
+define(['boxing'], function(B) {
     /**
      * Creates a form.
-     * @param aView Container instance to be used as view of created form. Optional. If it is omitted P.AnchorsPane will be created and used as view.
+     * @param aView Container instance to be used as view of created form. Optional. If it is omitted AnchorsPane will be created and used as a view.
      * @param aFormKey Form instance key for open windows accounting. Optional.
      * @constructor Form Form
      */
@@ -11,8 +11,8 @@ define(['boxing'], function(P) {
         var maxArgs = 2;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
-            : arguments.length === 2 ? new javaClass(P.boxAsJava(aView), P.boxAsJava(aFormKey))
-            : arguments.length === 1 ? new javaClass(P.boxAsJava(aView))
+            : arguments.length === 2 ? new javaClass(B.boxAsJava(aView), B.boxAsJava(aFormKey))
+            : arguments.length === 1 ? new javaClass(B.boxAsJava(aView))
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
@@ -37,37 +37,37 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "alwaysOnTop", {
             get: function() {
                 var value = delegate.alwaysOnTop;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.alwaysOnTop = P.boxAsJava(aValue);
+                delegate.alwaysOnTop = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "icon", {
             get: function() {
                 var value = delegate.icon;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.icon = P.boxAsJava(aValue);
+                delegate.icon = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "title", {
             get: function() {
                 var value = delegate.title;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.title = P.boxAsJava(aValue);
+                delegate.title = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "minimized", {
             get: function() {
                 var value = delegate.minimized;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
@@ -84,10 +84,10 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "top", {
             get: function() {
                 var value = delegate.top;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.top = P.boxAsJava(aValue);
+                delegate.top = B.boxAsJava(aValue);
             }
         });
 
@@ -104,20 +104,20 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "locationByPlatform", {
             get: function() {
                 var value = delegate.locationByPlatform;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.locationByPlatform = P.boxAsJava(aValue);
+                delegate.locationByPlatform = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "minimizable", {
             get: function() {
                 var value = delegate.minimizable;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.minimizable = P.boxAsJava(aValue);
+                delegate.minimizable = B.boxAsJava(aValue);
             }
         });
 
@@ -134,17 +134,17 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.height = P.boxAsJava(aValue);
+                delegate.height = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
@@ -161,20 +161,20 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "resizable", {
             get: function() {
                 var value = delegate.resizable;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.resizable = P.boxAsJava(aValue);
+                delegate.resizable = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "formKey", {
             get: function() {
                 var value = delegate.formKey;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.formKey = P.boxAsJava(aValue);
+                delegate.formKey = B.boxAsJava(aValue);
             }
         });
 
@@ -191,7 +191,7 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "maximized", {
             get: function() {
                 var value = delegate.maximized;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
@@ -208,40 +208,40 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "maximizable", {
             get: function() {
                 var value = delegate.maximizable;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.maximizable = P.boxAsJava(aValue);
+                delegate.maximizable = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "undecorated", {
             get: function() {
                 var value = delegate.undecorated;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.undecorated = P.boxAsJava(aValue);
+                delegate.undecorated = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "left", {
             get: function() {
                 var value = delegate.left;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.left = P.boxAsJava(aValue);
+                delegate.left = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.width = P.boxAsJava(aValue);
+                delegate.width = B.boxAsJava(aValue);
             }
         });
 
@@ -258,10 +258,10 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "opacity", {
             get: function() {
                 var value = delegate.opacity;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.opacity = P.boxAsJava(aValue);
+                delegate.opacity = B.boxAsJava(aValue);
             }
         });
 
@@ -274,31 +274,8 @@ define(['boxing'], function(P) {
      */
     Form.prototype.close = function(obj) {
         var delegate = this.unwrap();
-        var value = delegate.close(P.boxAsJava(obj));
-        return P.boxAsJs(value);
-    };
-
-    /**
-     * Moves form to the front position.
-     * @method toFront
-     * @memberOf Form
-     */
-    Form.prototype.toFront = function() {
-        var delegate = this.unwrap();
-        var value = delegate.toFront();
-        return P.boxAsJs(value);
-    };
-
-    /**
-     * Shows the form as a dialog (modal window).
-     * @param callback a callback handler function
-     * @method showModal
-     * @memberOf Form
-     */
-    Form.prototype.showModal = function(callback) {
-        var delegate = this.unwrap();
-        var value = delegate.showModal(P.boxAsJava(callback));
-        return P.boxAsJs(value);
+        var value = delegate.close(B.boxAsJava(obj));
+        return B.boxAsJs(value);
     };
 
     /**
@@ -309,18 +286,18 @@ define(['boxing'], function(P) {
     Form.prototype.show = function() {
         var delegate = this.unwrap();
         var value = delegate.show();
-        return P.boxAsJs(value);
+        return B.boxAsJs(value);
     };
 
     /**
-     * Minimizes this form.
-     * @method minimize
+     * Moves form to the front position.
+     * @method toFront
      * @memberOf Form
      */
-    Form.prototype.minimize = function() {
+    Form.prototype.toFront = function() {
         var delegate = this.unwrap();
-        var value = delegate.minimize();
-        return P.boxAsJs(value);
+        var value = delegate.toFront();
+        return B.boxAsJs(value);
     };
 
     /**
@@ -331,7 +308,18 @@ define(['boxing'], function(P) {
     Form.prototype.maximize = function() {
         var delegate = this.unwrap();
         var value = delegate.maximize();
-        return P.boxAsJs(value);
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Minimizes this form.
+     * @method minimize
+     * @memberOf Form
+     */
+    Form.prototype.minimize = function() {
+        var delegate = this.unwrap();
+        var value = delegate.minimize();
+        return B.boxAsJs(value);
     };
 
     /**
@@ -342,7 +330,19 @@ define(['boxing'], function(P) {
     Form.prototype.restore = function() {
         var delegate = this.unwrap();
         var value = delegate.restore();
-        return P.boxAsJs(value);
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Shows the form as a dialog (modal window).
+     * @param callback a callback handler function
+     * @method showModal
+     * @memberOf Form
+     */
+    Form.prototype.showModal = function(callback) {
+        var delegate = this.unwrap();
+        var value = delegate.showModal(B.boxAsJava(callback));
+        return B.boxAsJs(value);
     };
 
     /**
@@ -353,8 +353,8 @@ define(['boxing'], function(P) {
      */
     Form.prototype.showInternalFrame = function(desktop) {
         var delegate = this.unwrap();
-        var value = delegate.showInternalFrame(P.boxAsJava(desktop));
-        return P.boxAsJs(value);
+        var value = delegate.showInternalFrame(B.boxAsJava(desktop));
+        return B.boxAsJs(value);
     };
 
 

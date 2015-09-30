@@ -1,6 +1,6 @@
 /* global Java */
 
-define(['boxing'], function(P) {
+define(['boxing'], function(B) {
     /**
      *
      * @constructor WebSocketClientSession WebSocketClientSession
@@ -9,7 +9,7 @@ define(['boxing'], function(P) {
         var maxArgs = 1;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
-            : arguments.length === 1 ? new javaClass(P.boxAsJava(uri))
+            : arguments.length === 1 ? new javaClass(B.boxAsJava(uri))
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
@@ -54,7 +54,7 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "query", {
             get: function() {
                 var value = delegate.query;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
@@ -71,21 +71,21 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "protocolVersion", {
             get: function() {
                 var value = delegate.protocolVersion;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
         Object.defineProperty(this, "id", {
             get: function() {
                 var value = delegate.id;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
         Object.defineProperty(this, "uri", {
             get: function() {
                 var value = delegate.uri;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
@@ -97,8 +97,8 @@ define(['boxing'], function(P) {
      */
     WebSocket.prototype.close = function(arg0, arg1) {
         var delegate = this.unwrap();
-        var value = delegate.close(P.boxAsJava(arg0), P.boxAsJava(arg1));
-        return P.boxAsJs(value);
+        var value = delegate.close(B.boxAsJava(arg0), B.boxAsJava(arg1));
+        return B.boxAsJs(value);
     };
 
     /**
@@ -108,8 +108,8 @@ define(['boxing'], function(P) {
      */
     WebSocket.prototype.send = function(data) {
         var delegate = this.unwrap();
-        var value = delegate.send(P.boxAsJava(data));
-        return P.boxAsJs(value);
+        var value = delegate.send(B.boxAsJava(data));
+        return B.boxAsJs(value);
     };
 
 

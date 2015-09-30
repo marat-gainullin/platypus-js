@@ -53,7 +53,7 @@ public class Classes2Scripts {
     private static final String JAVA_CLASS_FILE_EXT = ".class";//NOI18N
     private static final String CONSTRUCTOR_TEMPLATE = getStringResource("constructorTemplate.js");//NOI18N
     private static final Set<String> preservedFilesNames = new HashSet<>(Arrays.asList(new String[]{
-        "platypus.js", "platypus-jsdoc.js", "internals.js"
+        "facade.js", "platypus-jsdoc.js", "internals.js"
             , "http-context.js", "managed.js", "orderer.js"
             , "ui.js", "orm.js", "boxing.js", "logger.js"
             , "rpc.js", "resource.js", "md5.js", "id.js", "files.js"
@@ -458,7 +458,7 @@ public class Classes2Scripts {
         if (JSObject.class.isAssignableFrom(property.method.getReturnType())) {
             sb.append("return value;\n");
         } else {
-            sb.append("return P.boxAsJs(value);\n");
+            sb.append("return B.boxAsJs(value);\n");
         }
         sb.append(getIndentStr(--i));
         sb.append("}");
@@ -471,7 +471,7 @@ public class Classes2Scripts {
             if (JSObject.class.isAssignableFrom(property.method.getReturnType())) {
                 sb.append(" = aValue;\n");
             } else {
-                sb.append(" = P.boxAsJava(aValue);\n");
+                sb.append(" = B.boxAsJava(aValue);\n");
             }
             sb.append(getIndentStr(--i));
             sb.append("}\n");
@@ -531,7 +531,7 @@ public class Classes2Scripts {
                 pName = methodAnnotation.params()[p];
             }
             formalParams.append(delimiter).append(pName);
-            paramsInCall.append(delimiter).append("P.boxAsJava(").append(pName).append(")");
+            paramsInCall.append(delimiter).append("B.boxAsJava(").append(pName).append(")");
             if (delimiter.isEmpty()) {
                 delimiter = ", ";
             }
@@ -549,7 +549,7 @@ public class Classes2Scripts {
                 .append(paramsInCall)
                 .append(");\n");
         sb.append(getIndentStr(i));
-        sb.append("return P.boxAsJs(value);\n");
+        sb.append("return B.boxAsJs(value);\n");
         sb.append(getIndentStr(--i));
         sb.append("};\n");
         return sb.toString();
@@ -682,7 +682,7 @@ public class Classes2Scripts {
                 StringBuilder paramsSb = new StringBuilder();
                 paramsSb.append("new javaClass(");
                 for (int i = 0; i < argsCount; i++) {
-                    paramsSb.append("P.boxAsJava(").append(params[i]).append(")");
+                    paramsSb.append("B.boxAsJava(").append(params[i]).append(")");
                     if (i < argsCount - 1) {
                         paramsSb.append(", ");//NOI18N
                     }

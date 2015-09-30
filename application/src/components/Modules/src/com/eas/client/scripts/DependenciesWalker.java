@@ -26,6 +26,7 @@ public class DependenciesWalker {
     public static final String MODEL = "model";
     public static final String LOAD_ENTITY = "loadEntity";
     public static final String SERVER_MODULE = "ServerModule";
+    public static final String RPC_PROXY = "Proxy";
     private final Set<String> localFunctions = new HashSet<>();
     private final Set<String> dependenceLikeIdentifiers = new HashSet<>();
     private final Set<String> dependencies = new HashSet<>();
@@ -110,6 +111,7 @@ public class DependenciesWalker {
                             }
                         } else if (/*lastCall.isNew() && */atFirstArg) {
                             switch (funcName) {
+                                case RPC_PROXY:
                                 case SERVER_MODULE:
                                     putServerDependence(value);
                                     break;

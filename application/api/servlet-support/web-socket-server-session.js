@@ -1,6 +1,6 @@
 /* global Java */
 
-define(['boxing'], function(P) {
+define(['boxing'], function(B) {
     /**
      * Generated constructor.
      * @constructor WebSocketServerSession WebSocketServerSession
@@ -23,28 +23,28 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "query", {
             get: function() {
                 var value = delegate.query;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
         Object.defineProperty(this, "protocolVersion", {
             get: function() {
                 var value = delegate.protocolVersion;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
         Object.defineProperty(this, "id", {
             get: function() {
                 var value = delegate.id;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
         Object.defineProperty(this, "uri", {
             get: function() {
                 var value = delegate.uri;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
@@ -56,8 +56,8 @@ define(['boxing'], function(P) {
      */
     WebSocketServerSession.prototype.close = function(arg0, arg1) {
         var delegate = this.unwrap();
-        var value = delegate.close(P.boxAsJava(arg0), P.boxAsJava(arg1));
-        return P.boxAsJs(value);
+        var value = delegate.close(B.boxAsJava(arg0), B.boxAsJava(arg1));
+        return B.boxAsJs(value);
     };
 
     /**
@@ -67,8 +67,8 @@ define(['boxing'], function(P) {
      */
     WebSocketServerSession.prototype.send = function(data) {
         var delegate = this.unwrap();
-        var value = delegate.send(P.boxAsJava(data));
-        return P.boxAsJs(value);
+        var value = delegate.send(B.boxAsJava(data));
+        return B.boxAsJs(value);
     };
 
 

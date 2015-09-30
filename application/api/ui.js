@@ -198,7 +198,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
                 title = "Choose Color";
             }
             if (!color) {
-                color = P.Color.BLACK;
+                color = Color.BLACK;
             }
             var res = ColorChooserClass.showDialog(null, title, color ? color.unwrap() : null);
             result = res ? (new ColorClass(res)).getPublished() : null;
@@ -434,13 +434,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         }
         return aTarget;
     }
-    /**
-     * @static
-     * @param {type} aName
-     * @param {type} aModel
-     * @param {type} aTarget
-     * @returns {P.loadForm.publishTo}
-     */
     function loadForm(aName, aModel, aTarget) {
         var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
         var document = ScriptedResourceClass.getApp().getForms().get(aName, files);

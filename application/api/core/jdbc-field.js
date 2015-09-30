@@ -1,6 +1,6 @@
 /* global Java */
 
-define(['boxing'], function(P) {
+define(['boxing'], function(B) {
     /**
      * Generated constructor.
      * @constructor JdbcField JdbcField
@@ -23,87 +23,87 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "originalName", {
             get: function() {
                 var value = delegate.originalName;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.originalName = P.boxAsJava(aValue);
+                delegate.originalName = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "readonly", {
             get: function() {
                 var value = delegate.readonly;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.readonly = P.boxAsJava(aValue);
+                delegate.readonly = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "nullable", {
             get: function() {
                 var value = delegate.nullable;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.nullable = P.boxAsJava(aValue);
+                delegate.nullable = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "fk", {
             get: function() {
                 var value = delegate.fk;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
         Object.defineProperty(this, "name", {
             get: function() {
                 var value = delegate.name;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.name = P.boxAsJava(aValue);
+                delegate.name = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "description", {
             get: function() {
                 var value = delegate.description;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.description = P.boxAsJava(aValue);
+                delegate.description = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "pk", {
             get: function() {
                 var value = delegate.pk;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.pk = P.boxAsJava(aValue);
+                delegate.pk = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "type", {
             get: function() {
                 var value = delegate.type;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.type = P.boxAsJava(aValue);
+                delegate.type = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "tableName", {
             get: function() {
                 var value = delegate.tableName;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.tableName = P.boxAsJava(aValue);
+                delegate.tableName = B.boxAsJava(aValue);
             }
         });
 

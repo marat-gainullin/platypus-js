@@ -1,6 +1,6 @@
 /* global Java */
 
-define(['boxing'], function(P) {
+define(['boxing'], function(B) {
     /**
      * A container with Card Layout. It treats each component in the container as a card. Only one card is visible at a time, and the container acts as a stack of cards.
      * @param hgap the horizontal gap (optional).
@@ -11,8 +11,8 @@ define(['boxing'], function(P) {
         var maxArgs = 2;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
-            : arguments.length === 2 ? new javaClass(P.boxAsJava(hgap), P.boxAsJava(vgap))
-            : arguments.length === 1 ? new javaClass(P.boxAsJava(hgap))
+            : arguments.length === 2 ? new javaClass(B.boxAsJava(hgap), B.boxAsJava(vgap))
+            : arguments.length === 1 ? new javaClass(B.boxAsJava(hgap))
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
@@ -27,10 +27,10 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "cursor", {
             get: function() {
                 var value = delegate.cursor;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.cursor = P.boxAsJava(aValue);
+                delegate.cursor = B.boxAsJava(aValue);
             }
         });
 
@@ -77,30 +77,30 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "foreground", {
             get: function() {
                 var value = delegate.foreground;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.foreground = P.boxAsJava(aValue);
+                delegate.foreground = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "error", {
             get: function() {
                 var value = delegate.error;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.error = P.boxAsJava(aValue);
+                delegate.error = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "enabled", {
             get: function() {
                 var value = delegate.enabled;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.enabled = P.boxAsJava(aValue);
+                delegate.enabled = B.boxAsJava(aValue);
             }
         });
 
@@ -127,20 +127,20 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "componentPopupMenu", {
             get: function() {
                 var value = delegate.componentPopupMenu;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.componentPopupMenu = P.boxAsJava(aValue);
+                delegate.componentPopupMenu = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "top", {
             get: function() {
                 var value = delegate.top;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.top = P.boxAsJava(aValue);
+                delegate.top = B.boxAsJava(aValue);
             }
         });
 
@@ -157,17 +157,17 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "vgap", {
             get: function() {
                 var value = delegate.vgap;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.vgap = P.boxAsJava(aValue);
+                delegate.vgap = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "parent", {
             get: function() {
                 var value = delegate.parentWidget;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
@@ -184,37 +184,37 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "toolTipText", {
             get: function() {
                 var value = delegate.toolTipText;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.toolTipText = P.boxAsJava(aValue);
+                delegate.toolTipText = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "hgap", {
             get: function() {
                 var value = delegate.hgap;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.hgap = P.boxAsJava(aValue);
+                delegate.hgap = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "height", {
             get: function() {
                 var value = delegate.height;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.height = P.boxAsJava(aValue);
+                delegate.height = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "element", {
             get: function() {
                 var value = delegate.element;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
@@ -241,20 +241,20 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "opaque", {
             get: function() {
                 var value = delegate.opaque;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.opaque = P.boxAsJava(aValue);
+                delegate.opaque = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.visible = P.boxAsJava(aValue);
+                delegate.visible = B.boxAsJava(aValue);
             }
         });
 
@@ -271,17 +271,17 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "nextFocusableComponent", {
             get: function() {
                 var value = delegate.nextFocusableComponent;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.nextFocusableComponent = P.boxAsJava(aValue);
+                delegate.nextFocusableComponent = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "count", {
             get: function() {
                 var value = delegate.count;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
@@ -308,10 +308,10 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "focusable", {
             get: function() {
                 var value = delegate.focusable;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.focusable = P.boxAsJava(aValue);
+                delegate.focusable = B.boxAsJava(aValue);
             }
         });
 
@@ -358,7 +358,7 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "component", {
             get: function() {
                 var value = delegate.component;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
@@ -375,20 +375,20 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "left", {
             get: function() {
                 var value = delegate.left;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.left = P.boxAsJava(aValue);
+                delegate.left = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "background", {
             get: function() {
                 var value = delegate.background;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.background = P.boxAsJava(aValue);
+                delegate.background = B.boxAsJava(aValue);
             }
         });
 
@@ -415,30 +415,30 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "name", {
             get: function() {
                 var value = delegate.name;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.name = P.boxAsJava(aValue);
+                delegate.name = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.width = P.boxAsJava(aValue);
+                delegate.width = B.boxAsJava(aValue);
             }
         });
 
         Object.defineProperty(this, "font", {
             get: function() {
                 var value = delegate.font;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.font = P.boxAsJava(aValue);
+                delegate.font = B.boxAsJava(aValue);
             }
         });
 
@@ -462,8 +462,8 @@ define(['boxing'], function(P) {
      */
     CardPane.prototype.add = function(component, cardName) {
         var delegate = this.unwrap();
-        var value = delegate.add(P.boxAsJava(component), P.boxAsJava(cardName));
-        return P.boxAsJs(value);
+        var value = delegate.add(B.boxAsJava(component), B.boxAsJava(cardName));
+        return B.boxAsJs(value);
     };
 
     /**
@@ -474,8 +474,8 @@ define(['boxing'], function(P) {
      */
     CardPane.prototype.remove = function(component) {
         var delegate = this.unwrap();
-        var value = delegate.remove(P.boxAsJava(component));
-        return P.boxAsJs(value);
+        var value = delegate.remove(B.boxAsJava(component));
+        return B.boxAsJs(value);
     };
 
     /**
@@ -486,18 +486,7 @@ define(['boxing'], function(P) {
     CardPane.prototype.clear = function() {
         var delegate = this.unwrap();
         var value = delegate.clear();
-        return P.boxAsJs(value);
-    };
-
-    /**
-     * Gets the container's children components.
-     * @method children
-     * @memberOf CardPane
-     */
-    CardPane.prototype.children = function() {
-        var delegate = this.unwrap();
-        var value = delegate.children();
-        return P.boxAsJs(value);
+        return B.boxAsJs(value);
     };
 
     /**
@@ -508,8 +497,8 @@ define(['boxing'], function(P) {
      */
     CardPane.prototype.show = function(name) {
         var delegate = this.unwrap();
-        var value = delegate.show(P.boxAsJava(name));
-        return P.boxAsJs(value);
+        var value = delegate.show(B.boxAsJava(name));
+        return B.boxAsJs(value);
     };
 
     /**
@@ -520,7 +509,18 @@ define(['boxing'], function(P) {
     CardPane.prototype.focus = function() {
         var delegate = this.unwrap();
         var value = delegate.focus();
-        return P.boxAsJs(value);
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Gets the container's children components.
+     * @method children
+     * @memberOf CardPane
+     */
+    CardPane.prototype.children = function() {
+        var delegate = this.unwrap();
+        var value = delegate.children();
+        return B.boxAsJs(value);
     };
 
     /**
@@ -532,8 +532,8 @@ define(['boxing'], function(P) {
      */
     CardPane.prototype.child = function(cardName) {
         var delegate = this.unwrap();
-        var value = delegate.child(P.boxAsJava(cardName));
-        return P.boxAsJs(value);
+        var value = delegate.child(B.boxAsJava(cardName));
+        return B.boxAsJs(value);
     };
 
 

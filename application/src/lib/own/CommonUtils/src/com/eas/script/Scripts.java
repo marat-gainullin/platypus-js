@@ -2,7 +2,6 @@ package com.eas.script;
 
 import com.eas.concurrent.DeamonThreadFactory;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -64,8 +63,8 @@ public class Scripts {
 
     private static final NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
     private static final NashornScriptEngine engine = (NashornScriptEngine) factory.getScriptEngine();
-    protected static final String PLATYPUS_JS_MODULENAME = "platypus";
-    protected static final String PLATYPUS_JS_FILENAME = PLATYPUS_JS_MODULENAME + ".js";
+    protected static final String PLATYPUS_JS_MODULENAME = "facade";
+    public static final String PLATYPUS_JS_FILENAME = PLATYPUS_JS_MODULENAME + ".js";
     protected static final String INTERNALS_MODULENAME = "internals";
     protected static final String INTERNALS_JS_FILENAME = INTERNALS_MODULENAME + ".js";
     public static final String STRING_TYPE_NAME = "String";//NOI18N

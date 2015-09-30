@@ -1,6 +1,6 @@
 /* global Java */
 
-define(['boxing'], function(P) {
+define(['boxing'], function(B) {
     /**
      * Generated constructor.
      * @constructor KeyEvent KeyEvent
@@ -23,49 +23,49 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "altDown", {
             get: function() {
                 var value = delegate.altDown;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
         Object.defineProperty(this, "controlDown", {
             get: function() {
                 var value = delegate.controlDown;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
         Object.defineProperty(this, "shiftDown", {
             get: function() {
                 var value = delegate.shiftDown;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
         Object.defineProperty(this, "char", {
             get: function() {
                 var value = delegate.char;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
         Object.defineProperty(this, "metaDown", {
             get: function() {
                 var value = delegate.metaDown;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
         Object.defineProperty(this, "key", {
             get: function() {
                 var value = delegate.key;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 

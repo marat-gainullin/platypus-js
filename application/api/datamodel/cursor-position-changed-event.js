@@ -1,6 +1,6 @@
 /* global Java */
 
-define(['boxing'], function(P) {
+define(['boxing'], function(B) {
     /**
      * Generated constructor.
      * @constructor CursorPositionChangedEvent CursorPositionChangedEvent
@@ -23,21 +23,21 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "oldIndex", {
             get: function() {
                 var value = delegate.oldIndex;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
         Object.defineProperty(this, "newIndex", {
             get: function() {
                 var value = delegate.newIndex;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 

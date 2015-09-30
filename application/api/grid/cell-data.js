@@ -1,6 +1,6 @@
 /* global Java */
 
-define(['boxing'], function(P) {
+define(['boxing'], function(B) {
     /**
      * Generated constructor.
      * @constructor CellData CellData
@@ -23,17 +23,17 @@ define(['boxing'], function(P) {
         Object.defineProperty(this, "data", {
             get: function() {
                 var value = delegate.data;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
 
         Object.defineProperty(this, "display", {
             get: function() {
                 var value = delegate.display;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.display = P.boxAsJava(aValue);
+                delegate.display = B.boxAsJava(aValue);
             }
         });
 

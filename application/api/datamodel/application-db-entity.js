@@ -1,6 +1,6 @@
 /* global Java */
 
-define(['boxing'], function(P) {
+define(['boxing'], function(B) {
     /**
      * Generated constructor.
      * @constructor ApplicationDbEntity ApplicationDbEntity
@@ -50,8 +50,8 @@ define(['boxing'], function(P) {
      */
     ApplicationDbEntity.prototype.executeUpdate = function(onSuccess, onFailure) {
         var delegate = this.unwrap();
-        var value = delegate.executeUpdate(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
-        return P.boxAsJs(value);
+        var value = delegate.executeUpdate(B.boxAsJava(onSuccess), B.boxAsJava(onFailure));
+        return B.boxAsJs(value);
     };
 
     /**
@@ -62,7 +62,7 @@ define(['boxing'], function(P) {
     ApplicationDbEntity.prototype.enqueueUpdate = function() {
         var delegate = this.unwrap();
         var value = delegate.enqueueUpdate();
-        return P.boxAsJs(value);
+        return B.boxAsJs(value);
     };
 
     /**
@@ -72,8 +72,8 @@ define(['boxing'], function(P) {
      */
     ApplicationDbEntity.prototype.append = function(data) {
         var delegate = this.unwrap();
-        var value = delegate.append(P.boxAsJava(data));
-        return P.boxAsJs(value);
+        var value = delegate.append(B.boxAsJava(data));
+        return B.boxAsJs(value);
     };
 
     /**
@@ -85,8 +85,8 @@ define(['boxing'], function(P) {
      */
     ApplicationDbEntity.prototype.execute = function(onSuccess, onFailure) {
         var delegate = this.unwrap();
-        var value = delegate.execute(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
-        return P.boxAsJs(value);
+        var value = delegate.execute(B.boxAsJava(onSuccess), B.boxAsJava(onFailure));
+        return B.boxAsJs(value);
     };
 
     /**
@@ -100,8 +100,8 @@ define(['boxing'], function(P) {
      */
     ApplicationDbEntity.prototype.query = function(params, onSuccess, onFailure) {
         var delegate = this.unwrap();
-        var value = delegate.query(P.boxAsJava(params), P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
-        return P.boxAsJs(value);
+        var value = delegate.query(B.boxAsJava(params), B.boxAsJava(onSuccess), B.boxAsJava(onFailure));
+        return B.boxAsJs(value);
     };
 
     /**
@@ -113,8 +113,8 @@ define(['boxing'], function(P) {
      */
     ApplicationDbEntity.prototype.requery = function(onSuccess, onFailure) {
         var delegate = this.unwrap();
-        var value = delegate.requery(P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
-        return P.boxAsJs(value);
+        var value = delegate.requery(B.boxAsJava(onSuccess), B.boxAsJava(onFailure));
+        return B.boxAsJs(value);
     };
 
 
