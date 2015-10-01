@@ -411,7 +411,7 @@ public class DatabasesClient {
 
     protected static class ApplyProcess extends AsyncProcess<ApplyResult, List<ApplyResult>> {
 
-        public List<ApplyResult> results = new ArrayList<>();
+        public final List<ApplyResult> results = new ArrayList<>();
 
         public ApplyProcess(int aExpected, Consumer<List<ApplyResult>> aOnSuccess, Consumer<Exception> aOnFailure) {
             super(aExpected, aOnSuccess, aOnFailure);

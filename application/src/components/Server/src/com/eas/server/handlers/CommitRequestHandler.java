@@ -38,6 +38,7 @@ public class CommitRequestHandler extends RequestHandler<CommitRequest, CommitRe
     protected static class ChangesSortProcess {
 
         private final List<Change> expectedChanges;
+        private final String defaultDatasource;
         private int factCalls;
         private final Consumer<Map<String, List<Change>>> onSuccess;
         private final Consumer<Exception> onFailure;
@@ -46,9 +47,10 @@ public class CommitRequestHandler extends RequestHandler<CommitRequest, CommitRe
         private final List<AccessControlException> accessDeniedEntities = new ArrayList<>();
         private final List<Exception> notRetrievedEntities = new ArrayList<>();
 
-        public ChangesSortProcess(List<Change> aChanges, Consumer<Map<String, List<Change>>> aOnSuccess, Consumer<Exception> aOnFailure) {
+        public ChangesSortProcess(List<Change> aChanges, String aDefaultDatasource, Consumer<Map<String, List<Change>>> aOnSuccess, Consumer<Exception> aOnFailure) {
             super();
             expectedChanges = aChanges;
+            defaultDatasource = aDefaultDatasource;
             onSuccess = aOnSuccess;
             onFailure = aOnFailure;
         }
@@ -98,7 +100,14 @@ public class CommitRequestHandler extends RequestHandler<CommitRequest, CommitRe
                         Map<String, List<Change>> changeLogs = new HashMap<>();
                         expectedChanges.stream().forEach((Change aSortedChange) -> {
                             SqlCompiledQuery entity = entities.get(aSortedChange.entityName);
-                            List<Change> targetChangeLog = changeLogs.get(entity.getDatasourceName());
+                            String datasourceName = entity.getDatasourceName();
+                            // defaultDatasource is needed here to avoid multi transaction
+                            // actions against the same datasource, leading to unexpected
+                            // row-level locking and deadlocks in two phase transaction commit process
+                            if (datasourceName == null || datasourceName.isEmpty()) {
+                                datasourceName = defaultDatasource;
+                            }
+                            List<Change> targetChangeLog = changeLogs.get(datasourceName);
                             if (targetChangeLog == null) {
                                 targetChangeLog = new ArrayList<>();
                                 changeLogs.put(entity.getDatasourceName(), targetChangeLog);
@@ -125,7 +134,7 @@ public class CommitRequestHandler extends RequestHandler<CommitRequest, CommitRe
         try {
             DatabasesClient client = getServerCore().getDatabasesClient();
             List<Change> changes = ChangesJSONReader.read(getRequest().getChangesJson(), Scripts.getSpace());
-            ChangesSortProcess process = new ChangesSortProcess(changes, (Map<String, List<Change>> changeLogs) -> {
+            ChangesSortProcess process = new ChangesSortProcess(changes, client.getDefaultDatasourceName(), (Map<String, List<Change>> changeLogs) -> {
                 try {
                     client.commit(changeLogs, (Integer aUpdated) -> {
                         if (onSuccess != null) {

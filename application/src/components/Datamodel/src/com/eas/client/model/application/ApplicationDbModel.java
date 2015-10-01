@@ -103,10 +103,13 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Sq
     }
 
     public List<Change> getChangeLog(String aDatasourceName) {
-        List<Change> changeLog = changeLogs.get(aDatasourceName);
+        String datasourceName = aDatasourceName;
+        if(datasourceName == null || datasourceName.isEmpty())
+            datasourceName = basesProxy.getDefaultDatasourceName();
+        List<Change> changeLog = changeLogs.get(datasourceName);
         if (changeLog == null) {
             changeLog = new ArrayList<>();
-            changeLogs.put(aDatasourceName, changeLog);
+            changeLogs.put(datasourceName, changeLog);
         }
         return changeLog;
     }
