@@ -110,7 +110,7 @@ public class CommitRequestHandler extends RequestHandler<CommitRequest, CommitRe
                             List<Change> targetChangeLog = changeLogs.get(datasourceName);
                             if (targetChangeLog == null) {
                                 targetChangeLog = new ArrayList<>();
-                                changeLogs.put(entity.getDatasourceName(), targetChangeLog);
+                                changeLogs.put(datasourceName, targetChangeLog);
                             }
                             targetChangeLog.add(aSortedChange);
                         });
