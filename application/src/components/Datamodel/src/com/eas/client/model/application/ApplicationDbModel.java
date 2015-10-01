@@ -104,6 +104,9 @@ public class ApplicationDbModel extends ApplicationModel<ApplicationDbEntity, Sq
 
     public List<Change> getChangeLog(String aDatasourceName) {
         String datasourceName = aDatasourceName;
+        // basesProxy.getDefaultDatasourceName() is needed here to avoid multi transaction
+        // actions against the same datasource, leading to unexpected
+        // row-level locking and deadlocks in two phase transaction commit process
         if(datasourceName == null || datasourceName.isEmpty())
             datasourceName = basesProxy.getDefaultDatasourceName();
         List<Change> changeLog = changeLogs.get(datasourceName);

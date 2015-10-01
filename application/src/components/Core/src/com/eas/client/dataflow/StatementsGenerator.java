@@ -239,7 +239,7 @@ public class StatementsGenerator implements ChangeVisitor {
                 }
                 //
                 chunk.insert.clause = String.format(INSERT_CLAUSE, tableName, chunk.dataColumnsNames.toString(), generatePlaceholders(chunk.insert.parameters.size()));
-                // Validness of the insert statement is outlined by inserted columns and key columns existance also
+                // Validness of the insert statement is outlined by inserted columns and also by key columns existance 
                 // because we have to prevent unexpected inserts in any joined table.
                 // In this case inserts will be valid only if they include at least one key column per table.
                 // Another case is single table per Insert instance.
