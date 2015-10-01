@@ -14,7 +14,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.eas.client.application.Application;
 import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.metadata.Parameters;
@@ -64,11 +63,13 @@ public class AppClient {
 	public static final String REPORT_LOCATION_CONTENT_TYPE = "text/platypus-report-location";
 	//
 	private static AppClient appClient;
+	private boolean cacheBustEnabled;
 	private String apiUrl;
 	private String principal;
 	private Map<String, Document> documents = new HashMap<String, Document>();
 	private Map<String, ModuleStructure> modulesStructures = new HashMap<String, ModuleStructure>();
 	private Map<String, Query> queries = new HashMap<String, Query>();
+	private Map<String, Object> serverModules = new HashMap<>();
 
 	public static class ModuleStructure {
 
@@ -119,14 +120,10 @@ public class AppClient {
 		return pageUrl;
 	}
 
-	public static void init() {
+	public static AppClient getInstance() {
 		if (appClient == null) {
 			appClient = new AppClient(remoteApiUri() + APPLICATION_URI);
 		}
-	}
-
-	public static AppClient getInstance() {
-		init();
 		return appClient;
 	}
 
@@ -857,15 +854,27 @@ public class AppClient {
 		}
 	}
 
-	public static native void addServerModule(String aModuleName, String aStructure) throws Exception /*-{
-		$wnd.P.serverModules[aModuleName] = JSON.parse(aStructure);
-	}-*/;
+	public void addServerModule(String aModuleName, String aStructure) throws Exception {
+		serverModules.put(aModuleName, Utils.jsonParse(aStructure));
+	}
 
-	public static native boolean isServerModule(String aModuleName) throws Exception /*-{
-		return !!($wnd.P && $wnd.P.serverModules && $wnd.P.serverModules[aModuleName]);
-	}-*/;
+	public boolean isServerModule(String aModuleName) throws Exception{
+		return serverModules.containsKey(aModuleName);
+	}
 
-	public Object requestServerMethodExecution(final String aModuleName, final String aMethodName, final JsArrayString aParams, final JavaScriptObject onSuccess, final JavaScriptObject onFailure)
+	public static native JavaScriptObject createReport(JavaScriptObject Report, String reportLocation)/*-{
+		return new Report(reportLocation);
+	}-*/;
+	
+	public boolean isCacheBustEnabled(){
+		return cacheBustEnabled;
+	}
+	
+	public void setCacheBustEnabled(boolean aValue) {
+		cacheBustEnabled = aValue;
+	}
+
+	public Object requestServerMethodExecution(final String aModuleName, final String aMethodName, final JsArrayString aParams, final JavaScriptObject onSuccess, final JavaScriptObject onFailure, final JavaScriptObject aReportConstructor)
 	        throws Exception {
 		String[] convertedParams = new String[aParams.length()];
 		for (int i = 0; i < aParams.length(); i++)
@@ -883,7 +892,7 @@ public class AppClient {
 						if (responseType.contains("text/json") || responseType.contains("text/javascript")) {
 							Utils.executeScriptEventVoid(onSuccess, onSuccess, Utils.toJs(aResponse.getResponseText()));
 						} else if (responseType.contains(REPORT_LOCATION_CONTENT_TYPE)) {
-							Utils.executeScriptEventVoid(onSuccess, onSuccess, Application.createReport(aResponse.getResponseText()));
+							Utils.executeScriptEventVoid(onSuccess, onSuccess, createReport(aReportConstructor, aResponse.getResponseText()));
 						} else {
 							Utils.executeScriptEventVoid(onSuccess, onSuccess, Utils.toJs(aResponse.getResponseText()));
 						}
@@ -916,7 +925,7 @@ public class AppClient {
 						if (responseType.contains("text/json") || responseType.contains("text/javascript")) {
 							return Utils.toJs(executed.getResponseText());
 						} else if (responseType.contains(REPORT_LOCATION_CONTENT_TYPE)) {
-							return Application.createReport(executed.getResponseText());
+							return createReport(aReportConstructor, executed.getResponseText());
 						} else {
 							return Utils.toJs(executed.getResponseText());
 						}
@@ -980,6 +989,16 @@ public class AppClient {
 			});
 		}
 	}
+	
+	public Query getCachedAppQuery(String aQueryId) {
+		Query query = queries.get(aQueryId);
+		if (query != null) {
+			AppClient client = query.getClient();
+			query = query.copy();
+			query.setClient(client);
+		}
+		return query;
+	}
 
 	public Cancellable requestData(String aQueryName, Parameters aParams, final Fields aExpectedFields, final Callback<JavaScriptObject, String> aCallback) throws Exception {
 		String query = params(param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqExecuteQuery)), param(PlatypusHttpRequestParams.QUERY_ID, aQueryName), params(aParams));
@@ -1007,7 +1026,7 @@ public class AppClient {
 		});
 	}
 
-	public static String checkedCacheBust(String aUrl) {
-		return Application.isCacheBustEnabled() ? aUrl + "?" + PlatypusHttpRequestParams.CACHE_BUSTER + "=" + IDGenerator.genId() : aUrl;
+	public String checkedCacheBust(String aUrl) {
+		return cacheBustEnabled ? aUrl + "?" + PlatypusHttpRequestParams.CACHE_BUSTER + "=" + IDGenerator.genId() : aUrl;
 	}
 }

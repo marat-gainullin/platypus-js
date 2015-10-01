@@ -284,6 +284,7 @@ public class Parameter extends Field {
 	}
 
 	public static native void publishFacade(JavaScriptObject aTarget, Parameter aField)/*-{
+		var B = @com.eas.predefine.Predefine::boxing;
 		Object.defineProperty(aTarget, "modified", {
 			get : function() {
 				return aField.@com.eas.client.metadata.Parameter::isModified()();
@@ -291,10 +292,10 @@ public class Parameter extends Field {
 		});
 		Object.defineProperty(aTarget, "value", {
 			get : function() {
-				return $wnd.P.boxAsJs(aField.@com.eas.client.metadata.Parameter::getJsValue()());
+				return B.boxAsJs(aField.@com.eas.client.metadata.Parameter::getJsValue()());
 			},
 			set : function(aValue) {
-				aField.@com.eas.client.metadata.Parameter::setJsValue(Ljava/lang/Object;)($wnd.P.boxAsJava(aValue));
+				aField.@com.eas.client.metadata.Parameter::setJsValue(Ljava/lang/Object;)(B.boxAsJava(aValue));
 			}
 		});
 	}-*/;

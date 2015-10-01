@@ -4,10 +4,10 @@
  */
 package com.bearsoft.gwt.ui.widgets.grid.processing;
 
-import com.eas.client.form.events.CollapsedHandler;
-import com.eas.client.form.events.ExpandedHandler;
-import com.eas.client.form.events.HasCollapsedHandlers;
-import com.eas.client.form.events.HasExpandedHandlers;
+import com.bearsoft.gwt.ui.events.CollapsedHandler;
+import com.bearsoft.gwt.ui.events.ExpandedHandler;
+import com.bearsoft.gwt.ui.events.HasCollapsedHandlers;
+import com.bearsoft.gwt.ui.events.HasExpandedHandlers;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.view.client.ListDataProvider;
 import java.util.ArrayList;

@@ -15,7 +15,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.eas.client.application.Application;
 import com.eas.client.queries.Query;
 import com.eas.client.xhr.UrlQueryProcessor;
 import com.google.gwt.core.client.Callback;
@@ -80,32 +79,30 @@ public class Loader {
 	public static final String SCRIPT_SOURCE_TAG_NAME = "source";
 	public static final String TYPE_JAVASCRIPT = "text/javascript";
 	protected static final com.google.gwt.dom.client.Document htmlDom = com.google.gwt.dom.client.Document.get();
-	protected AppClient client;
-	protected Set<LoadHandler> handlers = new HashSet<LoadHandler>();
-	protected Set<String> started = new HashSet<>();
-	protected Set<String> executed = new HashSet<>();
-	protected Map<String, JavaScriptObject> defined = new HashMap<>();
-	protected List<String> amdDependencies;
-	protected Callback<String, Void> amdDefineCallback;
-	protected Map<String, List<Callback<Void, String>>> pending = new HashMap<>();
+	protected static Set<LoadHandler> handlers = new HashSet<LoadHandler>();
+	protected static Set<String> started = new HashSet<>();
+	protected static Set<String> executed = new HashSet<>();
+	protected static Map<String, JavaScriptObject> defined = new HashMap<>();
+	protected static List<String> amdDependencies;
+	protected static Callback<String, Void> amdDefineCallback;
+	protected static Map<String, List<Callback<Void, String>>> pending = new HashMap<>();
 
-	public Loader(AppClient aClient) {
-		client = aClient;
+	protected Loader() {
 	}
 
-	protected void fireStarted(String anItemName) {
+	protected static void fireStarted(String anItemName) {
 		for (LoadHandler lh : handlers) {
 			lh.started(anItemName);
 		}
 	}
 
-	protected void fireLoaded(String anItemName) {
+	protected static void fireLoaded(String anItemName) {
 		for (LoadHandler lh : handlers) {
 			lh.loaded(anItemName);
 		}
 	}
 
-	public HandlerRegistration addHandler(final LoadHandler aHandler) {
+	public static HandlerRegistration addHandler(final LoadHandler aHandler) {
 		handlers.add(aHandler);
 		return new HandlerRegistration() {
 			@Override
@@ -115,28 +112,28 @@ public class Loader {
 		};
 	}
 
-	public Map<String, JavaScriptObject> getDefined() {
+	public static Map<String, JavaScriptObject> getDefined() {
 		return defined;
 	}
 
-	public void setAmdDefine(List<String> aDependencies, Callback<String, Void> aModuleDefiner) {
+	public static void setAmdDefine(List<String> aDependencies, Callback<String, Void> aModuleDefiner) {
 		amdDependencies = aDependencies;
 		amdDefineCallback = aModuleDefiner;
 	}
 
-	public List<String> consumeAmdDependencies() {
+	public static List<String> consumeAmdDependencies() {
 		List<String> res = amdDependencies;
 		amdDependencies = null;
 		return res;
 	}
 
-	public Callback<String, Void> consumeAmdDefineCallback() {
+	public static Callback<String, Void> consumeAmdDefineCallback() {
 		Callback<String, Void> res = amdDefineCallback;
 		amdDefineCallback = null;
 		return res;
 	}
 
-	public void load(final Collection<String> aModulesNames, final Callback<Void, String> aCallback, final Set<String> aCyclic) throws Exception {
+	public static void load(final Collection<String> aModulesNames, final Callback<Void, String> aCallback, final Set<String> aCyclic) throws Exception {
 		if (!aModulesNames.isEmpty()) {
 			final CumulativeCallbackAdapter<Void, String> process = new CumulativeCallbackAdapter<Void, String>(aModulesNames.size()) {
 
@@ -172,7 +169,7 @@ public class Loader {
 					}
 					pendingOnModule.add(process);
 					if (!started.contains(moduleName)) {
-						client.requestModuleStructure(moduleName, new CallbackAdapter<AppClient.ModuleStructure, XMLHttpRequest>() {
+						AppClient.getInstance().requestModuleStructure(moduleName, new CallbackAdapter<AppClient.ModuleStructure, XMLHttpRequest>() {
 
 							@Override
 							protected void doWork(AppClient.ModuleStructure aStructure) throws Exception {
@@ -209,18 +206,18 @@ public class Loader {
 
 									@Override
 									protected void doWork(String aJsPart) throws Exception {
-										final String jsURL = AppClient.checkedCacheBust(AppClient.relativeUri() + AppClient.APP_RESOURCE_PREFIX + aJsPart);
+										final String jsURL = AppClient.getInstance().checkedCacheBust(AppClient.relativeUri() + AppClient.APP_RESOURCE_PREFIX + aJsPart);
 										ScriptInjector.fromUrl(jsURL).setCallback(new Callback<Void, Exception>() {
 
 											@Override
 											public void onSuccess(Void result) {
 												executed.add(moduleName);
 												fireLoaded(moduleName);
-												final Callback<String, Void> amdDefineCallback = Loader.this.consumeAmdDefineCallback();
-												List<String> amdDependencies = Loader.this.consumeAmdDependencies();
+												final Callback<String, Void> amdDefineCallback = Loader.consumeAmdDefineCallback();
+												List<String> amdDependencies = Loader.consumeAmdDependencies();
 												if (amdDefineCallback != null) {
 													try {
-														Loader.this.load(amdDependencies, new Callback<Void, String>() {
+														Loader.load(amdDependencies, new Callback<Void, String>() {
 
 															@Override
 															public void onFailure(String reason) {
@@ -275,7 +272,7 @@ public class Loader {
 											}
 										});
 									} else {
-										client.requestDocument(part, new CallbackAdapter<Document, XMLHttpRequest>() {
+										AppClient.getInstance().requestDocument(part, new CallbackAdapter<Document, XMLHttpRequest>() {
 
 											@Override
 											public void onFailure(XMLHttpRequest reason) {
@@ -329,7 +326,7 @@ public class Loader {
 		}
 	}
 
-	public void loadServerModules(Collection<String> aServerModulesNames, final Callback<Void, String> aCallback) throws Exception {
+	public static void loadServerModules(Collection<String> aServerModulesNames, final Callback<Void, String> aCallback) throws Exception {
 		if (!aServerModulesNames.isEmpty()) {
 			final CumulativeCallbackAdapter<Void, String> process = new CumulativeCallbackAdapter<Void, String>(aServerModulesNames.size()) {
 
@@ -345,7 +342,7 @@ public class Loader {
 			};
 			final Collection<Cancellable> startLoadings = new ArrayList<Cancellable>();
 			for (final String appElementName : aServerModulesNames) {
-				startLoadings.add(client.createServerModule(appElementName, new CallbackAdapter<Void, String>() {
+				startLoadings.add(AppClient.getInstance().createServerModule(appElementName, new CallbackAdapter<Void, String>() {
 
 					@Override
 					public void doWork(Void aDoc) throws Exception {
@@ -372,15 +369,7 @@ public class Loader {
 		}
 	}
 
-	/**
-	 * This method is public ONLY because of tests!
-	 * 
-	 * @param aQueriesNames
-	 * @param onSuccess
-	 * @return
-	 * @throws Exception
-	 */
-	public void loadQueries(Collection<String> aQueriesNames, final Callback<Void, String> aCallback) throws Exception {
+	public static void loadQueries(Collection<String> aQueriesNames, final Callback<Void, String> aCallback) throws Exception {
 		if (!aQueriesNames.isEmpty()) {
 			final CumulativeCallbackAdapter<Void, String> process = new CumulativeCallbackAdapter<Void, String>(aQueriesNames.size()) {
 
@@ -397,11 +386,10 @@ public class Loader {
 			};
 			final Collection<Cancellable> startLoadings = new ArrayList<Cancellable>();
 			for (final String queryName : aQueriesNames) {
-				startLoadings.add(client.getAppQuery(queryName, new CallbackAdapter<Query, String>() {
+				startLoadings.add(AppClient.getInstance().getAppQuery(queryName, new CallbackAdapter<Query, String>() {
 
 					@Override
 					public void doWork(Query aQuery) throws Exception {
-						Application.putAppQuery(aQuery);
 						fireLoaded(queryName);
 						process.onSuccess(null);
 					}
@@ -423,5 +411,53 @@ public class Loader {
 				}
 			});
 		}
+	}
+	
+	public static void jsLoadQueries(JavaScriptObject aQueries, final JavaScriptObject aOnSuccess, final JavaScriptObject aOnFailure) throws Exception {
+		List<String> queries = new ArrayList<>();
+		Utils.JsObject jsQueries = aQueries.cast();
+		for (int i = 0; i < jsQueries.length(); i++) {
+			queries.add(jsQueries.getString(i));
+		}
+		Loader.loadQueries(queries, new Callback<Void, String>() {
+
+			@Override
+			public void onSuccess(Void result) {
+				if (aOnSuccess != null) {
+					aOnSuccess.<Utils.JsObject> cast().apply(null, null);
+				}
+			}
+
+			@Override
+			public void onFailure(String aReason) {
+				if (aOnFailure != null) {
+					aOnFailure.<Utils.JsObject> cast().call(null, aReason);
+				}
+			}
+		});
+	}
+
+	public static void jsLoadServerModules(JavaScriptObject aModulesNames, final JavaScriptObject aOnSuccess, final JavaScriptObject aOnFailure) throws Exception {
+		List<String> modulesNames = new ArrayList<>();
+		Utils.JsObject jsModulesNames = aModulesNames.cast();
+		for (int i = 0; i < jsModulesNames.length(); i++) {
+			modulesNames.add(jsModulesNames.getString(i));
+		}
+		Loader.loadServerModules(modulesNames, new Callback<Void, String>() {
+
+			@Override
+			public void onSuccess(Void result) {
+				if (aOnSuccess != null) {
+					aOnSuccess.<Utils.JsObject> cast().apply(null, null);
+				}
+			}
+
+			@Override
+			public void onFailure(String aReason) {
+				if (aOnFailure != null) {
+					aOnFailure.<Utils.JsObject> cast().call(null, aReason);
+				}
+			}
+		});
 	}
 }

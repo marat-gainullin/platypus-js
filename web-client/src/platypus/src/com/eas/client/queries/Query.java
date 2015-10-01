@@ -16,9 +16,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.eas.application.WebFlowProvider;
 import com.eas.client.AppClient;
 import com.eas.client.Cancellable;
-import com.eas.client.application.WebFlowProvider;
 import com.eas.client.dataflow.FlowProvider;
 import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.Parameter;
@@ -135,12 +135,13 @@ public class Query {
     }
     
     public native JavaScriptObject prepareCommand()/*-{
+		var B = @com.eas.predefine.Predefine::boxing;
         var command = {kind: 'command', entity: this.@com.eas.client.queries.Query::getEntityName()(), parameters: {}};
         var nParameters = this.@com.eas.client.queries.Query::getParameters()();
         var pCount = nParameters.@com.eas.client.metadata.Parameters::getParametersCount()();
         for (var i = 0; i < pCount; i++) {
             var nParameter = nParameters.@com.eas.client.metadata.Parameters::get(I)(i + 1);
-            command.parameters[p.@com.eas.client.metadata.Parameter::getName()()] = $wnd.P.boxAsJs(p.@com.eas.client.metadata.Parameter::getJsValue()());
+            command.parameters[p.@com.eas.client.metadata.Parameter::getName()()] = B.boxAsJs(p.@com.eas.client.metadata.Parameter::getJsValue()());
         }
         return command;
     }-*/;

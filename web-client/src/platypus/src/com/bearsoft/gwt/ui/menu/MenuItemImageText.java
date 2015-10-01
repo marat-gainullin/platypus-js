@@ -5,12 +5,12 @@
  */
 package com.bearsoft.gwt.ui.menu;
 
-import com.eas.client.form.events.HasHideHandlers;
-import com.eas.client.form.events.HasShowHandlers;
-import com.eas.client.form.events.HideEvent;
-import com.eas.client.form.events.HideHandler;
-import com.eas.client.form.events.ShowEvent;
-import com.eas.client.form.events.ShowHandler;
+import com.bearsoft.gwt.ui.events.HasHideHandlers;
+import com.bearsoft.gwt.ui.events.HasShowHandlers;
+import com.bearsoft.gwt.ui.events.HideEvent;
+import com.bearsoft.gwt.ui.events.HideHandler;
+import com.bearsoft.gwt.ui.events.ShowEvent;
+import com.bearsoft.gwt.ui.events.ShowHandler;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.shared.EventHandler;

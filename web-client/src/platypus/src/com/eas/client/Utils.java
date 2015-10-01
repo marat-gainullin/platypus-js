@@ -25,7 +25,8 @@ public class Utils {
 		}-*/;
 
 		public final native Object getJava(String aName)/*-{
-			return $wnd.P.boxAsJava(this[aName]);
+			var B = @com.eas.predefine.Predefine::boxing;
+			return B.boxAsJava(this[aName]);
 		}-*/;
 
 		public final native boolean getBoolean(String aName)/*-{
@@ -63,7 +64,8 @@ public class Utils {
 		}-*/;
 
 		public final native void setJava(String aName, Object aValue)/*-{
-			return this[aName] = $wnd.P.boxAsJs(aValue);
+			var B = @com.eas.predefine.Predefine::boxing;
+			return this[aName] = B.boxAsJs(aValue);
 		}-*/;
 
 		public final native boolean has(String aName)/*-{
@@ -154,11 +156,13 @@ public class Utils {
 		}-*/;
 
 		public final native Object call(JavaScriptObject aThis, Object aArg)/*-{
-			return this.call(aThis, $wnd.P.boxAsJs(aArg));
+			var B = @com.eas.predefine.Predefine::boxing;
+			return this.call(aThis, B.boxAsJs(aArg));
 		}-*/;
 
 		public final native Object call(JavaScriptObject aThis, Object aArg, boolean aFlag)/*-{
-			return this.call(aThis, $wnd.P.boxAsJs(aArg), aFlag);
+			var B = @com.eas.predefine.Predefine::boxing;
+			return this.call(aThis, B.boxAsJs(aArg), aFlag);
 		}-*/;
 
 		public final native JavaScriptObject newObject()/*-{
@@ -255,7 +259,8 @@ public class Utils {
 		try {
 			aTarget[@com.eas.client.Utils::fireChangeName](aChange);
 		} catch (e) {
-			$wnd.P.Logger.severe(e);
+			var Logger = @com.eas.predefine.Predefine::logger;
+			Logger.Logger.severe(e);
 		}
 	}-*/;
 
@@ -329,7 +334,8 @@ public class Utils {
 
 	public native static Boolean executeScriptEventBoolean(JavaScriptObject aEventThis, JavaScriptObject aHandler, Object aArg) throws Exception/*-{
 		if (aHandler != null) {
-			var res = aHandler.call(aEventThis, $wnd.P.boxAsJs(aArg));
+			var B = @com.eas.predefine.Predefine::boxing;
+			var res = aHandler.call(aEventThis, B.boxAsJs(aArg));
 			if (res != undefined && res != null)
 				return @java.lang.Boolean::new(Z)((false != res));
 			else
@@ -340,7 +346,8 @@ public class Utils {
 
 	public native static Double executeScriptEventDouble(JavaScriptObject aEventThis, JavaScriptObject aHandler, Object aArg) throws Exception/*-{
 		if (aHandler != null) {
-			var res = aHandler.call(aEventThis, $wnd.P.boxAsJs(aArg));
+			var B = @com.eas.predefine.Predefine::boxing;
+			var res = aHandler.call(aEventThis, B.boxAsJs(aArg));
 			if (res != undefined && res != null)
 				return @java.lang.Double::new(D)(res * 1);
 			else
@@ -351,7 +358,8 @@ public class Utils {
 
 	public native static String executeScriptEventString(JavaScriptObject aEventThis, JavaScriptObject aHandler, Object aArg) throws Exception/*-{
 		if (aHandler != null) {
-			var res = aHandler.call(aEventThis, $wnd.P.boxAsJs(aArg));
+			var B = @com.eas.predefine.Predefine::boxing;
+			var res = aHandler.call(aEventThis, B.boxAsJs(aArg));
 			if (res != undefined && res != null)
 				return (res + '');
 			else
@@ -362,7 +370,8 @@ public class Utils {
 
 	public native static Date executeScriptEventDate(JavaScriptObject aEventThis, JavaScriptObject aHandler, Object aArg) throws Exception/*-{
 		if (aHandler != null) {
-			var res = new Date(aHandler.call(aEventThis, $wnd.P.boxAsJs(aArg)));
+			var B = @com.eas.predefine.Predefine::boxing;
+			var res = new Date(aHandler.call(aEventThis, B.boxAsJs(aArg)));
 			if (res != undefined && res != null)
 				return @com.eas.client.Utils::double2Date(D)(res.getTime());
 			else
@@ -373,16 +382,19 @@ public class Utils {
 
 	public native static void executeScriptEventVoid(JavaScriptObject aEventThis, JavaScriptObject aHandler, Object aArg) throws Exception/*-{
 		if (aHandler != null) {
-			aHandler.call(aEventThis, $wnd.P.boxAsJs(aArg));
+			var B = @com.eas.predefine.Predefine::boxing;
+			aHandler.call(aEventThis, B.boxAsJs(aArg));
 		}
 	}-*/;
 
 	public native static Object jsonParse(String aData) throws Exception /*-{
-		return $wnd.P.boxAsJava(JSON.parse(aData));
+		var B = @com.eas.predefine.Predefine::boxing;
+		return B.boxAsJava(JSON.parse(aData));
 	}-*/;
 
 	public native static String jsonStringify(Object aToJsedObject) /*-{
-		return JSON.stringify($wnd.P.boxAsJs(aToJsedObject));
+		var B = @com.eas.predefine.Predefine::boxing;
+		return JSON.stringify(B.boxAsJs(aToJsedObject));
 	}-*/;
 
 	public native static void invokeJsFunction(JavaScriptObject aHandler) /*-{
@@ -390,14 +402,6 @@ public class Utils {
 			aHandler();
 		}
 	}-*/;
-
-	public static boolean isNumber(Object aValue) {
-		return aValue instanceof Number;
-	}
-
-	public static boolean isBoolean(Object aValue) {
-		return aValue instanceof Boolean;
-	}
 
 	public static boolean isDate(Object aValue) {
 		return aValue instanceof Date;
@@ -535,10 +539,12 @@ public class Utils {
 	 * @return js array.
 	 */
 	public native static JavaScriptObject toJsArray(Object[] aValue)/*-{
+		var B = @com.eas.predefine.Predefine::boxing;
 		var res = [];
 		var inLength = @com.eas.client.Utils::javaArrayLength([Ljava/lang/Object;)(aValue);
-		for ( var i = 0; i < inLength; i++)
-			res[res.length] = $wnd.P.boxAsJs(@com.eas.client.Utils::javaArrayItem([Ljava/lang/Object;I)(aValue, i))
+		for ( var i = 0; i < inLength; i++){
+			res[res.length] = B.boxAsJs(@com.eas.client.Utils::javaArrayItem([Ljava/lang/Object;I)(aValue, i));
+		}
 		return res;
 	}-*/;
 
@@ -568,7 +574,8 @@ public class Utils {
 					propName = path[i];
 			}
 			if (propName != null) {
-				var javaValue = $wnd.P.boxAsJava(target[propName]);
+				var B = @com.eas.predefine.Predefine::boxing;
+				var javaValue = B.boxAsJava(target[propName]);
 				return javaValue;
 			} else
 				return null;
@@ -590,7 +597,8 @@ public class Utils {
 				}
 			}
 			if (propName != null) {
-				var jsData = $wnd.P.boxAsJs(aValue);
+				var B = @com.eas.predefine.Predefine::boxing;
+				var jsData = B.boxAsJs(aValue);
 				target[propName] = jsData;
 			}
 		}
