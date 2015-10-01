@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.application;
+package com.eas.client;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,13 +14,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.eas.client.CallbackAdapter;
-import com.eas.client.Cancellable;
-import com.eas.client.IDGenerator;
-import com.eas.client.PlatypusHttpRequestParams;
-import com.eas.client.Requests;
-import com.eas.client.Utils;
-import com.eas.client.Utils.JsObject;
+import com.eas.client.application.Application;
 import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.metadata.Parameters;
@@ -682,7 +676,7 @@ public class AppClient {
 				Object oResult = respText != null && !respText.isEmpty() ? Utils.toJava(Utils.jsonParse(respText)) : null;
 				assert oResult == null || oResult instanceof JavaScriptObject : "Credential request expects null or JavaScriptObject value as a response.";
 				JavaScriptObject jsObject = (JavaScriptObject) oResult;
-				Object oUserName = jsObject.<JsObject> cast().getJava("userName");
+				Object oUserName = jsObject.<Utils.JsObject> cast().getJava("userName");
 				assert oUserName == null || oUserName instanceof String : "Credential request expects null or String value as a user name.";
 				principal = (String) oUserName;
 				if (principal == null)

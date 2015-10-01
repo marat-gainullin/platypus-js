@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 
 import com.bearsoft.gwt.ui.RadioGroup;
 import com.eas.client.Utils;
+import com.eas.client.application.js.JsEvents;
 import com.eas.client.form.EventsExecutor;
 import com.eas.client.form.events.AddEvent;
 import com.eas.client.form.events.AddHandler;
@@ -12,7 +13,6 @@ import com.eas.client.form.events.HasAddHandlers;
 import com.eas.client.form.events.HasRemoveHandlers;
 import com.eas.client.form.events.RemoveEvent;
 import com.eas.client.form.events.RemoveHandler;
-import com.eas.client.form.js.JsEvents;
 import com.eas.client.form.published.HasJsFacade;
 import com.eas.client.form.published.HasPlatypusButtonGroup;
 import com.eas.client.form.published.HasPublished;

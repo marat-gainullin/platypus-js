@@ -140,9 +140,9 @@
         enumerable: true,
         value: Rpc.Proxy
     });
-    Object.defineProperty(module, 'loadRemotes', {
+    Object.defineProperty(module, 'requireRemotes', {
         enumerable: true,
-        value: Rpc.loadRemotes
+        value: Rpc.requireRemotes
     });
     Object.defineProperty(module, 'extend', {
         enumerable: true,

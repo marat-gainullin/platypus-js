@@ -3,6 +3,7 @@ package com.eas.client.application;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.eas.client.AppClient;
 import com.eas.client.CallbackAdapter;
 import com.eas.client.Utils;
 import com.google.gwt.core.client.Callback;

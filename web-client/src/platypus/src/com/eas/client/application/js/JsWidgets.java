@@ -1,4 +1,4 @@
-package com.eas.client.form.js;
+package com.eas.client.application.js;
 
 import com.eas.client.form.published.PublishedComponent;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -6,354 +6,546 @@ import com.google.gwt.core.client.JavaScriptObject;
 public class JsWidgets {
 
 	public native static void init()/*-{
-		$wnd.P.Orientation = {HORIZONTAL: 0, VERTICAL: 1};
-		$wnd.P.VerticalPosition = {CENTER: 0, TOP: 1, BOTTOM: 3};
-		$wnd.P.HorizontalPosition = {CENTER: 0, LEFT: 2, RIGHT: 4};
-		$wnd.P.FontStyle = {NORMAL: 0, BOLD: 1, ITALIC: 2, BOLD_ITALIC: 3};
-		
-		// ***************************************************
-		$wnd.P.Label = function(aText, aIcon, aIconTextGap) {			
-			var aComponent = arguments.length > 3 ? arguments[3] : null;
-			
-			if (!(this instanceof $wnd.P.Label)) {
-				throw  ' use  "new P.Label()" !';
+		function predefine(aDeps, aName, aDefiner){
+			var resolved = [];
+			for(var d = 0; d < aDeps.length; d++){
+				var module = @com.eas.client.application.Application::prerequire(Ljava/lang/String;)(aDeps[d]);
+				resolved.push(module);
 			}
-
-			var published = this;
-			 
-			aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusLabel::new()(); 	
-			published.unwrap = function() {
-				return aComponent;
-			};
-			publishComponentProperties(published);
-			if (aText) {
-				published.text = aText;
-			} 	
-			if (aIcon) {
-				published.icon = aIcon;
-			}
-			if(aIconTextGap){
-				published.iconTextGap = aIconTextGap;
-			}
-		};		
-		
-		// **************************************************************************
-		$wnd.P.Button = function (aText, aIcon, aGapOrCallback, aCallback) {
-			var aIconTextGap = 4;
-			if(!aCallback && aGapOrCallback && aGapOrCallback.call)
-				aCallback = aGapOrCallback;
-			
-			var aComponent = arguments.length > 4 ? arguments[4] : null;
-			
-			if (!(this instanceof $wnd.P.Button)) {
-				throw  ' use  "new P.Button()" !';
-			}
-
-			var published = this;
-			aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusButton::new()();
-			published.unwrap = function() {
-				return aComponent;
-			};
-			publishComponentProperties(published);
-			
-			if (aText) {
-				published.text = aText;
-			} 	
-			if (aIcon) {
-				published.icon = aIcon;
-			}
-			if (aCallback) {
-				published.onActionPerformed = aCallback; 
-			}	 	
-		};	
-		
-		// **************************************************************************
-		$wnd.P.DropDownButton = function (aText, aIcon, aGapOrCallback, aCallback) {			
-			if (!(this instanceof $wnd.P.DropDownButton)) {
-				throw  ' use  "new P.DropDownButton()" !';
-			}
-			var aIconTextGap = 4;
-			if(!aCallback && aGapOrCallback && aGapOrCallback.call)
-				aCallback = aGapOrCallback;
-			var aComponent = arguments.length > 4 ? arguments[4] : null;
-
-			var published = this;
-			aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusSplitButton::new()();
-			published.unwrap = function() {
-				return aComponent;
-			};
-			publishComponentProperties(published);
-			
-			if (aText) {
-				published.text = aText;
-			} 	
-			if (aIcon) {
-				published.icon = aIcon;
-			}
-			if (aCallback) {
-				published.onActionPerformed = aCallback; 
-			}	 	
-		};	
-		
-		// **************************************************************************
-		$wnd.P.ToggleButton = function (aText, aIcon, aSelected, aGapOrCallback, aCallback) {
-			
-			var aIconTextGap = 4;
-			if(!aCallback && aGapOrCallback && aGapOrCallback.call)
-				aCallback = aGapOrCallback;
-
-			var aComponent = arguments.length > 5 ? arguments[5] : null;
-			
-			if (!(this instanceof $wnd.P.ToggleButton)) {
-				throw  ' use  "new P.ToggleButton()" !';
-			}
-
-			var published = this;
-			aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusToggleButton::new()();
-			published.unwrap = function() {
-				return aComponent;
-			};
-			publishComponentProperties(published);
-
-			if (aText) {
-				published.text = aText;
-			} 	
-			if (aIcon) {
-				published.icon = aIcon;
-			}
-			if (aSelected != undefined) {
-				published.selected = aSelected;
-			}
-			if (aCallback) {
-				published.onActionPerformed = aCallback; 
-			}	 	
-		};	
-		
-		// **************************************************************************
-		$wnd.P.RadioButton = function (aText, aSelected, aCallback) {
-			var aComponent = arguments.length > 3 ? arguments[3] : null;
-			
-			if (!(this instanceof $wnd.P.RadioButton)) {
-				throw  ' use  "new P.RadioButton()" !';
-			}
-
-			var published = this;
-			aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusRadioButton::new()();
-			published.unwrap = function() {
-				return aComponent;
-			};
-			publishComponentProperties(published);
-
-			if (aText) {
-				published.text = aText;
-			} 	
-			if (aSelected) {
-				published.selected = aSelected;
-			}
-			if(aCallback){
-				published.onActionPerformed = aCallback; 
-			}
-		};	
-		
-		// **************************************************************************
-		$wnd.P.CheckBox = function (aText, aSelected, aCallback) {
-			var aComponent = arguments.length>3?arguments[3]:null;
-			
-			if (!(this instanceof $wnd.P.CheckBox)) {
-				throw  ' use  "new P.CheckBox()" !';
-			}
-
-			var published = this;
-			aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusCheckBox::new()();
-			published.unwrap = function() {
-				return aComponent;
-			};
-			publishComponentProperties(published);
-
-			if (aText) {
-				published.text = aText;
-			} 	
-			if (aSelected != undefined) {
-				published.selected = aSelected;
-			}
-			if(aCallback){
-				published.onActionPerformed = aCallback; 
-			}
-		};			
-		
-		// **************************************************************************
-		$wnd.P.PasswordField = function (aText) {
-			var aComponent = arguments.length > 1 ? arguments[1] : null;
-			if (!(this instanceof $wnd.P.PasswordField)) {
-				throw  ' use  "new P.PasswordField()" !';
-			}
-			var published = this;
-			aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusPasswordField::new()();
-			published.unwrap = function() {
-				return aComponent;
-			};
-			publishComponentProperties(published);			
-			if (aText) {
-				published.text = aText;
-			} 	
-		};	
-		
-		// **************************************************************************
-		$wnd.P.TextField = function (aText) {
-			var aComponent = arguments.length > 1 ? arguments[1] : null;
-			if (!(this instanceof $wnd.P.TextField)) {
-				throw  ' use  "new P.TextField()" !';
-			}
-			var published = this;
-			aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusTextField::new()();
-			published.unwrap = function() {
-				return aComponent;
-			};
-			publishComponentProperties(published);
-			if (aText) {
-				published.text = aText;
-			} 	
-		};	
-
-		// **************************************************************************
-		$wnd.P.FormattedField = function (aValue) {
-			var aComponent = arguments.length > 1 ? arguments[1] : null;
-			if (!(this instanceof $wnd.P.FormattedField)) {
-				throw  ' use  "new P.FormattedField()" !';
-			}
-			var published = this;
-			aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusFormattedTextField::new()();
-			published.unwrap = function() {
-				return aComponent;
-			};
-			publishComponentProperties(published);
-			if (aValue) {
-				published.value = aValue;
-			} 	
-		};			
-		
-		// **************************************************************************
-		$wnd.P.TextArea = function (aText) {
-			var aComponent = arguments.length > 1 ? arguments[1] : null;
-			if (!(this instanceof $wnd.P.TextArea)) {
-				throw  ' use  "new P.TextArea()" !';
-			}
-			var published = this;
-			aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusTextArea::new()();
-			published.unwrap = function() {
-				return aComponent;
-			};
-			publishComponentProperties(published);
-			if (aText) {
-				published.text = aText;
-			} 	
+			@com.eas.client.application.Application::predefine(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aName, aDefiner(resolved));
 		}
+		predefine([], 'forms/label', function(){
+			function Label(aText, aIcon, aIconTextGap) {			
+				var aComponent = arguments.length > 3 ? arguments[3] : null;
+				
+				if (!(this instanceof Label)) {
+					throw  ' use  "new Label()" !';
+				}
+	
+				var published = this;
+				 
+				aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusLabel::new()(); 	
+				published.unwrap = function() {
+					return aComponent;
+				};
+				publishComponentProperties(published);
+				if (aText) {
+					published.text = aText;
+				} 	
+				if (aIcon) {
+					published.icon = aIcon;
+				}
+				if(aIconTextGap){
+					published.iconTextGap = aIconTextGap;
+				}
+			}		
+			return Label;
+		});
 		
-		// **************************************************************************
-		$wnd.P.HtmlArea = function (aText) {
-			var aComponent = arguments.length > 1 ? arguments[1] : null;
-			if (!(this instanceof $wnd.P.HtmlArea)) {
-				throw  ' use  "new P.HtmlArea()" !';
+		predefine([], 'forms/button', function(){
+			function Button(aText, aIcon, aGapOrCallback, aCallback) {
+				var aIconTextGap = 4;
+				if(!aCallback && aGapOrCallback && aGapOrCallback.call)
+					aCallback = aGapOrCallback;
+				
+				var aComponent = arguments.length > 4 ? arguments[4] : null;
+				
+				if (!(this instanceof Button)) {
+					throw  ' use  "new Button()" !';
+				}
+	
+				var published = this;
+				aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusButton::new()();
+				published.unwrap = function() {
+					return aComponent;
+				};
+				publishComponentProperties(published);
+				
+				if (aText) {
+					published.text = aText;
+				} 	
+				if (aIcon) {
+					published.icon = aIcon;
+				}
+				if (aCallback) {
+					published.onActionPerformed = aCallback; 
+				}	 	
 			}
-			var published = this;
-			aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusHtmlEditor::new()();
-			published.unwrap = function() {
-				return aComponent;
-			};
-			publishComponentProperties(published);
-			if (aText) {
-				published.text = aText;
-			} 	
-		}
+			return Button;
+		});	
 		
-		// **************************************************************************
-		$wnd.P.Slider = function () {
-			var aOrientation = arguments.length == 1 || arguments.length == 4 ? arguments[0] : $wnd.P.Orientation.HORIZONTAL;
-			var aMinimum = null;
-			if(arguments.length == 3)
-				aMinimum = arguments[0];
-			else if(arguments.length == 4)
-				aMinimum = arguments[1];
-			var aMaximum = null;
-			if(arguments.length == 3)
-				aMaximum = arguments[1];
-			else if(arguments.length == 4)
-				aMaximum = arguments[2];
-			var aValue = null;
-			if(arguments.length == 3)
-				aValue = arguments[2];
-			else if(arguments.length == 4)
-				aValue = arguments[3];
-			var aComponent = arguments.length > 4 ? arguments[4] : null;
-			if (!(this instanceof $wnd.P.Slider)) {
-				throw  ' use  "new P.Slider()" !';
+		predefine([], 'forms/drop-down-button', function(){
+			function DropDownButton(aText, aIcon, aGapOrCallback, aCallback) {			
+				if (!(this instanceof DropDownButton)) {
+					throw  ' use  "new DropDownButton()" !';
+				}
+				var aIconTextGap = 4;
+				if(!aCallback && aGapOrCallback && aGapOrCallback.call)
+					aCallback = aGapOrCallback;
+				var aComponent = arguments.length > 4 ? arguments[4] : null;
+	
+				var published = this;
+				aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusSplitButton::new()();
+				published.unwrap = function() {
+					return aComponent;
+				};
+				publishComponentProperties(published);
+				
+				if (aText) {
+					published.text = aText;
+				} 	
+				if (aIcon) {
+					published.icon = aIcon;
+				}
+				if (aCallback) {
+					published.onActionPerformed = aCallback; 
+				}	 	
 			}
-			if (!aMinimum) {
-				aMinimum = 0;
-			} 	
-			if (!aMaximum) {
-				aMaximum = 100;
-			} 	
-			if (!aValue) {
-				aValue = aMinimum;
-			} 	
-			
-			var published = this;
-			aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusSlider::new(DD)(aMinimum, aMaximum);
-			published.unwrap = function() {
-				return aComponent;
-			};
-			publishComponentProperties(published);
-			if (aMinimum) {
-				published.minimum = aMinimum;
-			} 	
-			if (aMaximum) {
-				published.maximum = aMaximum;
-			} 	
-			if (aValue) {
-				published.value = aValue;
-			} 	
-			return published;
-		}
+			return DropDownButton;	
+		});
 		
-		// **************************************************************************
-		$wnd.P.ProgressBar = function (aMinimum, aMaximum) {
-			var aComponent = arguments.length > 2 ? arguments[2] : null;			
-			if (!(this instanceof $wnd.P.ProgressBar)) {
-				throw  ' use  "new P.ProgressBar()" !';
+		predefine([], 'forms/toggle-button', function(){
+			function ToggleButton(aText, aIcon, aSelected, aGapOrCallback, aCallback) {
+				
+				var aIconTextGap = 4;
+				if(!aCallback && aGapOrCallback && aGapOrCallback.call)
+					aCallback = aGapOrCallback;
+	
+				var aComponent = arguments.length > 5 ? arguments[5] : null;
+				
+				if (!(this instanceof ToggleButton)) {
+					throw  ' use  "new ToggleButton()" !';
+				}
+	
+				var published = this;
+				aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusToggleButton::new()();
+				published.unwrap = function() {
+					return aComponent;
+				};
+				publishComponentProperties(published);
+	
+				if (aText) {
+					published.text = aText;
+				} 	
+				if (aIcon) {
+					published.icon = aIcon;
+				}
+				if (aSelected != undefined) {
+					published.selected = aSelected;
+				}
+				if (aCallback) {
+					published.onActionPerformed = aCallback; 
+				}	 	
 			}
-			var published = this;
-			aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusProgressBar::new()();
-			published.unwrap = function() {
-				return aComponent;
-			};
-			publishComponentProperties(published);
-			if (aMinimum) {
-				published.minimum = aMinimum; 
-			} 	
-			if (aMaximum) {
-				published.maximum = aMaximum; 
-			} 	
-			return published;
-		}
+			return ToggleButton;
+		});	
+		
+		predefine([], 'forms/radio-button', function(){
+			function RadioButton(aText, aSelected, aCallback) {
+				var aComponent = arguments.length > 3 ? arguments[3] : null;
+				
+				if (!(this instanceof RadioButton)) {
+					throw  ' use  "new RadioButton()" !';
+				}
+	
+				var published = this;
+				aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusRadioButton::new()();
+				published.unwrap = function() {
+					return aComponent;
+				};
+				publishComponentProperties(published);
+	
+				if (aText) {
+					published.text = aText;
+				} 	
+				if (aSelected) {
+					published.selected = aSelected;
+				}
+				if(aCallback){
+					published.onActionPerformed = aCallback; 
+				}
+			}
+			return RadioButton;	
+		});	
+		
+		predefine([], 'forms/check-box', function(){
+			function CheckBox(aText, aSelected, aCallback) {
+				var aComponent = arguments.length>3?arguments[3]:null;
+				
+				if (!(this instanceof CheckBox)) {
+					throw  ' use  "new CheckBox()" !';
+				}
+	
+				var published = this;
+				aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusCheckBox::new()();
+				published.unwrap = function() {
+					return aComponent;
+				};
+				publishComponentProperties(published);
+	
+				if (aText) {
+					published.text = aText;
+				} 	
+				if (aSelected != undefined) {
+					published.selected = aSelected;
+				}
+				if(aCallback){
+					published.onActionPerformed = aCallback; 
+				}
+			}
+			return CheckBox;
+		});			
+		
+		predefine([], 'forms/password-field', function(){
+			function PasswordField(aText) {
+				var aComponent = arguments.length > 1 ? arguments[1] : null;
+				if (!(this instanceof PasswordField)) {
+					throw  ' use  "new PasswordField()" !';
+				}
+				var published = this;
+				aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusPasswordField::new()();
+				published.unwrap = function() {
+					return aComponent;
+				};
+				publishComponentProperties(published);			
+				if (aText) {
+					published.text = aText;
+				} 	
+			}
+			return PasswordField;
+		});	
+		
+		predefine([], 'forms/text-field', function(){
+			function TextField(aText) {
+				var aComponent = arguments.length > 1 ? arguments[1] : null;
+				if (!(this instanceof TextField)) {
+					throw  ' use  "new TextField()" !';
+				}
+				var published = this;
+				aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusTextField::new()();
+				published.unwrap = function() {
+					return aComponent;
+				};
+				publishComponentProperties(published);
+				if (aText) {
+					published.text = aText;
+				} 	
+			}
+			return TextField;
+		});	
 
-		// ***************************************************
-		$wnd.P.DesktopPane = function() {
-			var aComponent = arguments.length > 0 ? arguments[0] : null;
-			if (!(this instanceof $wnd.P.DesktopPane)) {
-				throw  ' use  "new P.DesktopPane()" !';
+		predefine([], 'forms/formatted-field', function(){
+			function FormattedField(aValue) {
+				var aComponent = arguments.length > 1 ? arguments[1] : null;
+				if (!(this instanceof FormattedField)) {
+					throw  ' use  "new FormattedField()" !';
+				}
+				var published = this;
+				aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusFormattedTextField::new()();
+				published.unwrap = function() {
+					return aComponent;
+				};
+				publishComponentProperties(published);
+				if (aValue) {
+					published.value = aValue;
+				} 	
 			}
-			var published = this;
-			aComponent = aComponent || @com.eas.client.form.published.widgets.DesktopPane::new()();
-			published.unwrap = function() {
-				return aComponent;
-			};
-			publishComponentProperties(published);
-			return published;
-		};
+			return FormattedField;
+		});
+		
+		predefine([], 'forms/text-area', function(){
+			function TextArea(aText) {
+				var aComponent = arguments.length > 1 ? arguments[1] : null;
+				if (!(this instanceof TextArea)) {
+					throw  ' use  "new TextArea()" !';
+				}
+				var published = this;
+				aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusTextArea::new()();
+				published.unwrap = function() {
+					return aComponent;
+				};
+				publishComponentProperties(published);
+				if (aText) {
+					published.text = aText;
+				} 	
+			}
+			return TextArea;
+		});
+		
+		predefine([], 'forms/html-area', function(){
+			function HtmlArea(aText) {
+				var aComponent = arguments.length > 1 ? arguments[1] : null;
+				if (!(this instanceof HtmlArea)) {
+					throw  ' use  "new HtmlArea()" !';
+				}
+				var published = this;
+				aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusHtmlEditor::new()();
+				published.unwrap = function() {
+					return aComponent;
+				};
+				publishComponentProperties(published);
+				if (aText) {
+					published.text = aText;
+				} 	
+			}
+			return HtmlArea;
+		});
+		
+		predefine(['ui'], 'forms/slider', function(Ui){
+			function Slider() {
+				var aOrientation = arguments.length == 1 || arguments.length == 4 ? arguments[0] : Ui.Orientation.HORIZONTAL;
+				var aMinimum = null;
+				if(arguments.length == 3)
+					aMinimum = arguments[0];
+				else if(arguments.length == 4)
+					aMinimum = arguments[1];
+				var aMaximum = null;
+				if(arguments.length == 3)
+					aMaximum = arguments[1];
+				else if(arguments.length == 4)
+					aMaximum = arguments[2];
+				var aValue = null;
+				if(arguments.length == 3)
+					aValue = arguments[2];
+				else if(arguments.length == 4)
+					aValue = arguments[3];
+				var aComponent = arguments.length > 4 ? arguments[4] : null;
+				if (!(this instanceof Slider)) {
+					throw  ' use  "new Slider()" !';
+				}
+				if (!aMinimum) {
+					aMinimum = 0;
+				} 	
+				if (!aMaximum) {
+					aMaximum = 100;
+				} 	
+				if (!aValue) {
+					aValue = aMinimum;
+				} 	
+				
+				var published = this;
+				aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusSlider::new(DD)(aMinimum, aMaximum);
+				published.unwrap = function() {
+					return aComponent;
+				};
+				publishComponentProperties(published);
+				if (aMinimum) {
+					published.minimum = aMinimum;
+				} 	
+				if (aMaximum) {
+					published.maximum = aMaximum;
+				} 	
+				if (aValue) {
+					published.value = aValue;
+				} 	
+				return published;
+			}
+			return Slider;
+		});
+		
+		predefine([], 'forms/progress-bar', function(){
+			function ProgressBar(aMinimum, aMaximum) {
+				var aComponent = arguments.length > 2 ? arguments[2] : null;			
+				if (!(this instanceof ProgressBar)) {
+					throw  ' use  "new ProgressBar()" !';
+				}
+				var published = this;
+				aComponent = aComponent || @com.eas.client.form.published.widgets.PlatypusProgressBar::new()();
+				published.unwrap = function() {
+					return aComponent;
+				};
+				publishComponentProperties(published);
+				if (aMinimum) {
+					published.minimum = aMinimum; 
+				} 	
+				if (aMaximum) {
+					published.maximum = aMaximum; 
+				} 	
+				return published;
+			}
+			return ProgressBar;
+		});
 
+		predefine([], 'forms/desktop-pane', function(){
+			function DesktopPane() {
+				var aComponent = arguments.length > 0 ? arguments[0] : null;
+				if (!(this instanceof DesktopPane)) {
+					throw  ' use  "new DesktopPane()" !';
+				}
+				var published = this;
+				aComponent = aComponent || @com.eas.client.form.published.widgets.DesktopPane::new()();
+				published.unwrap = function() {
+					return aComponent;
+				};
+				publishComponentProperties(published);
+				return published;
+			}
+			return DesktopPane;
+		});
+
+		predefine([], 'forms/menu-bar', function(){
+			function MenuBar() {
+				if (!(this instanceof MenuBar)) {
+					throw  ' use  "new MenuBar()" !';
+				}
+				var aComponent = arguments.length > 0 ? arguments[0] : null;
+	
+				var published = this;
+				aComponent = aComponent || @com.eas.client.form.published.menu.PlatypusMenuBar::new(Z)(false);
+				published.unwrap = function() {
+					return aComponent;
+				};
+				publishComponentProperties(published);
+			}
+			return MenuBar;
+		});
+
+		predefine([], 'forms/menu', function(){
+			function Menu(aText) {
+				if (!(this instanceof Menu)) {
+					throw  ' use  "new Menu()" !';
+				}
+				var aComponent = arguments.length > 1 ? arguments[1] : null;
+	
+				var published = this;
+				aComponent = aComponent || @com.eas.client.form.published.menu.PlatypusMenu::new()();
+				published.unwrap = function() {
+					return aComponent;
+				};
+				publishComponentProperties(published);
+	
+				if (aText) {
+					published.text = aText;
+				}
+			}
+			return Menu;
+		});
+
+		predefine([], 'forms/popup-menu', function(){
+			function PopupMenu() {
+				if (!(this instanceof PopupMenu)) {
+					throw  ' use  "new PopupMenu()" !';
+				}
+				var aComponent = arguments.length > 0 ? arguments[0] : null;
+	
+				var published = this;
+				aComponent = aComponent || @com.eas.client.form.published.menu.PlatypusPopupMenu::new()();
+				published.unwrap = function() {
+					return aComponent;
+				};
+				publishComponentProperties(published);
+			}
+			return PopupMenu;
+		});
+		
+		predefine([], 'forms/menu-item', function(){
+			function MenuItem(aText, aIcon, aCallback) {
+				var aComponent = arguments.length > 3 ? arguments[3] : null;
+				
+				if (!(this instanceof MenuItem)) {
+					throw  ' use  "new MenuItem()" !';
+				}
+	
+				var published = this;
+				
+				aComponent = aComponent || @com.eas.client.form.published.menu.PlatypusMenuItemImageText::new()();
+				published.unwrap = function() {
+					return aComponent;
+				};
+				publishComponentProperties(published);
+	
+				if (aText) {
+					published.text = aText;
+				} 	
+				if (aIcon) {
+					published.icon = aIcon;
+				}
+				if (aCallback) {
+					published.onActionPerformed = aCallback;
+				}	 	
+				return published;
+			}
+			return MenuItem;
+		});	
+		
+		predefine([], 'forms/check-menu-item', function(){
+			function CheckMenuItem(aText, aSelected, aCallback) {
+				var aComponent = arguments.length > 3 ? arguments[3] : null;
+				
+				if (!(this instanceof CheckMenuItem)) {
+					throw  ' use  "new CheckMenuItem()" !';
+				}
+	
+				var published = this;
+				aComponent = aComponent || @com.eas.client.form.published.menu.PlatypusMenuItemCheckBox::new()();
+				published.unwrap = function() {
+					return aComponent;
+				};
+				publishComponentProperties(published);
+	
+				if (aText) {
+					published.text = aText;
+				} 	
+				if (aSelected) {
+					published.selected = aSelected;
+				}
+				if(aCallback){
+					published.onActionPerformed = aCallback; 
+				}
+				return published;
+			}
+			return CheckMenuItem;
+		});
+
+		predefine([], 'forms/radio-menu-item', function(){
+			function RadioMenuItem(aText, aSelected, aCallback) {
+				var aComponent = arguments.length > 3 ? arguments[3] : null;
+				
+				if (!(this instanceof RadioMenuItem)) {
+					throw  ' use  "new RadioMenuItem()" !';
+				}
+	
+				var published = this;
+				aComponent = aComponent || @com.eas.client.form.published.menu.PlatypusMenuItemRadioButton::new()();
+				published.unwrap = function() {
+					return aComponent;
+				};
+				publishComponentProperties(published);
+				
+				if (aText) {
+					published.text = aText;
+				} 	
+				if (aSelected) {
+					published.selected = aSelected;
+				}
+				if(aCallback){
+					published.onActionPerformed = aCallback; 
+				}
+				return published;
+			}
+		});
+		
+		predefine([], 'forms/menu-separator', function(){
+			function MenuSeparator() {
+				var aComponent = arguments.length > 0 ? arguments[0] : null;
+				
+				if (!(this instanceof MenuSeparator)) {
+					throw  ' use  "new MenuSeparator()" !';
+				}
+	
+				var published = this;
+				aComponent = aComponent || @com.eas.client.form.published.menu.PlatypusMenuItemSeparator::new()();
+				published.unwrap = function() {
+					return aComponent;
+				};
+				publishComponentProperties(published);
+				return published;
+			}
+			return MenuSeparator;
+		});
+		
 		function publishComponentProperties(aPublished) {
-			@com.eas.client.form.js.JsWidgets::publishComponentProperties(Lcom/eas/client/form/published/PublishedComponent;)(aPublished);
+			@com.eas.client.application.js.JsWidgets::publishComponentProperties(Lcom/eas/client/form/published/PublishedComponent;)(aPublished);
 		}
 	}-*/;
 
@@ -562,7 +754,7 @@ public class JsWidgets {
 		    }
  	    });
  	    // Events
- 	    @com.eas.client.form.js.JsWidgets::publishExecutor(Lcom/google/gwt/core/client/JavaScriptObject;)(aPublished);
+ 	    @com.eas.client.application.js.JsWidgets::publishExecutor(Lcom/google/gwt/core/client/JavaScriptObject;)(aPublished);
  	    // Native API
         Object.defineProperty(aPublished, "element", {
         	get : function() {

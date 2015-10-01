@@ -1,7 +1,7 @@
 define(['core/report', 'reports/report-template'], function(Report, ReportTemplate){
     var ScriptedResourceClass = Java.type("com.eas.client.scripts.ScriptedResource");
     
-    return function (aName, aData, aTarget) {
+    function loadTemplate(aName, aData, aTarget) {
         var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
         if (files) {
             var reportConfig = ScriptedResourceClass.getApp().getReports().get(aName, files);
@@ -14,5 +14,6 @@ define(['core/report', 'reports/report-template'], function(Report, ReportTempla
         } else {
             throw "Report template '" + aName + "' missing.";
         }
-    };
+    }
+    return loadTemplate;
 });

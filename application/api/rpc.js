@@ -58,7 +58,7 @@ define('logger', function(){
             throw "Module name could not be empty.";
         }
     }
-    function loadRemotes(aRemotesNames, aOnSuccess, aOnFailure) {
+    function requireRemotes(aRemotesNames, aOnSuccess, aOnFailure) {
         var remotesNames = Array.isArray(aRemotesNames) ? aRemotesNames : [aRemotesNames];
         ScriptedResourceClass.loadRemotes(Java.to(remotesNames, JavaStringArrayClass), aOnSuccess ? aOnSuccess : null, aOnFailure ? aOnFailure : null);
     }
@@ -67,9 +67,9 @@ define('logger', function(){
         enumerable: true,
         value: RPCProxy
     });
-    Object.defineProperty(module, 'loadRemotes', {
+    Object.defineProperty(module, 'requireRemotes', {
         enumerable: true,
-        value: loadRemotes
+        value: requireRemotes
     });
     return module;
 });

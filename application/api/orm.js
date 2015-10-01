@@ -736,7 +736,7 @@ define(['logger', 'boxing', 'managed', 'orderer', 'datamodel/application-db-mode
                 return loadModelDocument(modelDocument, aTarget);
             }
 
-            function loadEntities(aEntities, aOnSuccess, aOnFailure) {
+            function requireEntities(aEntities, aOnSuccess, aOnFailure) {
                 var entities;
                 if (!Array.isArray(aEntities)) {
                     aEntities = aEntities + "";
@@ -767,9 +767,9 @@ define(['logger', 'boxing', 'managed', 'orderer', 'datamodel/application-db-mode
                 enumerable: true,
                 value: readModel
             });
-            Object.defineProperty(module, "loadEntities", {
+            Object.defineProperty(module, 'requireEntities', {
                 enumerable: true,
-                value: loadEntities
+                value: requireEntities
             });
             return module;
         }

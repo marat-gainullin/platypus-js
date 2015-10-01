@@ -131,8 +131,7 @@ public class Entity implements HasPublished {
 				nEntity.@com.eas.client.model.Entity::execute(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
 			}
 		});
-		Object
-				.defineProperty(
+		Object.defineProperty(
 						aTarget,
 						'query',
 						{

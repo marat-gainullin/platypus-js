@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.application;
+package com.eas.client;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,9 +15,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.eas.client.CallbackAdapter;
-import com.eas.client.Cancellable;
-import com.eas.client.CumulativeCallbackAdapter;
+import com.eas.client.application.Application;
 import com.eas.client.queries.Query;
 import com.eas.client.xhr.UrlQueryProcessor;
 import com.google.gwt.core.client.Callback;

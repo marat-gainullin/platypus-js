@@ -12,8 +12,8 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.eas.client.AppClient;
 import com.eas.client.Utils;
-import com.eas.client.application.AppClient;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.ForeignKeySpec;
 import com.eas.client.metadata.Parameter;

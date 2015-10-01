@@ -16,8 +16,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.eas.client.AppClient;
 import com.eas.client.Cancellable;
-import com.eas.client.application.AppClient;
 import com.eas.client.application.WebFlowProvider;
 import com.eas.client.dataflow.FlowProvider;
 import com.eas.client.metadata.Fields;
