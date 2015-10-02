@@ -34,6 +34,7 @@ import com.eas.form.published.HasJsName;
 import com.eas.form.published.PublishedComponent;
 import com.eas.form.published.containers.AnchorsPane;
 import com.eas.form.published.widgets.DesktopPane;
+import com.eas.predefine.Predefine;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
@@ -77,7 +78,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	protected static void shownFormsChanged(JavaScriptObject aSource) {
 		if (onChange != null) {
 			try {
-				Utils.executeScriptEventVoid(Publisher.getFormsClass(), onChange, Publisher.publishSourcedEvent(aSource));
+				Utils.executeScriptEventVoid(Predefine.prerequire("forms/form"), onChange, Publisher.publishSourcedEvent(aSource));
 			} catch (Exception ex) {
 				Logger.getLogger(PlatypusWindow.class.getName()).log(Level.SEVERE, null, ex);
 			}

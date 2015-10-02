@@ -459,7 +459,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 			JavaScriptObject renderedElement = key instanceof JavaScriptObject ? (JavaScriptObject) key : null;
 			if (renderedElement != null) {
 				Object data = aField != null && !aField.isEmpty() ? Utils.getPathData(renderedElement, aField) : null;
-				PublishedCell cell = Publisher.publishCell(data, aDisplay);
+				PublishedCell cell = ControlsUtils.publishCell(data, aDisplay);
 				JsArrayMixed args = JavaScriptObject.createArray().cast();
 				args.push(Publisher.publishOnRenderEvent(aThis, null, null, renderedElement, cell));
 				aOnRender.<JsObject> cast().apply(aThis, args);

@@ -149,7 +149,7 @@ public class ButtonGroup extends RadioGroup implements HasJsFacade, HasAddHandle
 		}
 		published.child = function(aIndex) {
 			var comp = aWidget.@com.eas.form.published.containers.ButtonGroup::getChild(I)(aIndex);
-		    return @com.eas.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(comp);					
+		    return @com.eas.form.ControlsUtils::checkPublishedComponent(Ljava/lang/Object;)(comp);					
 		};
 		Object.defineProperty(published, "children", {
 			value : function() {

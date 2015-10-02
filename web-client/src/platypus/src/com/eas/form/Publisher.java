@@ -3,7 +3,7 @@ package com.eas.form;
 import com.bearsoft.gwt.ui.containers.window.events.MoveEvent;
 import com.bearsoft.gwt.ui.events.HideEvent;
 import com.bearsoft.gwt.ui.events.ShowEvent;
-import com.eas.client.HasPublished;
+import com.eas.client.Utils;
 import com.eas.form.events.ActionEvent;
 import com.eas.form.events.AddEvent;
 import com.eas.form.events.RemoveEvent;
@@ -70,464 +70,359 @@ import com.google.gwt.event.logical.shared.ResizeEvent;
 
 public class Publisher {
 
-	public native static JavaScriptObject getFormsClass()/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return Ui.Form;
-	}-*/;
+	private static Utils.JsObject constructors = JavaScriptObject.createObject().cast();
+	
+	private static JavaScriptObject getPublisher(String aClassName){
+		JavaScriptObject constr = constructors.getJs(aClassName);
+		if(constr == null)
+			throw new IllegalStateException("Constructor for " + aClassName + " was not found.");
+		return constr;
+	}
+	
+	public static void putPublisher(String aClassName, JavaScriptObject aPublisher){
+		constructors.setJs(aClassName, aPublisher);
+	}
 	
 	public native static JavaScriptObject publishSourcedEvent(JavaScriptObject aSource)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.PublishedSourcedEvent(aSource);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('PublishedSourcedEvent');
+		return new constr(aSource);
 	}-*/;	
 	
 	public native static JavaScriptObject publishItemEvent(JavaScriptObject aSource, JavaScriptObject aItem)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.ItemEvent(aSource, aItem);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('ItemEvent');
+		return new constr(aSource, aItem);
 	}-*/;	
 	
 	public native static JavaScriptObject publishOnRenderEvent(JavaScriptObject aSource, Object aRowId, Object aColumnId, JavaScriptObject aRendered, PublishedCell aCell)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.CellRenderEvent(aSource, Ui.boxAsJs(aRowId), Ui.boxAsJs(aColumnId), aRendered, aCell);
+		var B = @com.eas.predefine.Predefine::boxing;
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('CellRenderEvent');
+		return new constr(aSource, B.boxAsJs(aRowId), B.boxAsJs(aColumnId), aRendered, aCell);
 	}-*/;
 	
 	public native static JavaScriptObject publishWindowEvent(Object aEvent, JavaScriptObject aWindow)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.WindowEvent(aWindow);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('WindowEvent');
+		return new constr(aWindow);
 	}-*/;
 	
 	public native static JavaScriptObject publish(MouseDownEvent aEvent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.MouseEvent(aEvent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('MouseEvent');
+		return new constr(aEvent);
 	}-*/;
 	
 	public native static JavaScriptObject publish(MouseUpEvent aEvent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.MouseEvent(aEvent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('MouseEvent');
+		return new constr(aEvent);
 	}-*/;
 	
 	public native static JavaScriptObject publish(MouseWheelEvent aEvent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.MouseEvent(aEvent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('MouseEvent');
+		return new constr(aEvent);
 	}-*/;
 	
 	public native static JavaScriptObject publish(MouseMoveEvent aEvent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.MouseEvent(aEvent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('MouseEvent');
+		return new constr(aEvent);
 	}-*/;
 	
 	public native static JavaScriptObject publish(ClickEvent aEvent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.MouseEvent(aEvent, 1);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('MouseEvent');
+		return new constr(aEvent, 1);
 	}-*/;
 	
 	public native static JavaScriptObject publish(DoubleClickEvent aEvent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.MouseEvent(aEvent, 2);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('MouseEvent');
+		return new constr(aEvent, 2);
 	}-*/;
 	
 	public native static JavaScriptObject publish(MouseOverEvent aEvent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.MouseEvent(aEvent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('MouseEvent');
+		return new constr(aEvent);
 	}-*/;
 	
 	public native static JavaScriptObject publish(MouseOutEvent aEvent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.MouseEvent(aEvent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('MouseEvent');
+		return new constr(aEvent);
 	}-*/;
 	
 	public native static JavaScriptObject publish(KeyDownEvent aEvent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.KeyEvent(aEvent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('KeyEvent');
+		return new constr(aEvent);
 	}-*/;
 	
 	public native static JavaScriptObject publish(KeyUpEvent aEvent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.KeyEvent(aEvent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('KeyEvent');
+		return new constr(aEvent);
 	}-*/;
 	
 	public native static JavaScriptObject publish(KeyPressEvent aEvent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.KeyEvent(aEvent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('KeyEvent');
+		return new constr(aEvent);
 	}-*/;
 	
 	public native static JavaScriptObject publish(FocusEvent aEvent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.FocusEvent(aEvent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('FocusEvent');
+		return new constr(aEvent);
 	}-*/;
 	
 	public native static JavaScriptObject publish(BlurEvent aEvent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.FocusEvent(aEvent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('FocusEvent');
+		return new constr(aEvent);
 	}-*/;
 	
 	public native static JavaScriptObject publish(ResizeEvent aEvent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.ComponentEvent(aEvent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('ComponentEvent');
+		return new constr(aEvent);
 	}-*/;
 	
 	public native static JavaScriptObject publish(ShowEvent aEvent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.ComponentEvent(aEvent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('ComponentEvent');
+		return new constr(aEvent);
 	}-*/;
 	
 	public native static JavaScriptObject publish(HideEvent aEvent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.ComponentEvent(aEvent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('ComponentEvent');
+		return new constr(aEvent);
 	}-*/;
 	
 	public native static JavaScriptObject publish(MoveEvent<Object> aEvent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.ComponentEvent(aEvent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('ComponentEvent');
+		return new constr(aEvent);
 	}-*/;
 	
 	public native static JavaScriptObject publish(AddEvent aEvent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.ContainerEvent(aEvent, true); 
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('ContainerEvent');
+		return new constr(aEvent, true);
 	}-*/;
 	
 	public native static JavaScriptObject publish(RemoveEvent aEvent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.ContainerEvent(aEvent, false);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('ContainerEvent');
+		return new constr(aEvent, false);
 	}-*/;
 	
 	public native static JavaScriptObject publish(ActionEvent aEvent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.ActionEvent(aEvent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('ActionEvent');
+		return new constr(aEvent);
 	}-*/;
 
 	public native static PublishedComponent publish(PlatypusRadioButton aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.RadioButton(null, null, null, aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('RadioButton');
+		return new constr(null, null, null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(PlatypusCheckBox aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.CheckBox(null, null, null, aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('CheckBox');
+		return new constr(null, null, null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(PlatypusSlider aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.Slider(null, null, null, null, aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('Slider');
+		return new constr(null, null, null, null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(PlatypusToggleButton aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.ToggleButton(null, null, null, null, null, aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('ToggleButton');
+		return new constr(null, null, null, null, null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(PlatypusTextField aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.TextField(null, aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('TextField');
+		return new constr(null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(PlatypusFormattedTextField aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.FormattedField(null, aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('FormattedField');
+		return new constr(null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(PlatypusTextArea aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.TextArea(null, aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('TextArea');
+		return new constr(null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(PlatypusHtmlEditor aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.HtmlArea(null, aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('HtmlArea');
+		return new constr(null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(PlatypusProgressBar aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.ProgressBar(null, null, aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('ProgressBar');
+		return new constr(null, null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(PlatypusPasswordField aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.PasswordField(null, aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('PasswordField');
+		return new constr(null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(PlatypusButton aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.Button(null, null, null, null, aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('Button');
+		return new constr(null, null, null, null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(PlatypusSplitButton aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.DropDownButton(null, null, null, null, aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('DropDownButton');
+		return new constr(null, null, null, null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(PlatypusLabel aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.Label(null, null, null, aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('Label');
+		return new constr(null, null, null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(PlatypusMenuItemSeparator aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.MenuSeparator(aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('MenuSeparator');
+		return new constr(aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(PlatypusMenuBar aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.MenuBar(aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('MenuBar');
+		return new constr(aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(PlatypusMenu aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.Menu(null, aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('Menu');
+		return new constr(null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publishPopup(PlatypusMenu aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.PopupMenu(aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('PopupMenu');
+		return new constr(aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(PlatypusMenuItemImageText aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.MenuItem(null, null, null, aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('MenuItem');
+		return new constr(null, null, null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(PlatypusMenuItemCheckBox aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.CheckMenuItem(null, null, null, aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('CheckMenuItem');
+		return new constr(null, null, null, aComponent);
 	}-*/;
 
 	public native static JavaScriptObject publish(PlatypusMenuItemRadioButton aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.RadioMenuItem(null, null, null, aComponent);
-	}-*/;
-
-	public native static PublishedCell publishCell(Object aData, String aDisplay)/*-{
-		var published = {
-			data : aData
-		};
-		var _display = aDisplay;
-		var _background = null;
-		var _foreground = null;
-		var _font = null;
-		var _align = null;
-		var _icon = null;
-		var _folderIcon = null;
-		var _openFolderIcon = null;
-		var _leafIcon = null;
-		
-		function displayChanged(){
-			if (published.displayCallback != null)
-				published.displayCallback.@java.lang.Runnable::run()();
-		}
-		
-		function iconsChanged(){
-			if (published.iconCallback)
-				published.iconCallback.@java.lang.Runnable::run()();
-		}
-		
-		Object.defineProperty(published, "display", {
-			get : function() {
-				return _display;
-			},
-			set : function(aValue) {
-				_display = aValue;
-				displayChanged();
-			}
-		});
-		Object.defineProperty(published, "background", {
-			get : function() {
-				return _background;
-			},
-			set : function(aValue) {
-				_background = aValue;
-				displayChanged();
-			}
-		});
-		Object.defineProperty(published, "foreground", {
-			get : function() {
-				return _foreground;
-			},
-			set : function(aValue) {
-				_foreground = aValue;
-				displayChanged();
-			}
-		});
-		Object.defineProperty(published, "font", {
-			get : function() {
-				return _font;
-			},
-			set : function(aValue) {
-				_font = aValue;
-				displayChanged();
-			}
-		});
-		Object.defineProperty(published, "align", {
-			get : function() {
-				return _align;
-			},
-			set : function(aValue) {
-				_align = aValue;
-				displayChanged();
-			}
-		});
-		Object.defineProperty(published, "icon", {
-			get : function() {
-				return _icon;
-			},
-			set : function(aValue) {
-				_icon = aValue;
-				iconsChanged();
-			}
-		});
-		Object.defineProperty(published, "folderIcon", {
-			get : function() {
-				return _folderIcon;
-			},
-			set : function(aValue) {
-				_folderIcon = aValue;
-				iconsChanged();
-			}
-		});
-		Object.defineProperty(published, "openFolderIcon", {
-			get : function() {
-				return _openFolderIcon;
-			},
-			set : function(aValue) {
-				_openFolderIcon = aValue;
-				iconsChanged();
-			}
-		});
-		Object.defineProperty(published, "leafIcon", {
-			get : function() {
-				return _leafIcon;
-			},
-			set : function(aValue) {
-				_leafIcon = aValue;
-				iconsChanged();
-			}
-		});
-		return published;
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('RadioMenuItem');
+		return new constr(null, null, null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(ModelGrid aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.ModelGrid(aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('ModelGrid');
+		return new constr(aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(CheckHeaderNode aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.CheckGridColumn(aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('CheckGridColumn');
+		return new constr(aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(RadioHeaderNode aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.RadioGridColumn(aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('RadioGridColumn');
+		return new constr(aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(ServiceHeaderNode aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.ServiceGridColumn(aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('ServiceGridColumn');
+		return new constr(aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(ModelHeaderNode aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.ModelGridColumn(aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('ModelGridColumn');
+		return new constr(aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(ModelCheck aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.ModelCheckBox(null, aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('ModelCheckBox');
+		return new constr(null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(ModelFormattedField aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.ModelFormattedField(aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('ModelFormattedField');
+		return new constr(aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(ModelTextArea aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.ModelTextArea(aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('ModelTextArea');
+		return new constr(aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(ModelDate aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.ModelDate(aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('ModelDate');
+		return new constr(aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(ModelSpin aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.ModelSpin(aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('ModelSpin');
+		return new constr(aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(ModelCombo aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.ModelCombo(aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('ModelCombo');
+		return new constr(aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(BorderPane aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.BorderPane(null, null, aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('BorderPane');
+		return new constr(null, null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(ScrollPane aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.ScrollPane(null, aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('ScrollPane');
+		return new constr(null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(SplitPane aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.SplitPane(null, aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('SplitPane');
+		return new constr(null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(BoxPane aComponent)/*-{
 		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.BoxPane(Ui.Orientation.HORIZONTAL, null, null, aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('BoxPane');
+		return new constr(Ui.Orientation.HORIZONTAL, null, null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(CardPane aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.CardPane(null, null, aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('CardPane');
+		return new constr(null, null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(AbsolutePane aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.AbsolutePane(aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('AbsolutePane');
+		return new constr(aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(AnchorsPane aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.AnchorsPane(aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('AnchorsPane');
+		return new constr(aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(DesktopPane aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.DesktopPane(aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('DesktopPane');
+		return new constr(aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(TabbedPane aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.TabbedPane(aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('TabbedPane');
+		return new constr(aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(ToolBar aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.ToolBar(null, aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('ToolBar');
+		return new constr(null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(FlowPane aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.FlowPane(null, null, aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('FlowPane');
+		return new constr(null, null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(GridPane aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.GridPane(null, null, null, null, aComponent);
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('GridPane');
+		return new constr(null, null, null, null, aComponent);
 	}-*/;
 
-	protected static JavaScriptObject checkPublishedComponent(Object aCandidate) {
-		if (aCandidate instanceof HasPublished) {
-			return ((HasPublished) aCandidate).getPublished();
-		} else
-			return null;
-	}
-
-	public native static JavaScriptObject publish(ButtonGroup aButtonGroup)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.ButtonGroup(aButtonGroup);
+	public native static JavaScriptObject publish(ButtonGroup aComponent)/*-{
+		var constr = @com.eas.form.Publisher::getPublisher(Ljava/lang/String;)('ButtonGroup');
+		return new constr(aComponent);
 	}-*/;
 
 }

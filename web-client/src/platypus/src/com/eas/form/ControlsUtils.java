@@ -187,7 +187,7 @@ public class ControlsUtils {
 			@Override
 			public void execute() {
 				tmpField.setFocus(true);
-				click(tmpField.getElement());
+				tmpField.getElement().<XElement>cast().click();
 				Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
 					@Override
 					public boolean execute() {
@@ -198,10 +198,6 @@ public class ControlsUtils {
 			}
 		});
 	}
-
-	public static native void click(Element aElement)/*-{
-		aElement.click();
-	}-*/;
 
 	protected static RegExp rgbPattern = RegExp.compile("rgb *\\( *([0-9]+) *, *([0-9]+) *, *([0-9]+) *\\)");
 	protected static RegExp rgbaPattern = RegExp.compile("rgba *\\( *([0-9]+) *, *([0-9]+) *, *([0-9]+) *, *([0-9]*\\.?[0-9]+) *\\)");
@@ -260,6 +256,121 @@ public class ControlsUtils {
 		};
 	}
 
+	protected static JavaScriptObject checkPublishedComponent(Object aCandidate) {
+		if (aCandidate instanceof HasPublished) {
+			return ((HasPublished) aCandidate).getPublished();
+		} else
+			return null;
+	}
+
+	public native static PublishedCell publishCell(Object aData, String aDisplay)/*-{
+		var published = {
+			data : aData
+		};
+		var _display = aDisplay;
+		var _background = null;
+		var _foreground = null;
+		var _font = null;
+		var _align = null;
+		var _icon = null;
+		var _folderIcon = null;
+		var _openFolderIcon = null;
+		var _leafIcon = null;
+		
+		function displayChanged(){
+			if (published.displayCallback != null)
+				published.displayCallback.@java.lang.Runnable::run()();
+		}
+		
+		function iconsChanged(){
+			if (published.iconCallback)
+				published.iconCallback.@java.lang.Runnable::run()();
+		}
+		
+		Object.defineProperty(published, "display", {
+			get : function() {
+				return _display;
+			},
+			set : function(aValue) {
+				_display = aValue;
+				displayChanged();
+			}
+		});
+		Object.defineProperty(published, "background", {
+			get : function() {
+				return _background;
+			},
+			set : function(aValue) {
+				_background = aValue;
+				displayChanged();
+			}
+		});
+		Object.defineProperty(published, "foreground", {
+			get : function() {
+				return _foreground;
+			},
+			set : function(aValue) {
+				_foreground = aValue;
+				displayChanged();
+			}
+		});
+		Object.defineProperty(published, "font", {
+			get : function() {
+				return _font;
+			},
+			set : function(aValue) {
+				_font = aValue;
+				displayChanged();
+			}
+		});
+		Object.defineProperty(published, "align", {
+			get : function() {
+				return _align;
+			},
+			set : function(aValue) {
+				_align = aValue;
+				displayChanged();
+			}
+		});
+		Object.defineProperty(published, "icon", {
+			get : function() {
+				return _icon;
+			},
+			set : function(aValue) {
+				_icon = aValue;
+				iconsChanged();
+			}
+		});
+		Object.defineProperty(published, "folderIcon", {
+			get : function() {
+				return _folderIcon;
+			},
+			set : function(aValue) {
+				_folderIcon = aValue;
+				iconsChanged();
+			}
+		});
+		Object.defineProperty(published, "openFolderIcon", {
+			get : function() {
+				return _openFolderIcon;
+			},
+			set : function(aValue) {
+				_openFolderIcon = aValue;
+				iconsChanged();
+			}
+		});
+		Object.defineProperty(published, "leafIcon", {
+			get : function() {
+				return _leafIcon;
+			},
+			set : function(aValue) {
+				_leafIcon = aValue;
+				iconsChanged();
+			}
+		});
+		return published;
+	}-*/;
+
 	/**
 	 * Calculates a published cell for stand-alone model-aware controls against
 	 * row aRow.
@@ -275,7 +386,7 @@ public class ControlsUtils {
 	        PublishedCell aAlreadyCell) throws Exception {
 		if (aEventThis != null && aField != null && !aField.isEmpty() && cellFunction != null) {
 			if (aData != null) {
-				PublishedCell cell = aAlreadyCell != null ? aAlreadyCell : Publisher.publishCell(Utils.getPathData(aData, aField), aDisplay);
+				PublishedCell cell = aAlreadyCell != null ? aAlreadyCell : publishCell(Utils.getPathData(aData, aField), aDisplay);
 				Utils.executeScriptEventVoid(aEventThis, cellFunction, Publisher.publishOnRenderEvent(aEventThis, null, null, aData, cell));
 				return cell;
 			}
@@ -285,7 +396,7 @@ public class ControlsUtils {
 
 	public static PublishedCell calcValuedPublishedCell(JavaScriptObject aEventThis, JavaScriptObject cellFunction, Object aValue, String aDisplay, PublishedCell aAlreadyCell) {
 		if (aEventThis != null && cellFunction != null) {
-			PublishedCell cell = aAlreadyCell != null ? aAlreadyCell : Publisher.publishCell(Utils.toJs(aValue), aDisplay);
+			PublishedCell cell = aAlreadyCell != null ? aAlreadyCell : publishCell(Utils.toJs(aValue), aDisplay);
 			try {
 				Utils.executeScriptEventVoid(aEventThis, cellFunction, Publisher.publishOnRenderEvent(aEventThis, null, null, null, cell));
 			} catch (Exception ex) {

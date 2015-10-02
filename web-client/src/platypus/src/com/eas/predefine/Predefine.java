@@ -2,7 +2,6 @@ package com.eas.predefine;
 
 import java.util.logging.Logger;
 
-import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.JavaScriptObject;
 
 public class Predefine {
@@ -20,6 +19,9 @@ public class Predefine {
 		return aValue instanceof Boolean;
 	}
 
+	public static native JavaScriptObject prerequire(String aName)/*-{
+		return predefined[aName];
+	}-*/;
 	
 	public static native void predefine(JavaScriptObject aDeps, String aName, JavaScriptObject aDefiner)/*-{
 		var predefined = @com.eas.predefine.Predefine::predefined;
