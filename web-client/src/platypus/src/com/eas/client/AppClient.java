@@ -25,6 +25,7 @@ import com.eas.client.xhr.ProgressEvent;
 import com.eas.client.xhr.ProgressHandler;
 import com.eas.client.xhr.ProgressHandlerAdapter;
 import com.eas.client.xhr.XMLHttpRequest2;
+import com.eas.predefine.Utils;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;

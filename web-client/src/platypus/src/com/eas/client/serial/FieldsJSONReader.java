@@ -4,9 +4,9 @@
  */
 package com.eas.client.serial;
 
-import com.eas.client.Utils.JsObject;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
+import com.eas.predefine.Utils.JsObject;
 import com.google.gwt.core.client.JavaScriptObject;
 
 /**

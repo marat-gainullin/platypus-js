@@ -17,63 +17,72 @@ import com.bearsoft.gwt.ui.Orientation;
 import com.bearsoft.gwt.ui.widgets.DropDownButton;
 import com.bearsoft.gwt.ui.widgets.ImageButton;
 import com.bearsoft.gwt.ui.widgets.ObjectFormat;
+import com.eas.bound.BoundPublisher;
+import com.eas.bound.ModelCheck;
+import com.eas.bound.ModelCombo;
+import com.eas.bound.ModelDate;
+import com.eas.bound.ModelDecoratorBox;
+import com.eas.bound.ModelFormattedField;
+import com.eas.bound.ModelSpin;
+import com.eas.bound.ModelTextArea;
 import com.eas.client.CallbackAdapter;
-import com.eas.client.Utils;
-import com.eas.client.HasPublished;
-import com.eas.form.grid.columns.ModelColumn;
-import com.eas.form.grid.columns.header.CheckHeaderNode;
-import com.eas.form.grid.columns.header.HeaderNode;
-import com.eas.form.grid.columns.header.ModelHeaderNode;
-import com.eas.form.grid.columns.header.RadioHeaderNode;
-import com.eas.form.grid.columns.header.ServiceHeaderNode;
-import com.eas.form.published.HasBinding;
-import com.eas.form.published.HasComponentPopupMenu;
-import com.eas.form.published.HasEmptyText;
-import com.eas.form.published.HasJsName;
-import com.eas.form.published.HasPlatypusButtonGroup;
-import com.eas.form.published.PublishedColor;
-import com.eas.form.published.PublishedComponent;
-import com.eas.form.published.PublishedFont;
-import com.eas.form.published.containers.AnchorsPane;
-import com.eas.form.published.containers.BorderPane;
-import com.eas.form.published.containers.BoxPane;
-import com.eas.form.published.containers.ButtonGroup;
-import com.eas.form.published.containers.CardPane;
-import com.eas.form.published.containers.FlowPane;
-import com.eas.form.published.containers.GridPane;
-import com.eas.form.published.containers.ScrollPane;
-import com.eas.form.published.containers.SplitPane;
-import com.eas.form.published.containers.TabbedPane;
-import com.eas.form.published.containers.ToolBar;
-import com.eas.form.published.menu.PlatypusMenu;
-import com.eas.form.published.menu.PlatypusMenuBar;
-import com.eas.form.published.menu.PlatypusMenuItemCheckBox;
-import com.eas.form.published.menu.PlatypusMenuItemImageText;
-import com.eas.form.published.menu.PlatypusMenuItemRadioButton;
-import com.eas.form.published.menu.PlatypusMenuItemSeparator;
-import com.eas.form.published.menu.PlatypusPopupMenu;
-import com.eas.form.published.widgets.DesktopPane;
-import com.eas.form.published.widgets.PlatypusButton;
-import com.eas.form.published.widgets.PlatypusCheckBox;
-import com.eas.form.published.widgets.PlatypusFormattedTextField;
-import com.eas.form.published.widgets.PlatypusHtmlEditor;
-import com.eas.form.published.widgets.PlatypusLabel;
-import com.eas.form.published.widgets.PlatypusPasswordField;
-import com.eas.form.published.widgets.PlatypusProgressBar;
-import com.eas.form.published.widgets.PlatypusRadioButton;
-import com.eas.form.published.widgets.PlatypusSlider;
-import com.eas.form.published.widgets.PlatypusSplitButton;
-import com.eas.form.published.widgets.PlatypusTextArea;
-import com.eas.form.published.widgets.PlatypusTextField;
-import com.eas.form.published.widgets.PlatypusToggleButton;
-import com.eas.form.published.widgets.model.ModelCheck;
-import com.eas.form.published.widgets.model.ModelCombo;
-import com.eas.form.published.widgets.model.ModelDate;
-import com.eas.form.published.widgets.model.ModelDecoratorBox;
-import com.eas.form.published.widgets.model.ModelFormattedField;
-import com.eas.form.published.widgets.model.ModelGrid;
-import com.eas.form.published.widgets.model.ModelSpin;
-import com.eas.form.published.widgets.model.ModelTextArea;
+import com.eas.grid.GridPublisher;
+import com.eas.grid.ModelGrid;
+import com.eas.grid.columns.ModelColumn;
+import com.eas.grid.columns.header.CheckHeaderNode;
+import com.eas.grid.columns.header.HeaderNode;
+import com.eas.grid.columns.header.ModelHeaderNode;
+import com.eas.grid.columns.header.RadioHeaderNode;
+import com.eas.grid.columns.header.ServiceHeaderNode;
+import com.eas.menu.MenuPublisher;
+import com.eas.menu.PlatypusMenu;
+import com.eas.menu.PlatypusMenuBar;
+import com.eas.menu.PlatypusMenuItemCheckBox;
+import com.eas.menu.PlatypusMenuItemImageText;
+import com.eas.menu.PlatypusMenuItemRadioButton;
+import com.eas.menu.PlatypusMenuItemSeparator;
+import com.eas.menu.PlatypusPopupMenu;
+import com.eas.predefine.HasPublished;
+import com.eas.predefine.Utils;
+import com.eas.ui.HasBinding;
+import com.eas.ui.HasComponentPopupMenu;
+import com.eas.ui.HasEmptyText;
+import com.eas.ui.HasJsName;
+import com.eas.ui.HasPlatypusButtonGroup;
+import com.eas.ui.HorizontalPosition;
+import com.eas.ui.MarginConstraints;
+import com.eas.ui.PlatypusImageResource;
+import com.eas.ui.PublishedColor;
+import com.eas.ui.PublishedComponent;
+import com.eas.ui.PublishedFont;
+import com.eas.ui.VerticalPosition;
+import com.eas.widgets.AnchorsPane;
+import com.eas.widgets.BorderPane;
+import com.eas.widgets.BoxPane;
+import com.eas.widgets.ButtonGroup;
+import com.eas.widgets.CardPane;
+import com.eas.widgets.ControlsUtils;
+import com.eas.widgets.DesktopPane;
+import com.eas.widgets.FlowPane;
+import com.eas.widgets.GridPane;
+import com.eas.widgets.PlatypusButton;
+import com.eas.widgets.PlatypusCheckBox;
+import com.eas.widgets.PlatypusFormattedTextField;
+import com.eas.widgets.PlatypusHtmlEditor;
+import com.eas.widgets.PlatypusLabel;
+import com.eas.widgets.PlatypusPasswordField;
+import com.eas.widgets.PlatypusProgressBar;
+import com.eas.widgets.PlatypusRadioButton;
+import com.eas.widgets.PlatypusSlider;
+import com.eas.widgets.PlatypusSplitButton;
+import com.eas.widgets.PlatypusTextArea;
+import com.eas.widgets.PlatypusTextField;
+import com.eas.widgets.PlatypusToggleButton;
+import com.eas.widgets.ScrollPane;
+import com.eas.widgets.SplitPane;
+import com.eas.widgets.TabbedPane;
+import com.eas.widgets.ToolBar;
+import com.eas.widgets.WidgetsPublisher;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.HasEnabled;
@@ -212,19 +221,19 @@ public class FormFactory {
 		// widgets
 		case "Label":
 			final PlatypusLabel label = new PlatypusLabel();
-			Publisher.publish(label);
+			WidgetsPublisher.publish(label);
 			readGeneralProps(anElement, label);
 			readImageParagraph(anElement, label);
 			return label;
 		case "Button":
 			PlatypusButton button = new PlatypusButton();
-			Publisher.publish(button);
+			WidgetsPublisher.publish(button);
 			readGeneralProps(anElement, button);
 			readImageParagraph(anElement, button);
 			return button;
 		case "DropDownButton":
 			final PlatypusSplitButton dropDownButton = new PlatypusSplitButton();
-			Publisher.publish(dropDownButton);
+			WidgetsPublisher.publish(dropDownButton);
 			readGeneralProps(anElement, dropDownButton);
 			readImageParagraph(anElement, dropDownButton);
 			if (anElement.hasAttribute("dropDownMenu")) {
@@ -243,14 +252,14 @@ public class FormFactory {
 			return dropDownButton;
 		case "ButtonGroup":
 			ButtonGroup buttonGroup = new ButtonGroup();
-			Publisher.publish(buttonGroup);
+			WidgetsPublisher.publish(buttonGroup);
 			if (anElement.hasAttribute("name")) {
 				buttonGroup.setJsName(anElement.getAttribute("name"));
 			}
 			return buttonGroup;
 		case "CheckBox":
 			PlatypusCheckBox checkBox = new PlatypusCheckBox();
-			Publisher.publish(checkBox);
+			WidgetsPublisher.publish(checkBox);
 			readGeneralProps(anElement, checkBox);
 			readImageParagraph(anElement, checkBox);
 			if (anElement.hasAttribute("selected")) {
@@ -263,7 +272,7 @@ public class FormFactory {
 			return checkBox;
 		case "TextArea":
 			PlatypusTextArea textArea = new PlatypusTextArea();
-			Publisher.publish(textArea);
+			WidgetsPublisher.publish(textArea);
 			readGeneralProps(anElement, textArea);
 			if (anElement.hasAttribute("text")) {
 				textArea.setText(anElement.getAttribute("text"));
@@ -271,7 +280,7 @@ public class FormFactory {
 			return textArea;
 		case "HtmlArea":
 			PlatypusHtmlEditor htmlArea = new PlatypusHtmlEditor();
-			Publisher.publish(htmlArea);
+			WidgetsPublisher.publish(htmlArea);
 			readGeneralProps(anElement, htmlArea);
 			if (anElement.hasAttribute("text")) {
 				String text = anElement.getAttribute("text");
@@ -280,7 +289,7 @@ public class FormFactory {
 			return htmlArea;
 		case "FormattedField": {
 			PlatypusFormattedTextField formattedField = new PlatypusFormattedTextField();
-			Publisher.publish(formattedField);
+			WidgetsPublisher.publish(formattedField);
 			readGeneralProps(anElement, formattedField);
 			String format = anElement.getAttribute("format");
 			int valueType = Utils.getIntegerAttribute(anElement, "valueType", ObjectFormat.REGEXP);
@@ -293,7 +302,7 @@ public class FormFactory {
 		}
 		case "PasswordField":
 			PlatypusPasswordField passwordField = new PlatypusPasswordField();
-			Publisher.publish(passwordField);
+			WidgetsPublisher.publish(passwordField);
 			readGeneralProps(anElement, passwordField);
 			if (anElement.hasAttribute("text")) {
 				passwordField.setText(anElement.getAttribute("text"));
@@ -301,7 +310,7 @@ public class FormFactory {
 			return passwordField;
 		case "ProgressBar": {
 			PlatypusProgressBar progressBar = new PlatypusProgressBar();
-			Publisher.publish(progressBar);
+			WidgetsPublisher.publish(progressBar);
 			readGeneralProps(anElement, progressBar);
 			int minimum = Utils.getIntegerAttribute(anElement, "minimum", 0);
 			int value = Utils.getIntegerAttribute(anElement, "value", 0);
@@ -316,7 +325,7 @@ public class FormFactory {
 		}
 		case "RadioButton":
 			PlatypusRadioButton radio = new PlatypusRadioButton();
-			Publisher.publish(radio);
+			WidgetsPublisher.publish(radio);
 			readGeneralProps(anElement, radio);
 			readImageParagraph(anElement, radio);
 			if (anElement.hasAttribute("selected")) {
@@ -329,7 +338,7 @@ public class FormFactory {
 			return radio;
 		case "Slider":
 			PlatypusSlider slider = new PlatypusSlider();
-			Publisher.publish(slider);
+			WidgetsPublisher.publish(slider);
 			readGeneralProps(anElement, slider);
 			int minimum = Utils.getIntegerAttribute(anElement, "minimum", 0);
 			int value = Utils.getIntegerAttribute(anElement, "value", 0);
@@ -340,7 +349,7 @@ public class FormFactory {
 			return slider;
 		case "TextField":
 			PlatypusTextField textField = new PlatypusTextField();
-			Publisher.publish(textField);
+			WidgetsPublisher.publish(textField);
 			readGeneralProps(anElement, textField);
 			if (anElement.hasAttribute("text")) {
 				textField.setText(anElement.getAttribute("text"));
@@ -348,7 +357,7 @@ public class FormFactory {
 			return textField;
 		case "ToggleButton":
 			PlatypusToggleButton toggle = new PlatypusToggleButton();
-			Publisher.publish(toggle);
+			WidgetsPublisher.publish(toggle);
 			readGeneralProps(anElement, toggle);
 			readImageParagraph(anElement, toggle);
 			if (anElement.hasAttribute("selected")) {
@@ -358,13 +367,13 @@ public class FormFactory {
 			return toggle;
 		case "DesktopPane":
 			DesktopPane desktop = new DesktopPane();
-			Publisher.publish(desktop);
+			WidgetsPublisher.publish(desktop);
 			readGeneralProps(anElement, desktop);
 			return desktop;
 			// model widgets
 		case "ModelCheckBox":
 			ModelCheck modelCheckBox = new ModelCheck();
-			Publisher.publish(modelCheckBox);
+			BoundPublisher.publish(modelCheckBox);
 			readGeneralProps(anElement, modelCheckBox);
 			if (anElement.hasAttribute("text")) {
 				modelCheckBox.setText(anElement.getAttribute("text"));
@@ -372,7 +381,7 @@ public class FormFactory {
 			return modelCheckBox;
 		case "ModelCombo":
 			ModelCombo modelCombo = new ModelCombo();
-			Publisher.publish(modelCombo);
+			BoundPublisher.publish(modelCombo);
 			readGeneralProps(anElement, modelCombo);
 			boolean list = Utils.getBooleanAttribute(anElement, "list", Boolean.TRUE);
 			modelCombo.setList(list);
@@ -387,7 +396,7 @@ public class FormFactory {
 			return modelCombo;
 		case "ModelDate":
 			ModelDate modelDate = new ModelDate();
-			Publisher.publish(modelDate);
+			BoundPublisher.publish(modelDate);
 			readGeneralProps(anElement, modelDate);
 			if (anElement.hasAttribute("dateFormat")) {
 				String dateFormat = anElement.getAttribute("dateFormat");
@@ -408,7 +417,7 @@ public class FormFactory {
 			return modelDate;
 		case "ModelFormattedField":
 			ModelFormattedField modelFormattedField = new ModelFormattedField();
-			Publisher.publish(modelFormattedField);
+			BoundPublisher.publish(modelFormattedField);
 			readGeneralProps(anElement, modelFormattedField);
 			try {
 				String format = anElement.getAttribute("format");
@@ -424,7 +433,7 @@ public class FormFactory {
 			return modelFormattedField;
 		case "ModelSpin":
 			ModelSpin modelSpin = new ModelSpin();
-			Publisher.publish(modelSpin);
+			BoundPublisher.publish(modelSpin);
 			readGeneralProps(anElement, modelSpin);
 			Double min = null;
 			if (anElement.hasAttribute("min"))
@@ -443,7 +452,7 @@ public class FormFactory {
 			return modelSpin;
 		case "ModelTextArea":
 			ModelTextArea modelTextArea = new ModelTextArea();
-			Publisher.publish(modelTextArea);
+			BoundPublisher.publish(modelTextArea);
 			readGeneralProps(anElement, modelTextArea);
 			if (anElement.hasAttribute("text")) {
 				modelTextArea.setValue(anElement.getAttribute("text"));
@@ -451,7 +460,7 @@ public class FormFactory {
 			return modelTextArea;
 		case "ModelGrid": {
 			ModelGrid grid = new ModelGrid();
-			Publisher.publish(grid);
+			GridPublisher.publish(grid);
 			readGeneralProps(anElement, grid);
 			int frozenColumns = Utils.getIntegerAttribute(anElement, "frozenColumns", 0);
 			int frozenRows = Utils.getIntegerAttribute(anElement, "frozenRows", 0);
@@ -511,14 +520,14 @@ public class FormFactory {
 		// containers
 		case "AnchorsPane":
 			AnchorsPane anchorsPane = new AnchorsPane();
-			Publisher.publish(anchorsPane);
+			WidgetsPublisher.publish(anchorsPane);
 			readGeneralProps(anElement, anchorsPane);
 			return anchorsPane;
 		case "BorderPane": {
 			int hgap = Utils.getIntegerAttribute(anElement, "hgap", 0);
 			int vgap = Utils.getIntegerAttribute(anElement, "vgap", 0);
 			BorderPane borderPane = new BorderPane(hgap, vgap);
-			Publisher.publish(borderPane);
+			WidgetsPublisher.publish(borderPane);
 			readGeneralProps(anElement, borderPane);
 			return borderPane;
 		}
@@ -527,7 +536,7 @@ public class FormFactory {
 			int vgap = Utils.getIntegerAttribute(anElement, "vgap", 0);
 			int orientation = Utils.getIntegerAttribute(anElement, "orientation", Orientation.HORIZONTAL);
 			BoxPane boxPane = new BoxPane(orientation, hgap, vgap);
-			Publisher.publish(boxPane);
+			WidgetsPublisher.publish(boxPane);
 			readGeneralProps(anElement, boxPane);
 			return boxPane;
 		}
@@ -535,7 +544,7 @@ public class FormFactory {
 			int hgap = Utils.getIntegerAttribute(anElement, "hgap", 0);
 			int vgap = Utils.getIntegerAttribute(anElement, "vgap", 0);
 			CardPane cardPane = new CardPane(hgap, vgap);
-			Publisher.publish(cardPane);
+			WidgetsPublisher.publish(cardPane);
 			readGeneralProps(anElement, cardPane);
 			return cardPane;
 		}
@@ -543,7 +552,7 @@ public class FormFactory {
 			int hgap = Utils.getIntegerAttribute(anElement, "hgap", 0);
 			int vgap = Utils.getIntegerAttribute(anElement, "vgap", 0);
 			FlowPane flowPane = new FlowPane(hgap, vgap);
-			Publisher.publish(flowPane);
+			WidgetsPublisher.publish(flowPane);
 			readGeneralProps(anElement, flowPane);
 			return flowPane;
 		}
@@ -553,14 +562,14 @@ public class FormFactory {
 			int rows = Utils.getIntegerAttribute(anElement, "rows", 0);
 			int columns = Utils.getIntegerAttribute(anElement, "columns", 0);
 			GridPane gridPane = new GridPane(rows, columns, hgap, vgap);
-			Publisher.publish(gridPane);
+			WidgetsPublisher.publish(gridPane);
 			readGeneralProps(anElement, gridPane);
 			return gridPane;
 		}
 		// predefined layout containers
 		case "ScrollPane":
 			ScrollPane scroll = new ScrollPane();
-			Publisher.publish(scroll);
+			WidgetsPublisher.publish(scroll);
 			readGeneralProps(anElement, scroll);
 			boolean wheelScrollingEnabled = Utils.getBooleanAttribute(anElement, "wheelScrollingEnabled", Boolean.TRUE);
 			int horizontalScrollBarPolicy = Utils.getIntegerAttribute(anElement, "horizontalScrollBarPolicy", ScrollPane.SCROLLBAR_AS_NEEDED);
@@ -570,7 +579,7 @@ public class FormFactory {
 			return scroll;
 		case "SplitPane":
 			final SplitPane split = new SplitPane();
-			Publisher.publish(split);
+			WidgetsPublisher.publish(split);
 			readGeneralProps(anElement, split);
 			boolean oneTouchExpandable = Utils.getBooleanAttribute(anElement, "oneTouchExpandable", true);
 			int dividerLocation = Utils.getIntegerAttribute(anElement, "dividerLocation", 0);
@@ -601,7 +610,7 @@ public class FormFactory {
 			return split;
 		case "TabbedPane":
 			TabbedPane tabs = new TabbedPane();
-			Publisher.publish(tabs);
+			WidgetsPublisher.publish(tabs);
 			readGeneralProps(anElement, tabs);
 			/*
 			 * int tabPlacement = Utils.getIntegerAttribute(anElement,
@@ -611,13 +620,13 @@ public class FormFactory {
 			return tabs;
 		case "ToolBar":
 			ToolBar toolbar = new ToolBar();
-			Publisher.publish(toolbar);
+			WidgetsPublisher.publish(toolbar);
 			readGeneralProps(anElement, toolbar);
 			return toolbar;
 			// menus
 		case "Menu":
 			PlatypusMenu menu = new PlatypusMenu();
-			Publisher.publish(menu);
+			MenuPublisher.publish(menu);
 			readGeneralProps(anElement, menu);
 			if (anElement.hasAttribute("text")) {
 				menu.setText(anElement.getAttribute("text"));
@@ -625,7 +634,7 @@ public class FormFactory {
 			return menu;
 		case "MenuItem":
 			PlatypusMenuItemImageText menuitem = new PlatypusMenuItemImageText();
-			Publisher.publish(menuitem);
+			MenuPublisher.publish(menuitem);
 			readGeneralProps(anElement, menuitem);
 			readImageParagraph(anElement, menuitem);
 			if (anElement.hasAttribute("text")) {
@@ -634,7 +643,7 @@ public class FormFactory {
 			return menuitem;
 		case "CheckMenuItem":
 			PlatypusMenuItemCheckBox checkMenuItem = new PlatypusMenuItemCheckBox();
-			Publisher.publish(checkMenuItem);
+			MenuPublisher.publish(checkMenuItem);
 			readGeneralProps(anElement, checkMenuItem);
 			readImageParagraph(anElement, checkMenuItem);
 			if (anElement.hasAttribute("selected")) {
@@ -647,7 +656,7 @@ public class FormFactory {
 			return checkMenuItem;
 		case "RadioMenuItem":
 			PlatypusMenuItemRadioButton radioMenuItem = new PlatypusMenuItemRadioButton();
-			Publisher.publish(radioMenuItem);
+			MenuPublisher.publish(radioMenuItem);
 			readGeneralProps(anElement, radioMenuItem);
 			readImageParagraph(anElement, radioMenuItem);
 			if (anElement.hasAttribute("selected")) {
@@ -660,17 +669,17 @@ public class FormFactory {
 			return radioMenuItem;
 		case "MenuSeparator":
 			PlatypusMenuItemSeparator menuSeparator = new PlatypusMenuItemSeparator();
-			Publisher.publish(menuSeparator);
+			MenuPublisher.publish(menuSeparator);
 			readGeneralProps(anElement, menuSeparator);
 			return menuSeparator;
 		case "MenuBar":
 			PlatypusMenuBar menuBar = new PlatypusMenuBar();
-			Publisher.publish(menuBar);
+			MenuPublisher.publish(menuBar);
 			readGeneralProps(anElement, menuBar);
 			return menuBar;
 		case "PopupMenu":
 			PlatypusPopupMenu popupMenu = new PlatypusPopupMenu();
-			Publisher.publish(popupMenu);
+			MenuPublisher.publish(popupMenu);
 			readGeneralProps(anElement, popupMenu);
 			return popupMenu;
 		default:
@@ -956,7 +965,7 @@ public class FormFactory {
 				switch (columnType) {
 				case "CheckGridColumn": {
 					CheckHeaderNode column = new CheckHeaderNode();
-					Publisher.publish(column);
+					GridPublisher.publish(column);
 					readColumnNode(column, childTag);
 					nodes.add(column);
 					List<HeaderNode<JavaScriptObject>> children = readColumns(childTag);
@@ -967,7 +976,7 @@ public class FormFactory {
 				}
 				case "RadioGridColumn": {
 					RadioHeaderNode column = new RadioHeaderNode();
-					Publisher.publish(column);
+					GridPublisher.publish(column);
 					readColumnNode(column, childTag);
 					nodes.add(column);
 					List<HeaderNode<JavaScriptObject>> children = readColumns(childTag);
@@ -978,7 +987,7 @@ public class FormFactory {
 				}
 				case "ServiceGridColumn": {
 					ServiceHeaderNode column = new ServiceHeaderNode();
-					Publisher.publish(column);
+					GridPublisher.publish(column);
 					readColumnNode(column, childTag);
 					nodes.add(column);
 					List<HeaderNode<JavaScriptObject>> children = readColumns(childTag);
@@ -989,7 +998,7 @@ public class FormFactory {
 				}
 				case "ModelGridColumn": {
 					ModelHeaderNode column = new ModelHeaderNode();
-					Publisher.publish(column);
+					GridPublisher.publish(column);
 					readColumnNode(column, childTag);
 					if (childTag.hasAttribute("field")) {
 						column.setField(childTag.getAttribute("field"));

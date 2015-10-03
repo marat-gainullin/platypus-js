@@ -9,7 +9,7 @@
  */
 package com.eas.client.metadata;
 
-import com.eas.client.Utils;
+import com.eas.predefine.Utils;
 import com.google.gwt.core.client.JavaScriptObject;
 
 import java.sql.ParameterMetaData;

@@ -13,7 +13,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.eas.client.AppClient;
-import com.eas.client.Utils;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.ForeignKeySpec;
 import com.eas.client.metadata.Parameter;
@@ -23,6 +22,7 @@ import com.eas.model.Model;
 import com.eas.model.ModelVisitor;
 import com.eas.model.ReferenceRelation;
 import com.eas.model.Relation;
+import com.eas.predefine.Utils;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Element;

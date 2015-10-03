@@ -1,11 +1,9 @@
 package com.eas.form;
 
-import com.eas.form.published.PublishedComponent;
+import com.eas.ui.PublishedComponent;
 import com.google.gwt.core.client.JavaScriptObject;
 
 public class JsUi {
-	
-	public static JavaScriptObject ui;
 	
 	public native static void publishComponentProperties(PublishedComponent aPublished)/*-{
 		var Ui = @com.eas.form.JsUi::ui;
@@ -53,7 +51,7 @@ public class JsUi {
 		    set : function(aValue) {
 		    	_background = aValue;
 		    	//apply
-		    	@com.eas.form.ControlsUtils::applyBackground(Lcom/google/gwt/user/client/ui/UIObject;Ljava/lang/String;)(comp, _background != null && _opaque ? _background.toStyled() : ""); 
+		    	@com.eas.widgets.ControlsUtils::applyBackground(Lcom/google/gwt/user/client/ui/UIObject;Ljava/lang/String;)(comp, _background != null && _opaque ? _background.toStyled() : ""); 
 		    }
 		    });
 	    Object.defineProperty(aPublished, "backgroundSet", {get : function(){return _background != null;}});
@@ -64,7 +62,7 @@ public class JsUi {
 		    set : function(aValue) {
 		    	_foreground = aValue;
 		    	// apply
-		    	@com.eas.form.ControlsUtils::applyForeground(Lcom/google/gwt/user/client/ui/UIObject;Lcom/eas/form/published/PublishedColor;)(comp, _foreground); 
+		    	@com.eas.widgets.ControlsUtils::applyForeground(Lcom/google/gwt/user/client/ui/UIObject;Lcom/eas/ui/PublishedColor;)(comp, _foreground); 
 		    }
 		    });
 	    Object.defineProperty(aPublished, "foregroundSet", {get : function(){return _foreground != null;}});
@@ -75,7 +73,7 @@ public class JsUi {
 		    set : function(aValue) {
 		    	_opaque = !!aValue;
 		    	// apply
-	    		@com.eas.form.ControlsUtils::applyBackground(Lcom/google/gwt/user/client/ui/UIObject;Ljava/lang/String;)(comp, _background != null && _opaque ? _background.toStyled() : "");
+	    		@com.eas.widgets.ControlsUtils::applyBackground(Lcom/google/gwt/user/client/ui/UIObject;Ljava/lang/String;)(comp, _background != null && _opaque ? _background.toStyled() : "");
 		    }
 		    });
 	    Object.defineProperty(aPublished, "font", {
@@ -85,7 +83,7 @@ public class JsUi {
 		    set : function(aValue) {
 		    	_font = aValue;
 		    	// apply
-		    	@com.eas.form.ControlsUtils::applyFont(Lcom/google/gwt/user/client/ui/UIObject;Lcom/eas/form/published/PublishedFont;)(comp, _font); 
+		    	@com.eas.widgets.ControlsUtils::applyFont(Lcom/google/gwt/user/client/ui/UIObject;Lcom/eas/ui/PublishedFont;)(comp, _font); 
 		    }
 		    });
 	    Object.defineProperty(aPublished, "fontSet", { get : function(){return _font != null;}});
@@ -96,7 +94,7 @@ public class JsUi {
 		    	set : function(aValue){
 		    		_cursor = aValue; 
 		    		// apply	
-		    	@com.eas.form.ControlsUtils::applyCursor(Lcom/google/gwt/user/client/ui/UIObject;Ljava/lang/String;)(comp, _cursor); 
+		    	@com.eas.widgets.ControlsUtils::applyCursor(Lcom/google/gwt/user/client/ui/UIObject;Ljava/lang/String;)(comp, _cursor); 
 		    	}
 		    	
 		    });
@@ -105,28 +103,28 @@ public class JsUi {
 	    Object.defineProperty(aPublished, "left", {
 		    get : function() {
 		    	if(aPublished.parent){
-					_left = aPublished.parent.unwrap().@com.eas.form.published.containers.HasChildrenPosition::getLeft(Lcom/google/gwt/user/client/ui/Widget;)(aPublished.unwrap());
+					_left = aPublished.parent.unwrap().@com.eas.widgets.HasChildrenPosition::getLeft(Lcom/google/gwt/user/client/ui/Widget;)(aPublished.unwrap());
 		    	}
 				return _left;
 		    },
 		    set : function(aValue) {
 		    	_left = aValue;
 		    	if(aPublished.parent instanceof Ui.AbsolutePane || aPublished.parent instanceof Ui.AnchorsPane)
-		    		aPublished.parent.unwrap().@com.eas.form.published.containers.MarginsPane::ajustLeft(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), aValue);
+		    		aPublished.parent.unwrap().@com.eas.widgets.MarginsPane::ajustLeft(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), aValue);
 		    }
 		    });
 		    var _top = null;
 	    Object.defineProperty(aPublished, "top", {
 		    get : function() {
 		    	if(aPublished.parent){
-					_top = aPublished.parent.unwrap().@com.eas.form.published.containers.HasChildrenPosition::getTop(Lcom/google/gwt/user/client/ui/Widget;)(aPublished.unwrap());
+					_top = aPublished.parent.unwrap().@com.eas.widgets.HasChildrenPosition::getTop(Lcom/google/gwt/user/client/ui/Widget;)(aPublished.unwrap());
 		    	}
 				return _top;
 		    },
 		    set : function(aValue) {
 		    	_top = aValue;
 		    	if(aPublished.parent instanceof Ui.AbsolutePane || aPublished.parent instanceof Ui.AnchorsPane)
-		    		aPublished.parent.unwrap().@com.eas.form.published.containers.MarginsPane::ajustTop(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), aValue);
+		    		aPublished.parent.unwrap().@com.eas.widgets.MarginsPane::ajustTop(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), aValue);
 		    }
 		    });
 		    var _width = null;
@@ -139,11 +137,11 @@ public class JsUi {
 		    set : function(aValue) {
 		    	_width = aValue;
 		    	if(aPublished.parent instanceof Ui.AbsolutePane || aPublished.parent instanceof Ui.AnchorsPane){
-		    		aPublished.parent.unwrap().@com.eas.form.published.containers.MarginsPane::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _width);		    		
+		    		aPublished.parent.unwrap().@com.eas.widgets.MarginsPane::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _width);		    		
 		    	}else if(aPublished.parent instanceof Ui.ScrollPane){
-		    		@com.eas.form.published.containers.ScrollPane::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _width);
+		    		@com.eas.widgets.ScrollPane::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _width);
 		    	}else if(aPublished.parent instanceof Ui.FlowPane){
-		    		@com.eas.form.published.containers.FlowPane::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _width);
+		    		@com.eas.widgets.FlowPane::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _width);
 		    	}else if(aPublished.parent instanceof Ui.BoxPane && aPublished.parent.orientation == Ui.Orientation.HORIZONTAL){
 	    			aPublished.parent.unwrap().@com.bearsoft.gwt.ui.containers.BoxPanel::ajustWidth(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _width);
 		    	}else if(aPublished.parent instanceof Ui.ToolBar){
@@ -165,11 +163,11 @@ public class JsUi {
 		    set : function(aValue) {
 		    	_height = aValue;
 		    	if(aPublished.parent instanceof Ui.AbsolutePane || aPublished.parent instanceof Ui.AnchorsPane){
-		    		aPublished.parent.unwrap().@com.eas.form.published.containers.MarginsPane::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _height);
+		    		aPublished.parent.unwrap().@com.eas.widgets.MarginsPane::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _height);
 		    	}else if(aPublished.parent instanceof Ui.ScrollPane){
-		    		@com.eas.form.published.containers.ScrollPane::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _height);
+		    		@com.eas.widgets.ScrollPane::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _height);
 	    		}else if(aPublished.parent instanceof Ui.FlowPane){
-		    		@com.eas.form.published.containers.FlowPane::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _height);
+		    		@com.eas.widgets.FlowPane::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _height);
 				}else if(aPublished.parent instanceof Ui.BoxPane && aPublished.parent.orientation == Ui.Orientation.VERTICAL){
 	    			aPublished.parent.unwrap().@com.bearsoft.gwt.ui.containers.BoxPanel::ajustHeight(Lcom/google/gwt/user/client/ui/Widget;I)(aPublished.unwrap(), _height);
 		    	}else if(aPublished.parent instanceof Ui.BorderPane){
@@ -181,34 +179,34 @@ public class JsUi {
 		});
 	    Object.defineProperty(aPublished, "componentPopupMenu", {
 	    	get : function() {
-	    		var menu = comp.@com.eas.form.published.HasComponentPopupMenu::getPlatypusPopupMenu()();
-			    return @com.eas.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(menu);
+	    		var menu = comp.@com.eas.ui.HasComponentPopupMenu::getPlatypusPopupMenu()();
+			    return @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(menu);
 	    	},
 		    set : function(aValue) {
 		    	if (aValue && aValue.unwrap) {
-			    	comp.@com.eas.form.published.HasComponentPopupMenu::setPlatypusPopupMenu(Lcom/eas/form/published/menu/PlatypusPopupMenu;)(aValue.unwrap());
+			    	comp.@com.eas.ui.HasComponentPopupMenu::setPlatypusPopupMenu(Lcom/eas/menu/PlatypusPopupMenu;)(aValue.unwrap());
 		    	} else {
-			    	comp.@com.eas.form.published.HasComponentPopupMenu::setPlatypusPopupMenu(Lcom/eas/form/published/menu/PlatypusPopupMenu;)(null);
+			    	comp.@com.eas.ui.HasComponentPopupMenu::setPlatypusPopupMenu(Lcom/eas/menu/PlatypusPopupMenu;)(null);
 		    	}
 		    }
 		});
 	    Object.defineProperty(aPublished, "parent", {
 		    get : function() {
-		    	return @com.eas.form.ControlsUtils::lookupPublishedParent(Lcom/google/gwt/user/client/ui/UIObject;)(comp);
+		    	return @com.eas.widgets.ControlsUtils::lookupPublishedParent(Lcom/google/gwt/user/client/ui/UIObject;)(comp);
 		    }
 		});
 	    Object.defineProperty(aPublished, "name", {
 		    get : function() {
-		    	return comp.@com.eas.form.published.HasJsName::getJsName()();
+		    	return comp.@com.eas.ui.HasJsName::getJsName()();
 		    },
 		    set : function(aValue){
-		    	comp.@com.eas.form.published.HasJsName::setJsName(Ljava/lang/String;)("" + aValue);
+		    	comp.@com.eas.ui.HasJsName::setJsName(Ljava/lang/String;)("" + aValue);
 		    }
 		});
 	    Object.defineProperty(aPublished, "focus", {
 		    get : function() {
 		    	return function(){
-		    		@com.eas.form.ControlsUtils::focus(Lcom/google/gwt/user/client/ui/Widget;)(comp);
+		    		@com.eas.widgets.ControlsUtils::focus(Lcom/google/gwt/user/client/ui/Widget;)(comp);
 		    	}
 		    }
 		});
@@ -227,7 +225,7 @@ public class JsUi {
 	    });
 	    Object.defineProperty(aPublished, "layout", {
 	    	value : function() {
-				@com.eas.form.ControlsUtils::callOnResize(Lcom/google/gwt/user/client/ui/Widget;)(aPublished.unwrap());
+				@com.eas.widgets.ControlsUtils::callOnResize(Lcom/google/gwt/user/client/ui/Widget;)(aPublished.unwrap());
 	    	}
 	    });
 	    Object.defineProperty(aPublished, "showOn", {
@@ -235,20 +233,20 @@ public class JsUi {
 	    		if(typeof aElement == "string")
 	    			aElement = $doc.getElementById(aElement);
 	    		if(aElement){
-						@com.eas.form.ControlsUtils::addWidgetTo(Lcom/google/gwt/user/client/ui/Widget;Lcom/google/gwt/dom/client/Element;)(aPublished.unwrap(), aElement);
+						@com.eas.widgets.ControlsUtils::addWidgetTo(Lcom/google/gwt/user/client/ui/Widget;Lcom/google/gwt/dom/client/Element;)(aPublished.unwrap(), aElement);
 	    		}
 	    	}
 	    });
-	    comp.@com.eas.client.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(aPublished);
+	    comp.@com.eas.predefine.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(aPublished);
 	}-*/;
 	
 	public native static JavaScriptObject publishExecutor(JavaScriptObject published)/*-{
 		if (published && published.unwrap) {
 			var comp = published.unwrap();
-			var executor = comp.@com.eas.form.published.HasEventsExecutor::getEventsExecutor()();
+			var executor = comp.@com.eas.ui.HasEventsExecutor::getEventsExecutor()();
 			if(executor == null){
 				executor = @com.eas.form.EventsExecutor::new(Lcom/google/gwt/user/client/ui/UIObject;Lcom/google/gwt/core/client/JavaScriptObject;)(comp, published);
-				comp.@com.eas.form.published.HasEventsExecutor::setEventsExecutor(Lcom/eas/form/EventsExecutor;)(executor);
+				comp.@com.eas.ui.HasEventsExecutor::setEventsExecutor(Lcom/eas/form/EventsExecutor;)(executor);
 			} else {
 				executor.@com.eas.form.EventsExecutor::setEventThis(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 			}
@@ -462,17 +460,17 @@ public class JsUi {
 				var comp = aPublished.unwrap();
 				aPublished.toFront = function(aChild, aCount) {
 					if (arguments.length == 1) {
-					    comp.@com.eas.form.published.containers.HasLayers::toFront(Lcom/google/gwt/user/client/ui/Widget;)(aChild.unwrap());
+					    comp.@com.eas.widgets.HasLayers::toFront(Lcom/google/gwt/user/client/ui/Widget;)(aChild.unwrap());
 					} else {
-					    comp.@com.eas.form.published.containers.HasLayers::toFront(Lcom/google/gwt/user/client/ui/Widget;I)(aChild.unwrap(), aCount);
+					    comp.@com.eas.widgets.HasLayers::toFront(Lcom/google/gwt/user/client/ui/Widget;I)(aChild.unwrap(), aCount);
 					}
 				}
 		
 				aPublished.toBack = function(aChild, aCount) {
 					if (arguments.length == 1) {
-					    comp.@com.eas.form.published.containers.HasLayers::toBack(Lcom/google/gwt/user/client/ui/Widget;)(aChild.unwrap());
+					    comp.@com.eas.widgets.HasLayers::toBack(Lcom/google/gwt/user/client/ui/Widget;)(aChild.unwrap());
 					} else {
-					    comp.@com.eas.form.published.containers.HasLayers::toBack(Lcom/google/gwt/user/client/ui/Widget;I)(aChild.unwrap(), aCount);
+					    comp.@com.eas.widgets.HasLayers::toBack(Lcom/google/gwt/user/client/ui/Widget;I)(aChild.unwrap(), aCount);
 					}
 				}
 			}
@@ -498,7 +496,7 @@ public class JsUi {
 			};
 			aPublished.child = function(aIndex) {
 				var widget = comp.@com.google.gwt.user.client.ui.IndexedPanel::getWidget(I)(aIndex);
-				return @com.eas.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(widget);
+				return @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(widget);
 			};
 			publishChildren(aPublished);
 		}
@@ -535,7 +533,7 @@ public class JsUi {
 				if(aFormKey){
 					aComponent.@com.eas.form.PlatypusWindow::setFormKey(Ljava/lang/String;)(aFormKey);
 				}
-				aComponent.@com.eas.client.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+				aComponent.@com.eas.predefine.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 			}
 			Form.getShownForm = function(aFormKey){
 				return @com.eas.form.PlatypusWindow::getShownForm(Ljava/lang/String;)(aFormKey);
@@ -559,11 +557,11 @@ public class JsUi {
 		
 		predefine(['common-utils/color', 'common-utils/cursor', 'common-utils/font', 'forms/form'], 'ui', function(Color, Cursor, Font, Form){
 			function selectFile(aCallback, aFileFilter) {
-				@com.eas.form.ControlsUtils::jsSelectFile(Lcom/google/gwt/core/client/JavaScriptObject;Ljava/lang/String;)(aCallback, aFileFilter);
+				@com.eas.widgets.ControlsUtils::jsSelectFile(Lcom/google/gwt/core/client/JavaScriptObject;Ljava/lang/String;)(aCallback, aFileFilter);
 			}
 			
 			function selectColor(aCallback, aOldValue) {
-				@com.eas.form.ControlsUtils::jsSelectColor(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aOldValue != null ? aOldValue + '' : '', aCallback);
+				@com.eas.widgets.ControlsUtils::jsSelectColor(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aOldValue != null ? aOldValue + '' : '', aCallback);
 			}
 			
 			function readFormDocument(aDocumnet, aModel, aTarget){
@@ -576,7 +574,7 @@ public class JsUi {
 				var nwList = factory.@com.eas.form.FormFactory::getWidgetsList()();
 				for(var i = 0; i < nwList.@java.util.List::size()(); i++){
 					var nWidget = nwList.@java.util.List::get(I)(i);
-					var pWidget = nWidget.@com.eas.client.HasPublished::getPublished()();
+					var pWidget = nWidget.@com.eas.predefine.HasPublished::getPublished()();
 					if(pWidget.name)
 						aTarget[pWidget.name] = pWidget;
 				}
@@ -600,7 +598,7 @@ public class JsUi {
 			}
 			Object.defineProperty(Icon, "load", { 
 				value: function(aIconName, aOnSuccess, aOnFailure) {
-					@com.eas.form.PlatypusImageResource::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aIconName != null ? '' + aIconName : null, aOnSuccess, aOnFailure);
+					@com.eas.ui.PlatypusImageResource::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aIconName != null ? '' + aIconName : null, aOnSuccess, aOnFailure);
 				} 
 			});
 			var Orientation = {HORIZONTAL: 0, VERTICAL: 1};
@@ -796,7 +794,7 @@ public class JsUi {
 				Object.defineProperty(this, "source", {
 					get : function() {
 						var source = aEvent.@com.google.web.bindery.event.shared.Event::getSource()();
-						var jsSource = @com.eas.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(source);
+						var jsSource = @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(source);
 						return jsSource;
 					}
 				});
@@ -868,7 +866,7 @@ public class JsUi {
 				Object.defineProperty(this, "source", {
 					get : function() {
 						var source = aEvent.@com.google.web.bindery.event.shared.Event::getSource()();
-						var jsSource = @com.eas.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(source);
+						var jsSource = @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(source);
 						return jsSource;
 					}
 				});
@@ -913,7 +911,7 @@ public class JsUi {
 				Object.defineProperty(this, "source", {
 					get : function() {
 						var source = aEvent.@com.google.web.bindery.event.shared.Event::getSource()();
-						var jsSource = @com.eas.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(source);
+						var jsSource = @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(source);
 						return jsSource;
 					}
 				});
@@ -921,10 +919,10 @@ public class JsUi {
 					get : function(){
 						var comp;
 						if(isAdd)
-							comp = aEvent.@com.eas.form.events.AddEvent::getWidget()();
+							comp = aEvent.@com.bearsoft.gwt.ui.events.AddEvent::getWidget()();
 						else
-							comp = aEvent.@com.eas.form.events.RemoveEvent::getWidget()();
-						return @com.eas.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(comp);
+							comp = aEvent.@com.bearsoft.gwt.ui.events.RemoveEvent::getWidget()();
+						return @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(comp);
 					}
 				});
 			}
@@ -952,7 +950,7 @@ public class JsUi {
 				Object.defineProperty(this, "source", {
 					get : function() {
 						var source = aEvent.@com.google.web.bindery.event.shared.Event::getSource()();
-						var jsSource = @com.eas.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(source);
+						var jsSource = @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(source);
 						return jsSource;
 					}
 				});
@@ -965,7 +963,7 @@ public class JsUi {
 				Object.defineProperty(this, "source", {
 					get : function() {
 						var source = aEvent.@com.google.web.bindery.event.shared.Event::getSource()();
-						var jsSource = @com.eas.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(source);
+						var jsSource = @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(source);
 						return jsSource;
 					}
 				});
@@ -978,7 +976,7 @@ public class JsUi {
 				Object.defineProperty(this, "source", {
 					get : function() {
 						var source = aEvent.@com.google.web.bindery.event.shared.Event::getSource()();
-						var jsSource = @com.eas.form.Publisher::checkPublishedComponent(Ljava/lang/Object;)(source);
+						var jsSource = @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(source);
 						return jsSource;
 					}
 				});
@@ -996,7 +994,7 @@ public class JsUi {
 	
 				var published = this;
 				 
-				aComponent = aComponent || @com.eas.form.published.widgets.PlatypusLabel::new()(); 	
+				aComponent = aComponent || @com.eas.widgets.PlatypusLabel::new()(); 	
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1027,7 +1025,7 @@ public class JsUi {
 				}
 	
 				var published = this;
-				aComponent = aComponent || @com.eas.form.published.widgets.PlatypusButton::new()();
+				aComponent = aComponent || @com.eas.widgets.PlatypusButton::new()();
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1057,7 +1055,7 @@ public class JsUi {
 				var aComponent = arguments.length > 4 ? arguments[4] : null;
 	
 				var published = this;
-				aComponent = aComponent || @com.eas.form.published.widgets.PlatypusSplitButton::new()();
+				aComponent = aComponent || @com.eas.widgets.PlatypusSplitButton::new()();
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1090,7 +1088,7 @@ public class JsUi {
 				}
 	
 				var published = this;
-				aComponent = aComponent || @com.eas.form.published.widgets.PlatypusToggleButton::new()();
+				aComponent = aComponent || @com.eas.widgets.PlatypusToggleButton::new()();
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1121,7 +1119,7 @@ public class JsUi {
 				}
 	
 				var published = this;
-				aComponent = aComponent || @com.eas.form.published.widgets.PlatypusRadioButton::new()();
+				aComponent = aComponent || @com.eas.widgets.PlatypusRadioButton::new()();
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1149,7 +1147,7 @@ public class JsUi {
 				}
 	
 				var published = this;
-				aComponent = aComponent || @com.eas.form.published.widgets.PlatypusCheckBox::new()();
+				aComponent = aComponent || @com.eas.widgets.PlatypusCheckBox::new()();
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1175,7 +1173,7 @@ public class JsUi {
 					throw  ' use  "new PasswordField()" !';
 				}
 				var published = this;
-				aComponent = aComponent || @com.eas.form.published.widgets.PlatypusPasswordField::new()();
+				aComponent = aComponent || @com.eas.widgets.PlatypusPasswordField::new()();
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1194,7 +1192,7 @@ public class JsUi {
 					throw  ' use  "new TextField()" !';
 				}
 				var published = this;
-				aComponent = aComponent || @com.eas.form.published.widgets.PlatypusTextField::new()();
+				aComponent = aComponent || @com.eas.widgets.PlatypusTextField::new()();
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1213,7 +1211,7 @@ public class JsUi {
 					throw  ' use  "new FormattedField()" !';
 				}
 				var published = this;
-				aComponent = aComponent || @com.eas.form.published.widgets.PlatypusFormattedTextField::new()();
+				aComponent = aComponent || @com.eas.widgets.PlatypusFormattedTextField::new()();
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1232,7 +1230,7 @@ public class JsUi {
 					throw  ' use  "new TextArea()" !';
 				}
 				var published = this;
-				aComponent = aComponent || @com.eas.form.published.widgets.PlatypusTextArea::new()();
+				aComponent = aComponent || @com.eas.widgets.PlatypusTextArea::new()();
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1251,7 +1249,7 @@ public class JsUi {
 					throw  ' use  "new HtmlArea()" !';
 				}
 				var published = this;
-				aComponent = aComponent || @com.eas.form.published.widgets.PlatypusHtmlEditor::new()();
+				aComponent = aComponent || @com.eas.widgets.PlatypusHtmlEditor::new()();
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1296,7 +1294,7 @@ public class JsUi {
 				} 	
 				
 				var published = this;
-				aComponent = aComponent || @com.eas.form.published.widgets.PlatypusSlider::new(DD)(aMinimum, aMaximum);
+				aComponent = aComponent || @com.eas.widgets.PlatypusSlider::new(DD)(aMinimum, aMaximum);
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1322,7 +1320,7 @@ public class JsUi {
 					throw  ' use  "new ProgressBar()" !';
 				}
 				var published = this;
-				aComponent = aComponent || @com.eas.form.published.widgets.PlatypusProgressBar::new()();
+				aComponent = aComponent || @com.eas.widgets.PlatypusProgressBar::new()();
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1345,7 +1343,7 @@ public class JsUi {
 					throw  ' use  "new DesktopPane()" !';
 				}
 				var published = this;
-				aComponent = aComponent || @com.eas.form.published.widgets.DesktopPane::new()();
+				aComponent = aComponent || @com.eas.widgets.DesktopPane::new()();
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1363,7 +1361,7 @@ public class JsUi {
 				var aComponent = arguments.length > 0 ? arguments[0] : null;
 	
 				var published = this;
-				aComponent = aComponent || @com.eas.form.published.menu.PlatypusMenuBar::new(Z)(false);
+				aComponent = aComponent || @com.eas.menu.PlatypusMenuBar::new(Z)(false);
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1380,7 +1378,7 @@ public class JsUi {
 				var aComponent = arguments.length > 1 ? arguments[1] : null;
 	
 				var published = this;
-				aComponent = aComponent || @com.eas.form.published.menu.PlatypusMenu::new()();
+				aComponent = aComponent || @com.eas.menu.PlatypusMenu::new()();
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1401,7 +1399,7 @@ public class JsUi {
 				var aComponent = arguments.length > 0 ? arguments[0] : null;
 	
 				var published = this;
-				aComponent = aComponent || @com.eas.form.published.menu.PlatypusPopupMenu::new()();
+				aComponent = aComponent || @com.eas.menu.PlatypusPopupMenu::new()();
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1420,7 +1418,7 @@ public class JsUi {
 	
 				var published = this;
 				
-				aComponent = aComponent || @com.eas.form.published.menu.PlatypusMenuItemImageText::new()();
+				aComponent = aComponent || @com.eas.menu.PlatypusMenuItemImageText::new()();
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1449,7 +1447,7 @@ public class JsUi {
 				}
 	
 				var published = this;
-				aComponent = aComponent || @com.eas.form.published.menu.PlatypusMenuItemCheckBox::new()();
+				aComponent = aComponent || @com.eas.menu.PlatypusMenuItemCheckBox::new()();
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1478,7 +1476,7 @@ public class JsUi {
 				}
 	
 				var published = this;
-				aComponent = aComponent || @com.eas.form.published.menu.PlatypusMenuItemRadioButton::new()();
+				aComponent = aComponent || @com.eas.menu.PlatypusMenuItemRadioButton::new()();
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1506,7 +1504,7 @@ public class JsUi {
 				}
 	
 				var published = this;
-				aComponent = aComponent || @com.eas.form.published.menu.PlatypusMenuItemSeparator::new()();
+				aComponent = aComponent || @com.eas.menu.PlatypusMenuItemSeparator::new()();
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1526,7 +1524,7 @@ public class JsUi {
 	
 				var published = this;
 				var injected = aComponent != null;
-				aComponent = injected ? aComponent : @com.eas.form.published.widgets.model.ModelGrid::new()(); 
+				aComponent = injected ? aComponent : @com.eas.grid.ModelGrid::new()(); 
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1546,11 +1544,11 @@ public class JsUi {
 	
 				var published = this;
 				var injected = aComponent != null;
-				aComponent = injected ? aComponent : @com.eas.form.grid.columns.header.CheckHeaderNode::new()(); 
+				aComponent = injected ? aComponent : @com.eas.grid.columns.header.CheckHeaderNode::new()(); 
 				published.unwrap = function() {
 					return aComponent;
 				};
-	        	aComponent.@com.eas.client.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+	        	aComponent.@com.eas.predefine.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 				return published;
 			}
 			return CheckGridColumn;
@@ -1566,11 +1564,11 @@ public class JsUi {
 	
 				var published = this;
 				var injected = aComponent != null;
-				aComponent = injected ? aComponent : @com.eas.form.grid.columns.header.RadioHeaderNode::new()(); 
+				aComponent = injected ? aComponent : @com.eas.grid.columns.header.RadioHeaderNode::new()(); 
 				published.unwrap = function() {
 					return aComponent;
 				};
-	        	aComponent.@com.eas.client.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+	        	aComponent.@com.eas.predefine.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 				return published;
 			}
 			return RadioGridColumn;	
@@ -1586,11 +1584,11 @@ public class JsUi {
 	
 				var published = this;
 				var injected = aComponent != null;
-				aComponent = injected ? aComponent : @com.eas.form.grid.columns.header.ServiceHeaderNode::new()(); 
+				aComponent = injected ? aComponent : @com.eas.grid.columns.header.ServiceHeaderNode::new()(); 
 				published.unwrap = function() {
 					return aComponent;
 				};
-	        	aComponent.@com.eas.client.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+	        	aComponent.@com.eas.predefine.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 				return published;
 			}
 			return ServiceGridColumn;
@@ -1606,11 +1604,11 @@ public class JsUi {
 	
 				var published = this;
 				var injected = aComponent != null;
-				aComponent = injected ? aComponent : @com.eas.form.grid.columns.header.ModelHeaderNode::new()(); 
+				aComponent = injected ? aComponent : @com.eas.grid.columns.header.ModelHeaderNode::new()(); 
 				published.unwrap = function() {
 					return aComponent;
 				};
-	        	aComponent.@com.eas.client.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+	        	aComponent.@com.eas.predefine.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 				return published;
 			}
 			return ModelGridColumn;
@@ -1626,7 +1624,7 @@ public class JsUi {
 	
 				var published = this;
 				var injected = aComponent != null;
-				aComponent = injected ? aComponent : @com.eas.form.published.widgets.model.ModelCheck::new()(); 
+				aComponent = injected ? aComponent : @com.eas.bound.ModelCheck::new()(); 
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1650,7 +1648,7 @@ public class JsUi {
 	
 				var published = this;
 				var injected = aComponent != null;
-				aComponent = injected ? aComponent : @com.eas.form.published.widgets.model.ModelFormattedField::new()(); 
+				aComponent = injected ? aComponent : @com.eas.bound.ModelFormattedField::new()(); 
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1670,7 +1668,7 @@ public class JsUi {
 	
 				var published = this;
 				var injected = aComponent != null;
-				aComponent = injected ? aComponent : @com.eas.form.published.widgets.model.ModelTextArea::new()(); 
+				aComponent = injected ? aComponent : @com.eas.bound.ModelTextArea::new()(); 
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1690,7 +1688,7 @@ public class JsUi {
 	
 				var published = this;
 				var injected = aComponent != null;
-				aComponent = injected ? aComponent : @com.eas.form.published.widgets.model.ModelDate::new()(); 
+				aComponent = injected ? aComponent : @com.eas.bound.ModelDate::new()(); 
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1710,7 +1708,7 @@ public class JsUi {
 	
 				var published = this;
 				var injected = aComponent != null;
-				aComponent = injected ? aComponent : @com.eas.form.published.widgets.model.ModelSpin::new()(); 
+				aComponent = injected ? aComponent : @com.eas.bound.ModelSpin::new()(); 
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1730,7 +1728,7 @@ public class JsUi {
 	
 				var published = this;
 				var injected = aComponent != null;
-				aComponent = injected ? aComponent : @com.eas.form.published.widgets.model.ModelCombo::new()(); 
+				aComponent = injected ? aComponent : @com.eas.bound.ModelCombo::new()(); 
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1754,7 +1752,7 @@ public class JsUi {
 				}
 	
 				var published = this; 
-				aComponent = aComponent || @com.eas.form.published.containers.BorderPane::new(II)(aVGap, aHGap);
+				aComponent = aComponent || @com.eas.widgets.BorderPane::new(II)(aVGap, aHGap);
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1779,7 +1777,7 @@ public class JsUi {
 				}
 	
 				var published = this; 
-				aComponent = aComponent || @com.eas.form.published.containers.FlowPane::new(II)(aVGap,aHGap);
+				aComponent = aComponent || @com.eas.widgets.FlowPane::new(II)(aVGap,aHGap);
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1797,7 +1795,7 @@ public class JsUi {
 				}
 	
 				var published = this; 
-				aComponent = aComponent || @com.eas.form.published.containers.GridPane::new()();
+				aComponent = aComponent || @com.eas.widgets.GridPane::new()();
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1810,12 +1808,12 @@ public class JsUi {
 					if (aCols == undefined) {
 						throw "aCols argument is required!"
 					}
-					aComponent.@com.eas.form.published.containers.GridPane::resize(II)(aRows, aCols);
+					aComponent.@com.eas.widgets.GridPane::resize(II)(aRows, aCols);
 					if (aVGap) {
-						aComponent.@com.eas.form.published.containers.GridPane::setVgap(I)(aVGap);
+						aComponent.@com.eas.widgets.GridPane::setVgap(I)(aVGap);
 					}
 					if (aHGap) {
-						aComponent.@com.eas.form.published.containers.GridPane::setHgap(I)(aHGap);
+						aComponent.@com.eas.widgets.GridPane::setHgap(I)(aHGap);
 					}
 				}
 			}
@@ -1835,7 +1833,7 @@ public class JsUi {
 						aHGap = 0;
 					if(arguments.length < 1)
 						aOrientation = Ui.Orientation.HORIZONTAL;
-					aComponent = @com.eas.form.published.containers.BoxPane::new(III)(aOrientation, aHGap, aVGap);
+					aComponent = @com.eas.widgets.BoxPane::new(III)(aOrientation, aHGap, aVGap);
 				}
 	
 				var published = this;
@@ -1849,7 +1847,7 @@ public class JsUi {
 					if(toAdd && toAdd.unwrap){
 						if(toAdd.parent == published)
 							throw 'A widget already added to this container';
-						aComponent.@com.eas.form.published.containers.BoxPane::add(Lcom/google/gwt/user/client/ui/Widget;I)(toAdd.unwrap(), published.orientation == Ui.Orientation.VERTICAL ? toAdd.height : toAdd.width);
+						aComponent.@com.eas.widgets.BoxPane::add(Lcom/google/gwt/user/client/ui/Widget;I)(toAdd.unwrap(), published.orientation == Ui.Orientation.VERTICAL ? toAdd.height : toAdd.width);
 					}
 				}
 				
@@ -1877,7 +1875,7 @@ public class JsUi {
 				}
 	
 				var published = this; 
-				aComponent = aComponent || @com.eas.form.published.containers.CardPane::new(II)(aVGap, aHGap);
+				aComponent = aComponent || @com.eas.widgets.CardPane::new(II)(aVGap, aHGap);
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1895,7 +1893,7 @@ public class JsUi {
 				}
 	
 				var published = this; 
-				aComponent = aComponent || @com.eas.form.published.containers.TabbedPane::new()();
+				aComponent = aComponent || @com.eas.widgets.TabbedPane::new()();
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1913,7 +1911,7 @@ public class JsUi {
 				}
 	
 				var published = this; 
-				aComponent = aComponent || @com.eas.form.published.containers.ScrollPane::new()();
+				aComponent = aComponent || @com.eas.widgets.ScrollPane::new()();
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1935,9 +1933,9 @@ public class JsUi {
 				{
 					if(!aOrientation)
 						aOrientation = Ui.Orientation.HORIZONTAL;
-					aComponent = @com.eas.form.published.containers.SplitPane::new()();
-					var orientation = (aOrientation === Ui.Orientation.VERTICAL ? @com.eas.form.published.containers.SplitPane::VERTICAL_SPLIT : @com.eas.form.published.containers.SplitPane::HORIZONTAL_SPLIT); 
-					aComponent.@com.eas.form.published.containers.SplitPane::setOrientation(I)(orientation);
+					aComponent = @com.eas.widgets.SplitPane::new()();
+					var orientation = (aOrientation === Ui.Orientation.VERTICAL ? @com.eas.widgets.SplitPane::VERTICAL_SPLIT : @com.eas.widgets.SplitPane::HORIZONTAL_SPLIT); 
+					aComponent.@com.eas.widgets.SplitPane::setOrientation(I)(orientation);
 				}
 	
 				var published = this; 
@@ -1960,7 +1958,7 @@ public class JsUi {
 				{
 					if(floatable == undefined || floatable == null)
 						floatable = false;
-					aComponent = @com.eas.form.published.containers.ToolBar::new()();
+					aComponent = @com.eas.widgets.ToolBar::new()();
 				}
 	
 				var published = this;
@@ -1981,7 +1979,7 @@ public class JsUi {
 				}
 	
 				var published = this; 
-				aComponent = aComponent || @com.eas.form.published.containers.AnchorsPane::new()();
+				aComponent = aComponent || @com.eas.widgets.AnchorsPane::new()();
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -1999,7 +1997,7 @@ public class JsUi {
 					throw  ' use  "new AbsolutePane()" !';
 				}
 				var published = this; 
-				aComponent = aComponent || @com.eas.form.published.containers.AbsolutePane::new()();
+				aComponent = aComponent || @com.eas.widgets.AbsolutePane::new()();
 				published.unwrap = function() {
 					return aComponent;
 				};
@@ -2018,11 +2016,11 @@ public class JsUi {
 					throw  ' use  "new ButtonGroup()" !';
 				}
 				var published = this;
-				aComponent = aComponent || @com.eas.form.published.containers.ButtonGroup::new()();
+				aComponent = aComponent || @com.eas.widgets.ButtonGroup::new()();
 				published.unwrap = function() {
 					return aComponent;
 				};			
-				aComponent.@com.eas.form.published.containers.ButtonGroup::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+				aComponent.@com.eas.widgets.ButtonGroup::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 			}
 			return ButtonGroup;
 		});
@@ -2031,8 +2029,8 @@ public class JsUi {
 			function Anchors(aLeft, aWidth, aRight, aTop, aHeight, aBottom) {
 				function marginToString (aMargin) {
 					if (aMargin != undefined && aMargin != null) {
-						var unit = aMargin.@com.eas.form.MarginConstraints.Margin::unit;
-						return aMargin.@com.eas.form.MarginConstraints.Margin::value + unit.@com.google.gwt.dom.client.Style.Unit::getType()();
+						var unit = aMargin.@com.eas.ui.MarginConstraints.Margin::unit;
+						return aMargin.@com.eas.ui.MarginConstraints.Margin::value + unit.@com.google.gwt.dom.client.Style.Unit::getType()();
 					}
 					return null;
 				}
@@ -2042,7 +2040,7 @@ public class JsUi {
 				}
 				var aConstraints = arguments.length>6?arguments[6]:null;
 				if(!aConstraints){
-					aConstraints = @com.eas.form.MarginConstraints::new()();
+					aConstraints = @com.eas.ui.MarginConstraints::new()();
 				}
 				var published = this; 
 				published.unwrap = function() {
@@ -2051,67 +2049,67 @@ public class JsUi {
 				
 				Object.defineProperty(published, "left", {
 					get : function() {
-						return marginToString(aConstraints.@com.eas.form.MarginConstraints::getLeft()());
+						return marginToString(aConstraints.@com.eas.ui.MarginConstraints::getLeft()());
 					},
 					set : function(aValue) {
 						if(aValue != null) {
-							var margin = @com.eas.form.MarginConstraints.Margin::parse(Ljava/lang/String;)('' + aValue);
-							aConstraints.@com.eas.form.MarginConstraints::setLeft(Lcom/eas/form/MarginConstraints$Margin;)(margin);
+							var margin = @com.eas.ui.MarginConstraints.Margin::parse(Ljava/lang/String;)('' + aValue);
+							aConstraints.@com.eas.ui.MarginConstraints::setLeft(Lcom/eas/ui/MarginConstraints$Margin;)(margin);
 						}
 					}
 				});
 				Object.defineProperty(published, "width", {
 					get : function() {
-						return marginToString(aConstraints.@com.eas.form.MarginConstraints::getWidth()());
+						return marginToString(aConstraints.@com.eas.ui.MarginConstraints::getWidth()());
 					},
 					set : function(aValue) {
 						if(aValue != null) {
-							var margin = @com.eas.form.MarginConstraints.Margin::parse(Ljava/lang/String;)('' + aValue);
-							aConstraints.@com.eas.form.MarginConstraints::setWidth(Lcom/eas/form/MarginConstraints$Margin;)(margin);
+							var margin = @com.eas.ui.MarginConstraints.Margin::parse(Ljava/lang/String;)('' + aValue);
+							aConstraints.@com.eas.ui.MarginConstraints::setWidth(Lcom/eas/ui/MarginConstraints$Margin;)(margin);
 						}
 					}
 				});
 				Object.defineProperty(published, "right", {
 					get : function() {
-						return marginToString(aConstraints.@com.eas.form.MarginConstraints::getRight()());
+						return marginToString(aConstraints.@com.eas.ui.MarginConstraints::getRight()());
 					},
 					set : function(aValue) {
 						if(aValue != null) {
-							var margin = @com.eas.form.MarginConstraints.Margin::parse(Ljava/lang/String;)('' + aValue);
-							aConstraints.@com.eas.form.MarginConstraints::setRight(Lcom/eas/form/MarginConstraints$Margin;)(margin);
+							var margin = @com.eas.ui.MarginConstraints.Margin::parse(Ljava/lang/String;)('' + aValue);
+							aConstraints.@com.eas.ui.MarginConstraints::setRight(Lcom/eas/ui/MarginConstraints$Margin;)(margin);
 						}
 					}
 				});
 				Object.defineProperty(published, "top", {
 					get : function() {
-						return marginToString(aConstraints.@com.eas.form.MarginConstraints::getTop()());
+						return marginToString(aConstraints.@com.eas.ui.MarginConstraints::getTop()());
 					},
 					set : function(aValue) {
 						if(aValue != null) {
-							var margin = @com.eas.form.MarginConstraints.Margin::parse(Ljava/lang/String;)('' + aValue);
-							aConstraints.@com.eas.form.MarginConstraints::setTop(Lcom/eas/form/MarginConstraints$Margin;)(margin);
+							var margin = @com.eas.ui.MarginConstraints.Margin::parse(Ljava/lang/String;)('' + aValue);
+							aConstraints.@com.eas.ui.MarginConstraints::setTop(Lcom/eas/ui/MarginConstraints$Margin;)(margin);
 						}
 					}
 				});
 				Object.defineProperty(published, "height", {
 					get : function() {
-						return marginToString(aConstraints.@com.eas.form.MarginConstraints::getHeight()());
+						return marginToString(aConstraints.@com.eas.ui.MarginConstraints::getHeight()());
 					},
 					set : function(aValue) {
 						if(aValue != null) {
-							var margin = @com.eas.form.MarginConstraints.Margin::parse(Ljava/lang/String;)('' + aValue);
-							aConstraints.@com.eas.form.MarginConstraints::setHeight(Lcom/eas/form/MarginConstraints$Margin;)(margin);
+							var margin = @com.eas.ui.MarginConstraints.Margin::parse(Ljava/lang/String;)('' + aValue);
+							aConstraints.@com.eas.ui.MarginConstraints::setHeight(Lcom/eas/ui/MarginConstraints$Margin;)(margin);
 						}
 					}
 				});
 				Object.defineProperty(published, "bottom", {
 					get : function() {
-						return marginToString(aConstraints.@com.eas.form.MarginConstraints::getBottom()());
+						return marginToString(aConstraints.@com.eas.ui.MarginConstraints::getBottom()());
 					},
 					set : function(aValue) {
 						if(aValue != null) {
-							var margin = @com.eas.form.MarginConstraints.Margin::parse(Ljava/lang/String;)('' + aValue);
-							aConstraints.@com.eas.form.MarginConstraints::setBottom(Lcom/eas/form/MarginConstraints$Margin;)(margin);
+							var margin = @com.eas.ui.MarginConstraints.Margin::parse(Ljava/lang/String;)('' + aValue);
+							aConstraints.@com.eas.ui.MarginConstraints::setBottom(Lcom/eas/ui/MarginConstraints$Margin;)(margin);
 						}
 					}
 				});

@@ -14,11 +14,11 @@ import java.util.logging.Logger;
 
 import com.eas.client.AppClient;
 import com.eas.client.CallbackAdapter;
-import com.eas.client.HasPublished;
-import com.eas.client.Utils;
-import com.eas.client.Utils.JsObject;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
+import com.eas.predefine.HasPublished;
+import com.eas.predefine.Utils;
+import com.eas.predefine.Utils.JsObject;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
@@ -326,19 +326,19 @@ public class Model implements HasPublished {
 		
 	    function fireSelfScalarsOppositeCollectionsChanges(aSubject, aChange, nFields) {
             var expandingsOldValues = aChange.beforeState.selfScalarsOldValues;
-	        var ormDefs = nFields.@com.eas.client.metadata.Fields::forEachOrmScalarExpandings(Ljava/lang/String;Lcom/eas/client/Utils$JsObject;)(aChange.propertyName, function(ormDef){
+	        var ormDefs = nFields.@com.eas.client.metadata.Fields::forEachOrmScalarExpandings(Ljava/lang/String;Lcom/eas/predefine/Utils$JsObject;)(aChange.propertyName, function(ormDef){
             	var ormDefName = ormDef.@com.eas.client.metadata.Fields.OrmDef::getName()(); 
                 if (ormDefName) {
                 	var ormDefOppositeName = ormDef.@com.eas.client.metadata.Fields.OrmDef::getOppositeName()();
                     var expandingOldValue = expandingsOldValues[ormDefName];
                     var expandingNewValue = aSubject[ormDefName];
-                    @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aSubject, {source: aChange.source, propertyName: ormDefName, oldValue: expandingOldValue, newValue: expandingNewValue});
+                    @com.eas.predefine.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aSubject, {source: aChange.source, propertyName: ormDefName, oldValue: expandingOldValue, newValue: expandingNewValue});
                     if (ormDefOppositeName) {
                         if (expandingOldValue) {
-                            @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(expandingOldValue, {source: expandingOldValue, propertyName: ormDefOppositeName});
+                            @com.eas.predefine.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(expandingOldValue, {source: expandingOldValue, propertyName: ormDefOppositeName});
                         }
                         if (expandingNewValue) {
-                            @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(expandingNewValue, {source: expandingNewValue, propertyName: ormDefOppositeName});
+                            @com.eas.predefine.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(expandingNewValue, {source: expandingNewValue, propertyName: ormDefOppositeName});
                         }
                     }
                 }
@@ -347,7 +347,7 @@ public class Model implements HasPublished {
 	
 	    function prepareSelfScalarsChanges(aSubject, aChange, nFields) {
 	        var oldScalarValues = [];
-	    	nFields.@com.eas.client.metadata.Fields::forEachOrmScalarExpandings(Ljava/lang/String;Lcom/eas/client/Utils$JsObject;)(aChange.propertyName, function(ormDef){
+	    	nFields.@com.eas.client.metadata.Fields::forEachOrmScalarExpandings(Ljava/lang/String;Lcom/eas/predefine/Utils$JsObject;)(aChange.propertyName, function(ormDef){
             	var ormDefName = ormDef.@com.eas.client.metadata.Fields.OrmDef::getName()(); 
                 if (ormDef && ormDefName) {
                     oldScalarValues[ormDefName] = aSubject[ormDefName];
@@ -372,14 +372,14 @@ public class Model implements HasPublished {
 	                var ormDef = aEntry.@java.util.Map.Entry::getValue()();
 	                var collection = aSubject[collectionName];
 	                collection.forEach(function (item) {
-	                    @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(item, {source: item, propertyName: ormDef.@com.eas.client.metadata.Fields.OrmDef::getOppositeName()()});
+	                    @com.eas.predefine.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(item, {source: item, propertyName: ormDef.@com.eas.client.metadata.Fields.OrmDef::getOppositeName()()});
 	                });
 	            };
 	            collectionsDefsIt = collectionsDefs.@java.util.Set::iterator()();
 	            while(collectionsDefsIt.@java.util.Iterator::hasNext()()) {
 	            	aEntry = collectionsDefsIt.@java.util.Iterator::next()();
 	                var collectionName = aEntry.@java.util.Map.Entry::getKey()();
-	                @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aSubject, {source: aSubject, propertyName: collectionName});
+	                @com.eas.predefine.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aSubject, {source: aSubject, propertyName: collectionName});
 	            };
 	        }
 	    }
@@ -397,7 +397,7 @@ public class Model implements HasPublished {
 	               	var ormDefOppositeName = ormDef.@com.eas.client.metadata.Fields.OrmDef::getOppositeName()();
 	                if (ormDefOppositeName) {
 	                    firerers.push(function () {
-	                        @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(item, {source: item, propertyName: ormDefOppositeName});
+	                        @com.eas.predefine.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(item, {source: item, propertyName: ormDefOppositeName});
 	                    });
 	                }
 	            });
@@ -423,7 +423,7 @@ public class Model implements HasPublished {
 	                var scalar = aSubject[scalarName];
 	               	var ormDefOppositeName = ormDef.@com.eas.client.metadata.Fields.OrmDef::getOppositeName()();
 	                if (scalar && ormDefOppositeName) {
-	                    @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(scalar, {source: scalar, propertyName: ormDefOppositeName});
+	                    @com.eas.predefine.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(scalar, {source: scalar, propertyName: ormDefOppositeName});
 	                }
 	            }
 	        };
@@ -467,7 +467,7 @@ public class Model implements HasPublished {
                     aOrderer.add(aChange.source);
                 }
             });
-            @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aSubject, aChange);
+            @com.eas.predefine.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aSubject, aChange);
             fireSelfScalarsOppositeCollectionsChanges(aSubject, aChange, nFields);// Expanding change
             if (nField && nField.@com.eas.client.metadata.Field::isPk()()) {
                 fireOppositeScalarsSelfCollectionsChanges(aSubject, aChange, nFields);
@@ -544,7 +544,7 @@ public class Model implements HasPublished {
   			}
 	    	
             M.manageObject(aSubject, managedOnChange, managedBeforeChange);
-            @com.eas.client.Utils::listenable(Lcom/google/gwt/core/client/JavaScriptObject;)(aSubject);
+            @com.eas.predefine.Utils::listenable(Lcom/google/gwt/core/client/JavaScriptObject;)(aSubject);
             // ORM mutable scalar and collection properties
 	    	for(sd in scalarJsDefs){
 	        	Object.defineProperty(aSubject, sd, scalarJsDefs[sd]);
@@ -610,7 +610,7 @@ public class Model implements HasPublished {
                     }
                     fireOppositeScalarsChanges(aDeleted, nFields);
                     fireOppositeCollectionsChanges(aDeleted, nFields);
-                    @com.eas.client.Utils::unlistenable(Lcom/google/gwt/core/client/JavaScriptObject;)(aDeleted);
+                    @com.eas.predefine.Utils::unlistenable(Lcom/google/gwt/core/client/JavaScriptObject;)(aDeleted);
                     M.unmanageObject(aDeleted);
                 });
                 if (_onInserted && added.length > 0) {
@@ -627,7 +627,7 @@ public class Model implements HasPublished {
                         Logger.severe(e);
                     }
                 }
-            	@com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(published, {source: published, propertyName: 'length'});
+            	@com.eas.predefine.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(published, {source: published, propertyName: 'length'});
             },
             scrolled: function (aSubject, oldCursor, newCursor) {
                 if (_onScrolled) {
@@ -637,7 +637,7 @@ public class Model implements HasPublished {
                         Logger.severe(e);
                     }
                 }
-                @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(published, {source: published, propertyName: 'cursor', oldValue: oldCursor, newValue: newCursor});
+                @com.eas.predefine.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(published, {source: published, propertyName: 'cursor', oldValue: oldCursor, newValue: newCursor});
             }
         });
         var pSchema = {};
@@ -787,7 +787,7 @@ public class Model implements HasPublished {
             }
             orderers = {};
             published.cursor = published.length > 0 ? published[0] : null;
-            @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(published, {source: published, propertyName: 'length'});
+            @com.eas.predefine.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(published, {source: published, propertyName: 'length'});
             published.forEach(function(aItem){
 	            fireOppositeScalarsChanges(aItem, nFields);
 	            fireOppositeCollectionsChanges(aItem, nFields);
@@ -809,7 +809,7 @@ public class Model implements HasPublished {
             });
             return snapshot;
         });
-        @com.eas.client.Utils::listenable(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+        @com.eas.predefine.Utils::listenable(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
         return published;
 	}-*/; 
 	
@@ -855,13 +855,13 @@ public class Model implements HasPublished {
 	                            deleted.forEach(function (item) {
 	                                item[sourceFieldName] = null;
 	                            });
-	                            @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(found, {source: found, propertyName: 'length'});
+	                            @com.eas.predefine.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(found, {source: found, propertyName: 'length'});
 	                        },
 	                        scrolled: function (aSubject, oldCursor, newCursor) {
-	                            @com.eas.client.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(found, {source: found, propertyName: 'cursor', oldValue: oldCursor, newValue: newCursor});
+	                            @com.eas.predefine.Utils::fire(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(found, {source: found, propertyName: 'cursor', oldValue: oldCursor, newValue: newCursor});
 	                        }
 	                    });
-	                    @com.eas.client.Utils::listenable(Lcom/google/gwt/core/client/JavaScriptObject;)(found);
+	                    @com.eas.predefine.Utils::listenable(Lcom/google/gwt/core/client/JavaScriptObject;)(found);
 	                    return found;
 					};
 				}

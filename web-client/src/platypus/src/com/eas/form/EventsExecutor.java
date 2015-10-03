@@ -6,23 +6,24 @@ import java.util.logging.Logger;
 import com.bearsoft.gwt.ui.containers.window.events.HasMoveHandlers;
 import com.bearsoft.gwt.ui.containers.window.events.MoveEvent;
 import com.bearsoft.gwt.ui.containers.window.events.MoveHandler;
+import com.bearsoft.gwt.ui.events.ActionEvent;
+import com.bearsoft.gwt.ui.events.ActionHandler;
+import com.bearsoft.gwt.ui.events.AddEvent;
+import com.bearsoft.gwt.ui.events.AddHandler;
+import com.bearsoft.gwt.ui.events.HasActionHandlers;
+import com.bearsoft.gwt.ui.events.HasAddHandlers;
 import com.bearsoft.gwt.ui.events.HasHideHandlers;
+import com.bearsoft.gwt.ui.events.HasRemoveHandlers;
 import com.bearsoft.gwt.ui.events.HasShowHandlers;
 import com.bearsoft.gwt.ui.events.HideEvent;
 import com.bearsoft.gwt.ui.events.HideHandler;
+import com.bearsoft.gwt.ui.events.RemoveEvent;
+import com.bearsoft.gwt.ui.events.RemoveHandler;
 import com.bearsoft.gwt.ui.events.ShowEvent;
 import com.bearsoft.gwt.ui.events.ShowHandler;
-import com.eas.client.Utils;
-import com.eas.form.events.ActionEvent;
-import com.eas.form.events.ActionHandler;
-import com.eas.form.events.AddEvent;
-import com.eas.form.events.AddHandler;
-import com.eas.form.events.HasActionHandlers;
-import com.eas.form.events.HasAddHandlers;
-import com.eas.form.events.HasRemoveHandlers;
-import com.eas.form.events.RemoveEvent;
-import com.eas.form.events.RemoveHandler;
-import com.eas.client.HasPublished;
+import com.eas.predefine.HasPublished;
+import com.eas.predefine.Utils;
+import com.eas.ui.EventsPublisher;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
@@ -219,7 +220,7 @@ public class EventsExecutor {
 					public void onMouseOut(MouseOutEvent event) {
 						if (mouseExited != null) {
 							event.stopPropagation();
-							executeEvent(mouseExited, Publisher.publish(event));
+							executeEvent(mouseExited, EventsPublisher.publish(event));
 						}
 					}
 				};
@@ -246,7 +247,7 @@ public class EventsExecutor {
 
 					@Override
 					public void onAction(ActionEvent event) {
-						executeEvent(actionPerformed, Publisher.publish(event));
+						executeEvent(actionPerformed, EventsPublisher.publish(event));
 					}
 
 				});
@@ -274,7 +275,7 @@ public class EventsExecutor {
 					public void onClick(ClickEvent event) {
 						if (mouseClicked != null) {
 							event.stopPropagation();
-							executeEvent(mouseClicked, Publisher.publish(event));
+							executeEvent(mouseClicked, EventsPublisher.publish(event));
 						}
 					}
 				};
@@ -283,7 +284,7 @@ public class EventsExecutor {
 					public void onDoubleClick(DoubleClickEvent event) {
 						if (mouseClicked != null) {
 							event.stopPropagation();
-							executeEvent(mouseClicked, Publisher.publish(event));
+							executeEvent(mouseClicked, EventsPublisher.publish(event));
 						}
 					}
 				};
@@ -319,7 +320,7 @@ public class EventsExecutor {
 							event.stopPropagation();
 							// Event.setCapture(event.getRelativeElement());
 							mouseState = MOUSE.PRESSED;
-							executeEvent(mousePressed, Publisher.publish(event));
+							executeEvent(mousePressed, EventsPublisher.publish(event));
 						}
 					}
 				};
@@ -350,7 +351,7 @@ public class EventsExecutor {
 						if (mouseReleased != null) {
 							event.stopPropagation();
 							mouseState = MOUSE.NULL;
-							executeEvent(mouseReleased, Publisher.publish(event));
+							executeEvent(mouseReleased, EventsPublisher.publish(event));
 						}
 					}
 				};
@@ -377,7 +378,7 @@ public class EventsExecutor {
 					public void onMouseOver(MouseOverEvent event) {
 						if (mouseEntered != null) {
 							event.stopPropagation();
-							executeEvent(mouseEntered, Publisher.publish(event));
+							executeEvent(mouseEntered, EventsPublisher.publish(event));
 						}
 					}
 				};
@@ -405,7 +406,7 @@ public class EventsExecutor {
 					public void onMouseWheel(MouseWheelEvent event) {
 						if (mouseWheelMoved != null) {
 							event.stopPropagation();
-							executeEvent(mouseWheelMoved, Publisher.publish(event));
+							executeEvent(mouseWheelMoved, EventsPublisher.publish(event));
 						}
 					}
 				};
@@ -435,10 +436,10 @@ public class EventsExecutor {
 							event.stopPropagation();
 							if (mouseState == MOUSE.NULL || mouseState == MOUSE.MOVED) {
 								mouseState = MOUSE.MOVED;
-								executeEvent(mouseMoved, Publisher.publish(event));
+								executeEvent(mouseMoved, EventsPublisher.publish(event));
 							} else if (mouseState == MOUSE.PRESSED || mouseState == MOUSE.DRAGGED) {
 								mouseState = MOUSE.DRAGGED;
-								executeEvent(mouseDragged, Publisher.publish(event));
+								executeEvent(mouseDragged, EventsPublisher.publish(event));
 							}
 						}
 					}
@@ -467,7 +468,7 @@ public class EventsExecutor {
 					@Override
 					public void onResize(ResizeEvent event) {
 						if (componentResized != null) {
-							executeEvent(componentResized, Publisher.publish(event));
+							executeEvent(componentResized, EventsPublisher.publish(event));
 						}
 					}
 				});
@@ -488,7 +489,7 @@ public class EventsExecutor {
 					@Override
 					public void onMove(MoveEvent<Object> event) {
 						if (componentMoved != null) {
-							executeEvent(componentMoved, Publisher.publish(event));
+							executeEvent(componentMoved, EventsPublisher.publish(event));
 						}
 					}
 				});
@@ -509,7 +510,7 @@ public class EventsExecutor {
 					@Override
 					public void onShow(ShowEvent event) {
 						if (componentShown != null) {
-							executeEvent(componentShown, Publisher.publish(event));
+							executeEvent(componentShown, EventsPublisher.publish(event));
 						}
 					}
 				});
@@ -530,7 +531,7 @@ public class EventsExecutor {
 					@Override
 					public void onHide(HideEvent event) {
 						if (componentHidden != null) {
-							executeEvent(componentHidden, Publisher.publish(event));
+							executeEvent(componentHidden, EventsPublisher.publish(event));
 						}
 					}
 				});
@@ -551,7 +552,7 @@ public class EventsExecutor {
 					@Override
 					public void onAdd(AddEvent event) {
 						if (componentAdded != null) {
-							executeEvent(componentAdded, Publisher.publish(event));
+							executeEvent(componentAdded, EventsPublisher.publish(event));
 						}
 					}
 				});
@@ -572,7 +573,7 @@ public class EventsExecutor {
 					@Override
 					public void onRemove(RemoveEvent event) {
 						if (componentRemoved != null) {
-							executeEvent(componentRemoved, Publisher.publish(event));
+							executeEvent(componentRemoved, EventsPublisher.publish(event));
 						}
 					}
 				});
@@ -597,7 +598,7 @@ public class EventsExecutor {
 					@Override
 					public void onFocus(FocusEvent event) {
 						if (focusGained != null) {
-							executeEvent(focusGained, Publisher.publish(event));
+							executeEvent(focusGained, EventsPublisher.publish(event));
 						}
 					}
 				});
@@ -619,7 +620,7 @@ public class EventsExecutor {
 					@Override
 					public void onBlur(BlurEvent event) {
 						if (focusLost != null) {
-							executeEvent(focusLost, Publisher.publish(event));
+							executeEvent(focusLost, EventsPublisher.publish(event));
 						}
 						mouseState = MOUSE.NULL;
 					}
@@ -643,7 +644,7 @@ public class EventsExecutor {
 					public void onKeyPress(KeyPressEvent event) {
 						if (keyTyped != null) {
 							event.stopPropagation();
-							executeEvent(keyTyped, Publisher.publish(event));
+							executeEvent(keyTyped, EventsPublisher.publish(event));
 						}
 					}
 				});
@@ -666,7 +667,7 @@ public class EventsExecutor {
 					public void onKeyDown(KeyDownEvent event) {
 						if (keyPressed != null) {
 							event.stopPropagation();
-							executeEvent(keyPressed, Publisher.publish(event));
+							executeEvent(keyPressed, EventsPublisher.publish(event));
 						}
 					}
 				});
@@ -689,7 +690,7 @@ public class EventsExecutor {
 					public void onKeyUp(KeyUpEvent event) {
 						if (keyReleased != null) {
 							event.stopPropagation();
-							executeEvent(keyReleased, Publisher.publish(event));
+							executeEvent(keyReleased, EventsPublisher.publish(event));
 						}
 					}
 
@@ -720,7 +721,7 @@ public class EventsExecutor {
 						Object oItem = event.getSelectedItem();
 						if (oItem instanceof HasPublished)
 							oItem = ((HasPublished) oItem).getPublished();
-						executeEvent(itemSelected, Publisher.publishItemEvent(published, oItem instanceof JavaScriptObject ? (JavaScriptObject) oItem : null));
+						executeEvent(itemSelected, EventsPublisher.publishItemEvent(published, oItem instanceof JavaScriptObject ? (JavaScriptObject) oItem : null));
 					}
 
 				});
@@ -743,7 +744,7 @@ public class EventsExecutor {
 					@Override
 					public void onValueChange(ValueChangeEvent<Object> event) {
 						JavaScriptObject published = ((HasPublished) event.getSource()).getPublished();
-						executeEvent(valueChanged, Publisher.publishSourcedEvent(published));
+						executeEvent(valueChanged, EventsPublisher.publishSourcedEvent(published));
 					}
 				});
 

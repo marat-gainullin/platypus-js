@@ -8,15 +8,15 @@ import java.util.logging.Logger;
 
 import com.eas.client.CallbackAdapter;
 import com.eas.client.Cancellable;
-import com.eas.client.HasPublished;
 import com.eas.client.IDGenerator;
-import com.eas.client.Utils;
-import com.eas.client.Utils.JsObject;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.metadata.Parameters;
 import com.eas.client.queries.Query;
+import com.eas.predefine.HasPublished;
+import com.eas.predefine.Utils;
+import com.eas.predefine.Utils.JsObject;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;

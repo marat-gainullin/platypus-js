@@ -27,14 +27,16 @@ import com.bearsoft.gwt.ui.containers.window.events.MoveHandler;
 import com.bearsoft.gwt.ui.containers.window.events.RestoreEvent;
 import com.bearsoft.gwt.ui.containers.window.events.RestoreHandler;
 import com.eas.client.AppClient;
-import com.eas.client.HasPublished;
-import com.eas.client.Utils;
-import com.eas.client.Utils.JsObject;
-import com.eas.form.published.HasJsName;
-import com.eas.form.published.PublishedComponent;
-import com.eas.form.published.containers.AnchorsPane;
-import com.eas.form.published.widgets.DesktopPane;
+import com.eas.predefine.HasPublished;
 import com.eas.predefine.Predefine;
+import com.eas.predefine.Utils;
+import com.eas.predefine.Utils.JsObject;
+import com.eas.ui.HasJsName;
+import com.eas.ui.PublishedComponent;
+import com.eas.ui.EventsPublisher;
+import com.eas.widgets.AnchorsPane;
+import com.eas.widgets.DesktopPane;
+import com.eas.widgets.WidgetsPublisher;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
@@ -78,7 +80,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	protected static void shownFormsChanged(JavaScriptObject aSource) {
 		if (onChange != null) {
 			try {
-				Utils.executeScriptEventVoid(Predefine.prerequire("forms/form"), onChange, Publisher.publishSourcedEvent(aSource));
+				Utils.executeScriptEventVoid(Predefine.prerequire("forms/form"), onChange, EventsPublisher.publishSourcedEvent(aSource));
 			} catch (Exception ex) {
 				Logger.getLogger(PlatypusWindow.class.getName()).log(Level.SEVERE, null, ex);
 			}
@@ -114,7 +116,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 
 	public PlatypusWindow() {
 		this(new AnchorsPane());
-		Publisher.publish((AnchorsPane) view);
+		WidgetsPublisher.publish((AnchorsPane) view);
 	}
 
 	public PlatypusWindow(Widget aView) {
@@ -270,7 +272,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 				showingForms.put(formKey, PlatypusWindow.this);
 				if (windowOpened != null) {
 					try {
-						Utils.executeScriptEventVoid(published, windowOpened, Publisher.publishWindowEvent(event, published));
+						Utils.executeScriptEventVoid(published, windowOpened, EventsPublisher.publishWindowEvent(event, published));
 					} catch (Exception ex) {
 						Logger.getLogger(PlatypusWindow.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 					}
@@ -293,7 +295,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 				}
 				if (windowActivated != null) {
 					try {
-						Utils.executeScriptEventVoid(published, windowActivated, Publisher.publishWindowEvent(event, published));
+						Utils.executeScriptEventVoid(published, windowActivated, EventsPublisher.publishWindowEvent(event, published));
 					} catch (Exception ex) {
 						Logger.getLogger(PlatypusWindow.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 					}
@@ -307,7 +309,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 			public void onDeactivate(DeactivateEvent<WindowUI> event) {
 				if (windowDeactivated != null) {
 					try {
-						Utils.executeScriptEventVoid(published, windowDeactivated, Publisher.publishWindowEvent(event, published));
+						Utils.executeScriptEventVoid(published, windowDeactivated, EventsPublisher.publishWindowEvent(event, published));
 					} catch (Exception ex) {
 						Logger.getLogger(PlatypusWindow.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 					}
@@ -321,7 +323,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 			public void onMinimize(MinimizeEvent<WindowUI> event) {
 				if (windowMinimized != null) {
 					try {
-						Utils.executeScriptEventVoid(published, windowMinimized, Publisher.publishWindowEvent(event, published));
+						Utils.executeScriptEventVoid(published, windowMinimized, EventsPublisher.publishWindowEvent(event, published));
 					} catch (Exception ex) {
 						Logger.getLogger(PlatypusWindow.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 					}
@@ -335,7 +337,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 			public void onMaximize(MaximizeEvent<WindowUI> event) {
 				if (windowMaximized != null) {
 					try {
-						Utils.executeScriptEventVoid(published, windowMaximized, Publisher.publishWindowEvent(event, published));
+						Utils.executeScriptEventVoid(published, windowMaximized, EventsPublisher.publishWindowEvent(event, published));
 					} catch (Exception ex) {
 						Logger.getLogger(PlatypusWindow.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 					}
@@ -349,7 +351,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 			public void onRestore(RestoreEvent<WindowUI> event) {
 				if (windowRestored != null) {
 					try {
-						Utils.executeScriptEventVoid(published, windowRestored, Publisher.publishWindowEvent(event, published));
+						Utils.executeScriptEventVoid(published, windowRestored, EventsPublisher.publishWindowEvent(event, published));
 					} catch (Exception ex) {
 						Logger.getLogger(PlatypusWindow.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 					}
@@ -363,7 +365,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 			public void onBeforeClose(BeforeCloseEvent<WindowUI> anEvent) {
 				if (windowClosing != null) {
 					try {
-						Boolean res = Utils.executeScriptEventBoolean(published, windowClosing, Publisher.publishWindowEvent(anEvent, published));
+						Boolean res = Utils.executeScriptEventBoolean(published, windowClosing, EventsPublisher.publishWindowEvent(anEvent, published));
 						if (Boolean.FALSE.equals(res))
 							anEvent.setCancelled(true);
 					} catch (Exception ex) {
@@ -380,7 +382,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 				view.removeFromParent();
 				if (windowClosed != null) {
 					try {
-						Utils.executeScriptEventVoid(published, windowClosed, Publisher.publishWindowEvent(event, published));
+						Utils.executeScriptEventVoid(published, windowClosed, EventsPublisher.publishWindowEvent(event, published));
 					} catch (Exception ex) {
 						Logger.getLogger(PlatypusWindow.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 					}
@@ -638,19 +640,19 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	        var closeCallback = null;
 	        aPublished.show = function() {
 		        closeCallback = null;
-		        showedWnd = aForm.@com.eas.form.PlatypusWindow::show(ZLcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/form/published/widgets/DesktopPane;)(false, null, null);
+		        showedWnd = aForm.@com.eas.form.PlatypusWindow::show(ZLcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/widgets/DesktopPane;)(false, null, null);
 		        aForm.@com.eas.form.PlatypusWindow::activate()();
 	        };
 	        aPublished.showModal = function(aCallback) {
 		        closeCallback = aCallback;
-		        showedWnd = aForm.@com.eas.form.PlatypusWindow::show(ZLcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/form/published/widgets/DesktopPane;)(true, aCallback, null);
+		        showedWnd = aForm.@com.eas.form.PlatypusWindow::show(ZLcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/widgets/DesktopPane;)(true, aCallback, null);
 		        aForm.@com.eas.form.PlatypusWindow::activate()();
 	        };
 	        aPublished.showOnPanel = function(aPanel) {
 	        	Logger.info("showOnPanel is unsupported. Use widget.showOn(...) method instead.");
 	        };
 	        aPublished.showInternalFrame = function(aPanel) {
-	        	showedWnd = aForm.@com.eas.form.PlatypusWindow::show(ZLcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/form/published/widgets/DesktopPane;)(false, null, aPanel != null ? aPanel.unwrap() : null);
+	        	showedWnd = aForm.@com.eas.form.PlatypusWindow::show(ZLcom/google/gwt/core/client/JavaScriptObject;Lcom/eas/widgets/DesktopPane;)(false, null, aPanel != null ? aPanel.unwrap() : null);
 		        aForm.@com.eas.form.PlatypusWindow::activate()();
 	        };
 	        aPublished.minimize = function(){
