@@ -4,9 +4,6 @@ import java.util.Comparator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bearsoft.gwt.ui.widgets.grid.cells.CellHasReadonly;
-import com.bearsoft.gwt.ui.widgets.grid.cells.CellRenderer;
-import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
 import com.eas.bound.ModelCheck;
 import com.eas.bound.ModelCombo;
 import com.eas.bound.ModelDecoratorBox;
@@ -14,15 +11,18 @@ import com.eas.grid.GridColumn;
 import com.eas.grid.GridSection;
 import com.eas.grid.ModelGrid;
 import com.eas.grid.RenderedCellContext;
+import com.eas.grid.cells.CellHasReadonly;
+import com.eas.grid.cells.CellRenderer;
 import com.eas.grid.cells.CheckBoxCell;
 import com.eas.grid.cells.RenderedEditorCell;
+import com.eas.grid.cells.TreeExpandableCell;
 import com.eas.grid.rows.PathComparator;
 import com.eas.predefine.HasPublished;
 import com.eas.predefine.Utils;
 import com.eas.predefine.Utils.JsObject;
 import com.eas.ui.PublishedCell;
 import com.eas.ui.EventsPublisher;
-import com.eas.widgets.ControlsUtils;
+import com.eas.widgets.WidgetsUtils;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -434,7 +434,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 							else
 								lsb.append(SafeHtmlUtils.fromString(display));
 							grid.complementPublishedStyle(cellToRender);
-							String decorId = ControlsUtils.renderDecorated(lsb, aId, cellToRender, sb);
+							String decorId = WidgetsUtils.renderDecorated(lsb, aId, cellToRender, sb);
 							if (cellToRender != null) {
 								if (context instanceof RenderedCellContext) {
 									((RenderedCellContext) context).setPublishedCell(cellToRender);
@@ -459,7 +459,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 			JavaScriptObject renderedElement = key instanceof JavaScriptObject ? (JavaScriptObject) key : null;
 			if (renderedElement != null) {
 				Object data = aField != null && !aField.isEmpty() ? Utils.getPathData(renderedElement, aField) : null;
-				PublishedCell cell = ControlsUtils.publishCell(data, aDisplay);
+				PublishedCell cell = WidgetsUtils.publishCell(data, aDisplay);
 				JsArrayMixed args = JavaScriptObject.createArray().cast();
 				args.push(EventsPublisher.publishOnRenderEvent(aThis, null, null, renderedElement, cell));
 				aOnRender.<JsObject> cast().apply(aThis, args);

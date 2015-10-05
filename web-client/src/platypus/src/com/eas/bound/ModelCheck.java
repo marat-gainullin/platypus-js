@@ -1,11 +1,11 @@
 package com.eas.bound;
 
-import com.bearsoft.gwt.ui.events.ActionEvent;
-import com.bearsoft.gwt.ui.events.ActionHandler;
-import com.bearsoft.gwt.ui.events.HasActionHandlers;
-import com.bearsoft.gwt.ui.widgets.NullableCheckBox;
 import com.eas.client.converters.BooleanValueConverter;
 import com.eas.predefine.Utils;
+import com.eas.ui.events.ActionEvent;
+import com.eas.ui.events.ActionHandler;
+import com.eas.ui.events.HasActionHandlers;
+import com.eas.widgets.boxes.NullableCheckBox;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

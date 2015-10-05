@@ -13,15 +13,20 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.eas.bound.JsBound;
 import com.eas.client.AppClient;
 import com.eas.client.CallbackAdapter;
 import com.eas.client.GroupingHandlerRegistration;
 import com.eas.client.Loader;
 import com.eas.client.PlatypusLogFormatter;
-import com.eas.form.JsUi;
+import com.eas.form.JsForm;
+import com.eas.grid.JsGrid;
+import com.eas.menu.JsMenu;
 import com.eas.model.JsModel;
 import com.eas.predefine.Predefine;
 import com.eas.predefine.Utils;
+import com.eas.ui.JsUi;
+import com.eas.widgets.JsWidgets;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -64,13 +69,11 @@ public class Application {
 		}
 		Predefine.init();
 		JsApi.init();
-		JsModel.init();
-		JsUi.init();
-		/*
 		GWT.runAsync(new RunAsyncCallback() {
 			
 			@Override
 			public void onSuccess() {
+				JsUi.init();
 			}
 			
 			@Override
@@ -81,13 +84,68 @@ public class Application {
 			
 			@Override
 			public void onSuccess() {
+				JsMenu.init();
 			}
 			
 			@Override
 			public void onFailure(Throwable reason) {
 			}
 		});
-		*/
+		GWT.runAsync(new RunAsyncCallback() {
+			
+			@Override
+			public void onSuccess() {
+				JsWidgets.init();
+			}
+			
+			@Override
+			public void onFailure(Throwable reason) {
+			}
+		});
+		GWT.runAsync(new RunAsyncCallback() {
+			
+			@Override
+			public void onSuccess() {
+				JsBound.init();
+			}
+			
+			@Override
+			public void onFailure(Throwable reason) {
+			}
+		});
+		GWT.runAsync(new RunAsyncCallback() {
+			
+			@Override
+			public void onSuccess() {
+				JsGrid.init();
+			}
+			
+			@Override
+			public void onFailure(Throwable reason) {
+			}
+		});
+		GWT.runAsync(new RunAsyncCallback() {
+			
+			@Override
+			public void onSuccess() {
+				JsForm.init();
+			}
+			
+			@Override
+			public void onFailure(Throwable reason) {
+			}
+		});
+		GWT.runAsync(new RunAsyncCallback() {
+			
+			@Override
+			public void onSuccess() {
+				JsModel.init();
+			}
+			
+			@Override
+			public void onFailure(Throwable reason) {
+			}
+		});
 		loaderHandlerRegistration.add(Loader.addHandler(new LoggingLoadHandler()));
 		AppClient.getInstance().requestLoggedInUser(new CallbackAdapter<String, String>() {
 

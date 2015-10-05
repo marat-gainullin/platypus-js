@@ -4,7 +4,6 @@
 
 <module>
     <inherits name="com.eas.ui.UI"/>
-    <inherits name="com.eas.predefine.Predefine"/>
 
     <source path=""/>
     

@@ -1,6 +1,6 @@
 package com.eas.grid.rows;
 
-import com.bearsoft.gwt.ui.widgets.grid.processing.TreeDataProvider;
+import com.eas.grid.processing.TreeDataProvider;
 import com.google.gwt.core.client.JavaScriptObject;
 
 public class JsArrayTreeDataProvider extends TreeDataProvider<JavaScriptObject> implements JsDataContainer {

@@ -57,8 +57,8 @@ public final class PublishedCell extends JavaScriptObject {
 	}-*/;
 	
 	public final native int getAlign()/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return this.align ? this.align : Ui.HorizontalPosition.LEFT;
+		var HorizontalPosition = @com.eas.ui.JsUi::HorizontalPosition;
+		return this.align ? this.align : HorizontalPosition.LEFT;
 	}-*/;
 	
 	public final native void setAlign(int aValue)/*-{
@@ -66,10 +66,10 @@ public final class PublishedCell extends JavaScriptObject {
 	}-*/;
 	
 	public final native String getStyledAlign()/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		if (this.align == Ui.HorizontalPosition.CENTER)
+		var HorizontalPosition = @com.eas.ui.JsUi::HorizontalPosition;
+		if (this.align == HorizontalPosition.CENTER)
 			return "center";
-		else if (this.align == Ui.HorizontalPosition.RIGHT)
+		else if (this.align == HorizontalPosition.RIGHT)
 			return "right";
 		else
 			return "left";

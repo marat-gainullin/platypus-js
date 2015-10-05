@@ -2,12 +2,12 @@ package com.eas.grid;
 
 import java.util.List;
 
-import com.bearsoft.gwt.ui.Orientation;
-import com.bearsoft.gwt.ui.containers.AnchorsPanel;
-import com.bearsoft.gwt.ui.containers.BoxPanel;
-import com.bearsoft.gwt.ui.containers.window.ToolsCaption;
-import com.bearsoft.gwt.ui.containers.window.WindowPanel;
-import com.bearsoft.gwt.ui.containers.window.WindowPopupPanel;
+import com.eas.ui.Orientation;
+import com.eas.widgets.containers.AnchorsPanel;
+import com.eas.widgets.containers.BoxPanel;
+import com.eas.window.ToolsCaption;
+import com.eas.window.WindowPanel;
+import com.eas.window.WindowPopupPanel;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;

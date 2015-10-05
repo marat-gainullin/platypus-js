@@ -1,14 +1,14 @@
 package com.eas.bound;
 
-import com.bearsoft.gwt.ui.events.ActionEvent;
-import com.bearsoft.gwt.ui.events.ActionHandler;
-import com.bearsoft.gwt.ui.events.HasActionHandlers;
-import com.bearsoft.gwt.ui.widgets.ExplicitDoubleBox;
 import com.eas.client.converters.DoubleValueConverter;
 import com.eas.predefine.Utils;
 import com.eas.ui.HasEmptyText;
+import com.eas.ui.events.ActionEvent;
+import com.eas.ui.events.ActionHandler;
+import com.eas.ui.events.HasActionHandlers;
 import com.eas.widgets.ConstraintedSpinnerBox;
-import com.eas.widgets.ControlsUtils;
+import com.eas.widgets.WidgetsUtils;
+import com.eas.widgets.boxes.ExplicitDoubleBox;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -63,7 +63,7 @@ public class ModelSpin extends ModelDecoratorBox<Double> implements HasEmptyText
 	@Override
 	public void setEmptyText(String aValue) {
 		emptyText = aValue;
-		ControlsUtils.applyEmptyText(getElement(), emptyText);
+		WidgetsUtils.applyEmptyText(getElement(), emptyText);
 	}
 
 	@Override

@@ -8,13 +8,13 @@ public class PublishedFont extends JavaScriptObject {
 	}
 
 	public final native boolean isBold()/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return this.style == Ui.FontStyle.BOLD || this.style == Ui.FontStyle.BOLD_ITALIC;
+		var FontStyle = @com.eas.ui.JsUi::FontStyle;
+		return this.style == FontStyle.BOLD || this.style == FontStyle.BOLD_ITALIC;
 	}-*/;
 
 	public final native boolean isItalic()/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return this.style == Ui.FontStyle.ITALIC || this.style == Ui.FontStyle.BOLD_ITALIC;
+		var FontStyle = @com.eas.ui.JsUi::FontStyle;
+		return this.style == FontStyle.ITALIC || this.style == FontStyle.BOLD_ITALIC;
 	}-*/;
 
 	public final native String getFamily()/*-{
@@ -22,8 +22,8 @@ public class PublishedFont extends JavaScriptObject {
 	}-*/;
 
 	public final native int getStyle()/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return this.style != null ? this.style : Ui.FontStyle.NORMAL;
+		var FontStyle = @com.eas.ui.JsUi::FontStyle;
+		return this.style != null ? this.style : FontStyle.NORMAL;
 	}-*/;
 
 	public final native int getSize()/*-{
@@ -31,8 +31,8 @@ public class PublishedFont extends JavaScriptObject {
 	}-*/;
 
 	public static native PublishedFont create(String aFamily, int aStyle, int aSize)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
-		return new Ui.Font(aFamily, aStyle, aSize);
+		var Font = @com.eas.ui.JsUi::Font;
+		return new Font(aFamily, aStyle, aSize);
 	}-*/;
 
 	public final String toStyled() {

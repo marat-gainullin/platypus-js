@@ -1,6 +1,6 @@
 package com.eas.ui;
 
-import com.eas.form.EventsExecutor;
+import com.eas.widgets.EventsExecutor;
 
 
 public interface HasEventsExecutor {

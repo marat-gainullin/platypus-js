@@ -4,10 +4,10 @@
  */
 package com.eas.grid;
 
-import com.bearsoft.gwt.ui.dnd.XDataTransfer;
 import com.eas.grid.columns.header.HeaderNode;
 import com.eas.ui.PublishedColor;
 import com.eas.ui.PublishedFont;
+import com.eas.ui.XDataTransfer;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.core.client.GWT;

@@ -1,13 +1,12 @@
 package com.eas.menu;
 
-import com.bearsoft.gwt.ui.events.ActionEvent;
-import com.bearsoft.gwt.ui.events.ActionHandler;
-import com.bearsoft.gwt.ui.events.HasActionHandlers;
-import com.bearsoft.gwt.ui.menu.MenuItemImageText;
-import com.eas.form.EventsExecutor;
 import com.eas.predefine.HasPublished;
 import com.eas.ui.HasEventsExecutor;
 import com.eas.ui.HasJsFacade;
+import com.eas.ui.events.ActionEvent;
+import com.eas.ui.events.ActionHandler;
+import com.eas.ui.events.HasActionHandlers;
+import com.eas.widgets.EventsExecutor;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.shared.HandlerRegistration;

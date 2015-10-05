@@ -1,20 +1,5 @@
 package com.eas.widgets;
 
-import com.bearsoft.gwt.ui.XElement;
-import com.bearsoft.gwt.ui.containers.BorderPanel;
-import com.bearsoft.gwt.ui.events.AddEvent;
-import com.bearsoft.gwt.ui.events.AddHandler;
-import com.bearsoft.gwt.ui.events.HasAddHandlers;
-import com.bearsoft.gwt.ui.events.HasHideHandlers;
-import com.bearsoft.gwt.ui.events.HasRemoveHandlers;
-import com.bearsoft.gwt.ui.events.HasShowHandlers;
-import com.bearsoft.gwt.ui.events.HideEvent;
-import com.bearsoft.gwt.ui.events.HideHandler;
-import com.bearsoft.gwt.ui.events.RemoveEvent;
-import com.bearsoft.gwt.ui.events.RemoveHandler;
-import com.bearsoft.gwt.ui.events.ShowEvent;
-import com.bearsoft.gwt.ui.events.ShowHandler;
-import com.eas.form.EventsExecutor;
 import com.eas.menu.PlatypusPopupMenu;
 import com.eas.predefine.HasPublished;
 import com.eas.ui.HasComponentPopupMenu;
@@ -22,6 +7,20 @@ import com.eas.ui.HasEventsExecutor;
 import com.eas.ui.HasJsFacade;
 import com.eas.ui.HorizontalPosition;
 import com.eas.ui.VerticalPosition;
+import com.eas.ui.XElement;
+import com.eas.ui.events.AddEvent;
+import com.eas.ui.events.AddHandler;
+import com.eas.ui.events.HasAddHandlers;
+import com.eas.ui.events.HasHideHandlers;
+import com.eas.ui.events.HasRemoveHandlers;
+import com.eas.ui.events.HasShowHandlers;
+import com.eas.ui.events.HideEvent;
+import com.eas.ui.events.HideHandler;
+import com.eas.ui.events.RemoveEvent;
+import com.eas.ui.events.RemoveHandler;
+import com.eas.ui.events.ShowEvent;
+import com.eas.ui.events.ShowHandler;
+import com.eas.widgets.containers.BorderPanel;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
@@ -329,7 +328,8 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 	}
 
 	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
+		var VerticalPosition = @com.eas.ui.JsUi::VerticalPosition;		
+		var HorizontalPosition = @com.eas.ui.JsUi::HorizontalPosition;		
 		Object.defineProperty(published, "hgap", {
 			get : function(){
 				return aWidget.@com.eas.widgets.BorderPane::getHgap()();
@@ -396,13 +396,13 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 				if(toAdd.parent == published)
 					throw 'A widget already added to this container';
 				if(!region){
-					region = Ui.VerticalPosition.CENTER;
+					region = VerticalPosition.CENTER;
 				}
 				switch (region) {
-					case Ui.VerticalPosition.CENTER:
+					case VerticalPosition.CENTER:
 						aWidget.@com.eas.widgets.BorderPane::setCenterComponent(Lcom/google/gwt/user/client/ui/Widget;)(toAdd.unwrap());
 						break;  
-					case Ui.VerticalPosition.TOP: 
+					case VerticalPosition.TOP: 
 						if (!aSize) {
 							aSize = toAdd.height;
 							if (!aSize) {
@@ -411,7 +411,7 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 						}
 						aWidget.@com.eas.widgets.BorderPane::setTopComponent(Lcom/google/gwt/user/client/ui/Widget;D)(toAdd.unwrap(), aSize);
 						break;  
-					case Ui.VerticalPosition.BOTTOM: 
+					case VerticalPosition.BOTTOM: 
 						if (!aSize) {
 							aSize = toAdd.height;
 							if (!aSize) {
@@ -420,7 +420,7 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 						}
 						aWidget.@com.eas.widgets.BorderPane::setBottomComponent(Lcom/google/gwt/user/client/ui/Widget;D)(toAdd.unwrap(), aSize);
 						break;  
-					case Ui.HorizontalPosition.LEFT: 
+					case HorizontalPosition.LEFT: 
 						if (!aSize) {
 							aSize = toAdd.width;
 							if (!aSize) {
@@ -429,7 +429,7 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 						}
 						aWidget.@com.eas.widgets.BorderPane::setLeftComponent(Lcom/google/gwt/user/client/ui/Widget;D)(toAdd.unwrap(), aSize);
 						break;  
-					case Ui.HorizontalPosition.RIGHT: 
+					case HorizontalPosition.RIGHT: 
 						if (!aSize) {
 							aSize = toAdd.width;
 							if (!aSize) {

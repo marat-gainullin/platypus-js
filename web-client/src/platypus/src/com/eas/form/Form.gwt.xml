@@ -4,6 +4,7 @@
 
 <module>
     <inherits name="com.eas.widgets.Widgets"/>
+    <inherits name="com.eas.window.Window"/>
     <inherits name="com.eas.menu.Menu"/>
     <inherits name="com.eas.grid.Grid"/>
 

@@ -10,15 +10,15 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bearsoft.gwt.ui.XElement;
-import com.bearsoft.gwt.ui.dnd.XDataTransfer;
-import com.bearsoft.gwt.ui.menu.MenuItemCheckBox;
 import com.eas.grid.builders.NullHeaderOrFooterBuilder;
 import com.eas.grid.builders.ThemedHeaderOrFooterBuilder;
 import com.eas.grid.columns.ModelColumn;
 import com.eas.grid.columns.header.HasSortList;
 import com.eas.grid.columns.header.HeaderNode;
+import com.eas.menu.MenuItemCheckBox;
 import com.eas.ui.PublishedColor;
+import com.eas.ui.XDataTransfer;
+import com.eas.ui.XElement;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;

@@ -1,10 +1,10 @@
 package com.eas.bound;
 
-import com.bearsoft.gwt.ui.widgets.NullableTextArea;
 import com.eas.client.converters.StringValueConverter;
 import com.eas.predefine.Utils;
 import com.eas.ui.HasEmptyText;
-import com.eas.widgets.ControlsUtils;
+import com.eas.widgets.WidgetsUtils;
+import com.eas.widgets.boxes.NullableTextArea;
 import com.google.gwt.core.client.JavaScriptObject;
 
 public class ModelTextArea extends ModelDecoratorBox<String> implements HasEmptyText {
@@ -31,7 +31,7 @@ public class ModelTextArea extends ModelDecoratorBox<String> implements HasEmpty
 	@Override
 	public void setEmptyText(String aValue) {
 		emptyText = aValue;
-		ControlsUtils.applyEmptyText(getElement(), emptyText);
+		WidgetsUtils.applyEmptyText(getElement(), emptyText);
 	}
 
 	public void setPublished(JavaScriptObject aValue) {

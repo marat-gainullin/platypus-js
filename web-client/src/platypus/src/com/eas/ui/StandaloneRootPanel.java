@@ -1,6 +1,5 @@
 package com.eas.ui;
 
-import com.bearsoft.gwt.ui.XElement;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Element;

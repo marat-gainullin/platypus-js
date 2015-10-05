@@ -1,15 +1,14 @@
 package com.eas.menu;
 
-import com.bearsoft.gwt.ui.events.ActionEvent;
-import com.bearsoft.gwt.ui.events.ActionHandler;
-import com.bearsoft.gwt.ui.events.HasActionHandlers;
-import com.bearsoft.gwt.ui.menu.MenuItemCheckBox;
-import com.eas.form.EventsExecutor;
 import com.eas.predefine.HasPublished;
 import com.eas.ui.HasEventsExecutor;
 import com.eas.ui.HasJsFacade;
 import com.eas.ui.HasPlatypusButtonGroup;
+import com.eas.ui.events.ActionEvent;
+import com.eas.ui.events.ActionHandler;
+import com.eas.ui.events.HasActionHandlers;
 import com.eas.widgets.ButtonGroup;
+import com.eas.widgets.EventsExecutor;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;

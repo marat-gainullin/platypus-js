@@ -3,25 +3,24 @@ package com.eas.widgets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bearsoft.gwt.ui.CommonResources;
-import com.bearsoft.gwt.ui.XElement;
-import com.bearsoft.gwt.ui.events.HasHideHandlers;
-import com.bearsoft.gwt.ui.events.HasShowHandlers;
-import com.bearsoft.gwt.ui.events.HideEvent;
-import com.bearsoft.gwt.ui.events.HideHandler;
-import com.bearsoft.gwt.ui.events.ShowEvent;
-import com.bearsoft.gwt.ui.events.ShowHandler;
 import com.eas.client.AppClient;
 import com.eas.client.Cancellable;
 import com.eas.client.published.PublishedFile;
 import com.eas.client.xhr.ProgressEvent;
-import com.eas.form.EventsExecutor;
 import com.eas.menu.PlatypusPopupMenu;
 import com.eas.predefine.HasPublished;
+import com.eas.ui.CommonResources;
 import com.eas.ui.HasComponentPopupMenu;
 import com.eas.ui.HasEmptyText;
 import com.eas.ui.HasEventsExecutor;
 import com.eas.ui.HasJsFacade;
+import com.eas.ui.XElement;
+import com.eas.ui.events.HasHideHandlers;
+import com.eas.ui.events.HasShowHandlers;
+import com.eas.ui.events.HideEvent;
+import com.eas.ui.events.HideHandler;
+import com.eas.ui.events.ShowEvent;
+import com.eas.ui.events.ShowHandler;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.shared.GWT;
@@ -266,13 +265,13 @@ HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHan
 		btnBackground.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				ControlsUtils.selectColor(textContainer.getFormatter().getBackColor(), new Callback<String, String>() {
+				WidgetsUtils.selectColor(textContainer.getFormatter().getBackColor(), new Callback<String, String>() {
 					@Override
 					public void onSuccess(String result) {
 						try {
 							textContainer.getFormatter().setBackColor(result);
 						} catch (Exception ex) {
-							Logger.getLogger(ControlsUtils.class.getName()).log(Level.SEVERE, null, ex);
+							Logger.getLogger(WidgetsUtils.class.getName()).log(Level.SEVERE, null, ex);
 						}
 					}
 					@Override
@@ -285,13 +284,13 @@ HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHan
 		btnForeground.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				ControlsUtils.selectColor(textContainer.getFormatter().getForeColor(), new Callback<String, String>() {
+				WidgetsUtils.selectColor(textContainer.getFormatter().getForeColor(), new Callback<String, String>() {
 					@Override
 					public void onSuccess(String result) {
 						try {
 							textContainer.getFormatter().setForeColor(result);
 						} catch (Exception ex) {
-							Logger.getLogger(ControlsUtils.class.getName()).log(Level.SEVERE, null, ex);
+							Logger.getLogger(WidgetsUtils.class.getName()).log(Level.SEVERE, null, ex);
 						}
 					}
 					@Override
@@ -338,7 +337,7 @@ HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHan
 		btnUploadImage.addClickHandler(new ClickHandler() {
 			@Override
 				public void onClick(ClickEvent event) {
-					ControlsUtils.selectFile(new Callback<JavaScriptObject, String>() {
+					WidgetsUtils.selectFile(new Callback<JavaScriptObject, String>() {
 						@Override
 						public void onSuccess(JavaScriptObject result) {
 							try {
@@ -365,7 +364,7 @@ HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHan
 								} else
 									return;
 							} catch (Exception ex) {
-								Logger.getLogger(ControlsUtils.class.getName()).log(Level.SEVERE, null, ex);
+								Logger.getLogger(WidgetsUtils.class.getName()).log(Level.SEVERE, null, ex);
 							}
 						}
 						@Override
@@ -618,7 +617,7 @@ HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHan
 	@Override
 	public void setEmptyText(String aValue) {
 		emptyText = aValue;
-		ControlsUtils.applyEmptyText(getElement(), emptyText);
+		WidgetsUtils.applyEmptyText(getElement(), emptyText);
 	}
 	
 	public JavaScriptObject getPublished() {

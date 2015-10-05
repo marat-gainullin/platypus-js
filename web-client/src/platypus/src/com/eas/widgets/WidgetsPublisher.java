@@ -126,9 +126,9 @@ public class WidgetsPublisher {
 	}-*/;
 
 	public native static PublishedComponent publish(BoxPane aComponent)/*-{
-		var Ui = @com.eas.form.JsUi::ui;
+		var Orientation = @com.eas.ui.JsUi::Orientation;
 		var constr = @com.eas.widgets.WidgetsPublisher::getPublisher(Ljava/lang/String;)('BoxPane');
-		return new constr(Ui.Orientation.HORIZONTAL, null, null, aComponent);
+		return new constr(Orientation.HORIZONTAL, null, null, aComponent);
 	}-*/;
 
 	public native static PublishedComponent publish(CardPane aComponent)/*-{

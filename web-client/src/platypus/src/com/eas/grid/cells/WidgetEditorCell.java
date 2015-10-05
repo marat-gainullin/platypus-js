@@ -6,8 +6,8 @@ package com.eas.grid.cells;
 
 import java.util.Set;
 
-import com.bearsoft.gwt.ui.widgets.AutoCloseBox;
 import com.eas.grid.Grid;
+import com.eas.widgets.boxes.AutoCloseBox;
 import com.google.gwt.cell.client.AbstractEditableCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.ValueUpdater;

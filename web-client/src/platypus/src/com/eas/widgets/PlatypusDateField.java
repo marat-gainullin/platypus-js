@@ -1,19 +1,18 @@
 package com.eas.widgets;
 
-import com.bearsoft.gwt.ui.XElement;
-import com.bearsoft.gwt.ui.events.HasHideHandlers;
-import com.bearsoft.gwt.ui.events.HasShowHandlers;
-import com.bearsoft.gwt.ui.events.HideEvent;
-import com.bearsoft.gwt.ui.events.HideHandler;
-import com.bearsoft.gwt.ui.events.ShowEvent;
-import com.bearsoft.gwt.ui.events.ShowHandler;
-import com.bearsoft.gwt.ui.widgets.DateTimeBox;
-import com.eas.form.EventsExecutor;
 import com.eas.menu.PlatypusPopupMenu;
 import com.eas.predefine.HasPublished;
 import com.eas.ui.HasComponentPopupMenu;
 import com.eas.ui.HasEventsExecutor;
 import com.eas.ui.HasJsFacade;
+import com.eas.ui.XElement;
+import com.eas.ui.events.HasHideHandlers;
+import com.eas.ui.events.HasShowHandlers;
+import com.eas.ui.events.HideEvent;
+import com.eas.ui.events.HideHandler;
+import com.eas.ui.events.ShowEvent;
+import com.eas.ui.events.ShowHandler;
+import com.eas.widgets.boxes.DateTimeBox;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
@@ -155,7 +154,7 @@ public class PlatypusDateField extends DateTimeBox implements HasJsFacade, HasEn
 	public void setFormatPattern(String aValue) {
 		formatPattern = aValue;
 		if (formatPattern != null)
-			formatPattern = ControlsUtils.convertDateFormatString(formatPattern);
+			formatPattern = WidgetsUtils.convertDateFormatString(formatPattern);
 		DateTimeFormat dtFormat = formatPattern != null ? DateTimeFormat.getFormat(formatPattern) : DateTimeFormat.getFormat("dd.MM.yyyy");
 		setFormat(new DateBox.DefaultFormat(dtFormat));
 	}

@@ -1,7 +1,7 @@
 package com.eas.grid.columns;
 
-import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
 import com.eas.grid.cells.CheckBoxCell;
+import com.eas.grid.cells.TreeExpandableCell;
 import com.google.gwt.core.client.JavaScriptObject;
 
 public class CheckServiceColumn extends ModelColumn {

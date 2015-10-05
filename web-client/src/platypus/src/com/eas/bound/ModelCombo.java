@@ -4,19 +4,19 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bearsoft.gwt.ui.CommonResources;
-import com.bearsoft.gwt.ui.events.ActionEvent;
-import com.bearsoft.gwt.ui.events.ActionHandler;
-import com.bearsoft.gwt.ui.events.HasActionHandlers;
-import com.bearsoft.gwt.ui.widgets.StyledListBox;
 import com.eas.client.IDGenerator;
 import com.eas.client.converters.StringValueConverter;
 import com.eas.grid.rows.JsArrayList;
 import com.eas.predefine.Utils;
+import com.eas.ui.CommonResources;
 import com.eas.ui.HasEmptyText;
 import com.eas.ui.JavaScriptObjectKeyProvider;
 import com.eas.ui.PublishedCell;
-import com.eas.widgets.ControlsUtils;
+import com.eas.ui.events.ActionEvent;
+import com.eas.ui.events.ActionHandler;
+import com.eas.ui.events.HasActionHandlers;
+import com.eas.widgets.WidgetsUtils;
+import com.eas.widgets.boxes.StyledListBox;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -199,7 +199,7 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 
 	public String calcLabel(JavaScriptObject aValue) {
 		String label = aValue != null ? new StringValueConverter().convert(Utils.getPathData(aValue, displayField)) : "...";
-		PublishedCell cell = ControlsUtils.calcValuedPublishedCell(published, onRender, aValue, label != null ? label : "", null);
+		PublishedCell cell = WidgetsUtils.calcValuedPublishedCell(published, onRender, aValue, label != null ? label : "", null);
 		if (cell != null && cell.getDisplay() != null && !cell.getDisplay().isEmpty()) {
 			label = cell.getDisplay();
 		}
@@ -226,7 +226,7 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 	@Override
 	public void setEmptyText(String aValue) {
 		emptyText = aValue;
-		ControlsUtils.applyEmptyText(getElement(), emptyText);
+		WidgetsUtils.applyEmptyText(getElement(), emptyText);
 	}
 
 	public void setPublished(JavaScriptObject aValue) {

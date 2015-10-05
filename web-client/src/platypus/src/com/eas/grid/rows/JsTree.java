@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.bearsoft.gwt.ui.widgets.grid.processing.TreeAdapter;
+import com.eas.grid.processing.TreeAdapter;
 import com.eas.predefine.Utils;
 import com.eas.predefine.Utils.JsObject;
 import com.google.gwt.core.client.JavaScriptObject;

@@ -5,8 +5,6 @@
  */
 package com.eas.grid.cells;
 
-import com.bearsoft.gwt.ui.widgets.grid.cells.CellHasReadonly;
-import com.bearsoft.gwt.ui.widgets.grid.cells.CellRenderer;
 import com.eas.grid.RenderedCellContext;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.ValueUpdater;

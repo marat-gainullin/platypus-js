@@ -2,17 +2,17 @@ package com.eas.bound;
 
 import java.text.ParseException;
 
-import com.bearsoft.gwt.ui.events.ActionEvent;
-import com.bearsoft.gwt.ui.events.ActionHandler;
-import com.bearsoft.gwt.ui.events.HasActionHandlers;
-import com.bearsoft.gwt.ui.widgets.FormattedObjectBox;
-import com.bearsoft.gwt.ui.widgets.ObjectFormat;
 import com.eas.client.converters.DateValueConverter;
 import com.eas.client.converters.DoubleValueConverter;
 import com.eas.client.converters.StringValueConverter;
 import com.eas.predefine.Utils;
 import com.eas.ui.HasEmptyText;
-import com.eas.widgets.ControlsUtils;
+import com.eas.ui.events.ActionEvent;
+import com.eas.ui.events.ActionHandler;
+import com.eas.ui.events.HasActionHandlers;
+import com.eas.widgets.WidgetsUtils;
+import com.eas.widgets.boxes.FormattedObjectBox;
+import com.eas.widgets.boxes.ObjectFormat;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -133,7 +133,7 @@ public class ModelFormattedField extends ModelDecoratorBox<Object> implements Ha
 	@Override
 	public void setEmptyText(String aValue) {
 		emptyText = aValue;
-		ControlsUtils.applyEmptyText(getElement(), emptyText);
+		WidgetsUtils.applyEmptyText(getElement(), emptyText);
 	}
 
 	@Override
@@ -166,11 +166,11 @@ public class ModelFormattedField extends ModelDecoratorBox<Object> implements Ha
 			get : function() {
 				var typeNum = aWidget.@com.eas.bound.ModelFormattedField::getValueType()()
 				var type;
-				if (typeNum === @com.bearsoft.gwt.ui.widgets.ObjectFormat::NUMBER ){
+				if (typeNum === @com.eas.widgets.boxes.ObjectFormat::NUMBER ){
 					type = $wnd.Number;
-				} else if (typeNum === @com.bearsoft.gwt.ui.widgets.ObjectFormat::DATE ){
+				} else if (typeNum === @com.eas.widgets.boxes.ObjectFormat::DATE ){
 					type = $wnd.Date;
-				} else if (typeNum === @com.bearsoft.gwt.ui.widgets.ObjectFormat::REGEXP ){
+				} else if (typeNum === @com.eas.widgets.boxes.ObjectFormat::REGEXP ){
 					type = $wnd.RegExp;
 				} else {
 					type = $wnd.String;
@@ -180,13 +180,13 @@ public class ModelFormattedField extends ModelDecoratorBox<Object> implements Ha
 			set : function(aValue) {
 				var typeNum;
 				if (aValue === $wnd.Number ){
-					typeNum = @com.bearsoft.gwt.ui.widgets.ObjectFormat::NUMBER;
+					typeNum = @com.eas.widgets.boxes.ObjectFormat::NUMBER;
 				} else if (aValue === $wnd.Date ){
-					typeNum = @com.bearsoft.gwt.ui.widgets.ObjectFormat::DATE;
+					typeNum = @com.eas.widgets.boxes.ObjectFormat::DATE;
 				} else if (aValue === $wnd.RegExp ){
-					typeNum = @com.bearsoft.gwt.ui.widgets.ObjectFormat::REGEXP;
+					typeNum = @com.eas.widgets.boxes.ObjectFormat::REGEXP;
 				} else {
-					typeNum = @com.bearsoft.gwt.ui.widgets.ObjectFormat::TEXT;
+					typeNum = @com.eas.widgets.boxes.ObjectFormat::TEXT;
 				}
 				aWidget.@com.eas.bound.ModelFormattedField::setValueType(I)(typeNum);
 			}

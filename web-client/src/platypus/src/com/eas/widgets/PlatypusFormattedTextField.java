@@ -1,17 +1,5 @@
 package com.eas.widgets;
 
-import com.bearsoft.gwt.ui.XElement;
-import com.bearsoft.gwt.ui.events.ActionEvent;
-import com.bearsoft.gwt.ui.events.ActionHandler;
-import com.bearsoft.gwt.ui.events.HasActionHandlers;
-import com.bearsoft.gwt.ui.events.HasHideHandlers;
-import com.bearsoft.gwt.ui.events.HasShowHandlers;
-import com.bearsoft.gwt.ui.events.HideEvent;
-import com.bearsoft.gwt.ui.events.HideHandler;
-import com.bearsoft.gwt.ui.events.ShowEvent;
-import com.bearsoft.gwt.ui.events.ShowHandler;
-import com.bearsoft.gwt.ui.widgets.FormattedObjectBox;
-import com.eas.form.EventsExecutor;
 import com.eas.menu.PlatypusPopupMenu;
 import com.eas.predefine.HasPublished;
 import com.eas.predefine.Utils;
@@ -19,6 +7,17 @@ import com.eas.ui.HasComponentPopupMenu;
 import com.eas.ui.HasEmptyText;
 import com.eas.ui.HasEventsExecutor;
 import com.eas.ui.HasJsFacade;
+import com.eas.ui.XElement;
+import com.eas.ui.events.ActionEvent;
+import com.eas.ui.events.ActionHandler;
+import com.eas.ui.events.HasActionHandlers;
+import com.eas.ui.events.HasHideHandlers;
+import com.eas.ui.events.HasShowHandlers;
+import com.eas.ui.events.HideEvent;
+import com.eas.ui.events.HideHandler;
+import com.eas.ui.events.ShowEvent;
+import com.eas.ui.events.ShowHandler;
+import com.eas.widgets.boxes.FormattedObjectBox;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
@@ -182,7 +181,7 @@ public class PlatypusFormattedTextField extends FormattedObjectBox implements Ha
 	@Override
 	public void setEmptyText(String aValue) {
 		emptyText = aValue;
-		ControlsUtils.applyEmptyText(getElement(), emptyText);
+		WidgetsUtils.applyEmptyText(getElement(), emptyText);
 	}
 
 	public JavaScriptObject getPublished() {
@@ -230,11 +229,11 @@ public class PlatypusFormattedTextField extends FormattedObjectBox implements Ha
 			get : function() {
 				var typeNum = aWidget.@com.eas.widgets.PlatypusFormattedTextField::getValueType()()
 				var type;
-				if (typeNum === @com.bearsoft.gwt.ui.widgets.ObjectFormat::NUMBER ){
+				if (typeNum === @com.eas.widgets.boxes.ObjectFormat::NUMBER ){
 					type = $wnd.Number;
-				} else if (typeNum === @com.bearsoft.gwt.ui.widgets.ObjectFormat::DATE ){
+				} else if (typeNum === @com.eas.widgets.boxes.ObjectFormat::DATE ){
 					type = $wnd.Date;
-				} else if (typeNum === @com.bearsoft.gwt.ui.widgets.ObjectFormat::REGEXP ){
+				} else if (typeNum === @com.eas.widgets.boxes.ObjectFormat::REGEXP ){
 					type = $wnd.RegExp;
 				} else {
 					type = $wnd.String;
@@ -244,13 +243,13 @@ public class PlatypusFormattedTextField extends FormattedObjectBox implements Ha
 			set : function(aValue) {
 				var typeNum;
 				if (aValue === $wnd.Number ){
-					typeNum = @com.bearsoft.gwt.ui.widgets.ObjectFormat::NUMBER;
+					typeNum = @com.eas.widgets.boxes.ObjectFormat::NUMBER;
 				} else if (aValue === $wnd.Date ){
-					typeNum = @com.bearsoft.gwt.ui.widgets.ObjectFormat::DATE;
+					typeNum = @com.eas.widgets.boxes.ObjectFormat::DATE;
 				} else if (aValue === $wnd.RegExp ){
-					typeNum = @com.bearsoft.gwt.ui.widgets.ObjectFormat::REGEXP;
+					typeNum = @com.eas.widgets.boxes.ObjectFormat::REGEXP;
 				} else {
-					typeNum = @com.bearsoft.gwt.ui.widgets.ObjectFormat::TEXT;
+					typeNum = @com.eas.widgets.boxes.ObjectFormat::TEXT;
 				}
 				aWidget.@com.eas.widgets.PlatypusFormattedTextField::setValueType(I)(typeNum);
 			}

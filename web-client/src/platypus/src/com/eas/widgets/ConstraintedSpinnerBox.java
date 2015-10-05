@@ -1,12 +1,12 @@
 package com.eas.widgets;
 
-import com.bearsoft.gwt.ui.events.HasHideHandlers;
-import com.bearsoft.gwt.ui.events.HasShowHandlers;
-import com.bearsoft.gwt.ui.events.HideEvent;
-import com.bearsoft.gwt.ui.events.HideHandler;
-import com.bearsoft.gwt.ui.events.ShowEvent;
-import com.bearsoft.gwt.ui.events.ShowHandler;
-import com.bearsoft.gwt.ui.widgets.SpinnerBox;
+import com.eas.ui.events.HasHideHandlers;
+import com.eas.ui.events.HasShowHandlers;
+import com.eas.ui.events.HideEvent;
+import com.eas.ui.events.HideHandler;
+import com.eas.ui.events.ShowEvent;
+import com.eas.ui.events.ShowHandler;
+import com.eas.widgets.boxes.SpinnerBox;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;

@@ -5,8 +5,8 @@
  */
 package com.eas.grid.cells;
 
-import com.bearsoft.gwt.ui.widgets.StyledListBox;
 import com.eas.bound.ModelCombo;
+import com.eas.widgets.boxes.StyledListBox;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Widget;
 

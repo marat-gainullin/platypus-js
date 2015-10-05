@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.bearsoft.gwt.ui.widgets.grid.processing.IndexOfProvider;
+import com.eas.grid.processing.IndexOfProvider;
 import com.eas.predefine.Utils;
 import com.eas.predefine.Utils.JsObject;
 import com.google.gwt.core.client.Callback;

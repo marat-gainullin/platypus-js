@@ -18,7 +18,7 @@ public class JsApi {
 		$wnd.require = function (aDeps, aOnSuccess, aOnFailure) {
             if (!Array.isArray(aDeps))
                 aDeps = [aDeps];
-			@com.eas.application.Application::require(Lcom/eas/client/Utils$JsObject;Lcom/eas/client/Utils$JsObject;Lcom/eas/client/Utils$JsObject;)(aDeps, aOnSuccess, aOnFailure);
+			@com.eas.application.Application::require(Lcom/eas/predefine/Utils$JsObject;Lcom/eas/predefine/Utils$JsObject;Lcom/eas/predefine/Utils$JsObject;)(aDeps, aOnSuccess, aOnFailure);
 		}; 
 		$wnd.define = function () {
 	        if (arguments.length === 1 ||
@@ -27,7 +27,7 @@ public class JsApi {
 	            var aModuleDefiner = arguments.length > 1 ? arguments[1] : arguments[0];
 	            if (!Array.isArray(aDeps))
 	                aDeps = [aDeps];
-	            @com.eas.application.Application::define(Lcom/eas/client/Utils$JsObject;Lcom/eas/client/Utils$JsObject;)(aDeps, function(){
+	            @com.eas.application.Application::define(Lcom/eas/predefine/Utils$JsObject;Lcom/eas/predefine/Utils$JsObject;)(aDeps, function(){
                 	return typeof aModuleDefiner === 'function' ? aModuleDefiner.apply(null, arguments) : aModuleDefiner;
 	            });
 	        } else {
@@ -522,11 +522,11 @@ public class JsApi {
 								if(typeof aResult === 'object' && aResult instanceof Report)
 									onSuccess(aResult);
 								else
-									onSuccess(JSON.parse(aResult, @com.eas.client.Utils.JsObject::dateReviver()()));
+									onSuccess(JSON.parse(aResult, @com.eas.predefine.Utils.JsObject::dateReviver()()));
 							}, onFailure, Report);
 					} else {
 						var result = nativeClient.@com.eas.client.AppClient::requestServerMethodExecution(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aFunctionName, params, null, null, Report);
-						return typeof result === 'object' && result instanceof Report ? result : JSON.parse(result, @com.eas.client.Utils.JsObject::dateReviver()()); 
+						return typeof result === 'object' && result instanceof Report ? result : JSON.parse(result, @com.eas.predefine.Utils.JsObject::dateReviver()()); 
 					}
 				};
 			}
@@ -559,13 +559,13 @@ public class JsApi {
 		
 		predefine([], 'invoke', function(){
 			function invokeLater(aTarget) {
-				@com.eas.client.Utils::invokeLater(Lcom/google/gwt/core/client/JavaScriptObject;)(aTarget);
+				@com.eas.predefine.Utils::invokeLater(Lcom/google/gwt/core/client/JavaScriptObject;)(aTarget);
 			}
 	        
 			function invokeDelayed(aTimeout, aTarget) {
 			    if (arguments.length < 2)
 			        throw "invoke.delayed needs 2 arguments - timeout, callback.";
-				@com.eas.client.Utils::invokeScheduled(ILcom/google/gwt/core/client/JavaScriptObject;)(+aTimeout, aTarget);
+				@com.eas.predefine.Utils::invokeScheduled(ILcom/google/gwt/core/client/JavaScriptObject;)(+aTimeout, aTarget);
 			}
 		
 			var module = {};

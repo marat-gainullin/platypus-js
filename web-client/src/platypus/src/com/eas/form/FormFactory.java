@@ -11,12 +11,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bearsoft.gwt.ui.HasImageParagraph;
-import com.bearsoft.gwt.ui.HasImageResource;
-import com.bearsoft.gwt.ui.Orientation;
-import com.bearsoft.gwt.ui.widgets.DropDownButton;
-import com.bearsoft.gwt.ui.widgets.ImageButton;
-import com.bearsoft.gwt.ui.widgets.ObjectFormat;
 import com.eas.bound.BoundPublisher;
 import com.eas.bound.ModelCheck;
 import com.eas.bound.ModelCombo;
@@ -47,10 +41,13 @@ import com.eas.predefine.Utils;
 import com.eas.ui.HasBinding;
 import com.eas.ui.HasComponentPopupMenu;
 import com.eas.ui.HasEmptyText;
+import com.eas.ui.HasImageParagraph;
+import com.eas.ui.HasImageResource;
 import com.eas.ui.HasJsName;
 import com.eas.ui.HasPlatypusButtonGroup;
 import com.eas.ui.HorizontalPosition;
 import com.eas.ui.MarginConstraints;
+import com.eas.ui.Orientation;
 import com.eas.ui.PlatypusImageResource;
 import com.eas.ui.PublishedColor;
 import com.eas.ui.PublishedComponent;
@@ -61,7 +58,6 @@ import com.eas.widgets.BorderPane;
 import com.eas.widgets.BoxPane;
 import com.eas.widgets.ButtonGroup;
 import com.eas.widgets.CardPane;
-import com.eas.widgets.ControlsUtils;
 import com.eas.widgets.DesktopPane;
 import com.eas.widgets.FlowPane;
 import com.eas.widgets.GridPane;
@@ -83,6 +79,9 @@ import com.eas.widgets.SplitPane;
 import com.eas.widgets.TabbedPane;
 import com.eas.widgets.ToolBar;
 import com.eas.widgets.WidgetsPublisher;
+import com.eas.widgets.boxes.DropDownButton;
+import com.eas.widgets.boxes.ImageButton;
+import com.eas.widgets.boxes.ObjectFormat;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.HasEnabled;
@@ -486,11 +485,11 @@ public class FormFactory {
 			grid.setFrozenRows(frozenRows);
 			if (anElement.hasAttribute("oddRowsColor")) {
 				String oddRowsColorDesc = anElement.getAttribute("oddRowsColor");
-				grid.setOddRowsColor(ControlsUtils.parseColor(oddRowsColorDesc));
+				grid.setOddRowsColor(PublishedColor.parse(oddRowsColorDesc));
 			}
 			if (anElement.hasAttribute("gridColor")) {
 				String gridColorDesc = anElement.getAttribute("gridColor");
-				grid.setGridColor(ControlsUtils.parseColor(gridColorDesc));
+				grid.setGridColor(PublishedColor.parse(gridColorDesc));
 			}
 			if (anElement.hasAttribute("parentField")) {
 				String parentFieldPath = anElement.getAttribute("parentField");
@@ -767,11 +766,11 @@ public class FormFactory {
 				pComp.setOpaque(Utils.getBooleanAttribute(anElement, "opaque", Boolean.TRUE));
 			}
 			if (anElement.hasAttribute("background")) {
-				PublishedColor background = ControlsUtils.parseColor(anElement.getAttribute("background"));
+				PublishedColor background = PublishedColor.parse(anElement.getAttribute("background"));
 				pComp.setBackground(background);
 			}
 			if (anElement.hasAttribute("foreground")) {
-				PublishedColor foreground = ControlsUtils.parseColor(anElement.getAttribute("foreground"));
+				PublishedColor foreground = PublishedColor.parse(anElement.getAttribute("foreground"));
 				pComp.setForeground(foreground);
 			}
 			if (anElement.hasAttribute("toolTipText")) {
@@ -1042,11 +1041,11 @@ public class FormFactory {
 			aNode.setTitle(anElement.getAttribute("title"));
 		}
 		if (anElement.hasAttribute("background")) {
-			PublishedColor background = ControlsUtils.parseColor(anElement.getAttribute("background"));
+			PublishedColor background = PublishedColor.parse(anElement.getAttribute("background"));
 			aNode.setBackground(background);
 		}
 		if (anElement.hasAttribute("foreground")) {
-			PublishedColor foreground = ControlsUtils.parseColor(anElement.getAttribute("foreground"));
+			PublishedColor foreground = PublishedColor.parse(anElement.getAttribute("foreground"));
 			aNode.setForeground(foreground);
 		}
 		aNode.setReadonly(Utils.getBooleanAttribute(anElement, "readonly", Boolean.FALSE));

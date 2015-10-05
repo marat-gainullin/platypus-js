@@ -3,14 +3,6 @@ package com.eas.bound;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bearsoft.gwt.ui.events.HasHideHandlers;
-import com.bearsoft.gwt.ui.events.HasShowHandlers;
-import com.bearsoft.gwt.ui.events.HideEvent;
-import com.bearsoft.gwt.ui.events.HideHandler;
-import com.bearsoft.gwt.ui.events.ShowEvent;
-import com.bearsoft.gwt.ui.events.ShowHandler;
-import com.bearsoft.gwt.ui.widgets.DecoratorBox;
-import com.eas.form.EventsExecutor;
 import com.eas.menu.PlatypusPopupMenu;
 import com.eas.predefine.Utils;
 import com.eas.ui.HasBinding;
@@ -22,7 +14,15 @@ import com.eas.ui.HasJsValue;
 import com.eas.ui.HasOnRender;
 import com.eas.ui.HasOnSelect;
 import com.eas.ui.PublishedCell;
-import com.eas.widgets.ControlsUtils;
+import com.eas.ui.events.HasHideHandlers;
+import com.eas.ui.events.HasShowHandlers;
+import com.eas.ui.events.HideEvent;
+import com.eas.ui.events.HideHandler;
+import com.eas.ui.events.ShowEvent;
+import com.eas.ui.events.ShowHandler;
+import com.eas.widgets.EventsExecutor;
+import com.eas.widgets.WidgetsUtils;
+import com.eas.widgets.boxes.DecoratorBox;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
@@ -217,7 +217,7 @@ public abstract class ModelDecoratorBox<T> extends DecoratorBox<T> implements Ha
 			super.setValue(value, fireEvents);
 			try {
 				if (onRender != null && data != null && field != null && !field.isEmpty()) {
-					cellToRender = ControlsUtils.calcStandalonePublishedCell(published, onRender, data, field, getText(), cellToRender);
+					cellToRender = WidgetsUtils.calcStandalonePublishedCell(published, onRender, data, field, getText(), cellToRender);
 				}
 				if (cellToRender != null) {
 					if (cellToRender.getDisplayCallback() == null) {
@@ -248,7 +248,7 @@ public abstract class ModelDecoratorBox<T> extends DecoratorBox<T> implements Ha
 		try {
 			Utils.executeScriptEventVoid(published, onSelect, published);
 		} catch (Exception ex) {
-			Logger.getLogger(ControlsUtils.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+			Logger.getLogger(WidgetsUtils.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 		}
 	}
 
@@ -369,10 +369,10 @@ public abstract class ModelDecoratorBox<T> extends DecoratorBox<T> implements Ha
 		});
 		Object.defineProperty(aPublished, "nullable", {
 			get : function() {
-				return aWidget.@com.bearsoft.gwt.ui.widgets.DecoratorBox::isNullable()();
+				return aWidget.@com.eas.widgets.boxes.DecoratorBox::isNullable()();
 			},
 			set : function(aValue) {
-				aWidget.@com.bearsoft.gwt.ui.widgets.DecoratorBox::setNullable(Z)(!!aValue);
+				aWidget.@com.eas.widgets.boxes.DecoratorBox::setNullable(Z)(!!aValue);
 			}
 		});
 		Object.defineProperty(aPublished, "selectOnly", {

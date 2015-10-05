@@ -5,23 +5,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bearsoft.gwt.ui.XElement;
-import com.bearsoft.gwt.ui.events.CollapsedHandler;
-import com.bearsoft.gwt.ui.events.ExpandedHandler;
-import com.bearsoft.gwt.ui.events.HasHideHandlers;
-import com.bearsoft.gwt.ui.events.HasShowHandlers;
-import com.bearsoft.gwt.ui.events.HideEvent;
-import com.bearsoft.gwt.ui.events.HideHandler;
-import com.bearsoft.gwt.ui.events.ShowEvent;
-import com.bearsoft.gwt.ui.events.ShowHandler;
-import com.bearsoft.gwt.ui.widgets.grid.cells.TreeExpandableCell;
-import com.bearsoft.gwt.ui.widgets.grid.processing.IndexOfProvider;
-import com.bearsoft.gwt.ui.widgets.grid.processing.ListMultiSortHandler;
-import com.bearsoft.gwt.ui.widgets.grid.processing.TreeDataProvider;
-import com.bearsoft.gwt.ui.widgets.grid.processing.TreeMultiSortHandler;
-import com.eas.form.EventsExecutor;
 import com.eas.grid.builders.RenderedTableCellBuilder;
 import com.eas.grid.builders.ThemedHeaderOrFooterBuilder;
+import com.eas.grid.cells.TreeExpandableCell;
 import com.eas.grid.columns.CheckServiceColumn;
 import com.eas.grid.columns.ModelColumn;
 import com.eas.grid.columns.RadioServiceColumn;
@@ -29,6 +15,10 @@ import com.eas.grid.columns.UsualServiceColumn;
 import com.eas.grid.columns.header.HeaderAnalyzer;
 import com.eas.grid.columns.header.HeaderNode;
 import com.eas.grid.columns.header.HeaderSplitter;
+import com.eas.grid.processing.IndexOfProvider;
+import com.eas.grid.processing.ListMultiSortHandler;
+import com.eas.grid.processing.TreeDataProvider;
+import com.eas.grid.processing.TreeMultiSortHandler;
 import com.eas.grid.rows.JsArrayListDataProvider;
 import com.eas.grid.rows.JsArrayTreeDataProvider;
 import com.eas.grid.rows.JsDataContainer;
@@ -49,7 +39,17 @@ import com.eas.ui.JavaScriptObjectKeyProvider;
 import com.eas.ui.PublishedCell;
 import com.eas.ui.PublishedComponent;
 import com.eas.ui.EventsPublisher;
-import com.eas.widgets.ControlsUtils;
+import com.eas.ui.XElement;
+import com.eas.ui.events.CollapsedHandler;
+import com.eas.ui.events.ExpandedHandler;
+import com.eas.ui.events.HasHideHandlers;
+import com.eas.ui.events.HasShowHandlers;
+import com.eas.ui.events.HideEvent;
+import com.eas.ui.events.HideHandler;
+import com.eas.ui.events.ShowEvent;
+import com.eas.ui.events.ShowHandler;
+import com.eas.widgets.EventsExecutor;
+import com.eas.widgets.WidgetsUtils;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -917,13 +917,13 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 
 	protected void applyColorsFontCursor() {
 		if (published.isBackgroundSet() && published.isOpaque())
-			ControlsUtils.applyBackground(this, published.getBackground());
+			WidgetsUtils.applyBackground(this, published.getBackground());
 		if (published.isForegroundSet())
-			ControlsUtils.applyForeground(this, published.getForeground());
+			WidgetsUtils.applyForeground(this, published.getForeground());
 		if (published.isFontSet())
-			ControlsUtils.applyFont(this, published.getFont());
+			WidgetsUtils.applyFont(this, published.getFont());
 		if (published.isCursorSet())
-			ControlsUtils.applyCursor(this, published.getCursor());
+			WidgetsUtils.applyCursor(this, published.getCursor());
 	}
 
 	public JavaScriptObject getPublished() {

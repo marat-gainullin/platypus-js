@@ -2,14 +2,14 @@ package com.eas.bound;
 
 import java.util.Date;
 
-import com.bearsoft.gwt.ui.events.ActionEvent;
-import com.bearsoft.gwt.ui.events.ActionHandler;
-import com.bearsoft.gwt.ui.events.HasActionHandlers;
-import com.bearsoft.gwt.ui.widgets.DateTimeBox;
 import com.eas.client.converters.DateValueConverter;
 import com.eas.predefine.Utils;
 import com.eas.ui.HasEmptyText;
-import com.eas.widgets.ControlsUtils;
+import com.eas.ui.events.ActionEvent;
+import com.eas.ui.events.ActionHandler;
+import com.eas.ui.events.HasActionHandlers;
+import com.eas.widgets.WidgetsUtils;
+import com.eas.widgets.boxes.DateTimeBox;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -64,7 +64,7 @@ public class ModelDate extends ModelDecoratorBox<Date> implements HasEmptyText, 
 	public void setFormat(String aValue) {
 		format = aValue;
 		if (format != null)
-			format = ControlsUtils.convertDateFormatString(format);
+			format = WidgetsUtils.convertDateFormatString(format);
 		DateTimeFormat dtFormat = format != null ? DateTimeFormat.getFormat(format) : DateTimeFormat.getFormat("dd.MM.yyyy");
 		((DateTimeBox) decorated).setFormat(new DateBox.DefaultFormat(dtFormat));
 	}
@@ -94,7 +94,7 @@ public class ModelDate extends ModelDecoratorBox<Date> implements HasEmptyText, 
 	@Override
 	public void setEmptyText(String aValue) {
 		emptyText = aValue;
-		ControlsUtils.applyEmptyText(getElement(), emptyText);
+		WidgetsUtils.applyEmptyText(getElement(), emptyText);
 	}
 
 	public boolean isDateShown(){

@@ -1,12 +1,12 @@
 package com.eas.ui;
 
-import com.bearsoft.gwt.ui.containers.window.events.MoveEvent;
-import com.bearsoft.gwt.ui.events.ActionEvent;
-import com.bearsoft.gwt.ui.events.AddEvent;
-import com.bearsoft.gwt.ui.events.HideEvent;
-import com.bearsoft.gwt.ui.events.RemoveEvent;
-import com.bearsoft.gwt.ui.events.ShowEvent;
 import com.eas.predefine.Utils;
+import com.eas.ui.events.ActionEvent;
+import com.eas.ui.events.AddEvent;
+import com.eas.ui.events.HideEvent;
+import com.eas.ui.events.RemoveEvent;
+import com.eas.ui.events.ShowEvent;
+import com.eas.window.events.MoveEvent;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
