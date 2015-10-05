@@ -5,7 +5,7 @@
  */
 package com.eas.widgets.containers;
 
-import com.eas.ui.XElement;
+import com.eas.predefine.XElement;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style;

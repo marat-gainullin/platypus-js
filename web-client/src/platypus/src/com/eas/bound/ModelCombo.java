@@ -6,7 +6,6 @@ import java.util.logging.Logger;
 
 import com.eas.client.IDGenerator;
 import com.eas.client.converters.StringValueConverter;
-import com.eas.grid.rows.JsArrayList;
 import com.eas.predefine.Utils;
 import com.eas.ui.CommonResources;
 import com.eas.ui.HasEmptyText;

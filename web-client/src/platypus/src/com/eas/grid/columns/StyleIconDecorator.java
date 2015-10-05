@@ -1,6 +1,7 @@
-package com.eas.ui;
+package com.eas.grid.columns;
 
 import com.eas.grid.cells.RenderedEditorCell;
+import com.eas.ui.PublishedCell;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.resources.client.ImageResource;

@@ -42,6 +42,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HasValue;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 
 public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements FieldUpdater<JavaScriptObject, Object>, ChangesHost, HasPublished {
 
@@ -70,6 +71,10 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 		setFieldUpdater(this);
 		setDefaultSortAscending(true);
 		setPublished(JavaScriptObject.createObject());
+	}
+
+	public static String renderDecorated(SafeHtmlBuilder rendered, String aId, PublishedCell aCell, SafeHtmlBuilder sb) {
+		return StyleIconDecorator.decorate(rendered.toSafeHtml(), aId, aCell, HasVerticalAlignment.ALIGN_MIDDLE, sb);
 	}
 
 	protected Cell<Object> getTargetCell() {
@@ -434,7 +439,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 							else
 								lsb.append(SafeHtmlUtils.fromString(display));
 							grid.complementPublishedStyle(cellToRender);
-							String decorId = WidgetsUtils.renderDecorated(lsb, aId, cellToRender, sb);
+							String decorId = renderDecorated(lsb, aId, cellToRender, sb);
 							if (cellToRender != null) {
 								if (context instanceof RenderedCellContext) {
 									((RenderedCellContext) context).setPublishedCell(cellToRender);

@@ -1,14 +1,16 @@
 package com.eas.widgets;
 
+import com.eas.menu.HasComponentPopupMenu;
 import com.eas.menu.PlatypusPopupMenu;
 import com.eas.predefine.HasPublished;
-import com.eas.ui.HasComponentPopupMenu;
+import com.eas.predefine.XElement;
+import com.eas.ui.ButtonGroup;
 import com.eas.ui.HasEventsExecutor;
 import com.eas.ui.HasJsFacade;
 import com.eas.ui.HasPlatypusButtonGroup;
-import com.eas.ui.XElement;
 import com.eas.ui.events.ActionEvent;
 import com.eas.ui.events.ActionHandler;
+import com.eas.ui.events.EventsExecutor;
 import com.eas.ui.events.HasActionHandlers;
 import com.eas.ui.events.HasHideHandlers;
 import com.eas.ui.events.HasShowHandlers;
@@ -229,7 +231,7 @@ public class PlatypusRadioButton extends RadioButton implements HasActionHandler
 				return @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(buttonGroup);					
 			},
 			set : function(aValue) {
-				aWidget.@com.eas.ui.HasPlatypusButtonGroup::mutateButtonGroup(Lcom/eas/widgets/ButtonGroup;)(aValue != null ? aValue.unwrap() : null);
+				aWidget.@com.eas.ui.HasPlatypusButtonGroup::mutateButtonGroup(Lcom/eas/ui/ButtonGroup;)(aValue != null ? aValue.unwrap() : null);
 			}
 		});
 	}-*/;

@@ -7,13 +7,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.eas.client.CallbackAdapter;
-import com.eas.client.Cancellable;
 import com.eas.client.IDGenerator;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.metadata.Parameters;
 import com.eas.client.queries.Query;
+import com.eas.predefine.Cancellable;
 import com.eas.predefine.HasPublished;
 import com.eas.predefine.Utils;
 import com.eas.predefine.Utils.JsObject;

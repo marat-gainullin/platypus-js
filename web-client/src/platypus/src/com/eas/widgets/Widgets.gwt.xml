@@ -4,6 +4,8 @@
 
 <module>
     <inherits name="com.eas.ui.UI"/>
+    <inherits name="com.eas.window.Window"/>
+    <inherits name="com.eas.menu.Menu"/>    
 
     <source path=""/>
     

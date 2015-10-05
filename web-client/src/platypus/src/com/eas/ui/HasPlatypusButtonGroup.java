@@ -1,6 +1,5 @@
 package com.eas.ui;
 
-import com.eas.widgets.ButtonGroup;
 
 public interface HasPlatypusButtonGroup {
 

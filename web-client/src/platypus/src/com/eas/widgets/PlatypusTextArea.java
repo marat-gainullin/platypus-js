@@ -1,13 +1,14 @@
 package com.eas.widgets;
 
+import com.eas.menu.HasComponentPopupMenu;
 import com.eas.menu.PlatypusPopupMenu;
 import com.eas.predefine.HasPublished;
+import com.eas.predefine.XElement;
 import com.eas.ui.CommonResources;
-import com.eas.ui.HasComponentPopupMenu;
 import com.eas.ui.HasEmptyText;
 import com.eas.ui.HasEventsExecutor;
 import com.eas.ui.HasJsFacade;
-import com.eas.ui.XElement;
+import com.eas.ui.events.EventsExecutor;
 import com.eas.ui.events.HasHideHandlers;
 import com.eas.ui.events.HasShowHandlers;
 import com.eas.ui.events.HideEvent;

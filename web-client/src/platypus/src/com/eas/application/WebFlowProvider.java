@@ -8,11 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.eas.client.AppClient;
-import com.eas.client.Cancellable;
 import com.eas.client.changes.Change;
 import com.eas.client.dataflow.FlowProvider;
 import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.Parameters;
+import com.eas.predefine.Cancellable;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 

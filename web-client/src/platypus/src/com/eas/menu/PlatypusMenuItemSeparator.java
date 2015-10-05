@@ -1,16 +1,16 @@
 package com.eas.menu;
 
 import com.eas.predefine.HasPublished;
+import com.eas.predefine.XElement;
 import com.eas.ui.HasEventsExecutor;
 import com.eas.ui.HasJsFacade;
-import com.eas.ui.XElement;
+import com.eas.ui.events.EventsExecutor;
 import com.eas.ui.events.HasHideHandlers;
 import com.eas.ui.events.HasShowHandlers;
 import com.eas.ui.events.HideEvent;
 import com.eas.ui.events.HideHandler;
 import com.eas.ui.events.ShowEvent;
 import com.eas.ui.events.ShowHandler;
-import com.eas.widgets.EventsExecutor;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;

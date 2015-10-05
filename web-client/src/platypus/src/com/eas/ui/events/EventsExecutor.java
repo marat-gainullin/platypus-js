@@ -1,4 +1,4 @@
-package com.eas.widgets;
+package com.eas.ui.events;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -6,21 +6,6 @@ import java.util.logging.Logger;
 import com.eas.predefine.HasPublished;
 import com.eas.predefine.Utils;
 import com.eas.ui.EventsPublisher;
-import com.eas.ui.events.ActionEvent;
-import com.eas.ui.events.ActionHandler;
-import com.eas.ui.events.AddEvent;
-import com.eas.ui.events.AddHandler;
-import com.eas.ui.events.HasActionHandlers;
-import com.eas.ui.events.HasAddHandlers;
-import com.eas.ui.events.HasHideHandlers;
-import com.eas.ui.events.HasRemoveHandlers;
-import com.eas.ui.events.HasShowHandlers;
-import com.eas.ui.events.HideEvent;
-import com.eas.ui.events.HideHandler;
-import com.eas.ui.events.RemoveEvent;
-import com.eas.ui.events.RemoveHandler;
-import com.eas.ui.events.ShowEvent;
-import com.eas.ui.events.ShowHandler;
 import com.eas.window.events.HasMoveHandlers;
 import com.eas.window.events.MoveEvent;
 import com.eas.window.events.MoveHandler;

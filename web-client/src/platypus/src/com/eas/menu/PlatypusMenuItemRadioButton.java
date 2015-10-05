@@ -1,14 +1,14 @@
 package com.eas.menu;
 
 import com.eas.predefine.HasPublished;
+import com.eas.ui.ButtonGroup;
 import com.eas.ui.HasEventsExecutor;
 import com.eas.ui.HasJsFacade;
 import com.eas.ui.HasPlatypusButtonGroup;
 import com.eas.ui.events.ActionEvent;
 import com.eas.ui.events.ActionHandler;
+import com.eas.ui.events.EventsExecutor;
 import com.eas.ui.events.HasActionHandlers;
-import com.eas.widgets.ButtonGroup;
-import com.eas.widgets.EventsExecutor;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -160,7 +160,7 @@ public class PlatypusMenuItemRadioButton extends MenuItemRadioButton implements 
 				return @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(buttonGroup);					
 			},
 			set : function(aValue) {
-				aWidget.@com.eas.ui.HasPlatypusButtonGroup::mutateButtonGroup(Lcom/eas/widgets/ButtonGroup;)(aValue != null ? aValue.unwrap() : null);
+				aWidget.@com.eas.ui.HasPlatypusButtonGroup::mutateButtonGroup(Lcom/eas/ui/ButtonGroup;)(aValue != null ? aValue.unwrap() : null);
 			}
 		});
 	}-*/;

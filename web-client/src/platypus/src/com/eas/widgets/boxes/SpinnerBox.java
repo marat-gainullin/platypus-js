@@ -5,8 +5,8 @@
  */
 package com.eas.widgets.boxes;
 
+import com.eas.predefine.XElement;
 import com.eas.ui.CommonResources;
-import com.eas.ui.XElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.editor.client.IsEditor;
 import com.google.gwt.editor.client.LeafValueEditor;

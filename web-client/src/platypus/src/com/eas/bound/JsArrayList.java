@@ -1,4 +1,4 @@
-package com.eas.grid.rows;
+package com.eas.bound;
 
 import java.util.ArrayList;
 import java.util.Collection;

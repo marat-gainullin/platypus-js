@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.eas.bound.JsArrayList;
 import com.eas.grid.processing.TreeAdapter;
 import com.eas.predefine.Utils;
 import com.eas.predefine.Utils.JsObject;

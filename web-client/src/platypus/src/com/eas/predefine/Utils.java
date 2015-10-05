@@ -3,7 +3,6 @@ package com.eas.predefine;
 import java.util.Date;
 import java.util.Map;
 
-import com.eas.client.Cancellable;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.core.client.Scheduler;
@@ -275,7 +274,7 @@ public class Utils {
 	public static native JavaScriptObject publishCancellable(Cancellable aValue)/*-{
 		return {
 			abort : function() {
-				aValue.@com.eas.client.Cancellable::cancel()();
+				aValue.@com.eas.predefine.Cancellable::cancel()();
 			}
 		};
 	}-*/;

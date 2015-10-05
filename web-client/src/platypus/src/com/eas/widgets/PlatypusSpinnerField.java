@@ -1,11 +1,12 @@
 package com.eas.widgets;
 
+import com.eas.menu.HasComponentPopupMenu;
 import com.eas.menu.PlatypusPopupMenu;
 import com.eas.predefine.HasPublished;
-import com.eas.ui.HasComponentPopupMenu;
+import com.eas.predefine.XElement;
 import com.eas.ui.HasEventsExecutor;
 import com.eas.ui.HasJsFacade;
-import com.eas.ui.XElement;
+import com.eas.ui.events.EventsExecutor;
 import com.eas.widgets.boxes.ExplicitDoubleBox;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ContextMenuEvent;

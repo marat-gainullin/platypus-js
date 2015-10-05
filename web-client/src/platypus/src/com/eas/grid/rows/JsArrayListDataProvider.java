@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.eas.bound.JsArrayList;
 import com.eas.grid.processing.IndexOfProvider;
 import com.eas.predefine.Utils;
 import com.eas.predefine.Utils.JsObject;

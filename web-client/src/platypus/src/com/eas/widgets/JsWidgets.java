@@ -199,14 +199,14 @@ public class JsWidgets {
 		});
 	    Object.defineProperty(aPublished, "componentPopupMenu", {
 	    	get : function() {
-	    		var menu = comp.@com.eas.ui.HasComponentPopupMenu::getPlatypusPopupMenu()();
+	    		var menu = comp.@com.eas.menu.HasComponentPopupMenu::getPlatypusPopupMenu()();
 			    return @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(menu);
 	    	},
 		    set : function(aValue) {
 		    	if (aValue && aValue.unwrap) {
-			    	comp.@com.eas.ui.HasComponentPopupMenu::setPlatypusPopupMenu(Lcom/eas/menu/PlatypusPopupMenu;)(aValue.unwrap());
+			    	comp.@com.eas.menu.HasComponentPopupMenu::setPlatypusPopupMenu(Lcom/eas/menu/PlatypusPopupMenu;)(aValue.unwrap());
 		    	} else {
-			    	comp.@com.eas.ui.HasComponentPopupMenu::setPlatypusPopupMenu(Lcom/eas/menu/PlatypusPopupMenu;)(null);
+			    	comp.@com.eas.menu.HasComponentPopupMenu::setPlatypusPopupMenu(Lcom/eas/menu/PlatypusPopupMenu;)(null);
 		    	}
 		    }
 		});
@@ -265,207 +265,207 @@ public class JsWidgets {
 			var comp = published.unwrap();
 			var executor = comp.@com.eas.ui.HasEventsExecutor::getEventsExecutor()();
 			if(executor == null){
-				executor = @com.eas.widgets.EventsExecutor::new(Lcom/google/gwt/user/client/ui/UIObject;Lcom/google/gwt/core/client/JavaScriptObject;)(comp, published);
-				comp.@com.eas.ui.HasEventsExecutor::setEventsExecutor(Lcom/eas/widgets/EventsExecutor;)(executor);
+				executor = @com.eas.ui.events.EventsExecutor::new(Lcom/google/gwt/user/client/ui/UIObject;Lcom/google/gwt/core/client/JavaScriptObject;)(comp, published);
+				comp.@com.eas.ui.HasEventsExecutor::setEventsExecutor(Lcom/eas/ui/events/EventsExecutor;)(executor);
 			} else {
-				executor.@com.eas.widgets.EventsExecutor::setEventThis(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+				executor.@com.eas.ui.events.EventsExecutor::setEventThis(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 			}
 			Object.defineProperty(published, "onActionPerformed", {
 				get : function() {
-					return executor.@com.eas.widgets.EventsExecutor::getActionPerformed()();
+					return executor.@com.eas.ui.events.EventsExecutor::getActionPerformed()();
 				},
 				set : function(aValue) {
-					executor.@com.eas.widgets.EventsExecutor::setActionPerformed(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+					executor.@com.eas.ui.events.EventsExecutor::setActionPerformed(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 				},
 				configurable : true
 			});
 	
 			Object.defineProperty(published, "onMouseExited", {
 				get : function() {
-					return executor.@com.eas.widgets.EventsExecutor::getMouseExited()();
+					return executor.@com.eas.ui.events.EventsExecutor::getMouseExited()();
 				},
 				set : function(aValue) {
-					executor.@com.eas.widgets.EventsExecutor::setMouseExited(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+					executor.@com.eas.ui.events.EventsExecutor::setMouseExited(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 				},
 				configurable : true
 			});
 			Object.defineProperty(published, "onMouseClicked", {
 				get : function() {
-					return executor.@com.eas.widgets.EventsExecutor::getMouseClicked()();
+					return executor.@com.eas.ui.events.EventsExecutor::getMouseClicked()();
 				},
 				set : function(aValue) {
-					executor.@com.eas.widgets.EventsExecutor::setMouseClicked(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+					executor.@com.eas.ui.events.EventsExecutor::setMouseClicked(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 				},
 				configurable : true
 			});
 			Object.defineProperty(published, "onMousePressed", {
 				get : function() {
-					return executor.@com.eas.widgets.EventsExecutor::getMousePressed()();
+					return executor.@com.eas.ui.events.EventsExecutor::getMousePressed()();
 				},
 				set : function(aValue) {
-					executor.@com.eas.widgets.EventsExecutor::setMousePressed(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+					executor.@com.eas.ui.events.EventsExecutor::setMousePressed(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 				},
 				configurable : true
 			});
 			Object.defineProperty(published, "onMouseReleased", {
 				get : function() {
-					return executor.@com.eas.widgets.EventsExecutor::getMouseReleased()();
+					return executor.@com.eas.ui.events.EventsExecutor::getMouseReleased()();
 				},
 				set : function(aValue) {
-					executor.@com.eas.widgets.EventsExecutor::setMouseReleased(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+					executor.@com.eas.ui.events.EventsExecutor::setMouseReleased(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 				},
 				configurable : true
 			});
 			Object.defineProperty(published, "onMouseEntered", {
 				get : function() {
-					return executor.@com.eas.widgets.EventsExecutor::getMouseEntered()();
+					return executor.@com.eas.ui.events.EventsExecutor::getMouseEntered()();
 				},
 				set : function(aValue) {
-					executor.@com.eas.widgets.EventsExecutor::setMouseEntered(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+					executor.@com.eas.ui.events.EventsExecutor::setMouseEntered(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 				},
 				configurable : true
 			});
 			Object.defineProperty(published, "onMouseWheelMoved", {
 				get : function() {
-					return executor.@com.eas.widgets.EventsExecutor::getMouseWheelMoved()();
+					return executor.@com.eas.ui.events.EventsExecutor::getMouseWheelMoved()();
 				},
 				set : function(aValue) {
-					executor.@com.eas.widgets.EventsExecutor::setMouseWheelMoved(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+					executor.@com.eas.ui.events.EventsExecutor::setMouseWheelMoved(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 				},
 				configurable : true
 			});
 			Object.defineProperty(published, "onMouseDragged", {
 				get : function() {
-					return executor.@com.eas.widgets.EventsExecutor::getMouseDragged()();
+					return executor.@com.eas.ui.events.EventsExecutor::getMouseDragged()();
 				},
 				set : function(aValue) {
-					executor.@com.eas.widgets.EventsExecutor::setMouseDragged(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+					executor.@com.eas.ui.events.EventsExecutor::setMouseDragged(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 				},
 				configurable : true
 			});
 			Object.defineProperty(published, "onMouseMoved", {
 				get : function() {
-					return executor.@com.eas.widgets.EventsExecutor::getMouseMoved()();
+					return executor.@com.eas.ui.events.EventsExecutor::getMouseMoved()();
 				},
 				set : function(aValue) {
-					executor.@com.eas.widgets.EventsExecutor::setMouseMoved(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+					executor.@com.eas.ui.events.EventsExecutor::setMouseMoved(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 				},
 				configurable : true
 			});
 			Object.defineProperty(published, "onComponentResized", {
 				get : function() {
-					return executor.@com.eas.widgets.EventsExecutor::getComponentResized()();
+					return executor.@com.eas.ui.events.EventsExecutor::getComponentResized()();
 				},
 				set : function(aValue) {
-					executor.@com.eas.widgets.EventsExecutor::setComponentResized(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+					executor.@com.eas.ui.events.EventsExecutor::setComponentResized(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 				},
 				configurable : true
 			});
 			Object.defineProperty(published, "onComponentMoved", {
 				get : function() {
-					return executor.@com.eas.widgets.EventsExecutor::getComponentMoved()();
+					return executor.@com.eas.ui.events.EventsExecutor::getComponentMoved()();
 				},
 				set : function(aValue) {
-					executor.@com.eas.widgets.EventsExecutor::setComponentMoved(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+					executor.@com.eas.ui.events.EventsExecutor::setComponentMoved(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 				},
 				configurable : true
 			});
 			Object.defineProperty(published, "onComponentShown", {
 				get : function() {
-					return executor.@com.eas.widgets.EventsExecutor::getComponentShown()();
+					return executor.@com.eas.ui.events.EventsExecutor::getComponentShown()();
 				},
 				set : function(aValue) {
-					executor.@com.eas.widgets.EventsExecutor::setComponentShown(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+					executor.@com.eas.ui.events.EventsExecutor::setComponentShown(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 				},
 				configurable : true
 			});
 			Object.defineProperty(published, "onComponentHidden", {
 				get : function() {
-					return executor.@com.eas.widgets.EventsExecutor::getComponentHidden()();
+					return executor.@com.eas.ui.events.EventsExecutor::getComponentHidden()();
 				},
 				set : function(aValue) {
-					executor.@com.eas.widgets.EventsExecutor::setComponentHidden(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+					executor.@com.eas.ui.events.EventsExecutor::setComponentHidden(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 				},
 				configurable : true
 			});
 			Object.defineProperty(published, "onComponentAdded", {
 				get : function() {
-					return executor.@com.eas.widgets.EventsExecutor::getComponentAdded()();
+					return executor.@com.eas.ui.events.EventsExecutor::getComponentAdded()();
 				},
 				set : function(aValue) {
-					executor.@com.eas.widgets.EventsExecutor::setComponentAdded(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+					executor.@com.eas.ui.events.EventsExecutor::setComponentAdded(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 				},
 				configurable : true
 			});
 			Object.defineProperty(published, "onComponentRemoved", {
 				get : function() {
-					return executor.@com.eas.widgets.EventsExecutor::getComponentRemoved()();
+					return executor.@com.eas.ui.events.EventsExecutor::getComponentRemoved()();
 				},
 				set : function(aValue) {
-					executor.@com.eas.widgets.EventsExecutor::setComponentRemoved(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+					executor.@com.eas.ui.events.EventsExecutor::setComponentRemoved(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 				},
 				configurable : true
 			});			
 			Object.defineProperty(published, "onFocusGained", {
 				get : function() {
-					return executor.@com.eas.widgets.EventsExecutor::getFocusGained()();
+					return executor.@com.eas.ui.events.EventsExecutor::getFocusGained()();
 				},
 				set : function(aValue) {
-					executor.@com.eas.widgets.EventsExecutor::setFocusGained(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+					executor.@com.eas.ui.events.EventsExecutor::setFocusGained(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 				},
 				configurable : true
 			});
 			Object.defineProperty(published, "onFocusLost", {
 				get : function() {
-					return executor.@com.eas.widgets.EventsExecutor::getFocusLost()();
+					return executor.@com.eas.ui.events.EventsExecutor::getFocusLost()();
 				},
 				set : function(aValue) {
-					executor.@com.eas.widgets.EventsExecutor::setFocusLost(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+					executor.@com.eas.ui.events.EventsExecutor::setFocusLost(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 				},
 				configurable : true
 			});
 			Object.defineProperty(published, "onKeyTyped", {
 				get : function() {
-					return executor.@com.eas.widgets.EventsExecutor::getKeyTyped()();
+					return executor.@com.eas.ui.events.EventsExecutor::getKeyTyped()();
 				},
 				set : function(aValue) {
-					executor.@com.eas.widgets.EventsExecutor::setKeyTyped(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+					executor.@com.eas.ui.events.EventsExecutor::setKeyTyped(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 				},
 				configurable : true
 			});
 			Object.defineProperty(published, "onKeyPressed", {
 				get : function() {
-					return executor.@com.eas.widgets.EventsExecutor::getKeyPressed()();
+					return executor.@com.eas.ui.events.EventsExecutor::getKeyPressed()();
 				},
 				set : function(aValue) {
-					executor.@com.eas.widgets.EventsExecutor::setKeyPressed(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+					executor.@com.eas.ui.events.EventsExecutor::setKeyPressed(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 				},
 				configurable : true
 			});
 			Object.defineProperty(published, "onKeyReleased", {
 				get : function() {
-					return executor.@com.eas.widgets.EventsExecutor::getKeyReleased()();
+					return executor.@com.eas.ui.events.EventsExecutor::getKeyReleased()();
 				},
 				set : function(aValue) {
-					executor.@com.eas.widgets.EventsExecutor::setKeyReleased(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+					executor.@com.eas.ui.events.EventsExecutor::setKeyReleased(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 				},
 				configurable : true
 			});
 			Object.defineProperty(published, "onItemSelected", {
 				get : function() {
-					return executor.@com.eas.widgets.EventsExecutor::getItemSelected()();
+					return executor.@com.eas.ui.events.EventsExecutor::getItemSelected()();
 				},
 				set : function(aValue) {
-					executor.@com.eas.widgets.EventsExecutor::setItemSelected(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+					executor.@com.eas.ui.events.EventsExecutor::setItemSelected(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 				},
 				configurable : true
 			});
 			Object.defineProperty(published, "onValueChange", {
 				get : function() {
-					return executor.@com.eas.widgets.EventsExecutor::getValueChanged()();
+					return executor.@com.eas.ui.events.EventsExecutor::getValueChanged()();
 				},
 				set : function(aValue) {
-					executor.@com.eas.widgets.EventsExecutor::setValueChanged(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+					executor.@com.eas.ui.events.EventsExecutor::setValueChanged(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 				},
 				configurable : true
 			});
@@ -1185,11 +1185,11 @@ public class JsWidgets {
 					throw  ' use  "new ButtonGroup()" !';
 				}
 				var published = this;
-				aComponent = aComponent || @com.eas.widgets.ButtonGroup::new()();
+				aComponent = aComponent || @com.eas.ui.ButtonGroup::new()();
 				published.unwrap = function() {
 					return aComponent;
 				};			
-				aComponent.@com.eas.widgets.ButtonGroup::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+				aComponent.@com.eas.ui.ButtonGroup::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 			}
 			return ButtonGroup;
 		});

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.widgets.containers;
+package com.eas.window;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;

@@ -5,10 +5,10 @@
  */
 package com.eas.widgets.boxes;
 
+import com.eas.predefine.XElement;
 import com.eas.ui.CommonResources;
 import com.eas.ui.HasImageParagraph;
 import com.eas.ui.HasImageResource;
-import com.eas.ui.XElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

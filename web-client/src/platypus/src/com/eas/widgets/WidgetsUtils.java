@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 
 import com.eas.predefine.HasPublished;
 import com.eas.predefine.Utils;
+import com.eas.predefine.XElement;
 import com.eas.ui.HasCustomParent;
 import com.eas.ui.MarginConstraints;
 import com.eas.ui.PublishedCell;
@@ -15,8 +16,6 @@ import com.eas.ui.PublishedComponent;
 import com.eas.ui.PublishedFont;
 import com.eas.ui.EventsPublisher;
 import com.eas.ui.StandaloneRootPanel;
-import com.eas.ui.StyleIconDecorator;
-import com.eas.ui.XElement;
 import com.eas.ui.MarginConstraints.Margin;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -30,10 +29,8 @@ import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.Focusable;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.MenuItemSeparator;
@@ -205,10 +202,6 @@ public class WidgetsUtils {
 	public static PublishedColor getStyledBackground(XElement aElement) {
 		String c = aElement.getStyle().getBackgroundColor();
 		return c != null ? PublishedColor.parse(c) : null;
-	}
-
-	public static String renderDecorated(SafeHtmlBuilder rendered, String aId, PublishedCell aCell, SafeHtmlBuilder sb) {
-		return StyleIconDecorator.decorate(rendered.toSafeHtml(), aId, aCell, HasVerticalAlignment.ALIGN_MIDDLE, sb);
 	}
 
 	public static Runnable createScriptSelector(final JavaScriptObject aThis, final JavaScriptObject selectFunction, final JavaScriptObject aPublishedField) {

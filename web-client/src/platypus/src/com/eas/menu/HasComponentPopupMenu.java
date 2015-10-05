@@ -1,6 +1,5 @@
-package com.eas.ui;
+package com.eas.menu;
 
-import com.eas.menu.PlatypusPopupMenu;
 
 public interface HasComponentPopupMenu {
 

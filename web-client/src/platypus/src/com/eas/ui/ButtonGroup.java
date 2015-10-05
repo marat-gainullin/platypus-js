@@ -1,16 +1,13 @@
-package com.eas.widgets;
+package com.eas.ui;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.eas.predefine.HasPublished;
 import com.eas.predefine.Utils;
-import com.eas.ui.HasJsFacade;
-import com.eas.ui.HasPlatypusButtonGroup;
-import com.eas.ui.EventsPublisher;
-import com.eas.ui.RadioGroup;
 import com.eas.ui.events.AddEvent;
 import com.eas.ui.events.AddHandler;
+import com.eas.ui.events.EventsExecutor;
 import com.eas.ui.events.HasAddHandlers;
 import com.eas.ui.events.HasRemoveHandlers;
 import com.eas.ui.events.RemoveEvent;
@@ -135,19 +132,19 @@ public class ButtonGroup extends RadioGroup implements HasJsFacade, HasAddHandle
 			if(toAdd && toAdd.unwrap) {
 				if(toAdd.buttonGroup == published)
 					throw 'A widget already added to this group';
-				aWidget.@com.eas.widgets.ButtonGroup::add(Lcom/eas/predefine/HasPublished;)(toAdd.unwrap());
+				aWidget.@com.eas.ui.ButtonGroup::add(Lcom/eas/predefine/HasPublished;)(toAdd.unwrap());
 			}
 		}
 		published.remove = function(toRemove) {
 			if(toRemove && toRemove.unwrap) {
-				aWidget.@com.eas.widgets.ButtonGroup::remove(Lcom/eas/predefine/HasPublished;)(toRemove.unwrap());
+				aWidget.@com.eas.ui.ButtonGroup::remove(Lcom/eas/predefine/HasPublished;)(toRemove.unwrap());
 			}
 		}
 		published.clear = function() {
-			aWidget.@com.eas.widgets.ButtonGroup::clear()();				
+			aWidget.@com.eas.ui.ButtonGroup::clear()();				
 		}
 		published.child = function(aIndex) {
-			var comp = aWidget.@com.eas.widgets.ButtonGroup::getChild(I)(aIndex);
+			var comp = aWidget.@com.eas.ui.ButtonGroup::getChild(I)(aIndex);
 		    return @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(comp);					
 		};
 		Object.defineProperty(published, "children", {
@@ -160,7 +157,7 @@ public class ButtonGroup extends RadioGroup implements HasJsFacade, HasAddHandle
 		});
 		Object.defineProperty(published, "count", {
 			get : function() {
-				return aWidget.@com.eas.widgets.ButtonGroup::size()();
+				return aWidget.@com.eas.ui.ButtonGroup::size()();
 			}
 		});
 	    Object.defineProperty(published, "name", {
@@ -170,10 +167,10 @@ public class ButtonGroup extends RadioGroup implements HasJsFacade, HasAddHandle
  	    });
 		Object.defineProperty(published, "onItemSelected", {
 			get : function() {
-				return aWidget.@com.eas.widgets.ButtonGroup::getItemSelected()();
+				return aWidget.@com.eas.ui.ButtonGroup::getItemSelected()();
 			},
 			set : function(aValue) {
-				aWidget.@com.eas.widgets.ButtonGroup::setItemSelected(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				aWidget.@com.eas.ui.ButtonGroup::setItemSelected(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
 			},
 			configurable : true
 		});
