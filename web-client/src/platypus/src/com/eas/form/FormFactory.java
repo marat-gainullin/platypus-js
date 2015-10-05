@@ -11,31 +11,10 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.eas.bound.BoundPublisher;
-import com.eas.bound.ModelCheck;
-import com.eas.bound.ModelCombo;
-import com.eas.bound.ModelDate;
-import com.eas.bound.ModelDecoratorBox;
-import com.eas.bound.ModelFormattedField;
-import com.eas.bound.ModelSpin;
-import com.eas.bound.ModelTextArea;
 import com.eas.client.CallbackAdapter;
-import com.eas.grid.GridPublisher;
-import com.eas.grid.ModelGrid;
-import com.eas.grid.columns.ModelColumn;
-import com.eas.grid.columns.header.CheckHeaderNode;
-import com.eas.grid.columns.header.HeaderNode;
-import com.eas.grid.columns.header.ModelHeaderNode;
-import com.eas.grid.columns.header.RadioHeaderNode;
-import com.eas.grid.columns.header.ServiceHeaderNode;
 import com.eas.menu.HasComponentPopupMenu;
-import com.eas.menu.MenuPublisher;
 import com.eas.menu.PlatypusMenu;
 import com.eas.menu.PlatypusMenuBar;
-import com.eas.menu.PlatypusMenuItemCheckBox;
-import com.eas.menu.PlatypusMenuItemImageText;
-import com.eas.menu.PlatypusMenuItemRadioButton;
-import com.eas.menu.PlatypusMenuItemSeparator;
 import com.eas.menu.PlatypusPopupMenu;
 import com.eas.predefine.HasPublished;
 import com.eas.predefine.Utils;
@@ -58,30 +37,14 @@ import com.eas.widgets.AnchorsPane;
 import com.eas.widgets.BorderPane;
 import com.eas.widgets.BoxPane;
 import com.eas.widgets.CardPane;
-import com.eas.widgets.DesktopPane;
 import com.eas.widgets.FlowPane;
 import com.eas.widgets.GridPane;
-import com.eas.widgets.PlatypusButton;
-import com.eas.widgets.PlatypusCheckBox;
-import com.eas.widgets.PlatypusFormattedTextField;
-import com.eas.widgets.PlatypusHtmlEditor;
-import com.eas.widgets.PlatypusLabel;
-import com.eas.widgets.PlatypusPasswordField;
-import com.eas.widgets.PlatypusProgressBar;
-import com.eas.widgets.PlatypusRadioButton;
-import com.eas.widgets.PlatypusSlider;
-import com.eas.widgets.PlatypusSplitButton;
-import com.eas.widgets.PlatypusTextArea;
-import com.eas.widgets.PlatypusTextField;
-import com.eas.widgets.PlatypusToggleButton;
 import com.eas.widgets.ScrollPane;
 import com.eas.widgets.SplitPane;
 import com.eas.widgets.TabbedPane;
 import com.eas.widgets.ToolBar;
-import com.eas.widgets.WidgetsPublisher;
 import com.eas.widgets.boxes.DropDownButton;
 import com.eas.widgets.boxes.ImageButton;
-import com.eas.widgets.boxes.ObjectFormat;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.HasEnabled;
@@ -200,7 +163,7 @@ public class FormFactory {
 			return null;
 	}
 
-	protected Utils.JsObject resolveEntity(String aEntityName) throws Exception {
+	public Utils.JsObject resolveEntity(String aEntityName) throws Exception {
 		if (model.has(aEntityName)) {
 			JavaScriptObject oEntity = model.getJs(aEntityName);
 			if (oEntity != null) {
@@ -214,479 +177,34 @@ public class FormFactory {
 		return null;
 	}
 
-	private UIObject readWidget(Element anElement) throws Exception {
-		String type = anElement.getTagName();
-		switch (type) {
-		// widgets
-		case "Label":
-			final PlatypusLabel label = new PlatypusLabel();
-			WidgetsPublisher.publish(label);
-			readGeneralProps(anElement, label);
-			readImageParagraph(anElement, label);
-			return label;
-		case "Button":
-			PlatypusButton button = new PlatypusButton();
-			WidgetsPublisher.publish(button);
-			readGeneralProps(anElement, button);
-			readImageParagraph(anElement, button);
-			return button;
-		case "DropDownButton":
-			final PlatypusSplitButton dropDownButton = new PlatypusSplitButton();
-			WidgetsPublisher.publish(dropDownButton);
-			readGeneralProps(anElement, dropDownButton);
-			readImageParagraph(anElement, dropDownButton);
-			if (anElement.hasAttribute("dropDownMenu")) {
-				final String dropDownMenuName = anElement.getAttribute("dropDownMenu");
-				resolvers.add(new Runnable() {
-					public void run() {
-						if (widgets.containsKey(dropDownMenuName)) {
-							UIObject compMenu = widgets.get(dropDownMenuName);
-							if (compMenu instanceof PlatypusPopupMenu) {
-								dropDownButton.setMenu((PlatypusPopupMenu) compMenu);
-							}
-						}
-					}
-				});
-			}
-			return dropDownButton;
-		case "ButtonGroup":
-			ButtonGroup buttonGroup = new ButtonGroup();
-			WidgetsPublisher.publish(buttonGroup);
-			if (anElement.hasAttribute("name")) {
-				buttonGroup.setJsName(anElement.getAttribute("name"));
-			}
-			return buttonGroup;
-		case "CheckBox":
-			PlatypusCheckBox checkBox = new PlatypusCheckBox();
-			WidgetsPublisher.publish(checkBox);
-			readGeneralProps(anElement, checkBox);
-			readImageParagraph(anElement, checkBox);
-			if (anElement.hasAttribute("selected")) {
-				boolean selected = Utils.getBooleanAttribute(anElement, "selected", Boolean.FALSE);
-				checkBox.setValue(selected);
-			}
-			if (anElement.hasAttribute("text")) {
-				checkBox.setText(anElement.getAttribute("text"));
-			}
-			return checkBox;
-		case "TextArea":
-			PlatypusTextArea textArea = new PlatypusTextArea();
-			WidgetsPublisher.publish(textArea);
-			readGeneralProps(anElement, textArea);
-			if (anElement.hasAttribute("text")) {
-				textArea.setText(anElement.getAttribute("text"));
-			}
-			return textArea;
-		case "HtmlArea":
-			PlatypusHtmlEditor htmlArea = new PlatypusHtmlEditor();
-			WidgetsPublisher.publish(htmlArea);
-			readGeneralProps(anElement, htmlArea);
-			if (anElement.hasAttribute("text")) {
-				String text = anElement.getAttribute("text");
-				htmlArea.setValue(text); 
-			}
-			return htmlArea;
-		case "FormattedField": {
-			PlatypusFormattedTextField formattedField = new PlatypusFormattedTextField();
-			WidgetsPublisher.publish(formattedField);
-			readGeneralProps(anElement, formattedField);
-			String format = anElement.getAttribute("format");
-			int valueType = Utils.getIntegerAttribute(anElement, "valueType", ObjectFormat.REGEXP);
-			formattedField.setValueType(valueType);
-			formattedField.setFormat(format);
-			if (anElement.hasAttribute("text")) {
-				formattedField.setText(anElement.getAttribute("text"));
-			}
-			return formattedField;
-		}
-		case "PasswordField":
-			PlatypusPasswordField passwordField = new PlatypusPasswordField();
-			WidgetsPublisher.publish(passwordField);
-			readGeneralProps(anElement, passwordField);
-			if (anElement.hasAttribute("text")) {
-				passwordField.setText(anElement.getAttribute("text"));
-			}
-			return passwordField;
-		case "ProgressBar": {
-			PlatypusProgressBar progressBar = new PlatypusProgressBar();
-			WidgetsPublisher.publish(progressBar);
-			readGeneralProps(anElement, progressBar);
-			int minimum = Utils.getIntegerAttribute(anElement, "minimum", 0);
-			int value = Utils.getIntegerAttribute(anElement, "value", 0);
-			int maximum = Utils.getIntegerAttribute(anElement, "maximum", 100);
-			progressBar.setMinProgress(minimum);
-			progressBar.setMaxProgress(maximum);
-			progressBar.setValue((double) value);
-			if (anElement.hasAttribute("string")) {
-				progressBar.setText(anElement.getAttribute("string"));
-			}
-			return progressBar;
-		}
-		case "RadioButton":
-			PlatypusRadioButton radio = new PlatypusRadioButton();
-			WidgetsPublisher.publish(radio);
-			readGeneralProps(anElement, radio);
-			readImageParagraph(anElement, radio);
-			if (anElement.hasAttribute("selected")) {
-				boolean selected = Utils.getBooleanAttribute(anElement, "selected", Boolean.FALSE);
-				radio.setValue(selected);
-			}
-			if (anElement.hasAttribute("text")) {
-				radio.setText(anElement.getAttribute("text"));
-			}
-			return radio;
-		case "Slider":
-			PlatypusSlider slider = new PlatypusSlider();
-			WidgetsPublisher.publish(slider);
-			readGeneralProps(anElement, slider);
-			int minimum = Utils.getIntegerAttribute(anElement, "minimum", 0);
-			int value = Utils.getIntegerAttribute(anElement, "value", 0);
-			int maximum = Utils.getIntegerAttribute(anElement, "maximum", 100);
-			slider.setMinValue(minimum);
-			slider.setMaxValue(maximum);
-			slider.setValue((double) value);
-			return slider;
-		case "TextField":
-			PlatypusTextField textField = new PlatypusTextField();
-			WidgetsPublisher.publish(textField);
-			readGeneralProps(anElement, textField);
-			if (anElement.hasAttribute("text")) {
-				textField.setText(anElement.getAttribute("text"));
-			}
-			return textField;
-		case "ToggleButton":
-			PlatypusToggleButton toggle = new PlatypusToggleButton();
-			WidgetsPublisher.publish(toggle);
-			readGeneralProps(anElement, toggle);
-			readImageParagraph(anElement, toggle);
-			if (anElement.hasAttribute("selected")) {
-				boolean selected = Utils.getBooleanAttribute(anElement, "selected", Boolean.FALSE);
-				toggle.setValue(selected);
-			}
-			return toggle;
-		case "DesktopPane":
-			DesktopPane desktop = new DesktopPane();
-			WidgetsPublisher.publish(desktop);
-			readGeneralProps(anElement, desktop);
-			return desktop;
-			// model widgets
-		case "ModelCheckBox":
-			ModelCheck modelCheckBox = new ModelCheck();
-			BoundPublisher.publish(modelCheckBox);
-			readGeneralProps(anElement, modelCheckBox);
-			if (anElement.hasAttribute("text")) {
-				modelCheckBox.setText(anElement.getAttribute("text"));
-			}
-			return modelCheckBox;
-		case "ModelCombo":
-			ModelCombo modelCombo = new ModelCombo();
-			BoundPublisher.publish(modelCombo);
-			readGeneralProps(anElement, modelCombo);
-			boolean list = Utils.getBooleanAttribute(anElement, "list", Boolean.TRUE);
-			modelCombo.setList(list);
-			if (anElement.hasAttribute("displayList")) {
-				String displayList = anElement.getAttribute("displayList");
-				modelCombo.setDisplayList(resolveEntity(displayList));
-			}
-			if (anElement.hasAttribute("displayField")) {
-				String displayField = anElement.getAttribute("displayField");
-				modelCombo.setDisplayField(displayField);
-			}
-			return modelCombo;
-		case "ModelDate":
-			ModelDate modelDate = new ModelDate();
-			BoundPublisher.publish(modelDate);
-			readGeneralProps(anElement, modelDate);
-			if (anElement.hasAttribute("dateFormat")) {
-				String dateFormat = anElement.getAttribute("dateFormat");
-				try {
-					modelDate.setFormat(dateFormat);
-				} catch (Exception ex) {
-					Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
-				}
-			}
-			if (anElement.hasAttribute("datePicker")) {
-				boolean selected = Utils.getBooleanAttribute(anElement, "datePicker", Boolean.FALSE);
-				modelDate.setDateShown(selected);
-			}
-			if (anElement.hasAttribute("timePicker")) {
-				boolean selected = Utils.getBooleanAttribute(anElement, "timePicker", Boolean.FALSE);
-				modelDate.setTimeShown(selected);
-			}
-			return modelDate;
-		case "ModelFormattedField":
-			ModelFormattedField modelFormattedField = new ModelFormattedField();
-			BoundPublisher.publish(modelFormattedField);
-			readGeneralProps(anElement, modelFormattedField);
-			try {
-				String format = anElement.getAttribute("format");
-				int valueType = Utils.getIntegerAttribute(anElement, "valueType", ObjectFormat.REGEXP);
-				modelFormattedField.setValueType(valueType);
-				modelFormattedField.setFormat(format);
-				if (anElement.hasAttribute("text")) {
-					modelFormattedField.setText(anElement.getAttribute("text"));
-				}
-			} catch (Exception ex) {
-				Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
-			}
-			return modelFormattedField;
-		case "ModelSpin":
-			ModelSpin modelSpin = new ModelSpin();
-			BoundPublisher.publish(modelSpin);
-			readGeneralProps(anElement, modelSpin);
-			Double min = null;
-			if (anElement.hasAttribute("min"))
-				min = Utils.getDoubleAttribute(anElement, "min", -Double.MAX_VALUE);
-			double step = Utils.getDoubleAttribute(anElement, "step", 1.0d);
-			Double max = null;
-			if (anElement.hasAttribute("max"))
-				max = Utils.getDoubleAttribute(anElement, "max", Double.MAX_VALUE);
-			try {
-				modelSpin.setMin(min);
-				modelSpin.setMax(max);
-				modelSpin.setStep(step);
-			} catch (Exception ex) {
-				Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
-			}
-			return modelSpin;
-		case "ModelTextArea":
-			ModelTextArea modelTextArea = new ModelTextArea();
-			BoundPublisher.publish(modelTextArea);
-			readGeneralProps(anElement, modelTextArea);
-			if (anElement.hasAttribute("text")) {
-				modelTextArea.setValue(anElement.getAttribute("text"));
-			}
-			return modelTextArea;
-		case "ModelGrid": {
-			ModelGrid grid = new ModelGrid();
-			GridPublisher.publish(grid);
-			readGeneralProps(anElement, grid);
-			int frozenColumns = Utils.getIntegerAttribute(anElement, "frozenColumns", 0);
-			int frozenRows = Utils.getIntegerAttribute(anElement, "frozenRows", 0);
-			boolean insertable = Utils.getBooleanAttribute(anElement, "insertable", Boolean.TRUE);
-			boolean deletable = Utils.getBooleanAttribute(anElement, "deletable", Boolean.TRUE);
-			boolean editable = Utils.getBooleanAttribute(anElement, "editable", Boolean.TRUE);
-			boolean headerVisible = Utils.getBooleanAttribute(anElement, "headerVisible", Boolean.TRUE);
-			boolean draggableRows = Utils.getBooleanAttribute(anElement, "draggableRows", Boolean.FALSE);
-			boolean showHorizontalLines = Utils.getBooleanAttribute(anElement, "showHorizontalLines", Boolean.TRUE);
-			boolean showVerticalLines = Utils.getBooleanAttribute(anElement, "showVerticalLines", Boolean.TRUE);
-			boolean showOddRowsInOtherColor = Utils.getBooleanAttribute(anElement, "showOddRowsInOtherColor", Boolean.TRUE);
-			int rowsHeight = Utils.getIntegerAttribute(anElement, "rowsHeight", 20);
-			grid.setHeaderVisible(headerVisible);
-			grid.setDraggableRows(draggableRows);
-			grid.setRowsHeight(rowsHeight);
-			grid.setShowOddRowsInOtherColor(showOddRowsInOtherColor);
-			grid.setShowVerticalLines(showVerticalLines);
-			grid.setShowHorizontalLines(showHorizontalLines);
-			grid.setEditable(editable);
-			grid.setDeletable(deletable);
-			grid.setInsertable(insertable);
-			grid.setFrozenColumns(frozenColumns);
-			grid.setFrozenRows(frozenRows);
-			if (anElement.hasAttribute("oddRowsColor")) {
-				String oddRowsColorDesc = anElement.getAttribute("oddRowsColor");
-				grid.setOddRowsColor(PublishedColor.parse(oddRowsColorDesc));
-			}
-			if (anElement.hasAttribute("gridColor")) {
-				String gridColorDesc = anElement.getAttribute("gridColor");
-				grid.setGridColor(PublishedColor.parse(gridColorDesc));
-			}
-			if (anElement.hasAttribute("parentField")) {
-				String parentFieldPath = anElement.getAttribute("parentField");
-				grid.setParentField(parentFieldPath);
-			}
-			if (anElement.hasAttribute("childrenField")) {
-				String childrenFieldPath = anElement.getAttribute("childrenField");
-				grid.setChildrenField(childrenFieldPath);
-			}
-			List<HeaderNode<JavaScriptObject>> roots = readColumns(anElement);
-			grid.setHeader(roots);
-			if (anElement.hasAttribute("data")) {
-				String entityName = anElement.getAttribute("data");
-				try {
-					grid.setData(resolveEntity(entityName));
-				} catch (Exception ex) {
-					Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE,
-					        "While setting data to named model's property " + entityName + " to widget " + grid.getJsName() + " exception occured: " + ex.getMessage());
-				}
-			}
-			if (anElement.hasAttribute("field")) {
-				String dataPropertyPath = anElement.getAttribute("field");
-				grid.setField(dataPropertyPath);
-			}
-			return grid;
-		}
-		// containers
-		case "AnchorsPane":
-			AnchorsPane anchorsPane = new AnchorsPane();
-			WidgetsPublisher.publish(anchorsPane);
-			readGeneralProps(anElement, anchorsPane);
-			return anchorsPane;
-		case "BorderPane": {
-			int hgap = Utils.getIntegerAttribute(anElement, "hgap", 0);
-			int vgap = Utils.getIntegerAttribute(anElement, "vgap", 0);
-			BorderPane borderPane = new BorderPane(hgap, vgap);
-			WidgetsPublisher.publish(borderPane);
-			readGeneralProps(anElement, borderPane);
-			return borderPane;
-		}
-		case "BoxPane": {
-			int hgap = Utils.getIntegerAttribute(anElement, "hgap", 0);
-			int vgap = Utils.getIntegerAttribute(anElement, "vgap", 0);
-			int orientation = Utils.getIntegerAttribute(anElement, "orientation", Orientation.HORIZONTAL);
-			BoxPane boxPane = new BoxPane(orientation, hgap, vgap);
-			WidgetsPublisher.publish(boxPane);
-			readGeneralProps(anElement, boxPane);
-			return boxPane;
-		}
-		case "CardPane": {
-			int hgap = Utils.getIntegerAttribute(anElement, "hgap", 0);
-			int vgap = Utils.getIntegerAttribute(anElement, "vgap", 0);
-			CardPane cardPane = new CardPane(hgap, vgap);
-			WidgetsPublisher.publish(cardPane);
-			readGeneralProps(anElement, cardPane);
-			return cardPane;
-		}
-		case "FlowPane": {
-			int hgap = Utils.getIntegerAttribute(anElement, "hgap", 0);
-			int vgap = Utils.getIntegerAttribute(anElement, "vgap", 0);
-			FlowPane flowPane = new FlowPane(hgap, vgap);
-			WidgetsPublisher.publish(flowPane);
-			readGeneralProps(anElement, flowPane);
-			return flowPane;
-		}
-		case "GridPane": {
-			int hgap = Utils.getIntegerAttribute(anElement, "hgap", 0);
-			int vgap = Utils.getIntegerAttribute(anElement, "vgap", 0);
-			int rows = Utils.getIntegerAttribute(anElement, "rows", 0);
-			int columns = Utils.getIntegerAttribute(anElement, "columns", 0);
-			GridPane gridPane = new GridPane(rows, columns, hgap, vgap);
-			WidgetsPublisher.publish(gridPane);
-			readGeneralProps(anElement, gridPane);
-			return gridPane;
-		}
-		// predefined layout containers
-		case "ScrollPane":
-			ScrollPane scroll = new ScrollPane();
-			WidgetsPublisher.publish(scroll);
-			readGeneralProps(anElement, scroll);
-			boolean wheelScrollingEnabled = Utils.getBooleanAttribute(anElement, "wheelScrollingEnabled", Boolean.TRUE);
-			int horizontalScrollBarPolicy = Utils.getIntegerAttribute(anElement, "horizontalScrollBarPolicy", ScrollPane.SCROLLBAR_AS_NEEDED);
-			int verticalScrollBarPolicy = Utils.getIntegerAttribute(anElement, "verticalScrollBarPolicy", ScrollPane.SCROLLBAR_AS_NEEDED);
-			scroll.setHorizontalScrollBarPolicy(horizontalScrollBarPolicy);
-			scroll.setVerticalScrollBarPolicy(verticalScrollBarPolicy);
-			return scroll;
-		case "SplitPane":
-			final SplitPane split = new SplitPane();
-			WidgetsPublisher.publish(split);
-			readGeneralProps(anElement, split);
-			boolean oneTouchExpandable = Utils.getBooleanAttribute(anElement, "oneTouchExpandable", true);
-			int dividerLocation = Utils.getIntegerAttribute(anElement, "dividerLocation", 0);
-			int orientation = Utils.getIntegerAttribute(anElement, "orientation", Orientation.VERTICAL);
-			split.setDividerLocation(dividerLocation);
-			split.setOrientation(orientation);
-			split.setOneTouchExpandable(oneTouchExpandable);
-			if (anElement.hasAttribute("leftComponent")) {
-				final String leftComponentName = anElement.getAttribute("leftComponent");
-				resolvers.add(new Runnable() {
-					@Override
-					public void run() {
-						UIObject leftComponent = widgets.get(leftComponentName);
-						split.setFirstWidget((Widget) leftComponent);
-					}
-				});
-			}
-			if (anElement.hasAttribute("rightComponent")) {
-				final String rightComponentName = anElement.getAttribute("rightComponent");
-				resolvers.add(new Runnable() {
-					@Override
-					public void run() {
-						UIObject rightComponent = widgets.get(rightComponentName);
-						split.setSecondWidget((Widget) rightComponent);
-					}
-				});
-			}
-			return split;
-		case "TabbedPane":
-			TabbedPane tabs = new TabbedPane();
-			WidgetsPublisher.publish(tabs);
-			readGeneralProps(anElement, tabs);
-			/*
-			 * int tabPlacement = Utils.getIntegerAttribute(anElement,
-			 * "tabPlacement", TabbedPane.TOP);
-			 * tabs.setTabPlacement(tabPlacement);
-			 */
-			return tabs;
-		case "ToolBar":
-			ToolBar toolbar = new ToolBar();
-			WidgetsPublisher.publish(toolbar);
-			readGeneralProps(anElement, toolbar);
-			return toolbar;
-			// menus
-		case "Menu":
-			PlatypusMenu menu = new PlatypusMenu();
-			MenuPublisher.publish(menu);
-			readGeneralProps(anElement, menu);
-			if (anElement.hasAttribute("text")) {
-				menu.setText(anElement.getAttribute("text"));
-			}
-			return menu;
-		case "MenuItem":
-			PlatypusMenuItemImageText menuitem = new PlatypusMenuItemImageText();
-			MenuPublisher.publish(menuitem);
-			readGeneralProps(anElement, menuitem);
-			readImageParagraph(anElement, menuitem);
-			if (anElement.hasAttribute("text")) {
-				menuitem.setText(anElement.getAttribute("text"));
-			}
-			return menuitem;
-		case "CheckMenuItem":
-			PlatypusMenuItemCheckBox checkMenuItem = new PlatypusMenuItemCheckBox();
-			MenuPublisher.publish(checkMenuItem);
-			readGeneralProps(anElement, checkMenuItem);
-			readImageParagraph(anElement, checkMenuItem);
-			if (anElement.hasAttribute("selected")) {
-				boolean selected = Utils.getBooleanAttribute(anElement, "selected", Boolean.FALSE);
-				checkMenuItem.setValue(selected);
-			}
-			if (anElement.hasAttribute("text")) {
-				checkMenuItem.setText(anElement.getAttribute("text"));
-			}
-			return checkMenuItem;
-		case "RadioMenuItem":
-			PlatypusMenuItemRadioButton radioMenuItem = new PlatypusMenuItemRadioButton();
-			MenuPublisher.publish(radioMenuItem);
-			readGeneralProps(anElement, radioMenuItem);
-			readImageParagraph(anElement, radioMenuItem);
-			if (anElement.hasAttribute("selected")) {
-				boolean selected = Utils.getBooleanAttribute(anElement, "selected", Boolean.FALSE);
-				radioMenuItem.setValue(selected);
-			}
-			if (anElement.hasAttribute("text")) {
-				radioMenuItem.setText(anElement.getAttribute("text"));
-			}
-			return radioMenuItem;
-		case "MenuSeparator":
-			PlatypusMenuItemSeparator menuSeparator = new PlatypusMenuItemSeparator();
-			MenuPublisher.publish(menuSeparator);
-			readGeneralProps(anElement, menuSeparator);
-			return menuSeparator;
-		case "MenuBar":
-			PlatypusMenuBar menuBar = new PlatypusMenuBar();
-			MenuPublisher.publish(menuBar);
-			readGeneralProps(anElement, menuBar);
-			return menuBar;
-		case "PopupMenu":
-			PlatypusPopupMenu popupMenu = new PlatypusPopupMenu();
-			MenuPublisher.publish(popupMenu);
-			readGeneralProps(anElement, popupMenu);
-			return popupMenu;
-		default:
-			return null;
-		}
+	public void addResolver(Runnable aResolver) {
+		resolvers.add(aResolver);
 	}
 
-	protected void readImageParagraph(Element anElement, final UIObject aImageParagraph) throws Exception {
+	public UIObject readWidget(final Element anElement) throws Exception {
+		return null;
+		/*
+		return WidgetsFactory.readWidget(anElement, this);
+		UIObject read = GridFactory.readWidget(anElement, this);
+		if (read != null)
+			return read;
+		else {
+			read = BoundFactory.readWidget(anElement, this);
+			if (read != null)
+				return read;
+			else {
+				read = MenuFactory.readWidget(anElement, this);
+				if (read != null)
+					return read;
+				else {
+					return WidgetsFactory.readWidget(anElement, this);
+				}
+			}
+		}
+		*/
+	}
+
+	public void readImageParagraph(Element anElement, final UIObject aImageParagraph) throws Exception {
 		if (anElement.hasAttribute("icon") && aImageParagraph instanceof HasImageResource) {
 			String iconImage = anElement.getAttribute("icon");
 			PlatypusImageResource.load(iconImage, new CallbackAdapter<ImageResource, String>() {
@@ -706,8 +224,8 @@ public class FormFactory {
 		}
 		if (aImageParagraph instanceof HasImageParagraph) {
 			HasImageParagraph hip = (HasImageParagraph) aImageParagraph;
-			hip.setHorizontalAlignment(Utils.getIntegerAttribute(anElement, "horizontalAlignment", aImageParagraph instanceof ImageButton || aImageParagraph instanceof DropDownButton ? HasImageParagraph.CENTER
-			        : HasImageParagraph.LEFT));
+			hip.setHorizontalAlignment(Utils.getIntegerAttribute(anElement, "horizontalAlignment",
+			        aImageParagraph instanceof ImageButton || aImageParagraph instanceof DropDownButton ? HasImageParagraph.CENTER : HasImageParagraph.LEFT));
 			hip.setVerticalAlignment(Utils.getIntegerAttribute(anElement, "verticalAlignment", HasImageParagraph.CENTER));
 			hip.setIconTextGap(Utils.getIntegerAttribute(anElement, "iconTextGap", 4));
 			hip.setHorizontalTextPosition(Utils.getIntegerAttribute(anElement, "horizontalTextPosition", HasImageParagraph.RIGHT));
@@ -715,14 +233,11 @@ public class FormFactory {
 		}
 	}
 
-	private void readGeneralProps(final Element anElement, final UIObject aTarget) throws Exception {
+	public void readGeneralProps(final Element anElement, final UIObject aTarget) throws Exception {
 		String widgetName = "";
 		if (anElement.hasAttribute("name") && aTarget instanceof HasJsName) {
 			widgetName = anElement.getAttribute("name");
 			((HasJsName) aTarget).setJsName(widgetName);
-		}
-		if (anElement.hasAttribute("nullable") && aTarget instanceof ModelDecoratorBox<?>) {
-			((ModelDecoratorBox<?>) aTarget).setNullable(Utils.getBooleanAttribute(anElement, "nullable", true));
 		}
 		/*
 		 * if (anElement.hasAttribute("editable") && aTarget instanceof
@@ -832,7 +347,7 @@ public class FormFactory {
 		}
 	}
 
-	protected PublishedFont readFont(Element anElement) throws Exception {
+	public PublishedFont readFont(Element anElement) throws Exception {
 		PublishedFont font = readFontTag(anElement, "font");
 		if (font != null) {
 			return font;
@@ -954,131 +469,4 @@ public class FormFactory {
 		return result;
 	}
 
-	private List<HeaderNode<JavaScriptObject>> readColumns(Element aColumnsElement) throws Exception {
-		List<HeaderNode<JavaScriptObject>> nodes = new ArrayList<>();
-		Node childNode = aColumnsElement.getFirstChild();
-		while (childNode != null) {
-			if (childNode instanceof Element) {
-				Element childTag = (Element) childNode;
-				String columnType = childTag.getTagName();
-				switch (columnType) {
-				case "CheckGridColumn": {
-					CheckHeaderNode column = new CheckHeaderNode();
-					GridPublisher.publish(column);
-					readColumnNode(column, childTag);
-					nodes.add(column);
-					List<HeaderNode<JavaScriptObject>> children = readColumns(childTag);
-					for (int i = 0; i < children.size(); i++) {
-						column.addColumnNode(children.get(i));
-					}
-					break;
-				}
-				case "RadioGridColumn": {
-					RadioHeaderNode column = new RadioHeaderNode();
-					GridPublisher.publish(column);
-					readColumnNode(column, childTag);
-					nodes.add(column);
-					List<HeaderNode<JavaScriptObject>> children = readColumns(childTag);
-					for (int i = 0; i < children.size(); i++) {
-						column.addColumnNode(children.get(i));
-					}
-					break;
-				}
-				case "ServiceGridColumn": {
-					ServiceHeaderNode column = new ServiceHeaderNode();
-					GridPublisher.publish(column);
-					readColumnNode(column, childTag);
-					nodes.add(column);
-					List<HeaderNode<JavaScriptObject>> children = readColumns(childTag);
-					for (int i = 0; i < children.size(); i++) {
-						column.addColumnNode(children.get(i));
-					}
-					break;
-				}
-				case "ModelGridColumn": {
-					ModelHeaderNode column = new ModelHeaderNode();
-					GridPublisher.publish(column);
-					readColumnNode(column, childTag);
-					if (childTag.hasAttribute("field")) {
-						column.setField(childTag.getAttribute("field"));
-					}
-					if (childTag.hasAttribute("sortField")) {
-						column.setSortField(childTag.getAttribute("sortField"));
-					}
-					Node _childNode = childTag.getFirstChild();
-					while (_childNode != null) {
-						if (_childNode instanceof Element) {
-							Element _childTag = (Element) _childNode;
-							UIObject editorComp = readWidget(_childTag);
-							if (editorComp instanceof ModelDecoratorBox<?>) {
-								ModelColumn col = (ModelColumn) column.getColumn();
-								col.setEditor((ModelDecoratorBox<Object>) editorComp);
-								// ModelWidget viewComp = (ModelWidget)
-								// readWidget((Element) _childNode);
-								// col.setView(viewComp);
-								break;
-							}
-						}
-						_childNode = _childNode.getNextSibling();
-					}
-					nodes.add(column);
-					List<HeaderNode<JavaScriptObject>> children = readColumns(childTag);
-					for (int i = 0; i < children.size(); i++) {
-						column.addColumnNode(children.get(i));
-					}
-					break;
-				}
-				}
-			}
-			childNode = childNode.getNextSibling();
-		}
-		return nodes;
-	}
-
-	private void readColumnNode(ModelHeaderNode aNode, Element anElement) throws Exception {
-		aNode.setJsName(anElement.getAttribute("name"));
-		if (anElement.hasAttribute("title")) {
-			aNode.setTitle(anElement.getAttribute("title"));
-		}
-		if (anElement.hasAttribute("background")) {
-			PublishedColor background = PublishedColor.parse(anElement.getAttribute("background"));
-			aNode.setBackground(background);
-		}
-		if (anElement.hasAttribute("foreground")) {
-			PublishedColor foreground = PublishedColor.parse(anElement.getAttribute("foreground"));
-			aNode.setForeground(foreground);
-		}
-		aNode.setReadonly(Utils.getBooleanAttribute(anElement, "readonly", Boolean.FALSE));
-		// aNode.setEnabled(Utils.getBooleanAttribute(anElement, "enabled",
-		// Boolean.TRUE));
-		PublishedFont font = readFont(anElement);
-		if (font != null) {
-			aNode.setFont(font);
-		}
-		if (anElement.hasAttribute("minWidth")) {
-			String minWidth = anElement.getAttribute("minWidth");
-			if (minWidth.length() > 2 && minWidth.endsWith("px")) {
-				aNode.setMinWidth(Integer.parseInt(minWidth.substring(0, minWidth.length() - 2)));
-			}
-		}
-		if (anElement.hasAttribute("maxWidth")) {
-			String maxWidth = anElement.getAttribute("maxWidth");
-			if (maxWidth.length() > 2 && maxWidth.endsWith("px")) {
-				aNode.setMaxWidth(Integer.parseInt(maxWidth.substring(0, maxWidth.length() - 2)));
-			}
-		}
-		if (anElement.hasAttribute("preferredWidth")) {
-			String preferredWidth = anElement.getAttribute("preferredWidth");
-			if (preferredWidth.length() > 2 && preferredWidth.endsWith("px")) {
-				aNode.setPreferredWidth(Integer.parseInt(preferredWidth.substring(0, preferredWidth.length() - 2)));
-			}
-		}
-		aNode.setMoveable(Utils.getBooleanAttribute(anElement, "movable", Boolean.TRUE));
-		aNode.setResizable(Utils.getBooleanAttribute(anElement, "resizable", aNode instanceof CheckHeaderNode || aNode instanceof RadioHeaderNode || aNode instanceof ServiceHeaderNode ? Boolean.FALSE
-		        : Boolean.TRUE));
-		// aNode.setSelectOnly(Utils.getBooleanAttribute(anElement,
-		// "selectOnly", Boolean.FALSE));
-		aNode.setSortable(Utils.getBooleanAttribute(anElement, "sortable", Boolean.TRUE));
-		aNode.setVisible(Utils.getBooleanAttribute(anElement, "visible", Boolean.TRUE));
-	}
 }
