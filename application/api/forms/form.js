@@ -3,7 +3,7 @@
 define(['boxing'], function(B) {
     /**
      * Creates a form.
-     * @param aView Container instance to be used as view of created form. Optional. If it is omitted AnchorsPane will be created and used as a view.
+     * @param aView Container instance to be used as view of created form. Optional. If it is omitted P.AnchorsPane will be created and used as view.
      * @param aFormKey Form instance key for open windows accounting. Optional.
      * @constructor Form Form
      */
@@ -168,16 +168,6 @@ define(['boxing'], function(B) {
             }
         });
 
-        Object.defineProperty(this, "formKey", {
-            get: function() {
-                var value = delegate.formKey;
-                return B.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.formKey = B.boxAsJava(aValue);
-            }
-        });
-
         Object.defineProperty(this, "onWindowRestored", {
             get: function() {
                 var value = delegate.onWindowRestored;
@@ -185,6 +175,16 @@ define(['boxing'], function(B) {
             },
             set: function(aValue) {
                 delegate.onWindowRestored = aValue;
+            }
+        });
+
+        Object.defineProperty(this, "formKey", {
+            get: function() {
+                var value = delegate.formKey;
+                return B.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.formKey = B.boxAsJava(aValue);
             }
         });
 

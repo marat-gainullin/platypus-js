@@ -6,6 +6,7 @@
 package com.eas.script;
 
 import com.eas.client.cache.PlatypusFiles;
+import com.eas.client.forms.components.model.grid.ModelGrid;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.util.FileUtils;
 import com.eas.util.PropertiesUtils;
@@ -52,17 +53,12 @@ public class Classes2Scripts {
 
     private static final String JAVA_CLASS_FILE_EXT = ".class";//NOI18N
     private static final String CONSTRUCTOR_TEMPLATE = getStringResource("constructorTemplate.js");//NOI18N
-    private static final Set<String> preservedFilesNames = new HashSet<>(Arrays.asList(new String[]{
-        "facade.js", "platypus-jsdoc.js", "internals.js"
-            , "http-context.js", "managed.js", "orderer.js"
-            , "ui.js", "orm.js", "boxing.js", "logger.js"
-            , "rpc.js", "resource.js", "md5.js", "id.js", "files.js"
-            , "template.js", "invoke.js", "environment.js", "extend.js"
-    }));
 
     private static final int DEFAULT_IDENTATION_WIDTH = 4;
     private static final int CONSTRUCTOR_IDENT_LEVEL = 1;
 
+    private static final String DEPS_TAG = "${Deps}";
+    private static final String DEPS_RESULTS_TAG = "${DepsResults}";
     private static final String NAME_TAG = "${Name}";//NOI18N
     private static final String JAVA_TYPE_TAG = "${Type}";//NOI18N
     private static final String PARAMS_TAG = "${Params}";//NOI18N
@@ -94,11 +90,6 @@ public class Classes2Scripts {
             + "/**\n"//NOI18N
             + " * %s\n"//NOI18N
             + " */";//NOI18N
-
-    private static final String DEPS_HEADER = ""
-            + "/**\n"//NOI18N
-            + " * Contains the basic dependencies loading.\n"//NOI18N
-            + " */\n";//NOI18N
 
     private String checkScriptObject(Class clazz, String name) {
         ScriptObj ann = (ScriptObj) clazz.getAnnotation(ScriptObj.class);
@@ -190,7 +181,7 @@ public class Classes2Scripts {
             throw new IllegalArgumentException("Only directory can be used as dest."); // NOI18N
         }
         for (File c : destDirectory.listFiles()) {
-            if (!preservedFilesNames.contains(c.getName())) {
+            if (c.isDirectory()) {
                 FileUtils.delete(c);
             }
         }
@@ -338,7 +329,13 @@ public class Classes2Scripts {
         }
         //
 
+        if (ModelGrid.class.getName().equals(ci.javaClassName)) {
+            ci.jsDeps += ", 'grid/cell-data', './cell-render-event', './item-event', './service-grid-column', './check-grid-column', './radio-grid-column', './model-check-box', './model-combo', './model-date', './model-formatted-field', './model-grid-column', './model-spin', './model-text-area'";
+            ci.jsDepsResults += ", CellData, RenderEvent, ItemEvent, ServiceGridColumn, CheckGridColumn, RadioGridColumn, ModelCheckBox, ModelCombo, ModelDate, ModelFormattedField, ModelGridColumn, ModelSpin, ModelTextArea";
+        }
         String js = CONSTRUCTOR_TEMPLATE
+                .replace(DEPS_TAG, ci.jsDeps)
+                .replace(DEPS_RESULTS_TAG, ci.jsDepsResults)
                 .replace(JAVA_TYPE_TAG, ci.javaClassName)
                 .replace(JSDOC_TAG, getConstructorJsDoc(ci))
                 .replace(NAME_TAG, checkScriptObject(clazz, ci.name))
@@ -481,31 +478,32 @@ public class Classes2Scripts {
         sb.append(getIndentStr(--i));
         sb.append("});\n");
         /*
-        TODO: 
-        sb.append(getIndentStr(i)).append("if(!P.").append(namespace).append("){\n");
-        sb.append(getPropertyJsDoc(namespace, property, ++i)).append("\n");
-        sb.append(getIndentStr(i)).append("P.").append(namespace).append(".prototype.").append(apiPropName).append(" = ").append(getDefaultLiteralOfType(property.typeName)).append(";\n");
-        sb.append(getIndentStr(--i)).append("}");
-        */
+         TODO: 
+         sb.append(getIndentStr(i)).append("if(!P.").append(namespace).append("){\n");
+         sb.append(getPropertyJsDoc(namespace, property, ++i)).append("\n");
+         sb.append(getIndentStr(i)).append("P.").append(namespace).append(".prototype.").append(apiPropName).append(" = ").append(getDefaultLiteralOfType(property.typeName)).append(";\n");
+         sb.append(getIndentStr(--i)).append("}");
+         */
         return sb.toString();
     }
-/*
-    private String getDefaultLiteralOfType(String aTypeName) {
-        if ("Number".equals(aTypeName)) {
-            return "0";
-        } else if ("Date".equals(aTypeName)) {
-            return "new Date()";
-        } else if (aTypeName != null && aTypeName.startsWith("[]")) {
-            return aTypeName;
-        } else if ("Boolean".equals(aTypeName)) {
-            return "true";
-        } else if ("String".equals(aTypeName)) {
-            return "''";
-        } else {
-            return "{}";
-        }
-    }
-*/
+    /*
+     private String getDefaultLiteralOfType(String aTypeName) {
+     if ("Number".equals(aTypeName)) {
+     return "0";
+     } else if ("Date".equals(aTypeName)) {
+     return "new Date()";
+     } else if (aTypeName != null && aTypeName.startsWith("[]")) {
+     return aTypeName;
+     } else if ("Boolean".equals(aTypeName)) {
+     return "true";
+     } else if ("String".equals(aTypeName)) {
+     return "''";
+     } else {
+     return "{}";
+     }
+     }
+     */
+
     private String getMethodPart(String namespace, Method method, int indent) {
         FunctionInfo fi = getFunctionInfo(method.getName(), method);
         StringBuilder sb = new StringBuilder();
@@ -644,6 +642,8 @@ public class Classes2Scripts {
         public String name;
         public String apiName;
         public String javaClassName;
+        public String jsDeps = "'boxing'";
+        public String jsDepsResults = "B";
         public String[] params;
         public Parameter[] nativeParams;
         public String jsDoc;

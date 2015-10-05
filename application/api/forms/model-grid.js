@@ -1,6 +1,6 @@
 /* global Java */
 
-define(['boxing'], function(B) {
+define(['boxing', 'grid/cell-data', './cell-render-event', './item-event', './service-grid-column', './check-grid-column', './radio-grid-column', './model-check-box', './model-combo', './model-date', './model-formatted-field', './model-grid-column', './model-spin', './model-text-area'], function(B, CellData, RenderEvent, ItemEvent, ServiceGridColumn, CheckGridColumn, RadioGridColumn, ModelCheckBox, ModelCombo, ModelDate, ModelFormattedField, ModelGridColumn, ModelSpin, ModelTextArea) {
     /**
      * Generated constructor.
      * @constructor ModelGrid ModelGrid
@@ -181,16 +181,6 @@ define(['boxing'], function(B) {
             }
         });
 
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = aValue;
-            }
-        });
-
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -198,6 +188,16 @@ define(['boxing'], function(B) {
             },
             set: function(aValue) {
                 delegate.onActionPerformed = aValue;
+            }
+        });
+
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = aValue;
             }
         });
 
@@ -321,16 +321,6 @@ define(['boxing'], function(B) {
             }
         });
 
-        Object.defineProperty(this, "onFocusLost", {
-            get: function() {
-                var value = delegate.onFocusLost;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onFocusLost = aValue;
-            }
-        });
-
         Object.defineProperty(this, "onExpand", {
             get: function() {
                 var value = delegate.onExpand;
@@ -338,6 +328,16 @@ define(['boxing'], function(B) {
             },
             set: function(aValue) {
                 delegate.onExpand = aValue;
+            }
+        });
+
+        Object.defineProperty(this, "onFocusLost", {
+            get: function() {
+                var value = delegate.onFocusLost;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onFocusLost = aValue;
             }
         });
 
@@ -682,6 +682,39 @@ define(['boxing'], function(B) {
 
     /**
      *
+     * @method elementByModelIndex
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.elementByModelIndex = function(arg0) {
+        var delegate = this.unwrap();
+        var value = delegate.elementByModelIndex(B.boxAsJava(arg0));
+        return B.boxAsJs(value);
+    };
+
+    /**
+     *
+     * @method try2StopAnyEditing
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.try2StopAnyEditing = function() {
+        var delegate = this.unwrap();
+        var value = delegate.try2StopAnyEditing();
+        return B.boxAsJs(value);
+    };
+
+    /**
+     *
+     * @method try2CancelAnyEditing
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.try2CancelAnyEditing = function() {
+        var delegate = this.unwrap();
+        var value = delegate.try2CancelAnyEditing();
+        return B.boxAsJs(value);
+    };
+
+    /**
+     *
      * @method addColumnNode
      * @memberOf ModelGrid
      */
@@ -721,39 +754,6 @@ define(['boxing'], function(B) {
     ModelGrid.prototype.insertColumnNode = function(arg0, arg1) {
         var delegate = this.unwrap();
         var value = delegate.insertColumnNode(B.boxAsJava(arg0), B.boxAsJava(arg1));
-        return B.boxAsJs(value);
-    };
-
-    /**
-     *
-     * @method elementByModelIndex
-     * @memberOf ModelGrid
-     */
-    ModelGrid.prototype.elementByModelIndex = function(arg0) {
-        var delegate = this.unwrap();
-        var value = delegate.elementByModelIndex(B.boxAsJava(arg0));
-        return B.boxAsJs(value);
-    };
-
-    /**
-     *
-     * @method try2StopAnyEditing
-     * @memberOf ModelGrid
-     */
-    ModelGrid.prototype.try2StopAnyEditing = function() {
-        var delegate = this.unwrap();
-        var value = delegate.try2StopAnyEditing();
-        return B.boxAsJs(value);
-    };
-
-    /**
-     *
-     * @method try2CancelAnyEditing
-     * @memberOf ModelGrid
-     */
-    ModelGrid.prototype.try2CancelAnyEditing = function() {
-        var delegate = this.unwrap();
-        var value = delegate.try2CancelAnyEditing();
         return B.boxAsJs(value);
     };
 

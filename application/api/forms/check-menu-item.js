@@ -274,16 +274,6 @@ define(['boxing'], function(B) {
             }
         });
 
-        Object.defineProperty(this, "onKeyReleased", {
-            get: function() {
-                var value = delegate.onKeyReleased;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onKeyReleased = aValue;
-            }
-        });
-
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -291,6 +281,16 @@ define(['boxing'], function(B) {
             },
             set: function(aValue) {
                 delegate.onActionPerformed = aValue;
+            }
+        });
+
+        Object.defineProperty(this, "onKeyReleased", {
+            get: function() {
+                var value = delegate.onKeyReleased;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onKeyReleased = aValue;
             }
         });
 
