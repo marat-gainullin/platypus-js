@@ -647,10 +647,10 @@ HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHan
 		});
 //		Object.defineProperty(published, "text", {
 //			get : function() {
-//				return aWidget.@com.eas.form.published.widgets.PlatypusHtmlEditor::getText()();
+//				return aWidget.@com.eas.widgets.PlatypusHtmlEditor::getText()();
 //			},
 //			set : function(aValue) {
-//				aWidget.@com.eas.form.published.widgets.PlatypusHtmlEditor::setText(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
+//				aWidget.@com.eas.widgets.PlatypusHtmlEditor::setText(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
 //			}
 //		});
 		Object.defineProperty(published, "emptyText", {

@@ -3,22 +3,23 @@ package com.eas.bound;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.eas.form.FormFactory;
 import com.eas.predefine.Utils;
+import com.eas.ui.UiReader;
+import com.eas.ui.UiWidgetReader;
 import com.eas.widgets.boxes.ObjectFormat;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.xml.client.Element;
 
-public class BoundFactory {
+public class BoundFactory implements UiWidgetReader{
 
-	private static void readGeneralProps(final Element anElement, final UIObject aTarget, final FormFactory aFactory) throws Exception {
+	private static void readGeneralProps(final Element anElement, final UIObject aTarget, final UiReader aFactory) throws Exception {
 		aFactory.readGeneralProps(anElement, aTarget);
 		if (anElement.hasAttribute("nullable") && aTarget instanceof ModelDecoratorBox<?>) {
 			((ModelDecoratorBox<?>) aTarget).setNullable(Utils.getBooleanAttribute(anElement, "nullable", true));
 		}
 	}
 	
-	public static UIObject readWidget(Element anElement, final FormFactory aFactory) throws Exception {
+	public UIObject readWidget(Element anElement, final UiReader aFactory) throws Exception {
 		String type = anElement.getTagName();
 		switch (type) {
 		case "ModelCheckBox":
@@ -53,7 +54,7 @@ public class BoundFactory {
 				try {
 					modelDate.setFormat(dateFormat);
 				} catch (Exception ex) {
-					Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
+					Logger.getLogger(BoundFactory.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
 			if (anElement.hasAttribute("datePicker")) {
@@ -78,7 +79,7 @@ public class BoundFactory {
 					modelFormattedField.setText(anElement.getAttribute("text"));
 				}
 			} catch (Exception ex) {
-				Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
+				Logger.getLogger(BoundFactory.class.getName()).log(Level.SEVERE, null, ex);
 			}
 			return modelFormattedField;
 		case "ModelSpin":
@@ -97,7 +98,7 @@ public class BoundFactory {
 				modelSpin.setMax(max);
 				modelSpin.setStep(step);
 			} catch (Exception ex) {
-				Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
+				Logger.getLogger(BoundFactory.class.getName()).log(Level.SEVERE, null, ex);
 			}
 			return modelSpin;
 		case "ModelTextArea":

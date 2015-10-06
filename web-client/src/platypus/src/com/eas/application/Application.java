@@ -13,6 +13,7 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.eas.bound.BoundFactory;
 import com.eas.bound.JsBound;
 import com.eas.client.AppClient;
 import com.eas.client.CallbackAdapter;
@@ -20,13 +21,17 @@ import com.eas.client.GroupingHandlerRegistration;
 import com.eas.client.Loader;
 import com.eas.client.PlatypusLogFormatter;
 import com.eas.form.JsForm;
+import com.eas.grid.GridFactory;
 import com.eas.grid.JsGrid;
 import com.eas.menu.JsMenu;
+import com.eas.menu.MenuFactory;
 import com.eas.model.JsModel;
 import com.eas.predefine.Predefine;
 import com.eas.predefine.Utils;
 import com.eas.ui.JsUi;
+import com.eas.ui.UiReader;
 import com.eas.widgets.JsWidgets;
+import com.eas.widgets.WidgetsFactory;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -69,21 +74,28 @@ public class Application {
 		}
 		Predefine.init();
 		JsApi.init();
+		JsUi.init();
+		/*
+		UiReader.addFactory(new WidgetsFactory());
+		JsWidgets.init();
+		
+		UiReader.addFactory(new MenuFactory());
+		JsMenu.init();
+		UiReader.addFactory(new BoundFactory());
+		JsBound.init();
+		UiReader.addFactory(new GridFactory());
+		JsGrid.init();
+		JsForm.init();
+		JsModel.init();
+		*/
 		GWT.runAsync(new RunAsyncCallback() {
 			
 			@Override
 			public void onSuccess() {
-				JsUi.init();
-			}
-			
-			@Override
-			public void onFailure(Throwable reason) {
-			}
-		});
-		GWT.runAsync(new RunAsyncCallback() {
-			
-			@Override
-			public void onSuccess() {
+				UiReader.addFactory(new WidgetsFactory());
+				JsWidgets.init();
+				
+				UiReader.addFactory(new MenuFactory());
 				JsMenu.init();
 			}
 			
@@ -95,17 +107,7 @@ public class Application {
 			
 			@Override
 			public void onSuccess() {
-				JsWidgets.init();
-			}
-			
-			@Override
-			public void onFailure(Throwable reason) {
-			}
-		});
-		GWT.runAsync(new RunAsyncCallback() {
-			
-			@Override
-			public void onSuccess() {
+				UiReader.addFactory(new BoundFactory());
 				JsBound.init();
 			}
 			
@@ -117,6 +119,7 @@ public class Application {
 			
 			@Override
 			public void onSuccess() {
+				UiReader.addFactory(new GridFactory());
 				JsGrid.init();
 			}
 			
@@ -128,7 +131,7 @@ public class Application {
 			
 			@Override
 			public void onSuccess() {
-				JsForm.init();
+				JsModel.init();
 			}
 			
 			@Override
@@ -139,7 +142,7 @@ public class Application {
 			
 			@Override
 			public void onSuccess() {
-				JsModel.init();
+				JsForm.init();
 			}
 			
 			@Override

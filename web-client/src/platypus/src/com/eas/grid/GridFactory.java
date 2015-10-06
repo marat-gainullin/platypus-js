@@ -6,7 +6,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.eas.bound.ModelDecoratorBox;
-import com.eas.form.FormFactory;
 import com.eas.grid.columns.ModelColumn;
 import com.eas.grid.columns.header.CheckHeaderNode;
 import com.eas.grid.columns.header.HeaderNode;
@@ -16,14 +15,16 @@ import com.eas.grid.columns.header.ServiceHeaderNode;
 import com.eas.predefine.Utils;
 import com.eas.ui.PublishedColor;
 import com.eas.ui.PublishedFont;
+import com.eas.ui.UiReader;
+import com.eas.ui.UiWidgetReader;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.xml.client.Element;
 import com.google.gwt.xml.client.Node;
 
-public class GridFactory {
+public class GridFactory implements UiWidgetReader{
 
-	public static UIObject readWidget(Element anElement, final FormFactory aFactory) throws Exception {
+	public UIObject readWidget(Element anElement, final UiReader aFactory) throws Exception {
 		String type = anElement.getTagName();
 		switch (type) {
 		case "ModelGrid": {
@@ -75,7 +76,7 @@ public class GridFactory {
 				try {
 					grid.setData(aFactory.resolveEntity(entityName));
 				} catch (Exception ex) {
-					Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE,
+					Logger.getLogger(GridFactory.class.getName()).log(Level.SEVERE,
 					        "While setting data to named model's property " + entityName + " to widget " + grid.getJsName() + " exception occured: " + ex.getMessage());
 				}
 			}
@@ -90,7 +91,7 @@ public class GridFactory {
 		}
 	}
 	
-	private static List<HeaderNode<JavaScriptObject>> readColumns(Element aColumnsElement, FormFactory aFactory) throws Exception {
+	private static List<HeaderNode<JavaScriptObject>> readColumns(Element aColumnsElement, UiReader aFactory) throws Exception {
 		List<HeaderNode<JavaScriptObject>> nodes = new ArrayList<>();
 		Node childNode = aColumnsElement.getFirstChild();
 		while (childNode != null) {
@@ -171,7 +172,7 @@ public class GridFactory {
 		return nodes;
 	}
 
-	private static void readColumnNode(ModelHeaderNode aNode, Element anElement, FormFactory aFactory) throws Exception {
+	private static void readColumnNode(ModelHeaderNode aNode, Element anElement, UiReader aFactory) throws Exception {
 		aNode.setJsName(anElement.getAttribute("name"));
 		if (anElement.hasAttribute("title")) {
 			aNode.setTitle(anElement.getAttribute("title"));

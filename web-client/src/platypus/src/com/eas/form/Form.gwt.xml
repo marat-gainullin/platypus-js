@@ -3,10 +3,11 @@
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 1.7.0//EN" "http://google-web-toolkit.googlecode.com/svn/tags/1.7.0/distro-source/core/src/gwt-module.dtd">
 
 <module>
+    <inherits name="com.eas.client.Client"/>
     <inherits name="com.eas.widgets.Widgets"/>
-    <inherits name="com.eas.bound.Bound"/>
-    <inherits name="com.eas.window.Window"/>
     <inherits name="com.eas.menu.Menu"/>
+    
+    <inherits name="com.eas.bound.Bound"/>
     <inherits name="com.eas.grid.Grid"/>
 
     <source path=""/>

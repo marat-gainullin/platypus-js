@@ -32,6 +32,8 @@ import com.eas.ui.PlatypusImageResource;
 import com.eas.ui.PublishedColor;
 import com.eas.ui.PublishedComponent;
 import com.eas.ui.PublishedFont;
+import com.eas.ui.UiReader;
+import com.eas.ui.UiWidgetReader;
 import com.eas.ui.VerticalPosition;
 import com.eas.widgets.AnchorsPane;
 import com.eas.widgets.BorderPane;
@@ -59,7 +61,7 @@ import com.google.gwt.xml.client.Node;
  * 
  * @author mg
  */
-public class FormFactory {
+public class FormFactory extends UiReader {
 
 	protected static class Dimension {
 		public int width;
@@ -102,10 +104,14 @@ public class FormFactory {
 			while (childNode != null) {
 				if (childNode instanceof Element) {
 					UIObject widget = readWidget((Element) childNode);
-					String wName = ((HasJsName) widget).getJsName();
-					assert wName != null && !wName.isEmpty() : "A widget is expected to be a named item.";
-					widgets.put(wName, widget);
-					widgetsList.add(widget);
+					if (widget != null) {
+						String wName = ((HasJsName) widget).getJsName();
+						assert wName != null && !wName.isEmpty() : "A widget is expected to be a named item.";
+						widgets.put(wName, widget);
+						widgetsList.add(widget);
+					} else {
+						Logger.getLogger(FormFactory.class.getName()).log(Level.WARNING, "Unknown widget tag name: " + ((Element)childNode).getTagName() + ". skipping.");
+					}
 				}
 				childNode = childNode.getNextSibling();
 			}
@@ -182,26 +188,13 @@ public class FormFactory {
 	}
 
 	public UIObject readWidget(final Element anElement) throws Exception {
-		return null;
-		/*
-		return WidgetsFactory.readWidget(anElement, this);
-		UIObject read = GridFactory.readWidget(anElement, this);
-		if (read != null)
-			return read;
-		else {
-			read = BoundFactory.readWidget(anElement, this);
-			if (read != null)
+		for (UiWidgetReader reader : UiReader.getFactories()) {
+			UIObject read = reader.readWidget(anElement, this);
+			if (read != null) {
 				return read;
-			else {
-				read = MenuFactory.readWidget(anElement, this);
-				if (read != null)
-					return read;
-				else {
-					return WidgetsFactory.readWidget(anElement, this);
-				}
 			}
 		}
-		*/
+		return null;
 	}
 
 	public void readImageParagraph(Element anElement, final UIObject aImageParagraph) throws Exception {

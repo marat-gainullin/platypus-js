@@ -1,18 +1,19 @@
 package com.eas.widgets;
 
-import com.eas.form.FormFactory;
 import com.eas.menu.PlatypusPopupMenu;
 import com.eas.predefine.Utils;
 import com.eas.ui.ButtonGroup;
 import com.eas.ui.Orientation;
+import com.eas.ui.UiReader;
+import com.eas.ui.UiWidgetReader;
 import com.eas.widgets.boxes.ObjectFormat;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xml.client.Element;
 
-public class WidgetsFactory {
+public class WidgetsFactory implements UiWidgetReader{
 
-	public static UIObject readWidget(Element anElement, final FormFactory aFactory) throws Exception {
+	public UIObject readWidget(Element anElement, final UiReader aFactory) throws Exception {
 		String type = anElement.getTagName();
 		switch (type) {
 		// widgets

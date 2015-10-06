@@ -1,13 +1,14 @@
 package com.eas.menu;
 
-import com.eas.form.FormFactory;
 import com.eas.predefine.Utils;
+import com.eas.ui.UiReader;
+import com.eas.ui.UiWidgetReader;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.xml.client.Element;
 
-public class MenuFactory {
+public class MenuFactory implements UiWidgetReader{
 
-	public static UIObject readWidget(Element anElement, final FormFactory aFactory) throws Exception {
+	public UIObject readWidget(Element anElement, final UiReader aFactory) throws Exception {
 		String type = anElement.getTagName();
 		switch (type) {
 		case "Menu":
