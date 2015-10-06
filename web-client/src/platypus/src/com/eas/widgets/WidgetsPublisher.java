@@ -1,6 +1,6 @@
 package com.eas.widgets;
 
-import com.eas.predefine.Utils;
+import com.eas.core.Utils;
 import com.eas.ui.ButtonGroup;
 import com.eas.ui.PublishedComponent;
 import com.eas.widgets.AbsolutePane;

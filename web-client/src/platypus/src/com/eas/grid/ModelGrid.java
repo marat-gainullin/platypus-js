@@ -5,6 +5,10 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.eas.core.HasPublished;
+import com.eas.core.Utils;
+import com.eas.core.XElement;
+import com.eas.core.Utils.JsObject;
 import com.eas.grid.builders.RenderedTableCellBuilder;
 import com.eas.grid.builders.ThemedHeaderOrFooterBuilder;
 import com.eas.grid.cells.TreeExpandableCell;
@@ -27,10 +31,6 @@ import com.eas.grid.selection.HasSelectionLead;
 import com.eas.grid.selection.MultiJavaScriptObjectSelectionModel;
 import com.eas.menu.HasComponentPopupMenu;
 import com.eas.menu.PlatypusPopupMenu;
-import com.eas.predefine.HasPublished;
-import com.eas.predefine.Utils;
-import com.eas.predefine.XElement;
-import com.eas.predefine.Utils.JsObject;
 import com.eas.ui.HasBinding;
 import com.eas.ui.HasEventsExecutor;
 import com.eas.ui.HasJsFacade;
@@ -1011,7 +1011,7 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 			var res = [];
 			for(var r = 0; r < rootsCount; r++){
 				var nNode = headerRoots.@java.util.List::get(I)(r);
-				var jsNode = nNode.@com.eas.predefine.HasPublished::getPublished()();
+				var jsNode = nNode.@com.eas.core.HasPublished::getPublished()();
 				res.push(jsNode);
 			}
 			return res;

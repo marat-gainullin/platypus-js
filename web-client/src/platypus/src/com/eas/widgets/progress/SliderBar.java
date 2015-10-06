@@ -15,7 +15,7 @@
  */
 package com.eas.widgets.progress;
 
-import com.eas.predefine.XElement;
+import com.eas.core.XElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;

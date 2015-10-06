@@ -21,7 +21,7 @@ public class JsUi {
 		@com.eas.ui.JsUi::ScrollBarPolicy = {ALLWAYS: 32, NEVER: 31, AUTO: 30}; 
 		
 		function predefine(aDeps, aName, aDefiner){
-			@com.eas.predefine.Predefine::predefine(Lcom/google/gwt/core/client/JavaScriptObject;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aDeps, aName, aDefiner);
+			@com.eas.core.Predefine::predefine(Lcom/google/gwt/core/client/JavaScriptObject;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aDeps, aName, aDefiner);
 		}
 		
 		predefine([], 'forms/cell-render-event', function(){
@@ -71,7 +71,7 @@ public class JsUi {
 				Object.defineProperty(this, "source", {
 					get : function() {
 						var source = aEvent.@com.google.web.bindery.event.shared.Event::getSource()();
-						var jsSource = @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(source);
+						var jsSource = @com.eas.core.Utils::checkPublishedComponent(Ljava/lang/Object;)(source);
 						return jsSource;
 					}
 				});
@@ -143,7 +143,7 @@ public class JsUi {
 				Object.defineProperty(this, "source", {
 					get : function() {
 						var source = aEvent.@com.google.web.bindery.event.shared.Event::getSource()();
-						var jsSource = @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(source);
+						var jsSource = @com.eas.core.Utils::checkPublishedComponent(Ljava/lang/Object;)(source);
 						return jsSource;
 					}
 				});
@@ -188,7 +188,7 @@ public class JsUi {
 				Object.defineProperty(this, "source", {
 					get : function() {
 						var source = aEvent.@com.google.web.bindery.event.shared.Event::getSource()();
-						var jsSource = @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(source);
+						var jsSource = @com.eas.core.Utils::checkPublishedComponent(Ljava/lang/Object;)(source);
 						return jsSource;
 					}
 				});
@@ -199,7 +199,7 @@ public class JsUi {
 							comp = aEvent.@com.eas.ui.events.AddEvent::getWidget()();
 						else
 							comp = aEvent.@com.eas.ui.events.RemoveEvent::getWidget()();
-						return @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(comp);
+						return @com.eas.core.Utils::checkPublishedComponent(Ljava/lang/Object;)(comp);
 					}
 				});
 			}
@@ -227,7 +227,7 @@ public class JsUi {
 				Object.defineProperty(this, "source", {
 					get : function() {
 						var source = aEvent.@com.google.web.bindery.event.shared.Event::getSource()();
-						var jsSource = @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(source);
+						var jsSource = @com.eas.core.Utils::checkPublishedComponent(Ljava/lang/Object;)(source);
 						return jsSource;
 					}
 				});
@@ -240,7 +240,7 @@ public class JsUi {
 				Object.defineProperty(this, "source", {
 					get : function() {
 						var source = aEvent.@com.google.web.bindery.event.shared.Event::getSource()();
-						var jsSource = @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(source);
+						var jsSource = @com.eas.core.Utils::checkPublishedComponent(Ljava/lang/Object;)(source);
 						return jsSource;
 					}
 				});
@@ -253,7 +253,7 @@ public class JsUi {
 				Object.defineProperty(this, "source", {
 					get : function() {
 						var source = aEvent.@com.google.web.bindery.event.shared.Event::getSource()();
-						var jsSource = @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(source);
+						var jsSource = @com.eas.core.Utils::checkPublishedComponent(Ljava/lang/Object;)(source);
 						return jsSource;
 					}
 				});

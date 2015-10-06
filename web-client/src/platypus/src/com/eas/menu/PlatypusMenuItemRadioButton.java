@@ -1,6 +1,6 @@
 package com.eas.menu;
 
-import com.eas.predefine.HasPublished;
+import com.eas.core.HasPublished;
 import com.eas.ui.ButtonGroup;
 import com.eas.ui.HasEventsExecutor;
 import com.eas.ui.HasJsFacade;
@@ -157,7 +157,7 @@ public class PlatypusMenuItemRadioButton extends MenuItemRadioButton implements 
 		Object.defineProperty(published, "buttonGroup", {
 			get : function() {
 				var buttonGroup = aWidget.@com.eas.ui.HasPlatypusButtonGroup::getButtonGroup()();
-				return @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(buttonGroup);					
+				return @com.eas.core.Utils::checkPublishedComponent(Ljava/lang/Object;)(buttonGroup);					
 			},
 			set : function(aValue) {
 				aWidget.@com.eas.ui.HasPlatypusButtonGroup::mutateButtonGroup(Lcom/eas/ui/ButtonGroup;)(aValue != null ? aValue.unwrap() : null);

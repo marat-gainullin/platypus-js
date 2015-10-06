@@ -1,6 +1,6 @@
 package com.eas.menu;
 
-import com.eas.predefine.HasPublished;
+import com.eas.core.HasPublished;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.UIObject;

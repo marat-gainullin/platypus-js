@@ -1,4 +1,4 @@
-package com.eas.predefine;
+package com.eas.core;
 
 import java.util.logging.Logger;
 
@@ -24,7 +24,7 @@ public class Predefine {
 	}-*/;
 	
 	public static native void predefine(JavaScriptObject aDeps, String aName, JavaScriptObject aDefiner)/*-{
-		var predefined = @com.eas.predefine.Predefine::predefined;
+		var predefined = @com.eas.core.Predefine::predefined;
 		var resolved = [];
 		for(var d = 0; d < aDeps.length; d++){
 			var module = predefined[aDeps[d]];
@@ -38,9 +38,9 @@ public class Predefine {
 			function boxAsJs(aValue) {
 				if(aValue == null)
 					return null;
-				else if(@com.eas.predefine.Predefine::isNumber(Ljava/lang/Object;)(aValue))
+				else if(@com.eas.core.Predefine::isNumber(Ljava/lang/Object;)(aValue))
 					return aValue.@java.lang.Number::doubleValue()();
-				else if(@com.eas.predefine.Predefine::isBoolean(Ljava/lang/Object;)(aValue))
+				else if(@com.eas.core.Predefine::isBoolean(Ljava/lang/Object;)(aValue))
 					return aValue.@java.lang.Boolean::booleanValue()();
 				else // dates, strings, complex java objects handled in Utils.toJs()
 					return aValue;
@@ -66,13 +66,13 @@ public class Predefine {
 		    	enumerable: true,
 		    	value: boxAsJava
 			});
-			@com.eas.predefine.Predefine::boxing = module;
+			@com.eas.core.Predefine::boxing = module;
 			return module;
 		});
 		
 		predefine([], 'logger', function(){
 	        var module = {};
-			var nativeLogger = @com.eas.predefine.Predefine::platypusApplicationLogger;
+			var nativeLogger = @com.eas.core.Predefine::platypusApplicationLogger;
 			
 			function severe(aMessage){
 				nativeLogger.@java.util.logging.Logger::severe(Ljava/lang/String;)(aMessage!=null?""+aMessage:null);
@@ -116,7 +116,7 @@ public class Predefine {
 		    	enumerable: true,
 		    	value: finest
 		    });
-			@com.eas.predefine.Predefine::logger = module;
+			@com.eas.core.Predefine::logger = module;
 	        return module;
 		});
 		

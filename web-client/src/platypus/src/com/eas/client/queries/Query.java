@@ -22,7 +22,7 @@ import com.eas.client.dataflow.FlowProvider;
 import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.metadata.Parameters;
-import com.eas.predefine.Cancellable;
+import com.eas.core.Cancellable;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 
@@ -135,7 +135,7 @@ public class Query {
     }
     
     public native JavaScriptObject prepareCommand()/*-{
-		var B = @com.eas.predefine.Predefine::boxing;
+		var B = @com.eas.core.Predefine::boxing;
         var command = {kind: 'command', entity: this.@com.eas.client.queries.Query::getEntityName()(), parameters: {}};
         var nParameters = this.@com.eas.client.queries.Query::getParameters()();
         var pCount = nParameters.@com.eas.client.metadata.Parameters::getParametersCount()();

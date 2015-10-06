@@ -17,8 +17,8 @@ import java.util.logging.Logger;
 
 import com.eas.client.queries.Query;
 import com.eas.client.xhr.UrlQueryProcessor;
-import com.eas.predefine.Cancellable;
-import com.eas.predefine.Utils;
+import com.eas.core.Cancellable;
+import com.eas.core.Utils;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;

@@ -7,10 +7,10 @@ package com.eas.widgets;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.eas.core.HasPublished;
+import com.eas.core.XElement;
 import com.eas.menu.HasComponentPopupMenu;
 import com.eas.menu.PlatypusPopupMenu;
-import com.eas.predefine.HasPublished;
-import com.eas.predefine.XElement;
 import com.eas.ui.HasEventsExecutor;
 import com.eas.ui.HasJsFacade;
 import com.eas.ui.events.AddEvent;
@@ -272,7 +272,7 @@ public class CardPane extends CardsPanel implements HasJsFacade, HasEnabled, Has
 				var index = parseInt(aIndex_or_aCardName, 10);
 				widget = aWidget.@com.eas.widgets.CardPane::getWidget(I)(index);
 			}
-			return @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(widget);
+			return @com.eas.core.Utils::checkPublishedComponent(Ljava/lang/Object;)(widget);
 		};
 		published.show = function(aCardName) {
 			aWidget.@com.eas.widgets.CardPane::show(Ljava/lang/String;)(aCardName);

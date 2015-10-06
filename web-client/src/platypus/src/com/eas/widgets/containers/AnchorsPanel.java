@@ -5,7 +5,7 @@
  */
 package com.eas.widgets.containers;
 
-import com.eas.predefine.XElement;
+import com.eas.core.XElement;
 import com.eas.ui.CommonResources;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;

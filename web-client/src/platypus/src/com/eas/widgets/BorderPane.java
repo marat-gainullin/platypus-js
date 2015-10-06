@@ -1,9 +1,9 @@
 package com.eas.widgets;
 
+import com.eas.core.HasPublished;
+import com.eas.core.XElement;
 import com.eas.menu.HasComponentPopupMenu;
 import com.eas.menu.PlatypusPopupMenu;
-import com.eas.predefine.HasPublished;
-import com.eas.predefine.XElement;
 import com.eas.ui.HasEventsExecutor;
 import com.eas.ui.HasJsFacade;
 import com.eas.ui.HorizontalPosition;
@@ -350,7 +350,7 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 		Object.defineProperty(published, "leftComponent", {
 			get : function() {
 				var comp = aWidget.@com.eas.widgets.BorderPane::getLeftComponent()();
-				return @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(comp);
+				return @com.eas.core.Utils::checkPublishedComponent(Ljava/lang/Object;)(comp);
 			},
 			set : function(aChild) {
 				aWidget.@com.eas.widgets.BorderPane::setLeftComponent(Lcom/google/gwt/user/client/ui/Widget;D)(aChild.unwrap(), toAdd.width);
@@ -359,7 +359,7 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 		Object.defineProperty(published, "rightComponent", {
 			get : function() {
 				var comp = aWidget.@com.eas.widgets.BorderPane::getRightComponent()();
-				return @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(comp);
+				return @com.eas.core.Utils::checkPublishedComponent(Ljava/lang/Object;)(comp);
 			},
 			set : function(aChild) {
 				aWidget.@com.eas.widgets.BorderPane::setRightComponent(Lcom/google/gwt/user/client/ui/Widget;D)(aChild.unwrap(), toAdd.width);
@@ -368,7 +368,7 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 		Object.defineProperty(published, "topComponent", {
 			get : function() {
 				var comp = aWidget.@com.eas.widgets.BorderPane::getTopComponent()();
-				return @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(comp);
+				return @com.eas.core.Utils::checkPublishedComponent(Ljava/lang/Object;)(comp);
 			},
 			set : function(aChild) {
 				aWidget.@com.eas.widgets.BorderPane::setTopComponent(Lcom/google/gwt/user/client/ui/Widget;D)(aChild.unwrap(), toAdd.height);
@@ -377,7 +377,7 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 		Object.defineProperty(published, "bottomComponent", {
 			get : function() {
 				var comp = aWidget.@com.eas.widgets.BorderPane::getBottomComponent()();
-				return @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(comp);
+				return @com.eas.core.Utils::checkPublishedComponent(Ljava/lang/Object;)(comp);
 			},
 			set : function(aChild) {
 				aWidget.@com.eas.widgets.BorderPane::setBottomComponent(Lcom/google/gwt/user/client/ui/Widget;D)(aChild.unwrap(), toAdd.height);
@@ -386,7 +386,7 @@ public class BorderPane extends BorderPanel implements HasJsFacade, HasEnabled, 
 		Object.defineProperty(published, "centerComponent", {
 			get : function() {
 				var comp = aWidget.@com.eas.widgets.BorderPane::getCenterComponent()();
-				return @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(comp);
+				return @com.eas.core.Utils::checkPublishedComponent(Ljava/lang/Object;)(comp);
 			},
 			set : function(aChild) {
 			 	aWidget.@com.eas.widgets.BorderPane::setCenterComponent(Lcom/google/gwt/user/client/ui/Widget;)(aChild.unwrap());

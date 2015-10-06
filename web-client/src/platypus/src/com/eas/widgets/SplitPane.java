@@ -1,9 +1,9 @@
 package com.eas.widgets;
 
+import com.eas.core.HasPublished;
+import com.eas.core.XElement;
 import com.eas.menu.HasComponentPopupMenu;
 import com.eas.menu.PlatypusPopupMenu;
-import com.eas.predefine.HasPublished;
-import com.eas.predefine.XElement;
 import com.eas.ui.HasEventsExecutor;
 import com.eas.ui.HasJsFacade;
 import com.eas.ui.events.AddEvent;
@@ -326,7 +326,7 @@ public class SplitPane extends SplittedPanel implements HasJsFacade, HasEnabled,
 		Object.defineProperty(published, "firstComponent", {
 			get : function() {
 				var comp = aWidget.@com.eas.widgets.SplitPane::getFirstWidget()();
-				return @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(comp);
+				return @com.eas.core.Utils::checkPublishedComponent(Ljava/lang/Object;)(comp);
 			},
 			set : function(aChild) {
 				var child = (aChild == null ? null: aChild.unwrap());
@@ -336,7 +336,7 @@ public class SplitPane extends SplittedPanel implements HasJsFacade, HasEnabled,
 		Object.defineProperty(published, "secondComponent", {
 			get : function() {
 				var comp = aWidget.@com.eas.widgets.SplitPane::getSecondWidget()();
-				return @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(comp);
+				return @com.eas.core.Utils::checkPublishedComponent(Ljava/lang/Object;)(comp);
 			},
 			set : function(aChild) {
 				var child = (aChild == null ? null: aChild.unwrap());
@@ -377,7 +377,7 @@ public class SplitPane extends SplittedPanel implements HasJsFacade, HasEnabled,
 		};
 		published.child = function(aIndex) {
 			var widget = aWidget.@com.eas.widgets.SplitPane::getWidget(I)(aIndex);
-			return @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(widget);
+			return @com.eas.core.Utils::checkPublishedComponent(Ljava/lang/Object;)(widget);
 		};
 	}-*/;
 

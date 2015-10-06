@@ -1,7 +1,7 @@
 package com.eas.bound;
 
 import com.eas.client.converters.BooleanValueConverter;
-import com.eas.predefine.Utils;
+import com.eas.core.Utils;
 import com.eas.ui.events.ActionEvent;
 import com.eas.ui.events.ActionHandler;
 import com.eas.ui.events.HasActionHandlers;
@@ -69,7 +69,7 @@ public class ModelCheck extends ModelDecoratorBox<Boolean> implements HasActionH
 	}
 
 	private static native void publish(ModelCheck aField, JavaScriptObject aPublished)/*-{
-		var B = @com.eas.predefine.Predefine::boxing;
+		var B = @com.eas.core.Predefine::boxing;
 		Object.defineProperty(aPublished, "text", {
 			get : function() {
 				return aField.@com.eas.bound.ModelCheck::getText()();

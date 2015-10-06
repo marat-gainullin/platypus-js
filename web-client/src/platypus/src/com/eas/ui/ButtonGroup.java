@@ -3,8 +3,8 @@ package com.eas.ui;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.eas.predefine.HasPublished;
-import com.eas.predefine.Utils;
+import com.eas.core.HasPublished;
+import com.eas.core.Utils;
 import com.eas.ui.events.AddEvent;
 import com.eas.ui.events.AddHandler;
 import com.eas.ui.events.EventsExecutor;
@@ -132,12 +132,12 @@ public class ButtonGroup extends RadioGroup implements HasJsFacade, HasAddHandle
 			if(toAdd && toAdd.unwrap) {
 				if(toAdd.buttonGroup == published)
 					throw 'A widget already added to this group';
-				aWidget.@com.eas.ui.ButtonGroup::add(Lcom/eas/predefine/HasPublished;)(toAdd.unwrap());
+				aWidget.@com.eas.ui.ButtonGroup::add(Lcom/eas/core/HasPublished;)(toAdd.unwrap());
 			}
 		}
 		published.remove = function(toRemove) {
 			if(toRemove && toRemove.unwrap) {
-				aWidget.@com.eas.ui.ButtonGroup::remove(Lcom/eas/predefine/HasPublished;)(toRemove.unwrap());
+				aWidget.@com.eas.ui.ButtonGroup::remove(Lcom/eas/core/HasPublished;)(toRemove.unwrap());
 			}
 		}
 		published.clear = function() {
@@ -145,7 +145,7 @@ public class ButtonGroup extends RadioGroup implements HasJsFacade, HasAddHandle
 		}
 		published.child = function(aIndex) {
 			var comp = aWidget.@com.eas.ui.ButtonGroup::getChild(I)(aIndex);
-		    return @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(comp);					
+		    return @com.eas.core.Utils::checkPublishedComponent(Ljava/lang/Object;)(comp);					
 		};
 		Object.defineProperty(published, "children", {
 			value : function() {

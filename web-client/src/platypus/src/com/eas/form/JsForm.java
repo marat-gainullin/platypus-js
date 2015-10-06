@@ -5,7 +5,7 @@ public class JsForm {
 	public native static void init()/*-{
 		
 		function predefine(aDeps, aName, aDefiner){
-			@com.eas.predefine.Predefine::predefine(Lcom/google/gwt/core/client/JavaScriptObject;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aDeps, aName, aDefiner);
+			@com.eas.core.Predefine::predefine(Lcom/google/gwt/core/client/JavaScriptObject;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aDeps, aName, aDefiner);
 		}
 		
 		predefine([], 'forms/form', function(Form){
@@ -25,7 +25,7 @@ public class JsForm {
 				if(aFormKey){
 					aComponent.@com.eas.form.PlatypusWindow::setFormKey(Ljava/lang/String;)(aFormKey);
 				}
-				aComponent.@com.eas.predefine.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+				aComponent.@com.eas.core.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 			}
 			Form.getShownForm = function(aFormKey){
 				return @com.eas.form.PlatypusWindow::getShownForm(Ljava/lang/String;)(aFormKey);
@@ -72,7 +72,7 @@ public class JsForm {
 				var nwList = factory.@com.eas.form.FormFactory::getWidgetsList()();
 				for(var i = 0; i < nwList.@java.util.List::size()(); i++){
 					var nWidget = nwList.@java.util.List::get(I)(i);
-					var pWidget = nWidget.@com.eas.predefine.HasPublished::getPublished()();
+					var pWidget = nWidget.@com.eas.core.HasPublished::getPublished()();
 					if(pWidget.name)
 						aTarget[pWidget.name] = pWidget;
 				}

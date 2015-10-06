@@ -1,9 +1,9 @@
 package com.eas.widgets;
 
+import com.eas.core.HasPublished;
+import com.eas.core.XElement;
 import com.eas.menu.HasComponentPopupMenu;
 import com.eas.menu.PlatypusPopupMenu;
-import com.eas.predefine.HasPublished;
-import com.eas.predefine.XElement;
 import com.eas.ui.HasEventsExecutor;
 import com.eas.ui.HasJsFacade;
 import com.eas.ui.events.ActionEvent;
@@ -280,7 +280,7 @@ public class PlatypusSplitButton extends DropDownButton implements HasActionHand
 		Object.defineProperty(published, "dropDownMenu", {
 			get : function(){
 				var menu = aWidget.@com.eas.widgets.PlatypusSplitButton::getMenu()();
-				return @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(menu);
+				return @com.eas.core.Utils::checkPublishedComponent(Ljava/lang/Object;)(menu);
 			},
 			set : function(aValue){
 				aWidget.@com.eas.widgets.PlatypusSplitButton::setMenu(Lcom/google/gwt/user/client/ui/MenuBar;)(aValue != null ? aValue.unwrap() : null);

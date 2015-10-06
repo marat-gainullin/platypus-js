@@ -6,13 +6,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.eas.bound.ModelDecoratorBox;
+import com.eas.core.Utils;
 import com.eas.grid.columns.ModelColumn;
 import com.eas.grid.columns.header.CheckHeaderNode;
 import com.eas.grid.columns.header.HeaderNode;
 import com.eas.grid.columns.header.ModelHeaderNode;
 import com.eas.grid.columns.header.RadioHeaderNode;
 import com.eas.grid.columns.header.ServiceHeaderNode;
-import com.eas.predefine.Utils;
 import com.eas.ui.PublishedColor;
 import com.eas.ui.PublishedFont;
 import com.eas.ui.UiReader;

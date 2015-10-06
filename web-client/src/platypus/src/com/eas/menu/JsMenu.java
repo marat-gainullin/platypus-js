@@ -9,7 +9,7 @@ public class JsMenu {
 		}
 		
 		function predefine(aDeps, aName, aDefiner){
-			@com.eas.predefine.Predefine::predefine(Lcom/google/gwt/core/client/JavaScriptObject;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aDeps, aName, aDefiner);
+			@com.eas.core.Predefine::predefine(Lcom/google/gwt/core/client/JavaScriptObject;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aDeps, aName, aDefiner);
 		}
 		
 		predefine([], 'forms/menu-bar', function(){

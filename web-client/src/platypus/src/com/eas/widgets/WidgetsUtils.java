@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.eas.predefine.HasPublished;
-import com.eas.predefine.Utils;
-import com.eas.predefine.XElement;
+import com.eas.core.HasPublished;
+import com.eas.core.Utils;
+import com.eas.core.XElement;
 import com.eas.ui.HasCustomParent;
 import com.eas.ui.MarginConstraints;
 import com.eas.ui.PublishedCell;

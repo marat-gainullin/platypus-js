@@ -1,7 +1,7 @@
 package com.eas.widgets.containers;
 
+import com.eas.core.XElement;
 import com.eas.menu.MenuItemImageText;
-import com.eas.predefine.XElement;
 import com.eas.ui.HasImageResource;
 import com.eas.widgets.boxes.ImageLabel;
 import com.google.gwt.core.client.GWT;

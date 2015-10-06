@@ -1,6 +1,6 @@
 package com.eas.menu;
 
-import com.eas.predefine.Utils;
+import com.eas.core.Utils;
 import com.eas.ui.PublishedComponent;
 import com.google.gwt.core.client.JavaScriptObject;
 

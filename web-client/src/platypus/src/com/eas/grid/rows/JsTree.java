@@ -5,9 +5,9 @@ import java.util.Collections;
 import java.util.List;
 
 import com.eas.bound.JsArrayList;
+import com.eas.core.Utils;
+import com.eas.core.Utils.JsObject;
 import com.eas.grid.processing.TreeAdapter;
-import com.eas.predefine.Utils;
-import com.eas.predefine.Utils.JsObject;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;

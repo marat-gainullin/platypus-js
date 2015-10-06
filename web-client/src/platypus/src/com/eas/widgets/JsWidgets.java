@@ -200,7 +200,7 @@ public class JsWidgets {
 	    Object.defineProperty(aPublished, "componentPopupMenu", {
 	    	get : function() {
 	    		var menu = comp.@com.eas.menu.HasComponentPopupMenu::getPlatypusPopupMenu()();
-			    return @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(menu);
+			    return @com.eas.core.Utils::checkPublishedComponent(Ljava/lang/Object;)(menu);
 	    	},
 		    set : function(aValue) {
 		    	if (aValue && aValue.unwrap) {
@@ -257,7 +257,7 @@ public class JsWidgets {
 	    		}
 	    	}
 	    });
-	    comp.@com.eas.predefine.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(aPublished);
+	    comp.@com.eas.core.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(aPublished);
 	}-*/;
 	
 	public native static JavaScriptObject publishExecutor(JavaScriptObject published)/*-{
@@ -515,7 +515,7 @@ public class JsWidgets {
 			};
 			aPublished.child = function(aIndex) {
 				var widget = comp.@com.google.gwt.user.client.ui.IndexedPanel::getWidget(I)(aIndex);
-				return @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(widget);
+				return @com.eas.core.Utils::checkPublishedComponent(Ljava/lang/Object;)(widget);
 			};
 			publishChildren(aPublished);
 		}
@@ -532,7 +532,7 @@ public class JsWidgets {
 		}	
 			
 		function predefine(aDeps, aName, aDefiner){
-			@com.eas.predefine.Predefine::predefine(Lcom/google/gwt/core/client/JavaScriptObject;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aDeps, aName, aDefiner);
+			@com.eas.core.Predefine::predefine(Lcom/google/gwt/core/client/JavaScriptObject;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aDeps, aName, aDefiner);
 		}
 		
 		predefine([], 'forms/label', function(){

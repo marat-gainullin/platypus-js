@@ -7,10 +7,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.eas.client.AppClient;
-import com.eas.predefine.HasPublished;
-import com.eas.predefine.Predefine;
-import com.eas.predefine.Utils;
-import com.eas.predefine.Utils.JsObject;
+import com.eas.core.HasPublished;
+import com.eas.core.Predefine;
+import com.eas.core.Utils;
+import com.eas.core.Utils.JsObject;
 import com.eas.ui.HasJsName;
 import com.eas.ui.PublishedComponent;
 import com.eas.ui.EventsPublisher;
@@ -634,8 +634,8 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
         });
         
         (function() {
-			var B = @com.eas.predefine.Predefine::boxing;
-			var Logger = @com.eas.predefine.Predefine::logger;
+			var B = @com.eas.core.Predefine::boxing;
+			var Logger = @com.eas.core.Predefine::logger;
 	        var showedWnd = null;
 	        var closeCallback = null;
 	        aPublished.show = function() {

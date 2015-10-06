@@ -5,7 +5,7 @@ import java.util.logging.Logger;
 
 import com.eas.client.AppClient;
 import com.eas.client.CallbackAdapter;
-import com.eas.predefine.Utils;
+import com.eas.core.Utils;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Style;

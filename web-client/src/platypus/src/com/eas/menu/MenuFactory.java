@@ -1,6 +1,6 @@
 package com.eas.menu;
 
-import com.eas.predefine.Utils;
+import com.eas.core.Utils;
 import com.eas.ui.UiReader;
 import com.eas.ui.UiWidgetReader;
 import com.google.gwt.user.client.ui.UIObject;

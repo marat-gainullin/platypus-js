@@ -15,7 +15,7 @@ public class JsModel {
 */		
 	public native static void init()/*-{
 		function predefine(aDeps, aName, aDefiner){
-			@com.eas.predefine.Predefine::predefine(Lcom/google/gwt/core/client/JavaScriptObject;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aDeps, aName, aDefiner);
+			@com.eas.core.Predefine::predefine(Lcom/google/gwt/core/client/JavaScriptObject;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aDeps, aName, aDefiner);
 		}
 		
 		predefine([], 'managed', function(){

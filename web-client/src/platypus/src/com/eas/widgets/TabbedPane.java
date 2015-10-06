@@ -1,9 +1,9 @@
 package com.eas.widgets;
 
+import com.eas.core.HasPublished;
+import com.eas.core.XElement;
 import com.eas.menu.HasComponentPopupMenu;
 import com.eas.menu.PlatypusPopupMenu;
-import com.eas.predefine.HasPublished;
-import com.eas.predefine.XElement;
 import com.eas.ui.HasEventsExecutor;
 import com.eas.ui.HasImageResource;
 import com.eas.ui.HasJsFacade;
@@ -292,7 +292,7 @@ public class TabbedPane extends TabsDecoratedPanel implements HasJsFacade, HasEn
 		Object.defineProperty(published, "selectedComponent", {
 			get : function() {
 				var comp = aWidget.@com.eas.widgets.TabbedPane::getSelected()();
-				return @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(comp);
+				return @com.eas.core.Utils::checkPublishedComponent(Ljava/lang/Object;)(comp);
 			},
 			set : function(aValue) {
 				if(aValue != null)

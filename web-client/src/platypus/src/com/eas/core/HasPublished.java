@@ -1,4 +1,4 @@
-package com.eas.predefine;
+package com.eas.core;
 
 import com.google.gwt.core.client.JavaScriptObject;
 

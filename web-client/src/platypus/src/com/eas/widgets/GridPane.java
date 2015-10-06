@@ -4,10 +4,10 @@
  */
 package com.eas.widgets;
 
+import com.eas.core.HasPublished;
+import com.eas.core.XElement;
 import com.eas.menu.HasComponentPopupMenu;
 import com.eas.menu.PlatypusPopupMenu;
-import com.eas.predefine.HasPublished;
-import com.eas.predefine.XElement;
 import com.eas.ui.HasEventsExecutor;
 import com.eas.ui.HasJsFacade;
 import com.eas.ui.events.AddEvent;
@@ -219,7 +219,7 @@ public class GridPane extends GridPanel implements HasJsFacade, HasEnabled, HasC
 		published.child = function(aRow, aCol) {
 			if (arguments.length > 1) {
 				var widget = aWidget.@com.eas.widgets.GridPane::getWidget(II)(1 * aRow, 1 * aCol);
-				return !!widget ? @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(widget) : null;
+				return !!widget ? @com.eas.core.Utils::checkPublishedComponent(Ljava/lang/Object;)(widget) : null;
 			}else
 				return null;
 		};

@@ -5,7 +5,7 @@
  */
 package com.eas.widgets.containers;
 
-import com.eas.predefine.XElement;
+import com.eas.core.XElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;

@@ -3,8 +3,8 @@ package com.eas.menu;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.eas.predefine.HasPublished;
-import com.eas.predefine.XElement;
+import com.eas.core.HasPublished;
+import com.eas.core.XElement;
 import com.eas.ui.HasCustomParent;
 import com.eas.ui.HasEventsExecutor;
 import com.eas.ui.HasJsFacade;
@@ -246,7 +246,7 @@ public class PlatypusMenuBar extends MenuBar implements HasJsFacade, HasEnabled,
 		};
 		published.child = function(aIndex) {
 			var comp = aWidget.@com.eas.menu.PlatypusMenuBar::getItem(I)(aIndex);
-			return @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(comp);
+			return @com.eas.core.Utils::checkPublishedComponent(Ljava/lang/Object;)(comp);
 		};
 		Object.defineProperty(published, "count", {
 			get : function() {

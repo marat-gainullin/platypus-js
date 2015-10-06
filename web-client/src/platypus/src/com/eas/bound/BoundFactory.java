@@ -3,7 +3,7 @@ package com.eas.bound;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.eas.predefine.Utils;
+import com.eas.core.Utils;
 import com.eas.ui.UiReader;
 import com.eas.ui.UiWidgetReader;
 import com.eas.widgets.boxes.ObjectFormat;

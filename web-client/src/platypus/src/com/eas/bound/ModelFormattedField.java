@@ -5,7 +5,7 @@ import java.text.ParseException;
 import com.eas.client.converters.DateValueConverter;
 import com.eas.client.converters.DoubleValueConverter;
 import com.eas.client.converters.StringValueConverter;
-import com.eas.predefine.Utils;
+import com.eas.core.Utils;
 import com.eas.ui.HasEmptyText;
 import com.eas.ui.events.ActionEvent;
 import com.eas.ui.events.ActionHandler;
@@ -145,7 +145,7 @@ public class ModelFormattedField extends ModelDecoratorBox<Object> implements Ha
 	}
 
 	private native static void publish(ModelFormattedField aWidget, JavaScriptObject aPublished)/*-{
-		var B = @com.eas.predefine.Predefine::boxing;
+		var B = @com.eas.core.Predefine::boxing;
 		Object.defineProperty(aPublished, "emptyText", {
 			get : function() {
 				return aWidget.@com.eas.ui.HasEmptyText::getEmptyText()();

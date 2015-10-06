@@ -3,9 +3,9 @@ package com.eas.bound;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.eas.core.Utils;
 import com.eas.menu.HasComponentPopupMenu;
 import com.eas.menu.PlatypusPopupMenu;
-import com.eas.predefine.Utils;
 import com.eas.ui.HasBinding;
 import com.eas.ui.HasCustomEditing;
 import com.eas.ui.HasEventsExecutor;

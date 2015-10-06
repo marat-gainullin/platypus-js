@@ -1,6 +1,6 @@
 package com.eas.ui;
 
-import com.eas.predefine.Utils;
+import com.eas.core.Utils;
 import com.eas.ui.events.ActionEvent;
 import com.eas.ui.events.AddEvent;
 import com.eas.ui.events.HideEvent;
@@ -49,7 +49,7 @@ public class EventsPublisher {
 	}-*/;	
 	
 	public native static JavaScriptObject publishOnRenderEvent(JavaScriptObject aSource, Object aRowId, Object aColumnId, JavaScriptObject aRendered, PublishedCell aCell)/*-{
-		var B = @com.eas.predefine.Predefine::boxing;
+		var B = @com.eas.core.Predefine::boxing;
 		var constr = @com.eas.ui.EventsPublisher::getPublisher(Ljava/lang/String;)('CellRenderEvent');
 		return new constr(aSource, B.boxAsJs(aRowId), B.boxAsJs(aColumnId), aRendered, aCell);
 	}-*/;

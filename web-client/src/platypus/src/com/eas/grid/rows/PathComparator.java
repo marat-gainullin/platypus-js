@@ -2,7 +2,7 @@ package com.eas.grid.rows;
 
 import java.util.Comparator;
 
-import com.eas.predefine.Utils;
+import com.eas.core.Utils;
 import com.google.gwt.core.client.JavaScriptObject;
 
 public class PathComparator implements Comparator<JavaScriptObject> {
@@ -17,7 +17,7 @@ public class PathComparator implements Comparator<JavaScriptObject> {
 	}
 
 	protected native int oCompare(Object o1, Object o2)/*-{
-		var B = @com.eas.predefine.Predefine::boxing;
+		var B = @com.eas.core.Predefine::boxing;
 		var od1 = B.boxAsJs(o1);
 		var od2 = B.boxAsJs(o2);
 		if(od1 == null && od2 == null)

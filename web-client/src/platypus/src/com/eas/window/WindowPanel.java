@@ -5,7 +5,7 @@
  */
 package com.eas.window;
 
-import com.eas.predefine.XElement;
+import com.eas.core.XElement;
 import com.eas.window.events.ActivateEvent;
 import com.eas.window.events.ActivateHandler;
 import com.eas.window.events.BeforeCloseEvent;

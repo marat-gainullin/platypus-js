@@ -1,7 +1,7 @@
 package com.eas.bound;
 
 import com.eas.client.converters.DoubleValueConverter;
-import com.eas.predefine.Utils;
+import com.eas.core.Utils;
 import com.eas.ui.HasEmptyText;
 import com.eas.ui.events.ActionEvent;
 import com.eas.ui.events.ActionHandler;

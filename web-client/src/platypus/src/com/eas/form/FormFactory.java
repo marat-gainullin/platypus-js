@@ -12,12 +12,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.eas.client.CallbackAdapter;
+import com.eas.core.HasPublished;
+import com.eas.core.Utils;
 import com.eas.menu.HasComponentPopupMenu;
 import com.eas.menu.PlatypusMenu;
 import com.eas.menu.PlatypusMenuBar;
 import com.eas.menu.PlatypusPopupMenu;
-import com.eas.predefine.HasPublished;
-import com.eas.predefine.Utils;
 import com.eas.ui.ButtonGroup;
 import com.eas.ui.HasBinding;
 import com.eas.ui.HasEmptyText;

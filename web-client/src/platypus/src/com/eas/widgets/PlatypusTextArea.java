@@ -1,9 +1,9 @@
 package com.eas.widgets;
 
+import com.eas.core.HasPublished;
+import com.eas.core.XElement;
 import com.eas.menu.HasComponentPopupMenu;
 import com.eas.menu.PlatypusPopupMenu;
-import com.eas.predefine.HasPublished;
-import com.eas.predefine.XElement;
 import com.eas.ui.CommonResources;
 import com.eas.ui.HasEmptyText;
 import com.eas.ui.HasEventsExecutor;

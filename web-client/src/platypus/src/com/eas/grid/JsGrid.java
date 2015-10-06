@@ -9,7 +9,7 @@ public class JsGrid {
 		}
 		
 		function predefine(aDeps, aName, aDefiner){
-			@com.eas.predefine.Predefine::predefine(Lcom/google/gwt/core/client/JavaScriptObject;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aDeps, aName, aDefiner);
+			@com.eas.core.Predefine::predefine(Lcom/google/gwt/core/client/JavaScriptObject;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aDeps, aName, aDefiner);
 		}
 		
 		predefine([], 'forms/model-grid', function(){
@@ -46,7 +46,7 @@ public class JsGrid {
 				published.unwrap = function() {
 					return aComponent;
 				};
-	        	aComponent.@com.eas.predefine.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+	        	aComponent.@com.eas.core.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 				return published;
 			}
 			return CheckGridColumn;
@@ -66,7 +66,7 @@ public class JsGrid {
 				published.unwrap = function() {
 					return aComponent;
 				};
-	        	aComponent.@com.eas.predefine.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+	        	aComponent.@com.eas.core.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 				return published;
 			}
 			return RadioGridColumn;	
@@ -86,7 +86,7 @@ public class JsGrid {
 				published.unwrap = function() {
 					return aComponent;
 				};
-	        	aComponent.@com.eas.predefine.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+	        	aComponent.@com.eas.core.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 				return published;
 			}
 			return ServiceGridColumn;
@@ -106,7 +106,7 @@ public class JsGrid {
 				published.unwrap = function() {
 					return aComponent;
 				};
-	        	aComponent.@com.eas.predefine.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+	        	aComponent.@com.eas.core.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 				return published;
 			}
 			return ModelGridColumn;

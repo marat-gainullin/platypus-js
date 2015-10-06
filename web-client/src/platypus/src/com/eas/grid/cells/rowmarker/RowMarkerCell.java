@@ -1,7 +1,7 @@
 package com.eas.grid.cells.rowmarker;
 
+import com.eas.core.Utils.JsObject;
 import com.eas.grid.cells.RenderedEditorCell;
-import com.eas.predefine.Utils.JsObject;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Style;

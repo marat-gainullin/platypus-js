@@ -5,7 +5,7 @@
  */
 package com.eas.widgets.boxes;
 
-import com.eas.predefine.XElement;
+import com.eas.core.XElement;
 import com.eas.ui.CommonResources;
 import com.eas.ui.HasImageParagraph;
 import com.eas.ui.HasImageResource;

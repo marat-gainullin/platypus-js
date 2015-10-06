@@ -1,7 +1,7 @@
 package com.eas.widgets;
 
+import com.eas.core.Utils;
 import com.eas.menu.PlatypusPopupMenu;
-import com.eas.predefine.Utils;
 import com.eas.ui.ButtonGroup;
 import com.eas.ui.Orientation;
 import com.eas.ui.UiReader;

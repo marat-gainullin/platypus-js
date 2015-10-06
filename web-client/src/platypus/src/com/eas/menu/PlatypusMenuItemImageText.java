@@ -1,6 +1,6 @@
 package com.eas.menu;
 
-import com.eas.predefine.HasPublished;
+import com.eas.core.HasPublished;
 import com.eas.ui.HasEventsExecutor;
 import com.eas.ui.HasJsFacade;
 import com.eas.ui.events.ActionEvent;

@@ -1,6 +1,6 @@
 package com.eas.widgets;
 
-import com.eas.predefine.HasPublished;
+import com.eas.core.HasPublished;
 import com.eas.ui.PublishedAbsoluteConstraints;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.ui.Widget;

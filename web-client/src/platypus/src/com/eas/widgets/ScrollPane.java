@@ -1,9 +1,9 @@
 package com.eas.widgets;
 
+import com.eas.core.HasPublished;
+import com.eas.core.XElement;
 import com.eas.menu.HasComponentPopupMenu;
 import com.eas.menu.PlatypusPopupMenu;
-import com.eas.predefine.HasPublished;
-import com.eas.predefine.XElement;
 import com.eas.ui.HasEventsExecutor;
 import com.eas.ui.HasJsFacade;
 import com.eas.ui.events.AddEvent;
@@ -292,7 +292,7 @@ public class ScrollPane extends ScrollBoxPanel implements HasJsFacade, HasEnable
 		Object.defineProperty(published, "view", {
 			get : function(){
 				var widget = aWidget.@com.eas.widgets.ScrollPane::getWidget()();
-				return @com.eas.predefine.Utils::checkPublishedComponent(Ljava/lang/Object;)(widget);
+				return @com.eas.core.Utils::checkPublishedComponent(Ljava/lang/Object;)(widget);
 			},
 			set : function(aValue){
 				if(aValue != null)

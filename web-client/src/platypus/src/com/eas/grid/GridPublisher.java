@@ -1,11 +1,11 @@
 package com.eas.grid;
 
+import com.eas.core.Utils;
 import com.eas.grid.ModelGrid;
 import com.eas.grid.columns.header.CheckHeaderNode;
 import com.eas.grid.columns.header.ModelHeaderNode;
 import com.eas.grid.columns.header.RadioHeaderNode;
 import com.eas.grid.columns.header.ServiceHeaderNode;
-import com.eas.predefine.Utils;
 import com.eas.ui.PublishedComponent;
 import com.google.gwt.core.client.JavaScriptObject;
 

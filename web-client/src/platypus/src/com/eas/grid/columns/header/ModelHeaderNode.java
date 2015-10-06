@@ -2,9 +2,9 @@ package com.eas.grid.columns.header;
 
 import com.eas.bound.ModelDecoratorBox;
 import com.eas.bound.ModelFormattedField;
+import com.eas.core.HasPublished;
 import com.eas.grid.DraggableHeader;
 import com.eas.grid.columns.ModelColumn;
-import com.eas.predefine.HasPublished;
 import com.eas.ui.HasJsName;
 import com.eas.ui.PublishedColor;
 import com.eas.ui.PublishedFont;
@@ -384,7 +384,7 @@ public class ModelHeaderNode extends HeaderNode<JavaScriptObject> implements Has
 			var res = [];
 			for(var c = 0; c < nChildrenCount; c++){
 				var nNode = nChildren.@java.util.List::get(I)(c);
-				var jsNode = nNode.@com.eas.predefine.HasPublished::getPublished()();
+				var jsNode = nNode.@com.eas.core.HasPublished::getPublished()();
 				res.push(jsNode);
 			}
 			return res;

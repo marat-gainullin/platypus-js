@@ -1,6 +1,6 @@
 package com.eas.client.metadata;
 
-import com.eas.predefine.Utils;
+import com.eas.core.Utils;
 import com.google.gwt.core.client.JavaScriptObject;
 
 import java.util.*;

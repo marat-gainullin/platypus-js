@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 
 import com.eas.client.IDGenerator;
 import com.eas.client.converters.StringValueConverter;
-import com.eas.predefine.Utils;
+import com.eas.core.Utils;
 import com.eas.ui.CommonResources;
 import com.eas.ui.HasEmptyText;
 import com.eas.ui.JavaScriptObjectKeyProvider;
@@ -236,7 +236,7 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 	}
 
 	private native static void publish(ModelCombo aWidget, JavaScriptObject aPublished)/*-{
-	    var B = @com.eas.predefine.Predefine::boxing;
+	    var B = @com.eas.core.Predefine::boxing;
         Object.defineProperty(aPublished, "emptyText", {
 	        get : function() {
 	            return aWidget.@com.eas.ui.HasEmptyText::getEmptyText()();

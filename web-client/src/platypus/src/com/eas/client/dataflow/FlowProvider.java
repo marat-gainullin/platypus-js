@@ -9,7 +9,7 @@ import java.util.List;
 import com.eas.client.changes.Change;
 import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.Parameters;
-import com.eas.predefine.Cancellable;
+import com.eas.core.Cancellable;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 

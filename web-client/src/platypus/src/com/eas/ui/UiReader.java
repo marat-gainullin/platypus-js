@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.eas.predefine.Utils;
+import com.eas.core.Utils;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.xml.client.Element;
 

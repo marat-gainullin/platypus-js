@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.eas.client.GroupingHandlerRegistration;
+import com.eas.core.HasPublished;
+import com.eas.core.XElement;
 import com.eas.menu.HasComponentPopupMenu;
 import com.eas.menu.PlatypusPopupMenu;
-import com.eas.predefine.HasPublished;
-import com.eas.predefine.XElement;
 import com.eas.ui.HasEventsExecutor;
 import com.eas.ui.HasJsFacade;
 import com.eas.ui.events.EventsExecutor;
@@ -276,7 +276,7 @@ public class DesktopPane extends FlowPanel implements RequiresResize, ProvidesRe
 				var res = [];
 				for ( var i = 0; i < managed.@java.util.List::size()(); i++) {
 					var m = managed.@java.util.List::get(I)(i);
-					res[res.length] = m.@com.eas.predefine.HasPublished::getPublished()();
+					res[res.length] = m.@com.eas.core.HasPublished::getPublished()();
 				}
 				return res;
 			}

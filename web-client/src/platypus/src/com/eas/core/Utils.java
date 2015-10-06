@@ -1,4 +1,4 @@
-package com.eas.predefine;
+package com.eas.core;
 
 import java.util.Date;
 import java.util.Map;
@@ -32,7 +32,7 @@ public class Utils {
 		}-*/;
 
 		public final native Object getJava(String aName)/*-{
-			var B = @com.eas.predefine.Predefine::boxing;
+			var B = @com.eas.core.Predefine::boxing;
 			return B.boxAsJava(this[aName]);
 		}-*/;
 
@@ -71,7 +71,7 @@ public class Utils {
 		}-*/;
 
 		public final native void setJava(String aName, Object aValue)/*-{
-			var B = @com.eas.predefine.Predefine::boxing;
+			var B = @com.eas.core.Predefine::boxing;
 			return this[aName] = B.boxAsJs(aValue);
 		}-*/;
 
@@ -163,12 +163,12 @@ public class Utils {
 		}-*/;
 
 		public final native Object call(JavaScriptObject aThis, Object aArg)/*-{
-			var B = @com.eas.predefine.Predefine::boxing;
+			var B = @com.eas.core.Predefine::boxing;
 			return this.call(aThis, B.boxAsJs(aArg));
 		}-*/;
 
 		public final native Object call(JavaScriptObject aThis, Object aArg, boolean aFlag)/*-{
-			var B = @com.eas.predefine.Predefine::boxing;
+			var B = @com.eas.core.Predefine::boxing;
 			return this.call(aThis, B.boxAsJs(aArg), aFlag);
 		}-*/;
 
@@ -196,7 +196,7 @@ public class Utils {
 		}-*/;
 	
 		public static native JavaScriptObject parseJSONDateReviver(String aText)/*-{
-			return JSON.parse(aText, @com.eas.predefine.Utils.JsObject::dateReviver()());
+			return JSON.parse(aText, @com.eas.core.Utils.JsObject::dateReviver()());
 		}-*/;
 
 		public static native String writeJSON(JavaScriptObject changeLog)/*-{
@@ -214,17 +214,17 @@ public class Utils {
 
 	public static native JavaScriptObject listenable(JavaScriptObject aTarget)/*-{
 		var listeners = new Set();
-		Object.defineProperty(aTarget, @com.eas.predefine.Utils::addListenerName, {
+		Object.defineProperty(aTarget, @com.eas.core.Utils::addListenerName, {
 			value : function(aListener) {
 				listeners.add(aListener);
 			}
 		});
-		Object.defineProperty(aTarget, @com.eas.predefine.Utils::removeListenerName, {
+		Object.defineProperty(aTarget, @com.eas.core.Utils::removeListenerName, {
 			value : function(aListener) {
 				listeners['delete'](aListener);
 			}
 		});
-		Object.defineProperty(aTarget, @com.eas.predefine.Utils::fireChangeName, {
+		Object.defineProperty(aTarget, @com.eas.core.Utils::fireChangeName, {
 			value : function(aChange) {
 				Object.freeze(aChange);
 				var _listeners = [];
@@ -242,16 +242,16 @@ public class Utils {
 	}-*/;
 
 	public static native void unlistenable(JavaScriptObject aTarget)/*-{
-		delete aTarget[@com.eas.predefine.Utils::addListenerName];
-		delete aTarget[@com.eas.predefine.Utils::removeListenerName];
+		delete aTarget[@com.eas.core.Utils::addListenerName];
+		delete aTarget[@com.eas.core.Utils::removeListenerName];
 	}-*/;
 
 	public static native JavaScriptObject listen(JavaScriptObject aTarget, JavaScriptObject aListener)/*-{
-		var addListener = aTarget[@com.eas.predefine.Utils::addListenerName];
+		var addListener = aTarget[@com.eas.core.Utils::addListenerName];
 		if (addListener) {
 			addListener(aListener);
 			return function() {
-				aTarget[@com.eas.predefine.Utils::removeListenerName](aListener);
+				aTarget[@com.eas.core.Utils::removeListenerName](aListener);
 			};
 		} else {
 			return null;
@@ -259,14 +259,14 @@ public class Utils {
 	}-*/;
 
 	public static native void unlisten(JavaScriptObject aTarget, JavaScriptObject aListener)/*-{
-		aTarget[@com.eas.predefine.Utils::removeListenerName](aListener);
+		aTarget[@com.eas.core.Utils::removeListenerName](aListener);
 	}-*/;
 
 	public static native void fire(JavaScriptObject aTarget, JavaScriptObject aChange)/*-{
 		try {
-			aTarget[@com.eas.predefine.Utils::fireChangeName](aChange);
+			aTarget[@com.eas.core.Utils::fireChangeName](aChange);
 		} catch (e) {
-			var Logger = @com.eas.predefine.Predefine::logger;
+			var Logger = @com.eas.core.Predefine::logger;
 			Logger.Logger.severe(e);
 		}
 	}-*/;
@@ -274,7 +274,7 @@ public class Utils {
 	public static native JavaScriptObject publishCancellable(Cancellable aValue)/*-{
 		return {
 			abort : function() {
-				aValue.@com.eas.predefine.Cancellable::cancel()();
+				aValue.@com.eas.core.Cancellable::cancel()();
 			}
 		};
 	}-*/;
@@ -291,7 +291,7 @@ public class Utils {
 
 	private static native JavaScriptObject publishOnChangeHandler(OnChangeHandler aValue)/*-{
 		return function(aArg) {
-			aValue.@com.eas.predefine.Utils.OnChangeHandler::onChange(Lcom/google/gwt/core/client/JavaScriptObject;)(aArg);
+			aValue.@com.eas.core.Utils.OnChangeHandler::onChange(Lcom/google/gwt/core/client/JavaScriptObject;)(aArg);
 		};
 	}-*/;
 
@@ -341,7 +341,7 @@ public class Utils {
 
 	public native static Boolean executeScriptEventBoolean(JavaScriptObject aEventThis, JavaScriptObject aHandler, Object aArg) throws Exception/*-{
 		if (aHandler != null) {
-			var B = @com.eas.predefine.Predefine::boxing;
+			var B = @com.eas.core.Predefine::boxing;
 			var res = aHandler.call(aEventThis, B.boxAsJs(aArg));
 			if (res != undefined && res != null)
 				return @java.lang.Boolean::new(Z)((false != res));
@@ -353,7 +353,7 @@ public class Utils {
 
 	public native static Double executeScriptEventDouble(JavaScriptObject aEventThis, JavaScriptObject aHandler, Object aArg) throws Exception/*-{
 		if (aHandler != null) {
-			var B = @com.eas.predefine.Predefine::boxing;
+			var B = @com.eas.core.Predefine::boxing;
 			var res = aHandler.call(aEventThis, B.boxAsJs(aArg));
 			if (res != undefined && res != null)
 				return @java.lang.Double::new(D)(res * 1);
@@ -365,7 +365,7 @@ public class Utils {
 
 	public native static String executeScriptEventString(JavaScriptObject aEventThis, JavaScriptObject aHandler, Object aArg) throws Exception/*-{
 		if (aHandler != null) {
-			var B = @com.eas.predefine.Predefine::boxing;
+			var B = @com.eas.core.Predefine::boxing;
 			var res = aHandler.call(aEventThis, B.boxAsJs(aArg));
 			if (res != undefined && res != null)
 				return (res + '');
@@ -377,10 +377,10 @@ public class Utils {
 
 	public native static Date executeScriptEventDate(JavaScriptObject aEventThis, JavaScriptObject aHandler, Object aArg) throws Exception/*-{
 		if (aHandler != null) {
-			var B = @com.eas.predefine.Predefine::boxing;
+			var B = @com.eas.core.Predefine::boxing;
 			var res = new Date(aHandler.call(aEventThis, B.boxAsJs(aArg)));
 			if (res != undefined && res != null)
-				return @com.eas.predefine.Utils::double2Date(D)(res.getTime());
+				return @com.eas.core.Utils::double2Date(D)(res.getTime());
 			else
 				return null;
 		} else
@@ -389,18 +389,18 @@ public class Utils {
 
 	public native static void executeScriptEventVoid(JavaScriptObject aEventThis, JavaScriptObject aHandler, Object aArg) throws Exception/*-{
 		if (aHandler != null) {
-			var B = @com.eas.predefine.Predefine::boxing;
+			var B = @com.eas.core.Predefine::boxing;
 			aHandler.call(aEventThis, B.boxAsJs(aArg));
 		}
 	}-*/;
 
 	public native static Object jsonParse(String aData) throws Exception /*-{
-		var B = @com.eas.predefine.Predefine::boxing;
+		var B = @com.eas.core.Predefine::boxing;
 		return B.boxAsJava(JSON.parse(aData));
 	}-*/;
 
 	public native static String jsonStringify(Object aToJsedObject) /*-{
-		var B = @com.eas.predefine.Predefine::boxing;
+		var B = @com.eas.core.Predefine::boxing;
 		return JSON.stringify(B.boxAsJs(aToJsedObject));
 	}-*/;
 
@@ -444,7 +444,7 @@ public class Utils {
 		if (aValue == null || aValue == undefined)
 			return null;
 		else if (aValue instanceof Date || aValue instanceof $wnd.Date || aValue.constructor.name == "Date")
-			return @com.eas.predefine.Utils::double2Date(D)(aValue.getTime());
+			return @com.eas.core.Utils::double2Date(D)(aValue.getTime());
 		else if(aValue instanceof Boolean || aValue instanceof $wnd.Boolean || aValue.constructor.name == "Boolean")
 			return new @java.lang.Boolean::new(Z)((aValue == true));
 		else if(aValue instanceof String || aValue instanceof $wnd.String || aValue.constructor.name == "String")
@@ -546,11 +546,11 @@ public class Utils {
 	 * @return js array.
 	 */
 	public native static JavaScriptObject toJsArray(Object[] aValue)/*-{
-		var B = @com.eas.predefine.Predefine::boxing;
+		var B = @com.eas.core.Predefine::boxing;
 		var res = [];
-		var inLength = @com.eas.predefine.Utils::javaArrayLength([Ljava/lang/Object;)(aValue);
+		var inLength = @com.eas.core.Utils::javaArrayLength([Ljava/lang/Object;)(aValue);
 		for ( var i = 0; i < inLength; i++){
-			res[res.length] = B.boxAsJs(@com.eas.predefine.Utils::javaArrayItem([Ljava/lang/Object;I)(aValue, i));
+			res[res.length] = B.boxAsJs(@com.eas.core.Utils::javaArrayItem([Ljava/lang/Object;I)(aValue, i));
 		}
 		return res;
 	}-*/;
@@ -581,7 +581,7 @@ public class Utils {
 					propName = path[i];
 			}
 			if (propName != null) {
-				var B = @com.eas.predefine.Predefine::boxing;
+				var B = @com.eas.core.Predefine::boxing;
 				var javaValue = B.boxAsJava(target[propName]);
 				return javaValue;
 			} else
@@ -604,7 +604,7 @@ public class Utils {
 				}
 			}
 			if (propName != null) {
-				var B = @com.eas.predefine.Predefine::boxing;
+				var B = @com.eas.core.Predefine::boxing;
 				var jsData = B.boxAsJs(aValue);
 				target[propName] = jsData;
 			}
@@ -613,7 +613,7 @@ public class Utils {
 
 	private static native JavaScriptObject observeElements(JavaScriptObject aTarget, JavaScriptObject aPropListener)/*-{
 		function subscribe(aData, aListener) {
-			var nHandler = @com.eas.predefine.Utils::listen(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aData, aListener);
+			var nHandler = @com.eas.core.Utils::listen(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aData, aListener);
 			if (nHandler != null) {
 				return nHandler;
 			} else if ($wnd.Object.observe) {
@@ -652,7 +652,7 @@ public class Utils {
 
 	private static native JavaScriptObject observePath(JavaScriptObject aTarget, String aPath, JavaScriptObject aPropListener)/*-{
 	    function subscribe(aData, aListener, aPropName) {
-        	var nHandler = @com.eas.predefine.Utils::listen(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aData, function(aChange){
+        	var nHandler = @com.eas.core.Utils::listen(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aData, function(aChange){
         		if(!aPropName || aChange.propertyName == aPropName){
         			aListener(aChange);
         		}

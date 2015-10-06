@@ -1,10 +1,10 @@
 package com.eas.widgets;
 
+import com.eas.core.HasPublished;
+import com.eas.core.Utils;
+import com.eas.core.XElement;
 import com.eas.menu.HasComponentPopupMenu;
 import com.eas.menu.PlatypusPopupMenu;
-import com.eas.predefine.HasPublished;
-import com.eas.predefine.Utils;
-import com.eas.predefine.XElement;
 import com.eas.ui.HasEmptyText;
 import com.eas.ui.HasEventsExecutor;
 import com.eas.ui.HasJsFacade;
@@ -201,7 +201,7 @@ public class PlatypusFormattedTextField extends FormattedObjectBox implements Ha
 	}
 
 	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
-		var B = @com.eas.predefine.Predefine::boxing;
+		var B = @com.eas.core.Predefine::boxing;
 		Object.defineProperty(published, "text", {
 			get : function() {
 				return aWidget.@com.eas.widgets.PlatypusFormattedTextField::getText()();

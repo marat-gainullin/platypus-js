@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.eas.bound.JsArrayList;
+import com.eas.core.Utils;
+import com.eas.core.Utils.JsObject;
 import com.eas.grid.processing.IndexOfProvider;
-import com.eas.predefine.Utils;
-import com.eas.predefine.Utils.JsObject;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;

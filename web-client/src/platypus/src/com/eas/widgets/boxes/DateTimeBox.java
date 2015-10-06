@@ -7,7 +7,7 @@ package com.eas.widgets.boxes;
 
 import java.util.Date;
 
-import com.eas.predefine.XElement;
+import com.eas.core.XElement;
 import com.eas.ui.CommonResources;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;

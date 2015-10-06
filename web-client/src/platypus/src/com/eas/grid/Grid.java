@@ -10,13 +10,13 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.eas.core.XElement;
 import com.eas.grid.builders.NullHeaderOrFooterBuilder;
 import com.eas.grid.builders.ThemedHeaderOrFooterBuilder;
 import com.eas.grid.columns.ModelColumn;
 import com.eas.grid.columns.header.HasSortList;
 import com.eas.grid.columns.header.HeaderNode;
 import com.eas.menu.MenuItemCheckBox;
-import com.eas.predefine.XElement;
 import com.eas.ui.PublishedColor;
 import com.eas.ui.XDataTransfer;
 import com.google.gwt.cell.client.Cell;

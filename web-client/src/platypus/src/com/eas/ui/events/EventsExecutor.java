@@ -3,8 +3,8 @@ package com.eas.ui.events;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.eas.predefine.HasPublished;
-import com.eas.predefine.Utils;
+import com.eas.core.HasPublished;
+import com.eas.core.Utils;
 import com.eas.ui.EventsPublisher;
 import com.eas.window.events.HasMoveHandlers;
 import com.eas.window.events.MoveEvent;
