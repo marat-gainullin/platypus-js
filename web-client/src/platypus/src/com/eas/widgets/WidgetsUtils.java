@@ -19,24 +19,16 @@ import com.eas.ui.StandaloneRootPanel;
 import com.eas.ui.MarginConstraints.Margin;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.core.client.JsArray;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.RepeatingCommand;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.MenuItemSeparator;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -77,121 +69,6 @@ public class WidgetsUtils {
 			return "dd.MM.yyyy HH:mm:ss";
 		else
 			return dateFormat;
-	}
-
-	public static void jsSelectFile(final JavaScriptObject aCallback, final String aFileTypes) {
-		if (aCallback != null) {
-			selectFile(new Callback<JavaScriptObject, String>() {
-
-				@Override
-				public void onSuccess(JavaScriptObject result) {
-					try {
-						Utils.executeScriptEventVoid(aCallback, aCallback, result);
-					} catch (Exception ex) {
-						Logger.getLogger(WidgetsUtils.class.getName()).log(Level.SEVERE, null, ex);
-					}
-				}
-
-				@Override
-				public void onFailure(String reason) {
-				}
-
-			}, aFileTypes);
-		}
-	}
-
-	public static void selectFile(final Callback<JavaScriptObject, String> aCallback, String aFileTypes) {
-		final FileUpload fu = new FileUpload();
-		fu.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
-		fu.setWidth("10px");
-		fu.setHeight("10px");
-		fu.getElement().getStyle().setLeft(-100, Style.Unit.PX);
-		fu.getElement().getStyle().setTop(-100, Style.Unit.PX);
-		fu.addChangeHandler(new ChangeHandler() {
-			@Override
-			public void onChange(ChangeEvent event) {
-				Utils.JsObject jsFu = fu.getElement().cast();
-				JavaScriptObject oFiles = jsFu.getJs("files");
-				if (oFiles != null) {
-					JsArray<JavaScriptObject> jsFiles = oFiles.cast();
-					for (int i = 0; i < jsFiles.length(); i++) {
-						try {
-							aCallback.onSuccess(jsFiles.get(i));
-						} catch (Exception ex) {
-							Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
-						}
-					}
-				}
-				fu.removeFromParent();
-			}
-		});
-		RootPanel.get().add(fu, -100, -100);
-		fu.click();
-		Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
-			@Override
-			public boolean execute() {
-				fu.removeFromParent();
-				return false;
-			}
-		}, 1000 * 60 * 1);// 1 min
-	}
-
-	public static void jsSelectColor(String aOldValue, final JavaScriptObject aCallback) {
-		if (aCallback != null) {
-			selectColor(aOldValue, new Callback<String, String>() {
-
-				@Override
-				public void onSuccess(String result) {
-					try {
-						Utils.executeScriptEventVoid(aCallback, aCallback, result);
-					} catch (Exception ex) {
-						Logger.getLogger(WidgetsUtils.class.getName()).log(Level.SEVERE, null, ex);
-					}
-				}
-
-				@Override
-				public void onFailure(String reason) {
-				}
-
-			});
-		}
-	}
-
-	public static void selectColor(String aOldValue, final Callback<String, String> aCallback) {
-		final TextBox tmpField = new TextBox();
-		tmpField.getElement().setAttribute("type", "color");
-		tmpField.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
-		tmpField.setWidth("10px");
-		tmpField.setHeight("10px");
-		tmpField.setValue(aOldValue);
-
-		tmpField.addChangeHandler(new ChangeHandler() {
-
-			@Override
-			public void onChange(ChangeEvent event) {
-				try {
-					aCallback.onSuccess(tmpField.getValue());
-				} finally {
-					tmpField.removeFromParent();
-				}
-			}
-
-		});
-		RootPanel.get().add(tmpField, 100, 100);
-		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-			@Override
-			public void execute() {
-				tmpField.setFocus(true);
-				tmpField.getElement().<XElement>cast().click();
-				Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
-					@Override
-					public boolean execute() {
-						tmpField.removeFromParent();
-						return false;
-					}
-				}, 1000 * 60 * 1);// 1 min
-			}
-		});
 	}
 
 	public static PublishedColor getStyledForeground(XElement aElement) {

@@ -5,6 +5,7 @@
 <module>
     <inherits name="com.google.gwt.xml.XML"/>
     <inherits name="com.google.gwt.logging.Logging"/>
+    <inherits name="com.eas.facade.Facade"/>
     
     <!-- Default noop implementation of url processing for xhr requests -->
 	<replace-with class="com.eas.client.xhr.impl.NoopUrlQueryProcessor">

@@ -20,14 +20,13 @@ public class GridPublisher {
 		return constr;
 	}
 	
+	public static native JavaScriptObject getConstructors()/*-{
+		return @com.eas.grid.GridPublisher::constructors;
+	}-*/;
+
 	public static void putPublisher(String aClassName, JavaScriptObject aPublisher){
 		constructors.setJs(aClassName, aPublisher);
 	}
-	
-	public native static JavaScriptObject publishSourcedEvent(JavaScriptObject aSource)/*-{
-		var constr = @com.eas.grid.GridPublisher::getPublisher(Ljava/lang/String;)('PublishedSourcedEvent');
-		return new constr(aSource);
-	}-*/;	
 	
 	public native static PublishedComponent publish(ModelGrid aComponent)/*-{
 		var constr = @com.eas.grid.GridPublisher::getPublisher(Ljava/lang/String;)('ModelGrid');

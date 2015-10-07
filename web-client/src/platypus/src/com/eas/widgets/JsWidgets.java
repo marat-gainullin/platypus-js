@@ -560,6 +560,7 @@ public class JsWidgets {
 					published.iconTextGap = aIconTextGap;
 				}
 			}		
+			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('Label', Label);
 			return Label;
 		});
 		
@@ -592,6 +593,7 @@ public class JsWidgets {
 					published.onActionPerformed = aCallback; 
 				}	 	
 			}
+			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('Button', Button);
 			return Button;
 		});	
 		
@@ -622,6 +624,7 @@ public class JsWidgets {
 					published.onActionPerformed = aCallback; 
 				}	 	
 			}
+			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('DropDownButton', DropDownButton);
 			return DropDownButton;	
 		});
 		
@@ -658,6 +661,7 @@ public class JsWidgets {
 					published.onActionPerformed = aCallback; 
 				}	 	
 			}
+			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('ToggleButton', ToggleButton);
 			return ToggleButton;
 		});	
 		
@@ -686,6 +690,7 @@ public class JsWidgets {
 					published.onActionPerformed = aCallback; 
 				}
 			}
+			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('RadioButton', RadioButton);
 			return RadioButton;	
 		});	
 		
@@ -714,6 +719,7 @@ public class JsWidgets {
 					published.onActionPerformed = aCallback; 
 				}
 			}
+			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('CheckBox', CheckBox);
 			return CheckBox;
 		});			
 		
@@ -733,6 +739,7 @@ public class JsWidgets {
 					published.text = aText;
 				} 	
 			}
+			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('PasswordField', PasswordField);
 			return PasswordField;
 		});	
 		
@@ -752,6 +759,7 @@ public class JsWidgets {
 					published.text = aText;
 				} 	
 			}
+			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('TextField', TextField);
 			return TextField;
 		});	
 
@@ -771,6 +779,7 @@ public class JsWidgets {
 					published.value = aValue;
 				} 	
 			}
+			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('FormattedField', FormattedField);
 			return FormattedField;
 		});
 		
@@ -790,6 +799,7 @@ public class JsWidgets {
 					published.text = aText;
 				} 	
 			}
+			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('TextArea', TextArea);
 			return TextArea;
 		});
 		
@@ -809,6 +819,7 @@ public class JsWidgets {
 					published.text = aText;
 				} 	
 			}
+			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('HtmlArea', HtmlArea);
 			return HtmlArea;
 		});
 		
@@ -862,6 +873,7 @@ public class JsWidgets {
 				} 	
 				return published;
 			}
+			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('Slider', Slider);
 			return Slider;
 		});
 		
@@ -885,6 +897,7 @@ public class JsWidgets {
 				} 	
 				return published;
 			}
+			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('ProgressBar', ProgressBar);
 			return ProgressBar;
 		});
 
@@ -902,6 +915,7 @@ public class JsWidgets {
 				publishComponentProperties(published);
 				return published;
 			}
+			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('DesktopPane', DesktopPane);
 			return DesktopPane;
 		});
 
@@ -926,6 +940,7 @@ public class JsWidgets {
 				publishComponentProperties(published);
 				publishIndexedPanel(published);
 			};
+			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('BorderPane', BorderPane);
 			return BorderPane;
 		});
 
@@ -951,6 +966,7 @@ public class JsWidgets {
 				publishComponentProperties(published);
 				publishIndexedPanel(published);
 			}
+			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('FlowPane', FlowPane);
 			return FlowPane;
 		});
 		
@@ -984,6 +1000,7 @@ public class JsWidgets {
 					}
 				}
 			}
+			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('GridPane', GridPane);
 			return GridPane;
 		});
 		
@@ -1025,6 +1042,7 @@ public class JsWidgets {
 					}
 				});
 			}
+			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('BoxPane', BoxPane);
 			return BoxPane;
 		});		
 
@@ -1050,6 +1068,7 @@ public class JsWidgets {
 				publishComponentProperties(published);
 				publishIndexedPanel(published);
 			}
+			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('CardPane', CardPane);
 			return CardPane;
 		});		
 
@@ -1068,6 +1087,7 @@ public class JsWidgets {
 				publishComponentProperties(published);
 				publishIndexedPanel(published);
 			}
+			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('TabbedPane', TabbedPane);
 			return TabbedPane;
 		});
 
@@ -1088,6 +1108,7 @@ public class JsWidgets {
 				if(aChild)
 					published.add(aChild);
 			}
+			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('ScrollPane', ScrollPane);
 			return ScrollPane;
 		});		
 		
@@ -1114,7 +1135,8 @@ public class JsWidgets {
 				publishComponentProperties(published);
 				publishIndexedPanel(published);
 			}
-			return SplitPane
+			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('SplitPane', SplitPane);
+			return SplitPane;
 		});		
 		
 		predefine([], 'forms/tool-bar', function(){
@@ -1137,6 +1159,7 @@ public class JsWidgets {
 				publishComponentProperties(published);
 				publishIndexedPanel(published);
 			}
+			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('ToolBar', ToolBar);
 			return ToolBar;
 		});
 		
@@ -1156,6 +1179,7 @@ public class JsWidgets {
 				publishIndexedPanel(published);
 				publishChildrenOrdering(published);
 			}
+			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('AnchorsPane', AnchorsPane);
 			return AnchorsPane;
 		});
 
@@ -1174,6 +1198,7 @@ public class JsWidgets {
 				publishIndexedPanel(published);
 				publishChildrenOrdering(published);
 			}
+			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('AbsolutePane', AbsolutePane);
 			return AbsolutePane;
 		});
 		
@@ -1191,6 +1216,7 @@ public class JsWidgets {
 				};			
 				aComponent.@com.eas.ui.ButtonGroup::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 			}
+			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('ButtonGroup', ButtonGroup);
 			return ButtonGroup;
 		});
 	}-*/;

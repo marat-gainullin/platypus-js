@@ -1,5 +1,9 @@
 package com.eas.core;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.JavaScriptObject;
@@ -8,8 +12,9 @@ public class Predefine {
 
 	private static JavaScriptObject boxing;
 	private static JavaScriptObject logger;
-	private static Logger platypusApplicationLogger = Logger.getLogger("platypusApplication");
-	private static JavaScriptObject predefined = JavaScriptObject.createObject();
+	public static Logger platypusApplicationLogger = Logger.getLogger("platypusApplication");
+	protected static Map<String, JavaScriptObject> defined = new HashMap<>();
+	public static Set<String> executed = new HashSet<>();
 	
 	public static boolean isNumber(Object aValue) {
 		return aValue instanceof Number;
@@ -19,18 +24,26 @@ public class Predefine {
 		return aValue instanceof Boolean;
 	}
 
+	public static Map<String, JavaScriptObject> getDefined() {
+		return Predefine.getDefined();
+	}
+
 	public static native JavaScriptObject prerequire(String aName)/*-{
-		return predefined[aName];
+		var defined = @com.eas.core.Predefine::defined;
+		return defined.@java.util.Map::get(Ljava/lang/Object;)(aName);
 	}-*/;
 	
 	public static native void predefine(JavaScriptObject aDeps, String aName, JavaScriptObject aDefiner)/*-{
-		var predefined = @com.eas.core.Predefine::predefined;
+		var defined = @com.eas.core.Predefine::defined;
+		var executed = @com.eas.core.Predefine::executed;
 		var resolved = [];
 		for(var d = 0; d < aDeps.length; d++){
-			var module = predefined[aDeps[d]];
+			var module = defined.@java.util.Map::get(Ljava/lang/Object;)(aDeps[d]);
 			resolved.push(module);
 		}
-		predefined[aName] = aDefiner(resolved);
+		var module = aDefiner(resolved);
+		defined.@java.util.Map::put(Ljava/lang/Object;Ljava/lang/Object;)(aName, module);
+		executed.@java.util.Set::add(Ljava/lang/Object;)(module);
 	}-*/;
 	
 	public native static void init()/*-{

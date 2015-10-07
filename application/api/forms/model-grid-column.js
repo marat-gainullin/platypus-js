@@ -1,6 +1,6 @@
 /* global Java */
 
-define(['boxing'], function(B) {
+define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/font', './cell-render-event'], function(B, Color, Cursor, Font, RenderEvent) {
     /**
      *
      * @constructor ModelGridColumn ModelGridColumn
@@ -199,6 +199,16 @@ define(['boxing'], function(B) {
     };
 
     /**
+     * @method unsort
+     * @memberOf ModelGridColumn
+     * Clears sort column, works only in HTML5 */
+    ModelGridColumn.prototype.unsort = function() {
+        var delegate = this.unwrap();
+        var value = delegate.unsort();
+        return B.boxAsJs(value);
+    };
+
+    /**
      *
      * @method addColumnNode
      * @memberOf ModelGridColumn
@@ -239,16 +249,6 @@ define(['boxing'], function(B) {
     ModelGridColumn.prototype.insertColumnNode = function(position, node) {
         var delegate = this.unwrap();
         var value = delegate.insertColumnNode(B.boxAsJava(position), B.boxAsJava(node));
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * @method unsort
-     * @memberOf ModelGridColumn
-     * Clears sort column, works only in HTML5 */
-    ModelGridColumn.prototype.unsort = function() {
-        var delegate = this.unwrap();
-        var value = delegate.unsort();
         return B.boxAsJs(value);
     };
 

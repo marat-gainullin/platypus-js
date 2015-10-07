@@ -45,13 +45,31 @@
         }
     } catch (e) {
         // SE client
-        define(['environment', 'logger', 'resource', 'id', 'md5', 'template', 'invoke', 'orm', 'core/index', 'datamodel/index', 'reports/index', 'rpc', 'extend', 'ui'], function (Environment, Logger, Resource, Id, Md5, loadTemplate, Invoke, Orm, Core, Datamodel, Reports, Rpc, extend, Ui) {
+        define(['environment', 'logger', 'resource', 'id', 'md5', 'template', 'invoke', 'orm', 'core/index', 'datamodel/index', 'reports/index', 'rpc', 'extend', 'forms/index', 'grid/index', 'ui', 'forms'], function (Environment, Logger, Resource, Id, Md5, loadTemplate, Invoke, Orm, Core, Datamodel, Reports, Rpc, extend, FormsIndex, GridIndex, Ui, Forms) {
             var module = aInitializer();
             aCommonDefiner(module, Environment, Logger, Resource, Id, Md5, loadTemplate, Invoke, Orm, Core, Datamodel, Reports, Rpc, extend);
-            for (var i in Ui) {
+            for (var f in FormsIndex) {
+                Object.defineProperty(module, f, {
+                    enumerable: true,
+                    value: FormsIndex[f]
+                });
+            }
+            for (var g in GridIndex) {
+                Object.defineProperty(module, g, {
+                    enumerable: true,
+                    value: GridIndex[g]
+                });
+            }
+            for (var u in Ui) {
+                Object.defineProperty(module, u, {
+                    enumerable: true,
+                    value: Ui[u]
+                });
+            }
+            for (var i in Forms) {
                 Object.defineProperty(module, i, {
                     enumerable: true,
-                    value: Ui[i]
+                    value: Forms[i]
                 });
             }
             return module;

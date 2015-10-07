@@ -1,6 +1,6 @@
 /* global Java */
 
-define(['boxing'], function(B) {
+define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/font', './action-event', './cell-render-event', './component-event', './focus-event', './item-event', './key-event', './value-change-event', './container-event', './popup-menu'], function(B, Color, Cursor, Font, ActionEvent, RenderEvent, ComponentEvent, FocusEvent, ItemEvent, KeyEvent, ValueChangeEvent, ContainerEvent, PopupMenu) {
     /**
      * A container with Anchors Layout.
      * @constructor AnchorsPane AnchorsPane

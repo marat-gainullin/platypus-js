@@ -1,6 +1,6 @@
 /* global Java */
 
-define(['boxing'], function(B) {
+define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/font', './cell-render-event'], function(B, Color, Cursor, Font, RenderEvent) {
     /**
      *
      * @constructor RadioGridColumn RadioGridColumn

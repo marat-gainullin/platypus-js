@@ -8,7 +8,7 @@ package com.eas.proto.dom;
  *
  * @author pk
  */
-public enum ProtoNodeType
-{
+public enum ProtoNodeType {
+
     STREAM, ENTITY_REF, LEAF;
 }

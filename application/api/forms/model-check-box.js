@@ -1,6 +1,6 @@
 /* global Java */
 
-define(['boxing'], function(B) {
+define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/font', './action-event', './cell-render-event', './component-event', './focus-event', './item-event', './key-event', './value-change-event', './popup-menu'], function(B, Color, Cursor, Font, ActionEvent, RenderEvent, ComponentEvent, FocusEvent, ItemEvent, KeyEvent, ValueChangeEvent, PopupMenu) {
     /**
      * An implementation of a model check box -- an item that can be selected or deselected, and which displays its state to the user.
      * @param text the text of the component (optional).
@@ -72,16 +72,6 @@ define(['boxing'], function(B) {
             }
         });
 
-        Object.defineProperty(this, "onFocusLost", {
-            get: function() {
-                var value = delegate.onFocusLost;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onFocusLost = aValue;
-            }
-        });
-
         Object.defineProperty(this, "nullable", {
             get: function() {
                 var value = delegate.nullable;
@@ -89,6 +79,16 @@ define(['boxing'], function(B) {
             },
             set: function(aValue) {
                 delegate.nullable = B.boxAsJava(aValue);
+            }
+        });
+
+        Object.defineProperty(this, "onFocusLost", {
+            get: function() {
+                var value = delegate.onFocusLost;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onFocusLost = aValue;
             }
         });
 

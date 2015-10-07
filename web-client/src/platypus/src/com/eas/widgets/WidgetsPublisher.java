@@ -41,6 +41,10 @@ public class WidgetsPublisher {
 		return constr;
 	}
 	
+	public static native JavaScriptObject getConstructors()/*-{
+		return @com.eas.widgets.WidgetsPublisher::constructors;
+	}-*/;
+	
 	public static void putPublisher(String aClassName, JavaScriptObject aPublisher){
 		constructors.setJs(aClassName, aPublisher);
 	}

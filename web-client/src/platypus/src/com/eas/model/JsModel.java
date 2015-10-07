@@ -392,7 +392,7 @@ public class JsModel {
 				}else{
 					entities = aEntities;
 				}
-				@com.eas.client.Loader::jsLoadQueries(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(entities, aOnSuccess, aOnFailure);
+				@com.eas.application.Loader::jsLoadQueries(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(entities, aOnSuccess, aOnFailure);
 			}
 			function readModelDocument(aDocument, aTarget){
 				if(!aTarget)

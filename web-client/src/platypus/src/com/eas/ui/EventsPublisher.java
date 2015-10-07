@@ -34,13 +34,16 @@ public class EventsPublisher {
 		return constr;
 	}
 	
+	public static native JavaScriptObject getConstructors()/*-{
+		return @com.eas.ui.EventsPublisher::constructors;
+	}-*/;
+
 	public static void putPublisher(String aClassName, JavaScriptObject aPublisher){
 		constructors.setJs(aClassName, aPublisher);
 	}
 	
 	public native static JavaScriptObject publishSourcedEvent(JavaScriptObject aSource)/*-{
-		var constr = @com.eas.ui.EventsPublisher::getPublisher(Ljava/lang/String;)('PublishedSourcedEvent');
-		return new constr(aSource);
+		return {source: aSource};
 	}-*/;	
 	
 	public native static JavaScriptObject publishItemEvent(JavaScriptObject aSource, JavaScriptObject aItem)/*-{

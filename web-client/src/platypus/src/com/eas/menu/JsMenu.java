@@ -26,6 +26,7 @@ public class JsMenu {
 				};
 				publishComponentProperties(published);
 			}
+			@com.eas.menu.MenuPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('MenuBar', MenuBar);
 			return MenuBar;
 		});
 
@@ -47,6 +48,7 @@ public class JsMenu {
 					published.text = aText;
 				}
 			}
+			@com.eas.menu.MenuPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('Menu', Menu);
 			return Menu;
 		});
 
@@ -64,6 +66,7 @@ public class JsMenu {
 				};
 				publishComponentProperties(published);
 			}
+			@com.eas.menu.MenuPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('PopupMenu', PopupMenu);
 			return PopupMenu;
 		});
 		
@@ -94,6 +97,7 @@ public class JsMenu {
 				}	 	
 				return published;
 			}
+			@com.eas.menu.MenuPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('MenuItem', MenuItem);
 			return MenuItem;
 		});	
 		
@@ -123,6 +127,7 @@ public class JsMenu {
 				}
 				return published;
 			}
+			@com.eas.menu.MenuPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('CheckMenuItem', CheckMenuItem);
 			return CheckMenuItem;
 		});
 
@@ -152,6 +157,8 @@ public class JsMenu {
 				}
 				return published;
 			}
+			@com.eas.menu.MenuPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('RadioMenuItem', RadioMenuItem);
+			return RadioMenuItem;
 		});
 		
 		predefine([], 'forms/menu-separator', function(){
@@ -170,6 +177,7 @@ public class JsMenu {
 				publishComponentProperties(published);
 				return published;
 			}
+			@com.eas.menu.MenuPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('MenuSeparator', MenuSeparator);
 			return MenuSeparator;
 		});
 		

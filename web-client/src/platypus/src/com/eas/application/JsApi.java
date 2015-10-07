@@ -1,6 +1,10 @@
 package com.eas.application;
 
+import com.google.gwt.core.client.JavaScriptObject;
+
 public class JsApi {
+	
+	public static JavaScriptObject sourcedEventConstructor;
 	
 	public native static void init()/*-{
 		// Fix Function#name on browsers that do not support it (IE):
@@ -455,6 +459,7 @@ public class JsApi {
 					}
 				});
 			}
+			@com.eas.application.JsApi::sourcedEventConstructor = PublishedSourcedEvent; 
 			return PublishedSourcedEvent;
 		});		
 		
@@ -488,7 +493,7 @@ public class JsApi {
 		predefine(['core/report'], 'rpc', function(Report){
 			function requireRemotes(aRemotesNames, aOnSuccess, aOnFailure){
 				var remotesNames = Array.isArray(aRemotesNames) ? aRemotesNames : [aRemotesNames];
-				@com.eas.client.Loader::jsLoadServerModules(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(remotesNames, aOnSuccess, aOnFailure);
+				@com.eas.application.Loader::jsLoadServerModules(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(remotesNames, aOnSuccess, aOnFailure);
 			}		
 			function generateFunction(aModuleName, aFunctionName) {
 				return function() {

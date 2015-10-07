@@ -119,6 +119,32 @@ define(['boxing'], function(B) {
         });
 
     };
+    Object.defineProperty(Color, "black", {value: new Color(0, 0, 0)});
+    Object.defineProperty(Color, "BLACK", {value: new Color(0, 0, 0)});
+    Object.defineProperty(Color, "blue", {value: new Color(0, 0, 0xff)});
+    Object.defineProperty(Color, "BLUE", {value: new Color(0, 0, 0xff)});
+    Object.defineProperty(Color, "cyan", {value: new Color(0, 0xff, 0xff)});
+    Object.defineProperty(Color, "CYAN", {value: new Color(0, 0xff, 0xff)});
+    Object.defineProperty(Color, "DARK_GRAY", {value: new Color(0x40, 0x40, 0x40)});
+    Object.defineProperty(Color, "darkGray", {value: new Color(0x40, 0x40, 0x40)});
+    Object.defineProperty(Color, "gray", {value: new Color(0x80, 0x80, 0x80)});
+    Object.defineProperty(Color, "GRAY", {value: new Color(0x80, 0x80, 0x80)});
+    Object.defineProperty(Color, "green", {value: new Color(0, 0xff, 0)});
+    Object.defineProperty(Color, "GREEN", {value: new Color(0, 0xff, 0)});
+    Object.defineProperty(Color, "LIGHT_GRAY", {value: new Color(0xC0, 0xC0, 0xC0)});
+    Object.defineProperty(Color, "lightGray", {value: new Color(0xC0, 0xC0, 0xC0)});
+    Object.defineProperty(Color, "magenta", {value: new Color(0xff, 0, 0xff)});
+    Object.defineProperty(Color, "MAGENTA", {value: new Color(0xff, 0, 0xff)});
+    Object.defineProperty(Color, "orange", {value: new Color(0xff, 0xC8, 0)});
+    Object.defineProperty(Color, "ORANGE", {value: new Color(0xff, 0xC8, 0)});
+    Object.defineProperty(Color, "pink", {value: new Color(0xFF, 0xAF, 0xAF)});
+    Object.defineProperty(Color, "PINK", {value: new Color(0xFF, 0xAF, 0xAF)});
+    Object.defineProperty(Color, "red", {value: new Color(0xFF, 0, 0)});
+    Object.defineProperty(Color, "RED", {value: new Color(0xFF, 0, 0)});
+    Object.defineProperty(Color, "white", {value: new Color(0xFF, 0xff, 0xff)});
+    Object.defineProperty(Color, "WHITE", {value: new Color(0xFF, 0xff, 0xff)});
+    Object.defineProperty(Color, "yellow", {value: new Color(0xFF, 0xff, 0)});
+    Object.defineProperty(Color, "YELLOW", {value: new Color(0xFF, 0xff, 0)});
 
     var className = "com.eas.gui.ScriptColor";
     var javaClass = Java.type(className);

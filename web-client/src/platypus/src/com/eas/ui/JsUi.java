@@ -1,6 +1,21 @@
 package com.eas.ui;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.eas.core.Utils;
+import com.eas.core.XElement;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArray;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.RepeatingCommand;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.user.client.ui.FileUpload;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.TextBox;
 
 public class JsUi {
 	
@@ -12,6 +27,121 @@ public class JsUi {
 	private static JavaScriptObject Color;	
 	private static JavaScriptObject Font;	
 	
+	public static void jsSelectFile(final JavaScriptObject aCallback, final String aFileTypes) {
+		if (aCallback != null) {
+			selectFile(new Callback<JavaScriptObject, String>() {
+
+				@Override
+				public void onSuccess(JavaScriptObject result) {
+					try {
+						Utils.executeScriptEventVoid(aCallback, aCallback, result);
+					} catch (Exception ex) {
+						Logger.getLogger(JsUi.class.getName()).log(Level.SEVERE, null, ex);
+					}
+				}
+
+				@Override
+				public void onFailure(String reason) {
+				}
+
+			}, aFileTypes);
+		}
+	}
+
+	public static void selectFile(final Callback<JavaScriptObject, String> aCallback, String aFileTypes) {
+		final FileUpload fu = new FileUpload();
+		fu.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
+		fu.setWidth("10px");
+		fu.setHeight("10px");
+		fu.getElement().getStyle().setLeft(-100, Style.Unit.PX);
+		fu.getElement().getStyle().setTop(-100, Style.Unit.PX);
+		fu.addChangeHandler(new ChangeHandler() {
+			@Override
+			public void onChange(ChangeEvent event) {
+				Utils.JsObject jsFu = fu.getElement().cast();
+				JavaScriptObject oFiles = jsFu.getJs("files");
+				if (oFiles != null) {
+					JsArray<JavaScriptObject> jsFiles = oFiles.cast();
+					for (int i = 0; i < jsFiles.length(); i++) {
+						try {
+							aCallback.onSuccess(jsFiles.get(i));
+						} catch (Exception ex) {
+							Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
+						}
+					}
+				}
+				fu.removeFromParent();
+			}
+		});
+		RootPanel.get().add(fu, -100, -100);
+		fu.click();
+		Scheduler.get().scheduleFixedDelay(new Scheduler.RepeatingCommand() {
+			@Override
+			public boolean execute() {
+				fu.removeFromParent();
+				return false;
+			}
+		}, 1000 * 60 * 1);// 1 min
+	}
+
+	public static void jsSelectColor(String aOldValue, final JavaScriptObject aCallback) {
+		if (aCallback != null) {
+			selectColor(aOldValue, new Callback<String, String>() {
+
+				@Override
+				public void onSuccess(String result) {
+					try {
+						Utils.executeScriptEventVoid(aCallback, aCallback, result);
+					} catch (Exception ex) {
+						Logger.getLogger(JsUi.class.getName()).log(Level.SEVERE, null, ex);
+					}
+				}
+
+				@Override
+				public void onFailure(String reason) {
+				}
+
+			});
+		}
+	}
+
+	public static void selectColor(String aOldValue, final Callback<String, String> aCallback) {
+		final TextBox tmpField = new TextBox();
+		tmpField.getElement().setAttribute("type", "color");
+		tmpField.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
+		tmpField.setWidth("10px");
+		tmpField.setHeight("10px");
+		tmpField.setValue(aOldValue);
+
+		tmpField.addChangeHandler(new ChangeHandler() {
+
+			@Override
+			public void onChange(ChangeEvent event) {
+				try {
+					aCallback.onSuccess(tmpField.getValue());
+				} finally {
+					tmpField.removeFromParent();
+				}
+			}
+
+		});
+		RootPanel.get().add(tmpField, 100, 100);
+		Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+			@Override
+			public void execute() {
+				tmpField.setFocus(true);
+				tmpField.getElement().<XElement>cast().click();
+				Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+					@Override
+					public boolean execute() {
+						tmpField.removeFromParent();
+						return false;
+					}
+				}, 1000 * 60 * 1);// 1 min
+			}
+		});
+	}
+
 	public native static void init()/*-{
 			
 		@com.eas.ui.JsUi::Orientation = {HORIZONTAL: 0, VERTICAL: 1}; 
@@ -52,6 +182,7 @@ public class JsUi {
 					}
 				});
 			}
+			@com.eas.ui.EventsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('CellRenderEvent', CellRenderEvent);
 			return CellRenderEvent;
 		});
 		
@@ -63,6 +194,7 @@ public class JsUi {
 					}
 				});
 			}
+			@com.eas.ui.EventsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('WindowEvent', WindowEvent);
 			return WindowEvent;
 		});
 				
@@ -135,6 +267,7 @@ public class JsUi {
 					}
 				});
 			}
+			@com.eas.ui.EventsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('MouseEvent', MouseEvent);
 			return MouseEvent;
 		});
 		
@@ -180,6 +313,7 @@ public class JsUi {
 					}
 				});
 			}
+			@com.eas.ui.EventsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('KeyEvent', KeyEvent);
 			return KeyEvent;
 		});
 		
@@ -203,6 +337,7 @@ public class JsUi {
 					}
 				});
 			}
+			@com.eas.ui.EventsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('ContainerEvent', ContainerEvent);
 			return ContainerEvent;
 		});
 		
@@ -219,6 +354,7 @@ public class JsUi {
 					}
 				});
 			}
+			@com.eas.ui.EventsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('ItemEvent', ItemEvent);
 			return ItemEvent;
 		});
 		
@@ -232,6 +368,7 @@ public class JsUi {
 					}
 				});
 			}
+			@com.eas.ui.EventsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('ComponentEvent', ComponentEvent);
 			return ComponentEvent;
 		});
 		
@@ -245,6 +382,7 @@ public class JsUi {
 					}
 				});
 			}
+			@com.eas.ui.EventsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('FocusEvent', FocusEvent);
 			return FocusEvent;
 		});
 		
@@ -258,6 +396,7 @@ public class JsUi {
 					}
 				});
 			}
+			@com.eas.ui.EventsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('ActionEvent', ActionEvent);
 			return ActionEvent;
 		});
 		
@@ -476,6 +615,161 @@ public class JsUi {
 			Color.YELLOW = new Color(0xFF, 0xff, 0);
 			@com.eas.ui.JsUi::Color = Color; 
 			return Color;
+		});
+		
+		predefine(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/font'], 'ui', function(B, Color, Cursor, Font){
+			var Orientation = @com.eas.ui.JsUi::Orientation;
+			var VerticalPosition = @com.eas.ui.JsUi::VerticalPosition;
+			var HorizontalPosition = @com.eas.ui.JsUi::HorizontalPosition;
+			var FontStyle = @com.eas.ui.JsUi::FontStyle;
+			var ScrollBarPolicy = @com.eas.ui.JsUi::ScrollBarPolicy;
+			
+			function selectFile(aCallback, aFileFilter) {
+				@com.eas.ui.JsUi::jsSelectFile(Lcom/google/gwt/core/client/JavaScriptObject;Ljava/lang/String;)(aCallback, aFileFilter);
+			}
+			
+			function selectColor(aCallback, aOldValue) {
+				@com.eas.ui.JsUi::jsSelectColor(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aOldValue != null ? aOldValue + '' : '', aCallback);
+			}
+			
+			function Icon() {
+			}
+			Object.defineProperty(Icon, "load", { 
+				value: function(aIconName, aOnSuccess, aOnFailure) {
+					@com.eas.ui.PlatypusImageResource::jsLoad(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aIconName != null ? '' + aIconName : null, aOnSuccess, aOnFailure);
+				} 
+			});
+			
+			var module = {};
+		    Object.defineProperty(module, 'Colors', {
+		        enumerable: true,
+		        value: Color
+		    });
+		    Object.defineProperty(module, 'Color', {
+		        enumerable: true,
+		        value: Color
+		    });
+		    Object.defineProperty(module, 'Cursor', {
+		        enumerable: true,
+		        value: Cursor
+		    });
+		    Object.defineProperty(module, 'Icon', {
+		        enumerable: true,
+		        value: Icon
+		    });
+		    Object.defineProperty(module, 'Icons', {
+		        enumerable: true,
+		        value: Icon
+		    });
+		    Object.defineProperty(module, 'Font', {
+		        enumerable: true,
+		        value: Font
+		    });
+			Object.defineProperty(module, 'VK_ALT', {
+				enumerable: true,
+				value : @com.google.gwt.event.dom.client.KeyCodes::KEY_ALT 
+			});
+			Object.defineProperty(module, 'VK_BACKSPACE', {
+				enumerable: true,
+				value : @com.google.gwt.event.dom.client.KeyCodes::KEY_BACKSPACE 
+			});
+			Object.defineProperty(module, 'VK_BACKSPACE', {
+				enumerable: true,
+				value : @com.google.gwt.event.dom.client.KeyCodes::KEY_BACKSPACE 
+			});
+			Object.defineProperty(module, 'VK_DELETE', {
+				enumerable: true,
+				value : @com.google.gwt.event.dom.client.KeyCodes::KEY_DELETE 
+			});
+			Object.defineProperty(module, 'VK_DOWN', {
+				enumerable: true,
+				value : @com.google.gwt.event.dom.client.KeyCodes::KEY_DOWN 
+			});
+			Object.defineProperty(module, 'VK_END', {
+				enumerable: true,
+				value : @com.google.gwt.event.dom.client.KeyCodes::KEY_END 
+			});
+			Object.defineProperty(module, 'VK_ENTER', {
+				enumerable: true,
+				value : @com.google.gwt.event.dom.client.KeyCodes::KEY_ENTER 
+			});
+			Object.defineProperty(module, 'VK_ESCAPE', {
+				enumerable: true,
+				value : @com.google.gwt.event.dom.client.KeyCodes::KEY_ESCAPE 
+			});
+			Object.defineProperty(module, 'VK_HOME', {
+				enumerable: true,
+				value : @com.google.gwt.event.dom.client.KeyCodes::KEY_HOME 
+			});
+			Object.defineProperty(module, 'VK_LEFT', {
+				enumerable: true,
+				value : @com.google.gwt.event.dom.client.KeyCodes::KEY_LEFT
+			});
+			Object.defineProperty(module, 'VK_PAGEDOWN', {
+				enumerable: true,
+				value : @com.google.gwt.event.dom.client.KeyCodes::KEY_PAGEDOWN 
+			});
+			Object.defineProperty(module, 'VK_PAGEUP', {
+				enumerable: true,
+				value : @com.google.gwt.event.dom.client.KeyCodes::KEY_PAGEUP 
+			});
+			Object.defineProperty(module, 'VK_RIGHT', {
+				enumerable: true,
+				value : @com.google.gwt.event.dom.client.KeyCodes::KEY_RIGHT 
+			});
+			Object.defineProperty(module, 'VK_SHIFT', {
+				enumerable: true,
+				value : @com.google.gwt.event.dom.client.KeyCodes::KEY_SHIFT 
+			});
+			Object.defineProperty(module, 'VK_TAB', {
+				enumerable: true,
+				value : @com.google.gwt.event.dom.client.KeyCodes::KEY_TAB 
+			});
+			Object.defineProperty(module, 'VK_UP', {
+				enumerable: true,
+				value : @com.google.gwt.event.dom.client.KeyCodes::KEY_UP 
+			});
+			Object.defineProperty(module, 'selectFile', {
+				enumerable: true,
+				value : selectFile
+			});
+			Object.defineProperty(module, 'selectColor', {
+				enumerable: true,
+				value : selectColor
+			});
+		    Object.defineProperty(module, 'msgBox', {
+		        enumerable: true,
+		        value: $wnd.alert
+		    });
+		    Object.defineProperty(module, 'error', {
+		        enumerable: true,
+		        value: $wnd.alert
+		    });
+		    Object.defineProperty(module, 'warn', {
+		        enumerable: true,
+		        value: $wnd.alert
+		    });
+		    Object.defineProperty(module, 'HorizontalPosition', {
+		        enumerable: true,
+		        value: HorizontalPosition
+		    });
+		    Object.defineProperty(module, 'VerticalPosition', {
+		        enumerable: true,
+		        value: VerticalPosition
+		    });
+		    Object.defineProperty(module, 'Orientation', {
+		        enumerable: true,
+		        value: Orientation
+		    });
+		    Object.defineProperty(module, 'ScrollBarPolicy', {
+		        enumerable: true,
+		        value: ScrollBarPolicy
+		    });
+		    Object.defineProperty(module, 'FontStyle', {
+		        enumerable: true,
+		        value: FontStyle
+		    });
+		    return module;
 		});
 	}-*/;
 }

@@ -357,6 +357,33 @@ define(['boxing'], function(B) {
         return B.boxAsJs(value);
     };
 
+    var FormClass = Java.type("com.eas.client.forms.Form");
+    Object.defineProperty(Form, 'shown', {
+        get: function () {
+            var nativeArray = FormClass.getShownForms();
+            var res = [];
+            for (var i = 0; i < nativeArray.length; i++)
+                res[res.length] = nativeArray[i].getPublished();
+            return res;
+        }
+    });
+
+    Object.defineProperty(Form, 'getShownForm', {
+        value: function (aName) {
+            var shownForm = FormClass.getShownForm(aName);
+            return shownForm !== null ? shownForm.getPublished() : null;
+        }
+    });
+
+    Object.defineProperty(Form, 'onChange', {
+        get: function () {
+            return FormClass.getOnChange();
+        },
+        set: function (aValue) {
+            FormClass.setOnChange(aValue);
+        }
+    });
+
 
     var className = "com.eas.client.forms.Form";
     var javaClass = Java.type(className);

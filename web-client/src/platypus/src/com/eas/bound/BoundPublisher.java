@@ -15,6 +15,10 @@ public class BoundPublisher {
 		return constr;
 	}
 	
+	public static native JavaScriptObject getConstructors()/*-{
+		return @com.eas.bound.BoundPublisher::constructors;
+	}-*/;
+
 	public static void putPublisher(String aClassName, JavaScriptObject aPublisher){
 		constructors.setJs(aClassName, aPublisher);
 	}

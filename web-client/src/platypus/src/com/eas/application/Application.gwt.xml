@@ -3,8 +3,9 @@
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 1.7.0//EN" "http://google-web-toolkit.googlecode.com/svn/tags/1.7.0/distro-source/core/src/gwt-module.dtd">
 
 <module rename-to="pwc">
-    <inherits name="com.eas.model.Model"/>
-    <inherits name="com.eas.form.Form"/>
+	<inherits name="com.eas.form.Form"/>
+	<inherits name="com.eas.model.Model"/>
+	<inherits name="com.eas.grid.Grid"/>
 	<!--inherits name="com.google.gwt.logging.Logging"/>
 	<set-property name="gwt.logging.enabled" value="TRUE"/>
 	<set-property name="gwt.logging.consoleHandler" value="ENABLED"/>

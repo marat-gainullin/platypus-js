@@ -29,6 +29,7 @@ public class JsGrid {
 				publishComponentProperties(published);
 				return published;
 			}
+			@com.eas.grid.GridPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('ModelGrid', ModelGrid);
 			return ModelGrid;
 		});		
 
@@ -49,6 +50,7 @@ public class JsGrid {
 	        	aComponent.@com.eas.core.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 				return published;
 			}
+			@com.eas.grid.GridPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('CheckGridColumn', CheckGridColumn);
 			return CheckGridColumn;
 		});	
 		
@@ -69,6 +71,7 @@ public class JsGrid {
 	        	aComponent.@com.eas.core.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 				return published;
 			}
+			@com.eas.grid.GridPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('RadioGridColumn', RadioGridColumn);
 			return RadioGridColumn;	
 		});
 				
@@ -89,6 +92,7 @@ public class JsGrid {
 	        	aComponent.@com.eas.core.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 				return published;
 			}
+			@com.eas.grid.GridPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('ServiceGridColumn', ServiceGridColumn);
 			return ServiceGridColumn;
 		});	
 		
@@ -109,6 +113,7 @@ public class JsGrid {
 	        	aComponent.@com.eas.core.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
 				return published;
 			}
+			@com.eas.grid.GridPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('ModelGridColumn', ModelGridColumn);
 			return ModelGridColumn;
 		});	
 	}-*/;

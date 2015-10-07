@@ -1,6 +1,6 @@
 /* global Java */
 
-define(['boxing', 'grid/cell-data', './cell-render-event', './item-event', './service-grid-column', './check-grid-column', './radio-grid-column', './model-check-box', './model-combo', './model-date', './model-formatted-field', './model-grid-column', './model-spin', './model-text-area'], function(B, CellData, RenderEvent, ItemEvent, ServiceGridColumn, CheckGridColumn, RadioGridColumn, ModelCheckBox, ModelCombo, ModelDate, ModelFormattedField, ModelGridColumn, ModelSpin, ModelTextArea) {
+define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/font', './action-event', './cell-render-event', './component-event', './focus-event', './item-event', './key-event', './value-change-event', './popup-menu', 'grid/cell-data', './cell-render-event', './item-event', './service-grid-column', './check-grid-column', './radio-grid-column', './model-check-box', './model-combo', './model-date', './model-formatted-field', './model-grid-column', './model-spin', './model-text-area'], function(B, Color, Cursor, Font, ActionEvent, RenderEvent, ComponentEvent, FocusEvent, ItemEvent, KeyEvent, ValueChangeEvent, PopupMenu, CellData, RenderEvent, ItemEvent, ServiceGridColumn, CheckGridColumn, RadioGridColumn, ModelCheckBox, ModelCombo, ModelDate, ModelFormattedField, ModelGridColumn, ModelSpin, ModelTextArea) {
     /**
      * Generated constructor.
      * @constructor ModelGrid ModelGrid
@@ -714,6 +714,27 @@ define(['boxing', 'grid/cell-data', './cell-render-event', './item-event', './se
     };
 
     /**
+     * Redraw the component.
+     * @method redraw
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.redraw = function() {
+        var delegate = this.unwrap();
+        var value = delegate.redraw();
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * @method unsort
+     * @memberOf ModelGrid
+     * Clears sort on all columns, works only in HTML5 */
+    ModelGrid.prototype.unsort = function() {
+        var delegate = this.unwrap();
+        var value = delegate.unsort();
+        return B.boxAsJs(value);
+    };
+
+    /**
      *
      * @method addColumnNode
      * @memberOf ModelGrid
@@ -754,27 +775,6 @@ define(['boxing', 'grid/cell-data', './cell-render-event', './item-event', './se
     ModelGrid.prototype.insertColumnNode = function(arg0, arg1) {
         var delegate = this.unwrap();
         var value = delegate.insertColumnNode(B.boxAsJava(arg0), B.boxAsJava(arg1));
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * Redraw the component.
-     * @method redraw
-     * @memberOf ModelGrid
-     */
-    ModelGrid.prototype.redraw = function() {
-        var delegate = this.unwrap();
-        var value = delegate.redraw();
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * @method unsort
-     * @memberOf ModelGrid
-     * Clears sort on all columns, works only in HTML5 */
-    ModelGrid.prototype.unsort = function() {
-        var delegate = this.unwrap();
-        var value = delegate.unsort();
         return B.boxAsJs(value);
     };
 

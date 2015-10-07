@@ -16,6 +16,7 @@ import com.eas.ui.CommonResources;
 import com.eas.ui.HasEmptyText;
 import com.eas.ui.HasEventsExecutor;
 import com.eas.ui.HasJsFacade;
+import com.eas.ui.JsUi;
 import com.eas.ui.events.EventsExecutor;
 import com.eas.ui.events.HasHideHandlers;
 import com.eas.ui.events.HasShowHandlers;
@@ -267,7 +268,7 @@ HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHan
 		btnBackground.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				WidgetsUtils.selectColor(textContainer.getFormatter().getBackColor(), new Callback<String, String>() {
+				JsUi.selectColor(textContainer.getFormatter().getBackColor(), new Callback<String, String>() {
 					@Override
 					public void onSuccess(String result) {
 						try {
@@ -286,7 +287,7 @@ HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHan
 		btnForeground.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				WidgetsUtils.selectColor(textContainer.getFormatter().getForeColor(), new Callback<String, String>() {
+				JsUi.selectColor(textContainer.getFormatter().getForeColor(), new Callback<String, String>() {
 					@Override
 					public void onSuccess(String result) {
 						try {
@@ -339,7 +340,7 @@ HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHan
 		btnUploadImage.addClickHandler(new ClickHandler() {
 			@Override
 				public void onClick(ClickEvent event) {
-					WidgetsUtils.selectFile(new Callback<JavaScriptObject, String>() {
+				JsUi.selectFile(new Callback<JavaScriptObject, String>() {
 						@Override
 						public void onSuccess(JavaScriptObject result) {
 							try {

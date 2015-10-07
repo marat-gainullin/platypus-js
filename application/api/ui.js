@@ -1,10 +1,6 @@
 /* global Java*/
-define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/font', 'forms/form', 'forms/index', 'grid/index'], function (B, Color, Cursor, Font, Form, Forms, Grid) {
+define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/font'], function (B, Color, Cursor, Font) {
     var global = this;
-    // core imports
-    var ScriptedResourceClass = Java.type("com.eas.client.scripts.ScriptedResource");
-    var EngineUtilsClass = Java.type("jdk.nashorn.api.scripting.ScriptUtils");
-    var Source2XmlDom = Java.type('com.eas.xml.dom.Source2XmlDom');
     // gui imports
     var KeyEventClass = Java.type("java.awt.event.KeyEvent");
     var FileChooserClass = Java.type("javax.swing.JFileChooser");
@@ -12,59 +8,12 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     var ColorChooserClass = Java.type("javax.swing.JColorChooser");
     var OptionPaneClass = Java.type("javax.swing.JOptionPane");
     var ColorClass = Java.type("com.eas.gui.ScriptColor");
-    var FormClass = Java.type("com.eas.client.forms.Form");
-    var FormLoaderClass = Java.type('com.eas.client.scripts.ModelFormLoader');
     var IconResourcesClass = Java.type("com.eas.client.forms.IconResources");
     var HorizontalPositionClass = Java.type("com.eas.client.forms.HorizontalPosition");
     var VerticalPositionClass = Java.type("com.eas.client.forms.VerticalPosition");
     var OrientationClass = Java.type("com.eas.client.forms.Orientation");
 
     //
-    Object.defineProperty(Color, "black", {value: new Color(0, 0, 0)});
-    Object.defineProperty(Color, "BLACK", {value: new Color(0, 0, 0)});
-    Object.defineProperty(Color, "blue", {value: new Color(0, 0, 0xff)});
-    Object.defineProperty(Color, "BLUE", {value: new Color(0, 0, 0xff)});
-    Object.defineProperty(Color, "cyan", {value: new Color(0, 0xff, 0xff)});
-    Object.defineProperty(Color, "CYAN", {value: new Color(0, 0xff, 0xff)});
-    Object.defineProperty(Color, "DARK_GRAY", {value: new Color(0x40, 0x40, 0x40)});
-    Object.defineProperty(Color, "darkGray", {value: new Color(0x40, 0x40, 0x40)});
-    Object.defineProperty(Color, "gray", {value: new Color(0x80, 0x80, 0x80)});
-    Object.defineProperty(Color, "GRAY", {value: new Color(0x80, 0x80, 0x80)});
-    Object.defineProperty(Color, "green", {value: new Color(0, 0xff, 0)});
-    Object.defineProperty(Color, "GREEN", {value: new Color(0, 0xff, 0)});
-    Object.defineProperty(Color, "LIGHT_GRAY", {value: new Color(0xC0, 0xC0, 0xC0)});
-    Object.defineProperty(Color, "lightGray", {value: new Color(0xC0, 0xC0, 0xC0)});
-    Object.defineProperty(Color, "magenta", {value: new Color(0xff, 0, 0xff)});
-    Object.defineProperty(Color, "MAGENTA", {value: new Color(0xff, 0, 0xff)});
-    Object.defineProperty(Color, "orange", {value: new Color(0xff, 0xC8, 0)});
-    Object.defineProperty(Color, "ORANGE", {value: new Color(0xff, 0xC8, 0)});
-    Object.defineProperty(Color, "pink", {value: new Color(0xFF, 0xAF, 0xAF)});
-    Object.defineProperty(Color, "PINK", {value: new Color(0xFF, 0xAF, 0xAF)});
-    Object.defineProperty(Color, "red", {value: new Color(0xFF, 0, 0)});
-    Object.defineProperty(Color, "RED", {value: new Color(0xFF, 0, 0)});
-    Object.defineProperty(Color, "white", {value: new Color(0xFF, 0xff, 0xff)});
-    Object.defineProperty(Color, "WHITE", {value: new Color(0xFF, 0xff, 0xff)});
-    Object.defineProperty(Color, "yellow", {value: new Color(0xFF, 0xff, 0)});
-    Object.defineProperty(Color, "YELLOW", {value: new Color(0xFF, 0xff, 0)});
-
-    Object.defineProperty(Cursor, "CROSSHAIR", {value: new Cursor(1)});
-    Object.defineProperty(Cursor, "DEFAULT", {value: new Cursor(0)});
-    Object.defineProperty(Cursor, "AUTO", {value: new Cursor(0)});
-    Object.defineProperty(Cursor, "E_RESIZE", {value: new Cursor(11)});
-// help ?
-// progress ?
-    Object.defineProperty(Cursor, "HAND", {value: new Cursor(12)});
-    Object.defineProperty(Cursor, "MOVE", {value: new Cursor(13)});
-    Object.defineProperty(Cursor, "NE_RESIZE", {value: new Cursor(7)});
-    Object.defineProperty(Cursor, "NW_RESIZE", {value: new Cursor(6)});
-    Object.defineProperty(Cursor, "N_RESIZE", {value: new Cursor(8)});
-    Object.defineProperty(Cursor, "SE_RESIZE", {value: new Cursor(5)});
-    Object.defineProperty(Cursor, "SW_RESIZE", {value: new Cursor(4)});
-    Object.defineProperty(Cursor, "S_RESIZE", {value: new Cursor(9)});
-    Object.defineProperty(Cursor, "TEXT", {value: new Cursor(2)});
-    Object.defineProperty(Cursor, "WAIT", {value: new Cursor(3)});
-    Object.defineProperty(Cursor, "W_RESIZE", {value: new Cursor(10)});
-
     function lookupCallerFile() {
         var calledFromFile = null;
         var error = new Error('path test error');
@@ -135,16 +84,12 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
      * @return selected file or else null
      */
     function selectFile(aCallback, aFileFilter, curDir) {
-//            if (aCallback) {
         invokeLater(function () {
             var file = fileDialog(curDir, false, aFileFilter);
             if (file) {
                 aCallback(file);
             }
         });
-//            } else {
-//                return fileDialog(curDir, false, aFileFilter);
-//            }
     }
 
     /**
@@ -217,32 +162,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             return colorDialog(aTitle, aOldColor);
         }
     }
-
-    Object.defineProperty(Form, "shown", {
-        get: function () {
-            var nativeArray = FormClass.getShownForms();
-            var res = [];
-            for (var i = 0; i < nativeArray.length; i++)
-                res[res.length] = nativeArray[i].getPublished();
-            return res;
-        }
-    });
-
-    Object.defineProperty(Form, "getShownForm", {
-        value: function (aName) {
-            var shownForm = FormClass.getShownForm(aName);
-            return shownForm !== null ? shownForm.getPublished() : null;
-        }
-    });
-
-    Object.defineProperty(Form, "onChange", {
-        get: function () {
-            return FormClass.getOnChange();
-        },
-        set: function (aValue) {
-            FormClass.setOnChange(aValue);
-        }
-    });
 
     /**
      * Shows a message box
@@ -409,46 +328,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     Object.defineProperty(FontStyle, "NORMAL", {
         value: FontStyleClass.NORMAL
     });
-
-    function loadFormDocument(aDocument, aModel, aTarget) {
-        var formFactory = FormLoaderClass.load(aDocument, ScriptedResourceClass.getApp(), arguments[1] ? aModel : null);
-        var form = formFactory.form;
-        if (aTarget) {
-            Form.call(aTarget, null, null, form);
-        } else {
-            aTarget = new Form(null, null, form);
-        }
-        form.injectPublished(aTarget);
-        var comps = formFactory.getWidgetsList();
-        for (var c = 0; c < comps.length; c++) {
-            (function () {
-                var comp = EngineUtilsClass.unwrap(B.boxAsJs(comps[c]));
-                if (comp.name) {
-                    Object.defineProperty(aTarget, comp.name, {
-                        get: function () {
-                            return comp;
-                        }
-                    });
-                }
-            })();
-        }
-        return aTarget;
-    }
-    function loadForm(aName, aModel, aTarget) {
-        var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
-        var document = ScriptedResourceClass.getApp().getForms().get(aName, files);
-        var form = loadFormDocument(document, aModel, aTarget);
-        if (!form.title)
-            form.title = aName;
-        form.formKey = aName;
-        return form;
-    }
-
-    function readForm(aContent, aModel, aTarget) {
-        var document = Source2XmlDom.transform(aContent);
-        return loadFormDocument(document, aModel, aTarget);
-    }
-
+    
     var module = {};
     Object.defineProperty(module, 'Colors', {
         enumerable: true,
@@ -578,25 +458,5 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
         enumerable: true,
         value: FontStyle
     });
-    Object.defineProperty(module, 'loadForm', {
-        enumerable: true,
-        value: loadForm
-    });
-    Object.defineProperty(module, 'readForm', {
-        enumerable: true,
-        value: readForm
-    });
-    for (var f in Forms) {
-        Object.defineProperty(module, f, {
-            enumerable: true,
-            value: Forms[f]
-        });
-    }
-    for (var g in Grid) {
-        Object.defineProperty(module, g, {
-            enumerable: true,
-            value: Grid[g]
-        });
-    }
     return module;
 });

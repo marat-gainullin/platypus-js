@@ -329,6 +329,28 @@ public class Classes2Scripts {
         }
         //
 
+        if (ci.javaClassName.startsWith("com.eas.client.forms.components")
+                || ci.javaClassName.startsWith("com.eas.client.forms.containers")
+                || ci.javaClassName.startsWith("com.eas.client.forms.menu")) {
+            if (ci.javaClassName.startsWith("com.eas.client.forms.components.model.grid.header")) {
+                ci.jsDeps += ", 'common-utils/color', 'common-utils/cursor', 'common-utils/font', './cell-render-event'";
+                ci.jsDepsResults += ", Color, Cursor, Font, RenderEvent";
+            } else {
+                ci.jsDeps += ", 'common-utils/color', 'common-utils/cursor', 'common-utils/font', './action-event', './cell-render-event', './component-event', './focus-event', './item-event', './key-event', './value-change-event'";
+                ci.jsDepsResults += ", Color, Cursor, Font, ActionEvent, RenderEvent, ComponentEvent, FocusEvent, ItemEvent, KeyEvent, ValueChangeEvent";
+                if(ci.javaClassName.startsWith("com.eas.client.forms.containers") ||
+                        ci.javaClassName.startsWith("com.eas.client.forms.menu.MenuBar")||
+                        ci.javaClassName.startsWith("com.eas.client.forms.menu.Menu")||
+                        ci.javaClassName.startsWith("com.eas.client.forms.menu.PopupMenu")){
+                    ci.jsDeps += ", './container-event'";
+                    ci.jsDepsResults += ", ContainerEvent";
+                }
+                if (!ci.javaClassName.equals("com.eas.client.forms.menu.PopupMenu")) {
+                    ci.jsDeps += ", './popup-menu'";
+                    ci.jsDepsResults += ", PopupMenu";
+                }
+            }
+        }
         if (ModelGrid.class.getName().equals(ci.javaClassName)) {
             ci.jsDeps += ", 'grid/cell-data', './cell-render-event', './item-event', './service-grid-column', './check-grid-column', './radio-grid-column', './model-check-box', './model-combo', './model-date', './model-formatted-field', './model-grid-column', './model-spin', './model-text-area'";
             ci.jsDepsResults += ", CellData, RenderEvent, ItemEvent, ServiceGridColumn, CheckGridColumn, RadioGridColumn, ModelCheckBox, ModelCombo, ModelDate, ModelFormattedField, ModelGridColumn, ModelSpin, ModelTextArea";
@@ -627,6 +649,84 @@ public class Classes2Scripts {
             sb.append(getMethodPart(checkScriptObject(clazz, ci.name), method, ident));
             sb.append("\n");//NOI18N
             generatedMethods.add(method.getName());
+        }
+        if ("com.eas.client.forms.Form".equals(clazz.getName())) {
+            sb.append(""
+                    + "    var FormClass = Java.type(\"com.eas.client.forms.Form\");\n"
+                    + "    Object.defineProperty(Form, 'shown', {\n"
+                    + "        get: function () {\n"
+                    + "            var nativeArray = FormClass.getShownForms();\n"
+                    + "            var res = [];\n"
+                    + "            for (var i = 0; i < nativeArray.length; i++)\n"
+                    + "                res[res.length] = nativeArray[i].getPublished();\n"
+                    + "            return res;\n"
+                    + "        }\n"
+                    + "    });\n"
+                    + "\n"
+                    + "    Object.defineProperty(Form, 'getShownForm', {\n"
+                    + "        value: function (aName) {\n"
+                    + "            var shownForm = FormClass.getShownForm(aName);\n"
+                    + "            return shownForm !== null ? shownForm.getPublished() : null;\n"
+                    + "        }\n"
+                    + "    });\n"
+                    + "\n"
+                    + "    Object.defineProperty(Form, 'onChange', {\n"
+                    + "        get: function () {\n"
+                    + "            return FormClass.getOnChange();\n"
+                    + "        },\n"
+                    + "        set: function (aValue) {\n"
+                    + "            FormClass.setOnChange(aValue);\n"
+                    + "        }\n"
+                    + "    });\n"
+                    + "\n"
+                    + "");
+        } else if ("com.eas.gui.ScriptColor".equals(clazz.getName())) {
+            sb.append(""
+                    + "    Object.defineProperty(Color, \"black\", {value: new Color(0, 0, 0)});\n"
+                    + "    Object.defineProperty(Color, \"BLACK\", {value: new Color(0, 0, 0)});\n"
+                    + "    Object.defineProperty(Color, \"blue\", {value: new Color(0, 0, 0xff)});\n"
+                    + "    Object.defineProperty(Color, \"BLUE\", {value: new Color(0, 0, 0xff)});\n"
+                    + "    Object.defineProperty(Color, \"cyan\", {value: new Color(0, 0xff, 0xff)});\n"
+                    + "    Object.defineProperty(Color, \"CYAN\", {value: new Color(0, 0xff, 0xff)});\n"
+                    + "    Object.defineProperty(Color, \"DARK_GRAY\", {value: new Color(0x40, 0x40, 0x40)});\n"
+                    + "    Object.defineProperty(Color, \"darkGray\", {value: new Color(0x40, 0x40, 0x40)});\n"
+                    + "    Object.defineProperty(Color, \"gray\", {value: new Color(0x80, 0x80, 0x80)});\n"
+                    + "    Object.defineProperty(Color, \"GRAY\", {value: new Color(0x80, 0x80, 0x80)});\n"
+                    + "    Object.defineProperty(Color, \"green\", {value: new Color(0, 0xff, 0)});\n"
+                    + "    Object.defineProperty(Color, \"GREEN\", {value: new Color(0, 0xff, 0)});\n"
+                    + "    Object.defineProperty(Color, \"LIGHT_GRAY\", {value: new Color(0xC0, 0xC0, 0xC0)});\n"
+                    + "    Object.defineProperty(Color, \"lightGray\", {value: new Color(0xC0, 0xC0, 0xC0)});\n"
+                    + "    Object.defineProperty(Color, \"magenta\", {value: new Color(0xff, 0, 0xff)});\n"
+                    + "    Object.defineProperty(Color, \"MAGENTA\", {value: new Color(0xff, 0, 0xff)});\n"
+                    + "    Object.defineProperty(Color, \"orange\", {value: new Color(0xff, 0xC8, 0)});\n"
+                    + "    Object.defineProperty(Color, \"ORANGE\", {value: new Color(0xff, 0xC8, 0)});\n"
+                    + "    Object.defineProperty(Color, \"pink\", {value: new Color(0xFF, 0xAF, 0xAF)});\n"
+                    + "    Object.defineProperty(Color, \"PINK\", {value: new Color(0xFF, 0xAF, 0xAF)});\n"
+                    + "    Object.defineProperty(Color, \"red\", {value: new Color(0xFF, 0, 0)});\n"
+                    + "    Object.defineProperty(Color, \"RED\", {value: new Color(0xFF, 0, 0)});\n"
+                    + "    Object.defineProperty(Color, \"white\", {value: new Color(0xFF, 0xff, 0xff)});\n"
+                    + "    Object.defineProperty(Color, \"WHITE\", {value: new Color(0xFF, 0xff, 0xff)});\n"
+                    + "    Object.defineProperty(Color, \"yellow\", {value: new Color(0xFF, 0xff, 0)});\n"
+                    + "    Object.defineProperty(Color, \"YELLOW\", {value: new Color(0xFF, 0xff, 0)});\n"
+                    + "");
+        } else if ("com.eas.gui.Cursor".equals(clazz.getName())) {
+            sb.append(""
+                    + "    Object.defineProperty(Cursor, \"CROSSHAIR\", {value: new Cursor(1)});\n"
+                    + "    Object.defineProperty(Cursor, \"DEFAULT\", {value: new Cursor(0)});\n"
+                    + "    Object.defineProperty(Cursor, \"AUTO\", {value: new Cursor(0)});\n"
+                    + "    Object.defineProperty(Cursor, \"E_RESIZE\", {value: new Cursor(11)});\n"
+                    + "    Object.defineProperty(Cursor, \"HAND\", {value: new Cursor(12)});\n"
+                    + "    Object.defineProperty(Cursor, \"MOVE\", {value: new Cursor(13)});\n"
+                    + "    Object.defineProperty(Cursor, \"NE_RESIZE\", {value: new Cursor(7)});\n"
+                    + "    Object.defineProperty(Cursor, \"NW_RESIZE\", {value: new Cursor(6)});\n"
+                    + "    Object.defineProperty(Cursor, \"N_RESIZE\", {value: new Cursor(8)});\n"
+                    + "    Object.defineProperty(Cursor, \"SE_RESIZE\", {value: new Cursor(5)});\n"
+                    + "    Object.defineProperty(Cursor, \"SW_RESIZE\", {value: new Cursor(4)});\n"
+                    + "    Object.defineProperty(Cursor, \"S_RESIZE\", {value: new Cursor(9)});\n"
+                    + "    Object.defineProperty(Cursor, \"TEXT\", {value: new Cursor(2)});\n"
+                    + "    Object.defineProperty(Cursor, \"WAIT\", {value: new Cursor(3)});\n"
+                    + "    Object.defineProperty(Cursor, \"W_RESIZE\", {value: new Cursor(10)});\n"
+                    + "");
         }
         return sb.toString();
     }

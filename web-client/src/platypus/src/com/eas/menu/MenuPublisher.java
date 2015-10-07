@@ -15,6 +15,10 @@ public class MenuPublisher {
 		return constr;
 	}
 	
+	public static native JavaScriptObject getConstructors()/*-{
+		return @com.eas.menu.MenuPublisher::constructors;
+	}-*/;
+
 	public static void putPublisher(String aClassName, JavaScriptObject aPublisher){
 		constructors.setJs(aClassName, aPublisher);
 	}

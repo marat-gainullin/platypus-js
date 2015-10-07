@@ -23,6 +23,21 @@ define(['boxing'], function(B) {
             Cursor.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
     };
+    Object.defineProperty(Cursor, "CROSSHAIR", {value: new Cursor(1)});
+    Object.defineProperty(Cursor, "DEFAULT", {value: new Cursor(0)});
+    Object.defineProperty(Cursor, "AUTO", {value: new Cursor(0)});
+    Object.defineProperty(Cursor, "E_RESIZE", {value: new Cursor(11)});
+    Object.defineProperty(Cursor, "HAND", {value: new Cursor(12)});
+    Object.defineProperty(Cursor, "MOVE", {value: new Cursor(13)});
+    Object.defineProperty(Cursor, "NE_RESIZE", {value: new Cursor(7)});
+    Object.defineProperty(Cursor, "NW_RESIZE", {value: new Cursor(6)});
+    Object.defineProperty(Cursor, "N_RESIZE", {value: new Cursor(8)});
+    Object.defineProperty(Cursor, "SE_RESIZE", {value: new Cursor(5)});
+    Object.defineProperty(Cursor, "SW_RESIZE", {value: new Cursor(4)});
+    Object.defineProperty(Cursor, "S_RESIZE", {value: new Cursor(9)});
+    Object.defineProperty(Cursor, "TEXT", {value: new Cursor(2)});
+    Object.defineProperty(Cursor, "WAIT", {value: new Cursor(3)});
+    Object.defineProperty(Cursor, "W_RESIZE", {value: new Cursor(10)});
 
     var className = "com.eas.gui.Cursor";
     var javaClass = Java.type(className);

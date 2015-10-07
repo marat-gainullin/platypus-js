@@ -13,29 +13,15 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.eas.bound.BoundFactory;
-import com.eas.bound.JsBound;
 import com.eas.client.AppClient;
 import com.eas.client.CallbackAdapter;
 import com.eas.client.GroupingHandlerRegistration;
-import com.eas.client.Loader;
 import com.eas.client.PlatypusLogFormatter;
 import com.eas.core.Predefine;
 import com.eas.core.Utils;
-import com.eas.form.JsForm;
-import com.eas.grid.GridFactory;
-import com.eas.grid.JsGrid;
-import com.eas.menu.JsMenu;
-import com.eas.menu.MenuFactory;
-import com.eas.model.JsModel;
 import com.eas.ui.JsUi;
-import com.eas.ui.UiReader;
-import com.eas.widgets.JsWidgets;
-import com.eas.widgets.WidgetsFactory;
 import com.google.gwt.core.client.Callback;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.core.client.RunAsyncCallback;
 
 /**
  * 
@@ -52,21 +38,19 @@ public class Application {
 		@Override
 		public void started(String anItemName) {
 			final String message = "Loading... " + anItemName;
-			platypusApplicationLogger.log(Level.INFO, message);
+			Predefine.platypusApplicationLogger.log(Level.INFO, message);
 		}
 
 		@Override
 		public void loaded(String anItemName) {
 			final String message = anItemName + " - Loaded";
-			platypusApplicationLogger.log(Level.INFO, message);
+			Predefine.platypusApplicationLogger.log(Level.INFO, message);
 		}
 	}
 
-	public static Logger platypusApplicationLogger;
 	protected static GroupingHandlerRegistration loaderHandlerRegistration = new GroupingHandlerRegistration();
 
 	public static void run() throws Exception {
-		platypusApplicationLogger = Logger.getLogger("platypusApplication");
 		Formatter f = new PlatypusLogFormatter(true);
 		Handler[] handlers = Logger.getLogger("").getHandlers();
 		for (Handler h : handlers) {
@@ -75,80 +59,6 @@ public class Application {
 		Predefine.init();
 		JsApi.init();
 		JsUi.init();
-		/*
-		UiReader.addFactory(new WidgetsFactory());
-		JsWidgets.init();
-		
-		UiReader.addFactory(new MenuFactory());
-		JsMenu.init();
-		UiReader.addFactory(new BoundFactory());
-		JsBound.init();
-		UiReader.addFactory(new GridFactory());
-		JsGrid.init();
-		JsForm.init();
-		JsModel.init();
-		*/
-		GWT.runAsync(new RunAsyncCallback() {
-			
-			@Override
-			public void onSuccess() {
-				UiReader.addFactory(new WidgetsFactory());
-				JsWidgets.init();
-				
-				UiReader.addFactory(new MenuFactory());
-				JsMenu.init();
-			}
-			
-			@Override
-			public void onFailure(Throwable reason) {
-			}
-		});
-		GWT.runAsync(new RunAsyncCallback() {
-			
-			@Override
-			public void onSuccess() {
-				UiReader.addFactory(new BoundFactory());
-				JsBound.init();
-			}
-			
-			@Override
-			public void onFailure(Throwable reason) {
-			}
-		});
-		GWT.runAsync(new RunAsyncCallback() {
-			
-			@Override
-			public void onSuccess() {
-				UiReader.addFactory(new GridFactory());
-				JsGrid.init();
-			}
-			
-			@Override
-			public void onFailure(Throwable reason) {
-			}
-		});
-		GWT.runAsync(new RunAsyncCallback() {
-			
-			@Override
-			public void onSuccess() {
-				JsModel.init();
-			}
-			
-			@Override
-			public void onFailure(Throwable reason) {
-			}
-		});
-		GWT.runAsync(new RunAsyncCallback() {
-			
-			@Override
-			public void onSuccess() {
-				JsForm.init();
-			}
-			
-			@Override
-			public void onFailure(Throwable reason) {
-			}
-		});
 		loaderHandlerRegistration.add(Loader.addHandler(new LoggingLoadHandler()));
 		AppClient.getInstance().requestLoggedInUser(new CallbackAdapter<String, String>() {
 

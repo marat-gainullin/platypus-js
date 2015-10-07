@@ -29,6 +29,7 @@ public class JsBound {
 				}
 				return published;
 			}
+			@com.eas.bound.BoundPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('ModelCheckBox', ModelCheckBox);
 			return ModelCheckBox;	
 		});
 		
@@ -49,6 +50,7 @@ public class JsBound {
 				publishComponentProperties(published);
 				return published;
 			}
+			@com.eas.bound.BoundPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('ModelFormattedField', ModelFormattedField);
 			return ModelFormattedField;	
 		});
 		
@@ -69,6 +71,7 @@ public class JsBound {
 				publishComponentProperties(published);
 				return published;
 			}
+			@com.eas.bound.BoundPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('ModelTextArea', ModelTextArea);
 			return ModelTextArea;
 		});	
 
@@ -89,6 +92,7 @@ public class JsBound {
 				publishComponentProperties(published);
 				return published;
 			}
+			@com.eas.bound.BoundPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('ModelDate', ModelDate);
 			return ModelDate;
 		});	
 
@@ -109,6 +113,7 @@ public class JsBound {
 				publishComponentProperties(published);
 				return published;
 			}
+			@com.eas.bound.BoundPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('ModelSpin', ModelSpin);
 			return ModelSpin;
 		});	
 
@@ -129,6 +134,7 @@ public class JsBound {
 				publishComponentProperties(published);
 				return published;
 			}
+			@com.eas.bound.BoundPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('ModelCombo', ModelCombo);
 			return ModelCombo;
 		});	
 	}-*/;

@@ -5,10 +5,6 @@
 <module>
     <inherits name="com.eas.client.Client"/>
     <inherits name="com.eas.widgets.Widgets"/>
-    <inherits name="com.eas.menu.Menu"/>
-    
-    <inherits name="com.eas.bound.Bound"/>
-    <inherits name="com.eas.grid.Grid"/>
 
     <source path=""/>
     
