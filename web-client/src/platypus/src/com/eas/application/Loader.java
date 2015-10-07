@@ -151,97 +151,297 @@ public class Loader {
 	}
 
 	private static String lookupPredefined(String aModuleName) {
-		if ("facade".equals(aModuleName)) {
-			return "facade";
+		if (aModuleName.equals("facade")) {
+			return FACADE_HUB;
+		} else if (aModuleName.startsWith("forms/model-grid") || aModuleName.endsWith("-grid-column")) {
+			return GRID_HUB;
+		} else if (aModuleName.startsWith("forms/model-")) {
+			return BOUND_HUB;
+		} else if (aModuleName.startsWith("datamodel/") || aModuleName.equals("orm") || aModuleName.equals("managed") || aModuleName.equals("orderer")) {
+			return MODEL_HUB;
+		} else if (aModuleName.equals("forms") || aModuleName.equals("forms/form")) {
+			return FORM_HUB;
+		} else if (aModuleName.startsWith("forms/")) {
+			return WMW_HUB;
 		} else {
 			return null;
 		}
 	}
 
-	private static void loadPredefined(final String aModuleName, String aPredefinedHub) {
-		GWT.runAsync(new RunAsyncCallback() {
+	private static Set<String> asyncRan = new HashSet<>();
+
+	private static final String FACADE_HUB = "facade-hub";
+	private static final String BOUND_HUB = "bound-hub";
+	private static final String WMW_HUB = "wmw-hub";
+	private static final String FORM_HUB = "form-hub";
+	private static final String MODEL_HUB = "model-hub";
+	private static final String GRID_HUB = "grid-hub";
+
+	private static void loadFacade(final Callback<Void, String> aCallback) {
+		final CumulativeCallbackAdapter<Void, String> facadeProcess = new CumulativeCallbackAdapter<Void, String>(3) {
 
 			@Override
-			public void onSuccess() {
-				JsFacade.init();
-				notifyPendingsModuleSucceded(aModuleName);
+			protected void doWork(Void aResult) throws Exception {
+				GWT.runAsync(new RunAsyncCallback() {
+
+					@Override
+					public void onSuccess() {
+						if (!asyncRan.contains(FACADE_HUB)) {
+							asyncRan.add(FACADE_HUB);
+							JsFacade.init();
+						}
+						aCallback.onSuccess(null);
+					}
+
+					@Override
+					public void onFailure(Throwable reason) {
+						aCallback.onFailure(reason.toString());
+					}
+				});
 			}
 
 			@Override
-			public void onFailure(Throwable reason) {
-				notifyPendingsModuleFailed(aModuleName, Arrays.asList(new String[] { reason.toString() }));
+			protected void failed(List<String> aReasons) {
+				aCallback.onFailure(errorsToString(aReasons));
 			}
+
+		};
+		loadGrid(new Callback<Void, String>() {
+
+			@Override
+			public void onSuccess(Void result) {
+				facadeProcess.onSuccess(null);
+			}
+
+			@Override
+			public void onFailure(String reason) {
+				facadeProcess.onFailure(reason);
+			}
+
 		});
-		GWT.runAsync(new RunAsyncCallback() {
-			
+		loadHub(MODEL_HUB, new Callback<Void, String>() {
+
 			@Override
-			public void onSuccess() {
-				UiReader.addFactory(new WidgetsFactory());
-				JsWidgets.init();
-				
-				UiReader.addFactory(new MenuFactory());
-				JsMenu.init();
-				notifyPendingsModuleSucceded(aModuleName);
+			public void onSuccess(Void result) {
+				facadeProcess.onSuccess(null);
 			}
 
 			@Override
-			public void onFailure(Throwable reason) {
-				notifyPendingsModuleFailed(aModuleName, Arrays.asList(new String[] { reason.toString() }));
+			public void onFailure(String reason) {
+				facadeProcess.onFailure(reason);
 			}
+
 		});
-		GWT.runAsync(new RunAsyncCallback() {
-			
+		loadHub(FORM_HUB, new Callback<Void, String>() {
+
 			@Override
-			public void onSuccess() {
-				UiReader.addFactory(new BoundFactory());
-				JsBound.init();
-				notifyPendingsModuleSucceded(aModuleName);
+			public void onSuccess(Void result) {
+				facadeProcess.onSuccess(null);
 			}
 
 			@Override
-			public void onFailure(Throwable reason) {
-				notifyPendingsModuleFailed(aModuleName, Arrays.asList(new String[] { reason.toString() }));
+			public void onFailure(String reason) {
+				facadeProcess.onFailure(reason);
 			}
+
 		});
-		GWT.runAsync(new RunAsyncCallback() {
-			
+	}
+
+	private static void loadBound(final Callback<Void, String> aCallback) {
+		loadHub(WMW_HUB, new Callback<Void, String>() {
+
 			@Override
-			public void onSuccess() {
-				UiReader.addFactory(new GridFactory());
-				JsGrid.init();
-				notifyPendingsModuleSucceded(aModuleName);
+			public void onSuccess(Void result) {
+				GWT.runAsync(new RunAsyncCallback() {
+
+					@Override
+					public void onSuccess() {
+						if (!asyncRan.contains(BOUND_HUB)) {
+							asyncRan.add(BOUND_HUB);
+							UiReader.addFactory(new BoundFactory());
+							JsBound.init();
+						}
+						aCallback.onSuccess(null);
+					}
+
+					@Override
+					public void onFailure(Throwable reason) {
+						aCallback.onFailure(reason.toString());
+					}
+				});
+				GWT.runAsync(new RunAsyncCallback() {
+
+					@Override
+					public void onSuccess() {
+						if (asyncRan.contains("6-6-6-6-6")) {
+							UiReader.addFactory(new BoundFactory());
+							JsBound.init();
+						}
+					}
+
+					@Override
+					public void onFailure(Throwable reason) {
+					}
+				});
+				GWT.runAsync(new RunAsyncCallback() {
+
+					@Override
+					public void onSuccess() {
+						if (asyncRan.contains("7-7-7-7-7")) {
+							UiReader.addFactory(new BoundFactory());
+							JsBound.init();
+						}
+					}
+
+					@Override
+					public void onFailure(Throwable reason) {
+					}
+				});
 			}
 
 			@Override
-			public void onFailure(Throwable reason) {
-				notifyPendingsModuleFailed(aModuleName, Arrays.asList(new String[] { reason.toString() }));
+			public void onFailure(String reason) {
+				aCallback.onFailure(reason);
 			}
+
 		});
-		GWT.runAsync(new RunAsyncCallback() {
-			
+	}
+
+	private static void loadGrid(final Callback<Void, String> aCallback) {
+		loadBound(new Callback<Void, String>() {
+
 			@Override
-			public void onSuccess() {
-				JsModel.init();
-				notifyPendingsModuleSucceded(aModuleName);
+			public void onSuccess(Void result) {
+				GWT.runAsync(new RunAsyncCallback() {
+
+					@Override
+					public void onSuccess() {
+						if (!asyncRan.contains(GRID_HUB)) {
+							asyncRan.add(GRID_HUB);
+							UiReader.addFactory(new GridFactory());
+							JsGrid.init();
+						}
+						aCallback.onSuccess(null);
+					}
+
+					@Override
+					public void onFailure(Throwable reason) {
+						aCallback.onFailure(reason.toString());
+					}
+				});
 			}
 
 			@Override
-			public void onFailure(Throwable reason) {
-				notifyPendingsModuleFailed(aModuleName, Arrays.asList(new String[] { reason.toString() }));
+			public void onFailure(String reason) {
+				aCallback.onFailure(reason);
 			}
+
 		});
-		GWT.runAsync(new RunAsyncCallback() {
-			
+	}
+
+	private static void loadHub(String aPredefinedHub, final Callback<Void, String> aCallback) {
+		if (FACADE_HUB.equals(aPredefinedHub)) {
+			if (asyncRan.contains(FACADE_HUB)) {
+				aCallback.onSuccess(null);
+			} else {
+				loadFacade(aCallback);
+			}
+		} else if (WMW_HUB.equals(aPredefinedHub)) {
+			if (asyncRan.contains(WMW_HUB)) {
+				aCallback.onSuccess(null);
+			} else {
+				GWT.runAsync(new RunAsyncCallback() {
+
+					@Override
+					public void onSuccess() {
+						if (!asyncRan.contains(WMW_HUB)) {
+							asyncRan.add(WMW_HUB);
+							UiReader.addFactory(new WidgetsFactory());
+							JsWidgets.init();
+
+							UiReader.addFactory(new MenuFactory());
+							JsMenu.init();
+							aCallback.onSuccess(null);
+						}
+						aCallback.onSuccess(null);
+					}
+
+					@Override
+					public void onFailure(Throwable reason) {
+						aCallback.onFailure(reason.toString());
+					}
+				});
+			}
+		} else if (BOUND_HUB.equals(aPredefinedHub)) {
+			if (asyncRan.contains(BOUND_HUB)) {
+				aCallback.onSuccess(null);
+			} else {
+				loadBound(aCallback);
+			}
+		} else if (GRID_HUB.equals(aPredefinedHub)) {
+			if (asyncRan.contains(GRID_HUB)) {
+				aCallback.onSuccess(null);
+			} else {
+				loadGrid(aCallback);
+			}
+		} else if (MODEL_HUB.equals(aPredefinedHub)) {
+			if (asyncRan.contains(MODEL_HUB)) {
+				aCallback.onSuccess(null);
+			} else {
+				GWT.runAsync(new RunAsyncCallback() {
+
+					@Override
+					public void onSuccess() {
+						if (!asyncRan.contains(MODEL_HUB)) {
+							asyncRan.add(MODEL_HUB);
+							JsModel.init();
+						}
+						aCallback.onSuccess(null);
+					}
+
+					@Override
+					public void onFailure(Throwable reason) {
+						aCallback.onFailure(reason.toString());
+					}
+				});
+			}
+		} else if (FORM_HUB.equals(aPredefinedHub)) {
+			if (asyncRan.contains(FORM_HUB)) {
+				aCallback.onSuccess(null);
+			} else {
+				GWT.runAsync(new RunAsyncCallback() {
+
+					@Override
+					public void onSuccess() {
+						if (!asyncRan.contains(FORM_HUB)) {
+							asyncRan.add(FORM_HUB);
+							JsForm.init();
+						}
+						aCallback.onSuccess(null);
+					}
+
+					@Override
+					public void onFailure(Throwable reason) {
+						aCallback.onFailure(reason.toString());
+					}
+				});
+			}
+		}
+	}
+
+	private static void loadPredefined(final String aModuleName, String aHub) {
+		loadHub(aHub, new Callback<Void, String>() {
+
 			@Override
-			public void onSuccess() {
-				JsForm.init();
+			public void onSuccess(Void result) {
 				notifyPendingsModuleSucceded(aModuleName);
 			}
 
 			@Override
-			public void onFailure(Throwable reason) {
-				notifyPendingsModuleFailed(aModuleName, Arrays.asList(new String[] { reason.toString() }));
+			public void onFailure(String reason) {
+				notifyPendingsModuleFailed(aModuleName, Arrays.asList(new String[] { reason }));
 			}
+
 		});
 	}
 
@@ -360,21 +560,25 @@ public class Loader {
 
 			@Override
 			public void onFailure(XMLHttpRequest reason) {
-				notifyPendingsModuleFailed(aModuleName, Arrays.asList(new String[]{reason.getStatus() + ": " + reason.getStatusText()}));
+				notifyPendingsModuleFailed(aModuleName, Arrays.asList(new String[] { reason.getStatus() + ": " + reason.getStatusText() }));
 			}
 		});
 	}
 
-	public static void notifyPendingsModuleFailed(String aModuleName, final List<String> aReasons) {
-		List<Callback<Void, String>> interestedPendings = new ArrayList<>(pending.get(aModuleName));
-		pending.get(aModuleName).clear();
+	private static String errorsToString(List<String> aReasons) {
 		StringBuilder errorsSb = new StringBuilder();
 		for (int i = 0; i < aReasons.size(); i++) {
 			if (errorsSb.length() > 0)
 				errorsSb.append("\n");
 			errorsSb.append(aReasons.get(i));
 		}
-		final String errors = errorsSb.toString();
+		return errorsSb.toString();
+	}
+
+	public static void notifyPendingsModuleFailed(String aModuleName, final List<String> aReasons) {
+		List<Callback<Void, String>> interestedPendings = new ArrayList<>(pending.get(aModuleName));
+		pending.get(aModuleName).clear();
+		final String errors = errorsToString(aReasons);
 		for (final Callback<Void, String> interestedPending : interestedPendings) {
 			Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 
@@ -399,8 +603,8 @@ public class Loader {
 			});
 		}
 	}
-	
-	private static void pendOnModule(String aModuleName, Callback<Void, String> aPending){
+
+	private static void pendOnModule(String aModuleName, Callback<Void, String> aPending) {
 		List<Callback<Void, String>> pendingOnModule = pending.get(aModuleName);
 		if (pendingOnModule == null) {
 			pendingOnModule = new ArrayList<>();
