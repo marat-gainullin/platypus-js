@@ -1,6 +1,8 @@
 /* global Java */
 
 define(['boxing'], function(B) {
+    var className = "com.eas.gui.Cursor";
+    var javaClass = Java.type(className);
     /**
      * Constructs new cursor object.
      * @param type Type of new cursor.
@@ -39,8 +41,6 @@ define(['boxing'], function(B) {
     Object.defineProperty(Cursor, "WAIT", {value: new Cursor(3)});
     Object.defineProperty(Cursor, "W_RESIZE", {value: new Cursor(10)});
 
-    var className = "com.eas.gui.Cursor";
-    var javaClass = Java.type(className);
     var ScriptsClass = Java.type("com.eas.script.Scripts");
     var space = ScriptsClass.getSpace();
     space.putPublisher(className, function(aDelegate) {

@@ -1,6 +1,8 @@
 /* global Java */
 
 define(['boxing'], function(B) {
+    var className = "com.eas.gui.ScriptColor";
+    var javaClass = Java.type(className);
     /**
      * The <code>Color</code> class is used to encapsulate colors in the default RGB color space.* @param red Red compontent (optional)
      * @param green Green compontent (optional)
@@ -76,16 +78,16 @@ define(['boxing'], function(B) {
             }
         });
 
-        Object.defineProperty(this, "BLACK", {
+        Object.defineProperty(this, "MAGENTA", {
             get: function() {
-                var value = delegate.BLACK;
+                var value = delegate.MAGENTA;
                 return B.boxAsJs(value);
             }
         });
 
-        Object.defineProperty(this, "MAGENTA", {
+        Object.defineProperty(this, "BLACK", {
             get: function() {
-                var value = delegate.MAGENTA;
+                var value = delegate.BLACK;
                 return B.boxAsJs(value);
             }
         });
@@ -97,16 +99,16 @@ define(['boxing'], function(B) {
             }
         });
 
-        Object.defineProperty(this, "CYAN", {
+        Object.defineProperty(this, "DARK_GRAY", {
             get: function() {
-                var value = delegate.CYAN;
+                var value = delegate.DARK_GRAY;
                 return B.boxAsJs(value);
             }
         });
 
-        Object.defineProperty(this, "DARK_GRAY", {
+        Object.defineProperty(this, "CYAN", {
             get: function() {
-                var value = delegate.DARK_GRAY;
+                var value = delegate.CYAN;
                 return B.boxAsJs(value);
             }
         });
@@ -146,8 +148,6 @@ define(['boxing'], function(B) {
     Object.defineProperty(Color, "yellow", {value: new Color(0xFF, 0xff, 0)});
     Object.defineProperty(Color, "YELLOW", {value: new Color(0xFF, 0xff, 0)});
 
-    var className = "com.eas.gui.ScriptColor";
-    var javaClass = Java.type(className);
     var ScriptsClass = Java.type("com.eas.script.Scripts");
     var space = ScriptsClass.getSpace();
     space.putPublisher(className, function(aDelegate) {

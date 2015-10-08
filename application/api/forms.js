@@ -1,5 +1,5 @@
 /* global Java*/
-define(['boxing', 'forms/form'], function (B, Form) {
+define(['boxing', 'forms/form', 'forms/index', 'grid/index'], function (B, Form) {
     // core imports
     var ScriptedResourceClass = Java.type("com.eas.client.scripts.ScriptedResource");
     var EngineUtilsClass = Java.type("jdk.nashorn.api.scripting.ScriptUtils");

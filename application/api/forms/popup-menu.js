@@ -1,6 +1,8 @@
 /* global Java */
 
 define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/font', './action-event', './cell-render-event', './component-event', './focus-event', './item-event', './key-event', './value-change-event', './container-event'], function(B, Color, Cursor, Font, ActionEvent, RenderEvent, ComponentEvent, FocusEvent, ItemEvent, KeyEvent, ValueChangeEvent, ContainerEvent) {
+    var className = "com.eas.client.forms.menu.PopupMenu";
+    var javaClass = Java.type(className);
     /**
      * An implementation of a popup menu -- a small window that pops up and displays a series of choices.
      * @constructor PopupMenu PopupMenu
@@ -490,8 +492,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     };
 
 
-    var className = "com.eas.client.forms.menu.PopupMenu";
-    var javaClass = Java.type(className);
     var ScriptsClass = Java.type("com.eas.script.Scripts");
     var space = ScriptsClass.getSpace();
     space.putPublisher(className, function(aDelegate) {

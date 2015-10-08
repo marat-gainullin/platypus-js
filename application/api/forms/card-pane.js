@@ -1,6 +1,8 @@
 /* global Java */
 
 define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/font', './action-event', './cell-render-event', './component-event', './focus-event', './item-event', './key-event', './value-change-event', './container-event', './popup-menu'], function(B, Color, Cursor, Font, ActionEvent, RenderEvent, ComponentEvent, FocusEvent, ItemEvent, KeyEvent, ValueChangeEvent, ContainerEvent, PopupMenu) {
+    var className = "com.eas.client.forms.containers.CardPane";
+    var javaClass = Java.type(className);
     /**
      * A container with Card Layout. It treats each component in the container as a card. Only one card is visible at a time, and the container acts as a stack of cards.
      * @param hgap the horizontal gap (optional).
@@ -537,8 +539,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     };
 
 
-    var className = "com.eas.client.forms.containers.CardPane";
-    var javaClass = Java.type(className);
     var ScriptsClass = Java.type("com.eas.script.Scripts");
     var space = ScriptsClass.getSpace();
     space.putPublisher(className, function(aDelegate) {

@@ -1,6 +1,8 @@
 /* global Java */
 
 define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/font', './action-event', './cell-render-event', './component-event', './focus-event', './item-event', './key-event', './value-change-event', './popup-menu'], function(B, Color, Cursor, Font, ActionEvent, RenderEvent, ComponentEvent, FocusEvent, ItemEvent, KeyEvent, ValueChangeEvent, PopupMenu) {
+    var className = "com.eas.client.forms.components.model.ModelSpin";
+    var javaClass = Java.type(className);
     /**
      * A model component that represents a combination of a numeric text box and arrow buttons to change the value incrementally.
      * @constructor ModelSpin ModelSpin
@@ -361,16 +363,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        Object.defineProperty(this, "value", {
-            get: function() {
-                var value = delegate.jsValue;
-                return B.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.jsValue = B.boxAsJava(aValue);
-            }
-        });
-
         Object.defineProperty(this, "min", {
             get: function() {
                 var value = delegate.min;
@@ -378,6 +370,16 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             },
             set: function(aValue) {
                 delegate.min = B.boxAsJava(aValue);
+            }
+        });
+
+        Object.defineProperty(this, "value", {
+            get: function() {
+                var value = delegate.jsValue;
+                return B.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.jsValue = B.boxAsJava(aValue);
             }
         });
 
@@ -562,8 +564,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     };
 
 
-    var className = "com.eas.client.forms.components.model.ModelSpin";
-    var javaClass = Java.type(className);
     var ScriptsClass = Java.type("com.eas.script.Scripts");
     var space = ScriptsClass.getSpace();
     space.putPublisher(className, function(aDelegate) {

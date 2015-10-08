@@ -22,7 +22,7 @@ public class JsApi {
 		$wnd.require = function (aDeps, aOnSuccess, aOnFailure) {
             if (!Array.isArray(aDeps))
                 aDeps = [aDeps];
-			@com.eas.application.Application::require(Lcom/eas/core/Utils$JsObject;Lcom/eas/core/Utils$JsObject;Lcom/eas/core/Utils$JsObject;)(aDeps, aOnSuccess, aOnFailure);
+			return @com.eas.application.Application::require(Lcom/eas/core/Utils$JsObject;Lcom/eas/core/Utils$JsObject;Lcom/eas/core/Utils$JsObject;)(aDeps, aOnSuccess, aOnFailure);
 		}; 
 		$wnd.define = function () {
 	        if (arguments.length === 1 ||
@@ -417,20 +417,6 @@ public class JsApi {
 		    var HTML5 = "HTML5 client";
 		    var J2SE = "Java SE environment";
 		
-		    var module = {};
-		    Object.defineProperty(module, "HTML5", {
-		        enumerable: true,
-		        value: HTML5
-		    });
-		    Object.defineProperty(module, "J2SE", {
-		        enumerable: true,
-		        value: J2SE
-		    });
-		    Object.defineProperty(module, "agent", {
-		        enumerable: true,
-		        value: HTML5
-		    });
-		
 			var principal = {};
 			
 			Object.defineProperty(principal, "name", {get: function(){
@@ -444,10 +430,33 @@ public class JsApi {
 				var appClient = @com.eas.client.AppClient::getInstance()();
 				return appClient.@com.eas.client.AppClient::jsLogout(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
 			}});
+			
+			function cacheBust(aValue){
+				var appClient = @com.eas.client.AppClient::getInstance()();
+				appClient.@com.eas.client.AppClient::setCacheBustEnabled(Z)(!!aValue);
+			}
+			
+		    var module = {};
+		    Object.defineProperty(module, "HTML5", {
+		        enumerable: true,
+		        value: HTML5
+		    });
+		    Object.defineProperty(module, "J2SE", {
+		        enumerable: true,
+		        value: J2SE
+		    });
+		    Object.defineProperty(module, "agent", {
+		        enumerable: true,
+		        value: HTML5
+		    });		
 		    Object.defineProperty(module, "principal", {
 		        enumerable: true,
 		        value: principal
 		    });
+		    Object.defineProperty(module, "cacheBust", {
+		        enumerable: true,
+		        value: cacheBust
+		    });		    
 		    return module;
 		});		
 		

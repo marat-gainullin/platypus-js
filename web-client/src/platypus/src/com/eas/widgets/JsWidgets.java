@@ -474,6 +474,10 @@ public class JsWidgets {
 
 	public native static void init()/*-{		
 
+		function publishComponentProperties(aPublished) {
+			@com.eas.widgets.JsWidgets::publishComponentProperties(Lcom/eas/ui/PublishedComponent;)(aPublished);
+		}
+		
 		function publishChildrenOrdering(aPublished) {
 			if (aPublished) {
 				var comp = aPublished.unwrap();
@@ -940,6 +944,7 @@ public class JsWidgets {
 				publishComponentProperties(published);
 				publishIndexedPanel(published);
 			};
+			@com.eas.widgets.JsWidgets::BorderPane = BorderPane;
 			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('BorderPane', BorderPane);
 			return BorderPane;
 		});
@@ -966,6 +971,7 @@ public class JsWidgets {
 				publishComponentProperties(published);
 				publishIndexedPanel(published);
 			}
+			@com.eas.widgets.JsWidgets::FlowPane = FlowPane;
 			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('FlowPane', FlowPane);
 			return FlowPane;
 		});
@@ -1042,6 +1048,7 @@ public class JsWidgets {
 					}
 				});
 			}
+			@com.eas.widgets.JsWidgets::BoxPane = BoxPane;
 			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('BoxPane', BoxPane);
 			return BoxPane;
 		});		
@@ -1108,6 +1115,7 @@ public class JsWidgets {
 				if(aChild)
 					published.add(aChild);
 			}
+			@com.eas.widgets.JsWidgets::ScrollPane = ScrollPane;
 			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('ScrollPane', ScrollPane);
 			return ScrollPane;
 		});		
@@ -1159,6 +1167,7 @@ public class JsWidgets {
 				publishComponentProperties(published);
 				publishIndexedPanel(published);
 			}
+			@com.eas.widgets.JsWidgets::ToolBar = ToolBar;
 			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('ToolBar', ToolBar);
 			return ToolBar;
 		});
@@ -1179,6 +1188,7 @@ public class JsWidgets {
 				publishIndexedPanel(published);
 				publishChildrenOrdering(published);
 			}
+			@com.eas.widgets.JsWidgets::AnchorsPane = AnchorsPane;
 			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('AnchorsPane', AnchorsPane);
 			return AnchorsPane;
 		});
@@ -1198,6 +1208,7 @@ public class JsWidgets {
 				publishIndexedPanel(published);
 				publishChildrenOrdering(published);
 			}
+			@com.eas.widgets.JsWidgets::AbsolutePane = AbsolutePane;
 			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('AbsolutePane', AbsolutePane);
 			return AbsolutePane;
 		});

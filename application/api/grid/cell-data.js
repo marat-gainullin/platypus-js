@@ -1,6 +1,8 @@
 /* global Java */
 
 define(['boxing'], function(B) {
+    var className = "com.bearsoft.gui.grid.data.CellData";
+    var javaClass = Java.type(className);
     /**
      * Generated constructor.
      * @constructor CellData CellData
@@ -39,8 +41,6 @@ define(['boxing'], function(B) {
 
     };
 
-    var className = "com.bearsoft.gui.grid.data.CellData";
-    var javaClass = Java.type(className);
     var ScriptsClass = Java.type("com.eas.script.Scripts");
     var space = ScriptsClass.getSpace();
     space.putPublisher(className, function(aDelegate) {

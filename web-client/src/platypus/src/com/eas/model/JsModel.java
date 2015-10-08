@@ -14,6 +14,7 @@ public class JsModel {
 	public static JavaScriptObject entityInstanceInsertEvent;
 */		
 	public native static void init()/*-{
+		
 		function predefine(aDeps, aName, aDefiner){
 			@com.eas.core.Predefine::predefine(Lcom/google/gwt/core/client/JavaScriptObject;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aDeps, aName, aDefiner);
 		}
@@ -406,6 +407,7 @@ public class JsModel {
 				return readModelDocument(doc, aTarget);
 			}
 			function loadModel(appElementName, aTarget) {
+				var aClient = @com.eas.client.AppClient::getInstance()();
 				var appElementDoc = aClient.@com.eas.client.AppClient::getModelDocument(Ljava/lang/String;)(appElementName);
 				return readModelDocument(appElementDoc, aTarget);
 			}		

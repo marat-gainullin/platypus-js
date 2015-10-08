@@ -1,6 +1,8 @@
 /* global Java */
 
 define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/font', './action-event', './cell-render-event', './component-event', './focus-event', './item-event', './key-event', './value-change-event', './popup-menu'], function(B, Color, Cursor, Font, ActionEvent, RenderEvent, ComponentEvent, FocusEvent, ItemEvent, KeyEvent, ValueChangeEvent, PopupMenu) {
+    var className = "com.eas.client.forms.components.model.ModelCheckBox";
+    var javaClass = Java.type(className);
     /**
      * An implementation of a model check box -- an item that can be selected or deselected, and which displays its state to the user.
      * @param text the text of the component (optional).
@@ -72,16 +74,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        Object.defineProperty(this, "nullable", {
-            get: function() {
-                var value = delegate.nullable;
-                return B.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.nullable = B.boxAsJava(aValue);
-            }
-        });
-
         Object.defineProperty(this, "onFocusLost", {
             get: function() {
                 var value = delegate.onFocusLost;
@@ -89,6 +81,16 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             },
             set: function(aValue) {
                 delegate.onFocusLost = aValue;
+            }
+        });
+
+        Object.defineProperty(this, "nullable", {
+            get: function() {
+                var value = delegate.nullable;
+                return B.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.nullable = B.boxAsJava(aValue);
             }
         });
 
@@ -514,8 +516,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     };
 
 
-    var className = "com.eas.client.forms.components.model.ModelCheckBox";
-    var javaClass = Java.type(className);
     var ScriptsClass = Java.type("com.eas.script.Scripts");
     var space = ScriptsClass.getSpace();
     space.putPublisher(className, function(aDelegate) {

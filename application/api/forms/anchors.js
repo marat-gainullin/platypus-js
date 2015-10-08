@@ -1,6 +1,8 @@
 /* global Java */
 
 define(['boxing'], function(B) {
+    var className = "com.eas.client.forms.Anchors";
+    var javaClass = Java.type(className);
     /**
      * Component's layout anchors for AnchorsPane.
      * Two constraint values of three possible must be provided for X and Y axis, other constraints must be set to <code>null</code>.* Parameters values can be provided in pixels, per cents or numbers, e.g. '30px', '30' or 10%.
@@ -35,8 +37,6 @@ define(['boxing'], function(B) {
         delegate.setPublished(this);
     };
 
-    var className = "com.eas.client.forms.Anchors";
-    var javaClass = Java.type(className);
     var ScriptsClass = Java.type("com.eas.script.Scripts");
     var space = ScriptsClass.getSpace();
     space.putPublisher(className, function(aDelegate) {

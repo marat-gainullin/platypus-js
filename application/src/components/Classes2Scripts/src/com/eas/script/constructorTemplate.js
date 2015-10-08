@@ -1,6 +1,8 @@
 /* global Java */
 
 define([${Deps}], function(${DepsResults}) {
+    var className = "${Type}";
+    var javaClass = Java.type(className);
 ${JsDoc}
     function ${Name}(${Params}) {
         var maxArgs = ${MaxArgs};
@@ -17,10 +19,8 @@ ${JsDoc}
         if(${Name}.superclass)
             ${Name}.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-${Props}${Body}    };
+${Props}${Body}    }
 ${Methods}
-    var className = "${Type}";
-    var javaClass = Java.type(className);
     var ScriptsClass = Java.type("com.eas.script.Scripts");
     var space = ScriptsClass.getSpace();
     space.putPublisher(className, function(aDelegate) {

@@ -1,6 +1,8 @@
 /* global Java */
 
 define(['boxing'], function(B) {
+    var className = "com.eas.client.forms.Form";
+    var javaClass = Java.type(className);
     /**
      * Creates a form.
      * @param aView Container instance to be used as view of created form. Optional. If it is omitted P.AnchorsPane will be created and used as view.
@@ -385,8 +387,6 @@ define(['boxing'], function(B) {
     });
 
 
-    var className = "com.eas.client.forms.Form";
-    var javaClass = Java.type(className);
     var ScriptsClass = Java.type("com.eas.script.Scripts");
     var space = ScriptsClass.getSpace();
     space.putPublisher(className, function(aDelegate) {

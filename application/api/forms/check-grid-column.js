@@ -1,6 +1,8 @@
 /* global Java */
 
 define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/font', './cell-render-event'], function(B, Color, Cursor, Font, RenderEvent) {
+    var className = "com.eas.client.forms.components.model.grid.header.CheckGridColumn";
+    var javaClass = Java.type(className);
     /**
      *
      * @constructor CheckGridColumn CheckGridColumn
@@ -149,8 +151,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
 
     };
 
-    var className = "com.eas.client.forms.components.model.grid.header.CheckGridColumn";
-    var javaClass = Java.type(className);
     var ScriptsClass = Java.type("com.eas.script.Scripts");
     var space = ScriptsClass.getSpace();
     space.putPublisher(className, function(aDelegate) {

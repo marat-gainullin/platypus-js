@@ -1,6 +1,8 @@
 /* global Java */
 
 define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/font', './cell-render-event'], function(B, Color, Cursor, Font, RenderEvent) {
+    var className = "com.eas.client.forms.components.model.grid.header.ModelGridColumn";
+    var javaClass = Java.type(className);
     /**
      *
      * @constructor ModelGridColumn ModelGridColumn
@@ -199,16 +201,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     };
 
     /**
-     * @method unsort
-     * @memberOf ModelGridColumn
-     * Clears sort column, works only in HTML5 */
-    ModelGridColumn.prototype.unsort = function() {
-        var delegate = this.unwrap();
-        var value = delegate.unsort();
-        return B.boxAsJs(value);
-    };
-
-    /**
      *
      * @method addColumnNode
      * @memberOf ModelGridColumn
@@ -253,6 +245,16 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     };
 
     /**
+     * @method unsort
+     * @memberOf ModelGridColumn
+     * Clears sort column, works only in HTML5 */
+    ModelGridColumn.prototype.unsort = function() {
+        var delegate = this.unwrap();
+        var value = delegate.unsort();
+        return B.boxAsJs(value);
+    };
+
+    /**
      * @method sortDesc
      * @memberOf ModelGridColumn
      * Descending column sort, works only in HTML5 */
@@ -263,8 +265,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     };
 
 
-    var className = "com.eas.client.forms.components.model.grid.header.ModelGridColumn";
-    var javaClass = Java.type(className);
     var ScriptsClass = Java.type("com.eas.script.Scripts");
     var space = ScriptsClass.getSpace();
     space.putPublisher(className, function(aDelegate) {

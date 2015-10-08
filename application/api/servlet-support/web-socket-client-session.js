@@ -1,6 +1,8 @@
 /* global Java */
 
 define(['boxing'], function(B) {
+    var className = "com.eas.server.websocket.WebSocketClientSession";
+    var javaClass = Java.type(className);
     /**
      *
      * @constructor WebSocketClientSession WebSocketClientSession
@@ -113,8 +115,6 @@ define(['boxing'], function(B) {
     };
 
 
-    var className = "com.eas.server.websocket.WebSocketClientSession";
-    var javaClass = Java.type(className);
     var ScriptsClass = Java.type("com.eas.script.Scripts");
     var space = ScriptsClass.getSpace();
     space.putPublisher(className, function(aDelegate) {

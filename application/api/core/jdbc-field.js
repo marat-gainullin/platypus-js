@@ -1,6 +1,8 @@
 /* global Java */
 
 define(['boxing'], function(B) {
+    var className = "com.eas.client.metadata.JdbcField";
+    var javaClass = Java.type(className);
     /**
      * Generated constructor.
      * @constructor JdbcField JdbcField
@@ -30,16 +32,6 @@ define(['boxing'], function(B) {
             }
         });
 
-        Object.defineProperty(this, "nullable", {
-            get: function() {
-                var value = delegate.nullable;
-                return B.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.nullable = B.boxAsJava(aValue);
-            }
-        });
-
         Object.defineProperty(this, "readonly", {
             get: function() {
                 var value = delegate.readonly;
@@ -47,6 +39,16 @@ define(['boxing'], function(B) {
             },
             set: function(aValue) {
                 delegate.readonly = B.boxAsJava(aValue);
+            }
+        });
+
+        Object.defineProperty(this, "nullable", {
+            get: function() {
+                var value = delegate.nullable;
+                return B.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.nullable = B.boxAsJava(aValue);
             }
         });
 
@@ -109,8 +111,6 @@ define(['boxing'], function(B) {
 
     };
 
-    var className = "com.eas.client.metadata.JdbcField";
-    var javaClass = Java.type(className);
     var ScriptsClass = Java.type("com.eas.script.Scripts");
     var space = ScriptsClass.getSpace();
     space.putPublisher(className, function(aDelegate) {

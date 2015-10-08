@@ -426,6 +426,11 @@ public class AppClient {
 		apiUrl = aApiUrl;
 	}
 
+	/**
+	 * For use only in JsApi !
+	 * 
+	 * @return
+	 */
 	public String getPrincipal() {
 		return principal;
 	}
@@ -449,7 +454,7 @@ public class AppClient {
 		}
 		return null;
 	}
-	
+
 	private String params(Parameters parameters) {
 		String[] res = new String[parameters.getParametersCount()];
 		for (int i = 0; i < parameters.getParametersCount(); i++) {
@@ -485,14 +490,14 @@ public class AppClient {
 		return startApiRequest(null, query, null, RequestBuilder.GET, null, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
 			@Override
-			public void onFailure(XMLHttpRequest reason) {
-				aCallback.onFailure(reason);
+			protected void doWork(XMLHttpRequest aResult) throws Exception {
+				principal = null;
+				aCallback.onSuccess(aResult);
 			}
 
 			@Override
-			protected void doWork(XMLHttpRequest aResult) throws Exception {
-				principal = "anonymous-" + String.valueOf(IDGenerator.genId());
-				aCallback.onSuccess(aResult);
+			public void onFailure(XMLHttpRequest reason) {
+				aCallback.onFailure(reason);
 			}
 
 		});
@@ -666,32 +671,46 @@ public class AppClient {
 		});
 	}
 
-	public Cancellable requestLoggedInUser(final Callback<String, String> aCallback) throws Exception {
-		String query = param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqCredential));
-		return startApiRequest(null, query, "", RequestBuilder.GET, null, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
+	public void requestLoggedInUser(final Callback<String, String> aCallback) throws Exception {
+		if (principal == null) {
+			String query = param(PlatypusHttpRequestParams.TYPE, String.valueOf(Requests.rqCredential));
+			startApiRequest(null, query, "", RequestBuilder.GET, null, new CallbackAdapter<XMLHttpRequest, XMLHttpRequest>() {
 
-			@Override
-			protected void doWork(XMLHttpRequest aResponse) throws Exception {
-				String respText = aResponse.getResponseText();
-				Object oResult = respText != null && !respText.isEmpty() ? Utils.toJava(Utils.jsonParse(respText)) : null;
-				assert oResult == null || oResult instanceof JavaScriptObject : "Credential request expects null or JavaScriptObject value as a response.";
-				JavaScriptObject jsObject = (JavaScriptObject) oResult;
-				Object oUserName = jsObject.<Utils.JsObject> cast().getJava("userName");
-				assert oUserName == null || oUserName instanceof String : "Credential request expects null or String value as a user name.";
-				principal = (String) oUserName;
-				if (principal == null)
-					principal = "anonymous" + String.valueOf(IDGenerator.genId());
-				if (aCallback != null) {
-					aCallback.onSuccess(principal);
+				@Override
+				protected void doWork(XMLHttpRequest aResponse) throws Exception {
+					String respText = aResponse.getResponseText();
+					Object oResult = respText != null && !respText.isEmpty() ? Utils.toJava(Utils.jsonParse(respText)) : null;
+					assert oResult == null || oResult instanceof JavaScriptObject : "Credential request expects null or JavaScriptObject value as a response.";
+					JavaScriptObject jsObject = (JavaScriptObject) oResult;
+					Object oUserName = jsObject.<Utils.JsObject> cast().getJava("userName");
+					assert oUserName == null || oUserName instanceof String : "Credential request expects null or String value as a user name.";
+					principal = (String) oUserName;
+					if (principal == null || principal.isEmpty())
+						principal = "anonymous" + String.valueOf(IDGenerator.genId());
+					if (aCallback != null) {
+						aCallback.onSuccess(principal);
+					}
 				}
-			}
 
-			@Override
-			public void onFailure(XMLHttpRequest reason) {
-				if (aCallback != null)
-					aCallback.onFailure(reason.getStatus() + " : " + reason.getStatusText());
-			}
-		});
+				@Override
+				public void onFailure(XMLHttpRequest reason) {
+					principal = "anonymous" + String.valueOf(IDGenerator.genId());
+					if (aCallback != null)
+						aCallback.onFailure(reason.getStatus() + " : " + reason.getStatusText());
+				}
+			});
+		} else {
+			Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+
+				@Override
+				public void execute() {
+					if (aCallback != null) {
+						aCallback.onSuccess(principal);
+					}
+				}
+
+			});
+		}
 	}
 
 	public ModuleStructure getModuleStructure(String aModuleName) {
@@ -847,8 +866,8 @@ public class AppClient {
 
 				@Override
 				public void onFailure(XMLHttpRequest aResponse) {
-					if (aCallback != null){
-						String responseText = aResponse.getResponseText(); 
+					if (aCallback != null) {
+						String responseText = aResponse.getResponseText();
 						aCallback.onFailure(responseText != null && !responseText.isEmpty() ? responseText : aResponse.getStatusText());
 					}
 				}
@@ -861,24 +880,24 @@ public class AppClient {
 		serverModules.put(aModuleName, Utils.jsonParse(aStructure));
 	}
 
-	public boolean isServerModule(String aModuleName) throws Exception{
+	public boolean isServerModule(String aModuleName) throws Exception {
 		return serverModules.containsKey(aModuleName);
 	}
 
 	public static native JavaScriptObject createReport(JavaScriptObject Report, String reportLocation)/*-{
 		return new Report(reportLocation);
 	}-*/;
-	
-	public boolean isCacheBustEnabled(){
+
+	public boolean isCacheBustEnabled() {
 		return cacheBustEnabled;
 	}
-	
+
 	public void setCacheBustEnabled(boolean aValue) {
 		cacheBustEnabled = aValue;
 	}
 
-	public Object requestServerMethodExecution(final String aModuleName, final String aMethodName, final JsArrayString aParams, final JavaScriptObject onSuccess, final JavaScriptObject onFailure, final JavaScriptObject aReportConstructor)
-	        throws Exception {
+	public Object requestServerMethodExecution(final String aModuleName, final String aMethodName, final JsArrayString aParams, final JavaScriptObject onSuccess, final JavaScriptObject onFailure,
+	        final JavaScriptObject aReportConstructor) throws Exception {
 		String[] convertedParams = new String[aParams.length()];
 		for (int i = 0; i < aParams.length(); i++)
 			convertedParams[i] = param(PlatypusHttpRequestParams.PARAMS_ARRAY, aParams.get(i));
@@ -935,7 +954,7 @@ public class AppClient {
 					} else {
 						return Utils.toJs(executed.getResponseText());
 					}
-				} else{
+				} else {
 					String responseText = executed.getResponseText();
 					throw new Exception(responseText != null && !responseText.isEmpty() ? responseText : executed.getStatusText());
 				}
@@ -992,7 +1011,7 @@ public class AppClient {
 			});
 		}
 	}
-	
+
 	public Query getCachedAppQuery(String aQueryId) {
 		Query query = queries.get(aQueryId);
 		if (query != null) {

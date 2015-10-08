@@ -1,6 +1,8 @@
 /* global Java */
 
 define(['boxing'], function(B) {
+    var className = "com.eas.client.report.Report";
+    var javaClass = Java.type(className);
     /**
      * Creates report, generated with template.
      * @param body The report binary body (array of byte).
@@ -61,8 +63,6 @@ define(['boxing'], function(B) {
     };
 
 
-    var className = "com.eas.client.report.Report";
-    var javaClass = Java.type(className);
     var ScriptsClass = Java.type("com.eas.script.Scripts");
     var space = ScriptsClass.getSpace();
     space.putPublisher(className, function(aDelegate) {

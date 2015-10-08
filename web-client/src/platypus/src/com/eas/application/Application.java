@@ -22,6 +22,7 @@ import com.eas.core.Utils;
 import com.eas.ui.JsUi;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.ScriptInjector;
 
 /**
  * 
@@ -60,22 +61,25 @@ public class Application {
 		JsApi.init();
 		JsUi.init();
 		loaderHandlerRegistration.add(Loader.addHandler(new LoggingLoadHandler()));
-		AppClient.getInstance().requestLoggedInUser(new CallbackAdapter<String, String>() {
-
-			@Override
-			protected void doWork(String aResult) throws Exception {
-				// onReady();
-			}
-
-			@Override
-			public void onFailure(String reason) {
-				// onError(reason);
-				Logger.getLogger(Application.class.getName()).log(Level.SEVERE, reason);
-			}
-		});
+		ScriptInjector.fromUrl("app/start.js").setWindow(ScriptInjector.TOP_WINDOW).setRemoveTag(true).inject();
 	}
 
-	public static void require(final Utils.JsObject aDeps, final Utils.JsObject aOnSuccess, final Utils.JsObject aOnFailure) {
+	protected static native JavaScriptObject lookupInGlobal(String aModuleName)/*-{
+		return $wnd[aModuleName];
+	}-*/;
+
+	private static JavaScriptObject lookupResolved(List<String> deps){
+		Map<String, JavaScriptObject> defined = Loader.getDefined();
+		Utils.JsObject resolved = JavaScriptObject.createArray().cast();
+		for (int d = 0; d < deps.size(); d++) {
+			String mName = deps.get(d);
+			JavaScriptObject m = defined.get(mName);
+			resolved.setSlot(d, m != null ? m : lookupInGlobal(mName));
+		}
+		return resolved;
+	}
+	
+	public static JavaScriptObject require(final Utils.JsObject aDeps, final Utils.JsObject aOnSuccess, final Utils.JsObject aOnFailure) throws Exception {
 		String calledFromDir = Utils.lookupCallerJsDir();
 		final List<String> deps = new ArrayList<String>();
 		for (int i = 0; i < aDeps.length(); i++) {
@@ -88,44 +92,31 @@ public class Application {
 			}
 			deps.add(dep);
 		}
-		try {
-			Loader.load(deps, new CallbackAdapter<Void, String>() {
+		Loader.load(deps, new CallbackAdapter<Void, String>() {
 
-				@Override
-				public void onFailure(String reason) {
-					if (aOnFailure != null) {
-						try {
-							Utils.executeScriptEventString(aOnFailure, aOnFailure, reason);
-						} catch (Exception ex) {
-							Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
-						}
-					} else {
-						Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require failed and callback is missing. Required modules are: " + aDeps.toString());
+			@Override
+			public void onFailure(String reason) {
+				if (aOnFailure != null) {
+					try {
+						Utils.executeScriptEventString(aOnFailure, aOnFailure, reason);
+					} catch (Exception ex) {
+						Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
 					}
+				} else {
+					Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require failed and callback is missing. Required modules are: " + aDeps.toString());
 				}
+			}
 
-				protected final native JavaScriptObject lookupInGlobal(String aModuleName)/*-{
-					return $wnd[aModuleName];
-				}-*/;
-
-				@Override
-				protected void doWork(Void aResult) throws Exception {
-					if (aOnSuccess != null) {
-						Map<String, JavaScriptObject> defined = Loader.getDefined();
-						Utils.JsObject resolved = JavaScriptObject.createArray().cast();
-						for (int d = 0; d < deps.size(); d++) {
-							String mName = deps.get(d);
-							JavaScriptObject m = defined.get(mName);
-							resolved.setSlot(d, m != null ? m : lookupInGlobal(mName));
-						}
-						aOnSuccess.apply(null, resolved);
-					} else
-						Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require succeded, but callback is missing. Required modules are: " + aDeps.toString());
-				}
-			}, new HashSet<String>());
-		} catch (Exception ex) {
-			Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
-		}
+			@Override
+			protected void doWork(Void aResult) throws Exception {
+				if (aOnSuccess != null) {
+					JavaScriptObject resolved = lookupResolved(deps);
+					aOnSuccess.apply(null, resolved);
+				} else
+					Logger.getLogger(Application.class.getName()).log(Level.WARNING, "Require succeded, but callback is missing. Required modules are: " + aDeps.toString());
+			}
+		}, new HashSet<String>());
+		return lookupResolved(deps);
 	}
 
 	public static void define(final Utils.JsObject aDeps, final Utils.JsObject aModuleDefiner) {

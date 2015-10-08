@@ -1,6 +1,8 @@
 /* global Java */
 
 define(['boxing'], function(B) {
+    var className = "com.eas.server.Session";
+    var javaClass = Java.type(className);
     /**
      * Generated constructor.
      * @constructor Session Session
@@ -29,8 +31,6 @@ define(['boxing'], function(B) {
 
     };
 
-    var className = "com.eas.server.Session";
-    var javaClass = Java.type(className);
     var ScriptsClass = Java.type("com.eas.script.Scripts");
     var space = ScriptsClass.getSpace();
     space.putPublisher(className, function(aDelegate) {

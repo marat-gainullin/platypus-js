@@ -8,7 +8,7 @@ public class JsFacade {
 			@com.eas.core.Predefine::predefine(Lcom/google/gwt/core/client/JavaScriptObject;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aDeps, aName, aDefiner);
 		}
 		
-        predefine(['environment', 'logger', 'resource', 'id', 'md5', 'invoke', 'orm', 'core/report', 'rpc', 'extend', 'ui', 'forms'], function (Environment, Logger, Resource, Id, Md5, Invoke, Orm, Report, Rpc, extend, Ui, Forms) {
+        predefine(['environment', 'logger', 'resource', 'id', 'md5', 'invoke', 'orm', 'core/report', 'rpc', 'extend', 'ui', 'forms'], 'facade', function (Environment, Logger, Resource, Id, Md5, Invoke, Orm, Report, Rpc, extend, Ui, Forms) {
         	
 		    var module = {};
 		    Object.defineProperty(module, "logout", {
@@ -23,9 +23,10 @@ public class JsFacade {
 		        }
 		    });
 		    for (var e in Environment) {
+		    	if(e === '$H') continue;
 		        Object.defineProperty(module, e, {
 		            enumerable: true,
-		            value: Orm[e]
+		            value: Environment[e]
 		        });
 		    }
 		    Object.defineProperty(module, 'Logger', {
@@ -53,6 +54,7 @@ public class JsFacade {
 		        value: Md5
 		    });
 		    for (var o in Orm) {
+		    	if(o === '$H') continue;
 		        Object.defineProperty(module, o, {
 		            enumerable: true,
 		            value: Orm[o]
@@ -83,7 +85,8 @@ public class JsFacade {
 		    // aka forms/index...
 		    function accept(constructors){
 				for(var c in constructors){
-					Object.defineProperty(aTarget, c, {
+		    		if(c === '$H') continue;
+					Object.defineProperty(module, c, {
 						enumerable: true,
 						value: constructors[c] 
 					});			
@@ -95,15 +98,17 @@ public class JsFacade {
 		    accept(@com.eas.menu.MenuPublisher::getConstructors()());
 		    accept(@com.eas.ui.EventsPublisher::getConstructors()());
             for (var u in Ui) {
+		    	if(u === '$H') continue;
                 Object.defineProperty(module, u, {
                     enumerable: true,
                     value: Ui[u]
                 });
             }
-            for (var i in Forms) {
-                Object.defineProperty(module, i, {
+            for (var f in Forms) {
+		    	if(f === '$H') continue;
+                Object.defineProperty(module, f, {
                     enumerable: true,
-                    value: Forms[i]
+                    value: Forms[f]
                 });
             }
             return module;

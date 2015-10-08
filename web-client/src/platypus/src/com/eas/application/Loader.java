@@ -178,7 +178,7 @@ public class Loader {
 	private static final String GRID_HUB = "grid-hub";
 
 	private static void loadFacade(final Callback<Void, String> aCallback) {
-		final CumulativeCallbackAdapter<Void, String> facadeProcess = new CumulativeCallbackAdapter<Void, String>(3) {
+		final CumulativeCallbackAdapter<Void, String> facadeProcess = new CumulativeCallbackAdapter<Void, String>(2) {
 
 			@Override
 			protected void doWork(Void aResult) throws Exception {
@@ -206,45 +206,8 @@ public class Loader {
 			}
 
 		};
-		loadGrid(new Callback<Void, String>() {
-
-			@Override
-			public void onSuccess(Void result) {
-				facadeProcess.onSuccess(null);
-			}
-
-			@Override
-			public void onFailure(String reason) {
-				facadeProcess.onFailure(reason);
-			}
-
-		});
-		loadHub(MODEL_HUB, new Callback<Void, String>() {
-
-			@Override
-			public void onSuccess(Void result) {
-				facadeProcess.onSuccess(null);
-			}
-
-			@Override
-			public void onFailure(String reason) {
-				facadeProcess.onFailure(reason);
-			}
-
-		});
-		loadHub(FORM_HUB, new Callback<Void, String>() {
-
-			@Override
-			public void onSuccess(Void result) {
-				facadeProcess.onSuccess(null);
-			}
-
-			@Override
-			public void onFailure(String reason) {
-				facadeProcess.onFailure(reason);
-			}
-
-		});
+		loadForms(facadeProcess);
+		loadHub(MODEL_HUB, facadeProcess);
 	}
 
 	private static void loadBound(final Callback<Void, String> aCallback) {
@@ -339,6 +302,37 @@ public class Loader {
 		});
 	}
 
+	private static void loadForms(final Callback<Void, String> aCallback) {
+		loadGrid(new Callback<Void, String>() {
+
+			@Override
+			public void onSuccess(Void result) {
+				GWT.runAsync(new RunAsyncCallback() {
+
+					@Override
+					public void onSuccess() {
+						if (!asyncRan.contains(FORM_HUB)) {
+							asyncRan.add(FORM_HUB);
+							JsForm.init();
+						}
+						aCallback.onSuccess(null);
+					}
+
+					@Override
+					public void onFailure(Throwable reason) {
+						aCallback.onFailure(reason.toString());
+					}
+				});
+			}
+
+			@Override
+			public void onFailure(String reason) {
+				aCallback.onFailure(reason);
+			}
+
+		});
+	}
+
 	private static void loadHub(String aPredefinedHub, final Callback<Void, String> aCallback) {
 		if (FACADE_HUB.equals(aPredefinedHub)) {
 			if (asyncRan.contains(FACADE_HUB)) {
@@ -361,7 +355,6 @@ public class Loader {
 
 							UiReader.addFactory(new MenuFactory());
 							JsMenu.init();
-							aCallback.onSuccess(null);
 						}
 						aCallback.onSuccess(null);
 					}
@@ -409,22 +402,7 @@ public class Loader {
 			if (asyncRan.contains(FORM_HUB)) {
 				aCallback.onSuccess(null);
 			} else {
-				GWT.runAsync(new RunAsyncCallback() {
-
-					@Override
-					public void onSuccess() {
-						if (!asyncRan.contains(FORM_HUB)) {
-							asyncRan.add(FORM_HUB);
-							JsForm.init();
-						}
-						aCallback.onSuccess(null);
-					}
-
-					@Override
-					public void onFailure(Throwable reason) {
-						aCallback.onFailure(reason.toString());
-					}
-				});
+				loadForms(aCallback);
 			}
 		}
 	}
@@ -464,10 +442,10 @@ public class Loader {
 
 							@Override
 							public void onSuccess(Void result) {
-								Predefine.executed.add(aModuleName);
+								Predefine.getExecuted().add(aModuleName);
 								fireLoaded(aModuleName);
-								final Callback<String, Void> amdDefineCallback = Loader.consumeAmdDefineCallback();
 								List<String> amdDependencies = Loader.consumeAmdDependencies();
+								final Callback<String, Void> amdDefineCallback = Loader.consumeAmdDefineCallback();
 								if (amdDefineCallback != null) {
 									try {
 										Loader.load(amdDependencies, new Callback<Void, String>() {
@@ -483,7 +461,7 @@ public class Loader {
 												notifyPendingsModuleSucceded(aModuleName);
 											}
 
-										}, aCyclic);
+										}, new HashSet<String>());
 									} catch (Exception ex) {
 										Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
 									}
@@ -565,6 +543,27 @@ public class Loader {
 		});
 	}
 
+	private static void loadEnvironment(final String moduleName) {
+		try {
+			AppClient.getInstance().requestLoggedInUser(new CallbackAdapter<String, String>() {
+
+				@Override
+				protected void doWork(String aResult) throws Exception {
+					notifyPendingsModuleSucceded(moduleName);
+				}
+
+				@Override
+				public void onFailure(String reason) {
+					Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, reason);
+					notifyPendingsModuleFailed(moduleName, Arrays.asList(new String[] { reason }));
+				}
+			});
+		} catch (Exception ex) {
+			Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, ex.toString());
+			notifyPendingsModuleFailed(moduleName, Arrays.asList(new String[] { ex.toString() }));
+		}
+	}
+
 	private static String errorsToString(List<String> aReasons) {
 		StringBuilder errorsSb = new StringBuilder();
 		for (int i = 0; i < aReasons.size(); i++) {
@@ -632,7 +631,8 @@ public class Loader {
 
 			};
 			for (final String moduleName : aModulesNames) {
-				if (Predefine.executed.contains(moduleName) || aCyclic.contains(moduleName)) {
+				boolean env = "environment".equals(moduleName);
+				if ((Predefine.getExecuted().contains(moduleName) && !env) || aCyclic.contains(moduleName) || Predefine.getDefined().containsKey(moduleName)) {
 					Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 
 						@Override
@@ -644,11 +644,15 @@ public class Loader {
 					aCyclic.add(moduleName);
 					pendOnModule(moduleName, process);
 					if (!started.contains(moduleName)) {
-						String predefinedHub = lookupPredefined(moduleName);
-						if (predefinedHub != null)
-							loadPredefined(moduleName, predefinedHub);
-						else
-							loadFormServer(moduleName, aCyclic);
+						if (env) {
+							loadEnvironment(moduleName);
+						} else {
+							String predefinedHub = lookupPredefined(moduleName);
+							if (predefinedHub != null)
+								loadPredefined(moduleName, predefinedHub);
+							else
+								loadFormServer(moduleName, aCyclic);
+						}
 						started.add(moduleName);
 						fireStarted(moduleName);
 					}

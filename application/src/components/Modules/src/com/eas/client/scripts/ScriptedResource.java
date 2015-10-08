@@ -62,6 +62,7 @@ public class ScriptedResource {
      *
      * @param aApp
      * @param aAbsoluteApiPath
+     * @param aGlobalAPI
      * @throws Exception If something goes wrong
      */
     public static void init(Application<?> aApp, Path aAbsoluteApiPath, boolean aGlobalAPI) throws Exception {
@@ -300,7 +301,7 @@ public class ScriptedResource {
             return httResponse.toJs(space);
         }
     }
-    
+
     public static String toModuleId(Path apiPath, Path appPath, String aScriptName, String aCalledFromFile) throws URISyntaxException {
         if (aScriptName != null && !aScriptName.isEmpty()) {
             Path calledFromFile = resolveApiApp(aCalledFromFile, apiPath, appPath);
@@ -734,7 +735,15 @@ public class ScriptedResource {
                                     aSpace.exec(relativeLocalPath.toString().replace(File.separator, "/"), aLocalFile.toUri().toURL());
                                     String[] amdDependencies = aSpace.consumeAmdDependencies();
                                     JSObject onDependenciesResolved = aSpace.consumeAmdDefineCallback();
-                                    _require(amdDependencies, aCalledFromFile, aSpace, aCyclic, (Void v) -> {
+                                    if (scriptOrModuleName.equals("forms")) {
+                                        int o = 0;
+                                        o++;
+                                    }
+                                    _require(amdDependencies, null, aSpace, new HashSet<>(), (Void v) -> {
+                                        if (scriptOrModuleName.equals("forms")) {
+                                            int o = 0;
+                                            o++;
+                                        }
                                         if (onDependenciesResolved != null) {
                                             onDependenciesResolved.call(null, new Object[]{scriptOrModuleName});
                                         }

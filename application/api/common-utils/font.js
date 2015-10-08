@@ -1,6 +1,8 @@
 /* global Java */
 
 define(['boxing'], function(B) {
+    var className = "com.eas.gui.Font";
+    var javaClass = Java.type(className);
     /**
      * Font object, which is used to render text in a visible way.
      * @param family a font family name, e.g. 'SansSerif'
@@ -28,8 +30,6 @@ define(['boxing'], function(B) {
         delegate.setPublished(this);
     };
 
-    var className = "com.eas.gui.Font";
-    var javaClass = Java.type(className);
     var ScriptsClass = Java.type("com.eas.script.Scripts");
     var space = ScriptsClass.getSpace();
     space.putPublisher(className, function(aDelegate) {

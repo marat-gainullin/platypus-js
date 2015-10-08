@@ -47,7 +47,7 @@ public class JsForm {
 			return Form;
 		});		
 		
-		predefine(['boxing', 'forms/form', 'forms/index', 'grid/index', 'ui'], 'forms', function(B, Form, FormsIndex, GridIndex, Ui){
+		predefine(['boxing', 'forms/form'], 'forms', function(B, Form){
 			function readFormDocument(aDocumnet, aModel, aTarget){
 				var factory = @com.eas.form.store.XmlDom2Form::transform(Lcom/google/gwt/xml/client/Document;Lcom/google/gwt/core/client/JavaScriptObject;)(aDocumnet, aModel);
 				var nativeForm = factory.@com.eas.form.FormFactory::getForm()(); 
@@ -65,6 +65,7 @@ public class JsForm {
 				return aTarget;
 			}
 			function loadForm(appElementName, aModel, aTarget) {
+				var aClient = @com.eas.client.AppClient::getInstance()();
 				var appElementDoc = aClient.@com.eas.client.AppClient::getFormDocument(Ljava/lang/String;)(appElementName);
 				var form = readFormDocument(appElementDoc, aModel, aTarget);
 	            if (!form.title)
@@ -86,24 +87,6 @@ public class JsForm {
 				enumerable: true,
 				value : readForm
 			});
-		    for (var f in FormsIndex) {
-		        Object.defineProperty(module, f, {
-		            enumerable: true,
-		            value: FormsIndex[f]
-		        });
-		    }
-		    for (var g in GridIndex) {
-		        Object.defineProperty(module, g, {
-		            enumerable: true,
-		            value: GridIndex[g]
-		        });
-		    }
-		    for (var u in Ui) {
-		        Object.defineProperty(module, u, {
-		            enumerable: true,
-		            value: Ui[u]
-		        });
-		    }
 			return module;
 		});
 	}-*/;

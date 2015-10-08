@@ -8,6 +8,10 @@ public class JsBound {
 			@com.eas.widgets.JsWidgets::publishComponentProperties(Lcom/eas/ui/PublishedComponent;)(aPublished);
 		}
 		
+		function predefine(aDeps, aName, aDefiner){
+			@com.eas.core.Predefine::predefine(Lcom/google/gwt/core/client/JavaScriptObject;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aDeps, aName, aDefiner);
+		}
+		
 		predefine([], 'forms/model-check-box', function(){
 			function ModelCheckBox(aText) {
 				var aComponent = arguments.length > 1 ? arguments[1] : null;

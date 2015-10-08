@@ -60,7 +60,7 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
             + " */\n"
             + "require(['facade'], function (F) {\n"
             + "        var global = this;\n" //NOI18N
-            + "        %sF.cacheBust = true;\n"
+            + "        %sF.cacheBust(true);\n"
             + "        %sF.export(global);\n"
             + "        require('%s', function(%s){\n" //NOI18N
             + "    %s"//NOI18N

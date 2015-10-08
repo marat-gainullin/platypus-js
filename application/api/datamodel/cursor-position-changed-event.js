@@ -1,6 +1,8 @@
 /* global Java */
 
 define(['boxing'], function(B) {
+    var className = "com.eas.client.model.application.CursorPositionChangedEvent";
+    var javaClass = Java.type(className);
     /**
      * Generated constructor.
      * @constructor CursorPositionChangedEvent CursorPositionChangedEvent
@@ -43,8 +45,6 @@ define(['boxing'], function(B) {
 
     };
 
-    var className = "com.eas.client.model.application.CursorPositionChangedEvent";
-    var javaClass = Java.type(className);
     var ScriptsClass = Java.type("com.eas.script.Scripts");
     var space = ScriptsClass.getSpace();
     space.putPublisher(className, function(aDelegate) {
