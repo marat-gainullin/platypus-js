@@ -61,14 +61,23 @@ public class Application {
 		JsApi.init();
 		JsUi.init();
 		loaderHandlerRegistration.add(Loader.addHandler(new LoggingLoadHandler()));
-		ScriptInjector.fromUrl("app/start.js").setWindow(ScriptInjector.TOP_WINDOW).setRemoveTag(true).inject();
+		Utils.JsObject window = ScriptInjector.TOP_WINDOW.cast();
+		Utils.JsObject onReady = window.getJs("onPlatypusReady");
+		if (onReady == null)
+			onReady = window.getJs("onPlatypusReady1");
+		if (onReady == null)
+			onReady = window.getJs("onPlatypusReady2");
+		if (onReady == null)
+			onReady = window.getJs("onPlatypusReady3");
+		if (onReady != null)
+			onReady.apply(null, null);
 	}
 
 	protected static native JavaScriptObject lookupInGlobal(String aModuleName)/*-{
 		return $wnd[aModuleName];
 	}-*/;
 
-	private static JavaScriptObject lookupResolved(List<String> deps){
+	private static JavaScriptObject lookupResolved(List<String> deps) {
 		Map<String, JavaScriptObject> defined = Loader.getDefined();
 		Utils.JsObject resolved = JavaScriptObject.createArray().cast();
 		for (int d = 0; d < deps.size(); d++) {
@@ -78,7 +87,7 @@ public class Application {
 		}
 		return resolved;
 	}
-	
+
 	public static JavaScriptObject require(final Utils.JsObject aDeps, final Utils.JsObject aOnSuccess, final Utils.JsObject aOnFailure) throws Exception {
 		String calledFromDir = Utils.lookupCallerJsDir();
 		final List<String> deps = new ArrayList<String>();
@@ -135,8 +144,8 @@ public class Application {
 		Loader.setAmdDefine(deps, new Callback<String, Void>() {
 
 			protected final native JavaScriptObject lookupInGlobal(String aModuleName)/*-{
-				return $wnd[aModuleName];
-			}-*/;
+		return $wnd[aModuleName];
+	}-*/;
 
 			@Override
 			public void onSuccess(String aModuleName) {

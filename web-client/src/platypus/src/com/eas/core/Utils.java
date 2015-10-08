@@ -62,7 +62,7 @@ public class Utils {
 			return +this[aName];
 		}-*/;
 
-		public final native JavaScriptObject getJs(String aName)/*-{
+		public final native Utils.JsObject getJs(String aName)/*-{
 			return this[aName];
 		}-*/;
 
