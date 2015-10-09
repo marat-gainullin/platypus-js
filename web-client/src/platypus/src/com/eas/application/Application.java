@@ -23,6 +23,10 @@ import com.eas.ui.JsUi;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.ScriptInjector;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NodeList;
+import com.google.gwt.dom.client.ScriptElement;
 
 /**
  * 
@@ -61,16 +65,15 @@ public class Application {
 		JsApi.init();
 		JsUi.init();
 		loaderHandlerRegistration.add(Loader.addHandler(new LoggingLoadHandler()));
-		Utils.JsObject window = ScriptInjector.TOP_WINDOW.cast();
-		Utils.JsObject onReady = window.getJs("onPlatypusReady");
-		if (onReady == null)
-			onReady = window.getJs("onPlatypusReady1");
-		if (onReady == null)
-			onReady = window.getJs("onPlatypusReady2");
-		if (onReady == null)
-			onReady = window.getJs("onPlatypusReady3");
-		if (onReady != null)
-			onReady.apply(null, null);
+		NodeList<Element> scriptTags = Document.get().getElementsByTagName("script");
+		for(int s = 0; s < scriptTags.getLength(); s++){
+			ScriptElement script = scriptTags.getItem(s).cast();
+			if(script.getSrc().endsWith("pwc.nocache.js") && script.hasAttribute("entry-point")){
+				String entryPoint = script.getAttribute("entry-point");
+				ScriptInjector.fromUrl(entryPoint).setWindow(ScriptInjector.TOP_WINDOW).setRemoveTag(true).inject();
+				break;
+			}
+		}
 	}
 
 	protected static native JavaScriptObject lookupInGlobal(String aModuleName)/*-{

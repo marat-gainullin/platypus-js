@@ -110,7 +110,6 @@ public class ScriptDocument {
 
             @Override
             protected void commentedDefineCall(CallNode aCallNode, JsDoc aJsDoc) {
-                aJsDoc.parseAnnotations();
                 aJsDoc.getAnnotations().stream().forEach((JsDoc.Tag tag) -> {
                     moduleAnnotations.add(tag);
                     if (tag.getName().equalsIgnoreCase(JsDoc.Tag.ROLES_ALLOWED_TAG)) {

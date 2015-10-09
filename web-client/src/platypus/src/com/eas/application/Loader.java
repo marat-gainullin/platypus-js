@@ -232,34 +232,6 @@ public class Loader {
 						aCallback.onFailure(reason.toString());
 					}
 				});
-				GWT.runAsync(new RunAsyncCallback() {
-
-					@Override
-					public void onSuccess() {
-						if (asyncRan.contains("6-6-6-6-6")) {
-							UiReader.addFactory(new BoundFactory());
-							JsBound.init();
-						}
-					}
-
-					@Override
-					public void onFailure(Throwable reason) {
-					}
-				});
-				GWT.runAsync(new RunAsyncCallback() {
-
-					@Override
-					public void onSuccess() {
-						if (asyncRan.contains("7-7-7-7-7")) {
-							UiReader.addFactory(new BoundFactory());
-							JsBound.init();
-						}
-					}
-
-					@Override
-					public void onFailure(Throwable reason) {
-					}
-				});
 			}
 
 			@Override
@@ -543,27 +515,6 @@ public class Loader {
 		});
 	}
 
-	private static void loadEnvironment(final String moduleName) {
-		try {
-			AppClient.getInstance().requestLoggedInUser(new CallbackAdapter<String, String>() {
-
-				@Override
-				protected void doWork(String aResult) throws Exception {
-					notifyPendingsModuleSucceded(moduleName);
-				}
-
-				@Override
-				public void onFailure(String reason) {
-					Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, reason);
-					notifyPendingsModuleFailed(moduleName, Arrays.asList(new String[] { reason }));
-				}
-			});
-		} catch (Exception ex) {
-			Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, ex.toString());
-			notifyPendingsModuleFailed(moduleName, Arrays.asList(new String[] { ex.toString() }));
-		}
-	}
-
 	private static String errorsToString(List<String> aReasons) {
 		StringBuilder errorsSb = new StringBuilder();
 		for (int i = 0; i < aReasons.size(); i++) {
@@ -631,8 +582,7 @@ public class Loader {
 
 			};
 			for (final String moduleName : aModulesNames) {
-				boolean env = "environment".equals(moduleName);
-				if ((Predefine.getExecuted().contains(moduleName) && !env) || aCyclic.contains(moduleName) || Predefine.getDefined().containsKey(moduleName)) {
+				if (Predefine.getExecuted().contains(moduleName) || aCyclic.contains(moduleName) || Predefine.getDefined().containsKey(moduleName)) {
 					Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 
 						@Override
@@ -644,15 +594,11 @@ public class Loader {
 					aCyclic.add(moduleName);
 					pendOnModule(moduleName, process);
 					if (!started.contains(moduleName)) {
-						if (env) {
-							loadEnvironment(moduleName);
-						} else {
-							String predefinedHub = lookupPredefined(moduleName);
-							if (predefinedHub != null)
-								loadPredefined(moduleName, predefinedHub);
-							else
-								loadFormServer(moduleName, aCyclic);
-						}
+						String predefinedHub = lookupPredefined(moduleName);
+						if (predefinedHub != null)
+							loadPredefined(moduleName, predefinedHub);
+						else
+							loadFormServer(moduleName, aCyclic);
 						started.add(moduleName);
 						fireStarted(moduleName);
 					}

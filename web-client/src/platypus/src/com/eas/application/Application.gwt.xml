@@ -6,12 +6,12 @@
 	<inherits name="com.eas.form.Form"/>
 	<inherits name="com.eas.model.Model"/>
 	<inherits name="com.eas.grid.Grid"/>
-	<!--inherits name="com.google.gwt.logging.Logging"/>
+	<inherits name="com.google.gwt.logging.Logging"/>
 	<set-property name="gwt.logging.enabled" value="TRUE"/>
 	<set-property name="gwt.logging.consoleHandler" value="ENABLED"/>
 	<set-property name="gwt.logging.developmentModeHandler" value="DISABLED" />
 	<set-property name="gwt.logging.systemHandler" value="DISABLED" />
-	<set-property name="gwt.logging.simpleRemoteHandler" value="DISABLED" /-->
+	<set-property name="gwt.logging.simpleRemoteHandler" value="DISABLED" />
 	<!--set-property name="gwt.logging.logLevel" value="SEVERE"/-->
 	<!--  The following is to pretty stack traces. Should be removed from production -->
 	<!--set-property name="compiler.stackMode" value="emulated" />

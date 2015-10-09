@@ -3,9 +3,9 @@ package com.eas.application;
 import com.google.gwt.core.client.JavaScriptObject;
 
 public class JsApi {
-	
+
 	public static JavaScriptObject sourcedEventConstructor;
-	
+
 	public native static void init()/*-{
 		// Fix Function#name on browsers that do not support it (IE):
 		if (!(function f() {}).name) {
@@ -412,24 +412,33 @@ public class JsApi {
 			});
 	        return module;
 		});		
+		
+		predefine([], 'security', function(){
+			function Principal(aName){
+				Object.defineProperty(this, "name", {get: function(){
+					return aName;
+				}});
+				Object.defineProperty(this, "hasRole", {value: function(){
+					return true;
+				}});
+				Object.defineProperty(this, "logout", {value: function(onSuccess, onFailure){
+					var appClient = @com.eas.client.AppClient::getInstance()();
+					return appClient.@com.eas.client.AppClient::jsLogout(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
+				}});
+			}
+			var module = {};
+			Object.defineProperty(module, 'principal', {
+				value : function(aOnSuccess, aOnFailure){
+					var appClient = @com.eas.client.AppClient::getInstance()();
+					appClient.@com.eas.client.AppClient::jsLoggedInUser(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aOnSuccess != null ? function(aPrincipalName){aOnSuccess(new Principal(aPrincipalName));} : null, aOnFailure);
+				}
+			});
+			return module;
+		});
 
 		predefine(['boxing'], 'environment', function(B){
 		    var HTML5 = "HTML5 client";
 		    var J2SE = "Java SE environment";
-		
-			var principal = {};
-			
-			Object.defineProperty(principal, "name", {get: function(){
-				var appClient = @com.eas.client.AppClient::getInstance()();
-				return '' + appClient.@com.eas.client.AppClient::getPrincipal()();
-			}});
-			Object.defineProperty(principal, "hasRole", {value: function(){
-				return true;
-			}});
-			Object.defineProperty(principal, "logout", {value: function(onSuccess, onFailure){
-				var appClient = @com.eas.client.AppClient::getInstance()();
-				return appClient.@com.eas.client.AppClient::jsLogout(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
-			}});
 			
 			function cacheBust(aValue){
 				var appClient = @com.eas.client.AppClient::getInstance()();
@@ -449,10 +458,6 @@ public class JsApi {
 		        enumerable: true,
 		        value: HTML5
 		    });		
-		    Object.defineProperty(module, "principal", {
-		        enumerable: true,
-		        value: principal
-		    });
 		    Object.defineProperty(module, "cacheBust", {
 		        enumerable: true,
 		        value: cacheBust

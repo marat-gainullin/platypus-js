@@ -10,22 +10,31 @@
                 var module = aInitializer();
                 aCommonDefiner(module, Environment, Logger, Resource, Id, Md5, loadTemplate, Invoke, Orm, Core, Datamodel, Reports, Rpc, extend);
                 for (var s in Server) {
-                    Object.defineProperty(module, s, {
-                        enumerable: true,
-                        value: Server[s]
-                    });
+                    (function () {
+                        var p = s;
+                        Object.defineProperty(module, p, {
+                            enumerable: true,
+                            get: function(){ return Server[p]; }
+                        });
+                    }());
                 }
                 for (var ss in Servlet) {
-                    Object.defineProperty(module, ss, {
-                        enumerable: true,
-                        value: Servlet[ss]
-                    });
+                    (function () {
+                        var p = ss;
+                        Object.defineProperty(module, p, {
+                            enumerable: true,
+                            get: function(){ return Servlet[p]; }
+                        });
+                    }());
                 }
                 for (var h in Http) {
-                    Object.defineProperty(module, h, {
-                        enumerable: true,
-                        value: Http[h]
-                    });
+                    (function () {
+                        var p = h;
+                        Object.defineProperty(module, p, {
+                            enumerable: true,
+                            get: function(){ return Http[p]; }
+                        });
+                    }());
                 }
                 return module;
             });
@@ -35,10 +44,13 @@
                 var module = aInitializer();
                 aCommonDefiner(module, Environment, Logger, Resource, Id, Md5, loadTemplate, Invoke, Orm, Core, Datamodel, Reports, Rpc, extend);
                 for (var s in Server) {
-                    Object.defineProperty(module, s, {
-                        enumerable: true,
-                        value: Server[s]
-                    });
+                    (function () {
+                        var p = s;
+                        Object.defineProperty(module, p, {
+                            enumerable: true,
+                            get: function(){ return Server[p]; }
+                        });
+                    }());
                 }
                 return module;
             });
@@ -49,28 +61,40 @@
             var module = aInitializer();
             aCommonDefiner(module, Environment, Logger, Resource, Id, Md5, loadTemplate, Invoke, Orm, Core, Datamodel, Reports, Rpc, extend);
             for (var f in FormsIndex) {
-                Object.defineProperty(module, f, {
-                    enumerable: true,
-                    value: FormsIndex[f]
-                });
+                (function () {
+                    var p = f;
+                    Object.defineProperty(module, p, {
+                        enumerable: true,
+                        get: function(){ return FormsIndex[p]; }
+                    });
+                }());
             }
             for (var g in GridIndex) {
-                Object.defineProperty(module, g, {
-                    enumerable: true,
-                    value: GridIndex[g]
-                });
+                (function () {
+                    var p = g;
+                    Object.defineProperty(module, p, {
+                        enumerable: true,
+                        get: function(){ return GridIndex[p]; }
+                    });
+                }());
             }
             for (var u in Ui) {
-                Object.defineProperty(module, u, {
-                    enumerable: true,
-                    value: Ui[u]
-                });
+                (function () {
+                    var p = u;
+                    Object.defineProperty(module, p, {
+                        enumerable: true,
+                        get: function(){ return Ui[p]; }
+                    });
+                }());
             }
-            for (var i in Forms) {
-                Object.defineProperty(module, i, {
-                    enumerable: true,
-                    value: Forms[i]
-                });
+            for (var f in Forms) {
+                (function () {
+                    var p = f;
+                    Object.defineProperty(module, p, {
+                        enumerable: true,
+                        get: function(){ return Forms[p]; }
+                    });
+                }());
             }
             return module;
         });
@@ -88,13 +112,21 @@
             aTarget.P = module;
         }
     });
+    Object.defineProperty(module, "cacheBust", {
+        value: function (aValue) {
+            // not supported in SE client yet
+        }
+    });
     return module;
 }, function (module, Environment, Logger, Resource, Id, Md5, loadTemplate, Invoke, Orm, Core, Datamodel, Reports, Rpc, extend) {
     for (var e in Environment) {
-        Object.defineProperty(module, e, {
-            enumerable: true,
-            value: Orm[e]
-        });
+        (function () {
+            var p = e;
+            Object.defineProperty(module, p, {
+                enumerable: true,
+                get: function(){ return Environment[p]; }
+            });
+        }());
     }
     Object.defineProperty(module, 'Logger', {
         enumerable: true,
@@ -121,28 +153,40 @@
         value: Md5
     });
     for (var o in Orm) {
-        Object.defineProperty(module, o, {
-            enumerable: true,
-            value: Orm[o]
-        });
+        (function () {
+            var p = o;
+            Object.defineProperty(module, p, {
+                enumerable: true,
+                get: function(){ return Orm[p]; }
+            });
+        }());
     }
     for (var c in Core) {
-        Object.defineProperty(module, c, {
-            enumerable: true,
-            value: Core[c]
-        });
+        (function () {
+            var p = c;
+            Object.defineProperty(module, p, {
+                enumerable: true,
+                get: function(){ return Core[p]; }
+            });
+        }());
     }
     for (var d in Datamodel) {
-        Object.defineProperty(module, d, {
-            enumerable: true,
-            value: Datamodel[d]
-        });
+        (function () {
+            var p = d;
+            Object.defineProperty(module, p, {
+                enumerable: true,
+                get: function(){ return Datamodel[p]; }
+            });
+        }());
     }
     for (var r in Reports) {
-        Object.defineProperty(module, r, {
-            enumerable: true,
-            value: Reports[r]
-        });
+        (function () {
+            var p = r;
+            Object.defineProperty(module, p, {
+                enumerable: true,
+                get: function(){ return Reports[p]; }
+            });
+        }());
     }
     Object.defineProperty(module, 'loadTemplate', {
         enumerable: true,

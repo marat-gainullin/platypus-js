@@ -58,15 +58,15 @@ public class DependenciesWalkerTest {
     @Test
     public void testParseAmdDependencies1() {
         String va1 = ""
-                + "P.define(['AnyModule'], function(AnyModule){"
+                + "P.define(['AnyModule'], function(AnyModule1){"
                 + "    return function(){"
                 + "        var self = this;"
-                + "        var am = new AnyModule();"
+                + "        var am = new AnyModule1();"
                 + "        var sm = P.ServerModule('ServerCalc');"
                 + "    };"
                 + "});";
         DependenciesWalker walker = new DependenciesWalker(va1, (aIfDependency)->{
-            return "AnyModule".equals(aIfDependency);
+            return "AnyModule1".equals(aIfDependency);
         });
         walker.walk();
         assertTrue(walker.getDependencies().isEmpty());
@@ -76,15 +76,15 @@ public class DependenciesWalkerTest {
     @Test
     public void testParseAmdDependencies2() {
         String va1 = ""
-                + "define(['AnyModule'], function(AnyModule){"
+                + "define(['AnyModule'], function(AnyModule2){"
                 + "    return function(){"
                 + "        var self = this;"
-                + "        var am = new AnyModule();"
+                + "        var am = new AnyModule2();"
                 + "        var sm = RPC.Proxy('ServerCalc');"
                 + "    };"
                 + "});";
         DependenciesWalker walker = new DependenciesWalker(va1, (aIfDependency)->{
-            return "AnyModule".equals(aIfDependency);
+            return "AnyModule2".equals(aIfDependency);
         });
         walker.walk();
         assertTrue(walker.getDependencies().isEmpty());

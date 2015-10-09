@@ -426,15 +426,6 @@ public class AppClient {
 		apiUrl = aApiUrl;
 	}
 
-	/**
-	 * For use only in JsApi !
-	 * 
-	 * @return
-	 */
-	public String getPrincipal() {
-		return principal;
-	}
-
 	public Document getModelDocument(String aModuleName) {
 		ModuleStructure structure = modulesStructures.get(aModuleName);
 		for (String part : structure.getStructure()) {
@@ -667,6 +658,25 @@ public class AppClient {
 				Logger.getLogger(AppClient.class.getName()).log(Level.INFO, "Commit failed: " + aResponse.getStatus() + " " + aResponse.getStatusText());
 				if (aCallback != null)
 					aCallback.onFailure(aResponse.getStatusText());
+			}
+		});
+	}
+
+	public void jsLoggedInUser(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
+		requestLoggedInUser(new CallbackAdapter<String, String>() {
+
+			@Override
+			protected void doWork(String aResult) throws Exception {
+				if(onSuccess != null){
+					onSuccess.<Utils.JsObject>cast().call(null, Utils.toJs(aResult));
+				}
+			}
+
+			@Override
+			public void onFailure(String reason) {
+				if(onFailure != null){
+					onFailure.<Utils.JsObject>cast().call(null, Utils.toJs(reason));
+				}
 			}
 		});
 	}
