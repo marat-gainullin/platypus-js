@@ -505,6 +505,7 @@ public class JsApi {
 		});
 		
 		predefine(['core/report'], 'rpc', function(Report){
+			var nativeClient = @com.eas.client.AppClient::getInstance()();
 			function requireRemotes(aRemotesNames, aOnSuccess, aOnFailure){
 				var remotesNames = Array.isArray(aRemotesNames) ? aRemotesNames : [aRemotesNames];
 				@com.eas.application.Loader::jsLoadServerModules(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(remotesNames, aOnSuccess, aOnFailure);
@@ -534,7 +535,6 @@ public class JsApi {
 							break;
 						}
 					}
-					var nativeClient = @com.eas.client.AppClient::getInstance()();
 					if(onSuccess) {
 						nativeClient.@com.eas.client.AppClient::requestServerMethodExecution(Ljava/lang/String;Ljava/lang/String;Lcom/google/gwt/core/client/JsArrayString;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(aModuleName, aFunctionName, params,
 							function(aResult){
@@ -549,11 +549,10 @@ public class JsApi {
 					}
 				};
 			}
-		    var serverModules = {};
 			function Proxy(aModuleName){
 				if(!(this instanceof Proxy))
-					throw 'use Rpc.requireRemotes(...) please.';
-				var moduleData = serverModules[aModuleName];
+					throw 'use new Rpc.Proxy() please.';
+				var moduleData = nativeClient.@com.eas.client.AppClient::getServerModule(Ljava/lang/String;)('' + aModuleName);
 				if(!moduleData)
 					throw 'No server module proxy for module: ' + aModuleName;
 				if(!moduleData.isPermitted)

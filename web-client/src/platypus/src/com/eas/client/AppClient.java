@@ -886,6 +886,10 @@ public class AppClient {
 		}
 	}
 
+	public Object getServerModule(String aModuleName) {
+		return serverModules.get(aModuleName);
+	}
+
 	public void addServerModule(String aModuleName, String aStructure) throws Exception {
 		serverModules.put(aModuleName, Utils.jsonParse(aStructure));
 	}

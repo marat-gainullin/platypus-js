@@ -70,7 +70,10 @@ public class Application {
 			ScriptElement script = scriptTags.getItem(s).cast();
 			if(script.getSrc().endsWith("pwc.nocache.js") && script.hasAttribute("entry-point")){
 				String entryPoint = script.getAttribute("entry-point");
-				ScriptInjector.fromUrl(entryPoint).setWindow(ScriptInjector.TOP_WINDOW).setRemoveTag(true).inject();
+				if(!entryPoint.toLowerCase().endsWith(".js"))
+					entryPoint += ".js";
+				String entryPointJsUrl = AppClient.relativeUri() + AppClient.APP_RESOURCE_PREFIX + entryPoint;
+				ScriptInjector.fromUrl(entryPointJsUrl).setWindow(ScriptInjector.TOP_WINDOW).setRemoveTag(true).inject();
 				break;
 			}
 		}
