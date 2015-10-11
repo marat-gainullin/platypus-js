@@ -322,6 +322,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
             clientListeners.stream().forEach((onChange) -> {
                 onChange.connected(aDatasourceName);
             });
+            fireQueriesChanged();
         });
     }
 
@@ -349,6 +350,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
             } catch (Exception ex) {
                 Exceptions.printStackTrace(ex);
             }
+            fireQueriesChanged();
         });
     }
 
@@ -357,6 +359,7 @@ public class PlatypusProjectImpl implements PlatypusProject {
             clientListeners.stream().forEach((onChange) -> {
                 onChange.defaultDatasourceNameChanged(aOldDatasourceName, aNewDatasourceName);
             });
+            fireQueriesChanged();
         });
     }
 

@@ -17,7 +17,6 @@ import com.eas.client.model.gui.view.ModelViewDragHandler;
 import com.eas.client.model.gui.view.entities.EntityView;
 import com.eas.client.model.gui.view.model.ApplicationModelView;
 import com.eas.designer.application.indexer.PlatypusPathRecognizer;
-import com.eas.designer.application.project.PlatypusProject;
 import com.eas.designer.datamodel.ModelUndoProvider;
 import com.eas.designer.datamodel.nodes.EntityNode;
 import com.eas.designer.datamodel.nodes.FieldNode;
@@ -143,7 +142,7 @@ public final class PlatypusDatamodelView extends CloneableTopComponent implement
     protected transient MultiViewElementCallback multiViewObserver;
     protected transient ApplicationModelEditorView appModelEditor;
     protected transient NodeSelectionListener exlorerSelectionListener = new NodeSelectionListener();
-    protected transient ListenerRegistration clientChangeListener;
+    //protected transient ListenerRegistration clientChangeListener;
     protected transient ListenerRegistration modelValidChangeListener;
     protected transient ExplorerManager explorerManager;
     protected PlatypusDataObject dataObject;
@@ -177,6 +176,7 @@ public final class PlatypusDatamodelView extends CloneableTopComponent implement
                     ErrorManager.getDefault().notify(ex);
                 }
             });
+            /*
             clientChangeListener = dataObject.addClientChangeListener(new PlatypusProject.ClientChangeListener() {
 
                 @Override
@@ -209,6 +209,7 @@ public final class PlatypusDatamodelView extends CloneableTopComponent implement
                     }
                 }
             });
+            */
         }
     }
 
@@ -475,9 +476,11 @@ public final class PlatypusDatamodelView extends CloneableTopComponent implement
         if (pms != null) {
             pms.shrink();
         }
+        /*
         if (clientChangeListener != null) {
             clientChangeListener.remove();
         }
+        */
         if (modelValidChangeListener != null) {
             modelValidChangeListener.remove();
         }
