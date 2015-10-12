@@ -26,7 +26,7 @@ import com.eas.core.Cancellable;
 import com.eas.core.Predefine;
 import com.eas.core.Utils;
 import com.eas.facade.JsFacade;
-import com.eas.form.JsForm;
+import com.eas.form.JsForms;
 import com.eas.grid.GridFactory;
 import com.eas.grid.JsGrid;
 import com.eas.menu.JsMenu;
@@ -159,7 +159,7 @@ public class Loader {
 			return BOUND_HUB;
 		} else if (aModuleName.startsWith("datamodel/") || aModuleName.equals("orm") || aModuleName.equals("managed") || aModuleName.equals("orderer")) {
 			return MODEL_HUB;
-		} else if (aModuleName.equals("forms") || aModuleName.equals("forms/form")) {
+		} else if (aModuleName.equals("forms")) {
 			return FORM_HUB;
 		} else if (aModuleName.startsWith("forms/")) {
 			return WMW_HUB;
@@ -285,7 +285,7 @@ public class Loader {
 					public void onSuccess() {
 						if (!asyncRan.contains(FORM_HUB)) {
 							asyncRan.add(FORM_HUB);
-							JsForm.init();
+							JsForms.init();
 						}
 						aCallback.onSuccess(null);
 					}
@@ -395,7 +395,7 @@ public class Loader {
 		});
 	}
 
-	private static void loadFormServer(final String aModuleName, final Set<String> aCyclic) throws Exception {
+	private static void loadFromServer(final String aModuleName, final Set<String> aCyclic) throws Exception {
 		AppClient.getInstance().requestModuleStructure(aModuleName, new CallbackAdapter<AppClient.ModuleStructure, XMLHttpRequest>() {
 
 			@Override
@@ -598,7 +598,7 @@ public class Loader {
 						if (predefinedHub != null)
 							loadPredefined(moduleName, predefinedHub);
 						else
-							loadFormServer(moduleName, aCyclic);
+							loadFromServer(moduleName, aCyclic);
 						started.add(moduleName);
 						fireStarted(moduleName);
 					}

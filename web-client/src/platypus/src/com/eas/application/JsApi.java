@@ -22,7 +22,8 @@ public class JsApi {
 		$wnd.require = function (aDeps, aOnSuccess, aOnFailure) {
             if (!Array.isArray(aDeps))
                 aDeps = [aDeps];
-			return @com.eas.application.Application::require(Lcom/eas/core/Utils$JsObject;Lcom/eas/core/Utils$JsObject;Lcom/eas/core/Utils$JsObject;)(aDeps, aOnSuccess, aOnFailure);
+			var resolved = @com.eas.application.Application::require(Lcom/eas/core/Utils$JsObject;Lcom/eas/core/Utils$JsObject;Lcom/eas/core/Utils$JsObject;)(aDeps, aOnSuccess, aOnFailure);
+			return resolved.length === 1 ? resolved[0] : resolved; 
 		}; 
 		$wnd.define = function () {
 	        if (arguments.length === 1 ||

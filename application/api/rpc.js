@@ -3,6 +3,7 @@ define('logger', function(){
     var ScriptsClass = Java.type("com.eas.script.Scripts");
     var ScriptedResourceClass = Java.type("com.eas.client.scripts.ScriptedResource");
     var JavaStringArrayClass = Java.type("java.lang.String[]");
+    var JavaArrayClass = Java.type("java.lang.Object[]");
     var space = ScriptsClass.getSpace();
     /**
      * Constructs server module network proxy.

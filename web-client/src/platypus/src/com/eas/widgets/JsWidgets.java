@@ -1230,5 +1230,44 @@ public class JsWidgets {
 			@com.eas.widgets.WidgetsPublisher::putPublisher(Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)('ButtonGroup', ButtonGroup);
 			return ButtonGroup;
 		});
+		
+		predefine([], 'forms/form', function(Form){
+			function Form(aView, aFormKey){
+				var aComponent = arguments.length > 2 ? arguments[2] : null;
+	
+				var published = this;
+				if(!aComponent){ 
+					if(aView)
+						aComponent = @com.eas.form.PlatypusWindow::new(Lcom/google/gwt/user/client/ui/Widget;)(aView.unwrap());
+					else
+						aComponent = @com.eas.form.PlatypusWindow::new()();
+				} 	
+				published.unwrap = function() {
+					return aComponent;
+				};
+				if(aFormKey){
+					aComponent.@com.eas.form.PlatypusWindow::setFormKey(Ljava/lang/String;)(aFormKey);
+				}
+				aComponent.@com.eas.core.HasPublished::setPublished(Lcom/google/gwt/core/client/JavaScriptObject;)(published);
+			}
+			Form.getShownForm = function(aFormKey){
+				return @com.eas.form.PlatypusWindow::getShownForm(Ljava/lang/String;)(aFormKey);
+			};
+			
+			Object.defineProperty(Form, "shown", {
+				get : function() {
+					return @com.eas.form.PlatypusWindow::getShownForms()();
+				}
+			});
+			Object.defineProperty(Form, "onChange", {
+				get : function() {
+					return @com.eas.form.PlatypusWindow::getOnChange()();
+				},
+				set : function(aValue) {
+					@com.eas.form.PlatypusWindow::setOnChange(Lcom/google/gwt/core/client/JavaScriptObject;)(aValue);
+				}
+			});
+			return Form;
+		});				
 	}-*/;
 }

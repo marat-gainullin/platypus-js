@@ -164,6 +164,9 @@ public class ServerMain {
             } else if ((CMD_SWITCHS_PREFIX + APP_ELEMENT_CONF_PARAM).equalsIgnoreCase(args[i])) {
                 if (i + 1 < args.length) {
                     appElement = args[i + 1];
+                    if (appElement.toLowerCase().endsWith(".js")) {
+                        appElement = appElement.substring(0, appElement.length() - 3);
+                    }
                     i += 2;
                 } else {
                     printHelp(BAD_DEFAULT_APPLICATION_ELEMENT_MSG);

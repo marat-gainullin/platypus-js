@@ -92,6 +92,42 @@ public class DependenciesWalkerTest {
     }
     
     @Test
+    public void testParseAmdDependencies3() {
+        String va1 = ""
+                + "P.require(['AnyModule'], function(AnyModule1){"
+                + "    return function(){"
+                + "        var self = this;"
+                + "        var am = new AnyModule1();"
+                + "        var sm = P.ServerModule('ServerCalc');"
+                + "    };"
+                + "});";
+        DependenciesWalker walker = new DependenciesWalker(va1, (aIfDependency)->{
+            return "AnyModule1".equals(aIfDependency);
+        });
+        walker.walk();
+        assertTrue(walker.getDependencies().isEmpty());
+        assertFalse(walker.getServerDependencies().isEmpty());
+    }
+    
+    @Test
+    public void testParseAmdDependencies4() {
+        String va1 = ""
+                + "require(['AnyModule'], function(AnyModule2){"
+                + "    return function(){"
+                + "        var self = this;"
+                + "        var am = new AnyModule2();"
+                + "        var sm = RPC.Proxy('ServerCalc');"
+                + "    };"
+                + "});";
+        DependenciesWalker walker = new DependenciesWalker(va1, (aIfDependency)->{
+            return "AnyModule2".equals(aIfDependency);
+        });
+        walker.walk();
+        assertTrue(walker.getDependencies().isEmpty());
+        assertFalse(walker.getServerDependencies().isEmpty());
+    }
+    
+    @Test
     public void testParseDependencies9() {
         String va1 = "var q = model.loadEntity('someQuery');";
         DependenciesWalker walker = new DependenciesWalker(va1);

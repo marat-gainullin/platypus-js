@@ -156,14 +156,14 @@ public class DependenciesWalker {
                     Expression ifDefineCall = lastCall.getFunction();
                     if (ifDefineCall instanceof AccessNode) {
                         AccessNode acc = (AccessNode) ifDefineCall;
-                        if (DEFINE_FUNCTION_NAME.equals(acc.getProperty())) {
+                        if (DEFINE_FUNCTION_NAME.equals(acc.getProperty()) || REQUIRE_FUNCTION_NAME.equals(acc.getProperty())) {
                             functionNode.getParameters().stream().forEach((definerArg) -> {
                                 dynamicDependencies.add(definerArg.getName());
                             });
                         }
                     } else if (ifDefineCall instanceof IdentNode) {
                         IdentNode toBeCalled = (IdentNode) lastCall.getFunction();
-                        if (DEFINE_FUNCTION_NAME.equals(toBeCalled.getName())) {
+                        if (DEFINE_FUNCTION_NAME.equals(toBeCalled.getName()) || REQUIRE_FUNCTION_NAME.equals(toBeCalled.getName())) {
                             functionNode.getParameters().stream().forEach((definerArg) -> {
                                 dynamicDependencies.add(definerArg.getName());
                             });

@@ -58,6 +58,9 @@ public class PlatypusServerConfig {
                         globalAPI = Boolean.valueOf(paramValue);
                     } else if (APPELEMENT_CONF_PARAM.equalsIgnoreCase(paramName)) {
                         appElementName = paramValue;
+                    if (appElementName.toLowerCase().endsWith(".js")) {
+                        appElementName = appElementName.substring(0, appElementName.length() - 3);
+                    }
                     } else if (WATCH_CONF_PARAM.equalsIgnoreCase(paramName)) {
                         watch = Boolean.valueOf(paramValue);
                     }

@@ -102,7 +102,7 @@ public class Application {
 			if (calledFromDir != null && dep.startsWith("./") || dep.startsWith("../")) {
 				dep = AppClient.toAppModuleId(dep, calledFromDir);
 			}
-			if (dep.endsWith(".js")) {
+			if (dep.toLowerCase().endsWith(".js")) {
 				dep = dep.substring(0, dep.length() - 3);
 			}
 			deps.add(dep);
