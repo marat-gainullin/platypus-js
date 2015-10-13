@@ -321,6 +321,9 @@ public class PlatypusWebModuleManager {
     private void configureParams(WebApplication wa) throws Exception {
         wa.addInitParam(new ContextParam(PlatypusServerConfig.DEF_DATASOURCE_CONF_PARAM, project.getSettings().getDefaultDataSourceName()));
         wa.addInitParam(new ContextParam(PlatypusServerConfig.APPELEMENT_CONF_PARAM, PlatypusProjectSettings.START_JS_FILE_NAME));
+        if (project.getSettings().getGlobalAPI()) {
+            wa.addInitParam(new ContextParam(PlatypusServerConfig.GLOBAL_API_CONF_PARAM, "" + true));
+        }
     }
 
     private void configureServlet(WebApplication wa) {

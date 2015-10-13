@@ -9,7 +9,7 @@
  */
 package com.eas.client.metadata;
 
-import com.eas.client.Utils;
+import com.eas.core.Utils;
 import com.google.gwt.core.client.JavaScriptObject;
 
 import java.sql.ParameterMetaData;
@@ -284,6 +284,7 @@ public class Parameter extends Field {
 	}
 
 	public static native void publishFacade(JavaScriptObject aTarget, Parameter aField)/*-{
+		var B = @com.eas.core.Predefine::boxing;
 		Object.defineProperty(aTarget, "modified", {
 			get : function() {
 				return aField.@com.eas.client.metadata.Parameter::isModified()();
@@ -291,10 +292,10 @@ public class Parameter extends Field {
 		});
 		Object.defineProperty(aTarget, "value", {
 			get : function() {
-				return $wnd.P.boxAsJs(aField.@com.eas.client.metadata.Parameter::getJsValue()());
+				return B.boxAsJs(aField.@com.eas.client.metadata.Parameter::getJsValue()());
 			},
 			set : function(aValue) {
-				aField.@com.eas.client.metadata.Parameter::setJsValue(Ljava/lang/Object;)($wnd.P.boxAsJava(aValue));
+				aField.@com.eas.client.metadata.Parameter::setJsValue(Ljava/lang/Object;)(B.boxAsJava(aValue));
 			}
 		});
 	}-*/;

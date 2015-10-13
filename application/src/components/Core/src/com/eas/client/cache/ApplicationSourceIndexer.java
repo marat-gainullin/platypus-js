@@ -304,20 +304,24 @@ public class ApplicationSourceIndexer implements PlatypusIndexer {
     @Override
     public AppElementFiles nameToFiles(String aName) throws Exception {
         if (aName != null) {
-            File resource = new File(calcSrcPath() + File.separator + aName.replace('/', File.separatorChar));
-            if (resource.exists()) {
-                AppElementFiles files = new AppElementFiles();
-                files.addFile(resource);
-                return files;
+            Set<String> paths = id2Paths.get(aName);
+            if (paths != null && !paths.isEmpty()) {
+                AppElementFiles files = families.get(paths.iterator().next());
+                if (files != null) {
+                    return files.copy();
+                } else {
+                    return null;
+                }
             } else {
-                Set<String> paths = id2Paths.get(aName);
-                if (paths != null && !paths.isEmpty()) {
-                    AppElementFiles files = families.get(paths.iterator().next());
-                    if (files != null) {
-                        return files.copy();
-                    } else {
-                        return null;
-                    }
+                String resourceName = calcSrcPath() + File.separator + aName.replace('/', File.separatorChar);
+                File resource = new File(resourceName + PlatypusFiles.JAVASCRIPT_FILE_END);
+                if (!resource.exists()) {
+                    resource = new File(resourceName);
+                }
+                if (resource.exists()) {
+                    AppElementFiles files = new AppElementFiles();
+                    files.addFile(resource);
+                    return files;
                 } else {
                     return null;
                 }

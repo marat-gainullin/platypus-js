@@ -33,8 +33,7 @@ public class ResourceRequestHandler extends RequestHandler<ResourceRequest, Reso
         String fileRelativeName = getRequest().getResourceName();
         fileRelativeName = fileRelativeName.replace("\\", File.separator);
         fileRelativeName = fileRelativeName.replace("/", File.separator);
-        String fileName = serverCore.getIndexer().calcSrcPath() + File.separator + fileRelativeName;
-        File resourceFile = new File(fileName);
+        File resourceFile = new File(serverCore.getIndexer().calcSrcPath() + File.separator + fileRelativeName);
         if (resourceFile.exists()) {
             try {
                 Date serverResourceTime = new Date(resourceFile.lastModified());

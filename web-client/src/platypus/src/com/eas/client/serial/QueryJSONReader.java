@@ -4,10 +4,10 @@
  */
 package com.eas.client.serial;
 
-import com.eas.client.Utils.JsObject;
 import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.Parameters;
 import com.eas.client.queries.Query;
+import com.eas.core.Utils.JsObject;
 import com.google.gwt.core.client.JavaScriptObject;
 
 /**

@@ -22,9 +22,11 @@ import jdk.nashorn.internal.ir.visitor.NodeVisitor;
 public class DependenciesWalker {
 
     public static final String REQUIRE_FUNCTION_NAME = "require";
+    public static final String DEFINE_FUNCTION_NAME = "define";
     public static final String MODEL = "model";
     public static final String LOAD_ENTITY = "loadEntity";
     public static final String SERVER_MODULE = "ServerModule";
+    public static final String RPC_PROXY = "Proxy";
     private final Set<String> localFunctions = new HashSet<>();
     private final Set<String> dependenceLikeIdentifiers = new HashSet<>();
     private final Set<String> dependencies = new HashSet<>();
@@ -49,13 +51,14 @@ public class DependenciesWalker {
         sourceRoot = Scripts.parseJs(source);
         sourceRoot.accept(new NodeVisitor<LexicalContext>(new LexicalContext()) {
 
-            private final Stack<CallNode> calls = new Stack<>();
+            private final Deque<CallNode> calls = new LinkedList<>();
 
             @Override
             public boolean enterCallNode(CallNode callNode) {
                 calls.push(callNode);
                 if (callNode.getFunction() instanceof IdentNode) {
-                    processIdentNode((IdentNode) callNode.getFunction());
+                    IdentNode toBeCalled = (IdentNode) callNode.getFunction();
+                    processIdentNode(toBeCalled);
                 }
                 return super.enterCallNode(callNode);
             }
@@ -74,13 +77,27 @@ public class DependenciesWalker {
 
             @Override
             public boolean enterLiteralNode(LiteralNode<?> literalNode) {
-                if (literalNode.getType().isString() && !calls.empty()) {
+                if (literalNode.getType().isString() && !calls.isEmpty()) {
                     String value = literalNode.getString();
                     CallNode lastCall = calls.peek();
                     boolean arrayAtFirstArg = lastCall.getArgs().size() >= 1 && lastCall.getArgs().get(0) instanceof LiteralNode.ArrayLiteralNode;
                     boolean atFirstArg = lastCall.getArgs().size() >= 1 && lastCall.getArgs().get(0) == literalNode;
                     Expression fe = lastCall.getFunction();
-                    if (fe instanceof AccessNode) {
+                    if (fe instanceof IdentNode) {
+                        IdentNode defineCall = (IdentNode) fe;
+                        String funcName = defineCall.getName();
+                        if (REQUIRE_FUNCTION_NAME.equals(funcName)) {
+                            if (arrayAtFirstArg) {
+                                LiteralNode.ArrayLiteralNode a = (LiteralNode.ArrayLiteralNode) lastCall.getArgs().get(0);
+                                if (a.getElementExpressions().contains(literalNode)) {
+                                    dynamicDependencies.add(value);
+                                }
+                            }
+                            if (atFirstArg) {
+                                dynamicDependencies.add(value);
+                            }
+                        }
+                    } else if (fe instanceof AccessNode) {
                         AccessNode lastAccess = (AccessNode) fe;
                         String funcName = lastAccess.getProperty();
                         if (REQUIRE_FUNCTION_NAME.equals(funcName)) {
@@ -95,6 +112,7 @@ public class DependenciesWalker {
                             }
                         } else if (/*lastCall.isNew() && */atFirstArg) {
                             switch (funcName) {
+                                case RPC_PROXY:
                                 case SERVER_MODULE:
                                     putServerDependence(value);
                                     break;
@@ -132,6 +150,25 @@ public class DependenciesWalker {
                 scopeLevel++;
                 if (scopeLevel == 2 && !functionNode.isAnonymous()) {
                     localFunctions.add(functionNode.getName());
+                }
+                if (!calls.isEmpty()) {
+                    CallNode lastCall = calls.peek();
+                    Expression ifDefineCall = lastCall.getFunction();
+                    if (ifDefineCall instanceof AccessNode) {
+                        AccessNode acc = (AccessNode) ifDefineCall;
+                        if (DEFINE_FUNCTION_NAME.equals(acc.getProperty()) || REQUIRE_FUNCTION_NAME.equals(acc.getProperty())) {
+                            functionNode.getParameters().stream().forEach((definerArg) -> {
+                                dynamicDependencies.add(definerArg.getName());
+                            });
+                        }
+                    } else if (ifDefineCall instanceof IdentNode) {
+                        IdentNode toBeCalled = (IdentNode) lastCall.getFunction();
+                        if (DEFINE_FUNCTION_NAME.equals(toBeCalled.getName()) || REQUIRE_FUNCTION_NAME.equals(toBeCalled.getName())) {
+                            functionNode.getParameters().stream().forEach((definerArg) -> {
+                                dynamicDependencies.add(definerArg.getName());
+                            });
+                        }
+                    }
                 }
                 return super.enterFunctionNode(functionNode);
             }

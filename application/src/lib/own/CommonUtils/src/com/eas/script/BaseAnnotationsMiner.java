@@ -21,6 +21,7 @@ public abstract class BaseAnnotationsMiner extends NodeVisitor<LexicalContext> {
 
     protected final int TOP_SCOPE_LEVEL = 1;
     protected final int TOP_CONSTRUCTORS_SCOPE_LEVEL = 2;
+    protected final int AMD_CONSTRUCTORS_SCOPE_LEVEL = 3;
     protected Map<Long, Long> prevComments = new TreeMap<>();
     protected Source source;
 

@@ -6,15 +6,19 @@ package com.eas.client;
 
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusFilesSupport;
+import com.eas.script.JsDoc;
 import com.eas.util.FileUtils;
 import com.eas.util.IDGenerator;
 import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -41,12 +45,20 @@ public class AppElementFiles {
     }
 
     public String getAppElementId(int appElementType) {
-        if (appElementType == ClientConstants.ET_COMPONENT || appElementType == ClientConstants.ET_FORM || appElementType == ClientConstants.ET_REPORT) {
-            return PlatypusFilesSupport.getAppElementIdByAnnotation(findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION));
-        } else if (appElementType == ClientConstants.ET_QUERY) {
-            return PlatypusFilesSupport.getAppElementIdByAnnotation(findFileByExtension(PlatypusFiles.SQL_EXTENSION));
-        } else if (appElementType == ClientConstants.ET_DB_SCHEME) {
-            return IDGenerator.genID() + "";
+        try {
+            if (appElementType == ClientConstants.ET_COMPONENT || appElementType == ClientConstants.ET_FORM || appElementType == ClientConstants.ET_REPORT) {
+                File jsFile = findFileByExtension(PlatypusFiles.JAVASCRIPT_EXTENSION);
+                String fileContent = FileUtils.readString(jsFile, PlatypusFiles.DEFAULT_ENCODING);
+                return PlatypusFilesSupport.extractModuleName(fileContent, jsFile.getPath());
+            } else if (appElementType == ClientConstants.ET_QUERY) {
+                File sqlFile = findFileByExtension(PlatypusFiles.SQL_EXTENSION);
+                String fileContent = FileUtils.readString(sqlFile, PlatypusFiles.DEFAULT_ENCODING);
+                return PlatypusFilesSupport.getAnnotationValue(fileContent, JsDoc.Tag.NAME_TAG);
+            } else if (appElementType == ClientConstants.ET_DB_SCHEME) {
+                return IDGenerator.genID() + "";
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(AppElementFiles.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }

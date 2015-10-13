@@ -1,9 +1,11 @@
-(function () {
+/* global Java */
+
+define(['logger', 'boxing'], function (Logger, B) {
     /**
      * Http context of current http request.
      * @constructor
      */
-    P.HttpContext = function () {
+    return function () {
         var BinaryUtils = Java.type("com.eas.util.BinaryUtils");
         var JavaString = Java.type("java.lang.String");
         var HttpCookie = Java.type("javax.servlet.http.Cookie");
@@ -62,7 +64,7 @@
                     } else {
                         var encoding = aHttpRequest.getCharacterEncoding();
                         if (!encoding || encoding.isEmpty()) {
-                            P.Logger.warning("Missing character encoding. Falling back to utf-8.");
+                            Logger.warning("Missing character encoding. Falling back to utf-8.");
                             encoding = "utf-8";
                         }
                         if (CharsetClass.isSupported(encoding)) {
@@ -363,12 +365,12 @@
                     if (paramValues.length === 1) {
                         Object.defineProperty(self, aParamName, {
                             enumerable: true,
-                            value: P.boxAsJs(aHttpRequest.getParameter(aParamName))
+                            value: B.boxAsJs(paramValues[0])
                         });
                     } else {
                         Object.defineProperty(self, aParamName, {
                             enumerable: true,
-                            value: P.boxAsJs(paramValues)
+                            value: B.boxAsJs(paramValues)
                         });
                     }
                 }
@@ -445,7 +447,7 @@
                     _body = aValue;
                     var encoding = aHttpResponse.getCharacterEncoding();
                     if (!encoding || encoding.isEmpty()) {
-                        P.Logger.warning("Missing character encoding. Falling back to utf-8.");
+                        Logger.warning("Missing character encoding. Falling back to utf-8.");
                         encoding = "utf-8";
                     }
                     if (CharsetClass.isSupported(encoding)) {
@@ -498,40 +500,40 @@
              * Adds a new cookie to the response.\n"
              * Use a key-value object with the following properties:
              * <code>name</code>, <code>value</code>, <code>comment</code>, <code>domain</code>, <code>maxAge</code>e, <code>path</code>, <code>secure</code>, <code>version</code>.
-             * @param cookie the cookie object, for example <code>{name: 'platypus', value: 'test', maxAge: 60*60}</code>
+             * @param aValue the cookie object, for example <code>{name: 'platypus', value: 'test', maxAge: 60*60}</code>
              */
             this.addCookie = function (aValue) {
                 var name = aValue.name;
                 var value = aValue.value;
-                if (name != null && value != null) {
+                if (name !== null && value !== null) {
                     var httpCookie = new HttpCookie(name, value);
                     var comment = aValue.comment;
-                    if (comment != null) {
+                    if (comment !== null) {
                         httpCookie.setComment(comment);
                     }
                     var domain = aValue.domain;
-                    if (domain != null) {
+                    if (domain !== null) {
                         httpCookie.setDomain(domain);
                     }
                     var maxAge = aValue.maxAge;
-                    if (maxAge != null) {
+                    if (maxAge !== null) {
                         var maxAgeInt = parseInt(maxAge);
-                        if (maxAgeInt != null) {
+                        if (maxAgeInt !== null) {
                             httpCookie.setMaxAge(maxAgeInt);
                         }
                     }
                     var path = aValue.path;
-                    if (path != null) {
+                    if (path !== null) {
                         httpCookie.setPath(path);
                     }
                     var secure = aValue.secure;
-                    if (secure != null) {
+                    if (secure !== null) {
                         httpCookie.setSecure(new Boolean(secure));
                     }
                     var version = aValue.version;
-                    if (version != null) {
+                    if (version !== null) {
                         var versionInt = parseInt(version);
-                        if (versionInt != null) {
+                        if (versionInt !== null) {
                             httpCookie.setVersion(versionInt);
                         }
                     }
@@ -583,4 +585,4 @@
             };
         }
     };
-})();
+});

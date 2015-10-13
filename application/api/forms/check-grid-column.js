@@ -1,16 +1,13 @@
-(function() {
+/* global Java */
+
+define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/font', './cell-render-event'], function(B, Color, Cursor, Font, RenderEvent) {
     var className = "com.eas.client.forms.components.model.grid.header.CheckGridColumn";
     var javaClass = Java.type(className);
-    var space = this['-platypus-scripts-space'];
-    space.putPublisher(className, function(aDelegate) {
-        return new P.CheckGridColumn(aDelegate);
-    });
-    
     /**
      *
      * @constructor CheckGridColumn CheckGridColumn
      */
-    P.CheckGridColumn = function () {
+    function CheckGridColumn() {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -22,226 +19,142 @@
                 return delegate;
             }
         });
-        if(P.CheckGridColumn.superclass)
-            P.CheckGridColumn.superclass.constructor.apply(this, arguments);
+        if(CheckGridColumn.superclass)
+            CheckGridColumn.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
         Object.defineProperty(this, "preferredWidth", {
             get: function() {
                 var value = delegate.preferredWidth;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.preferredWidth = P.boxAsJava(aValue);
+                delegate.preferredWidth = B.boxAsJava(aValue);
             }
         });
-        if(!P.CheckGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property preferredWidth
-             * @memberOf CheckGridColumn
-             */
-            P.CheckGridColumn.prototype.preferredWidth = 0;
-        }
+
         Object.defineProperty(this, "visible", {
             get: function() {
                 var value = delegate.visible;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.visible = P.boxAsJava(aValue);
+                delegate.visible = B.boxAsJava(aValue);
             }
         });
-        if(!P.CheckGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property visible
-             * @memberOf CheckGridColumn
-             */
-            P.CheckGridColumn.prototype.visible = true;
-        }
+
         Object.defineProperty(this, "resizable", {
             get: function() {
                 var value = delegate.resizable;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.resizable = P.boxAsJava(aValue);
+                delegate.resizable = B.boxAsJava(aValue);
             }
         });
-        if(!P.CheckGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property resizable
-             * @memberOf CheckGridColumn
-             */
-            P.CheckGridColumn.prototype.resizable = true;
-        }
+
         Object.defineProperty(this, "minWidth", {
             get: function() {
                 var value = delegate.minWidth;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.minWidth = P.boxAsJava(aValue);
+                delegate.minWidth = B.boxAsJava(aValue);
             }
         });
-        if(!P.CheckGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property minWidth
-             * @memberOf CheckGridColumn
-             */
-            P.CheckGridColumn.prototype.minWidth = 0;
-        }
+
         Object.defineProperty(this, "foreground", {
             get: function() {
                 var value = delegate.foreground;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.foreground = P.boxAsJava(aValue);
+                delegate.foreground = B.boxAsJava(aValue);
             }
         });
-        if(!P.CheckGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property foreground
-             * @memberOf CheckGridColumn
-             */
-            P.CheckGridColumn.prototype.foreground = {};
-        }
+
         Object.defineProperty(this, "sortable", {
             get: function() {
                 var value = delegate.sortable;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.sortable = P.boxAsJava(aValue);
+                delegate.sortable = B.boxAsJava(aValue);
             }
         });
-        if(!P.CheckGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property sortable
-             * @memberOf CheckGridColumn
-             */
-            P.CheckGridColumn.prototype.sortable = true;
-        }
+
         Object.defineProperty(this, "title", {
             get: function() {
                 var value = delegate.title;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.title = P.boxAsJava(aValue);
+                delegate.title = B.boxAsJava(aValue);
             }
         });
-        if(!P.CheckGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property title
-             * @memberOf CheckGridColumn
-             */
-            P.CheckGridColumn.prototype.title = '';
-        }
+
         Object.defineProperty(this, "movable", {
             get: function() {
                 var value = delegate.movable;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.movable = P.boxAsJava(aValue);
+                delegate.movable = B.boxAsJava(aValue);
             }
         });
-        if(!P.CheckGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property movable
-             * @memberOf CheckGridColumn
-             */
-            P.CheckGridColumn.prototype.movable = true;
-        }
+
         Object.defineProperty(this, "readonly", {
             get: function() {
                 var value = delegate.readonly;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.readonly = P.boxAsJava(aValue);
+                delegate.readonly = B.boxAsJava(aValue);
             }
         });
-        if(!P.CheckGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property readonly
-             * @memberOf CheckGridColumn
-             */
-            P.CheckGridColumn.prototype.readonly = true;
-        }
+
         Object.defineProperty(this, "background", {
             get: function() {
                 var value = delegate.background;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.background = P.boxAsJava(aValue);
+                delegate.background = B.boxAsJava(aValue);
             }
         });
-        if(!P.CheckGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property background
-             * @memberOf CheckGridColumn
-             */
-            P.CheckGridColumn.prototype.background = {};
-        }
+
         Object.defineProperty(this, "width", {
             get: function() {
                 var value = delegate.width;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
-        if(!P.CheckGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property width
-             * @memberOf CheckGridColumn
-             */
-            P.CheckGridColumn.prototype.width = 0;
-        }
+
         Object.defineProperty(this, "font", {
             get: function() {
                 var value = delegate.font;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.font = P.boxAsJava(aValue);
+                delegate.font = B.boxAsJava(aValue);
             }
         });
-        if(!P.CheckGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property font
-             * @memberOf CheckGridColumn
-             */
-            P.CheckGridColumn.prototype.font = {};
-        }
+
         Object.defineProperty(this, "maxWidth", {
             get: function() {
                 var value = delegate.maxWidth;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             },
             set: function(aValue) {
-                delegate.maxWidth = P.boxAsJava(aValue);
+                delegate.maxWidth = B.boxAsJava(aValue);
             }
         });
-        if(!P.CheckGridColumn){
-            /**
-             * Generated property jsDoc.
-             * @property maxWidth
-             * @memberOf CheckGridColumn
-             */
-            P.CheckGridColumn.prototype.maxWidth = 0;
-        }
+
     };
-})();
+
+    var ScriptsClass = Java.type("com.eas.script.Scripts");
+    var space = ScriptsClass.getSpace();
+    space.putPublisher(className, function(aDelegate) {
+        return new CheckGridColumn(aDelegate);
+    });
+    return CheckGridColumn;
+});

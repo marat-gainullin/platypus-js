@@ -1,16 +1,13 @@
-(function() {
+/* global Java */
+
+define(['boxing'], function(B) {
     var className = "com.eas.client.forms.events.ContainerEvent";
     var javaClass = Java.type(className);
-    var space = this['-platypus-scripts-space'];
-    space.putPublisher(className, function(aDelegate) {
-        return new P.ContainerEvent(aDelegate);
-    });
-    
     /**
      * Generated constructor.
      * @constructor ContainerEvent ContainerEvent
      */
-    P.ContainerEvent = function () {
+    function ContainerEvent() {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -22,36 +19,29 @@
                 return delegate;
             }
         });
-        if(P.ContainerEvent.superclass)
-            P.ContainerEvent.superclass.constructor.apply(this, arguments);
+        if(ContainerEvent.superclass)
+            ContainerEvent.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
-        if(!P.ContainerEvent){
-            /**
-             * The source object of the event.
-             * @property source
-             * @memberOf ContainerEvent
-             */
-            P.ContainerEvent.prototype.source = {};
-        }
+
         Object.defineProperty(this, "child", {
             get: function() {
                 var value = delegate.child;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
-        if(!P.ContainerEvent){
-            /**
-             * The child component the operation is performed on.
-             * @property child
-             * @memberOf ContainerEvent
-             */
-            P.ContainerEvent.prototype.child = {};
-        }
+
     };
-})();
+
+    var ScriptsClass = Java.type("com.eas.script.Scripts");
+    var space = ScriptsClass.getSpace();
+    space.putPublisher(className, function(aDelegate) {
+        return new ContainerEvent(aDelegate);
+    });
+    return ContainerEvent;
+});

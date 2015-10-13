@@ -31,13 +31,17 @@ public class LocalModulesProxy implements ModulesProxy {
 
     protected ApplicationSourceIndexer indexer;
     protected ModelsDocuments modelsDocs;
-    protected String defaultModuleName;
+    protected final String defaultModuleName;
 
     public LocalModulesProxy(ApplicationSourceIndexer aIndexer, ModelsDocuments aModelsDocs, String aDefaultModuleName) throws Exception {
         super();
         indexer = aIndexer;
         modelsDocs = aModelsDocs;
-        defaultModuleName = aDefaultModuleName;
+        if (aDefaultModuleName.toLowerCase().endsWith(PlatypusFiles.JAVASCRIPT_FILE_END)) {
+            defaultModuleName = aDefaultModuleName.substring(0, aDefaultModuleName.length() - PlatypusFiles.JAVASCRIPT_FILE_END.length());
+        } else {
+            defaultModuleName = aDefaultModuleName;
+        }
     }
 
     @Override

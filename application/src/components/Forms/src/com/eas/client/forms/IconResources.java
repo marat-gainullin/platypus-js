@@ -6,7 +6,6 @@ package com.eas.client.forms;
 
 import com.eas.client.scripts.ScriptedResource;
 import com.eas.script.Scripts;
-import java.net.URL;
 import java.util.function.Consumer;
 import javax.swing.ImageIcon;
 import jdk.nashorn.api.scripting.JSObject;
@@ -44,7 +43,7 @@ public class IconResources {
             });
             return null;
         } else {
-            Object loaded = ScriptedResource.load(aResourceName, aCalledFromFile);
+            Object loaded = ScriptedResource._load(aResourceName, aCalledFromFile, aSpace);
             if (loaded instanceof byte[]) {
                 byte[] content = (byte[]) loaded;
                 return new ImageIcon(content);

@@ -1,9 +1,15 @@
-try{
-    P.require([
-          './cursor.js'
-        , './color.js'
-        , './font.js'
-    ]);
-}catch(e){
-    P.Logger.severe(e);
-}
+define([
+      './cursor'
+    , './font'
+    , './color'
+], function(
+      Cursor
+    , Font
+    , Color
+    ){
+    return {
+          Cursor: Cursor
+        , Font: Font
+        , Color: Color
+    };
+});

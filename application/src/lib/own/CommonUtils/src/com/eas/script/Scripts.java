@@ -62,25 +62,34 @@ import jdk.nashorn.internal.runtime.options.Options;
 public class Scripts {
 
     private static final NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
-    private static final NashornScriptEngine engine = (NashornScriptEngine)factory.getScriptEngine();
-    protected static final String PLATYPUS_JS_FILENAME = "platypus.js";
+    private static final NashornScriptEngine engine = (NashornScriptEngine) factory.getScriptEngine();
+    protected static final String PLATYPUS_JS_MODULENAME = "facade";
+    public static final String PLATYPUS_JS_FILENAME = PLATYPUS_JS_MODULENAME + ".js";
+    protected static final String INTERNALS_MODULENAME = "internals";
+    protected static final String INTERNALS_JS_FILENAME = INTERNALS_MODULENAME + ".js";
     public static final String STRING_TYPE_NAME = "String";//NOI18N
     public static final String NUMBER_TYPE_NAME = "Number";//NOI18N
     public static final String DATE_TYPE_NAME = "Date";//NOI18N
     public static final String BOOLEAN_TYPE_NAME = "Boolean";//NOI18N
     public static final String GEOMETRY_TYPE_NAME = "Geometry";//NOI18N
     public static final String THIS_KEYWORD = "this";//NOI18N
-    protected static volatile Path absoluteApiPath;
-    protected static volatile URL platypusJsUrl;
-    
-    public static NashornScriptEngine getEngine(){
+    public static /*final*/ URL internalsUrl;
+    public static /*final*/ URL platypusJsUrl;
+    public static /*final*/ boolean globalAPI;
+    public static volatile Path absoluteApiPath;
+
+    public static NashornScriptEngine getEngine() {
         return engine;
     }
-    
+
     private static final ThreadLocal<LocalContext> contextRef = new ThreadLocal<>();
 
     public static Space getSpace() {
         return getContext() != null ? getContext().getSpace() : null;
+    }
+
+    public static boolean isGlobalAPI() {
+        return globalAPI;
     }
 
     public static LocalContext getContext() {
@@ -101,7 +110,7 @@ public class Scripts {
         protected Object response;
         protected Object principal;
         protected Object session;
-        
+
         protected Integer asyncsCount;
 
         protected Scripts.Space space;
@@ -188,14 +197,17 @@ public class Scripts {
     }
 
     public static class Space {
-        
+
         protected ScriptContext scriptContext;
         protected Object global;
         protected Map<String, JSObject> publishers = new HashMap<>();
         protected Set<String> required = new HashSet<>();
         protected Set<String> executed = new HashSet<>();
         protected Map<String, List<Pending>> pending = new HashMap<>();
-        
+        protected String[] amdDependencies;
+        protected JSObject amdDefineCallback;
+        protected Map<String, JSObject> defined = new HashMap<>();
+
         protected Space() {
             this(null);
             global = new Object();
@@ -204,6 +216,15 @@ public class Scripts {
         public Space(ScriptContext aScriptContext) {
             super();
             scriptContext = aScriptContext;
+        }
+
+        /**
+         * This method is used by crazy designer only
+         *
+         * @return
+         */
+        public String getFileNameFromContext() {
+            return (String) scriptContext.getAttribute(ScriptEngine.FILENAME);
         }
 
         public Set<String> getRequired() {
@@ -216,6 +237,27 @@ public class Scripts {
 
         public Map<String, List<Pending>> getPending() {
             return pending;
+        }
+
+        public Map<String, JSObject> getDefined() {
+            return defined;
+        }
+
+        public void setAmdDefine(String[] aAmdDependencies, JSObject aModuleDefiner) {
+            amdDependencies = aAmdDependencies;
+            amdDefineCallback = aModuleDefiner;
+        }
+
+        public String[] consumeAmdDependencies() {
+            String[] res = amdDependencies;
+            amdDependencies = null;
+            return res;
+        }
+
+        public JSObject consumeAmdDefineCallback() {
+            JSObject res = amdDefineCallback;
+            amdDefineCallback = null;
+            return res;
         }
 
         protected JSObject loadFunc;
@@ -478,9 +520,8 @@ public class Scripts {
 
         public JSObject createModule(String aModuleName) {
             assert lookupInGlobalFunc != null : SCRIPT_NOT_INITIALIZED;
-            Object oConstructor = lookupInGlobalFunc.call(null, new Object[]{aModuleName});
-            if (oConstructor instanceof JSObject && ((JSObject) oConstructor).isFunction()) {
-                JSObject jsConstructor = (JSObject) oConstructor;
+            JSObject jsConstructor = lookupInGlobal(aModuleName);
+            if (jsConstructor != null && jsConstructor.isFunction()) {
                 return (JSObject) jsConstructor.newObject(new Object[]{});
             } else {
                 return null;
@@ -489,8 +530,13 @@ public class Scripts {
 
         public JSObject lookupInGlobal(String aName) {
             assert lookupInGlobalFunc != null : SCRIPT_NOT_INITIALIZED;
-            Object res = lookupInGlobalFunc.call(null, new Object[]{aName});
-            return res instanceof JSObject ? (JSObject) res : null;
+            JSObject amd = defined.get(aName);
+            if (amd != null) {
+                return amd;
+            } else {
+                Object res = lookupInGlobalFunc.call(null, new Object[]{aName});
+                return res instanceof JSObject ? (JSObject) res : null;
+            }
         }
 
         public void putInGlobal(String aName, JSObject aValue) {
@@ -499,7 +545,7 @@ public class Scripts {
         }
 
         public Object exec(String aSourceName, URL aSourcePlace) throws ScriptException, URISyntaxException {
-            scriptContext.setAttribute(ScriptEngine.FILENAME, aSourceName, ScriptContext.ENGINE_SCOPE);
+            scriptContext.setAttribute(ScriptEngine.FILENAME, aSourceName.toLowerCase().endsWith(".js") ? aSourceName.substring(0, aSourceName.length() - 3) : aSourceName, ScriptContext.ENGINE_SCOPE);
             return engine.eval(new URLReader(aSourcePlace), scriptContext);
         }
 
@@ -592,13 +638,12 @@ public class Scripts {
         void initSpaceGlobal() {
             Bindings bindings = engine.createBindings();
             scriptContext.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
-            bindings.put("space", this);
             try {
                 Scripts.LocalContext ctx = Scripts.createContext(Scripts.Space.this);
                 Scripts.setContext(ctx);
                 try {
-                    scriptContext.setAttribute(ScriptEngine.FILENAME, PLATYPUS_JS_FILENAME, ScriptContext.ENGINE_SCOPE);
-                    engine.eval(new URLReader(platypusJsUrl), scriptContext);
+                    scriptContext.setAttribute(ScriptEngine.FILENAME, INTERNALS_MODULENAME, ScriptContext.ENGINE_SCOPE);
+                    engine.eval(new URLReader(internalsUrl), scriptContext);
                 } finally {
                     Scripts.setContext(null);
                 }
@@ -625,9 +670,11 @@ public class Scripts {
     // bio thread pool
     protected static ThreadPoolExecutor bio;
 
-    public static void init(Path aAbsoluteApiPath) throws MalformedURLException {
+    public static void init(Path aAbsoluteApiPath, boolean aGlobalAPI) throws MalformedURLException {
+        globalAPI = aGlobalAPI;
+        platypusJsUrl = aAbsoluteApiPath.resolve(PLATYPUS_JS_FILENAME).toUri().toURL();
+        internalsUrl = aAbsoluteApiPath.resolve(INTERNALS_JS_FILENAME).toUri().toURL();
         absoluteApiPath = aAbsoluteApiPath;
-        platypusJsUrl = absoluteApiPath.resolve(PLATYPUS_JS_FILENAME).toUri().toURL();
     }
 
     public static Path getAbsoluteApiPath() {

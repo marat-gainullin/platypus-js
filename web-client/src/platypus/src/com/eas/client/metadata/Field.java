@@ -12,7 +12,7 @@ package com.eas.client.metadata;
 import java.util.Date;
 
 import com.eas.client.IDGenerator;
-import com.eas.client.Utils;
+import com.eas.core.Utils;
 import com.google.gwt.core.client.JavaScriptObject;
 
 /**

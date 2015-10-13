@@ -1,16 +1,13 @@
-(function() {
+/* global Java */
+
+define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/font', './action-event', './cell-render-event', './component-event', './focus-event', './item-event', './key-event', './value-change-event', './popup-menu'], function(B, Color, Cursor, Font, ActionEvent, RenderEvent, ComponentEvent, FocusEvent, ItemEvent, KeyEvent, ValueChangeEvent, PopupMenu) {
     var className = "com.eas.client.forms.components.model.CellRenderEvent";
     var javaClass = Java.type(className);
-    var space = this['-platypus-scripts-space'];
-    space.putPublisher(className, function(aDelegate) {
-        return new P.CellRenderEvent(aDelegate);
-    });
-    
     /**
      * Generated constructor.
      * @constructor CellRenderEvent CellRenderEvent
      */
-    P.CellRenderEvent = function () {
+    function CellRenderEvent() {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -22,64 +19,43 @@
                 return delegate;
             }
         });
-        if(P.CellRenderEvent.superclass)
-            P.CellRenderEvent.superclass.constructor.apply(this, arguments);
+        if(CellRenderEvent.superclass)
+            CellRenderEvent.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
         Object.defineProperty(this, "column", {
             get: function() {
                 var value = delegate.column;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
-        if(!P.CellRenderEvent){
-            /**
-             * The cell's column.
-             * @property column
-             * @memberOf CellRenderEvent
-             */
-            P.CellRenderEvent.prototype.column = {};
-        }
+
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
-        if(!P.CellRenderEvent){
-            /**
-             * The source object of the event.
-             * @property source
-             * @memberOf CellRenderEvent
-             */
-            P.CellRenderEvent.prototype.source = {};
-        }
+
         Object.defineProperty(this, "cell", {
             get: function() {
                 var value = delegate.cell;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
-        if(!P.CellRenderEvent){
-            /**
-             * The "abstract" cell.
-             * @property cell
-             * @memberOf CellRenderEvent
-             */
-            P.CellRenderEvent.prototype.cell = {};
-        }
+
         Object.defineProperty(this, "object", {
             get: function() {
                 var value = delegate.object;
                 return value;
             }
         });
-        if(!P.CellRenderEvent){
-            /**
-             * The cell's object.
-             * @property object
-             * @memberOf CellRenderEvent
-             */
-            P.CellRenderEvent.prototype.object = {};
-        }
+
     };
-})();
+
+    var ScriptsClass = Java.type("com.eas.script.Scripts");
+    var space = ScriptsClass.getSpace();
+    space.putPublisher(className, function(aDelegate) {
+        return new CellRenderEvent(aDelegate);
+    });
+    return CellRenderEvent;
+});

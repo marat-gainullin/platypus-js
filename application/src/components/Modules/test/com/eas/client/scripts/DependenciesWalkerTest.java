@@ -27,7 +27,7 @@ public class DependenciesWalkerTest {
 
     @Test
     public void testParseDependencies6() {
-        String va1 = "P.require([\"ANY_REPORT_NAME\", \"ANY_MODULE_NAME\"], function(){var report = new P.ServerModule(\"ANY_REPORT_NAME\"); var module = new ANY_MODULE1_NAME(); var servModule = new P.ServerModule(\"ANY_MODULE_NAME\");});";
+        String va1 = "P.require([\"ANY_REPORT_NAME\", \"ANY_MODULE_NAME\"], function(){var report = new RPC.Proxy(\"ANY_REPORT_NAME\"); var module = new ANY_MODULE1_NAME(); var servModule = new P.ServerModule(\"ANY_MODULE_NAME\");});";
         DependenciesWalker walker = new DependenciesWalker(va1, (aIfDependency)->{
             return "ANY_MODULE1_NAME".equals(aIfDependency);
         });
@@ -50,6 +50,78 @@ public class DependenciesWalkerTest {
     public void testParseDependencies8() {
         String va1 = "P.require(\"ANY_REPORT_NAME\", function(){var m = new ANY_REPORT_NAME(); var report = new P.ServerModule(\"ANY_REPORT_NAME\");});";
         DependenciesWalker walker = new DependenciesWalker(va1);
+        walker.walk();
+        assertTrue(walker.getDependencies().isEmpty());
+        assertFalse(walker.getServerDependencies().isEmpty());
+    }
+    
+    @Test
+    public void testParseAmdDependencies1() {
+        String va1 = ""
+                + "P.define(['AnyModule'], function(AnyModule1){"
+                + "    return function(){"
+                + "        var self = this;"
+                + "        var am = new AnyModule1();"
+                + "        var sm = P.ServerModule('ServerCalc');"
+                + "    };"
+                + "});";
+        DependenciesWalker walker = new DependenciesWalker(va1, (aIfDependency)->{
+            return "AnyModule1".equals(aIfDependency);
+        });
+        walker.walk();
+        assertTrue(walker.getDependencies().isEmpty());
+        assertFalse(walker.getServerDependencies().isEmpty());
+    }
+    
+    @Test
+    public void testParseAmdDependencies2() {
+        String va1 = ""
+                + "define(['AnyModule'], function(AnyModule2){"
+                + "    return function(){"
+                + "        var self = this;"
+                + "        var am = new AnyModule2();"
+                + "        var sm = RPC.Proxy('ServerCalc');"
+                + "    };"
+                + "});";
+        DependenciesWalker walker = new DependenciesWalker(va1, (aIfDependency)->{
+            return "AnyModule2".equals(aIfDependency);
+        });
+        walker.walk();
+        assertTrue(walker.getDependencies().isEmpty());
+        assertFalse(walker.getServerDependencies().isEmpty());
+    }
+    
+    @Test
+    public void testParseAmdDependencies3() {
+        String va1 = ""
+                + "P.require(['AnyModule'], function(AnyModule1){"
+                + "    return function(){"
+                + "        var self = this;"
+                + "        var am = new AnyModule1();"
+                + "        var sm = P.ServerModule('ServerCalc');"
+                + "    };"
+                + "});";
+        DependenciesWalker walker = new DependenciesWalker(va1, (aIfDependency)->{
+            return "AnyModule1".equals(aIfDependency);
+        });
+        walker.walk();
+        assertTrue(walker.getDependencies().isEmpty());
+        assertFalse(walker.getServerDependencies().isEmpty());
+    }
+    
+    @Test
+    public void testParseAmdDependencies4() {
+        String va1 = ""
+                + "require(['AnyModule'], function(AnyModule2){"
+                + "    return function(){"
+                + "        var self = this;"
+                + "        var am = new AnyModule2();"
+                + "        var sm = RPC.Proxy('ServerCalc');"
+                + "    };"
+                + "});";
+        DependenciesWalker walker = new DependenciesWalker(va1, (aIfDependency)->{
+            return "AnyModule2".equals(aIfDependency);
+        });
         walker.walk();
         assertTrue(walker.getDependencies().isEmpty());
         assertFalse(walker.getServerDependencies().isEmpty());

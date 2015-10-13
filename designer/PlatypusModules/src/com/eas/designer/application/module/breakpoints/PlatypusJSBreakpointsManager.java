@@ -5,6 +5,7 @@
  */
 package com.eas.designer.application.module.breakpoints;
 
+import com.eas.client.cache.PlatypusFiles;
 import com.sun.jdi.AbsentInformationException;
 import com.sun.jdi.request.EventRequest;
 import java.util.HashMap;
@@ -133,7 +134,7 @@ public class PlatypusJSBreakpointsManager extends DebuggerManagerAdapter {
     }
 
     private static String fileNameToClassNameFragment(String aFileName) {
-        final int index = aFileName.lastIndexOf(".js");
+        final int index = aFileName.lastIndexOf(PlatypusFiles.JAVASCRIPT_FILE_END);
         if (index != -1) {
             aFileName = aFileName.substring(0, index);
         }

@@ -1,16 +1,13 @@
-(function() {
+/* global Java */
+
+define(['boxing'], function(B) {
     var className = "com.eas.client.forms.events.FocusEvent";
     var javaClass = Java.type(className);
-    var space = this['-platypus-scripts-space'];
-    space.putPublisher(className, function(aDelegate) {
-        return new P.FocusEvent(aDelegate);
-    });
-    
     /**
      * Generated constructor.
      * @constructor FocusEvent FocusEvent
      */
-    P.FocusEvent = function () {
+    function FocusEvent() {
         var maxArgs = 0;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
@@ -22,22 +19,22 @@
                 return delegate;
             }
         });
-        if(P.FocusEvent.superclass)
-            P.FocusEvent.superclass.constructor.apply(this, arguments);
+        if(FocusEvent.superclass)
+            FocusEvent.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
         Object.defineProperty(this, "source", {
             get: function() {
                 var value = delegate.source;
-                return P.boxAsJs(value);
+                return B.boxAsJs(value);
             }
         });
-        if(!P.FocusEvent){
-            /**
-             * The source object of the event.
-             * @property source
-             * @memberOf FocusEvent
-             */
-            P.FocusEvent.prototype.source = {};
-        }
+
     };
-})();
+
+    var ScriptsClass = Java.type("com.eas.script.Scripts");
+    var space = ScriptsClass.getSpace();
+    space.putPublisher(className, function(aDelegate) {
+        return new FocusEvent(aDelegate);
+    });
+    return FocusEvent;
+});

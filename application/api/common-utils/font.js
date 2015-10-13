@@ -1,11 +1,8 @@
-(function() {
+/* global Java */
+
+define(['boxing'], function(B) {
     var className = "com.eas.gui.Font";
     var javaClass = Java.type(className);
-    var space = this['-platypus-scripts-space'];
-    space.putPublisher(className, function(aDelegate) {
-        return new P.Font(null, null, null, aDelegate);
-    });
-    
     /**
      * Font object, which is used to render text in a visible way.
      * @param family a font family name, e.g. 'SansSerif'
@@ -13,13 +10,13 @@
      * @param size the size of the font
      * @constructor Font Font
      */
-    P.Font = function (family, style, size) {
+    function Font(family, style, size) {
         var maxArgs = 3;
         var delegate = arguments.length > maxArgs ?
               arguments[maxArgs] 
-            : arguments.length === 3 ? new javaClass(P.boxAsJava(family), P.boxAsJava(style), P.boxAsJava(size))
-            : arguments.length === 2 ? new javaClass(P.boxAsJava(family), P.boxAsJava(style))
-            : arguments.length === 1 ? new javaClass(P.boxAsJava(family))
+            : arguments.length === 3 ? new javaClass(B.boxAsJava(family), B.boxAsJava(style), B.boxAsJava(size))
+            : arguments.length === 2 ? new javaClass(B.boxAsJava(family), B.boxAsJava(style))
+            : arguments.length === 1 ? new javaClass(B.boxAsJava(family))
             : new javaClass();
 
         Object.defineProperty(this, "unwrap", {
@@ -28,8 +25,15 @@
                 return delegate;
             }
         });
-        if(P.Font.superclass)
-            P.Font.superclass.constructor.apply(this, arguments);
+        if(Font.superclass)
+            Font.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
     };
-})();
+
+    var ScriptsClass = Java.type("com.eas.script.Scripts");
+    var space = ScriptsClass.getSpace();
+    space.putPublisher(className, function(aDelegate) {
+        return new Font(null, null, null, aDelegate);
+    });
+    return Font;
+});

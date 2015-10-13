@@ -172,6 +172,7 @@ public class ProjectRunner {
     }
 
     private static void start(PlatypusProject project, String appElementName, boolean debug) throws Exception {
+        boolean seClient = ClientType.PLATYPUS_CLIENT.equals(project.getSettings().getRunClientType());
         if (appElementName != null && !appElementName.isEmpty()) {
             FileObject appSrcDir = project.getSrcRoot();
             FileObject startJs = appSrcDir.getFileObject(PlatypusProjectSettings.START_JS_FILE_NAME);
@@ -181,10 +182,19 @@ public class ProjectRunner {
             AppElementFiles startFiles = project.getIndexer().nameToFiles(appElementName);
             if (startFiles != null) {
                 String startMethod = startFiles.hasExtension(PlatypusFiles.FORM_EXTENSION) ? "show" : "execute";
-                String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, appElementName, "        var m = new " + appElementName+"();\n", "        m." + startMethod+"();\n", appElementName);
+                String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, project.getSettings().getBrowserCacheBusting() ? "" : "//", project.getSettings().getGlobalAPI() ? "" : "//", appElementName, appElementName, "        var m = new " + appElementName + "();\n", "        m." + startMethod + "();\n", appElementName);
                 FileUtils.writeString(FileUtil.toFile(startJs), starupScript, PlatypusUtils.COMMON_ENCODING_NAME);
-            } else if (appElementName.toLowerCase().endsWith("." + PlatypusFiles.JAVASCRIPT_EXTENSION)) {
-                String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, appElementName, "", "", appElementName);
+            } else if (appElementName.toLowerCase().endsWith(PlatypusFiles.JAVASCRIPT_FILE_END)) {
+                String requireCallabckArg = appElementName.substring(0, appElementName.length() - PlatypusFiles.JAVASCRIPT_FILE_END.length());
+                int lastFileSepIndex = requireCallabckArg.lastIndexOf(File.separator);
+                if (lastFileSepIndex != -1) {
+                    requireCallabckArg = requireCallabckArg.substring(lastFileSepIndex + 1);
+                }
+                lastFileSepIndex = requireCallabckArg.lastIndexOf("/");
+                if (lastFileSepIndex != -1) {
+                    requireCallabckArg = requireCallabckArg.substring(lastFileSepIndex + 1);
+                }
+                String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, project.getSettings().getBrowserCacheBusting() ? "" : "//", project.getSettings().getGlobalAPI() ? "" : "//", appElementName, requireCallabckArg, "", "    //...\n", appElementName);
                 FileUtils.writeString(FileUtil.toFile(startJs), starupScript, PlatypusUtils.COMMON_ENCODING_NAME);
             }
         } else {
@@ -254,7 +264,7 @@ public class ProjectRunner {
                     }
                 }
             }
-            if (ClientType.PLATYPUS_CLIENT.equals(pps.getRunClientType())) {
+            if (seClient) {
                 ExecutionDescriptor descriptor = new ExecutionDescriptor()
                         .frontWindow(true)
                         .controllable(true);
@@ -295,7 +305,7 @@ public class ProjectRunner {
                             arguments.add(connection.getDatabaseURL());
                             arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_USERNAME_CONF_PARAM);
                             arguments.add(connection.getUser());
-                            if(connection.getPassword() != null && !connection.getPassword().isEmpty()){
+                            if (connection.getPassword() != null && !connection.getPassword().isEmpty()) {
                                 arguments.add(ProjectRunner.OPTION_PREFIX + DatasourcesArgsConsumer.DB_PASSWORD_CONF_PARAM);
                                 arguments.add(connection.getPassword());
                             }
@@ -401,19 +411,11 @@ public class ProjectRunner {
                     throw new IllegalStateException(NbBundle.getMessage(ProjectRunner.class, "MSG_Cnt_Start_Web_Browser"));
                 }
             }
-        } catch (MalformedURLException ex) {
-            io.getErr().println(ex.getMessage());
-        } catch (ServerSupport.ServerTimeOutException ex) {
-            io.getErr().println(ex.getMessage());
-        } catch (ServerSupport.ServerStoppedException ex) {
+        } catch (MalformedURLException | ServerSupport.ServerTimeOutException | ServerSupport.ServerStoppedException | InterruptedException | IllegalStateException ex) {
             io.getErr().println(ex.getMessage());
         } catch (PlatformHomePathException ex) {
             io.getErr().println(ex.getMessage());
             io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Specify_Platypus_Platform_Path"));//NOI18N
-        } catch (InterruptedException ex) {
-            io.getErr().println(ex.getMessage());
-        } catch (IllegalStateException ex) {
-            io.getErr().println(ex.getMessage());
         }
     }
 
@@ -448,11 +450,11 @@ public class ProjectRunner {
                 + EQUALS_SIGN
                 + logLevel.getName());
         /*
-        arguments.add(OPTION_PREFIX
-                + JS_APPLICATION_LOG_LEVEL_OPTION_NAME
-                + EQUALS_SIGN
-                + logLevel.getName());
-        */        
+         arguments.add(OPTION_PREFIX
+         + JS_APPLICATION_LOG_LEVEL_OPTION_NAME
+         + EQUALS_SIGN
+         + logLevel.getName());
+         */
         arguments.add(OPTION_PREFIX
                 + CONSOLE_LOG_FORMATTER_OPTION_NAME
                 + EQUALS_SIGN

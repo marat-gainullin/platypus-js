@@ -5,6 +5,8 @@
  */
 package com.eas.script;
 
+import com.eas.client.cache.PlatypusFiles;
+import com.eas.client.forms.components.model.grid.ModelGrid;
 import com.eas.client.settings.SettingsConstants;
 import com.eas.util.FileUtils;
 import com.eas.util.PropertiesUtils;
@@ -51,13 +53,12 @@ public class Classes2Scripts {
 
     private static final String JAVA_CLASS_FILE_EXT = ".class";//NOI18N
     private static final String CONSTRUCTOR_TEMPLATE = getStringResource("constructorTemplate.js");//NOI18N
-    private static final Set<String> preservedFilesNames = new HashSet<>(Arrays.asList(new String[]{
-        "platypus.js", "platypus-jsdoc.js", "internals.js", "http-context.js", "managed.js", "orderer.js", "ui.js", "orm.js"
-    }));
 
     private static final int DEFAULT_IDENTATION_WIDTH = 4;
     private static final int CONSTRUCTOR_IDENT_LEVEL = 1;
 
+    private static final String DEPS_TAG = "${Deps}";
+    private static final String DEPS_RESULTS_TAG = "${DepsResults}";
     private static final String NAME_TAG = "${Name}";//NOI18N
     private static final String JAVA_TYPE_TAG = "${Type}";//NOI18N
     private static final String PARAMS_TAG = "${Params}";//NOI18N
@@ -89,11 +90,6 @@ public class Classes2Scripts {
             + "/**\n"//NOI18N
             + " * %s\n"//NOI18N
             + " */";//NOI18N
-
-    private static final String DEPS_HEADER = ""
-            + "/**\n"//NOI18N
-            + " * Contains the basic dependencies loading.\n"//NOI18N
-            + " */\n";//NOI18N
 
     private String checkScriptObject(Class clazz, String name) {
         ScriptObj ann = (ScriptObj) clazz.getAnnotation(ScriptObj.class);
@@ -185,7 +181,7 @@ public class Classes2Scripts {
             throw new IllegalArgumentException("Only directory can be used as dest."); // NOI18N
         }
         for (File c : destDirectory.listFiles()) {
-            if (!preservedFilesNames.contains(c.getName())) {
+            if (c.isDirectory()) {
                 FileUtils.delete(c);
             }
         }
@@ -221,7 +217,8 @@ public class Classes2Scripts {
             Logger.getLogger(Classes2Scripts.class.getName())
                     .log(Level.FINE, "Processing jar: {0}", new String[]{jarFile.getAbsolutePath()});
             URLClassLoader cl = new URLClassLoader(new URL[]{jarFile.toURI().toURL()}, this.getClass().getClassLoader());
-            Set<File> jarApiFiles = new HashSet<>();
+            List<File> jarApiFiles = new ArrayList<>();
+            List<String> jarApiClasses = new ArrayList<>();
             File subDir = new File(destDirectory, FileNameSupport.getFileName(FileUtils.removeExtension(jarFile.getName())));
             Enumeration<JarEntry> e = jar.entries();
             while (e.hasMoreElements()) {
@@ -239,9 +236,10 @@ public class Classes2Scripts {
                                 }
                                 Logger.getLogger(Classes2Scripts.class.getName())
                                         .log(Level.FINE, "\tClass name: {0}", new String[]{className});
-                                File resultFile = new File(subDir, FileNameSupport.getFileName(jsConstructor.name) + ".js"); //NOI18N
+                                File resultFile = new File(subDir, FileNameSupport.getFileName(jsConstructor.name) + PlatypusFiles.JAVASCRIPT_FILE_END); //NOI18N
                                 FileUtils.writeString(resultFile, js, SettingsConstants.COMMON_ENCODING);
                                 jarApiFiles.add(resultFile);
+                                jarApiClasses.add(jsConstructor.name);
                             }
                         }
                     }
@@ -250,25 +248,37 @@ public class Classes2Scripts {
                 }
             }
             if (!jarApiFiles.isEmpty()) {
-                StringBuilder jarApiDeps = new StringBuilder();
-                jarApiDeps.append("try{\n");
-                jarApiDeps.append(getIndentStr(1)).append("P.require([\n");
-                File[] f = jarApiFiles.toArray(new File[]{});
-                for (int i = 0; i < f.length; i++) {
-                    File jarApiFile = f[i];
+                StringBuilder apiDeps = new StringBuilder();
+                apiDeps.append("define([\n");
+                StringBuilder deps = new StringBuilder();
+                StringBuilder depsRes = new StringBuilder();
+                StringBuilder moduleItems = new StringBuilder();
+                for (int i = 0; i < jarApiFiles.size(); i++) {
+                    File jarApiFile = jarApiFiles.get(i);
+                    String apiClass = jarApiClasses.get(i);
                     if (i == 0) {
-                        jarApiDeps.append(getIndentStr(2)).append("  ");
+                        deps.append(getIndentStr(1)).append("  ");
+                        depsRes.append(getIndentStr(1)).append("  ");
+                        moduleItems.append(getIndentStr(2)).append("  ");
                     } else {
-                        jarApiDeps.append(getIndentStr(2)).append(", ");
+                        deps.append(getIndentStr(1)).append(", ");
+                        depsRes.append(getIndentStr(1)).append(", ");
+                        moduleItems.append(getIndentStr(2)).append(", ");
                     }
-                    jarApiDeps.append("'./").append(jarApiFile.getName()).append("'\n");
+                    String includeName = jarApiFile.getName();
+                    if (includeName.toLowerCase().endsWith(PlatypusFiles.JAVASCRIPT_FILE_END)) {
+                        includeName = includeName.substring(0, includeName.length() - PlatypusFiles.JAVASCRIPT_FILE_END.length());
+                    }
+                    deps.append("'./").append(includeName).append("'\n");
+                    depsRes.append(apiClass).append("\n");
+                    moduleItems.append(apiClass).append(": ").append(apiClass).append("\n");
                 }
-                jarApiDeps.append(getIndentStr(1)).append("]);\n");
-                jarApiDeps.append("}catch(e){\n");
-                jarApiDeps.append(getIndentStr(1)).append("P.Logger.severe(e);\n");
-                jarApiDeps.append("}\n");
+                apiDeps.append(deps).append("]").append(", function(\n");
+                apiDeps.append(depsRes).append(getIndentStr(1)).append("){\n").append(getIndentStr(1)).append("return {\n");
+                apiDeps.append(moduleItems).append(getIndentStr(1)).append("};\n");
+                apiDeps.append("});\n");
                 File depsFile = Paths.get(subDir.toURI()).resolve("index.js").toFile();
-                FileUtils.writeString(depsFile, jarApiDeps.toString(), SettingsConstants.COMMON_ENCODING);
+                FileUtils.writeString(depsFile, apiDeps.toString(), SettingsConstants.COMMON_ENCODING);
             }
         }
     }
@@ -319,7 +329,35 @@ public class Classes2Scripts {
         }
         //
 
+        if (ci.javaClassName.startsWith("com.eas.client.forms.components")
+                || ci.javaClassName.startsWith("com.eas.client.forms.containers")
+                || ci.javaClassName.startsWith("com.eas.client.forms.menu")) {
+            if (ci.javaClassName.startsWith("com.eas.client.forms.components.model.grid.header")) {
+                ci.jsDeps += ", 'common-utils/color', 'common-utils/cursor', 'common-utils/font', './cell-render-event'";
+                ci.jsDepsResults += ", Color, Cursor, Font, RenderEvent";
+            } else {
+                ci.jsDeps += ", 'common-utils/color', 'common-utils/cursor', 'common-utils/font', './action-event', './cell-render-event', './component-event', './focus-event', './item-event', './key-event', './value-change-event'";
+                ci.jsDepsResults += ", Color, Cursor, Font, ActionEvent, RenderEvent, ComponentEvent, FocusEvent, ItemEvent, KeyEvent, ValueChangeEvent";
+                if(ci.javaClassName.startsWith("com.eas.client.forms.containers") ||
+                        ci.javaClassName.startsWith("com.eas.client.forms.menu.MenuBar")||
+                        ci.javaClassName.startsWith("com.eas.client.forms.menu.Menu")||
+                        ci.javaClassName.startsWith("com.eas.client.forms.menu.PopupMenu")){
+                    ci.jsDeps += ", './container-event'";
+                    ci.jsDepsResults += ", ContainerEvent";
+                }
+                if (!ci.javaClassName.equals("com.eas.client.forms.menu.PopupMenu")) {
+                    ci.jsDeps += ", './popup-menu'";
+                    ci.jsDepsResults += ", PopupMenu";
+                }
+            }
+        }
+        if (ModelGrid.class.getName().equals(ci.javaClassName)) {
+            ci.jsDeps += ", 'grid/cell-data', './cell-render-event', './item-event', './service-grid-column', './check-grid-column', './radio-grid-column', './model-check-box', './model-combo', './model-date', './model-formatted-field', './model-grid-column', './model-spin', './model-text-area'";
+            ci.jsDepsResults += ", CellData, RenderEvent, ItemEvent, ServiceGridColumn, CheckGridColumn, RadioGridColumn, ModelCheckBox, ModelCombo, ModelDate, ModelFormattedField, ModelGridColumn, ModelSpin, ModelTextArea";
+        }
         String js = CONSTRUCTOR_TEMPLATE
+                .replace(DEPS_TAG, ci.jsDeps)
+                .replace(DEPS_RESULTS_TAG, ci.jsDepsResults)
                 .replace(JAVA_TYPE_TAG, ci.javaClassName)
                 .replace(JSDOC_TAG, getConstructorJsDoc(ci))
                 .replace(NAME_TAG, checkScriptObject(clazz, ci.name))
@@ -439,7 +477,7 @@ public class Classes2Scripts {
         if (JSObject.class.isAssignableFrom(property.method.getReturnType())) {
             sb.append("return value;\n");
         } else {
-            sb.append("return P.boxAsJs(value);\n");
+            sb.append("return B.boxAsJs(value);\n");
         }
         sb.append(getIndentStr(--i));
         sb.append("}");
@@ -452,7 +490,7 @@ public class Classes2Scripts {
             if (JSObject.class.isAssignableFrom(property.method.getReturnType())) {
                 sb.append(" = aValue;\n");
             } else {
-                sb.append(" = P.boxAsJava(aValue);\n");
+                sb.append(" = B.boxAsJava(aValue);\n");
             }
             sb.append(getIndentStr(--i));
             sb.append("}\n");
@@ -461,40 +499,44 @@ public class Classes2Scripts {
         }
         sb.append(getIndentStr(--i));
         sb.append("});\n");
-        sb.append(getIndentStr(i)).append("if(!P.").append(namespace).append("){\n");
-        sb.append(getPropertyJsDoc(namespace, property, ++i)).append("\n");
-        sb.append(getIndentStr(i)).append("P.").append(namespace).append(".prototype.").append(apiPropName).append(" = ").append(getDefaultLiteralOfType(property.typeName)).append(";\n");
-        sb.append(getIndentStr(--i)).append("}");
+        /*
+         TODO: 
+         sb.append(getIndentStr(i)).append("if(!P.").append(namespace).append("){\n");
+         sb.append(getPropertyJsDoc(namespace, property, ++i)).append("\n");
+         sb.append(getIndentStr(i)).append("P.").append(namespace).append(".prototype.").append(apiPropName).append(" = ").append(getDefaultLiteralOfType(property.typeName)).append(";\n");
+         sb.append(getIndentStr(--i)).append("}");
+         */
         return sb.toString();
     }
+    /*
+     private String getDefaultLiteralOfType(String aTypeName) {
+     if ("Number".equals(aTypeName)) {
+     return "0";
+     } else if ("Date".equals(aTypeName)) {
+     return "new Date()";
+     } else if (aTypeName != null && aTypeName.startsWith("[]")) {
+     return aTypeName;
+     } else if ("Boolean".equals(aTypeName)) {
+     return "true";
+     } else if ("String".equals(aTypeName)) {
+     return "''";
+     } else {
+     return "{}";
+     }
+     }
+     */
 
-    private String getDefaultLiteralOfType(String aTypeName) {
-        if ("Number".equals(aTypeName)) {
-            return "0";
-        } else if ("Date".equals(aTypeName)) {
-            return "new Date()";
-        } else if (aTypeName != null && aTypeName.startsWith("[]")) {
-            return aTypeName;
-        } else if ("Boolean".equals(aTypeName)) {
-            return "true";
-        } else if ("String".equals(aTypeName)) {
-            return "''";
-        } else {
-            return "{}";
-        }
-    }
-
-    private String getMethodPart(String namespace, Method method, int ident) {
+    private String getMethodPart(String namespace, Method method, int indent) {
         FunctionInfo fi = getFunctionInfo(method.getName(), method);
         StringBuilder sb = new StringBuilder();
-        int i = ident;
+        int i = indent;
         String methodName = fi.name;
         if (fi.apiName != null && !fi.apiName.isEmpty()) {
             methodName = fi.apiName;
         }
-        sb.append(getMethodJsDoc(namespace, methodName, fi.jsDoc, ++i)).append("\n");
+        sb.append(getMethodJsDoc(namespace, methodName, fi.jsDoc, i)).append("\n");
         sb.append(getIndentStr(i));
-        sb.append("P.").append(namespace).append(".prototype.").append(methodName).append(" = ")
+        sb.append(namespace).append(".prototype.").append(methodName).append(" = ")
                 .append("function(");
         StringBuilder paramsInCall = new StringBuilder();
         StringBuilder formalParams = new StringBuilder();
@@ -509,7 +551,7 @@ public class Classes2Scripts {
                 pName = methodAnnotation.params()[p];
             }
             formalParams.append(delimiter).append(pName);
-            paramsInCall.append(delimiter).append("P.boxAsJava(").append(pName).append(")");
+            paramsInCall.append(delimiter).append("B.boxAsJava(").append(pName).append(")");
             if (delimiter.isEmpty()) {
                 delimiter = ", ";
             }
@@ -527,7 +569,7 @@ public class Classes2Scripts {
                 .append(paramsInCall)
                 .append(");\n");
         sb.append(getIndentStr(i));
-        sb.append("return P.boxAsJs(value);\n");
+        sb.append("return B.boxAsJs(value);\n");
         sb.append(getIndentStr(--i));
         sb.append("};\n");
         return sb.toString();
@@ -608,6 +650,84 @@ public class Classes2Scripts {
             sb.append("\n");//NOI18N
             generatedMethods.add(method.getName());
         }
+        if ("com.eas.client.forms.Form".equals(clazz.getName())) {
+            sb.append(""
+                    + "    var FormClass = Java.type(\"com.eas.client.forms.Form\");\n"
+                    + "    Object.defineProperty(Form, 'shown', {\n"
+                    + "        get: function () {\n"
+                    + "            var nativeArray = FormClass.getShownForms();\n"
+                    + "            var res = [];\n"
+                    + "            for (var i = 0; i < nativeArray.length; i++)\n"
+                    + "                res[res.length] = nativeArray[i].getPublished();\n"
+                    + "            return res;\n"
+                    + "        }\n"
+                    + "    });\n"
+                    + "\n"
+                    + "    Object.defineProperty(Form, 'getShownForm', {\n"
+                    + "        value: function (aName) {\n"
+                    + "            var shownForm = FormClass.getShownForm(aName);\n"
+                    + "            return shownForm !== null ? shownForm.getPublished() : null;\n"
+                    + "        }\n"
+                    + "    });\n"
+                    + "\n"
+                    + "    Object.defineProperty(Form, 'onChange', {\n"
+                    + "        get: function () {\n"
+                    + "            return FormClass.getOnChange();\n"
+                    + "        },\n"
+                    + "        set: function (aValue) {\n"
+                    + "            FormClass.setOnChange(aValue);\n"
+                    + "        }\n"
+                    + "    });\n"
+                    + "\n"
+                    + "");
+        } else if ("com.eas.gui.ScriptColor".equals(clazz.getName())) {
+            sb.append(""
+                    + "    Object.defineProperty(Color, \"black\", {value: new Color(0, 0, 0)});\n"
+                    + "    Object.defineProperty(Color, \"BLACK\", {value: new Color(0, 0, 0)});\n"
+                    + "    Object.defineProperty(Color, \"blue\", {value: new Color(0, 0, 0xff)});\n"
+                    + "    Object.defineProperty(Color, \"BLUE\", {value: new Color(0, 0, 0xff)});\n"
+                    + "    Object.defineProperty(Color, \"cyan\", {value: new Color(0, 0xff, 0xff)});\n"
+                    + "    Object.defineProperty(Color, \"CYAN\", {value: new Color(0, 0xff, 0xff)});\n"
+                    + "    Object.defineProperty(Color, \"DARK_GRAY\", {value: new Color(0x40, 0x40, 0x40)});\n"
+                    + "    Object.defineProperty(Color, \"darkGray\", {value: new Color(0x40, 0x40, 0x40)});\n"
+                    + "    Object.defineProperty(Color, \"gray\", {value: new Color(0x80, 0x80, 0x80)});\n"
+                    + "    Object.defineProperty(Color, \"GRAY\", {value: new Color(0x80, 0x80, 0x80)});\n"
+                    + "    Object.defineProperty(Color, \"green\", {value: new Color(0, 0xff, 0)});\n"
+                    + "    Object.defineProperty(Color, \"GREEN\", {value: new Color(0, 0xff, 0)});\n"
+                    + "    Object.defineProperty(Color, \"LIGHT_GRAY\", {value: new Color(0xC0, 0xC0, 0xC0)});\n"
+                    + "    Object.defineProperty(Color, \"lightGray\", {value: new Color(0xC0, 0xC0, 0xC0)});\n"
+                    + "    Object.defineProperty(Color, \"magenta\", {value: new Color(0xff, 0, 0xff)});\n"
+                    + "    Object.defineProperty(Color, \"MAGENTA\", {value: new Color(0xff, 0, 0xff)});\n"
+                    + "    Object.defineProperty(Color, \"orange\", {value: new Color(0xff, 0xC8, 0)});\n"
+                    + "    Object.defineProperty(Color, \"ORANGE\", {value: new Color(0xff, 0xC8, 0)});\n"
+                    + "    Object.defineProperty(Color, \"pink\", {value: new Color(0xFF, 0xAF, 0xAF)});\n"
+                    + "    Object.defineProperty(Color, \"PINK\", {value: new Color(0xFF, 0xAF, 0xAF)});\n"
+                    + "    Object.defineProperty(Color, \"red\", {value: new Color(0xFF, 0, 0)});\n"
+                    + "    Object.defineProperty(Color, \"RED\", {value: new Color(0xFF, 0, 0)});\n"
+                    + "    Object.defineProperty(Color, \"white\", {value: new Color(0xFF, 0xff, 0xff)});\n"
+                    + "    Object.defineProperty(Color, \"WHITE\", {value: new Color(0xFF, 0xff, 0xff)});\n"
+                    + "    Object.defineProperty(Color, \"yellow\", {value: new Color(0xFF, 0xff, 0)});\n"
+                    + "    Object.defineProperty(Color, \"YELLOW\", {value: new Color(0xFF, 0xff, 0)});\n"
+                    + "");
+        } else if ("com.eas.gui.Cursor".equals(clazz.getName())) {
+            sb.append(""
+                    + "    Object.defineProperty(Cursor, \"CROSSHAIR\", {value: new Cursor(1)});\n"
+                    + "    Object.defineProperty(Cursor, \"DEFAULT\", {value: new Cursor(0)});\n"
+                    + "    Object.defineProperty(Cursor, \"AUTO\", {value: new Cursor(0)});\n"
+                    + "    Object.defineProperty(Cursor, \"E_RESIZE\", {value: new Cursor(11)});\n"
+                    + "    Object.defineProperty(Cursor, \"HAND\", {value: new Cursor(12)});\n"
+                    + "    Object.defineProperty(Cursor, \"MOVE\", {value: new Cursor(13)});\n"
+                    + "    Object.defineProperty(Cursor, \"NE_RESIZE\", {value: new Cursor(7)});\n"
+                    + "    Object.defineProperty(Cursor, \"NW_RESIZE\", {value: new Cursor(6)});\n"
+                    + "    Object.defineProperty(Cursor, \"N_RESIZE\", {value: new Cursor(8)});\n"
+                    + "    Object.defineProperty(Cursor, \"SE_RESIZE\", {value: new Cursor(5)});\n"
+                    + "    Object.defineProperty(Cursor, \"SW_RESIZE\", {value: new Cursor(4)});\n"
+                    + "    Object.defineProperty(Cursor, \"S_RESIZE\", {value: new Cursor(9)});\n"
+                    + "    Object.defineProperty(Cursor, \"TEXT\", {value: new Cursor(2)});\n"
+                    + "    Object.defineProperty(Cursor, \"WAIT\", {value: new Cursor(3)});\n"
+                    + "    Object.defineProperty(Cursor, \"W_RESIZE\", {value: new Cursor(10)});\n"
+                    + "");
+        }
         return sb.toString();
     }
 
@@ -622,6 +742,8 @@ public class Classes2Scripts {
         public String name;
         public String apiName;
         public String javaClassName;
+        public String jsDeps = "'boxing'";
+        public String jsDepsResults = "B";
         public String[] params;
         public Parameter[] nativeParams;
         public String jsDoc;
@@ -660,7 +782,7 @@ public class Classes2Scripts {
                 StringBuilder paramsSb = new StringBuilder();
                 paramsSb.append("new javaClass(");
                 for (int i = 0; i < argsCount; i++) {
-                    paramsSb.append("P.boxAsJava(").append(params[i]).append(")");
+                    paramsSb.append("B.boxAsJava(").append(params[i]).append(")");
                     if (i < argsCount - 1) {
                         paramsSb.append(", ");//NOI18N
                     }

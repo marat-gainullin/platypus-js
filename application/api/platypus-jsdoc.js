@@ -41,7 +41,7 @@ if (!this.P) {
      * They will be accessible and there is no necessity to load them manually.
      * @param {type} aEntities Names of entities, definitions will be loaded for.
      * It may be a single entity name or an array of entities names or a model definition xml string.
-     * If it will be a model definition xml string, P.loadEntities() will find entities names automatically.
+     * If it will be a model definition xml string, P.requireEntities() will find entities names automatically.
      * @param {type} aOnSuccess Success callback. If omitted, than in JavaSE environment, synchrionous call will be performed.
      * @param {type} aOnFailure Failure callback. Accepts information about any problem occured while loading.
      * @returns {undefined}
@@ -74,7 +74,7 @@ if (!this.P) {
      * Parses a string with xml definition of data model (entity manager).
      * Returns data model instance ready for use as entity manager.
      * Note! It does not resolve entities dependencies. For entities resolution
-     * use <code>P.loadEntities()</code> function please. If entities already were loaded
+     * use <code>P.requireEntities()</code> function please. If entities already were loaded
      * while dependencies resolution process, initiated with P.require() function,
      * They will be accessible and there is no necessity to load them manually.
      * @param aContent String with xml definition of data model (entity manager).

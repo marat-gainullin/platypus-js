@@ -5,19 +5,19 @@
 package com.eas.client.cache;
 
 import com.eas.client.ClientConstants;
+import com.eas.script.AmdPropertiesAnnotationsMiner;
 import com.eas.script.BaseAnnotationsMiner;
 import com.eas.script.JsDoc;
 import com.eas.script.Scripts;
-import com.eas.util.FileUtils;
 import com.eas.util.StringUtils;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import jdk.nashorn.internal.ir.CallNode;
+import jdk.nashorn.internal.ir.Expression;
 import jdk.nashorn.internal.ir.FunctionNode;
 
 /**
@@ -35,15 +35,45 @@ public class PlatypusFilesSupport {
         int functions;
         int annotatedConstructors;
         FunctionNode result;
+        String amdName;
     }
 
-    public static String extractModuleConstructorName(String aJsContent, String aFileName) {
-        FunctionNode fn = extractModuleConstructor(aJsContent, aFileName);
-        return fn != null ? fn.getName() : null;
+    public static String extractModuleName(String aJsContent, String aFileName) {
+        FunctionNode scriptRoot = Scripts.parseJs(aJsContent);
+        String amdName = extractAmdDefineAnnotation(scriptRoot, aFileName);
+        if (amdName != null && !amdName.isEmpty()) {
+            return amdName;
+        } else {
+            FunctionNode fn = extractModuleConstructor(scriptRoot, aFileName);
+            return fn != null ? fn.getName() : null;
+        }
     }
 
-    public static FunctionNode extractModuleConstructor(String aJsContent, String aFileName) {
-        return extractModuleConstructor(Scripts.parseJs(aJsContent), aFileName);
+    public static String extractAmdDefineAnnotation(FunctionNode jsRoot, String aFileName) {
+        if (jsRoot != null) {
+            NodesContext cx = new NodesContext();
+            jsRoot.accept(new AmdPropertiesAnnotationsMiner(jsRoot.getSource()) {
+
+                @Override
+                protected void commentedDefineCall(CallNode aCallNode, JsDoc aJsDoc) {
+                    JsDoc.Tag moduleAnnotation = aJsDoc.getTag(JsDoc.Tag.MODULE_TAG);
+                    if (moduleAnnotation != null && !moduleAnnotation.getParams().isEmpty()) {
+                        cx.amdName = moduleAnnotation.getParams().get(0);
+                    }
+                }
+
+                @Override
+                protected void commentedProperty(String aPropertyName, String aComment) {
+                }
+
+                @Override
+                protected void property(String aPropertyName, Expression aValueExpression) {
+                }
+
+            });
+            return cx.amdName;
+        }
+        return null;
     }
 
     public static FunctionNode extractModuleConstructor(FunctionNode jsRoot, String aFileName) {
@@ -66,12 +96,14 @@ public class PlatypusFilesSupport {
                 protected void commentedFunction(FunctionNode fn, String aComment) {
                     if (scopeLevel == TOP_CONSTRUCTORS_SCOPE_LEVEL) {
                         JsDoc jsDoc = new JsDoc(aComment);
-                        if (jsDoc.containsModuleAnnotation()) {
+                        jsDoc.parseAnnotations();
+                        if (jsDoc.containsTag(JsDoc.Tag.CONSTRUCTOR_TAG)) {
                             cx.result = fn;
                             cx.annotatedConstructors++;
                         }
                     }
                 }
+
             });
             if (cx.annotatedConstructors == 1) {
                 return cx.result;
@@ -83,22 +115,8 @@ public class PlatypusFilesSupport {
             } else if (cx.annotatedConstructors > 1) {
                 Logger.getLogger(PlatypusFilesSupport.class.getName()).log(Level.WARNING, "More than one annotated constructor found in module {0}.", aFileName);
             } else if (cx.annotatedConstructors == 0 && cx.functions > 1) {
-                Logger.getLogger(PlatypusFilesSupport.class.getName()).log(Level.WARNING, "No annotated constructors and multiple functions found in top level scope of the module {0}.", aFileName);
+                Logger.getLogger(PlatypusFilesSupport.class.getName()).log(Level.WARNING, "Multiple functions found in top level scope of the module, but no annotated constructors found in file {0}.", aFileName);
             }
-        }
-        return null;
-    }
-
-    public static String getAppElementIdByAnnotation(File aFile) {
-        try {
-            String fileContent = FileUtils.readString(aFile, PlatypusFiles.DEFAULT_ENCODING);
-            if (aFile.getPath().endsWith("." + PlatypusFiles.JAVASCRIPT_EXTENSION)) {
-                return extractModuleConstructorName(fileContent, aFile.getPath());
-            } else {
-                return getAnnotationValue(fileContent, JsDoc.Tag.NAME_TAG);
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(PlatypusFiles.class.getName()).log(Level.INFO, null, ex);
         }
         return null;
     }

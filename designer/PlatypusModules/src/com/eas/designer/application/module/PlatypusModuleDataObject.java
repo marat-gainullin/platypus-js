@@ -293,7 +293,7 @@ public class PlatypusModuleDataObject extends PlatypusDataObject implements AstP
     }
 
     private String getCopyModuleContent(Project project, String aJsContent) {
-        FunctionNode constructorFunc = PlatypusFilesSupport.extractModuleConstructor(aJsContent, getPrimaryFile().getPath());
+        FunctionNode constructorFunc = PlatypusFilesSupport.extractModuleConstructor(Scripts.parseJs(aJsContent), getPrimaryFile().getPath());
         if (constructorFunc != null) {
             String oldName = constructorFunc.getName();
             String newName = NewApplicationElementWizardIterator.getNewValidAppElementName(project, oldName);

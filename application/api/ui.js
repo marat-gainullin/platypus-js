@@ -1,10 +1,6 @@
-/* global P, Java*/
-(function () {
+/* global Java*/
+define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/font'], function (B, Color, Cursor, Font) {
     var global = this;
-    // core imports
-    var ScriptedResourceClass = Java.type("com.eas.client.scripts.ScriptedResource");
-    var EngineUtilsClass = Java.type("jdk.nashorn.api.scripting.ScriptUtils");
-    var Source2XmlDom = Java.type('com.eas.xml.dom.Source2XmlDom');
     // gui imports
     var KeyEventClass = Java.type("java.awt.event.KeyEvent");
     var FileChooserClass = Java.type("javax.swing.JFileChooser");
@@ -12,62 +8,12 @@
     var ColorChooserClass = Java.type("javax.swing.JColorChooser");
     var OptionPaneClass = Java.type("javax.swing.JOptionPane");
     var ColorClass = Java.type("com.eas.gui.ScriptColor");
-    var FormClass = Java.type("com.eas.client.forms.Form");
-    var FormLoaderClass = Java.type('com.eas.client.scripts.ModelFormLoader');
     var IconResourcesClass = Java.type("com.eas.client.forms.IconResources");
     var HorizontalPositionClass = Java.type("com.eas.client.forms.HorizontalPosition");
     var VerticalPositionClass = Java.type("com.eas.client.forms.VerticalPosition");
     var OrientationClass = Java.type("com.eas.client.forms.Orientation");
 
     //
-    P.require('common-utils/color.js');
-    Object.defineProperty(P.Color, "black", {value: new P.Color(0, 0, 0)});
-    Object.defineProperty(P.Color, "BLACK", {value: new P.Color(0, 0, 0)});
-    Object.defineProperty(P.Color, "blue", {value: new P.Color(0, 0, 0xff)});
-    Object.defineProperty(P.Color, "BLUE", {value: new P.Color(0, 0, 0xff)});
-    Object.defineProperty(P.Color, "cyan", {value: new P.Color(0, 0xff, 0xff)});
-    Object.defineProperty(P.Color, "CYAN", {value: new P.Color(0, 0xff, 0xff)});
-    Object.defineProperty(P.Color, "DARK_GRAY", {value: new P.Color(0x40, 0x40, 0x40)});
-    Object.defineProperty(P.Color, "darkGray", {value: new P.Color(0x40, 0x40, 0x40)});
-    Object.defineProperty(P.Color, "gray", {value: new P.Color(0x80, 0x80, 0x80)});
-    Object.defineProperty(P.Color, "GRAY", {value: new P.Color(0x80, 0x80, 0x80)});
-    Object.defineProperty(P.Color, "green", {value: new P.Color(0, 0xff, 0)});
-    Object.defineProperty(P.Color, "GREEN", {value: new P.Color(0, 0xff, 0)});
-    Object.defineProperty(P.Color, "LIGHT_GRAY", {value: new P.Color(0xC0, 0xC0, 0xC0)});
-    Object.defineProperty(P.Color, "lightGray", {value: new P.Color(0xC0, 0xC0, 0xC0)});
-    Object.defineProperty(P.Color, "magenta", {value: new P.Color(0xff, 0, 0xff)});
-    Object.defineProperty(P.Color, "MAGENTA", {value: new P.Color(0xff, 0, 0xff)});
-    Object.defineProperty(P.Color, "orange", {value: new P.Color(0xff, 0xC8, 0)});
-    Object.defineProperty(P.Color, "ORANGE", {value: new P.Color(0xff, 0xC8, 0)});
-    Object.defineProperty(P.Color, "pink", {value: new P.Color(0xFF, 0xAF, 0xAF)});
-    Object.defineProperty(P.Color, "PINK", {value: new P.Color(0xFF, 0xAF, 0xAF)});
-    Object.defineProperty(P.Color, "red", {value: new P.Color(0xFF, 0, 0)});
-    Object.defineProperty(P.Color, "RED", {value: new P.Color(0xFF, 0, 0)});
-    Object.defineProperty(P.Color, "white", {value: new P.Color(0xFF, 0xff, 0xff)});
-    Object.defineProperty(P.Color, "WHITE", {value: new P.Color(0xFF, 0xff, 0xff)});
-    Object.defineProperty(P.Color, "yellow", {value: new P.Color(0xFF, 0xff, 0)});
-    Object.defineProperty(P.Color, "YELLOW", {value: new P.Color(0xFF, 0xff, 0)});
-    P.Colors = P.Color;
-
-    P.require('common-utils/cursor.js');
-    Object.defineProperty(P.Cursor, "CROSSHAIR", {value: new P.Cursor(1)});
-    Object.defineProperty(P.Cursor, "DEFAULT", {value: new P.Cursor(0)});
-    Object.defineProperty(P.Cursor, "AUTO", {value: new P.Cursor(0)});
-    Object.defineProperty(P.Cursor, "E_RESIZE", {value: new P.Cursor(11)});
-// help ?
-// progress ?
-    Object.defineProperty(P.Cursor, "HAND", {value: new P.Cursor(12)});
-    Object.defineProperty(P.Cursor, "MOVE", {value: new P.Cursor(13)});
-    Object.defineProperty(P.Cursor, "NE_RESIZE", {value: new P.Cursor(7)});
-    Object.defineProperty(P.Cursor, "NW_RESIZE", {value: new P.Cursor(6)});
-    Object.defineProperty(P.Cursor, "N_RESIZE", {value: new P.Cursor(8)});
-    Object.defineProperty(P.Cursor, "SE_RESIZE", {value: new P.Cursor(5)});
-    Object.defineProperty(P.Cursor, "SW_RESIZE", {value: new P.Cursor(4)});
-    Object.defineProperty(P.Cursor, "S_RESIZE", {value: new P.Cursor(9)});
-    Object.defineProperty(P.Cursor, "TEXT", {value: new P.Cursor(2)});
-    Object.defineProperty(P.Cursor, "WAIT", {value: new P.Cursor(3)});
-    Object.defineProperty(P.Cursor, "W_RESIZE", {value: new P.Cursor(10)});
-
     function lookupCallerFile() {
         var calledFromFile = null;
         var error = new Error('path test error');
@@ -85,29 +31,12 @@
     }
 
     var Icon = {};
-    Object.defineProperty(P, "Icon", {value: Icon});
     Object.defineProperty(Icon, "load", {
         value: function (aResName, onSuccess, onFailure) {
             var calledFromFile = lookupCallerFile();
-            return IconResourcesClass.load(P.boxAsJava(aResName), P.boxAsJava(calledFromFile), P.boxAsJava(onSuccess), P.boxAsJava(onFailure));
+            return IconResourcesClass.load(B.boxAsJava(aResName), B.boxAsJava(calledFromFile), B.boxAsJava(onSuccess), B.boxAsJava(onFailure));
         }
     });
-    P.Icons = P.Icon;
-    Object.defineProperty(P, "VK_ALT", {value: KeyEventClass.VK_ALT});
-    Object.defineProperty(P, "VK_BACKSPACE", {value: KeyEventClass.VK_BACK_SPACE});
-    Object.defineProperty(P, "VK_DELETE", {value: KeyEventClass.VK_DELETE});
-    Object.defineProperty(P, "VK_DOWN", {value: KeyEventClass.VK_DOWN});
-    Object.defineProperty(P, "VK_END", {value: KeyEventClass.VK_END});
-    Object.defineProperty(P, "VK_ENTER", {value: KeyEventClass.VK_ENTER});
-    Object.defineProperty(P, "VK_ESCAPE", {value: KeyEventClass.VK_ESCAPE});
-    Object.defineProperty(P, "VK_HOME", {value: KeyEventClass.VK_HOME});
-    Object.defineProperty(P, "VK_LEFT", {value: KeyEventClass.VK_LEFT});
-    Object.defineProperty(P, "VK_PAGEDOWN", {value: KeyEventClass.VK_PAGE_DOWN});
-    Object.defineProperty(P, "VK_PAGEUP", {value: KeyEventClass.VK_PAGE_UP});
-    Object.defineProperty(P, "VK_RIGHT", {value: KeyEventClass.VK_RIGHT});
-    Object.defineProperty(P, "VK_SHIFT", {value: KeyEventClass.VK_SHIFT});
-    Object.defineProperty(P, "VK_TAB", {value: KeyEventClass.VK_TAB});
-    Object.defineProperty(P, "VK_UP", {value: KeyEventClass.VK_UP});
 
     /**
      * Opens a file dialog box 
@@ -155,22 +84,13 @@
      * @return selected file or else null
      */
     function selectFile(aCallback, aFileFilter, curDir) {
-//            if (aCallback) {
         invokeLater(function () {
             var file = fileDialog(curDir, false, aFileFilter);
             if (file) {
                 aCallback(file);
             }
         });
-//            } else {
-//                return fileDialog(curDir, false, aFileFilter);
-//            }
     }
-
-
-    Object.defineProperty(P, "selectFile", {
-        value: selectFile
-    });
 
     /**
      * Opens a directory dialog box 
@@ -209,9 +129,6 @@
         }
     }
 
-    Object.defineProperty(P, "selectDirectory", {
-        value: selectDirectory
-    });
     /**
      * Opens a color chooser dialog box 
      *
@@ -226,7 +143,7 @@
                 title = "Choose Color";
             }
             if (!color) {
-                color = P.Color.BLACK;
+                color = Color.BLACK;
             }
             var res = ColorChooserClass.showDialog(null, title, color ? color.unwrap() : null);
             result = res ? (new ColorClass(res)).getPublished() : null;
@@ -245,37 +162,6 @@
             return colorDialog(aTitle, aOldColor);
         }
     }
-
-    Object.defineProperty(P, "selectColor", {
-        value: selectColor
-    });
-
-    P.require('forms/form.js');
-    Object.defineProperty(P.Form, "shown", {
-        get: function () {
-            var nativeArray = FormClass.getShownForms();
-            var res = [];
-            for (var i = 0; i < nativeArray.length; i++)
-                res[res.length] = nativeArray[i].getPublished();
-            return res;
-        }
-    });
-
-    Object.defineProperty(P.Form, "getShownForm", {
-        value: function (aName) {
-            var shownForm = FormClass.getShownForm(aName);
-            return shownForm !== null ? shownForm.getPublished() : null;
-        }
-    });
-
-    Object.defineProperty(P.Form, "onChange", {
-        get: function () {
-            return FormClass.getOnChange();
-        },
-        set: function (aValue) {
-            FormClass.setOnChange(aValue);
-        }
-    });
 
     /**
      * Shows a message box
@@ -300,9 +186,6 @@
         _msgBox();
     }
     msgBox.docString = "shows MessageBox to the user";
-    Object.defineProperty(P, "msgBox", {
-        value: msgBox
-    });
 
     /**
      * Shows an information alert box
@@ -328,9 +211,6 @@
         msgBox(msg, title, OptionPaneClass.ERROR_MESSAGE);
     }
     error.docString = "shows an error message box to the user";
-    Object.defineProperty(P, "error", {
-        value: error
-    });
 
     /**
      * Shows a warning alert box
@@ -342,9 +222,6 @@
         msgBox(msg, title, OptionPaneClass.WARNING_MESSAGE);
     }
     warn.docString = "shows a warning message box to the user";
-    Object.defineProperty(P, "warn", {
-        value: warn
-    });
 
     /**
      * Shows a prompt dialog box
@@ -405,9 +282,6 @@
     Object.defineProperty(HorizontalPosition, "RIGHT", {
         value: HorizontalPositionClass.RIGHT
     });
-    Object.defineProperty(P, "HorizontalPosition", {
-        value: HorizontalPosition
-    });
 //
     var VerticalPosition = {};
     Object.defineProperty(VerticalPosition, "TOP", {
@@ -419,9 +293,6 @@
     Object.defineProperty(VerticalPosition, "BOTTOM", {
         value: VerticalPositionClass.BOTTOM
     });
-    Object.defineProperty(P, "VerticalPosition", {
-        value: VerticalPosition
-    });
 //
     var Orientation = {};
     Object.defineProperty(Orientation, "HORIZONTAL", {
@@ -430,9 +301,7 @@
     Object.defineProperty(Orientation, "VERTICAL", {
         value: OrientationClass.VERTICAL
     });
-    Object.defineProperty(P, "Orientation", {
-        value: Orientation
-    });
+
     var ScrollBarPolicy = {};
     Object.defineProperty(ScrollBarPolicy, "AUTO", {
         value: 30
@@ -443,9 +312,7 @@
     Object.defineProperty(ScrollBarPolicy, "ALLWAYS", {
         value: 32
     });
-    Object.defineProperty(P, "ScrollBarPolicy", {
-        value: ScrollBarPolicy
-    });
+
     //
     var FontStyleClass = Java.type("com.eas.gui.FontStyle");
     var FontStyle = {};
@@ -461,57 +328,135 @@
     Object.defineProperty(FontStyle, "NORMAL", {
         value: FontStyleClass.NORMAL
     });
-    Object.defineProperty(P, "FontStyle", {
+    
+    var module = {};
+    Object.defineProperty(module, 'Colors', {
+        enumerable: true,
+        value: Color
+    });
+    Object.defineProperty(module, 'Color', {
+        enumerable: true,
+        value: Color
+    });
+    Object.defineProperty(module, 'Cursor', {
+        enumerable: true,
+        value: Cursor
+    });
+    Object.defineProperty(module, 'Icon', {
+        enumerable: true,
+        value: Icon
+    });
+    Object.defineProperty(module, 'Icons', {
+        enumerable: true,
+        value: Icon
+    });
+    Object.defineProperty(module, 'Font', {
+        enumerable: true,
+        value: Font
+    });
+    Object.defineProperty(module, 'VK_ALT', {
+        enumerable: true,
+        value: KeyEventClass.VK_ALT
+    });
+    Object.defineProperty(module, 'VK_BACKSPACE', {
+        enumerable: true,
+        value: KeyEventClass.VK_BACK_SPACE
+    });
+    Object.defineProperty(module, 'VK_DELETE', {
+        enumerable: true,
+        value: KeyEventClass.VK_DELETE
+    });
+    Object.defineProperty(module, 'VK_DOWN', {
+        enumerable: true,
+        value: KeyEventClass.VK_DOWN
+    });
+    Object.defineProperty(module, 'VK_END', {
+        enumerable: true,
+        value: KeyEventClass.VK_END
+    });
+    Object.defineProperty(module, 'VK_ENTER', {
+        enumerable: true,
+        value: KeyEventClass.VK_ENTER
+    });
+    Object.defineProperty(module, 'VK_ESCAPE', {
+        enumerable: true,
+        value: KeyEventClass.VK_ESCAPE
+    });
+    Object.defineProperty(module, 'VK_HOME', {
+        enumerable: true,
+        value: KeyEventClass.VK_HOME
+    });
+    Object.defineProperty(module, 'VK_LEFT', {
+        enumerable: true,
+        value: KeyEventClass.VK_LEFT
+    });
+    Object.defineProperty(module, 'VK_PAGEDOWN', {
+        enumerable: true,
+        value: KeyEventClass.VK_PAGE_DOWN
+    });
+    Object.defineProperty(module, 'VK_PAGEUP', {
+        enumerable: true,
+        value: KeyEventClass.VK_PAGE_UP
+    });
+    Object.defineProperty(module, 'VK_RIGHT', {
+        enumerable: true,
+        value: KeyEventClass.VK_RIGHT
+    });
+    Object.defineProperty(module, 'VK_SHIFT', {
+        enumerable: true,
+        value: KeyEventClass.VK_SHIFT
+    });
+    Object.defineProperty(module, 'VK_TAB', {
+        enumerable: true,
+        value: KeyEventClass.VK_TAB
+    });
+    Object.defineProperty(module, 'VK_UP', {
+        enumerable: true,
+        value: KeyEventClass.VK_UP
+    });
+    Object.defineProperty(module, 'selectFile', {
+        enumerable: true,
+        value: selectFile
+    });
+    Object.defineProperty(module, 'selectDirectory', {
+        enumerable: true,
+        value: selectDirectory
+    });
+    Object.defineProperty(module, 'selectColor', {
+        enumerable: true,
+        value: selectColor
+    });
+    Object.defineProperty(module, 'msgBox', {
+        enumerable: true,
+        value: msgBox
+    });
+    Object.defineProperty(module, 'error', {
+        enumerable: true,
+        value: error
+    });
+    Object.defineProperty(module, 'warn', {
+        enumerable: true,
+        value: warn
+    });
+    Object.defineProperty(module, 'HorizontalPosition', {
+        enumerable: true,
+        value: HorizontalPosition
+    });
+    Object.defineProperty(module, 'VerticalPosition', {
+        enumerable: true,
+        value: VerticalPosition
+    });
+    Object.defineProperty(module, 'Orientation', {
+        enumerable: true,
+        value: Orientation
+    });
+    Object.defineProperty(module, 'ScrollBarPolicy', {
+        enumerable: true,
+        value: ScrollBarPolicy
+    });
+    Object.defineProperty(module, 'FontStyle', {
+        enumerable: true,
         value: FontStyle
     });
-    function loadFormDocument(aDocument, aModel, aTarget) {
-        var formFactory = FormLoaderClass.load(aDocument, ScriptedResourceClass.getApp(), arguments[1] ? aModel : null);
-        var form = formFactory.form;
-        if (aTarget) {
-            P.Form.call(aTarget, null, null, form);
-        } else {
-            aTarget = new P.Form(null, null, form);
-        }
-        form.injectPublished(aTarget);
-        var comps = formFactory.getWidgetsList();
-        for (var c = 0; c < comps.length; c++) {
-            (function () {
-                var comp = EngineUtilsClass.unwrap(P.boxAsJs(comps[c]));
-                if (comp.name) {
-                    Object.defineProperty(aTarget, comp.name, {
-                        get: function () {
-                            return comp;
-                        }
-                    });
-                }
-            })();
-        }
-        return aTarget;
-    }
-    /**
-     * @static
-     * @param {type} aName
-     * @param {type} aModel
-     * @param {type} aTarget
-     * @returns {P.loadForm.publishTo}
-     */
-    function loadForm(aName, aModel, aTarget) {
-        P.require(['forms/index.js', 'grid/index.js']);
-        var files = ScriptedResourceClass.getApp().getModules().nameToFiles(aName);
-        var document = ScriptedResourceClass.getApp().getForms().get(aName, files);
-        var form = loadFormDocument(document, aModel, aTarget);
-        if (!form.title)
-            form.title = aName;
-        form.formKey = aName;
-        return form;
-    }
-
-    function readForm(aContent, aModel, aTarget) {
-        P.require(['forms/index.js', 'grid/index.js']);
-        var document = Source2XmlDom.transform(aContent);
-        return loadFormDocument(document, aModel, aTarget);
-    }
-
-    Object.defineProperty(P, "loadForm", {value: loadForm});
-    Object.defineProperty(P, "readForm", {value: readForm});
-})();
+    return module;
+});

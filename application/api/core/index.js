@@ -1,17 +1,39 @@
-try{
-    P.require([
-          './jdbc-change-value.js'
-        , './field.js'
-        , './report.js'
-        , './command.js'
-        , './update.js'
-        , './parameter.js'
-        , './delete.js'
-        , './insert.js'
-        , './published-sourced-event.js'
-        , './change-value.js'
-        , './jdbc-field.js'
-    ]);
-}catch(e){
-    P.Logger.severe(e);
-}
+define([
+      './change-value'
+    , './command'
+    , './delete'
+    , './insert'
+    , './jdbc-change-value'
+    , './update'
+    , './published-sourced-event'
+    , './field'
+    , './jdbc-field'
+    , './parameter'
+    , './report'
+], function(
+      ChangeValue
+    , Command
+    , Delete
+    , Insert
+    , JdbcChangeValue
+    , Update
+    , PublishedSourcedEvent
+    , Field
+    , JdbcField
+    , Parameter
+    , Report
+    ){
+    return {
+          ChangeValue: ChangeValue
+        , Command: Command
+        , Delete: Delete
+        , Insert: Insert
+        , JdbcChangeValue: JdbcChangeValue
+        , Update: Update
+        , PublishedSourcedEvent: PublishedSourcedEvent
+        , Field: Field
+        , JdbcField: JdbcField
+        , Parameter: Parameter
+        , Report: Report
+    };
+});

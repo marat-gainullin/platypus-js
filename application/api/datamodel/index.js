@@ -1,15 +1,33 @@
-try{
-    P.require([
-          './application-platypus-entity.js'
-        , './entity-instance-delete-event.js'
-        , './entity-instance-insert-event.js'
-        , './cursor-position-changed-event.js'
-        , './application-db-model.js'
-        , './entity-instance-change-event.js'
-        , './application-platypus-model.js'
-        , './application-db-entity.js'
-        , './cursor-position-will-change-event.js'
-    ]);
-}catch(e){
-    P.Logger.severe(e);
-}
+define([
+      './application-db-entity'
+    , './application-db-model'
+    , './application-platypus-entity'
+    , './application-platypus-model'
+    , './cursor-position-changed-event'
+    , './cursor-position-will-change-event'
+    , './entity-instance-change-event'
+    , './entity-instance-delete-event'
+    , './entity-instance-insert-event'
+], function(
+      ApplicationDbEntity
+    , ApplicationDbModel
+    , ApplicationPlatypusEntity
+    , ApplicationPlatypusModel
+    , CursorPositionChangedEvent
+    , CursorPositionWillChangeEvent
+    , EntityInstanceChangeEvent
+    , EntityInstanceDeleteEvent
+    , EntityInstanceInsertEvent
+    ){
+    return {
+          ApplicationDbEntity: ApplicationDbEntity
+        , ApplicationDbModel: ApplicationDbModel
+        , ApplicationPlatypusEntity: ApplicationPlatypusEntity
+        , ApplicationPlatypusModel: ApplicationPlatypusModel
+        , CursorPositionChangedEvent: CursorPositionChangedEvent
+        , CursorPositionWillChangeEvent: CursorPositionWillChangeEvent
+        , EntityInstanceChangeEvent: EntityInstanceChangeEvent
+        , EntityInstanceDeleteEvent: EntityInstanceDeleteEvent
+        , EntityInstanceInsertEvent: EntityInstanceInsertEvent
+    };
+});
