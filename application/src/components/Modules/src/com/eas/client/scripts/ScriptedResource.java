@@ -153,6 +153,10 @@ public class ScriptedResource {
         } : null);
     }
 
+    public static Object _load(final String aResourceName, String aCalledFromFile, Scripts.Space aSpace) throws Exception {
+        return _load(aResourceName, aCalledFromFile, aSpace, null, null);
+    }
+    
     public static Object _load(final String aResourceName, String aCalledFromFile, Scripts.Space aSpace, Consumer<Object> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (onSuccess != null) {
             Matcher htppMatcher = httpPattern.matcher(aResourceName);

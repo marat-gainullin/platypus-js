@@ -515,7 +515,7 @@ public class PlatypusHttpServlet extends HttpServlet {
                 }
             }
             Logger.getLogger(PlatypusHttpServlet.class.getName()).log(Level.SEVERE, REQUEST_PARAMETER_MISSING_MSG, PlatypusHttpRequestParams.TYPE);
-            throw new Exception(String.format("Platypus http requset parameter '%s' is missing", PlatypusHttpRequestParams.TYPE));
+            throw new Exception(String.format("Platypus http request parameter '%s' is missing", PlatypusHttpRequestParams.TYPE));
         }
     }
 }

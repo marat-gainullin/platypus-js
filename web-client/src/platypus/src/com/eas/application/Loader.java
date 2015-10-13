@@ -384,6 +384,7 @@ public class Loader {
 
 			@Override
 			public void onSuccess(Void result) {
+				fireLoaded(aModuleName);
 				notifyPendingsModuleSucceded(aModuleName);
 			}
 

@@ -357,17 +357,19 @@ define(['logger', 'boxing'], function (Logger, B) {
 
         function Params(aHttpRequest) {
             var self = this;
-            var paramNames = aHttpRequest.getParameterMap().keySet();
+            var paramNames = aHttpRequest.getParameterMap().keySet().toArray();
             if (paramNames) {
                 for (var i = 0; i < paramNames.length; i++) {
                     var aParamName = paramNames[i];
                     var paramValues = aHttpRequest.getParameterValues(aParamName);
                     if (paramValues.length === 1) {
                         Object.defineProperty(self, aParamName, {
-                            value: aHttpRequest.getParameter(aParamName)
+                            enumerable: true,
+                            value: B.boxAsJs(paramValues[0])
                         });
                     } else {
                         Object.defineProperty(self, aParamName, {
+                            enumerable: true,
                             value: B.boxAsJs(paramValues)
                         });
                     }

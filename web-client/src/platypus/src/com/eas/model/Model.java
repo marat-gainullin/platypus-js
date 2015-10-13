@@ -306,6 +306,7 @@ public class Model implements HasPublished {
 		var B = @com.eas.core.Predefine::boxing;
 		var Logger = @com.eas.core.Predefine::logger;
 		var M = @com.eas.model.JsModel::managed;
+		var Orderer = @com.eas.model.JsModel::orderer;
 		
 		function Insert(aEntityName){
 			this.kind = 'insert';

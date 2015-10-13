@@ -6,7 +6,7 @@
         try {
             Java.type('com.eas.server.httpservlet.PlatypusHttpServlet');
             // Servlet container (may be EE server)
-            define(['environment', 'logger', 'resource', 'id', 'md5', 'template', 'invoke', 'orm', 'core/index', 'datamodel/index', 'reports/index', 'rpc', 'extend', 'server/index', 'servlet-support/index', 'http-context'], function (Environment, Logger, Resource, Id, Md5, loadTemplate, Invoke, Orm, Core, Datamodel, Reports, Rpc, extend, Server, Servlet, Http) {
+            define(['environment', 'logger', 'resource', 'id', 'md5', 'template', 'invoke', 'orm', 'core/index', 'datamodel/index', 'reports/index', 'rpc', 'extend', 'server/index', 'servlet-support/index', 'http-context'], function (Environment, Logger, Resource, Id, Md5, loadTemplate, Invoke, Orm, Core, Datamodel, Reports, Rpc, extend, Server, Servlet, HttpContext) {
                 var module = aInitializer();
                 aCommonDefiner(module, Environment, Logger, Resource, Id, Md5, loadTemplate, Invoke, Orm, Core, Datamodel, Reports, Rpc, extend);
                 for (var s in Server) {
@@ -27,15 +27,11 @@
                         });
                     }());
                 }
-                for (var h in Http) {
-                    (function () {
-                        var p = h;
-                        Object.defineProperty(module, p, {
-                            enumerable: true,
-                            get: function(){ return Http[p]; }
-                        });
-                    }());
-                }
+                Object.defineProperty(module, 'HttpContext', {
+                    enumerable: true,
+                    value: HttpContext
+                });
+                
                 return module;
             });
         } catch (se) {

@@ -96,6 +96,7 @@ public class PlatypusFilesSupport {
                 protected void commentedFunction(FunctionNode fn, String aComment) {
                     if (scopeLevel == TOP_CONSTRUCTORS_SCOPE_LEVEL) {
                         JsDoc jsDoc = new JsDoc(aComment);
+                        jsDoc.parseAnnotations();
                         if (jsDoc.containsTag(JsDoc.Tag.CONSTRUCTOR_TAG)) {
                             cx.result = fn;
                             cx.annotatedConstructors++;
@@ -114,7 +115,7 @@ public class PlatypusFilesSupport {
             } else if (cx.annotatedConstructors > 1) {
                 Logger.getLogger(PlatypusFilesSupport.class.getName()).log(Level.WARNING, "More than one annotated constructor found in module {0}.", aFileName);
             } else if (cx.annotatedConstructors == 0 && cx.functions > 1) {
-                Logger.getLogger(PlatypusFilesSupport.class.getName()).log(Level.WARNING, "No annotated constructors and multiple functions found in top level scope of the module {0}.", aFileName);
+                Logger.getLogger(PlatypusFilesSupport.class.getName()).log(Level.WARNING, "Multiple functions found in top level scope of the module, but no annotated constructors found in file {0}.", aFileName);
             }
         }
         return null;

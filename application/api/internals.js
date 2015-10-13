@@ -62,7 +62,7 @@
         for (var s = 0; s < aDeps.length; s++) {
             var sDep = aDeps[s];
             if (sDep.toLowerCase().endsWith('.js')) {
-                sDeps = sDep.substring(0, sDep.length - 3);
+                sDep = sDep.substring(0, sDep.length - 3);
             }
             sDep = ScriptedResourceClass.toModuleId(apiPath, appPath, sDep, calledFromFile);
             sDeps[s] = sDep;

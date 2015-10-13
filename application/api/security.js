@@ -8,10 +8,13 @@ define(['invoke'], function (Invoke) {
             try {
                 var clientSpacePrincipal = PlatypusPrincipalClass.getClientSpacePrincipal();
                 var tlsPrincipal = ScriptsClass.getContext().getPrincipal();
+                var calcedPrincipal = clientSpacePrincipal !== null ? clientSpacePrincipal : tlsPrincipal;
                 if (aOnSuccess) {
                     Invoke.later(function () {
-                        aOnSuccess(clientSpacePrincipal !== null ? clientSpacePrincipal : tlsPrincipal);
+                        aOnSuccess(calcedPrincipal);
                     });
+                }else{
+                    return calcedPrincipal;
                 }
             } catch (ex) {
                 if (aOnFailure) {
