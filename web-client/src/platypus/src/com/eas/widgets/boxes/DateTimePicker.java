@@ -8,7 +8,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DatePicker;
 
 public class DateTimePicker extends DatePicker {
@@ -35,8 +34,8 @@ public class DateTimePicker extends DatePicker {
 	    setStyleName(panel.getElement(), "gwt-DatePicker");
 	    
 	    panel.getElement().getStyle().setBorderWidth(0, Style.Unit.PX);
-	    panel.add(this.getMonthSelector());
-		panel.add(this.getView());
+	    panel.add(getMonthSelector());
+		panel.add(getView());
 		tmPicker = new TimePicker();
 		
 	    timePickerCaller = new FlowPanel();

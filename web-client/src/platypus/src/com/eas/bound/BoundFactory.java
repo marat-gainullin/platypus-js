@@ -49,8 +49,8 @@ public class BoundFactory implements UiWidgetReader{
 			ModelDate modelDate = new ModelDate();
 			BoundPublisher.publish(modelDate);
 			readGeneralProps(anElement, modelDate, aFactory);
-			if (anElement.hasAttribute("dateFormat")) {
-				String dateFormat = anElement.getAttribute("dateFormat");
+			if (anElement.hasAttribute("format")) {
+				String dateFormat = anElement.getAttribute("format");
 				try {
 					modelDate.setFormat(dateFormat);
 				} catch (Exception ex) {

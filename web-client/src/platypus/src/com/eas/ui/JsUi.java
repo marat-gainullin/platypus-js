@@ -533,12 +533,16 @@ public class JsUi {
 		});
 		
 		predefine([], 'common-utils/font', function(){
+			var FontStyle = @com.eas.ui.JsUi::FontStyle;
 			function Font(aFamily, aStyle, aSize){
 				var _self = this;
 				Object.defineProperty(_self, "family", { get:function(){ return aFamily;} });
 				Object.defineProperty(_self, "style", { get:function(){ return aStyle;} });
 				Object.defineProperty(_self, "size", { get:function(){ return aSize;} });			
 			}; 
+			Font.prototype.toString = function(){
+				return this.family + ' ' + (this.style == FontStyle.ITALIC ? 'Italic' : this.style == FontStyle.BOLD ? 'Bold' : this.style == FontStyle.BOLD_ITALIC ? 'Bold Italic' : 'Normal') + ' ' + this.size;
+			}
 			@com.eas.ui.JsUi::Font = Font; 
 			return Font;
 		});

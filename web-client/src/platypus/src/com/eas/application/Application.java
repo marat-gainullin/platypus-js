@@ -150,8 +150,8 @@ public class Application {
 		Loader.setAmdDefine(deps, new Callback<String, Void>() {
 
 			protected final native JavaScriptObject lookupInGlobal(String aModuleName)/*-{
-		return $wnd[aModuleName];
-	}-*/;
+				return $wnd[aModuleName];
+			}-*/;
 
 			@Override
 			public void onSuccess(String aModuleName) {

@@ -147,7 +147,7 @@ public class ModelDate extends ModelDecoratorBox<Date> implements HasEmptyText, 
 				return B.boxAsJs(aWidget.@com.eas.bound.ModelDate::getText()());
 			}
 		});
-		Object.defineProperty(aPublished, "dateFormat", {
+		Object.defineProperty(aPublished, "format", {
 			get : function() {
 				return aWidget.@com.eas.bound.ModelDate::getFormat()();
 			},
