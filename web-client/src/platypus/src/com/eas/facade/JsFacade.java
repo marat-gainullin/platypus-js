@@ -8,8 +8,8 @@ public class JsFacade {
 			@com.eas.core.Predefine::predefine(Lcom/google/gwt/core/client/JavaScriptObject;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aDeps, aName, aDefiner);
 		}
 
-		predefine(['environment', 'logger', 'resource', 'id', 'md5', 'invoke', 'orm', 'core/report', 'rpc', 'extend', 'ui', 'forms' ], 'facade', function(Environment, Logger, Resource, Id, Md5,
-				Invoke, Orm, Report, Rpc, extend, Ui, Forms) {
+		predefine(['environment', 'logger', 'resource', 'id', 'md5', 'invoke', 'orm', 'core/report', 'rpc', 'extend', 'ui', 'forms', 'forms/anchors'], 'facade', function(Environment, Logger, Resource, Id, Md5,
+				Invoke, Orm, Report, Rpc, extend, Ui, Forms, Anchors) {
 
 			var module = {};
 			Object.defineProperty(module, "logout", {
@@ -129,6 +129,10 @@ public class JsFacade {
 					});
 				}());
 			}
+			Object.defineProperty(module, 'Anchors', {
+				enumerable : true,
+				value : Anchors
+			});			
 			return module;
 		});
 

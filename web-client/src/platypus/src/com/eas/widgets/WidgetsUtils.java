@@ -291,12 +291,12 @@ public class WidgetsUtils {
 			aElement.getStyle().setFontSize(aFont.getSize(), Style.Unit.PT);
 			if (aFont.isBold())
 				aElement.getStyle().setFontWeight(Style.FontWeight.BOLD);
-			// aElement.getStyle().setFontWeight(aFont.isBold() ?
-			// FontWeight.BOLD : FontWeight.NORMAL);
+			else
+				aElement.getStyle().setFontWeight(Style.FontWeight.NORMAL);
 			if (aFont.isItalic())
 				aElement.getStyle().setFontStyle(Style.FontStyle.ITALIC);
-			// aElement.getStyle().setFontStyle(aFont.isItalic() ?
-			// FontStyle.ITALIC : FontStyle.NORMAL);
+			else
+				aElement.getStyle().setFontStyle(Style.FontStyle.NORMAL);
 		} else {
 			aElement.getStyle().clearFontSize();
 			aElement.getStyle().clearFontWeight();

@@ -3,6 +3,7 @@ package com.eas.widgets.boxes;
 import java.util.Date;
 
 import com.google.gwt.user.datepicker.client.DateBox;
+import com.google.gwt.user.datepicker.client.DatePicker;
 
 public class DecoratedDateBox extends DateBox {
 
@@ -13,7 +14,7 @@ public class DecoratedDateBox extends DateBox {
 	}
 
 	public DecoratedDateBox(DateTimePicker aPicker, Date date, Format format) {
-		super(aPicker, date, format);
+		super(new DatePicker(), date, format);
 		picker = aPicker;
 	}
 

@@ -461,10 +461,10 @@ public class FormFactory {
             case "DbDateDesignInfo":
                 ModelDate modelDate = new ModelDate();
                 readGeneralProps(anElement, modelDate);
-                if (anElement.hasAttribute("dateFormat")) {
-                    String dateFormat = anElement.getAttribute("dateFormat");
+                if (anElement.hasAttribute("format")) {
+                    String dateFormat = anElement.getAttribute("format");
                     try {
-                        modelDate.setDateFormat(dateFormat);
+                        modelDate.setFormat(dateFormat);
                     } catch (Exception ex) {
                         Logger.getLogger(FormFactory.class.getName()).log(Level.SEVERE, null, ex);
                     }

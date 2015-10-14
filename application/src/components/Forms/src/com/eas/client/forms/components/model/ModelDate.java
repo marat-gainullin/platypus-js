@@ -85,12 +85,12 @@ public class ModelDate extends ModelComponentDecorator<VDateTimeField, Date> imp
     }
 
     @ScriptFunction
-    public String getDateFormat() {
+    public String getFormat() {
         return decorated.getDateFormat();
     }
 
     @ScriptFunction
-    public void setDateFormat(String aValue) throws Exception {
+    public void setFormat(String aValue) throws Exception {
         decorated.setDateFormat(aValue);
     }
 

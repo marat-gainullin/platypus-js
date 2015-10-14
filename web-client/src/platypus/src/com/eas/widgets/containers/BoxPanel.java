@@ -191,10 +191,17 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 	@Override
 	protected void onAttach() {
 		super.onAttach();
-		if (orientation == Orientation.HORIZONTAL)
+		if (orientation == Orientation.HORIZONTAL) {
+			if (getParent() instanceof ScrollPanel) {
+				getElement().getStyle().setHeight(100, Style.Unit.PCT);
+			}
 			ajustWidth();
-		else
+		} else {
+			if (getParent() instanceof ScrollPanel) {
+				getElement().getStyle().setWidth(100, Style.Unit.PCT);
+			}
 			ajustHeight();
+		}
 	}
 
 	@Override
