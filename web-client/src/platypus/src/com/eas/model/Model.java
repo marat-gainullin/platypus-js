@@ -16,6 +16,7 @@ import com.eas.client.AppClient;
 import com.eas.client.CallbackAdapter;
 import com.eas.client.metadata.Field;
 import com.eas.client.metadata.Fields;
+import com.eas.core.Callable;
 import com.eas.core.HasPublished;
 import com.eas.core.Utils;
 import com.eas.core.Utils.JsObject;
@@ -39,13 +40,11 @@ public class Model implements HasPublished {
 	protected JavaScriptObject jsPublished;
 
 	public static class RequeryProcess {
-		public Collection<Entity> entities;
 		public Map<Entity, String> errors = new HashMap<Entity, String>();
 		public Callback<JavaScriptObject, String> callback;
 
-		public RequeryProcess(Collection<Entity> aEntities, Callback<JavaScriptObject, String> aCallback) {
+		public RequeryProcess(Callback<JavaScriptObject, String> aCallback) {
 			super();
-			entities = aEntities;
 			callback = aCallback;
 			assert callback != null : "aCallback argument is required.";
 		}
@@ -1007,22 +1006,7 @@ public class Model implements HasPublished {
 		}
 		for (Entity entity : toExecute) {
 			if (!entity.getQuery().isManual()) {
-                if (process == null) {
-                    entity.internalExecute(new CallbackAdapter<JavaScriptObject, String>() {
-            			@Override
-            			protected void doWork(JavaScriptObject result) throws Exception {
-            				// no op
-            			}
-
-            			@Override
-            			public void onFailure(String reason) {
-                            Logger.getLogger(Model.class.getName()).log(Level.WARNING, reason);
-            			}
-
-                    });
-                } else {
-    				entity.internalExecute(null);
-                }
+  				entity.internalExecute(null);
 			}
 		}
 	}
@@ -1162,19 +1146,14 @@ public class Model implements HasPublished {
 	}
 
 	public void requery(Callback<JavaScriptObject, String> aCallback) throws Exception {
-		changeLog.splice(0, changeLog.length());
-		if (process != null) {
-			process.cancel();
-		}
-		if (aCallback != null) {
-			process = new RequeryProcess(entities.values(), aCallback);
-		}
-		revert();
-		executeEntities(true, rootEntities());
-		if (!isPending() && process != null) {
-			process.end();
-			process = null;
-		}
+		inProcess(new Callable(){
+			@Override
+			public void call() throws Exception {
+				revert();
+				executeEntities(true, rootEntities());
+			}
+
+		}, aCallback);
 	}
 
 	public void execute(final JavaScriptObject onSuccess, final JavaScriptObject onFailure) throws Exception {
@@ -1199,13 +1178,23 @@ public class Model implements HasPublished {
 	}
 
 	public void execute(Callback<JavaScriptObject, String> aCallback) throws Exception {
+		inProcess(new Callable(){
+			@Override
+			public void call() throws Exception {
+				executeEntities(false, rootEntities());
+			}
+		}, aCallback);
+	}
+
+	public void inProcess(Callable aAction, Callback<JavaScriptObject, String> aCallback) throws Exception {
 		if (process != null) {
 			process.cancel();
+			process = null;
 		}
 		if (aCallback != null) {
-			process = new RequeryProcess(entities.values(), aCallback);
+			process = new RequeryProcess(aCallback);
 		}
-		executeEntities(false, rootEntities());
+		aAction.call();
 		if (!isPending() && process != null) {
 			process.end();
 			process = null;

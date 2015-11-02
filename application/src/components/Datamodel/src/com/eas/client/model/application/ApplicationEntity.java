@@ -159,11 +159,26 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
 
     @ScriptFunction(jsDoc = EXECUTE_JSDOC, params = {"onSuccess", "onFailure"})
     public void execute(final JSObject aOnSuccess, final JSObject aOnFailure) throws Exception {
-        internalExecute(aOnSuccess != null ? (JSObject v) -> {
-            aOnSuccess.call(null, new Object[]{v});
-        } : null, aOnFailure != null ? (Exception ex) -> {
-            aOnFailure.call(null, new Object[]{ex.getMessage()});
-        } : null);
+        if (aOnSuccess != null) {
+            if (getOutRelations().isEmpty()) {
+                internalExecute((JSObject v) -> {
+                    aOnSuccess.call(null, new Object[]{published});
+                }, aOnFailure != null ? (Exception ex) -> {
+                    aOnFailure.call(null, new Object[]{ex.getMessage()});
+                } : null);
+            } else {
+                model.inProcess(() -> {
+                    internalExecute(null, null);
+                    return null;
+                }, (Void v) -> {
+                    aOnSuccess.call(null, new Object[]{published});
+                }, aOnFailure != null ? (Exception ex) -> {
+                    aOnFailure.call(null, new Object[]{ex.getMessage()});
+                } : null);
+            }
+        } else {
+            internalExecute(null, null);
+        }
     }
 
     // Requery interface
@@ -184,11 +199,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccess", "onFailure"})
     public void requery(JSObject aOnSuccess, JSObject aOnFailure) throws Exception {
         invalidate();
-        internalExecute(aOnSuccess != null ? (JSObject v) -> {
-            aOnSuccess.call(null, new Object[]{v});
-        } : null, aOnFailure != null ? (Exception ex) -> {
-            aOnFailure.call(null, new Object[]{ex.getMessage()});
-        } : null);
+        execute(aOnSuccess, aOnFailure);
     }
 
     private static final String QUERY_JSDOC = ""

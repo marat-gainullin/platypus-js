@@ -6,9 +6,9 @@
         try {
             Java.type('com.eas.server.httpservlet.PlatypusHttpServlet');
             // Servlet container (may be EE server)
-            define(['environment', 'logger', 'resource', 'id', 'md5', 'template', 'invoke', 'orm', 'core/index', 'datamodel/index', 'reports/index', 'rpc', 'extend', 'server/index', 'servlet-support/index', 'http-context'], function (Environment, Logger, Resource, Id, Md5, loadTemplate, Invoke, Orm, Core, Datamodel, Reports, Rpc, extend, Server, Servlet, HttpContext) {
+            define(['environment', 'logger', 'resource', 'id', 'md5', 'template', 'invoke', 'orm', 'core/index', 'datamodel/index', 'reports/index', 'rpc', 'extend', 'security', 'server/index', 'servlet-support/index', 'http-context'], function (Environment, Logger, Resource, Id, Md5, loadTemplate, Invoke, Orm, Core, Datamodel, Reports, Rpc, extend, Security, Server, Servlet, HttpContext) {
                 var module = aInitializer();
-                aCommonDefiner(module, Environment, Logger, Resource, Id, Md5, loadTemplate, Invoke, Orm, Core, Datamodel, Reports, Rpc, extend);
+                aCommonDefiner(module, Environment, Logger, Resource, Id, Md5, loadTemplate, Invoke, Orm, Core, Datamodel, Reports, Rpc, extend, Security);
                 for (var s in Server) {
                     (function () {
                         var p = s;
@@ -36,9 +36,9 @@
             });
         } catch (se) {
             // TSA server
-            define(['environment', 'logger', 'resource', 'id', 'md5', 'template', 'invoke', 'orm', 'core/index', 'datamodel/index', 'reports/index', 'rpc', 'extend', 'server/index'], function (Environment, Logger, Resource, Id, Md5, loadTemplate, Invoke, Orm, Core, Datamodel, Reports, Rpc, extend, Server) {
+            define(['environment', 'logger', 'resource', 'id', 'md5', 'template', 'invoke', 'orm', 'core/index', 'datamodel/index', 'reports/index', 'rpc', 'extend', 'security', 'server/index'], function (Environment, Logger, Resource, Id, Md5, loadTemplate, Invoke, Orm, Core, Datamodel, Reports, Rpc, extend, Security, Server) {
                 var module = aInitializer();
-                aCommonDefiner(module, Environment, Logger, Resource, Id, Md5, loadTemplate, Invoke, Orm, Core, Datamodel, Reports, Rpc, extend);
+                aCommonDefiner(module, Environment, Logger, Resource, Id, Md5, loadTemplate, Invoke, Orm, Core, Datamodel, Reports, Rpc, extend, Security);
                 for (var s in Server) {
                     (function () {
                         var p = s;
@@ -53,9 +53,9 @@
         }
     } catch (e) {
         // SE client
-        define(['environment', 'logger', 'resource', 'id', 'md5', 'template', 'invoke', 'orm', 'core/index', 'datamodel/index', 'reports/index', 'rpc', 'extend', 'forms/index', 'grid/index', 'ui', 'forms'], function (Environment, Logger, Resource, Id, Md5, loadTemplate, Invoke, Orm, Core, Datamodel, Reports, Rpc, extend, FormsIndex, GridIndex, Ui, Forms) {
+        define(['environment', 'logger', 'resource', 'id', 'md5', 'template', 'invoke', 'orm', 'core/index', 'datamodel/index', 'reports/index', 'rpc', 'extend', 'security', 'forms/index', 'grid/index', 'ui', 'forms'], function (Environment, Logger, Resource, Id, Md5, loadTemplate, Invoke, Orm, Core, Datamodel, Reports, Rpc, extend, Security, FormsIndex, GridIndex, Ui, Forms) {
             var module = aInitializer();
-            aCommonDefiner(module, Environment, Logger, Resource, Id, Md5, loadTemplate, Invoke, Orm, Core, Datamodel, Reports, Rpc, extend);
+            aCommonDefiner(module, Environment, Logger, Resource, Id, Md5, loadTemplate, Invoke, Orm, Core, Datamodel, Reports, Rpc, extend, Security);
             for (var f in FormsIndex) {
                 (function () {
                     var p = f;
@@ -114,7 +114,7 @@
         }
     });
     return module;
-}, function (module, Environment, Logger, Resource, Id, Md5, loadTemplate, Invoke, Orm, Core, Datamodel, Reports, Rpc, extend) {
+}, function (module, Environment, Logger, Resource, Id, Md5, loadTemplate, Invoke, Orm, Core, Datamodel, Reports, Rpc, extend, Security) {
     for (var e in Environment) {
         (function () {
             var p = e;
@@ -127,6 +127,12 @@
     Object.defineProperty(module, 'Logger', {
         enumerable: true,
         value: Logger
+    });
+    Object.defineProperty(module, 'principal', {
+        enumerable: true,
+        get: function () {
+            return Security.principal();
+        }
     });
     Object.defineProperty(module, 'Resource', {
         enumerable: true,

@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,14 +45,12 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
 
     public static class RequeryProcess<E extends ApplicationEntity<?, Q, E>, Q extends Query> {
 
-        public Collection<E> entities;
         public Map<E, Exception> errors = new HashMap<>();
         public Consumer<Void> onSuccess;
         public Consumer<Exception> onFailure;
 
-        public RequeryProcess(Collection<E> aEntities, Consumer<Void> aOnSuccess, Consumer<Exception> aOnFailure) {
+        public RequeryProcess(Consumer<Void> aOnSuccess, Consumer<Exception> aOnFailure) {
             super();
-            entities = aEntities;
             onSuccess = aOnSuccess;
             assert onSuccess != null : "aOnSuccess argument is required.";
             onFailure = aOnFailure;
@@ -133,14 +132,7 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
             });
         }
         for (E entity : toExecute) {
-            if (process == null) {
-                entity.internalExecute((JSObject aData) -> {
-                }, (Exception ex) -> {
-                    Logger.getLogger(ApplicationModel.class.getName()).log(Level.WARNING, ex.getMessage());
-                });
-            } else {
-                entity.internalExecute(null, null);
-            }
+            entity.internalExecute(null, null);
         }
     }
 
@@ -387,24 +379,15 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
 
     @ScriptFunction(jsDoc = REQUERY_JSDOC, params = {"onSuccess", "onFailure"})
     public void requery(JSObject onSuccess, JSObject onFailure) throws Exception {
-        if (process != null) {
-            process.cancel();
-        }
-        if (onSuccess != null) {
-            process = new RequeryProcess<>(entities.values(), (Void v) -> {
-                onSuccess.call(null, new Object[]{});
-            }, (Exception ex) -> {
-                if (onFailure != null) {
-                    onFailure.call(null, new Object[]{ex.getMessage()});
-                }
-            });
-        }
-        revert();
-        executeEntities(true, rootEntities());
-        if (!isPending() && process != null) {
-            process.end();
-            process = null;
-        }
+        inProcess(() -> {
+            revert();
+            executeEntities(true, rootEntities());
+            return null;
+        }, onSuccess != null ? (Void v) -> {
+            onSuccess.call(null, new Object[]{});
+        } : null, onFailure != null ? (Exception ex) -> {
+            onFailure.call(null, new Object[]{ex.getMessage()});
+        } : null);
     }
 
     public void execute() throws Exception {
@@ -423,13 +406,21 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
 
     @ScriptFunction(jsDoc = EXECUTE_JSDOC, params = {"onSuccess", "onFailure"})
     public void execute(Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        inProcess(() -> {
+            executeEntities(false, rootEntities());
+            return null;
+        }, onSuccess, onFailure);
+    }
+
+    public void inProcess(Callable<Void> aAction, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (process != null) {
             process.cancel();
+            process = null;
         }
         if (onSuccess != null) {
-            process = new RequeryProcess<>(entities.values(), onSuccess, onFailure);
+            process = new RequeryProcess<>(onSuccess, onFailure);
         }
-        executeEntities(false, rootEntities());
+        aAction.call();
         if (!isPending() && process != null) {
             process.end();
             process = null;
@@ -438,9 +429,9 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
 
     protected static final String USER_DATASOURCE_NAME = "userQuery";
 
-    public E createQuery(String aQueryId) throws Exception {
+    public E createQuery(String aQueryName) throws Exception {
         Logger.getLogger(ApplicationModel.class.getName()).log(Level.WARNING, "createQuery deprecated call detected. Use loadEntity() instead.");
-        return loadEntity(aQueryId);
+        return loadEntity(aQueryName);
     }
     private static final String LOAD_ENTITY_JSDOC = ""
             + "/**\n"
@@ -449,11 +440,11 @@ public abstract class ApplicationModel<E extends ApplicationEntity<?, Q, E>, Q e
             + "* @return a new entity.\n"
             + "*/";
 
-    @ScriptFunction(jsDoc = LOAD_ENTITY_JSDOC, params = {"queryId"})
-    public E loadEntity(String aQueryId) throws Exception {
+    @ScriptFunction(jsDoc = LOAD_ENTITY_JSDOC, params = {"queryName"})
+    public E loadEntity(String aQueryName) throws Exception {
         E entity = newGenericEntity();
         entity.setName(USER_DATASOURCE_NAME);
-        entity.setQueryName(aQueryId);
+        entity.setQueryName(aQueryName);
         entity.validateQuery();
         return entity;
     }

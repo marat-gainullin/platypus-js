@@ -13,6 +13,7 @@ import com.eas.client.metadata.Fields;
 import com.eas.client.metadata.Parameter;
 import com.eas.client.metadata.Parameters;
 import com.eas.client.queries.Query;
+import com.eas.core.Callable;
 import com.eas.core.Cancellable;
 import com.eas.core.HasPublished;
 import com.eas.core.Utils;
@@ -45,8 +46,8 @@ public class Entity implements HasPublished {
 	protected String queryName;
 	protected Model model;
 	protected Query query;
-	protected Set<Relation> inRelations = new HashSet<Relation>();
-	protected Set<Relation> outRelations = new HashSet<Relation>();
+	protected Set<Relation> inRelations = new HashSet<>();
+	protected Set<Relation> outRelations = new HashSet<>();
 
 	public Entity() {
 		super();
@@ -130,7 +131,8 @@ public class Entity implements HasPublished {
 				nEntity.@com.eas.model.Entity::execute(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
 			}
 		});
-		Object.defineProperty(
+		Object
+				.defineProperty(
 						aTarget,
 						'query',
 						{
@@ -140,7 +142,7 @@ public class Entity implements HasPublished {
 						});
 		Object.defineProperty(aTarget, 'requery', {
 			value : function(onSuccess, onFailure) {
-				nEntity.@com.eas.model.Entity::refresh(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
+				nEntity.@com.eas.model.Entity::requery(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(onSuccess, onFailure);
 			}
 		});
 		Object.defineProperty(aTarget, 'append', {
@@ -321,7 +323,7 @@ public class Entity implements HasPublished {
 							}
 						}
 						if (aCallback != null) {
-							aCallback.onSuccess(aResult);
+							aCallback.onSuccess(jsPublished);
 						}
 					}
 				}
@@ -368,8 +370,8 @@ public class Entity implements HasPublished {
 		return pending != null;
 	}
 
-	public void refresh(final JavaScriptObject aOnSuccess, final JavaScriptObject aOnFailure) throws Exception {
-		refresh(new CallbackAdapter<JavaScriptObject, String>() {
+	public void requery(final JavaScriptObject aOnSuccess, final JavaScriptObject aOnFailure) throws Exception {
+		requery(new CallbackAdapter<JavaScriptObject, String>() {
 			@Override
 			protected void doWork(JavaScriptObject result) throws Exception {
 				if (aOnSuccess != null) {
@@ -419,10 +421,10 @@ public class Entity implements HasPublished {
 		});
 	}
 
-	public void refresh(final Callback<JavaScriptObject, String> aCallback) throws Exception {
+	public void requery(final Callback<JavaScriptObject, String> aCallback) throws Exception {
 		if (model != null) {
 			invalidate();
-			internalExecute(aCallback);
+			execute(aCallback);
 		}
 	}
 
@@ -488,9 +490,28 @@ public class Entity implements HasPublished {
 		});
 	}
 
-	public void execute(Callback<JavaScriptObject, String> aCallback) throws Exception {
+	public void execute(final Callback<JavaScriptObject, String> aCallback) throws Exception {
 		if (model != null) {
-			internalExecute(aCallback);
+			if (getOutRelations().isEmpty()) {
+				internalExecute(aCallback);
+			} else {
+				model.inProcess(new Callable() {
+					@Override
+					public void call() throws Exception {
+						internalExecute(null);
+					}
+				}, new Callback<JavaScriptObject, String>() {
+					@Override
+					public void onSuccess(JavaScriptObject result) {
+						aCallback.onSuccess(jsPublished);
+					}
+
+					@Override
+					public void onFailure(String reason) {
+						aCallback.onFailure(reason);
+					}
+				});
+			}
 		}
 	}
 
