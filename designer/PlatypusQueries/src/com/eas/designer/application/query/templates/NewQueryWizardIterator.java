@@ -28,7 +28,7 @@ public class NewQueryWizardIterator extends NewApplicationElementWizardIterator 
     }
 
     @TemplateRegistration(
-            folder = "Platypus application elements",
+            folder = "Platypus",
     position = 300,
     content = {"PlatypusQueryTemplate.sql",     "PlatypusQueryTemplate.model",
                "PlatypusQueryTemplate.dialect", "PlatypusQueryTemplate.out"},

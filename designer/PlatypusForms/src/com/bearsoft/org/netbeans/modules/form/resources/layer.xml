@@ -193,8 +193,8 @@
 
     <folder name="Templates">
         <folder name="Privileged">
-            <file name="PlatypusFormTemplate.shadow">
-                <attr name="originalFile" stringvalue="Templates/Platypus application elements/PlatypusFormTemplate.js"/>
+            <file name="PlatypusAMDFormTemplate.shadow">
+                <attr name="originalFile" stringvalue="Templates/Platypus/AMD modules/PlatypusAMDFormTemplate.js"/>
                 <attr name="position" intvalue="400"/>
             </file>
         </folder>

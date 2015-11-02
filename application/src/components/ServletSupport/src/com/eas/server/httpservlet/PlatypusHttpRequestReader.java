@@ -38,7 +38,7 @@ public class PlatypusHttpRequestReader implements PlatypusRequestVisitor {
     public static final String METHOD_NAME_PARAMETER_MISSING = "Method name parameter missing";
     public static final String PROPERTY_NAME_PARAMETER_MISSING_MSG = "Property name parameter missing";
     public static final String PROPERTY_VALUE_PARAMETER_MISSING_MSG = "Property value parameter missing.";
-    public static final String MUST_BE_RESOURCE_MSG = "Application element requests nust be resource requests.";
+    public static final String MUST_BE_RESOURCE_MSG = "Application element requests must be resource requests.";
     protected PlatypusServerCore serverCore;
     protected HttpServletRequest httpRequest;
 

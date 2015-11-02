@@ -813,9 +813,9 @@ public class QueryResultsView extends javax.swing.JPanel {
                         // Date and time
                         case Scripts.DATE_TYPE_NAME: {
                             ModelDate editor = new ModelDate();
-                            editor.setDateFormat("dd.MM.yyyy HH:mm:ss.SSS");
+                            editor.setFormat("dd.MM.yyyy HH:mm:ss.SSS");
                             ModelDate view = new ModelDate();
-                            view.setDateFormat("dd.MM.yyyy HH:mm:ss.SSS");
+                            view.setFormat("dd.MM.yyyy HH:mm:ss.SSS");
                             column.setEditor(editor);
                             column.setView(view);
                             break;

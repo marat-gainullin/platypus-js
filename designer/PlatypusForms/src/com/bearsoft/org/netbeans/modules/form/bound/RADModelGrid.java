@@ -242,7 +242,7 @@ public class RADModelGrid extends RADVisualComponent<ModelGrid> implements Compo
                                     break;
                                 case Scripts.DATE_TYPE_NAME: {
                                     ModelDate editor = new ModelDate();
-                                    editor.setDateFormat("dd.MM.yyyy HH:mm:ss.SSS");
+                                    editor.setFormat("dd.MM.yyyy HH:mm:ss.SSS");
                                     radColumn.getViewControl().setInstance(editor);
                                 }
                                 break;

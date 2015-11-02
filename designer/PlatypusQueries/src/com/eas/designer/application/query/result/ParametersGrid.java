@@ -316,7 +316,7 @@ public class ParametersGrid extends JTable {
             Parameter param = params.get(i + 1);
             ModelWidget widget = Forms.chooseWidgetByType(param.getType());
             if (Scripts.DATE_TYPE_NAME.equals(param.getType())) {
-                ((ModelDate) widget).setDateFormat("dd.MM.yyyy HH:mm:ss.SSS");
+                ((ModelDate) widget).setFormat("dd.MM.yyyy HH:mm:ss.SSS");
             }
             ((JComponent) widget).setBorder(null);
             if (widget instanceof HasEditable) {

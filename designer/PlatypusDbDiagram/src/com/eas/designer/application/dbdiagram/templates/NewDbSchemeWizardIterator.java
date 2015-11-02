@@ -30,7 +30,7 @@ public class NewDbSchemeWizardIterator extends NewApplicationElementWizardIterat
     }
 
     @TemplateRegistration(
-            folder = "Platypus application elements",
+            folder = "Platypus",
     position = 300,
     content = "PlatypusDbDiagramTemplate.pd",
     displayName = "#Templates/Other/PlatypusDbDiagramTemplate",
