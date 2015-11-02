@@ -52,7 +52,7 @@
 			<arg value="war" />
 			<!-- Additional arguments like -style PRETTY or -logLevel DEBUG -->
 			<arg line="${gwt.args}" />
-			<arg value="com.eas.client.application.Main" />
+			<arg value="com.eas.application.Application" />
 		</java>
 	</target>
 
