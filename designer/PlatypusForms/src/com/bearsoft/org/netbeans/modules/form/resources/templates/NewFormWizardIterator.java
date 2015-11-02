@@ -23,7 +23,7 @@ public class NewFormWizardIterator extends NewApplicationElementWizardIterator {
                 folder = "Platypus/AMD modules",
                 position = 400,
                 content = {
-                    "PlatypusAMDFormTemplate.js", "PlatypusFormTemplate.layout", "PlatypusFormTemplate.model"
+                    "PlatypusAMDFormTemplate.js", "PlatypusAMDFormTemplate.layout", "PlatypusAMDFormTemplate.model"
                 },
                 displayName = "#Templates/Other/PlatypusAMDFormTemplate",
                 description = "Form.html",

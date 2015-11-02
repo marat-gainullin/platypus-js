@@ -22,7 +22,7 @@ public class NewReportWizardIterator extends NewApplicationElementWizardIterator
         @TemplateRegistration(
                 folder = "Platypus/AMD modules",
                 position = 300,
-                content = {"PlatypusAMDReportTemplate.js", "PlatypusReportTemplate.model", "PlatypusReportTemplate.xlsx"},
+                content = {"PlatypusAMDReportTemplate.js", "PlatypusAMDReportTemplate.model", "PlatypusAMDReportTemplate.xlsx"},
                 displayName = "#Templates/Other/PlatypusAMDReportTemplate",
                 description = "Report.html",
                 scriptEngine = "freemarker"),
@@ -38,7 +38,8 @@ public class NewReportWizardIterator extends NewApplicationElementWizardIterator
                 position = 310,
                 content = {"PlatypusReportTemplateTemplate.xlsx"},
                 displayName = "#Templates/Other/PlatypusReportTemplateTemplate",
-                description = "ReportTemplate.html")})
+                description = "ReportTemplate.html")
+    })
     public static NewApplicationElementWizardIterator createIterator() {
         return new NewReportWizardIterator();
     }
