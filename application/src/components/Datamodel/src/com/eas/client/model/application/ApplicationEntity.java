@@ -152,7 +152,7 @@ public abstract class ApplicationEntity<M extends ApplicationModel<E, Q>, Q exte
     }
     private static final String EXECUTE_JSDOC = ""
             + "/**\n"
-            + "* Refreshes entity, only if any of its parameters has changed.\n"
+            + "* Requeries the entity, only if any of its parameters has changed.\n"
             + "* @param onSuccess The handler function for refresh data on success event (optional).\n"
             + "* @param onFailure The handler function for refresh data on failure event (optional).\n"
             + "*/";

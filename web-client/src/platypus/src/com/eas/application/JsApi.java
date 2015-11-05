@@ -509,7 +509,13 @@ public class JsApi {
 			var nativeClient = @com.eas.client.AppClient::getInstance()();
 			function requireRemotes(aRemotesNames, aOnSuccess, aOnFailure){
 				var remotesNames = Array.isArray(aRemotesNames) ? aRemotesNames : [aRemotesNames];
-				@com.eas.application.Loader::jsLoadServerModules(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(remotesNames, aOnSuccess, aOnFailure);
+				@com.eas.application.Loader::jsLoadServerModules(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(remotesNames, function () {
+		            var proxies = [];
+		            for(var r = 1; r < aRemotesNames.length; r++){
+		                proxies.push(new RpcProxy(aRemotesNames[r]));
+		            }
+		            aOnSuccess.apply(null, proxies);
+		        }, aOnFailure);
 			}		
 			function generateFunction(aModuleName, aFunctionName) {
 				return function() {
@@ -550,8 +556,8 @@ public class JsApi {
 					}
 				};
 			}
-			function Proxy(aModuleName){
-				if(!(this instanceof Proxy))
+			function RpcProxy(aModuleName){
+				if(!(this instanceof RpcProxy))
 					throw 'use new Rpc.Proxy() please.';
 				var moduleData = nativeClient.@com.eas.client.AppClient::getServerModule(Ljava/lang/String;)('' + aModuleName);
 				if(!moduleData)
@@ -567,7 +573,7 @@ public class JsApi {
 			var module = {};
 		    Object.defineProperty(module, "Proxy", {
 		        enumerable: true,
-		        value: Proxy
+		        value: RpcProxy
 		    });
 		    Object.defineProperty(module, "requireRemotes", {
 		        enumerable: true,

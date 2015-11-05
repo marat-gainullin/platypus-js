@@ -1,5 +1,5 @@
 /* global Java*/
-define('logger', function(){
+define('logger', function () {
     var ScriptsClass = Java.type("com.eas.script.Scripts");
     var ScriptedResourceClass = Java.type("com.eas.client.scripts.ScriptedResource");
     var JavaStringArrayClass = Java.type("java.lang.String[]");
@@ -10,7 +10,7 @@ define('logger', function(){
      * @constructor
      * @param {String} aModuleName Name of server module (session stateless or statefull or rezident).
      */
-    function RPCProxy(aModuleName) {
+    function RpcProxy(aModuleName) {
         if (aModuleName) {
             var app = ScriptedResourceClass.getApp();
             if (app) {
@@ -61,12 +61,18 @@ define('logger', function(){
     }
     function requireRemotes(aRemotesNames, aOnSuccess, aOnFailure) {
         var remotesNames = Array.isArray(aRemotesNames) ? aRemotesNames : [aRemotesNames];
-        ScriptedResourceClass.loadRemotes(Java.to(remotesNames, JavaStringArrayClass), aOnSuccess ? aOnSuccess : null, aOnFailure ? aOnFailure : null);
+        ScriptedResourceClass.loadRemotes(Java.to(remotesNames, JavaStringArrayClass), aOnSuccess ? function () {
+            var proxies = [];
+            for(var r = 1; r < remotesNames.length; r++){
+                proxies.push(new RpcProxy(remotesNames[r]));
+            }
+            aOnSuccess.apply(null, proxies);
+        } : null, aOnFailure ? aOnFailure : null);
     }
     var module = {};
     Object.defineProperty(module, 'Proxy', {
         enumerable: true,
-        value: RPCProxy
+        value: RpcProxy
     });
     Object.defineProperty(module, 'requireRemotes', {
         enumerable: true,
