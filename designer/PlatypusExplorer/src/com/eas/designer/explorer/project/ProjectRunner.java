@@ -181,19 +181,13 @@ public class ProjectRunner {
             }
             AppElementFiles startFiles = project.getIndexer().nameToFiles(appElementName);
             if (startFiles != null) {
+                String requireCallabckArg = moduleIdToVarName(appElementName);
                 String startMethod = startFiles.hasExtension(PlatypusFiles.FORM_EXTENSION) ? "show" : "execute";
-                String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, project.getSettings().getBrowserCacheBusting() ? "" : "//", project.getSettings().getGlobalAPI() ? "" : "//", appElementName, appElementName, "        var m = new " + appElementName + "();\n", "        m." + startMethod + "();\n", appElementName);
+                String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, project.getSettings().getBrowserCacheBusting() ? "" : "//", project.getSettings().getGlobalAPI() ? "" : "//", appElementName, requireCallabckArg, "        var m = new " + requireCallabckArg + "();\n", "        m." + startMethod + "();\n", appElementName);
                 FileUtils.writeString(FileUtil.toFile(startJs), starupScript, PlatypusUtils.COMMON_ENCODING_NAME);
             } else if (appElementName.toLowerCase().endsWith(PlatypusFiles.JAVASCRIPT_FILE_END)) {
-                String requireCallabckArg = appElementName.substring(0, appElementName.length() - PlatypusFiles.JAVASCRIPT_FILE_END.length());
-                int lastFileSepIndex = requireCallabckArg.lastIndexOf(File.separator);
-                if (lastFileSepIndex != -1) {
-                    requireCallabckArg = requireCallabckArg.substring(lastFileSepIndex + 1);
-                }
-                lastFileSepIndex = requireCallabckArg.lastIndexOf("/");
-                if (lastFileSepIndex != -1) {
-                    requireCallabckArg = requireCallabckArg.substring(lastFileSepIndex + 1);
-                }
+                String moduleId = appElementName.substring(0, appElementName.length() - PlatypusFiles.JAVASCRIPT_FILE_END.length());
+                String requireCallabckArg = moduleIdToVarName(moduleId);
                 String starupScript = String.format(PlatypusProjectSettingsImpl.START_JS_FILE_TEMPLATE, project.getSettings().getBrowserCacheBusting() ? "" : "//", project.getSettings().getGlobalAPI() ? "" : "//", appElementName, requireCallabckArg, "", "    //...\n", appElementName);
                 FileUtils.writeString(FileUtil.toFile(startJs), starupScript, PlatypusUtils.COMMON_ENCODING_NAME);
             }
@@ -417,6 +411,19 @@ public class ProjectRunner {
             io.getErr().println(ex.getMessage());
             io.getOut().println(NbBundle.getMessage(ProjectRunner.class, "MSG_Specify_Platypus_Platform_Path"));//NOI18N
         }
+    }
+
+    protected static String moduleIdToVarName(String moduleId) {
+        String requireCallabckArg = moduleId;
+        int lastFileSepIndex = requireCallabckArg.lastIndexOf(File.separator);
+        if (lastFileSepIndex != -1) {
+            requireCallabckArg = requireCallabckArg.substring(lastFileSepIndex + 1);
+        }
+        lastFileSepIndex = requireCallabckArg.lastIndexOf("/");
+        if (lastFileSepIndex != -1) {
+            requireCallabckArg = requireCallabckArg.substring(lastFileSepIndex + 1);
+        }
+        return requireCallabckArg;
     }
 
     public static void addArguments(List<String> arguments, String argsStr) {

@@ -6,6 +6,7 @@ package com.eas.designer.application.indexer;
 
 import com.eas.client.cache.PlatypusFiles;
 import com.eas.client.cache.PlatypusFilesSupport;
+import com.eas.designer.application.project.PlatypusProject;
 import com.eas.script.JsDoc;
 import com.eas.util.FileUtils;
 import java.io.File;
@@ -13,6 +14,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.netbeans.api.project.FileOwnerQuery;
+import org.netbeans.api.project.Project;
 import org.netbeans.modules.parsing.spi.indexing.Context;
 import org.netbeans.modules.parsing.spi.indexing.CustomIndexer;
 import org.netbeans.modules.parsing.spi.indexing.Indexable;
@@ -60,8 +63,17 @@ public class FileIndexer extends CustomIndexer {
                         String appElementName = null;
                         boolean isPublic = false;
                         String fileContent = FileUtils.readString(f, PlatypusFiles.DEFAULT_ENCODING);
-                        if (fo.existsExt(PlatypusFiles.MODEL_EXTENSION) && nameExt.endsWith(PlatypusFiles.JAVASCRIPT_FILE_END)) {
+                        if (nameExt.endsWith(PlatypusFiles.JAVASCRIPT_FILE_END)) {
                             appElementName = PlatypusFilesSupport.extractModuleName(fileContent, f.getPath());
+                            if (appElementName == null) {
+                                Project fileProject = FileOwnerQuery.getOwner(fo);
+                                if (fileProject instanceof PlatypusProject) {
+                                    PlatypusProject pProject = (PlatypusProject) fileProject;
+                                    appElementName = FileUtil.getRelativePath(pProject.getSrcRoot(), fo);
+                                    appElementName = appElementName.substring(0, appElementName.length() - PlatypusFiles.JAVASCRIPT_FILE_END.length());
+                                    appElementName = appElementName.replace(File.separator, "/");
+                                }
+                            }
                         } else {
                             appElementName = PlatypusFilesSupport.getAnnotationValue(fileContent, JsDoc.Tag.NAME_TAG);
                         }
