@@ -63,7 +63,7 @@ define('logger', function () {
         var remotesNames = Array.isArray(aRemotesNames) ? aRemotesNames : [aRemotesNames];
         ScriptedResourceClass.loadRemotes(Java.to(remotesNames, JavaStringArrayClass), aOnSuccess ? function () {
             var proxies = [];
-            for(var r = 1; r < remotesNames.length; r++){
+            for(var r = 0; r < remotesNames.length; r++){
                 proxies.push(new RpcProxy(remotesNames[r]));
             }
             aOnSuccess.apply(null, proxies);
