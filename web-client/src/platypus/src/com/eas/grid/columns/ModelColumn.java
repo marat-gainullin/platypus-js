@@ -91,7 +91,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 
 	public void setGrid(ModelGrid aValue) {
 		if (grid != aValue) {
-			if (grid != null) {
+			if (grid != null && grid.getSortHandler() != null) {
 				grid.getSortHandler().setComparator(this, null);
 			}
 			grid = aValue;
