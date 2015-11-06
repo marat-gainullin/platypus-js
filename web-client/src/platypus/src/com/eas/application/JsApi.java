@@ -511,8 +511,8 @@ public class JsApi {
 				var remotesNames = Array.isArray(aRemotesNames) ? aRemotesNames : [aRemotesNames];
 				@com.eas.application.Loader::jsLoadServerModules(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(remotesNames, function () {
 		            var proxies = [];
-		            for(var r = 0; r < aRemotesNames.length; r++){
-		                proxies.push(new RpcProxy(aRemotesNames[r]));
+		            for(var r = 0; r < remotesNames.length; r++){
+		                proxies.push(new RpcProxy(remotesNames[r]));
 		            }
 		            aOnSuccess.apply(null, proxies);
 		        }, aOnFailure);
