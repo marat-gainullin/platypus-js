@@ -114,8 +114,10 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 			public void onValueChange(ValueChangeEvent<Date> event) {
 				Date datePart = event.getValue();
 				Date timePart = timePicker.getValue();
-				if((new Date(0)).equals(timePart))
+				if((new Date(0)).equals(timePart)){
 					timePart = new Date();
+					timePart = new Date(timePart.getTime() - datePart.getTime());
+				}
 				Date newValue;
 				if (timePart == null) {
 					newValue = datePart;

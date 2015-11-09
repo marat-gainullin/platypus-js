@@ -60,6 +60,7 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 	protected SimplePanel contentWrapper = new SimplePanel();
 	protected SimplePanel selectButton = new SimplePanel();
 	protected SimplePanel clearButton = new SimplePanel();
+	protected boolean clearButtonVisible;
 
 	public DecoratorBox(HasValue<T> aDecorated) {
 		this();
@@ -86,7 +87,7 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 		selectButton.getElement().getStyle().setTop(0, Style.Unit.PX);
 		selectButton.getElement().getStyle().setHeight(100, Style.Unit.PCT);
 		clearButton.getElement().addClassName("decorator-clear");
-		clearButton.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+		clearButton.getElement().getStyle().setDisplay(Style.Display.NONE);
 		clearButton.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
 		clearButton.getElement().getStyle().setTop(0, Style.Unit.PX);
 		clearButton.getElement().getStyle().setHeight(100, Style.Unit.PCT);
@@ -214,6 +215,12 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 
 					@Override
 					public void onValueChange(ValueChangeEvent<T> event) {
+						if (isClearButtonVisible() && getValue() != null) {
+							clearButton.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+						} else {
+							clearButton.getElement().getStyle().setDisplay(Style.Display.NONE);
+						}
+						organizeButtonsContent();
 						fireValueChangeEvent();
 					}
 				});
@@ -302,13 +309,13 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 
 	protected void organizeButtonsContent() {
 		int right = 0;
-		if (isClearButtonVisible()) {
-			clearButton.getElement().getStyle().setRight(right, Style.Unit.PX);
-			right += clearButton.getElement().getOffsetWidth();
-		}
 		if (isSelectButtonVisible()) {
 			selectButton.getElement().getStyle().setRight(right, Style.Unit.PX);
 			right += selectButton.getElement().getOffsetWidth();
+		}
+		if (isClearButtonVisible()) {
+			clearButton.getElement().getStyle().setRight(right, Style.Unit.PX);
+			right += clearButton.getElement().getOffsetWidth();
 		}
 		contentWrapper.getElement().getStyle().setRight(right, Style.Unit.PX);
 	}
@@ -329,12 +336,13 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 	}
 
 	public boolean isClearButtonVisible() {
-		return !Style.Display.NONE.getCssName().equalsIgnoreCase(clearButton.getElement().getStyle().getDisplay());
+		return clearButtonVisible;
 	}
 
 	public void setClearButtonVisible(boolean aValue) {
-		if (isClearButtonVisible() != aValue) {
-			if (aValue) {
+		if (clearButtonVisible != aValue) {
+			clearButtonVisible = aValue;
+			if (aValue && getValue() != null) {
 				clearButton.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 			} else {
 				clearButton.getElement().getStyle().setDisplay(Style.Display.NONE);

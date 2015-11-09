@@ -1160,7 +1160,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 			scrollableRight.setColumnWidth(aColumn, aWidth, aUnit);
 			footerRight.setColumnWidth(aColumn, aWidth, aUnit);
 		} else {
-			Logger.getLogger(Grid.class.getName()).log(Level.WARNING, "Unknown column is met while setting column width");
+			//Logger.getLogger(Grid.class.getName()).log(Level.WARNING, "Unknown column is met while setting column width");
 		}
 	}
 

@@ -468,7 +468,7 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
 
     @Override
     public void setGlobalAPI(boolean aValue) {
-        boolean oldValue = getBrowserCacheBusting();
+        boolean oldValue = getGlobalAPI();
         projectProperties.put(GLOBAL_API_KEY, "" + aValue);
         projectPropertiesIsDirty = true;
         changeSupport.firePropertyChange(GLOBAL_API_KEY, oldValue, aValue);

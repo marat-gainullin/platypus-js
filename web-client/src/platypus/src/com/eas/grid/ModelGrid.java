@@ -870,7 +870,7 @@ public class ModelGrid extends Grid<JavaScriptObject> implements HasJsFacade, Ha
 		}
 		ThemedHeaderOrFooterBuilder<JavaScriptObject> leftBuilder = (ThemedHeaderOrFooterBuilder<JavaScriptObject>) headerLeft.getHeaderBuilder();
 		ThemedHeaderOrFooterBuilder<JavaScriptObject> rightBuilder = (ThemedHeaderOrFooterBuilder<JavaScriptObject>) headerRight.getHeaderBuilder();
-		List<HeaderNode<JavaScriptObject>> leftHeader = HeaderSplitter.split(header, 0, frozenColumns);
+		List<HeaderNode<JavaScriptObject>> leftHeader = HeaderSplitter.split(header, 0, frozenColumns - 1);
 		leftBuilder.setHeaderNodes(leftHeader);
 		List<HeaderNode<JavaScriptObject>> rightHeader = HeaderSplitter.split(header, frozenColumns, getDataColumnCount());
 		rightBuilder.setHeaderNodes(rightHeader);
