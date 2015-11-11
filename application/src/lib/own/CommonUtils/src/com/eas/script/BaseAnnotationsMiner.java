@@ -2,6 +2,8 @@ package com.eas.script;
 
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jdk.nashorn.internal.ir.FunctionNode;
 import jdk.nashorn.internal.ir.LexicalContext;
 import jdk.nashorn.internal.ir.Node;
@@ -10,11 +12,13 @@ import jdk.nashorn.internal.parser.Lexer;
 import jdk.nashorn.internal.parser.Token;
 import jdk.nashorn.internal.parser.TokenStream;
 import jdk.nashorn.internal.parser.TokenType;
+import jdk.nashorn.internal.runtime.ParserException;
 import jdk.nashorn.internal.runtime.Source;
 
 /**
- * Base class for annotations mining.
- * Important! The visitor's <code>accept</code> method must be invoked on an AST root.
+ * Base class for annotations mining. Important! The visitor's
+ * <code>accept</code> method must be invoked on an AST root.
+ *
  * @author mg
  */
 public abstract class BaseAnnotationsMiner extends NodeVisitor<LexicalContext> {
@@ -32,31 +36,35 @@ public abstract class BaseAnnotationsMiner extends NodeVisitor<LexicalContext> {
     }
 
     private void mineComments() {
-        TokenStream tokens = new TokenStream();
-        Lexer lexer = new Lexer(source, tokens);
-        long prevT = 0;
-        long t;
-        TokenType tt = TokenType.EOL;
-        int i = 0;
-        while (tt != TokenType.EOF) {
-            // Get next token in nashorn's parser way
-            while (i > tokens.last()) {
-                if (tokens.isFull()) {
-                    tokens.grow();
+        try {
+            TokenStream tokens = new TokenStream();
+            Lexer lexer = new Lexer(source, tokens);
+            long prevT = 0;
+            long t;
+            TokenType tt = TokenType.EOL;
+            int i = 0;
+            while (tt != TokenType.EOF) {
+                // Get next token in nashorn's parser way
+                while (i > tokens.last()) {
+                    if (tokens.isFull()) {
+                        tokens.grow();
+                    }
+                    lexer.lexify();
                 }
-                lexer.lexify();
+                t = tokens.get(i++);
+                // next token has been obtained.
+                tt = Token.descType(t);
+                if (tt == TokenType.EOL) {
+                    continue;
+                }
+                TokenType prevTt = Token.descType(prevT);
+                if (prevTt == TokenType.COMMENT) {
+                    prevComments.put(t, prevT);
+                }
+                prevT = t;
             }
-            t = tokens.get(i++);
-            // next token has been obtained.
-            tt = Token.descType(t);
-            if (tt == TokenType.EOL) {
-                continue;
-            }
-            TokenType prevTt = Token.descType(prevT);
-            if (prevTt == TokenType.COMMENT) {
-                prevComments.put(t, prevT);
-            }
-            prevT = t;
+        } catch (ParserException ex) {
+            Logger.getLogger(BaseAnnotationsMiner.class.getName()).log(Level.WARNING, ex.getMessage());
         }
     }
 
