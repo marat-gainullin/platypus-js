@@ -161,6 +161,7 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 		field.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
 		field.getElement().getStyle().setTop(0, Style.Unit.PX);
 		field.getElement().getStyle().setHeight(100, Style.Unit.PCT);
+		field.getElement().getStyle().setBottom(0, Style.Unit.PX);
 		field.getElement().getStyle().setLeft(0, Style.Unit.PX);
 		field.getElement().getStyle().setWidth(100, Style.Unit.PCT);
 		field.getElement().getStyle().setBorderWidth(0, Style.Unit.PX);
@@ -168,6 +169,7 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 		field.getElement().getStyle().setPadding(0, Style.Unit.PX);
 		field.getElement().getStyle().setBackgroundColor("inherit");
 		field.getElement().getStyle().setColor("inherit");
+		field.getElement().addClassName("date-time-box");
 		fieldWrapper.setWidget(field);
 
 		right.getElement().addClassName("date-select");

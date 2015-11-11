@@ -29,7 +29,6 @@ import com.google.gwt.event.logical.shared.HasResizeHandlers;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.RequiresResize;
 
@@ -43,12 +42,17 @@ public class PlatypusCheckBox extends CheckBox implements HasActionHandlers, Has
 	protected ButtonGroup group;
 
 	public PlatypusCheckBox() {
-		this(DOM.createInputCheck());
-	}
-	
-	protected PlatypusCheckBox(Element aInputElement){
-		super(aInputElement);
-		aInputElement.getStyle().setVerticalAlign(VerticalAlign.MIDDLE);
+		super();
+		getElement().removeClassName("gwt-CheckBox");
+		Element child = getElement().getFirstChildElement();
+		while(child != null){
+			if("input".equalsIgnoreCase(child.getTagName())){
+				child.addClassName("radio-box");
+			}else{
+				child.addClassName("radio-label");
+			}
+			child = child.getNextSiblingElement();
+		}
 		getElement().<XElement>cast().addResizingTransitionEnd(this);
 	}
 

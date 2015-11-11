@@ -35,7 +35,8 @@ public class PlatypusTextArea extends TextArea implements HasJsFacade, HasEmptyT
 
 	public PlatypusTextArea() {
 		super();
-		this.getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
+		setStyleName("form-control");
+		getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
 		getElement().<XElement>cast().addResizingTransitionEnd(this);
 	}
 

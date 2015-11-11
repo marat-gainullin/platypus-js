@@ -61,7 +61,6 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Focusable;
@@ -71,74 +70,73 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.RichTextArea;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.Widget;
 
-public class PlatypusHtmlEditor extends Composite implements HasJsFacade,HasValueChangeHandlers<String>, HasEmptyText, HasValue<String>, HasComponentPopupMenu, HasEventsExecutor, 
-HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHandlers, HasBlurHandlers, Focusable, HasEnabled, HasKeyDownHandlers, HasKeyPressHandlers, HasKeyUpHandlers{
-	
+public class PlatypusHtmlEditor extends Composite implements HasJsFacade, HasValueChangeHandlers<String>, HasEmptyText, HasValue<String>, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers,
+        HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHandlers, HasBlurHandlers, Focusable, HasEnabled, HasKeyDownHandlers, HasKeyPressHandlers, HasKeyUpHandlers {
+
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
 	protected String emptyText;
-	protected String name;	
+	protected String name;
 	protected JavaScriptObject published;
-	private boolean isNull=true;
+	private boolean isNull = true;
 	private String oldValue;
 	protected boolean enabled = true;
-	
+
 	protected FlowPanel container = new FlowPanel();
 	protected RichTextArea textContainer = new RichTextArea();
 	protected ToolBar toolBar = new ToolBar();
-	
-	protected Button btnBold = new Button();
-	protected Button btnItalic = new Button();
-	protected Button btnUnderline = new Button();
+
+	protected PlatypusButton btnBold = new PlatypusButton();
+	protected PlatypusButton btnItalic = new PlatypusButton();
+	protected PlatypusButton btnUnderline = new PlatypusButton();
 	protected ButtonGroup groupSubSuperScript = new ButtonGroup();
-	protected ToggleButton tglSubScript = new ToggleButton();
-	protected ToggleButton tglSuperScript = new ToggleButton();
+	protected PlatypusToggleButton tglSubScript = new PlatypusToggleButton();
+	protected PlatypusToggleButton tglSuperScript = new PlatypusToggleButton();
 	protected ButtonGroup groupAlingment = new ButtonGroup();
-	protected ToggleButton tglAlignLeft = new ToggleButton();
-	protected ToggleButton tglAlignCenter = new ToggleButton();
-	protected ToggleButton tglAlignRight = new ToggleButton();
-	protected Button btnBackground = new Button();
-	protected Button btnForeground = new Button();
-	protected Button btnStrikeTrough = new Button();
-	protected Button btnIdentRight = new Button();
-	protected Button btnIdentLeft = new Button();
-	protected Button btnHorizontalRule = new Button();
-	protected Button btnOrderedList = new Button();
-	protected Button btnUnOrderedList = new Button();
-	protected Button btnImage = new Button();
-	protected Button btnUploadImage = new Button();
-	protected Button btnCreateLink = new Button();
-	protected Button btnRemoveLink = new Button();
+	protected PlatypusToggleButton tglAlignLeft = new PlatypusToggleButton();
+	protected PlatypusToggleButton tglAlignCenter = new PlatypusToggleButton();
+	protected PlatypusToggleButton tglAlignRight = new PlatypusToggleButton();
+	protected PlatypusButton btnBackground = new PlatypusButton();
+	protected PlatypusButton btnForeground = new PlatypusButton();
+	protected PlatypusButton btnStrikeTrough = new PlatypusButton();
+	protected PlatypusButton btnIdentRight = new PlatypusButton();
+	protected PlatypusButton btnIdentLeft = new PlatypusButton();
+	protected PlatypusButton btnHorizontalRule = new PlatypusButton();
+	protected PlatypusButton btnOrderedList = new PlatypusButton();
+	protected PlatypusButton btnUnOrderedList = new PlatypusButton();
+	protected PlatypusButton btnImage = new PlatypusButton();
+	protected PlatypusButton btnUploadImage = new PlatypusButton();
+	protected PlatypusButton btnCreateLink = new PlatypusButton();
+	protected PlatypusButton btnRemoveLink = new PlatypusButton();
 	protected ListBox fonts = createFontList();
 	protected ListBox fontSizes = createFontSizes();
-	protected Button btnClearFormatting = new Button();
+	protected PlatypusButton btnClearFormatting = new PlatypusButton();
 	protected SimplePanel paneForRichTextBox = new SimplePanel();
-	
+
 	protected int elementWidth = 30;
 	protected int elementHeight = 30;
 	protected static PlatypusHtmlEditorConstants constants = GWT.create(PlatypusHtmlEditorConstants.class);
-	
-	public PlatypusHtmlEditor(){
+
+	public PlatypusHtmlEditor() {
 		super();
-		
-		placeWidgetToMenu(btnBold, null, "editor-bold",constants.bold());
-		placeWidgetToMenu(btnItalic, null, "editor-italic",constants.italic());
-		placeWidgetToMenu(btnUnderline, null, "editor-underline",constants.underline());
-		placeWidgetToMenu(tglSubScript, groupSubSuperScript, "editor-subscript",constants.subscript());
-		placeWidgetToMenu(tglSuperScript, groupSubSuperScript, "editor-superscript",constants.superscript());
+
+		placeWidgetToMenu(btnBold, null, "editor-bold", constants.bold());
+		placeWidgetToMenu(btnItalic, null, "editor-italic", constants.italic());
+		placeWidgetToMenu(btnUnderline, null, "editor-underline", constants.underline());
+		placeWidgetToMenu(tglSubScript, groupSubSuperScript, "editor-subscript", constants.subscript());
+		placeWidgetToMenu(tglSuperScript, groupSubSuperScript, "editor-superscript", constants.superscript());
 		placeWidgetToMenu(tglAlignLeft, groupAlingment, "editor-align-left", constants.justifyLeft());
 		placeWidgetToMenu(tglAlignCenter, groupAlingment, "editor-align-center", constants.justifyCenter());
 		placeWidgetToMenu(tglAlignRight, groupAlingment, "editor-align-right", constants.justifyRight());
-		placeWidgetToMenu(btnStrikeTrough, null, "editor-strike-through",constants.strikeThrough());
-		placeWidgetToMenu(btnIdentRight, null, "editor-indent-right",constants.indent());
-		placeWidgetToMenu(btnIdentLeft, null, "editor-indent-left",constants.outdent());
+		placeWidgetToMenu(btnStrikeTrough, null, "editor-strike-through", constants.strikeThrough());
+		placeWidgetToMenu(btnIdentRight, null, "editor-indent-right", constants.indent());
+		placeWidgetToMenu(btnIdentLeft, null, "editor-indent-left", constants.outdent());
 		placeWidgetToMenu(btnHorizontalRule, null, "editor-horisontal-rule", constants.hr());
 		placeWidgetToMenu(btnOrderedList, null, "editor-ordered-list", constants.ol());
 		placeWidgetToMenu(btnUnOrderedList, null, "editor-unordered-list", constants.ul());
-		placeWidgetToMenu(btnImage, null, "editor-insert-image",constants.insertImage());
+		placeWidgetToMenu(btnImage, null, "editor-insert-image", constants.insertImage());
 		placeWidgetToMenu(btnUploadImage, null, "editor-insert-image", constants.uploadImage());
 		placeWidgetToMenu(btnCreateLink, null, "editor-create-link", constants.createLink());
 		placeWidgetToMenu(btnRemoveLink, null, "editor-delete-link", constants.removeLink());
@@ -152,6 +150,8 @@ HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHan
 
 		container.getElement().getStyle().setHeight(100, Style.Unit.PCT);
 		container.getElement().getStyle().setWidth(100, Style.Unit.PCT);
+
+		textContainer.setStyleName("form-control");
 		textContainer.getElement().getStyle().setHeight(100, Style.Unit.PCT);
 		textContainer.getElement().getStyle().setWidth(100, Style.Unit.PCT);
 		textContainer.getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
@@ -164,65 +164,65 @@ HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHan
 		paneForRichTextBox.add(textContainer);
 		container.add(toolBar);
 		container.add(paneForRichTextBox);
-		
+
 		initWidget(container);
-		
+
 		btnBold.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				textContainer.getFormatter().toggleBold();
 			}
 		});
-		
+
 		btnItalic.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				textContainer.getFormatter().toggleItalic();
 			}
 		});
-		
+
 		btnUnderline.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				textContainer.getFormatter().toggleUnderline();
 			}
 		});
-		
+
 		tglSubScript.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				textContainer.getFormatter().toggleSubscript();
 			}
 		});
-		
+
 		tglSuperScript.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				textContainer.getFormatter().toggleSuperscript();
 			}
 		});
-		
+
 		tglAlignLeft.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				textContainer.getFormatter().setJustification(RichTextArea.Justification.LEFT);
 			}
 		});
-		
+
 		tglAlignCenter.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				textContainer.getFormatter().setJustification(RichTextArea.Justification.CENTER);
 			}
 		});
-		
+
 		tglAlignRight.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				textContainer.getFormatter().setJustification(RichTextArea.Justification.RIGHT);
 			}
 		});
-		
+
 		btnStrikeTrough.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -236,35 +236,35 @@ HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHan
 				textContainer.getFormatter().rightIndent();
 			}
 		});
-		
+
 		btnIdentLeft.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				textContainer.getFormatter().leftIndent();
 			}
 		});
-		
+
 		btnHorizontalRule.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				textContainer.getFormatter().insertHorizontalRule();
 			}
 		});
-		
+
 		btnOrderedList.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				textContainer.getFormatter().insertOrderedList();
 			}
 		});
-		
+
 		btnUnOrderedList.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				textContainer.getFormatter().insertUnorderedList();
 			}
 		});
-		
+
 		btnBackground.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -277,13 +277,14 @@ HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHan
 							Logger.getLogger(WidgetsUtils.class.getName()).log(Level.SEVERE, null, ex);
 						}
 					}
+
 					@Override
 					public void onFailure(String reason) {
 					}
 				});
 			}
 		});
-		
+
 		btnForeground.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -296,37 +297,38 @@ HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHan
 							Logger.getLogger(WidgetsUtils.class.getName()).log(Level.SEVERE, null, ex);
 						}
 					}
+
 					@Override
 					public void onFailure(String reason) {
 					}
 				});
 			}
 		});
-		
+
 		btnClearFormatting.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				textContainer.getFormatter().removeFormat();
 			}
 		});
-		
+
 		btnCreateLink.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				String url = Window.prompt(constants.linkUrl(), "http://");
-		        if (url != null) {
-		        	textContainer.getFormatter().createLink(url);
-		        }
+				if (url != null) {
+					textContainer.getFormatter().createLink(url);
+				}
 			}
 		});
-			
+
 		btnRemoveLink.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				textContainer.getFormatter().removeLink();
 			}
 		});
-		
+
 		btnImage.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -336,71 +338,73 @@ HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHan
 				}
 			}
 		});
-		
+
 		btnUploadImage.addClickHandler(new ClickHandler() {
 			@Override
-				public void onClick(ClickEvent event) {
+			public void onClick(ClickEvent event) {
 				JsUi.selectFile(new Callback<JavaScriptObject, String>() {
-						@Override
-						public void onSuccess(JavaScriptObject result) {
-							try {
-								if (result != null) {
-									Cancellable cancellable = AppClient.getInstance().startUploadRequest((PublishedFile)result, ((PublishedFile)result).getName(), new Callback<ProgressEvent, String>() {
-										protected boolean completed;
-	
-										public void onSuccess(ProgressEvent aResult) {
-											try {
-												if (!completed) {
-														if (aResult.isComplete() && aResult.getRequest() != null ) {
-															completed = true;
-															textContainer.getFormatter().insertImage( aResult.getRequest().getResponseText());
-													}
+					@Override
+					public void onSuccess(JavaScriptObject result) {
+						try {
+							if (result != null) {
+								Cancellable cancellable = AppClient.getInstance().startUploadRequest((PublishedFile) result, ((PublishedFile) result).getName(), new Callback<ProgressEvent, String>() {
+									protected boolean completed;
+
+									public void onSuccess(ProgressEvent aResult) {
+										try {
+											if (!completed) {
+												if (aResult.isComplete() && aResult.getRequest() != null) {
+													completed = true;
+													textContainer.getFormatter().insertImage(aResult.getRequest().getResponseText());
 												}
-											} catch (Exception ex) {
-												Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, null, ex);
 											}
+										} catch (Exception ex) {
+											Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, null, ex);
 										}
-										public void onFailure(String reason) {
-											Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, reason);
-										}
-									});
-								} else
-									return;
-							} catch (Exception ex) {
-								Logger.getLogger(WidgetsUtils.class.getName()).log(Level.SEVERE, null, ex);
-							}
+									}
+
+									public void onFailure(String reason) {
+										Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, reason);
+									}
+								});
+							} else
+								return;
+						} catch (Exception ex) {
+							Logger.getLogger(WidgetsUtils.class.getName()).log(Level.SEVERE, null, ex);
 						}
-						@Override
-						public void onFailure(String reason) {
-							Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, reason);
-						}
-					}, "image/*");
-				}
+					}
+
+					@Override
+					public void onFailure(String reason) {
+						Logger.getLogger(AppClient.class.getName()).log(Level.SEVERE, reason);
+					}
+				}, "image/*");
+			}
 		});
-		
+
 		fontSizes.addChangeHandler(new ChangeHandler() {
 			@Override
 			public void onChange(ChangeEvent event) {
 				textContainer.getFormatter().setFontSize(fontSizesConstants[fontSizes.getSelectedIndex() - 1]);
-			    fontSizes.setSelectedIndex(0);
+				fontSizes.setSelectedIndex(0);
 			}
 		});
-			
+
 		fonts.addChangeHandler(new ChangeHandler() {
 			@Override
 			public void onChange(ChangeEvent event) {
 				textContainer.getFormatter().setFontName(fonts.getValue(fonts.getSelectedIndex()));
-		        fonts.setSelectedIndex(0);
+				fonts.setSelectedIndex(0);
 			}
 		});
-		
-		getElement().<XElement>cast().addResizingTransitionEnd(this);
-		
+
+		getElement().<XElement> cast().addResizingTransitionEnd(this);
+
 		textContainer.addBlurHandler(new BlurHandler() {
 			@Override
 			public void onBlur(BlurEvent event) {
 				String newValue = getValue();
-				if (oldValue == null ? newValue != null : !oldValue.equals(newValue)){
+				if (oldValue == null ? newValue != null : !oldValue.equals(newValue)) {
 					isNull = newValue == null;
 					oldValue = newValue;
 					ValueChangeEvent.fire(PlatypusHtmlEditor.this, newValue);
@@ -408,126 +412,121 @@ HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHan
 				BlurEvent.fireNativeEvent(event.getNativeEvent(), PlatypusHtmlEditor.this);
 			}
 		});
-		
+
 		textContainer.addFocusHandler(new FocusHandler() {
 			@Override
 			public void onFocus(FocusEvent event) {
 				FocusEvent.fireNativeEvent(event.getNativeEvent(), PlatypusHtmlEditor.this);
 			}
 		});
-		
+
 		textContainer.addKeyDownHandler(new KeyDownHandler() {
 			@Override
 			public void onKeyDown(KeyDownEvent event) {
 				KeyDownEvent.fireNativeEvent(event.getNativeEvent(), PlatypusHtmlEditor.this);
 			}
 		});
-		
+
 		textContainer.addKeyUpHandler(new KeyUpHandler() {
 			@Override
 			public void onKeyUp(KeyUpEvent event) {
 				KeyUpEvent.fireNativeEvent(event.getNativeEvent(), PlatypusHtmlEditor.this);
 			}
 		});
-		
+
 		textContainer.addKeyPressHandler(new KeyPressHandler() {
 			@Override
 			public void onKeyPress(KeyPressEvent event) {
 				KeyPressEvent.fireNativeEvent(event.getNativeEvent(), PlatypusHtmlEditor.this);
 			}
 		});
-		
+
 	}
-	
-	private void placeWidgetToMenu(Widget aWidget,ButtonGroup aBtnGroup,String divStyleName){
+
+	private void placeWidgetToMenu(Widget aWidget, ButtonGroup aBtnGroup, String aStyleName) {
 		aWidget.getElement().getStyle().setWidth(elementWidth, Style.Unit.PX);
 		aWidget.getElement().getStyle().setHeight(elementHeight, Style.Unit.PX);
-		addDivToElement(aWidget.getElement(),divStyleName);
-		if (aBtnGroup!=null){
-			if(aWidget instanceof HasValue){
-				aBtnGroup.add((HasValue)aWidget);
+		if (aStyleName != null && !aStyleName.isEmpty()) {
+			aWidget.addStyleName(aStyleName);
+		}
+		if (aBtnGroup != null) {
+			if (aWidget instanceof HasValue) {
+				aBtnGroup.add((HasValue<Boolean>) aWidget);
 			}
 		}
 		toolBar.add(aWidget);
 	}
-	
-	private void placeWidgetToMenu(Widget aWidget,ButtonGroup aBtnGroup,String divStyleName, String aTitle){
-		placeWidgetToMenu(aWidget,aBtnGroup,divStyleName);
+
+	private void placeWidgetToMenu(Widget aWidget, ButtonGroup aBtnGroup, String divStyleName, String aTitle) {
+		placeWidgetToMenu(aWidget, aBtnGroup, divStyleName);
 		aWidget.setTitle(aTitle);
-		
+
 	}
-	
-	private void addDivToElement(Element aBase, String aName){
-		if (aName.length()>0){
+
+	private void addDivToElement(Element aBase, String aName) {
+		if (aName.length() > 0) {
 			Element imageDiv = Document.get().createDivElement();
 			imageDiv.addClassName(aName);
 			aBase.appendChild(imageDiv);
 		}
 	}
-	
-	private static final RichTextArea.FontSize[] fontSizesConstants = new RichTextArea.FontSize[] {
-	      RichTextArea.FontSize.XX_SMALL, RichTextArea.FontSize.X_SMALL,
-	      RichTextArea.FontSize.SMALL, RichTextArea.FontSize.MEDIUM,
-	      RichTextArea.FontSize.LARGE, RichTextArea.FontSize.X_LARGE,
-	      RichTextArea.FontSize.XX_LARGE};
-	
-	
-	 private ListBox createFontList() {
-		    ListBox lb = new ListBox();
-		    lb.setVisibleItemCount(1);
 
-		    lb.addItem(constants.font(), "");
-//		    lb.addItem(strings.normal(), "");
-		    lb.addItem("Times New Roman", "Times New Roman");
-		    lb.addItem("Arial", "Arial");
-		    lb.addItem("Courier New", "Courier New");
-		    lb.addItem("Georgia", "Georgia");
-		    lb.addItem("Trebuchet", "Trebuchet");
-		    lb.addItem("Verdana", "Verdana");
-		    return lb;
-		  }
-	 
-	 private ListBox createFontSizes() {
-		    ListBox lb = new ListBox();
-		    lb.setVisibleItemCount(1);
-		    lb.addItem(constants.size());
-		    lb.addItem(constants.xxsmall());
-		    lb.addItem(constants.xsmall());
-		    lb.addItem(constants.small());
-		    lb.addItem(constants.medium());
-		    lb.addItem(constants.large());
-		    lb.addItem(constants.xlarge());
-		    lb.addItem(constants.xxlarge());
-		    return lb;
-		  }
-	
-	 
-	 
-	  @Override
-	  public String getValue() {
-	    return isNull? null : textContainer.getHTML(); 
-	  }
+	private static final RichTextArea.FontSize[] fontSizesConstants = new RichTextArea.FontSize[] { RichTextArea.FontSize.XX_SMALL, RichTextArea.FontSize.X_SMALL, RichTextArea.FontSize.SMALL,
+	        RichTextArea.FontSize.MEDIUM, RichTextArea.FontSize.LARGE, RichTextArea.FontSize.X_LARGE, RichTextArea.FontSize.XX_LARGE };
 
-	  @Override
-	  public void setValue(String value) {
-	    setValue(value, true);
-	  }
+	private ListBox createFontList() {
+		ListBox lb = new ListBox();
+		lb.setVisibleItemCount(1);
 
-	  @Override
-	  public void setValue(String value, boolean fireEvents) {
-		  oldValue = getValue();
-		  isNull = value == null;
-		    if (isNull){
-		    	value="";
-		    }
-	    SafeHtml html = SimpleHtmlSanitizer.sanitizeHtml(value);
-	    textContainer.setHTML(html); 
-	    if (fireEvents) {
-	      ValueChangeEvent.fireIfNotEqual(this, oldValue, getValue());
-	    }
-	  }
-	  
-	
+		lb.addItem(constants.font(), "");
+		// lb.addItem(strings.normal(), "");
+		lb.addItem("Times New Roman", "Times New Roman");
+		lb.addItem("Arial", "Arial");
+		lb.addItem("Courier New", "Courier New");
+		lb.addItem("Georgia", "Georgia");
+		lb.addItem("Trebuchet", "Trebuchet");
+		lb.addItem("Verdana", "Verdana");
+		return lb;
+	}
+
+	private ListBox createFontSizes() {
+		ListBox lb = new ListBox();
+		lb.setVisibleItemCount(1);
+		lb.addItem(constants.size());
+		lb.addItem(constants.xxsmall());
+		lb.addItem(constants.xsmall());
+		lb.addItem(constants.small());
+		lb.addItem(constants.medium());
+		lb.addItem(constants.large());
+		lb.addItem(constants.xlarge());
+		lb.addItem(constants.xxlarge());
+		return lb;
+	}
+
+	@Override
+	public String getValue() {
+		return isNull ? null : textContainer.getHTML();
+	}
+
+	@Override
+	public void setValue(String value) {
+		setValue(value, true);
+	}
+
+	@Override
+	public void setValue(String value, boolean fireEvents) {
+		oldValue = getValue();
+		isNull = value == null;
+		if (isNull) {
+			value = "";
+		}
+		SafeHtml html = SimpleHtmlSanitizer.sanitizeHtml(value);
+		textContainer.setHTML(html);
+		if (fireEvents) {
+			ValueChangeEvent.fireIfNotEqual(this, oldValue, getValue());
+		}
+	}
+
 	@Override
 	public HandlerRegistration addResizeHandler(ResizeHandler handler) {
 		return addHandler(handler, ResizeEvent.getType());
@@ -535,7 +534,7 @@ HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHan
 
 	@Override
 	public void onResize() {
-		if(isAttached()){
+		if (isAttached()) {
 			toolBar.onResize();
 			ResizeEvent.fire(this, getElement().getOffsetWidth(), getElement().getOffsetHeight());
 		}
@@ -575,9 +574,9 @@ HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHan
 	}
 
 	@Override
-    public PlatypusPopupMenu getPlatypusPopupMenu() {
-		return menu; 
-    }
+	public PlatypusPopupMenu getPlatypusPopupMenu() {
+		return menu;
+	}
 
 	protected HandlerRegistration menuTriggerReg;
 
@@ -589,7 +588,7 @@ HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHan
 			menu = aMenu;
 			if (menu != null) {
 				menuTriggerReg = super.addDomHandler(new ContextMenuHandler() {
-					
+
 					@Override
 					public void onContextMenu(ContextMenuEvent event) {
 						event.preventDefault();
@@ -616,13 +615,13 @@ HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHan
 	public String getEmptyText() {
 		return emptyText;
 	}
-	
+
 	@Override
 	public void setEmptyText(String aValue) {
 		emptyText = aValue;
 		WidgetsUtils.applyEmptyText(getElement(), emptyText);
 	}
-	
+
 	public JavaScriptObject getPublished() {
 		return published;
 	}
@@ -646,14 +645,14 @@ HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHan
 				aWidget.@com.eas.widgets.PlatypusHtmlEditor::setValue(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
 			}
 		});
-//		Object.defineProperty(published, "text", {
-//			get : function() {
-//				return aWidget.@com.eas.widgets.PlatypusHtmlEditor::getText()();
-//			},
-//			set : function(aValue) {
-//				aWidget.@com.eas.widgets.PlatypusHtmlEditor::setText(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
-//			}
-//		});
+		//		Object.defineProperty(published, "text", {
+		//			get : function() {
+		//				return aWidget.@com.eas.widgets.PlatypusHtmlEditor::getText()();
+		//			},
+		//			set : function(aValue) {
+		//				aWidget.@com.eas.widgets.PlatypusHtmlEditor::setText(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
+		//			}
+		//		});
 		Object.defineProperty(published, "emptyText", {
 			get : function() {
 				return aWidget.@com.eas.ui.HasEmptyText::getEmptyText()();
@@ -663,7 +662,7 @@ HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHan
 			}
 		});
 	}-*/;
-	
+
 	@Override
 	public HandlerRegistration addValueChangeHandler(ValueChangeHandler<String> handler) {
 		return addHandler(handler, ValueChangeEvent.getType());
@@ -682,7 +681,7 @@ HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHan
 	@Override
 	public void setFocus(boolean focused) {
 		textContainer.setFocus(focused);
-		
+
 	}
 
 	@Override
@@ -709,10 +708,10 @@ HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHan
 	public void setEnabled(boolean aValue) {
 		boolean oldValue = enabled;
 		enabled = aValue;
-		if(!oldValue && enabled){
-			getElement().<XElement>cast().unmask();
-		}else if(oldValue && !enabled){
-			getElement().<XElement>cast().disabledMask();
+		if (!oldValue && enabled) {
+			getElement().<XElement> cast().unmask();
+		} else if (oldValue && !enabled) {
+			getElement().<XElement> cast().disabledMask();
 		}
 	}
 
@@ -730,6 +729,5 @@ HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize, HasFocusHan
 	public HandlerRegistration addKeyDownHandler(KeyDownHandler handler) {
 		return addHandler(handler, KeyDownEvent.getType());
 	}
-
 
 }

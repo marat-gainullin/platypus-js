@@ -16,7 +16,16 @@ public class NullableCheckBox extends CheckBox {
 
 	public NullableCheckBox() {
 	    this(DOM.createInputCheck());
-	    setStyleName("gwt-CheckBox");
+		getElement().removeClassName("gwt-CheckBox");
+		Element child = getElement().getFirstChildElement();
+		while(child != null){
+			if("input".equalsIgnoreCase(child.getTagName())){
+				child.addClassName("radio-box");
+			}else{
+				child.addClassName("radio-label");
+			}
+			child = child.getNextSiblingElement();
+		}
 	}
 
 	public NullableCheckBox(Element elem) {

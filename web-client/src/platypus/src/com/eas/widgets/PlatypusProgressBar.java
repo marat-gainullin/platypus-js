@@ -30,7 +30,9 @@ public class PlatypusProgressBar extends ProgressBar implements HasJsFacade, Has
 	protected boolean enabled = true;
 	protected String name;
 	protected JavaScriptObject published;
-	
+
+	protected String styleSuffix = "default";
+
 	protected String text;
 	protected TextFormatter formatter = new TextFormatter() {
 
@@ -42,7 +44,23 @@ public class PlatypusProgressBar extends ProgressBar implements HasJsFacade, Has
 
 	public PlatypusProgressBar() {
 		super();
-		getElement().<XElement>cast().addResizingTransitionEnd(this);
+		setStyleName("progress");
+		getBarElement().removeClassName("gwt-ProgressBar-bar");
+		getBarElement().addClassName("progress-bar");
+		getBarElement().addClassName("progress-bar-" + styleSuffix);
+		getElement().<XElement> cast().addResizingTransitionEnd(this);
+	}
+
+	public String getStyleSuffix() {
+		return styleSuffix;
+	}
+
+	public void setStyleSuffix(String aValue) {
+		if (styleSuffix == null ? aValue != null : !styleSuffix.equals(aValue)) {
+			getBarElement().removeClassName("progress-bar-" + styleSuffix);
+			styleSuffix = aValue;
+			getBarElement().addClassName("progress-bar-" + styleSuffix);
+		}
 	}
 
 	@Override
@@ -53,7 +71,7 @@ public class PlatypusProgressBar extends ProgressBar implements HasJsFacade, Has
 	@Override
 	public void onResize() {
 		super.onResize();
-		if(isAttached()){
+		if (isAttached()) {
 			ResizeEvent.fire(this, getElement().getOffsetWidth(), getElement().getOffsetHeight());
 		}
 	}
@@ -92,9 +110,9 @@ public class PlatypusProgressBar extends ProgressBar implements HasJsFacade, Has
 	}
 
 	@Override
-    public PlatypusPopupMenu getPlatypusPopupMenu() {
-		return menu; 
-    }
+	public PlatypusPopupMenu getPlatypusPopupMenu() {
+		return menu;
+	}
 
 	protected HandlerRegistration menuTriggerReg;
 
@@ -106,7 +124,7 @@ public class PlatypusProgressBar extends ProgressBar implements HasJsFacade, Has
 			menu = aMenu;
 			if (menu != null) {
 				menuTriggerReg = super.addDomHandler(new ContextMenuHandler() {
-					
+
 					@Override
 					public void onContextMenu(ContextMenuEvent event) {
 						event.preventDefault();
@@ -128,10 +146,10 @@ public class PlatypusProgressBar extends ProgressBar implements HasJsFacade, Has
 	public void setEnabled(boolean aValue) {
 		boolean oldValue = enabled;
 		enabled = aValue;
-		if(!oldValue && enabled){
-			getElement().<XElement>cast().unmask();
-		}else if(oldValue && !enabled){
-			getElement().<XElement>cast().disabledMask();
+		if (!oldValue && enabled) {
+			getElement().<XElement> cast().unmask();
+		} else if (oldValue && !enabled) {
+			getElement().<XElement> cast().disabledMask();
 		}
 	}
 
@@ -144,7 +162,7 @@ public class PlatypusProgressBar extends ProgressBar implements HasJsFacade, Has
 	public void setJsName(String aValue) {
 		name = aValue;
 	}
-	
+
 	public String getText() {
 		return text;
 	}
@@ -157,7 +175,7 @@ public class PlatypusProgressBar extends ProgressBar implements HasJsFacade, Has
 			} else {
 				setTextFormatter(null);
 			}
-			
+
 		}
 	}
 
@@ -216,6 +234,14 @@ public class PlatypusProgressBar extends ProgressBar implements HasJsFacade, Has
 			},
 			set : function(aValue) {
 				aWidget.@com.eas.widgets.PlatypusProgressBar::setText(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
+			}
+		});
+		Object.defineProperty(published, "suffix", {
+			get : function() {
+				return aWidget.@com.eas.widgets.PlatypusProgressBar::getStyleSuffix()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.widgets.PlatypusProgressBar::setStyleSuffix(Ljava/lang/String;)(aValue);
 			}
 		});
 	}-*/;

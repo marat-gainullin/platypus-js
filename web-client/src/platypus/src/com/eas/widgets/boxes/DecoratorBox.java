@@ -146,18 +146,18 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 			getElement().<XElement> cast().disabledMask();
 		}
 	}
-	
+
 	public boolean isNullable() {
 		return nullable;
 	}
 
 	public void setNullable(boolean aValue) {
-		if(nullable != aValue){
+		if (nullable != aValue) {
 			nullable = aValue;
 			setClearButtonVisible(nullable);
 		}
-    }
-	
+	}
+
 	@Override
 	public void setFocus(boolean focused) {
 		if (decorated instanceof Focusable) {
@@ -215,12 +215,7 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 
 					@Override
 					public void onValueChange(ValueChangeEvent<T> event) {
-						if (isClearButtonVisible() && getValue() != null) {
-							clearButton.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-						} else {
-							clearButton.getElement().getStyle().setDisplay(Style.Display.NONE);
-						}
-						organizeButtonsContent();
+						recalcClearButton();
 						fireValueChangeEvent();
 					}
 				});
@@ -295,14 +290,14 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 		}
 	}
 
-	protected void focused(){
+	protected void focused() {
 		DecoratorBox.this.getElement().addClassName(DECORATOR_FOCUSED_CLASS_NAME);
 	}
-	
-	protected void blurred(){
+
+	protected void blurred() {
 		DecoratorBox.this.getElement().removeClassName(DECORATOR_FOCUSED_CLASS_NAME);
 	}
-	
+
 	protected void fireValueChangeEvent() {
 		ValueChangeEvent.fire(DecoratorBox.this, getValue());
 	}
@@ -364,6 +359,18 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 	@Override
 	public void setValue(T value, boolean fireEvents) {
 		decorated.setValue(value, fireEvents);
+		if (!fireEvents) {
+			recalcClearButton();
+		}
+	}
+
+	protected void recalcClearButton() {
+		if (isClearButtonVisible() && getValue() != null) {
+			clearButton.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+		} else {
+			clearButton.getElement().getStyle().setDisplay(Style.Display.NONE);
+		}
+		organizeButtonsContent();
 	}
 
 	@Override
