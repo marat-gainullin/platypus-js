@@ -152,11 +152,11 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 	public String getFormKey() {
 		return formKey;
 	}
-
+		
 	public void setFormKey(String aValue) throws Exception {
 		showingForms.remove(formKey);
 		formKey = aValue;
-		if (isVisible())
+		if (isOpened())
 			showingForms.put(formKey, this);
 		shownFormsChanged(published);
 	}

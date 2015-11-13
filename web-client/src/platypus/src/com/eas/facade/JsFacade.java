@@ -8,8 +8,8 @@ public class JsFacade {
 			@com.eas.core.Predefine::predefine(Lcom/google/gwt/core/client/JavaScriptObject;Ljava/lang/String;Lcom/google/gwt/core/client/JavaScriptObject;)(aDeps, aName, aDefiner);
 		}
 
-		predefine(['environment', 'logger', 'resource', 'id', 'md5', 'invoke', 'orm', 'core/report', 'rpc', 'extend', 'ui', 'forms', 'forms/anchors'], 'facade', function(Environment, Logger, Resource, Id, Md5,
-				Invoke, Orm, Report, Rpc, extend, Ui, Forms, Anchors) {
+		predefine(['environment', 'logger', 'resource', 'id', 'md5', 'invoke', 'orm', 'core/report', 'rpc', 'extend', 'ui', 'forms', 'forms/anchors', 'forms/form'], 'facade', function(Environment, Logger, Resource, Id, Md5,
+				Invoke, Orm, Report, Rpc, extend, Ui, Forms, Anchors, Form) {
 
 			var module = {};
 			Object.defineProperty(module, "logout", {
@@ -53,6 +53,10 @@ public class JsFacade {
 			Object.defineProperty(module, 'MD5', {
 				enumerable : true,
 				value : Md5
+			});
+			Object.defineProperty(module, 'Form', {
+				enumerable : true,
+				value : Form
 			});
 			Object.defineProperty(module, 'MD5Generator', {
 				enumerable : true,
