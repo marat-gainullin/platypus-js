@@ -7,7 +7,7 @@ package com.eas.grid.cells;
 
 import java.util.Date;
 
-import com.eas.widgets.boxes.DecoratedDateBox;
+import com.eas.widgets.boxes.CustomDateBox;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -22,7 +22,7 @@ public class DateEditorCell extends RenderedEditorCell<Date> {
 	protected DateTimeFormat format = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_TIME_MEDIUM);
 
 	public DateEditorCell() {
-		super(new DecoratedDateBox());
+		super(new CustomDateBox());
 	}
 
 	public DateEditorCell(Widget aEditor) {

@@ -15,7 +15,7 @@ public class PlatypusPopupMenu extends PlatypusMenu {
 	public PlatypusPopupMenu() {
 		super();
 		popup.setWidget(this);
-		popup.getElement().setClassName("gwt-MenuBarPopup");
+		popup.getElement().setClassName("menu-popup");
 		List<Element> popupMarked = popup.getElement().<XElement>cast().selectByPrefix("popup");
 		for(Element el : popupMarked){
 			el.setClassName(el.getClassName().replace("popup", "menuPopup"));
@@ -32,6 +32,10 @@ public class PlatypusPopupMenu extends PlatypusMenu {
 
 	public void showRelativeTo(final UIObject target) {
 		popup.showRelativeTo(target);
+	}
+	
+	public void hide(){
+		popup.hide();
 	}
 
 }

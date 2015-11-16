@@ -1,7 +1,9 @@
 package com.eas.widgets.boxes;
 
+import com.eas.ui.HasDecorationsWidth;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.TextAreaElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -10,7 +12,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.TextArea;
 
-public class NullableTextArea extends TextArea {
+public class NullableTextArea extends TextArea implements HasDecorationsWidth {
 
 	protected TextAreaElement inputElem;
 	protected String value;
@@ -18,7 +20,7 @@ public class NullableTextArea extends TextArea {
 
 	public NullableTextArea() {
 	    super(Document.get().createTextAreaElement());
-	    setStyleName("gwt-TextArea");
+	    setStyleName("form-control");
 	}
 
 	public NullableTextArea(Element elem) {
@@ -26,6 +28,11 @@ public class NullableTextArea extends TextArea {
 		inputElem = TextAreaElement.as(elem);
 	}
 
+	@Override
+	public void setDecorationsWidth(int aDecorationsWidth) {
+		getElement().getStyle().setPaddingRight(aDecorationsWidth, Style.Unit.PX);
+	}
+	
 	@Override
 	public void setValue(String aValue, boolean fireEvents) {
 		String oldValue = getValue();

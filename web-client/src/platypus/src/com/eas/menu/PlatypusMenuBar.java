@@ -50,6 +50,7 @@ public class PlatypusMenuBar extends MenuBar implements HasJsFacade, HasEnabled,
 
 	public PlatypusMenuBar(boolean aVertical) {
 		super(aVertical);
+		setStylePrimaryName("menu-bar");
 	}
 	
 	@Override
@@ -174,6 +175,7 @@ public class PlatypusMenuBar extends MenuBar implements HasJsFacade, HasEnabled,
 		} else if (aChild instanceof PlatypusMenu) {
 			PlatypusMenu subMenu = (PlatypusMenu) aChild;
 			MenuItem item = new MenuItem(subMenu.getText(), false, subMenu);
+			item.setStyleName("menu-item");
 			subMenu.setParentItem(item);
 			addItem(item);
 			allItems.add(aChild);

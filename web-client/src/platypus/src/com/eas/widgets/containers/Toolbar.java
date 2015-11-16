@@ -93,7 +93,7 @@ public class Toolbar extends SimplePanel implements IndexedPanel, ProvidesResize
 				}
 				if (vp.getWidgetCount() > 0) {
 					PopupPanel pp = new PopupPanel(true);
-					pp.getElement().getStyle().setPadding(0, Style.Unit.PX);
+					pp.setStyleName("toolbar-chevron-popup");
 					pp.setWidget(vp);
 					pp.setAnimationEnabled(false);
 					pp.addCloseHandler(new CloseHandler<PopupPanel>() {

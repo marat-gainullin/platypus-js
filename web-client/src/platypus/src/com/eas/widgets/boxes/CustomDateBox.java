@@ -5,15 +5,15 @@ import java.util.Date;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.user.datepicker.client.DatePicker;
 
-public class DecoratedDateBox extends DateBox {
+public class CustomDateBox extends DateBox {
 
 	protected DateTimePicker picker;
 
-	public DecoratedDateBox() {
+	public CustomDateBox() {
 		super();
 	}
 
-	public DecoratedDateBox(DateTimePicker aPicker, Date date, Format format) {
+	public CustomDateBox(DateTimePicker aPicker, Date date, Format format) {
 		super(new DatePicker(), date, format);
 		picker = aPicker;
 	}

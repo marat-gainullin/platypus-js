@@ -65,8 +65,11 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
         nonListMaskAligner.getStyle().setHeight(100, Style.Unit.PCT);
         nonListMaskAligner.getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
         
-        contentWrapper.getElement().insertFirst(nonListMaskAligner);
-        contentWrapper.getElement().insertFirst(nonListMask);
+        getWidget().getElement().insertFirst(nonListMaskAligner);
+        getWidget().getElement().insertFirst(nonListMask);
+        
+        selectButton.getElement().addClassName("decorator-select-combo");
+        clearButton.getElement().addClassName("decorator-clear-combo");
 	}
 
 	public Runnable getOnRedraw() {
@@ -206,7 +209,7 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 	}
 
 	protected HasValue<JavaScriptObject> getDecorated() {
-		return decorated;
+		return ((HasValue<JavaScriptObject>)decorated);
 	}
 
 	public String getText() {

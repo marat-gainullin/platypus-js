@@ -43,6 +43,7 @@ public class MenuItemImageText extends MenuItem implements HasHandlers, HasShowH
 		text = aText;
 		html = asHtml;
 		imageUri = aImageUri;
+	    setStyleName("menu-item");
 		regenerate();
 	}
 

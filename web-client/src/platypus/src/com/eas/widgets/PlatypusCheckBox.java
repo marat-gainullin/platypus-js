@@ -20,7 +20,6 @@ import com.eas.ui.events.ShowEvent;
 import com.eas.ui.events.ShowHandler;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style.VerticalAlign;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
@@ -47,9 +46,9 @@ public class PlatypusCheckBox extends CheckBox implements HasActionHandlers, Has
 		Element child = getElement().getFirstChildElement();
 		while(child != null){
 			if("input".equalsIgnoreCase(child.getTagName())){
-				child.addClassName("radio-box");
+				child.addClassName("check-box");
 			}else{
-				child.addClassName("radio-label");
+				child.addClassName("check-label");
 			}
 			child = child.getNextSiblingElement();
 		}

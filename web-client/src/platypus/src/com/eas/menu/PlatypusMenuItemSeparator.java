@@ -30,6 +30,7 @@ public class PlatypusMenuItemSeparator extends MenuItemSeparator implements HasJ
 
 	public PlatypusMenuItemSeparator() {
 		super();
+		setStyleName("menu-separator");
 	}
 
 	@Override

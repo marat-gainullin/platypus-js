@@ -10,8 +10,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.eas.ui.HasDecorationsWidth;
 import com.google.gwt.dom.client.OptionElement;
 import com.google.gwt.dom.client.SelectElement;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -25,7 +27,7 @@ import com.google.gwt.user.client.ui.ListBox;
  * 
  * @author mg
  */
-public class StyledListBox<T> extends ListBox implements HasValue<T> {
+public class StyledListBox<T> extends ListBox implements HasValue<T>, HasDecorationsWidth {
 
 	protected List<T> associatedValues = new ArrayList<>();
 	protected Map<T, Integer> indicies;
@@ -37,6 +39,7 @@ public class StyledListBox<T> extends ListBox implements HasValue<T> {
 
 	public StyledListBox(boolean isMultipleSelect) {
 		super();
+		setStyleName("form-control");
 		setMultipleSelect(isMultipleSelect);
 		addChangeHandler(new ChangeHandler() {
 
@@ -53,6 +56,11 @@ public class StyledListBox<T> extends ListBox implements HasValue<T> {
 			}
 
 		});
+	}
+	
+	@Override
+	public void setDecorationsWidth(int aDecorationsWidth) {
+		getElement().getStyle().setPaddingRight(aDecorationsWidth, Style.Unit.PX);
 	}
 
 	public void addItem(String aLabel, String aKey, T aAssociatedValue, String aClassName) {
