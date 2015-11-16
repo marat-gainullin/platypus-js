@@ -5,12 +5,14 @@ import java.text.ParseException;
 import com.eas.client.converters.StringValueConverter;
 import com.eas.core.Utils;
 import com.eas.core.Utils.JsObject;
+import com.eas.ui.HasDecorationsWidth;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.text.shared.Parser;
 
-public class FormattedObjectBox extends ExplicitValueBox<Object> {
+public class FormattedObjectBox extends ExplicitValueBox<Object> implements HasDecorationsWidth{
 
 	public static class PolymorphRenderer extends AbstractRenderer<Object> {
 
@@ -90,11 +92,17 @@ public class FormattedObjectBox extends ExplicitValueBox<Object> {
 
 	public FormattedObjectBox() {
 		super(Document.get().createTextInputElement(), new PolymorphRenderer(), new PolymorphParser());
+		setStyleName("form-control");
 		format = new ObjectFormat();
 		((PolymorphRenderer)renderer).setBox(this);
 		((PolymorphParser)parser).setBox(this);
 	}
 
+	@Override
+	public void setDecorationsWidth(int aDecorationsWidth) {
+		getElement().getStyle().setPaddingRight(aDecorationsWidth, Style.Unit.PX);
+	}
+	
 	public JavaScriptObject getEventThis() {
 		return eventThis;
 	}

@@ -7,6 +7,8 @@ package com.eas.widgets.boxes;
 
 import com.eas.core.XElement;
 import com.eas.ui.CommonResources;
+import com.eas.ui.HasDecorations;
+import com.eas.ui.HasDecorationsWidth;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.editor.client.IsEditor;
 import com.google.gwt.editor.client.LeafValueEditor;
@@ -37,6 +39,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HasValue;
+import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.ValueBox;
@@ -47,13 +50,13 @@ import com.google.gwt.user.client.ui.ValueBox;
  * @param <T>
  */
 public abstract class SpinnerBox<T> extends Composite implements RequiresResize, HasValue<T>, HasText, HasValueChangeHandlers<T>, IsEditor<LeafValueEditor<T>>, Focusable, HasAllKeyHandlers,
-        HasFocusHandlers, HasBlurHandlers {
+        HasFocusHandlers, HasBlurHandlers, HasDecorations, HasDecorationsWidth {
 
 	protected FlowPanel container = new FlowPanel();
 	protected SimplePanel left = new SimplePanel();
-	protected SimplePanel fieldWrapper = new SimplePanel();
 	protected ValueBox<T> field;
 	protected SimplePanel right = new SimplePanel();
+	protected int decorationsWidth;
 
 	public SpinnerBox(ValueBox<T> aField) {
 		initWidget(container);
@@ -61,6 +64,7 @@ public abstract class SpinnerBox<T> extends Composite implements RequiresResize,
 		container.getElement().getStyle().setPosition(Style.Position.RELATIVE);
 		container.getElement().addClassName("spin-field");
 		field = aField;
+		field.setStyleName("form-control");
 		field.addValueChangeHandler(new ValueChangeHandler<T>() {
 
 			@Override
@@ -117,20 +121,11 @@ public abstract class SpinnerBox<T> extends Composite implements RequiresResize,
 		}
 		left.getElement().addClassName("spin-left");
 		left.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-		left.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
 		left.getElement().getStyle().setTop(0, Style.Unit.PX);
 		left.getElement().getStyle().setHeight(100, Style.Unit.PCT);
-		left.getElement().getStyle().setLeft(0, Style.Unit.PX);
+		left.getElement().getStyle().setPosition(Style.Position.RELATIVE);
 
-		fieldWrapper.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-		fieldWrapper.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
-		fieldWrapper.getElement().getStyle().setTop(0, Style.Unit.PX);
-		fieldWrapper.getElement().getStyle().setHeight(100, Style.Unit.PCT);
-		fieldWrapper.getElement().getStyle().setBorderWidth(0, Style.Unit.PX);
-		fieldWrapper.getElement().getStyle().setMargin(0, Style.Unit.PX);
-		fieldWrapper.getElement().getStyle().setPadding(0, Style.Unit.PX);
 		CommonResources.INSTANCE.commons().ensureInjected();
-		fieldWrapper.getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
 
 		field.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 		field.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
@@ -138,24 +133,23 @@ public abstract class SpinnerBox<T> extends Composite implements RequiresResize,
 		field.getElement().getStyle().setHeight(100, Style.Unit.PCT);
 		field.getElement().getStyle().setLeft(0, Style.Unit.PX);
 		field.getElement().getStyle().setWidth(100, Style.Unit.PCT);
-		field.getElement().getStyle().setBorderWidth(0, Style.Unit.PX);
 		field.getElement().getStyle().setMargin(0, Style.Unit.PX);
-		field.getElement().getStyle().setPadding(0, Style.Unit.PX);
-		fieldWrapper.setWidget(field);
+		field.getElement().getStyle().setBackgroundColor("inherit");
+		field.getElement().getStyle().setColor("inherit");
+		field.getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
 
 		right.getElement().addClassName("spin-right");
 		right.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-		right.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
 		right.getElement().getStyle().setTop(0, Style.Unit.PX);
 		right.getElement().getStyle().setHeight(100, Style.Unit.PCT);
-		right.getElement().getStyle().setRight(0, Style.Unit.PX);
+		right.getElement().getStyle().setPosition(Style.Position.RELATIVE);
 
 		CommonResources.INSTANCE.commons().ensureInjected();
 		left.getElement().addClassName(CommonResources.INSTANCE.commons().unselectable());
 		right.getElement().addClassName(CommonResources.INSTANCE.commons().unselectable());
 
+		container.add(field);
 		container.add(left);
-		container.add(fieldWrapper);
 		container.add(right);
 		left.addDomHandler(new ClickHandler() {
 
@@ -175,7 +169,7 @@ public abstract class SpinnerBox<T> extends Composite implements RequiresResize,
 				}
 			}
 		}, ClickEvent.getType());
-		organaizeFieldWrapperLeftRight();
+		redecorate();
 		getElement().<XElement> cast().addResizingTransitionEnd(this);
 	}
 
@@ -203,9 +197,23 @@ public abstract class SpinnerBox<T> extends Composite implements RequiresResize,
 		return addHandler(handler, BlurEvent.getType());
 	}
 
-	protected void organaizeFieldWrapperLeftRight() {
-		fieldWrapper.getElement().getStyle().setLeft(left.getElement().getOffsetWidth(), Style.Unit.PX);
-		fieldWrapper.getElement().getStyle().setRight(right.getElement().getOffsetWidth(), Style.Unit.PX);
+	@Override
+	public void setDecorationsWidth(int aDecorationsWidth) {
+		decorationsWidth = aDecorationsWidth;
+		redecorate();
+	}
+	
+	@Override
+	public HasWidgets getContainer() {
+	    return container;
+	}
+	
+	protected void redecorate() {
+		if (isAttached()) {
+			field.getElement().getStyle().setPaddingLeft(left.getElement().getOffsetWidth(), Style.Unit.PX);
+			int paddingRight = right.getElement().getOffsetWidth() + decorationsWidth;
+			field.getElement().getStyle().setPaddingRight(paddingRight, Style.Unit.PX);
+		}
 	}
 
 	protected abstract void increment();
@@ -269,13 +277,13 @@ public abstract class SpinnerBox<T> extends Composite implements RequiresResize,
 
 	@Override
 	public void onResize() {
-		organaizeFieldWrapperLeftRight();
+		redecorate();
 	}
 
 	@Override
 	protected void onAttach() {
 		super.onAttach();
-		organaizeFieldWrapperLeftRight();
+		redecorate();
 	}
 
 	@Override

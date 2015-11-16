@@ -6,7 +6,6 @@
 package com.eas.widgets.boxes;
 
 import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.resources.client.ImageResource;
 
 /**
@@ -15,18 +14,29 @@ import com.google.gwt.resources.client.ImageResource;
  */
 public class ImageButton extends ImageParagraph {
 
-	protected static Element createButtonContainer() {
-		Element container = Document.get().createPushButtonElement();
-		container.setAttribute("class", "gwt-Button");
-		return container;
-	}
+	protected String styleSuffix = "default";
 
 	public ImageButton(String aTitle, boolean asHtml, ImageResource aImage) {
-		super(createButtonContainer(), aTitle, asHtml, aImage);
+		super(Document.get().createPushButtonElement(), aTitle, asHtml, aImage);
 		horizontalAlignment = ImageParagraph.CENTER;
+		addStyleName("btn");
+		setStylePrimaryName("btn");
+		setStyleDependentName(styleSuffix, true);
 	}
 
 	public ImageButton(String aTitle, boolean asHtml) {
 		this(aTitle, asHtml, null);
+	}
+
+	public String getStyleSuffix() {
+		return styleSuffix;
+	}
+
+	public void setStyleSuffix(String aValue) {
+		if (styleSuffix == null ? aValue != null : !styleSuffix.equals(aValue)) {
+			setStyleDependentName(styleSuffix, false);
+			styleSuffix = aValue;
+			setStyleDependentName(styleSuffix, true);
+		}
 	}
 }

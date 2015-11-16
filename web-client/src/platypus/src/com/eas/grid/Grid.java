@@ -7,8 +7,6 @@ package com.eas.grid;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.eas.core.XElement;
 import com.eas.grid.builders.NullHeaderOrFooterBuilder;
@@ -17,6 +15,7 @@ import com.eas.grid.columns.ModelColumn;
 import com.eas.grid.columns.header.HasSortList;
 import com.eas.grid.columns.header.HeaderNode;
 import com.eas.menu.MenuItemCheckBox;
+import com.eas.menu.PlatypusPopupMenu;
 import com.eas.ui.PublishedColor;
 import com.eas.ui.XDataTransfer;
 import com.google.gwt.cell.client.Cell;
@@ -61,7 +60,6 @@ import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.MenuBar;
-import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -92,6 +90,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 		public SafeHtml cell(String aCssRuleName, double aRowsHeight);
 	}
 
+	public static final String GRID_SHELL_STYLE = "grid-shell";
 	public static final String RULER_STYLE = "grid-ruler";
 	public static final String COLUMN_PHANTOM_STYLE = "grid-column-phantom";
 	public static final String COLUMNS_CHEVRON_STYLE = "grid-columns-chevron";
@@ -520,16 +519,11 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 
 			@Override
 			public void onClick(ClickEvent event) {
-				PopupPanel pp = new PopupPanel();
-				pp.setAutoHideEnabled(true);
-				pp.setAutoHideOnHistoryEventsEnabled(true);
-				pp.setAnimationEnabled(true);
-				MenuBar columnsMenu = new MenuBar(true);
+				PlatypusPopupMenu columnsMenu = new PlatypusPopupMenu();
 				fillColumns(columnsMenu, headerLeft);
 				fillColumns(columnsMenu, headerRight);
-				pp.setWidget(columnsMenu);
-				pp.setPopupPosition(columnsChevron.getAbsoluteLeft(), columnsChevron.getAbsoluteTop());
-				pp.showRelativeTo(columnsChevron);
+				columnsMenu.setPopupPosition(columnsChevron.getAbsoluteLeft(), columnsChevron.getAbsoluteTop());
+				columnsMenu.showRelativeTo(columnsChevron);
 			}
 
 			private void fillColumns(MenuBar aTarget, final GridSection<T> aSection) {
@@ -610,6 +604,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 		regenerateDynamicTDStyles();
 		regenerateDynamicOddRowsStyles();
 		getElement().<XElement> cast().addResizingTransitionEnd(this);
+		setStyleName(GRID_SHELL_STYLE);
 	}
 
 	protected void installCellBuilders() {

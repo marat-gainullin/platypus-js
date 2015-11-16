@@ -43,6 +43,7 @@ public class PlatypusPasswordField extends PasswordTextBox implements HasJsFacad
 
 	public PlatypusPasswordField() {
 		super();
+		setStyleName("form-control");
 		getElement().<XElement> cast().addResizingTransitionEnd(this);
 	}
 

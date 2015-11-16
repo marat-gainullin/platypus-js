@@ -13,7 +13,7 @@ public class ModelTextArea extends ModelDecoratorBox<String> implements HasEmpty
 
 	public ModelTextArea() {
 		super(new NullableTextArea());
-		((NullableTextArea) decorated).getElement().getStyle().setProperty("wordWrap", "normal");
+		//((NullableTextArea) decorated).getElement().getStyle().setProperty("wordWrap", "normal");
 		((NullableTextArea) decorated).getElement().getStyle().setProperty("resize", "none");
 	}
 

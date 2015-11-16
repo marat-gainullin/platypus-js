@@ -39,6 +39,7 @@ public class PlatypusButton extends ImageButton implements RequiresResize, HasAc
 
 	public PlatypusButton(String aTitle, boolean asHtml, ImageResource aImage) {
 		super(aTitle, asHtml, aImage);
+		
 		getElement().<XElement> cast().addResizingTransitionEnd(this);
 	}
 
@@ -236,6 +237,14 @@ public class PlatypusButton extends ImageButton implements RequiresResize, HasAc
 			},
 			set : function(aValue) {
 				aWidget.@com.eas.widgets.PlatypusButton::setVerticalAlignment(I)(+aValue);
+			}
+		});
+		Object.defineProperty(published, "suffix", {
+			get : function() {
+				return aWidget.@com.eas.widgets.PlatypusButton::getStyleSuffix()();
+			},
+			set : function(aValue) {
+				aWidget.@com.eas.widgets.PlatypusButton::setStyleSuffix(Ljava/lang/String;)(aValue);
 			}
 		});
 	}-*/;

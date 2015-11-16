@@ -22,8 +22,6 @@ import com.google.gwt.user.client.ui.HasValue;
  */
 public class ImageToggleButton extends ImageButton implements HasValue<Boolean>, HasValueChangeHandlers<Boolean> {
 
-    private static final String SELECTED_CLASS_NAME = "toggle-button-selected";
-
     protected HandlerManager handlerManager = new HandlerManager(this);
     protected Boolean selected;
 
@@ -60,11 +58,8 @@ public class ImageToggleButton extends ImageButton implements HasValue<Boolean>,
         }
         Boolean oldValue = getValue();
         selected = aValue;
-        if (selected) {
-            getElement().addClassName(SELECTED_CLASS_NAME);
-        } else {
-            getElement().removeClassName(SELECTED_CLASS_NAME);
-        }
+        setStyleDependentName("active", selected);
+        setStyleDependentName(styleSuffix, !selected);
         if (fireEvents && !aValue.equals(oldValue)) {
             ValueChangeEvent.fire(this, aValue);
         }

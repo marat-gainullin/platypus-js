@@ -7,6 +7,8 @@ package com.eas.widgets.boxes;
 
 import com.eas.core.XElement;
 import com.eas.ui.CommonResources;
+import com.eas.ui.HasDecorations;
+import com.eas.ui.HasDecorationsWidth;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
@@ -35,6 +37,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.HasValue;
+import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -46,8 +49,6 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public abstract class DecoratorBox<T> extends Composite implements RequiresResize, HasValue<T>, HasValueChangeHandlers<T>, Focusable, HasEnabled, HasAllKeyHandlers, HasFocusHandlers, HasBlurHandlers {
 
-	private static final String DECORATOR_FOCUSED_CLASS_NAME = "decorator-focused";
-	protected FlowPanel container = new FlowPanel();
 	protected HasValue<T> decorated;
 	protected boolean enabled = true;
 	protected boolean nullable = true;
@@ -57,43 +58,59 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 	protected HandlerRegistration keyPressHandler;
 	protected HandlerRegistration focusHandler;
 	protected HandlerRegistration blurHandler;
-	protected SimplePanel contentWrapper = new SimplePanel();
 	protected SimplePanel selectButton = new SimplePanel();
 	protected SimplePanel clearButton = new SimplePanel();
-	protected boolean clearButtonVisible;
+	protected boolean selectButtonNeeded;
 
 	public DecoratorBox(HasValue<T> aDecorated) {
-		this();
-		setWidget(aDecorated);
-	}
-
-	public DecoratorBox() {
 		super();
-		initWidget(container);
-		container.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-		container.getElement().getStyle().setPosition(Style.Position.RELATIVE);
-		container.getElement().addClassName("decorator");
-		contentWrapper.getElement().addClassName("decorator-content");
-		contentWrapper.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-		contentWrapper.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
-		contentWrapper.getElement().getStyle().setLeft(0, Style.Unit.PX);
-		contentWrapper.getElement().getStyle().setTop(0, Style.Unit.PX);
-		contentWrapper.getElement().getStyle().setHeight(100, Style.Unit.PCT);
-		contentWrapper.getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
+		decorated = aDecorated;
+		if (decorated instanceof HasValue<?>) {
+			decorated.addValueChangeHandler(new ValueChangeHandler<T>() {
+
+				@Override
+				public void onValueChange(ValueChangeEvent<T> event) {
+					setClearButtonVisible(nullable && event.getValue() != null);
+				}
+			});
+		}
+		if (decorated instanceof HasDecorations) {
+			HasWidgets container = ((HasDecorations) decorated).getContainer();
+			container.add(selectButton);
+			container.add(clearButton);
+			initWidget((Widget) decorated);
+		} else {
+			CommonResources.INSTANCE.commons().ensureInjected();
+			((Widget) decorated).getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
+			Style style = ((Widget) decorated).getElement().getStyle();
+			style.setMargin(0, Style.Unit.PX);
+			style.setPosition(Style.Position.ABSOLUTE);
+			style.setDisplay(Style.Display.INLINE_BLOCK);
+			style.setLeft(0, Style.Unit.PX);
+			style.setTop(0, Style.Unit.PX);
+			style.setHeight(100, Style.Unit.PCT);
+			style.setWidth(100, Style.Unit.PCT);
+			style.setOutlineStyle(Style.OutlineStyle.NONE);
+			style.setBackgroundColor("inherit");
+			style.setColor("inherit");
+			FlowPanel panel = new FlowPanel();
+			initWidget(panel);
+			panel.add((Widget) decorated);
+			panel.add(selectButton);
+			panel.add(clearButton);
+		}
 
 		selectButton.getElement().addClassName("decorator-select");
-		selectButton.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-		selectButton.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
+		selectButton.getElement().getStyle().setDisplay(Style.Display.NONE);
 		selectButton.getElement().getStyle().setTop(0, Style.Unit.PX);
 		selectButton.getElement().getStyle().setHeight(100, Style.Unit.PCT);
+		selectButton.getElement().getStyle().setPosition(Style.Position.RELATIVE);
 		clearButton.getElement().addClassName("decorator-clear");
 		clearButton.getElement().getStyle().setDisplay(Style.Display.NONE);
-		clearButton.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
 		clearButton.getElement().getStyle().setTop(0, Style.Unit.PX);
 		clearButton.getElement().getStyle().setHeight(100, Style.Unit.PCT);
-		container.add(contentWrapper);
-		container.add(selectButton);
-		container.add(clearButton);
+		clearButton.getElement().getStyle().setPosition(Style.Position.RELATIVE);
+
 		selectButton.addDomHandler(new ClickHandler() {
 
 			@Override
@@ -110,11 +127,71 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 			}
 		}, ClickEvent.getType());
 		organizeButtonsContent();
+
 		getElement().<XElement> cast().addResizingTransitionEnd(this);
+
+		if (decorated instanceof HasValue<?>) {
+			changeValueHandler = decorated.addValueChangeHandler(new ValueChangeHandler<T>() {
+
+				@Override
+				public void onValueChange(ValueChangeEvent<T> event) {
+					fireValueChangeEvent();
+				}
+			});
+		}
+
+		if (decorated instanceof HasKeyDownHandlers) {
+			keyDownHandler = ((HasKeyDownHandlers) decorated).addKeyDownHandler(new KeyDownHandler() {
+
+				@Override
+				public void onKeyDown(KeyDownEvent event) {
+					KeyDownEvent.fireNativeEvent(event.getNativeEvent(), DecoratorBox.this);
+				}
+			});
+		}
+		if (decorated instanceof HasKeyUpHandlers) {
+			keyUpHandler = ((HasKeyUpHandlers) decorated).addKeyUpHandler(new KeyUpHandler() {
+
+				@Override
+				public void onKeyUp(KeyUpEvent event) {
+					KeyUpEvent.fireNativeEvent(event.getNativeEvent(), DecoratorBox.this);
+				}
+			});
+		}
+		if (decorated instanceof HasKeyPressHandlers) {
+			keyPressHandler = ((HasKeyPressHandlers) decorated).addKeyPressHandler(new KeyPressHandler() {
+
+				@Override
+				public void onKeyPress(KeyPressEvent event) {
+					KeyPressEvent.fireNativeEvent(event.getNativeEvent(), DecoratorBox.this);
+				}
+			});
+		}
+		if (decorated instanceof HasFocusHandlers) {
+			focusHandler = ((HasFocusHandlers) decorated).addFocusHandler(new FocusHandler() {
+
+				@Override
+				public void onFocus(FocusEvent event) {
+					FocusEvent.fireNativeEvent(event.getNativeEvent(), DecoratorBox.this);
+				}
+
+			});
+		}
+		if (decorated instanceof HasBlurHandlers) {
+			blurHandler = ((HasBlurHandlers) decorated).addBlurHandler(new BlurHandler() {
+
+				@Override
+				public void onBlur(BlurEvent event) {
+					BlurEvent.fireNativeEvent(event.getNativeEvent(), DecoratorBox.this);
+				}
+
+			});
+		}
+
 	}
 
 	public Widget getWidget() {
-		return decorated instanceof Widget ? (Widget) decorated : null;
+		return (Widget) decorated;
 	}
 
 	@Override
@@ -146,18 +223,18 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 			getElement().<XElement> cast().disabledMask();
 		}
 	}
-	
+
 	public boolean isNullable() {
 		return nullable;
 	}
 
 	public void setNullable(boolean aValue) {
-		if(nullable != aValue){
+		if (nullable != aValue) {
 			nullable = aValue;
-			setClearButtonVisible(nullable);
+			setClearButtonVisible(nullable && getValue() != null);
 		}
-    }
-	
+	}
+
 	@Override
 	public void setFocus(boolean focused) {
 		if (decorated instanceof Focusable) {
@@ -191,140 +268,88 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 
 	protected abstract void clearValue();
 
-	public void setWidget(HasValue<T> w) {
-		if (decorated != w) {
-			if (changeValueHandler != null) {
-				changeValueHandler.removeHandler();
-			}
-			if (keyDownHandler != null)
-				keyDownHandler.removeHandler();
-			if (keyUpHandler != null)
-				keyUpHandler.removeHandler();
-			if (keyPressHandler != null)
-				keyPressHandler.removeHandler();
-			if (focusHandler != null)
-				focusHandler.removeHandler();
-			if (blurHandler != null)
-				blurHandler.removeHandler();
-			if (decorated instanceof Widget) {
-				((Widget) decorated).removeFromParent();
-			}
-			decorated = w;
-			if (decorated != null) {
-				changeValueHandler = decorated.addValueChangeHandler(new ValueChangeHandler<T>() {
+	/*
+	 * public void setWidget(HasValue<T> w) { if (decorated != w) { if
+	 * (changeValueHandler != null) { changeValueHandler.removeHandler(); } if
+	 * (keyDownHandler != null) keyDownHandler.removeHandler(); if (keyUpHandler
+	 * != null) keyUpHandler.removeHandler(); if (keyPressHandler != null)
+	 * keyPressHandler.removeHandler(); if (focusHandler != null)
+	 * focusHandler.removeHandler(); if (blurHandler != null)
+	 * blurHandler.removeHandler(); if (decorated instanceof Widget) { ((Widget)
+	 * decorated).removeFromParent(); } decorated = w; if (decorated != null) {
+	 * changeValueHandler = decorated.addValueChangeHandler(new
+	 * ValueChangeHandler<T>() {
+	 * 
+	 * @Override public void onValueChange(ValueChangeEvent<T> event) {
+	 * recalcClearButton(); fireValueChangeEvent(); } }); if (decorated
+	 * instanceof Widget) { CommonResources.INSTANCE.commons().ensureInjected();
+	 * ((Widget)
+	 * decorated).getElement().addClassName(CommonResources.INSTANCE.commons
+	 * ().borderSized()); Style style = ((Widget)
+	 * decorated).getElement().getStyle(); style.setBorderWidth(0,
+	 * Style.Unit.PX); style.setPadding(0, Style.Unit.PX); style.setMargin(0,
+	 * Style.Unit.PX); style.setPosition(Style.Position.ABSOLUTE);
+	 * style.setDisplay(Style.Display.INLINE_BLOCK); style.setLeft(0,
+	 * Style.Unit.PX); style.setTop(0, Style.Unit.PX); style.setHeight(100,
+	 * Style.Unit.PCT); style.setWidth(100, Style.Unit.PCT);
+	 * style.setOutlineStyle(Style.OutlineStyle.NONE);
+	 * style.setBackgroundColor("inherit"); style.setColor("inherit");
+	 * container.add((Widget) decorated); } if (decorated instanceof
+	 * HasKeyDownHandlers) { keyDownHandler = ((HasKeyDownHandlers)
+	 * decorated).addKeyDownHandler(new KeyDownHandler() {
+	 * 
+	 * @Override public void onKeyDown(KeyDownEvent event) {
+	 * KeyDownEvent.fireNativeEvent(event.getNativeEvent(), DecoratorBox.this);
+	 * } }); } if (decorated instanceof HasKeyUpHandlers) { keyUpHandler =
+	 * ((HasKeyUpHandlers) decorated).addKeyUpHandler(new KeyUpHandler() {
+	 * 
+	 * @Override public void onKeyUp(KeyUpEvent event) {
+	 * KeyUpEvent.fireNativeEvent(event.getNativeEvent(), DecoratorBox.this); }
+	 * }); } if (decorated instanceof HasKeyPressHandlers) { keyPressHandler =
+	 * ((HasKeyPressHandlers) decorated).addKeyPressHandler(new
+	 * KeyPressHandler() {
+	 * 
+	 * @Override public void onKeyPress(KeyPressEvent event) {
+	 * KeyPressEvent.fireNativeEvent(event.getNativeEvent(), DecoratorBox.this);
+	 * } }); } if (decorated instanceof HasFocusHandlers) { focusHandler =
+	 * ((HasFocusHandlers) decorated).addFocusHandler(new FocusHandler() {
+	 * 
+	 * @Override public void onFocus(FocusEvent event) { focused();
+	 * FocusEvent.fireNativeEvent(event.getNativeEvent(), DecoratorBox.this); }
+	 * 
+	 * }); } if (decorated instanceof HasBlurHandlers) { blurHandler =
+	 * ((HasBlurHandlers) decorated).addBlurHandler(new BlurHandler() {
+	 * 
+	 * @Override public void onBlur(BlurEvent event) { blurred();
+	 * BlurEvent.fireNativeEvent(event.getNativeEvent(), DecoratorBox.this); }
+	 * 
+	 * }); } } } }
+	 */
 
-					@Override
-					public void onValueChange(ValueChangeEvent<T> event) {
-						if (isClearButtonVisible() && getValue() != null) {
-							clearButton.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-						} else {
-							clearButton.getElement().getStyle().setDisplay(Style.Display.NONE);
-						}
-						organizeButtonsContent();
-						fireValueChangeEvent();
-					}
-				});
-				if (decorated instanceof Widget) {
-					CommonResources.INSTANCE.commons().ensureInjected();
-					((Widget) decorated).getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
-					Style style = ((Widget) decorated).getElement().getStyle();
-					style.setBorderWidth(0, Style.Unit.PX);
-					style.setPadding(0, Style.Unit.PX);
-					style.setMargin(0, Style.Unit.PX);
-					style.setPosition(Style.Position.ABSOLUTE);
-					style.setDisplay(Style.Display.INLINE_BLOCK);
-					style.setLeft(0, Style.Unit.PX);
-					style.setTop(0, Style.Unit.PX);
-					style.setHeight(100, Style.Unit.PCT);
-					style.setWidth(100, Style.Unit.PCT);
-					style.setOutlineStyle(Style.OutlineStyle.NONE);
-					style.setBackgroundColor("inherit");
-					style.setColor("inherit");
-					contentWrapper.setWidget((Widget) decorated);
-				}
-				if (decorated instanceof HasKeyDownHandlers) {
-					keyDownHandler = ((HasKeyDownHandlers) decorated).addKeyDownHandler(new KeyDownHandler() {
-
-						@Override
-						public void onKeyDown(KeyDownEvent event) {
-							KeyDownEvent.fireNativeEvent(event.getNativeEvent(), DecoratorBox.this);
-						}
-					});
-				}
-				if (decorated instanceof HasKeyUpHandlers) {
-					keyUpHandler = ((HasKeyUpHandlers) decorated).addKeyUpHandler(new KeyUpHandler() {
-
-						@Override
-						public void onKeyUp(KeyUpEvent event) {
-							KeyUpEvent.fireNativeEvent(event.getNativeEvent(), DecoratorBox.this);
-						}
-					});
-				}
-				if (decorated instanceof HasKeyPressHandlers) {
-					keyPressHandler = ((HasKeyPressHandlers) decorated).addKeyPressHandler(new KeyPressHandler() {
-
-						@Override
-						public void onKeyPress(KeyPressEvent event) {
-							KeyPressEvent.fireNativeEvent(event.getNativeEvent(), DecoratorBox.this);
-						}
-					});
-				}
-				if (decorated instanceof HasFocusHandlers) {
-					focusHandler = ((HasFocusHandlers) decorated).addFocusHandler(new FocusHandler() {
-
-						@Override
-						public void onFocus(FocusEvent event) {
-							focused();
-							FocusEvent.fireNativeEvent(event.getNativeEvent(), DecoratorBox.this);
-						}
-
-					});
-				}
-				if (decorated instanceof HasBlurHandlers) {
-					blurHandler = ((HasBlurHandlers) decorated).addBlurHandler(new BlurHandler() {
-
-						@Override
-						public void onBlur(BlurEvent event) {
-							blurred();
-							BlurEvent.fireNativeEvent(event.getNativeEvent(), DecoratorBox.this);
-						}
-
-					});
-				}
-			}
-		}
-	}
-
-	protected void focused(){
-		DecoratorBox.this.getElement().addClassName(DECORATOR_FOCUSED_CLASS_NAME);
-	}
-	
-	protected void blurred(){
-		DecoratorBox.this.getElement().removeClassName(DECORATOR_FOCUSED_CLASS_NAME);
-	}
-	
 	protected void fireValueChangeEvent() {
 		ValueChangeEvent.fire(DecoratorBox.this, getValue());
 	}
 
 	protected void organizeButtonsContent() {
-		int right = 0;
-		if (isSelectButtonVisible()) {
-			selectButton.getElement().getStyle().setRight(right, Style.Unit.PX);
-			right += selectButton.getElement().getOffsetWidth();
+		if (decorated != null) {
+			int right = 0;
+			if (isSelectButtonVisible()) {
+				right += selectButton.getElement().getOffsetWidth();
+			}
+			if (isClearButtonVisible()) {
+				right += clearButton.getElement().getOffsetWidth();
+			}
+			if (decorated instanceof HasDecorationsWidth) {
+				((HasDecorationsWidth) decorated).setDecorationsWidth(right);
+			}
 		}
-		if (isClearButtonVisible()) {
-			clearButton.getElement().getStyle().setRight(right, Style.Unit.PX);
-			right += clearButton.getElement().getOffsetWidth();
-		}
-		contentWrapper.getElement().getStyle().setRight(right, Style.Unit.PX);
 	}
 
-	public boolean isSelectButtonVisible() {
+	protected boolean isSelectButtonVisible() {
 		return !Style.Display.NONE.getCssName().equalsIgnoreCase(selectButton.getElement().getStyle().getDisplay());
 	}
 
-	public void setSelectButtonVisible(boolean aValue) {
+	protected void setSelectButtonVisible(boolean aValue) {
 		if (isSelectButtonVisible() != aValue) {
 			if (aValue) {
 				selectButton.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
@@ -335,14 +360,13 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 		}
 	}
 
-	public boolean isClearButtonVisible() {
-		return clearButtonVisible;
+	protected boolean isClearButtonVisible() {
+		return !Style.Display.NONE.getCssName().equalsIgnoreCase(clearButton.getElement().getStyle().getDisplay());
 	}
 
-	public void setClearButtonVisible(boolean aValue) {
-		if (clearButtonVisible != aValue) {
-			clearButtonVisible = aValue;
-			if (aValue && getValue() != null) {
+	protected void setClearButtonVisible(boolean aValue) {
+		if (isClearButtonVisible() != aValue) {
+			if (aValue) {
 				clearButton.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 			} else {
 				clearButton.getElement().getStyle().setDisplay(Style.Display.NONE);

@@ -2,6 +2,7 @@ package com.eas.widgets.containers;
 
 import com.eas.core.XElement;
 import com.eas.menu.MenuItemImageText;
+import com.eas.menu.PlatypusPopupMenu;
 import com.eas.ui.HasImageResource;
 import com.eas.widgets.boxes.ImageLabel;
 import com.google.gwt.core.client.GWT;
@@ -29,8 +30,6 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.IndexedPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.LayoutPanel;
-import com.google.gwt.user.client.ui.MenuBar;
-import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -80,7 +79,7 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 			}
 
 			@Override
-			public void insert(Widget child, Widget tab, int beforeIndex) {
+			public void insert(Widget child, Widget aTabWidget, int beforeIndex) {
 				child.getElement().getStyle().clearWidth();
 				child.getElement().getStyle().clearHeight();
 				// if (child instanceof FocusWidget) {
@@ -89,7 +88,9 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 				com.eas.ui.CommonResources.INSTANCE.commons().ensureInjected();
 				child.getElement().addClassName(com.eas.ui.CommonResources.INSTANCE.commons().borderSized());
 				// }
-				super.insert(child, tab, beforeIndex);
+				super.insert(child, aTabWidget, beforeIndex);
+				Widget tab = ((FlowPanel)tabBar).getWidget(beforeIndex);
+				tab.setStylePrimaryName("tabs-tab");
 				tabsList.setEnabled(true);
 			}
 
@@ -128,6 +129,8 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 		});
 		tabBar = tabBarContainer.getWidget(0);
 		tabsContent = tabBarContainer.getWidget(1);
+	    tabBar.setStylePrimaryName("tabs-bar");
+	    tabs.setStylePrimaryName("tabs");
 		// GWT Layout animations are deprecated because of CSS3 transitions
 		tabs.setAnimationDuration(0);
 		scrollLeft = new Button(template.classedDiv("tabs-chevron-left"), new ClickHandler() {
@@ -154,11 +157,7 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 
 			@Override
 			public void onClick(ClickEvent event) {
-				final PopupPanel pp = new PopupPanel();
-				pp.setAutoHideEnabled(true);
-				pp.setAutoHideOnHistoryEventsEnabled(true);
-				pp.setAnimationEnabled(true);
-				MenuBar menu = new MenuBar(true);
+				final PlatypusPopupMenu menu = new PlatypusPopupMenu();
 				for (int i = 0; i < tabs.getWidgetCount(); i++) {
 					final Widget content = tabs.getWidget(i);
 					Widget w = tabs.getTabWidget(i);
@@ -171,7 +170,7 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 						@Override
 						public void execute() {
 							tabs.selectTab(content);
-							pp.hide();
+							menu.hide();
 							Widget targetTab = tabs.getTabWidget(content);
 							int tabCenterX = targetTab.getParent().getElement().getOffsetLeft() + targetTab.getParent().getElement().getOffsetWidth() / 2;
 							int tabBarParentWidth = tabBar.getElement().getParentElement().getOffsetWidth() - chevron.getElement().getOffsetWidth();
@@ -207,10 +206,9 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 						menu.addItem(new MenuItemImageText(l.getText(), false, imageUri, tabSelector));
 					}
 				}
-				pp.setWidget(menu);
 				Widget lastWidget = chevron.getWidget(chevron.getWidgetCount() - 1);
-				pp.setPopupPosition(lastWidget.getAbsoluteLeft(), lastWidget.getAbsoluteTop() + lastWidget.getElement().getOffsetHeight());
-				pp.showRelativeTo(lastWidget);
+				menu.setPopupPosition(lastWidget.getAbsoluteLeft(), lastWidget.getAbsoluteTop() + lastWidget.getElement().getOffsetHeight());
+				menu.showRelativeTo(lastWidget);
 			}
 		});
 		tabsList.setEnabled(false);

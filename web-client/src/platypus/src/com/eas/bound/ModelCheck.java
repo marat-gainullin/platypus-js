@@ -16,17 +16,6 @@ public class ModelCheck extends ModelDecoratorBox<Boolean> implements HasActionH
 
 	public ModelCheck() {
 		super(new NullableCheckBox());
-		container.getElement().removeClassName("decorator");
-	}
-
-	@Override
-	protected void focused() {
-		// no op since check boxes even model check does not need a focus border
-	}
-
-	@Override
-	protected void blurred() {
-		// no op since check boxes even model check does not need a focus border
 	}
 
 	protected int actionHandlers;

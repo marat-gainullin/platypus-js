@@ -19,6 +19,7 @@ import com.eas.ui.events.HideHandler;
 import com.eas.ui.events.ShowEvent;
 import com.eas.ui.events.ShowHandler;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
@@ -30,18 +31,40 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.RequiresResize;
 
-public class PlatypusRadioButton extends RadioButton implements HasActionHandlers, HasJsFacade, HasPlatypusButtonGroup, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers, RequiresResize {
+public class PlatypusRadioButton extends RadioButton implements HasActionHandlers, HasJsFacade, HasPlatypusButtonGroup, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers,
+        HasResizeHandlers, RequiresResize {
 
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
 	protected String name;
 	protected JavaScriptObject published;
-	
+
 	protected ButtonGroup group;
 
 	public PlatypusRadioButton() {
 		super("");
-		getElement().<XElement>cast().addResizingTransitionEnd(this);
+		propagateAlign();
+	}
+
+	protected void propagateAlign() {
+		getElement().removeClassName("gwt-RadioButton");
+		Element child = getElement().getFirstChildElement();
+		while (child != null) {
+			if("input".equalsIgnoreCase(child.getTagName())){
+				child.addClassName("radio-box");
+			}else{
+				child.addClassName("radio-label");
+			}
+			child = child.getNextSiblingElement();
+		}
+		getElement().<XElement> cast().addResizingTransitionEnd(this);
+	}
+
+	@Override
+	public void setName(String name) {
+		super.setName(name);
+		propagateAlign();// because of replacing of input tag, while
+						 // super.setName();
 	}
 
 	@Override
@@ -51,7 +74,7 @@ public class PlatypusRadioButton extends RadioButton implements HasActionHandler
 
 	@Override
 	public void onResize() {
-		if(isAttached()){
+		if (isAttached()) {
 			ResizeEvent.fire(this, getElement().getOffsetWidth(), getElement().getOffsetHeight());
 		}
 	}
@@ -89,9 +112,9 @@ public class PlatypusRadioButton extends RadioButton implements HasActionHandler
 			clickReg = addClickHandler(new ClickHandler() {
 
 				@Override
-                public void onClick(ClickEvent event) {
+				public void onClick(ClickEvent event) {
 					ActionEvent.fire(PlatypusRadioButton.this, PlatypusRadioButton.this);
-                }
+				}
 
 			});
 		}
@@ -121,9 +144,9 @@ public class PlatypusRadioButton extends RadioButton implements HasActionHandler
 	}
 
 	@Override
-    public PlatypusPopupMenu getPlatypusPopupMenu() {
-		return menu; 
-    }
+	public PlatypusPopupMenu getPlatypusPopupMenu() {
+		return menu;
+	}
 
 	protected HandlerRegistration menuTriggerReg;
 
@@ -135,7 +158,7 @@ public class PlatypusRadioButton extends RadioButton implements HasActionHandler
 			menu = aMenu;
 			if (menu != null) {
 				menuTriggerReg = super.addDomHandler(new ContextMenuHandler() {
-					
+
 					@Override
 					public void onContextMenu(ContextMenuEvent event) {
 						event.preventDefault();
@@ -172,10 +195,10 @@ public class PlatypusRadioButton extends RadioButton implements HasActionHandler
 	public void mutateButtonGroup(ButtonGroup aGroup) {
 		if (group != aGroup) {
 			if (group != null)
-				group.remove((HasPublished)this);
+				group.remove((HasPublished) this);
 			group = aGroup;
 			if (group != null)
-				group.add((HasPublished)this);
+				group.add((HasPublished) this);
 		}
 	}
 
@@ -205,34 +228,34 @@ public class PlatypusRadioButton extends RadioButton implements HasActionHandler
 	}
 
 	private native static void publish(HasPublished aWidget, JavaScriptObject published)/*-{
-		Object.defineProperty(published, "text", {
-			get : function() {
-				return aWidget.@com.eas.widgets.PlatypusRadioButton::getText()();
-			},
-			set : function(aValue) {
-				aWidget.@com.eas.widgets.PlatypusRadioButton::setText(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
-			}
-		});
-		Object.defineProperty(published, "selected", {
-			get : function() {
-				var value = aWidget.@com.eas.widgets.PlatypusRadioButton::getValue()();
-				if (value == null)
-					return null;
-				else
-					return aWidget.@com.eas.widgets.PlatypusRadioButton::getPlainValue()();
-			},
-			set : function(aValue) {
-				aWidget.@com.eas.widgets.PlatypusRadioButton::setPlainValue(Z)(aValue!=null && (false != aValue));
-			}
-		});
-		Object.defineProperty(published, "buttonGroup", {
-			get : function() {
-				var buttonGroup = aWidget.@com.eas.ui.HasPlatypusButtonGroup::getButtonGroup()();
-				return @com.eas.core.Utils::checkPublishedComponent(Ljava/lang/Object;)(buttonGroup);					
-			},
-			set : function(aValue) {
-				aWidget.@com.eas.ui.HasPlatypusButtonGroup::mutateButtonGroup(Lcom/eas/ui/ButtonGroup;)(aValue != null ? aValue.unwrap() : null);
-			}
-		});
-	}-*/;
+	                                                                                    Object.defineProperty(published, "text", {
+	                                                                                    get : function() {
+	                                                                                    return aWidget.@com.eas.widgets.PlatypusRadioButton::getText()();
+	                                                                                    },
+	                                                                                    set : function(aValue) {
+	                                                                                    aWidget.@com.eas.widgets.PlatypusRadioButton::setText(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
+	                                                                                    }
+	                                                                                    });
+	                                                                                    Object.defineProperty(published, "selected", {
+	                                                                                    get : function() {
+	                                                                                    var value = aWidget.@com.eas.widgets.PlatypusRadioButton::getValue()();
+	                                                                                    if (value == null)
+	                                                                                    return null;
+	                                                                                    else
+	                                                                                    return aWidget.@com.eas.widgets.PlatypusRadioButton::getPlainValue()();
+	                                                                                    },
+	                                                                                    set : function(aValue) {
+	                                                                                    aWidget.@com.eas.widgets.PlatypusRadioButton::setPlainValue(Z)(aValue!=null && (false != aValue));
+	                                                                                    }
+	                                                                                    });
+	                                                                                    Object.defineProperty(published, "buttonGroup", {
+	                                                                                    get : function() {
+	                                                                                    var buttonGroup = aWidget.@com.eas.ui.HasPlatypusButtonGroup::getButtonGroup()();
+	                                                                                    return @com.eas.core.Utils::checkPublishedComponent(Ljava/lang/Object;)(buttonGroup);					
+	                                                                                    },
+	                                                                                    set : function(aValue) {
+	                                                                                    aWidget.@com.eas.ui.HasPlatypusButtonGroup::mutateButtonGroup(Lcom/eas/ui/ButtonGroup;)(aValue != null ? aValue.unwrap() : null);
+	                                                                                    }
+	                                                                                    });
+	                                                                                    }-*/;
 }

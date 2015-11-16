@@ -55,8 +55,6 @@ public abstract class ModelDecoratorBox<T> extends DecoratorBox<T> implements Ha
 
 	public ModelDecoratorBox(HasValue<T> aDecorated) {
 		super(aDecorated);
-		setSelectButtonVisible(false);
-		setClearButtonVisible(true);
 	}
 
 	@Override

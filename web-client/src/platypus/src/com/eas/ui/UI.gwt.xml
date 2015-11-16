@@ -4,7 +4,7 @@
 
 <module>
     <inherits name="com.eas.core.Core"/>
-    <inherits name='com.google.gwt.user.theme.standard.Standard'/>
+    <!--inherits name='com.google.gwt.user.theme.standard.Standard'/-->
 
     <source path=""/>
     

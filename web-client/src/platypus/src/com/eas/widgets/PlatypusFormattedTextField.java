@@ -43,6 +43,7 @@ public class PlatypusFormattedTextField extends FormattedObjectBox implements Ha
 
 	public PlatypusFormattedTextField() {
 		super();
+		setStyleName("form-control");
 		getElement().<XElement> cast().addResizingTransitionEnd(this);
 	}
 

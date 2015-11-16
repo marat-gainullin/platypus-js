@@ -43,6 +43,7 @@ public class PlatypusTextField extends TextBox implements HasActionHandlers, Has
 
 	public PlatypusTextField() {
 		super();
+		setStyleName("form-control");
 		getElement().<XElement> cast().addResizingTransitionEnd(this);
 	}
 
