@@ -14,17 +14,21 @@ define(['logger', 'boxing'], function (Logger, B) {
         var ScriptsClass = Java.type('com.eas.script.Scripts');
 
         Object.defineProperty(this, "request", {
-            value: ScriptsClass.getContext().getRequest() ? new Request(ScriptsClass.getContext().getRequest()) : null
+            get: function () {
+                return ScriptsClass.getContext().getRequest() ? new Request(ScriptsClass.getContext().getRequest()) : null;
+            }
         });
 
         Object.defineProperty(this, "response", {
-            value: ScriptsClass.getContext().getResponse() ? new Response(ScriptsClass.getContext().getResponse()) : null
+            get: function () {
+                return ScriptsClass.getContext().getResponse() ? new Response(ScriptsClass.getContext().getResponse()) : null;
+            }
         });
 
         function Request(aHttpRequest) {
 
             var self = this;
-            
+
             /**
              * The name of the protection authentication scheme.
              */
@@ -385,7 +389,7 @@ define(['logger', 'boxing'], function (Logger, B) {
                     var headerName = headerNames.nextElement();
                     Object.defineProperty(self, headerName, {
                         enumerable: true,
-                        value: P.boxAsJs(aHttpRequest.getHeader(headerName))
+                        value: B.boxAsJs(aHttpRequest.getHeader(headerName))
                     });
                 }
             }
@@ -553,7 +557,7 @@ define(['logger', 'boxing'], function (Logger, B) {
                         return aHttpResponse.getHeader(aHeaderName);
                     },
                     set: function (aValue) {
-                        if(aValue instanceof Date)
+                        if (aValue instanceof Date)
                             aHttpResponse.setDateHeader(aHeaderName, aValue.getTime());
                         else
                             aHttpResponse.setHeader(aHeaderName, aValue);
@@ -567,7 +571,7 @@ define(['logger', 'boxing'], function (Logger, B) {
              * @param aDefaultValue the header value
              */
             this.add = function (aName, aDefaultValue) {
-                if(aDefaultValue instanceof Date)
+                if (aDefaultValue instanceof Date)
                     aHttpResponse.addDateHeader(aName, aDefaultValue.getTime());
                 else
                     aHttpResponse.addHeader(aName, aDefaultValue);
@@ -578,7 +582,7 @@ define(['logger', 'boxing'], function (Logger, B) {
              * @param aValue the header value
              */
             this.set = function (aName, aValue) {
-                if(aValue instanceof Date)
+                if (aValue instanceof Date)
                     aHttpResponse.setDateHeader(aName, aValue.getTime());
                 else
                     aHttpResponse.setHeader(aName, aValue);
