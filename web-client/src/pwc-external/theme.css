@@ -1001,7 +1001,7 @@ select.form-control{
 }
 
 .date-select, .time-select{
-    width: 20px; 
+    width: 30px; 
     opacity: 0.5;
     background-image: url(date-time-select.png);
     background-repeat: no-repeat;
@@ -1016,7 +1016,7 @@ select.form-control{
 
 
 .spin-left{
-    width: 20px; 
+    width: 30px; 
     background-image: url(spin-left.png);
     background-repeat: no-repeat;
     background-position: center;
@@ -1027,7 +1027,7 @@ select.form-control{
 }
 
 .spin-right{
-    width: 20px; 
+    width: 30px; 
     background-image: url(spin-right.png);
     background-repeat: no-repeat;
     background-position: center;
