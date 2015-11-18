@@ -65,8 +65,8 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
         nonListMaskAligner.getStyle().setHeight(100, Style.Unit.PCT);
         nonListMaskAligner.getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
         
-        getWidget().getElement().insertFirst(nonListMaskAligner);
-        getWidget().getElement().insertFirst(nonListMask);
+        getElement().insertFirst(nonListMaskAligner);
+        getElement().insertFirst(nonListMask);
         
         selectButton.getElement().addClassName("decorator-select-combo");
         clearButton.getElement().addClassName("decorator-clear-combo");
