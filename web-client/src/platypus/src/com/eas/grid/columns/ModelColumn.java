@@ -166,7 +166,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 	@Override
 	public void update(int aIndex, JavaScriptObject anElement, Object value) {
 		if (anElement != null && field != null && !field.isEmpty() && !readonly && grid.isEditable()) {
-			Utils.setPathData(anElement, field, value);
+			Utils.setPathData(anElement, field, Utils.toJs(value));
 		}
 	}
 

@@ -42,11 +42,13 @@ public class JsModel {
 		                        },
 		                        set: function (aValue) {
 		                            var _oldValue = container[_p];
-		                            var _beforeState = null;
-		                            if(aOnBeforeChange)
-		                                _beforeState = aOnBeforeChange(anObject, {source: anObject, propertyName: _p, oldValue: _oldValue, newValue: aValue});
-		                            container[_p] = aValue;
-		                            aOnChange(anObject, {source: anObject, propertyName: _p, oldValue: _oldValue, newValue: aValue, beforeState: _beforeState});
+		                            if(_oldValue != aValue){
+			                            var _beforeState = null;
+			                            if(aOnBeforeChange)
+			                                _beforeState = aOnBeforeChange(anObject, {source: anObject, propertyName: _p, oldValue: _oldValue, newValue: aValue});
+			                            container[_p] = aValue;
+			                            aOnChange(anObject, {source: anObject, propertyName: _p, oldValue: _oldValue, newValue: aValue, beforeState: _beforeState});
+		                            }
 		                        }
 		                    });
 		                })();
