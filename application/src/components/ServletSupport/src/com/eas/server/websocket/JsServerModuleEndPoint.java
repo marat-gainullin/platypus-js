@@ -8,6 +8,7 @@ import com.eas.client.ClientConstants;
 import com.eas.client.DatabasesClient;
 import com.eas.client.login.AnonymousPlatypusPrincipal;
 import com.eas.client.login.PlatypusPrincipal;
+import com.eas.client.scripts.ScriptedResource;
 import com.eas.script.Scripts;
 import com.eas.server.PlatypusServerCore;
 import com.eas.server.SessionManager;
@@ -158,12 +159,17 @@ public class JsServerModuleEndPoint {
         moduleName = aModuleName;
         PlatypusServerCore platypusCore = lookupPlaypusServerCore();
         in(platypusCore, websocketSession, (com.eas.server.Session aSession) -> {
-            Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "Container OnOpen {0}.", aSession.getId());
-            platypusCore.executeMethod(moduleName, WS_ON_OPEN, new Object[]{new WebSocketServerSession(websocketSession)}, true, (Object aResult) -> {
-                Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "{0} method of {1} module called successfully.", new Object[]{WS_ON_OPEN, aModuleName});
-            }, (Exception ex) -> {
+            try {
+                Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "Container OnOpen {0}.", aSession.getId());
+                ScriptedResource._require(new String[]{"servlet-support/web-socket-server-session"}, null, Scripts.getSpace());
+                platypusCore.executeMethod(moduleName, WS_ON_OPEN, new Object[]{new WebSocketServerSession(websocketSession)}, true, (Object aResult) -> {
+                    Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "{0} method of {1} module called successfully.", new Object[]{WS_ON_OPEN, aModuleName});
+                }, (Exception ex) -> {
+                    Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.SEVERE, null, ex);
+                });
+            } catch (Exception ex) {
                 Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.SEVERE, null, ex);
-            });
+            }
         });
     }
 
@@ -174,6 +180,7 @@ public class JsServerModuleEndPoint {
             Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "Container OnMessage {0}.", aSession.getId());
             JSObject messageEvent = Scripts.getSpace().makeObj();
             messageEvent.setMember("data", aData);
+            messageEvent.setMember("id", websocketSession.getId());
             platypusCore.executeMethod(moduleName, WS_ON_MESSAGE, new Object[]{messageEvent}, true, (Object aResult) -> {
                 Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "{0} method of {1} module called successfully.", new Object[]{WS_ON_MESSAGE, moduleName});
             }, (Exception ex) -> {
@@ -189,6 +196,7 @@ public class JsServerModuleEndPoint {
             Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "Container OnError {0}.", aSession.getId());
             JSObject errorEvent = Scripts.getSpace().makeObj();
             errorEvent.setMember("message", aError.getMessage());
+            errorEvent.setMember("id", websocketSession.getId());
             platypusCore.executeMethod(moduleName, WS_ON_ERROR, new Object[]{errorEvent}, true, (Object aResult) -> {
                 Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "{0} method of {1} module called successfully.", new Object[]{WS_ON_ERROR, moduleName});
             }, (Exception ex) -> {
@@ -206,6 +214,7 @@ public class JsServerModuleEndPoint {
             closeEvent.setMember("wasClean", true);
             closeEvent.setMember("code", CloseReason.CloseCodes.NORMAL_CLOSURE.getCode());
             closeEvent.setMember("reason", "");
+            closeEvent.setMember("id", websocketSession.getId());
             platypusCore.executeMethod(moduleName, WS_ON_CLOSE, new Object[]{closeEvent}, true, (Object aResult) -> {
                 com.eas.server.Session session = SessionManager.Singleton.instance.remove(wasPlatypusSessionId);
                 Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.INFO, "WebSocket platypus session closed. Session id: {0}", session.getId());
