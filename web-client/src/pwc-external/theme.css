@@ -1,21 +1,21 @@
 body, table td, select {
-  font-family: Arial Unicode MS, Arial, sans-serif;
-  font-size: small;
+    font-family: Arial Unicode MS, Arial, sans-serif;
+    font-size: small;
 }
 pre {
-  font-family: "courier new", courier;
-  font-size: small;
+    font-family: "courier new", courier;
+    font-size: small;
 }
 body {
-  color: black;
-  margin: 0px;
-  border: 0px;
-  padding: 0px;
-  background: #fff;
-  direction: ltr;
+    color: black;
+    margin: 0px;
+    border: 0px;
+    padding: 0px;
+    background: #fff;
+    direction: ltr;
 }
 a, a:visited, a:hover {
-  color: #0000AA;
+    color: #0000AA;
 }
 
 .btn {
@@ -727,9 +727,11 @@ input[type="search"] {
     padding: 0px;
     margin: 0px;
     color: #333;
+    mix-blend-mode: difference;
 }
 
 .gwt-ProgressBar-text-secondHalf{
+    mix-blend-mode: difference;
     color: white;
 }
 
@@ -826,11 +828,7 @@ input[type="search"] {
 
 .menu-item:hover, .menu-item:focus, .menu-item-selected:hover, .menu-item-selected:focus{
     text-shadow: 0 1px rgba(0,0,0,0.4);
-    background: #3e91ee;
-    background-image: linear-gradient(to bottom, #5ea8fc, #2e86e7);
-    box-shadow: inset 0 1px rgba(255,255,255,0.2),0 1px #1e6abe,0 0 0 1px #277edd;
     color: white;
-    border-radius: 4px;
 }
 
 .menu-left-check-radio{
@@ -1146,7 +1144,6 @@ select.form-control{
 
 .tabs-tab-selected {
     cursor: default;
-    background-image: linear-gradient(to bottom, #49a4fc, #208be7);
     text-shadow: 0 1px rgba(0, 0, 0, 0.3);
     color: white;
 }
@@ -1201,17 +1198,11 @@ select.form-control{
     position: relative;
     line-height: 20px;
     overflow: hidden;
-    font-weight:bold;
     color:white;
     text-shadow:0 1px rgba(0,0,0,0.2);
-    background:#2c92ed;
     border-width:1px 1px 1px 0;
     border-style:solid;
     border-color:#1d87e2 #187ed9 #1670c1;
-    background-image:-webkit-linear-gradient(top, #49a4fc, #208be7);
-    background-image:-moz-linear-gradient(top, #49a4fc, #208be7);
-    background-image:-o-linear-gradient(top, #49a4fc, #208be7);
-    background-image:linear-gradient(to bottom, #49a4fc, #208be7);
     -webkit-box-shadow:inset 0 1px rgba(255,255,255,0.2),inset 0 0 0 1px rgba(255,255,255,0.06),0 1px rgba(0,0,0,0.04);
     box-shadow:inset 0 1px rgba(255,255,255,0.2),inset 0 0 0 1px rgba(255,255,255,0.06),0 1px rgba(0,0,0,0.04)
 }
@@ -1227,7 +1218,6 @@ select.form-control{
 }
 
 .grid-columns-chevron{
-    /*    position: absolute;*/
     right: 1px;
     top: 1px;
     width: 13px;
@@ -1278,14 +1268,24 @@ select.form-control{
     cursor: pointer;
     color:#6b6a5a;
     text-shadow:0 1px rgba(255,255,255,0.5);
-    background:#fcf0b0;
-    border:1px solid #d7cd89;
-    border-bottom-color:#cec986;
-    border-radius:3px;
-    background-image:-webkit-linear-gradient(top, #fef5bd,#faeca4);
-    background-image:-moz-linear-gradient(top, #fef5bd,#faeca4);
-    background-image:-o-linear-gradient(top, #fef5bd,#faeca4);
-    background-image:linear-gradient(to bottom, #fef5bd,#faeca4);
+    background: #95a5a6;
+    background-image: linear-gradient(to bottom, #95a5a6,#7f8c8d);
+}
+
+.window-caption-text {
+    color: white;
+    font-weight: 400;
+    font-size: 16px;
+    font-family: sans-serif;
+    text-shadow: 2px 1px 2px rgba(0,0,0,0.3);
+}
+
+.window-caption-tools {
+
+}
+
+.window-caption-text, .window-caption-tools {
+    padding: 10px;
 }
 
 .window-caption-active{
@@ -1293,46 +1293,32 @@ select.form-control{
     cursor: pointer;
     color:#526e4f;
     text-shadow:0 1px rgba(255,255,255,0.5);
-    background:#bff1bc;
-    border:1px solid;
-    border-color:#98cf9f #98cf9f #8ec397;
-    border-radius:3px;
-    background-image:-webkit-linear-gradient(top, #cef4d0,#b2eeaa);
-    background-image:-moz-linear-gradient(top, #cef4d0,#b2eeaa);
-    background-image:-o-linear-gradient(top, #cef4d0,#b2eeaa);
-    background-image:linear-gradient(to bottom, #cef4d0,#b2eeaa);
 }
 
-.window-tool{
-    height: 16px;
-    width: 16px;
+.window-tool {
+    font-family: Flaticon;
+    font-size: 12px;
+    color: white;
+    opacity: 1;
+    text-shadow: 2px 1px 2px rgba(0, 0, 0, 0.3);
+    padding-left: 4px;
+    padding-right: 4px;
 }
 
-.window-tool-minimize{
-    background-image: url(window-tool-minimize.png);
-    background-repeat: no-repeat;
-    background-position-y: 7px;
-    opacity: 0.45;
+.window-tool-minimize:before {
+    content: "\e002";
 }
 
-.window-tool-maximize{
-    background-image: url(window-tool-maximize.png);
-    background-repeat: no-repeat;
-    background-position-x: 0px;
-    opacity: 0.6;
+.window-tool-maximize:before {
+    content: "\e003";
 }
 
-.window-tool-restore{
-    background-image: url(window-tool-restore.png);
-    background-repeat: no-repeat;
-    background-position-x: 0px;
-    opacity: 0.6;
+.window-tool-restore:before {
+    content: "\e005";
 }
 
-.window-tool-close{
-    background-image: url(window-tool-close.png);
-    background-repeat: no-repeat;
-    background-position-x: 0px;
+.window-tool-close:before {
+    content: "\e001";
 }
 
 .window-content{
@@ -1340,18 +1326,10 @@ select.form-control{
     background-color: white;
 }
 
-.content-decor{
-    border: 1px solid #d7cd89;
-    border-bottom-color: #cec986;
+.content-decor, .content-decor-active{
     border-radius: 3px;
-}
-
-.content-decor-active{
-    border-width: 1px;
-    border-style: solid;
-    border-color: #98cf9f #98cf9f #8ec397 #8ec397;
-    border-radius: 3px;
-    /*    box-shadow: -1px -1px 10px 1px #a5e0ac, 1px 2px 4px #8ec397;*/
+    box-shadow: 3px;
+    box-shadow: 3px 3px 3px 3px rgba(0, 0, 0, 0.1);
 }
 
 .vertical-decor{
@@ -1432,6 +1410,10 @@ select.form-control{
 }
 
 .south-east-decor-active{
+}
+
+.window-caption-active, .tabs-tab-selected, .grid-column-header, .menu-item:hover, .menu-item:focus, .menu-item-selected:hover, .menu-item-selected:focus  {
+    background-image: linear-gradient(to bottom, #399adc, #2d8bc9);
 }
 
 .editor-bold, .editor-italic, .editor-underline, .editor-subscript, .editor-superscript, .editor-align-left, .editor-align-center, .editor-align-right, .editor-background-color, .editor-foreground-color, .editor-strike-through, .editor-indent-right, .editor-indent-left, .editor-horisontal-rule, .editor-ordered-list, .editor-unordered-list, .editor-insert-image, .editor-create-link, .editor-delete-link, .editor-remove-format, .time-picker-up, .time-picker-down, .time-picker-button, .date-picker-button  {
@@ -1547,6 +1529,7 @@ select.form-control{
     font-size: large;
     font-weight: bold;
 }
+
 .time-picker-text{
     border-width: 1px;
     border-radius: 5px;
@@ -1555,6 +1538,7 @@ select.form-control{
     padding:2px;
     box-sizing:border-box;
 }
+
 .time-picker-text:hover{
     border-style: inset;
     padding: 1px;
@@ -1567,4 +1551,3 @@ select.form-control{
     border-radius: 2px;
     box-sizing:border-box;
 }
-

@@ -35,8 +35,6 @@ public class ToolsCaption extends FlowPanel implements HasHTML {
 
 	protected HTML label = new HTML();
 	protected ImageResource icon;
-	protected SimplePanel anchor = new SimplePanel();
-	protected SimplePanel anchorWrapper = new SimplePanel(anchor);
 	protected Panel tools = new FlowPanel();
 	protected SimplePanel btnMinimize = new SimplePanel();
 	protected SimplePanel btnMaximize = new SimplePanel();
@@ -57,7 +55,6 @@ public class ToolsCaption extends FlowPanel implements HasHTML {
 		btnClose.getElement().addClassName(WINDOW_TOOL_CLASS_NAME + "-close");
 		for (Widget w : new Widget[] { btnMinimize, btnMaximize, btnRestore, btnClose }) {
 			w.getElement().getStyle().setMargin(0, Style.Unit.PX);
-			w.getElement().getStyle().setPadding(0, Style.Unit.PX);
 			w.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 			w.getElement().addClassName(WINDOW_TOOL_CLASS_NAME);
 		}
@@ -65,30 +62,16 @@ public class ToolsCaption extends FlowPanel implements HasHTML {
 		label.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 		label.getElement().getStyle().setPosition(Style.Position.RELATIVE);
 		label.getElement().getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
-		label.getElement().getStyle().setProperty("lineHeight", "initial");
-		label.getElement().setAttribute("class", "");// to implicitly remove gwt-HTML class
-		
-		anchor.getElement().addClassName(WINDOW_TOOL_CLASS_NAME);
-		anchor.getElement().getStyle().setPadding(0, Style.Unit.PX);
-		anchor.getElement().getStyle().setMargin(0, Style.Unit.PX);
-		anchor.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-		
-		anchorWrapper.getElement().getStyle().setLineHeight(0, Style.Unit.PX);
-		anchorWrapper.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-		anchorWrapper.getElement().getStyle().setVisibility(Style.Visibility.HIDDEN);
-		anchorWrapper.getElement().getStyle().setPosition(Style.Position.RELATIVE);
-		anchorWrapper.getElement().getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);		
+		label.setStyleName("window-caption-text");// to implicitly remove gwt-HTML class
 		
 		tools.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-		tools.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
-		tools.getElement().getStyle().setRight(0, Style.Unit.PX);
-		tools.getElement().getStyle().setLineHeight(0, Style.Unit.PX);
-
+		tools.getElement().getStyle().setFloat(Style.Float.RIGHT);
+		tools.getElement().getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
+		tools.setStyleName("window-caption-tools");
+		
 		getElement().getStyle().setPosition(Style.Position.RELATIVE);
-		getElement().getStyle().setLineHeight(0, Style.Unit.PX);
 		
 		add(label);
-		add(anchorWrapper);
 		add(tools);
 		tools.add(btnMinimize);
 		tools.add(btnMaximize);
