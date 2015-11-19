@@ -52,16 +52,16 @@ import java.util.List;
  * </ul>
  * </p>
  *
- * <h3>CSS Style Rules</h3> <ul class='css'> <li>.gwt-SliderBar-shell { primary
- * style }</li> <li>.gwt-SliderBar-shell-focused { primary style when focused
+ * <h3>CSS Style Rules</h3> <ul class='css'> <li>.slider-shell { primary
+ * style }</li> <li>.slider-shell-focused { primary style when focused
  * }</li>
- * <li>.gwt-SliderBar-shell gwt-SliderBar-line { the line that the knob moves
- * along }</li> <li>.gwt-SliderBar-shell gwt-SliderBar-line-sliding { the line
- * that the knob moves along when sliding }</li> <li>.gwt-SliderBar-shell
- * .gwt-SliderBar-knob { the sliding knob }</li> <li>.gwt-SliderBar-shell
- * .gwt-SliderBar-knob-sliding { the sliding knob when sliding }</li> <li>
- * .gwt-SliderBar-shell .gwt-SliderBar-tick { the ticks along the line }</li>
- * <li>.gwt-SliderBar-shell .gwt-SliderBar-label { the text labels along the
+ * <li>.slider-shell slider-line { the line that the knob moves
+ * along }</li> <li>.slider-shell slider-line-sliding { the line
+ * that the knob moves along when sliding }</li> <li>.slider-shell
+ * .slider-knob { the sliding knob }</li> <li>.slider-shell
+ * .slider-knob-sliding { the sliding knob when sliding }</li> <li>
+ * .slider-shell .slider-tick { the ticks along the line }</li>
+ * <li>.slider-shell .slider-label { the text labels along the
  * line }</li> </ul>
  */
 public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Double>, HasEnabled {
@@ -271,26 +271,26 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
         // default preferred size
         getElement().getStyle().setWidth(150, Style.Unit.PX);
         getElement().getStyle().setHeight(35, Style.Unit.PX);
-        setStyleName("gwt-SliderBar-shell");
+        setStyleName("slider-shell");
 
         // Create the line
         lineElement = DOM.createDiv();
         getElement().appendChild(lineElement);
         lineElement.getStyle().setPosition(Style.Position.ABSOLUTE);
-        lineElement.setClassName("gwt-SliderBar-line");
+        lineElement.setClassName("slider-line");
         coverElement = DOM.createDiv();
         lineElement.appendChild(coverElement);
         coverElement.getStyle().setPosition(Style.Position.ABSOLUTE);
         coverElement.getStyle().setLeft(0, Style.Unit.PX);
         coverElement.getStyle().setTop(0, Style.Unit.PX);
         coverElement.getStyle().setBottom(0, Style.Unit.PX);
-        coverElement.setClassName("gwt-SliderBar-line-before-knob");
+        coverElement.setClassName("slider-line-before-knob");
 
         // Create the knob
         knobElement.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
         knobElement.getStyle().setPosition(Style.Position.ABSOLUTE);
-        knobElement.setClassName("gwt-SliderBar-knob");
-        knobElement.addClassName("gwt-SliderBar-knob-enabled");
+        knobElement.setClassName("slider-knob btn btn-default");
+        knobElement.addClassName("slider-knob-enabled");
         getElement().appendChild(knobElement);
 
         sinkEvents(Event.MOUSEEVENTS | Event.KEYEVENTS | Event.FOCUSEVENTS);
@@ -504,14 +504,14 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     public void onResize() {
         // Center the line in the shell
         int width = getElement().getClientWidth();
-        int height = getElement().getClientHeight();
+        //int height = getElement().getClientHeight();
         int lineWidth = lineElement.getOffsetWidth();
-        int lineHeight = lineElement.getOffsetHeight();
+        //int lineHeight = lineElement.getOffsetHeight();
         lineLeftOffset = (width / 2) - (lineWidth / 2);
-        lineElement.getStyle().setLeft(lineLeftOffset, Style.Unit.PX);
-        lineElement.getStyle().setTop((height - lineHeight) / 2, Style.Unit.PX);
-        int knobHeight = knobElement.getOffsetHeight();
-        knobElement.getStyle().setTop((height - knobHeight) / 2, Style.Unit.PX);
+        //lineElement.getStyle().setLeft(lineLeftOffset, Style.Unit.PX);
+        //lineElement.getStyle().setTop((height - lineHeight) / 2, Style.Unit.PX);
+        //int knobHeight = knobElement.getOffsetHeight();
+        //knobElement.getStyle().setTop((height - knobHeight) / 2, Style.Unit.PX);
         // Draw the other components
         drawLabels();
         drawTicks();
@@ -579,15 +579,15 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     public void setEnabled(boolean aValue) {
         enabled = aValue;
         if (aValue) {
-            knobElement.removeClassName("gwt-SliderBar-knob-disabled");
-            lineElement.removeClassName("gwt-SliderBar-line-disabled");
-            knobElement.addClassName("gwt-SliderBar-knob-enabled");
-            lineElement.addClassName("gwt-SliderBar-line-enabled");
+            knobElement.removeClassName("slider-knob-disabled");
+            lineElement.removeClassName("slider-line-disabled");
+            knobElement.addClassName("slider-knob-enabled");
+            lineElement.addClassName("slider-line-enabled");
         } else {
-            knobElement.removeClassName("gwt-SliderBar-knob-enabled");
-            lineElement.removeClassName("gwt-SliderBar-line-enabled");
-            knobElement.addClassName("gwt-SliderBar-knob-disabled");
-            lineElement.addClassName("gwt-SliderBar-line-disabled");
+            knobElement.removeClassName("slider-knob-enabled");
+            lineElement.removeClassName("slider-line-enabled");
+            knobElement.addClassName("slider-knob-disabled");
+            lineElement.addClassName("slider-line-disabled");
         }
         redraw();
     }
@@ -768,18 +768,18 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                         label = labelElements.get(i);
                     } else { // Create the new label
                         label = DOM.createDiv();
-                        label.addClassName("gwt-SliderBar-label");
+                        label.addClassName("slider-label");
                         label.getStyle().setPosition(Style.Position.ABSOLUTE);
                         label.getStyle().setDisplay(Style.Display.NONE);
                         getElement().appendChild(label);
                         labelElements.add(label);
                     }
                     if (enabled) {
-                        label.removeClassName("gwt-SliderBar-label-disabled");
-                        label.addClassName("gwt-SliderBar-label-enabled");
+                        label.removeClassName("slider-label-disabled");
+                        label.addClassName("slider-label-enabled");
                     } else {
-                        label.removeClassName("gwt-SliderBar-label-enabled");
-                        label.addClassName("gwt-SliderBar-label-disabled");
+                        label.removeClassName("slider-label-enabled");
+                        label.addClassName("slider-label-disabled");
                     }
 
                     // Set the label text
@@ -829,7 +829,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                         tick = tickElements.get(i);
                     } else { // Create the new tick
                         tick = DOM.createDiv();
-                        tick.addClassName("gwt-SliderBar-tick");
+                        tick.addClassName("slider-tick");
                         tick.getStyle().setPosition(Style.Position.ABSOLUTE);
                         tick.getStyle().setDisplay(Style.Display.NONE);
                         DOM.appendChild(getElement(), tick);
@@ -846,11 +846,11 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                     tick.getStyle().setLeft(tickLeftOffset, Style.Unit.PX);
                     tick.getStyle().setVisibility(Style.Visibility.VISIBLE);
                     if (enabled) {
-                        tick.removeClassName("gwt-SliderBar-tick-disabled");
-                        tick.addClassName("gwt-SliderBar-tick-enabled");
+                        tick.removeClassName("slider-tick-disabled");
+                        tick.addClassName("slider-tick-enabled");
                     } else {
-                        tick.removeClassName("gwt-SliderBar-tick-enabled");
-                        tick.addClassName("gwt-SliderBar-tick-disabled");
+                        tick.removeClassName("slider-tick-enabled");
+                        tick.addClassName("slider-tick-disabled");
                     }
                 }
 
@@ -905,8 +905,8 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      */
     private void startSliding(boolean highlight) {
         if (highlight) {
-            lineElement.addClassName("gwt-SliderBar-line-sliding");
-            knobElement.addClassName("gwt-SliderBar-knob-sliding");
+            lineElement.addClassName("slider-line-sliding");
+            knobElement.addClassName("slider-knob-sliding");
         }
     }
 
@@ -918,8 +918,8 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      */
     private void stopSliding(boolean unhighlight) {
         if (unhighlight) {
-            lineElement.removeClassName("gwt-SliderBar-line-sliding");
-            knobElement.removeClassName("gwt-SliderBar-knob-sliding");
+            lineElement.removeClassName("slider-line-sliding");
+            knobElement.removeClassName("slider-knob-sliding");
         }
     }
 
