@@ -34,6 +34,7 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
@@ -177,7 +178,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 	public void setVisible(boolean aValue) {
 		if (visible != aValue) {
 			visible = aValue;
-			((TreeExpandableCell<JavaScriptObject, Object>) getCell()).setVisible(aValue);			
+			((TreeExpandableCell<JavaScriptObject, Object>) getCell()).setVisible(aValue);
 			if (grid != null) {
 				if (visible) {
 					grid.showColumn(this);
@@ -192,7 +193,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 	public void updateVisible(boolean aValue) {
 		if (visible != aValue) {
 			visible = aValue;
-			((TreeExpandableCell<JavaScriptObject, Object>) getCell()).setVisible(aValue);			
+			((TreeExpandableCell<JavaScriptObject, Object>) getCell()).setVisible(aValue);
 		}
 	}
 
@@ -478,19 +479,13 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 		aCell.setDisplayCallback(new Runnable() {
 			@Override
 			public void run() {
-				Element padded = Document.get().getElementById(aTargetElementId);
-				if (padded != null) {
-					aCell.styleToElementBackgroundToTd(padded);
-					int paddingLeft = RenderedEditorCell.CELL_PADDING;
-					ImageResource icon = aCell.getIcon();
-					if (icon != null) {
-						paddingLeft += icon.getWidth();
-					}
-					padded.getStyle().setPaddingLeft(paddingLeft, Style.Unit.PX);
+				Element identifiedTextSection = Document.get().getElementById(aTargetElementId);
+				if (identifiedTextSection != null) {
+					aCell.styleToElementBackgroundToTd(identifiedTextSection);
 					String toRender = aCell.getDisplay();
 					if (toRender == null)
 						toRender = "&#160;";
-					padded.setInnerSafeHtml(SafeHtmlUtils.fromTrustedString(toRender));
+					identifiedTextSection.setInnerSafeHtml(SafeHtmlUtils.fromTrustedString(toRender));
 				}
 			}
 		});
@@ -501,10 +496,16 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 
 			@Override
 			public void run() {
-				Element padded = Document.get().getElementById(aTargetElementId);
-				if (padded != null) {
-					int paddingLeft = RenderedEditorCell.CELL_PADDING + (aCell.getIcon() != null ? aCell.getIcon().getWidth() : 0);
-					padded.getStyle().setPaddingLeft(paddingLeft, Style.Unit.PX);
+				Element identifiedTextSection = Document.get().getElementById(aTargetElementId);
+				if (identifiedTextSection != null) {
+					ImageElement iconSection = (ImageElement) identifiedTextSection.getPreviousSiblingElement();
+					if (iconSection != null) {
+						if (aCell.getIcon() != null) {
+							iconSection.setSrc(aCell.getIcon().getSafeUri().asString());
+						} else {
+							iconSection.setSrc(null);
+						}
+					}
 				}
 			}
 
@@ -522,17 +523,17 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 			published = aValue;
 		}
 	}
-	
-	public void sort(){
+
+	public void sort() {
 		grid.addSort(this, true);
 	}
-	
-	public void sortDesc(){
+
+	public void sortDesc() {
 		grid.addSort(this, false);
 	}
-	
-	public void unsort(){
+
+	public void unsort() {
 		grid.unsortColumn(this);
 	}
-	
+
 }

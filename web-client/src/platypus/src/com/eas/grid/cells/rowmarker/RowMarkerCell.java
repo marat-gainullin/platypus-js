@@ -37,7 +37,6 @@ public abstract class RowMarkerCell extends AbstractCell<Object> {
 		*/		
 		SafeHtmlBuilder content = new SafeHtmlBuilder();
 		content.appendHtmlConstant("<div class=\"" + leftClasses.toString() + "\">&nbsp;</div><div class=\"" + rightClasses.toString() + "\">&nbsp;</div>");
-		RenderedEditorCell.CellsResources.INSTANCE.tablecell().ensureInjected();
-		sb.append(RenderedEditorCell.PaddedCell.INSTANCE.generate("", RenderedEditorCell.CellsResources.INSTANCE.tablecell().padded(), new SafeStylesBuilder().padding(RenderedEditorCell.CELL_PADDING, Style.Unit.PX).toSafeStyles(), content.toSafeHtml()));
+		sb.append(RenderedEditorCell.PaddedCell.INSTANCE.generate(new SafeStylesBuilder().toSafeStyles(), null, "", content.toSafeHtml()));
 	}
 }

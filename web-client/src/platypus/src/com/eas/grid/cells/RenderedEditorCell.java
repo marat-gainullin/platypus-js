@@ -15,15 +15,13 @@ import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.resources.client.ClientBundle;
-import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.safecss.shared.SafeStyles;
 import com.google.gwt.safecss.shared.SafeStylesBuilder;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Widget;
@@ -34,27 +32,12 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class RenderedEditorCell<T> extends WidgetEditorCell<T> {
 
-	public interface CellsResources extends ClientBundle {
-
-		public static CellsResources INSTANCE = GWT.create(CellsResources.class);
-
-		public interface CellStyles extends CssResource {
-
-			public String padded();
-
-		}
-
-		public CellStyles tablecell();
-	}
-
-	public static int CELL_PADDING = 2;
-
 	public interface PaddedCell extends SafeHtmlTemplates {
 
 		public static PaddedCell INSTANCE = GWT.create(PaddedCell.class);
 
-		@Template("<div id=\"{0}\" class=\"{1}\" style=\"{2}\">{3}</div>")
-		public SafeHtml generate(String aId, String aCellClass, SafeStyles aStyle, SafeHtml aContent);
+		@Template("<div class=\"grid-cell-anchor\"></div><img class=\"grid-cell-image\" style=\"{0}\" src=\"{1}\"></img><div id=\"{2}\" class=\"grid-cell-text\" style=\"{0}\">{3}</div>")
+		public SafeHtml generate(SafeStyles aStyle, SafeUri aImgSrc, String aId, SafeHtml aContent);
 	}
 
 	public interface EditorCloser {
@@ -97,7 +80,6 @@ public class RenderedEditorCell<T> extends WidgetEditorCell<T> {
 
 	@Override
 	public void render(final Context context, final T value, SafeHtmlBuilder sb) {
-		CellsResources.INSTANCE.tablecell().ensureInjected();
 		String viewDataId = "";
 		if (isEditing(context, null, value)) {
 			final ViewData<T> viewData = getViewData(context.getKey());
@@ -135,8 +117,7 @@ public class RenderedEditorCell<T> extends WidgetEditorCell<T> {
 		if (renderer == null || !renderer.render(context, viewDataId, value, sb)) {
 			SafeHtmlBuilder content = new SafeHtmlBuilder();
 			renderCell(context, value, content);
-			sb.append(PaddedCell.INSTANCE.generate(viewDataId, CellsResources.INSTANCE.tablecell().padded(), new SafeStylesBuilder().padding(CELL_PADDING, Style.Unit.PX).toSafeStyles(),
-			        content.toSafeHtml()));
+			sb.append(PaddedCell.INSTANCE.generate(new SafeStylesBuilder().toSafeStyles(), null, viewDataId, content.toSafeHtml()));
 		}
 	}
 

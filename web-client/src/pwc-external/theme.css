@@ -1152,16 +1152,22 @@ select.form-control{
     outline: none;
 }
 
+.treegrid-expanded-cell, .treegrid-collapased-cell{
+    padding-left: 24px;
+}
+
 .treegrid-expanded-cell{
     background-image: url(expanded.png);
     background-repeat: no-repeat;
     background-position-x: 0px;
+    background-position-y: center;
 }
 
 .treegrid-collapased-cell{
     background-image: url(collapsed.png);
     background-repeat: no-repeat;
     background-position-x: 0px;
+    background-position-y: center;
 }
 
 .grid-shell{
@@ -1180,6 +1186,34 @@ select.form-control{
 .grid-focused-cell {
     outline: black solid 2px;
     outline-offset: -2px;
+}
+
+.grid-cell-anchor{
+    display: inline-block;
+    height: 100%;
+    vertical-align: middle;
+}
+
+.grid-cell-image{
+    zoom: 1;
+    position: relative;
+    box-sizing: border-box;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+    padding-top: 2px;
+    padding-right: 7px;
+}
+
+.grid-cell-text{
+    zoom: 1;
+    position: relative;
+    box-sizing: border-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+    vertical-align: middle;
 }
 
 .grid-selected-row{
