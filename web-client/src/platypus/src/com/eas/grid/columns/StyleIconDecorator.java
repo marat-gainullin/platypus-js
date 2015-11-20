@@ -29,7 +29,10 @@ public class StyleIconDecorator {
 		} else {
 			decorId = Document.get().createUniqueId();
 		}
-		sb.append(RenderedEditorCell.PaddedCell.INSTANCE.generate(stb.toSafeStyles(), imgSrc, decorId, toDecorate));
+		if (imgSrc != null)
+			sb.append(RenderedEditorCell.PaddedCell.INSTANCE.generate(stb.toSafeStyles(), imgSrc, decorId, toDecorate));
+		else
+			sb.append(RenderedEditorCell.PaddedCell.INSTANCE.generate(stb.toSafeStyles(), decorId, toDecorate));
 		return decorId;
 	}
 }

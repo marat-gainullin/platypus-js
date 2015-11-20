@@ -38,6 +38,9 @@ public class RenderedEditorCell<T> extends WidgetEditorCell<T> {
 
 		@Template("<div class=\"grid-cell-anchor\"></div><img class=\"grid-cell-image\" style=\"{0}\" src=\"{1}\"></img><div id=\"{2}\" class=\"grid-cell-text\" style=\"{0}\">{3}</div>")
 		public SafeHtml generate(SafeStyles aStyle, SafeUri aImgSrc, String aId, SafeHtml aContent);
+		
+		@Template("<div class=\"grid-cell-anchor\"></div><img class=\"grid-cell-image\" style=\"{0}\"></img><div id=\"{1}\" class=\"grid-cell-text\" style=\"{0}\">{2}</div>")
+		public SafeHtml generate(SafeStyles aStyle, String aId, SafeHtml aContent);
 	}
 
 	public interface EditorCloser {
@@ -117,7 +120,7 @@ public class RenderedEditorCell<T> extends WidgetEditorCell<T> {
 		if (renderer == null || !renderer.render(context, viewDataId, value, sb)) {
 			SafeHtmlBuilder content = new SafeHtmlBuilder();
 			renderCell(context, value, content);
-			sb.append(PaddedCell.INSTANCE.generate(new SafeStylesBuilder().toSafeStyles(), null, viewDataId, content.toSafeHtml()));
+			sb.append(PaddedCell.INSTANCE.generate(new SafeStylesBuilder().toSafeStyles(), viewDataId, content.toSafeHtml()));
 		}
 	}
 

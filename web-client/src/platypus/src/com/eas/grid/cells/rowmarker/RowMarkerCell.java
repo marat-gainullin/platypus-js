@@ -1,11 +1,8 @@
 package com.eas.grid.cells.rowmarker;
 
 import com.eas.core.Utils.JsObject;
-import com.eas.grid.cells.RenderedEditorCell;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.safecss.shared.SafeStylesBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 
 public abstract class RowMarkerCell extends AbstractCell<Object> {
@@ -20,23 +17,18 @@ public abstract class RowMarkerCell extends AbstractCell<Object> {
 	
 	@Override
 	public void render(Context context, Object value, SafeHtmlBuilder sb) {
-		RowMarkerResources.INSTANCE.style().ensureInjected();
-		StringBuilder leftClasses = new StringBuilder();
-		leftClasses.append(RowMarkerResources.INSTANCE.style().rowMarkerLeft());
-		StringBuilder rightClasses = new StringBuilder();
-		rightClasses.append(RowMarkerResources.INSTANCE.style().rowMarkerRight());
+		SafeHtmlBuilder content = new SafeHtmlBuilder();
+		content.appendHtmlConstant("<div class=\"grid-cell-anchor\"></div>");
 		JavaScriptObject rows = getRowsData();
 		boolean currentRow = rows != null && rows.<JsObject>cast().getJs(getCursorProperty()) == value;
 		if (currentRow)
-			rightClasses.append(" ").append(RowMarkerResources.INSTANCE.style().rowMarkerCurrent());
+			content.appendHtmlConstant("<div class=\"grid-marker-cell-cursor\"></div>");
 		/*
 		if (value.isInserted())
-			leftClasses.append(" ").append(RowMarkerResources.INSTANCE.style().rowMarkerNew());
+			content.appendHtmlConstant("<div class=\"grid-marker-inserted\"></div>");
 		else if (value.isUpdated())
-			leftClasses.append(" ").append(RowMarkerResources.INSTANCE.style().rowMarkerEdited());
+			content.appendHtmlConstant("<div class=\"grid-marker-cell-dirty\"></div>");
 		*/		
-		SafeHtmlBuilder content = new SafeHtmlBuilder();
-		content.appendHtmlConstant("<div class=\"" + leftClasses.toString() + "\">&nbsp;</div><div class=\"" + rightClasses.toString() + "\">&nbsp;</div>");
-		sb.append(RenderedEditorCell.PaddedCell.INSTANCE.generate(new SafeStylesBuilder().toSafeStyles(), null, "", content.toSafeHtml()));
+		sb.append(content.toSafeHtml());
 	}
 }
