@@ -61,7 +61,9 @@ public interface WindowUI extends HasOpenHandlers<WindowUI>, HasClosedHandlers<W
 
     public boolean isActive();
 
-    public void setActive(boolean aValue);
+    public void activate();
+
+    public void deactivate();
 
     public boolean isUndecorated();
 

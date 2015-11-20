@@ -289,7 +289,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
         // Create the knob
         knobElement.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
         knobElement.getStyle().setPosition(Style.Position.ABSOLUTE);
-        knobElement.setClassName("slider-knob btn btn-default");
+        knobElement.setClassName("slider-knob slider-knob-default");
         knobElement.addClassName("slider-knob-enabled");
         getElement().appendChild(knobElement);
 

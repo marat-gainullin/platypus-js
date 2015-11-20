@@ -76,6 +76,7 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 		}
 		if (decorated instanceof HasDecorations) {
 			HasWidgets container = ((HasDecorations) decorated).getContainer();
+			((Widget)container).addStyleName("decorator");
 			container.add(selectButton);
 			container.add(clearButton);
 			initWidget((Widget) decorated);
@@ -91,15 +92,16 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 			style.setHeight(100, Style.Unit.PCT);
 			style.setWidth(100, Style.Unit.PCT);
 			style.setOutlineStyle(Style.OutlineStyle.NONE);
-			style.setBackgroundColor("inherit");
-			style.setColor("inherit");
 			FlowPanel panel = new FlowPanel();
+			panel.addStyleName("decorator");
 			initWidget(panel);
 			panel.add((Widget) decorated);
 			panel.add(selectButton);
 			panel.add(clearButton);
 		}
 
+		((Widget)decorated).addStyleName("decorator-content");
+		
 		selectButton.getElement().addClassName("decorator-select");
 		selectButton.getElement().getStyle().setDisplay(Style.Display.NONE);
 		selectButton.getElement().getStyle().setTop(0, Style.Unit.PX);

@@ -11,14 +11,13 @@ body {
     margin: 0px;
     border: 0px;
     padding: 0px;
-    background: #fff;
     direction: ltr;
 }
 a, a:visited, a:hover {
     color: #0000AA;
 }
 
-.btn {
+.btn, .slider-knob{
     display: inline-block;
     padding: 6px 12px;
     margin-bottom: 0;
@@ -76,7 +75,7 @@ a.btn.disabled,
 fieldset[disabled] a.btn {
     pointer-events: none;
 }
-.btn-default {
+.btn-default, .slider-knob {
     color: #333;
     background-color: #fff;
     border-color: #ccc;
@@ -727,11 +726,9 @@ input[type="search"] {
     padding: 0px;
     margin: 0px;
     color: #333;
-    mix-blend-mode: difference;
 }
 
 .gwt-ProgressBar-text-secondHalf{
-    mix-blend-mode: difference;
     color: white;
 }
 
@@ -926,6 +923,10 @@ select.form-control{
     padding-bottom: 2px;
 }
 
+.decorator {
+    background-color: white;
+}
+
 .decorator-select:hover{
     opacity: 1;
 }
@@ -1063,7 +1064,6 @@ select.form-control{
 }
 
 .tabs-chevron{
-    background-color: white;
     right: 0px;
     top: 0px;
     bottom: 0px;
@@ -1326,10 +1326,12 @@ select.form-control{
     background-color: white;
 }
 
-.content-decor, .content-decor-active{
+.content-decor{
     border-radius: 3px;
-    box-shadow: 3px;
     box-shadow: 3px 3px 3px 3px rgba(0, 0, 0, 0.1);
+}
+
+.content-decor-active{
 }
 
 .vertical-decor{

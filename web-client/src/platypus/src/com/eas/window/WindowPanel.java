@@ -51,6 +51,8 @@ import com.google.gwt.dom.client.Document;
  */
 public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimation {
 
+	protected static final String ACTIVE_SUFFIX_NAMNE = "active";
+
 	public static class Caption extends HTML {
 
 		public Caption(String aHtml) {
@@ -108,7 +110,7 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 	protected int mouseScreenY;
 	protected int targetScrollLeft;
 	protected int targetScrollTop;
-	
+
 	protected boolean dragged;
 
 	@Override
@@ -175,7 +177,7 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 								event.stopPropagation();
 								int dx = event.getScreenX() - mouseScreenX;
 								int dy = event.getScreenY() - mouseScreenY;
-								if(!dragged && (dx != 0 || dy != 0)){
+								if (!dragged && (dx != 0 || dy != 0)) {
 									dragged = true;
 									beginMoving();
 								}
@@ -193,10 +195,11 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 	@Override
 	protected void decorate() {
 		super.decorate();
+		content.setStyleName("content-decor");
 		if (isActive()) {
-			content.getElement().addClassName("content-decor-active");
+			content.addStyleDependentName(ACTIVE_SUFFIX_NAMNE);
 		} else {
-			content.getElement().addClassName("content-decor");
+			content.removeStyleDependentName(ACTIVE_SUFFIX_NAMNE);
 		}
 		if (captionWidget != null) {
 			captionWidget.getElement().getStyle().clearDisplay();
@@ -437,53 +440,33 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 	}
 
 	@Override
-	public void setActive(boolean aValue) {
-		if (active != aValue) {
-			active = aValue;
-			if (active) {
-				activate();
-			} else {
-				deactivate();
-			}
-		}
-	}
-
 	public void activate() {
-		if (captionWidget != null) {
-			captionWidget.removeStyleName("window-caption");
-			captionWidget.addStyleName("window-caption-active");
-		}
-		Widget[] widgets = new Widget[] { n, s, w, e, ne, nw, se, sw, content };
-		for (Widget _w : widgets) {
-			String sClasses = _w.getElement().getClassName();
-			String[] classes = sClasses.split(" ");
-			for (String className : classes) {
-				if (className.endsWith("-decor")) {
-					_w.getElement().removeClassName(className);
-					_w.getElement().addClassName(className + "-active");
-				}
+		if (!active) {
+			active = true;
+			if (captionWidget != null) {
+				captionWidget.addStyleDependentName(ACTIVE_SUFFIX_NAMNE);
 			}
+			Widget[] widgets = new Widget[] { n, s, w, e, ne, nw, se, sw, content };
+			for (Widget _w : widgets) {
+				_w.addStyleDependentName(ACTIVE_SUFFIX_NAMNE);
+			}
+			ActivateEvent.<WindowUI> fire(this, this);
 		}
-		ActivateEvent.<WindowUI> fire(this, this);
 	}
 
+	@Override
 	public void deactivate() {
-		if (captionWidget != null) {
-			captionWidget.removeStyleName("window-caption-active");
-			captionWidget.addStyleName("window-caption");
-		}
-		Widget[] widgets = new Widget[] { n, s, w, e, ne, nw, se, sw, content };
-		for (Widget _w : widgets) {
-			String sClasses = _w.getElement().getClassName();
-			String[] classes = sClasses.split(" ");
-			for (String className : classes) {
-				if (className.endsWith("-decor-active")) {
-					_w.getElement().removeClassName(className);
-					_w.getElement().addClassName(className.substring(0, className.length() - "-active".length()));
-				}
+		if (active) {
+			active = false;
+			if (captionWidget != null) {
+				captionWidget.removeStyleDependentName(ACTIVE_SUFFIX_NAMNE);
 			}
+			Widget[] widgets = new Widget[] { n, s, w, e, ne, nw, se, sw, content };
+			for (Widget _w : widgets) {
+				_w.removeStyleDependentName(ACTIVE_SUFFIX_NAMNE);
+			}
+			DeactivateEvent.<WindowUI> fire(this, this);
 		}
-		DeactivateEvent.<WindowUI> fire(this, this);
 	}
 
 	public void toFront() {
@@ -503,7 +486,7 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 	 */
 	@Override
 	public void focus() {
-		setActive(true);
+		activate();
 		toFront();
 	}
 

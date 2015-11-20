@@ -16,6 +16,7 @@ public class ModelCheck extends ModelDecoratorBox<Boolean> implements HasActionH
 
 	public ModelCheck() {
 		super(new NullableCheckBox());
+		setStyleName("decorator-check");
 	}
 
 	protected int actionHandlers;

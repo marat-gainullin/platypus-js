@@ -211,7 +211,7 @@ public class DesktopPane extends FlowPanel implements RequiresResize, ProvidesRe
 				public void onActivate(ActivateEvent<WindowUI> anEvent) {
 					for (WindowUI wd : managed) {
 						if (wd != anEvent.getTarget()) {
-							wd.setActive(false);
+							wd.deactivate();
 						}
 					}
 				}

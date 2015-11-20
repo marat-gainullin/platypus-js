@@ -289,7 +289,7 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 					if (w != event.getTarget() && w instanceof PlatypusWindow) {
 						PlatypusWindow pw = (PlatypusWindow) w;
 						if (!(pw.getParent() instanceof DesktopPane)) {
-							w.setActive(false);
+							w.deactivate();
 						}
 					}
 				}
@@ -379,7 +379,6 @@ public class PlatypusWindow extends WindowPanel implements HasPublished {
 			@Override
 			public void onClosed(ClosedEvent<WindowUI> event) {
 				showingForms.remove(formKey);
-				view.removeFromParent();
 				if (windowClosed != null) {
 					try {
 						Utils.executeScriptEventVoid(published, windowClosed, EventsPublisher.publishWindowEvent(event, published));

@@ -232,8 +232,8 @@ public class DraggablePanel extends SimplePanel implements RequiresResize, Provi
 		init();
 	}
 
-	private void init() {
-		styles.ensureInjected();
+	protected void init() {
+		styles.ensureInjected();		
 		super.setWidget(content);
 	}
 	

@@ -187,8 +187,13 @@ public class WindowPopupPanel extends PopupPanel implements WindowUI, RequiresRe
     }
 
     @Override
-    public void setActive(boolean aValue) {
-        window.setActive(aValue);
+    public void activate() {
+        window.activate();
+    }
+
+    @Override
+    public void deactivate() {
+        window.deactivate();
     }
 
     @Override
