@@ -156,7 +156,7 @@ public class ScriptedResource {
     public static Object _load(final String aResourceName, String aCalledFromFile, Scripts.Space aSpace) throws Exception {
         return _load(aResourceName, aCalledFromFile, aSpace, null, null);
     }
-    
+
     public static Object _load(final String aResourceName, String aCalledFromFile, Scripts.Space aSpace, Consumer<Object> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (onSuccess != null) {
             Matcher htppMatcher = httpPattern.matcher(aResourceName);
@@ -691,6 +691,22 @@ public class ScriptedResource {
         });
     }
 
+    private static void notifyModuleLoaded(List<Scripts.Pending> pending) {
+        Scripts.Pending[] pend = pending.toArray(new Scripts.Pending[]{});
+        pending.clear();
+        for (Scripts.Pending p : pend) {
+            p.loaded();
+        }
+    }
+
+    private static void notifyModuleFailed(List<Scripts.Pending> pending, Exception ex) {
+        Scripts.Pending[] pend = pending.toArray(new Scripts.Pending[]{});
+        pending.clear();
+        for (Scripts.Pending p : pend) {
+            p.failed(ex);
+        }
+    }
+
     public static void _require(String[] aScriptsNames, String aCalledFromFile, Scripts.Space aSpace, Set<String> aCyclic, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
         if (aScriptsNames != null && aScriptsNames.length > 0) {
             Path apiPath = Scripts.getAbsoluteApiPath();
@@ -726,7 +742,6 @@ public class ScriptedResource {
                             try {
                                 // sync require may occur while pending
                                 if (!aSpace.getExecuted().contains(scriptOrModuleName)) {
-                                    aSpace.getExecuted().add(scriptOrModuleName);
                                     Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Loaded", checkedScriptOrModuleName(scriptOrModuleName));
                                     Path relativeLocalPath;
                                     if (aLocalFile.startsWith(apiPath)) {
@@ -739,40 +754,27 @@ public class ScriptedResource {
                                     aSpace.exec(relativeLocalPath.toString().replace(File.separator, "/"), aLocalFile.toUri().toURL());
                                     String[] amdDependencies = aSpace.consumeAmdDependencies();
                                     JSObject onDependenciesResolved = aSpace.consumeAmdDefineCallback();
-                                    _require(amdDependencies, null, aSpace, new HashSet<>(), (Void v) -> {
-                                        
-                                        if (onDependenciesResolved != null) {
+                                    if (onDependenciesResolved != null) {
+                                        _require(amdDependencies, null, aSpace, new HashSet<>(), (Void v) -> {
+                                            aSpace.getExecuted().add(scriptOrModuleName);
                                             onDependenciesResolved.call(null, new Object[]{scriptOrModuleName});
-                                        }
-                                        Scripts.Pending[] pend = pending.toArray(new Scripts.Pending[]{});
-                                        pending.clear();
-                                        for (Scripts.Pending p : pend) {
-                                            p.loaded();
-                                        }
-                                    }, (Exception ex) -> {
-                                        Scripts.Pending[] pend = pending.toArray(new Scripts.Pending[]{});
-                                        pending.clear();
-                                        for (Scripts.Pending p : pend) {
-                                            p.failed(ex);
-                                        }
-                                    });
-                                } else {
-                                    Scripts.Pending[] pend = pending.toArray(new Scripts.Pending[]{});
-                                    pending.clear();
-                                    for (Scripts.Pending p : pend) {
-                                        p.loaded();
+                                            notifyModuleLoaded(pending);
+                                        }, (Exception ex) -> {
+                                            notifyModuleFailed(pending, ex);
+                                        });
+                                    } else {
+                                        aSpace.getExecuted().add(scriptOrModuleName);
+                                        notifyModuleLoaded(pending);
                                     }
+                                } else {
+                                    notifyModuleLoaded(pending);
                                 }
                             } catch (Exception ex) {
                                 Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, null, ex);
                             }
                         }, (Exception ex) -> {
                             Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Failed {1}", new Object[]{checkedScriptOrModuleName(scriptOrModuleName), ex.toString()});
-                            Scripts.Pending[] pend = pending.toArray(new Scripts.Pending[]{});
-                            pending.clear();
-                            for (Scripts.Pending p : pend) {
-                                p.failed(ex);
-                            }
+                            notifyModuleFailed(pending, ex);
                         });
                     }
                 }
