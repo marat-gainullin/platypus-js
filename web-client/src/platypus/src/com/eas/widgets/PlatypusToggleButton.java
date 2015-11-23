@@ -289,13 +289,5 @@ public class PlatypusToggleButton extends ImageToggleButton implements RequiresR
 				aWidget.@com.eas.ui.HasPlatypusButtonGroup::mutateButtonGroup(Lcom/eas/ui/ButtonGroup;)(aValue != null ? aValue.unwrap() : null);
 			}
 		});
-		Object.defineProperty(published, "suffix", {
-			get : function() {
-				return aWidget.@com.eas.widgets.PlatypusToggleButton::getStyleSuffix()();
-			},
-			set : function(aValue) {
-				aWidget.@com.eas.widgets.PlatypusToggleButton::setStyleSuffix(Ljava/lang/String;)(aValue);
-			}
-		});
 	}-*/;
 }

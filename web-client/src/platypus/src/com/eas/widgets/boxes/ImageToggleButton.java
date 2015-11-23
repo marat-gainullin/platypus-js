@@ -59,7 +59,7 @@ public class ImageToggleButton extends ImageButton implements HasValue<Boolean>,
         Boolean oldValue = getValue();
         selected = aValue;
         setStyleDependentName("active", selected);
-        setStyleDependentName(styleSuffix, !selected);
+        setStyleDependentName("default", !selected);
         if (fireEvents && !aValue.equals(oldValue)) {
             ValueChangeEvent.fire(this, aValue);
         }

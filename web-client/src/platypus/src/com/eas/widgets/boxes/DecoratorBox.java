@@ -76,7 +76,7 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 		}
 		if (decorated instanceof HasDecorations) {
 			HasWidgets container = ((HasDecorations) decorated).getContainer();
-			((Widget)container).addStyleName("decorator");
+			((Widget) container).addStyleName("decorator");
 			container.add(selectButton);
 			container.add(clearButton);
 			initWidget((Widget) decorated);
@@ -100,8 +100,8 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 			panel.add(clearButton);
 		}
 
-		((Widget)decorated).addStyleName("decorator-content");
-		
+		((Widget) decorated).addStyleName("decorator-content");
+
 		selectButton.getElement().addClassName("decorator-select");
 		selectButton.getElement().getStyle().setDisplay(Style.Display.NONE);
 		selectButton.getElement().getStyle().setTop(0, Style.Unit.PX);
@@ -270,64 +270,6 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 
 	protected abstract void clearValue();
 
-	/*
-	 * public void setWidget(HasValue<T> w) { if (decorated != w) { if
-	 * (changeValueHandler != null) { changeValueHandler.removeHandler(); } if
-	 * (keyDownHandler != null) keyDownHandler.removeHandler(); if (keyUpHandler
-	 * != null) keyUpHandler.removeHandler(); if (keyPressHandler != null)
-	 * keyPressHandler.removeHandler(); if (focusHandler != null)
-	 * focusHandler.removeHandler(); if (blurHandler != null)
-	 * blurHandler.removeHandler(); if (decorated instanceof Widget) { ((Widget)
-	 * decorated).removeFromParent(); } decorated = w; if (decorated != null) {
-	 * changeValueHandler = decorated.addValueChangeHandler(new
-	 * ValueChangeHandler<T>() {
-	 * 
-	 * @Override public void onValueChange(ValueChangeEvent<T> event) {
-	 * recalcClearButton(); fireValueChangeEvent(); } }); if (decorated
-	 * instanceof Widget) { CommonResources.INSTANCE.commons().ensureInjected();
-	 * ((Widget)
-	 * decorated).getElement().addClassName(CommonResources.INSTANCE.commons
-	 * ().borderSized()); Style style = ((Widget)
-	 * decorated).getElement().getStyle(); style.setBorderWidth(0,
-	 * Style.Unit.PX); style.setPadding(0, Style.Unit.PX); style.setMargin(0,
-	 * Style.Unit.PX); style.setPosition(Style.Position.ABSOLUTE);
-	 * style.setDisplay(Style.Display.INLINE_BLOCK); style.setLeft(0,
-	 * Style.Unit.PX); style.setTop(0, Style.Unit.PX); style.setHeight(100,
-	 * Style.Unit.PCT); style.setWidth(100, Style.Unit.PCT);
-	 * style.setOutlineStyle(Style.OutlineStyle.NONE);
-	 * style.setBackgroundColor("inherit"); style.setColor("inherit");
-	 * container.add((Widget) decorated); } if (decorated instanceof
-	 * HasKeyDownHandlers) { keyDownHandler = ((HasKeyDownHandlers)
-	 * decorated).addKeyDownHandler(new KeyDownHandler() {
-	 * 
-	 * @Override public void onKeyDown(KeyDownEvent event) {
-	 * KeyDownEvent.fireNativeEvent(event.getNativeEvent(), DecoratorBox.this);
-	 * } }); } if (decorated instanceof HasKeyUpHandlers) { keyUpHandler =
-	 * ((HasKeyUpHandlers) decorated).addKeyUpHandler(new KeyUpHandler() {
-	 * 
-	 * @Override public void onKeyUp(KeyUpEvent event) {
-	 * KeyUpEvent.fireNativeEvent(event.getNativeEvent(), DecoratorBox.this); }
-	 * }); } if (decorated instanceof HasKeyPressHandlers) { keyPressHandler =
-	 * ((HasKeyPressHandlers) decorated).addKeyPressHandler(new
-	 * KeyPressHandler() {
-	 * 
-	 * @Override public void onKeyPress(KeyPressEvent event) {
-	 * KeyPressEvent.fireNativeEvent(event.getNativeEvent(), DecoratorBox.this);
-	 * } }); } if (decorated instanceof HasFocusHandlers) { focusHandler =
-	 * ((HasFocusHandlers) decorated).addFocusHandler(new FocusHandler() {
-	 * 
-	 * @Override public void onFocus(FocusEvent event) { focused();
-	 * FocusEvent.fireNativeEvent(event.getNativeEvent(), DecoratorBox.this); }
-	 * 
-	 * }); } if (decorated instanceof HasBlurHandlers) { blurHandler =
-	 * ((HasBlurHandlers) decorated).addBlurHandler(new BlurHandler() {
-	 * 
-	 * @Override public void onBlur(BlurEvent event) { blurred();
-	 * BlurEvent.fireNativeEvent(event.getNativeEvent(), DecoratorBox.this); }
-	 * 
-	 * }); } } } }
-	 */
-
 	protected void fireValueChangeEvent() {
 		ValueChangeEvent.fire(DecoratorBox.this, getValue());
 	}
@@ -390,6 +332,9 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 	@Override
 	public void setValue(T value, boolean fireEvents) {
 		decorated.setValue(value, fireEvents);
+		if (!fireEvents) {
+			setClearButtonVisible(nullable && decorated.getValue() != null);
+		}
 	}
 
 	@Override

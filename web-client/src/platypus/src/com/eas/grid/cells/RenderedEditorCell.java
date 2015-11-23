@@ -92,16 +92,16 @@ public class RenderedEditorCell<T> extends WidgetEditorCell<T> {
 				@Override
 				public void execute() {
 					if (isEditing(context, null, value)) {
-						Element parent = Document.get().getElementById(viewData.id);
-						if (parent != null) {
-							parent.blur();
-							Element table = parent;
+						Element identifiedCellTextSection = Document.get().getElementById(viewData.id);
+						if (identifiedCellTextSection != null) {
+							identifiedCellTextSection.blur();
+							Element table = identifiedCellTextSection;
 							while (table != null && !"table".equalsIgnoreCase(table.getTagName())) {
 								table = table.getParentElement();
 							}
 							final Element table1 = table;
-							if (parent.getOwnerDocument() == Document.get()) {
-								startEditing(context, parent, table1.getParentElement(), value, viewData.updater, new Runnable() {
+							if (identifiedCellTextSection.getOwnerDocument() == Document.get()) {
+								startEditing(context, identifiedCellTextSection.getParentElement(), table1.getParentElement(), value, viewData.updater, new Runnable() {
 
 									public void run() {
 										if (onEditorClose != null && table1 != null) {

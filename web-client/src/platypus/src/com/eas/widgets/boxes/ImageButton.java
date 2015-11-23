@@ -14,29 +14,15 @@ import com.google.gwt.resources.client.ImageResource;
  */
 public class ImageButton extends ImageParagraph {
 
-	protected String styleSuffix = "default";
-
 	public ImageButton(String aTitle, boolean asHtml, ImageResource aImage) {
 		super(Document.get().createPushButtonElement(), aTitle, asHtml, aImage);
 		horizontalAlignment = ImageParagraph.CENTER;
 		addStyleName("btn");
 		setStylePrimaryName("btn");
-		setStyleDependentName(styleSuffix, true);
+		setStyleDependentName("default", true);
 	}
 
 	public ImageButton(String aTitle, boolean asHtml) {
 		this(aTitle, asHtml, null);
-	}
-
-	public String getStyleSuffix() {
-		return styleSuffix;
-	}
-
-	public void setStyleSuffix(String aValue) {
-		if (styleSuffix == null ? aValue != null : !styleSuffix.equals(aValue)) {
-			setStyleDependentName(styleSuffix, false);
-			styleSuffix = aValue;
-			setStyleDependentName(styleSuffix, true);
-		}
 	}
 }

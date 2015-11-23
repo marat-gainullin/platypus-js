@@ -363,7 +363,7 @@ public class ModelGrid extends JPanel implements ColumnNodesContainer, ArrayMode
     protected Icon closedFolderIcon;
     protected Icon leafIcon;
     protected List<GridColumnsNode> header = new ArrayList<>();
-    protected int rowsHeight = 20;
+    protected int rowsHeight = 30;
     protected boolean showVerticalLines = true;
     protected boolean showHorizontalLines = true;
     protected boolean showOddRowsInOtherColor = true;

@@ -31,8 +31,6 @@ public class PlatypusProgressBar extends ProgressBar implements HasJsFacade, Has
 	protected String name;
 	protected JavaScriptObject published;
 
-	protected String styleSuffix = "default";
-
 	protected String text;
 	protected TextFormatter formatter = new TextFormatter() {
 
@@ -47,20 +45,8 @@ public class PlatypusProgressBar extends ProgressBar implements HasJsFacade, Has
 		setStyleName("progress");
 		getBarElement().removeClassName("gwt-ProgressBar-bar");
 		getBarElement().addClassName("progress-bar");
-		getBarElement().addClassName("progress-bar-" + styleSuffix);
+		getBarElement().addClassName("progress-bar-default");
 		getElement().<XElement> cast().addResizingTransitionEnd(this);
-	}
-
-	public String getStyleSuffix() {
-		return styleSuffix;
-	}
-
-	public void setStyleSuffix(String aValue) {
-		if (styleSuffix == null ? aValue != null : !styleSuffix.equals(aValue)) {
-			getBarElement().removeClassName("progress-bar-" + styleSuffix);
-			styleSuffix = aValue;
-			getBarElement().addClassName("progress-bar-" + styleSuffix);
-		}
 	}
 
 	@Override
@@ -234,14 +220,6 @@ public class PlatypusProgressBar extends ProgressBar implements HasJsFacade, Has
 			},
 			set : function(aValue) {
 				aWidget.@com.eas.widgets.PlatypusProgressBar::setText(Ljava/lang/String;)(aValue != null ? '' + aValue : null);
-			}
-		});
-		Object.defineProperty(published, "suffix", {
-			get : function() {
-				return aWidget.@com.eas.widgets.PlatypusProgressBar::getStyleSuffix()();
-			},
-			set : function(aValue) {
-				aWidget.@com.eas.widgets.PlatypusProgressBar::setStyleSuffix(Ljava/lang/String;)(aValue);
 			}
 		});
 	}-*/;

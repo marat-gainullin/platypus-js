@@ -122,7 +122,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 	protected boolean showVerticalLines = true;
 	protected boolean showOddRowsInOtherColor = true;
 	protected PublishedColor gridColor;
-	protected PublishedColor oddRowsColor = PublishedColor.create(52, 152, 219, 25);
+	protected PublishedColor oddRowsColor = PublishedColor.create(241, 241, 241, 255);
 
 	protected String dynamicTDClassName = "grid-td-" + Document.get().createUniqueId();
 	protected String dynamicCellClassName = "grid-cell-" + Document.get().createUniqueId();
@@ -145,7 +145,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 		getElement().appendChild(cellsStyleElement);
 		getElement().appendChild(oddRowsStyleElement);
 		getElement().appendChild(evenRowsStyleElement);
-		setRowsHeight(25);
+		setRowsHeight(30);
 		hive = new FlexTable();
 		setWidget(hive);
 		hive.setCellPadding(0);

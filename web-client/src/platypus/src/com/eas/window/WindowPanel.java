@@ -497,12 +497,6 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 		OpenEvent.<WindowUI> fire(this, this);
 	}
 
-	@Override
-	protected void onDetach() {
-		super.onDetach();
-		fireCloseEvent();
-	}
-
 	protected void fireCloseEvent() {
 		ClosedEvent.<WindowUI> fire(this, this);
 	}
@@ -511,6 +505,7 @@ public class WindowPanel extends DraggablePanel implements WindowUI, HasAnimatio
 	public void close() {
 		if (!BeforeCloseEvent.<WindowUI> fire(this, this)) {
 			getMovableTarget().removeFromParent();
+			fireCloseEvent();
 		}
 	}
 
