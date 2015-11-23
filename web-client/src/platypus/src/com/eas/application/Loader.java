@@ -415,9 +415,8 @@ public class Loader {
 
 							@Override
 							public void onSuccess(Void result) {
-								Predefine.getExecuted().add(aModuleName);
 								fireLoaded(aModuleName);
-								List<String> amdDependencies = Loader.consumeAmdDependencies();
+								final List<String> amdDependencies = Loader.consumeAmdDependencies();
 								final Callback<String, Void> amdDefineCallback = Loader.consumeAmdDefineCallback();
 								if (amdDefineCallback != null) {
 									try {
@@ -430,6 +429,7 @@ public class Loader {
 
 											@Override
 											public void onSuccess(Void result) {
+												Predefine.getExecuted().add(aModuleName);
 												amdDefineCallback.onSuccess(aModuleName);
 												notifyPendingsModuleSucceded(aModuleName);
 											}
@@ -439,6 +439,7 @@ public class Loader {
 										Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
 									}
 								} else {
+									Predefine.getExecuted().add(aModuleName);
 									notifyPendingsModuleSucceded(aModuleName);
 								}
 							}

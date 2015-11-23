@@ -739,15 +739,8 @@ public class ScriptedResource {
                                     aSpace.exec(relativeLocalPath.toString().replace(File.separator, "/"), aLocalFile.toUri().toURL());
                                     String[] amdDependencies = aSpace.consumeAmdDependencies();
                                     JSObject onDependenciesResolved = aSpace.consumeAmdDefineCallback();
-                                    if (scriptOrModuleName.equals("forms")) {
-                                        int o = 0;
-                                        o++;
-                                    }
                                     _require(amdDependencies, null, aSpace, new HashSet<>(), (Void v) -> {
-                                        if (scriptOrModuleName.equals("forms")) {
-                                            int o = 0;
-                                            o++;
-                                        }
+                                        
                                         if (onDependenciesResolved != null) {
                                             onDependenciesResolved.call(null, new Object[]{scriptOrModuleName});
                                         }
