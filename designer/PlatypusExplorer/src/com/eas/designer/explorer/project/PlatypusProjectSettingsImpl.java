@@ -584,7 +584,7 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
     @Override
     public ClientType getRunClientType() {
         ClientType val = ClientType.getById(projectPrivateProperties.get(CLIENT_TYPE_KEY));
-        return val != null ? val : ClientType.PLATYPUS_CLIENT;
+        return val != null ? val : ClientType.WEB_BROWSER;
     }
 
     /**
@@ -612,7 +612,7 @@ public class PlatypusProjectSettingsImpl implements PlatypusProjectSettings {
     @Override
     public AppServerType getRunAppServerType() {
         AppServerType val = AppServerType.getById(projectPrivateProperties.get(SERVER_TYPE_KEY));
-        return val != null ? val : AppServerType.NONE;
+        return val != null ? val : AppServerType.J2EE_SERVER;
     }
 
     /**

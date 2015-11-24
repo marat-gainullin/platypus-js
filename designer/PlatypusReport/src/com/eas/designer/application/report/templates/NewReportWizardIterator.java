@@ -20,7 +20,7 @@ public class NewReportWizardIterator extends NewApplicationElementWizardIterator
 
     @TemplateRegistrations({
         @TemplateRegistration(
-                folder = "Platypus/AMD modules",
+                folder = "Platypus",
                 position = 300,
                 content = {"PlatypusAMDReportTemplate.js", "PlatypusAMDReportTemplate.model", "PlatypusAMDReportTemplate.xlsx"},
                 displayName = "#Templates/Other/PlatypusAMDReportTemplate",

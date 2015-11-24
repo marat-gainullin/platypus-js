@@ -1076,14 +1076,14 @@ public class RADComponentCreator {
         int width = -1;
         int height = -1;
         if (comp instanceof Label || comp instanceof AbstractButton) {
-            width = 70;
-            height = 20;
-        } else if (comp instanceof ToolBar || comp instanceof MenuBar) {
             width = 100;
-            height = 20;
+            height = 30;
+        } else if (comp instanceof ToolBar || comp instanceof MenuBar) {
+            width = 150;
+            height = 30;
         } else if (comp instanceof ProgressBar || comp instanceof Slider) {
-            width = 130;
-            height = 20;
+            width = 250;
+            height = 30;
         } else if (isContainer) {
             width = 100;
             height = 100;

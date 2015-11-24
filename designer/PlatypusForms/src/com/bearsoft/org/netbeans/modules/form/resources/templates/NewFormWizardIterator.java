@@ -20,7 +20,7 @@ public class NewFormWizardIterator extends NewApplicationElementWizardIterator {
 
     @TemplateRegistrations({
         @TemplateRegistration(
-                folder = "Platypus/AMD modules",
+                folder = "Platypus",
                 position = 400,
                 content = {
                     "PlatypusAMDFormTemplate.js", "PlatypusAMDFormTemplate.layout", "PlatypusAMDFormTemplate.model"

@@ -1,9 +1,7 @@
 package com.eas.core;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.JavaScriptObject;
@@ -14,7 +12,6 @@ public class Predefine {
 	private static JavaScriptObject logger;
 	public static Logger platypusApplicationLogger = Logger.getLogger("platypusApplication");
 	protected static Map<String, JavaScriptObject> defined = new HashMap<>();
-	protected static Set<String> executed = new HashSet<>();
 
 	public static boolean isNumber(Object aValue) {
 		return aValue instanceof Number;
@@ -28,10 +25,6 @@ public class Predefine {
 		return defined;
 	}
 
-	public static Set<String> getExecuted() {
-		return executed;
-	}
-
 	public static native JavaScriptObject prerequire(String aName)/*-{
 		var defined = @com.eas.core.Predefine::defined;
 		return defined.@java.util.Map::get(Ljava/lang/Object;)(aName);
@@ -39,9 +32,8 @@ public class Predefine {
 
 	public static native void predefine(JavaScriptObject aDeps, String aName, JavaScriptObject aDefiner)/*-{
 		var defined = @com.eas.core.Predefine::defined;
-		var executed = @com.eas.core.Predefine::executed;
 		var resolved = [];
-		for ( var d = 0; d < aDeps.length; d++) {
+		for (var d = 0; d < aDeps.length; d++) {
 			var module = defined.@java.util.Map::get(Ljava/lang/Object;)(aDeps[d]);
 			resolved.push(module);
 		}

@@ -385,12 +385,12 @@ public class Loader {
 			@Override
 			public void onSuccess(Void result) {
 				fireLoaded(aModuleName);
-				notifyPendingsModuleSucceded(aModuleName);
+				notifyModuleLoaded(aModuleName);
 			}
 
 			@Override
 			public void onFailure(String reason) {
-				notifyPendingsModuleFailed(aModuleName, Arrays.asList(new String[] { reason }));
+				notifyModuleFailed(aModuleName, Arrays.asList(new String[] { reason }));
 			}
 
 		});
@@ -405,7 +405,7 @@ public class Loader {
 
 					@Override
 					protected void failed(final List<String> aReasons) {
-						notifyPendingsModuleFailed(aModuleName, aReasons);
+						notifyModuleFailed(aModuleName, aReasons);
 					}
 
 					@Override
@@ -429,9 +429,12 @@ public class Loader {
 
 											@Override
 											public void onSuccess(Void result) {
-												Predefine.getExecuted().add(aModuleName);
 												amdDefineCallback.onSuccess(aModuleName);
-												notifyPendingsModuleSucceded(aModuleName);
+	                                            // If module is still not defined because of buggy definer in script,
+	                                            // we have to put it definition as undefined by hand.
+												if (!Predefine.getDefined().containsKey(aModuleName))
+													Predefine.getDefined().put(aModuleName, null);
+												notifyModuleLoaded(aModuleName);
 											}
 
 										}, new HashSet<String>());
@@ -439,8 +442,10 @@ public class Loader {
 										Logger.getLogger(Loader.class.getName()).log(Level.SEVERE, null, ex);
 									}
 								} else {
-									Predefine.getExecuted().add(aModuleName);
-									notifyPendingsModuleSucceded(aModuleName);
+                                    // Module is still not defined because of absent module definer.
+                                    // And we have to put it definition as undefined by hand.
+									Predefine.getDefined().put(aModuleName, null);
+									notifyModuleLoaded(aModuleName);
 								}
 							}
 
@@ -512,7 +517,7 @@ public class Loader {
 
 			@Override
 			public void onFailure(XMLHttpRequest reason) {
-				notifyPendingsModuleFailed(aModuleName, Arrays.asList(new String[] { reason.getStatus() + ": " + reason.getStatusText() }));
+				notifyModuleFailed(aModuleName, Arrays.asList(new String[] { reason.getStatus() + ": " + reason.getStatusText() }));
 			}
 		});
 	}
@@ -527,7 +532,7 @@ public class Loader {
 		return errorsSb.toString();
 	}
 
-	public static void notifyPendingsModuleFailed(String aModuleName, final List<String> aReasons) {
+	public static void notifyModuleFailed(String aModuleName, final List<String> aReasons) {
 		List<Callback<Void, String>> interestedPendings = new ArrayList<>(pending.get(aModuleName));
 		pending.get(aModuleName).clear();
 		final String errors = errorsToString(aReasons);
@@ -542,7 +547,7 @@ public class Loader {
 		}
 	}
 
-	private static void notifyPendingsModuleSucceded(String aModuleName) {
+	private static void notifyModuleLoaded(String aModuleName) {
 		List<Callback<Void, String>> interestedPendings = new ArrayList<>(pending.get(aModuleName));
 		pending.get(aModuleName).clear();
 		for (final Callback<Void, String> interestedPending : interestedPendings) {
@@ -584,7 +589,7 @@ public class Loader {
 
 			};
 			for (final String moduleName : aModulesNames) {
-				if (Predefine.getExecuted().contains(moduleName) || aCyclic.contains(moduleName) || Predefine.getDefined().containsKey(moduleName)) {
+				if (Predefine.getDefined().containsKey(moduleName) || aCyclic.contains(moduleName)) {
 					Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 
 						@Override

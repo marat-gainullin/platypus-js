@@ -721,7 +721,7 @@ public class ScriptedResource {
                 });
             });
             for (String scriptOrModuleName : aScriptsNames) {
-                if (aSpace.getExecuted().contains(scriptOrModuleName) || aCyclic.contains(scriptOrModuleName)) {
+                if (aSpace.getDefined().containsKey(scriptOrModuleName) || aCyclic.contains(scriptOrModuleName)) {
                     process.complete(scriptOrModuleName, null);
                 } else {
                     aCyclic.add(scriptOrModuleName);
@@ -741,7 +741,7 @@ public class ScriptedResource {
                         loadModule(apiPath, scriptOrModuleName, aCalledFromFile, aSpace, aCyclic, (Path aLocalFile) -> {
                             try {
                                 // sync require may occur while pending
-                                if (!aSpace.getExecuted().contains(scriptOrModuleName)) {
+                                if (!aSpace.getDefined().containsKey(scriptOrModuleName)) {
                                     Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Loaded", checkedScriptOrModuleName(scriptOrModuleName));
                                     Path relativeLocalPath;
                                     if (aLocalFile.startsWith(apiPath)) {
@@ -756,14 +756,21 @@ public class ScriptedResource {
                                     JSObject onDependenciesResolved = aSpace.consumeAmdDefineCallback();
                                     if (onDependenciesResolved != null) {
                                         _require(amdDependencies, null, aSpace, new HashSet<>(), (Void v) -> {
-                                            aSpace.getExecuted().add(scriptOrModuleName);
                                             onDependenciesResolved.call(null, new Object[]{scriptOrModuleName});
+                                            // If module is still not defined because of buggy definer in script,
+                                            // we have to put it definition as undefined by hand.
+                                            if(!aSpace.getDefined().containsKey(scriptOrModuleName)){
+                                                aSpace.getDefined().put(scriptOrModuleName, null);
+                                            }
                                             notifyModuleLoaded(pending);
                                         }, (Exception ex) -> {
+                                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Failed {1}", new Object[]{checkedScriptOrModuleName(scriptOrModuleName), ex.toString()});
                                             notifyModuleFailed(pending, ex);
                                         });
                                     } else {
-                                        aSpace.getExecuted().add(scriptOrModuleName);
+                                        // Module is still not defined because of absent module definer.
+                                        // And we have to put it definition as undefined by hand.
+                                        aSpace.getDefined().put(scriptOrModuleName, null);
                                         notifyModuleLoaded(pending);
                                     }
                                 } else {
@@ -795,8 +802,7 @@ public class ScriptedResource {
         Path apiPath = Scripts.getAbsoluteApiPath();
         Path appPath = getAbsoluteAppPath();
         for (String scriptOrModuleName : aScriptsNames) {
-            if (!aSpace.getExecuted().contains(scriptOrModuleName)) {
-                aSpace.getExecuted().add(scriptOrModuleName);
+            if (!aSpace.getDefined().containsKey(scriptOrModuleName)) {
                 Path apiLocalPath = apiPath.resolve(scriptOrModuleName + PlatypusFiles.JAVASCRIPT_FILE_END);
                 if (apiLocalPath != null && apiLocalPath.toFile().exists() && !apiLocalPath.toFile().isDirectory()) {
                     URL toLoad = apiLocalPath.toUri().toURL();
@@ -822,11 +828,14 @@ public class ScriptedResource {
                 }
                 String[] moduleDefinedDependencies = aSpace.consumeAmdDependencies();
                 JSObject onDependenciesResolved = aSpace.consumeAmdDefineCallback();
-                if (moduleDefinedDependencies != null) {
+                if (onDependenciesResolved != null) {
                     _require(moduleDefinedDependencies, null, aSpace);
-                    if (onDependenciesResolved != null) {
-                        onDependenciesResolved.call(null, new Object[]{scriptOrModuleName});
-                    }
+                    onDependenciesResolved.call(null, new Object[]{scriptOrModuleName});
+                }
+                // If module is still not defined (lack of module definer or buggy definer in script, etc.)
+                // we have to put it definition as undefined by hand.
+                if(!aSpace.getDefined().containsKey(scriptOrModuleName)){
+                    aSpace.getDefined().put(scriptOrModuleName, null);
                 }
             }
         }

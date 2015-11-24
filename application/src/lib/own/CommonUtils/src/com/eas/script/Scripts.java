@@ -286,6 +286,10 @@ public class Scripts {
             }
         }
 
+        public Object getUndefined(){
+            return Undefined.getUndefined();
+        }
+        
         public void putPublisher(String aClassName, JSObject aPublisher) {
             publishers.put(aClassName, aPublisher);
         }
