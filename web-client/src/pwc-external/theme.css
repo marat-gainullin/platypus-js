@@ -1257,9 +1257,8 @@ select.form-control{
 }
 
 .grid-column-header-content{
-    padding-left: 5px;
-    padding-right: 5px;
     text-align: center;
+    max-height: 20px;
 }
 
 .grid-sortable-column-header{
@@ -1327,6 +1326,8 @@ select.form-control{
     text-shadow:0 1px rgba(255,255,255,0.5);
     background: #95a5a6;
     background-image: linear-gradient(to bottom, #95a5a6,#7f8c8d);
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
 }
 
 .window-caption-text {
@@ -1381,6 +1382,8 @@ select.form-control{
 .window-content{
     transition: width 0.5s, height 0.5s;
     background-color: white;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
 }
 
 .content-decor{
