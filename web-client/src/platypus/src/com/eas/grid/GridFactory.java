@@ -41,7 +41,7 @@ public class GridFactory implements UiWidgetReader{
 			boolean showHorizontalLines = Utils.getBooleanAttribute(anElement, "showHorizontalLines", Boolean.TRUE);
 			boolean showVerticalLines = Utils.getBooleanAttribute(anElement, "showVerticalLines", Boolean.TRUE);
 			boolean showOddRowsInOtherColor = Utils.getBooleanAttribute(anElement, "showOddRowsInOtherColor", Boolean.TRUE);
-			int rowsHeight = Utils.getIntegerAttribute(anElement, "rowsHeight", 20);
+			int rowsHeight = Utils.getIntegerAttribute(anElement, "rowsHeight", 30);
 			grid.setHeaderVisible(headerVisible);
 			grid.setDraggableRows(draggableRows);
 			grid.setRowsHeight(rowsHeight);

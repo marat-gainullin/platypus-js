@@ -16,20 +16,20 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 public class CheckBoxCell extends AbstractEditableCell<Object, Boolean> {
 
 	protected interface CheckBoxTemplate extends SafeHtmlTemplates {
-		@Template("<input type=\"checkbox\" style=\"vertical-align: middle; width: 100%;\" tabindex=\"-1\" checked/>")
+		@Template("<div class=\"grid-cell-anchor\"></div><input type=\"checkbox\" style=\"vertical-align: middle; width: 100%;\" tabindex=\"-1\" checked/>")
 		public SafeHtml checked();
 
-		@Template("<input type=\"checkbox\" style=\"vertical-align: middle; width: 100%;\" tabindex=\"-1\"/>")
+		@Template("<div class=\"grid-cell-anchor\"></div><input type=\"checkbox\" style=\"vertical-align: middle; width: 100%;\" tabindex=\"-1\"/>")
 		public SafeHtml unchecked();
 	}
 
 	private static final CheckBoxTemplate checkTemplate = GWT.create(CheckBoxTemplate.class);
 
 	protected interface RadioTemplate extends SafeHtmlTemplates {
-		@Template("<input name=\"{0}\" type=\"radio\" style=\"vertical-align: middle; width: 100%;\" tabindex=\"-1\" checked/>")
+		@Template("<div class=\"grid-cell-anchor\"></div><input name=\"{0}\" type=\"radio\" style=\"vertical-align: middle; width: 100%;\" tabindex=\"-1\" checked/>")
 		public SafeHtml checked(String aGroupName);
 
-		@Template("<input name=\"{0}\" type=\"radio\" style=\"vertical-align: middle; width: 100%;\" tabindex=\"-1\"/>")
+		@Template("<div class=\"grid-cell-anchor\"></div><input name=\"{0}\" type=\"radio\" style=\"vertical-align: middle; width: 100%;\" tabindex=\"-1\"/>")
 		public SafeHtml unchecked(String aGroupName);
 	}
 
