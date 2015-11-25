@@ -289,7 +289,7 @@ public class Utils {
 		public void onChange(JavaScriptObject anEvent);
 	}
 
-	private static native JavaScriptObject publishOnChangeHandler(OnChangeHandler aValue)/*-{
+	public static native JavaScriptObject publishOnChangeHandler(OnChangeHandler aValue)/*-{
 		return function(aArg) {
 			aValue.@com.eas.core.Utils.OnChangeHandler::onChange(Lcom/google/gwt/core/client/JavaScriptObject;)(aArg);
 		};

@@ -129,11 +129,9 @@ public abstract class WidgetEditorCell<C> extends AbstractEditableCell<C, Widget
 			editorBox.getElement().setClassName("grid-cell-editor-popup");
 			editorBox.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
 			editorBox.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-			editorBox.getElement().getStyle().setPaddingLeft(Grid.LEFT_RIGHT_CELL_PADDING, Style.Unit.PX);
-			editorBox.getElement().getStyle().setPaddingRight(Grid.LEFT_RIGHT_CELL_PADDING, Style.Unit.PX);
 			editorBox.getElement().getStyle().setWidth(aBoxPositionTemplate.getClientWidth(), Style.Unit.PX);
 			editorBox.getElement().getStyle().setHeight(aBoxPositionTemplate.getClientHeight(), Style.Unit.PX);
-			editorBox.getElement().getStyle().setLeft(aBoxPositionTemplate.getAbsoluteLeft() - aBoxParent.getAbsoluteLeft() - Grid.LEFT_RIGHT_CELL_PADDING, Style.Unit.PX);
+			editorBox.getElement().getStyle().setLeft(aBoxPositionTemplate.getAbsoluteLeft() - aBoxParent.getAbsoluteLeft(), Style.Unit.PX);
 			editorBox.getElement().getStyle().setTop(aBoxPositionTemplate.getAbsoluteTop() - aBoxParent.getAbsoluteTop(), Style.Unit.PX);
 			final HandlerRegistration editorKeyDownReg = editor.addDomHandler(new KeyDownHandler() {
 				@Override

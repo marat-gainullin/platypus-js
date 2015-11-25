@@ -17,14 +17,11 @@ import com.eas.ui.events.HideHandler;
 import com.eas.ui.events.ShowEvent;
 import com.eas.ui.events.ShowHandler;
 import com.eas.widgets.boxes.DropDownButton;
-import com.eas.widgets.boxes.ImageParagraph;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
@@ -32,8 +29,9 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.MenuBar;
+import com.google.gwt.user.client.ui.RequiresResize;
 
-public class PlatypusSplitButton extends DropDownButton implements HasActionHandlers, HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers {
+public class PlatypusSplitButton extends DropDownButton implements RequiresResize, HasActionHandlers, HasJsFacade, HasEnabled, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers, HasResizeHandlers {
 
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu contextMenu;
@@ -60,7 +58,6 @@ public class PlatypusSplitButton extends DropDownButton implements HasActionHand
 
 	@Override
 	public void onResize() {
-		super.onResize();
 		if(isAttached()){
 			ResizeEvent.fire(this, getElement().getOffsetWidth(), getElement().getOffsetHeight());
 		}
@@ -92,12 +89,11 @@ public class PlatypusSplitButton extends DropDownButton implements HasActionHand
 	@Override
 	protected void showMenu() {
 		if (menu instanceof PlatypusPopupMenu)
-			((PlatypusPopupMenu)menu).showRelativeTo(chevron);
+			((PlatypusPopupMenu)menu).showRelativeTo(chevronMenu);
 	}
 
 	protected int actionHandlers;
 	protected HandlerRegistration clickReg;
-	protected HandlerRegistration keyDownReg;
 
 	@Override
 	public HandlerRegistration addActionHandler(ActionHandler handler) {
@@ -111,12 +107,6 @@ public class PlatypusSplitButton extends DropDownButton implements HasActionHand
 				}
 
 			});
-			keyDownReg = content.addKeyDownHandler(new KeyDownHandler(){
-
-				@Override
-                public void onKeyDown(KeyDownEvent event) {
-					ActionEvent.fire(PlatypusSplitButton.this, PlatypusSplitButton.this);
-                }});
 		}
 		actionHandlers++;
 		return new HandlerRegistration() {
@@ -128,8 +118,6 @@ public class PlatypusSplitButton extends DropDownButton implements HasActionHand
 					assert clickReg != null : "Erroneous use of addActionHandler/removeHandler detected in PlatypusSplitButton";
 					clickReg.removeHandler();
 					clickReg = null;
-					keyDownReg.removeHandler();
-					keyDownReg = null;
 				}
 			}
 		};
@@ -197,10 +185,6 @@ public class PlatypusSplitButton extends DropDownButton implements HasActionHand
 	@Override
 	public void setJsName(String aValue) {
 		name = aValue;
-	}
-
-	public ImageParagraph getContent() {
-		return content;
 	}
 
 	public JavaScriptObject getPublished() {

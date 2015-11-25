@@ -901,18 +901,30 @@ input[type="search"] {
     border-radius: 2px;
 }
 
-.dropdown-button:active{
-    background:#75bd35;
-    border-color:#678f3a #75a143 #81b049;
-    background-image:-webkit-linear-gradient(top, #75bd35,#a0d44d);
-    background-image:-moz-linear-gradient(top, #75bd35,#a0d44d);
-    background-image:-o-linear-gradient(top, #75bd35,#a0d44d);
-    background-image:linear-gradient(to bottom, #75bd35,#a0d44d);
+.dropdown-split{
+    display: inline-block;
+    height: 100%;
+    position: relative;
+    vertical-align: middle;
+}
+
+.dropdown{
+    display: inline-block;
+    float: right;
+    position: relative;
+    height: 100%;
+    border-left: 1px solid #ccc;
+}
+
+.dropdown:hover{
+    border-left: 1px solid #adadad;
 }
 
 .dropdown-menu{
-    border-left: 1px solid gray;
-    width: 8px; 
+    display: inline-block;
+    position: relative;
+    vertical-align: middle;
+    padding: 10px;
     background-image: url(dropdown-menu.png);
     background-repeat: no-repeat;
     background-position: center;
@@ -1154,6 +1166,7 @@ select.form-control{
 
 .treegrid-expanded-cell, .treegrid-collapased-cell{
     padding-left: 24px;
+    background-position: 0px;// firefox hack
 }
 
 .treegrid-expanded-cell{
@@ -1195,6 +1208,7 @@ select.form-control{
 }
 
 .grid-marker-cell-cursor{
+    padding-left: 5px;
     font-family: Flaticon;
     font-size: 12px;
     color: #337ab7;

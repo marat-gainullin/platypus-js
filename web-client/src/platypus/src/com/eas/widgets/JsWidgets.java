@@ -253,7 +253,7 @@ public class JsWidgets {
 	    		if(typeof aElement == "string")
 	    			aElement = $doc.getElementById(aElement);
 	    		if(aElement){
-						@com.eas.widgets.WidgetsUtils::addWidgetTo(Lcom/google/gwt/user/client/ui/Widget;Lcom/google/gwt/dom/client/Element;)(aPublished.unwrap(), aElement);
+					@com.eas.widgets.WidgetsUtils::addWidgetTo(Lcom/google/gwt/user/client/ui/Widget;Lcom/google/gwt/dom/client/Element;)(aPublished.unwrap(), aElement);
 	    		}
 	    	}
 	    });
