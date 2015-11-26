@@ -20,7 +20,7 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -39,8 +39,7 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 	protected HandlerRegistration boundToList;
 	protected HandlerRegistration boundToListElements;
 	protected Runnable onRedraw;
-	protected Element nonListMask;
-	protected Element nonListMaskAligner;
+	protected InputElement nonListMask = Document.get().createTextInputElement();
 
 	protected boolean list = true;
 
@@ -50,26 +49,39 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 		box.addItem("...", keyForNullValue, null, "");
 		box.getElement().addClassName(CUSTOM_DROPDOWN_CLASS);
 		box.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
-        CommonResources.INSTANCE.commons().ensureInjected();
-        box.getElement().addClassName(CommonResources.INSTANCE.commons().withoutDropdown());
-        nonListMask = Document.get().createDivElement();
-        nonListMask.getStyle().setPosition(Style.Position.RELATIVE);
-        nonListMask.getStyle().setDisplay(Style.Display.NONE);
-        nonListMask.getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
-        nonListMask.getStyle().setPaddingLeft(4, Style.Unit.PX);
-        
-        nonListMaskAligner = Document.get().createDivElement();
-        nonListMaskAligner.getStyle().setVisibility(Style.Visibility.HIDDEN);
-        nonListMaskAligner.getStyle().setPosition(Style.Position.RELATIVE);
-        nonListMaskAligner.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-        nonListMaskAligner.getStyle().setHeight(100, Style.Unit.PCT);
-        nonListMaskAligner.getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
-        
-        getElement().insertFirst(nonListMaskAligner);
-        getElement().insertFirst(nonListMask);
-        
-        selectButton.getElement().addClassName("decorator-select-combo");
-        clearButton.getElement().addClassName("decorator-clear-combo");
+		CommonResources.INSTANCE.commons().ensureInjected();
+		box.getElement().addClassName(CommonResources.INSTANCE.commons().withoutDropdown());
+		nonListMask.setReadOnly(true);
+		nonListMask.addClassName(CommonResources.INSTANCE.commons().borderSized());
+		nonListMask.getStyle().setPosition(Style.Position.ABSOLUTE);
+		nonListMask.getStyle().setDisplay(Style.Display.NONE);
+		nonListMask.getStyle().setTop(0, Style.Unit.PX);
+		nonListMask.getStyle().setLeft(0, Style.Unit.PX);
+		nonListMask.getStyle().setWidth(100, Style.Unit.PCT);
+		nonListMask.getStyle().setHeight(100, Style.Unit.PCT);
+
+		getElement().insertFirst(nonListMask);
+
+		selectButton.getElement().addClassName("decorator-select-combo");
+		clearButton.getElement().addClassName("decorator-clear-combo");
+	}
+
+	@Override
+	public void setFocus(boolean focused) {
+		if (list) {
+			super.setFocus(focused);
+		} else {
+			nonListMask.focus();
+		}
+	}
+
+	@Override
+	protected int organizeButtonsContent() {
+		int right = super.organizeButtonsContent();
+		if (nonListMask != null) {
+			nonListMask.getStyle().setPaddingRight(right, Style.Unit.PX);
+		}
+		return right;
 	}
 
 	public Runnable getOnRedraw() {
@@ -129,7 +141,7 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 				injected = aValue;
 			}
 			super.setValue(aValue, fireEvents);
-			nonListMask.setInnerText(box.getSelectedItemText());
+			nonListMask.setValue(box.getSelectedItemText());
 		}
 	}
 
@@ -191,7 +203,7 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 			}
 			int valueIndex = box.indexOf(value);
 			box.setSelectedIndex(valueIndex);
-			nonListMask.setInnerText(box.getSelectedItemText());
+			nonListMask.setValue(box.getSelectedItemText());
 			if (onRedraw != null)
 				onRedraw.run();
 		} catch (Exception e) {
@@ -209,7 +221,7 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 	}
 
 	protected HasValue<JavaScriptObject> getDecorated() {
-		return ((HasValue<JavaScriptObject>)decorated);
+		return ((HasValue<JavaScriptObject>) decorated);
 	}
 
 	public String getText() {
@@ -299,14 +311,20 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 		if (list != aValue) {
 			list = aValue;
 			StyledListBox<JavaScriptObject> box = (StyledListBox<JavaScriptObject>) decorated;
-			if (list){
+			if (list) {
 				box.getElement().addClassName(CUSTOM_DROPDOWN_CLASS);
 				box.getElement().getStyle().clearVisibility();
 				nonListMask.getStyle().setDisplay(Style.Display.NONE);
-			}else{
+				selectButton.getElement().addClassName("decorator-select-combo");
+				clearButton.getElement().addClassName("decorator-clear-combo");
+				nonListMask.removeClassName("form-control");
+			} else {
 				box.getElement().removeClassName(CUSTOM_DROPDOWN_CLASS);
 				box.getElement().getStyle().setVisibility(Style.Visibility.HIDDEN);
 				nonListMask.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+				selectButton.getElement().removeClassName("decorator-select-combo");
+				clearButton.getElement().removeClassName("decorator-clear-combo");
+				nonListMask.addClassName("form-control");
 			}
 			redraw();
 		}
@@ -324,10 +342,6 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 		setValue(convert(aValue), fireEvents);
 	}
 
-	/*
-	 * public void clear() { ((StyledListBox<JavaScriptObject>)
-	 * decorated).clear(); }
-	 */
 	public JavaScriptObject getDisplayList() {
 		return displayList;
 	}
@@ -364,7 +378,7 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 					}
 					if (displayList != null) {
 						boundToListElements = Utils.listenElements(displayList, new Utils.OnChangeHandler() {
-							
+
 							@Override
 							public void onChange(JavaScriptObject anEvent) {
 								enqueueListChanges();
@@ -380,7 +394,7 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 	protected void bindList() {
 		if (displayList != null) {
 			boundToList = Utils.listenPath(displayList, "length", new Utils.OnChangeHandler() {
-				
+
 				@Override
 				public void onChange(JavaScriptObject anEvent) {
 					enqueueListReadd();
@@ -419,11 +433,11 @@ public class ModelCombo extends ModelDecoratorBox<JavaScriptObject> implements H
 	}
 
 	@Override
-    protected void setReadonly(boolean aValue) {
-    }
+	protected void setReadonly(boolean aValue) {
+	}
 
 	@Override
-    protected boolean isReadonly() {
-	    return false;
-    }
+	protected boolean isReadonly() {
+		return false;
+	}
 }

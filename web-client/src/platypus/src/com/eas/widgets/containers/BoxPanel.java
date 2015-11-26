@@ -116,7 +116,10 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 			es.setPosition(Style.Position.RELATIVE);
 			es.setHeight(100, Style.Unit.PCT);
 			es.setDisplay(visible ? Style.Display.INLINE_BLOCK : Style.Display.NONE);
-			es.setFloat(direction == Direction.LTR ? Style.Float.LEFT : Style.Float.RIGHT);
+			if(direction == Direction.LTR)
+				es.clearFloat();
+			else
+				es.setFloat(Style.Float.RIGHT);
 		} else {
 			es.setPosition(Style.Position.RELATIVE);
 			es.setDisplay(visible ? Style.Display.BLOCK : Style.Display.NONE);

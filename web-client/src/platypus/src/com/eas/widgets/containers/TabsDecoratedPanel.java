@@ -5,7 +5,6 @@ import com.eas.menu.MenuItemImageText;
 import com.eas.menu.PlatypusPopupMenu;
 import com.eas.ui.HasImageResource;
 import com.eas.widgets.boxes.ImageLabel;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Element;
@@ -17,7 +16,6 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
@@ -41,14 +39,6 @@ import com.google.gwt.user.client.ui.Widget;
  * @author mg
  */
 public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, ProvidesResize, IndexedPanel, HasSelectionHandlers<Widget> {
-
-	public interface Template extends SafeHtmlTemplates {
-
-		@SafeHtmlTemplates.Template("<div class=\"{0}\"></div>")
-		SafeHtml classedDiv(String aClasses);
-	}
-
-	private static final Template template = GWT.create(Template.class);
 
 	protected boolean tabsOnTop = true;
 	protected FlowPanel chevron = new FlowPanel();
@@ -133,7 +123,7 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 	    tabs.setStylePrimaryName("tabs");
 		// GWT Layout animations are deprecated because of CSS3 transitions
 		tabs.setAnimationDuration(0);
-		scrollLeft = new Button(template.classedDiv("tabs-chevron-left"), new ClickHandler() {
+		scrollLeft = new Button("", new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
@@ -144,7 +134,9 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 				updateScrolls();
 			}
 		});
-		scrollRight = new Button(template.classedDiv("tabs-chevron-right"), new ClickHandler() {
+		scrollLeft.setStyleName("tabs-chevron-left");
+		scrollLeft.addStyleName("btn");
+		scrollRight = new Button("", new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
@@ -153,7 +145,9 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 				updateScrolls();
 			}
 		});
-		tabsList = new Button(template.classedDiv("tabs-chevron-list"), new ClickHandler() {
+		scrollRight.setStyleName("tabs-chevron-right");
+		scrollRight.addStyleName("btn");
+		tabsList = new Button("", new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
@@ -211,6 +205,8 @@ public class TabsDecoratedPanel extends SimplePanel implements RequiresResize, P
 				menu.showRelativeTo(lastWidget);
 			}
 		});
+		tabsList.setStyleName("tabs-chevron-list");
+		tabsList.addStyleName("btn");
 		tabsList.setEnabled(false);
 		getElement().getStyle().setPosition(Style.Position.RELATIVE);
 		tabs.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);

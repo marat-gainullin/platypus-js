@@ -5,13 +5,16 @@
  */
 package com.eas.widgets.boxes;
 
-import com.eas.core.Utils;
-import com.eas.core.Utils.OnChangeHandler;
 import com.eas.ui.CommonResources;
-import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.MouseDownEvent;
+import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -37,7 +40,7 @@ public class DropDownButton extends ImageButton {
 	}
 
 	public DropDownButton(String aTitle, boolean asHtml, ImageResource aImage, MenuBar aMenu) {
-		super(aTitle, asHtml, aImage);
+		super(Document.get().createDivElement(), aTitle, asHtml, aImage);
 		menu = aMenu;
 
 		CommonResources.INSTANCE.commons().ensureInjected();
@@ -52,14 +55,35 @@ public class DropDownButton extends ImageButton {
 
 		getElement().insertFirst(chevron.getElement());
 
-		chevron.getElement().setPropertyJSO("onclick", Utils.publishOnChangeHandler(new OnChangeHandler() {
+		addMouseDownHandler(new MouseDownHandler() {
 
 			@Override
-			public void onChange(JavaScriptObject anEvent) {
-				anEvent.<NativeEvent> cast().stopPropagation();
-				showMenu();
+			public void onMouseDown(MouseDownEvent event) {
 			}
-		}));
+
+		});
+		addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+			}
+
+		});
+	}
+
+	@Override
+	public void onBrowserEvent(Event event) {
+		if (event.getTypeInt() == Event.ONCLICK || event.getTypeInt() == Event.ONMOUSEDOWN) {
+			Element target = Element.as(event.getEventTarget());
+			if (target == chevron.getElement() || target == chevronAnchor.getElement() || target == chevronMenu.getElement()) {
+				event.preventDefault();
+				event.stopPropagation();
+				showMenu();
+			} else {
+				super.onBrowserEvent(event);
+			}
+		} else
+			super.onBrowserEvent(event);
 	}
 
 	protected void showMenu() {

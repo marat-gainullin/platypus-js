@@ -274,9 +274,9 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 		ValueChangeEvent.fire(DecoratorBox.this, getValue());
 	}
 
-	protected void organizeButtonsContent() {
+	protected int organizeButtonsContent() {
+		int right = 0;
 		if (decorated != null) {
-			int right = 0;
 			if (isSelectButtonVisible()) {
 				right += selectButton.getElement().getOffsetWidth();
 			}
@@ -287,6 +287,7 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 				((HasDecorationsWidth) decorated).setDecorationsWidth(right);
 			}
 		}
+		return right;
 	}
 
 	protected boolean isSelectButtonVisible() {

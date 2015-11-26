@@ -22,6 +22,9 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.logical.shared.HasResizeHandlers;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
@@ -40,15 +43,25 @@ public class PlatypusSplitButton extends DropDownButton implements RequiresResiz
 	protected JavaScriptObject published;
 
 	public PlatypusSplitButton() {
-		super("", false, null);
+		this("", false, null);
 	}
 
 	public PlatypusSplitButton(String aTitle, boolean asHtml, MenuBar aMenu) {
-		super(aTitle, asHtml, aMenu);
+		this(aTitle, asHtml, null, aMenu);
 	}
 
 	public PlatypusSplitButton(String aTitle, boolean asHtml, ImageResource aImage, MenuBar aMenu) {
 		super(aTitle, asHtml, aImage, aMenu);
+		addKeyDownHandler(new KeyDownHandler(){
+
+			@Override
+            public void onKeyDown(KeyDownEvent event) {
+				if(event.getNativeKeyCode() == KeyCodes.KEY_ENTER || event.getNativeKeyCode() == KeyCodes.KEY_SPACE){
+					ActionEvent.fire(PlatypusSplitButton.this, PlatypusSplitButton.this);
+				}
+            }
+			
+		});
 	}
 
 	@Override

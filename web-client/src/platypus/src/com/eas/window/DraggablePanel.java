@@ -324,14 +324,14 @@ public class DraggablePanel extends SimplePanel implements RequiresResize, Provi
 
 		Element topElement = getElement();
 		// Physical attach
-		topElement.insertFirst(nw.getElement());
-		topElement.insertFirst(ne.getElement());
-		topElement.insertFirst(sw.getElement());
-		topElement.insertFirst(se.getElement());
-		topElement.insertFirst(n.getElement());
-		topElement.insertFirst(s.getElement());
-		topElement.insertFirst(w.getElement());
-		topElement.insertFirst(e.getElement());
+		topElement.appendChild(n.getElement());
+		topElement.appendChild(s.getElement());
+		topElement.appendChild(w.getElement());
+		topElement.appendChild(e.getElement());
+		topElement.appendChild(nw.getElement());
+		topElement.appendChild(ne.getElement());
+		topElement.appendChild(sw.getElement());
+		topElement.appendChild(se.getElement());
 		// Logical attach
 		adopt(e);
 		adopt(w);

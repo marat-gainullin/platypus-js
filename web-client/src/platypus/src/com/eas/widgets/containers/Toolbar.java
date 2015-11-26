@@ -72,8 +72,8 @@ public class Toolbar extends SimplePanel implements IndexedPanel, ProvidesResize
 					Widget iw = widgets[i];
 					int rightMost = iw.getElement().getOffsetLeft() + iw.getElement().getOffsetWidth();
 					int bottomMost = iw.getElement().getOffsetTop() + iw.getElement().getOffsetHeight();
-					int parentWidth = iw.getElement().getParentElement().getOffsetWidth();
-					int parentHeight = iw.getElement().getParentElement().getOffsetHeight();
+					int parentWidth = iw.getElement().getParentElement().getClientWidth();
+					int parentHeight = iw.getElement().getParentElement().getClientHeight();
 					if (rightMost <= 0 || iw.getElement().getOffsetLeft() >= parentWidth || bottomMost <= 0 || iw.getElement().getOffsetTop() >= parentHeight) {
 						lefts.put(iw, iw.getElement().getStyle().getLeft());
 						rights.put(iw, iw.getElement().getStyle().getRight());

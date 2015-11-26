@@ -7,6 +7,7 @@ package com.eas.grid.cells;
 import java.util.Set;
 
 import com.eas.grid.Grid;
+import com.eas.ui.CommonResources;
 import com.eas.widgets.boxes.AutoCloseBox;
 import com.google.gwt.cell.client.AbstractEditableCell;
 import com.google.gwt.cell.client.Cell;
@@ -74,8 +75,10 @@ public abstract class WidgetEditorCell<C> extends AbstractEditableCell<C, Widget
 			focusHost = (Focusable) editor;
 			focusHost.setTabIndex(1);
 		}
-		if (editor != null)
-			editor.getElement().getStyle().setBorderWidth(0, Style.Unit.PX);
+		if (editor != null){
+			CommonResources.INSTANCE.commons().ensureInjected();
+			editor.getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
+		}
 	}
 
 	protected static class UpdaterRef<C> {
