@@ -127,6 +127,7 @@ public class BoxPanel extends ComplexPanel implements RequiresResize, ProvidesRe
 			es.clearRight();
 			es.setWidth(100, Style.Unit.PCT);
 		}
+		es.setVerticalAlign(Style.VerticalAlign.MIDDLE);
 		child.getElement().addClassName(CommonResources.INSTANCE.commons().borderSized());
 	}
 

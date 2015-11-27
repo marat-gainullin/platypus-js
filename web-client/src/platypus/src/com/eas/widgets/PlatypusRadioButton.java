@@ -19,7 +19,9 @@ import com.eas.ui.events.HideHandler;
 import com.eas.ui.events.ShowEvent;
 import com.eas.ui.events.ShowHandler;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
@@ -34,6 +36,8 @@ import com.google.gwt.user.client.ui.RequiresResize;
 public class PlatypusRadioButton extends RadioButton implements HasActionHandlers, HasJsFacade, HasPlatypusButtonGroup, HasComponentPopupMenu, HasEventsExecutor, HasShowHandlers, HasHideHandlers,
         HasResizeHandlers, RequiresResize {
 
+	protected Element anchor = Document.get().createDivElement();
+	
 	protected EventsExecutor eventsExecutor;
 	protected PlatypusPopupMenu menu;
 	protected String name;
@@ -44,6 +48,11 @@ public class PlatypusRadioButton extends RadioButton implements HasActionHandler
 	public PlatypusRadioButton() {
 		super("");
 		propagateAlign();
+		anchor.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+		anchor.getStyle().setPosition(Style.Position.RELATIVE);
+		anchor.getStyle().setHeight(100, Style.Unit.PCT);
+		anchor.getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
+		getElement().appendChild(anchor);
 	}
 
 	protected void propagateAlign() {
@@ -52,7 +61,7 @@ public class PlatypusRadioButton extends RadioButton implements HasActionHandler
 		while (child != null) {
 			if("input".equalsIgnoreCase(child.getTagName())){
 				child.addClassName("radio-box");
-			}else{
+			}else if("label".equalsIgnoreCase(child.getTagName())) {
 				child.addClassName("radio-label");
 			}
 			child = child.getNextSiblingElement();

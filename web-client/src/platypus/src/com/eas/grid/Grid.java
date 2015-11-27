@@ -91,7 +91,7 @@ public class Grid<T> extends SimplePanel implements ProvidesResize, RequiresResi
 	public static final String GRID_SHELL_STYLE = "grid-shell";
 	public static final String RULER_STYLE = "grid-ruler";
 	public static final String COLUMN_PHANTOM_STYLE = "grid-column-phantom";
-	public static final String COLUMNS_CHEVRON_STYLE = "grid-columns-chevronMenu";
+	public static final String COLUMNS_CHEVRON_STYLE = "grid-columns-chevron";
 	public static final int MINIMUM_COLUMN_WIDTH = 15;
 	//
 	protected FlexTable hive;

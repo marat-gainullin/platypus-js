@@ -79,10 +79,13 @@ public class TreeExpandableCell<T, C> extends DivDecoratorCell<C> {
 			SafeHtmlBuilder cellBuilder = new SafeHtmlBuilder();
 			cell.render(context, value, cellBuilder);
 			int deepness = getDeepness(context);
-			int outerDivPadding = indent * (deepness + 1);
-			SafeStyles styles = new SafeStylesBuilder().paddingLeft(outerDivPadding, Style.Unit.PX)
-			        .position(Style.Position.RELATIVE).height(100, Style.Unit.PCT).toSafeStyles();
-			sb.append(template.outerDiv(outerDivClasses(context), styles, cellBuilder.toSafeHtml()));
+			int outerDivPadding = indent * deepness;
+			SafeStylesBuilder styles = new SafeStylesBuilder();
+			if (deepness > 0) {
+				styles.paddingLeft(outerDivPadding, Style.Unit.PX);
+			}
+			styles.position(Style.Position.RELATIVE).height(100, Style.Unit.PCT).toSafeStyles();
+			sb.append(template.outerDiv(outerDivClasses(context), styles.toSafeStyles(), cellBuilder.toSafeHtml()));
 		} else {
 			cell.render(context, value, sb);
 		}

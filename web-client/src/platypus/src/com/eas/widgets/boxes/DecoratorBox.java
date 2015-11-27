@@ -104,12 +104,10 @@ public abstract class DecoratorBox<T> extends Composite implements RequiresResiz
 
 		selectButton.getElement().addClassName("decorator-select");
 		selectButton.getElement().getStyle().setDisplay(Style.Display.NONE);
-		selectButton.getElement().getStyle().setTop(0, Style.Unit.PX);
 		selectButton.getElement().getStyle().setHeight(100, Style.Unit.PCT);
 		selectButton.getElement().getStyle().setPosition(Style.Position.RELATIVE);
 		clearButton.getElement().addClassName("decorator-clear");
 		clearButton.getElement().getStyle().setDisplay(Style.Display.NONE);
-		clearButton.getElement().getStyle().setTop(0, Style.Unit.PX);
 		clearButton.getElement().getStyle().setHeight(100, Style.Unit.PCT);
 		clearButton.getElement().getStyle().setPosition(Style.Position.RELATIVE);
 

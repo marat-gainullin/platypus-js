@@ -167,7 +167,6 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 
 		right.getElement().addClassName("date-select");
 		right.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
-		right.getElement().getStyle().setTop(0, Style.Unit.PX);
 		right.getElement().getStyle().setHeight(100, Style.Unit.PCT);
 		right.getElement().getStyle().setPosition(Style.Position.RELATIVE);
 

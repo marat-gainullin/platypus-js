@@ -73,6 +73,7 @@ public class TimePicker extends Composite implements HasValue<Date>, HasValueCha
 	public TimePicker() {
 		super();
 		dateBlock.getElement().setInnerText(constants.date());
+		dateBlock.getElement().setClassName("time-picker-date");
 		widgetContainer.add(dateBlock);
 
 		FlowPanel upperBtnBlock = new FlowPanel();
