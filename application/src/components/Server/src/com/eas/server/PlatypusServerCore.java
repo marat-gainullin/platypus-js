@@ -415,7 +415,7 @@ public class PlatypusServerCore implements ContextHost, Application<SqlQuery> {
             Object oModule = jsConstr != null ? jsConstr.newObject(new Object[]{}) : null;
             JSObject module = oModule instanceof JSObject ? (JSObject) oModule : null;
             if (module != null) {
-                sessionManager.getSystemSession().registerModule(module);
+                sessionManager.getSystemSession().registerModule(aModuleName, module);
                 Logger.getLogger(PlatypusServerCore.class.getName()).log(Level.INFO, "Resident module \"{0}\" has been started successfully", aModuleName);
                 return true;
             } else {

@@ -64,11 +64,11 @@ public class AppElementFiles {
     }
 
     public Integer getAppElementType() {
-        if (hasExtension(PlatypusFiles.JAVASCRIPT_EXTENSION) && hasExtension(PlatypusFiles.MODEL_EXTENSION) && hasExtension(PlatypusFiles.FORM_EXTENSION)) {
+        if (hasExtension(PlatypusFiles.JAVASCRIPT_EXTENSION) && hasExtension(PlatypusFiles.FORM_EXTENSION)) {
             return ClientConstants.ET_FORM;
-        } else if (hasExtension(PlatypusFiles.JAVASCRIPT_EXTENSION) && hasExtension(PlatypusFiles.MODEL_EXTENSION) && (hasExtension(PlatypusFiles.REPORT_LAYOUT_EXTENSION) || hasExtension(PlatypusFiles.REPORT_LAYOUT_EXTENSION_X))) {
+        } else if (hasExtension(PlatypusFiles.JAVASCRIPT_EXTENSION) && (hasExtension(PlatypusFiles.REPORT_LAYOUT_EXTENSION) || hasExtension(PlatypusFiles.REPORT_LAYOUT_EXTENSION_X))) {
             return ClientConstants.ET_REPORT;
-        } else if (hasExtension(PlatypusFiles.JAVASCRIPT_EXTENSION) && hasExtension(PlatypusFiles.MODEL_EXTENSION)) {
+        } else if (hasExtension(PlatypusFiles.JAVASCRIPT_EXTENSION)) {
             return ClientConstants.ET_COMPONENT;
         } else if (hasExtension(PlatypusFiles.SQL_EXTENSION) && hasExtension(PlatypusFiles.MODEL_EXTENSION)) {
             return ClientConstants.ET_QUERY;

@@ -168,10 +168,6 @@ public class Session implements HasPublished {
         return modulesInstances.containsKey(aName);
     }
 
-    public void registerModule(JSObject aModule) {
-        registerModule(null, aModule);
-    }
-
     public void registerModule(String aName, JSObject aModule) {
         if (aName == null || aName.isEmpty()) {
             JSObject c = (JSObject) aModule.getMember("constructor");

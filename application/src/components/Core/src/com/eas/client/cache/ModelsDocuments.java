@@ -28,8 +28,6 @@ public class ModelsDocuments extends ActualCache<Document> {
         AppElementFiles files = new AppElementFiles();
         if (aFiles.hasExtension(PlatypusFiles.MODEL_EXTENSION)) {
             files.addFile(aFiles.findFileByExtension(PlatypusFiles.MODEL_EXTENSION));
-        } else {
-            throw new IllegalStateException("Application element " + aName + " has no model definition file (" + PlatypusFiles.MODEL_EXTENSION + ")");
         }
         return super.get(aName, files);
     }
@@ -37,9 +35,12 @@ public class ModelsDocuments extends ActualCache<Document> {
     @Override
     protected Document parse(String aName, AppElementFiles aFiles) throws Exception {
         Set<File> files = aFiles.getFiles();
-        assert files.size() == 1;
-        String modelContent = FileUtils.readString(files.iterator().next(), SettingsConstants.COMMON_ENCODING);
-        return Source2XmlDom.transform(modelContent);
+        if (files.size() == 1) {
+            String modelContent = FileUtils.readString(files.iterator().next(), SettingsConstants.COMMON_ENCODING);
+            return Source2XmlDom.transform(modelContent);
+        } else {
+            return null;
+        }
     }
 
 }

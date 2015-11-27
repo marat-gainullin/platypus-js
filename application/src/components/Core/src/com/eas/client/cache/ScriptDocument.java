@@ -127,7 +127,7 @@ public class ScriptDocument {
 
             @Override
             protected void property(String aPropertyName, Expression aValue) {
-                if (!aPropertyName.contains(".") && aValue instanceof FunctionNode) {
+                if (!aPropertyName.contains(".")) {
                     functionProperties.add(aPropertyName);
                 }
             }
@@ -160,7 +160,7 @@ public class ScriptDocument {
 
                 @Override
                 protected void property(String aPropertyName, Expression aValue) {
-                    if (!aPropertyName.contains(".") && aValue instanceof FunctionNode) {
+                    if (!aPropertyName.contains(".")) {
                         functionProperties.add(aPropertyName);
                     }
                 }

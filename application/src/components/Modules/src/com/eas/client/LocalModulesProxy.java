@@ -88,14 +88,16 @@ public class LocalModulesProxy implements ModulesProxy {
                             structure.getQueryDependencies().addAll(walker.getQueryDependencies());
                             //Query dependencies from model's xml
                             Document modelDoc = modelsDocs.get(name, structure.getParts());
-                            Element rootNode = modelDoc.getDocumentElement();
-                            NodeList docNodes = rootNode.getElementsByTagName(Model2XmlDom.ENTITY_TAG_NAME);
-                            for (int i = docNodes.getLength() - 1; i >= 0; i--) {
-                                Node entityNode = docNodes.item(i);
-                                Node queryIdAttribute = entityNode.getAttributes().getNamedItem(Model2XmlDom.QUERY_ID_ATTR_NAME);
-                                if (queryIdAttribute != null) {
-                                    String sQueryName = queryIdAttribute.getNodeValue();
-                                    structure.getQueryDependencies().add(sQueryName);
+                            if (modelDoc != null) {
+                                Element rootNode = modelDoc.getDocumentElement();
+                                NodeList docNodes = rootNode.getElementsByTagName(Model2XmlDom.ENTITY_TAG_NAME);
+                                for (int i = docNodes.getLength() - 1; i >= 0; i--) {
+                                    Node entityNode = docNodes.item(i);
+                                    Node queryIdAttribute = entityNode.getAttributes().getNamedItem(Model2XmlDom.QUERY_ID_ATTR_NAME);
+                                    if (queryIdAttribute != null) {
+                                        String sQueryName = queryIdAttribute.getNodeValue();
+                                        structure.getQueryDependencies().add(sQueryName);
+                                    }
                                 }
                             }
                         }
