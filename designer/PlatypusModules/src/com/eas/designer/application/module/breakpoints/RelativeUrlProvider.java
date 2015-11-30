@@ -5,6 +5,7 @@
  */
 package com.eas.designer.application.module.breakpoints;
 
+import com.eas.client.cache.PlatypusFiles;
 import com.sun.jdi.AbsentInformationException;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -57,7 +58,7 @@ public class RelativeUrlProvider extends SourcePathProvider {
                 rootDirs = computeModuleRoots();
             }
             for (FileObject root : rootDirs) {
-                FileObject fo = root.getFileObject(relativePath);
+                FileObject fo = root.getFileObject(relativePath.endsWith(PlatypusFiles.JAVASCRIPT_FILE_END) ? relativePath : relativePath + PlatypusFiles.JAVASCRIPT_FILE_END);
                 if (fo != null) {
                     return fo.toURL().toExternalForm();
                 }
