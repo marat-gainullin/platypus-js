@@ -67,7 +67,17 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 	protected SimplePanel right = new SimplePanel();
 	protected int decorationsWidth;
 
-	protected PopupPanel popup = new PopupPanel();
+	protected PopupPanel popup = new PopupPanel() {
+
+		public void setPopupPosition(int popupLeft, int popupTop) {
+			super.setPopupPosition(popupLeft, popupTop);
+			if (datePicker != null) {
+				int rightAbsoluteLeft = right.getElement().getAbsoluteLeft();
+				datePicker.shown(rightAbsoluteLeft - popupLeft <= 30);
+			}
+		}
+
+	};
 	private TextBox box;
 	private DateTimePicker datePicker;
 	private TimePicker timePicker;
@@ -118,9 +128,11 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 			public void onValueChange(ValueChangeEvent<Date> event) {
 				Date datePart = event.getValue();
 				Date timePart = timePicker.getValue();
-				if ((new Date(0)).equals(timePart)) {
-					timePart = new Date();
-					timePart = new Date(timePart.getTime() - datePart.getTime());
+				if (value == null && (new Date(0)).equals(timePart)) {
+					Date currentTime = new Date();
+					Date currentDate = new Date(currentTime.getTime());
+					CalendarUtil.resetTime(currentDate);
+					timePart = new Date(currentTime.getTime() - currentDate.getTime());
 				}
 				Date newValue;
 				if (timePart == null) {
@@ -173,7 +185,7 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 		CommonResources.INSTANCE.commons().ensureInjected();
 		right.getElement().addClassName(CommonResources.INSTANCE.commons().unselectable());
 
-		popup.setStyleName("dateBoxPopup");
+		popup.setStyleName("date-box-popup");
 		popup.setAutoHideEnabled(true);
 		container.add(field);
 		container.add(right);
@@ -315,9 +327,9 @@ public class DateTimeBox extends Composite implements RequiresResize, HasValue<D
 
 	@Override
 	public HasWidgets getContainer() {
-	    return container;
+		return container;
 	}
-	
+
 	protected void redecorate() {
 		if (isAttached()) {
 			int paddingRight = right.getElement().getOffsetWidth() + decorationsWidth;

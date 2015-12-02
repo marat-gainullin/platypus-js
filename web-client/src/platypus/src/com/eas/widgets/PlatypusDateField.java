@@ -43,11 +43,6 @@ public class PlatypusDateField extends DateTimeBox implements HasJsFacade, HasEn
 		formatPattern = DEFAULT_FORMAT.getDateTimeFormat().getPattern();
 	}
 
-	public PlatypusDateField(DateTimeFormat aFormat) {
-		super(null, null, new DateBox.DefaultFormat(aFormat));
-		formatPattern = aFormat.getPattern();
-	}
-	
 	@Override
 	public void onResize() {
 		super.onResize();
