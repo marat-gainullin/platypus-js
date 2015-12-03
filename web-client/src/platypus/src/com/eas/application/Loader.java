@@ -572,7 +572,7 @@ public class Loader {
 	}
 
 	public static void load(final Collection<String> aModulesNames, final Callback<Void, String> aCallback, final Set<String> aCyclic) throws Exception {
-        String[] modulesNames = aModulesNames != null ? new HashSet<>(Arrays.asList(aModulesNames)).toArray(new String[]{}) : null;
+        String[] modulesNames = aModulesNames != null ? new HashSet<>(aModulesNames).toArray(new String[]{}) : null;
 		if (modulesNames != null && modulesNames.length > 0) {
 			final Callback<Void, String> process = new CumulativeCallbackAdapter<Void, String>(modulesNames.length) {
 
