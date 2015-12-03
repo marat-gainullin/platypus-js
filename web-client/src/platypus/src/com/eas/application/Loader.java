@@ -600,7 +600,7 @@ public class Loader {
 						}
 					});
 				}else if(aCyclic.contains(moduleName)){
-                    Logger.getLogger(Loader.class.getName()).log(Level.WARNING, "Cyclic dependency detected: {0}", moduleName);
+                    Logger.getLogger(Loader.class.getName()).log(Level.WARNING, "Cyclic dependency detected: " + moduleName);
 					Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 
 						@Override
