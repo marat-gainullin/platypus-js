@@ -318,7 +318,14 @@ public class ApplicationSourceIndexer implements PlatypusIndexer {
                 if (files != null) {
                     return files.copy();
                 } else {
-                    return null;
+                    File plainResource = new File(resourceName);
+                    if (plainResource.exists()) {
+                        files = new AppElementFiles();
+                        files.addFile(plainResource);
+                        return files;
+                    } else {
+                        return null;
+                    }
                 }
             }
         } else {
