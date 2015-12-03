@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eas.client.forms.components.model;
+package com.eas.client.forms.events;
 
 import com.bearsoft.gui.grid.data.CellData;
 import com.eas.client.events.PublishedSourcedEvent;

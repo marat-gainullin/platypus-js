@@ -415,7 +415,6 @@ public class Loader {
 
 							@Override
 							public void onSuccess(Void result) {
-								fireLoaded(aModuleName);
 								final List<String> amdDependencies = Loader.consumeAmdDependencies();
 								final Callback<String, Void> amdDefineCallback = Loader.consumeAmdDefineCallback();
 								if (amdDefineCallback != null) {
@@ -434,6 +433,7 @@ public class Loader {
 	                                            // we have to put it definition as undefined by hand.
 												if (!Predefine.getDefined().containsKey(aModuleName))
 													Predefine.getDefined().put(aModuleName, null);
+												fireLoaded(aModuleName);
 												notifyModuleLoaded(aModuleName);
 											}
 
@@ -445,6 +445,7 @@ public class Loader {
                                     // Module is still not defined because of absent module definer.
                                     // And we have to put it definition as undefined by hand.
 									Predefine.getDefined().put(aModuleName, null);
+									fireLoaded(aModuleName);
 									notifyModuleLoaded(aModuleName);
 								}
 							}
@@ -571,8 +572,9 @@ public class Loader {
 	}
 
 	public static void load(final Collection<String> aModulesNames, final Callback<Void, String> aCallback, final Set<String> aCyclic) throws Exception {
-		if (!aModulesNames.isEmpty()) {
-			final Callback<Void, String> process = new CumulativeCallbackAdapter<Void, String>(aModulesNames.size()) {
+        String[] modulesNames = aModulesNames != null ? new HashSet<>(Arrays.asList(aModulesNames)).toArray(new String[]{}) : null;
+		if (modulesNames != null && modulesNames.length > 0) {
+			final Callback<Void, String> process = new CumulativeCallbackAdapter<Void, String>(modulesNames.length) {
 
 				@Override
 				protected void failed(List<String> aReasons) {
@@ -588,8 +590,17 @@ public class Loader {
 				}
 
 			};
-			for (final String moduleName : aModulesNames) {
-				if (Predefine.getDefined().containsKey(moduleName) || aCyclic.contains(moduleName)) {
+			for (final String moduleName : modulesNames) {
+				if (Predefine.getDefined().containsKey(moduleName)) {
+					Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+
+						@Override
+						public void execute() {
+							process.onSuccess(null);
+						}
+					});
+				}else if(aCyclic.contains(moduleName)){
+                    Logger.getLogger(Loader.class.getName()).log(Level.WARNING, "Cyclic dependency detected: {0}", moduleName);
 					Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 
 						@Override

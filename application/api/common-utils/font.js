@@ -28,7 +28,7 @@ define(['boxing'], function(B) {
         if(Font.superclass)
             Font.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-    };
+    }
 
     var ScriptsClass = Java.type("com.eas.script.Scripts");
     var space = ScriptsClass.getSpace();

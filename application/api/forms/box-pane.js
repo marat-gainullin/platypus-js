@@ -215,13 +215,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return B.boxAsJs(value);
-            }
-        });
-
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -229,6 +222,13 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             },
             set: function(aValue) {
                 delegate.onComponentShown = aValue;
+            }
+        });
+
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return B.boxAsJs(value);
             }
         });
 
@@ -289,13 +289,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        Object.defineProperty(this, "count", {
-            get: function() {
-                var value = delegate.count;
-                return B.boxAsJs(value);
-            }
-        });
-
         Object.defineProperty(this, "onActionPerformed", {
             get: function() {
                 var value = delegate.onActionPerformed;
@@ -313,6 +306,13 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             },
             set: function(aValue) {
                 delegate.onKeyReleased = aValue;
+            }
+        });
+
+        Object.defineProperty(this, "count", {
+            get: function() {
+                var value = delegate.count;
+                return B.boxAsJs(value);
             }
         });
 
@@ -453,7 +453,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-    };
+    }
     /**
      * Appends the specified component to the end of this container.
      * @param component the component to add
@@ -490,17 +490,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     };
 
     /**
-     * Tries to acquire focus for this component.
-     * @method focus
-     * @memberOf BoxPane
-     */
-    BoxPane.prototype.focus = function() {
-        var delegate = this.unwrap();
-        var value = delegate.focus();
-        return B.boxAsJs(value);
-    };
-
-    /**
      * Gets the container's children components.
      * @method children
      * @memberOf BoxPane
@@ -508,6 +497,17 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     BoxPane.prototype.children = function() {
         var delegate = this.unwrap();
         var value = delegate.children();
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Tries to acquire focus for this component.
+     * @method focus
+     * @memberOf BoxPane
+     */
+    BoxPane.prototype.focus = function() {
+        var delegate = this.unwrap();
+        var value = delegate.focus();
         return B.boxAsJs(value);
     };
 

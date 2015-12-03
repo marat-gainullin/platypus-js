@@ -24,7 +24,7 @@ define(['boxing'], function(B) {
         if(Cursor.superclass)
             Cursor.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-    };
+    }
     Object.defineProperty(Cursor, "CROSSHAIR", {value: new Cursor(1)});
     Object.defineProperty(Cursor, "DEFAULT", {value: new Cursor(0)});
     Object.defineProperty(Cursor, "AUTO", {value: new Cursor(0)});

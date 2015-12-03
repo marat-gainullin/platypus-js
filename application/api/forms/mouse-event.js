@@ -22,16 +22,16 @@ define(['boxing'], function(B) {
         if(MouseEvent.superclass)
             MouseEvent.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-        Object.defineProperty(this, "altDown", {
+        Object.defineProperty(this, "button", {
             get: function() {
-                var value = delegate.altDown;
+                var value = delegate.button;
                 return B.boxAsJs(value);
             }
         });
 
-        Object.defineProperty(this, "button", {
+        Object.defineProperty(this, "altDown", {
             get: function() {
-                var value = delegate.button;
+                var value = delegate.altDown;
                 return B.boxAsJs(value);
             }
         });
@@ -85,7 +85,7 @@ define(['boxing'], function(B) {
             }
         });
 
-    };
+    }
 
     var ScriptsClass = Java.type("com.eas.script.Scripts");
     var space = ScriptsClass.getSpace();

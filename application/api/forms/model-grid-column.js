@@ -189,7 +189,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-    };
+    }
     /**
      * @method sort
      * @memberOf ModelGridColumn
@@ -197,6 +197,16 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     ModelGridColumn.prototype.sort = function() {
         var delegate = this.unwrap();
         var value = delegate.sort();
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * @method unsort
+     * @memberOf ModelGridColumn
+     * Clears sort column, works only in HTML5 */
+    ModelGridColumn.prototype.unsort = function() {
+        var delegate = this.unwrap();
+        var value = delegate.unsort();
         return B.boxAsJs(value);
     };
 
@@ -241,16 +251,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     ModelGridColumn.prototype.insertColumnNode = function(position, node) {
         var delegate = this.unwrap();
         var value = delegate.insertColumnNode(B.boxAsJava(position), B.boxAsJava(node));
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * @method unsort
-     * @memberOf ModelGridColumn
-     * Clears sort column, works only in HTML5 */
-    ModelGridColumn.prototype.unsort = function() {
-        var delegate = this.unwrap();
-        var value = delegate.unsort();
         return B.boxAsJs(value);
     };
 

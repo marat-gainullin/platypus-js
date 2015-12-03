@@ -15,7 +15,6 @@ define([
     , './text-area'
     , './text-field'
     , './toggle-button'
-    , './cell-render-event'
     , './model-check-box'
     , './model-combo'
     , './model-date'
@@ -39,6 +38,7 @@ define([
     , './tabbed-pane'
     , './tool-bar'
     , './action-event'
+    , './cell-render-event'
     , './component-event'
     , './container-event'
     , './focus-event'
@@ -71,7 +71,6 @@ define([
     , TextArea
     , TextField
     , ToggleButton
-    , CellRenderEvent
     , ModelCheckBox
     , ModelCombo
     , ModelDate
@@ -95,6 +94,7 @@ define([
     , TabbedPane
     , ToolBar
     , ActionEvent
+    , CellRenderEvent
     , ComponentEvent
     , ContainerEvent
     , FocusEvent
@@ -128,7 +128,6 @@ define([
         , TextArea: TextArea
         , TextField: TextField
         , ToggleButton: ToggleButton
-        , CellRenderEvent: CellRenderEvent
         , ModelCheckBox: ModelCheckBox
         , ModelCombo: ModelCombo
         , ModelDate: ModelDate
@@ -152,6 +151,7 @@ define([
         , TabbedPane: TabbedPane
         , ToolBar: ToolBar
         , ActionEvent: ActionEvent
+        , CellRenderEvent: CellRenderEvent
         , ComponentEvent: ComponentEvent
         , ContainerEvent: ContainerEvent
         , FocusEvent: FocusEvent

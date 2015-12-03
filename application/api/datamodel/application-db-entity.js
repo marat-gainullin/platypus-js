@@ -42,7 +42,7 @@ define(['boxing'], function(B) {
             }
         });
 
-    };
+    }
     /**
      * Applies the updates into the database and commits the transaction.
      * @param onSuccess Success callback. It has an argument, - updates rows count.
@@ -79,7 +79,7 @@ define(['boxing'], function(B) {
     };
 
     /**
-     * Refreshes entity, only if any of its parameters has changed.
+     * Requeries the entity, only if any of its parameters has changed.
      * @param onSuccess The handler function for refresh data on success event (optional).
      * @param onFailure The handler function for refresh data on failure event (optional).
      * @method execute

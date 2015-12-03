@@ -4,6 +4,7 @@
  */
 package com.eas.client.forms.components.model;
 
+import com.eas.client.forms.events.CellRenderEvent;
 import com.eas.client.forms.ModelCellEditingListener;
 import com.eas.client.forms.Forms;
 import com.eas.client.forms.HasComponentEvents;

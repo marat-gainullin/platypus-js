@@ -22,7 +22,7 @@ define(['boxing'], function(B) {
         if(ApplicationPlatypusModel.superclass)
             ApplicationPlatypusModel.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-    };
+    }
     /**
      * Saves model data changes.
      * If model can't apply the changed data, than exception is thrown. In this case, application can call model.save() another time to save the changes.
@@ -84,9 +84,9 @@ define(['boxing'], function(B) {
      * @method loadEntity
      * @memberOf ApplicationPlatypusModel
      */
-    ApplicationPlatypusModel.prototype.loadEntity = function(queryId) {
+    ApplicationPlatypusModel.prototype.loadEntity = function(queryName) {
         var delegate = this.unwrap();
-        var value = delegate.loadEntity(B.boxAsJava(queryId));
+        var value = delegate.loadEntity(B.boxAsJava(queryName));
         return B.boxAsJs(value);
     };
 

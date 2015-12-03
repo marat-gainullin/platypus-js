@@ -22,7 +22,7 @@ import com.eas.client.forms.HasComponentEvents;
 import com.eas.client.forms.HasJsName;
 import com.eas.client.forms.Widget;
 import com.eas.client.forms.components.model.ArrayModelWidget;
-import com.eas.client.forms.components.model.CellRenderEvent;
+import com.eas.client.forms.events.CellRenderEvent;
 import com.eas.client.forms.components.model.ModelComponentDecorator;
 import com.eas.client.forms.components.model.ModelWidget;
 import com.eas.client.forms.components.model.grid.columns.ModelColumn;

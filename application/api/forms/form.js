@@ -170,16 +170,6 @@ define(['boxing'], function(B) {
             }
         });
 
-        Object.defineProperty(this, "onWindowRestored", {
-            get: function() {
-                var value = delegate.onWindowRestored;
-                return value;
-            },
-            set: function(aValue) {
-                delegate.onWindowRestored = aValue;
-            }
-        });
-
         Object.defineProperty(this, "formKey", {
             get: function() {
                 var value = delegate.formKey;
@@ -187,6 +177,16 @@ define(['boxing'], function(B) {
             },
             set: function(aValue) {
                 delegate.formKey = B.boxAsJava(aValue);
+            }
+        });
+
+        Object.defineProperty(this, "onWindowRestored", {
+            get: function() {
+                var value = delegate.onWindowRestored;
+                return value;
+            },
+            set: function(aValue) {
+                delegate.onWindowRestored = aValue;
             }
         });
 
@@ -267,7 +267,7 @@ define(['boxing'], function(B) {
             }
         });
 
-    };
+    }
     /**
      * Closes this form.
      * @param obj an object to be passed as a result of a selection into <code>showModal</code> callback handler function.
@@ -277,17 +277,6 @@ define(['boxing'], function(B) {
     Form.prototype.close = function(obj) {
         var delegate = this.unwrap();
         var value = delegate.close(B.boxAsJava(obj));
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * Shows the form as an ordinary window.
-     * @method show
-     * @memberOf Form
-     */
-    Form.prototype.show = function() {
-        var delegate = this.unwrap();
-        var value = delegate.show();
         return B.boxAsJs(value);
     };
 
@@ -303,13 +292,25 @@ define(['boxing'], function(B) {
     };
 
     /**
-     * Maximizes this form.
-     * @method maximize
+     * Shows the form as a dialog (modal window).
+     * @param callback a callback handler function
+     * @method showModal
      * @memberOf Form
      */
-    Form.prototype.maximize = function() {
+    Form.prototype.showModal = function(callback) {
         var delegate = this.unwrap();
-        var value = delegate.maximize();
+        var value = delegate.showModal(B.boxAsJava(callback));
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Shows the form as an ordinary window.
+     * @method show
+     * @memberOf Form
+     */
+    Form.prototype.show = function() {
+        var delegate = this.unwrap();
+        var value = delegate.show();
         return B.boxAsJs(value);
     };
 
@@ -325,6 +326,17 @@ define(['boxing'], function(B) {
     };
 
     /**
+     * Maximizes this form.
+     * @method maximize
+     * @memberOf Form
+     */
+    Form.prototype.maximize = function() {
+        var delegate = this.unwrap();
+        var value = delegate.maximize();
+        return B.boxAsJs(value);
+    };
+
+    /**
      * Restores this form state.
      * @method restore
      * @memberOf Form
@@ -332,18 +344,6 @@ define(['boxing'], function(B) {
     Form.prototype.restore = function() {
         var delegate = this.unwrap();
         var value = delegate.restore();
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * Shows the form as a dialog (modal window).
-     * @param callback a callback handler function
-     * @method showModal
-     * @memberOf Form
-     */
-    Form.prototype.showModal = function(callback) {
-        var delegate = this.unwrap();
-        var value = delegate.showModal(B.boxAsJava(callback));
         return B.boxAsJs(value);
     };
 

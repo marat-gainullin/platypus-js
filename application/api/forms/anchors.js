@@ -35,7 +35,7 @@ define(['boxing'], function(B) {
         if(Anchors.superclass)
             Anchors.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-    };
+    }
 
     var ScriptsClass = Java.type("com.eas.script.Scripts");
     var space = ScriptsClass.getSpace();

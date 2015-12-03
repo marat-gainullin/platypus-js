@@ -120,7 +120,7 @@ define(['boxing'], function(B) {
             }
         });
 
-    };
+    }
     Object.defineProperty(Color, "black", {value: new Color(0, 0, 0)});
     Object.defineProperty(Color, "BLACK", {value: new Color(0, 0, 0)});
     Object.defineProperty(Color, "blue", {value: new Color(0, 0, 0xff)});

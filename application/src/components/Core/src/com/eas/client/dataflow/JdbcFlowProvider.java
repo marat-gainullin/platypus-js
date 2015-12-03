@@ -10,6 +10,7 @@ import com.eas.client.metadata.Parameters;
 import com.eas.concurrent.CallableConsumer;
 import com.eas.script.Scripts;
 import com.eas.util.BinaryUtils;
+import com.eas.util.RowsetJsonConstants;
 import com.eas.util.StringUtils;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,9 +18,11 @@ import java.io.Reader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -623,9 +626,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                                     Parameter param = aParams.get(i);
                                     assignParameter(param, stmt, i, connection);
                                 }
-                                if (queriesLogger.isLoggable(Level.FINE)) {
-                                    queriesLogger.log(Level.FINE, "Executing sql with {0} parameters:\n{1}", new Object[]{aParams.getParametersCount(), sqlClause});
-                                }
+                                logQuery(sqlClause, aParams);
                                 ResultSet rs = null;
                                 if (procedure) {
                                     assert stmt instanceof CallableStatement;
@@ -701,6 +702,27 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
             return null;
         } else {
             return doWork.call();
+        }
+    }
+
+    protected static void logQuery(String sqlClause, Parameters aParams) {
+        if (queriesLogger.isLoggable(Level.FINE)) {
+            boolean finerLogs = queriesLogger.isLoggable(Level.FINER);
+            queriesLogger.log(Level.FINE, "Executing sql {0} with {1} parameters{2}", new Object[]{sqlClause, aParams.getParametersCount(), finerLogs ? ":" : ""});
+            if (finerLogs) {
+                for (int i = 1; i <= aParams.getParametersCount(); i++) {
+                    Parameter param = aParams.get(i);
+                    if (Scripts.DATE_TYPE_NAME.equals(param.getType())) {
+                        Date dateValue = (Date) param.getValue();
+                        SimpleDateFormat sdf = new SimpleDateFormat(RowsetJsonConstants.DATE_FORMAT);
+                        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+                        String jsonLikeText = sdf.format(dateValue);
+                        queriesLogger.log(Level.FINER, "{0}, {1}: json like timestamp: {2}, raw timestamp: {3}", new Object[]{i, param.getName(), jsonLikeText, dateValue.getTime()});
+                    } else {
+                        queriesLogger.log(Level.FINER, "{0}, {1}: {2}", new Object[]{i, param.getName(), param.getValue()});
+                    }
+                }
+            }
         }
     }
 

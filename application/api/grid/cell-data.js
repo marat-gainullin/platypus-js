@@ -39,7 +39,7 @@ define(['boxing'], function(B) {
             }
         });
 
-    };
+    }
 
     var ScriptsClass = Java.type("com.eas.script.Scripts");
     var space = ScriptsClass.getSpace();

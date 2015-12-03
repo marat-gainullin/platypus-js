@@ -149,13 +149,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return B.boxAsJs(value);
-            }
-        });
-
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -163,6 +156,13 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             },
             set: function(aValue) {
                 delegate.onComponentShown = aValue;
+            }
+        });
+
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return B.boxAsJs(value);
             }
         });
 
@@ -363,16 +363,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        Object.defineProperty(this, "min", {
-            get: function() {
-                var value = delegate.min;
-                return B.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.min = B.boxAsJava(aValue);
-            }
-        });
-
         Object.defineProperty(this, "value", {
             get: function() {
                 var value = delegate.jsValue;
@@ -380,6 +370,16 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             },
             set: function(aValue) {
                 delegate.jsValue = B.boxAsJava(aValue);
+            }
+        });
+
+        Object.defineProperty(this, "min", {
+            get: function() {
+                var value = delegate.min;
+                return B.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.min = B.boxAsJava(aValue);
             }
         });
 
@@ -540,7 +540,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-    };
+    }
     /**
      * Tries to acquire focus for this component.
      * @method focus

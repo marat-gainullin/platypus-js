@@ -352,7 +352,7 @@ public class Classes2Scripts {
             }
         }
         if (ModelGrid.class.getName().equals(ci.javaClassName)) {
-            ci.jsDeps += ", 'grid/cell-data', './cell-render-event', './item-event', './service-grid-column', './check-grid-column', './radio-grid-column', './model-check-box', './model-combo', './model-date', './model-formatted-field', './model-grid-column', './model-spin', './model-text-area'";
+            ci.jsDeps += ", 'grid/cell-data', './service-grid-column', './check-grid-column', './radio-grid-column', './model-check-box', './model-combo', './model-date', './model-formatted-field', './model-grid-column', './model-spin', './model-text-area'";
             ci.jsDepsResults += ", CellData, RenderEvent, ItemEvent, ServiceGridColumn, CheckGridColumn, RadioGridColumn, ModelCheckBox, ModelCombo, ModelDate, ModelFormattedField, ModelGridColumn, ModelSpin, ModelTextArea";
         }
         String js = CONSTRUCTOR_TEMPLATE

@@ -28,7 +28,7 @@ define(['boxing'], function(B) {
         if(Report.superclass)
             Report.superclass.constructor.apply(this, arguments);
         delegate.setPublished(this);
-    };
+    }
     /**
      * Runs printing.
      * @method print

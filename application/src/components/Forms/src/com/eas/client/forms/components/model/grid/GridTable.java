@@ -10,7 +10,7 @@ import com.bearsoft.gui.grid.editing.InsettedTreeEditor;
 import com.bearsoft.gui.grid.rendering.InsettedTreeRenderer;
 import com.eas.client.forms.Forms;
 import com.eas.client.forms.ModelCellEditingListener;
-import com.eas.client.forms.components.model.CellRenderEvent;
+import com.eas.client.forms.events.CellRenderEvent;
 import com.eas.client.forms.components.model.grid.columns.ModelColumn;
 import com.eas.client.forms.components.model.grid.columns.RadioServiceColumn;
 import com.eas.gui.ScriptColor;

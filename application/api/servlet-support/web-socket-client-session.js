@@ -91,7 +91,7 @@ define(['boxing'], function(B) {
             }
         });
 
-    };
+    }
     /**
      *
      * @method close

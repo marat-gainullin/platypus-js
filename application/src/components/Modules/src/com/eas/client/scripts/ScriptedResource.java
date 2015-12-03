@@ -32,12 +32,14 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -479,6 +481,7 @@ public class ScriptedResource {
                     conn.setRequestProperty(aHeader.getKey(), "" + ((Number) oValue).intValue());
                 } else if (oValue instanceof Date) {
                     DateFormat df = new SimpleDateFormat(PlatypusHttpConstants.HTTP_DATE_FORMAT);
+                    df.setTimeZone(TimeZone.getTimeZone("UTC"));
                     conn.setRequestProperty(aHeader.getKey(), df.format((Date) oValue));
                 } else if (oValue != null) {
                     conn.setRequestProperty(aHeader.getKey(), "" + oValue);
@@ -678,9 +681,9 @@ public class ScriptedResource {
         return scriptOrModuleName != null && !scriptOrModuleName.isEmpty() ? scriptOrModuleName : "[start]";
     }
 
-    public static void require(String[] aScriptsIds, String aCalledFromFile, JSObject onSuccess, JSObject onFailure) throws Exception {
+    public static void require(String[] aModulesNames, String aCalledFromFile, JSObject onSuccess, JSObject onFailure) throws Exception {
         Scripts.Space space = Scripts.getSpace();
-        _require(aScriptsIds, aCalledFromFile, space, new HashSet<>(), (Void v) -> {
+        _require(aModulesNames, aCalledFromFile, space, new HashSet<>(), (Void v) -> {
             if (onSuccess != null) {
                 onSuccess.call(null, new Object[]{});
             }
@@ -707,11 +710,12 @@ public class ScriptedResource {
         }
     }
 
-    public static void _require(String[] aScriptsNames, String aCalledFromFile, Scripts.Space aSpace, Set<String> aCyclic, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
-        if (aScriptsNames != null && aScriptsNames.length > 0) {
+    public static void _require(String[] aModulesNames, String aCalledFromFile, Scripts.Space aSpace, Set<String> aCyclic, Consumer<Void> onSuccess, Consumer<Exception> onFailure) throws Exception {
+        String[] modulesNames = aModulesNames != null ? new HashSet<>(Arrays.asList(aModulesNames)).toArray(new String[]{}) : null;
+        if (modulesNames != null && modulesNames.length > 0) {
             Path apiPath = Scripts.getAbsoluteApiPath();
             Path appPath = getAbsoluteAppPath();
-            RequireProcess process = new RequireProcess(aScriptsNames.length, (Void v) -> {
+            RequireProcess process = new RequireProcess(modulesNames.length, (Void v) -> {
                 aSpace.process(() -> {
                     onSuccess.accept(v);
                 });
@@ -720,29 +724,31 @@ public class ScriptedResource {
                     onFailure.accept(ex);
                 });
             });
-            for (String scriptOrModuleName : aScriptsNames) {
-                if (aSpace.getDefined().containsKey(scriptOrModuleName) || aCyclic.contains(scriptOrModuleName)) {
-                    process.complete(scriptOrModuleName, null);
-                } else {
-                    aCyclic.add(scriptOrModuleName);
+            for (String moduleName : modulesNames) {
+                if (aSpace.getDefined().containsKey(moduleName)) {
+                    process.complete(moduleName, null);
+                } else if(aCyclic.contains(moduleName)){
+                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, "Cyclic dependency detected: {0}", checkedScriptOrModuleName(moduleName));
+                    process.complete(moduleName, null);
+                }else {
+                    aCyclic.add(moduleName);
                     // add callbacks to pendings
-                    if (!aSpace.getPending().containsKey(scriptOrModuleName)) {
-                        aSpace.getPending().put(scriptOrModuleName, new ArrayList<>());
+                    if (!aSpace.getPending().containsKey(moduleName)) {
+                        aSpace.getPending().put(moduleName, new ArrayList<>());
                     }
-                    List<Scripts.Pending> pending = aSpace.getPending().get(scriptOrModuleName);
+                    List<Scripts.Pending> pending = aSpace.getPending().get(moduleName);
                     pending.add(new Scripts.Pending((Void v) -> {
-                        process.complete(scriptOrModuleName, null);
+                        process.complete(moduleName, null);
                     }, (Exception ex) -> {
-                        process.complete(scriptOrModuleName, ex);
+                        process.complete(moduleName, ex);
                     }));
-                    if (!aSpace.getRequired().contains(scriptOrModuleName)) {
-                        Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "Loading {0} ...", checkedScriptOrModuleName(scriptOrModuleName));
-                        aSpace.getRequired().add(scriptOrModuleName);
-                        loadModule(apiPath, scriptOrModuleName, aCalledFromFile, aSpace, aCyclic, (Path aLocalFile) -> {
+                    if (!aSpace.getRequired().contains(moduleName)) {
+                        Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "Loading {0} ...", checkedScriptOrModuleName(moduleName));
+                        aSpace.getRequired().add(moduleName);
+                        loadModule(apiPath, moduleName, aCalledFromFile, aSpace, aCyclic, (Path aLocalFile) -> {
                             try {
                                 // sync require may occur while pending
-                                if (!aSpace.getDefined().containsKey(scriptOrModuleName)) {
-                                    Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Loaded", checkedScriptOrModuleName(scriptOrModuleName));
+                                if (!aSpace.getDefined().containsKey(moduleName)) {
                                     Path relativeLocalPath;
                                     if (aLocalFile.startsWith(apiPath)) {
                                         relativeLocalPath = apiPath.relativize(aLocalFile);
@@ -756,21 +762,23 @@ public class ScriptedResource {
                                     JSObject onDependenciesResolved = aSpace.consumeAmdDefineCallback();
                                     if (onDependenciesResolved != null) {
                                         _require(amdDependencies, null, aSpace, new HashSet<>(), (Void v) -> {
-                                            onDependenciesResolved.call(null, new Object[]{scriptOrModuleName});
+                                            onDependenciesResolved.call(null, new Object[]{moduleName});
                                             // If module is still not defined because of buggy definer in script,
                                             // we have to put it definition as undefined by hand.
-                                            if(!aSpace.getDefined().containsKey(scriptOrModuleName)){
-                                                aSpace.getDefined().put(scriptOrModuleName, null);
+                                            if(!aSpace.getDefined().containsKey(moduleName)){
+                                                aSpace.getDefined().put(moduleName, null);
                                             }
+                                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Loaded", checkedScriptOrModuleName(moduleName));
                                             notifyModuleLoaded(pending);
                                         }, (Exception ex) -> {
-                                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Failed {1}", new Object[]{checkedScriptOrModuleName(scriptOrModuleName), ex.toString()});
+                                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, "{0} - Failed {1}", new Object[]{checkedScriptOrModuleName(moduleName), ex.toString()});
                                             notifyModuleFailed(pending, ex);
                                         });
                                     } else {
                                         // Module is still not defined because of absent module definer.
                                         // And we have to put it definition as undefined by hand.
-                                        aSpace.getDefined().put(scriptOrModuleName, null);
+                                        aSpace.getDefined().put(moduleName, null);
+                                        Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Loaded", checkedScriptOrModuleName(moduleName));
                                         notifyModuleLoaded(pending);
                                     }
                                 } else {
@@ -780,7 +788,7 @@ public class ScriptedResource {
                                 Logger.getLogger(ScriptedResource.class.getName()).log(Level.SEVERE, null, ex);
                             }
                         }, (Exception ex) -> {
-                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.INFO, "{0} - Failed {1}", new Object[]{checkedScriptOrModuleName(scriptOrModuleName), ex.toString()});
+                            Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, "{0} - Failed {1}", new Object[]{checkedScriptOrModuleName(moduleName), ex.toString()});
                             notifyModuleFailed(pending, ex);
                         });
                     }
@@ -793,15 +801,15 @@ public class ScriptedResource {
         }
     }
 
-    public static void require(String[] aScriptsIds, String aCalledFromFile) throws Exception {
+    public static void require(String[] aModulesNames, String aCalledFromFile) throws Exception {
         Scripts.Space space = Scripts.getSpace();
-        _require(aScriptsIds, aCalledFromFile, space);
+        _require(aModulesNames, aCalledFromFile, space);
     }
 
-    public static void _require(String[] aScriptsNames, String aCalledFromFile, Scripts.Space aSpace) throws Exception {
+    public static void _require(String[] aModulesNames, String aCalledFromFile, Scripts.Space aSpace) throws Exception {
         Path apiPath = Scripts.getAbsoluteApiPath();
         Path appPath = getAbsoluteAppPath();
-        for (String scriptOrModuleName : aScriptsNames) {
+        for (String scriptOrModuleName : aModulesNames) {
             if (!aSpace.getDefined().containsKey(scriptOrModuleName)) {
                 Path apiLocalPath = apiPath.resolve(scriptOrModuleName + PlatypusFiles.JAVASCRIPT_FILE_END);
                 if (apiLocalPath != null && apiLocalPath.toFile().exists() && !apiLocalPath.toFile().isDirectory()) {

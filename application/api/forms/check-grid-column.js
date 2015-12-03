@@ -149,7 +149,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-    };
+    }
 
     var ScriptsClass = Java.type("com.eas.script.Scripts");
     var space = ScriptsClass.getSpace();

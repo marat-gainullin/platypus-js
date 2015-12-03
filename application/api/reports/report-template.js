@@ -60,7 +60,7 @@ define(['boxing'], function(B) {
             }
         });
 
-    };
+    }
     /**
      * Generate report from template.
      * @method generateReport

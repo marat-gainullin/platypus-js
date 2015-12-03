@@ -32,16 +32,6 @@ define(['boxing'], function(B) {
             }
         });
 
-        Object.defineProperty(this, "readonly", {
-            get: function() {
-                var value = delegate.readonly;
-                return B.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.readonly = B.boxAsJava(aValue);
-            }
-        });
-
         Object.defineProperty(this, "nullable", {
             get: function() {
                 var value = delegate.nullable;
@@ -49,6 +39,16 @@ define(['boxing'], function(B) {
             },
             set: function(aValue) {
                 delegate.nullable = B.boxAsJava(aValue);
+            }
+        });
+
+        Object.defineProperty(this, "readonly", {
+            get: function() {
+                var value = delegate.readonly;
+                return B.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.readonly = B.boxAsJava(aValue);
             }
         });
 
@@ -109,7 +109,7 @@ define(['boxing'], function(B) {
             }
         });
 
-    };
+    }
 
     var ScriptsClass = Java.type("com.eas.script.Scripts");
     var space = ScriptsClass.getSpace();

@@ -1,6 +1,6 @@
 /* global Java */
 
-define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/font', './action-event', './cell-render-event', './component-event', './focus-event', './item-event', './key-event', './value-change-event', './popup-menu', 'grid/cell-data', './cell-render-event', './item-event', './service-grid-column', './check-grid-column', './radio-grid-column', './model-check-box', './model-combo', './model-date', './model-formatted-field', './model-grid-column', './model-spin', './model-text-area'], function(B, Color, Cursor, Font, ActionEvent, RenderEvent, ComponentEvent, FocusEvent, ItemEvent, KeyEvent, ValueChangeEvent, PopupMenu, CellData, RenderEvent, ItemEvent, ServiceGridColumn, CheckGridColumn, RadioGridColumn, ModelCheckBox, ModelCombo, ModelDate, ModelFormattedField, ModelGridColumn, ModelSpin, ModelTextArea) {
+define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/font', './action-event', './cell-render-event', './component-event', './focus-event', './item-event', './key-event', './value-change-event', './popup-menu', 'grid/cell-data', './service-grid-column', './check-grid-column', './radio-grid-column', './model-check-box', './model-combo', './model-date', './model-formatted-field', './model-grid-column', './model-spin', './model-text-area'], function(B, Color, Cursor, Font, ActionEvent, RenderEvent, ComponentEvent, FocusEvent, ItemEvent, KeyEvent, ValueChangeEvent, PopupMenu, CellData, RenderEvent, ItemEvent, ServiceGridColumn, CheckGridColumn, RadioGridColumn, ModelCheckBox, ModelCombo, ModelDate, ModelFormattedField, ModelGridColumn, ModelSpin, ModelTextArea) {
     var className = "com.eas.client.forms.components.model.grid.ModelGrid";
     var javaClass = Java.type(className);
     /**
@@ -146,13 +146,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        Object.defineProperty(this, "element", {
-            get: function() {
-                var value = delegate.element;
-                return B.boxAsJs(value);
-            }
-        });
-
         Object.defineProperty(this, "onComponentShown", {
             get: function() {
                 var value = delegate.onComponentShown;
@@ -160,6 +153,13 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             },
             set: function(aValue) {
                 delegate.onComponentShown = aValue;
+            }
+        });
+
+        Object.defineProperty(this, "element", {
+            get: function() {
+                var value = delegate.element;
+                return B.boxAsJs(value);
             }
         });
 
@@ -550,16 +550,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-        Object.defineProperty(this, "gridColor", {
-            get: function() {
-                var value = delegate.gridColor;
-                return B.boxAsJs(value);
-            },
-            set: function(aValue) {
-                delegate.gridColor = B.boxAsJava(aValue);
-            }
-        });
-
         Object.defineProperty(this, "showHorizontalLines", {
             get: function() {
                 var value = delegate.showHorizontalLines;
@@ -567,6 +557,16 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             },
             set: function(aValue) {
                 delegate.showHorizontalLines = B.boxAsJava(aValue);
+            }
+        });
+
+        Object.defineProperty(this, "gridColor", {
+            get: function() {
+                var value = delegate.gridColor;
+                return B.boxAsJs(value);
+            },
+            set: function(aValue) {
+                delegate.gridColor = B.boxAsJava(aValue);
             }
         });
 
@@ -610,7 +610,7 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
             }
         });
 
-    };
+    }
     /**
      * Shows find dialog.
      * @deprecated Use find() instead.
@@ -620,40 +620,6 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     ModelGrid.prototype.find = function() {
         var delegate = this.unwrap();
         var value = delegate.find();
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * Tries to acquire focus for this component.
-     * @method focus
-     * @memberOf ModelGrid
-     */
-    ModelGrid.prototype.focus = function() {
-        var delegate = this.unwrap();
-        var value = delegate.focus();
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * Clears current selection.
-     * @method clearSelection
-     * @memberOf ModelGrid
-     */
-    ModelGrid.prototype.clearSelection = function() {
-        var delegate = this.unwrap();
-        var value = delegate.clearSelection();
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * Unselects the specified element.
-     * @param instance Entity's instance to be unselected
-     * @method unselect
-     * @memberOf ModelGrid
-     */
-    ModelGrid.prototype.unselect = function(instance) {
-        var delegate = this.unwrap();
-        var value = delegate.unselect(B.boxAsJava(instance));
         return B.boxAsJs(value);
     };
 
@@ -670,15 +636,35 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     };
 
     /**
-     * Makes specified instance visible.
-     * @param instance Entity's instance to make visible.
-     * @param need2select true to select the instance (optional).
-     * @method makeVisible
+     * Clears current selection.
+     * @method clearSelection
      * @memberOf ModelGrid
      */
-    ModelGrid.prototype.makeVisible = function(instance, need2select) {
+    ModelGrid.prototype.clearSelection = function() {
         var delegate = this.unwrap();
-        var value = delegate.makeVisible(B.boxAsJava(instance), B.boxAsJava(need2select));
+        var value = delegate.clearSelection();
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Tries to acquire focus for this component.
+     * @method focus
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.focus = function() {
+        var delegate = this.unwrap();
+        var value = delegate.focus();
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Redraw the component.
+     * @method redraw
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.redraw = function() {
+        var delegate = this.unwrap();
+        var value = delegate.redraw();
         return B.boxAsJs(value);
     };
 
@@ -712,6 +698,28 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     ModelGrid.prototype.try2CancelAnyEditing = function() {
         var delegate = this.unwrap();
         var value = delegate.try2CancelAnyEditing();
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * Unselects the specified element.
+     * @param instance Entity's instance to be unselected
+     * @method unselect
+     * @memberOf ModelGrid
+     */
+    ModelGrid.prototype.unselect = function(instance) {
+        var delegate = this.unwrap();
+        var value = delegate.unselect(B.boxAsJava(instance));
+        return B.boxAsJs(value);
+    };
+
+    /**
+     * @method unsort
+     * @memberOf ModelGrid
+     * Clears sort on all columns, works only in HTML5 */
+    ModelGrid.prototype.unsort = function() {
+        var delegate = this.unwrap();
+        var value = delegate.unsort();
         return B.boxAsJs(value);
     };
 
@@ -760,23 +768,15 @@ define(['boxing', 'common-utils/color', 'common-utils/cursor', 'common-utils/fon
     };
 
     /**
-     * Redraw the component.
-     * @method redraw
+     * Makes specified instance visible.
+     * @param instance Entity's instance to make visible.
+     * @param need2select true to select the instance (optional).
+     * @method makeVisible
      * @memberOf ModelGrid
      */
-    ModelGrid.prototype.redraw = function() {
+    ModelGrid.prototype.makeVisible = function(instance, need2select) {
         var delegate = this.unwrap();
-        var value = delegate.redraw();
-        return B.boxAsJs(value);
-    };
-
-    /**
-     * @method unsort
-     * @memberOf ModelGrid
-     * Clears sort on all columns, works only in HTML5 */
-    ModelGrid.prototype.unsort = function() {
-        var delegate = this.unwrap();
-        var value = delegate.unsort();
+        var value = delegate.makeVisible(B.boxAsJava(instance), B.boxAsJava(need2select));
         return B.boxAsJs(value);
     };
 

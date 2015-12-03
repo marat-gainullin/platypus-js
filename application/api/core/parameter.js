@@ -149,7 +149,7 @@ define(['boxing'], function(B) {
             }
         });
 
-    };
+    }
     /**
      * Assigning method of field/parameter information using specified source.
      * @params sourceField
