@@ -708,17 +708,18 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
     protected static void logQuery(String sqlClause, Parameters aParams) {
         if (queriesLogger.isLoggable(Level.FINE)) {
             boolean finerLogs = queriesLogger.isLoggable(Level.FINER);
-            queriesLogger.log(Level.FINE, "Executing sql {0} with {1} parameters{2}", new Object[]{sqlClause, aParams.getParametersCount(), finerLogs ? ":" : ""});
+            queriesLogger.log(Level.FINE, "Executing sql:\n{0}\nwith {1} parameters{2}", new Object[]{sqlClause, aParams.getParametersCount(), finerLogs && aParams.getParametersCount() > 0 ? ":" : ""});
             if (finerLogs) {
                 for (int i = 1; i <= aParams.getParametersCount(); i++) {
                     Parameter param = aParams.get(i);
-                    if (Scripts.DATE_TYPE_NAME.equals(param.getType())) {
-                        java.util.Date dateValue = (java.util.Date) param.getValue();
+                    Object paramValue = param.getValue();
+                    if (paramValue != null && Scripts.DATE_TYPE_NAME.equals(param.getType())) {
+                        java.util.Date dateValue = (java.util.Date) paramValue;
                         SimpleDateFormat sdf = new SimpleDateFormat(RowsetJsonConstants.DATE_FORMAT);
                         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
                         String jsonLikeText = sdf.format(dateValue);
                         queriesLogger.log(Level.FINER, "{0}, {1}: json like timestamp: {2}, raw timestamp: {3}", new Object[]{i, param.getName(), jsonLikeText, dateValue.getTime()});
-                    } else {
+                    } else {// nulls, String, Number, Boolean
                         queriesLogger.log(Level.FINER, "{0}, {1}: {2}", new Object[]{i, param.getName(), param.getValue()});
                     }
                 }
