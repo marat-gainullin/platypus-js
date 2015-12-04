@@ -713,7 +713,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                 for (int i = 1; i <= aParams.getParametersCount(); i++) {
                     Parameter param = aParams.get(i);
                     if (Scripts.DATE_TYPE_NAME.equals(param.getType())) {
-                        Date dateValue = (Date) param.getValue();
+                        java.util.Date dateValue = (java.util.Date) param.getValue();
                         SimpleDateFormat sdf = new SimpleDateFormat(RowsetJsonConstants.DATE_FORMAT);
                         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
                         String jsonLikeText = sdf.format(dateValue);
