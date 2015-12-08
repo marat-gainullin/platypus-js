@@ -552,7 +552,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                     } else if (aValue instanceof Boolean) {
                         castedDate = new java.util.Date(((Boolean) aValue) ? 1 : 0);
                     } else if (aValue instanceof java.util.Date) {
-                        castedDate = ((java.util.Date) aValue);
+                        castedDate = (java.util.Date) aValue;
                     }
                     if (castedDate != null) {
                         if (aParameterJdbcType == Types.DATE) {
@@ -763,10 +763,17 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
         Object paramValue = aParameter.getValue();
         int jdbcType;
         String sqlTypeName;
+        /*
+        // Fuck! Crazy DBMS-es in most cases can't answer the question about parameter's type properly!
+        // PostgreSQL, for example starts answer the question after some time (about 4-8 hours).
+        // But before it raises SQLException. And after that, starts to report TIMESTAMP parameters
+        // as DATE parameters.
+        // This leads to parameters values shifting while statement.setDate() and  errorneous select results!
         try {
             jdbcType = aStatement.getParameterMetaData().getParameterType(aParameterIndex);
             sqlTypeName = aStatement.getParameterMetaData().getParameterTypeName(aParameterIndex);
         } catch (SQLException ex) {
+        */
             if (paramValue != null || aParameter.getType() == null) {
                 jdbcType = assumeJdbcType(paramValue);
                 sqlTypeName = null;
@@ -789,7 +796,9 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                         jdbcType = assumeJdbcType(paramValue);
                 }
             }
+            /*
         }
+            */
         assign(paramValue, aParameterIndex, aStatement, jdbcType, sqlTypeName);
         checkOutParameter(aParameter, aStatement, aParameterIndex, jdbcType);
     }
