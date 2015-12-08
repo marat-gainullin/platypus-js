@@ -764,7 +764,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
         int jdbcType;
         String sqlTypeName;
         /*
-        // Fuck! Crazy DBMS-es in most cases can't answer the question about parameter's type properly!
+        // Crazy DBMS-es in most cases can't answer the question about parameter's type properly!
         // PostgreSQL, for example starts answer the question after some time (about 4-8 hours).
         // But before it raises SQLException. And after that, starts to report TIMESTAMP parameters
         // as DATE parameters.
