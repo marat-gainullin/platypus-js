@@ -1,5 +1,6 @@
 package com.eas.grid.cells;
 
+import com.eas.core.XElement;
 import com.google.gwt.cell.client.AbstractEditableCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -76,12 +77,12 @@ public class CheckBoxCell extends AbstractEditableCell<Object, Boolean> {
 		boolean enterPressed = (BrowserEvents.KEYDOWN.equals(type) && event.getKeyCode() == KeyCodes.KEY_ENTER);
 		/* 
 		 * Crazy browsers fire click and change events in different order.
-		 * because of that Firefox, for example first issues a click event and then change event.
+		 * FireFox issues a click event first and then change event.
 		 * Than we have an issue with selection re-rendering and 'change' event never fired,
-		 * because of markup replacement while grid rendering.
+		 * because of mark-up replacement while grid rendering.
 		 */ 
 		if (BrowserEvents.CLICK.equals(type) || BrowserEvents.CHANGE.equals(type) || enterPressed) {
-			InputElement input = parent.getFirstChild().cast();
+			InputElement input = parent.<XElement>cast().firstChildByTagName("input").cast();
 			Boolean isChecked = input.isChecked();
 
 			/*

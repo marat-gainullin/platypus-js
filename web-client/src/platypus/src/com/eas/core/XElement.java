@@ -140,6 +140,26 @@ public class XElement extends Element {
 		return result;
 	}
 
+	/**
+	 * Selects child nodes based on the passed CSS selector (the selector should
+	 * not contain an id).
+	 * 
+	 * @param aTagName
+	 *            the selector/xpath query
+	 * @return the matching elements
+	 */
+	public final Element firstChildByTagName(final String aTagName) {
+		final List<Element> result = new ArrayList<>();
+		iterate(this, new Observer() {
+			@Override
+			public void observe(Element anElement) {
+				if(anElement.getTagName().equalsIgnoreCase(aTagName))
+					result.add(anElement);
+			}
+		});
+		return result.isEmpty() ? null : result.get(0);
+	}
+
 	public final List<Element> selectByPrefix(final String aClassNamePrefix) {
 		final List<Element> result = new ArrayList<>();
 		iterate(this, new Observer() {

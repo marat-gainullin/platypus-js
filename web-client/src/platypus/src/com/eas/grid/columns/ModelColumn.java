@@ -9,6 +9,7 @@ import com.eas.bound.ModelCombo;
 import com.eas.bound.ModelDecoratorBox;
 import com.eas.core.HasPublished;
 import com.eas.core.Utils;
+import com.eas.core.XElement;
 import com.eas.core.Utils.JsObject;
 import com.eas.grid.GridColumn;
 import com.eas.grid.GridSection;
@@ -331,7 +332,7 @@ public class ModelColumn extends GridColumn<JavaScriptObject, Object> implements
 					public void onBrowserEvent(com.google.gwt.cell.client.Cell.Context context, Element parent, Object value, NativeEvent event, ValueUpdater<Object> valueUpdater) {
 						String type = event.getType();
 						if (BrowserEvents.CHANGE.equals(type) && (readonly || !grid.isEditable())) {
-							InputElement input = parent.getFirstChild().cast();
+							InputElement input = parent.<XElement>cast().firstChildByTagName("input").cast();
 							boolean checked = input.isChecked();
 							input.setChecked(!checked);
 						} else
