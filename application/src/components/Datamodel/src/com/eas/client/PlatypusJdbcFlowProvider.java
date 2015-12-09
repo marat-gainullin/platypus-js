@@ -63,20 +63,21 @@ public class PlatypusJdbcFlowProvider extends JdbcFlowProvider<String> {
     }
     
     @Override
-    protected void assignParameter(Parameter aParameter, PreparedStatement aStatement, int aParameterIndex, Connection aConnection) throws SQLException {
+    protected int assignParameter(Parameter aParameter, PreparedStatement aStatement, int aParameterIndex, Connection aConnection) throws SQLException {
         if (Scripts.GEOMETRY_TYPE_NAME.equals(aParameter.getType())) {
             try {
                 JdbcChangeValue jv = sqlDriver.convertGeometry(aParameter.getValue().toString(), aConnection);
                 Object paramValue = jv.value;
                 int jdbcType = jv.jdbcType;
                 String sqlTypeName = jv.sqlTypeName;
-                assign(paramValue, aParameterIndex, aStatement, jdbcType, sqlTypeName);
+                int assignedJdbcType = assign(paramValue, aParameterIndex, aStatement, jdbcType, sqlTypeName);
                 checkOutParameter(aParameter, aStatement, aParameterIndex, jdbcType);
+                return assignedJdbcType;
             } catch (Exception ex) {
                 throw new SQLException(ex);
             }
         } else {
-            super.assignParameter(aParameter, aStatement, aParameterIndex, aConnection);
+            return super.assignParameter(aParameter, aStatement, aParameterIndex, aConnection);
         }
     }
 
