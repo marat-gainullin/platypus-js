@@ -21,6 +21,7 @@ import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.Callable;
@@ -305,7 +306,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
         }
     }
 
-    public static void assign(Object aValue, int aParameterIndex, PreparedStatement aStmt, int aParameterJdbcType, String aParameterSqlTypeName) throws SQLException {
+    public static int assign(Object aValue, int aParameterIndex, PreparedStatement aStmt, int aParameterJdbcType, String aParameterSqlTypeName) throws SQLException {
         if (aValue != null) {
             /*
              if (aValue instanceof JSObject) {
@@ -587,6 +588,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                 aStmt.setNull(aParameterIndex, aParameterJdbcType, aParameterSqlTypeName);
             }
         }
+        return aParameterJdbcType;
     }
 
     protected static final String FALLED_TO_NULL_MSG = "Some value falled to null while tranferring to a database. May be it''s class is unsupported: {0}";
@@ -622,11 +624,13 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                         try {
                             prepareConnection(connection);
                             try {
+                                Map<String, Integer> assignedJdbcTypes = new HashMap<>();
                                 for (int i = 1; i <= aParams.getParametersCount(); i++) {
                                     Parameter param = aParams.get(i);
-                                    assignParameter(param, stmt, i, connection);
+                                    int assignedJdbcType = assignParameter(param, stmt, i, connection);
+                                    assignedJdbcTypes.put(param.getName(), assignedJdbcType);
                                 }
-                                logQuery(sqlClause, aParams);
+                                logQuery(sqlClause, aParams, assignedJdbcTypes);
                                 ResultSet rs = null;
                                 if (procedure) {
                                     assert stmt instanceof CallableStatement;
@@ -705,7 +709,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
         }
     }
 
-    protected static void logQuery(String sqlClause, Parameters aParams) {
+    protected static void logQuery(String sqlClause, Parameters aParams, Map<String, Integer> aAssignedJdbcTypes) {
         if (queriesLogger.isLoggable(Level.FINE)) {
             boolean finerLogs = queriesLogger.isLoggable(Level.FINER);
             queriesLogger.log(Level.FINE, "Executing sql:\n{0}\nwith {1} parameters{2}", new Object[]{sqlClause, aParams.getParametersCount(), finerLogs && aParams.getParametersCount() > 0 ? ":" : ""});
@@ -718,9 +722,9 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
                         SimpleDateFormat sdf = new SimpleDateFormat(RowsetJsonConstants.DATE_FORMAT);
                         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
                         String jsonLikeText = sdf.format(dateValue);
-                        queriesLogger.log(Level.FINER, "{0}, {1}: json like timestamp: {2}, raw timestamp: {3}", new Object[]{i, param.getName(), jsonLikeText, dateValue.getTime()});
+                        queriesLogger.log(Level.FINER, "order: {0}; name: {1}; jdbc type: {2}; json like timestamp: {3}; raw timestamp: {4};", new Object[]{i, param.getName(), aAssignedJdbcTypes.get(param.getName()), jsonLikeText, dateValue.getTime()});
                     } else {// nulls, String, Number, Boolean
-                        queriesLogger.log(Level.FINER, "{0}, {1}: {2}", new Object[]{i, param.getName(), param.getValue()});
+                        queriesLogger.log(Level.FINER, "order: {0}; name: {1}; jdbc type: {2}; value: {3};", new Object[]{i, param.getName(), aAssignedJdbcTypes.get(param.getName()), param.getValue()});
                     }
                 }
             }
@@ -759,7 +763,7 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
         }
     }
 
-    protected void assignParameter(Parameter aParameter, PreparedStatement aStatement, int aParameterIndex, Connection aConnection) throws SQLException {
+    protected int assignParameter(Parameter aParameter, PreparedStatement aStatement, int aParameterIndex, Connection aConnection) throws SQLException {
         Object paramValue = aParameter.getValue();
         int jdbcType;
         String sqlTypeName;
@@ -799,8 +803,9 @@ public abstract class JdbcFlowProvider<JKT> extends DatabaseFlowProvider<JKT> {
             /*
         }
             */
-        assign(paramValue, aParameterIndex, aStatement, jdbcType, sqlTypeName);
+        int assignedJdbcType = assign(paramValue, aParameterIndex, aStatement, jdbcType, sqlTypeName);
         checkOutParameter(aParameter, aStatement, aParameterIndex, jdbcType);
+        return assignedJdbcType;
     }
 
     protected void checkOutParameter(Parameter param, PreparedStatement stmt, int aParameterIndex, int jdbcType) throws SQLException {
