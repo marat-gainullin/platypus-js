@@ -14,6 +14,7 @@ import com.eas.server.PlatypusServerCore;
 import com.eas.server.SessionManager;
 import com.eas.server.httpservlet.PlatypusHttpServlet;
 import com.eas.util.IDGenerator;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -161,7 +162,7 @@ public class JsServerModuleEndPoint {
         in(platypusCore, websocketSession, (com.eas.server.Session aSession) -> {
             try {
                 Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "Container OnOpen {0}.", aSession.getId());
-                ScriptedResource._require(new String[]{"servlet-support/web-socket-server-session"}, null, Scripts.getSpace());
+                ScriptedResource._require(new String[]{"servlet-support/web-socket-server-session"}, null, Scripts.getSpace(), new HashSet<>());
                 platypusCore.executeMethod(moduleName, WS_ON_OPEN, new Object[]{new WebSocketServerSession(websocketSession)}, true, (Object aResult) -> {
                     Logger.getLogger(JsServerModuleEndPoint.class.getName()).log(Level.FINE, "{0} method of {1} module called successfully.", new Object[]{WS_ON_OPEN, aModuleName});
                 }, (Exception ex) -> {
