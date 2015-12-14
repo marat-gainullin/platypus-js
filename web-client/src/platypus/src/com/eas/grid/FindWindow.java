@@ -121,7 +121,7 @@ public class FindWindow extends WindowPanel {
 		anchors.setWidgetTopHeight(label, 5, Style.Unit.PX, 20, Style.Unit.PX);
 
 		anchors.add(findBox);
-		anchors.setWidgetLeftWidth(findBox, 50, Style.Unit.PX, 290, Style.Unit.PX);
+		anchors.setWidgetLeftWidth(findBox, 60, Style.Unit.PX, 280, Style.Unit.PX);
 		anchors.setWidgetTopHeight(findBox, 5, Style.Unit.PX, 50, Style.Unit.PX);
 
 		anchors.add(btnFind);
