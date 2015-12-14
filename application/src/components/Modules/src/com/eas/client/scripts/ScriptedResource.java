@@ -803,14 +803,17 @@ public class ScriptedResource {
 
     public static void require(String[] aModulesNames, String aCalledFromFile) throws Exception {
         Scripts.Space space = Scripts.getSpace();
-        _require(aModulesNames, aCalledFromFile, space);
+        _require(aModulesNames, aCalledFromFile, space, new HashSet<>());
     }
 
-    public static void _require(String[] aModulesNames, String aCalledFromFile, Scripts.Space aSpace) throws Exception {
+    public static void _require(String[] aModulesNames, String aCalledFromFile, Scripts.Space aSpace, Set<String> aCyclic) throws Exception {
         Path apiPath = Scripts.getAbsoluteApiPath();
         Path appPath = getAbsoluteAppPath();
         for (String scriptOrModuleName : aModulesNames) {
-            if (!aSpace.getDefined().containsKey(scriptOrModuleName)) {
+            if(aCyclic.contains(scriptOrModuleName)){
+                Logger.getLogger(ScriptedResource.class.getName()).log(Level.WARNING, "Cyclic dependency detected: {0}", checkedScriptOrModuleName(scriptOrModuleName));
+            }else if (!aSpace.getDefined().containsKey(scriptOrModuleName)) {
+                aCyclic.add(scriptOrModuleName);
                 Path apiLocalPath = apiPath.resolve(scriptOrModuleName + PlatypusFiles.JAVASCRIPT_FILE_END);
                 if (apiLocalPath != null && apiLocalPath.toFile().exists() && !apiLocalPath.toFile().isDirectory()) {
                     URL toLoad = apiLocalPath.toUri().toURL();
@@ -826,7 +829,7 @@ public class ScriptedResource {
                             sRequire(structure.getServerDependencies().toArray(new String[]{}), null, null, null);
                         }
                         String[] autoDiscoveredDependencies = structure.getClientDependencies().toArray(new String[]{});
-                        _require(autoDiscoveredDependencies, null, aSpace);
+                        _require(autoDiscoveredDependencies, null, aSpace, aCyclic);
                         Path fileToLoad = Paths.get(toLoad.toURI());
                         Path appRelative = appPath.relativize(fileToLoad);
                         aSpace.exec(appRelative.toString().replace(File.separator, "/"), toLoad);
@@ -837,7 +840,7 @@ public class ScriptedResource {
                 String[] moduleDefinedDependencies = aSpace.consumeAmdDependencies();
                 JSObject onDependenciesResolved = aSpace.consumeAmdDefineCallback();
                 if (onDependenciesResolved != null) {
-                    _require(moduleDefinedDependencies, null, aSpace);
+                    _require(moduleDefinedDependencies, null, aSpace, aCyclic);
                     onDependenciesResolved.call(null, new Object[]{scriptOrModuleName});
                 }
                 // If module is still not defined (lack of module definer or buggy definer in script, etc.)
